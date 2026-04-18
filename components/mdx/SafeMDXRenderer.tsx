@@ -171,6 +171,49 @@ function stripInlineJsxProps(input: string): string {
   return input.replace(/\s+[A-Za-z_:][-A-Za-z0-9_:.]*=(\{[^}]*\}|"[^"]*"|'[^']*')/g, "");
 }
 
+// ---------------------------------------------------------------------------
+// Protected zones — extract code blocks and inline code before transforms,
+// restore after. Prevents JSX stripping inside code fences.
+// ---------------------------------------------------------------------------
+
+type ProtectedZone = { placeholder: string; content: string };
+
+function protectZones(input: string): { text: string; zones: ProtectedZone[] } {
+  const zones: ProtectedZone[] = [];
+  let idx = 0;
+
+  // Protect fenced code blocks (``` ... ```)
+  let text = input.replace(/```[\s\S]*?```/g, (match) => {
+    const placeholder = `\x00PROTECTED_${idx++}\x00`;
+    zones.push({ placeholder, content: match });
+    return placeholder;
+  });
+
+  // Protect inline code (` ... `)
+  text = text.replace(/`[^`\n]+`/g, (match) => {
+    const placeholder = `\x00PROTECTED_${idx++}\x00`;
+    zones.push({ placeholder, content: match });
+    return placeholder;
+  });
+
+  // Protect HTML comments
+  text = text.replace(/<!--[\s\S]*?-->/g, (match) => {
+    const placeholder = `\x00PROTECTED_${idx++}\x00`;
+    zones.push({ placeholder, content: match });
+    return placeholder;
+  });
+
+  return { text, zones };
+}
+
+function restoreZones(text: string, zones: ProtectedZone[]): string {
+  let result = text;
+  for (const zone of zones) {
+    result = result.replace(zone.placeholder, zone.content);
+  }
+  return result;
+}
+
 function extractAttr(attrs: string, name: string): string {
   const re = new RegExp(
     `\\b${name}=(?:"([^"]*)"|'([^']*)'|\\{\`([^\`]*)\`\\}|\\{"([^"]*)"\\}|\\{'([^']*)'\\})`,
@@ -182,6 +225,10 @@ function extractAttr(attrs: string, name: string): string {
 function transformRawMdxToMarkdownLike(input: string): string {
   let s = safeString(input).replace(/\r\n/g, "\n").trim();
   if (!s) return "";
+
+  // Protect code blocks, inline code, and HTML comments from transformation
+  const { text: unprotected, zones } = protectZones(s);
+  s = unprotected;
 
   // Strip JS module lines
   s = s.replace(/^\s*import\s.+?;?\s*$/gm, "");
@@ -264,7 +311,8 @@ function transformRawMdxToMarkdownLike(input: string): string {
 
   s = s.replace(/\n{3,}/g, "\n\n").trim();
 
-  return s;
+  // Restore protected zones (code blocks, inline code, HTML comments)
+  return restoreZones(s, zones);
 }
 
 function RawMarkdownFallback({ content }: { content: string }) {
@@ -287,39 +335,41 @@ function RawMarkdownFallback({ content }: { content: string }) {
     processed = escapeHtml(processed);
 
     // ── Inline formatting ──────────────────────────────────────────────
-    // Links — uses the same amber accent as MDXComponents.tsx
     processed = processed.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" class="text-[#C9A96E] hover:text-[#D4B87A] underline decoration-[#C9A96E]/30 underline-offset-2">$1</a>',
+      '<a href="$2" style="color:var(--mdx-accent);text-decoration:underline;text-underline-offset:3px">$1</a>',
     );
 
-    processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-[#C9A96E] font-semibold">$1</strong>');
+    processed = processed.replace(
+      /\*\*([^*]+)\*\*/g,
+      '<strong style="color:var(--mdx-accent);font-weight:600">$1</strong>',
+    );
     processed = processed.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
 
-    // ── Headings — same typographic hierarchy as MDXComponents.tsx ─────
+    // ── Headings ──────────────────────────────────────────────────────
     processed = processed.replace(
       /^###### (.+)$/gm,
-      '<h6 class="mt-6 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] opacity-60">$1</h6>',
+      '<h6 class="mt-6 mb-2 font-mono text-[10px] uppercase tracking-[0.22em]" style="color:var(--mdx-muted)">$1</h6>',
     );
     processed = processed.replace(
       /^##### (.+)$/gm,
-      '<h5 class="mt-8 mb-3 font-mono text-[11px] uppercase tracking-[0.28em] opacity-70">$1</h5>',
+      '<h5 class="mt-8 mb-3 font-mono text-[11px] uppercase tracking-[0.28em]" style="color:var(--mdx-muted)">$1</h5>',
     );
     processed = processed.replace(
       /^#### (.+)$/gm,
-      '<h4 class="mt-10 mb-3 font-serif text-xl opacity-85">$1</h4>',
+      '<h4 class="mt-10 mb-3 font-serif text-xl" style="color:var(--mdx-heading)">$1</h4>',
     );
     processed = processed.replace(
       /^### (.+)$/gm,
-      '<h3 class="mt-12 mb-4 font-serif text-2xl opacity-90">$1</h3>',
+      '<h3 class="mt-12 mb-4 font-serif text-2xl" style="color:var(--mdx-heading)">$1</h3>',
     );
     processed = processed.replace(
       /^## (.+)$/gm,
-      '<h2 class="mt-16 mb-5 border-b border-current/10 pb-3 font-mono text-[10px] uppercase tracking-[0.35em] text-[#C9A96E]">$1</h2>',
+      '<h2 class="mt-16 mb-5 pb-3 font-mono text-[10px] uppercase tracking-[0.35em]" style="color:var(--mdx-accent);border-bottom:1px solid var(--mdx-border)">$1</h2>',
     );
     processed = processed.replace(
       /^# (.+)$/gm,
-      '<h1 class="mt-10 mb-6 font-serif text-4xl tracking-tight">$1</h1>',
+      '<h1 class="mt-10 mb-6 font-serif text-4xl tracking-tight" style="color:var(--mdx-heading)">$1</h1>',
     );
 
     // ── Block-level processing ─────────────────────────────────────────
@@ -335,7 +385,7 @@ function RawMarkdownFallback({ content }: { content: string }) {
         if (/^<h[1-6]/.test(trimmed)) return trimmed;
 
         if (/^---$/.test(trimmed)) {
-          return '<hr class="my-8 border-current/10" />';
+          return '<hr class="my-8" style="border-color:var(--mdx-border)" />';
         }
 
         // Blockquotes: collect all > lines in the block
@@ -348,7 +398,7 @@ function RawMarkdownFallback({ content }: { content: string }) {
 
           if (!quoteBody) return "";
 
-          return `<blockquote class="my-8 border-l-2 border-[#C9A96E]/40 pl-5 italic opacity-75">${quoteBody}</blockquote>`;
+          return `<blockquote class="my-8 border-l-2 pl-5 italic" style="color:var(--mdx-muted);border-color:var(--mdx-accent)">${quoteBody}</blockquote>`;
         }
 
         if (/^[-*+]\s+/m.test(trimmed)) {
@@ -358,7 +408,7 @@ function RawMarkdownFallback({ content }: { content: string }) {
             .filter(Boolean)
             .map(
               (item) =>
-                `<li class="flex items-start gap-3 opacity-80"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C9A96E]"></span><span>${item}</span></li>`,
+                `<li class="flex items-start gap-3" style="color:var(--mdx-text)"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style="background:var(--mdx-accent)"></span><span>${item}</span></li>`,
             )
             .join("");
 
@@ -371,23 +421,23 @@ function RawMarkdownFallback({ content }: { content: string }) {
             .map((line) => line.replace(/^\d+\.\s+/, "").trim())
             .filter(Boolean)
             .map(
-              (item) => `<li class="ml-5 list-decimal opacity-80">${item}</li>`,
+              (item) => `<li class="ml-5 list-decimal" style="color:var(--mdx-text)">${item}</li>`,
             )
             .join("");
 
           return `<ol class="mb-6 space-y-3">${items}</ol>`;
         }
 
-        return `<p class="mb-6 leading-8 opacity-80">${trimmed.replace(/\n/g, "<br />")}</p>`;
+        return `<p class="mb-6 leading-8" style="color:var(--mdx-text)">${trimmed.replace(/\n/g, "<br />")}</p>`;
       })
       .join("");
 
     // Final cleanup: convert any surviving component markers to <hr> or strip
     return joined
       .replace(/<strong[^>]*>\[(Divider|Rule|SectionBreak)\]<\/strong>/g,
-        '<hr class="my-8 border-current/10" />')
+        '<hr class="my-8" style="border-color:var(--mdx-border)" />')
       .replace(/&lt;(Divider|Rule|SectionBreak)\s*\/?&gt;/g,
-        '<hr class="my-8 border-current/10" />')
+        '<hr class="my-8" style="border-color:var(--mdx-border)" />')
       .replace(/<strong[^>]*>\[[A-Z][A-Za-z0-9._-]*\]<\/strong>/g, "")
       .replace(/\[[A-Z][A-Za-z0-9._-]*\]/g, "")
       .replace(/&lt;\/?[A-Z][A-Za-z0-9._-]*[^&]*&gt;/g, "")
@@ -460,6 +510,7 @@ export default function SafeMDXRenderer({
   }, [components, disableBaseComponents, directive]);
 
   if (!safeCode) {
+    if (IS_DEV) console.warn("[MDX] Empty content passed to renderer");
     return <EmptyState />;
   }
 
@@ -468,29 +519,31 @@ export default function SafeMDXRenderer({
   const isRawMdx = !isSuspicious && !isCompiled && looksLikeRawMdx(safeCode);
   const isRaw = !isSuspicious && !isCompiled && !isRawMdx && looksLikeRawMarkdown(safeCode);
 
-  if (debug && IS_DEV) {
-    console.log("[SafeMDXRenderer]", {
-      codeLength: safeCode.length,
-      isCompiled,
-      isRawMdx,
-      isRaw,
-      isSuspicious,
-      preview: safeCode.slice(0, 250),
-    });
+  // Observability — log render path decision for every invocation.
+  // Production: warn-level only for non-compiled paths (indicates fallback).
+  // Dev: full diagnostic.
+  const renderPath = isSuspicious
+    ? "suspicious"
+    : isCompiled
+      ? "compiled"
+      : isRawMdx
+        ? "raw-mdx"
+        : isRaw
+          ? "markdown"
+          : "unclassified";
+
+  if (IS_DEV || renderPath !== "compiled") {
+    console[renderPath === "compiled" ? "log" : "warn"](
+      `[MDX:${renderPath}]`,
+      { length: safeCode.length, preview: safeCode.slice(0, 120) },
+    );
   }
 
   if (isSuspicious) {
     return <SuspiciousCodeState code={safeCode} />;
   }
 
-  if (isRawMdx) {
-    const normalized = transformRawMdxToMarkdownLike(safeCode);
-    return <RawMarkdownFallback content={normalized} />;
-  }
-
-  if (isRaw) {
-    // Run the MDX-to-markdown transform even for raw content,
-    // to handle component tokens like <Divider /> and <Rule />
+  if (isRawMdx || isRaw) {
     const cleaned = transformRawMdxToMarkdownLike(safeCode);
     return <RawMarkdownFallback content={cleaned} />;
   }

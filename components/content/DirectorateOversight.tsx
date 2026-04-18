@@ -5,7 +5,6 @@ import Image from "next/image";
 import {
   ArrowLeft,
   Clock3,
-  Tag,
   Lock,
   Loader2,
   AlertCircle,
@@ -52,7 +51,7 @@ type DirectorateOversightProps = {
   requiredTier?: AccessTier;
   loading?: boolean;
   unlockError?: string | null;
-  activeCode?: string | null;           // ← important: allow null
+  activeCode?: string | null;
   emptyLabel?: string;
   childrenTopRight?: React.ReactNode;
 };
@@ -80,16 +79,24 @@ function normalizeReadTime(value?: string | number | null): string | null {
 function getResolvedCategory(kind: DirectorateKind, category?: string): string {
   if (category?.trim()) return category.trim();
   switch (kind) {
-    case "book": return "Book";
-    case "volume": return "Volume";
-    case "essay": return "Essay";
-    default: return "Document";
+    case "book":
+      return "Book";
+    case "volume":
+      return "Volume";
+    case "essay":
+      return "Essay";
+    default:
+      return "Document";
   }
 }
 
 function EmptyStateIcon({ kind }: { kind: DirectorateKind }) {
-  if (kind === "book" || kind === "volume") return <BookOpen className="mx-auto mb-3 h-6 w-6 text-white/30" />;
-  if (kind === "essay") return <FileText className="mx-auto mb-3 h-6 w-6 text-white/30" />;
+  if (kind === "book" || kind === "volume") {
+    return <BookOpen className="mx-auto mb-3 h-6 w-6 text-white/30" />;
+  }
+  if (kind === "essay") {
+    return <FileText className="mx-auto mb-3 h-6 w-6 text-white/30" />;
+  }
   return <Library className="mx-auto mb-3 h-6 w-6 text-white/30" />;
 }
 
@@ -128,6 +135,32 @@ function resolveFit(fit?: CoverFit | null): CoverFit {
   return fit === "cover" || fit === "contain" || fit === "smart" ? fit : "smart";
 }
 
+function parseAspectRatio(aspect: string): number {
+  const cleaned = String(aspect || "").trim();
+  const parts = cleaned.split("/").map((p) => Number(p.trim()));
+  if (parts.length === 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1]) && parts[1] > 0) {
+    return parts[0] / parts[1];
+  }
+  return 16 / 10;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function shouldContainForSmart(imageRatio: number | null, frameRatio: number): boolean {
+  if (!imageRatio || !Number.isFinite(imageRatio) || imageRatio <= 0) return false;
+
+  const delta = Math.abs(imageRatio - frameRatio) / frameRatio;
+
+  if (delta >= 0.28) return true;
+
+  if (imageRatio < frameRatio * 0.82) return true;
+  if (imageRatio > frameRatio * 1.45) return true;
+
+  return false;
+}
+
 function SmartHeroCover({
   src,
   alt,
@@ -141,24 +174,77 @@ function SmartHeroCover({
   fit: CoverFit;
   position: string;
 }) {
-  const isCover = fit === "cover";
+  const frameRatio = React.useMemo(() => parseAspectRatio(aspect), [aspect]);
+  const [imageRatio, setImageRatio] = React.useState<number | null>(null);
+
+  const effectiveFit: "cover" | "contain" = React.useMemo(() => {
+    if (fit === "cover") return "cover";
+    if (fit === "contain") return "contain";
+    return shouldContainForSmart(imageRatio, frameRatio) ? "contain" : "cover";
+  }, [fit, imageRatio, frameRatio]);
+
+  const useContain = effectiveFit === "contain";
+
+  const containPadding = React.useMemo(() => {
+    if (!useContain) return 0;
+
+    if (!imageRatio || !Number.isFinite(imageRatio) || imageRatio <= 0) {
+      return 18;
+    }
+
+    const delta = Math.abs(imageRatio - frameRatio) / frameRatio;
+    return Math.round(clamp(18 + delta * 28, 18, 34));
+  }, [useContain, imageRatio, frameRatio]);
+
+  const handleLoadingComplete = React.useCallback((img: HTMLImageElement) => {
+    const naturalWidth = img?.naturalWidth || 0;
+    const naturalHeight = img?.naturalHeight || 0;
+
+    if (naturalWidth > 0 && naturalHeight > 0) {
+      setImageRatio(naturalWidth / naturalHeight);
+    }
+  }, []);
 
   return (
     <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/50 shadow-[0_30px_100px_-60px_rgba(0,0,0,0.95)]">
       <div className="relative w-full" style={{ aspectRatio: aspect }}>
-        {!isCover && (
+        {useContain ? (
           <>
             <Image
               src={src}
               alt=""
               fill
-              className="object-cover scale-[1.05]"
-              style={{ objectPosition: position, filter: "blur(22px)" }}
-              sizes="(max-width: 1024px) 100vw, 920px"
               priority
+              aria-hidden
+              className="object-cover scale-[1.06] opacity-80"
+              style={{
+                objectPosition: position,
+                filter: "blur(24px)",
+                transformOrigin: "center",
+              }}
+              sizes="(max-width: 1024px) 100vw, 920px"
+              onLoadingComplete={handleLoadingComplete}
             />
-            <div aria-hidden className="absolute inset-0 bg-black/55" />
-            <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(245,158,11,0.14),transparent_40%)]" />
+            <div aria-hidden className="absolute inset-0 bg-black/58" />
+            <div
+              aria-hidden
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(circle at 22% 18%, rgba(245,158,11,0.13), transparent 40%), linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.42))",
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <div
+              aria-hidden
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.14))",
+              }}
+            />
           </>
         )}
 
@@ -167,15 +253,31 @@ function SmartHeroCover({
           alt={alt}
           fill
           priority
-          className={isCover ? "object-cover" : "object-contain"}
+          className={useContain ? "object-contain" : "object-cover"}
           style={{
             objectPosition: position,
-            padding: isCover ? undefined : "18px",
+            padding: useContain ? `${containPadding}px` : undefined,
           }}
           sizes="(max-width: 1024px) 100vw, 920px"
+          onLoadingComplete={handleLoadingComplete}
         />
 
-        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.06),rgba(0,0,0,0.52))]" />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background: useContain
+              ? "linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.30))"
+              : "linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.52))",
+          }}
+        />
+
+        {useContain ? (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-[10px] rounded-[22px] border border-white/6"
+          />
+        ) : null}
       </div>
     </div>
   );
@@ -211,25 +313,26 @@ export default function DirectorateOversight({
   const heroFit = resolveFit(coverFit);
   const heroPosition = resolvePosition(coverPosition);
 
-  // === CRITICAL: Clean and validate the code before rendering ===
   const cleanCode = React.useMemo(() => {
     if (!activeCode || typeof activeCode !== "string") return "";
     const trimmed = activeCode.trim();
 
-    // Reject obvious React runtime garbage / minified bundles
     if (
       trimmed.length > 500 &&
       (trimmed.includes("Object.create") ||
-       trimmed.includes("getOwnPropertyDescriptor") ||
-       trimmed.includes("react-dom-client"))
+        trimmed.includes("getOwnPropertyDescriptor") ||
+        trimmed.includes("react-dom-client"))
     ) {
-      console.warn("[DirectorateOversight] Detected invalid MDX code (React runtime leak). Skipping render.");
+      console.warn(
+        "[DirectorateOversight] Detected invalid MDX code (React runtime leak). Skipping render."
+      );
       return "";
     }
+
     return trimmed;
   }, [activeCode]);
 
-  const hasValidContent = cleanCode.length > 30; // reasonable minimum for real content
+  const hasValidContent = cleanCode.length > 30;
 
   return (
     <>
@@ -283,7 +386,10 @@ export default function DirectorateOversight({
                 {title}
               </h1>
 
-              {subtitle ? <p className="mt-5 max-w-2xl text-lg text-amber-200/62">{subtitle}</p> : null}
+              {subtitle ? (
+                <p className="mt-5 max-w-2xl text-lg text-amber-200/62">{subtitle}</p>
+              ) : null}
+
               {excerpt ? (
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/62 md:text-base">
                   {excerpt}
@@ -292,15 +398,27 @@ export default function DirectorateOversight({
 
               <div className="mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-4">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/34">Reading Time</div>
-                  <div className="mt-2 font-serif text-2xl text-white">{resolvedReadTime || "Essay"}</div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/34">
+                    Reading Time
+                  </div>
+                  <div className="mt-2 font-serif text-2xl text-white">
+                    {resolvedReadTime || "Essay"}
+                  </div>
                 </div>
+
                 <div className="rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-4">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/34">Access</div>
-                  <div className="mt-2 font-serif text-2xl text-white">{getTierLabel(requiredTier)}</div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/34">
+                    Access
+                  </div>
+                  <div className="mt-2 font-serif text-2xl text-white">
+                    {getTierLabel(requiredTier)}
+                  </div>
                 </div>
+
                 <div className="rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-4">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/34">Imprint</div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/34">
+                    Imprint
+                  </div>
                   <div className="mt-2 text-sm leading-relaxed text-white/66">{imprint}</div>
                 </div>
               </div>
@@ -321,7 +439,7 @@ export default function DirectorateOversight({
 
       <section className="relative z-10 mx-auto max-w-7xl px-6 py-14 lg:px-10">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-9 order-2 lg:order-1">
+          <div className="order-2 lg:col-span-9 lg:order-1">
             <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-3 shadow-[0_30px_100px_-70px_rgba(0,0,0,0.95)]">
               <div className="rounded-[26px] border border-white/8 bg-black/45 p-8 md:p-12">
                 <div className="mb-8 flex items-center gap-3 border-b border-white/10 pb-6">
@@ -331,23 +449,26 @@ export default function DirectorateOversight({
                   </div>
                 </div>
 
-              {unlockError ? (
-                <div className="mb-8 rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-red-400 flex gap-3">
-                  <AlertCircle className="mt-0.5 h-5 w-5" />
-                  {unlockError}
-                </div>
-              ) : loading ? (
-                <div className="flex justify-center py-20">
-                  <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
-                </div>
-              ) : hasValidContent ? (
-                <SafeMDXRenderer code={cleanCode} debug={process.env.NODE_ENV === "development"} />
-              ) : (
-                <div className="py-20 text-center text-white/50">
-                  <EmptyStateIcon kind={kind} />
-                  <p className="mt-4">{emptyLabel}</p>
-                </div>
-              )}
+                {unlockError ? (
+                  <div className="mb-8 flex gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-red-400">
+                    <AlertCircle className="mt-0.5 h-5 w-5" />
+                    {unlockError}
+                  </div>
+                ) : loading ? (
+                  <div className="flex justify-center py-20">
+                    <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+                  </div>
+                ) : hasValidContent ? (
+                  <SafeMDXRenderer
+                    code={cleanCode}
+                    debug={process.env.NODE_ENV === "development"}
+                  />
+                ) : (
+                  <div className="py-20 text-center text-white/50">
+                    <EmptyStateIcon kind={kind} />
+                    <p className="mt-4">{emptyLabel}</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -358,7 +479,7 @@ export default function DirectorateOversight({
           </div>
 
           {hasValidContent && !loading && !unlockError && (
-            <div className="lg:col-span-3 order-1 lg:order-2 lg:sticky lg:top-24 h-fit">
+            <div className="order-1 h-fit lg:sticky lg:top-24 lg:col-span-3 lg:order-2">
               <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-5">
                 <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/68">
                   On This Page

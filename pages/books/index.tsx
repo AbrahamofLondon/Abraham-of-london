@@ -33,6 +33,9 @@ type BookItem = {
   subtitle: string;
   description: string;
   coverImage: string;
+  coverAspect: string | null;
+  coverFit: string | null;
+  coverPosition: string | null;
   tags: string[];
   category: string;
   date: string;
@@ -91,6 +94,9 @@ function normalizeBook(doc: BookDoc): BookItem {
     subtitle,
     description,
     coverImage: resolvedCover || FALLBACK_BOOK_COVER,
+    coverAspect: safeString((doc as any).coverAspect, "") || null,
+    coverFit: safeString((doc as any).coverFit, "") || null,
+    coverPosition: safeString((doc as any).coverPosition, "") || null,
     tags: safeArray(doc.tags),
     category: safeString(doc.category, "Book"),
     date: safeString(doc.date, ""),
@@ -437,6 +443,9 @@ export default function BooksPage({
                     title: book.title,
                     subtitle: book.subtitle,
                     coverImage: book.coverImage || FALLBACK_BOOK_COVER,
+                    coverAspect: book.coverAspect,
+                    coverFit: book.coverFit,
+                    coverPosition: book.coverPosition,
                     date: book.date,
                     readTime: book.readingTime,
                     tags: book.tags,
@@ -480,6 +489,9 @@ export default function BooksPage({
                     title: book.title,
                     subtitle: book.subtitle,
                     coverImage: book.coverImage || FALLBACK_BOOK_COVER,
+                    coverAspect: book.coverAspect,
+                    coverFit: book.coverFit,
+                    coverPosition: book.coverPosition,
                     date: book.date,
                     readTime: book.readingTime,
                     tags: book.tags,

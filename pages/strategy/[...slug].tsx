@@ -63,7 +63,7 @@ const StrategySlugPage: NextPage<Props> = ({ item, requiredTier }) => {
   const slug = cleanPathish(item?.slug || "");
   const canonical = `${SITE}/strategy/${encodeURIComponent(slug)}`;
   const isPublic = requiredTier === "public";
-  const code = isPublic ? safeStr(item?.bodyCode || item?.body?.code || "", "") : "";
+  const code = isPublic ? safeStr(item?.bodyCode, "") : "";
 
   return (
     <Layout title={title} description={desc} ogImage={og} className="bg-[#050505]">

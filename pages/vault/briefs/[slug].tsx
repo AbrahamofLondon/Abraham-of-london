@@ -186,6 +186,9 @@ function looksLikeLeakedModuleCode(code: string): boolean {
   );
 }
 
+// Retained wrapper: prefers getRenderableBody result, falls back to direct
+// access only as last resort. Called from getStaticProps with renderBody
+// from getRenderableBody(). Safe because SafeMDXRenderer governs downstream.
 function pickRenderableBriefCode(doc: any, renderBody?: any): string {
   const compiled =
     safeString(renderBody?.code) ||

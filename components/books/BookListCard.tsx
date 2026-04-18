@@ -24,6 +24,9 @@ export type BookListItem = {
   readTime?: string | null;
   tags?: string[];
   coverImage: string;
+  coverAspect?: string | null;
+  coverFit?: string | null;
+  coverPosition?: string | null;
   featured?: boolean;
 };
 
@@ -54,7 +57,9 @@ function BookListCard({
         <SmartCover
           src={book.coverImage}
           alt={book.title}
-          aspect="portrait"
+          aspect={(book.coverAspect as any) || "portrait"}
+          fit={(book.coverFit as any) || "cover"}
+          position={book.coverPosition || "center"}
           priority={priority}
           sizes="(max-width: 768px) 100vw, 420px"
           overlay={false}

@@ -31,6 +31,7 @@ import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
+import { getRenderableBody } from "@/lib/content/render-body";
 import { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
@@ -87,29 +88,7 @@ function normalizeSlug(input: unknown): string {
   return safeString(input).replace(/^\/+|\/+$/g, "");
 }
 
-function looksLikeLeakedModuleCode(code: string): boolean {
-  const s = safeString(code).trim();
-  if (!s) return false;
-
-  return (
-    /\bObject\.defineProperty\s*\(\s*exports\b/.test(s) ||
-    /\bmodule\.exports\b/.test(s) ||
-    /\bexports\.[A-Za-z_$]/.test(s) ||
-    /\b__esModule\b/.test(s) ||
-    /\brequire\s*\(/.test(s) ||
-    /\bjsx_runtime\b/.test(s) ||
-    /\bvar\s+\w+\s*=\s*Object\.create/.test(s)
-  );
-}
-
-function pickRenderablePlaybookCode(playbook: Playbook): string {
-  const compiled = safeString((playbook as any)?.body?.code);
-  const raw = safeString((playbook as any)?.body?.raw);
-
-  if (compiled && !looksLikeLeakedModuleCode(compiled)) return compiled;
-  if (raw) return raw;
-  return compiled || "";
-}
+// Do not access doc.body.code directly; use getRenderableBody(doc).
 
 function difficultyColor(d?: string): string {
   switch ((d ?? "").toLowerCase()) {
@@ -193,7 +172,7 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
   return {
     props: {
       playbook,
-      renderCode: isPublic ? pickRenderablePlaybookCode(playbook) : null,
+      renderCode: isPublic ? getRenderableBody(playbook).code : null,
       requiredTier: tier,
       adjacent: {
         prev: prevItem

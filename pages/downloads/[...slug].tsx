@@ -10,6 +10,7 @@ import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
+import { getRenderableBody } from "@/lib/content/render-body";
 
 import { getMdxDocumentBySlug } from "@/lib/server/mdx-collections";
 
@@ -37,35 +38,7 @@ function safeString(value: unknown): string {
   return typeof value === "string" ? value : value == null ? "" : String(value);
 }
 
-function looksLikeLeakedModuleCode(code: string): boolean {
-  const s = safeString(code).trim();
-  if (!s) return false;
-
-  return (
-    /\bObject\.defineProperty\s*\(\s*exports\b/.test(s) ||
-    /\bmodule\.exports\b/.test(s) ||
-    /\bexports\.[A-Za-z_$]/.test(s) ||
-    /\b__esModule\b/.test(s) ||
-    /\brequire\s*\(/.test(s) ||
-    /\bjsx_runtime\b/.test(s) ||
-    /\bvar\s+\w+\s*=\s*Object\.create/.test(s)
-  );
-}
-
-function pickRenderableDocumentCode(doc: any): string {
-  const compiled = safeString(doc?.body?.code || doc?.bodyCode);
-  const raw = safeString(doc?.body?.raw || doc?.content);
-
-  if (compiled && !looksLikeLeakedModuleCode(compiled)) {
-    return compiled;
-  }
-
-  if (raw) {
-    return raw;
-  }
-
-  return compiled || "";
-}
+// Do not access doc.body.code directly; use getRenderableBody(doc).
 
 const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode }) => {
   const isPublic = requiredTier === "public";
@@ -129,7 +102,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
       slug,
       title: doc.title || "Untitled Download",
       requiredTier,
-      bodyCode: isPublic ? pickRenderableDocumentCode(doc) : null,
+      bodyCode: isPublic ? getRenderableBody(doc).code : null,
     },
   };
 

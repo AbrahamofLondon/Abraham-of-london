@@ -104,9 +104,7 @@ const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
 
         {isPublic ? (
           <ReaderBody surface="canon">
-            <ServerMDXRenderer
-              code={(bodyCode || "").replace(/<(Divider|Rule|SectionBreak)\s*\/?>/g, "\n---\n")}
-            />
+            <ServerMDXRenderer code={bodyCode || ""} />
           </ReaderBody>
         ) : (
           <div className="mx-auto max-w-3xl px-6 py-12">

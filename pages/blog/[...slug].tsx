@@ -65,12 +65,40 @@ function toBareBlogSlug(input: unknown): string {
   return s;
 }
 
-const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSlug }) => {
+function normalizeCoverAspect(
+  input: unknown
+): "square" | "video" | "wide" | "book" | null {
+  const v = String(input ?? "").trim().toLowerCase();
+  if (v === "square") return "square";
+  if (v === "video") return "video";
+  if (v === "wide") return "wide";
+  if (v === "book") return "book";
+  return null;
+}
+
+function normalizeCoverFit(input: unknown): "cover" | "contain" | null {
+  const v = String(input ?? "").trim().toLowerCase();
+  if (v === "cover") return "cover";
+  if (v === "contain") return "contain";
+  return null;
+}
+
+function normalizeCoverPosition(input: unknown): string | null {
+  const v = String(input ?? "").trim();
+  return v ? v : null;
+}
+
+const BlogSlugPage: NextPage<BlogSlugProps> = ({
+  doc,
+  code,
+  requiredTier,
+  bareSlug,
+}) => {
   const { data: session, status } = useSession();
 
   const title = doc?.title || "Untitled Essay";
   const excerpt = doc?.excerpt || doc?.description || "";
-  const cover = resolveDocCoverImage(doc, { contentType: 'BLOG' });
+  const cover = resolveDocCoverImage(doc, { contentType: "BLOG" });
   const canonicalUrl = joinHref("blog", bareSlug);
 
   const required = normalizeRequiredTier(requiredTier);
@@ -92,7 +120,9 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
     setLoadingContent(true);
 
     try {
-      const res = await fetch(`/api/blog/${encodeURIComponent(bareSlug)}`, { method: "GET" });
+      const res = await fetch(`/api/blog/${encodeURIComponent(bareSlug)}`, {
+        method: "GET",
+      });
       const json = await res.json().catch(() => ({}));
 
       if (!res.ok || !json?.ok) {
@@ -175,9 +205,9 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
         tags={Array.isArray(doc?.tags) ? doc.tags : []}
         readTime={doc?.readTime || null}
         cover={cover}
-        coverAspect={doc?.coverAspect || null}
-        coverFit={doc?.coverFit || null}
-        coverPosition={doc?.coverPosition || null}
+        coverAspect={normalizeCoverAspect(doc?.coverAspect)}
+        coverFit={normalizeCoverFit(doc?.coverFit)}
+        coverPosition={normalizeCoverPosition(doc?.coverPosition)}
         backHref="/blog"
         backLabel="Back"
         imprint="Abraham of London • Essays & Insights"
@@ -196,16 +226,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   const posts = (await getPublishedPosts()) || [];
 
-  // Prerender ALL published posts to avoid ISR/edge-function failures on Netlify.
   const paths = [...posts]
     .filter((p: any) => !p?.draft)
     .map((p: any) => {
       const raw = normalizeSlug(
-        p?.urlSlug ||
-          p?.collectionSlug ||
-          p?.slug ||
-          p?._raw?.flattenedPath ||
-          ""
+        p?.urlSlug || p?.collectionSlug || p?.slug || p?._raw?.flattenedPath || ""
       );
 
       const bare = toBareBlogSlug(raw);
@@ -214,8 +239,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .filter(Boolean) as Array<{ params: { slug: string[] } }>;
 
   return { paths, fallback: "blocking" };
-
-
 };
 
 export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) => {
@@ -270,8 +293,6 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
     console.error("[Blog] Error in getStaticProps:", error);
     return { notFound: true, revalidate: 60 };
   }
-
-
 };
 
 export default BlogSlugPage;

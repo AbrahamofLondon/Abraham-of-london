@@ -553,6 +553,54 @@
 }
 
 /* ==========================================================================
+   SURFACE TYPOGRAPHY — governs fallback HTML rendering
+   Each surface defines the token set so RawMarkdownFallback inherits
+   correct colors without hardcoded Tailwind utilities.
+   ========================================================================== */
+
+/* Default surface: dark background (most pages) */
+.aol-mdx-content {
+  --mdx-text: rgba(255, 255, 255, 0.80);
+  --mdx-heading: rgba(255, 255, 255, 0.95);
+  --mdx-muted: rgba(255, 255, 255, 0.60);
+  --mdx-accent: #C9A96E;
+  --mdx-border: rgba(255, 255, 255, 0.10);
+  --mdx-code-bg: rgba(255, 255, 255, 0.04);
+}
+
+/* Canon surface: warm bone panel */
+.reader-body--canon .aol-mdx-content {
+  --mdx-text: var(--ds-neutral-800);
+  --mdx-heading: var(--ds-neutral-900);
+  --mdx-muted: var(--ds-neutral-600);
+  --mdx-accent: var(--ds-amber-600);
+  --mdx-border: var(--ds-neutral-200);
+  --mdx-code-bg: var(--ds-neutral-100);
+}
+
+/* Vault surface: dark technical */
+.reader-body--vault .aol-mdx-content {
+  --mdx-text: rgba(245, 247, 250, 0.90);
+  --mdx-heading: rgba(245, 247, 250, 0.96);
+  --mdx-muted: rgba(219, 228, 238, 0.80);
+  --mdx-accent: var(--ds-amber-300);
+  --mdx-border: rgba(188, 203, 218, 0.12);
+  --mdx-code-bg: rgba(26, 35, 43, 0.86);
+}
+
+/* Light surface: for prints and any light-bg pages */
+.surface-light .aol-mdx-content,
+[class*="bg-white"] .aol-mdx-content,
+[class*="text-black"] .aol-mdx-content {
+  --mdx-text: rgba(0, 0, 0, 0.80);
+  --mdx-heading: rgba(0, 0, 0, 0.95);
+  --mdx-muted: rgba(0, 0, 0, 0.60);
+  --mdx-accent: #8A6A2F;
+  --mdx-border: rgba(0, 0, 0, 0.10);
+  --mdx-code-bg: rgba(0, 0, 0, 0.04);
+}
+
+/* ==========================================================================
    REDUCED MOTION
    ========================================================================== */
 

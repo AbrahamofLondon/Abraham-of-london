@@ -9,11 +9,21 @@ import { getComponentSync } from "./registry";
 /* -------------------------------------------------------------------------- */
 
 const MissingComponent = ({ name }: { name: string }) => {
-  if (process.env.NODE_ENV === "production") return null;
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(`[MDX] Component not found in base map: "${name}"`);
+  }
 
+  // Never return null — silent content loss breaks editorial trust.
+  // In production: render an unobtrusive but visible placeholder.
+  // In dev: render with the component name for debugging.
   return (
-    <div className="my-4 rounded-lg border border-dashed border-amber-500/30 bg-amber-500/5 p-4 font-mono text-[10px] uppercase tracking-wider text-amber-500/60">
-      Component registry miss: {name}
+    <div
+      className="my-4 rounded-lg border border-dashed border-amber-500/30 bg-amber-500/5 p-4 font-mono text-[10px] uppercase tracking-wider text-amber-500/60"
+      data-mdx-missing={name}
+    >
+      {process.env.NODE_ENV === "production"
+        ? "Content element unavailable."
+        : `Component not found: ${name}`}
     </div>
   );
 };

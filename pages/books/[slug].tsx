@@ -85,6 +85,29 @@ function pickBookSlug(doc: any): string {
   );
 }
 
+function normalizeCoverAspect(
+  input: unknown,
+): "square" | "video" | "wide" | "book" | null {
+  const v = String(input ?? "").trim().toLowerCase();
+  if (v === "square") return "square";
+  if (v === "video") return "video";
+  if (v === "wide") return "wide";
+  if (v === "book") return "book";
+  return null;
+}
+
+function normalizeCoverFit(input: unknown): "cover" | "contain" | null {
+  const v = String(input ?? "").trim().toLowerCase();
+  if (v === "cover") return "cover";
+  if (v === "contain") return "contain";
+  return null;
+}
+
+function normalizeCoverPosition(input: unknown): string | null {
+  const v = String(input ?? "").trim();
+  return v ? v : null;
+}
+
 const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
   const { data: session, status } = useSession();
 
@@ -199,6 +222,9 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
         tags={Array.isArray(doc?.tags) ? doc.tags : []}
         readTime={doc?.readTime || null}
         cover={cover}
+        coverAspect={normalizeCoverAspect(doc?.coverAspect)}
+        coverFit={normalizeCoverFit(doc?.coverFit)}
+        coverPosition={normalizeCoverPosition(doc?.coverPosition)}
         backHref="/books"
         backLabel="Back"
         imprint="Abraham of London • Books & Manifestos"

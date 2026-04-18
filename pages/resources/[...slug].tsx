@@ -7,6 +7,7 @@ import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
 import { normalizeSlug } from "@/lib/content/shared";
+import { getRenderableBody } from "@/lib/content/render-body";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -149,7 +150,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         slug,
       },
       requiredTier,
-      bodyCode: isPublic ? String(doc.body?.code || doc.bodyCode || "") : null,
+      bodyCode: isPublic ? getRenderableBody(doc).code : null,
     }),
     revalidate: 3600,
   };
