@@ -120,9 +120,9 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
           <AccessGate
             title={metadata.title}
             requiredTier={required}
-            message="This content requires appropriate clearance."
+            message="This content requires appropriate access."
+            isAuthenticated={!!session?.user}
             onUnlocked={handleUnlock}
-            onGoToJoin={() => window.location.assign("/inner-circle")}
           />
         </div>
       </RegistryLayout>

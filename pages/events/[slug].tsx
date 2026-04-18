@@ -178,7 +178,7 @@ const EventPage: NextPage<Props> = ({ event, initialBodyCode, requiredTier }) =>
                   <SafeMDXRenderer code={bodyCode} />
                 </div>
               ) : needsAuth ? (
-                <AccessGate title={event.title} requiredTier={required} onUnlocked={handleUnlock} />
+                <AccessGate title={event.title} requiredTier={required} isAuthenticated={!!session?.user} onUnlocked={handleUnlock} />
               ) : (
                 <div className="py-20 text-center font-mono text-[10px] uppercase tracking-[0.5em] text-zinc-300">
                   No event content available

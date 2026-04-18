@@ -16,12 +16,16 @@ import {
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
+
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
 /* -------------------------------------------------------------------------- */
 /* UTILITIES                                                                  */
 /* -------------------------------------------------------------------------- */
 
-type Props = { item: any };
+type Props = { item: any; requiredTier: AccessTier };
 
 function jsonSafe<T>(v: T): T {
   return JSON.parse(JSON.stringify(v, (_k, val) => (val === undefined ? null : val)));
@@ -51,13 +55,14 @@ const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.o
 /* COMPONENT                                                                  */
 /* -------------------------------------------------------------------------- */
 
-const StrategySlugPage: NextPage<Props> = ({ item }) => {
+const StrategySlugPage: NextPage<Props> = ({ item, requiredTier }) => {
   const title = safeStr(item?.title, "Intelligence Brief");
   const desc = safeStr(item?.description || item?.excerpt, "Classified Strategy Document");
   const og = safeStr(item?.coverImage, "") || undefined;
   const slug = cleanPathish(item?.slug || "");
   const canonical = `${SITE}/strategy/${encodeURIComponent(slug)}`;
-  const code = safeStr(item?.bodyCode || item?.body?.code || "", "");
+  const isPublic = requiredTier === "public";
+  const code = isPublic ? safeStr(item?.bodyCode || item?.body?.code || "", "") : "";
 
   return (
     <Layout title={title} description={desc} ogImage={og} className="bg-[#050505]">
@@ -125,7 +130,15 @@ const StrategySlugPage: NextPage<Props> = ({ item }) => {
                 prose-strong:text-[#8A6A2F] prose-strong:font-medium
                 prose-blockquote:border-[#8A6A2F]/50 prose-blockquote:bg-white/[0.02] prose-blockquote:py-1
               ">
-                {code ? (
+                {!isPublic ? (
+                  <ClientUnlockRenderer
+                    slug={`strategy/${slug}`}
+                    requiredTier={requiredTier}
+                    initialCode={null}
+                    title={title}
+                    message="This strategy document requires appropriate access."
+                  />
+                ) : code ? (
                   <SafeMDXRenderer code={code} />
                 ) : (
                   <div className="rounded border border-dashed border-white/10 p-12 text-center text-[10px] font-mono uppercase tracking-widest text-zinc-600">
@@ -216,10 +229,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true, revalidate: 300 };
   }
 
-  const bodyCode = safeStr((doc as any)?.body?.code, "") || safeStr((doc as any)?.bodyCode, "") || "";
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc as any));
+  const isPublic = requiredTier === "public";
+  const bodyCode = isPublic
+    ? (safeStr((doc as any)?.body?.code, "") || safeStr((doc as any)?.bodyCode, "") || "")
+    : "";
 
   return {
-    props: jsonSafe({ item: { ...doc, slug, bodyCode } }),
+    props: jsonSafe({ item: { ...doc, slug, bodyCode }, requiredTier }),
     revalidate: 1800,
   };
 

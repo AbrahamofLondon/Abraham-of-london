@@ -20,7 +20,10 @@ import {
   Quote,
 } from "lucide-react";
 
+import { useSession } from "next-auth/react";
+
 import Layout from "@/components/Layout";
+import AccessGate from "@/components/AccessGate";
 import {
   getPublicationBySlug,
   getPublicationCatalogue,
@@ -96,6 +99,40 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relatedSlugs }) => {
+  const { data: session } = useSession();
+  const isPublic = item.tier === "public";
+
+  // For restricted editorials, strip download links client-side
+  const safePreviewHref = isPublic ? previewHref : null;
+  const safePdfPath = isPublic ? item.pdfPath : null;
+  const safeEpubPath = isPublic ? item.epubPath : null;
+
+  if (!isPublic && !session?.user) {
+    return (
+      <Layout
+        title={`${item.title} | Abraham of London`}
+        description={item.description || item.subtitle || item.title}
+        canonicalUrl={`/editorials/${item.slug}`}
+        fullWidth
+        headerTransparent
+      >
+        <Head>
+          <meta name="robots" content="noindex,nofollow" />
+        </Head>
+        <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
+          <div className="flex min-h-screen items-center justify-center px-6">
+            <AccessGate
+              title={item.title}
+              requiredTier={item.tier}
+              message="This publication requires appropriate access."
+              isAuthenticated={false}
+            />
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout
       title={`${item.title} | Abraham of London`}
@@ -781,13 +818,19 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
   const prev = idx > 0 ? sorted[idx - 1]!.slug : null;
   const next = idx < sorted.length - 1 ? sorted[idx + 1]!.slug : null;
 
-  const previewHref = item.previewEnabled
+  const isPublic = item.tier === "public";
+  const previewHref = isPublic && item.previewEnabled
     ? (item.previewPath || `/api/editorials/preview/${item.slug}`)
     : null;
 
+  // Strip asset paths for non-public publications at the server level
+  const safeItem = isPublic
+    ? item
+    : { ...item, pdfPath: undefined, epubPath: undefined, previewPath: undefined };
+
   return {
     props: {
-      item,
+      item: safeItem,
       previewHref,
       citationHref: `/api/editorials/citation/${item.slug}`,
       relatedSlugs: { prev, next },

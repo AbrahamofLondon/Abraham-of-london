@@ -29,6 +29,10 @@ import {
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
+
+import { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -36,7 +40,8 @@ import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 
 interface PlaybookPageProps {
   playbook: Playbook;
-  renderCode: string;
+  renderCode: string | null;
+  requiredTier: AccessTier;
   adjacent: {
     prev: { slug: string; title: string } | null;
     next: { slug: string; title: string } | null;
@@ -182,10 +187,14 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
   const prevItem = idx > 0 ? sorted[idx - 1] : null;
   const nextItem = idx >= 0 && idx < sorted.length - 1 ? sorted[idx + 1] : null;
 
+  const tier = requiredTierFromDoc(playbook as any);
+  const isPublic = tier === "public";
+
   return {
     props: {
       playbook,
-      renderCode: pickRenderablePlaybookCode(playbook),
+      renderCode: isPublic ? pickRenderablePlaybookCode(playbook) : null,
+      requiredTier: tier,
       adjacent: {
         prev: prevItem
           ? { slug: normalizeSlug(prevItem.slug), title: safeString(prevItem.title) }
@@ -205,7 +214,8 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjacent }) => {
+const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requiredTier, adjacent }) => {
+  const isPublic = requiredTier === "public";
   const reduceMotion = useReducedMotion();
 
   // Local typed extractions — playbook fields are `unknown` in ambient declarations
@@ -772,7 +782,17 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
               transition={{ duration: 0.70 }}
             >
               <div className="playbook-body">
-                <SafeMDXRenderer code={renderCode} />
+                {!isPublic ? (
+                  <ClientUnlockRenderer
+                    slug={`playbooks/${normalizeSlug(playbook.slug)}`}
+                    requiredTier={requiredTier}
+                    initialCode={null}
+                    title={safeString(playbook.title)}
+                    message="This playbook requires appropriate access."
+                  />
+                ) : renderCode ? (
+                  <SafeMDXRenderer code={renderCode} />
+                ) : null}
               </div>
             </motion.div>
           </div>

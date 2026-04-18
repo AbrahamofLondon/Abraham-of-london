@@ -368,12 +368,12 @@ const BriefPage: NextPage<Props> = ({
               <AccessGate
                 title={title}
                 requiredTier={required}
+                isAuthenticated={!!session?.user}
                 onUnlocked={handleUnlock}
                 message={
                   safeString(brief?.lockMessage) ||
-                  "This briefing requires the appropriate clearance level."
+                  "This briefing requires appropriate access."
                 }
-                onGoToJoin={() => window.location.assign("/inner-circle")}
               />
 
               {unlockError ? (

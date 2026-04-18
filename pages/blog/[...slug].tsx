@@ -134,11 +134,9 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
             <AccessGate
               title={title}
               requiredTier={required}
-              message="This essay requires appropriate clearance."
+              message="This essay requires appropriate access."
+              isAuthenticated={!!session?.user}
               onUnlocked={handleUnlock}
-              onGoToJoin={() => {
-                window.location.href = "/inner-circle";
-              }}
             />
             {unlockError ? (
               <div className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-red-400/90">

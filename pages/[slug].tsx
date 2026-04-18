@@ -216,10 +216,8 @@ const GenericContentPage: NextPage<Props> = ({
           <AccessGate
             title={doc.title}
             requiredTier={required}
-            message="This content requires appropriate clearance."
-            onGoToJoin={() => {
-              window.location.href = "/inner-circle";
-            }}
+            message="This content requires appropriate access."
+            isAuthenticated={!!session?.user}
           />
         </div>
       </Layout>

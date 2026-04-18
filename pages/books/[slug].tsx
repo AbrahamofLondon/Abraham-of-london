@@ -157,11 +157,9 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
             <AccessGate
               title={title}
               requiredTier={required}
-              message="This volume requires appropriate clearance."
+              message="This volume requires appropriate access."
+              isAuthenticated={!!session?.user}
               onUnlocked={handleUnlock}
-              onGoToJoin={() => {
-                window.location.href = "/inner-circle";
-              }}
             />
             {unlockError ? (
               <div className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-red-400/90">

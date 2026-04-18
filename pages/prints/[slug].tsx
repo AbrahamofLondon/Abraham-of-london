@@ -4,15 +4,19 @@ import Head from "next/head";
 
 import Layout from "@/components/Layout";
 import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
+import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
 import { normalizeSlug } from "@/lib/content/shared";
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
 type Props = {
   print: {
     title: string;
     slug: string;
   };
-  bodyCode: string;
+  requiredTier: AccessTier;
+  bodyCode: string | null;
 };
 
 function isPrintDoc(doc: any): boolean {
@@ -30,17 +34,29 @@ function isPrintDoc(doc: any): boolean {
   );
 }
 
-const Page: NextPage<Props> = ({ print, bodyCode }) => {
+const Page: NextPage<Props> = ({ print, requiredTier, bodyCode }) => {
+  const isPublic = requiredTier === "public";
+
   return (
     <Layout title={print.title}>
       <Head>
-        <meta name="robots" content="index,follow" />
+        <meta name="robots" content={isPublic ? "index,follow" : "noindex,nofollow"} />
       </Head>
 
       <main className="min-h-screen bg-white text-black px-6 py-16">
         <div className="mx-auto max-w-5xl">
           <h1 className="text-5xl font-serif mb-10">{print.title}</h1>
-          <ServerMDXRenderer code={bodyCode} />
+          {isPublic && bodyCode ? (
+            <ServerMDXRenderer code={bodyCode} />
+          ) : !isPublic ? (
+            <ClientUnlockRenderer
+              slug={`prints/${print.slug}`}
+              requiredTier={requiredTier}
+              initialCode={null}
+              title={print.title}
+              message="This print requires appropriate access."
+            />
+          ) : null}
         </div>
       </main>
     </Layout>
@@ -91,13 +107,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+  const isPublic = requiredTier === "public";
+
   return {
     props: sanitizeData({
       print: {
         title: doc.title || "Untitled Print",
         slug,
       },
-      bodyCode: String(doc.body?.code || doc.bodyCode || ""),
+      requiredTier,
+      bodyCode: isPublic ? String(doc.body?.code || doc.bodyCode || "") : null,
     }),
     revalidate: 3600,
   };

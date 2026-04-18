@@ -223,8 +223,8 @@ const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl, ro
           <AccessGate
             title={asset.title}
             requiredTier={required}
-            message="This library asset requires appropriate clearance."
-            onGoToJoin={() => (window.location.href = "/inner-circle")}
+            message="This library asset requires appropriate access."
+            isAuthenticated={!!session?.user}
           />
         </div>
       </Layout>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useSession } from "next-auth/react";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import AccessGate from "@/components/AccessGate";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
@@ -82,6 +83,7 @@ export default function ClientUnlockRenderer({
   message = "Restricted content",
   onGoToJoin,
 }: ClientUnlockRendererProps) {
+  const { data: session } = useSession();
   const [code, setCode] = React.useState<string | null>(initialCode);
   const [loading, setLoading] = React.useState(false);
   const [unlockError, setUnlockError] = React.useState<string | null>(null);
@@ -128,9 +130,10 @@ export default function ClientUnlockRenderer({
         <AccessGate
           title={title ?? ""}
           requiredTier={requiredTier as AccessTier}
+          isAuthenticated={!!session?.user}
           onUnlocked={unlock}
           message={message}
-          onGoToJoin={onGoToJoin}
+          onGoToAccess={onGoToJoin}
         />
         {unlockError ? (
           <div className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-red-400/90">

@@ -7,6 +7,10 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
+
+import { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
 import ShortHero from "@/components/shorts/ShortHero";
 import ShortMetadata from "@/components/shorts/ShortMetadata";
@@ -77,6 +81,7 @@ type PageItem = {
 
 type Props = {
   item: PageItem;
+  requiredTier: AccessTier;
   relatedShorts: ShortLinkItem[];
   prevShort: ShortLinkItem | null;
   nextShort: ShortLinkItem | null;
@@ -391,10 +396,12 @@ async function loadAllShorts(): Promise<RawShortLike[]> {
 
 const ShortsSlugPage: NextPage<Props> = ({
   item = EMPTY_ITEM,
+  requiredTier = "public",
   relatedShorts = [],
   prevShort = null,
   nextShort = null,
 }) => {
+  const isPublic = requiredTier === "public";
   const safeItem = item || EMPTY_ITEM;
 
   const title = safeItem.title || "Short";
@@ -585,7 +592,15 @@ const ShortsSlugPage: NextPage<Props> = ({
         </div>
 
         <article className="mx-auto max-w-3xl px-6 py-8">
-          {safeItem.bodyCode ? (
+          {!isPublic ? (
+            <ClientUnlockRenderer
+              slug={`shorts/${safeItem.slug}`}
+              requiredTier={requiredTier}
+              initialCode={null}
+              title={safeItem.title}
+              message="This short requires appropriate access."
+            />
+          ) : safeItem.bodyCode ? (
             <SafeMDXRenderer code={safeItem.bodyCode} />
           ) : (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center font-mono text-sm text-red-200">
@@ -749,9 +764,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
-  // FIXED: Allow content to render even if bodyCode is raw MDX
-  // The SafeMDXRenderer will handle raw MDX content appropriately
-  if (!item.bodyCode) {
+  const tier = requiredTierFromDoc(doc as any);
+  const isPublic = tier === "public";
+
+  // Strip body code for gated content
+  if (!isPublic) {
+    item.bodyCode = null;
+  } else if (!item.bodyCode) {
     console.warn(`[Short ${item.title}] No body code available. Content may not render.`);
   }
 
@@ -774,6 +793,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   return {
     props: {
       item,
+      requiredTier: tier,
       relatedShorts,
       prevShort: toShortLinkItem(prevDoc),
       nextShort: toShortLinkItem(nextDoc),
