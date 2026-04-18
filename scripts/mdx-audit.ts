@@ -152,14 +152,23 @@ function auditDocument(
       });
     }
 
-    // Check 6: Raw HTML blocks (non-MDX)
-    const rawHtml = bodyRaw.match(/<(script|iframe|style|object|embed)\b/gi);
-    if (rawHtml) {
+    // Check 6: Dangerous HTML (script/iframe/object/embed = error; style = warning)
+    const dangerousHtml = bodyRaw.match(/<(script|iframe|object|embed)\b/gi);
+    if (dangerousHtml) {
       findings.push({
         severity: "error",
         file: docId,
         title,
-        message: `Dangerous HTML elements found: ${rawHtml.join(", ")}`,
+        message: `Dangerous HTML elements found: ${dangerousHtml.join(", ")}`,
+      });
+    }
+    const styleHtml = bodyRaw.match(/<style\b/gi);
+    if (styleHtml) {
+      findings.push({
+        severity: "warning",
+        file: docId,
+        title,
+        message: "Contains <style> tag — review for appropriateness",
       });
     }
   }

@@ -9,9 +9,11 @@ import { ShieldCheck, Lock, ChevronLeft } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { getRenderableBody } from "@/lib/content/render-body";
 
 type Props = {
   brief: any;
+  bodyCode: string;
   accessTier: string;
 };
 
@@ -37,10 +39,9 @@ function findBriefInList(slug: string, briefs: any[]) {
   return briefs.find((b: any) => getBriefRouteSlug(b) === needle) || null;
 }
 
-const BriefDetailPage: NextPage<Props> = ({ brief, accessTier }) => {
+const BriefDetailPage: NextPage<Props> = ({ brief, bodyCode, accessTier }) => {
   const title = safeString(brief?.title) || "Untitled Brief";
   const subtitle = safeString(brief?.subtitle);
-  const bodyCode = safeString(brief?.body?.code);
 
   return (
     <Layout title={`${title} | Abraham of London`}>
@@ -154,9 +155,12 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   const brief = findBriefInList(slug, allBriefs);
   if (!brief) return { notFound: true };
 
+  const renderBody = getRenderableBody(brief);
+
   return {
     props: {
       brief: JSON.parse(JSON.stringify(brief)),
+      bodyCode: renderBody.code,
       accessTier: safeString(ctx.tier) || "inner-circle",
     },
   };
