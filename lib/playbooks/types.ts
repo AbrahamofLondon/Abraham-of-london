@@ -44,6 +44,10 @@ export type PlaybookMatchContext = {
   failureModes: string[];
   dominantDomains?: string[];
   authorityType?: string | null;
+  /** From accumulated thread: team fragility status */
+  teamFragility?: string | null;
+  /** From accumulated thread: enterprise structural pattern */
+  enterprisePattern?: string | null;
 };
 
 export type MatchedPlaybook = PlaybookDefinition & {

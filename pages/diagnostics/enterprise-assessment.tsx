@@ -51,6 +51,7 @@ import type {
 } from "@/lib/diagnostics/types";
 import {
   readConstitutionalThread,
+  mergeEnterpriseFindingsIntoThread,
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
@@ -626,6 +627,22 @@ export default function EnterpriseAssessmentPage() {
     const nextHref = reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting";
     const outcome = reading?.route === "STRATEGY_ROOM" ? "strategy" as const : "diagnostic" as const;
     trackStageComplete("enterprise", outcome, nextHref);
+
+    // Write enterprise findings back into the constitutional thread
+    const weakBlocks = BLOCKS
+      .map(b => ({ id: b.id, title: b.title, pct: sections.find(s => s.id === b.id)?.pct ?? 0 }))
+      .filter(b => b.pct < 50)
+      .map(b => b.title);
+
+    mergeEnterpriseFindingsIntoThread({
+      completedAt: new Date().toISOString(),
+      band: bandFromPct(totalPct),
+      totalPct,
+      weakBlocks,
+      patternTitle: reading?.patternTitle ?? "",
+      route: reading?.route ?? "EXECUTIVE_REPORTING",
+      narrative: (reading?.primaryReading ?? "").slice(0, 300),
+    });
 
     // Handoff to /diagnostics/executive-reporting (and the Strategy Room chain).
     // Canonical key per CLAUDE_SESSION_LOG.md section 4 ladder chain:

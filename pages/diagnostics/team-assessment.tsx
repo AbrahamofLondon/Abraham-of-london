@@ -45,6 +45,7 @@ import type {
 import { calculateFragility } from "@/lib/alignment/fragility-logic";
 import {
   readConstitutionalThread,
+  mergeTeamFindingsIntoThread,
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
@@ -606,6 +607,18 @@ export default function TeamAssessmentPage() {
     });
     setSubmitResult(res);
     trackStageComplete("team", "diagnostic", "/diagnostics/enterprise-assessment");
+
+    // Write team findings back into the constitutional thread
+    mergeTeamFindingsIntoThread({
+      completedAt: new Date().toISOString(),
+      fragilityStatus: fragility.status,
+      fragilityScore: fragility.score,
+      dominantGapDomains: criticalGaps.map(g => g.domain),
+      overallGap: Math.round(overallLeader - overallReality),
+      patternTitle: reading.title,
+      escalationRoute: reading.route,
+      narrative: reading.pattern.slice(0, 300),
+    });
 
     // Handoff to /diagnostics/enterprise-assessment (reads `team-assessment-result`
     // and extracts `overallReality` + related metrics). Canonical chain per

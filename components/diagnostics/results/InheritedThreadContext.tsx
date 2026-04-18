@@ -1,4 +1,5 @@
 import type { ConstitutionalThread } from "@/lib/diagnostics/session-thread";
+import { getJourneySummary } from "@/lib/diagnostics/session-thread";
 
 const GOLD = "#C9A96E";
 
@@ -9,6 +10,9 @@ export default function InheritedThreadContext({
   thread: ConstitutionalThread;
   title?: string;
 }) {
+  const journeyLines = getJourneySummary(thread);
+  const hasAccumulated = !!(thread.teamFindings || thread.enterpriseFindings || thread.executiveFindings);
+
   return (
     <div
       style={{
@@ -47,6 +51,41 @@ export default function InheritedThreadContext({
         <Metric label="Authority" value={thread.authorityType} />
         <Metric label="Posture" value={thread.posture} />
       </div>
+
+      {/* Accumulated downstream findings */}
+      {hasAccumulated && (
+        <div style={{ marginTop: "0.9rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.9rem" }}>
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "6.5px",
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: `${GOLD}70`,
+              marginBottom: "0.65rem",
+            }}
+          >
+            Accumulated journey signal
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+            {journeyLines.map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px",
+                  lineHeight: 1.55,
+                  color: "rgba(255,255,255,0.48)",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <p
         style={{
           marginTop: "0.9rem",

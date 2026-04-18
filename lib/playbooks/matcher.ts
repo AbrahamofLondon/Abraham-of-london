@@ -52,6 +52,16 @@ function scorePlaybook(
     reasons.push(`Supports ${context.authorityType.toLowerCase()} authority condition`);
   }
 
+  // Bonus for accumulated thread context
+  if (context.teamFragility === "FRACTURED" && playbook.failureModes.some(m => /TRUST|SIGNAL/i.test(m))) {
+    score += 8;
+    reasons.push("Team fragility confirms structural strain");
+  }
+  if (context.enterprisePattern && playbook.failureModes.some(m => /EXECUTION|GOVERNANCE/i.test(m))) {
+    score += 6;
+    reasons.push("Enterprise pattern reinforces operational risk");
+  }
+
   if (score < 24) {
     return null;
   }

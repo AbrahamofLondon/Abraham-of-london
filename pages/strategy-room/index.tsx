@@ -542,6 +542,8 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, t
         failureModes: [...thread.failureModes, ...posture.failureModes],
         dominantDomains: [],
         authorityType: posture.authorityType,
+        teamFragility: thread.teamFindings?.fragilityStatus ?? null,
+        enterprisePattern: thread.enterpriseFindings?.patternTitle ?? null,
       })
     : [];
 

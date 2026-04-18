@@ -1,4 +1,52 @@
+/**
+ * lib/diagnostics/session-thread.ts — Accumulative constitutional thread
+ *
+ * The thread starts at Stage 1 (Constitutional Diagnostic) and accumulates
+ * findings from each downstream stage. Strategy Room and Executive Reporting
+ * consume the accumulated thread as journey context.
+ *
+ * Thread is session-scoped (sessionStorage). No cross-device persistence.
+ */
+
 export const CONSTITUTIONAL_THREAD_KEY = "aol_constitutional_thread_v1";
+
+// ---------------------------------------------------------------------------
+// Stage finding types
+// ---------------------------------------------------------------------------
+
+export type TeamFindings = {
+  completedAt: string;
+  fragilityStatus: "STABLE" | "VOLATILE" | "FRACTURED" | "INSUFFICIENT_DATA";
+  fragilityScore: number;
+  dominantGapDomains: string[];
+  overallGap: number;
+  patternTitle: string;
+  escalationRoute: string;
+  narrative: string;
+};
+
+export type EnterpriseFindings = {
+  completedAt: string;
+  band: string;
+  totalPct: number;
+  weakBlocks: string[];
+  patternTitle: string;
+  route: string;
+  narrative: string;
+};
+
+export type ExecutiveFindings = {
+  completedAt: string;
+  runKey: string;
+  route: string;
+  orgState: string;
+  readinessTier: string;
+  narrativeHeadline: string;
+};
+
+// ---------------------------------------------------------------------------
+// Thread type
+// ---------------------------------------------------------------------------
 
 export type ConstitutionalThread = {
   source: "constitutional-diagnostic";
@@ -41,14 +89,26 @@ export type ConstitutionalThread = {
       escalationAllowed: boolean;
     };
   };
+
+  // Accumulated downstream findings
+  teamFindings?: TeamFindings;
+  enterpriseFindings?: EnterpriseFindings;
+  executiveFindings?: ExecutiveFindings;
 };
+
+// ---------------------------------------------------------------------------
+// Core persistence
+// ---------------------------------------------------------------------------
 
 export function saveConstitutionalThread(thread: ConstitutionalThread): void {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.setItem(CONSTITUTIONAL_THREAD_KEY, JSON.stringify(thread));
+    window.sessionStorage.setItem(
+      CONSTITUTIONAL_THREAD_KEY,
+      JSON.stringify(thread),
+    );
   } catch {
-    // ignore unavailable session storage
+    // sessionStorage unavailable
   }
 }
 
@@ -63,4 +123,79 @@ export function readConstitutionalThread(): ConstitutionalThread | null {
   } catch {
     return null;
   }
+}
+
+export function clearConstitutionalThread(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(CONSTITUTIONAL_THREAD_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Accumulation: downstream stages write findings back into the thread
+// ---------------------------------------------------------------------------
+
+export function mergeTeamFindingsIntoThread(
+  findings: TeamFindings,
+): void {
+  const thread = readConstitutionalThread();
+  if (!thread) return;
+
+  thread.teamFindings = findings;
+  saveConstitutionalThread(thread);
+}
+
+export function mergeEnterpriseFindingsIntoThread(
+  findings: EnterpriseFindings,
+): void {
+  const thread = readConstitutionalThread();
+  if (!thread) return;
+
+  thread.enterpriseFindings = findings;
+  saveConstitutionalThread(thread);
+}
+
+export function mergeExecutiveFindingsIntoThread(
+  findings: ExecutiveFindings,
+): void {
+  const thread = readConstitutionalThread();
+  if (!thread) return;
+
+  thread.executiveFindings = findings;
+  saveConstitutionalThread(thread);
+}
+
+// ---------------------------------------------------------------------------
+// Journey summary for display
+// ---------------------------------------------------------------------------
+
+export function getJourneySummary(thread: ConstitutionalThread): string[] {
+  const lines: string[] = [];
+
+  lines.push(
+    `Constitutional reading: ${thread.route} (confidence ${thread.confidence}%, posture ${thread.posture})`,
+  );
+
+  if (thread.teamFindings) {
+    lines.push(
+      `Team assessment: ${thread.teamFindings.fragilityStatus} (gap ${thread.teamFindings.overallGap}pt, pattern: ${thread.teamFindings.patternTitle})`,
+    );
+  }
+
+  if (thread.enterpriseFindings) {
+    lines.push(
+      `Enterprise assessment: ${thread.enterpriseFindings.band} (${thread.enterpriseFindings.totalPct}%, pattern: ${thread.enterpriseFindings.patternTitle})`,
+    );
+  }
+
+  if (thread.executiveFindings) {
+    lines.push(
+      `Executive reporting: ${thread.executiveFindings.route} (${thread.executiveFindings.orgState})`,
+    );
+  }
+
+  return lines;
 }

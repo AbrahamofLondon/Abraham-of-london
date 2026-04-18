@@ -6,6 +6,7 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
+import { mergeExecutiveFindingsIntoThread } from "@/lib/diagnostics/session-thread";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -2588,6 +2589,16 @@ export default function ExecutiveReportingRunPage() {
     // Mirrors the Team → Enterprise and Enterprise → ER write patterns.
     // Persists the full successful result so any downstream reader gets both
     // the report data and server-computed envelope fields.
+    // Write executive findings into the constitutional thread
+    mergeExecutiveFindingsIntoThread({
+      completedAt: new Date().toISOString(),
+      runKey: r.runKey || "",
+      route: r.route || "DIAGNOSTIC",
+      orgState: (r.canonical as any)?.constitution?.orgState || "DRIFTING",
+      readinessTier: (r.canonical as any)?.constitution?.readinessTier || "EMERGING",
+      narrativeHeadline: (r.canonical as any)?.report?.narrative?.headline || "",
+    });
+
     try {
       sessionStorage.setItem("executive-report-result", JSON.stringify(r));
     } catch {
