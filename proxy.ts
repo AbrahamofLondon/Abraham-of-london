@@ -71,6 +71,8 @@ const PUBLIC_PREFIXES = [
   "/leadership",
   "/auth/access-denied",
   "/inner-circle/insufficient-clearance",
+  "/diagnostics",
+  "/purpose-alignment",
 ] as const;
 
 const CONSTITUTIONAL_PROTECTED_PATHS: Record<
@@ -256,7 +258,7 @@ const TIER2_PREFIXES = [
 
 const TIER1_PREFIXES = [
   "/dashboard",
-  "/diagnostics",
+  // /diagnostics is PUBLIC — it is the product entry point, not a gated surface
   "/consulting",
   "/strategy",
 ];
