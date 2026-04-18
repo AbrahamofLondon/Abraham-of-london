@@ -4,21 +4,11 @@ import {
   normalizeCanonicalInput,
   processStrategyRoomEnrolment,
 } from "@/lib/strategy-room/enrol-core";
-
-function getClientIp(req: NextApiRequest): string {
-  const forwarded = req.headers["x-forwarded-for"];
-
-  if (Array.isArray(forwarded) && forwarded[0]) {
-    return String(forwarded[0]).trim();
-  }
-
-  if (typeof forwarded === "string" && forwarded.trim()) {
-    const first = forwarded.split(",")[0];
-    return String(first || "").trim();
-  }
-
-  return String(req.socket?.remoteAddress || "").trim();
-}
+import {
+  rateLimitCheck,
+  getClientIp,
+  createRateLimitHeaders,
+} from "@/lib/server/rate-limit-unified";
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,6 +19,20 @@ export default async function handler(
       ok: false,
       status: "declined",
       message: "Direct POST access required for this terminal.",
+    });
+  }
+
+  // Rate limit: 30 submissions per 10 minutes per IP
+  const ip = getClientIp(req);
+  const rl = rateLimitCheck({ key: "API_STRICT", id: `sr:${ip}` });
+  const rlHeaders = createRateLimitHeaders(rl);
+  for (const [k, v] of Object.entries(rlHeaders)) res.setHeader(k, v);
+
+  if (!rl.allowed) {
+    return res.status(429).json({
+      ok: false,
+      status: "declined",
+      message: "Too many requests. Please try again later.",
     });
   }
 

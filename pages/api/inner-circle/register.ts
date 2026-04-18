@@ -5,11 +5,12 @@ import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 
 import { normalizeUserTier } from "@/lib/access/tier-policy";
+import { rateLimitCheck, getClientIp, createRateLimitHeaders } from "@/lib/server/rate-limit-unified";
 
 import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
 
-type Ok = { ok: true; message: string; accessKey: string };
+type Ok = { ok: true; message: string };
 type Fail = { ok: false; error: string };
 
 function isEmail(email: string): boolean {
@@ -33,6 +34,19 @@ export default async function handler(
 
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store, max-age=0");
+
+  // Rate limit: 30 requests per 10 minutes per IP (INNER_CIRCLE_UNLOCK preset)
+  const ip = getClientIp(req);
+  const rl = rateLimitCheck({ key: "INNER_CIRCLE_UNLOCK", id: ip });
+  const rlHeaders = createRateLimitHeaders(rl);
+  for (const [k, v] of Object.entries(rlHeaders)) res.setHeader(k, v);
+
+  if (!rl.allowed) {
+    return res.status(429).json({
+      ok: false,
+      error: "Too many requests. Please try again later.",
+    });
+  }
 
   const email = String(req.body?.email || "").trim().toLowerCase();
   const name = String(req.body?.name || "").trim();
@@ -99,21 +113,26 @@ export default async function handler(
       ""
     )}/inner-circle/unlock?key=${encodeURIComponent(result.rawKey)}`;
 
-    await sendInnerCircleEmail(email, "Access Granted | Abraham of London", {
-      name: name || "Principal",
-      email,
-      accessKey: result.rawKey,
-      unlockUrl,
-      mode: "register",
-      requestIp: String(
-        req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown"
-      ),
-    });
+    try {
+      await sendInnerCircleEmail(email, "Access Granted | Abraham of London", {
+        name: name || "Principal",
+        email,
+        accessKey: result.rawKey,
+        unlockUrl,
+        mode: "register",
+        requestIp: ip,
+      });
+    } catch (mailErr) {
+      // Log mail failure but do NOT expose it to the client.
+      // The key is stored in DB — admin can resend if needed.
+      console.error("[REGISTER] Email delivery failed:", mailErr);
+    }
 
+    // Do not expose raw access key in the API response.
+    // Key is delivered via email only.
     return res.status(200).json({
       ok: true,
-      message: "Alignment confirmed. Asset key dispatched to inbox.",
-      accessKey: result.rawKey,
+      message: "Access provisioned. Check your inbox for your secure access key.",
     });
   } catch (error) {
     console.error("REGISTRATION_FAILURE:", error);

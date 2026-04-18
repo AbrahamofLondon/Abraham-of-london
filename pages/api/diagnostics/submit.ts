@@ -10,6 +10,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import { rateLimitCheck, getClientIp, createRateLimitHeaders } from "@/lib/server/rate-limit-unified";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import {
   getSessionContext,
@@ -138,16 +139,21 @@ function generateDiagnosticRef(kind: string): string {
 function getNextStepHref(kind: string): string | null {
   const safeKind = safeString(kind).toLowerCase();
 
+  // Funnel progression: constitutional → team → enterprise → strategy room
   if (safeKind === "initial-assessment" || safeKind === "directional-integrity") {
-    return "/diagnostics/team-alignment";
+    return "/diagnostics/team-assessment";
   }
 
-  if (safeKind === "team-alignment") {
-    return "/diagnostics/enterprise";
+  if (safeKind === "team-alignment" || safeKind === "team-assessment") {
+    return "/diagnostics/enterprise-assessment";
   }
 
-  if (safeKind === "enterprise") {
-    return "/consulting/strategy-room";
+  if (safeKind === "enterprise" || safeKind === "enterprise-assessment") {
+    return "/strategy-room";
+  }
+
+  if (safeKind === "executive-reporting") {
+    return "/strategy-room";
   }
 
   return "/diagnostics";
@@ -222,6 +228,16 @@ export default async function handler(
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
+  }
+
+  // Rate limit: 30 submissions per 10 minutes per IP
+  const ip = getClientIp(req);
+  const rl = rateLimitCheck({ key: "INNER_CIRCLE_UNLOCK", id: `diag:${ip}` });
+  const rlHeaders = createRateLimitHeaders(rl);
+  for (const [k, v] of Object.entries(rlHeaders)) res.setHeader(k, v);
+
+  if (!rl.allowed) {
+    return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
   }
 
   if (!validatePayload(req.body)) {

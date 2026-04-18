@@ -6,6 +6,7 @@ import { KeyStatus as PrismaKeyStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
+import { rateLimitCheck, getClientIp, createRateLimitHeaders } from "@/lib/server/rate-limit-unified";
 import { hashAccessKey, getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
 
@@ -74,6 +75,19 @@ export default async function handler(
 
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store, max-age=0");
+
+  // Rate limit: 30 requests per 10 minutes per IP
+  const ip = getClientIp(req);
+  const rl = rateLimitCheck({ key: "INNER_CIRCLE_UNLOCK", id: ip });
+  const rlHeaders = createRateLimitHeaders(rl);
+  for (const [k, v] of Object.entries(rlHeaders)) res.setHeader(k, v);
+
+  if (!rl.allowed) {
+    return res.status(429).json({
+      ok: false,
+      error: "Too many requests. Please try again later.",
+    });
+  }
 
   const email = String(req.body?.email || "").trim().toLowerCase();
   const name = String(req.body?.name || "").trim();
