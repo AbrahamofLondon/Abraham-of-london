@@ -171,6 +171,14 @@ function stripInlineJsxProps(input: string): string {
   return input.replace(/\s+[A-Za-z_:][-A-Za-z0-9_:.]*=(\{[^}]*\}|"[^"]*"|'[^']*')/g, "");
 }
 
+function extractAttr(attrs: string, name: string): string {
+  const re = new RegExp(
+    `\\b${name}=(?:"([^"]*)"|'([^']*)'|\\{\`([^\`]*)\`\\}|\\{"([^"]*)"\\}|\\{'([^']*)'\\})`,
+  );
+  const m = attrs.match(re);
+  return m?.[1] || m?.[2] || m?.[3] || m?.[4] || m?.[5] || "";
+}
+
 function transformRawMdxToMarkdownLike(input: string): string {
   let s = safeString(input).replace(/\r\n/g, "\n").trim();
   if (!s) return "";
@@ -179,78 +187,80 @@ function transformRawMdxToMarkdownLike(input: string): string {
   s = s.replace(/^\s*import\s.+?;?\s*$/gm, "");
   s = s.replace(/^\s*export\s.+?;?\s*$/gm, "");
 
-  // Callout blocks
-  s = s.replace(/^\s*<Callout\b([^>]*)>\s*$/gm, (_m, attrs: string) => {
-    const titleMatch = attrs.match(/\btitle=(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\}|\{"([^"]*)"\}|\{'([^']*)'\})/);
-    const title =
-      titleMatch?.[1] ||
-      titleMatch?.[2] ||
-      titleMatch?.[3] ||
-      titleMatch?.[4] ||
-      titleMatch?.[5] ||
-      "Callout";
-    return `> **${title}**\n>`;
+  // ── Callout blocks (multi-line: open tag, content, close tag) ────────
+  // Matches <Callout ...>content</Callout> across lines, preserves inner
+  // content as blockquote with bold title.
+  s = s.replace(
+    /<Callout\b([^>]*)>([\s\S]*?)<\/Callout>/g,
+    (_m, attrs: string, inner: string) => {
+      const title = extractAttr(attrs, "title") || "Note";
+      const body = inner
+        .trim()
+        .split("\n")
+        .map((line) => `> ${line}`)
+        .join("\n");
+      return `> **${title}**\n${body}`;
+    },
+  );
+  // Single-line self-closing: <Callout title="..." />
+  s = s.replace(/<Callout\b([^>]*)\/>/g, (_m, attrs: string) => {
+    const title = extractAttr(attrs, "title") || "Note";
+    return `> **${title}**`;
   });
-  s = s.replace(/^\s*<\/Callout>\s*$/gm, "");
+  // Orphan open/close tags (already handled above, but safety net)
+  s = s.replace(/^\s*<\/?Callout[^>]*>\s*$/gm, "");
 
-  // Section breaks and dividers
-  s = s.replace(/^\s*<SectionBreak\s*\/>\s*$/gm, "\n---\n");
-  s = s.replace(/^\s*<Divider\s*\/>\s*$/gm, "\n---\n");
-  s = s.replace(/^\s*<Rule\s*\/>\s*$/gm, "\n---\n");
+  // ── Section breaks and dividers ──────────────────────────────────────
+  s = s.replace(/<(SectionBreak|Divider|Rule)\s*\/?>/g, "\n---\n");
 
-  // PullQuote
-  s = s.replace(/^\s*<PullQuote\b([^>]*)>\s*$/gm, (_m, attrs: string) => {
-    const textMatch = attrs.match(/\bquote=(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\}|\{"([^"]*)"\}|\{'([^']*)'\})/);
-    const text =
-      textMatch?.[1] ||
-      textMatch?.[2] ||
-      textMatch?.[3] ||
-      textMatch?.[4] ||
-      textMatch?.[5] ||
-      "";
+  // ── PullQuote ────────────────────────────────────────────────────────
+  s = s.replace(
+    /<PullQuote\b([^>]*)>([\s\S]*?)<\/PullQuote>/g,
+    (_m, attrs: string, inner: string) => {
+      const text = extractAttr(attrs, "quote") || inner.trim();
+      return text ? `> *${text}*` : "";
+    },
+  );
+  s = s.replace(/<PullQuote\b([^>]*)\/>/g, (_m, attrs: string) => {
+    const text = extractAttr(attrs, "quote");
     return text ? `> *${text}*` : "";
   });
-  s = s.replace(/^\s*<\/PullQuote>\s*$/gm, "");
+  s = s.replace(/^\s*<\/?PullQuote[^>]*>\s*$/gm, "");
 
-  // Blockquote wrappers
-  s = s.replace(/^\s*<Blockquote>\s*$/gm, "> ");
-  s = s.replace(/^\s*<\/Blockquote>\s*$/gm, "");
+  // ── Blockquote wrappers ──────────────────────────────────────────────
+  s = s.replace(/<Blockquote>([\s\S]*?)<\/Blockquote>/g, (_m, inner: string) => {
+    return inner
+      .trim()
+      .split("\n")
+      .map((line) => `> ${line}`)
+      .join("\n");
+  });
+  s = s.replace(/^\s*<\/?Blockquote>\s*$/gm, "");
 
-  // Common lowercase HTML wrappers used in MDX prose
+  // ── Lowercase HTML wrappers ──────────────────────────────────────────
   s = s.replace(/^\s*<(div|section|article|span)\b[^>]*>\s*$/gm, "");
   s = s.replace(/^\s*<\/(div|section|article|span)>\s*$/gm, "");
-
-  // Self-closing anchors / wrappers
-  s = s.replace(/^\s*<div\b[^>]*id=["']([^"']+)["'][^>]\/>\s*$/gm, "\n---\n");
   s = s.replace(/^\s*<(div|section|article|span)\b[^>]*\/>\s*$/gm, "");
 
-  // Bracket tokens used as visual component markers
-  s = s.replace(/^\s*\[Link\]\s*$/gm, "**Link**");
+  // ── Bracket tokens ───────────────────────────────────────────────────
   s = s.replace(/^\s*\[Rule\]\s*$/gm, "---");
 
-  // Generic capitalized component wrappers (single-line)
-  s = s.replace(/^\s*<([A-Z][A-Za-z0-9._-]*)\b([^>]*)\/>\s*$/gm, (_m, tag: string) => {
-    return `**[${tag}]**`;
-  });
+  // ── Multi-line JSX components (open+close with inner content) ────────
+  s = s.replace(
+    /<([A-Z][A-Za-z0-9._-]*)\b[\s\S]*?>([\s\S]*?)<\/\1>/g,
+    (_m, _tag: string, inner: string) => inner.trim(),
+  );
+  // ── Multi-line self-closing JSX ──────────────────────────────────────
+  s = s.replace(/<[A-Z][A-Za-z0-9._-]*\b[\s\S]*?\/>/g, "");
+  // ── Single-line opening/closing JSX tags ─────────────────────────────
+  s = s.replace(/^\s*<\/?[A-Z][A-Za-z0-9._-]*[^>]*>\s*$/gm, "");
 
-  s = s.replace(/^\s*<([A-Z][A-Za-z0-9._-]*)\b([^>]*)>\s*$/gm, (_m, tag: string) => {
-    return `**[${tag}]**`;
-  });
-
-  s = s.replace(/^\s*<\/([A-Z][A-Za-z0-9._-]*)>\s*$/gm, "");
-
-  // Multi-line JSX component tags (e.g. <ResourcesCTA\n  title="..."\n/>)
-  s = s.replace(/<([A-Z][A-Za-z0-9._-]*)\b[\s\S]*?\/>/g, (_m, tag: string) => {
-    return `**[${tag}]**`;
-  });
-  s = s.replace(/<([A-Z][A-Za-z0-9._-]*)\b[\s\S]*?>([\s\S]*?)<\/\1>/g, (_m, tag: string, inner: string) => {
-    const trimmed = inner.trim();
-    return trimmed ? trimmed : "";
-  });
-
-  // Remove isolated JSX expressions / comments
+  // ── JSX expressions / comments ───────────────────────────────────────
   s = s.replace(/^\s*\{\s*\/\*[\s\S]*?\*\/\s*\}\s*$/gm, "");
   s = s.replace(/^\s*\{[^{}\n]*\}\s*$/gm, "");
+
+  // ── Clean up stray empty blockquote markers (lone ">") ───────────────
+  s = s.replace(/^\s*>\s*$/gm, "");
 
   s = s.replace(/\n{3,}/g, "\n\n").trim();
 
@@ -262,77 +272,83 @@ function RawMarkdownFallback({ content }: { content: string }) {
     let processed = safeString(content).replace(/\r\n/g, "\n").trim();
 
     // Convert remaining JSX component markers to horizontal rules BEFORE escaping.
-    // Handles <Divider />, <Rule />, <SectionBreak /> that may survive from raw MDX.
-    processed = processed.replace(/^\s*<(Divider|Rule|SectionBreak)\s*\/?\s*>\s*$/gm, "\n---\n");
-    // Also handle self-closing without space: <Divider/>
-    processed = processed.replace(/<(Divider|Rule|SectionBreak)\s*\/?\s*>/g, "\n---\n");
+    processed = processed.replace(/<(Divider|Rule|SectionBreak)\s*\/?>/g, "\n---\n");
 
-    // Strip remaining HTML/JSX tags (preserving text content) before escaping.
-    // Handles both single-line and multi-line tags.
-    // Multi-line self-closing: <ComponentName\n  attr="..."\n/>
-    processed = processed.replace(/<[A-Z][A-Za-z0-9._-]*\b[\s\S]*?\/>/g, "");
-    // Multi-line open+close: <ComponentName ...>content</ComponentName>
+    // Strip remaining JSX tags (preserve text content where possible).
     processed = processed.replace(/<([A-Z][A-Za-z0-9._-]*)\b[\s\S]*?>([\s\S]*?)<\/\1>/g, "$2");
-    // Single-line self-closing tags (e.g. <br />, <img ... />)
+    processed = processed.replace(/<[A-Z][A-Za-z0-9._-]*\b[\s\S]*?\/>/g, "");
+    processed = processed.replace(/<\/?[A-Z][A-Za-z0-9._-]*[^>]*>/g, "");
     processed = processed.replace(/<[a-z][^>]*\/\s*>/gi, "");
-    // Single-line open/close tags
     processed = processed.replace(/<\/?[a-z][a-z0-9]*(?:\s[^>]*)?>/gi, "");
+
+    // Strip stray empty blockquote markers BEFORE escaping
+    processed = processed.replace(/^\s*>\s*$/gm, "");
 
     processed = escapeHtml(processed);
 
+    // ── Inline formatting ──────────────────────────────────────────────
+    // Links — uses the same amber accent as MDXComponents.tsx
     processed = processed.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" class="text-amber-400 hover:text-amber-300 underline decoration-amber-400/30">$1</a>',
+      '<a href="$2" class="text-[#C9A96E] hover:text-[#D4B87A] underline decoration-[#C9A96E]/30 underline-offset-2">$1</a>',
     );
 
-    processed = processed.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-[#C9A96E] font-semibold">$1</strong>');
     processed = processed.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
 
+    // ── Headings — same typographic hierarchy as MDXComponents.tsx ─────
     processed = processed.replace(
       /^###### (.+)$/gm,
-      '<h6 class="mt-6 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">$1</h6>',
+      '<h6 class="mt-6 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] opacity-60">$1</h6>',
     );
     processed = processed.replace(
       /^##### (.+)$/gm,
-      '<h5 class="mt-8 mb-3 font-mono text-[11px] uppercase tracking-[0.28em] text-amber-200/80">$1</h5>',
+      '<h5 class="mt-8 mb-3 font-mono text-[11px] uppercase tracking-[0.28em] opacity-70">$1</h5>',
     );
     processed = processed.replace(
       /^#### (.+)$/gm,
-      '<h4 class="mt-10 mb-3 font-serif text-xl text-zinc-300">$1</h4>',
+      '<h4 class="mt-10 mb-3 font-serif text-xl opacity-85">$1</h4>',
     );
     processed = processed.replace(
       /^### (.+)$/gm,
-      '<h3 class="mt-12 mb-4 font-serif text-2xl text-zinc-200">$1</h3>',
+      '<h3 class="mt-12 mb-4 font-serif text-2xl opacity-90">$1</h3>',
     );
     processed = processed.replace(
       /^## (.+)$/gm,
-      '<h2 class="mt-16 mb-5 border-b border-white/10 pb-3 font-mono text-[10px] uppercase tracking-[0.35em] text-amber-400">$1</h2>',
+      '<h2 class="mt-16 mb-5 border-b border-current/10 pb-3 font-mono text-[10px] uppercase tracking-[0.35em] text-[#C9A96E]">$1</h2>',
     );
     processed = processed.replace(
       /^# (.+)$/gm,
-      '<h1 class="mt-10 mb-6 font-serif text-4xl tracking-tight text-white">$1</h1>',
+      '<h1 class="mt-10 mb-6 font-serif text-4xl tracking-tight">$1</h1>',
     );
 
+    // ── Block-level processing ─────────────────────────────────────────
     const blocks = processed.split(/\n{2,}/);
 
     const joined = blocks
       .map((block) => {
         const trimmed = block.trim();
         if (!trimmed) return "";
+        // Skip stray escaped > markers (artifact of Callout conversion)
+        if (/^&gt;\s*$/.test(trimmed)) return "";
 
         if (/^<h[1-6]/.test(trimmed)) return trimmed;
 
         if (/^---$/.test(trimmed)) {
-          return `<hr class="my-8 border-white/10" />`;
+          return '<hr class="my-8 border-current/10" />';
         }
 
-        if (/^&gt;/.test(trimmed)) {
+        // Blockquotes: collect all > lines in the block
+        if (/^&gt;/m.test(trimmed)) {
           const quoteBody = trimmed
             .split("\n")
             .map((line) => line.replace(/^&gt;\s?/, "").trim())
+            .filter(Boolean)
             .join("<br />");
 
-          return `<blockquote class="my-8 border-l-2 border-amber-400/40 pl-5 italic text-white/75">${quoteBody}</blockquote>`;
+          if (!quoteBody) return "";
+
+          return `<blockquote class="my-8 border-l-2 border-[#C9A96E]/40 pl-5 italic opacity-75">${quoteBody}</blockquote>`;
         }
 
         if (/^[-*+]\s+/m.test(trimmed)) {
@@ -342,7 +358,7 @@ function RawMarkdownFallback({ content }: { content: string }) {
             .filter(Boolean)
             .map(
               (item) =>
-                `<li class="flex items-start gap-3 text-white/80"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400"></span><span>${item}</span></li>`,
+                `<li class="flex items-start gap-3 opacity-80"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C9A96E]"></span><span>${item}</span></li>`,
             )
             .join("");
 
@@ -355,39 +371,34 @@ function RawMarkdownFallback({ content }: { content: string }) {
             .map((line) => line.replace(/^\d+\.\s+/, "").trim())
             .filter(Boolean)
             .map(
-              (item) => `<li class="ml-5 list-decimal text-white/80">${item}</li>`,
+              (item) => `<li class="ml-5 list-decimal opacity-80">${item}</li>`,
             )
             .join("");
 
           return `<ol class="mb-6 space-y-3">${items}</ol>`;
         }
 
-        return `<p class="mb-6 leading-8 text-white/80">${trimmed.replace(/\n/g, "<br />")}</p>`;
+        return `<p class="mb-6 leading-8 opacity-80">${trimmed.replace(/\n/g, "<br />")}</p>`;
       })
       .join("");
 
-    // Final cleanup: strip all component marker artifacts.
-    // [Divider], [Rule], [SectionBreak] become <hr>; all others are removed.
+    // Final cleanup: convert any surviving component markers to <hr> or strip
     return joined
-      .replace(/<strong>\[(Divider|Rule|SectionBreak)\]<\/strong>/g,
-        '<hr class="my-8 border-white/10" />')
+      .replace(/<strong[^>]*>\[(Divider|Rule|SectionBreak)\]<\/strong>/g,
+        '<hr class="my-8 border-current/10" />')
       .replace(/&lt;(Divider|Rule|SectionBreak)\s*\/?&gt;/g,
-        '<hr class="my-8 border-white/10" />')
-      .replace(/<strong>\[[A-Z][A-Za-z0-9._-]*\]<\/strong>/g, "")
-      .replace(/&lt;[A-Z][A-Za-z0-9._-]*[\s\S]*?&gt;/g, "");
+        '<hr class="my-8 border-current/10" />')
+      .replace(/<strong[^>]*>\[[A-Z][A-Za-z0-9._-]*\]<\/strong>/g, "")
+      .replace(/\[[A-Z][A-Za-z0-9._-]*\]/g, "")
+      .replace(/&lt;\/?[A-Z][A-Za-z0-9._-]*[^&]*&gt;/g, "")
+      // Strip any stray escaped > that survived (artifact cleanup)
+      .replace(/<p[^>]*>\s*&gt;\s*<\/p>/g, "");
   }, [content]);
-
-  // Belt-and-suspenders: strip any [ComponentName] markers that survived.
-  const cleanHtml = html
-    .replace(/<strong>\[(?:Divider|Rule|SectionBreak)\]<\/strong>/g, '<hr class="my-8 border-t border-white/10" />')
-    .replace(/\[(?:Divider|Rule|SectionBreak)\]/g, '<hr class="my-8 border-t border-white/10" />')
-    .replace(/<strong>\[[A-Z][A-Za-z0-9._-]*\]<\/strong>/g, "")
-    .replace(/\[[A-Z][A-Za-z0-9._-]*\]/g, "");
 
   return (
     <div
       className="aol-mdx-content max-w-none"
-      dangerouslySetInnerHTML={{ __html: cleanHtml }}
+      dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 }

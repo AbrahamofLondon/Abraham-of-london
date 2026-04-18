@@ -308,6 +308,7 @@
 .reader-body--canon .aol-mdx-content p,
 .reader-body--canon .aol-mdx-content li {
   color: var(--ds-neutral-800) !important;
+  opacity: 1 !important;
 }
 
 .reader-body--canon .aol-mdx-content h1,
@@ -317,6 +318,7 @@
 .reader-body--canon .aol-mdx-content h5,
 .reader-body--canon .aol-mdx-content h6 {
   color: var(--ds-neutral-900) !important;
+  opacity: 1 !important;
 }
 
 .reader-body--canon .aol-mdx-content strong {
@@ -337,6 +339,7 @@
 .reader-body--canon .aol-mdx-content blockquote {
   border-left-color: var(--ds-amber-500) !important;
   color: var(--ds-neutral-600) !important;
+  opacity: 1 !important;
 }
 
 .reader-body--canon .aol-mdx-content blockquote p {

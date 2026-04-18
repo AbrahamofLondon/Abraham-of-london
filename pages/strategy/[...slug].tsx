@@ -18,6 +18,7 @@ import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
+import { getRenderableBody } from "@/lib/content/render-body";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
@@ -231,9 +232,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc as any));
   const isPublic = requiredTier === "public";
-  const bodyCode = isPublic
-    ? (safeStr((doc as any)?.body?.code, "") || safeStr((doc as any)?.bodyCode, "") || "")
-    : "";
+  const renderBody = getRenderableBody(doc);
+  const bodyCode = isPublic ? renderBody.code : "";
 
   return {
     props: jsonSafe({ item: { ...doc, slug, bodyCode }, requiredTier }),
