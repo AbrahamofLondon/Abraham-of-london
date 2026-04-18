@@ -7,7 +7,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { Shield, Key, ChevronRight, Lock, Mail, LogOut } from "lucide-react";
 
-import { signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import Layout from "@/components/Layout";
 import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma.server";
@@ -293,9 +293,9 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
             </Link>
 
             {!access.permissions.isAuthenticated ? (
-              <Link
-                href="/api/auth/signin?callbackUrl=%2Faccess"
-                className="flex items-center justify-between rounded border px-5 py-4 transition"
+              <button
+                onClick={() => signIn(undefined, { callbackUrl: "/access" })}
+                className="flex w-full items-center justify-between rounded border px-5 py-4 text-left transition"
                 style={{
                   borderColor: "var(--ds-border)",
                   color: "var(--ds-text-muted)",
@@ -306,7 +306,7 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
                   Sign In
                 </span>
                 <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
+              </button>
             ) : (
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}

@@ -471,12 +471,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                       <EssayCard
                         key={item.url}
                         variant="compact"
-                        post={{
-                          ...item,
-                          coverImage: resolveDocCoverImage(item, {
-                            contentType: "BLOG",
-                          }),
-                        }}
+                        post={item}
                       />
                     ))
                   ) : (
@@ -654,12 +649,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
               {archiveStories.map((item, idx) => (
                 <EssayCard
                   key={item.url}
-                  post={{
-                    ...item,
-                    coverImage: resolveDocCoverImage(item, {
-                      contentType: "BLOG",
-                    }),
-                  }}
+                  post={item}
                   priority={idx === 0}
                 />
               ))}
@@ -709,12 +699,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                   <EssayCard
                     key={`spotlight-${item.url}`}
                     variant="compact"
-                    post={{
-                      ...item,
-                      coverImage: resolveDocCoverImage(item, {
-                        contentType: "BLOG",
-                      }),
-                    }}
+                    post={item}
                   />
                 ))}
               </div>
@@ -814,12 +799,14 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
         items,
         totalPosts: items.length,
       }),
-      revalidate: 3600,
+      // No revalidate — content is static (contentlayer build-time JSON).
+      // ISR would re-run getStaticProps in a Netlify Lambda where the
+      // runtime filesystem differs from the build container, risking
+      // cache poisoning. Redeploy to update content.
     };
   } catch {
     return {
       props: { items: [], totalPosts: 0 },
-      revalidate: 60,
     };
   }
 };

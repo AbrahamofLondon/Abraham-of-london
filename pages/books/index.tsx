@@ -531,6 +531,9 @@ export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
       tags,
       heroBook,
     },
-    revalidate: 300,
+    // No revalidate — content is static (contentlayer build-time JSON).
+    // ISR would re-run getStaticProps in a Netlify Lambda where the
+    // runtime filesystem differs from the build container, risking
+    // cache poisoning. Redeploy to update content.
   };
 };

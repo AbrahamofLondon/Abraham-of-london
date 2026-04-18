@@ -12,8 +12,12 @@ import Layout from "@/components/Layout";
 function sanitizeLocalPath(input: string | null, fallback: string) {
   if (!input) return fallback;
   let v = input;
-  try { v = decodeURIComponent(v); } catch { /* ignore */ }
+  // Decode up to twice to handle double-encoded values (%252F → %2F → /)
+  for (let i = 0; i < 2 && v.includes("%"); i++) {
+    try { v = decodeURIComponent(v); } catch { break; }
+  }
   if (!v.startsWith("/")) return fallback;
+  if (v.startsWith("//")) return fallback;
   try {
     const u = new URL(v, "http://local-check.internal");
     u.searchParams.delete("callbackUrl");

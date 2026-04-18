@@ -143,23 +143,13 @@ export function resolveDocCoverImage(
     const normalized = normalizeImageInput(imageValue);
 
     if (normalized) {
-      // Handle local paths
+      // Handle local paths — trust them as valid public URLs.
+      // Never validate against the filesystem: at ISR runtime the public/
+      // directory does not exist on disk (Netlify serves statics from CDN),
+      // so fs.existsSync would reject every valid path and collapse all
+      // covers to the fallback.
       if (isLocalPath(normalized)) {
-        const localPath = normalizeLocalPath(normalized);
-        // Validate file exists on disk during build (SSG/SSR only)
-        if (typeof process !== 'undefined' && process.cwd) {
-          try {
-            const fs = require('fs');
-            const path = require('path');
-            const diskPath = path.join(process.cwd(), 'public', localPath);
-            if (!fs.existsSync(diskPath)) {
-              continue; // Skip to next field or fallback
-            }
-          } catch {
-            // fs not available (client-side) — trust the path
-          }
-        }
-        return localPath;
+        return normalizeLocalPath(normalized);
       }
 
       // Handle remote URLs

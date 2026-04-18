@@ -8,8 +8,14 @@ import { signIn } from "next-auth/react";
 import Layout from "@/components/Layout";
 
 function normalizeReturnTo(input: unknown): string {
-  const raw = typeof input === "string" ? input.trim() : "";
+  let raw = typeof input === "string" ? input.trim() : "";
   if (!raw) return "/inner-circle";
+  // Decode any percent-encoding so double-encoded values (%252F) resolve
+  // correctly. Loop at most twice to handle double-encoding without
+  // risking infinite decode on adversarial input.
+  for (let i = 0; i < 2 && raw.includes("%"); i++) {
+    try { raw = decodeURIComponent(raw); } catch { break; }
+  }
   if (!raw.startsWith("/")) return "/inner-circle";
   if (raw.startsWith("//")) return "/inner-circle";
   return raw;
@@ -133,11 +139,10 @@ export default function InnerCircleLoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 flex items-center justify-between text-xs text-white/45">
-            <Link href="/" className="hover:text-white">
+          <div className="mt-6 text-center text-xs text-white/45">
+            <Link href="/" className="hover:text-white transition-colors">
               Back to Home
             </Link>
-            <span>Return target: {returnTo}</span>
           </div>
         </div>
       </section>

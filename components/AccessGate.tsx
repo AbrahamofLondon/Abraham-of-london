@@ -134,11 +134,11 @@ export default function AccessGate({
             value={token}
             onChange={(e) => setToken(e.target.value)}
             disabled={busy || success}
-            placeholder="ENTER PROTOCOL KEY"
+            placeholder="Enter access key"
             className="w-full bg-white/[0.02] border border-white/10 px-4 py-4 font-mono text-xs text-center tracking-[0.2em] focus:border-amber-500/50 outline-none transition-all text-white"
           />
           {error && <p className="text-[9px] font-mono text-red-500 uppercase text-center tracking-widest">{error}</p>}
-          
+
           <button
             type="submit"
             disabled={busy || success}
@@ -147,7 +147,7 @@ export default function AccessGate({
               success ? "bg-emerald-500 text-black" : "bg-amber-500 text-black hover:bg-white"
             )}
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : success ? "Access Granted" : "Decrypt Asset"}
+            {busy ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : success ? "Access Granted" : "Unlock Access"}
           </button>
 
           <button
@@ -160,10 +160,10 @@ export default function AccessGate({
 
           <button
             type="button"
-            onClick={onGoToJoin || (() => window.location.assign("/inner-circle"))}
+            onClick={onGoToJoin || (() => window.location.assign("/access"))}
             className="w-full text-[9px] font-mono uppercase text-zinc-600 hover:text-white transition-colors pt-2 tracking-widest"
           >
-            Request Access // Inner Circle
+            View Access Options
           </button>
         </form>
       </div>

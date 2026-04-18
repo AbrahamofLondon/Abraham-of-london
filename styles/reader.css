@@ -37,7 +37,9 @@
   max-width: 64rem;
   margin-left: auto;
   margin-right: auto;
-  padding-top: 8rem;
+  /* Layout provides pt-[84px] for nav clearance.
+     Reader-header only needs its own internal spacing. */
+  padding-top: 3rem;
   padding-bottom: 2.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 0;
@@ -45,7 +47,7 @@
 
 @media (min-width: 768px) {
   .reader-header {
-    padding-top: 9rem;
+    padding-top: 4rem;
     padding-bottom: 3rem;
   }
 }
@@ -119,9 +121,11 @@
   color: rgba(255, 255, 255, 0.60);
 }
 
-/* Divider below header */
+/* Divider below header — gradient fade for clean transition */
 .reader-header__divider {
-  display: none;
+  margin-top: 2rem;
+  height: 1px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.08), transparent 70%);
 }
 
 /* ==========================================================================

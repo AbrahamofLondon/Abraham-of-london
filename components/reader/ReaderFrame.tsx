@@ -18,13 +18,16 @@ export default function ReaderFrame({
 }: ReaderFrameProps) {
   const preset = getReaderPreset(surface);
 
+  // Renders as <div>, not <main> — Layout already provides the semantic
+  // <main> element. A nested <main> would be invalid HTML and would stack
+  // padding (Layout's pt-[84px] + reader-header's padding-top).
   return (
-    <main
+    <div
       className={[preset.scaffoldClass, preset.frameClass, className]
         .filter(Boolean)
         .join(" ")}
     >
       {children}
-    </main>
+    </div>
   );
 }
