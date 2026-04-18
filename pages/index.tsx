@@ -33,8 +33,10 @@ import {
 
 import Layout from "@/components/Layout";
 import ShortsSignalRail from "@/components/shorts/ShortsSignalRail";
+import CredibilityStrip from "@/components/homepage/CredibilityStrip";
 import DoctrineShowcase from "@/components/homepage/DoctrineShowcase";
 import EngagementLanes from "@/components/homepage/EngagementLanes";
+import PlaybooksSection from "@/components/homepage/PlaybooksSection";
 import WhoIWorkWith from "@/components/WhoIWorkWith";
 import VaultTeaserRail from "@/components/homepage/VaultTeaserRail";
 import ContentShowcase from "@/components/homepage/ContentShowcase";
@@ -2027,6 +2029,14 @@ function HowItWorksLadder() {
                 <div className="text-[11px] ds-text-subtle">{stage.effort}</div>
               </div>
               <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{stage.explanation}</p>
+              <p className="mt-2 text-[12px] leading-[1.7] ds-text-subtle">
+                Backed by real assessment logic and structured interpretation.
+              </p>
+              {stage.label === "Stage 3: Executive Reporting" && (
+                <p className="mt-2 text-[12px] leading-[1.7]" style={{ color: "rgba(201,169,110,0.92)" }}>
+                  First paid engagement - structured interpretation layer.
+                </p>
+              )}
               <p className="mt-4 text-[13px] leading-[1.75] ds-text-subtle">
                 <span className="ds-text">Expected outcome:</span> {stage.outcome}
               </p>
@@ -2101,16 +2111,16 @@ function ContentWithContext({
           <>
             Depth, with orientation.
             <br />
-            <span className="text-white/35">Every surface has a job.</span>
+            <span className="text-white/35">Authority surfaced as usable context.</span>
           </>
         }
-        description="The content layer exists to build judgment, not just atmosphere. If a first-time user lands here, they should know what each category is for and where it leads."
+        description="This layer exists as credibility infrastructure. It shows the thinking, operating models, and strategic language behind the diagnostic system without turning the homepage into a feed."
         large
       />
 
       <div className="mt-12 grid gap-4 lg:grid-cols-2">
         {[
-          ["Intelligence", "Deeper analysis for operators facing structural decisions, strategic pressure, or institutional consequence.", intelligenceHref],
+          ["Intelligence Archive", "Deeper analysis for operators facing structural decisions, strategic pressure, or institutional consequence.", intelligenceHref],
           ["Essays", "Long-form thinking on institutions, drift, leadership, execution, and the real structure beneath visible problems.", "/blog"],
           ["Shorts", "Concise signal for fast orientation, daily strategic clarity, and quick entry into the deeper body of work.", "/shorts"],
           ["Frameworks", "Practical operating models, playbooks, and structured tools that turn thinking into governed action.", "/playbooks"],
@@ -2145,11 +2155,18 @@ function ContentWithContext({
         {latestReport && (
           <Panel surface="lift">
             <div className="p-6">
-              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">Latest Intelligence</div>
+              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">Featured Intelligence</div>
               <div className="mt-3 text-[1.4rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
-                {latestReport.title}
+                {latestReport.title || "Quarterly Market Intelligence Report"}
               </div>
-              <p className="mt-3 text-[14px] leading-[1.8] ds-text-muted">{latestReport.description}</p>
+              <p className="mt-3 text-[14px] leading-[1.8] ds-text-muted">
+                Structural patterns observed across leadership, execution, and strategy failure.
+              </p>
+              <div className="mt-5">
+                <Link href={intelligenceHref} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] ds-text-muted transition">
+                  Open Intelligence Archive <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
             </div>
           </Panel>
         )}
@@ -2243,23 +2260,26 @@ function AuthoritySignal({ counts }: { counts: HomePageProps["counts"] }) {
         </Panel>
 
         <Panel surface="lift">
-          <div className="p-6">
-            <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">The Platform Helps Surface</div>
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {[
-                "Institutional drift hidden behind busy execution.",
-                "Decision ambiguity disguised as complexity.",
-                "Authority gaps that make strategy impossible to execute.",
-                "Misalignment between what leaders think and what the system can carry.",
-              ].map((item) => (
-                <div key={item} className="flex gap-3">
-                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
-                  <p className="text-[14px] leading-[1.8] ds-text-muted">{item}</p>
-                </div>
-              ))}
+            <div className="p-6">
+              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">The Platform Helps Surface</div>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                {[
+                  "Most organisations do not fail from lack of strategy.",
+                  "They fail from misdiagnosed problems.",
+                  "They fail from unaligned leadership structures.",
+                  "They fail from hidden execution constraints.",
+                ].map((item) => (
+                  <div key={item} className="flex gap-3">
+                    <div className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
+                    <p className="text-[14px] leading-[1.8] ds-text-muted">{item}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-6 text-[14px] leading-[1.85] ds-text-muted">
+                This system exists to surface those realities clearly.
+              </p>
             </div>
-          </div>
-        </Panel>
+          </Panel>
       </div>
     </Section>
   );
@@ -2369,6 +2389,9 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <HomeHero intelligenceHref={intelligenceHref} />
 
+      <Bridge text="hero · credibility" />
+      <CredibilityStrip />
+
       <Bridge text="orientation · system" />
       <WhatThisPlatformIs />
 
@@ -2385,6 +2408,9 @@ const HomePage: NextPage<HomePageProps> = ({
         featuredPlaybooks={featuredPlaybooks}
         latestReport={latestReport}
       />
+
+      <Bridge text="content · playbooks" />
+      <PlaybooksSection />
 
       <Bridge text="content · audience" />
       <WhoThisIsFor />
