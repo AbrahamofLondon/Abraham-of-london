@@ -60,9 +60,8 @@ function getRequestIp(req: NextApiRequest): string {
 }
 
 function makeAccessKey(): string {
-  return `AL-${crypto.randomBytes(4).toString("hex")}-${crypto
-    .randomBytes(4)
-    .toString("hex")}`.toUpperCase();
+  // Must use IC- prefix to match client-side key validation in keys.client.ts
+  return `IC-${crypto.randomBytes(20).toString("hex")}`.toUpperCase();
 }
 
 export default async function handler(
