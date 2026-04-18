@@ -35,6 +35,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   KEY_EXHAUSTED: "This access key has reached its maximum number of uses.",
   KEY_NOT_ACTIVE: "This access key is no longer active.",
   ALREADY_REDEEMED: "This key has already been redeemed by this account.",
+  ACCESS_KEY_REQUIRED: "Enter the access key you were given.",
+  INVALID_KEY_FORMAT: "This access key is malformed.",
+  REDEEM_FAILED: "The access key could not be redeemed.",
   METHOD_NOT_ALLOWED: "Request method not permitted.",
   AUTHENTICATION_REQUIRED: "Authentication is required to redeem an access key.",
 };
@@ -257,16 +260,29 @@ const RedeemPage: NextPage = () => {
                 </div>
               )}
 
-              <button
-                onClick={reset}
-                className="mt-8 inline-flex items-center gap-2 border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
-                style={{
-                  borderColor: "var(--ds-border)",
-                  color: "var(--ds-text-muted)",
-                }}
-              >
-                Redeem Another Key
-              </button>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a
+                  href="/access"
+                  className="inline-flex items-center gap-2 border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
+                  style={{
+                    borderColor: "var(--ds-accent-soft)",
+                    backgroundColor: "var(--ds-accent-soft)",
+                    color: "var(--ds-accent)",
+                  }}
+                >
+                  View Access
+                </a>
+                <button
+                  onClick={reset}
+                  className="inline-flex items-center gap-2 border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
+                  style={{
+                    borderColor: "var(--ds-border)",
+                    color: "var(--ds-text-muted)",
+                  }}
+                >
+                  Redeem Another Key
+                </button>
+              </div>
             </div>
           ) : (
             /* Redeem form */

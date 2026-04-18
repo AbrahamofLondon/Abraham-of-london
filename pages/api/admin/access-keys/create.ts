@@ -42,7 +42,7 @@ export default async function handler(
     actorType: "ADMIN",
     actorUserId: admin.userId,
     actorEmail: admin.email,
-    action: "access_key.create",
+    action: "key.created",
     targetType: "access_key",
     targetKey: issued.preview,
     success: true,

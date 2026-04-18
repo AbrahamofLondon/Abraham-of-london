@@ -28,6 +28,7 @@ type AcceptState =
 
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_INVITE: "This invitation link is not valid or has already been used.",
+  INVITE_TOKEN_REQUIRED: "This invitation link is incomplete.",
   INVITE_EXPIRED: "This invitation has expired.",
   INVITE_REVOKED: "This invitation has been revoked.",
   INVITE_REDEEMED: "This invitation has already been redeemed.",
@@ -240,21 +241,21 @@ const AcceptInvitePage: NextPage = () => {
               <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--ds-text-muted)" }}>
                 {state.message}
               </p>
-              <div className="mt-8 flex gap-3">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/access/redeem"
-                  className="inline-flex items-center gap-2 border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
-                  style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }}
+                  className="inline-flex items-center gap-2 rounded border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
+                  style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }}
                 >
                   <Key className="h-3.5 w-3.5" />
                   Redeem Key Instead
                 </Link>
                 <Link
-                  href="/inner-circle"
-                  className="inline-flex items-center border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
+                  href="/access"
+                  className="inline-flex items-center rounded border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
                   style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }}
                 >
-                  Request Access
+                  View Access
                 </Link>
               </div>
             </div>

@@ -1,32 +1,16 @@
-/**
- * Access Invite Service — server-side invite lifecycle management.
- *
- * Handles creation, validation, redemption, and revocation of
- * email-based access invitations.
- */
-
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma.server";
 import { logAccessAudit } from "./audit";
+import { auditGrantedEntitlements, grantEntitlements } from "./entitlement-service";
 import type { EntitlementGrant } from "./types";
 
-// ---------------------------------------------------------------------------
-// Token utilities
-// ---------------------------------------------------------------------------
-
-/** Generate a secure random invite token. */
 export function generateInviteToken(): string {
   return `aoli_${crypto.randomBytes(32).toString("base64url")}`;
 }
 
-/** Hash a token for storage. Raw token is never persisted. */
 export function hashInviteToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
-
-// ---------------------------------------------------------------------------
-// Create invite
-// ---------------------------------------------------------------------------
 
 export type CreateInviteInput = {
   recipientEmail: string;
@@ -39,7 +23,7 @@ export type CreateInviteInput = {
 
 export type CreateInviteResult = {
   id: string;
-  token: string; // raw token — show once, never persist
+  token: string;
   recipientEmail: string;
 };
 
@@ -69,7 +53,7 @@ export async function createInvite(
     targetKey: invite.id,
     success: true,
     metadata: {
-      recipientEmail: input.recipientEmail,
+      recipientEmail: invite.recipientEmail,
       grants: input.grants,
     },
   });
@@ -81,10 +65,6 @@ export async function createInvite(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Mark email sent
-// ---------------------------------------------------------------------------
-
 export async function markInviteEmailSent(
   inviteId: string,
   error?: string,
@@ -95,14 +75,39 @@ export async function markInviteEmailSent(
       ? { emailError: error }
       : { emailSentAt: new Date(), emailError: null },
   });
+
+  await logAccessAudit({
+    actorType: "SYSTEM",
+    action: "invite.sent",
+    targetType: "access_invite",
+    targetKey: inviteId,
+    success: !error,
+    reason: error ?? null,
+  });
 }
 
-// ---------------------------------------------------------------------------
-// Validate + redeem invite
-// ---------------------------------------------------------------------------
+export async function getInvitePreview(rawToken: string) {
+  const tokenHash = hashInviteToken(rawToken);
+  const invite = await prisma.accessInvite.findUnique({
+    where: { tokenHash },
+    select: {
+      id: true,
+      recipientEmail: true,
+      status: true,
+      grants: true,
+      expiresAt: true,
+      issuedAt: true,
+      uses: true,
+      maxUses: true,
+    },
+  });
+
+  if (!invite) return null;
+  return invite;
+}
 
 export type RedeemInviteResult =
-  | { ok: true; grants: EntitlementGrant[] }
+  | { ok: true; grants: EntitlementGrant[]; inviteId: string }
   | { ok: false; error: string };
 
 export async function redeemInvite(
@@ -121,17 +126,22 @@ export async function redeemInvite(
     await logAccessAudit({
       actorType: "USER",
       actorUserId: userId,
-      action: "invite.redeem",
+      actorEmail: userEmail,
+      action: "invite.redeemed",
       targetType: "access_invite",
-      targetKey: "unknown",
+      targetKey: null,
       success: false,
       reason: "not_found",
     });
     return { ok: false, error: "INVALID_INVITE" };
   }
 
-  if (invite.status !== "PENDING") {
-    return { ok: false, error: `INVITE_${invite.status}` };
+  if (invite.status === "REVOKED") {
+    return { ok: false, error: "INVITE_REVOKED" };
+  }
+
+  if (invite.status === "REDEEMED" && invite.uses >= invite.maxUses) {
+    return { ok: false, error: "INVITE_REDEEMED" };
   }
 
   if (invite.expiresAt && invite.expiresAt <= now) {
@@ -146,14 +156,14 @@ export async function redeemInvite(
     return { ok: false, error: "INVITE_DEPLETED" };
   }
 
-  // Email binding check — if invite has a specific recipient, verify match
   const recipientEmail = invite.recipientEmail.toLowerCase().trim();
   const callerEmail = userEmail.toLowerCase().trim();
   if (recipientEmail && recipientEmail !== callerEmail) {
     await logAccessAudit({
       actorType: "USER",
       actorUserId: userId,
-      action: "invite.redeem",
+      actorEmail: userEmail,
+      action: "invite.redeemed",
       targetType: "access_invite",
       targetKey: invite.id,
       success: false,
@@ -163,43 +173,46 @@ export async function redeemInvite(
     return { ok: false, error: "EMAIL_MISMATCH" };
   }
 
-  // Parse grants
-  let grants: EntitlementGrant[];
-  try {
-    grants = invite.grants as EntitlementGrant[];
-    if (!Array.isArray(grants)) throw new Error("not array");
-  } catch {
+  const grants = Array.isArray(invite.grants)
+    ? (invite.grants as unknown as EntitlementGrant[])
+    : [];
+
+  if (grants.length === 0) {
     return { ok: false, error: "INVALID_INVITE_FORMAT" };
   }
 
-  // Issue entitlements + update invite in transaction
-  await prisma.$transaction(async (tx) => {
-    for (const grant of grants) {
-      await tx.entitlement.create({
-        data: {
-          userId,
-          type: grant.type === "tier" ? "TIER" : grant.type === "product" ? "PRODUCT" : "ARTIFACT",
-          key: grant.key,
-          status: "ACTIVE",
-          issuedBy: `invite:${invite.id}`,
-          metadata: {
-            source: "access_invite",
-            inviteId: invite.id,
-          },
-        },
-      });
-    }
+  const granted = await prisma.$transaction(async (tx) => {
+    const grantedEntitlements = await grantEntitlements(tx, {
+      userId,
+      grants,
+      issuedBy: `invite:${invite.id}`,
+      metadata: {
+        source: "access_invite",
+        inviteId: invite.id,
+      },
+    });
 
-    const newUses = invite.uses + 1;
+    const nextUses = invite.uses + 1;
     await tx.accessInvite.update({
       where: { id: invite.id },
       data: {
         uses: { increment: 1 },
         redeemedByUserId: userId,
         redeemedAt: now,
-        status: newUses >= invite.maxUses ? "REDEEMED" : "PENDING",
+        status: nextUses >= invite.maxUses ? "REDEEMED" : "PENDING",
       },
     });
+
+    return grantedEntitlements;
+  });
+
+  await auditGrantedEntitlements({
+    actorType: "USER",
+    actorUserId: userId,
+    actorEmail: userEmail,
+    targetUserId: userId,
+    grants: granted,
+    source: `invite:${invite.id}`,
   });
 
   await logAccessAudit({
@@ -210,15 +223,11 @@ export async function redeemInvite(
     targetType: "access_invite",
     targetKey: invite.id,
     success: true,
-    metadata: { grants },
+    metadata: { grants: granted },
   });
 
-  return { ok: true, grants };
+  return { ok: true, grants: granted, inviteId: invite.id };
 }
-
-// ---------------------------------------------------------------------------
-// Revoke invite
-// ---------------------------------------------------------------------------
 
 export async function revokeInvite(
   inviteId: string,

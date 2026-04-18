@@ -24,11 +24,14 @@ import {
   Key,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { requireAdminPage } from "@/lib/access/server";
 import { ContextualContextCard } from "@/components/admin/decision/ContextualContextCard";
 import { RankedAssetTable } from "@/components/admin/decision/RankedAssetTable";
 
-export async function getServerSideProps() {
-  return { props: {} };
+export async function getServerSideProps(context: any) {
+  const guard = await requireAdminPage(context);
+  if (!guard.authorized) return guard.redirect;
+  return { props: { isAuthorized: true } };
 }
 
 type RankedAsset = {
@@ -75,11 +78,9 @@ type EfficacyRow = {
   rankedAssets: RankedAsset[];
 };
 
-const AdminIndexPage: NextPage = () => {
+const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
   const { data: session } = useSession();
-  const isAdmin =
-    session?.user?.email ===
-    (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@abrahamoflondon.com");
+  const isAdmin = true;
 
   const [stats, setStats] = React.useState<any>(null);
   const [efficacyRows, setEfficacyRows] = React.useState<EfficacyRow[]>([]);

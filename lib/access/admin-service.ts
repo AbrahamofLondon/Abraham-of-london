@@ -30,7 +30,7 @@ export async function issueAccessKey(input: {
 
   return {
     id: record.id,
-    code, // show once, never persist raw
+    code,
     preview: record.codePreview,
   };
 }

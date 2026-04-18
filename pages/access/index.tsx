@@ -5,8 +5,9 @@ import type { GetServerSideProps, NextPage } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
-import { Shield, Key, ChevronRight, Lock } from "lucide-react";
+import { Shield, Key, ChevronRight, Lock, Mail, LogOut } from "lucide-react";
 
+import { signOut } from "next-auth/react";
 import Layout from "@/components/Layout";
 import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma.server";
@@ -30,8 +31,12 @@ const TIER_LABELS: Record<string, string> = {
   public: "Public",
   member: "Member",
   "inner-circle": "Inner Circle",
+  restricted: "Restricted",
+  client: "Client",
+  legacy: "Legacy",
   architect: "Architect",
   owner: "Owner",
+  "top-secret": "Top Secret",
 };
 
 function tierLabel(tier: string): string {
@@ -43,6 +48,11 @@ function tierLabel(tier: string): string {
 // ---------------------------------------------------------------------------
 
 const AccessPage: NextPage<PageProps> = ({ access, email }) => {
+  const hasEntitlements =
+    access.entitlements.tiers.length > 0 ||
+    access.entitlements.artifacts.length > 0 ||
+    access.entitlements.products.length > 0;
+
   return (
     <Layout
       title="Access | Abraham of London"
@@ -88,34 +98,76 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
 
           <div
             className="my-8 h-px"
-            style={{ background: "var(--ds-border)" }}
+            style={{ background: "linear-gradient(to right, var(--ds-accent-soft), transparent)" }}
           />
 
-          {/* Effective tier */}
+          {/* Effective tier card */}
           <div
-            className="border p-6"
+            className="rounded border p-6"
             style={{
               borderColor: "var(--ds-accent-soft)",
               backgroundColor: "var(--ds-panel)",
             }}
           >
-            <div
-              className="font-mono text-[8px] uppercase tracking-[0.32em]"
-              style={{ color: "var(--ds-text-subtle)" }}
-            >
-              Effective Tier
+            <div className="flex items-center justify-between">
+              <div>
+                <div
+                  className="font-mono text-[8px] uppercase tracking-[0.32em]"
+                  style={{ color: "var(--ds-text-subtle)" }}
+                >
+                  Effective Tier
+                </div>
+                <div
+                  className="mt-3 font-serif text-2xl"
+                  style={{ color: "var(--ds-accent)" }}
+                >
+                  {tierLabel(access.tier)}
+                </div>
+              </div>
+              {access.role && access.role !== "USER" && (
+                <span
+                  className="rounded border px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.24em]"
+                  style={{
+                    borderColor: "var(--ds-accent-soft)",
+                    color: "var(--ds-accent)",
+                    backgroundColor: "rgba(201,169,110,0.06)",
+                  }}
+                >
+                  {access.role}
+                </span>
+              )}
             </div>
+
+            {/* Permissions summary */}
             <div
-              className="mt-3 font-serif text-2xl"
-              style={{ color: "var(--ds-accent)" }}
+              className="mt-5 flex flex-wrap gap-3 border-t pt-4"
+              style={{ borderColor: "var(--ds-border)" }}
             >
-              {tierLabel(access.tier)}
-            </div>
-            <div
-              className="mt-2 font-mono text-[9px] tracking-wide"
-              style={{ color: "var(--ds-text-subtle)" }}
-            >
-              Role: {access.role || "USER"}
+              <span
+                className="rounded-full border px-3 py-1 font-mono text-[8px] uppercase tracking-[0.2em]"
+                style={{
+                  borderColor: access.permissions.isAuthenticated ? "var(--ds-accent-soft)" : "var(--ds-border)",
+                  color: access.permissions.isAuthenticated ? "var(--ds-accent)" : "var(--ds-text-subtle)",
+                }}
+              >
+                {access.permissions.isAuthenticated ? "Authenticated" : "Guest"}
+              </span>
+              {access.permissions.isAdmin && (
+                <span
+                  className="rounded-full border px-3 py-1 font-mono text-[8px] uppercase tracking-[0.2em]"
+                  style={{ borderColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }}
+                >
+                  Admin
+                </span>
+              )}
+              {access.permissions.isOwner && (
+                <span
+                  className="rounded-full border px-3 py-1 font-mono text-[8px] uppercase tracking-[0.2em]"
+                  style={{ borderColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }}
+                >
+                  Owner
+                </span>
+              )}
             </div>
           </div>
 
@@ -128,24 +180,28 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
               Active Entitlements
             </h2>
 
-            {access.entitlements.tiers.length === 0 &&
-             access.entitlements.artifacts.length === 0 &&
-             access.entitlements.products.length === 0 ? (
-              <p
-                className="mt-4 text-sm"
-                style={{ color: "var(--ds-text-muted)" }}
+            {!hasEntitlements ? (
+              <div
+                className="mt-4 rounded border p-6 text-center"
+                style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}
               >
-                No active entitlements. Use an access key to activate tier
-                upgrades, artifact access, or product entitlements.
-              </p>
+                <Lock className="mx-auto h-5 w-5" style={{ color: "var(--ds-text-subtle)", opacity: 0.5 }} />
+                <p
+                  className="mt-3 text-sm leading-relaxed"
+                  style={{ color: "var(--ds-text-muted)" }}
+                >
+                  No active entitlements. Redeem an access key or accept an
+                  email invitation to unlock tier upgrades, artifacts, or products.
+                </p>
+              </div>
             ) : (
               <div className="mt-4 space-y-2">
                 {access.entitlements.tiers.map((t) => (
                   <div
                     key={`tier-${t}`}
-                    className="flex items-center justify-between border px-4 py-3"
+                    className="flex items-center justify-between rounded border px-4 py-3"
                     style={{
-                      borderColor: "var(--ds-border)",
+                      borderColor: "var(--ds-accent-soft)",
                       backgroundColor: "var(--ds-panel)",
                     }}
                   >
@@ -167,7 +223,7 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
                 {access.entitlements.artifacts.map((a) => (
                   <div
                     key={`artifact-${a}`}
-                    className="flex items-center justify-between border px-4 py-3"
+                    className="flex items-center justify-between rounded border px-4 py-3"
                     style={{
                       borderColor: "var(--ds-border)",
                       backgroundColor: "var(--ds-panel)",
@@ -191,7 +247,7 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
                 {access.entitlements.products.map((p) => (
                   <div
                     key={`product-${p}`}
-                    className="flex items-center justify-between border px-4 py-3"
+                    className="flex items-center justify-between rounded border px-4 py-3"
                     style={{
                       borderColor: "var(--ds-border)",
                       backgroundColor: "var(--ds-panel)",
@@ -222,7 +278,7 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
           >
             <Link
               href="/access/redeem"
-              className="flex items-center justify-between border px-5 py-4 transition"
+              className="flex items-center justify-between rounded border px-5 py-4 transition"
               style={{
                 borderColor: "var(--ds-accent-soft)",
                 backgroundColor: "var(--ds-accent-soft)",
@@ -236,10 +292,10 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
               <ChevronRight className="h-3.5 w-3.5" />
             </Link>
 
-            {!access.permissions.isAuthenticated && (
+            {!access.permissions.isAuthenticated ? (
               <Link
-                href="/inner-circle"
-                className="flex items-center justify-between border px-5 py-4 transition"
+                href="/api/auth/signin?callbackUrl=%2Faccess"
+                className="flex items-center justify-between rounded border px-5 py-4 transition"
                 style={{
                   borderColor: "var(--ds-border)",
                   color: "var(--ds-text-muted)",
@@ -247,10 +303,25 @@ const AccessPage: NextPage<PageProps> = ({ access, email }) => {
               >
                 <span className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.28em]">
                   <Lock className="h-3.5 w-3.5" />
-                  Request Access
+                  Sign In
                 </span>
                 <ChevronRight className="h-3.5 w-3.5" />
               </Link>
+            ) : (
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="flex w-full items-center justify-between rounded border px-5 py-4 text-left transition"
+                style={{
+                  borderColor: "var(--ds-border)",
+                  color: "var(--ds-text-subtle)",
+                }}
+              >
+                <span className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.28em]">
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign Out
+                </span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
             )}
           </div>
         </div>

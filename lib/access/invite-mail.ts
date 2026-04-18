@@ -148,9 +148,9 @@ export async function sendInviteEmail(
     const { Resend } = await import("resend");
     const apiKey = (process.env.RESEND_API_KEY || "").trim();
     if (!apiKey) {
-      console.warn("[INVITE EMAIL] RESEND_API_KEY not set, logging instead");
+      console.warn("[INVITE EMAIL] RESEND_API_KEY not set — email not sent");
       console.log("[INVITE EMAIL]", { from, to, subject });
-      return { ok: true };
+      return { ok: false, error: "RESEND_API_KEY not configured" };
     }
 
     const resend = new Resend(apiKey);

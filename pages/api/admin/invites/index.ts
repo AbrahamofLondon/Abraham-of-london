@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const invites = await prisma.accessInvite.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { issuedAt: "desc" },
     });
 
     return res.status(200).json({

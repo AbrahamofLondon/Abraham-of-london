@@ -2,8 +2,14 @@ export type AccessTier =
   | "public"
   | "member"
   | "inner-circle"
+  | "restricted"
+  | "client"
+  | "legacy"
   | "architect"
-  | "owner";
+  | "owner"
+  | "top-secret";
+
+export type AccessRole = "USER" | "ADMIN" | "OWNER";
 
 export type EntitlementGrant =
   | { type: "tier"; key: AccessTier }
@@ -12,7 +18,8 @@ export type EntitlementGrant =
 
 export type EffectiveAccess = {
   userId: string | null;
-  role: "USER" | "ADMIN" | "OWNER" | null;
+  email: string | null;
+  role: AccessRole | null;
   tier: AccessTier;
   entitlements: {
     tiers: AccessTier[];

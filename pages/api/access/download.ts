@@ -1,23 +1,8 @@
-/**
- * GET /api/access/download?artifact=<key>
- *
- * Enforces entitlement before returning a download.
- * Returns a signed temporary URL if the user has the required entitlement.
- *
- * This is the ONLY download endpoint. All downloads go through here.
- */
-
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
-import { prisma } from "@/lib/prisma.server";
-import { getUserAccess } from "@/lib/access/get-user-access";
 import { canAccessArtifact, canAccessProduct, canAccessTier } from "@/lib/access/checks";
-import crypto from "crypto";
-
-// Signed URL validity (seconds)
-const SIGNED_URL_TTL = 300; // 5 minutes
-const SIGNING_SECRET = process.env.DOWNLOAD_SIGNING_SECRET || "aol-download-secret";
+import { ACCESS_DOWNLOADS, createSignedDownloadToken } from "@/lib/access/downloads";
+import { logAccessAudit } from "@/lib/access/audit";
+import { requireAuthenticatedApi } from "@/lib/access/server";
 
 export default async function handler(
   req: NextApiRequest,
@@ -27,31 +12,43 @@ export default async function handler(
     return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
   }
 
-  const session = await getServerSession(req, res, authOptions);
-  if (!session?.user) {
-    return res.status(401).json({ error: "UNAUTHENTICATED" });
-  }
-
-  const userId = (session.user as any).id || (session as any).aol?.memberId;
-  if (!userId) {
-    return res.status(401).json({ error: "NO_USER_ID" });
-  }
+  const resolved = await requireAuthenticatedApi(req, res);
+  if (!resolved) return;
 
   const artifactKey = String(req.query.artifact || "").trim();
   if (!artifactKey) {
     return res.status(400).json({ error: "MISSING_ARTIFACT" });
   }
 
-  // Resolve user access from entitlements (SSOT)
-  const access = await getUserAccess(prisma, userId);
+  const asset = ACCESS_DOWNLOADS[artifactKey];
+  if (!asset) {
+    return res.status(404).json({ error: "ASSET_NOT_FOUND" });
+  }
 
-  // Check entitlement — try artifact first, then product, then tier fallback
+  const access = resolved.access;
+  const sessionUser = resolved.session?.user;
+
   const hasAccess =
     canAccessArtifact(access, artifactKey) ||
     canAccessProduct(access, artifactKey) ||
-    canAccessTier(access, "inner-circle");
+    (asset.requiredTier ? canAccessTier(access, asset.requiredTier) : false);
 
   if (!hasAccess) {
+    await logAccessAudit({
+      actorType: "USER",
+      actorUserId: access.userId,
+      actorEmail: sessionUser?.email ?? access.email,
+      action: "download.denied",
+      targetType: "asset",
+      targetKey: artifactKey,
+      success: false,
+      reason: "insufficient_entitlement",
+      metadata: {
+        tier: access.tier,
+        requiredTier: asset.requiredTier ?? null,
+      },
+    });
+
     return res.status(403).json({
       error: "INSUFFICIENT_ENTITLEMENT",
       required: artifactKey,
@@ -59,19 +56,22 @@ export default async function handler(
     });
   }
 
-  // Generate signed temporary URL
-  const expires = Math.floor(Date.now() / 1000) + SIGNED_URL_TTL;
-  const payload = `${artifactKey}:${userId}:${expires}`;
-  const signature = crypto
-    .createHmac("sha256", SIGNING_SECRET)
-    .update(payload)
-    .digest("hex");
+  const signed = createSignedDownloadToken(artifactKey, access.userId as string);
+  const signedUrl = `/api/access/serve?artifact=${encodeURIComponent(artifactKey)}&expires=${signed.expires}&sig=${signed.signature}`;
 
-  const signedUrl = `/api/access/serve?artifact=${encodeURIComponent(artifactKey)}&expires=${expires}&sig=${signature}`;
+  await logAccessAudit({
+    actorType: "USER",
+    actorUserId: access.userId,
+    actorEmail: sessionUser?.email ?? access.email,
+    action: "download.granted",
+    targetType: "asset",
+    targetKey: artifactKey,
+    success: true,
+  });
 
   return res.status(200).json({
     ok: true,
     url: signedUrl,
-    expiresIn: SIGNED_URL_TTL,
+    expiresIn: signed.expiresIn,
   });
 }

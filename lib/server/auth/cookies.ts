@@ -1,16 +1,10 @@
-/* ============================================================================
-   FILE: lib/server/auth/cookies.ts — Edge + Node compatible cookie SSOT
-============================================================================ */
-
 import type { NextApiResponse } from "next";
 import type { NextRequest } from "next/server";
 
-import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeUserTier } from "@/lib/access/tier-policy";
-
-
 export const ACCESS_COOKIE = "aol_access";
 export const TIER_COOKIE = "aol_tier";
+export const NEXTAUTH_COOKIE = "next-auth.session-token";
+export const NEXTAUTH_SECURE_COOKIE = "__Secure-next-auth.session-token";
 
 export const LEGACY_TIER_COOKIE_KEYS = [
   "aol_tier",
@@ -73,13 +67,11 @@ function readCookieFromAnyReq(req: unknown, name: string): string | null {
   }
 
   try {
-    let cookieHeader = "";
-
-    if (candidate?.headers && typeof candidate.headers.get === "function") {
-      cookieHeader = candidate.headers.get("cookie") || "";
-    } else {
-      cookieHeader = candidate?.headers?.cookie || "";
-    }
+    const headers = candidate?.headers;
+    const cookieHeader =
+      headers && typeof headers.get === "function"
+        ? headers.get("cookie") || ""
+        : headers?.cookie || "";
 
     const parsed = parseCookieHeader(cookieHeader);
     const value = parsed[name];
@@ -99,27 +91,19 @@ function cookieOptions(maxAgeSeconds: number) {
   };
 }
 
-/* -----------------------------------------------------------------------------
-   READERS
------------------------------------------------------------------------------ */
-
 export function readAccessCookie(req: NextRequest | any): string | null {
-  return readCookieFromAnyReq(req, ACCESS_COOKIE) ||
+  return (
+    readCookieFromAnyReq(req, NEXTAUTH_SECURE_COOKIE) ||
+    readCookieFromAnyReq(req, NEXTAUTH_COOKIE) ||
+    readCookieFromAnyReq(req, ACCESS_COOKIE) ||
     readCookieFromAnyReq(req, "aol_session") ||
-    null;
+    null
+  );
 }
 
-export function readTierCookie(req: NextRequest | any): AccessTier {
-  for (const key of LEGACY_TIER_COOKIE_KEYS) {
-    const value = readCookieFromAnyReq(req, key);
-    if (value) return normalizeUserTier(value);
-  }
+export function readTierCookie(): "public" {
   return "public";
 }
-
-/* -----------------------------------------------------------------------------
-   WRITERS (Pages Router)
------------------------------------------------------------------------------ */
 
 function appendSetCookie(res: NextApiResponse, cookieLine: string) {
   const existing = res.getHeader("Set-Cookie");
@@ -142,7 +126,6 @@ export function setAccessCookie(res: NextApiResponse, sessionId: string): void {
   if (!value) throw new Error("setAccessCookie: sessionId is empty");
 
   const opt = cookieOptions(MAX_AGE_SECONDS);
-
   const parts = [
     `${ACCESS_COOKIE}=${value}`,
     `Path=${opt.path}`,
@@ -152,22 +135,25 @@ export function setAccessCookie(res: NextApiResponse, sessionId: string): void {
   ];
 
   if (opt.secure) parts.push("Secure");
-
   appendSetCookie(res, parts.join("; "));
 }
 
 export function clearAccessCookie(res: NextApiResponse): void {
-  const secure = isProd() ? "; Secure" : "";
-  const expired =
-    `${ACCESS_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; ` +
-    `Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`;
+  const names = [
+    ACCESS_COOKIE,
+    "aol_session",
+    NEXTAUTH_COOKIE,
+    NEXTAUTH_SECURE_COOKIE,
+  ];
 
-  appendSetCookie(res, expired);
+  for (const name of names) {
+    const secure = name.startsWith("__Secure-") ? "; Secure" : "";
+    appendSetCookie(
+      res,
+      `${name}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`,
+    );
+  }
 }
-
-/* -----------------------------------------------------------------------------
-   ALIASES
------------------------------------------------------------------------------ */
 
 export const removeAccessCookie = clearAccessCookie;
 export const COOKIE_NAME = ACCESS_COOKIE;

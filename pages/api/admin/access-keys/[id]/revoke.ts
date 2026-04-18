@@ -50,7 +50,7 @@ export default async function handler(
       actorType: "ADMIN",
       actorUserId: admin.userId,
       actorEmail: admin.email,
-      action: "access_key.revoke",
+      action: "key.revoked",
       targetType: "access_key",
       targetKey: key.codePreview,
       success: true,

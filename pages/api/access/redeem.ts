@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma.server";
-import { authOptions } from "@/lib/auth/options";
-import { hashAccessKey, normalizeAccessKey } from "@/lib/access/access-key";
+import { normalizeAccessKey, hashAccessKey } from "@/lib/access/access-key";
 import { logAccessAudit } from "@/lib/access/audit";
+import { auditGrantedEntitlements, grantEntitlements } from "@/lib/access/entitlement-service";
+import { requireAuthenticatedApi } from "@/lib/access/server";
 import type { EntitlementGrant } from "@/lib/access/types";
 
 type ResponseBody =
@@ -27,21 +27,19 @@ export default async function handler(
   res: NextApiResponse<ResponseBody>,
 ) {
   if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, error: "Method not allowed" });
+    return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
   }
 
-  const session = await getServerSession(req, res, authOptions);
-  const userId = session?.user?.id;
+  const resolved = await requireAuthenticatedApi(req, res);
+  if (!resolved) return;
 
-  if (!userId) {
-    return res.status(401).json({ ok: false, error: "Authentication required" });
-  }
-
+  const userId = resolved.access.userId as string;
+  const userEmail = resolved.session?.user?.email ?? resolved.access.email;
   const rawCode = typeof req.body?.code === "string" ? req.body.code : "";
   const normalized = normalizeAccessKey(rawCode);
 
   if (!normalized) {
-    return res.status(400).json({ ok: false, error: "Access key is required" });
+    return res.status(400).json({ ok: false, error: "ACCESS_KEY_REQUIRED" });
   }
 
   const codeHash = hashAccessKey(normalized);
@@ -55,39 +53,39 @@ export default async function handler(
     await logAccessAudit({
       actorType: "USER",
       actorUserId: userId,
-      action: "access_key.redeem",
+      actorEmail: userEmail,
+      action: "key.redeemed",
       targetType: "access_key",
-      targetKey: "unknown",
+      targetKey: normalized,
       success: false,
       reason: "not_found",
     });
-
-    return res.status(404).json({ ok: false, error: "Invalid access key" });
+    return res.status(404).json({ ok: false, error: "INVALID_KEY" });
   }
 
   if (key.status !== "ACTIVE") {
-    return res.status(400).json({ ok: false, error: "Access key is not active" });
+    return res.status(400).json({ ok: false, error: "KEY_NOT_ACTIVE" });
   }
 
   if (key.startsAt && key.startsAt > now) {
-    return res.status(400).json({ ok: false, error: "Access key is not yet valid" });
+    return res.status(400).json({ ok: false, error: "KEY_NOT_ACTIVE" });
   }
 
   if (key.expiresAt && key.expiresAt <= now) {
-    return res.status(400).json({ ok: false, error: "Access key has expired" });
+    return res.status(400).json({ ok: false, error: "KEY_EXPIRED" });
   }
 
   if (key.uses >= key.maxUses) {
-    return res.status(400).json({ ok: false, error: "Access key has been depleted" });
+    return res.status(400).json({ ok: false, error: "KEY_EXHAUSTED" });
   }
 
   const grants = key.grants;
   if (!isGrantArray(grants)) {
-    return res.status(500).json({ ok: false, error: "Access key grants are invalid" });
+    return res.status(500).json({ ok: false, error: "INVALID_KEY_FORMAT" });
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
+    const granted = await prisma.$transaction(async (tx) => {
       await tx.accessKeyUse.create({
         data: {
           accessKeyId: key.id,
@@ -100,30 +98,20 @@ export default async function handler(
         },
       });
 
-      for (const grant of grants) {
-        await tx.entitlement.create({
-          data: {
-            userId,
-            type:
-              grant.type === "tier"
-                ? "TIER"
-                : grant.type === "product"
-                ? "PRODUCT"
-                : "ARTIFACT",
-            key: grant.key,
-            status: "ACTIVE",
-            issuedBy: key.issuedBy ?? "system",
-            metadata: {
-              source: "access_key",
-              accessKeyId: key.id,
-              accessKeyPreview: key.codePreview,
-            },
-          },
-        });
-      }
+      const grantedEntitlements = await grantEntitlements(tx, {
+        userId,
+        grants,
+        issuedBy: key.issuedBy ?? `key:${key.id}`,
+        startsAt: key.startsAt,
+        expiresAt: key.expiresAt,
+        metadata: {
+          source: "access_key",
+          accessKeyId: key.id,
+          accessKeyPreview: key.codePreview,
+        },
+      });
 
       const updatedUses = key.uses + 1;
-
       await tx.accessKey.update({
         where: { id: key.id },
         data: {
@@ -131,29 +119,42 @@ export default async function handler(
           status: updatedUses >= key.maxUses ? "DEPLETED" : key.status,
         },
       });
+
+      return grantedEntitlements;
+    });
+
+    await auditGrantedEntitlements({
+      actorType: "USER",
+      actorUserId: userId,
+      actorEmail: userEmail,
+      targetUserId: userId,
+      grants: granted,
+      source: `key:${key.id}`,
     });
 
     await logAccessAudit({
       actorType: "USER",
       actorUserId: userId,
-      action: "access_key.redeem",
+      actorEmail: userEmail,
+      action: "key.redeemed",
       targetType: "access_key",
       targetKey: key.codePreview,
       success: true,
       metadata: { grants },
     });
 
-    return res.status(200).json({ ok: true, granted: grants });
+    return res.status(200).json({ ok: true, granted });
   } catch (error) {
     const message =
       error instanceof Error && /Unique constraint/i.test(error.message)
-        ? "This key has already been redeemed by this account"
-        : "Unable to redeem access key";
+        ? "ALREADY_REDEEMED"
+        : "REDEEM_FAILED";
 
     await logAccessAudit({
       actorType: "USER",
       actorUserId: userId,
-      action: "access_key.redeem",
+      actorEmail: userEmail,
+      action: "key.redeemed",
       targetType: "access_key",
       targetKey: key.codePreview,
       success: false,

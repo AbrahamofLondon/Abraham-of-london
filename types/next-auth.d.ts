@@ -1,6 +1,6 @@
 import "next-auth";
 import "next-auth/jwt";
-import type { AccessTier } from "@/lib/access/types";
+import type { AccessTier, EffectiveAccess } from "@/lib/access/types";
 
 declare module "next-auth" {
   interface Session {
@@ -9,23 +9,20 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      role?: string;
+      role?: "USER" | "ADMIN" | "OWNER";
       accessTier?: AccessTier;
-      entitlements?: {
-        tiers: AccessTier[];
-        products: string[];
-        artifacts: string[];
-      };
+      entitlements?: EffectiveAccess["entitlements"];
+      access?: EffectiveAccess;
     };
   }
 
   interface User {
-    role?: string;
+    role?: "USER" | "ADMIN" | "OWNER";
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role?: string;
+    role?: "USER" | "ADMIN" | "OWNER";
   }
 }

@@ -1,6 +1,6 @@
-import type { PrismaClient, EntitlementType, EntitlementStatus } from "@prisma/client";
+import type { EntitlementStatus, EntitlementType, PrismaClient, UserRole } from "@prisma/client";
 import type { AccessTier, EffectiveAccess } from "./types";
-import { maxTier } from "./tier";
+import { maxTier, normalizeTier } from "./tier";
 
 type MinimalPrisma = Pick<PrismaClient, "user" | "entitlement">;
 
@@ -16,6 +16,12 @@ function isCurrentlyValid(
   return true;
 }
 
+function roleTier(role: UserRole | null): AccessTier | null {
+  if (role === "OWNER") return "owner";
+  if (role === "ADMIN") return "architect";
+  return null;
+}
+
 export async function getUserAccess(
   prisma: MinimalPrisma,
   userId: string | null | undefined,
@@ -23,6 +29,7 @@ export async function getUserAccess(
   if (!userId) {
     return {
       userId: null,
+      email: null,
       role: null,
       tier: "public",
       entitlements: { tiers: [], products: [], artifacts: [] },
@@ -39,7 +46,7 @@ export async function getUserAccess(
   const [user, entitlements] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, role: true },
+      select: { id: true, email: true, role: true },
     }),
     prisma.entitlement.findMany({
       where: {
@@ -47,10 +54,12 @@ export async function getUserAccess(
         status: ACTIVE_STATUS,
       },
       select: {
+        id: true,
         type: true,
         key: true,
         startsAt: true,
         expiresAt: true,
+        revokedAt: true,
       },
     }),
   ]);
@@ -58,6 +67,7 @@ export async function getUserAccess(
   if (!user) {
     return {
       userId: null,
+      email: null,
       role: null,
       tier: "public",
       entitlements: { tiers: [], products: [], artifacts: [] },
@@ -69,47 +79,48 @@ export async function getUserAccess(
     };
   }
 
-  const tiers: AccessTier[] = [];
-  const products: string[] = [];
-  const artifacts: string[] = [];
+  const tiers = new Set<AccessTier>();
+  const products = new Set<string>();
+  const artifacts = new Set<string>();
 
   for (const entitlement of entitlements) {
+    if (entitlement.revokedAt) continue;
     if (!isCurrentlyValid(entitlement.startsAt, entitlement.expiresAt, now)) {
       continue;
     }
 
     switch (entitlement.type as EntitlementType) {
       case "TIER":
-        tiers.push(entitlement.key as AccessTier);
+        tiers.add(normalizeTier(entitlement.key));
         break;
       case "PRODUCT":
-        products.push(entitlement.key);
+        products.add(entitlement.key);
         break;
       case "ARTIFACT":
-        artifacts.push(entitlement.key);
+        artifacts.add(entitlement.key);
         break;
       default:
         break;
     }
   }
 
-  const adminRole = user.role === "ADMIN";
-  const ownerRole = user.role === "OWNER";
-
-  if (ownerRole) {
-    tiers.push("owner");
-  } else if (adminRole) {
-    tiers.push("architect");
+  const elevatedTier = roleTier(user.role);
+  if (elevatedTier) {
+    tiers.add(elevatedTier);
   }
+
+  const ownerRole = user.role === "OWNER";
+  const adminRole = user.role === "ADMIN";
 
   return {
     userId: user.id,
+    email: user.email ?? null,
     role: user.role,
-    tier: maxTier(tiers),
+    tier: maxTier(Array.from(tiers)),
     entitlements: {
-      tiers: Array.from(new Set(tiers)),
-      products: Array.from(new Set(products)),
-      artifacts: Array.from(new Set(artifacts)),
+      tiers: Array.from(tiers),
+      products: Array.from(products),
+      artifacts: Array.from(artifacts),
     },
     permissions: {
       isAuthenticated: true,

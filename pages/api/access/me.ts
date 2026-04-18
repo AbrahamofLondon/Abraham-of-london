@@ -1,8 +1,10 @@
-// pages/api/access/me.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getAccessFromRequest } from "@/lib/server/access";
+import { resolveRequestAccess } from "@/lib/access/server";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const access = await getAccessFromRequest(req);
-  return res.status(200).json({ ok: access.ok, tier: access.tier });
+  const resolved = await resolveRequestAccess(req, res);
+  return res.status(200).json({
+    ok: true,
+    access: resolved.access,
+  });
 }
