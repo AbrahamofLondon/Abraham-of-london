@@ -1819,44 +1819,63 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
           <Eyebrow>Diagnostic Intelligence System</Eyebrow>
           <h1
             className="mt-6 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.9] tracking-[-0.04em] ds-text"
-            style={{ fontSize: "clamp(3.1rem, 8vw, 6.3rem)" }}
+            style={{ fontSize: "clamp(2.8rem, 7vw, 5.8rem)" }}
           >
             Diagnose what is actually wrong
             <br />
             <span className="ds-text-muted">— in your decisions, your team, or your organisation.</span>
           </h1>
 
-          <p className="mt-8 max-w-3xl text-[16px] leading-[1.9] ds-text-muted">
-            A structured diagnostic system that surfaces hidden misalignment,
-            structural failure, and decision drift. Start with yourself or start
-            with your organisation. The system reads the condition, classifies
-            the trajectory, and routes you to the correct next step.
+          <p
+            className="mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light italic ds-text-muted"
+            style={{ fontSize: "clamp(1.1rem, 2vw, 1.35rem)", lineHeight: 1.5 }}
+          >
+            Before it becomes a decision you can&rsquo;t reverse.
           </p>
 
-          {/* DUAL ENTRY CTAs */}
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-2xl">
+          <p className="mt-6 max-w-2xl text-[14px] leading-[1.8] ds-text-muted">
+            Run a 10-minute diagnostic. Get a clear condition, trajectory, and next action.
+          </p>
+
+          {/* Friction reducer */}
+          <p
+            className="mt-6"
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7.5px",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--ds-text-subtle)",
+            }}
+          >
+            Start with a free diagnostic. Escalate only if the situation justifies it.
+          </p>
+
+          {/* DUAL ENTRY CARDS */}
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 max-w-2xl">
             {/* Personal entry */}
             <Link
               href="/diagnostics/purpose-alignment"
-              className="group border p-5 transition hover:border-[var(--ds-accent-soft)]"
+              className="group border p-5 transition hover:border-[rgba(110,231,183,0.35)]"
               style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}
+              onClick={() => { try { (window as any).gtag?.("event", "hero_personal_clicked"); } catch {} }}
             >
               <div style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase",
-                color: "rgba(110,231,183,0.72)",
+                fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                color: "rgba(110,231,183,0.76)",
               }}>
-                Start with yourself
+                Your decisions feel off — start here
               </div>
-              <p className="mt-2 text-[13px] leading-[1.7] ds-text-muted">
-                Diagnose personal alignment, decision clarity, and hidden friction.
+              <p className="mt-3 text-[13px] leading-[1.7] ds-text-muted">
+                Identify where your decisions are breaking down — and why.
               </p>
-              <div className="mt-3 flex items-center gap-2" style={{
+              <div className="mt-4 flex items-center gap-2" style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
                 color: "rgba(110,231,183,0.60)",
               }}>
-                Run Personal Diagnostic · 8 min
+                Run Personal Diagnostic — 8 min
                 <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </div>
             </Link>
@@ -1864,31 +1883,33 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
             {/* Institutional entry */}
             <Link
               href="/diagnostics/constitutional-diagnostic"
-              className="group border p-5 transition hover:border-[var(--ds-accent-soft)]"
+              className="group border p-5 transition hover:border-[var(--ds-accent)]"
               style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)" }}
+              onClick={() => { try { (window as any).gtag?.("event", "hero_institutional_clicked"); } catch {} }}
             >
               <div style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase",
+                fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
                 color: "var(--ds-accent)",
               }}>
-                Start with your organisation
+                Something is breaking in the business — start here
               </div>
-              <p className="mt-2 text-[13px] leading-[1.7]" style={{ color: "var(--ds-text-muted)" }}>
-                Identify structural failure, misalignment, and execution risk.
+              <p className="mt-3 text-[13px] leading-[1.7]" style={{ color: "var(--ds-text-muted)" }}>
+                Diagnose structural failure, misalignment, and execution risk.
               </p>
-              <div className="mt-3 flex items-center gap-2" style={{
+              <div className="mt-4 flex items-center gap-2" style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
                 color: "var(--ds-accent)",
               }}>
-                Run Constitutional Diagnostic · 6 min
+                Run Constitutional Diagnostic — 6 min
                 <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </div>
             </Link>
           </div>
         </div>
 
+        {/* START HERE — decision routing */}
         <Panel surface="lift">
           <div className="p-6 md:p-7">
             <div
@@ -1902,26 +1923,26 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
             >
               Start here
             </div>
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 space-y-2">
               {[
-                { trigger: "Something feels off but you can't explain it", route: "Personal Diagnostic", href: "/diagnostics/purpose-alignment" },
-                { trigger: "Your decisions are inconsistent under pressure", route: "Personal Diagnostic", href: "/diagnostics/purpose-alignment" },
-                { trigger: "Your team is misaligned with your direction", route: "Team Assessment", href: "/diagnostics/team-assessment" },
-                { trigger: "The organisation is under structural pressure", route: "Constitutional Diagnostic", href: "/diagnostics/constitutional-diagnostic" },
-                { trigger: "A high-stakes decision is already on the table", route: "Strategy Room · £395", href: "/strategy-room" },
+                { trigger: "Something feels off — but you can\u2019t explain why", href: "/diagnostics/purpose-alignment" },
+                { trigger: "Your decisions change under pressure", href: "/diagnostics/purpose-alignment" },
+                { trigger: "Your team is misaligned with your direction", href: "/diagnostics/team-assessment" },
+                { trigger: "The organisation is under structural pressure", href: "/diagnostics/constitutional-diagnostic" },
+                { trigger: "A high-stakes decision is already on the table", href: "/strategy-room" },
               ].map((item) => (
-                <Link key={item.trigger} href={item.href} className="flex gap-3 border-b pb-3 last:border-b-0 last:pb-0 transition hover:opacity-80" style={{ borderColor: "var(--ds-border)" }}>
-                  <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
-                  <div>
-                    <p className="text-[13px] leading-[1.6] ds-text-muted">{item.trigger}</p>
-                    <p style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
-                      color: "var(--ds-accent)", opacity: 0.7, marginTop: "0.25rem",
-                    }}>
-                      → {item.route}
-                    </p>
-                  </div>
+                <Link
+                  key={item.trigger}
+                  href={item.href}
+                  className="group flex items-center gap-3 border-b py-2.5 last:border-b-0 transition"
+                  style={{ borderColor: "var(--ds-border)" }}
+                  onClick={() => { try { (window as any).gtag?.("event", "start_here_clicked", { target: item.href }); } catch {} }}
+                >
+                  <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full transition-colors group-hover:scale-125" style={{ backgroundColor: "var(--ds-accent)" }} />
+                  <p className="flex-1 text-[13px] leading-[1.55] ds-text-muted group-hover:text-white/80 transition-colors">
+                    {item.trigger}
+                  </p>
+                  <ArrowRight className="h-3 w-3 shrink-0 text-white/0 transition-all group-hover:text-white/40 group-hover:translate-x-0.5" />
                 </Link>
               ))}
             </div>
@@ -1944,7 +1965,7 @@ function WhatThisPlatformIs() {
             <span className="text-white/35">Decision drift creates structural failure.</span>
           </>
         }
-        description="The system reads the condition at the level where it actually lives — starting with the person if that is where clarity is missing, or with the organisation if the structure is already under strain. Each stage deepens the reading. Nothing is prescribed before it is diagnosed."
+        description="This system diagnoses both — and routes you to the correct next step."
         large
       />
 
