@@ -32,6 +32,7 @@ import InheritedThreadContext from "@/components/diagnostics/results/InheritedTh
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
+import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
 import {
   hasCommercialAccessCookie,
@@ -858,6 +859,12 @@ function ResultSurface({
 
             <TrajectoryLine trajectory={trajectory} />
             <EngagementReadinessPanel readiness={engagementReadiness} title="Engagement readiness prognosis" />
+            <ProofCapturePrompt
+              sourceStage="executive_reporting"
+              routeResultType={route}
+              mode="paid"
+              isPaidStage
+            />
 
             {(summary?.summary || summary?.mandate) && (
               <div

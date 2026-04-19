@@ -907,6 +907,45 @@ model DiagnosticLineageEvent {
   @@map("diagnostic_lineage_events")
 }
 
+model ProofEvidence {
+  id                String   @id @default(cuid())
+  sourceStage       String
+  proofType         String
+  routeResultType   String?
+  accuracyScore     String?
+  usefulnessScore   String?
+  nextStepChanged   Boolean?
+  actionIntent      String?
+  outcomeCategory   String?
+  mostAccuratePart  String?
+  paidSpecificity   String?
+  consequenceClear  Boolean?
+  justifiedAction   Boolean?
+  decisionClarity   String?
+  nextMoveClear     Boolean?
+  freeTextRaw       String?
+  anonymisedSummary String?
+  displayLabel      String?
+  userType          String?
+  organisationType  String?
+  sourceOrigin      String?
+  isPaidStage       Boolean  @default(false)
+  followupAt        DateTime?
+  approvalStatus    String   @default("PENDING")
+  displayStatus     String   @default("HIDDEN")
+  sourceKind        String   @default("SELF_REPORTED")
+  adminNotes        String?
+  metadataJson      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([sourceStage, createdAt])
+  @@index([proofType, createdAt])
+  @@index([approvalStatus, displayStatus])
+  @@index([followupAt])
+  @@map("proof_evidence")
+}
+
 model ClientEntitlement {
   id          String    @id @default(cuid())
   email       String

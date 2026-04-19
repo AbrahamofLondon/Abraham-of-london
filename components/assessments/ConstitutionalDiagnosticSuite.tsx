@@ -975,7 +975,7 @@ export default function ConstitutionalDiagnosticSuite() {
 
                   <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
-                  <DiagnosticFeedback stage="constitutional" />
+                  <DiagnosticFeedback stage="constitutional" routeResultType={decision.route} />
 
                   {/* Escalation routing */}
                   {(() => {

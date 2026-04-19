@@ -42,6 +42,7 @@ import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
+import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
 import {
   hasCommercialAccessCookie,
@@ -655,6 +656,12 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, t
 
             <TrajectoryLine trajectory={trajectory} />
             <EngagementReadinessPanel readiness={engagementReadiness} />
+            <ProofCapturePrompt
+              sourceStage="strategy_room"
+              routeResultType={posture.route}
+              mode="paid"
+              isPaidStage
+            />
 
             {/* Route reading panel */}
             <div style={{

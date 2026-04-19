@@ -45,6 +45,7 @@ import VenturesSection from "@/components/homepage/VenturesSection";
 import ExecutiveBuyerFitSection from "@/components/diagnostics/ExecutiveBuyerFitSection";
 import StrategyRoomIntegration from "@/components/consulting/StrategyRoomIntegration";
 import { OperatorBriefing } from "@/components/homepage";
+import { AccuracyMetricsBlock, ObservedOutcomesBlock } from "@/components/proof/PublicProofBlocks";
 
 import { joinHref, normalizeSlug } from "@/lib/content/shared";
 import { sanitizeData } from "@/lib/content/server";
@@ -2518,26 +2519,8 @@ function ProofLayer() {
           >
             Observed outcomes
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            {[
-              "Leadership misalignment identified → decision cadence stabilised within 30 days",
-              "Governance drift detected → execution clarity restored across teams",
-              "High-risk decisions surfaced early → escalation prevented structural damage",
-            ].map((outcome) => (
-              <div
-                key={outcome}
-                className="border p-4"
-                style={{
-                  borderColor: "rgba(255,255,255,0.08)",
-                  backgroundColor: "rgba(255,255,255,0.025)",
-                }}
-              >
-                <p className="text-[13.5px] leading-[1.65]" style={{ color: "#F5F5F5" }}>
-                  {outcome}
-                </p>
-              </div>
-            ))}
-          </div>
+          <ObservedOutcomesBlock />
+          <AccuracyMetricsBlock />
           <p className="mt-4 text-[13px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.70)" }}>
             The system does not improve outcomes directly. It makes the correct action visible.
           </p>
