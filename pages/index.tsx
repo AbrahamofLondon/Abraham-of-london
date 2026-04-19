@@ -1813,75 +1813,78 @@ function EscalationClose() {
 
 function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
   return (
-    <Section id="hero" variant="surface" cap="front door · orientation · progression">
+    <Section id="hero" variant="surface" cap="front door · dual entry · conversion">
       <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
         <div>
-          <Eyebrow>Strategic Diagnostic Platform</Eyebrow>
+          <Eyebrow>Diagnostic Intelligence System</Eyebrow>
           <h1
             className="mt-6 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.9] tracking-[-0.04em] ds-text"
             style={{ fontSize: "clamp(3.1rem, 8vw, 6.3rem)" }}
           >
-            Resolve structural problems
+            Diagnose what is actually wrong
             <br />
-            <span className="ds-text-muted">before they become expensive drift.</span>
+            <span className="ds-text-muted">— in your decisions, your team, or your organisation.</span>
           </h1>
 
           <p className="mt-8 max-w-3xl text-[16px] leading-[1.9] ds-text-muted">
-            Abraham of London is a governed operating system for diagnosis, strategic
-            clarity, and intervention. It helps founders, executives, and organizations
-            under pressure identify what is actually wrong, clarify what must happen next,
-            and escalate only when the situation justifies it.
+            A structured diagnostic system that surfaces hidden misalignment,
+            structural failure, and decision drift. Start with yourself or start
+            with your organisation. The system reads the condition, classifies
+            the trajectory, and routes you to the correct next step.
           </p>
 
-          <div className="mt-10 flex flex-wrap gap-4">
+          {/* DUAL ENTRY CTAs */}
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-2xl">
+            {/* Personal entry */}
+            <Link
+              href="/diagnostics/purpose-alignment"
+              className="group border p-5 transition hover:border-[var(--ds-accent-soft)]"
+              style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}
+            >
+              <div style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase",
+                color: "rgba(110,231,183,0.72)",
+              }}>
+                Start with yourself
+              </div>
+              <p className="mt-2 text-[13px] leading-[1.7] ds-text-muted">
+                Diagnose personal alignment, decision clarity, and hidden friction.
+              </p>
+              <div className="mt-3 flex items-center gap-2" style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
+                color: "rgba(110,231,183,0.60)",
+              }}>
+                Run Personal Diagnostic · 8 min
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </Link>
+
+            {/* Institutional entry */}
             <Link
               href="/diagnostics/constitutional-diagnostic"
-              className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition"
-              style={{
-                borderColor: "var(--ds-accent-soft)",
-                backgroundColor: "var(--ds-accent-soft)",
+              className="group border p-5 transition hover:border-[var(--ds-accent-soft)]"
+              style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)" }}
+            >
+              <div style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase",
                 color: "var(--ds-accent)",
+              }}>
+                Start with your organisation
+              </div>
+              <p className="mt-2 text-[13px] leading-[1.7]" style={{ color: "var(--ds-text-muted)" }}>
+                Identify structural failure, misalignment, and execution risk.
+              </p>
+              <div className="mt-3 flex items-center gap-2" style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "9px",
-                letterSpacing: "0.32em",
-                textTransform: "uppercase",
-              }}
-            >
-              Start the Diagnostic
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
-
-            <Link
-              href="/strategy-room"
-              className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition"
-              style={{
-                borderColor: "var(--ds-border)",
-                backgroundColor: "var(--ds-panel)",
-                color: "var(--ds-text-muted)",
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "9px",
-                letterSpacing: "0.32em",
-                textTransform: "uppercase",
-              }}
-            >
-              Enter Strategy Room
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
-
-            <Link
-              href={intelligenceHref}
-              className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition"
-              style={{
-                borderColor: "var(--ds-border)",
-                color: "var(--ds-text-subtle)",
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "9px",
-                letterSpacing: "0.32em",
-                textTransform: "uppercase",
-              }}
-            >
-              Browse Intelligence
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
+                color: "var(--ds-accent)",
+              }}>
+                Run Constitutional Diagnostic · 6 min
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </div>
             </Link>
           </div>
         </div>
@@ -1897,18 +1900,29 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                 color: "var(--ds-text-subtle)",
               }}
             >
-              Start Here
+              Start here
             </div>
-            <div className="mt-4 space-y-4">
+            <div className="mt-4 space-y-3">
               {[
-                "Use Diagnostics when you need signal, not speculation.",
-                "Use Executive Reporting when the issue is serious enough to justify paid interpretation.",
-                "Use Strategy Room when a real decision with real consequence is already on the table.",
+                { trigger: "Something feels off but you can't explain it", route: "Personal Diagnostic", href: "/diagnostics/purpose-alignment" },
+                { trigger: "Your decisions are inconsistent under pressure", route: "Personal Diagnostic", href: "/diagnostics/purpose-alignment" },
+                { trigger: "Your team is misaligned with your direction", route: "Team Assessment", href: "/diagnostics/team-assessment" },
+                { trigger: "The organisation is under structural pressure", route: "Constitutional Diagnostic", href: "/diagnostics/constitutional-diagnostic" },
+                { trigger: "A high-stakes decision is already on the table", route: "Strategy Room · £395", href: "/strategy-room" },
               ].map((item) => (
-                <div key={item} className="flex gap-4 border-b pb-4 last:border-b-0 last:pb-0" style={{ borderColor: "var(--ds-border)" }}>
-                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
-                  <p className="text-[14px] leading-[1.75] ds-text-muted">{item}</p>
-                </div>
+                <Link key={item.trigger} href={item.href} className="flex gap-3 border-b pb-3 last:border-b-0 last:pb-0 transition hover:opacity-80" style={{ borderColor: "var(--ds-border)" }}>
+                  <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
+                  <div>
+                    <p className="text-[13px] leading-[1.6] ds-text-muted">{item.trigger}</p>
+                    <p style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                      color: "var(--ds-accent)", opacity: 0.7, marginTop: "0.25rem",
+                    }}>
+                      → {item.route}
+                    </p>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -1920,26 +1934,26 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
 function WhatThisPlatformIs() {
   return (
-    <Section id="what-this-is" variant="void" cap="system · what this platform is">
+    <Section id="what-this-is" variant="void" cap="system · how it works">
       <SectionHeader
-        eyebrow="Operating Model"
+        eyebrow="How it works"
         title={
           <>
-            Not a blog. Not a generic consultancy.
+            Personal misalignment creates decision drift.
             <br />
-            <span className="text-white/35">A progressive system for diagnosis, clarity, and intervention.</span>
+            <span className="text-white/35">Decision drift creates structural failure.</span>
           </>
         }
-        description="This platform is a structured operating system for diagnosis, strategic clarity, and intervention. It is designed to move a serious user through a governed sequence: diagnose the problem, clarify the reality, escalate deliberately, and intervene only when the situation warrants it."
+        description="The system reads the condition at the level where it actually lives — starting with the person if that is where clarity is missing, or with the organisation if the structure is already under strain. Each stage deepens the reading. Nothing is prescribed before it is diagnosed."
         large
       />
 
       <div className="mt-12 grid gap-4 lg:grid-cols-4">
         {[
-          ["Diagnose", "Surface what is actually wrong before advice, action, or narrative distortion takes over."],
-          ["Clarify", "Translate pressure, drift, and conflicting signals into a decision-grade reading."],
-          ["Escalate", "Move only when the stakes, authority, and urgency justify a higher-order container."],
-          ["Intervene", "Use Strategy Room or advisory only when structured products are no longer sufficient."],
+          ["Diagnose", "Surface what is actually wrong — in your own decisions, your team's alignment, or your institution's structure."],
+          ["Classify", "The engine computes trajectory, readiness, and failure modes — not just scores, but structural classifications."],
+          ["Escalate", "Move only when the signal, authority, and consequence justify a higher-order container."],
+          ["Intervene", "Executive Reporting (£95) and Strategy Room (£395) — used only when free diagnostics confirm the need."],
         ].map(([title, body]) => (
           <Panel key={title} surface="lift">
             <div className="p-6">

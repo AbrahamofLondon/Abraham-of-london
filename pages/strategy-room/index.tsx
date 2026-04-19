@@ -568,10 +568,12 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, t
     : [];
 
   const readinessNum = ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[posture.readinessTier] ?? 50;
-  const trajectory = inferTrajectory(posture.clarityScore ?? 50, readinessNum, posture.failureModes ?? []);
+  const clarityScore = posture.confidence ?? 50;
+  const trajectory = inferTrajectory(clarityScore, readinessNum, posture.failureModes ?? []);
+  const rawPosture = canonical?.sections?.constitutionalPosture as Record<string, unknown> | undefined;
   const engagementReadiness = deriveEngagementReadiness({
-    revenueBand: posture.revenueBand,
-    problemStatement: "", // Not available from canonical output
+    revenueBand: String(rawPosture?.revenueBand ?? ""),
+    problemStatement: "",
     urgencyWindow: posture.temperature === "SCORCHING" ? "IMMEDIATE" : posture.temperature === "HOT" ? "NEAR_TERM" : "MID_TERM",
     authorityScope: posture.authorityType,
     boardInvolved: undefined,

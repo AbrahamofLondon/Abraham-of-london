@@ -60,13 +60,12 @@ type NavItem = {
 // Desktop nav — flat by product logic. Events removed to reduce crowding;
 // Events/Gatherings remain surfaced in the footer.
 const DESKTOP_NAV: readonly NavItem[] = [
-  { href: "/canon",        label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
-  { href: "/editorials",   label: "Editorials",  sub: "Essays & published arguments", icon: ScrollText },
-  { href: "/playbooks",    label: "Playbooks",   sub: "Execution Frameworks",     icon: Layers     },
-  { href: "/shorts",       label: "Shorts",      sub: "Intelligence Dispatches",  icon: Zap,       signal: true },
-  { href: "/diagnostics",  label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
-  { href: "/artifacts",    label: "Intelligence Archives",   sub: "Premium Intelligence",     icon: Archive    },
-  { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
+  { href: "/diagnostics",            label: "Diagnostics",         sub: "Free diagnostic system",         icon: ScanSearch },
+  { href: "/diagnostics/executive-reporting", label: "Executive Report", sub: "Paid interpretation · £95",    icon: ScrollText },
+  { href: "/strategy-room",          label: "Strategy Room",       sub: "Paid intervention · £395",        icon: Crown      },
+  { href: "/editorials",             label: "Intelligence",        sub: "Essays, Shorts & Dispatches",     icon: Zap,       signal: true },
+  { href: "/playbooks",              label: "Playbooks",           sub: "Execution Frameworks",            icon: Layers     },
+  { href: "/canon",                   label: "Canon",               sub: "Doctrine & Method",               icon: Compass    },
 ] as const;
 
 // Mobile menu — full directory including Library. Events removed per operator;
