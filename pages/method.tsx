@@ -59,6 +59,19 @@ const MethodPage: NextPage = () => {
               engine built to surface what is actually wrong — and what it will cost
               if left unresolved.
             </p>
+
+            <p
+              className="mt-5"
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7.5px",
+                letterSpacing: "0.20em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.35)",
+              }}
+            >
+              This page explains how the system thinks. It does not expose proprietary scoring thresholds or internal model weights.
+            </p>
           </div>
 
           {/* Principle strip */}
@@ -241,6 +254,31 @@ const MethodPage: NextPage = () => {
             </div>
           </div>
 
+          {/* What you can verify */}
+          <div className="mt-20 max-w-3xl">
+            <p
+              className="font-mono uppercase"
+              style={{ fontSize: "7.5px", letterSpacing: "0.28em", color: `${GOLD}70`, marginBottom: "1.5rem" }}
+            >
+              What you can verify
+            </p>
+            <div className="space-y-3">
+              {[
+                "The diagnostic ladder is structured — free stages precede paid interpretation.",
+                "Escalation is staged — the system will not recommend intervention the evidence does not support.",
+                "Interpretation is governed — outputs pass through constitutional constraints before reaching you.",
+                "Accuracy is measured — after every result, users are asked whether the output reflected reality.",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3">
+                  <div className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: `${GOLD}70` }} />
+                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.72, color: "rgba(255,255,255,0.55)" }}>
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* CTA */}
           <div className="mt-20">
             <Link
@@ -255,7 +293,7 @@ const MethodPage: NextPage = () => {
                 borderColor: "rgba(255,255,255,0.20)",
               }}
             >
-              Begin the diagnostic
+              Run the diagnostic →
             </Link>
           </div>
         </section>

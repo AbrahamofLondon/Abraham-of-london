@@ -1882,132 +1882,139 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
   }, []);
 
   return (
-    <Section id="hero" variant="surface" cap="front door · dual entry · conversion">
-      {/* Extra top padding to clear the fixed nav cleanly */}
-      <div style={{ paddingTop: "2rem" }}>
-        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          <div className="max-w-[640px]">
-            <Eyebrow>Diagnostic Intelligence System</Eyebrow>
+    <Section id="hero" variant="surface">
+      <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+        {/* LEFT — why / what */}
+        <div className="max-w-[560px]">
+          <Eyebrow>Diagnostic Intelligence System</Eyebrow>
 
-            <h1
-              className="mt-5 font-['Cormorant_Garamond',Georgia,serif] text-[2.8rem] font-light md:text-[4rem] lg:text-[4.85rem]"
-              style={{ lineHeight: 1.04, color: "#F5F5F5", letterSpacing: 0 }}
-            >
-              Diagnose what is actually wrong
-              <br />
-              <span style={{ color: "#B8B8B8" }}>— in your decisions, your team, or your organisation.</span>
-            </h1>
-
-            <p
-              className="mt-5 font-['Cormorant_Garamond',Georgia,serif] text-[1rem] font-light italic lg:text-[1.08rem]"
-              style={{ lineHeight: 1.55, color: "#B8B8B8", letterSpacing: 0 }}
-            >
-              Before it becomes a decision you can&rsquo;t reverse.
-            </p>
-
-            <p className="mt-5 max-w-[600px] text-[14.5px] leading-[1.6]" style={{ color: "#B8B8B8" }}>
-              Run a 10-minute diagnostic. Get a clear condition, trajectory, and next step — based on your actual situation, not generic advice.
-            </p>
-
-            <p
-              className="mt-4"
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
-                letterSpacing: 0,
-                textTransform: "uppercase",
-                color: "rgba(184,184,184,0.78)",
-              }}
-            >
-              Free to start. No subscription. No commitment.
-            </p>
-
-            <div ref={cardsRef} className="mt-7 grid max-w-[640px] gap-4 sm:grid-cols-2">
-              <Link
-                href="/diagnostics/purpose-alignment"
-                className="group border border-white/[0.08] bg-white/[0.03] p-5 transition-all duration-200 hover:border-white/[0.18] hover:bg-white/[0.06]"
-                onClick={() => trackHeroClick("personal")}
-              >
-                <div className="flex items-start gap-3">
-                  <Compass className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/70 transition-colors group-hover:text-white" />
-                  <div style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8.5px", letterSpacing: 0, textTransform: "uppercase",
-                    color: "#F5F5F5",
-                    fontWeight: 650,
-                  }}>
-                    Your decisions feel off — start here
-                  </div>
-                </div>
-                <p className="mt-3 text-[13.5px] leading-[1.6]" style={{ color: "#B8B8B8" }}>
-                  Identify where your decisions are breaking down — and why.
-                </p>
-                <div className="mt-4 inline-flex items-center gap-2 border-b border-white/20 pb-1 transition-colors group-hover:border-white/45" style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px", letterSpacing: 0, textTransform: "uppercase",
-                  color: "rgba(245,245,245,0.78)",
-                }}>
-                  Run personal diagnostic · 8 min
-                  <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-              </Link>
-
-              <Link
-                href="/diagnostics/constitutional-diagnostic"
-                className="group border border-white/[0.08] bg-white/[0.03] p-5 transition-all duration-200 hover:border-white/[0.18] hover:bg-white/[0.06]"
-                onClick={() => trackHeroClick("institutional")}
-              >
-                <div className="flex items-start gap-3">
-                  <Briefcase className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/55 transition-colors group-hover:text-white/80" />
-                  <div style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8.5px", letterSpacing: 0, textTransform: "uppercase",
-                    color: "rgba(245,245,245,0.86)",
-                    fontWeight: 650,
-                  }}>
-                    Something is breaking in the business — start here
-                  </div>
-                </div>
-                <p className="mt-3 text-[13.5px] leading-[1.6]" style={{ color: "#B8B8B8" }}>
-                  Diagnose structural failure, misalignment, and execution risk.
-                </p>
-                <div className="mt-4 inline-flex items-center gap-2 border-b pb-1 transition-colors group-hover:border-[#C9A96E]/70" style={{
-                  borderColor: "rgba(201,169,110,0.42)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px", letterSpacing: 0, textTransform: "uppercase",
-                  color: "#C9A96E",
-                }}>
-                  Run constitutional diagnostic · 6 min
-                  <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-              </Link>
-            </div>
-            <p className="mt-4 text-[12.5px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.74)" }}>
-              Used by founders, operators, and teams under pressure.
-            </p>
-          </div>
-
-          <div
-            className="relative overflow-hidden border border-white/[0.12]"
+          <h1
+            className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light"
             style={{
-              background: "rgba(0,0,0,0.65)",
-              backdropFilter: "blur(8px)",
-              boxShadow: "0 24px 90px rgba(0,0,0,0.32)",
+              fontSize: "clamp(2.4rem, 5.5vw, 3.8rem)",
+              lineHeight: 1.06,
+              color: "#F5F5F5",
+              letterSpacing: "-0.01em",
             }}
           >
-            <div className="p-6 md:p-8">
+            Diagnose what is actually wrong
+            <span style={{ color: "rgba(184,184,184,0.72)" }}> — in your decisions, your team, or your organisation.</span>
+          </h1>
+
+          <p
+            className="mt-3 font-['Cormorant_Garamond',Georgia,serif] font-light italic"
+            style={{ fontSize: "1.05rem", lineHeight: 1.5, color: "rgba(184,184,184,0.85)" }}
+          >
+            Before it becomes a decision you can&rsquo;t reverse.
+          </p>
+
+          <p className="mt-4 max-w-[52ch] text-[14px] leading-[1.65]" style={{ color: "#B8B8B8" }}>
+            Run a 10-minute diagnostic. Get a clear condition, trajectory, and next step — based on your actual situation, not generic advice.
+          </p>
+
+          <p
+            className="mt-3"
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(184,184,184,0.80)",
+            }}
+          >
+            Free to start. No subscription. No commitment.
+          </p>
+
+          <p className="mt-3 text-[12.5px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.62)" }}>
+            Used by founders, operators, and teams under pressure.
+          </p>
+        </div>
+
+        {/* RIGHT — choose / act */}
+        <div>
+          {/* Dual-entry cards */}
+          <div ref={cardsRef} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <Link
+              href="/diagnostics/purpose-alignment"
+              className="group border border-white/[0.10] bg-white/[0.03] p-5 transition-all duration-200 hover:border-white/[0.20] hover:bg-white/[0.06]"
+              onClick={() => trackHeroClick("personal")}
+            >
+              <div className="flex items-start gap-3">
+                <Compass className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/70 transition-colors group-hover:text-white" />
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px", letterSpacing: 0, textTransform: "uppercase",
+                  color: "#F5F5F5",
+                  fontWeight: 650,
+                }}>
+                  Your decisions feel off — start here
+                </div>
+              </div>
+              <p className="mt-2.5 text-[13px] leading-[1.55]" style={{ color: "#B8B8B8" }}>
+                Identify where your decisions are breaking down — and why.
+              </p>
+              <div className="mt-3 inline-flex items-center gap-2 border-b border-white/20 pb-1 transition-colors group-hover:border-white/45" style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: 0, textTransform: "uppercase",
+                color: "rgba(245,245,245,0.78)",
+              }}>
+                Run personal diagnostic · 8 min
+                <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
+              </div>
+            </Link>
+
+            <Link
+              href="/diagnostics/constitutional-diagnostic"
+              className="group border border-white/[0.10] bg-white/[0.03] p-5 transition-all duration-200 hover:border-white/[0.20] hover:bg-white/[0.06]"
+              onClick={() => trackHeroClick("institutional")}
+            >
+              <div className="flex items-start gap-3">
+                <Briefcase className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/55 transition-colors group-hover:text-white/80" />
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px", letterSpacing: 0, textTransform: "uppercase",
+                  color: "rgba(245,245,245,0.86)",
+                  fontWeight: 650,
+                }}>
+                  Something is breaking in the business — start here
+                </div>
+              </div>
+              <p className="mt-2.5 text-[13px] leading-[1.55]" style={{ color: "#B8B8B8" }}>
+                Diagnose structural failure, misalignment, and execution risk.
+              </p>
+              <div className="mt-3 inline-flex items-center gap-2 border-b pb-1 transition-colors group-hover:border-[#C9A96E]/70" style={{
+                borderColor: "rgba(201,169,110,0.42)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: 0, textTransform: "uppercase",
+                color: "#C9A96E",
+              }}>
+                Run constitutional diagnostic · 6 min
+                <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
+              </div>
+            </Link>
+          </div>
+
+          {/* Start here — routing panel */}
+          <div
+            className="mt-3 border border-white/[0.10] overflow-hidden"
+            style={{
+              background: "rgba(0,0,0,0.55)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <div className="px-5 py-4">
               <div
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "7.5px",
-                  letterSpacing: 0,
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  color: "rgba(184,184,184,0.78)",
+                  color: "rgba(184,184,184,0.68)",
                 }}
               >
-                Start here
+                Still unsure? Route by situation
               </div>
-              <div className="mt-5 space-y-1">
+              <div className="mt-3 space-y-0.5">
                 {[
                   { trigger: "Something feels off — but you can\u2019t explain why", route: "Personal diagnostic", href: "/diagnostics/purpose-alignment", tier: "personal" },
                   { trigger: "Your decisions change under pressure", route: "Personal diagnostic", href: "/diagnostics/purpose-alignment", tier: "personal" },
@@ -2018,52 +2025,56 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                   <Link
                     key={item.trigger}
                     href={item.href}
-                    className="group flex items-center gap-3 border-b border-white/[0.08] py-3.5 transition-all duration-150 last:border-b-0 hover:translate-x-1"
-                    onClick={() => { try { (window as any).gtag?.("event", "start_here_clicked", { target: item.href }); } catch {} }}
+                    className="group flex items-center gap-3 border-b border-white/[0.06] py-2.5 transition-all duration-150 last:border-b-0 hover:translate-x-1"
+                    onClick={() => track("start_here_clicked", { target: item.href })}
                   >
                     <div
-                      className="mt-0.5 h-2 w-2 shrink-0 rounded-full transition-transform duration-200 group-hover:scale-[1.4]"
+                      className="h-1.5 w-1.5 shrink-0 rounded-full transition-transform duration-200 group-hover:scale-[1.5]"
                       style={{
                         backgroundColor: item.tier === "personal"
                           ? "rgba(110,231,183,0.65)"
                           : item.tier === "premium"
                             ? "rgba(252,165,165,0.65)"
-                            : `var(--ds-accent)`,
+                            : "var(--ds-accent)",
                       }}
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p
-                        className="leading-[1.5] transition-colors duration-150"
+                        className="leading-[1.45] transition-colors duration-150 truncate"
                         style={{
-                          fontSize: "13.5px",
-                          color: item.tier === "personal" ? "rgba(245,245,245,0.78)" : "rgba(184,184,184,0.82)",
+                          fontSize: "12.5px",
+                          color: item.tier === "personal" ? "rgba(245,245,245,0.75)" : "rgba(184,184,184,0.75)",
                           fontWeight: item.tier === "personal" ? 500 : 350,
                         }}
                       >
                         {item.trigger}
                       </p>
                       <p
-                        className="mt-1"
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "8px",
-                          letterSpacing: 0,
+                          fontSize: "7px",
+                          letterSpacing: "0.08em",
                           textTransform: "uppercase",
-                          color: item.tier === "premium" ? "rgba(252,165,165,0.82)" : "rgba(201,169,110,0.82)",
+                          color: item.tier === "premium" ? "rgba(252,165,165,0.75)" : "rgba(201,169,110,0.72)",
                         }}
                       >
                         → {item.route}
                       </p>
                     </div>
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/0 transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-white/65" />
+                    <ArrowRight className="h-3 w-3 shrink-0 text-white/0 transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-white/50" />
                   </Link>
                 ))}
               </div>
-              <p className="mt-5 border-t border-white/[0.08] pt-5 text-[12.5px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.78)" }}>
-                Start with signal. Escalate only if the situation justifies it.
-              </p>
             </div>
           </div>
+
+          {/* Reassurance line */}
+          <p
+            className="mt-3 text-[12px] leading-[1.55]"
+            style={{ color: "rgba(184,184,184,0.62)" }}
+          >
+            You will know within minutes whether this is accurate. If it isn&rsquo;t, stop there.
+          </p>
         </div>
       </div>
     </Section>
@@ -2474,52 +2485,252 @@ function AuthoritySignal({ counts }: { counts: HomePageProps["counts"] }) {
   );
 }
 
-function OutcomeProofBlock() {
-  const outcomes = [
-    "Leadership misalignment identified → decision cadence stabilised within 30 days",
-    "Governance drift detected → execution clarity restored across teams",
-    "High-risk decisions surfaced early → escalation prevented structural damage",
-  ];
-
+function ProofLayer() {
   return (
-    <Section id="outcome-proof" variant="void" compact cap="proof · observed patterns">
-      <div className="mx-auto max-w-[900px]">
+    <Section id="proof-layer" variant="void" cap="proof · credibility · method">
+      <div className="mx-auto max-w-[1100px]">
+        {/* Section title */}
         <div
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
             fontSize: "9px",
-            letterSpacing: 0,
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "#F5F5F5",
             fontWeight: 700,
           }}
         >
-          What happens when this is used
+          Why this is credible
         </div>
-        <p className="mt-5 text-[14px] leading-[1.65]" style={{ color: "#B8B8B8" }}>
-          Observed patterns across early use:
-        </p>
+        <div className="mt-2 h-px w-16" style={{ backgroundColor: "rgba(201,169,110,0.35)" }} />
 
-        <div className="mt-6 grid gap-4">
-          {outcomes.map((outcome) => (
-            <div
-              key={outcome}
-              className="border p-5"
-              style={{
-                borderColor: "rgba(255,255,255,0.10)",
-                backgroundColor: "rgba(255,255,255,0.035)",
-              }}
-            >
-              <p className="text-[14px] leading-[1.65]" style={{ color: "#F5F5F5" }}>
-                {outcome}
+        {/* A: Observed outcomes */}
+        <div className="mt-10">
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(201,169,110,0.80)",
+              marginBottom: "1rem",
+            }}
+          >
+            Observed outcomes
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              "Leadership misalignment identified → decision cadence stabilised within 30 days",
+              "Governance drift detected → execution clarity restored across teams",
+              "High-risk decisions surfaced early → escalation prevented structural damage",
+            ].map((outcome) => (
+              <div
+                key={outcome}
+                className="border p-4"
+                style={{
+                  borderColor: "rgba(255,255,255,0.08)",
+                  backgroundColor: "rgba(255,255,255,0.025)",
+                }}
+              >
+                <p className="text-[13.5px] leading-[1.65]" style={{ color: "#F5F5F5" }}>
+                  {outcome}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-[13px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.70)" }}>
+            The system does not improve outcomes directly. It makes the correct action visible.
+          </p>
+        </div>
+
+        {/* B: Example output */}
+        <div className="mt-12">
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(201,169,110,0.80)",
+              marginBottom: "1rem",
+            }}
+          >
+            Example output (anonymised)
+          </div>
+          <div
+            style={{
+              border: "1px solid rgba(255,215,0,0.22)",
+              backgroundColor: "rgba(0,0,0,0.65)",
+              boxShadow: "0 20px 70px rgba(0,0,0,0.30)",
+            }}
+          >
+            <div style={{ padding: "1.5rem 1.75rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "1.25rem", lineHeight: 1.3, color: "#F5F5F5" }}>
+                Execution coherence collapsing under governance drift
+              </div>
+              <div className="mt-3 flex flex-wrap gap-4">
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#F87171", fontWeight: 700 }}>
+                  Trajectory: DETERIORATING
+                </span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#F5F5F5", fontWeight: 700 }}>
+                  Estimated exposure: £420,000 over 6 months
+                </span>
+              </div>
+            </div>
+            <div style={{ padding: "1.25rem 1.75rem 1.5rem" }}>
+              <p className="text-[13.5px] leading-[1.65]" style={{ color: "#B8B8B8" }}>
+                Stabilise governance cadence within 30 days. Decision authority is not ordered — three concurrent owners are producing conflicting mandates. Execution layer is compensating with informal authority, accelerating drift.
+              </p>
+              <p className="mt-4 border-t border-white/[0.08] pt-4 text-[12.5px] leading-[1.6]" style={{ color: "#F87171", fontWeight: 700 }}>
+                Without intervention, conditions like this typically deteriorate within 30–90 days.
               </p>
             </div>
-          ))}
+          </div>
         </div>
 
-        <p className="mt-6 border-t border-white/[0.10] pt-6 text-[14px] leading-[1.65]" style={{ color: "#B8B8B8" }}>
-          The system does not improve outcomes directly. It makes the correct action visible.
-        </p>
+        {/* C: How the system works (mechanism) */}
+        <div className="mt-12">
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(201,169,110,0.80)",
+              marginBottom: "1rem",
+            }}
+          >
+            How the system works
+          </div>
+          <div className="relative grid gap-4 md:grid-cols-3">
+            {[
+              { step: "01", title: "Signal capture", body: "Structured inputs — decisions, team signals, organisational conditions." },
+              { step: "02", title: "Constitutional analysis", body: "Weighted scoring, failure-mode detection, trajectory classification." },
+              { step: "03", title: "Output", body: "Condition → direction → next action. Not opinion. Not advice." },
+            ].map(({ step, title, body }, index) => (
+              <React.Fragment key={step}>
+                <div
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderTop: "1px solid rgba(255,255,255,0.14)",
+                    backgroundColor: "rgba(255,255,255,0.025)",
+                    padding: "1.25rem 1.5rem",
+                  }}
+                >
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(184,184,184,0.58)" }}>
+                    Step {step}
+                  </div>
+                  <div className="mt-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9.5px", letterSpacing: "0.04em", textTransform: "uppercase", color: "#F5F5F5" }}>
+                    {title}
+                  </div>
+                  <p className="mt-2 text-[13px] leading-[1.6]" style={{ color: "#B8B8B8" }}>{body}</p>
+                </div>
+                {index < 2 && (
+                  <div
+                    aria-hidden
+                    className="hidden md:block"
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: index === 0 ? "32.2%" : "66.1%",
+                      width: "2rem",
+                      height: "1px",
+                      background: "linear-gradient(to right, rgba(255,255,255,0.08), rgba(201,169,110,0.35), rgba(255,255,255,0.08))",
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+          <p className="mt-4 text-[13px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.70)" }}>
+            The system does not interpret loosely. It classifies structurally.
+          </p>
+        </div>
+
+        {/* D: Anti-hype + Method link — side by side */}
+        <div className="mt-12 grid gap-4 md:grid-cols-2">
+          {/* Anti-hype */}
+          <div
+            style={{
+              border: "1px solid rgba(255,255,255,0.08)",
+              backgroundColor: "rgba(255,255,255,0.02)",
+              padding: "1.25rem 1.5rem",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "#F5F5F5",
+                fontWeight: 700,
+                marginBottom: "0.85rem",
+              }}
+            >
+              What this is not
+            </div>
+            <div className="space-y-1.5">
+              {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as insight"].map((item) => (
+                <p key={item} className="text-[13px] leading-[1.5]" style={{ color: "rgba(184,184,184,0.68)" }}>
+                  Not {item.toLowerCase()}.
+                </p>
+              ))}
+            </div>
+            <p className="mt-4 border-t border-white/[0.06] pt-3 text-[13px] leading-[1.5]" style={{ color: "rgba(201,169,110,0.85)", fontWeight: 600 }}>
+              It is a diagnostic system.
+            </p>
+          </div>
+
+          {/* Method link */}
+          <div
+            style={{
+              border: "1px solid rgba(201,169,110,0.18)",
+              backgroundColor: "rgba(201,169,110,0.04)",
+              padding: "1.25rem 1.5rem",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "rgba(201,169,110,0.90)",
+                  fontWeight: 700,
+                  marginBottom: "0.85rem",
+                }}
+              >
+                Method
+              </div>
+              <p className="text-[13.5px] leading-[1.65]" style={{ color: "rgba(184,184,184,0.78)" }}>
+                See how the system captures signal, classifies condition, and governs interpretation.
+              </p>
+            </div>
+            <div className="mt-4">
+              <Link
+                href="/method"
+                className="group inline-flex items-center gap-2 border-b pb-1 transition-colors hover:border-[#C9A96E]/60"
+                style={{
+                  borderColor: "rgba(201,169,110,0.30)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "rgba(201,169,110,0.85)",
+                }}
+              >
+                Review the method
+                <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </Section>
   );
@@ -2630,119 +2841,9 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <HomeHero intelligenceHref={intelligenceHref} />
 
-      {/* A: Mechanism strip — kill "philosophy without proof" */}
-      <Section id="mechanism" variant="void" compact>
-        <div className="mb-8">
-          <div
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "9px",
-              letterSpacing: 0,
-              textTransform: "uppercase",
-              color: "#F5F5F5",
-              fontWeight: 700,
-            }}
-          >
-            How the system works
-          </div>
-        </div>
-        <div className="relative grid gap-6 lg:grid-cols-3">
-          {[
-            { step: "01", title: "Signal capture", body: "Structured inputs — decisions, team signals, organisational conditions." },
-            { step: "02", title: "Constitutional analysis", body: "Weighted scoring, failure-mode detection, trajectory classification." },
-            { step: "03", title: "Output", body: "Condition → direction → next action. Not opinion. Not advice." },
-          ].map(({ step, title, body }, index) => (
-            <React.Fragment key={step}>
-              <div
-                style={{
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  borderTop: "1px solid rgba(255,255,255,0.18)",
-                  backgroundColor: "rgba(255,255,255,0.035)",
-                  padding: "1.5rem 1.625rem",
-                }}
-              >
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: 0, textTransform: "uppercase", color: "rgba(184,184,184,0.68)" }}>
-                  Step {step}
-                </div>
-                <div className="mt-3" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: 0, textTransform: "uppercase", color: "#F5F5F5" }}>
-                  {title}
-                </div>
-                <p className="mt-3 text-[13.5px] leading-[1.65]" style={{ color: "#B8B8B8" }}>{body}</p>
-              </div>
-              {index < 2 && (
-                <div
-                  aria-hidden
-                  className="hidden lg:block"
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: index === 0 ? "32.2%" : "66.1%",
-                    width: "2.5rem",
-                    height: "1px",
-                    background: "linear-gradient(to right, rgba(255,255,255,0.10), rgba(201,169,110,0.45), rgba(255,255,255,0.10))",
-                    transform: "translate(-50%, -50%)",
-                  }}
-                />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-        <p className="mt-7 text-[13.5px] leading-[1.65]" style={{ color: "#B8B8B8" }}>
-          The system does not interpret loosely. It classifies structurally.
-        </p>
+      <ProofLayer />
 
-        {/* C: Anti-hype filter */}
-        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: 0, textTransform: "uppercase" }}>
-          <span style={{ color: "#F5F5F5" }}>What this is not:</span>
-          {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as insight"].map((item) => (
-            <span key={item} style={{ color: "#B8B8B8", opacity: 0.72 }}>
-              Not {item.toLowerCase()}
-            </span>
-          ))}
-          <span style={{ color: "#C9A96E", opacity: 0.90 }}>It is a diagnostic system.</span>
-        </div>
-      </Section>
-
-      {/* B: Sample output (anonymised) */}
-      <Section id="sample-output" variant="surface" compact>
-        <div className="mx-auto max-w-3xl">
-          <Eyebrow align="center">Example output (anonymised)</Eyebrow>
-          <div
-            className="mt-7"
-            style={{
-              border: "1px solid rgba(255,215,0,0.25)",
-              backgroundColor: "rgba(0,0,0,0.70)",
-              boxShadow: "0 30px 100px rgba(0,0,0,0.34)",
-            }}
-          >
-            <div style={{ padding: "2rem 2rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.10)" }}>
-              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "1.35rem", lineHeight: 1.32, color: "#F5F5F5" }}>
-                Execution coherence collapsing under governance drift
-              </div>
-              <div className="mt-4 flex flex-wrap gap-4">
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: 0, textTransform: "uppercase", color: "#F87171", fontWeight: 700 }}>
-                  Trajectory: DETERIORATING
-                </span>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: 0, textTransform: "uppercase", color: "#F5F5F5", fontWeight: 700 }}>
-                  Estimated exposure: £420,000 over 6 months
-                </span>
-              </div>
-            </div>
-            <div style={{ padding: "1.5rem 2rem 2rem" }}>
-              <p className="text-[14px] leading-[1.65]" style={{ color: "#B8B8B8" }}>
-                Stabilise governance cadence within 30 days. Decision authority is not ordered — three concurrent owners are producing conflicting mandates. Execution layer is compensating with informal authority, accelerating drift.
-              </p>
-              <p className="mt-5 border-t border-white/[0.10] pt-5 text-[13px] leading-[1.65]" style={{ color: "#F87171", fontWeight: 700 }}>
-                Without intervention, conditions like this typically deteriorate within 30–90 days.
-              </p>
-            </div>
-          </div>
-        </div>
-      </Section>
-
-      <OutcomeProofBlock />
-
-      <Bridge text="hero · credibility" />
+      <Bridge text="proof · credibility" />
       <CredibilityStrip />
 
       <Bridge text="orientation · system" />
