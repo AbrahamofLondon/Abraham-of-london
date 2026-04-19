@@ -7,6 +7,7 @@ import {
   PRODUCT_CODES,
   type ProductCode,
 } from "@/lib/server/billing/entitlements";
+import { prisma } from "@/lib/prisma.server";
 
 const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
 
@@ -23,6 +24,39 @@ export const config = {
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any }) : null;
+
+async function recordCheckoutCompletion(input: {
+  sessionId: string;
+  email: string;
+  productCode: string;
+  priceCode: string;
+  tier: string;
+  paymentStatus: string | null;
+}) {
+  try {
+    await prisma.accessAuditLog.create({
+      data: {
+        actorType: "SYSTEM",
+        actorEmail: input.email || null,
+        action: "billing.checkout.completed",
+        targetType: "checkout_session",
+        targetKey: input.sessionId,
+        success: input.paymentStatus === "paid",
+        reason: input.paymentStatus || null,
+        metadata: {
+          session_id: input.sessionId,
+          email: input.email,
+          product: input.productCode,
+          priceCode: input.priceCode,
+          tier: input.tier,
+          payment_status: input.paymentStatus,
+        },
+      },
+    });
+  } catch (error) {
+    console.warn("[BILLING_WEBHOOK] Failed to persist checkout audit record", error);
+  }
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
@@ -44,7 +78,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const session = event.data.object as Stripe.Checkout.Session;
     const email = String(session.metadata?.email || session.customer_details?.email || "").toLowerCase();
     const productCode = String(session.metadata?.productCode || "");
+    const priceCode = String(session.metadata?.priceCode || "");
     const tier = String(session.metadata?.tier || "report-basic");
+    const paymentStatus = session.payment_status || null;
+
+    await recordCheckoutCompletion({
+      sessionId: session.id,
+      email,
+      productCode,
+      priceCode,
+      tier,
+      paymentStatus,
+    });
 
     if (email && productCode && isProductCode(productCode)) {
       await grantEntitlement({

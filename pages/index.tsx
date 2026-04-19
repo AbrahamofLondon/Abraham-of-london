@@ -2010,6 +2010,34 @@ function HowItWorksLadder() {
         large
       />
 
+      <Panel surface="lift" className="mt-10">
+        <div className="flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.26em",
+                textTransform: "uppercase",
+                color: "rgba(110,231,183,0.72)",
+              }}
+            >
+              For personal diagnostic clarity
+            </div>
+            <p className="mt-3 max-w-3xl text-[14px] leading-[1.8] ds-text-muted">
+              Purpose Alignment is a parallel personal path. It reads the person before
+              the Constitutional Diagnostic reads the organisation.
+            </p>
+          </div>
+          <Link
+            href="/diagnostics/purpose-alignment"
+            className="group inline-flex shrink-0 items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/55 transition hover:text-white"
+          >
+            Take Purpose Alignment <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
+      </Panel>
+
       <div className="mt-12 grid gap-4 lg:grid-cols-2">
         {stages.map((stage, index) => (
           <Panel key={stage.label} surface="lift" gold={index === 0 || index === 2}>
@@ -2102,6 +2130,14 @@ function ContentWithContext({
   latestReport,
 }: Pick<HomePageProps, "featuredBlogPosts" | "featuredShorts" | "featuredPlaybooks" | "latestReport">) {
   const intelligenceHref = "/artifacts";
+  const contentLinks: Array<[string, string, string]> = [
+    ["Intelligence Archive", "Deeper analysis for operators facing structural decisions, strategic pressure, or institutional consequence.", intelligenceHref],
+    ["Essays", "Long-form thinking on institutions, drift, leadership, execution, and the real structure beneath visible problems.", "/blog"],
+    ["Shorts", "Concise signal for fast orientation, daily strategic clarity, and quick entry into the deeper body of work.", "/shorts"],
+    ["Frameworks", "Practical operating models, playbooks, and structured tools that turn thinking into governed action.", "/playbooks"],
+    ["Canon", "Foundational doctrine and core frameworks. The deeper intellectual spine behind the system.", "/canon"],
+    ["Vault", "Restricted archive and deployable assets for members and serious operators who need reusable tools and briefings.", "/vault"],
+  ];
 
   return (
     <Section id="content" variant="surface" cap="content · context · authority">
@@ -2119,14 +2155,7 @@ function ContentWithContext({
       />
 
       <div className="mt-12 grid gap-4 lg:grid-cols-2">
-        {[
-          ["Intelligence Archive", "Deeper analysis for operators facing structural decisions, strategic pressure, or institutional consequence.", intelligenceHref],
-          ["Essays", "Long-form thinking on institutions, drift, leadership, execution, and the real structure beneath visible problems.", "/blog"],
-          ["Shorts", "Concise signal for fast orientation, daily strategic clarity, and quick entry into the deeper body of work.", "/shorts"],
-          ["Frameworks", "Practical operating models, playbooks, and structured tools that turn thinking into governed action.", "/playbooks"],
-          ["Canon", "Foundational doctrine and core frameworks. The deeper intellectual spine behind the system.", "/canon"],
-          ["Vault", "Restricted archive and deployable assets for members and serious operators who need reusable tools and briefings.", "/vault"],
-        ].map(([title, body, href]) => (
+        {contentLinks.map(([title, body, href]) => (
           <Panel key={title} surface="lift">
             <div className="p-6">
               <div

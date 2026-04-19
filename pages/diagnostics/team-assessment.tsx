@@ -450,6 +450,9 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
           <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
             <Eyebrow>Next layer — escalation rationale</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.escalationNote}</p>
+            <p style={{ marginBottom: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+              Next: Enterprise Assessment stress-tests governance, execution, and recent decision quality.
+            </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/diagnostics/enterprise-assessment"
                 className="inline-flex items-center gap-2.5 transition-all duration-300"

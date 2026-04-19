@@ -18,6 +18,7 @@ export const PRODUCT_CODES = {
   EXECUTIVE_REPORT_BOARDROOM_PDF:       "executive-report.boardroom-pdf",
   EXECUTIVE_REPORT_INTERVENTION:        "executive-report.intervention-export",
   STRATEGY_ROOM_ARTEFACTS_V2:           "strategy-room.private-artefacts",
+  STRATEGY_ROOM_ENTRY:                  "strategy-room.entry",
 } as const;
 
 export type ProductCode = (typeof PRODUCT_CODES)[keyof typeof PRODUCT_CODES];

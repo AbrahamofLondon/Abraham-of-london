@@ -21,15 +21,6 @@ const VOID = "rgb(3 3 5)";
 
 const RUNGS: Rung[] = [
   {
-    n: "00",
-    label: "Purpose Alignment",
-    href: "/diagnostics/purpose-alignment",
-    duration: "8 min",
-    route: "PERSONAL",
-    role: "Free personal diagnostic",
-    produces: "Personal alignment profile, pattern reading, first action",
-  },
-  {
     n: "01",
     label: "Constitutional Diagnostic",
     href: "/diagnostics/constitutional-diagnostic",
@@ -132,7 +123,6 @@ function RouteStrip() {
 function routeColor(route: string) {
   if (route === "STRATEGY") return GOLD;
   if (route === "DIAGNOSTIC") return "rgba(255,255,255,0.48)";
-  if (route === "PERSONAL") return "rgba(110,231,183,0.65)";
   return "rgba(255,255,255,0.24)";
 }
 
@@ -277,7 +267,7 @@ export default function DiagnosticsIndexPage() {
                   maxWidth: "56ch",
                 }}
               >
-                A public navigation surface for the four assessment stages. Each stage below states whether it is an instrument, what it collects, and what it produces.
+                A public navigation surface for the institutional assessment ladder. Each stage below states whether it is an instrument, what it collects, and what it produces.
               </p>
               <RouteStrip />
               <div
@@ -293,7 +283,7 @@ export default function DiagnosticsIndexPage() {
                 Public entry · staged assessment · no account required for diagnostic stages
               </div>
               <Link
-                href="/diagnostics/purpose-alignment"
+                href="/diagnostics/constitutional-diagnostic"
                 className="mt-8 inline-flex items-center gap-2 transition-all hover:underline"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -303,8 +293,61 @@ export default function DiagnosticsIndexPage() {
                   color: AMBER,
                 }}
               >
-                Start the Diagnostic
+                Start the Constitutional Diagnostic
                 <ArrowRight style={{ width: "11px", height: "11px" }} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="mx-auto max-w-6xl px-6 lg:px-12">
+            <div
+              className="grid gap-5 border-y py-8 md:grid-cols-[0.9fr_1.1fr_auto] md:items-center"
+              style={{ borderColor: "rgba(255,255,255,0.06)" }}
+            >
+              <div>
+                <Eyebrow>Personal diagnostic path</Eyebrow>
+                <h2
+                  style={{
+                    marginTop: "0.9rem",
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
+                    lineHeight: 1.05,
+                    letterSpacing: "-0.02em",
+                    color: "rgba(255,255,255,0.84)",
+                  }}
+                >
+                  Start with the person.
+                </h2>
+              </div>
+              <p
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "1rem",
+                  lineHeight: 1.65,
+                  color: "rgba(255,255,255,0.45)",
+                }}
+              >
+                Purpose Alignment reads the person. The Constitutional Diagnostic reads the
+                organisation. Use this path when personal clarity is the first trust-building step,
+                not as a replacement for the institutional ladder.
+              </p>
+              <Link
+                href="/diagnostics/purpose-alignment"
+                className="inline-flex items-center gap-2 transition-all hover:underline md:justify-self-end"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  color: "rgba(110,231,183,0.76)",
+                }}
+              >
+                Take Purpose Alignment
+                <ArrowRight style={{ width: "10px", height: "10px" }} />
               </Link>
             </div>
           </div>

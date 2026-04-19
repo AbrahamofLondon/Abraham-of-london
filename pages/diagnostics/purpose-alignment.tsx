@@ -10,15 +10,21 @@ import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import PurposeAlignmentAssessment from "@/components/alignment/PurposeAlignmentAssessment";
-import { trackFunnelEntry, trackStageStart } from "@/lib/analytics/funnel";
+import { track } from "@/lib/analytics/track";
 
 const GOLD = "#C9A96E";
 const VOID = "rgb(3 3 5)";
 
 export default function PurposeAlignmentPage() {
   React.useEffect(() => {
-    trackFunnelEntry("/diagnostics/purpose-alignment");
-    trackStageStart("constitutional"); // Pre-qualifier counts as entry
+    track("purpose_alignment_viewed", {
+      route: "/diagnostics/purpose-alignment",
+    });
+    try {
+      window.sessionStorage.setItem("aol_diagnostics_origin", "purpose_alignment");
+    } catch {
+      // Origin marker is measurement-only.
+    }
   }, []);
 
   return (
@@ -92,6 +98,29 @@ export default function PurposeAlignmentPage() {
                 <span>Pattern-specific reading</span>
                 <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
                 <span>Concrete first action</span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: "1.75rem",
+                  padding: "1rem 1.25rem",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  backgroundColor: "rgba(255,255,255,0.018)",
+                  maxWidth: "44rem",
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "0.96rem",
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.46)",
+                  }}
+                >
+                  This is a parallel personal diagnostic surface. The institutional ladder still
+                  begins with the Constitutional Diagnostic.
+                </p>
               </div>
             </div>
           </div>

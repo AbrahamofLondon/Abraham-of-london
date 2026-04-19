@@ -8,6 +8,7 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -20,6 +21,7 @@ import Layout from "@/components/Layout";
 import ConstitutionalDiagnosticSuite from "@/components/assessments/ConstitutionalDiagnosticSuite";
 import { getOrCreateSubjectId } from "@/lib/diagnostics/subject-id";
 import { trackFunnelEntry, trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
+import { track } from "@/lib/analytics/track";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -55,6 +57,8 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
 }
 
 export default function ConstitutionalDiagnosticPage() {
+  const router = useRouter();
+
   React.useEffect(() => {
     getOrCreateSubjectId();
     trackFunnelEntry("/diagnostics/constitutional-diagnostic");
@@ -64,6 +68,22 @@ export default function ConstitutionalDiagnosticPage() {
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
   }, []);
+
+  React.useEffect(() => {
+    if (!router.isReady) return;
+    const queryOrigin = router.query.origin === "purpose_alignment";
+    let storedOrigin = false;
+    try {
+      storedOrigin = window.sessionStorage.getItem("aol_diagnostics_origin") === "purpose_alignment";
+    } catch {
+      storedOrigin = false;
+    }
+    if (!queryOrigin && !storedOrigin) return;
+    track("purpose_alignment_to_constitutional_started", {
+      origin: "purpose_alignment",
+      source: queryOrigin ? "query" : "session",
+    });
+  }, [router.isReady, router.query.origin]);
 
   return (
     <Layout

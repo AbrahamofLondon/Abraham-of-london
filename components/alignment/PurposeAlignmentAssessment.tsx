@@ -51,6 +51,7 @@ import type {
   DomainProfile,
   CoherenceBand,
 } from "@/lib/alignment/types";
+import { track } from "@/lib/analytics/track";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -568,13 +569,42 @@ function ResultSurface({
 }) {
   const pattern = derivePatternReading(answers, result);
   const bc = BAND_CONFIG[result.coherenceBand];
+  const weakDomains = result.domainProfiles
+    .filter((domain) => domain.percent < 45)
+    .map((domain) => domain.domain);
+  const structuralSpilloverLikely = weakDomains.some((domain) =>
+    ["identity", "decision", "environment"].includes(domain),
+  );
 
   // Determine escalation path
-  const escalationPath = result.coherenceBand === "FRAGMENTED" || result.coherenceBand === "DRIFTING"
-    ? { href: "/diagnostics/constitutional-diagnostic", label: "Constitutional Diagnostic", note: "Required before strategic action." }
-    : result.coherenceBand === "ALIGNED"
-      ? { href: "/diagnostics/team-assessment", label: "Team Assessment", note: "Test whether your alignment propagates." }
-      : { href: "/diagnostics/team-assessment", label: "Team Assessment", note: "Verify organisational translation of alignment." };
+  const escalationPath = {
+    href: "/diagnostics/constitutional-diagnostic?origin=purpose_alignment",
+    label: "Continue to Constitutional Diagnostic",
+    note: "Personal clarity becomes useful when it is tested against organisational structure.",
+  };
+
+  React.useEffect(() => {
+    track("purpose_alignment_bridge_viewed", {
+      band: result.coherenceBand,
+      percent: result.percent,
+      spillover_likely: structuralSpilloverLikely,
+    });
+  }, [result.coherenceBand, result.percent, structuralSpilloverLikely]);
+
+  function handleBridgeClick() {
+    try {
+      window.sessionStorage.setItem("aol_diagnostics_origin", "purpose_alignment");
+    } catch {
+      // Origin marker is measurement-only.
+    }
+    track("purpose_alignment_bridge_clicked", {
+      destination: "/diagnostics/constitutional-diagnostic",
+      band: result.coherenceBand,
+    });
+    track("purpose_alignment_to_constitutional_started", {
+      origin: "purpose_alignment",
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -731,7 +761,7 @@ function ResultSurface({
 
       {/* ESCALATION */}
       <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
-        <Eyebrow>Next step in the diagnostic ladder</Eyebrow>
+        <Eyebrow>If this is affecting how you lead, the next question is structural</Eyebrow>
         <p style={{
           marginTop: "0.85rem",
           fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
@@ -739,10 +769,15 @@ function ResultSurface({
           color: "rgba(255,255,255,0.45)", fontStyle: "italic",
           marginBottom: "1.25rem",
         }}>
-          {pattern.escalationNote}
+          This assessment reads you personally. The Constitutional Diagnostic reads whether
+          that misalignment is now affecting the operating structure of your organisation.
+          {structuralSpilloverLikely
+            ? " Your identity, decision, or environment signal suggests possible organisational spillover."
+            : " Your next step is to separate personal strain from structural organisational strain."}
         </p>
         <div className="flex flex-wrap gap-3">
           <a href={escalationPath.href}
+            onClick={handleBridgeClick}
             className="group inline-flex items-center gap-2.5 transition-all duration-300"
             style={{
               padding: "11px 22px",
@@ -815,6 +850,14 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
     return scorePurposeProfile({ answers });
   }, [answers, totalAnswered]);
 
+  React.useEffect(() => {
+    if (totalAnswered === 1) {
+      track("purpose_alignment_started", {
+        total_questions: totalQuestions,
+      });
+    }
+  }, [totalAnswered, totalQuestions]);
+
   function updateAnswer(qid: string, field: "resonance" | "certainty", value: number) {
     setAnswers(prev => ({
       ...prev,
@@ -849,7 +892,13 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
         "purpose-alignment-result",
         JSON.stringify({ ...scored, subjectId: getOrCreateSubjectId() }),
       );
+      sessionStorage.setItem("aol_diagnostics_origin", "purpose_alignment");
     } catch {}
+    track("purpose_alignment_completed", {
+      band: scored.coherenceBand,
+      percent: scored.percent,
+      weakest_domain: scored.weakestDomains[0] || "unknown",
+    });
     onScored?.(scored, answers);
     try {
       await fetch("/api/purpose-alignment/assessments", {

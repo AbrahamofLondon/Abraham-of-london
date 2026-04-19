@@ -6,9 +6,11 @@
 // Palette: #060609 base · #C9A96E softGold · sharp panels throughout
 
 import * as React from "react";
+import type { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { trackStrategyRoomEntry, trackStrategyRoomConversion } from "@/lib/analytics/funnel";
+import { track } from "@/lib/analytics/track";
 import {
   AlertTriangle,
   ArrowRight,
@@ -37,6 +39,12 @@ import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
+import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
+import {
+  hasCommercialAccessCookie,
+  setCommercialAccessCookie,
+  verifyCheckoutSessionForProduct,
+} from "@/lib/server/billing/commercial-access";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -56,6 +64,12 @@ type SessionInitResponse = {
     marketRiskBand: string;
   };
   error?: string;
+};
+
+type StrategyRoomPageProps = {
+  hasPaidAccess: boolean;
+  checkoutConfirmed?: boolean;
+  checkoutCancelled?: boolean;
 };
 
 type RecommendationItem = {
@@ -940,7 +954,11 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, t
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function StrategyRoomPage() {
+export default function StrategyRoomPage({
+  hasPaidAccess,
+  checkoutConfirmed = false,
+  checkoutCancelled = false,
+}: StrategyRoomPageProps) {
   const [form,        setForm]        = React.useState<ConstitutionalIntake>(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error,       setError]       = React.useState("");
@@ -948,14 +966,22 @@ export default function StrategyRoomPage() {
   const [sessionKey,  setSessionKey]  = React.useState<string | null>(null);
   const [draftSaved,  setDraftSaved]  = React.useState(false);
   const [thread, setThread] = React.useState<ConstitutionalThread | null>(null);
+  const [threadLoaded, setThreadLoaded] = React.useState(false);
+  const hasExecutiveReportingContext = Boolean(thread?.executiveFindings);
 
   // Track entry
   React.useEffect(() => {
     trackStrategyRoomEntry();
+    if (checkoutConfirmed) {
+      track("strategy_room_checkout_returned_success", {
+        stage: "strategy-room",
+      });
+    }
   }, []);
 
   React.useEffect(() => {
     setThread(readConstitutionalThread());
+    setThreadLoaded(true);
   }, []);
 
   // Load draft
@@ -979,6 +1005,47 @@ export default function StrategyRoomPage() {
     }, AUTOSAVE_MS);
     return () => window.clearTimeout(timer);
   }, [form]);
+
+  if (!hasPaidAccess) {
+    return (
+      <Layout
+        title="Strategy Room | Abraham of London"
+        description="The premium intervention layer for live institutional decisions."
+        canonicalUrl="/strategy-room"
+        fullWidth
+        headerTransparent
+      >
+        <Head>
+          <meta name="robots" content="noindex, nofollow" />
+        </Head>
+        <main style={{ backgroundColor: VOID, minHeight: "100vh", color: "white" }}>
+          <div className="mx-auto max-w-7xl px-6 py-24 lg:px-12">
+            {checkoutCancelled && (
+              <div
+                className="mb-6 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-5"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-amber-200/75">
+                  Checkout cancelled
+                </p>
+                <p className="mt-2 text-sm leading-6 text-white/58">
+                  No payment was taken. Strategy Room remains available when the decision requires intervention.
+                </p>
+              </div>
+            )}
+            <StrategyRoomConversionBridge
+              price={395}
+              checkoutPriceCode="strategy_room"
+              originPath="/strategy-room"
+              ctaHref="/strategy-room"
+              primaryCtaLabel="Enter Strategy Room"
+              title="Strategy Room is the paid intervention layer."
+              description="Executive Reporting gives the interpretation. Strategy Room exists when the decision now requires governed intervention, constraint removal, and action logic under real consequence."
+            />
+          </div>
+        </main>
+      </Layout>
+    );
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
@@ -1171,7 +1238,7 @@ export default function StrategyRoomPage() {
             <section>
               <div className="mx-auto max-w-6xl px-6 lg:px-12">
                 <div className="py-20 lg:py-24">
-                  <Eyebrow>STRATEGY ROOM · INSTRUMENT MODE</Eyebrow>
+                  <Eyebrow>STRATEGY ROOM · £395 INTERVENTION ENTRY</Eyebrow>
                   <h1
                     style={{
                       marginTop: "1rem",
@@ -1185,7 +1252,7 @@ export default function StrategyRoomPage() {
                       fontStyle: "italic",
                     }}
                   >
-                    The constitutional gate.
+                    Where interpretation becomes intervention.
                   </h1>
                   <p
                     style={{
@@ -1198,11 +1265,143 @@ export default function StrategyRoomPage() {
                       maxWidth: "56ch",
                     }}
                   >
-                    Qualified advisory intake. Constitutional routing. Decision-grade guidance.
+                    Strategy Room is the premium escalation layer for live decisions under
+                    material consequence. The £395 entry turns a constitutional reading into
+                    governed intervention logic.
                   </p>
+                  {hasExecutiveReportingContext && (
+                    <div
+                      className="mt-5 max-w-3xl"
+                      style={{
+                        border: `1px solid ${GOLD}22`,
+                        backgroundColor: `${GOLD}07`,
+                        padding: "1rem 1.25rem",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7px",
+                          letterSpacing: "0.28em",
+                          textTransform: "uppercase",
+                          color: `${GOLD}A0`,
+                          marginBottom: "0.45rem",
+                        }}
+                      >
+                        Executive Reporting handoff
+                      </div>
+                      <p
+                        style={{
+                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                          fontWeight: 300,
+                          fontSize: "0.98rem",
+                          lineHeight: 1.6,
+                          color: "rgba(255,255,255,0.62)",
+                        }}
+                      >
+                        Your Executive Reporting result suggests this now requires intervention:
+                        {` ${thread?.executiveFindings?.route ?? "STRATEGY"} · ${thread?.executiveFindings?.readinessTier ?? "decision-ready"}`}.
+                      </p>
+                    </div>
+                  )}
+                  {checkoutConfirmed && (
+                    <div
+                      className="mt-5 max-w-3xl"
+                      style={{
+                        border: `1px solid ${GOLD}22`,
+                        backgroundColor: `${GOLD}07`,
+                        padding: "1rem 1.25rem",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7px",
+                          letterSpacing: "0.28em",
+                          textTransform: "uppercase",
+                          color: `${GOLD}A0`,
+                        }}
+                      >
+                        Strategy Room access confirmed · continue to intervention intake
+                      </div>
+                    </div>
+                  )}
                   {thread && (
                     <div className="mt-6 max-w-3xl">
                       <InheritedThreadContext thread={thread} title="Inherited journey context" />
+                    </div>
+                  )}
+                  {threadLoaded && !thread && (
+                    <div
+                      className="mt-6 grid gap-4 md:grid-cols-2"
+                      style={{ maxWidth: "56rem" }}
+                    >
+                      <div
+                        style={{
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          backgroundColor: "rgba(255,255,255,0.018)",
+                          padding: "1rem 1.25rem",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7px",
+                            letterSpacing: "0.28em",
+                            textTransform: "uppercase",
+                            color: `${GOLD}A0`,
+                            marginBottom: "0.55rem",
+                          }}
+                        >
+                          You are entering at the intervention layer
+                        </div>
+                        <p
+                          style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "0.96rem",
+                            lineHeight: 1.6,
+                            color: "rgba(255,255,255,0.52)",
+                          }}
+                        >
+                          This surface is designed for live institutional decisions. If you have
+                          not completed the diagnostic ladder, the system will still assess your
+                          situation, but you are entering without accumulated stage context.
+                        </p>
+                      </div>
+                      <div
+                        style={{
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          backgroundColor: "rgba(255,255,255,0.018)",
+                          padding: "1rem 1.25rem",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7px",
+                            letterSpacing: "0.28em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.34)",
+                            marginBottom: "0.55rem",
+                          }}
+                        >
+                          Best for
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "0.94rem",
+                            lineHeight: 1.7,
+                            color: "rgba(255,255,255,0.48)",
+                          }}
+                        >
+                          <div>• when the decision is already real</div>
+                          <div>• when cost of delay is material</div>
+                          <div>• when generic advice is no longer enough</div>
+                        </div>
+                      </div>
                     </div>
                   )}
                   <RouteStrip />
@@ -1216,7 +1415,7 @@ export default function StrategyRoomPage() {
                       color: "rgba(255,255,255,0.28)",
                     }}
                   >
-                    Required: Strategic context · Authority signal · Problem articulation
+                    Required: Strategic context · Authority signal · Problem articulation · £395 entry
                   </div>
                 </div>
               </div>
@@ -1257,3 +1456,29 @@ export default function StrategyRoomPage() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<StrategyRoomPageProps> = async (ctx) => {
+  const hasCookie = hasCommercialAccessCookie(ctx.req.headers.cookie, "strategy_room");
+  if (hasCookie) {
+    return { props: { hasPaidAccess: true, checkoutConfirmed: ctx.query.checkout === "success" } };
+  }
+
+  if (ctx.query.checkout === "success") {
+    try {
+      const valid = await verifyCheckoutSessionForProduct(ctx.query.session_id, "strategy_room");
+      if (valid && typeof ctx.query.session_id === "string") {
+        setCommercialAccessCookie(ctx, "strategy_room", ctx.query.session_id);
+        return { props: { hasPaidAccess: true, checkoutConfirmed: true } };
+      }
+    } catch {
+      // Keep the page on the paid entry surface if session verification fails.
+    }
+  }
+
+  return {
+    props: {
+      hasPaidAccess: false,
+      checkoutCancelled: ctx.query.checkout === "cancelled",
+    },
+  };
+};

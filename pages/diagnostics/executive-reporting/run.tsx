@@ -6,6 +6,7 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
+import { track } from "@/lib/analytics/track";
 import {
   mergeExecutiveFindingsIntoThread,
   readConstitutionalThread,
@@ -28,6 +29,12 @@ import InheritedThreadContext from "@/components/diagnostics/results/InheritedTh
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
+import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
+import {
+  hasCommercialAccessCookie,
+  setCommercialAccessCookie,
+  verifyCheckoutSessionForProduct,
+} from "@/lib/server/billing/commercial-access";
 
 type ExecutiveReportingIntakeForm = {
   fullName: string;
@@ -290,6 +297,10 @@ type ExecutiveReportingResult =
     };
 
 type PageState = "intake" | "generating" | "result";
+
+type ExecutiveReportingRunPageProps = {
+  checkoutConfirmed?: boolean;
+};
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -2112,6 +2123,22 @@ function ResultSurface({
             </div>
           </div>
         </div>
+
+        <StrategyRoomConversionBridge
+          className="mt-10"
+          price={395}
+          ctaHref="/strategy-room"
+          checkoutPriceCode="strategy_room"
+          originPath="/diagnostics/executive-reporting/run"
+          primaryCtaLabel="Enter Strategy Room"
+          title="You now have the interpretation. Strategy Room is where it becomes intervention."
+          description="Executive Reporting shows the constitutional constraint, exposure, and priority stack. Strategy Room is the premium escalation for turning that reading into governed action under real decision pressure."
+          signals={[
+            "The report has identified a material constraint that requires a decision",
+            "The next risk is delay, avoidance, or fragmented execution",
+            "You need intervention logic, not another layer of interpretation",
+          ]}
+        />
       </div>
     </div>
   );
@@ -2232,7 +2259,7 @@ function ExecutiveReportingIntake({
               color: "rgba(255,255,255,0.92)",
             }}
           >
-            Declare the matter precisely.
+            Complete the paid interpretation intake.
           </h2>
           <p
             style={{
@@ -2245,9 +2272,30 @@ function ExecutiveReportingIntake({
               maxWidth: "48ch",
             }}
           >
-            The intake is the diagnostic instrument. Thin answers produce thin diagnoses.
-            Precision increases signal. Signal increases quality of judgment.
+            This is the £95 Executive Reporting instrument. Expect 10–15 minutes. Your
+            answers are translated into a constitutional verdict, financial exposure,
+            priority stack, and Strategy Room escalation logic where warranted.
           </p>
+          <div
+            className="mt-5 grid gap-3 sm:grid-cols-3"
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.34)",
+            }}
+          >
+            <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
+              One-time report · £95
+            </div>
+            <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
+              Output generated from your submission
+            </div>
+            <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
+              No subscription or account required
+            </div>
+          </div>
         </div>
 
         {upstreamContext && (
@@ -2655,7 +2703,9 @@ function ExecutiveReportingIntake({
   );
 }
 
-export default function ExecutiveReportingRunPage() {
+export default function ExecutiveReportingRunPage({
+  checkoutConfirmed = false,
+}: ExecutiveReportingRunPageProps) {
   const [pageState, setPageState] = React.useState<PageState>("intake");
   const [result, setResult] = React.useState<Extract<ExecutiveReportingResult, { ok: true }> | null>(
     null,
@@ -2664,7 +2714,30 @@ export default function ExecutiveReportingRunPage() {
 
   React.useEffect(() => {
     trackStageStart("executive");
+    track("executive_reporting_intake_started", {
+      checkout_confirmed: checkoutConfirmed,
+    });
+    if (checkoutConfirmed) {
+      track("executive_reporting_checkout_returned_success", {
+        stage: "executive",
+      });
+    }
     setThread(readConstitutionalThread());
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("checkout") === "cancelled") {
+        const raw = window.sessionStorage.getItem("executive-report-result");
+        if (raw) {
+          const parsed = JSON.parse(raw) as ExecutiveReportingResult;
+          if (parsed.ok) {
+            setResult(parsed);
+            setPageState("result");
+          }
+        }
+      }
+    } catch {
+      // Session result restore is a convenience only.
+    }
     const handleUnload = () => trackDropoff("executive");
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
@@ -2682,6 +2755,13 @@ export default function ExecutiveReportingRunPage() {
   function handleResult(r: Extract<ExecutiveReportingResult, { ok: true }>) {
     setResult(r);
     setPageState("result");
+    track("executive_reporting_intake_completed", {
+      route: r.route || "DIAGNOSTIC",
+    });
+    track("executive_reporting_result_rendered", {
+      route: r.route || "DIAGNOSTIC",
+      has_thread: Boolean(readConstitutionalThread()),
+    });
     trackStageComplete("executive", "strategy", "/strategy-room");
 
     // Handoff to the Strategy Room rung. Canonical key per the ladder chain
@@ -2801,7 +2881,7 @@ export default function ExecutiveReportingRunPage() {
               <div className="relative z-10 mx-auto max-w-4xl px-6 lg:px-12">
                 <div className="pb-12 pt-28 text-center md:pt-32">
                   <div className="mb-8 flex justify-center">
-                    <Eyebrow>Constitutional intake</Eyebrow>
+                    <Eyebrow>Executive Reporting · £95</Eyebrow>
                   </div>
 
                   <h1
@@ -2814,9 +2894,9 @@ export default function ExecutiveReportingRunPage() {
                       color: "rgba(255,255,255,0.94)",
                     }}
                   >
-                    Declare the matter.
+                    Paid interpretation intake.
                     <br />
-                    <span style={{ color: "rgba(255,255,255,0.28)" }}>Receive the reading.</span>
+                    <span style={{ color: "rgba(255,255,255,0.28)" }}>Receive the consequence map.</span>
                   </h1>
 
                   <p
@@ -2830,9 +2910,32 @@ export default function ExecutiveReportingRunPage() {
                       maxWidth: "46ch",
                     }}
                   >
-                    The intake is the diagnostic instrument. Every field drives the constitutional
-                    reading. Thin answers produce thin diagnoses.
+                    This is the first paid layer in the ladder: a board-grade interpretation
+                    of structural strain, financial exposure, priority order, and the next
+                    decision path.
                   </p>
+                  {checkoutConfirmed && (
+                    <div
+                      className="mx-auto mt-5 max-w-xl"
+                      style={{
+                        border: `1px solid ${GOLD}22`,
+                        backgroundColor: `${GOLD}07`,
+                        padding: "0.9rem 1.1rem",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7px",
+                          letterSpacing: "0.24em",
+                          textTransform: "uppercase",
+                          color: `${GOLD}A0`,
+                        }}
+                      >
+                        Payment confirmed · continue with Executive Reporting
+                      </div>
+                    </div>
+                  )}
 
                   <div
                     style={{
@@ -2855,7 +2958,7 @@ export default function ExecutiveReportingRunPage() {
                         color: "rgba(255,255,255,0.24)",
                       }}
                     >
-                      Governed intake · Board-grade output
+                      10–15 minute intake · Board-grade output · Strategy Room bridge
                     </span>
                   </div>
                 </div>
@@ -2946,7 +3049,29 @@ export default function ExecutiveReportingRunPage() {
 }
 
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  return { props: {} };
+export const getServerSideProps: GetServerSideProps<ExecutiveReportingRunPageProps> = async (ctx) => {
+  const hasCookie = hasCommercialAccessCookie(ctx.req.headers.cookie, "executive_reporting");
+  if (hasCookie) return { props: { checkoutConfirmed: ctx.query.checkout === "success" } };
 
+  if (ctx.query.checkout === "success") {
+    try {
+      const valid = await verifyCheckoutSessionForProduct(
+        ctx.query.session_id,
+        "executive_reporting",
+      );
+      if (valid && typeof ctx.query.session_id === "string") {
+        setCommercialAccessCookie(ctx, "executive_reporting", ctx.query.session_id);
+        return { props: { checkoutConfirmed: true } };
+      }
+    } catch {
+      // Fall through to the paywall with a clean state.
+    }
+  }
+
+  return {
+    redirect: {
+      destination: "/diagnostics/executive-reporting?access=required",
+      permanent: false,
+    },
+  };
 };

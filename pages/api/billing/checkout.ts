@@ -1,11 +1,30 @@
 // pages/api/billing/checkout.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
+import { COMMERCIAL_PRODUCTS } from "@/lib/server/billing/commercial-access";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any }) : null;
 
-const PRICE_MAP: Record<string, { amount: number; name: string; productCode: string; tier: string }> = {
+const PRICE_MAP: Record<"executive_reporting" | "strategy_room", string> = {
+  executive_reporting: process.env.STRIPE_EXECUTIVE_REPORTING_PRICE_ID || "",
+  strategy_room: process.env.STRIPE_STRATEGY_ROOM_PRICE_ID || "",
+};
+
+const COMMERCIAL_PRICE_CONFIG = {
+  executive_reporting: {
+    name: COMMERCIAL_PRODUCTS.executive_reporting.name,
+    productCode: COMMERCIAL_PRODUCTS.executive_reporting.productCode,
+    tier: COMMERCIAL_PRODUCTS.executive_reporting.tier,
+  },
+  strategy_room: {
+    name: COMMERCIAL_PRODUCTS.strategy_room.name,
+    productCode: COMMERCIAL_PRODUCTS.strategy_room.productCode,
+    tier: COMMERCIAL_PRODUCTS.strategy_room.tier,
+  },
+};
+
+const INLINE_PRICE_MAP: Record<string, { amount: number; name: string; productCode: string; tier: string }> = {
   diagnostic_report_basic: {
     amount: 25000,
     name: "Diagnostic Report Basic",
@@ -20,40 +39,83 @@ const PRICE_MAP: Record<string, { amount: number; name: string; productCode: str
   },
 };
 
+const RETURN_PATHS: Record<string, { successPath: string; cancelPath: string }> = {
+  executive_reporting: {
+    successPath: COMMERCIAL_PRODUCTS.executive_reporting.successPath,
+    cancelPath: COMMERCIAL_PRODUCTS.executive_reporting.cancelPath,
+  },
+  strategy_room: {
+    successPath: COMMERCIAL_PRODUCTS.strategy_room.successPath,
+    cancelPath: COMMERCIAL_PRODUCTS.strategy_room.cancelPath,
+  },
+};
+
+function siteUrl(req: NextApiRequest): string {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    `${req.headers["x-forwarded-proto"] || "http"}://${req.headers.host}`
+  ).replace(/\/$/, "");
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
   if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
 
-  const { email, priceCode } = req.body || {};
-  const price = PRICE_MAP[String(priceCode || "")];
+  const { email, priceCode, originPath } = req.body || {};
+  const normalizedPriceCode = String(priceCode || "");
+  const commercialPriceId = PRICE_MAP[normalizedPriceCode as keyof typeof PRICE_MAP];
+  const commercialConfig =
+    COMMERCIAL_PRICE_CONFIG[normalizedPriceCode as keyof typeof COMMERCIAL_PRICE_CONFIG];
+  const inlinePrice = INLINE_PRICE_MAP[normalizedPriceCode];
 
-  if (!email || !price) return res.status(400).json({ ok: false, reason: "INVALID_PAYLOAD" });
+  if (!email || (!commercialConfig && !inlinePrice)) {
+    return res.status(400).json({ ok: false, reason: "INVALID_PAYLOAD" });
+  }
+  if (commercialConfig && !commercialPriceId) {
+    return res.status(500).json({ ok: false, reason: "STRIPE_PRICE_NOT_CONFIGURED" });
+  }
+
+  const returnPaths = RETURN_PATHS[normalizedPriceCode];
+  const origin = typeof originPath === "string" && originPath.startsWith("/") ? originPath : "";
+  const successPath = returnPaths?.successPath || "/dashboard";
+  const cancelPath = origin || returnPaths?.cancelPath || "/dashboard";
+  const baseUrl = siteUrl(req);
+  const productCode = commercialConfig ? commercialConfig.productCode : inlinePrice.productCode;
+  const tier = commercialConfig ? commercialConfig.tier : inlinePrice.tier;
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     customer_email: String(email).trim().toLowerCase(),
     line_items: [
-      {
-        price_data: {
-          currency: process.env.DIAGNOSTIC_DEFAULT_CURRENCY || "gbp",
-          unit_amount: price.amount,
-          product_data: {
-            name: price.name,
-            metadata: {
-              productCode: price.productCode,
-              tier: price.tier,
+      commercialConfig
+        ? {
+            price: commercialPriceId,
+            quantity: 1,
+          }
+        : {
+            price_data: {
+              currency: process.env.DIAGNOSTIC_DEFAULT_CURRENCY || "gbp",
+              unit_amount: inlinePrice.amount,
+              product_data: {
+                name: inlinePrice.name,
+                metadata: {
+                  productCode,
+                  tier,
+                },
+              },
             },
+            quantity: 1,
           },
-        },
-        quantity: 1,
-      },
     ],
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?billing=success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?billing=cancelled`,
+    success_url: `${baseUrl}${successPath}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}${cancelPath}?checkout=cancelled`,
     metadata: {
-      productCode: price.productCode,
-      tier: price.tier,
+      productCode,
+      priceCode: normalizedPriceCode,
+      tier,
       email: String(email).trim().toLowerCase(),
+      originPath: origin,
     },
   });
 

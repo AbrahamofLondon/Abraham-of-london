@@ -954,6 +954,9 @@ export default function ConstitutionalDiagnosticSuite() {
                         <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>
                           {rc2.note}
                         </p>
+                        <p style={{ marginBottom: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+                          Next: Team Assessment tests whether leadership and team are operating from the same reality.
+                        </p>
                         <div className="flex flex-wrap gap-3">
                           <Link href={rc2.href}
                             className="inline-flex items-center gap-2.5 transition-all duration-300"
