@@ -1,0 +1,144 @@
+/* pages/diagnostics/purpose-alignment.tsx
+   Purpose Alignment Assessment — the personal diagnostic entry point.
+   Positioned as the free public instrument that proves the platform's
+   intelligence before the institutional ladder begins. */
+
+import * as React from "react";
+import Head from "next/head";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
+import Layout from "@/components/Layout";
+import PurposeAlignmentAssessment from "@/components/alignment/PurposeAlignmentAssessment";
+import { trackFunnelEntry, trackStageStart } from "@/lib/analytics/funnel";
+
+const GOLD = "#C9A96E";
+const VOID = "rgb(3 3 5)";
+
+export default function PurposeAlignmentPage() {
+  React.useEffect(() => {
+    trackFunnelEntry("/diagnostics/purpose-alignment");
+    trackStageStart("constitutional"); // Pre-qualifier counts as entry
+  }, []);
+
+  return (
+    <Layout
+      title="Purpose Alignment Assessment | Abraham of London"
+      description="A free personal diagnostic that reads your alignment across six structural domains. 8 minutes. No account required. Specific to your exact score pattern."
+      canonicalUrl="/diagnostics/purpose-alignment"
+      fullWidth
+      headerTransparent
+    >
+      <Head>
+        <meta name="robots" content="index,follow" />
+        <meta property="og:title" content="Purpose Alignment Assessment | Abraham of London" />
+        <meta property="og:description" content="A free personal diagnostic that reads your alignment across six structural domains. Specific to your exact pattern — not a generic band label." />
+      </Head>
+
+      <div style={{ backgroundColor: VOID, minHeight: "100vh", color: "white" }}>
+        {/* Hero */}
+        <section className="relative overflow-hidden" style={{ backgroundColor: VOID }}>
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute" style={{
+              left: "-5%", top: "-15%", width: "600px", height: "600px",
+              borderRadius: "50%",
+              background: `radial-gradient(ellipse at center, ${GOLD}09 0%, transparent 65%)`,
+              filter: "blur(140px)",
+            }} />
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-12">
+            <div className="pt-28 pb-12 md:pt-36 md:pb-16">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+                <span style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
+                  color: `${GOLD}BB`,
+                }}>
+                  Personal Diagnostic · Free · 8 minutes
+                </span>
+              </div>
+
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300, fontSize: "clamp(2.5rem, 6vw, 4rem)",
+                lineHeight: 0.98, letterSpacing: "-0.03em",
+                color: "rgba(255,255,255,0.92)", maxWidth: "20ch",
+                fontStyle: "italic",
+              }}>
+                Are you aligned with your own direction?
+              </h1>
+
+              <p style={{
+                marginTop: "1.25rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.65,
+                color: "rgba(255,255,255,0.48)", maxWidth: "52ch",
+              }}>
+                18 questions across six domains. Dual-axis scoring that distinguishes what you know from what you assume. Your result is specific to your exact pattern — not a generic label.
+              </p>
+
+              <div style={{
+                marginTop: "1.5rem", display: "flex", flexWrap: "wrap", gap: "1.5rem",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase",
+                color: "rgba(255,255,255,0.28)",
+              }}>
+                <span>No account required</span>
+                <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
+                <span>Instant result</span>
+                <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
+                <span>Pattern-specific reading</span>
+                <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
+                <span>Concrete first action</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Assessment */}
+        <section className="mx-auto max-w-6xl px-6 lg:px-12 pb-24">
+          <PurposeAlignmentAssessment />
+        </section>
+
+        {/* Post-assessment context */}
+        <section className="border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <div className="mx-auto max-w-6xl px-6 lg:px-12 py-16">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-4 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+                <span style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase",
+                  color: `${GOLD}90`,
+                }}>
+                  What comes next
+                </span>
+              </div>
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72,
+                color: "rgba(255,255,255,0.45)",
+              }}>
+                This assessment reads you personally. The Constitutional Diagnostic reads your organisation structurally. Together they form a continuous system — personal alignment informing institutional diagnosis.
+              </p>
+              <Link
+                href="/diagnostics/constitutional-diagnostic"
+                className="inline-flex items-center gap-2 mt-6 transition-all"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase",
+                  color: `${GOLD}`,
+                }}
+              >
+                Continue to Constitutional Diagnostic
+                <ArrowRight style={{ width: "11px", height: "11px" }} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    </Layout>
+  );
+}

@@ -21,6 +21,15 @@ const VOID = "rgb(3 3 5)";
 
 const RUNGS: Rung[] = [
   {
+    n: "00",
+    label: "Purpose Alignment",
+    href: "/diagnostics/purpose-alignment",
+    duration: "8 min",
+    route: "PERSONAL",
+    role: "Free personal diagnostic",
+    produces: "Personal alignment profile, pattern reading, first action",
+  },
+  {
     n: "01",
     label: "Constitutional Diagnostic",
     href: "/diagnostics/constitutional-diagnostic",
@@ -123,6 +132,7 @@ function RouteStrip() {
 function routeColor(route: string) {
   if (route === "STRATEGY") return GOLD;
   if (route === "DIAGNOSTIC") return "rgba(255,255,255,0.48)";
+  if (route === "PERSONAL") return "rgba(110,231,183,0.65)";
   return "rgba(255,255,255,0.24)";
 }
 
@@ -283,7 +293,7 @@ export default function DiagnosticsIndexPage() {
                 Public entry · staged assessment · no account required for diagnostic stages
               </div>
               <Link
-                href="/diagnostics/constitutional-diagnostic"
+                href="/diagnostics/purpose-alignment"
                 className="mt-8 inline-flex items-center gap-2 transition-all hover:underline"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
