@@ -59,9 +59,9 @@ type NavItem = {
 
 // Desktop nav — product-first. Primary = conversion surfaces, Secondary = content/authority.
 const PRIMARY_NAV: readonly NavItem[] = [
-  { href: "/diagnostics",                     label: "Diagnostics",         sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/diagnostics/executive-reporting",  label: "Executive Diagnosis", sub: "Paid interpretation · £95",   icon: ScrollText },
-  { href: "/strategy-room",                    label: "Make the Decision",   sub: "Paid intervention · £395",    icon: Crown      },
+  { href: "/diagnostics",                     label: "Diagnostics",       sub: "Free diagnostic system",      icon: ScanSearch },
+  { href: "/diagnostics/executive-reporting",  label: "Executive Report",  sub: "Paid interpretation · £95",   icon: ScrollText },
+  { href: "/strategy-room",                    label: "Strategy Room",     sub: "Paid intervention · £395",    icon: Crown      },
 ] as const;
 
 const SECONDARY_NAV: readonly NavItem[] = [

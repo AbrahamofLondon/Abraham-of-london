@@ -1814,140 +1814,165 @@ function EscalationClose() {
 function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
   return (
     <Section id="hero" variant="surface" cap="front door · dual entry · conversion">
-      <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-        <div>
-          <Eyebrow>Diagnostic Intelligence System</Eyebrow>
-          <h1
-            className="mt-6 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.9] tracking-[-0.04em] ds-text"
-            style={{ fontSize: "clamp(2.8rem, 7vw, 5.8rem)" }}
-          >
-            Diagnose what is actually wrong
-            <br />
-            <span className="ds-text-muted">— in your decisions, your team, or your organisation.</span>
-          </h1>
+      {/* Extra top padding to clear the fixed nav cleanly */}
+      <div style={{ paddingTop: "2rem" }}>
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+          <div>
+            <Eyebrow>Diagnostic Intelligence System</Eyebrow>
 
-          <p
-            className="mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light italic ds-text-muted"
-            style={{ fontSize: "clamp(1.1rem, 2vw, 1.35rem)", lineHeight: 1.5 }}
-          >
-            Before it becomes a decision you can&rsquo;t reverse.
-          </p>
-
-          <p className="mt-6 max-w-2xl text-[14px] leading-[1.8] ds-text-muted">
-            Run a 10-minute diagnostic. Get a clear condition, trajectory, and next action.
-          </p>
-
-          {/* Friction reducer */}
-          <p
-            className="mt-6"
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--ds-text-subtle)",
-            }}
-          >
-            Start with a free diagnostic. Escalate only if the situation justifies it.
-          </p>
-
-          {/* DUAL ENTRY CARDS */}
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 max-w-2xl">
-            {/* Personal entry */}
-            <Link
-              href="/diagnostics/purpose-alignment"
-              className="group border p-5 transition hover:border-[rgba(110,231,183,0.35)]"
-              style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}
-              onClick={() => { try { (window as any).gtag?.("event", "hero_personal_clicked"); } catch {} }}
+            {/* A: Headline — reduced ~12% from previous, tighter leading */}
+            <h1
+              className="mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light tracking-[-0.04em] ds-text"
+              style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)", lineHeight: 0.94 }}
             >
-              <div style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
-                color: "rgba(110,231,183,0.76)",
-              }}>
-                Your decisions feel off — start here
-              </div>
-              <p className="mt-3 text-[13px] leading-[1.7] ds-text-muted">
-                Identify where your decisions are breaking down — and why.
-              </p>
-              <div className="mt-4 flex items-center gap-2" style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
-                color: "rgba(110,231,183,0.60)",
-              }}>
-                Run Personal Diagnostic — 8 min
-                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-              </div>
-            </Link>
+              Diagnose what is actually wrong
+              <br />
+              <span className="ds-text-muted">— in your decisions, your team, or your organisation.</span>
+            </h1>
 
-            {/* Institutional entry */}
-            <Link
-              href="/diagnostics/constitutional-diagnostic"
-              className="group border p-5 transition hover:border-[var(--ds-accent)]"
-              style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)" }}
-              onClick={() => { try { (window as any).gtag?.("event", "hero_institutional_clicked"); } catch {} }}
+            {/* Urgency subline */}
+            <p
+              className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light italic ds-text-muted"
+              style={{ fontSize: "clamp(1.05rem, 1.8vw, 1.25rem)", lineHeight: 1.45 }}
             >
-              <div style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
-                color: "var(--ds-accent)",
-              }}>
-                Something is breaking in the business — start here
-              </div>
-              <p className="mt-3 text-[13px] leading-[1.7]" style={{ color: "var(--ds-text-muted)" }}>
-                Diagnose structural failure, misalignment, and execution risk.
-              </p>
-              <div className="mt-4 flex items-center gap-2" style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
-                color: "var(--ds-accent)",
-              }}>
-                Run Constitutional Diagnostic — 6 min
-                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-              </div>
-            </Link>
-          </div>
-        </div>
+              Before it becomes a decision you can&rsquo;t reverse.
+            </p>
 
-        {/* START HERE — decision routing */}
-        <Panel surface="lift">
-          <div className="p-6 md:p-7">
-            <div
+            {/* Support line */}
+            <p className="mt-4 max-w-2xl text-[14px] leading-[1.75] ds-text-muted">
+              Run a 10-minute diagnostic. Get a clear condition, trajectory, and next action.
+            </p>
+
+            {/* Friction reducer — tighter spacing to cards */}
+            <p
+              className="mt-4"
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "7.5px",
-                letterSpacing: "0.40em",
+                letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: "var(--ds-text-subtle)",
               }}
             >
-              Start here
-            </div>
-            <div className="mt-4 space-y-2">
-              {[
-                { trigger: "Something feels off — but you can\u2019t explain why", href: "/diagnostics/purpose-alignment" },
-                { trigger: "Your decisions change under pressure", href: "/diagnostics/purpose-alignment" },
-                { trigger: "Your team is misaligned with your direction", href: "/diagnostics/team-assessment" },
-                { trigger: "The organisation is under structural pressure", href: "/diagnostics/constitutional-diagnostic" },
-                { trigger: "A high-stakes decision is already on the table", href: "/strategy-room" },
-              ].map((item) => (
-                <Link
-                  key={item.trigger}
-                  href={item.href}
-                  className="group flex items-center gap-3 border-b py-2.5 last:border-b-0 transition"
-                  style={{ borderColor: "var(--ds-border)" }}
-                  onClick={() => { try { (window as any).gtag?.("event", "start_here_clicked", { target: item.href }); } catch {} }}
-                >
-                  <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full transition-colors group-hover:scale-125" style={{ backgroundColor: "var(--ds-accent)" }} />
-                  <p className="flex-1 text-[13px] leading-[1.55] ds-text-muted group-hover:text-white/80 transition-colors">
-                    {item.trigger}
-                  </p>
-                  <ArrowRight className="h-3 w-3 shrink-0 text-white/0 transition-all group-hover:text-white/40 group-hover:translate-x-0.5" />
-                </Link>
-              ))}
+              Start with a free diagnostic. Escalate only if the situation justifies it.
+            </p>
+
+            {/* C+D: DUAL ENTRY CARDS — tighter to copy, stronger decision feel */}
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 max-w-2xl">
+              {/* Personal entry */}
+              <Link
+                href="/diagnostics/purpose-alignment"
+                className="group border p-5 transition-all duration-200 hover:border-[rgba(110,231,183,0.40)] hover:bg-[rgba(110,231,183,0.03)]"
+                style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}
+                onClick={() => { try { (window as any).gtag?.("event", "hero_personal_clicked"); } catch {} }}
+              >
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                  color: "rgba(110,231,183,0.82)",
+                  fontWeight: 600,
+                }}>
+                  Your decisions feel off — start here
+                </div>
+                <p className="mt-2.5 text-[13px] leading-[1.65] ds-text-muted">
+                  Identify where your decisions are breaking down — and why.
+                </p>
+                <div className="mt-3.5 flex items-center gap-2" style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  color: "rgba(110,231,183,0.58)",
+                }}>
+                  Run Personal Diagnostic — 8 min
+                  <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
+                </div>
+              </Link>
+
+              {/* Institutional entry */}
+              <Link
+                href="/diagnostics/constitutional-diagnostic"
+                className="group border p-5 transition-all duration-200 hover:border-[var(--ds-accent)] hover:bg-[rgba(201,169,110,0.08)]"
+                style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)" }}
+                onClick={() => { try { (window as any).gtag?.("event", "hero_institutional_clicked"); } catch {} }}
+              >
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                  color: "var(--ds-accent)",
+                  fontWeight: 600,
+                }}>
+                  Something is breaking in the business — start here
+                </div>
+                <p className="mt-2.5 text-[13px] leading-[1.65]" style={{ color: "var(--ds-text-muted)" }}>
+                  Diagnose structural failure, misalignment, and execution risk.
+                </p>
+                <div className="mt-3.5 flex items-center gap-2" style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  color: "var(--ds-accent)",
+                }}>
+                  Run Constitutional Diagnostic — 6 min
+                  <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
+                </div>
+              </Link>
             </div>
           </div>
-        </Panel>
+
+          {/* E: START HERE — decision routing with visual hierarchy */}
+          <Panel surface="lift">
+            <div className="p-6 md:p-7">
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px",
+                  letterSpacing: "0.40em",
+                  textTransform: "uppercase",
+                  color: "var(--ds-text-subtle)",
+                }}
+              >
+                Start here
+              </div>
+              <div className="mt-4 space-y-1">
+                {[
+                  { trigger: "Something feels off — but you can\u2019t explain why", href: "/diagnostics/purpose-alignment", tier: "personal" },
+                  { trigger: "Your decisions change under pressure", href: "/diagnostics/purpose-alignment", tier: "personal" },
+                  { trigger: "Your team is misaligned with your direction", href: "/diagnostics/team-assessment", tier: "institutional" },
+                  { trigger: "The organisation is under structural pressure", href: "/diagnostics/constitutional-diagnostic", tier: "institutional" },
+                  { trigger: "A high-stakes decision is already on the table", href: "/strategy-room", tier: "premium" },
+                ].map((item) => (
+                  <Link
+                    key={item.trigger}
+                    href={item.href}
+                    className="group flex items-center gap-3 border-b py-3 last:border-b-0 transition-all"
+                    style={{ borderColor: "var(--ds-border)" }}
+                    onClick={() => { try { (window as any).gtag?.("event", "start_here_clicked", { target: item.href }); } catch {} }}
+                  >
+                    <div
+                      className="mt-0.5 h-2 w-2 shrink-0 rounded-full transition-transform duration-200 group-hover:scale-[1.4]"
+                      style={{
+                        backgroundColor: item.tier === "personal"
+                          ? "rgba(110,231,183,0.65)"
+                          : item.tier === "premium"
+                            ? "rgba(252,165,165,0.65)"
+                            : `var(--ds-accent)`,
+                      }}
+                    />
+                    <p
+                      className="flex-1 leading-[1.5] transition-colors duration-150"
+                      style={{
+                        fontSize: item.tier === "personal" ? "13.5px" : "13px",
+                        color: item.tier === "personal" ? "rgba(255,255,255,0.72)" : "var(--ds-text-muted)",
+                        fontWeight: item.tier === "personal" ? 450 : 300,
+                      }}
+                    >
+                      {item.trigger}
+                    </p>
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/0 transition-all duration-150 group-hover:text-white/45 group-hover:translate-x-0.5" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </Panel>
+        </div>
       </div>
     </Section>
   );
