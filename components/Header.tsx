@@ -64,6 +64,12 @@ const PRIMARY_NAV: readonly NavItem[] = [
   { href: "/strategy-room",                    label: "Strategy Room",     sub: "Paid intervention · £395",    icon: Crown      },
 ] as const;
 
+const PRIMARY_NAV_HINTS: Record<string, string> = {
+  Diagnostics: "find the problem",
+  "Executive Report": "understand the consequence",
+  "Strategy Room": "decide what to do",
+};
+
 const SECONDARY_NAV: readonly NavItem[] = [
   { href: "/artifacts",  label: "Intelligence", sub: "Essays, Shorts & Dispatches", icon: Zap,     signal: true },
   { href: "/playbooks",  label: "Playbooks",    sub: "Execution Frameworks",        icon: Layers   },
@@ -80,7 +86,7 @@ const MOBILE_NAV: readonly NavItem[] = [
   { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: "Paid interpretation · £95",   icon: ScrollText },
   { href: "/strategy-room",                    label: "Strategy Room",    sub: "Paid intervention · £395",    icon: Crown      },
   // Content & authority
-  { href: "/editorials",   label: "Intelligence",  sub: "Essays, Shorts & Dispatches",  icon: Zap,       signal: true },
+  { href: "/artifacts",    label: "Intelligence",  sub: "Essays, Shorts & Dispatches",  icon: Zap,       signal: true },
   { href: "/playbooks",    label: "Playbooks",     sub: "Execution Frameworks",         icon: Layers     },
   { href: "/canon",        label: "Canon",          sub: "Doctrine & Method",            icon: Compass    },
   // Reference
@@ -183,7 +189,7 @@ export default function Header({
           "fixed inset-x-0 top-0 z-[100] w-full transition-all duration-500",
           elevated
             ? "border-b border-white/[0.12] bg-[#060609]/95 py-3.5"
-            : "bg-transparent py-5",
+            : "border-b border-white/[0.10] bg-[#060609]/90 py-4",
         )}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12">
@@ -220,6 +226,8 @@ export default function Header({
                     <Link
                       key={item.href}
                       href={item.href}
+                      title={`${item.label} — ${PRIMARY_NAV_HINTS[item.label] || item.sub}`}
+                      aria-label={`${item.label} — ${PRIMARY_NAV_HINTS[item.label] || item.sub}`}
                       aria-current={active ? "page" : undefined}
                       className={cn(
                         "relative font-['JetBrains_Mono',ui-monospace,monospace] text-[8.5px] uppercase tracking-[0.26em] transition-colors duration-300",

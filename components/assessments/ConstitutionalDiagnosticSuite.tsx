@@ -477,9 +477,11 @@ export default function ConstitutionalDiagnosticSuite() {
 
   // Fire stage-complete event once when verdict is shown
   const completeFired = React.useRef(false);
+  const resultViewStart = React.useRef<number>(0);
   React.useEffect(() => {
     if (verdict && !completeFired.current) {
       completeFired.current = true;
+      resultViewStart.current = Date.now();
       if (thread) saveConstitutionalThread(thread);
       import("@/lib/analytics/funnel").then(({ trackStageComplete }) => {
         const outcome = decision.route === "REJECT" ? "reject" as const
@@ -489,6 +491,25 @@ export default function ConstitutionalDiagnosticSuite() {
       }).catch(() => {});
     }
   }, [verdict, decision.route, routeHref, thread]);
+
+  // Track result engagement depth — fire on unmount or page leave
+  React.useEffect(() => {
+    if (!verdict) return;
+    const handleUnload = () => {
+      if (resultViewStart.current) {
+        track("result_engagement", {
+          stage: "constitutional",
+          time_on_result_ms: Date.now() - resultViewStart.current,
+          route: decision.route,
+        });
+      }
+    };
+    window.addEventListener("beforeunload", handleUnload);
+    return () => {
+      handleUnload();
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, [verdict, decision.route]);
 
   function setResonance(v: number) {
     setAnswers(prev => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { readConstitutionalThread } from "@/lib/diagnostics/session-thread";
 import { track } from "@/lib/analytics/track";
 
@@ -26,6 +26,7 @@ export default function ExecutiveReportingPaywall({
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [checkoutCancelled, setCheckoutCancelled] = useState(false);
+  const paywallMountTime = useRef(Date.now());
   const [currentSignal, setCurrentSignal] = useState<string[]>([
     "Structural strain has been detected",
     "Interpretation is now required to determine consequence",
@@ -76,9 +77,11 @@ export default function ExecutiveReportingPaywall({
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem("aol_exec_checkout_email", email);
     }
+    const hesitation_ms = Date.now() - paywallMountTime.current;
     track("executive_reporting_checkout_clicked", {
       price_code: checkoutPriceCode,
       has_email: Boolean(email.trim()),
+      hesitation_ms,
     });
 
     const res = await fetch("/api/billing/checkout", {
@@ -100,6 +103,10 @@ export default function ExecutiveReportingPaywall({
     } else {
       setLoading(false);
       setMessage("Checkout could not be prepared. Check the email field and try again.");
+      track("checkout_failed", {
+        price_code: checkoutPriceCode,
+        reason: data?.error || "no_url_returned",
+      });
     }
   }
 

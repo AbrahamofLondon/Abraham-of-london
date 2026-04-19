@@ -235,7 +235,7 @@ export default function EnhancedFooter(): React.ReactElement {
   ],
   Governance: [
     { label: "About", href: "/about" },
-    { label: "Method", href: "/diagnostics" },
+    { label: "Method", href: "/method" },
     { label: "Security", href: "/security" },
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },

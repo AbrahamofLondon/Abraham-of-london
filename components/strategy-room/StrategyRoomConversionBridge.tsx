@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { track } from "@/lib/analytics/track";
 
 type StrategyRoomConversionBridgeProps = {
@@ -35,6 +35,7 @@ export default function StrategyRoomConversionBridge({
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [checkoutCancelled, setCheckoutCancelled] = useState(false);
+  const bridgeMountTime = React.useRef(Date.now());
 
   const escalationTone = useMemo(() => {
     const joined = signals.join(" ").toLowerCase();
@@ -75,9 +76,11 @@ export default function StrategyRoomConversionBridge({
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem("aol_strategy_room_checkout_email", email);
     }
+    const hesitation_ms = Date.now() - bridgeMountTime.current;
     track("strategy_room_checkout_clicked", {
       price_code: checkoutPriceCode,
       has_email: Boolean(email.trim()),
+      hesitation_ms,
     });
 
     const res = await fetch("/api/billing/checkout", {
@@ -100,6 +103,10 @@ export default function StrategyRoomConversionBridge({
     } else {
       setLoading(false);
       setMessage("Checkout could not be prepared. Check the email field and try again.");
+      track("checkout_failed", {
+        price_code: checkoutPriceCode,
+        reason: data?.error || "no_url_returned",
+      });
     }
   }
 

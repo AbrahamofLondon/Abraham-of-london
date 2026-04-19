@@ -57,6 +57,15 @@ export default function ConversionDashboard() {
             <Metric row={{ label: "Accuracy (self-report)", value: "—", target: "≥ 50% precise", status: "warn" }} />
           </div>
 
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Metric row={{ label: "Avg Time to First Click", value: "—", target: "< 30s", status: "warn" }} />
+            <Metric row={{ label: "Paywall Hesitation", value: "—", target: "< 120s", status: "warn" }} />
+            <Metric row={{ label: "Result Engagement Time", value: "—", target: "≥ 60s", status: "warn" }} />
+            <Metric row={{ label: "Conversion by User Type", value: "—", target: "personal > operator", status: "warn" }} />
+            <Metric row={{ label: "Conversion by Device", value: "—", target: "desktop ≥ mobile", status: "warn" }} />
+            <Metric row={{ label: "Checkout Failures", value: "—", target: "< 2%", status: "warn" }} />
+          </div>
+
           <div className="mt-10" style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1.5rem" }}>
             <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1rem" }}>
               Decision Matrix
@@ -83,6 +92,12 @@ export default function ConversionDashboard() {
               <p>executive_reporting_checkout_returned_success → A4 numerator</p>
               <p>strategy_room_checkout_clicked → A5 numerator</p>
               <p>diagnostic_feedback → accuracy signal (score: precise/partial/no)</p>
+              <p>hero_cards_visible → card exposure (time_to_visible_ms)</p>
+              <p>scroll_depth → engagement depth (percent: 25/50/75/100)</p>
+              <p>checkout_failed → failure signal (price_code, reason)</p>
+              <p>result_engagement → result depth (time_on_result_ms, route)</p>
+              <p>executive_reporting_paywall_abandoned → exit signal (time &gt; 5s)</p>
+              <p>strategy_room_bridge_abandoned → exit signal (time &gt; 5s)</p>
             </div>
           </div>
         </div>
