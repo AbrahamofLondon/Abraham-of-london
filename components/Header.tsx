@@ -65,7 +65,7 @@ const PRIMARY_NAV: readonly NavItem[] = [
 ] as const;
 
 const SECONDARY_NAV: readonly NavItem[] = [
-  { href: "/editorials", label: "Intelligence", sub: "Essays, Shorts & Dispatches", icon: Zap,     signal: true },
+  { href: "/artifacts",  label: "Intelligence", sub: "Essays, Shorts & Dispatches", icon: Zap,     signal: true },
   { href: "/playbooks",  label: "Playbooks",    sub: "Execution Frameworks",        icon: Layers   },
   { href: "/canon",      label: "Canon",         sub: "Doctrine & Method",           icon: Compass  },
 ] as const;
