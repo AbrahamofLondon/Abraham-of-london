@@ -125,11 +125,15 @@ export function trackStageStart(stage: FunnelStage): void {
   journey.currentStageStartedAt = Date.now();
   saveJourney(journey);
 
+  // Persist funnel stage for cross-event context
+  try { sessionStorage.setItem("aol_funnel_stage", `${stage}_started`); } catch {}
+
   track("diagnostics_stage_start", {
     stage,
     step_number: STAGE_NUMBERS[stage] ?? 0,
     path_type: journey.pathType,
     stages_completed: journey.stagesCompleted.length,
+    origin: typeof sessionStorage !== "undefined" ? sessionStorage.getItem("aol_diagnostics_origin") || "direct" : "direct",
   });
 }
 
@@ -163,13 +167,18 @@ export function trackStageComplete(
   journey.currentStageStartedAt = null;
   saveJourney(journey);
 
+  // Persist funnel stage for cross-event context
+  try { sessionStorage.setItem("aol_funnel_stage", `${stage}_completed`); } catch {}
+
   track("diagnostics_stage_complete", {
     stage,
     outcome,
     duration_ms: durationMs,
+    duration_seconds: Math.round(durationMs / 1000),
     next_step: nextStep || "none",
     path_type: journey.pathType,
     stages_completed: journey.stagesCompleted.length,
+    origin: typeof sessionStorage !== "undefined" ? sessionStorage.getItem("aol_diagnostics_origin") || "direct" : "direct",
   });
 }
 

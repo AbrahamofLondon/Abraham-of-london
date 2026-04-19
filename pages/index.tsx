@@ -1812,6 +1812,10 @@ function EscalationClose() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
+  React.useEffect(() => {
+    try { (window as any).gtag?.("event", "hero_viewed"); } catch {}
+  }, []);
+
   return (
     <Section id="hero" variant="surface" cap="front door · dual entry · conversion">
       {/* Extra top padding to clear the fixed nav cleanly */}

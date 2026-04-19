@@ -41,6 +41,7 @@ import {
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
+import DiagnosticFeedback from "@/components/diagnostics/results/DiagnosticFeedback";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 
 function readinessNumeric(tier: string): number {
@@ -952,6 +953,8 @@ export default function ConstitutionalDiagnosticSuite() {
                   )}
 
                   <RecommendedPlaybooks playbooks={matchedPlaybooks} />
+
+                  <DiagnosticFeedback stage="constitutional" />
 
                   {/* Escalation routing */}
                   {(() => {
