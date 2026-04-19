@@ -43,6 +43,10 @@ export type ExecutiveFindings = {
   orgState: string;
   readinessTier: string;
   narrativeHeadline: string;
+  trajectory?: string;
+  engagementReadiness?: number;
+  advisoryValueEstimate?: string;
+  nextAction?: string;
 };
 
 // ---------------------------------------------------------------------------

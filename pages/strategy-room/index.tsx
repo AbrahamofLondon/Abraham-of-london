@@ -35,6 +35,9 @@ import {
 } from "@/lib/diagnostics/session-thread";
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
+import EngagementReadinessPanel from "@/components/diagnostics/results/EngagementReadinessPanel";
+import { inferTrajectory, deriveEngagementReadiness } from "@/lib/diagnostics/prognosis";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import ThresholdProximityLine, {
   thresholdProximityText,
@@ -564,6 +567,16 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, t
       })
     : [];
 
+  const readinessNum = ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[posture.readinessTier] ?? 50;
+  const trajectory = inferTrajectory(posture.clarityScore ?? 50, readinessNum, posture.failureModes ?? []);
+  const engagementReadiness = deriveEngagementReadiness({
+    revenueBand: posture.revenueBand,
+    problemStatement: "", // Not available from canonical output
+    urgencyWindow: posture.temperature === "SCORCHING" ? "IMMEDIATE" : posture.temperature === "HOT" ? "NEAR_TERM" : "MID_TERM",
+    authorityScope: posture.authorityType,
+    boardInvolved: undefined,
+  });
+
   // Metric display
   function MetricRow({ label, value }: { label: string; value: string }) {
     return (
@@ -637,6 +650,9 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, t
             {thread && (
               <InheritedThreadContext thread={thread} title="Journey context" />
             )}
+
+            <TrajectoryLine trajectory={trajectory} />
+            <EngagementReadinessPanel readiness={engagementReadiness} />
 
             {/* Route reading panel */}
             <div style={{

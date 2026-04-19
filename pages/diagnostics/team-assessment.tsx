@@ -51,6 +51,8 @@ import {
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
+import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -391,10 +393,17 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
         {/* Left */}
         <div className="space-y-5">
           {constitutionalThread && (
-            <InheritedThreadContext
-              thread={constitutionalThread}
-              title="Inherited constitutional signal"
-            />
+            <>
+              <InheritedThreadContext
+                thread={constitutionalThread}
+                title="Inherited constitutional signal"
+              />
+              <TrajectoryLine trajectory={inferTrajectory(
+                constitutionalThread.domainScores.coherence,
+                ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[constitutionalThread.readinessTier] ?? 50,
+                constitutionalThread.failureModes,
+              )} />
+            </>
           )}
 
           {/* Pattern reading */}

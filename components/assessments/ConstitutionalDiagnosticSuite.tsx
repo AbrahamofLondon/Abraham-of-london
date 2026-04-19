@@ -40,6 +40,13 @@ import {
 } from "@/lib/diagnostics/session-thread";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
+import { inferTrajectory } from "@/lib/diagnostics/prognosis";
+
+function readinessNumeric(tier: string): number {
+  const map: Record<string, number> = { FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 };
+  return map[tier] ?? 50;
+}
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -884,6 +891,8 @@ export default function ConstitutionalDiagnosticSuite() {
                   </div>
                 </div>
               </div>
+
+              <TrajectoryLine trajectory={inferTrajectory(scores.coherence, readinessNumeric(scores.readinessTier), decision.disqualifiersTriggered || [])} />
 
               <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
                 {/* Left */}

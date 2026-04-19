@@ -12,6 +12,9 @@ import {
   readConstitutionalThread,
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
+import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
+import EngagementReadinessPanel from "@/components/diagnostics/results/EngagementReadinessPanel";
+import { inferTrajectory, deriveEngagementReadiness, type EngagementReadiness } from "@/lib/diagnostics/prognosis";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -753,6 +756,16 @@ function ResultSurface({
   const requiredInterventions =
     summary?.requiredInterventions ?? constitution?.requiredInterventions ?? [];
 
+  // Prognostic layer
+  const readinessNum = ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[safeString(constitution?.readinessTier)] ?? 50;
+  const trajectory = inferTrajectory(clarityScore, readinessNum, failureModes);
+  const engagementReadiness = deriveEngagementReadiness({
+    revenueBand: safeString(constitution?.revenueBand),
+    problemStatement: "", // full problem was in the intake, not persisted in the result
+    urgencyWindow: safeString(constitution?.temperature) === "SCORCHING" ? "IMMEDIATE" : safeString(constitution?.temperature) === "HOT" ? "NEAR_TERM" : "MID_TERM",
+    authorityScope: safeString(constitution?.authorityType),
+  });
+
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
       <div className="mx-auto max-w-7xl px-6 py-14 lg:px-12">
@@ -842,6 +855,9 @@ function ResultSurface({
             {thread && (
               <InheritedThreadContext thread={thread} title="Diagnostic progression" />
             )}
+
+            <TrajectoryLine trajectory={trajectory} />
+            <EngagementReadinessPanel readiness={engagementReadiness} title="Engagement readiness prognosis" />
 
             {(summary?.summary || summary?.mandate) && (
               <div
@@ -2773,13 +2789,28 @@ export default function ExecutiveReportingRunPage({
     // Persists the full successful result so any downstream reader gets both
     // the report data and server-computed envelope fields.
     // Write executive findings into the constitutional thread
+    // Compute prognosis for thread persistence
+    const erConstitution = (r.canonical as any)?.constitution;
+    const erReadinessNum = ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[String(erConstitution?.readinessTier || "")] ?? 50;
+    const erFailureModes = Array.isArray(erConstitution?.failureModes) ? erConstitution.failureModes : [];
+    const erTrajectory = inferTrajectory(Number(erConstitution?.clarityScore) || 50, erReadinessNum, erFailureModes);
+    const erEngagement = deriveEngagementReadiness({
+      revenueBand: String(erConstitution?.revenueBand || ""),
+      urgencyWindow: String(erConstitution?.temperature) === "SCORCHING" ? "IMMEDIATE" : String(erConstitution?.temperature) === "HOT" ? "NEAR_TERM" : "MID_TERM",
+      authorityScope: String(erConstitution?.authorityType || ""),
+    });
+
     mergeExecutiveFindingsIntoThread({
       completedAt: new Date().toISOString(),
       runKey: r.runKey || "",
       route: r.route || "DIAGNOSTIC",
-      orgState: (r.canonical as any)?.constitution?.orgState || "DRIFTING",
-      readinessTier: (r.canonical as any)?.constitution?.readinessTier || "EMERGING",
+      orgState: erConstitution?.orgState || "DRIFTING",
+      readinessTier: erConstitution?.readinessTier || "EMERGING",
       narrativeHeadline: (r.canonical as any)?.report?.narrative?.headline || "",
+      trajectory: erTrajectory,
+      engagementReadiness: erEngagement.readinessPercent,
+      advisoryValueEstimate: erEngagement.advisoryValueFormatted,
+      nextAction: erEngagement.nextActionLabel,
     });
     setThread(readConstitutionalThread());
 
