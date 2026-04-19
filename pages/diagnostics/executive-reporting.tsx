@@ -139,13 +139,20 @@ export default function ExecutiveReportingEntryPage() {
             </div>
           )}
 
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+          {/* Paywall credibility reinforcement */}
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+            <span>One-time analysis — no subscription</span>
+            <span>Generated from your actual inputs</span>
+            <span>No generic output</span>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/38">
               Secure checkout
             </p>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
-              Checkout opens through the existing Stripe-backed billing route. Successful payment
-              returns directly to the Executive Reporting intake so the commercial step does not
+              Checkout opens through Stripe. Successful payment returns directly
+              to the Executive Reporting intake. The commercial step does not
               interrupt the diagnostic journey.
             </p>
           </div>

@@ -2478,6 +2478,65 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <HomeHero intelligenceHref={intelligenceHref} />
 
+      {/* A: Mechanism strip — kill "philosophy without proof" */}
+      <Section id="mechanism" variant="void" compact>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {[
+            { step: "01", title: "Signal capture", body: "Structured inputs — decisions, team signals, organisational conditions." },
+            { step: "02", title: "Constitutional analysis", body: "Weighted scoring, failure-mode detection, trajectory classification." },
+            { step: "03", title: "Output", body: "Condition → direction → next action. Not opinion. Not advice." },
+          ].map(({ step, title, body }) => (
+            <div key={step} style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1.25rem 1.5rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}>
+                Step {step}
+              </div>
+              <div className="mt-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", color: "var(--ds-text-muted)" }}>
+                {title}
+              </div>
+              <p className="mt-2 text-[13px] leading-[1.65] ds-text-subtle">{body}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* C: Anti-hype filter */}
+        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+          <span style={{ color: "var(--ds-text-subtle)" }}>What this is not:</span>
+          {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as insight"].map((item) => (
+            <span key={item} style={{ color: "var(--ds-text-subtle)", opacity: 0.55 }}>
+              Not {item.toLowerCase()}
+            </span>
+          ))}
+          <span style={{ color: "var(--ds-accent)", opacity: 0.70 }}>It is a diagnostic system.</span>
+        </div>
+      </Section>
+
+      {/* B: Sample output (anonymised) */}
+      <Section id="sample-output" variant="surface" compact>
+        <div className="mx-auto max-w-3xl">
+          <Eyebrow align="center">Example output (anonymised)</Eyebrow>
+          <div className="mt-6" style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
+            <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--ds-border)" }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "1.15rem", lineHeight: 1.35, color: "var(--ds-text)" }}>
+                Execution coherence collapsing under governance drift
+              </div>
+              <div className="mt-2 flex flex-wrap gap-3">
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(252,165,165,0.80)" }}>
+                  Trajectory: DETERIORATING
+                </span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}>
+                  Estimated exposure: £420,000 over 6 months
+                </span>
+              </div>
+            </div>
+            <div style={{ padding: "1rem 1.5rem" }}>
+              <p className="text-[13px] leading-[1.7] ds-text-muted">
+                Stabilise governance cadence within 30 days. Decision authority is not ordered — three concurrent owners producing conflicting mandates. Execution layer is compensating with informal authority, which is accelerating drift.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       <Bridge text="hero · credibility" />
       <CredibilityStrip />
 
