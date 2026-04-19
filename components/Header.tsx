@@ -57,29 +57,35 @@ type NavItem = {
   signal?: true; // marks the live signal item for subtle treatment
 };
 
-// Desktop nav — flat by product logic. Events removed to reduce crowding;
-// Events/Gatherings remain surfaced in the footer.
-const DESKTOP_NAV: readonly NavItem[] = [
-  { href: "/diagnostics",            label: "Diagnostics",         sub: "Free diagnostic system",         icon: ScanSearch },
-  { href: "/diagnostics/executive-reporting", label: "Executive Report", sub: "Paid interpretation · £95",    icon: ScrollText },
-  { href: "/strategy-room",          label: "Strategy Room",       sub: "Paid intervention · £395",        icon: Crown      },
-  { href: "/editorials",             label: "Intelligence",        sub: "Essays, Shorts & Dispatches",     icon: Zap,       signal: true },
-  { href: "/playbooks",              label: "Playbooks",           sub: "Execution Frameworks",            icon: Layers     },
-  { href: "/canon",                   label: "Canon",               sub: "Doctrine & Method",               icon: Compass    },
+// Desktop nav — product-first. Primary = conversion surfaces, Secondary = content/authority.
+const PRIMARY_NAV: readonly NavItem[] = [
+  { href: "/diagnostics",                     label: "Diagnostics",      sub: "Free diagnostic system",      icon: ScanSearch },
+  { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: "Paid interpretation · £95",   icon: ScrollText },
+  { href: "/strategy-room",                    label: "Strategy Room",    sub: "Paid intervention · £395",    icon: Crown      },
 ] as const;
 
-// Mobile menu — full directory including Library. Events removed per operator;
-// surfaced in the footer as Gatherings.
+const SECONDARY_NAV: readonly NavItem[] = [
+  { href: "/editorials", label: "Intelligence", sub: "Essays, Shorts & Dispatches", icon: Zap,     signal: true },
+  { href: "/playbooks",  label: "Playbooks",    sub: "Execution Frameworks",        icon: Layers   },
+  { href: "/canon",      label: "Canon",         sub: "Doctrine & Method",           icon: Compass  },
+] as const;
+
+// Combined for backward compat (mobile menu iteration)
+const DESKTOP_NAV: readonly NavItem[] = [...PRIMARY_NAV, ...SECONDARY_NAV] as const;
+
+// Mobile menu — product-first, then content/reference.
 const MOBILE_NAV: readonly NavItem[] = [
-  { href: "/canon",        label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
-  { href: "/editorials",   label: "Editorials",  sub: "Essays & published arguments", icon: ScrollText },
-  { href: "/playbooks",    label: "Playbooks",   sub: "Execution Frameworks",     icon: Layers     },
-  { href: "/shorts",       label: "Shorts",      sub: "Intelligence Dispatches",  icon: Zap,       signal: true },
-  { href: "/library",      label: "Library",     sub: "Knowledge Shelf",          icon: BookOpen   },
-  { href: "/diagnostics",  label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
-  { href: "/artifacts",    label: "Intelligence Archives",   sub: "Premium Intelligence",     icon: Archive    },
-  { href: "/vault/briefs", label: "Briefs",      sub: "Operational Intelligence", icon: FileText   },
-  { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
+  // Product surfaces
+  { href: "/diagnostics",                     label: "Diagnostics",      sub: "Free diagnostic system",      icon: ScanSearch },
+  { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: "Paid interpretation · £95",   icon: ScrollText },
+  { href: "/strategy-room",                    label: "Strategy Room",    sub: "Paid intervention · £395",    icon: Crown      },
+  // Content & authority
+  { href: "/editorials",   label: "Intelligence",  sub: "Essays, Shorts & Dispatches",  icon: Zap,       signal: true },
+  { href: "/playbooks",    label: "Playbooks",     sub: "Execution Frameworks",         icon: Layers     },
+  { href: "/canon",        label: "Canon",          sub: "Doctrine & Method",            icon: Compass    },
+  // Reference
+  { href: "/library",      label: "Library",        sub: "Knowledge Shelf",              icon: BookOpen   },
+  { href: "/vault/briefs", label: "Briefs",         sub: "Operational Intelligence",     icon: FileText   },
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -196,7 +202,7 @@ export default function Header({
                 Abraham of London
               </span>
               <span className="hidden font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.32em] text-white/38 md:block">
-                Strategy · Canon · Library
+                Diagnostics · Intelligence · Advisory
               </span>
             </div>
           </Link>
@@ -204,14 +210,12 @@ export default function Header({
           {/* ── Right cluster ─────────────────────────────────────────────── */}
           <div className="flex items-center gap-5">
 
-            {/* Desktop nav */}
+            {/* Desktop nav — two-tier: primary product surfaces | secondary content */}
             {!minimal && (
-              <nav className="hidden items-center gap-5 md:flex" aria-label="Primary navigation">
-                {DESKTOP_NAV.map((item) => {
-                  // Gate behind mounted to prevent hydration mismatch.
-                  // Server always renders "/" as currentPath; client may differ.
+              <nav className="hidden items-center gap-3 md:flex" aria-label="Primary navigation">
+                {/* PRIMARY: product surfaces */}
+                {PRIMARY_NAV.map((item) => {
                   const active = mounted && isActive(currentPath, item.href);
-
                   return (
                     <Link
                       key={item.href}
@@ -219,20 +223,33 @@ export default function Header({
                       aria-current={active ? "page" : undefined}
                       className={cn(
                         "relative font-['JetBrains_Mono',ui-monospace,monospace] text-[8.5px] uppercase tracking-[0.26em] transition-colors duration-300",
-                        active
-                          ? "text-[#C9A96E]"
-                          : item.signal
-                            ? "text-white/78 hover:text-white/92"
-                            : "text-white/72 hover:text-white/92",
+                        active ? "text-[#C9A96E]" : "text-white/78 hover:text-white/92",
                       )}
                       style={active ? { color: GOLD } : {}}
                     >
                       {item.label}
+                    </Link>
+                  );
+                })}
 
-                      {/* Shorts signal underline:
-                          1px softGold at opacity 0.28 — below conscious threshold,
-                          above perceptual recognition. The mind notices rhythm breaks
-                          before the eye names them. */}
+                {/* Separator */}
+                <span className="mx-1 h-3 w-px bg-white/10" aria-hidden="true" />
+
+                {/* SECONDARY: content & authority */}
+                {SECONDARY_NAV.map((item) => {
+                  const active = mounted && isActive(currentPath, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "relative font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.22em] transition-colors duration-300",
+                        active ? "text-[#C9A96E]" : "text-white/50 hover:text-white/72",
+                      )}
+                      style={active ? { color: GOLD } : {}}
+                    >
+                      {item.label}
                       {item.signal && !active && (
                         <span
                           aria-hidden="true"
@@ -245,15 +262,6 @@ export default function Header({
                 })}
               </nav>
             )}
-
-            {/* Strategy Room — desktop */}
-            <Link
-              href="/strategy-room"
-              className="hidden items-center gap-2 border border-white/[0.18] bg-[#0E0E12] px-4 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.28em] text-white/78 transition-all duration-300 hover:border-white/[0.26] hover:bg-[#121216] hover:text-white md:inline-flex"
-            >
-              <Crown className="h-3 w-3" style={{ color: `${GOLD}90` }} />
-              Strategy Room
-            </Link>
 
             {/* Member slot — auth-aware.
                 Authenticated: Inner Circle → dashboard.
