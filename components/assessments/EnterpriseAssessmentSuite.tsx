@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Trash2,
 } from "lucide-react";
+import Link from "next/link";
 
 type EnterpriseDomain = {
   label: string;
@@ -404,64 +405,106 @@ function SystemReadout({ domains }: { domains: EnterpriseDomain[] }) {
   );
 }
 
+function deriveEnterpriseReading(posture: string, heatDomains: string[]): string {
+  const heat = heatDomains.length;
+  if (posture === "DISORDERED") return `The institution is structurally disordered. ${heat} domain${heat === 1 ? "" : "s"} under active stress. Governance and execution are both below the threshold needed for coherent decision-making. This is not drift — it is structural failure requiring immediate attention.`;
+  if (posture === "MISALIGNED") return `Significant misalignment detected across ${heat} domain${heat === 1 ? "" : "s"}. The institution is operating under internal contradiction — governance says one thing, execution does another. This gap will widen under pressure.`;
+  return `The enterprise is drifting but not yet in crisis. ${heat > 0 ? `${heat} domain${heat === 1 ? " shows" : "s show"} early stress signals.` : "No acute heat domains detected."} Intervention now is preventive, not reactive.`;
+}
+
+function deriveEnterpriseAction(posture: string, heatDomains: string[]): string {
+  if (posture === "DISORDERED") return "Do not attempt broad reform. Stabilise the single highest-exposure domain first. Identify who has actual decision authority in that domain and whether it matches the formal structure.";
+  if (posture === "MISALIGNED") return "Map the gap between governance intention and execution reality in the top heat domain. The misalignment is likely known informally but not surfaced formally. Making it visible is the first structural move.";
+  if (heatDomains.length > 0) return "Monitor the flagged heat domains. If any of them intersect with an upcoming decision of consequence, escalate to Executive Reporting before the decision is taken.";
+  return "No immediate structural intervention required. Reassess quarterly or when conditions change materially.";
+}
+
 /** Result panel */
 function ResultPanel({ result }: { result: any }) {
+  const posture = String(result.enterprisePosture ?? "DRIFTING");
+  const heatDomains: string[] = Array.isArray(result.heatDomains) ? result.heatDomains : [];
+  const postureColor = posture === "DISORDERED" ? "text-red-300/80" : posture === "MISALIGNED" ? "text-red-300/70" : "text-amber-300/80";
+  const reading = deriveEnterpriseReading(posture, heatDomains);
+  const nextAction = deriveEnterpriseAction(posture, heatDomains);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="overflow-hidden rounded-[22px] border border-amber-500/20 bg-amber-500/[0.04]"
+      className="space-y-4"
     >
-      <div className="p-5">
-        <div className="flex items-center gap-2">
+      {/* Condition */}
+      <div className="border border-amber-500/20 bg-amber-500/[0.04] p-5">
+        <div className="flex items-center gap-2 mb-4">
           <CheckCircle2 className="h-4 w-4 text-amber-400/80" />
           <div className="font-mono text-[8px] uppercase tracking-[0.28em] text-amber-300/80">
-            Assessment complete
+            Enterprise assessment complete
           </div>
         </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {[
-            { label: "Organisation", value: result.organisation },
-            { label: "Enterprise posture", value: result.enterprisePosture },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="rounded-[14px] border border-white/[0.06] bg-black/30 p-3.5"
-            >
-              <div className="font-mono text-[7px] uppercase tracking-[0.22em] text-white/25">
-                {item.label}
-              </div>
-              <div className="mt-2 font-serif text-xl text-white/90">{item.value}</div>
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <div className={cn("font-serif text-[clamp(2rem,4vw,3rem)] font-light leading-none", postureColor)}>
+              {posture}
             </div>
-          ))}
-        </div>
-
-        {result.heatDomains?.length > 0 && (
-          <div className="mt-3 rounded-[14px] border border-red-400/15 bg-red-500/[0.06] p-4">
-            <div className="font-mono text-[7px] uppercase tracking-[0.22em] text-red-300/60">
-              Heat domains
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {result.heatDomains.map((d: string) => (
-                <span
-                  key={d}
-                  className="rounded-full border border-red-400/15 bg-red-500/10 px-2.5 py-1 font-mono text-[8px] text-red-300/75"
-                >
-                  {d}
-                </span>
-              ))}
+            <div className="mt-1 font-mono text-[7.5px] uppercase tracking-[0.20em] text-white/35">
+              {String(result.organisation ?? "—")}
             </div>
           </div>
-        )}
-
-        <div className="mt-3 rounded-[14px] border border-amber-500/15 bg-amber-500/[0.06] p-4">
-          <div className="font-mono text-[7px] uppercase tracking-[0.22em] text-amber-400/60">
-            Recommended next layer
-          </div>
-          <div className="mt-2 font-serif text-lg text-white/85">{result.nextLayer}</div>
         </div>
+      </div>
+
+      {/* Heat domains */}
+      {heatDomains.length > 0 && (
+        <div className="border border-red-400/15 bg-red-500/[0.04] p-5">
+          <div className="font-mono text-[7.5px] uppercase tracking-[0.26em] text-red-300/60 mb-3">
+            Heat domains — active stress
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {heatDomains.map((d: string) => (
+              <span
+                key={d}
+                className="border border-red-400/15 bg-red-500/10 px-2.5 py-1 font-mono text-[8px] text-red-300/75"
+              >
+                {d}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Structural reading */}
+      <div className="border border-white/[0.07] bg-white/[0.015] overflow-hidden">
+        <div className="px-5 py-3 border-b border-white/[0.05]" style={{ background: "linear-gradient(to right, rgba(201,169,110,0.05), transparent)" }}>
+          <Eyebrow>Structural reading</Eyebrow>
+        </div>
+        <div className="p-5">
+          <p className="font-serif text-[1rem] font-light leading-[1.72] text-white/65">
+            {reading}
+          </p>
+        </div>
+      </div>
+
+      {/* Next action */}
+      <div className="border border-amber-500/15 bg-amber-500/[0.04] p-5">
+        <Eyebrow>Recommended action</Eyebrow>
+        <p className="mt-3 font-serif text-[1rem] font-light leading-[1.72] text-white/70">
+          {nextAction}
+        </p>
+      </div>
+
+      {/* Escalation */}
+      <div className="border border-white/[0.06] bg-white/[0.01] p-5">
+        <Eyebrow>Next layer</Eyebrow>
+        <p className="mt-2 font-serif text-[0.95rem] font-light italic leading-[1.65] text-white/50 mb-4">
+          The enterprise signal warrants deeper interpretation. Executive Reporting translates structural strain into financial exposure and a governed priority stack.
+        </p>
+        <Link
+          href="/diagnostics/executive-reporting"
+          className="group inline-flex items-center gap-2 border border-amber-500/25 bg-amber-500/[0.06] px-5 py-2.5 font-mono text-[8px] uppercase tracking-[0.24em] text-amber-300/80 transition-all hover:border-amber-500/40 hover:bg-amber-500/10"
+        >
+          Continue to Executive Reporting <ArrowRight className="h-3 w-3" />
+        </Link>
       </div>
     </motion.div>
   );

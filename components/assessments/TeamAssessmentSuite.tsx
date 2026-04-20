@@ -268,26 +268,98 @@ function AdvancedMetricsPanel({ rows }: { rows: TeamRow[] }) {
   );
 }
 
-function ResultPanel({ result }: { result: Record<string, unknown> }) {
+function deriveTeamCondition(vi: number, tg: number): { label: string; color: string; reading: string } {
+  if (vi > 30 || tg > 25) return { label: "MISALIGNED", color: "rgba(252,165,165,0.80)", reading: "Significant structural divergence across teams. This is not a communication issue — it is a systemic misalignment that will compound under pressure." };
+  if (vi > 15 || tg > 10) return { label: "DRIFTING", color: `${GOLD}CC`, reading: "Moderate variance detected. Teams are not yet in crisis, but the gap between leadership perception and operational reality is widening." };
+  return { label: "ALIGNED", color: "rgba(110,231,183,0.75)", reading: "Teams are operating with reasonable consistency. Monitor for early drift signals before they become structural." };
+}
+
+function deriveTeamNextAction(vi: number, tg: number, af: number): string {
+  if (tg > 25) return "Conduct a trust calibration exercise between leadership and operational teams within 14 days. The perception gap is large enough to cause execution failure under pressure.";
+  if (vi > 30) return "Map the specific points of divergence across teams. Identify whether the root is authority confusion, resource asymmetry, or conflicting mandates.";
+  if (af > 65) return "Reduce operating friction before attempting alignment work. High friction makes every other intervention slower and less effective.";
+  if (vi > 15) return "Schedule a structured cross-team alignment session focused on where perceptions differ — not whether they should.";
+  return "Continue monitoring. Current alignment is within acceptable bounds. Reassess if conditions change.";
+}
+
+function ResultPanel({ result, rows }: { result: Record<string, unknown>; rows: TeamRow[] }) {
+  const vi = Number(result.varianceIndex ?? 0);
+  const tg = Number(result.trustGap ?? 0);
+  const af = Number(result.avgFriction ?? 0);
+  const condition = deriveTeamCondition(vi, tg);
+  const adv = computeAdvancedMetrics(rows);
+  const narrative = adv ? generateNarrative(adv) : "";
+  const nextAction = deriveTeamNextAction(vi, tg, af);
+  const nextLayer = String(result.nextLayer === "EXECUTIVE_REPORTING" ? "Executive Reporting" : result.nextLayer === "CONSTITUTIONAL" ? "Constitutional Diagnostic" : result.nextLayer ?? "Enterprise Assessment");
+
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.50 }} style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}08` }}>
-      <div style={{ padding: "1.5rem" }}>
-        <div className="flex items-center gap-2 mb-5">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.50 }} className="space-y-4">
+      {/* Condition */}
+      <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}08`, padding: "1.5rem" }}>
+        <div className="flex items-center gap-2 mb-4">
           <CheckCircle2 style={{ width: "14px", height: "14px", color: `${GOLD}AA` }} />
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}BB` }}>Assessment complete</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}BB` }}>Team assessment complete</span>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[{ label: "Organisation", value: String(result.organisation ?? "—") }, { label: "Variance index", value: `${result.varianceIndex ?? "—"}%` }, { label: "Trust gap", value: `${result.trustGap ?? "—"}%` }].map(item => (
-            <div key={item.label} style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "0.85rem" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.4rem" }}>{item.label}</div>
-              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.4rem", lineHeight: 1, color: "rgba(255,255,255,0.85)" }}>{item.value}</div>
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(2rem, 4vw, 3rem)", lineHeight: 1, color: condition.color }}>
+              {condition.label}
             </div>
-          ))}
+            <div style={{ marginTop: "0.4rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+              {String(result.organisation ?? "—")}
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[{ label: "Variance", value: `${vi}%` }, { label: "Trust gap", value: `${tg}%` }, { label: "Friction", value: `${af}%` }].map(item => (
+              <div key={item.label} style={{ textAlign: "right" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{item.label}</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.75)", marginTop: "2px" }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div style={{ marginTop: "1rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}09`, padding: "0.85rem 1rem" }}>
-          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.35rem" }}>Recommended next layer</div>
-          <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", color: "rgba(255,255,255,0.80)" }}>{String(result.nextLayer ?? "Enterprise Assessment")}</div>
+      </div>
+
+      {/* Interpretation */}
+      <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT, overflow: "hidden" }}>
+        <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}>
+          <Eyebrow>Structural reading</Eyebrow>
         </div>
+        <div style={{ padding: "1.25rem 1.5rem" }}>
+          <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.72, color: "rgba(255,255,255,0.65)" }}>
+            {condition.reading}
+          </p>
+          {narrative && (
+            <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.72, color: "rgba(255,255,255,0.50)" }}>
+              {narrative}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Next action */}
+      <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.25rem 1.5rem" }}>
+        <Eyebrow>Recommended action</Eyebrow>
+        <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.72, color: "rgba(255,255,255,0.70)" }}>
+          {nextAction}
+        </p>
+      </div>
+
+      {/* Escalation */}
+      <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem 1.5rem" }}>
+        <Eyebrow>Next layer</Eyebrow>
+        <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", fontStyle: "italic", marginBottom: "1rem" }}>
+          {nextLayer === "Executive Reporting"
+            ? "The team signal warrants deeper interpretation. Executive Reporting translates this into financial exposure and a governed priority stack."
+            : "Team alignment is within bounds. The Constitutional Diagnostic can test whether the institutional structure matches."}
+        </p>
+        <Link
+          href={nextLayer === "Executive Reporting" ? "/diagnostics/executive-reporting" : "/diagnostics/constitutional-diagnostic"}
+          className="group inline-flex items-center gap-2 transition-all duration-300"
+          style={{ padding: "10px 20px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase" }}
+        >
+          Continue to {nextLayer} <ArrowRight style={{ width: "11px", height: "11px" }} />
+        </Link>
       </div>
     </motion.div>
   );
@@ -349,7 +421,7 @@ export default function TeamAssessmentSuite() {
           {loading ? (<><Loader2 style={{ width: "14px", height: "14px" }} /> Processing team data…</>) : (<><ShieldCheck style={{ width: "14px", height: "14px" }} /> Run team assessment <ArrowRight style={{ width: "13px", height: "13px" }} /></>)}
         </button>
 
-        <AnimatePresence>{result && <ResultPanel result={result} />}</AnimatePresence>
+        <AnimatePresence>{result && <ResultPanel result={result} rows={rows} />}</AnimatePresence>
       </div>
 
       <div className="space-y-4 xl:sticky xl:top-24">
