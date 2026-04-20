@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { COMMERCIAL_PRODUCTS } from "@/lib/server/billing/commercial-access";
+import { hubspotSync } from "@/lib/hubspot/sync";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any }) : null;
@@ -158,6 +159,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       type: typeof details.type === "string" ? details.type : undefined,
     });
   }
+
+  // HubSpot sync — fire and forget
+  const hsEvent = normalizedPriceCode === "strategy_room" ? "strategy_room_checkout" as const : "executive_reporting_checkout" as const;
+  hubspotSync({
+    event: hsEvent,
+    email: String(email || ""),
+    data: { amount: normalizedPriceCode === "strategy_room" ? 395 : 95 },
+  }).catch(() => {});
 
   return res.json({ ok: true, url: session.url });
 }

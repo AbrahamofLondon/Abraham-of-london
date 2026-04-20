@@ -8,6 +8,7 @@ import {
   type ProductCode,
 } from "@/lib/server/billing/entitlements";
 import { prisma } from "@/lib/prisma.server";
+import { hubspotSync } from "@/lib/hubspot/sync";
 
 const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
 
@@ -103,6 +104,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.warn(
         `[BILLING_WEBHOOK] Rejected unknown productCode from Stripe metadata: ${productCode}`,
       );
+    }
+  }
+
+  // HubSpot sync on successful checkout
+  if (event.type === "checkout.session.completed") {
+    const s = event.data.object as Stripe.Checkout.Session;
+    const hsEmail = String(s.metadata?.email || s.customer_details?.email || "").toLowerCase();
+    const hsAmount = typeof s.amount_total === "number" ? s.amount_total / 100 : undefined;
+    if (hsEmail) {
+      hubspotSync({
+        event: "payment_confirmed",
+        email: hsEmail,
+        data: { amount: hsAmount },
+      }).catch(() => {});
     }
   }
 

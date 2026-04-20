@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { KeyStatus as PrismaKeyStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
+import { hubspotSync } from "@/lib/hubspot/sync";
 
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 import { rateLimitCheck, getClientIp, createRateLimitHeaders } from "@/lib/server/rate-limit-unified";
@@ -130,6 +131,13 @@ export default async function handler(
 
     // Do not expose raw access key in the API response.
     // Key is delivered via email only.
+    // HubSpot sync — fire and forget
+    hubspotSync({
+      event: "inner_circle_registered",
+      email: String(email || ""),
+      data: { fullName: String(name || ""), tier: "inner-circle" },
+    }).catch(() => {});
+
     return res.status(200).json({
       ok: true,
       message: "Access provisioned. Check your inbox for your secure access key.",

@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Resend } from "resend";
 
 import { withSecurity } from "@/lib/apiGuard";
+import { hubspotSync } from "@/lib/hubspot/sync";
 import {
   rateLimit,
   getClientIp,
@@ -196,6 +197,13 @@ async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
         console.error(`[CONTACT_TASK_${i}_FAILED]`, result.reason);
       }
     });
+
+    // HubSpot sync — fire and forget
+    hubspotSync({
+      event: "contact_form_submitted",
+      email: safeEmail,
+      data: { fullName: safeName, message: safeMessage },
+    }).catch(() => {});
 
     return res.status(200).json({
       ok: true,

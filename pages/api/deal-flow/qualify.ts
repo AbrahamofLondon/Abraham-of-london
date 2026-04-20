@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { evaluateDealAI } from "@/lib/ai/deal-intelligence";
 import { fuseScores } from "@/lib/ai/deal-fusion";
 import { predictDealOutcome } from "@/lib/ai/predictive-deal-engine";
+import { hubspotSync } from "@/lib/hubspot/sync";
 
 const getIp = (req: NextApiRequest) =>
   (req.headers["x-forwarded-for"] as string)?.split(",")[0] ||
@@ -153,6 +154,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     expectedRevenue: prediction.expectedRevenue,
     priority: prediction.priority,
   });
+
+  // HubSpot sync — fire and forget
+  hubspotSync({
+    event: "deal_flow_qualified",
+    email: String(body.email || ""),
+    data: {
+      fullName: String(body.name || ""),
+      route: finalRoute,
+      score: ruleScore,
+      revenue: String(body.revenue || ""),
+      problem: String(body.problem || ""),
+      urgency: String(body.urgency || ""),
+    },
+  }).catch(() => {});
 
   return res.status(200).json({
     ok: true,

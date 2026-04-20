@@ -17,6 +17,7 @@ import {
   tierAtLeast,
 } from "@/lib/server/auth/tokenStore.postgres";
 import { pushToCRM } from "@/lib/server/crm/pushToCRM";
+import { hubspotSync } from "@/lib/hubspot/sync";
 import { saveDiagnosticRecord } from "@/lib/server/diagnostics/store";
 
 import type {
@@ -268,6 +269,19 @@ export default async function handler(
   } catch {
     crmForwarded = false;
   }
+
+  // HubSpot sync — fire and forget
+  hubspotSync({
+    event: "diagnostic_submitted",
+    email: safeString(payload.respondent?.email) || actor.email || "",
+    data: {
+      fullName: safeString(payload.respondent?.name) || actor.name,
+      organisation: safeString(payload.respondent?.organisation),
+      diagnosticType: payload.kind,
+      score: payload.score,
+      severity: payload.severity,
+    },
+  }).catch(() => {});
 
   try {
     await saveDiagnosticRecord({
