@@ -75,16 +75,16 @@ type Question = {
 };
 
 const QUESTIONS: readonly Question[] = [
-  { id: "q1",  text: "Strategy and actual resource allocation are aligned.",          domain: "coherence" },
-  { id: "q2",  text: "Decision authority is explicit and consistently exercised.",    domain: "authority" },
+  { id: "q1",  text: "Where we spend time and money matches what we say matters.",    domain: "coherence" },
+  { id: "q2",  text: "Everyone knows who has the final say — and that person actually decides.", domain: "authority" },
   { id: "q3",  text: "The environment has changed faster than the organisation has adapted.", domain: "environment", reverse: true },
-  { id: "q4",  text: "There is visible strategic drift.",                             domain: "execution",   reverse: true },
+  { id: "q4",  text: "We keep drifting from what we said we were going to do.",       domain: "execution",   reverse: true },
   { id: "q5",  text: "Trust between leadership and execution is intact.",             domain: "trust" },
-  { id: "q6",  text: "The organisation carries material operating friction.",         domain: "friction",    reverse: true },
-  { id: "q7",  text: "A decision-bearing sponsor exists for the matter at hand.",     domain: "authority" },
-  { id: "q8",  text: "The cost of error in this situation is material.",              domain: "stakes" },
-  { id: "q9",  text: "Past correction attempts have failed for structural reasons.",  domain: "pattern",     reverse: true },
-  { id: "q10", text: "External pressure is actively forcing institutional attention.", domain: "pressure" },
+  { id: "q6",  text: "Things that should be simple keep getting slowed down from the inside.", domain: "friction", reverse: true },
+  { id: "q7",  text: "There is one person who is clearly responsible for this decision — and they have the authority to make it.", domain: "authority" },
+  { id: "q8",  text: "If we get this wrong, the damage will be real and significant.", domain: "stakes" },
+  { id: "q9",  text: "We have tried to fix this before and it did not work — and the reasons go deeper than people or effort.", domain: "pattern", reverse: true },
+  { id: "q10", text: "Outside forces — market, regulators, competitors — are making this impossible to ignore.", domain: "pressure" },
 ] as const;
 
 const DOMAIN_LABELS: Record<Question["domain"], string> = {
@@ -627,7 +627,7 @@ export default function ConstitutionalDiagnosticSuite() {
                             fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase",
                             color: `${GOLD}90`,
                           }}>
-                            Resonance — how true is this?
+                            How true is this?
                           </span>
                           <span style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -656,7 +656,7 @@ export default function ConstitutionalDiagnosticSuite() {
                             fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase",
                             color: "rgba(110,231,183,0.70)",
                           }}>
-                            Certainty — how confident are you?
+                            How sure are you?
                           </span>
                           <span style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",

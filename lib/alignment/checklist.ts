@@ -25,7 +25,7 @@ export const ALIGNMENT_DOMAIN_LABELS: Record<AlignmentDomain, string> = {
 export const PURPOSE_ALIGNMENT_QUESTIONS: AlignmentQuestion[] = [
   { id: "identity_1", domain: "identity", statement: "I can clearly state my current mandate in one sentence." },
   { id: "identity_2", domain: "identity", statement: "My priorities reflect that mandate, not my mood." },
-  { id: "identity_3", domain: "identity", statement: "I am not operating from confusion or borrowed direction." },
+  { id: "identity_3", domain: "identity", statement: "I am not following someone else's direction because I lack my own." },
 
   { id: "decision_1", domain: "decision", statement: "My recent major decisions align with my stated values." },
   { id: "decision_2", domain: "decision", statement: "I am not making reactive choices under pressure." },
@@ -33,7 +33,7 @@ export const PURPOSE_ALIGNMENT_QUESTIONS: AlignmentQuestion[] = [
 
   { id: "environment_1", domain: "environment", statement: "My relationships reinforce my direction, not dilute it." },
   { id: "environment_2", domain: "environment", statement: "I am not tolerating environments that produce confusion." },
-  { id: "environment_3", domain: "environment", statement: "My inputs are curated, not chaotic." },
+  { id: "environment_3", domain: "environment", statement: "What I read, watch, and listen to is chosen deliberately — not just whatever shows up." },
 
   { id: "behaviour_1", domain: "behaviour", statement: "My daily habits move me toward long-term outcomes." },
   { id: "behaviour_2", domain: "behaviour", statement: "My calendar reflects what I claim matters." },

@@ -7,13 +7,13 @@ export const ENTERPRISE_ALIGNMENT_QUESTIONS: EnterpriseQuestion[] = [
     id: "mc_1",
     domain: "mandate_clarity",
     statement:
-      "We can state the organisation’s current mandate clearly and without ambiguity.",
+      "We can clearly say what this organisation is here to do — and there is no confusion about it.",
   },
   {
     id: "mc_2",
     domain: "mandate_clarity",
     statement:
-      "Our priorities reflect the mandate rather than reacting to noise.",
+      "Our priorities come from what actually matters — not from whatever is loudest this week.",
   },
   {
     id: "mc_3",
@@ -37,7 +37,7 @@ export const ENTERPRISE_ALIGNMENT_QUESTIONS: EnterpriseQuestion[] = [
     id: "di_3",
     domain: "decision_integrity",
     statement:
-      "Important decisions can be explained through principle, not only urgency.",
+      "We can explain why we made a decision — and the reason is not just 'it was urgent.'",
   },
   {
     id: "ec_1",
@@ -61,7 +61,7 @@ export const ENTERPRISE_ALIGNMENT_QUESTIONS: EnterpriseQuestion[] = [
     id: "od_1",
     domain: "operational_discipline",
     statement:
-      "Daily operating rhythms serve long-term outcomes.",
+      "How we run the week — meetings, check-ins, reporting — actually moves us toward what matters long-term.",
   },
   {
     id: "od_2",
@@ -79,19 +79,19 @@ export const ENTERPRISE_ALIGNMENT_QUESTIONS: EnterpriseQuestion[] = [
     id: "eco_1",
     domain: "emotional_cultural_order",
     statement:
-      "Pressure does not routinely destabilise leadership behaviour.",
+      "When things get hard, leadership stays steady.",
   },
   {
     id: "eco_2",
     domain: "emotional_cultural_order",
     statement:
-      "The culture can carry disagreement without fragmentation.",
+      "People can disagree openly without it damaging the team.",
   },
   {
     id: "eco_3",
     domain: "emotional_cultural_order",
     statement:
-      "Emotional volatility does not dominate execution.",
+      "Emotional reactions do not stop us from getting things done.",
   },
   {
     id: "lco_1",
@@ -109,6 +109,6 @@ export const ENTERPRISE_ALIGNMENT_QUESTIONS: EnterpriseQuestion[] = [
     id: "lco_3",
     domain: "legacy_continuity_orientation",
     statement:
-      "Strategic work is designed to outlast present personalities.",
+      "What we are building will hold together even if the current leaders leave.",
   },
 ];
