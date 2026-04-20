@@ -11,6 +11,14 @@ function makeSessionKey(): string {
   return `sr_${randomUUID().replace(/-/g, "")}`;
 }
 
+function toJsonString(value: unknown): string | null {
+  if (value == null) {
+    return null;
+  }
+
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
 function logStrategyRoomInitError(stage: string, error: unknown): void {
   const details =
     error instanceof Error
@@ -122,8 +130,8 @@ export async function POST(request: Request) {
         sessionKey,
         status: "active",
         source: "strategy-room",
-        intake: intake as any,
-        canonicalSnapshot: canonicalSnapshot as any,
+        intake: toJsonString(intake),
+        canonicalSnapshot: toJsonString(canonicalSnapshot),
         route: assembled.constitution.route,
         readinessTier: assembled.constitution.readinessTier,
         authorityType: assembled.constitution.authorityType,

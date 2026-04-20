@@ -5,6 +5,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
 
+function toJsonString(value: unknown): string | null {
+  if (value == null) {
+    return null;
+  }
+
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -34,15 +42,15 @@ export async function POST(request: Request) {
       data: {
         sessionKey,
         conversionType,
-        metadata: (body?.metadata || {}) as any,
-        canonicalSnapshot: canonicalSnapshot as any,
+        metadata: toJsonString(body?.metadata || {}),
+        canonicalSnapshot: toJsonString(canonicalSnapshot),
       },
     });
 
     await prisma.strategyRoomSession.updateMany({
       where: { sessionKey },
       data: {
-        canonicalSnapshot: canonicalSnapshot as any,
+        canonicalSnapshot: toJsonString(canonicalSnapshot),
         lastConversionAt: new Date(),
         lastConversionType: conversionType,
       },
