@@ -12,7 +12,6 @@ import { track } from "@/lib/analytics/track";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import {
   AlertTriangle,
-  Archive,
   ArrowRight,
   BookOpen,
   Briefcase,
@@ -21,30 +20,15 @@ import {
   Crown,
   Download,
   Eye,
-
   FileText,
-  LibraryBig,
   Lock,
   ScanSearch,
   ScrollText,
-  ShieldCheck,
   TrendingUp,
-  Workflow,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import ShortsSignalRail from "@/components/shorts/ShortsSignalRail";
-import CredibilityStrip from "@/components/homepage/CredibilityStrip";
-import DoctrineShowcase from "@/components/homepage/DoctrineShowcase";
-import EngagementLanes from "@/components/homepage/EngagementLanes";
-import PlaybooksSection from "@/components/homepage/PlaybooksSection";
-import WhoIWorkWith from "@/components/WhoIWorkWith";
-import VaultTeaserRail from "@/components/homepage/VaultTeaserRail";
-import ContentShowcase from "@/components/homepage/ContentShowcase";
-import VenturesSection from "@/components/homepage/VenturesSection";
-import ExecutiveBuyerFitSection from "@/components/diagnostics/ExecutiveBuyerFitSection";
-import StrategyRoomIntegration from "@/components/consulting/StrategyRoomIntegration";
-import { OperatorBriefing } from "@/components/homepage";
 import { AccuracyMetricsBlock, ObservedOutcomesBlock } from "@/components/proof/PublicProofBlocks";
 
 import { joinHref, normalizeSlug } from "@/lib/content/shared";
@@ -2144,28 +2128,28 @@ function HowItWorksLadder() {
       label: "Stage 1: Diagnostic",
       href: "/diagnostics/constitutional-diagnostic",
       effort: "6-10 minutes",
-      explanation: "The constitutional entry point for identifying seriousness, pressure, and route fit.",
+      explanation: "The constitutional entry point. Identifies seriousness, pressure, and route fit.",
       outcome: "A first reading of whether the problem should stay diagnostic or move upward.",
     },
     {
-      label: "Stage 2: Team / Enterprise Assessment",
+      label: "Stage 2: Team / Enterprise",
       href: "/diagnostics",
       effort: "10-25 minutes",
-      explanation: "Structured assessment layers for teams and organizations dealing with execution, alignment, or institutional friction.",
+      explanation: "Structured assessment for teams and organisations dealing with execution, alignment, or institutional friction.",
       outcome: "Sharper visibility into drift, misalignment, and system-level breakdowns.",
     },
     {
       label: "Stage 3: Executive Reporting",
       href: "/diagnostics/executive-reporting",
-      effort: "Paid analysis",
-      explanation: "This is where the system stops scoring and starts interpreting. A board-grade interpretation layer for decision-makers who need disciplined reading before intervention.",
+      effort: "£95",
+      explanation: "The first paid interpretation layer. Translates structural strain into financial exposure and a governed priority stack.",
       outcome: "Decision-grade clarity, implications, and governed next-step logic.",
     },
     {
       label: "Stage 4: Strategy Room",
       href: "/strategy-room",
-      effort: "Qualified escalation",
-      explanation: "Used when a real decision with consequence is already on the table. Not exploratory. Not theoretical.",
+      effort: "£395",
+      explanation: "Governed intervention logic for situations where a real decision with consequence is already on the table.",
       outcome: "Decision architecture, trade-offs, owners, and execution cadence.",
     },
   ];
@@ -2181,7 +2165,7 @@ function HowItWorksLadder() {
             <span className="text-white/35">not a pile of pages.</span>
           </>
         }
-        description="The system is designed as a deliberate escalation ladder. Strategy Room is not the first step for everyone. The route is earned by signal, seriousness, and authority."
+        description="The route is earned by signal, seriousness, and authority. Free stages come first. Paid escalation only when the signal justifies it."
         large
       />
 
@@ -2197,11 +2181,11 @@ function HowItWorksLadder() {
                 color: "rgba(110,231,183,0.72)",
               }}
             >
-              For personal diagnostic clarity
+              Personal path
             </div>
             <p className="mt-3 max-w-3xl text-[14px] leading-[1.8] ds-text-muted">
-              Purpose Alignment is a parallel personal path. It reads the person before
-              the Constitutional Diagnostic reads the organisation.
+              Purpose Alignment reads the person before the Constitutional Diagnostic
+              reads the organisation. A parallel entry point.
             </p>
           </div>
           <Link
@@ -2213,9 +2197,9 @@ function HowItWorksLadder() {
         </div>
       </Panel>
 
-      <div className="mt-12 grid gap-4 lg:grid-cols-2">
-        {stages.map((stage, index) => (
-          <Panel key={stage.label} surface="lift" gold={index === 0 || index === 2}>
+      <div className="mt-10 grid gap-4 lg:grid-cols-2">
+        {stages.map((stage) => (
+          <Panel key={stage.label} surface="lift">
             <div className="p-6">
               <div className="flex items-center justify-between gap-4">
                 <div
@@ -2232,26 +2216,10 @@ function HowItWorksLadder() {
                 <div className="text-[11px] ds-text-subtle">{stage.effort}</div>
               </div>
               <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{stage.explanation}</p>
-              <p className="mt-2 text-[12px] leading-[1.7] ds-text-subtle">
-                Backed by real assessment logic and structured interpretation.
+              <p className="mt-3 text-[13px] leading-[1.75] ds-text-subtle">
+                <span className="ds-text">Outcome:</span> {stage.outcome}
               </p>
-              {stage.label === "Stage 3: Executive Reporting" && (
-                <div className="mt-3 space-y-2">
-                  <p className="text-[12px] leading-[1.7]" style={{ color: "rgba(201,169,110,0.92)" }}>
-                    One-time analysis. No subscription.
-                  </p>
-                  <p className="text-[12px] leading-[1.7]" style={{ color: "rgba(184,184,184,0.78)" }}>
-                    Generated from your actual inputs — not templates.
-                  </p>
-                  <p className="text-[12px] leading-[1.7]" style={{ color: "#F5F5F5" }}>
-                    If the output reads like generic advice, do not proceed.
-                  </p>
-                </div>
-              )}
-              <p className="mt-4 text-[13px] leading-[1.75] ds-text-subtle">
-                <span className="ds-text">Expected outcome:</span> {stage.outcome}
-              </p>
-              <div className="mt-5">
+              <div className="mt-4">
                 <Link href={stage.href} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] ds-text-muted transition">
                   Open stage <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
@@ -2306,56 +2274,56 @@ function WhoThisIsFor() {
   );
 }
 
-function ContentWithContext({
+function ContentLibrarySection({
   featuredBlogPosts,
   featuredShorts,
   featuredPlaybooks,
   latestReport,
 }: Pick<HomePageProps, "featuredBlogPosts" | "featuredShorts" | "featuredPlaybooks" | "latestReport">) {
   const intelligenceHref = "/artifacts";
-  const contentLinks: Array<[string, string, string]> = [
-    ["Intelligence Archive", "Deeper analysis for operators facing structural decisions, strategic pressure, or institutional consequence.", intelligenceHref],
-    ["Essays", "Long-form thinking on institutions, drift, leadership, execution, and the real structure beneath visible problems.", "/blog"],
-    ["Shorts", "Concise signal for fast orientation, daily strategic clarity, and quick entry into the deeper body of work.", "/shorts"],
-    ["Frameworks", "Practical operating models, playbooks, and structured tools that turn thinking into governed action.", "/playbooks"],
-    ["Canon", "Foundational doctrine and core frameworks. The deeper intellectual spine behind the system.", "/canon"],
-    ["Vault", "Restricted archive and deployable assets for members and serious operators who need reusable tools and briefings.", "/vault"],
-  ];
 
   return (
-    <Section id="content" variant="surface">
+    <Section id="library" variant="void">
       <SectionHeader
-        eyebrow="Content With Context"
+        eyebrow="The library behind the system"
         title={
           <>
-            Depth, with orientation.
+            Depth, doctrine,
             <br />
-            <span className="text-white/35">Authority surfaced as usable context.</span>
+            <span className="text-white/35">and applied tools.</span>
           </>
         }
-        description="This layer exists as credibility infrastructure. It shows the thinking, operating models, and strategic language behind the diagnostic system without turning the homepage into a feed."
+        description="The diagnostic system is not assembled from borrowed parts. Below is the body of work it is built on — available for verification, deeper reading, and operational use."
         large
       />
 
-      <div className="mt-12 grid gap-4 lg:grid-cols-2">
-        {contentLinks.map(([title, body, href]) => (
+      {/* Content directory */}
+      <div className="mt-12 grid gap-4 lg:grid-cols-3">
+        {([
+          ["Intelligence Archive", "Market signals, structural breakdowns, and institutional analysis.", intelligenceHref],
+          ["Essays", "Long-form thinking on institutions, drift, leadership, and the real structure beneath visible problems.", "/blog"],
+          ["Canon", "Foundational doctrine and core frameworks. The intellectual spine behind the system.", "/canon"],
+          ["Playbooks", "Operational responses to diagnosed failure modes. Practical, structured, reusable.", "/playbooks"],
+          ["Shorts", "Concise signal for fast orientation and quick entry into the deeper body of work.", "/shorts"],
+          ["Vault", "Restricted archive and deployable assets for members and serious operators.", "/vault"],
+        ] as Array<[string, string, string]>).map(([title, body, href]) => (
           <Panel key={title} surface="lift">
-            <div className="p-6">
+            <div className="p-5">
               <div
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "8px",
-                  letterSpacing: "0.28em",
+                  letterSpacing: "0.26em",
                   textTransform: "uppercase",
                   color: "var(--ds-accent)",
                 }}
               >
                 {title}
               </div>
-              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{body}</p>
-              <div className="mt-5">
-                <Link href={href} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] ds-text-muted transition">
-                  Browse Intelligence <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <p className="mt-3 text-[13.5px] leading-[1.7] ds-text-muted">{body}</p>
+              <div className="mt-4">
+                <Link href={href} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] ds-text-subtle transition hover:text-white/70">
+                  Browse <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
             </div>
@@ -2363,135 +2331,150 @@ function ContentWithContext({
         ))}
       </div>
 
-      <div className="mt-12 grid gap-4 lg:grid-cols-3">
+      {/* Featured items */}
+      <div className="mt-8 grid gap-4 lg:grid-cols-3">
         {latestReport && (
           <Panel surface="lift">
-            <div className="p-6">
-              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">Featured Intelligence</div>
-              <div className="mt-3 text-[1.4rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
+            <div className="p-5">
+              <div className="text-[10px] uppercase tracking-[0.2em] ds-text-subtle">Featured Intelligence</div>
+              <div className="mt-3 text-[1.3rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
                 {latestReport.title || "Quarterly Market Intelligence Report"}
               </div>
-              <p className="mt-3 text-[14px] leading-[1.8] ds-text-muted">
-                Structural patterns observed across leadership, execution, and strategy failure.
-              </p>
-              <div className="mt-5">
-                <Link href={intelligenceHref} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] ds-text-muted transition">
-                  Open Intelligence Archive <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <div className="mt-4">
+                <Link href={intelligenceHref} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] ds-text-subtle transition hover:text-white/70">
+                  Open archive <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
             </div>
           </Panel>
         )}
-
         {featuredBlogPosts[0] && (
           <Panel surface="lift">
-            <div className="p-6">
-              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">Featured Essay</div>
-              <div className="mt-3 text-[1.35rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
+            <div className="p-5">
+              <div className="text-[10px] uppercase tracking-[0.2em] ds-text-subtle">Featured Essay</div>
+              <div className="mt-3 text-[1.3rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
                 {featuredBlogPosts[0].title}
               </div>
-              <p className="mt-3 text-[14px] leading-[1.8] ds-text-muted">{featuredBlogPosts[0].excerpt || "Long-form thinking designed to reframe the problem correctly."}</p>
             </div>
           </Panel>
         )}
-
-        {(featuredShorts[0] || featuredPlaybooks[0]) && (
+        {(featuredPlaybooks[0] || featuredShorts[0]) && (
           <Panel surface="lift">
-            <div className="p-6">
-              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">Active Surface</div>
-              <div className="mt-3 text-[1.35rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
+            <div className="p-5">
+              <div className="text-[10px] uppercase tracking-[0.2em] ds-text-subtle">Active Surface</div>
+              <div className="mt-3 text-[1.3rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
                 {featuredPlaybooks[0]?.title || featuredShorts[0]?.title || "Operational Frameworks"}
               </div>
-              <p className="mt-3 text-[14px] leading-[1.8] ds-text-muted">
-                {featuredPlaybooks[0]?.description || featuredShorts[0]?.excerpt || "Practical signal designed for operators who need usable structure, not just ideas."}
-              </p>
             </div>
           </Panel>
         )}
       </div>
-    </Section>
-  );
-}
 
-function ShortsRailSection() {
-  return (
-    <Section id="shorts-signal" variant="void">
-      <SectionHeader
-        eyebrow="Shorts Signal Rail"
-        title={
-          <>
-            Recognition before deeper reading.
-            <br />
-            <span className="text-white/35">Short-form signal for the right next move.</span>
-          </>
-        }
-        description="These are not a feed. They are a curated signal layer designed to move the right person from recognition into diagnosis, deeper intelligence, or strategic escalation."
-        large
-      />
-      <div className="mt-12">
+      {/* Shorts signal rail */}
+      <div className="mt-14">
+        <div className="mb-8">
+          <Eyebrow dim>Recognition before deeper reading</Eyebrow>
+        </div>
         <ShortsSignalRail
           items={HOMEPAGE_SHORT_SIGNALS}
           title="Signal Before Noise"
           subtitle="A controlled rail of high-fit Shorts. Recognition first, then the correct route."
         />
       </div>
-    </Section>
-  );
-}
 
-function AuthoritySignal({ counts }: { counts: HomePageProps["counts"] }) {
-  return (
-    <Section id="platform-depth" variant="void">
-      <SectionHeader
-        eyebrow="Platform Depth"
-        title={
-          <>
-            One system,
-            <br />
-            <span className="text-white/35">built to hold serious weight.</span>
-          </>
-        }
-        description="The diagnostic system is backed by a body of doctrine, structured products, and operational intelligence — not assembled from borrowed parts."
-      />
-
-      <div className="mt-12 grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
-        <Panel surface="lift">
-          <div className="grid grid-cols-2 gap-4 p-6">
-            {[
-              { label: "Diagnostics", value: "4-stage path" },
-              { label: "Canon", value: String(counts.canon || 0) },
-              { label: "Shorts", value: String(counts.shorts || 0) },
-              { label: "Library", value: String(counts.library || 0) },
-            ].map((item) => (
-              <div key={item.label} className="border p-4" style={{ borderColor: "var(--ds-border)" }}>
-                <div className="text-[10px] uppercase tracking-[0.2em] ds-text-subtle">{item.label}</div>
-                <div className="mt-2 text-[1.6rem] font-['Cormorant_Garamond',Georgia,serif] ds-text">{item.value}</div>
-              </div>
-            ))}
+      {/* Governing model — the intellectual spine */}
+      <div className="mt-14 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+        <div
+          style={{
+            border: "1px solid rgba(201,169,110,0.22)",
+            backgroundColor: "rgba(201,169,110,0.04)",
+            padding: "2rem",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7.5px",
+              letterSpacing: "0.38em",
+              textTransform: "uppercase",
+              color: "rgba(201,169,110,0.85)",
+            }}
+          >
+            Governing Model
           </div>
-        </Panel>
+          <h3
+            className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light italic leading-[1.05]"
+            style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", color: "rgba(255,255,255,0.92)" }}
+          >
+            The Architecture
+            <span style={{ color: "var(--ds-accent)" }}> of Human Purpose</span>
+          </h3>
+          <p
+            className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light italic"
+            style={{
+              fontSize: "1rem",
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.50)",
+              borderLeft: "2px solid rgba(201,169,110,0.25)",
+              paddingLeft: "1rem",
+            }}
+          >
+            &ldquo;Human flourishing is not accidental. It is architectural.&rdquo;
+          </p>
+          <p className="mt-4 text-[13.5px] leading-[1.7] ds-text-muted">
+            The distilled philosophical spine of the Canon. The model the diagnostic
+            system is built on — purpose, governance, formation, and legacy as
+            architectural disciplines, not aspirations.
+          </p>
+          <div className="mt-5">
+            <Link
+              href="/books/the-architecture-of-human-purpose-landing"
+              className="group inline-flex items-center gap-2 transition-colors"
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8.5px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--ds-accent)",
+              }}
+            >
+              Read the prelude
+              <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
 
-        <Panel surface="lift">
-            <div className="p-6">
-              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">The Platform Helps Surface</div>
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                {[
-                  "Most organisations do not fail from lack of strategy.",
-                  "They fail from misdiagnosed problems.",
-                  "They fail from unaligned leadership structures.",
-                  "They fail from hidden execution constraints.",
-                ].map((item) => (
-                  <div key={item} className="flex gap-3">
-                    <div className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
-                    <p className="text-[14px] leading-[1.8] ds-text-muted">{item}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-6 text-[14px] leading-[1.85] ds-text-muted">
-                This system exists to surface those realities clearly.
-              </p>
-            </div>
-          </Panel>
+        <div
+          style={{
+            border: "1px solid var(--ds-border)",
+            backgroundColor: "var(--ds-panel-alt)",
+            padding: "2rem",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7.5px",
+              letterSpacing: "0.38em",
+              textTransform: "uppercase",
+              color: "var(--ds-text-subtle)",
+            }}
+          >
+            The Canon — applied doctrine
+          </div>
+          <p className="mt-4 text-[13.5px] leading-[1.7] ds-text-muted">
+            Foundational frameworks applied to governance, execution, leadership,
+            and institutional integrity. The thinking that precedes the diagnostic engine.
+          </p>
+          <div className="mt-5">
+            <Link
+              href="/canon"
+              className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] ds-text-subtle transition hover:text-white/70"
+            >
+              Browse the Canon <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+        </div>
       </div>
     </Section>
   );
@@ -2516,29 +2499,8 @@ function ProofLayer() {
         </div>
         <div className="mt-2 h-px w-16" style={{ backgroundColor: "rgba(201,169,110,0.35)" }} />
 
-        {/* A: Observed outcomes */}
+        {/* A: Example output — what the system actually produces */}
         <div className="mt-10">
-          <div
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "rgba(201,169,110,0.80)",
-              marginBottom: "1rem",
-            }}
-          >
-            Observed outcomes
-          </div>
-          <ObservedOutcomesBlock />
-          <AccuracyMetricsBlock />
-          <p className="mt-4 text-[13px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.70)" }}>
-            The system does not improve outcomes directly. It makes the correct action visible.
-          </p>
-        </div>
-
-        {/* B: Example output */}
-        <div className="mt-12">
           <div
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -2582,7 +2544,30 @@ function ProofLayer() {
           </div>
         </div>
 
-        {/* C: Method link */}
+        {/* B: Observed outcomes — what happened when used */}
+        <div className="mt-10">
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(201,169,110,0.80)",
+              marginBottom: "1rem",
+            }}
+          >
+            Observed outcomes
+          </div>
+          <ObservedOutcomesBlock />
+          <p className="mt-4 text-[13px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.70)" }}>
+            The system does not improve outcomes directly. It makes the correct action visible.
+          </p>
+        </div>
+
+        {/* C: Accuracy metrics — aggregate proof */}
+        <AccuracyMetricsBlock />
+
+        {/* D: Method link — for skeptics who want to inspect */}
         <div className="mt-10">
           <div
             style={{
@@ -2857,25 +2842,15 @@ const HomePage: NextPage<HomePageProps> = ({
       {/* — mode change: conversion system → content library — */}
       <Bridge text="diagnostic system · content library" />
 
-      {/* 7. Content ecosystem */}
-      <ContentWithContext
+      {/* 7. The governed library */}
+      <ContentLibrarySection
         featuredBlogPosts={featuredBlogPosts}
         featuredShorts={featuredShorts}
         featuredPlaybooks={featuredPlaybooks}
         latestReport={latestReport}
       />
 
-      <PlaybooksSection />
-
-      <ShortsRailSection />
-
-      {/* 8. Platform depth */}
-      <AuthoritySignal counts={counts} />
-
-      {/* — mode change: library → final action — */}
-      <Bridge text="content library · next move" />
-
-      {/* 9. Final action */}
+      {/* 8. Final action */}
       <HomeFinalCta intelligenceHref={intelligenceHref} />
     </Layout>
   );
