@@ -2084,7 +2084,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
 function WhatThisPlatformIs() {
   return (
-    <Section id="what-this-is" variant="void" cap="system · how it works">
+    <Section id="what-this-is" variant="void">
       <SectionHeader
         eyebrow="How it works"
         title={
@@ -2123,6 +2123,17 @@ function WhatThisPlatformIs() {
           </Panel>
         ))}
       </div>
+
+      {/* Anti-hype */}
+      <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
+        <span style={{ color: "var(--ds-text)" }}>What this is not:</span>
+        {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as insight"].map((item) => (
+          <span key={item} style={{ color: "var(--ds-text-muted)", opacity: 0.72 }}>
+            Not {item.toLowerCase()}
+          </span>
+        ))}
+        <span style={{ color: "var(--ds-accent)", opacity: 0.90 }}>It is a diagnostic system.</span>
+      </div>
     </Section>
   );
 }
@@ -2160,7 +2171,7 @@ function HowItWorksLadder() {
   ];
 
   return (
-    <Section id="how-it-works" variant="surface" cap="journey · how the system works">
+    <Section id="how-it-works" variant="surface">
       <SectionHeader
         eyebrow="The Ladder"
         title={
@@ -2255,7 +2266,7 @@ function HowItWorksLadder() {
 
 function WhoThisIsFor() {
   return (
-    <Section id="who-this-is-for" variant="void" cap="fit · who this is for">
+    <Section id="who-this-is-for" variant="void">
       <div className="grid gap-6 lg:grid-cols-[1fr_0.72fr]">
         <div>
           <SectionHeader
@@ -2312,7 +2323,7 @@ function ContentWithContext({
   ];
 
   return (
-    <Section id="content" variant="surface" cap="content · context · authority">
+    <Section id="content" variant="surface">
       <SectionHeader
         eyebrow="Content With Context"
         title={
@@ -2404,7 +2415,7 @@ function ContentWithContext({
 
 function ShortsRailSection() {
   return (
-    <Section id="shorts-signal" variant="void" cap="shorts · signal layer">
+    <Section id="shorts-signal" variant="void">
       <SectionHeader
         eyebrow="Shorts Signal Rail"
         title={
@@ -2430,17 +2441,17 @@ function ShortsRailSection() {
 
 function AuthoritySignal({ counts }: { counts: HomePageProps["counts"] }) {
   return (
-    <Section id="authority-signal" variant="void" cap="proof · authority signal">
+    <Section id="platform-depth" variant="void">
       <SectionHeader
-        eyebrow="Authority Signal"
+        eyebrow="Platform Depth"
         title={
           <>
-            Seriousness without theatre.
+            One system,
             <br />
-            <span className="text-white/35">What this platform helps surface.</span>
+            <span className="text-white/35">built to hold serious weight.</span>
           </>
         }
-        description="The platform is designed to surface structural problems that usually remain hidden under noise, sentiment, or internal politics."
+        description="The diagnostic system is backed by a body of doctrine, structured products, and operational intelligence — not assembled from borrowed parts."
       />
 
       <div className="mt-12 grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
@@ -2488,7 +2499,7 @@ function AuthoritySignal({ counts }: { counts: HomePageProps["counts"] }) {
 
 function ProofLayer() {
   return (
-    <Section id="proof-layer" variant="void" cap="proof · credibility · method">
+    <Section id="proof-layer" variant="void">
       <div className="mx-auto max-w-[1100px]">
         {/* Section title */}
         <div
@@ -2571,102 +2582,8 @@ function ProofLayer() {
           </div>
         </div>
 
-        {/* C: How the system works (mechanism) */}
-        <div className="mt-12">
-          <div
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "rgba(201,169,110,0.80)",
-              marginBottom: "1rem",
-            }}
-          >
-            How the system works
-          </div>
-          <div className="relative grid gap-4 md:grid-cols-3">
-            {[
-              { step: "01", title: "Signal capture", body: "Structured inputs — decisions, team signals, organisational conditions." },
-              { step: "02", title: "Constitutional analysis", body: "Weighted scoring, failure-mode detection, trajectory classification." },
-              { step: "03", title: "Output", body: "Condition → direction → next action. Not opinion. Not advice." },
-            ].map(({ step, title, body }, index) => (
-              <React.Fragment key={step}>
-                <div
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderTop: "1px solid rgba(255,255,255,0.14)",
-                    backgroundColor: "rgba(255,255,255,0.025)",
-                    padding: "1.25rem 1.5rem",
-                  }}
-                >
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(184,184,184,0.58)" }}>
-                    Step {step}
-                  </div>
-                  <div className="mt-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9.5px", letterSpacing: "0.04em", textTransform: "uppercase", color: "#F5F5F5" }}>
-                    {title}
-                  </div>
-                  <p className="mt-2 text-[13px] leading-[1.6]" style={{ color: "#B8B8B8" }}>{body}</p>
-                </div>
-                {index < 2 && (
-                  <div
-                    aria-hidden
-                    className="hidden md:block"
-                    style={{
-                      position: "absolute",
-                      top: "50%",
-                      left: index === 0 ? "32.2%" : "66.1%",
-                      width: "2rem",
-                      height: "1px",
-                      background: "linear-gradient(to right, rgba(255,255,255,0.08), rgba(201,169,110,0.35), rgba(255,255,255,0.08))",
-                      transform: "translate(-50%, -50%)",
-                    }}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-          <p className="mt-4 text-[13px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.70)" }}>
-            The system does not interpret loosely. It classifies structurally.
-          </p>
-        </div>
-
-        {/* D: Anti-hype + Method link — side by side */}
-        <div className="mt-12 grid gap-4 md:grid-cols-2">
-          {/* Anti-hype */}
-          <div
-            style={{
-              border: "1px solid rgba(255,255,255,0.08)",
-              backgroundColor: "rgba(255,255,255,0.02)",
-              padding: "1.25rem 1.5rem",
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#F5F5F5",
-                fontWeight: 700,
-                marginBottom: "0.85rem",
-              }}
-            >
-              What this is not
-            </div>
-            <div className="space-y-1.5">
-              {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as insight"].map((item) => (
-                <p key={item} className="text-[13px] leading-[1.5]" style={{ color: "rgba(184,184,184,0.68)" }}>
-                  Not {item.toLowerCase()}.
-                </p>
-              ))}
-            </div>
-            <p className="mt-4 border-t border-white/[0.06] pt-3 text-[13px] leading-[1.5]" style={{ color: "rgba(201,169,110,0.85)", fontWeight: 600 }}>
-              It is a diagnostic system.
-            </p>
-          </div>
-
-          {/* Method link */}
+        {/* C: Method link */}
+        <div className="mt-10">
           <div
             style={{
               border: "1px solid rgba(201,169,110,0.18)",
@@ -2719,9 +2636,106 @@ function ProofLayer() {
   );
 }
 
+function HomeDecisionSection() {
+  return (
+    <Section id="paid-paths" variant="surface">
+      <div className="mx-auto max-w-4xl">
+        <Eyebrow>When free diagnosis confirms the need</Eyebrow>
+        <h2
+          className="mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.95] tracking-[-0.028em] ds-text"
+          style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
+        >
+          Two paid paths. Both earned by signal.
+        </h2>
+        <p className="mt-4 max-w-2xl text-[14.5px] leading-[1.75] ds-text-muted">
+          The system will not recommend escalation the evidence does not support.
+          These paths exist only when the free diagnostic has confirmed a situation
+          that justifies deeper interpretation or governed intervention.
+        </p>
+      </div>
+
+      <div className="mx-auto mt-10 grid max-w-4xl gap-4 md:grid-cols-2">
+        <Panel surface="lift">
+          <div className="p-6">
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.26em",
+                textTransform: "uppercase",
+                color: "var(--ds-accent)",
+              }}
+            >
+              Executive Reporting · £95
+            </div>
+            <h3 className="mt-4 font-['Cormorant_Garamond',Georgia,serif] text-[1.5rem] font-light leading-[1.1] ds-text">
+              Understand the consequence
+            </h3>
+            <p className="mt-3 text-[14px] leading-[1.75] ds-text-muted">
+              Translates structural strain into financial exposure, institutional
+              constraint, and a governed priority stack. Board-grade interpretation
+              from your actual inputs.
+            </p>
+            <div className="mt-5 space-y-1.5">
+              {["One-time analysis — no subscription", "Generated from your actual submission", "If it reads like generic advice, do not proceed"].map((line) => (
+                <p key={line} className="text-[12px] leading-[1.6] ds-text-subtle">{line}</p>
+              ))}
+            </div>
+            <div className="mt-5">
+              <Link
+                href="/diagnostics/executive-reporting"
+                className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] ds-text-muted transition hover:text-white"
+              >
+                Open Executive Reporting <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+          </div>
+        </Panel>
+
+        <Panel surface="lift" gold>
+          <div className="p-6">
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.26em",
+                textTransform: "uppercase",
+                color: "var(--ds-accent)",
+              }}
+            >
+              Strategy Room · £395
+            </div>
+            <h3 className="mt-4 font-['Cormorant_Garamond',Georgia,serif] text-[1.5rem] font-light leading-[1.1] ds-text">
+              Decide what to do
+            </h3>
+            <p className="mt-3 text-[14px] leading-[1.75] ds-text-muted">
+              Governed intervention logic for situations where a real decision with
+              consequence is already on the table. Decision architecture, trade-offs,
+              owners, and execution cadence.
+            </p>
+            <div className="mt-5 space-y-1.5">
+              {["Not exploratory — not theoretical", "Qualified by signal and seriousness", "Escalation earned, not purchased"].map((line) => (
+                <p key={line} className="text-[12px] leading-[1.6] ds-text-subtle">{line}</p>
+              ))}
+            </div>
+            <div className="mt-5">
+              <Link
+                href="/strategy-room"
+                className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] ds-text-muted transition hover:text-white"
+              >
+                Enter Strategy Room <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+          </div>
+        </Panel>
+      </div>
+    </Section>
+  );
+}
+
 function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
   return (
-    <Section id="final-cta" variant="surface" cap="exit · next move">
+    <Section id="final-cta" variant="surface">
       <Panel surface="lift" gold>
         <div className="p-8 md:p-12">
           <div className="mx-auto max-w-4xl text-center">
@@ -2822,23 +2836,28 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta property="og:image" content="/assets/images/social/og-image.jpg" />
       </Head>
 
+      {/* 1. Recognition + Choice */}
       <HomeHero intelligenceHref={intelligenceHref} />
 
-      <ProofLayer />
-
-      <Bridge text="proof · credibility" />
-      <CredibilityStrip />
-
-      <Bridge text="orientation · system" />
+      {/* 2. Mechanism — what happens after you click */}
       <WhatThisPlatformIs />
 
-      <Bridge text="system · ladder" />
+      {/* 3. Product path — the ladder */}
       <HowItWorksLadder />
 
-      <Bridge text="ladder · shorts" />
-      <ShortsRailSection />
+      {/* 4. Evidence — proof that earns trust */}
+      <ProofLayer />
 
-      <Bridge text="shorts · content" />
+      {/* 5. Audience qualification */}
+      <WhoThisIsFor />
+
+      {/* 6. Paid decision — commercial clarity */}
+      <HomeDecisionSection />
+
+      {/* — mode change: conversion system → content library — */}
+      <Bridge text="diagnostic system · content library" />
+
+      {/* 7. Content ecosystem */}
       <ContentWithContext
         featuredBlogPosts={featuredBlogPosts}
         featuredShorts={featuredShorts}
@@ -2846,16 +2865,17 @@ const HomePage: NextPage<HomePageProps> = ({
         latestReport={latestReport}
       />
 
-      <Bridge text="content · playbooks" />
       <PlaybooksSection />
 
-      <Bridge text="content · audience" />
-      <WhoThisIsFor />
+      <ShortsRailSection />
 
-      <Bridge text="audience · proof" />
+      {/* 8. Platform depth */}
       <AuthoritySignal counts={counts} />
 
-      <Bridge text="proof · exit" />
+      {/* — mode change: library → final action — */}
+      <Bridge text="content library · next move" />
+
+      {/* 9. Final action */}
       <HomeFinalCta intelligenceHref={intelligenceHref} />
     </Layout>
   );
