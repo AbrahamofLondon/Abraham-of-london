@@ -2,8 +2,11 @@ export const dynamic = "force-dynamic";
 // app/api/strategy-room/session/impression/route.ts
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma.server";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
+import {
+  createStrategyRoomImpression,
+  markStrategyRoomImpression,
+} from "@/lib/strategy-room/persistence";
 
 function toJsonString(value: unknown): string | null {
   if (value == null) {
@@ -46,21 +49,15 @@ export async function POST(request: Request) {
       }) ??
       (canonicalSnapshotInput || null);
 
-    await prisma.strategyRoomRecommendationImpression.create({
-      data: {
-        sessionKey,
-        recommendations: toJsonString(recommendations) || "[]",
-        canonicalSnapshot: toJsonString(canonicalSnapshot),
-      },
+    const persistedCanonicalSnapshot = toJsonString(canonicalSnapshot);
+
+    await createStrategyRoomImpression({
+      sessionKey,
+      recommendations: toJsonString(recommendations) || "[]",
+      canonicalSnapshot: persistedCanonicalSnapshot,
     });
 
-    await prisma.strategyRoomSession.updateMany({
-      where: { sessionKey },
-      data: {
-        canonicalSnapshot: toJsonString(canonicalSnapshot),
-        lastImpressionAt: new Date(),
-      },
-    });
+    await markStrategyRoomImpression(sessionKey, persistedCanonicalSnapshot);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

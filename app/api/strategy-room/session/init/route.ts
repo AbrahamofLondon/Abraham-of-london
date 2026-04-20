@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
-import { prisma } from "@/lib/prisma.server";
+import { createStrategyRoomSession } from "@/lib/strategy-room/persistence";
 import { randomUUID } from "crypto";
 
 function makeSessionKey(): string {
@@ -175,17 +175,15 @@ export async function POST(request: Request) {
     });
 
     stage = "persist_strategy_room_session";
-    await prisma.strategyRoomSession.create({
-      data: {
-        sessionKey,
-        status: "active",
-        source: "strategy-room",
-        intake: toJsonString(intake),
-        canonicalSnapshot: toJsonString(canonicalSnapshot),
-        route: assembled.constitution.route,
-        readinessTier: assembled.constitution.readinessTier,
-        authorityType: assembled.constitution.authorityType,
-      },
+    await createStrategyRoomSession({
+      sessionKey,
+      status: "active",
+      source: "strategy-room",
+      intake: toJsonString(intake),
+      canonicalSnapshot: toJsonString(canonicalSnapshot),
+      route: assembled.constitution.route,
+      readinessTier: assembled.constitution.readinessTier,
+      authorityType: assembled.constitution.authorityType,
     });
 
     return NextResponse.json({

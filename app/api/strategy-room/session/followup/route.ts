@@ -2,8 +2,11 @@ export const dynamic = "force-dynamic";
 // app/api/strategy-room/session/followup/route.ts
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma.server";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
+import {
+  createStrategyRoomFollowup,
+  markStrategyRoomFollowup,
+} from "@/lib/strategy-room/persistence";
 
 function toJsonString(value: unknown): string | null {
   if (value == null) {
@@ -36,27 +39,21 @@ export async function POST(request: Request) {
       sessionKey,
     });
 
-    await prisma.strategyRoomFollowup.create({
-      data: {
-        sessionKey,
-        routeAfter: String(body?.routeAfter || ""),
-        readinessTierAfter: String(body?.readinessTierAfter || ""),
-        authorityTypeAfter: String(body?.authorityTypeAfter || ""),
-        clarityDelta: Number(body?.clarityDelta || 0),
-        authorityDelta: Number(body?.authorityDelta || 0),
-        convertedAfterGuidance: Boolean(body?.convertedAfterGuidance),
-        metadata: toJsonString(body?.metadata || {}),
-        canonicalSnapshot: toJsonString(canonicalSnapshot),
-      },
+    const persistedCanonicalSnapshot = toJsonString(canonicalSnapshot);
+
+    await createStrategyRoomFollowup({
+      sessionKey,
+      routeAfter: String(body?.routeAfter || ""),
+      readinessTierAfter: String(body?.readinessTierAfter || ""),
+      authorityTypeAfter: String(body?.authorityTypeAfter || ""),
+      clarityDelta: Number(body?.clarityDelta || 0),
+      authorityDelta: Number(body?.authorityDelta || 0),
+      convertedAfterGuidance: Boolean(body?.convertedAfterGuidance),
+      metadata: toJsonString(body?.metadata || {}),
+      canonicalSnapshot: persistedCanonicalSnapshot,
     });
 
-    await prisma.strategyRoomSession.updateMany({
-      where: { sessionKey },
-      data: {
-        canonicalSnapshot: toJsonString(canonicalSnapshot),
-        lastFollowupAt: new Date(),
-      },
-    });
+    await markStrategyRoomFollowup(sessionKey, persistedCanonicalSnapshot);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

@@ -2,8 +2,11 @@ export const dynamic = "force-dynamic";
 // app/api/strategy-room/session/conversion/route.ts
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma.server";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
+import {
+  createStrategyRoomConversion,
+  markStrategyRoomConversion,
+} from "@/lib/strategy-room/persistence";
 
 function toJsonString(value: unknown): string | null {
   if (value == null) {
@@ -38,23 +41,20 @@ export async function POST(request: Request) {
       sessionKey,
     });
 
-    await prisma.strategyRoomConversion.create({
-      data: {
-        sessionKey,
-        conversionType,
-        metadata: toJsonString(body?.metadata || {}),
-        canonicalSnapshot: toJsonString(canonicalSnapshot),
-      },
+    const persistedCanonicalSnapshot = toJsonString(canonicalSnapshot);
+
+    await createStrategyRoomConversion({
+      sessionKey,
+      conversionType,
+      metadata: toJsonString(body?.metadata || {}),
+      canonicalSnapshot: persistedCanonicalSnapshot,
     });
 
-    await prisma.strategyRoomSession.updateMany({
-      where: { sessionKey },
-      data: {
-        canonicalSnapshot: toJsonString(canonicalSnapshot),
-        lastConversionAt: new Date(),
-        lastConversionType: conversionType,
-      },
-    });
+    await markStrategyRoomConversion(
+      sessionKey,
+      conversionType,
+      persistedCanonicalSnapshot
+    );
 
     return NextResponse.json({ ok: true });
   } catch (error) {
