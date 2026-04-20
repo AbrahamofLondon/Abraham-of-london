@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* pages/admin/index.tsx — DIRECTORATE TERMINAL WITH CANONICAL DECISION SURFACE */
+/* pages/admin/index.tsx — ADMIN COMMAND CENTER */
 
 import * as React from "react";
 import type { NextPage } from "next";
@@ -8,30 +8,24 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import {
   Activity,
-  Crown,
+  AlertTriangle,
   ArrowRight,
-  Terminal,
-  AlertCircle,
-  Zap,
-  Database,
   BarChart3,
   Building2,
+  Crown,
   FileCheck,
   FileText,
   Gauge,
-  GitBranch,
+  Key,
   Layers3,
   LineChart,
   Megaphone,
   ShieldCheck,
-  Compass,
   Sparkles,
-  Key,
+  Terminal,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
-import { ContextualContextCard } from "@/components/admin/decision/ContextualContextCard";
-import { RankedAssetTable } from "@/components/admin/decision/RankedAssetTable";
 
 export async function getServerSideProps(context: any) {
   const guard = await requireAdminPage(context);
@@ -39,428 +33,177 @@ export async function getServerSideProps(context: any) {
   return { props: { isAuthorized: true } };
 }
 
-type RankedAsset = {
-  assetId: string;
-  title: string;
-  kind: string;
-  href?: string | null;
-  impressions: number;
-  conversions: number;
-  conversionRate: number;
-  avgRank?: number;
-  avgMatchScore?: number;
-  contextualLift: number;
-  reasons: string[];
-};
+/* ─── Status card ─────────────────────────────────────── */
+function StatusCard({ label, value, sub, color = "text-white" }: {
+  label: string; value: string | number; sub?: string; color?: string;
+}) {
+  return (
+    <div className="border border-white/5 bg-zinc-900/20 p-4">
+      <p className="text-[8px] font-mono uppercase tracking-[0.24em] text-white/30">{label}</p>
+      <p className={`mt-2 text-2xl font-light ${color}`}>{value}</p>
+      {sub && <p className="mt-1 text-[8px] font-mono text-white/20">{sub}</p>}
+    </div>
+  );
+}
 
-type CanonicalContext = {
-  route: string;
-  readinessTier: string;
-  authorityType: string;
-  revenueBand: string;
-  marketRiskBand: string;
-  orgState: string;
-  dominantDomains: string[];
-  failureModes: string[];
-  requiredInterventions: string[];
-  sponsorTypes: string[];
-  worldviewAnchors: string[];
-  clarityScore: number;
-  authorityScore: number;
-  governanceScore: number;
-  severityScore: number;
-  revenueScore: number;
-};
+/* ─── Section heading ─────────────────────────────────── */
+function SectionLabel({ children, icon: Icon }: { children: React.ReactNode; icon?: any }) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      {Icon && <Icon className="h-3.5 w-3.5 text-amber-500/70" />}
+      <h3 className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/30">{children}</h3>
+    </div>
+  );
+}
 
-type EfficacyRow = {
-  id: string;
-  joinKey: string;
-  context: CanonicalContext;
-  totalSessions: number;
-  impressionCount: number;
-  conversionCount: number;
-  contextualConversionRate: number;
-  rankedAssets: RankedAsset[];
-};
+/* ─── Module link ─────────────────────────────────────── */
+function ModuleLink({ href, title, description, icon: Icon, color, bg }: {
+  href: string; title: string; description: string; icon: any; color: string; bg: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group block border border-white/5 bg-zinc-900/20 p-5 transition-all hover:border-white/10 hover:bg-zinc-900/30"
+    >
+      <div className={`mb-3 inline-flex rounded p-2 ${bg}`}>
+        <Icon className={`h-4 w-4 ${color}`} />
+      </div>
+      <h4 className="font-serif text-base text-white transition-colors group-hover:text-amber-400">
+        {title}
+      </h4>
+      <p className="mt-1 line-clamp-2 text-[10px] text-white/40">{description}</p>
+      <div className="mt-3 flex items-center justify-between">
+        <ArrowRight className="h-3 w-3 text-white/20 transition-colors group-hover:text-amber-500" />
+      </div>
+    </Link>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* PAGE                                                    */
+/* ═══════════════════════════════════════════════════════ */
 
 const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
   const { data: session } = useSession();
-  const isAdmin = true; // SSR guard (requireAdminPage) enforces real access; this controls client render
-
   const [stats, setStats] = React.useState<any>(null);
-  const [efficacyRows, setEfficacyRows] = React.useState<EfficacyRow[]>([]);
+  const [proofStats, setProofStats] = React.useState<any>(null);
+  const [alerts, setAlerts] = React.useState<string[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    if (!isAdmin) return;
-
     async function load() {
+      const results: string[] = [];
       try {
-        const [statsRes, efficacyRes] = await Promise.all([
-          fetch("/api/admin/deal-flow-stats"),
-          fetch("/api/admin/decision/contextual-efficacy?limit=4"),
+        const [statsRes, proofRes] = await Promise.all([
+          fetch("/api/admin/deal-flow-stats").then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch("/api/admin/proof/evidence").then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
+        setStats(statsRes);
+        setProofStats(proofRes);
 
-        const statsData = await statsRes.json();
-        const efficacyData = await efficacyRes.json();
-
-        setStats(statsData);
-        if (efficacyData?.ok) {
-          setEfficacyRows(efficacyData.rows || []);
+        // Derive alerts from data
+        if (!statsRes) results.push("Deal flow stats API unreachable");
+        if (!proofRes) results.push("Proof evidence API unreachable");
+        if (proofRes?.items) {
+          const pending = proofRes.items.filter((i: any) => i.status === "PENDING").length;
+          if (pending > 0) results.push(`${pending} proof item${pending > 1 ? "s" : ""} awaiting review`);
         }
       } catch {
-        // leave graceful fallback
+        results.push("Failed to load system status");
       } finally {
+        setAlerts(results);
         setLoading(false);
       }
     }
-
     void load();
-  }, [isAdmin]);
+  }, []);
 
-  if (!isAdmin) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <div className="border border-red-500/20 bg-red-500/10 p-8 text-center">
-          <AlertCircle className="mx-auto mb-4 h-8 w-8 text-red-500" />
-          <p className="text-sm text-white/60">Unauthorized access</p>
-          <p className="mt-2 text-xs text-white/30">
-            Administrative privileges required
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const primaryContext = efficacyRows[0] || null;
-
-  const modules = [
-    {
-      href: "/admin/intelligence",
-      title: "Intelligence Center",
-      description:
-        "Live audit stream, deal flow diagnostics, canonical decision context and recommendation rationale.",
-      icon: Sparkles,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-      stats: stats ? `${stats.strategy + stats.diagnostic} submissions` : "Loading",
-    },
-    {
-      href: "/admin/command-wall",
-      title: "Command Wall",
-      description:
-        "Decision-grade control surface with canonical context registry and governed asset ranking.",
-      icon: Terminal,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-      stats: "Active",
-    },
-    {
-      href: "/admin/decision/contextual-efficacy",
-      title: "Contextual Efficacy",
-      description:
-        "Track performance by canonical context, including domains, failure modes, interventions and rationale.",
-      icon: Layers3,
-      color: "text-cyan-400",
-      bg: "bg-cyan-500/10",
-      stats: "Canonical",
-    },
-    {
-      href: "/admin/decision/contextual-ranking",
-      title: "Session Ranking",
-      description:
-        "Load a session and inspect ranked assets from the exact context the user saw.",
-      icon: Compass,
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
-      stats: "Session",
-    },
-    {
-      href: "/admin/decision/governance",
-      title: "Recommendation Governance",
-      description:
-        "Approval logic, oversight workflows and recommendation governance controls.",
-      icon: GitBranch,
-      color: "text-orange-500",
-      bg: "bg-orange-500/10",
-      stats: "Active",
-    },
-    {
-      href: "/admin/decision/metadata-audit",
-      title: "Decision Metadata Audit",
-      description:
-        "Audit worldview anchors, commercial use cases and constitutional metadata across assets.",
-      icon: Database,
-      color: "text-indigo-400",
-      bg: "bg-indigo-500/10",
-      stats: "Audit",
-    },
-    {
-      href: "/admin/decision/performance",
-      title: "Decision Performance",
-      description:
-        "Track engagement, conversion rates and ranked recommendation performance.",
-      icon: BarChart3,
-      color: "text-rose-400",
-      bg: "bg-rose-500/10",
-      stats: "Analytics",
-    },
-    {
-      href: "/admin/decision/efficacy",
-      title: "Decision Efficacy",
-      description:
-        "Measure usefulness through readiness shifts, route progression and conversion outcomes.",
-      icon: Gauge,
-      color: "text-purple-400",
-      bg: "bg-purple-500/10",
-      stats: "Measured",
-    },
-    {
-      href: "/admin/access-keys",
-      title: "Access Management",
-      description:
-        "Issue, revoke, and audit access keys for tier, artifact, and product entitlements.",
-      icon: Key,
-      color: "text-amber-400",
-      bg: "bg-amber-500/10",
-      stats: "Entitlements",
-    },
-    {
-      href: "/admin/proof",
-      title: "Proof Queue",
-      description:
-        "Review, approve, anonymise, and publish diagnostic evidence for the homepage proof layer.",
-      icon: FileCheck,
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
-      stats: "Review",
-    },
-    {
-      href: "/admin/conversion-dashboard",
-      title: "Conversion Metrics",
-      description:
-        "Launch validation metrics, A1-A5 targets, funnel health, and GA4 event reference.",
-      icon: LineChart,
-      color: "text-sky-400",
-      bg: "bg-sky-500/10",
-      stats: "Launch",
-    },
-    {
-      href: "/admin/campaigns",
-      title: "Campaigns",
-      description:
-        "Campaign management, participant tracking, report generation, and delivery.",
-      icon: Megaphone,
-      color: "text-violet-400",
-      bg: "bg-violet-500/10",
-      stats: "Operations",
-    },
-    {
-      href: "/admin/organisations",
-      title: "Organisations",
-      description:
-        "Organisation management, dashboard oversight, and linked campaign surfaces.",
-      icon: Building2,
-      color: "text-teal-400",
-      bg: "bg-teal-500/10",
-      stats: "Institutional",
-    },
-    {
-      href: "/admin/pdf-dashboard",
-      title: "PDF & Reports",
-      description:
-        "PDF intelligence registry, report status, and document management.",
-      icon: FileText,
-      color: "text-pink-400",
-      bg: "bg-pink-500/10",
-      stats: "Registry",
-    },
-  ];
+  const pendingProof = proofStats?.items?.filter((i: any) => i.status === "PENDING")?.length ?? 0;
+  const approvedProof = proofStats?.items?.filter((i: any) => i.status === "APPROVED")?.length ?? 0;
+  const strategySubmissions = stats?.strategy ?? 0;
+  const diagnosticSubmissions = stats?.diagnostic ?? 0;
 
   return (
-    <AdminLayout title="Directorate Terminal">
+    <AdminLayout title="Command Center">
       <Head>
-        <title>Directorate Terminal | Abraham of London</title>
+        <title>Admin | Abraham of London</title>
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
       <div className="space-y-8">
-        <div className="rounded-sm border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-6">
+        {/* ── HEADER ──────────────────────────────────────── */}
+        <div className="border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-6">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-amber-500" />
                 <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-amber-500/60">
-                  Institutional Command
+                  Command Center
                 </span>
               </div>
               <h2 className="mt-3 font-serif text-2xl text-white">
-                Welcome, {session?.user?.name?.split(" ")[0] || "Administrator"}
+                {session?.user?.name?.split(" ")[0] || "Administrator"}
               </h2>
               <p className="mt-1 text-xs text-white/40">
-                {new Date().toLocaleDateString("en-GB", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
               </p>
             </div>
             <div className="hidden md:block">
               <div className="flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                <div className={`h-1.5 w-1.5 rounded-full ${alerts.length > 0 ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
                 <span className="text-[8px] font-mono uppercase tracking-wider text-white/40">
-                  System Operational
+                  {alerts.length > 0 ? `${alerts.length} alert${alerts.length > 1 ? "s" : ""}` : "System Operational"}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          {[
-            {
-              label: "Strategy Room",
-              value: stats?.strategy ?? "--",
-              icon: Crown,
-              trend: "Priority",
-              color: "text-amber-500",
-            },
-            {
-              label: "Diagnostic Track",
-              value: stats?.diagnostic ?? "--",
-              icon: Compass,
-              trend: "Active",
-              color: "text-blue-500",
-            },
-            {
-              label: "Canonical Contexts",
-              value: efficacyRows.length || "--",
-              icon: Layers3,
-              trend: "Tracked",
-              color: "text-cyan-400",
-            },
-            {
-              label: "Avg Score",
-              value: stats?.avg ? stats.avg.toFixed(0) : "--",
-              icon: Activity,
-              trend: "Institutional Fit",
-              color: "text-emerald-500",
-            },
-          ].map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                className="group rounded-sm border border-white/5 bg-zinc-900/20 p-5 transition-all hover:border-white/10 hover:bg-zinc-900/30"
-              >
-                <div className="flex items-center justify-between">
-                  <Icon className={`h-4 w-4 ${stat.color}`} />
-                  <span className="text-[8px] font-mono text-white/20">
-                    {stat.trend}
-                  </span>
-                </div>
-                <p className="mt-3 text-2xl font-light text-white">
-                  {loading ? "--" : stat.value}
-                </p>
-                <p className="text-[9px] uppercase tracking-wider text-white/30">
-                  {stat.label}
-                </p>
+        {/* ── ALERTS ──────────────────────────────────────── */}
+        {alerts.length > 0 && (
+          <div className="border border-amber-500/20 bg-amber-500/5 p-4 space-y-2">
+            <SectionLabel icon={AlertTriangle}>Alerts requiring attention</SectionLabel>
+            {alerts.map((alert) => (
+              <div key={alert} className="flex items-start gap-2">
+                <AlertTriangle className="h-3 w-3 text-amber-500/60 mt-0.5 shrink-0" />
+                <p className="text-[11px] text-white/60">{alert}</p>
               </div>
-            );
-          })}
-        </div>
-
-        {stats?.ai && (
-          <div className="rounded-sm border border-amber-500/20 bg-amber-500/5 p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <Zap className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-amber-500/60">
-                Institutional Assessment Intelligence
-              </span>
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div>
-                <p className="text-[10px] text-white/40">High-Quality Deals</p>
-                <p className="text-xl font-light text-white">
-                  {stats.ai.highQualityDeals}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] text-white/40">Avg Confidence</p>
-                <p className="text-xl font-light text-white">
-                  {stats.ai.avgAiConfidence}%
-                </p>
-                <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
-                  <div
-                    className="h-full rounded-full bg-amber-500"
-                    style={{ width: `${stats.ai.avgAiConfidence}%` }}
-                  />
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] text-white/40">Primary Intent</p>
-                <p className="text-xl font-light text-white">
-                  {Object.entries(stats.ai.intentDistribution).sort(
-                    (a: any, b: any) => b[1] - a[1]
-                  )[0]?.[0] || "—"}
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         )}
 
-        {primaryContext ? (
-          <div className="space-y-5">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-amber-500" />
-              <h3 className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30">
-                Leading Canonical Context
-              </h3>
-            </div>
-
-            <ContextualContextCard
-              context={primaryContext.context}
-              title="Top Performing Context"
-            />
-            <RankedAssetTable
-              items={primaryContext.rankedAssets || []}
-              title="Top Ranked Asset Rationale"
-            />
-          </div>
-        ) : null}
-
+        {/* ── OVERVIEW CARDS ──────────────────────────────── */}
         <div>
-          <h3 className="mb-4 text-[9px] font-mono uppercase tracking-[0.3em] text-white/30">
-            Command Modules
-          </h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {modules.map((module) => {
-              const Icon = module.icon;
-              return (
-                <Link
-                  key={module.href}
-                  href={module.href}
-                  className="group relative overflow-hidden rounded-sm border border-white/5 bg-zinc-900/20 p-5 transition-all hover:border-white/10 hover:bg-zinc-900/30"
-                >
-                  <div className={`mb-3 inline-flex rounded p-2 ${module.bg}`}>
-                    <Icon className={`h-4 w-4 ${module.color}`} />
-                  </div>
-                  <h4 className="font-serif text-base text-white transition-colors group-hover:text-amber-400">
-                    {module.title}
-                  </h4>
-                  <p className="mt-1 line-clamp-3 text-[10px] text-white/40">
-                    {module.description}
-                  </p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-[8px] font-mono uppercase tracking-wider text-white/20">
-                      {module.stats}
-                    </span>
-                    <ArrowRight className="h-3 w-3 text-white/20 transition-colors group-hover:text-amber-500" />
-                  </div>
-                </Link>
-              );
-            })}
+          <SectionLabel icon={Activity}>System overview</SectionLabel>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <StatusCard label="Strategy Room" value={loading ? "--" : strategySubmissions} sub="Submissions" color="text-amber-400" />
+            <StatusCard label="Diagnostics" value={loading ? "--" : diagnosticSubmissions} sub="Submissions" color="text-blue-400" />
+            <StatusCard label="Proof queue" value={loading ? "--" : pendingProof} sub="Pending review" color={pendingProof > 0 ? "text-amber-400" : "text-emerald-400"} />
+            <StatusCard label="Proof approved" value={loading ? "--" : approvedProof} sub="Ready to publish" color="text-emerald-400" />
+          </div>
+        </div>
+
+        {/* ── OPERATIONAL MODULES ─────────────────────────── */}
+        <div>
+          <SectionLabel icon={Layers3}>Operational modules</SectionLabel>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <ModuleLink href="/admin/proof" title="Proof Queue" description="Review, approve, anonymise, and publish diagnostic evidence." icon={FileCheck} color="text-emerald-400" bg="bg-emerald-500/10" />
+            <ModuleLink href="/admin/access-keys" title="Access Management" description="Issue, revoke, and audit access keys for entitlements." icon={Key} color="text-amber-400" bg="bg-amber-500/10" />
+            <ModuleLink href="/admin/conversion-dashboard" title="Conversion Metrics" description="A1-A5 targets, funnel health, and GA4 event reference." icon={LineChart} color="text-sky-400" bg="bg-sky-500/10" />
+            <ModuleLink href="/admin/campaigns" title="Campaigns" description="Campaign management, participant tracking, and report delivery." icon={Megaphone} color="text-violet-400" bg="bg-violet-500/10" />
+            <ModuleLink href="/admin/organisations" title="Organisations" description="Organisation management, dashboards, and linked campaigns." icon={Building2} color="text-teal-400" bg="bg-teal-500/10" />
+            <ModuleLink href="/admin/pdf-dashboard" title="PDF & Reports" description="PDF intelligence registry, report status, and documents." icon={FileText} color="text-pink-400" bg="bg-pink-500/10" />
+          </div>
+        </div>
+
+        {/* ── DECISION INTELLIGENCE ──────────────────────── */}
+        <div>
+          <SectionLabel icon={ShieldCheck}>Decision intelligence</SectionLabel>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <ModuleLink href="/admin/intelligence" title="Intelligence Center" description="Live audit stream, deal flow diagnostics, and recommendation rationale." icon={Sparkles} color="text-amber-500" bg="bg-amber-500/10" />
+            <ModuleLink href="/admin/decision/contextual-efficacy" title="Contextual Efficacy" description="Performance by canonical context: domains, failure modes, interventions." icon={Gauge} color="text-cyan-400" bg="bg-cyan-500/10" />
+            <ModuleLink href="/admin/decision/performance" title="Decision Performance" description="Engagement, conversion rates, and recommendation performance." icon={BarChart3} color="text-rose-400" bg="bg-rose-500/10" />
+            <ModuleLink href="/admin/command-wall" title="Command Wall" description="Control surface with context registry and governed asset ranking." icon={Terminal} color="text-blue-500" bg="bg-blue-500/10" />
           </div>
         </div>
       </div>

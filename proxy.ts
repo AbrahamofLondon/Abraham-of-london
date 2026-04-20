@@ -85,12 +85,6 @@ const CONSTITUTIONAL_PROTECTED_PATHS: Record<
     readOnly?: boolean;
   }
 > = {
-  "/dashboard": {
-    minAuthority: "PARTICIPANT",
-    requireSignature: false,
-    requireQuorum: false,
-    auditLevel: "INFO",
-  },
   "/pdf-dashboard": {
     minAuthority: "PARTICIPANT",
     requireSignature: false,
@@ -159,7 +153,10 @@ const CONSTITUTIONAL_PROTECTED_PATHS: Record<
     requireQuorum: false,
     auditLevel: "WARNING",
   },
-  "/api/strategy-room": {
+  // "/api/strategy-room" — removed from constitutional protection.
+  // Strategy Room is commercially gated via HMAC-signed cookies, not sovereign sessions.
+  // Paid users who came through Stripe do not have sovereign auth.
+  "/api/strategy-room-legacy": {
     minAuthority: "PARTICIPANT",
     requireSignature: false,
     requireQuorum: false,
@@ -186,7 +183,6 @@ const LOCKDOWN_EXEMPT_PATHS = [
 ];
 
 const TRACKABLE_PATHS = [
-  "/dashboard",
   "/pdf-dashboard",
   "/admin/reporting",
   "/admin/campaigns",
@@ -257,7 +253,7 @@ const TIER2_PREFIXES = [
 ];
 
 const TIER1_PREFIXES = [
-  "/dashboard",
+  // /dashboard retired — redirects via getServerSideProps, no proxy gating needed
   // /diagnostics is PUBLIC — it is the product entry point, not a gated surface
   "/consulting",
   "/strategy",
@@ -578,7 +574,7 @@ function safeReturnTo(req: NextRequest): string {
   const returnTo = `${pathname}${search}`;
 
   if (returnTo.startsWith("//") || returnTo.includes("://")) {
-    return encodeURIComponent("/dashboard");
+    return encodeURIComponent("/");
   }
 
   return encodeURIComponent(returnTo);
