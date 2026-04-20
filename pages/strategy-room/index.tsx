@@ -1035,7 +1035,7 @@ export default function StrategyRoomPage({
     return (
       <Layout
         title="Strategy Room | Abraham of London"
-        description="The premium intervention layer for live institutional decisions."
+        description="The governed intervention layer for live institutional decisions where consequence is already real."
         canonicalUrl="/strategy-room"
         fullWidth
         headerTransparent
@@ -1062,9 +1062,9 @@ export default function StrategyRoomPage({
               checkoutPriceCode="strategy_room"
               originPath="/strategy-room"
               ctaHref="/strategy-room"
-              primaryCtaLabel="Enter Strategy Room"
-              title="Strategy Room is the paid intervention layer."
-              description="Executive Reporting gives the interpretation. Strategy Room exists when the decision now requires governed intervention, constraint removal, and action logic under real consequence."
+              primaryCtaLabel="Continue to Strategy Room criteria"
+              title="Strategy Room is for decisions with real consequence."
+              description="Executive Reporting gives the interpretation. Strategy Room exists when the decision now requires governed intervention, constraint removal, and action logic. Not for exploratory use."
             />
           </div>
         </main>
@@ -1263,7 +1263,7 @@ export default function StrategyRoomPage({
             <section>
               <div className="mx-auto max-w-6xl px-6 lg:px-12">
                 <div className="py-20 lg:py-24">
-                  <Eyebrow>STRATEGY ROOM · £395 INTERVENTION ENTRY</Eyebrow>
+                  <Eyebrow>STRATEGY ROOM · QUALIFIED INTERVENTION ENTRY</Eyebrow>
                   <h1
                     style={{
                       marginTop: "1rem",
@@ -1277,7 +1277,7 @@ export default function StrategyRoomPage({
                       fontStyle: "italic",
                     }}
                   >
-                    Where interpretation becomes intervention.
+                    Only when consequence is real.
                   </h1>
                   <p
                     style={{
@@ -1290,9 +1290,9 @@ export default function StrategyRoomPage({
                       maxWidth: "56ch",
                     }}
                   >
-                    Strategy Room is the premium escalation layer for live decisions under
-                    material consequence. The £395 entry turns a constitutional reading into
-                    governed intervention logic.
+                    Strategy Room is the escalation layer for live decisions under
+                    material consequence. It turns a constitutional reading into
+                    governed intervention logic. Not exploratory. Not theoretical.
                   </p>
                   {hasExecutiveReportingContext && (
                     <div

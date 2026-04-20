@@ -134,6 +134,12 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
             >
               Long-form arguments, formal publication records, and preserved public reasoning.
             </p>
+            <p
+              className="mt-3 max-w-2xl text-sm leading-6"
+              style={{ color: "var(--ds-text-muted)" }}
+            >
+              This layer gives operators the reasoning behind the diagnostic system before they act on the signal.
+            </p>
 
             <div className="mt-6 h-px w-full" style={{ backgroundColor: "var(--ds-border)" }} />
 

@@ -19,7 +19,7 @@ const DEFAULT_OFFERS: Offer[] = [
   {
     title: "Diagnostics",
     label: "Entry",
-    price: "Paid",
+    price: "Free",
     body:
       "The first disciplined layer for leaders who need clarity before escalation.",
     bullets: [
@@ -34,7 +34,7 @@ const DEFAULT_OFFERS: Offer[] = [
     label: "Flagship",
     price: "Premium",
     body:
-      "The core reporting product for decision-makers who need a sharper reading, clearer exposure, and correction architecture.",
+      "The core reporting layer for decision-makers who need a sharper reading, clearer exposure, and correction architecture.",
     bullets: [
       "Narrative, matrix, exposure, and correction priority",
       "Readable by founders, boards, and operators",
@@ -54,7 +54,7 @@ const DEFAULT_OFFERS: Offer[] = [
       "Correction environment design",
       "Decision architecture under pressure",
     ],
-    href: "/consulting/strategy-room",
+    href: "/strategy-room",
   },
 ];
 

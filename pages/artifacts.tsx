@@ -389,6 +389,20 @@ function HeroSection() {
             </em>
             .
           </motion.p>
+          <motion.p
+            variants={fadeUp}
+            style={{
+              marginTop: "1rem",
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7.5px",
+              letterSpacing: "0.20em",
+              textTransform: "uppercase",
+              color: "rgba(201,169,110,0.72)",
+              maxWidth: "68ch",
+            }}
+          >
+            Intelligence for operators who need context before diagnostic or escalation decisions.
+          </motion.p>
 
           <motion.div
             variants={fadeUp}

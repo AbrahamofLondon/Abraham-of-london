@@ -299,7 +299,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 const inputStyle: React.CSSProperties = {
   width: "100%", backgroundColor: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.09)",
-  outline: "none", padding: "10px 13px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+  outline: "none", minHeight: "44px", padding: "10px 13px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
   fontWeight: 300, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.80)",
   transition: "border-color 250ms ease",
 };
@@ -325,7 +325,7 @@ function ScoreSelector({ value, onChange }: { value: DiagnosticAnswerValue | 0; 
         const isActive = value === n;
         return (
           <button key={n} type="button" onClick={() => onChange(n)} title={SCORE_LABELS[n]}
-            style={{ flex: 1, padding: "8px 4px", textAlign: "center", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", fontWeight: isActive ? 600 : 400, cursor: "pointer", transition: "all 200ms ease" }}
+            style={{ flex: 1, minHeight: "44px", padding: "8px 4px", textAlign: "center", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", fontWeight: isActive ? 600 : 400, cursor: "pointer", transition: "all 200ms ease" }}
             onMouseEnter={e => { if (!isActive) { (e.currentTarget as HTMLButtonElement).style.borderColor = `${GOLD}28`; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.55)"; } }}
             onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.07)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.30)"; } }}
           >
@@ -779,7 +779,7 @@ export default function EnterpriseAssessmentPage() {
                         </p>
                         {constitutionalThread.bridge.enterpriseAssessment.watchpoints.length > 0 && (
                           <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.58, color: "rgba(255,255,255,0.40)", fontStyle: "italic" }}>
-                            This stage is testing whether strain in {constitutionalThread.bridge.enterpriseAssessment.watchpoints[0].toLowerCase()} is distributed across the institution.
+                            This stage is testing whether strain in {String(constitutionalThread.bridge.enterpriseAssessment.watchpoints[0] ?? "the inherited watchpoint").toLowerCase()} is distributed across the institution.
                           </p>
                         )}
                       </div>

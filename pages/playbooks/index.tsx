@@ -277,6 +277,20 @@ const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
                 diagnosing drift, correcting failure modes, restoring alignment,
                 and enforcing execution discipline.
               </motion.p>
+              <motion.p
+                variants={fadeUp}
+                style={{
+                  marginTop: "0.9rem",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px",
+                  letterSpacing: "0.20em",
+                  textTransform: "uppercase",
+                  color: "rgba(201,169,110,0.72)",
+                  maxWidth: "58ch",
+                }}
+              >
+                Use after diagnosis, or when a known failure mode needs an operating response.
+              </motion.p>
 
               <motion.div variants={fadeUp} style={{ marginTop: "2.5rem" }}>
                 <div className="flex flex-wrap items-center gap-6">
@@ -534,7 +548,7 @@ const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
                 </Link>
 
                 <Link
-                  href="/consulting/strategy-room"
+                  href="/strategy-room"
                   className="group inline-flex items-center gap-2 transition-all duration-300"
                   style={{
                     padding: "10px 22px",

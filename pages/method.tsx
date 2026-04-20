@@ -74,6 +74,54 @@ const MethodPage: NextPage = () => {
             </p>
           </div>
 
+          {/* Concrete operating flow */}
+          <div
+            className="mt-12 grid gap-4 border p-5 md:grid-cols-[1fr_0.95fr]"
+            style={{ borderColor: "rgba(201,169,110,0.18)", backgroundColor: "rgba(201,169,110,0.035)" }}
+          >
+            <div>
+              <p
+                className="font-mono uppercase"
+                style={{ fontSize: "7.5px", letterSpacing: "0.28em", color: `${GOLD}80`, marginBottom: "1rem" }}
+              >
+                Simple flow
+              </p>
+              <div className="grid gap-2 text-sm leading-6 md:grid-cols-3">
+                {["Signal capture", "Structural classification", "Governed output"].map((step, index) => (
+                  <div key={step} className="border p-4" style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(0,0,0,0.24)" }}>
+                    <div className="font-mono text-[7px] uppercase tracking-[0.22em]" style={{ color: "rgba(255,255,255,0.32)" }}>
+                      {String(index + 1).padStart(2, "0")}
+                    </div>
+                    <div className="mt-2 font-mono text-[8px] uppercase tracking-[0.14em]" style={{ color: "rgba(255,255,255,0.78)" }}>
+                      {step}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p
+                className="font-mono uppercase"
+                style={{ fontSize: "7.5px", letterSpacing: "0.28em", color: `${GOLD}80`, marginBottom: "1rem" }}
+              >
+                Concrete example
+              </p>
+              <p
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontWeight: 300,
+                  fontSize: "0.98rem",
+                  lineHeight: 1.72,
+                  color: "rgba(255,255,255,0.62)",
+                }}
+              >
+                If a team reports slow execution, the system does not stop at “low performance.”
+                It tests whether the issue is authority confusion, trust erosion, resource constraint,
+                or governance drift, then routes the next step accordingly.
+              </p>
+            </div>
+          </div>
+
           {/* Principle strip */}
           <div
             className="mt-16 grid gap-6 md:grid-cols-3"

@@ -67,7 +67,7 @@ export default function ExecutiveBuyerFitSection() {
         viewport={{ once: true }}
         transition={{ duration: 0.65 }}
       >
-        <Eyebrow>Buyer fit</Eyebrow>
+        <Eyebrow>Operator fit</Eyebrow>
 
         <h2
           style={{
@@ -81,7 +81,7 @@ export default function ExecutiveBuyerFitSection() {
             color: "rgba(255,255,255,0.94)",
           }}
         >
-          Built for buyers who feel the cost of ambiguity.
+          Built for operators who feel the cost of ambiguity.
         </h2>
 
         <p
@@ -95,7 +95,7 @@ export default function ExecutiveBuyerFitSection() {
             color: "rgba(255,255,255,0.42)",
           }}
         >
-          This product is not for casual curiosity. It is for leaders and
+          This system is not for casual curiosity. It is for leaders and
           institutions where friction, drift, mistrust, and structural exposure
           already have consequences.
         </p>
@@ -125,7 +125,7 @@ export default function ExecutiveBuyerFitSection() {
               el.style.backgroundColor = `${GOLD}0E`;
             }}
           >
-            Product page
+            Executive Reporting
             <ArrowRight
               style={{ width: "13px", height: "13px" }}
               className="transition-transform group-hover:translate-x-0.5"
@@ -133,7 +133,7 @@ export default function ExecutiveBuyerFitSection() {
           </Link>
 
           <Link
-            href="/consulting/strategy-room"
+            href="/strategy-room"
             className="inline-flex items-center gap-2 transition-all duration-300"
             style={{
               padding: "12px 22px",

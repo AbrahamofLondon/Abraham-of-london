@@ -1003,6 +1003,12 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
             >
               Signal. Pattern. Decision.
             </div>
+            <p
+              className="mt-4 max-w-xl text-sm leading-6"
+              style={{ color: "var(--ds-text-muted)" }}
+            >
+              Short-form recognition for operators moving from pattern to diagnostic action.
+            </p>
 
             {/* Count */}
             <div

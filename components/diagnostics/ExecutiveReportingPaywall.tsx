@@ -111,17 +111,17 @@ export default function ExecutiveReportingPaywall({
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-16 px-6">
+    <div className="mx-auto max-w-3xl px-6 py-10 sm:py-16">
       {/* DIAGNOSIS PRESSURE */}
-      <div className="mb-8 text-sm text-gray-500">
+      <div className="mb-5 text-sm leading-6 text-white/58">
         Your diagnostic signal is not inconclusive. It is incomplete.
       </div>
 
-      <h1 className="text-3xl font-semibold mb-4">
+      <h1 className="mb-4 text-2xl font-semibold leading-tight text-white sm:text-3xl">
         Continue to Executive Interpretation
       </h1>
 
-      <p className="text-gray-400 mb-6">
+      <p className="mb-6 text-sm leading-6 text-white/68">
         You have reached the point where scoring is no longer sufficient.
         Interpretation is required.
       </p>
@@ -133,9 +133,9 @@ export default function ExecutiveReportingPaywall({
       )}
 
       {/* SIGNAL SUMMARY */}
-      <div className="bg-neutral-900 border border-neutral-800 p-6 mb-8">
-        <div className="font-medium mb-3">Your current signal</div>
-        <ul className="space-y-2 text-sm text-gray-300">
+      <div className="mb-6 border border-white/10 bg-white/[0.035] p-5 sm:p-6">
+        <div className="mb-3 font-medium text-white">Your current signal</div>
+        <ul className="space-y-2 text-sm leading-6 text-white/72">
           {currentSignal.slice(0, 3).map((item) => (
             <li key={item}>• {item}</li>
           ))}
@@ -143,12 +143,12 @@ export default function ExecutiveReportingPaywall({
       </div>
 
       {/* STAGE DIFFERENCE */}
-      <div className="bg-neutral-950 border border-neutral-800 p-6 mb-8 text-sm">
-        <div className="font-medium mb-3">What changes in Stage 4</div>
+      <div className="mb-6 border border-white/10 bg-black/35 p-5 text-sm sm:p-6">
+        <div className="mb-3 font-medium text-white">What changes in Stage 4</div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="border border-neutral-800 p-4">
-            <div className="text-gray-500 mb-1">Stages 1-3</div>
-            <div className="text-gray-300">Detect condition.</div>
+          <div className="border border-white/10 p-4">
+            <div className="mb-1 text-white/45">Stages 1-3</div>
+            <div className="text-white/72">Detect condition.</div>
           </div>
           <div className="border border-amber-700/30 bg-amber-950/10 p-4">
             <div className="text-amber-200/70 mb-1">Stage 4</div>
@@ -158,9 +158,9 @@ export default function ExecutiveReportingPaywall({
       </div>
 
       {/* OUTPUT SPECIFICITY */}
-      <div className="mb-8">
-        <h3 className="font-medium mb-3">You will receive:</h3>
-        <ul className="space-y-2 text-sm text-gray-300">
+      <div className="mb-6">
+        <h3 className="mb-3 font-medium text-white">You will receive:</h3>
+        <ul className="space-y-2 text-sm leading-6 text-white/72">
           <li>• Structural diagnosis (not a score)</li>
           <li>• Financial exposure estimate</li>
           <li>• Decision priority stack</li>
@@ -170,11 +170,11 @@ export default function ExecutiveReportingPaywall({
       </div>
 
       {/* PREVIEW */}
-      <div className="bg-neutral-950 border border-neutral-800 p-6 mb-8 text-sm">
-        <div className="font-medium mb-2">
+      <div className="mb-6 border border-white/10 bg-black/35 p-5 text-sm sm:p-6">
+        <div className="mb-2 font-medium text-white">
           Example Output
         </div>
-        <div className="text-gray-400">
+        <div className="text-white/66">
           <p className="mb-2">
             “Execution coherence collapsing under governance drift”
           </p>
@@ -189,8 +189,8 @@ export default function ExecutiveReportingPaywall({
       </div>
 
       {/* CONSEQUENCE */}
-      <div className="text-sm text-gray-500 mb-8">
-        <div className="font-medium text-gray-300 mb-2">What happens if this remains unresolved</div>
+      <div className="mb-6 text-sm leading-6 text-white/56">
+        <div className="mb-2 font-medium text-white/78">What happens if this remains unresolved</div>
         <br />• execution variance will increase
         <br />• decision latency will compound
         <br />• cost will not remain static
@@ -199,19 +199,19 @@ export default function ExecutiveReportingPaywall({
       {/* PRICE */}
       <div className="mb-6">
         <div className="text-2xl font-semibold">£{price}</div>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-white/50">
           One-time analysis • No subscription
         </div>
       </div>
 
       {/* EMAIL */}
-      <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">
+      <p className="mb-2 text-xs uppercase tracking-[0.16em] text-white/48">
         One-time analysis • No subscription • Output generated from your actual submission
       </p>
       <input
         type="email"
         placeholder="Enter your email"
-        className="w-full p-3 mb-4 bg-black border border-neutral-700"
+        className="mb-4 min-h-[44px] w-full border border-white/16 bg-black p-3 text-white"
         value={email}
         onChange={(e) => {
           setEmail(e.target.value);
@@ -222,18 +222,18 @@ export default function ExecutiveReportingPaywall({
       />
 
       {/* CTA */}
-      <p className="text-sm text-gray-500 mb-2">
+      <p className="mb-2 text-sm text-white/56">
         This is where the system stops scoring and starts interpreting.
       </p>
       <button
         onClick={handleCheckout}
         disabled={loading}
-        className="w-full bg-white text-black py-3 font-medium"
+        className="min-h-[44px] w-full bg-white py-3 font-medium text-black disabled:opacity-60"
       >
         {loading ? "Preparing Executive Reporting checkout..." : primaryCtaLabel}
       </button>
       {message && (
-        <p className="mt-3 text-sm text-gray-500">{message}</p>
+        <p className="mt-3 text-sm text-white/56">{message}</p>
       )}
     </div>
   );

@@ -220,7 +220,7 @@ function RatingRail({
         value={value}
         onChange={(e) => onChange(toLikert(Number(e.target.value)))}
         className={cn(
-          "h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10",
+          "h-11 w-full cursor-pointer appearance-none rounded-full bg-white/10",
           accent === "amber" ? "accent-amber-500" : "accent-emerald-400",
         )}
       />
@@ -580,7 +580,7 @@ export default function ConstitutionalDiagnostic() {
                     {bridge.strategyRoom.mandateDraft}
                   </p>
                   <Link
-                    href="/consulting/strategy-room"
+                    href="/strategy-room"
                     className="mt-3 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.16em] text-amber-300"
                   >
                     Continue into strategy room

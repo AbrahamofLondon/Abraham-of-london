@@ -57,11 +57,11 @@ type NavItem = {
   signal?: true; // marks the live signal item for subtle treatment
 };
 
-// Desktop nav — product-first. Primary = conversion surfaces, Secondary = content/authority.
+// Desktop nav — system-first. Primary = conversion surfaces, Secondary = content/authority.
 const PRIMARY_NAV: readonly NavItem[] = [
   { href: "/diagnostics",                     label: "Diagnostics",       sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/diagnostics/executive-reporting",  label: "Executive Report",  sub: "Paid interpretation · £95",   icon: ScrollText },
-  { href: "/strategy-room",                    label: "Strategy Room",     sub: "Paid intervention · £395",    icon: Crown      },
+  { href: "/diagnostics/executive-reporting",  label: "Executive Report",  sub: "Consequence layer · £95",     icon: ScrollText },
+  { href: "/strategy-room",                    label: "Strategy Room",     sub: "Decision intervention · £395", icon: Crown      },
 ] as const;
 
 const PRIMARY_NAV_HINTS: Record<string, string> = {
@@ -79,12 +79,12 @@ const SECONDARY_NAV: readonly NavItem[] = [
 // Combined for backward compat (mobile menu iteration)
 const DESKTOP_NAV: readonly NavItem[] = [...PRIMARY_NAV, ...SECONDARY_NAV] as const;
 
-// Mobile menu — product-first, then content/reference.
+// Mobile menu — system-first, then content/reference.
 const MOBILE_NAV: readonly NavItem[] = [
   // Product surfaces
   { href: "/diagnostics",                     label: "Diagnostics",      sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: "Paid interpretation · £95",   icon: ScrollText },
-  { href: "/strategy-room",                    label: "Strategy Room",    sub: "Paid intervention · £395",    icon: Crown      },
+  { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: "Consequence layer · £95",     icon: ScrollText },
+  { href: "/strategy-room",                    label: "Strategy Room",    sub: "Decision intervention · £395", icon: Crown      },
   // Content & authority
   { href: "/artifacts",    label: "Intelligence",  sub: "Essays, Shorts & Dispatches",  icon: Zap,       signal: true },
   { href: "/playbooks",    label: "Playbooks",     sub: "Execution Frameworks",         icon: Layers     },
@@ -216,10 +216,10 @@ export default function Header({
           {/* ── Right cluster ─────────────────────────────────────────────── */}
           <div className="flex items-center gap-5">
 
-            {/* Desktop nav — two-tier: primary product surfaces | secondary content */}
+            {/* Desktop nav — two-tier: primary system surfaces | secondary content */}
             {!minimal && (
               <nav className="hidden items-center gap-3 md:flex" aria-label="Primary navigation">
-                {/* PRIMARY: product surfaces */}
+                {/* PRIMARY: system surfaces */}
                 {PRIMARY_NAV.map((item) => {
                   const active = mounted && isActive(currentPath, item.href);
                   return (

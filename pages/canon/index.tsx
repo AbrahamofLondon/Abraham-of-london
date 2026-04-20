@@ -443,6 +443,12 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
             >
               The intellectual frame from which all structured products derive their authority.
             </p>
+            <p
+              className="mt-3 max-w-2xl text-sm leading-6"
+              style={{ color: "var(--ds-text-muted)" }}
+            >
+              Use this layer to inspect the doctrine behind the diagnostic system before moving into assessment or escalation.
+            </p>
 
             <div className="mt-6 h-px w-full" style={{ backgroundColor: "var(--ds-border)" }} />
 

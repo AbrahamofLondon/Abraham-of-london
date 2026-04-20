@@ -305,7 +305,7 @@ function Section({
         className={cn(
           "relative z-10 mx-auto max-w-[1200px] px-6 sm:px-8",
           id === "hero"
-            ? "pb-24 pt-28 lg:pb-28 lg:pt-32"
+            ? "pb-16 pt-24 sm:pb-20 sm:pt-28 lg:pb-28 lg:pt-32"
             : compact
               ? "py-16 lg:py-20"
               : "py-20 lg:py-24",
@@ -1871,18 +1871,19 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
   return (
     <Section id="hero" variant="surface">
-      <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+      <div className="grid min-w-0 gap-5 sm:gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-8">
         {/* LEFT — why / what */}
-        <div className="max-w-[560px]">
+        <div className="min-w-0 max-w-[560px]">
           <Eyebrow>Diagnostic Intelligence System</Eyebrow>
 
           <h1
-            className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light"
+            className="mt-3 font-['Cormorant_Garamond',Georgia,serif] font-light sm:mt-4"
             style={{
-              fontSize: "clamp(2.4rem, 5.5vw, 3.8rem)",
-              lineHeight: 1.06,
+              fontSize: "clamp(2rem, 10vw, 3.8rem)",
+              lineHeight: 1.04,
               color: "#F5F5F5",
-              letterSpacing: "-0.01em",
+              letterSpacing: 0,
+              overflowWrap: "break-word",
             }}
           >
             Diagnose what is actually wrong
@@ -1890,18 +1891,41 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
           </h1>
 
           <p
-            className="mt-3 font-['Cormorant_Garamond',Georgia,serif] font-light italic"
-            style={{ fontSize: "1.05rem", lineHeight: 1.5, color: "rgba(184,184,184,0.85)" }}
+            className="mt-2.5 font-['Cormorant_Garamond',Georgia,serif] font-light italic sm:mt-3"
+            style={{ fontSize: "1rem", lineHeight: 1.45, color: "rgba(184,184,184,0.85)" }}
           >
             Before it becomes a decision you can&rsquo;t reverse.
           </p>
 
-          <p className="mt-4 max-w-[52ch] text-[14px] leading-[1.65]" style={{ color: "#B8B8B8" }}>
-            Run a 10-minute diagnostic. Get a clear condition, trajectory, and next step — based on your actual situation, not generic advice.
+          <p className="mt-3 max-w-[48ch] text-[13.5px] leading-[1.55] sm:mt-4 sm:text-[14px]" style={{ color: "#B8B8B8" }}>
+            Run a 6-8 minute diagnostic to get a clear condition, trajectory, and next step from your actual situation.
           </p>
 
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Link
+              href="/diagnostics/constitutional-diagnostic"
+              className="group inline-flex w-full items-center justify-between gap-3 border px-5 py-3.5 transition-all duration-200 hover:-translate-y-0.5 sm:w-auto sm:justify-center"
+              style={{
+                borderColor: "rgba(201,169,110,0.45)",
+                backgroundColor: "rgba(201,169,110,0.16)",
+                color: "#F5F5F5",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8.5px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+              }}
+              onClick={() => trackHeroClick("primary")}
+            >
+              <span>Start diagnostic</span>
+              <span className="inline-flex items-center gap-2 text-[8px] opacity-75">
+                6-8 min
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+              </span>
+            </Link>
+          </div>
+
           <p
-            className="mt-3"
+            className="mt-2.5"
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
               fontSize: "8px",
@@ -1912,19 +1936,15 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
           >
             Free to start. No subscription. No commitment.
           </p>
-
-          <p className="mt-3 text-[12.5px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.62)" }}>
-            Built for founders, operators, and teams under pressure.
-          </p>
         </div>
 
         {/* RIGHT — choose / act */}
-        <div>
+        <div className="min-w-0">
           {/* Dual-entry cards */}
           <div ref={cardsRef} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
             <Link
               href="/diagnostics/purpose-alignment"
-              className="group border border-white/[0.10] bg-white/[0.03] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06]"
+              className="group min-w-0 border border-white/[0.10] bg-white/[0.03] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06] sm:p-5"
               onClick={() => trackHeroClick("personal")}
             >
               <div className="flex items-start gap-3">
@@ -1953,7 +1973,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
             <Link
               href="/diagnostics/constitutional-diagnostic"
-              className="group border border-white/[0.10] bg-white/[0.03] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06]"
+              className="group min-w-0 border border-white/[0.10] bg-white/[0.03] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06] sm:p-5"
               onClick={() => trackHeroClick("institutional")}
             >
               <div className="flex items-start gap-3">
@@ -1984,13 +2004,13 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
           {/* Start here — routing panel */}
           <div
-            className="mt-3 overflow-hidden border border-white/[0.07]"
+            className="mt-3 overflow-hidden border border-white/[0.06] opacity-85"
             style={{
-              background: "rgba(0,0,0,0.38)",
+              background: "rgba(0,0,0,0.30)",
               backdropFilter: "blur(8px)",
             }}
           >
-            <div className="px-5 py-3.5">
+            <div className="px-4 py-3 sm:px-5 sm:py-3.5">
               <div
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",

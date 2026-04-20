@@ -250,7 +250,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 const inputStyle: React.CSSProperties = {
   width: "100%", backgroundColor: "rgba(255,255,255,0.025)",
   border: "1px solid rgba(255,255,255,0.09)", outline: "none",
-  padding: "10px 13px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+  minHeight: "44px", padding: "10px 13px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
   fontWeight: 300, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.80)",
   transition: "border-color 250ms ease, background-color 250ms ease",
 };
@@ -281,7 +281,7 @@ function ScoreSelector({ value, onChange, accent = "gold" }: {
         return (
           <button key={n} type="button" onClick={() => onChange(n)} title={SCORE_LABELS[n]}
             style={{
-              flex: 1, padding: "8px 4px", textAlign: "center",
+              flex: 1, minHeight: "44px", padding: "8px 4px", textAlign: "center",
               border: `1px solid ${isActive ? ac.border : "rgba(255,255,255,0.07)"}`,
               backgroundColor: isActive ? ac.bg : "rgba(255,255,255,0.01)",
               color: isActive ? ac.text : "rgba(255,255,255,0.30)",
@@ -613,6 +613,7 @@ export default function TeamAssessmentPage() {
 
   async function handleSubmit() {
     setIsSubmitting(true);
+    const criticalGaps = gaps.filter((gap) => gap.gapSeverity === "CRITICAL");
     const answers: DiagnosticAnswer[] = [
       ...DOMAINS.flatMap(d => [0, 1, 2].map(idx => ({ sectionId: d.id, questionId: qKey("leader", d.id, idx), prompt: `[Leader] ${d.leaderPrefix} ${d.prompts[idx]}`, value: (leaderScores[qKey("leader", d.id, idx)] ?? 3) as DiagnosticAnswerValue }))),
       ...DOMAINS.flatMap(d => [0, 1, 2].map(idx => ({ sectionId: d.id, questionId: qKey("reality", d.id, idx), prompt: `[Reality] ${d.realityPrefix} ${d.prompts[idx]}`, value: (realityScores[qKey("reality", d.id, idx)] ?? 3) as DiagnosticAnswerValue }))),
@@ -721,7 +722,7 @@ export default function TeamAssessmentPage() {
                         </p>
                         {constitutionalThread.bridge.teamAssessment.hypotheses.length > 0 && (
                           <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.58, color: "rgba(255,255,255,0.40)", fontStyle: "italic" }}>
-                            This stage is testing whether {constitutionalThread.bridge.teamAssessment.hypotheses[0].charAt(0).toLowerCase() + constitutionalThread.bridge.teamAssessment.hypotheses[0].slice(1)}
+                            This stage is testing whether {String(constitutionalThread.bridge.teamAssessment.hypotheses[0] ?? "the inherited hypothesis").charAt(0).toLowerCase() + String(constitutionalThread.bridge.teamAssessment.hypotheses[0] ?? "the inherited hypothesis").slice(1)}
                           </p>
                         )}
                       </div>

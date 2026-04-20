@@ -118,20 +118,20 @@ export default function StrategyRoomConversionBridge({
         </div>
       )}
 
-      <h2 className="text-xl font-semibold mb-4">{title}</h2>
-      <p className="text-gray-400 mb-6">{description}</p>
+      <h1 className="mb-4 text-2xl font-semibold leading-tight text-white sm:text-3xl">{title}</h1>
+      <p className="mb-6 text-sm leading-6 text-white/68">{description}</p>
 
       <div className="grid gap-4 md:grid-cols-2 mb-6">
-        <div className="border border-neutral-800 bg-neutral-950 p-5">
+        <div className="border border-white/10 bg-white/[0.025] p-5">
           <h3 className="font-medium mb-3">What this report does not do</h3>
-          <ul className="space-y-2 text-sm text-gray-400">
+          <ul className="space-y-2 text-sm text-white/62">
             <li>• It clarifies the problem</li>
             <li>• It does not execute the intervention</li>
           </ul>
         </div>
         <div className="border border-amber-700/30 bg-amber-950/10 p-5">
           <h3 className="font-medium mb-3">What Strategy Room adds</h3>
-          <ul className="space-y-2 text-sm text-gray-300">
+          <ul className="space-y-2 text-sm text-white/72">
             <li>• intervention logic</li>
             <li>• governed next moves</li>
             <li>• action under live constraints</li>
@@ -139,25 +139,25 @@ export default function StrategyRoomConversionBridge({
         </div>
       </div>
 
-      <div className="border border-neutral-800 bg-black p-5 mb-6">
+      <div className="mb-6 border border-white/10 bg-black p-5">
         <h3 className="font-medium mb-3">If you stop here</h3>
-        <ul className="space-y-2 text-sm text-gray-400">
+        <ul className="space-y-2 text-sm text-white/62">
           <li>• You understand the problem</li>
           <li>• You have not changed the outcome</li>
           <li>• The gap between diagnosis and intervention is where organisations drift</li>
         </ul>
       </div>
 
-      <div className="border border-neutral-800 bg-neutral-950 p-5 mb-6">
+      <div className="mb-6 border border-white/10 bg-white/[0.025] p-5">
         <h3 className="font-medium mb-3">Sample intervention fragment</h3>
-        <div className="space-y-2 text-sm text-gray-400">
+        <div className="space-y-2 text-sm text-white/62">
           <p>Intervention priority: restore decision authority boundary</p>
           <p>Immediate constraint: governance conflict at reporting layer</p>
           <p>First move: collapse duplicate approval path within 14 days</p>
         </div>
       </div>
 
-      <div className="text-sm text-gray-500 mb-6">
+      <div className="mb-6 text-sm leading-6 text-white/56">
         {escalationTone}
         <div className="mt-3 space-y-1">
           {signals.slice(0, 3).map((signal) => (
@@ -167,14 +167,14 @@ export default function StrategyRoomConversionBridge({
       </div>
 
       <div className="text-2xl font-semibold mb-2">£{price}</div>
-      <div className="text-sm text-gray-500 mb-4">
+      <div className="mb-4 text-sm text-white/50">
         One-time intervention entry • No subscription
       </div>
 
       <input
         type="email"
         placeholder="Enter your email"
-        className="w-full p-3 mb-4 bg-black border border-neutral-700"
+        className="mb-4 min-h-[44px] w-full border border-white/16 bg-black p-3 text-white"
         value={email}
         onChange={(e) => {
           setEmail(e.target.value);
@@ -187,11 +187,11 @@ export default function StrategyRoomConversionBridge({
       <button
         onClick={handleCheckout}
         disabled={loading}
-        className="w-full bg-white text-black py-3 font-medium"
+        className="min-h-[44px] w-full bg-white py-3 font-medium text-black disabled:opacity-60"
       >
         {loading ? "Preparing Strategy Room access..." : primaryCtaLabel}
       </button>
-      {message && <p className="mt-3 text-sm text-gray-500">{message}</p>}
+      {message && <p className="mt-3 text-sm text-white/56">{message}</p>}
     </div>
   );
 }

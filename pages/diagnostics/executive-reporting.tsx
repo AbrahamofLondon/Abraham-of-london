@@ -12,7 +12,7 @@ export default function ExecutiveReportingEntryPage() {
   return (
     <Layout
       title="Executive Reporting | Abraham of London"
-      description="The first paid interpretation layer in the diagnostic ladder. Translate structural strain into financial exposure, strategic consequence, and a priority stack."
+      description="The first consequence layer in the diagnostic ladder. Translate structural strain into financial exposure, strategic consequence, and a priority stack."
       canonicalUrl="/diagnostics/executive-reporting"
       fullWidth
       headerTransparent
@@ -20,7 +20,7 @@ export default function ExecutiveReportingEntryPage() {
       <Head>
         <meta
           name="description"
-          content="Executive Reporting is the first paid interpretation layer in the Abraham of London diagnostic ladder."
+          content="Executive Reporting is the first consequence interpretation layer in the Abraham of London diagnostic ladder."
         />
       </Head>
 
@@ -28,14 +28,14 @@ export default function ExecutiveReportingEntryPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 max-w-3xl">
             <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-200/70">
-              Paid interpretation layer
+              Consequence interpretation layer
             </div>
             <h1 className="mt-4 font-serif text-4xl font-light leading-[0.98] tracking-[-0.04em] text-white md:text-6xl">
               Free diagnosis has established the signal.
               <span className="block text-white/35">Executive Reporting prices the consequence.</span>
             </h1>
             <p className="mt-5 max-w-2xl font-serif text-lg leading-8 text-white/52">
-              Executive Reporting is the first serious commercial step in the ladder. It translates
+              Executive Reporting is the first escalation step in the ladder. It translates
               constitutional strain into financial exposure, institutional constraint, and a governed
               priority stack.
             </p>
@@ -45,7 +45,7 @@ export default function ExecutiveReportingEntryPage() {
             price={95}
             ctaHref="/diagnostics/executive-reporting/run"
             checkoutPriceCode="executive_reporting"
-            primaryCtaLabel="Run Executive Reporting"
+            primaryCtaLabel="Continue to Executive Reporting"
             secondaryHref="/diagnostics"
             secondaryLabel="Return to free ladder"
             eyebrow="Executive Reporting · £95"
@@ -129,12 +129,12 @@ export default function ExecutiveReportingEntryPage() {
           {(checkoutCancelled || accessRequired) && (
             <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-amber-200/75">
-                {checkoutCancelled ? "Checkout cancelled" : "Payment required"}
+                {checkoutCancelled ? "Checkout cancelled" : "Access required"}
               </p>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/58">
                 {checkoutCancelled
                   ? "No payment was taken. You can return to the free ladder or restart Executive Reporting when ready."
-                  : "Executive Reporting is the paid interpretation layer. Complete checkout to continue into the intake."}
+                  : "Executive Reporting is the consequence interpretation layer. Complete checkout to continue into the intake."}
               </p>
             </div>
           )}

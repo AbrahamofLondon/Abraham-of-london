@@ -20,13 +20,13 @@ type CtaCard = {
 
 const CARDS: CtaCard[] = [
   {
-    href: "/consulting/strategy-room",
+    href: "/strategy-room",
     title: "Commission founder review",
     body:
       "For founder-led firms approaching complexity faster than internal clarity can support.",
     label: "Founder-led",
     icon: Crown,
-    cta: "Enter Strategy Room",
+    cta: "View Strategy Room criteria",
   },
   {
     href: "/diagnostics/executive-reporting",
@@ -36,7 +36,7 @@ const CARDS: CtaCard[] = [
     label: "Board / institution",
     icon: Building2,
     accent: true,
-    cta: "View flagship product",
+    cta: "View Executive Reporting",
   },
   {
     href: "/diagnostics",

@@ -290,6 +290,9 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
             <p className="mt-5 font-mono text-[8px] uppercase tracking-[0.34em]" style={{ color: "rgba(255,255,255,0.28)" }}>
               Documents, frameworks, and reference materials organized by type and access.
             </p>
+            <p className="mt-3 max-w-2xl text-sm leading-6" style={{ color: "rgba(255,255,255,0.48)" }}>
+              A reference layer for operators who need to verify the thinking, tools, and source materials behind the diagnostic system.
+            </p>
 
             <div className="mt-6 h-px w-full" style={{ backgroundColor: RULE }} />
 

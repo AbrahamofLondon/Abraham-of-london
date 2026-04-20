@@ -6,15 +6,15 @@ import { Crown, Layers, ShieldCheck } from "lucide-react";
 
 const ITEMS = [
   {
-    title: "Paid entry",
+    title: "Committed entry",
     body:
-      "The entry layer is priced to reflect commitment, attention, and decision value.",
+      "The entry layer is structured to reflect commitment, attention, and decision value.",
     icon: ShieldCheck,
   },
   {
     title: "Premium flagship",
     body:
-      "Executive Reporting stands as a premium standalone artifact with its own decision value.",
+      "Executive Reporting stands as a consequence layer with its own decision value.",
     icon: Crown,
   },
   {
