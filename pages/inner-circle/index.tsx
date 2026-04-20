@@ -93,15 +93,21 @@ const InnerCirclePage: NextPage = () => {
         body: JSON.stringify({ email: email.trim().toLowerCase(), name: name.trim(), recaptchaToken }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "Registration failed");
+      if (!res.ok) {
+        const msg = data?.error || "";
+        if (msg.includes("already") || msg.includes("exists")) {
+          throw new Error("This email is already recognised. If you have a key, use the Secure Entry panel. Otherwise, sign in with your existing account.");
+        }
+        throw new Error(msg || "Unable to process your request. Please check your details and try again.");
+      }
 
       setRegisterStatus("success");
-      setFeedback({ type: "register", msg: "Protocol Initialized. Key dispatched via encrypted mail." });
+      setFeedback({ type: "register", msg: "Access request received. Your key will be dispatched by email." });
       setEmail("");
       setName("");
     } catch (err: any) {
       setRegisterStatus("error");
-      setFeedback({ type: "register", msg: err?.message || "Protocol failure." });
+      setFeedback({ type: "register", msg: err?.message || "Access request service unavailable. Please try again shortly." });
     }
   };
 
@@ -118,14 +124,23 @@ const InnerCirclePage: NextPage = () => {
         body: JSON.stringify({ key: accessKey.trim() }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "Invalid Security Key");
+      if (!res.ok) {
+        const msg = data?.error || "";
+        if (msg.includes("expired")) {
+          throw new Error("This credential has expired. Please request a new access key.");
+        }
+        if (msg.includes("revoked")) {
+          throw new Error("This credential has been revoked. Contact the administrator if you believe this is an error.");
+        }
+        throw new Error("Invalid or expired credential. Please check your key and try again.");
+      }
 
       setUnlockStatus("success");
       setAlreadyUnlocked(true);
       window.setTimeout(() => router.replace(returnTo), 600);
     } catch (err: any) {
       setUnlockStatus("error");
-      setFeedback({ type: "unlock", msg: err?.message || "Access Denied." });
+      setFeedback({ type: "unlock", msg: err?.message || "Invalid or expired credential." });
     }
   };
 
@@ -359,6 +374,16 @@ export default InnerCirclePage;
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerSession(ctx.req, ctx.res, authOptions);
   const access = await getUserAccess(prisma, session?.user?.id ?? null);
+
+  // Privileged identity gate — OWNER/ADMIN bypass all member flows
+  if (access.permissions.isAdmin || access.permissions.isOwner) {
+    return {
+      redirect: {
+        destination: "/admin",
+        permanent: false,
+      },
+    };
+  }
 
   // Already has inner-circle access — redirect to dashboard
   if (canAccessTier(access, "inner-circle")) {

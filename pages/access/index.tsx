@@ -341,6 +341,16 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const userId = (session?.user as any)?.id ?? null;
   const access = await getUserAccess(prisma, userId);
 
+  // Privileged identity gate — OWNER/ADMIN go straight to admin
+  if (access.permissions.isAdmin || access.permissions.isOwner) {
+    return {
+      redirect: {
+        destination: "/admin",
+        permanent: false,
+      },
+    };
+  }
+
   return {
     props: {
       access: JSON.parse(JSON.stringify(access)),
