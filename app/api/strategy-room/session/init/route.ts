@@ -21,6 +21,8 @@ function toJsonString(value: unknown): string | null {
 
 function getSafePrismaDiagnostic(error: unknown):
   | {
+      name?: string;
+      message?: string;
       code?: string;
       clientVersion?: string;
       meta?: unknown;
@@ -31,12 +33,23 @@ function getSafePrismaDiagnostic(error: unknown):
   }
 
   const candidate = error as {
+    name?: unknown;
+    message?: unknown;
     code?: unknown;
     clientVersion?: unknown;
     meta?: unknown;
   };
 
+  const message =
+    typeof candidate.message === "string"
+      ? candidate.message
+          .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]")
+          .slice(0, 1200)
+      : undefined;
+
   const diagnostic = {
+    name: typeof candidate.name === "string" ? candidate.name : undefined,
+    message,
     code: typeof candidate.code === "string" ? candidate.code : undefined,
     clientVersion:
       typeof candidate.clientVersion === "string"
@@ -45,7 +58,11 @@ function getSafePrismaDiagnostic(error: unknown):
     meta: candidate.meta,
   };
 
-  return diagnostic.code || diagnostic.clientVersion || diagnostic.meta
+  return diagnostic.name ||
+    diagnostic.message ||
+    diagnostic.code ||
+    diagnostic.clientVersion ||
+    diagnostic.meta
     ? diagnostic
     : undefined;
 }
