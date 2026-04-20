@@ -1,0 +1,45 @@
+name: Build PDF Registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/**"
+      - "scripts/pdf/**"
+      - "lib/pdf/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-registry:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: npx tsx scripts/build-pdf-registry-json.ts
+
+      - name: Commit registry if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet public/pdfs/registry.json || (
+            git add public/pdfs/registry.json &&
+            git commit -m "chore: update PDF registry [skip ci]" &&
+            git push
+          )
