@@ -50,6 +50,26 @@ const RETURN_PATHS: Record<string, { successPath: string; cancelPath: string }> 
   },
 };
 
+function stripeErrorDetails(error: unknown): Record<string, unknown> {
+  if (!error || typeof error !== "object") {
+    return { message: String(error || "Unknown Stripe checkout error") };
+  }
+
+  const stripeError = error as Stripe.errors.StripeError & {
+    requestId?: string;
+    statusCode?: number;
+  };
+
+  return {
+    type: stripeError.type,
+    code: stripeError.code,
+    declineCode: stripeError.decline_code,
+    message: stripeError.message,
+    requestId: stripeError.requestId,
+    statusCode: stripeError.statusCode,
+  };
+}
+
 function siteUrl(req: NextApiRequest): string {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -81,43 +101,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const successPath = returnPaths?.successPath || "/dashboard";
   const cancelPath = origin || returnPaths?.cancelPath || "/dashboard";
   const baseUrl = siteUrl(req);
-  const productCode = commercialConfig ? commercialConfig.productCode : inlinePrice.productCode;
-  const tier = commercialConfig ? commercialConfig.tier : inlinePrice.tier;
+  const productCode = commercialConfig ? commercialConfig.productCode : inlinePrice!.productCode;
+  const tier = commercialConfig ? commercialConfig.tier : inlinePrice!.tier;
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    customer_email: String(email).trim().toLowerCase(),
-    line_items: [
-      commercialConfig
-        ? {
-            price: commercialPriceId,
-            quantity: 1,
-          }
-        : {
-            price_data: {
-              currency: process.env.DIAGNOSTIC_DEFAULT_CURRENCY || "gbp",
-              unit_amount: inlinePrice.amount,
-              product_data: {
-                name: inlinePrice.name,
-                metadata: {
-                  productCode,
-                  tier,
+  let session: Stripe.Checkout.Session;
+
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: String(email).trim().toLowerCase(),
+      line_items: [
+        commercialConfig
+          ? {
+              price: commercialPriceId,
+              quantity: 1,
+            }
+          : {
+              price_data: {
+                currency: process.env.DIAGNOSTIC_DEFAULT_CURRENCY || "gbp",
+                unit_amount: inlinePrice!.amount,
+                product_data: {
+                  name: inlinePrice!.name,
+                  metadata: {
+                    productCode,
+                    tier,
+                  },
                 },
               },
+              quantity: 1,
             },
-            quantity: 1,
-          },
-    ],
-    success_url: `${baseUrl}${successPath}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}${cancelPath}?checkout=cancelled`,
-    metadata: {
-      productCode,
+      ],
+      success_url: `${baseUrl}${successPath}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}${cancelPath}?checkout=cancelled`,
+      metadata: {
+        productCode,
+        priceCode: normalizedPriceCode,
+        tier,
+        email: String(email).trim().toLowerCase(),
+        originPath: origin,
+      },
+    });
+  } catch (error) {
+    const details = stripeErrorDetails(error);
+    console.error("[BILLING_CHECKOUT_ERROR]", {
       priceCode: normalizedPriceCode,
+      productCode,
       tier,
-      email: String(email).trim().toLowerCase(),
       originPath: origin,
-    },
-  });
+      stripe: details,
+    });
+
+    return res.status(502).json({
+      ok: false,
+      reason: "STRIPE_CHECKOUT_CREATE_FAILED",
+      code: typeof details.code === "string" ? details.code : undefined,
+      type: typeof details.type === "string" ? details.type : undefined,
+    });
+  }
 
   return res.json({ ok: true, url: session.url });
 }

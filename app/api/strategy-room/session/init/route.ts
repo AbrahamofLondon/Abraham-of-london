@@ -11,7 +11,26 @@ function makeSessionKey(): string {
   return `sr_${randomUUID().replace(/-/g, "")}`;
 }
 
+function logStrategyRoomInitError(stage: string, error: unknown): void {
+  const details =
+    error instanceof Error
+      ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+          cause: error.cause,
+        }
+      : { message: String(error || "Unknown Strategy Room session error") };
+
+  console.error("[STRATEGY_ROOM_SESSION_INIT_ERROR]", {
+    stage,
+    error: details,
+  });
+}
+
 export async function POST(request: Request) {
+  let stage = "parse_request";
+
   try {
     const body = await request.json();
     const intake = body?.intake;
@@ -25,6 +44,7 @@ export async function POST(request: Request) {
 
     const sessionKey = makeSessionKey();
 
+    stage = "assemble_guidance";
     const assembled = await assembleConstitutionalGuidance({
       intake,
       assetLimit: 6,
@@ -32,6 +52,7 @@ export async function POST(request: Request) {
       source: "strategy-room-session-init",
     });
 
+    stage = "build_canonical_contract";
     const canonical = buildCanonicalReportContract({
       report: {
         state: assembled.constitution.orgState,
@@ -88,12 +109,14 @@ export async function POST(request: Request) {
       },
     });
 
+    stage = "normalize_canonical_snapshot";
     const canonicalSnapshot = normalizeCanonicalSectionsSnapshot({
       envelope: canonical,
       source: "session-init",
       sessionKey,
     });
 
+    stage = "persist_strategy_room_session";
     await prisma.strategyRoomSession.create({
       data: {
         sessionKey,
@@ -123,10 +146,15 @@ export async function POST(request: Request) {
       canonical,
     });
   } catch (error) {
-    console.error("[STRATEGY_ROOM_SESSION_INIT_ERROR]", error);
+    logStrategyRoomInitError(stage, error);
 
     return NextResponse.json(
-      { success: false, error: "Failed to initialize governed session." },
+      {
+        success: false,
+        error: "Failed to initialize governed session.",
+        reason: "STRATEGY_ROOM_SESSION_INIT_FAILED",
+        stage,
+      },
       { status: 500 }
     );
   }

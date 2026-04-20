@@ -13,28 +13,53 @@ function bootstrapRoleForEmail(email: string) {
   return null;
 }
 
+function firstEnv(...names: string[]): string | undefined {
+  for (const name of names) {
+    const value = process.env[name]?.trim();
+    if (value) return value;
+  }
+  return undefined;
+}
+
 function buildProviders() {
   const providers = [];
 
-  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  const googleClientId = firstEnv("GOOGLE_CLIENT_ID", "GOOGLE_ID", "AUTH_GOOGLE_ID");
+  const googleClientSecret = firstEnv(
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_SECRET",
+    "AUTH_GOOGLE_SECRET",
+  );
+
+  if (googleClientId && googleClientSecret) {
     providers.push(
       GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        clientId: googleClientId,
+        clientSecret: googleClientSecret,
       }),
     );
   }
 
-  if (process.env.GITHUB_ID && process.env.GITHUB_SECRET) {
+  const githubId = firstEnv("GITHUB_ID", "GITHUB_CLIENT_ID", "AUTH_GITHUB_ID");
+  const githubSecret = firstEnv(
+    "GITHUB_SECRET",
+    "GITHUB_CLIENT_SECRET",
+    "AUTH_GITHUB_SECRET",
+  );
+
+  if (githubId && githubSecret) {
     providers.push(
       GitHubProvider({
-        clientId: process.env.GITHUB_ID,
-        clientSecret: process.env.GITHUB_SECRET,
+        clientId: githubId,
+        clientSecret: githubSecret,
       }),
     );
   }
 
-  if (process.env.ADMIN_USER_EMAIL && process.env.ADMIN_USER_PASSWORD) {
+  const adminUserEmail = firstEnv("ADMIN_USER_EMAIL", "NEXTAUTH_ADMIN_EMAIL");
+  const adminUserPassword = firstEnv("ADMIN_USER_PASSWORD", "NEXTAUTH_ADMIN_PASSWORD");
+
+  if (adminUserEmail && adminUserPassword) {
     providers.push(
       CredentialsProvider({
         id: "credentials",
@@ -46,8 +71,8 @@ function buildProviders() {
         async authorize(credentials) {
           const email = credentials?.email?.trim().toLowerCase();
           const password = credentials?.password ?? "";
-          const expectedEmail = process.env.ADMIN_USER_EMAIL?.trim().toLowerCase();
-          const expectedPassword = process.env.ADMIN_USER_PASSWORD ?? "";
+          const expectedEmail = adminUserEmail.trim().toLowerCase();
+          const expectedPassword = adminUserPassword;
 
           if (!email || !password || !expectedEmail || !expectedPassword) {
             return null;
@@ -65,6 +90,14 @@ function buildProviders() {
         },
       }),
     );
+  }
+
+  if (providers.length === 0) {
+    console.warn("[AUTH_PROVIDER_CONFIG] No NextAuth providers configured", {
+      google: Boolean(googleClientId && googleClientSecret),
+      github: Boolean(githubId && githubSecret),
+      credentials: Boolean(adminUserEmail && adminUserPassword),
+    });
   }
 
   return providers;
