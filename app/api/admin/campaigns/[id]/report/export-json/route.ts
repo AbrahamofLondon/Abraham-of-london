@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { buildExecutiveReportFromCampaign } from "@/lib/admin/reporting/executive-report-service";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -13,6 +14,9 @@ function buildFilename(campaignId: string): string {
 }
 
 export async function GET(_request: Request, context: RouteContext) {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const { id } = await context.params;
 

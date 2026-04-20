@@ -9,6 +9,7 @@ import {
   getCanonicalPerformanceContext,
   getCanonicalRecommendations,
 } from "@/lib/admin/decision/canonical-efficacy";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 type ContextAggregate = {
   joinKey: string;
@@ -80,6 +81,9 @@ function upsertAssetStat(
 }
 
 export async function POST() {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const [sessions, impressions, conversions] = await Promise.all([
       prisma.strategyRoomSession.findMany({

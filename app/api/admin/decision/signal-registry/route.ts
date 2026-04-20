@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { buildDecisionSignalRegistry } from "@/lib/decision/decision-signal-registry";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 type ContextPerformanceRow = {
   assetId: string;
@@ -35,6 +36,9 @@ function normalizeSearchParam(
 }
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const prisma =
       typeof (db as any)?.getPrismaClient === "function"

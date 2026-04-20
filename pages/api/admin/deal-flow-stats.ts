@@ -1,8 +1,12 @@
 // pages/api/admin/deal-flow-stats.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { requireAdmin } from "@/lib/access/require-admin";
 import { db } from "@/lib/db";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res);
+  if (!admin) return; // 401/403 already sent
+
   const prisma =
     typeof (db as any)?.getPrismaClient === "function"
       ? await (db as any).getPrismaClient()

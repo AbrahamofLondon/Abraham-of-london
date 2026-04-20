@@ -8,6 +8,7 @@ import {
   summarizeDecisionSignalProfiles,
   type DecisionAssetContextRow,
 } from "@/lib/decision/build-decision-signal-profile";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 function topBy<T>(
   items: T[],
@@ -20,6 +21,9 @@ function topBy<T>(
 }
 
 export async function GET() {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const prisma =
       typeof (db as any)?.getPrismaClient === "function"

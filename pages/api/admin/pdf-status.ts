@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { requireAdmin } from "@/lib/access/require-admin";
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -29,6 +30,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<PDFStatusResponse>
 ) {
+  const admin = await requireAdmin(req, res);
+  if (!admin) return; // 401/403 already sent
+
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }

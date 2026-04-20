@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 // app/api/admin/campaigns/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 type CampaignRow = {
   id: string;
@@ -18,6 +19,9 @@ type CampaignRow = {
 };
 
 export async function GET() {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const prisma =
       typeof db.getPrismaClient === "function"

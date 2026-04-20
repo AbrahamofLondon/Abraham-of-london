@@ -15,9 +15,14 @@ import {
   Zap,
   Database,
   BarChart3,
+  Building2,
+  FileCheck,
+  FileText,
   Gauge,
   GitBranch,
   Layers3,
+  LineChart,
+  Megaphone,
   ShieldCheck,
   Compass,
   Sparkles,
@@ -80,7 +85,7 @@ type EfficacyRow = {
 
 const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
   const { data: session } = useSession();
-  const isAdmin = true;
+  const isAdmin = true; // SSR guard (requireAdminPage) enforces real access; this controls client render
 
   const [stats, setStats] = React.useState<any>(null);
   const [efficacyRows, setEfficacyRows] = React.useState<EfficacyRow[]>([]);
@@ -212,13 +217,63 @@ const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
     },
     {
       href: "/admin/access-keys",
-      title: "Access Key Management",
+      title: "Access Management",
       description:
         "Issue, revoke, and audit access keys for tier, artifact, and product entitlements.",
       icon: Key,
       color: "text-amber-400",
       bg: "bg-amber-500/10",
       stats: "Entitlements",
+    },
+    {
+      href: "/admin/proof",
+      title: "Proof Queue",
+      description:
+        "Review, approve, anonymise, and publish diagnostic evidence for the homepage proof layer.",
+      icon: FileCheck,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+      stats: "Review",
+    },
+    {
+      href: "/admin/conversion-dashboard",
+      title: "Conversion Metrics",
+      description:
+        "Launch validation metrics, A1-A5 targets, funnel health, and GA4 event reference.",
+      icon: LineChart,
+      color: "text-sky-400",
+      bg: "bg-sky-500/10",
+      stats: "Launch",
+    },
+    {
+      href: "/admin/campaigns",
+      title: "Campaigns",
+      description:
+        "Campaign management, participant tracking, report generation, and delivery.",
+      icon: Megaphone,
+      color: "text-violet-400",
+      bg: "bg-violet-500/10",
+      stats: "Operations",
+    },
+    {
+      href: "/admin/organisations",
+      title: "Organisations",
+      description:
+        "Organisation management, dashboard oversight, and linked campaign surfaces.",
+      icon: Building2,
+      color: "text-teal-400",
+      bg: "bg-teal-500/10",
+      stats: "Institutional",
+    },
+    {
+      href: "/admin/pdf-dashboard",
+      title: "PDF & Reports",
+      description:
+        "PDF intelligence registry, report status, and document management.",
+      icon: FileText,
+      color: "text-pink-400",
+      bg: "bg-pink-500/10",
+      stats: "Registry",
     },
   ];
 

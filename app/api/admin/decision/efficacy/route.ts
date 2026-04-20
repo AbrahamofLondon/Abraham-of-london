@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 // app/api/admin/decision/efficacy/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 function toNumber(value: unknown, fallback = 0): number {
   if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
@@ -136,6 +137,9 @@ function serializeBucketMap(map: Map<string, ConditionBucket>) {
 }
 
 export async function GET() {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const prisma =
       typeof db.getPrismaClient === "function"

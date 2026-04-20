@@ -7,8 +7,12 @@ import {
   deriveAdaptiveWeight,
   derivePerformanceRates,
 } from "@/lib/decision/adaptive-weight-engine";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 export async function POST() {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const prisma =
       typeof (db as any)?.getPrismaClient === "function"

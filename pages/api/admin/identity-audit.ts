@@ -1,5 +1,6 @@
 /* pages/api/admin/identity-audit.ts — DATA INTEGRITY NODE RUNTIME */
 import type { NextApiRequest, NextApiResponse } from "next";
+import { requireAdmin } from "@/lib/access/require-admin";
 import { prisma } from "@/lib/prisma";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 
@@ -27,16 +28,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const admin = await requireAdmin(req, res);
+  if (!admin) return; // 401/403 already sent
+
   const timestamp = new Date().toISOString();
 
-  // 1. AUTHENTICATION & METHOD GATE (Standard Node style)
   if (req.method !== "GET") {
     return res.status(405).json({ ok: false, error: "Method not allowed" });
-  }
-
-  const authHeader = req.headers["authorization"];
-  if (authHeader !== `Bearer ${process.env.ADMIN_API_KEY}`) {
-    return res.status(401).json({ ok: false, error: "Unauthorized" });
   }
 
   try {

@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { detectDriftAlerts } from "@/lib/decision/recommendation-drift-alerts";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 type ContextPerformanceRow = {
   assetId: string;
@@ -41,6 +42,9 @@ function asNumber(value: unknown): number | null {
 }
 
 export async function POST() {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const prisma =
       typeof (db as any)?.getPrismaClient === "function"

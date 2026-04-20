@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import "server-only";
+import { requireAdmin } from "@/lib/access/require-admin";
 import { createOrUpdateMemberAndIssueKey } from "@/lib/inner-circle/keys.server";
 import { normalizeTier } from "@/lib/inner-circle/access.server";
 
@@ -18,21 +19,6 @@ type Err = {
 function methodNotAllowed(res: NextApiResponse<Err>) {
   res.setHeader("Allow", "POST");
   return res.status(405).json({ ok: false, error: "Method Not Allowed" });
-}
-
-// Phase 0: consolidated admin auth. Uses standard Authorization: Bearer
-// pattern with ADMIN_API_KEY, matching lib/server/guards.ts. Replaces the
-// ad-hoc x-admin-secret header and INNER_CIRCLE_ADMIN_SECRET env var.
-function assertAdmin(req: NextApiRequest) {
-  const adminKey = (process.env.ADMIN_API_KEY || "").trim();
-  if (!adminKey) {
-    throw new Error("Server misconfigured: ADMIN_API_KEY not set");
-  }
-  const auth = String(req.headers.authorization || "");
-  const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-  if (!token || token !== adminKey) {
-    throw new Error("Unauthorized");
-  }
 }
 
 function pickString(value: unknown): string {
@@ -54,11 +40,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Ok | Err>
 ) {
+  const admin = await requireAdmin(req, res);
+  if (!admin) return; // 401/403 already sent
+
   try {
     if (req.method !== "POST") {
       return methodNotAllowed(res);
     }
-    assertAdmin(req);
     const email = pickString(req.body?.email);
     const memberId = pickString(req.body?.memberId);
     const tierRaw = req.body?.tier;

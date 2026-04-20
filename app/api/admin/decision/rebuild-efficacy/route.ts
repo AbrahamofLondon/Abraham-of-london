@@ -4,8 +4,12 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { deriveDecisionEfficacy } from "@/lib/decision/decision-efficacy-engine";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 export async function POST() {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const prisma =
       typeof (db as any)?.getPrismaClient === "function"

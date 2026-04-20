@@ -3,8 +3,12 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 export async function GET(request: Request) {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const url = new URL(request.url);
     const limit = Math.max(

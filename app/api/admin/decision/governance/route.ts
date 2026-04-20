@@ -7,8 +7,12 @@ import {
   buildDecisionSignalProfiles,
   type DecisionAssetContextRow,
 } from "@/lib/decision/build-decision-signal-profile";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 export async function GET() {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   try {
     const prisma =
       typeof (db as any)?.getPrismaClient === "function"

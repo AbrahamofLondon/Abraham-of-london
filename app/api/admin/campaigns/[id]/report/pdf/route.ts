@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { generateExecutiveReportForCampaign } from "@/lib/admin/reporting/executive-report-service";
 import { evaluateConstitutionalRoute } from "@/lib/constitution/rules";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -73,18 +74,13 @@ async function readableStreamToUint8Array(
 }
 
 export async function GET(_request: Request, context: RouteContext) {
+  const auth = await requireAdminAppRoute();
+  if (!auth.authorized) return auth.response;
+
   const startTime = Date.now();
   let campaignId: string | null = null;
 
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return createErrorResponse(
-        "Authentication required",
-        "AUTH_REQUIRED",
-        401,
-      );
-    }
 
     const { id } = await context.params;
     campaignId = id;
@@ -225,6 +221,7 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 }
 
+// OPTIONS does not require auth (preflight)
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
