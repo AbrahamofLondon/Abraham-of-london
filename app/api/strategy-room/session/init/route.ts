@@ -199,7 +199,7 @@ export async function POST(request: Request) {
         error: "Failed to initialize governed session.",
         reason: "STRATEGY_ROOM_SESSION_INIT_FAILED",
         stage,
-        diagnostic,
+        diagnostic: diagnostic ?? null,
       },
       { status: 500 }
     );
