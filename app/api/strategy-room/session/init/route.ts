@@ -19,7 +19,39 @@ function toJsonString(value: unknown): string | null {
   return typeof value === "string" ? value : JSON.stringify(value);
 }
 
+function getSafePrismaDiagnostic(error: unknown):
+  | {
+      code?: string;
+      clientVersion?: string;
+      meta?: unknown;
+    }
+  | undefined {
+  if (!error || typeof error !== "object") {
+    return undefined;
+  }
+
+  const candidate = error as {
+    code?: unknown;
+    clientVersion?: unknown;
+    meta?: unknown;
+  };
+
+  const diagnostic = {
+    code: typeof candidate.code === "string" ? candidate.code : undefined,
+    clientVersion:
+      typeof candidate.clientVersion === "string"
+        ? candidate.clientVersion
+        : undefined,
+    meta: candidate.meta,
+  };
+
+  return diagnostic.code || diagnostic.clientVersion || diagnostic.meta
+    ? diagnostic
+    : undefined;
+}
+
 function logStrategyRoomInitError(stage: string, error: unknown): void {
+  const prismaDiagnostic = getSafePrismaDiagnostic(error);
   const details =
     error instanceof Error
       ? {
@@ -27,6 +59,7 @@ function logStrategyRoomInitError(stage: string, error: unknown): void {
           message: error.message,
           stack: error.stack,
           cause: error.cause,
+          prisma: prismaDiagnostic,
         }
       : { message: String(error || "Unknown Strategy Room session error") };
 
@@ -155,6 +188,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     logStrategyRoomInitError(stage, error);
+    const diagnostic =
+      stage === "persist_strategy_room_session"
+        ? getSafePrismaDiagnostic(error)
+        : undefined;
 
     return NextResponse.json(
       {
@@ -162,6 +199,7 @@ export async function POST(request: Request) {
         error: "Failed to initialize governed session.",
         reason: "STRATEGY_ROOM_SESSION_INIT_FAILED",
         stage,
+        diagnostic,
       },
       { status: 500 }
     );
