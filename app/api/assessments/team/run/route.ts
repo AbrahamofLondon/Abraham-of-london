@@ -1,5 +1,6 @@
 // app/api/assessments/team/run/route.ts
 import { NextResponse } from "next/server";
+import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 
 type TeamRow = {
   teamName: string;
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
         ? "EXECUTIVE_REPORTING"
         : "CONSTITUTIONAL";
 
-    return NextResponse.json({
+    const result = {
       ok: true,
       organisation,
       varianceIndex,
@@ -78,7 +79,35 @@ export async function POST(request: Request) {
         operatingFriction: row.operatingFriction,
         strategicCoherence: row.strategicCoherence,
       })),
+      methodology: {
+        mode: "leader_estimate",
+        confidence: rows.reduce((sum, row) => sum + n(row.respondents), 0) >= 3 ? 45 : 25,
+        note: "Leader-estimate mode: lower confidence than tokenized multi-respondent campaign mode.",
+      },
+    };
+
+    await persistDiagnosticStage({
+      email,
+      organisation,
+      stage: "team",
+      payload: result,
+      tensions: [
+        varianceIndex >= 20 ? "team variance" : "",
+        trustGap >= 20 ? "trust gap" : "",
+        avgFriction >= 65 ? "operating friction" : "",
+      ].filter(Boolean),
+      routeDecision: { nextLayer },
+      snapshot: {
+        timestamp: new Date().toISOString(),
+        stage: "team",
+        coreMetrics: { varianceIndex, trustGap, avgFriction },
+        tensions: [varianceIndex >= 20 ? "team variance" : "", trustGap >= 20 ? "trust gap" : ""].filter(Boolean),
+        escalationLevel: nextLayer === "EXECUTIVE_REPORTING" ? 2 : 1,
+        directive: nextLayer,
+      },
     });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("[TEAM_ASSESSMENT_RUN_ERROR]", error);
     return NextResponse.json(

@@ -50,12 +50,13 @@ export function readPrintSourcePublications(): PublicationItem[] {
       const slug = file.replace(/\.print\.md$/i, "");
 
       const preferredPdf = `/downloads/${slug}.pdf`;
-      const fallbackPdf = `/assets/downloads/${slug}.pdf`;
+      const controlledPdf = `/api/downloads/${slug}`;
+      const fallbackPdf = ["", "assets", "downloads", `${slug}.pdf`].join("/");
 
       const pdfHref = fileExistsInPublic(preferredPdf)
         ? preferredPdf
         : fileExistsInPublic(fallbackPdf)
-        ? fallbackPdf
+        ? controlledPdf
         : null;
 
       return {

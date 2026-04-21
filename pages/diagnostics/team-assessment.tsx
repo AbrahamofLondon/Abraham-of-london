@@ -6,7 +6,7 @@
 // Architecture:
 // Phase 1 — Identity: who is filling this in, what context
 // Phase 2 — Leader perception: how leader rates team on 4 domains × 3 questions
-// Phase 3 — Team reality: leader's estimate of how team would rate themselves
+// Phase 3 — Leader's team estimate: leader's estimate of how team would rate themselves
 // Phase 4 — Result: gap analysis, fragility classification, escalation routing
 //
 // The gap between Phase 2 and Phase 3 is the diagnostic finding.
@@ -178,13 +178,13 @@ function deriveGapReading(gaps: DomainGap[], overallLeader: number, overallReali
 
   if (criticalGaps.length >= 2) {
     title = "Systemic coherence strain";
-    pattern = `${criticalGaps.length} of 4 domains show critical divergence between leadership perception and team reality. That means judgment is being made from a map the operating layer does not share, which turns ordinary decisions into structural risk. The threshold from local variance into constitutional strain has already been crossed. The next move is enterprise-level reading, not another round of team exhortation.`;
+    pattern = `${criticalGaps.length} of 4 domains show critical divergence between leadership perception and estimated team experience. That means judgment is being made from a map the operating layer does not share, which turns ordinary decisions into structural risk. The threshold from local variance into constitutional strain has already been crossed. The next move is enterprise-level reading, not another round of team exhortation.`;
     firstAction = "Before any intervention, gather unfiltered direct reports from 3-5 team members on each domain — individually, not in a group. The goal is to verify whether the perception gap is accurate signal or whether team self-assessment is deflated by a psychological safety problem.";
     escalationNote = "The gap is too wide and too distributed to treat as a contained team issue. The Enterprise Assessment tests whether this strain is local or already embedded in the wider institutional structure.";
     route = "ENTERPRISE";
   } else if (hasSignalFailure) {
     title = "Trust no longer load-bearing";
-    pattern = `The trust domain shows a ${Math.abs(trustGap!.gap)}-point divergence between leadership reading and team reality. When trust stops carrying load, signal quality collapses first and correction weakens soon after. The threshold has been crossed from ordinary tension into signal failure. The next move is to restore honest transmission before widening intervention.`;
+    pattern = `The trust domain shows a ${Math.abs(trustGap!.gap)}-point divergence between leadership reading and estimated team experience. When trust stops carrying load, signal quality collapses first and correction weakens soon after. The threshold has been crossed from ordinary tension into signal failure. The next move is to restore honest transmission before widening intervention.`;
     firstAction = "Initiate a structured individual conversation with each team member — not a team meeting — focused on: 'What would you change about how decisions get made here?' Anonymise the responses and look for patterns, not individuals.";
     escalationNote = "A trust gap at this level usually means the leader is no longer receiving load-bearing signal. The Enterprise Assessment will test whether that condition is confined to this team or distributed across layers.";
     route = criticalGaps.length >= 1 ? "ENTERPRISE" : "WATCH";
@@ -214,7 +214,7 @@ function deriveGapReading(gaps: DomainGap[], overallLeader: number, overallReali
     route = "WATCH";
   } else {
     title = "Coherent team signal";
-    pattern = `Leadership and team reality are reading close enough to the same condition that signal remains usable. That does not mean there is no strain, only that the system is still coherent enough to correct itself without distortion. The threshold is currently on the ordered side of risk. The next move is to test whether this coherence holds under greater pressure.`;
+    pattern = `Leadership and estimated team experience are reading close enough to the same condition that signal remains usable. That does not mean there is no strain, only that the system is still coherent enough to correct itself without distortion. The threshold is currently on the ordered side of risk. The next move is to test whether this coherence holds under greater pressure.`;
     firstAction = "The next useful diagnostic question is whether this alignment holds under pressure. Run the same assessment after a period of significant change, resource constraint, or strategic shift.";
     escalationNote = "A coherent team can justify enterprise testing if leadership wants to know whether this ordering extends beyond one unit. The point is not escalation for its own sake, but verification under wider pressure.";
     route = "WATCH";
@@ -366,7 +366,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
     <div className="space-y-6">
       {/* Headline */}
       <div style={{ border: `1px solid ${rc.border}`, backgroundColor: rc.bg, padding: "2rem" }}>
-        <Eyebrow>Team assessment result</Eyebrow>
+        <Eyebrow>Team assessment result · Leader-estimate mode</Eyebrow>
         <div className="flex items-end justify-between gap-4 mt-4 flex-wrap">
           <div>
             <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.5rem, 3vw, 2.5rem)", lineHeight: 1.0, letterSpacing: "-0.022em", color: "rgba(255,255,255,0.92)" }}>{reading.title}</h2>
@@ -503,7 +503,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             </div>
             <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
               <MRow label="Leader perception" value={`${overallLeader}%`} />
-              <MRow label="Team reality"      value={`${overallReality}%`} />
+              <MRow label="Team estimate"     value={`${overallReality}%`} />
               <MRow label="Overall gap"       value={`${overallGap > 0 ? "+" : ""}${overallGap} pts`} />
               <MRow label="Fragility"         value={fragility.status} />
               <MRow label="Fragility score"   value={`${fragility.score} stddev`} />
@@ -673,7 +673,7 @@ export default function TeamAssessmentPage() {
   }
 
   return (
-    <Layout title="Team Assessment | Abraham of London" description="Perception gap analysis across leadership and team reality. The instrument that reveals whether your team shares your map." canonicalUrl="/diagnostics/team-assessment" fullWidth headerTransparent>
+    <Layout title="Team Assessment | Abraham of London" description="Perception gap analysis measuring the structural distance between leadership perception and leader-estimated team experience." canonicalUrl="/diagnostics/team-assessment" fullWidth headerTransparent>
       <Head><meta name="robots" content="index,follow" /></Head>
 
       <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
@@ -700,12 +700,12 @@ export default function TeamAssessmentPage() {
 
                 <div className="grid gap-14 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
                   <div>
-                    <Eyebrow>Layer 02 · Perception gap analysis</Eyebrow>
+                    <Eyebrow>Layer 02 · Evidence source for Executive Reporting</Eyebrow>
                     <h1 style={{ marginTop: "1.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(2.5rem, 6vw, 5.5rem)", lineHeight: 0.90, letterSpacing: "-0.042em", color: "rgba(255,255,255,0.94)" }}>
                       Does your team<br /><span style={{ color: "rgba(255,255,255,0.28)" }}>share your map?</span>
                     </h1>
                     <p style={{ marginTop: "1.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1rem, 1.4vw, 1.18rem)", lineHeight: 1.72, color: "rgba(255,255,255,0.42)", maxWidth: "48ch" }}>
-                      One leader's perception is not evidence. This instrument measures the gap between how you read the team and how the team reads itself. That gap is the structural finding.
+                      This instrument operates in two modes. <strong style={{ color: "rgba(255,255,255,0.58)", fontWeight: 400 }}>Leader View</strong> is a fast directional read based on your estimate of team experience. <strong style={{ color: "rgba(255,255,255,0.58)", fontWeight: 400 }}>Respondent-Based</strong> collects structured responses from team members directly — producing stronger evidence with higher confidence.
                     </p>
                     {purposePct !== null && (
                       <div style={{ marginTop: "1.25rem", padding: "0.85rem 1.25rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}07`, display: "inline-flex", alignItems: "center", gap: "0.75rem" }}>
@@ -775,7 +775,7 @@ export default function TeamAssessmentPage() {
                     <React.Fragment key={p}>
                       {i > 0 && <div style={{ width: "20px", height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />}
                       <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: isCurrent ? `${GOLD}CC` : isDone ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.18)" }}>
-                        {p === "leader" ? "Leader perception" : p === "reality" ? "Team reality" : "Gap analysis"}
+                        {p === "leader" ? "Leader perception" : p === "reality" ? "Leader's team estimate" : "Gap analysis"}
                       </span>
                     </React.Fragment>
                   );
@@ -822,9 +822,34 @@ export default function TeamAssessmentPage() {
                     </div>
                   </div>
 
-                  <div style={{ marginTop: "2rem", padding: "1.25rem", border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.008)" }}>
+                  {/* Mode selection */}
+                  <div style={{ marginTop: "2rem" }}>
+                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.75rem" }}>Assessment mode</div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div style={{ padding: "1.25rem", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}08` }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}CC`, marginBottom: "0.5rem" }}>Leader View</div>
+                        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60, color: "rgba(255,255,255,0.45)" }}>
+                          Fast directional read. You rate the team, then estimate how the team would rate itself. Produces a leader-estimated perception gap. Suitable for early-stage signal detection.
+                        </p>
+                        <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                          Claim level: leadership view of team reality
+                        </div>
+                      </div>
+                      <Link href="/admin/campaigns" style={{ padding: "1.25rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", display: "block", textDecoration: "none" }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(110,231,183,0.80)", marginBottom: "0.5rem" }}>Respondent-Based Team Reality</div>
+                        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60, color: "rgba(255,255,255,0.45)" }}>
+                          Structured team-wide assessment. Invite team members to respond directly. Produces respondent-derived sentiment with measurable confidence. Stronger evidence for Executive Reporting.
+                        </p>
+                        <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                          Claim level: respondent-derived team sentiment (when threshold met)
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: "1.5rem", padding: "1.25rem", border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.008)" }}>
                     <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.90rem", lineHeight: 1.65, color: "rgba(255,255,255,0.32)", fontStyle: "italic" }}>
-                      This assessment runs two phases: first you rate the team as you perceive it. Then you estimate how team members would rate themselves on the same dimensions. The gap between these two phases is the diagnostic finding.
+                      Leader View runs two phases: first you rate the team as you perceive it, then you estimate how the team would rate itself. The gap between these two phases is the diagnostic finding. This is a directional signal — not observed team sentiment.
                     </p>
                   </div>
 
@@ -832,7 +857,7 @@ export default function TeamAssessmentPage() {
                     onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; }}
                     onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; }}
                   >
-                    Begin: Leader perception <ArrowRight style={{ width: "12px", height: "12px" }} />
+                    Begin: Leader View <ArrowRight style={{ width: "12px", height: "12px" }} />
                   </button>
                 </div>
               </motion.div>
@@ -870,8 +895,8 @@ export default function TeamAssessmentPage() {
             {phase === "reality" && (
               <motion.div key="reality" initial={{ opacity: 0, x: direction * 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.40 }}>
                 <div className="py-14">
-                  <Eyebrow>Phase 2 — Team reality</Eyebrow>
-                  <h2 style={{ marginTop: "1.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.6rem, 2.5vw, 2.2rem)", lineHeight: 1.0, letterSpacing: "-0.020em", color: "rgba(255,255,255,0.88)" }}>How would your team rate themselves?</h2>
+                  <Eyebrow>Phase 2 — Leader&apos;s team estimate</Eyebrow>
+                  <h2 style={{ marginTop: "1.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.6rem, 2.5vw, 2.2rem)", lineHeight: 1.0, letterSpacing: "-0.020em", color: "rgba(255,255,255,0.88)" }}>How would your team rate themselves, in your estimate?</h2>
                   <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.70, color: "rgba(255,255,255,0.38)", fontStyle: "italic", maxWidth: "52ch" }}>Your best estimate of how team members would score themselves if asked individually and anonymously. The gap between Phase 1 and Phase 2 is the finding.</p>
                   <div style={{ marginTop: "1rem", padding: "0.85rem 1.25rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}>
                     <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60, color: "rgba(255,255,255,0.32)", fontStyle: "italic" }}>

@@ -88,12 +88,17 @@ export default function NewCampaignPage({ params }: PageProps) {
         
         <header className="mb-12 border-b border-white/10 pb-10">
           <div className="flex items-center gap-3 mb-4 text-[#8A6A2F]">
-            <Zap className="w-5 h-5" />
-            <span className="text-[10px] uppercase tracking-[0.5em] font-bold">Campaign Deployment // OGR-INIT</span>
+            <Target className="w-5 h-5" />
+            <span className="text-[10px] uppercase tracking-[0.5em] font-bold">Team Assessment · Respondent-Based</span>
           </div>
-          <h1 className="text-4xl font-serif italic text-white uppercase tracking-tight">
-            Launch <span className="not-italic font-sans font-black">Alignment Audit</span>
+          <h1 className="text-4xl font-serif italic text-white tracking-tight">
+            Create assessment campaign
           </h1>
+          <p className="mt-3 text-sm text-white/40 max-w-lg leading-relaxed">
+            Collect structured responses from team members directly. Respondent-based assessment
+            produces stronger evidence than leader estimate alone, with measurable confidence
+            for Executive Reporting.
+          </p>
         </header>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
@@ -101,7 +106,7 @@ export default function NewCampaignPage({ params }: PageProps) {
           {/* Campaign Parameters */}
           <div className="bg-white/[0.02] border border-white/5 p-8 space-y-8">
             <h2 className="text-[10px] text-[#8A6A2F] font-bold tracking-widest uppercase flex items-center gap-2">
-              <Target className="w-3 h-3" /> Mission Parameters
+              <Target className="w-3 h-3" /> Campaign details
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -141,7 +146,7 @@ export default function NewCampaignPage({ params }: PageProps) {
           {/* Participant Intake */}
           <div className="bg-white/[0.02] border border-white/5 p-8 space-y-8">
             <h2 className="text-[10px] text-[#8A6A2F] font-bold tracking-widest uppercase flex items-center gap-2">
-              <Users className="w-3 h-3" /> Target Population
+              <Users className="w-3 h-3" /> Participants
             </h2>
 
             <div className="space-y-4">
@@ -189,7 +194,7 @@ export default function NewCampaignPage({ params }: PageProps) {
               className="flex items-center gap-4 px-10 py-4 bg-[#8A6A2F] text-white text-[11px] uppercase font-bold tracking-[0.3em] hover:bg-[#A68B56] disabled:opacity-50 transition-all"
             >
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              {isSubmitting ? "Deploying..." : "Initiate Audit"}
+              {isSubmitting ? "Creating campaign…" : "Create campaign"}
             </button>
           </div>
 

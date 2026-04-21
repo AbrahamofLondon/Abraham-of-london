@@ -6,13 +6,24 @@ import { Zap, ShieldCheck, ArrowRight, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AssessmentContext {
+  kind?: "enterprise" | "team_assessment";
   participantId: string;
   campaignId: string;
   organisationName: string;
+  campaignTitle?: string;
   status: string;
   isExecutive: boolean;
   teamName: string;
+  anonymityMode?: "anonymous" | "attributed";
+  domains?: string[];
 }
+
+const TEAM_DOMAIN_LABELS: Record<string, string> = {
+  direction_priority: "Direction and priority are clear in day-to-day work.",
+  execution_integrity: "Execution reality matches what leadership believes is happening.",
+  trust_communication: "Trust and communication are strong enough for honest escalation.",
+  authority_escalation: "Authority and escalation paths are clear when decisions get stuck.",
+};
 
 export default function EnterpriseAssessmentPage({ params }: { params: { token: string } }) {
   const router = useRouter();
@@ -22,15 +33,35 @@ export default function EnterpriseAssessmentPage({ params }: { params: { token: 
   
   // OGR State: Using a record to match your Logic Engine requirements
   const [answers, setAnswers] = React.useState<Record<string, boolean>>({});
+  const [teamAnswers, setTeamAnswers] = React.useState<Record<string, number>>({});
 
   // 1. Initial Identity Validation
   React.useEffect(() => {
     async function validateToken() {
       try {
+        const teamRes = await fetch(`/api/team-assessment/respond/${params.token}`);
+        const teamResult = await teamRes.json();
+        if (teamRes.ok && teamResult?.ok && teamResult.kind === "team_assessment") {
+          setContext({
+            kind: "team_assessment",
+            participantId: teamResult.invite.id,
+            campaignId: teamResult.campaign.id,
+            organisationName: teamResult.campaign.title,
+            campaignTitle: teamResult.campaign.title,
+            status: teamResult.invite.status,
+            isExecutive: false,
+            teamName: teamResult.invite.roleLabel || "Team respondent",
+            anonymityMode: teamResult.anonymityMode,
+            domains: Array.isArray(teamResult.campaign.domains) ? teamResult.campaign.domains : [],
+          });
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch(`/api/alignment/enterprise/assessments?token=${params.token}`);
         const result = await res.json();
 
-        if (!res.ok) throw new Error(result.error || "Access Denied");
+        if (!res.ok) throw new Error(teamResult?.error || result.error || "Access Denied");
         
         if (result.data.status === 'completed') {
           router.push('/assessment/complete');
@@ -50,6 +81,30 @@ export default function EnterpriseAssessmentPage({ params }: { params: { token: 
 
   // 2. OGR Synchronization (Submission)
   const handleSubmit = async () => {
+    if (context?.kind === "team_assessment") {
+      const required = context.domains?.length ? context.domains : Object.keys(TEAM_DOMAIN_LABELS);
+      if (required.some((domain) => typeof teamAnswers[domain] !== "number")) {
+        toast.error("Please answer every team assessment domain.");
+        return;
+      }
+      setSubmitting(true);
+      try {
+        const res = await fetch(`/api/team-assessment/respond/${params.token}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers: teamAnswers }),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Submission failed.");
+        toast.success("Team response submitted");
+        router.push(`/assessment/success?mode=team&confidence=${result.aggregate?.confidence ?? 0}`);
+      } catch (err: any) {
+        toast.error(err.message);
+        setSubmitting(false);
+      }
+      return;
+    }
+
     if (Object.keys(answers).length < 5) { // Minimum threshold for integrity
       toast.error("Insufficient Data: Please complete all alignment nodes.");
       return;
@@ -79,6 +134,10 @@ export default function EnterpriseAssessmentPage({ params }: { params: { token: 
     setAnswers(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const setTeamAnswer = (key: string, value: number) => {
+    setTeamAnswers(prev => ({ ...prev, [key]: value }));
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center">
       <Loader2 className="w-6 h-6 text-[#8A6A2F] animate-spin" />
@@ -92,64 +151,97 @@ export default function EnterpriseAssessmentPage({ params }: { params: { token: 
         <div className="flex items-center gap-3">
           <ShieldCheck className="w-5 h-5 text-[#8A6A2F]" />
           <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-zinc-500">
-            {context?.organisationName} // <span className="text-white">Alignment Protocol</span>
+            {context?.organisationName} · <span className="text-white">{context?.kind === "team_assessment" ? "Team Assessment" : "Institutional Assessment"}</span>
           </span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1 bg-[#8A6A2F]/10 border border-[#8A6A2F]/20">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#8A6A2F] animate-pulse" />
-          <span className="text-[9px] uppercase tracking-widest text-[#8A6A2F] font-mono">Secure Node</span>
+          <Lock size={10} className="text-[#8A6A2F]" />
+          <span className="text-[9px] uppercase tracking-widest text-[#8A6A2F] font-mono">Confidential</span>
         </div>
       </nav>
 
       <div className="max-w-3xl mx-auto pt-40 pb-24 px-6">
         {/* HEADER SECTION */}
         <header className="mb-20 space-y-4">
-          <h1 className="text-5xl md:text-6xl font-serif font-light tracking-tighter leading-tight">
-            The <span className="italic text-[#8A6A2F]">Sovereign</span> Assessment.
+          <p className="text-[10px] uppercase tracking-[0.4em] font-mono text-[#8A6A2F]">
+            {context?.kind === "team_assessment" ? "Respondent assessment" : "Institutional assessment"}
+          </p>
+          <h1 className="text-4xl md:text-5xl font-serif font-light tracking-tighter leading-tight">
+            {context?.kind === "team_assessment" ? "Team" : "Institutional"}{" "}
+            <span className="italic text-[#8A6A2F]">assessment.</span>
           </h1>
           <p className="text-zinc-500 text-sm max-w-lg leading-relaxed font-light">
-            Finalize your institutional alignment. Your responses update the 
-            <span className="text-zinc-300"> {context?.teamName} </span> 
-            resonance within the registry.
+            {context?.kind === "team_assessment"
+              ? "Rate your own experience of the team condition. Answer from your genuine observation, not what you think leadership wants to hear."
+              : "Your responses contribute to the institutional reading for"}
+            {" "}<span className="text-zinc-300">{context?.teamName}</span>.
+            {" "}Responses are aggregated anonymously. Individual answers are not attributed.
           </p>
         </header>
 
         {/* ASSESSMENT NODES */}
-        <section className="space-y-12 mb-20">
-          {[
+        {context?.kind === "team_assessment" ? (
+          <section className="space-y-10 mb-20">
+            {(context.domains?.length ? context.domains : Object.keys(TEAM_DOMAIN_LABELS)).map((domain, idx) => (
+              <div key={domain} className="border-l border-white/5 pl-8 py-2">
+                <span className="text-[9px] font-mono text-[#8A6A2F] uppercase tracking-widest">Domain {idx + 1}</span>
+                <p className="mt-2 text-xl text-zinc-300">{TEAM_DOMAIN_LABELS[domain] || domain.replace(/_/g, " ")}</p>
+                <div className="mt-5 grid grid-cols-5 gap-2">
+                  {[20, 40, 60, 80, 100].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setTeamAnswer(domain, value)}
+                      className={`border px-3 py-3 text-[10px] font-mono uppercase tracking-widest transition-colors ${
+                        teamAnswers[domain] === value
+                          ? "border-[#8A6A2F] bg-[#8A6A2F]/20 text-[#C9A96E]"
+                          : "border-white/10 text-zinc-500 hover:border-[#8A6A2F]/40"
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+        ) : (
+          <section className="space-y-12 mb-20">
+            {[
             { id: "q1", label: "Operational transparency is maintained across all levels." },
             { id: "q2", label: "Strategic objectives are synchronized with team execution." },
             { id: "q3", label: "Resource allocation is prioritized by institutional impact." },
-            { id: "q4", label: "Decision-making follows the established Sovereign Protocol." },
+            { id: "q4", label: "Decision-making follows established governance processes." },
             { id: "q5", label: "Data integrity is verified before strategic commitments." }
-          ].map((q, idx) => (
-            <div key={q.id} className="group relative border-l border-white/5 pl-8 py-2 hover:border-[#8A6A2F]/50 transition-colors">
-              <span className="absolute left-[-1px] top-0 h-4 w-[1px] bg-[#8A6A2F]" />
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="space-y-1">
-                  <span className="text-[9px] font-mono text-[#8A6A2F] uppercase tracking-widest">Node {idx + 1}</span>
-                  <p className="text-xl text-zinc-400 group-hover:text-white transition-colors">{q.label}</p>
+            ].map((q, idx) => (
+              <div key={q.id} className="group relative border-l border-white/5 pl-8 py-2 hover:border-[#8A6A2F]/50 transition-colors">
+                <span className="absolute left-[-1px] top-0 h-4 w-[1px] bg-[#8A6A2F]" />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-mono text-[#8A6A2F] uppercase tracking-widest">Statement {idx + 1}</span>
+                    <p className="text-xl text-zinc-400 group-hover:text-white transition-colors">{q.label}</p>
+                  </div>
+                  <button
+                    onClick={() => toggleAnswer(q.id)}
+                    className={`relative w-16 h-8 border transition-all duration-500 flex items-center px-1 ${
+                      answers[q.id] ? "bg-[#8A6A2F]/20 border-[#8A6A2F]/50" : "bg-transparent border-white/10"
+                    }`}
+                  >
+                    <div className={`w-6 h-6 transition-all duration-500 ${
+                      answers[q.id] ? "translate-x-8 bg-[#8A6A2F]" : "translate-x-0 bg-zinc-800"
+                    }`} />
+                  </button>
                 </div>
-                <button 
-                  onClick={() => toggleAnswer(q.id)}
-                  className={`relative w-16 h-8 border transition-all duration-500 flex items-center px-1 ${
-                    answers[q.id] ? "bg-[#8A6A2F]/20 border-[#8A6A2F]/50" : "bg-transparent border-white/10"
-                  }`}
-                >
-                  <div className={`w-6 h-6 transition-all duration-500 ${
-                    answers[q.id] ? "translate-x-8 bg-[#8A6A2F]" : "translate-x-0 bg-zinc-800"
-                  }`} />
-                </button>
               </div>
-            </div>
-          ))}
-        </section>
+            ))}
+          </section>
+        )}
 
         {/* SUBMISSION FOOTER */}
         <footer className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-4 text-zinc-600 font-mono text-[9px] uppercase tracking-[0.2em]">
             <Lock size={12} />
-            <span>End-to-End Encrypted Registry Entry</span>
+            <span>Responses are confidential and anonymously aggregated</span>
           </div>
           
           <button 
@@ -161,7 +253,7 @@ export default function EnterpriseAssessmentPage({ params }: { params: { token: 
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                Commit to Registry
+                Submit response
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
               </>
             )}

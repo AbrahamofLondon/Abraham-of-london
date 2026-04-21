@@ -188,7 +188,7 @@ export function buildCanonicalReportContract(
     readinessTier: safeString(constitution?.readinessTier, "EMERGING") as ExecutiveReportReadinessTier,
     authorityType: safeString(constitution?.authorityType, "UNCLEAR") as ExecutiveReportAuthorityType,
     revenueBand: safeString(constitution?.revenueBand, "SMB") as ExecutiveReportRevenueBand,
-    marketRiskBand: safeString(constitution?.marketRiskBand, "MODERATE") as ExecutiveReportMarketRiskBand,
+    marketRiskBand: safeString(constitution?.marketRiskBand, "MEDIUM") as ExecutiveReportMarketRiskBand,
     clarityScore: safeNumber(constitution?.clarityScore, 50),
     authorityScore: safeNumber(constitution?.authorityScore, 50),
     governanceScore: safeNumber(constitution?.governanceScore, 50),
@@ -225,6 +225,117 @@ export function buildCanonicalReportContract(
     safeStringArray(normalizedConstitution.requiredInterventions),
   );
 
+  const sections: CanonicalExecutiveReportExport["sections"] = {
+    executiveSummary: {
+      title: "Executive Intelligence Brief",
+      subtitle: organisationName,
+      state: toExecutiveReportState(
+        report?.state,
+        normalizedConstitution.orgState,
+      ),
+      headline: safeString(
+        report?.narrative?.headline,
+        "Alignment condition assessed across core operating domains.",
+      ),
+      summary: safeString(
+        report?.narrative?.summary,
+        normalizedConstitution.narrativeSummary || guidance.summary,
+      ),
+      mandate: safeString(
+        report?.narrative?.mandate,
+        guidance.nextAction || "Restore structural order and execution discipline.",
+      ),
+    },
+
+    constitutionalPosture: normalizedConstitution,
+
+    strategicDomainAnalysis: {
+      averageDissonance,
+      domains,
+    },
+
+    financialExposure: {
+      replacementCost,
+      executionLoss,
+      totalExposure,
+      replacementCostFormatted: formatCurrencyGBP(replacementCost),
+      executionLossFormatted: formatCurrencyGBP(executionLoss),
+      totalExposureFormatted: formatCurrencyGBP(totalExposure),
+    },
+
+    integritySnapshot: {
+      sovereignCertainty: safeNumber(
+        report?.ogr?.sovereignCertainty,
+        normalizedConstitution.clarityScore,
+      ),
+      burnoutIndex: safeNumber(
+        report?.hcdAggregate?.overallBurnoutIndex,
+        normalizedConstitution.severityScore,
+      ),
+      averageDissonance,
+      authorized: safeBoolean(
+        report?.ogr?.isAuthorizedToExecute,
+        normalizedConstitution.route === "STRATEGY",
+      ),
+    },
+
+    governedRecommendations: {
+      summary: safeString(guidance?.summary, normalizedConstitution.narrativeSummary),
+      nextAction: safeString(
+        guidance?.nextAction,
+        "Proceed according to governed recommendation sequence.",
+      ),
+      rationale: uniqueStrings(safeStringArray(guidance?.rationale)),
+      recommendations,
+    },
+
+    priorityStack: {
+      items: priorityStackItems,
+    },
+
+    failureModes: {
+      items: failureModeItems,
+    },
+
+    requiredInterventions: {
+      items: requiredInterventionItems,
+    },
+
+    dominantDomains: {
+      items: uniqueStrings(safeStringArray(normalizedConstitution.dominantDomains)),
+    },
+
+    worldviewAnchors: {
+      items: uniqueStrings(safeStringArray(normalizedConstitution.worldviewAnchors)),
+    },
+
+    sponsorTypes: {
+      items: uniqueStrings(safeStringArray(normalizedConstitution.sponsorTypes)),
+    },
+
+    rationale: {
+      items: uniqueStrings(safeStringArray(normalizedConstitution.rationale)),
+    },
+  };
+
+  const optionalKeys = [
+    "intakeGovernance",
+    "benchmarkPosition",
+    "teamReality",
+    "teamSentimentReality",
+    "trajectoryOutlook",
+    "longitudinalMonitoring",
+    "enterpriseSignals",
+    "monitoringRecommendation",
+  ] as const;
+
+  for (const key of optionalKeys) {
+    const block = report?.[key];
+    if (block && typeof block === "object") {
+      (sections as AnyRecord)[key] = block;
+    }
+  }
+
   return {
     schemaVersion: "canonical-report-v2",
     generatedAt,
@@ -240,97 +351,6 @@ export function buildCanonicalReportContract(
       node: safeString(args.registry?.node, "Canary Wharf"),
       protocol: safeString(args.registry?.protocol, "Sovereign Protocol v2.2"),
     },
-    sections: {
-      executiveSummary: {
-        title: "Executive Intelligence Brief",
-        subtitle: organisationName,
-        state: toExecutiveReportState(
-          report?.state,
-          normalizedConstitution.orgState,
-        ),
-        headline: safeString(
-          report?.narrative?.headline,
-          "Alignment condition assessed across core operating domains.",
-        ),
-        summary: safeString(
-          report?.narrative?.summary,
-          normalizedConstitution.narrativeSummary || guidance.summary,
-        ),
-        mandate: safeString(
-          report?.narrative?.mandate,
-          guidance.nextAction || "Restore structural order and execution discipline.",
-        ),
-      },
-
-      constitutionalPosture: normalizedConstitution,
-
-      strategicDomainAnalysis: {
-        averageDissonance,
-        domains,
-      },
-
-      financialExposure: {
-        replacementCost,
-        executionLoss,
-        totalExposure,
-        replacementCostFormatted: formatCurrencyGBP(replacementCost),
-        executionLossFormatted: formatCurrencyGBP(executionLoss),
-        totalExposureFormatted: formatCurrencyGBP(totalExposure),
-      },
-
-      integritySnapshot: {
-        sovereignCertainty: safeNumber(
-          report?.ogr?.sovereignCertainty,
-          normalizedConstitution.clarityScore,
-        ),
-        burnoutIndex: safeNumber(
-          report?.hcdAggregate?.overallBurnoutIndex,
-          normalizedConstitution.severityScore,
-        ),
-        averageDissonance,
-        authorized: safeBoolean(
-          report?.ogr?.isAuthorizedToExecute,
-          normalizedConstitution.route === "STRATEGY",
-        ),
-      },
-
-      governedRecommendations: {
-        summary: safeString(guidance?.summary, normalizedConstitution.narrativeSummary),
-        nextAction: safeString(
-          guidance?.nextAction,
-          "Proceed according to governed recommendation sequence.",
-        ),
-        rationale: uniqueStrings(safeStringArray(guidance?.rationale)),
-        recommendations,
-      },
-
-      priorityStack: {
-        items: priorityStackItems,
-      },
-
-      failureModes: {
-        items: failureModeItems,
-      },
-
-      requiredInterventions: {
-        items: requiredInterventionItems,
-      },
-
-      dominantDomains: {
-        items: uniqueStrings(safeStringArray(normalizedConstitution.dominantDomains)),
-      },
-
-      worldviewAnchors: {
-        items: uniqueStrings(safeStringArray(normalizedConstitution.worldviewAnchors)),
-      },
-
-      sponsorTypes: {
-        items: uniqueStrings(safeStringArray(normalizedConstitution.sponsorTypes)),
-      },
-
-      rationale: {
-        items: uniqueStrings(safeStringArray(normalizedConstitution.rationale)),
-      },
-    },
+    sections,
   };
 }

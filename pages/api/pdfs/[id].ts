@@ -39,7 +39,7 @@ export default async function handler(
       exists: pdf.exists ?? false,
       isGenerating: pdf.isGenerating ?? false,
       error: pdf.error,
-      fileUrl: pdf.fileUrl || pdf.outputPathWeb || `/assets/downloads/${pdf.id}.pdf`,
+      fileUrl: `/api/downloads/${encodeURIComponent(pdf.id)}`,
       fileSize: pdf.fileSize || pdf.fileSizeLabel || "0 KB",
       lastGenerated: pdf.lastGenerated || pdf.updatedAt,
       createdAt: pdf.createdAt || pdf.lastModifiedIso || new Date().toISOString(),

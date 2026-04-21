@@ -1874,7 +1874,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
       <div className="grid min-w-0 gap-5 sm:gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-8">
         {/* LEFT — why / what */}
         <div className="min-w-0 max-w-[560px]">
-          <Eyebrow>Diagnostic Intelligence System</Eyebrow>
+          <Eyebrow>Governed Executive Reporting System</Eyebrow>
 
           <h1
             className="mt-3 font-['Cormorant_Garamond',Georgia,serif] font-light sm:mt-4"
@@ -1886,19 +1886,19 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
               overflowWrap: "break-word",
             }}
           >
-            Diagnose what is actually wrong
-            <span style={{ color: "rgba(184,184,184,0.72)" }}> — in your decisions, your team, or your organisation.</span>
+            Structured evidence in.
+            <span style={{ color: "rgba(184,184,184,0.72)" }}> Decision-ready position out.</span>
           </h1>
 
           <p
             className="mt-2.5 font-['Cormorant_Garamond',Georgia,serif] font-light italic sm:mt-3"
             style={{ fontSize: "1rem", lineHeight: 1.45, color: "rgba(184,184,184,0.85)" }}
           >
-            Before it becomes a decision you can&rsquo;t reverse.
+            Diagnostic evidence produces a governed executive brief: financial exposure, priority stack, and next action.
           </p>
 
           <p className="mt-3 max-w-[48ch] text-[13.5px] leading-[1.55] sm:mt-4 sm:text-[14px]" style={{ color: "#B8B8B8" }}>
-            Run a 6-8 minute diagnostic to get a clear condition, trajectory, and next step from your actual situation.
+            Start with a 6-minute diagnostic. The system accumulates evidence across stages and produces Executive Reporting when consequence must be priced.
           </p>
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -2096,12 +2096,12 @@ function WhatThisPlatformIs() {
         eyebrow="How it works"
         title={
           <>
-            Misalignment becomes decision drift.
+            Diagnostics identify condition.
             <br />
-            <span className="text-white/35">Decision drift becomes structural pressure.</span>
+            <span className="text-white/35">Executive Reporting states position and consequence.</span>
           </>
         }
-        description="This system diagnoses both — and routes you to the correct next step."
+        description="A governed system that turns structured diagnostic evidence into a decision-ready executive brief — position, financial exposure, priority stack, and next action."
         large
       />
 
@@ -2139,7 +2139,7 @@ function WhatThisPlatformIs() {
             Not {item.toLowerCase()}
           </span>
         ))}
-        <span style={{ color: "var(--ds-accent)", opacity: 0.90 }}>It is a diagnostic system.</span>
+        <span style={{ color: "var(--ds-accent)", opacity: 0.90 }}>It is a governed executive reporting system.</span>
       </div>
     </Section>
   );
@@ -2148,51 +2148,51 @@ function WhatThisPlatformIs() {
 function HowItWorksLadder() {
   const stages = [
     {
-      label: "Stage 1: Diagnostic",
+      label: "Evidence: Diagnostic",
       href: "/diagnostics/constitutional-diagnostic",
       cta: "Start diagnostic",
-      effort: "6-10 minutes",
-      explanation: "The constitutional entry point. Identifies seriousness, pressure, and route fit.",
-      outcome: "A first reading of whether the problem should stay diagnostic or move upward.",
+      effort: "6 minutes · Free",
+      explanation: "Constitutional entry point. Identifies structural condition, pressure, authority posture, and failure mode density.",
+      outcome: "Route decision (STRATEGY / DIAGNOSTIC / WATCH) with confidence score and rationale.",
     },
     {
-      label: "Stage 2: Team / Enterprise",
+      label: "Evidence: Team + Enterprise",
       href: "/diagnostics",
-      cta: "Explore team assessment",
-      effort: "10-25 minutes",
-      explanation: "Structured assessment for teams and organisations dealing with execution, alignment, or institutional friction.",
-      outcome: "Sharper visibility into drift, misalignment, and system-level breakdowns.",
+      cta: "Explore assessments",
+      effort: "10-25 minutes · Free",
+      explanation: "Team perception gap analysis and institutional stress test. Strengthens evidence for Executive Reporting.",
+      outcome: "Perception gaps, fragility classification, enterprise pressure map, escalation routing.",
     },
     {
-      label: "Stage 3: Executive Reporting",
+      label: "Flagship: Executive Reporting",
       href: "/diagnostics/executive-reporting",
       cta: "View Executive Reporting",
-      effort: "£95",
-      explanation: "The first escalation layer. Translates structural strain into financial exposure and a governed priority stack.",
-      outcome: "Decision-grade clarity, implications, and governed next-step logic.",
+      effort: "£95 · One-time",
+      explanation: "The governed executive brief. Takes accumulated diagnostic evidence and produces a decision-ready position.",
+      outcome: "Financial exposure, governed priority stack, position statement, trajectory outlook.",
     },
     {
-      label: "Stage 4: Strategy Room",
+      label: "Escalation: Strategy Room",
       href: "/strategy-room",
       cta: "View Strategy Room",
       effort: "£395",
-      explanation: "Governed intervention logic for situations where a real decision with consequence is already on the table.",
-      outcome: "Decision architecture, trade-offs, owners, and execution cadence.",
+      explanation: "Escalation environment. Opens when constitutional evidence warrants governed intervention.",
+      outcome: "Decision architecture, mandate development, intervention framework.",
     },
   ];
 
   return (
     <Section id="how-it-works" variant="surface">
       <SectionHeader
-        eyebrow="The Ladder"
+        eyebrow="The evidence ladder"
         title={
           <>
-            A structured path,
+            Free diagnostics build evidence.
             <br />
-            <span className="text-white/35">not a pile of pages.</span>
+            <span className="text-white/35">Executive Reporting is the destination.</span>
           </>
         }
-        description="The route is earned by signal, seriousness, and authority. Free stages come first. Escalation only when the signal justifies it."
+        description="The route is earned by signal, seriousness, and authority. Free stages come first. Escalation into the governed executive brief happens only when the evidence justifies it."
         large
       />
 
@@ -2265,7 +2265,7 @@ function WhoThisIsFor() {
       <div className="grid gap-6 lg:grid-cols-[1fr_0.72fr]">
         <div>
           <SectionHeader
-            eyebrow="Audience"
+            eyebrow="When to use this"
             title={
               <>
                 Built for operators
@@ -2273,28 +2273,64 @@ function WhoThisIsFor() {
                 <span className="text-white/35">carrying real consequence.</span>
               </>
             }
-            description="This platform is for founders, executives, organizations under pressure, and leaders facing structural, strategic, or execution problems that cannot be solved by more noise."
+            description="For founders, executives, and institutional leaders facing structural problems where the cost of inaction is real and the next decision matters."
           />
-        </div>
-        <Panel surface="lift">
-          <div className="p-6">
-            <div
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px",
-                letterSpacing: "0.28em",
-                textTransform: "uppercase",
-                color: "var(--ds-accent)",
-              }}
-            >
-              Poor Fit
-            </div>
-            <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">
-              Poor fit when the situation is low-stakes, exploratory, or purely informational.
-              The system is built for decisions where clarity has operational consequence.
-            </p>
+          <div className="mt-6 space-y-2.5">
+            {[
+              "Direction is unclear under real pressure",
+              "Team alignment has diverged from leadership perception",
+              "Decisions are carrying financial exposure without structured interpretation",
+              "An escalation is being considered but the evidence is not yet ordered",
+              "A board or principal needs a governed brief, not more meetings",
+            ].map((trigger) => (
+              <div key={trigger} className="flex items-start gap-2.5">
+                <span className="mt-1.5 h-1 w-1 rounded-full shrink-0" style={{ backgroundColor: "var(--ds-accent)", opacity: 0.65 }} />
+                <p className="text-[13.5px] leading-[1.6] ds-text-muted">{trigger}</p>
+              </div>
+            ))}
           </div>
-        </Panel>
+        </div>
+        <div className="space-y-4">
+          <Panel surface="lift">
+            <div className="p-6">
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.28em",
+                  textTransform: "uppercase",
+                  color: "var(--ds-accent)",
+                }}
+              >
+                What you receive
+              </div>
+              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">
+                An executive report: position statement, financial exposure estimate,
+                governed priority stack, failure mode identification, and directed next action.
+                Board-grade. Derived from your specific evidence.
+              </p>
+            </div>
+          </Panel>
+          <Panel surface="lift">
+            <div className="p-6">
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.28em",
+                  textTransform: "uppercase",
+                  color: "rgba(184,184,184,0.50)",
+                }}
+              >
+                Poor Fit
+              </div>
+              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">
+                Poor fit when the situation is low-stakes, exploratory, or purely informational.
+                The system is built for decisions where clarity has operational consequence.
+              </p>
+            </div>
+          </Panel>
+        </div>
       </div>
     </Section>
   );
@@ -2676,17 +2712,18 @@ function HomeDecisionSection() {
   return (
     <Section id="escalation-paths" variant="surface">
       <div className="mx-auto max-w-4xl">
-        <Eyebrow>When free diagnosis confirms the need</Eyebrow>
+        <Eyebrow>The flagship output</Eyebrow>
         <h2
           className="mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.95] tracking-[-0.028em] ds-text"
           style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
         >
-          Two escalation paths. Both earned by signal.
+          Executive Reporting is the destination.
+          <span className="text-white/35"> Strategy Room is the escalation.</span>
         </h2>
         <p className="mt-4 max-w-2xl text-[14.5px] leading-[1.75] ds-text-muted">
-          The system will not recommend escalation the evidence does not support.
-          These paths exist only when the free diagnostic has confirmed a situation
-          that justifies deeper interpretation or governed intervention.
+          The free diagnostic ladder accumulates evidence. Executive Reporting translates
+          that evidence into a governed executive brief. Strategy Room opens only when
+          the constitutional signal warrants direct intervention.
         </p>
       </div>
 
@@ -2775,14 +2812,14 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
       <Panel surface="lift" gold>
         <div className="p-8 md:p-12">
           <div className="mx-auto max-w-4xl text-center">
-            <Eyebrow align="center">Next Move</Eyebrow>
+            <Eyebrow align="center">Next step</Eyebrow>
             <h2 className="mt-5 font-['Cormorant_Garamond',Georgia,serif] text-4xl font-light leading-[0.95] tracking-[-0.03em] ds-text">
-              Start where the signal is clearest.
+              Start the diagnostic. Build the evidence. Get the brief.
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.9] ds-text-muted">
-              Start with the diagnostic if you need signal. Explore intelligence if you need context.
-              View Strategy Room criteria only when a real decision with consequence is already on the table.
-              Not exploratory. Not theoretical.
+              Start with a free diagnostic if you need signal. Go directly to Executive Reporting
+              if the evidence is already established. Strategy Room opens only when the constitutional
+              signal warrants intervention.
             </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-3">
@@ -2800,7 +2837,23 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
                 }}
               >
                 Start diagnostic
-                <span className="text-[8px] opacity-70">6-8 min</span>
+                <span className="text-[8px] opacity-70">Free · 6 min</span>
+              </Link>
+              <Link
+                href="/diagnostics/executive-reporting"
+                className="inline-flex items-center gap-3 border px-7 py-4 transition"
+                style={{
+                  borderColor: "var(--ds-accent-soft)",
+                  backgroundColor: "var(--ds-accent-soft)",
+                  color: "var(--ds-accent)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Executive Reporting
+                <span className="text-[8px] opacity-70">£95</span>
               </Link>
               <Link
                 href={intelligenceHref}
@@ -2863,7 +2916,7 @@ const HomePage: NextPage<HomePageProps> = ({
   return (
     <Layout
       title="Abraham of London"
-      description="A strategic diagnostic platform for founders, executives, and organizations that need structured clarity before intervention."
+      description="A governed executive reporting system. Structured diagnostic evidence produces a board-grade brief: position, financial exposure, priority stack, and next action."
       canonicalUrl="/"
       fullWidth
       headerTransparent

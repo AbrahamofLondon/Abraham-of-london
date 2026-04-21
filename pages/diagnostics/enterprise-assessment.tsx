@@ -352,7 +352,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
   const routeConfig = {
     EXECUTIVE_REPORTING: { href: "/diagnostics/executive-reporting", label: "Run Executive Reporting", border: `${GOLD}35`, bg: `${GOLD}0D`, text: `${GOLD}BB` },
     STRATEGY_ROOM:       { href: "/strategy-room", label: "Enter Strategy Room", border: "rgba(52,211,153,0.30)", bg: "rgba(52,211,153,0.07)", text: "rgba(110,231,183,0.90)" },
-    WATCH:               { href: "/diagnostics/executive-reporting", label: "View Executive Reporting", border: "rgba(255,255,255,0.10)", bg: "rgba(255,255,255,0.02)", text: "rgba(255,255,255,0.55)" },
+    WATCH:               { href: "/diagnostics/watch?source=enterprise-assessment", label: "Enter Watch State", border: "rgba(255,255,255,0.10)", bg: "rgba(255,255,255,0.02)", text: "rgba(255,255,255,0.55)" },
   }[reading.route];
 
   function MRow({ label, value }: { label: string; value: string }) {
@@ -766,7 +766,7 @@ export default function EnterpriseAssessmentPage() {
                     </p>
                     {teamAlignmentPct !== null && (
                       <div style={{ marginTop: "1.25rem", padding: "0.85rem 1.25rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}07`, display: "inline-flex", alignItems: "center", gap: "0.75rem" }}>
-                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Team reality loaded — {teamAlignmentPct}%</span>
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Team assessment loaded — {teamAlignmentPct}%</span>
                       </div>
                     )}
                     {constitutionalThread && (

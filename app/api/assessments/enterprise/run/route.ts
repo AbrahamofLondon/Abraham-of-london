@@ -1,5 +1,6 @@
 // app/api/assessments/enterprise/run/route.ts
 import { NextResponse } from "next/server";
+import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 
 type EnterpriseDomain = {
   label: string;
@@ -63,14 +64,34 @@ export async function POST(request: Request) {
           ? "MISALIGNED"
           : "DRIFTING";
 
-    return NextResponse.json({
+    const nextLayer = enterprisePosture === "DRIFTING" ? "WATCH" : "EXECUTIVE_REPORTING";
+    const result = {
       ok: true,
       organisation,
       enterprisePosture,
       heatDomains: disorderScores.slice(0, 4).map((x) => x.label),
-      nextLayer: "EXECUTIVE_REPORTING",
+      nextLayer,
       domains: disorderScores,
+    };
+
+    await persistDiagnosticStage({
+      email,
+      organisation,
+      stage: "enterprise",
+      payload: result,
+      tensions: result.heatDomains,
+      routeDecision: { nextLayer, enterprisePosture },
+      snapshot: {
+        timestamp: new Date().toISOString(),
+        stage: "enterprise",
+        coreMetrics: { highestDisorder },
+        tensions: result.heatDomains,
+        escalationLevel: nextLayer === "EXECUTIVE_REPORTING" ? 3 : 1,
+        directive: nextLayer,
+      },
     });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("[ENTERPRISE_ASSESSMENT_RUN_ERROR]", error);
     return NextResponse.json(

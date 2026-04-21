@@ -117,9 +117,11 @@ export interface ExecutiveReportGuidance {
 
 export interface ExecutiveReportPdfConstitutionPayload {
   route: ConstitutionalRoute;
+  confidence: number;
   priority: ExecutiveReportPriority;
   temperature: ExecutiveReportTemperature;
   orgState: ExecutiveReportState;
+  posture: ExecutiveReportState;
   readinessTier: ExecutiveReportReadinessTier;
   authorityType: ExecutiveReportAuthorityType;
   revenueBand: ExecutiveReportRevenueBand;
@@ -136,9 +138,121 @@ export interface ExecutiveReportPdfConstitutionPayload {
   requiredInterventions: string[];
   sponsorTypes: string[];
   worldviewAnchors: string[];
+  disqualifiersTriggered: string[];
+  escalationAllowed: boolean;
 
   narrativeSummary: string;
   rationale: string[];
+}
+
+export interface ExecutiveBenchmarkBlock {
+  available: boolean;
+  cohort?: {
+    id: string;
+    filters: Record<string, string | number | boolean>;
+    sampleSize: number;
+  };
+  confidence: number;
+  insufficientReason?: string;
+  deviations: Array<{
+    metric: string;
+    subjectValue: number;
+    percentile: number;
+    cohortMedian: number;
+    varianceFromCohort: number;
+    confidence: number;
+  }>;
+}
+
+export interface ExecutiveTrajectoryScenario {
+  scenario: "if_unchanged" | "if_corrective_action_taken" | "if_escalation_delayed";
+  likelyOutcomeCategory: string;
+  exposureMovement: "down" | "flat" | "up";
+  confidence: number;
+  uncertaintyNote: string;
+}
+
+export interface ExecutiveTrajectoryBlock {
+  trajectory: "stabilising" | "drifting" | "fragilising" | "escalating";
+  forecastWindowDays: number;
+  confidence: number;
+  keyDrivers: string[];
+  scenarioSummary: string;
+  scenarios: ExecutiveTrajectoryScenario[];
+}
+
+export interface ExecutiveSentimentDomainBlock {
+  domain: string;
+  leaderScore: number | null;
+  teamAggregateScore: number | null;
+  variance: number;
+  confidence: number;
+  respondentCount: number;
+  distribution?: Record<string, number>;
+  polarity?: "positive" | "mixed" | "negative";
+  anomalyFlag?: boolean;
+  disagreementDensity?: number;
+}
+
+export interface ExecutiveSentimentBlock {
+  mode: "leader_estimate" | "multi_respondent";
+  respondentDerived: boolean;
+  confidence: number;
+  participationCoverage: number;
+  domains: ExecutiveSentimentDomainBlock[];
+}
+
+export interface TeamRealityBlock {
+  mode: "leader_estimate" | "multi_respondent";
+  respondentCount?: number;
+  invitedCount?: number;
+  completionRate?: number;
+  confidence?: number;
+  domains: Record<string, {
+    leaderScore?: number | null;
+    teamScore?: number | null;
+    delta?: number | null;
+    variance?: number | null;
+  }>;
+  claimLevel: "leader_view" | "directional_team_signal" | "team_wide_sentiment";
+}
+
+export interface ExecutiveLongitudinalBlock {
+  available: boolean;
+  snapshotCount: number;
+  classification: "recovery" | "stable" | "deterioration" | "insufficient";
+  metricChanges: Array<{
+    metric: string;
+    previous: number;
+    current: number;
+    delta: number;
+  }>;
+  persistentTensions: string[];
+  escalationMovement: "down" | "flat" | "up" | "unknown";
+  monitoringCadence?: "monthly" | "quarterly" | "ad_hoc";
+}
+
+export interface ExecutiveEnterpriseSignalBlock {
+  integrated: boolean;
+  sources: string[];
+  signals: Array<{
+    category: string;
+    label: string;
+    value: number;
+    unit?: string;
+    direction?: "positive" | "neutral" | "negative";
+    evidenceWeight: number;
+  }>;
+  riskPostureModifiers: string[];
+  evidenceReinforcement: string[];
+}
+
+export interface ExecutiveIntakeGovernanceBlock {
+  intakeMode: "ladder" | "direct_sponsored" | "monitoring";
+  evidenceProvenance: string[];
+  ladderSatisfied: boolean;
+  sponsoredDirect: boolean;
+  monitoringContext: boolean;
 }
 
 export interface ReturnTypeSerializeExecutiveReportToPdfPayload {
@@ -217,9 +331,21 @@ export interface CanonicalExecutiveReportExport {
     sponsorTypes: {
       items: string[];
     };
-    rationale: {
-      items: string[];
-    };
+      rationale: {
+        items: string[];
+      };
+      intakeGovernance?: ExecutiveIntakeGovernanceBlock;
+      benchmarkPosition?: ExecutiveBenchmarkBlock;
+      teamReality?: TeamRealityBlock;
+      teamSentimentReality?: ExecutiveSentimentBlock;
+      trajectoryOutlook?: ExecutiveTrajectoryBlock;
+      longitudinalMonitoring?: ExecutiveLongitudinalBlock;
+      enterpriseSignals?: ExecutiveEnterpriseSignalBlock;
+      monitoringRecommendation?: {
+        recommended: boolean;
+        cadence: "monthly" | "quarterly" | "ad_hoc";
+        rationale: string[];
+      };
   };
 }
 

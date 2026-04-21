@@ -134,6 +134,7 @@ function pickConstitution(report: any, constitution?: any, guidance?: any): Exec
       reportConstitution.route ||
       report?.state
     ),
+    confidence: safeNumber(input.confidence, safeNumber(reportConstitution.confidence, 0)),
     priority: toExecutiveReportPriority(
       input.priority ||
       guidanceConstitution.priority ||
@@ -147,6 +148,14 @@ function pickConstitution(report: any, constitution?: any, guidance?: any): Exec
     orgState: toExecutiveReportState(
       input.orgState ||
       guidanceConstitution.orgState ||
+      reportConstitution.orgState
+    ),
+    posture: toExecutiveReportState(
+      input.posture ||
+      input.orgState ||
+      guidanceConstitution.posture ||
+      guidanceConstitution.orgState ||
+      reportConstitution.posture ||
       reportConstitution.orgState
     ),
     readinessTier: toExecutiveReportReadinessTier(
@@ -179,6 +188,8 @@ function pickConstitution(report: any, constitution?: any, guidance?: any): Exec
     requiredInterventions: safeArray<string>(input.requiredInterventions),
     sponsorTypes: safeArray<string>(input.sponsorTypes),
     worldviewAnchors: safeArray<string>(input.worldviewAnchors),
+    disqualifiersTriggered: safeArray<string>(input.disqualifiersTriggered),
+    escalationAllowed: Boolean(input.escalationAllowed),
     narrativeSummary: safeString(input.narrativeSummary) || safeString(report?.narrative?.summary),
     rationale: safeArray<string>(input.rationale),
   };
@@ -332,6 +343,13 @@ export function serializeExecutiveReportToJson(input: SerializeInput): { ok: boo
       rationale: {
         items: rationaleItems,
       },
+      intakeGovernance: safeObject(report?.intakeGovernance) as any,
+      benchmarkPosition: safeObject(report?.benchmarkPosition) as any,
+      teamSentimentReality: safeObject(report?.teamSentimentReality) as any,
+      trajectoryOutlook: safeObject(report?.trajectoryOutlook) as any,
+      longitudinalMonitoring: safeObject(report?.longitudinalMonitoring) as any,
+      enterpriseSignals: safeObject(report?.enterpriseSignals) as any,
+      monitoringRecommendation: safeObject(report?.monitoringRecommendation) as any,
     },
   };
 

@@ -186,15 +186,9 @@ function guardedPdfDownloadResponse(req: NextRequest, pathname: string): NextRes
   const match = pathname.match(/^\/assets\/downloads\/([^/]+)\.pdf$/i);
   if (!match) return null;
 
-  const hasSignedToken = Boolean(req.nextUrl.searchParams.get("downloadToken"));
-  const referrer = req.headers.get("referer") || "";
-  const allowedReferrer = referrer.includes("/downloads/") || referrer.includes("/api/dl/");
-
-  if (hasSignedToken || allowedReferrer) return null;
-
   const slug = match[1] || "";
   const url = req.nextUrl.clone();
-  url.pathname = `/downloads/${slug}`;
+  url.pathname = `/api/downloads/${slug}`;
   url.search = "";
   return NextResponse.redirect(url, 307);
 }

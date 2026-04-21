@@ -3,12 +3,12 @@ import * as React from "react";
 import styles from './DownloadCTA.module.scss';
 
 export default function DownloadCTA({
-  title = "Download",
-  badge = "Free",
+  title = "Access",
+  badge = "Available",
   details = [],
   features = [],
   steps = [],
-  buttonText = "Get the Pack",
+  buttonText = "Get structured clarity",
   onClick,
   href,
 }) {

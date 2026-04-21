@@ -663,6 +663,88 @@ model TeamAssessmentSnapshot {
   @@index([teamName])
 }
 
+model TeamAssessmentCampaign {
+  id                       String   @id @default(cuid())
+  organisationId           String?
+  sponsorUserId            String?
+  slug                     String?  @unique
+  title                    String
+  mode                     String   @default("leader_estimate")
+  status                   String   @default("draft")
+  closesAt                 DateTime?
+  minimumResponseThreshold Int      @default(3)
+  anonymityMode            String   @default("anonymous")
+  domainsJson              String
+  leaderEstimateJson       String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  invites   TeamAssessmentInvite[]
+  responses TeamAssessmentResponse[]
+  aggregate TeamAssessmentAggregate?
+
+  @@index([organisationId])
+  @@index([sponsorUserId])
+  @@index([mode])
+  @@index([status])
+  @@index([closesAt])
+}
+
+model TeamAssessmentInvite {
+  id          String    @id @default(cuid())
+  campaignId  String
+  tokenHash   String    @unique
+  email       String?
+  roleLabel   String?
+  status      String    @default("issued")
+  issuedAt    DateTime  @default(now())
+  openedAt    DateTime?
+  submittedAt DateTime?
+  expiresAt   DateTime?
+
+  campaign TeamAssessmentCampaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  response TeamAssessmentResponse?
+
+  @@index([campaignId])
+  @@index([email])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model TeamAssessmentResponse {
+  id            String   @id @default(cuid())
+  campaignId    String
+  inviteId      String?  @unique
+  respondentKey String
+  answersJson   String
+  submittedAt   DateTime @default(now())
+
+  campaign TeamAssessmentCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  invite   TeamAssessmentInvite?  @relation(fields: [inviteId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId])
+  @@index([respondentKey])
+  @@index([submittedAt])
+}
+
+model TeamAssessmentAggregate {
+  id             String   @id @default(cuid())
+  campaignId     String   @unique
+  respondentCount Int
+  invitedCount    Int
+  completionRate  Float
+  confidence      Float
+  claimLevel      String
+  domainsJson     String
+  generatedAt     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  campaign TeamAssessmentCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([claimLevel])
+  @@index([generatedAt])
+}
+
 model OrganisationAssessmentSnapshot {
   id                   String   @id @default(cuid())
   campaignId           String   @unique
@@ -1983,6 +2065,96 @@ model ExecutiveReportingArtifact {
   @@index([kind])
   @@index([runId, kind])
   @@index([status])
+  @@index([createdAt])
+}
+
+model DiagnosticJourney {
+  id                  String   @id @default(cuid())
+  journeyKey          String   @unique
+  subjectKey          String
+  email               String?
+  organisation        String?
+  status              String   @default("active")
+  mergedTensionThread Json?
+  escalationHistory   Json?
+  routeDecisions      Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  stages              DiagnosticStageRecord[]
+  threadSnapshots     DiagnosticThreadSnapshot[]
+  monitoringSnapshots MonitoringSnapshot[]
+
+  @@index([subjectKey])
+  @@index([email])
+  @@index([status])
+}
+
+model DiagnosticStageRecord {
+  id         String   @id @default(cuid())
+  journeyId  String
+  stage      String
+  payload    Json
+  createdAt  DateTime @default(now())
+
+  journey    DiagnosticJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+
+  @@index([journeyId])
+  @@index([stage])
+}
+
+model DiagnosticThreadSnapshot {
+  id          String   @id @default(cuid())
+  journeyId   String
+  snapshot    Json
+  createdAt   DateTime @default(now())
+
+  journey     DiagnosticJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+
+  @@index([journeyId])
+  @@index([createdAt])
+}
+
+model MonitoringSnapshot {
+  id             String   @id @default(cuid())
+  journeyId      String?
+  organisationId String?
+  campaignId     String?
+  cadence        String   @default("ad_hoc")
+  snapshot       Json
+  createdAt      DateTime @default(now())
+
+  journey        DiagnosticJourney? @relation(fields: [journeyId], references: [id], onDelete: SetNull)
+
+  @@index([journeyId])
+  @@index([organisationId])
+  @@index([campaignId])
+  @@index([cadence])
+  @@index([createdAt])
+}
+
+model BenchmarkFact {
+  id             String   @id @default(cuid())
+  subjectHash    String
+  assessmentType String
+  dimensions     Json
+  metrics        Json
+  recordedAt     DateTime @default(now())
+
+  @@index([assessmentType])
+  @@index([recordedAt])
+}
+
+model BenchmarkCohortSnapshot {
+  id         String   @id @default(cuid())
+  cohortKey  String
+  filters    Json
+  sampleSize Int
+  metrics    Json
+  createdAt  DateTime @default(now())
+
+  @@index([cohortKey])
+  @@index([sampleSize])
   @@index([createdAt])
 }
 

@@ -59,6 +59,117 @@ function reportChangedSubstantively(pathname: string): boolean {
 
 const findings: Finding[] = [];
 
+function readText(relativePath: string): string {
+  const abs = path.join(process.cwd(), relativePath);
+  return fs.existsSync(abs) ? fs.readFileSync(abs, "utf8") : "";
+}
+
+function requireFile(relativePath: string, rule: string): string {
+  const text = readText(relativePath);
+  if (!text) {
+    findings.push({
+      rule,
+      severity: "fail",
+      message: `Missing required monetisation infrastructure file: ${relativePath}.`,
+    });
+  }
+  return text;
+}
+
+function walkFiles(dir: string, extensions: Set<string>): string[] {
+  const abs = path.join(process.cwd(), dir);
+  if (!fs.existsSync(abs)) return [];
+
+  const files: string[] = [];
+  for (const entry of fs.readdirSync(abs, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name === ".next") continue;
+    const child = path.join(abs, entry.name);
+    const rel = path.relative(process.cwd(), child).replace(/\\/g, "/");
+    if (entry.isDirectory()) {
+      files.push(...walkFiles(rel, extensions));
+    } else if (extensions.has(path.extname(entry.name))) {
+      files.push(rel);
+    }
+  }
+  return files;
+}
+
+function assertIncludes(text: string, needle: string, rule: string, file: string): void {
+  if (!text.includes(needle)) {
+    findings.push({
+      rule,
+      severity: "fail",
+      message: `${file} must include ${needle}.`,
+    });
+  }
+}
+
+const accessPolicy = requireFile("lib/assets/pdf-access.ts", "pdf_access_policy_exists");
+assertIncludes(accessPolicy, "canAccessPdfAsset", "pdf_access_policy_exported", "lib/assets/pdf-access.ts");
+assertIncludes(accessPolicy, "asset.access === \"public\"", "pdf_access_public_enforced", "lib/assets/pdf-access.ts");
+assertIncludes(accessPolicy, "asset.access === \"inner_circle\"", "pdf_access_inner_circle_enforced", "lib/assets/pdf-access.ts");
+assertIncludes(accessPolicy, "asset.access === \"restricted\"", "pdf_access_restricted_enforced", "lib/assets/pdf-access.ts");
+assertIncludes(accessPolicy, "Purchase entitlement required", "pdf_access_paid_enforced", "lib/assets/pdf-access.ts");
+assertIncludes(accessPolicy, "hasExplicitPdfEntitlement", "pdf_access_entitlement_override", "lib/assets/pdf-access.ts");
+
+const pricingEngine = requireFile("lib/commercial/pricing-engine.ts", "pricing_engine_exists");
+assertIncludes(pricingEngine, "PdfAssetIdentityResolved", "pricing_requires_pdf_identity", "lib/commercial/pricing-engine.ts");
+assertIncludes(pricingEngine, "BASE_PRICING", "pricing_base_table_exists", "lib/commercial/pricing-engine.ts");
+assertIncludes(pricingEngine, "resolveAssetPricing", "pricing_exported", "lib/commercial/pricing-engine.ts");
+assertIncludes(pricingEngine, "hasExplicitPdfEntitlement", "pricing_entitlement_override", "lib/commercial/pricing-engine.ts");
+
+const deliveryEngine = requireFile("lib/assets/pdf-delivery.ts", "delivery_engine_exists");
+assertIncludes(deliveryEngine, "PdfAssetIdentityResolved", "delivery_requires_pdf_identity", "lib/assets/pdf-delivery.ts");
+assertIncludes(deliveryEngine, "canAccessPdfAsset", "delivery_uses_access_policy", "lib/assets/pdf-delivery.ts");
+assertIncludes(deliveryEngine, "resolveAssetPricing", "delivery_uses_pricing_policy", "lib/assets/pdf-delivery.ts");
+assertIncludes(deliveryEngine, "mode: \"paid\"", "delivery_paid_mode_exists", "lib/assets/pdf-delivery.ts");
+assertIncludes(deliveryEngine, "mode: \"member_only\"", "delivery_member_mode_exists", "lib/assets/pdf-delivery.ts");
+
+const entitlementSystem = requireFile("lib/commercial/entitlements.ts", "entitlement_system_exists");
+assertIncludes(entitlementSystem, "getUserEntitlements", "entitlement_get_exported", "lib/commercial/entitlements.ts");
+assertIncludes(entitlementSystem, "hasAssetEntitlement", "entitlement_has_exported", "lib/commercial/entitlements.ts");
+assertIncludes(entitlementSystem, "grantEntitlement", "entitlement_grant_exported", "lib/commercial/entitlements.ts");
+
+const downloadRoute = requireFile("app/api/downloads/[slug]/route.ts", "controlled_download_route_exists");
+assertIncludes(downloadRoute, "getPdfAssetIdentityBySlug", "download_route_resolves_identity", "app/api/downloads/[slug]/route.ts");
+assertIncludes(downloadRoute, "resolvePdfDelivery", "download_route_resolves_delivery", "app/api/downloads/[slug]/route.ts");
+assertIncludes(downloadRoute, "delivery.allowed", "download_route_enforces_delivery", "app/api/downloads/[slug]/route.ts");
+
+const checkoutRoute = requireFile("app/api/checkout/route.ts", "checkout_route_exists");
+assertIncludes(checkoutRoute, "resolveAssetPricing", "checkout_validates_pricing", "app/api/checkout/route.ts");
+assertIncludes(checkoutRoute, "grantEntitlement", "checkout_grants_entitlement", "app/api/checkout/route.ts");
+
+const proxySource = readText("proxy.ts");
+assertIncludes(proxySource, "/api/downloads/", "static_pdf_proxy_to_controlled_api", "proxy.ts");
+if (proxySource.includes("allowedReferrer") || proxySource.includes("downloadToken")) {
+  findings.push({
+    rule: "static_pdf_no_referrer_or_query_bypass",
+    severity: "fail",
+    message: "proxy.ts must not allow raw /assets/downloads/*.pdf access through referrer or query-token exceptions.",
+  });
+}
+
+const sourceFiles = ["app", "pages", "components", "lib"]
+  .flatMap((dir) => walkFiles(dir, new Set([".ts", ".tsx", ".js", ".jsx"])))
+  .filter((file) => ![
+    "lib/assets/pdf-canonical.ts",
+    "lib/assets/pdf-identity.ts",
+    "lib/config/runtime.ts",
+    "lib/pdf/pdf-registry.generated.ts",
+  ].includes(file))
+  .filter((file) => !/(\.test|\.spec)\.[jt]sx?$/.test(file));
+
+for (const sourceFile of sourceFiles) {
+  const text = readText(sourceFile);
+  if (/["'`]\/assets\/downloads\/[^"'`]+\.pdf["'`]/i.test(text)) {
+    findings.push({
+      rule: "no_direct_pdf_asset_links",
+      severity: "fail",
+      message: `${sourceFile} contains a direct /assets/downloads/*.pdf link; use /api/downloads/{slug}.`,
+    });
+  }
+}
+
 const canonical = readJson<{
   totals?: { unresolved?: number };
   decisions?: Array<{ slug: string; canonicalPath: string; resolved: boolean }>;

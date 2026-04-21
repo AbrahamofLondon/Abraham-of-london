@@ -13,13 +13,13 @@ export const ACCESS_DOWNLOADS: Record<string, ProtectedAsset> = {
     key: "gmi-q1-2026-report",
     kind: "artifact",
     requiredTier: "member",
-    fileUrl: "/assets/downloads/global-market-intelligence-report-q1-2026.pdf",
+    fileUrl: "/api/downloads/global-market-intelligence-report-q1-2026",
   },
   "gmi-q1-2026-deck": {
     key: "gmi-q1-2026-deck",
     kind: "artifact",
     requiredTier: "member",
-    fileUrl: "/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf",
+    fileUrl: "/api/downloads/global-market-intelligence-board-deck-q1-2026",
   },
 };
 

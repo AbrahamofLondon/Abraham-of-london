@@ -28,8 +28,8 @@ const RUNGS: Rung[] = [
     cta: "Start diagnostic",
     duration: "6 min",
     route: "STRATEGY",
-    role: "Public instrument",
-    produces: "Route, confidence, posture, readiness, failure modes",
+    role: "Evidence layer · Public",
+    produces: "Constitutional route, confidence score, posture, readiness tier, failure mode density",
   },
   {
     n: "02",
@@ -38,8 +38,8 @@ const RUNGS: Rung[] = [
     cta: "Explore team assessment",
     duration: "10 min",
     route: "DIAGNOSTIC",
-    role: "Continuation instrument",
-    produces: "Perception gap, fragility class, team focus areas",
+    role: "Evidence layer · Continuation",
+    produces: "Leadership–team perception gap, fragility classification, domain-level gap severity",
   },
   {
     n: "03",
@@ -48,8 +48,8 @@ const RUNGS: Rung[] = [
     cta: "Explore enterprise assessment",
     duration: "15 min",
     route: "DIAGNOSTIC",
-    role: "Continuation instrument",
-    produces: "Enterprise pressure points, escalation logic",
+    role: "Evidence layer · Institutional",
+    produces: "Enterprise pressure map, governance reliability, escalation routing or WATCH classification",
   },
   {
     n: "04",
@@ -58,42 +58,42 @@ const RUNGS: Rung[] = [
     cta: "View Executive Reporting",
     duration: "12 min",
     route: "STRATEGY",
-    role: "Executive intake instrument",
-    produces: "Board-grade constitutional interpretation",
+    role: "Flagship · Consequence interpretation",
+    produces: "Board-grade position, financial exposure, governed priority stack, trajectory outlook",
   },
 ];
 
 const TOTAL_STAGES = RUNGS.length;
 const STARTING_SIGNALS = [
   {
-    label: "Something feels off, but you cannot name it",
+    label: "The direction is unclear, or the pressure is personal",
     href: "/diagnostics/purpose-alignment",
     route: "Personal diagnostic",
-    detail: "Start here when the first problem is your own direction, pressure response, or decision pattern.",
+    detail: "Start here when leadership clarity, decision pattern, or personal mandate is the first question. Produces a dual-axis reading of alignment vs assumption.",
   },
   {
-    label: "The organisation is under pressure",
+    label: "The organisation is carrying structural strain",
     href: "/diagnostics/constitutional-diagnostic",
     route: "Constitutional diagnostic",
-    detail: "Use this when governance, authority, execution, or trust may be creating the strain.",
+    detail: "Use this when governance, authority, execution, or trust may be producing the pressure. Routes to STRATEGY, DIAGNOSTIC, or REJECT with constitutional confidence.",
   },
   {
-    label: "Your team does not share the same map",
+    label: "Leadership perception and team experience have diverged",
     href: "/diagnostics/team-assessment",
     route: "Team assessment",
-    detail: "Use this when leadership perception and team reality may have started to diverge.",
+    detail: "Measures the gap between how leadership reads the team and how leadership estimates the team would read itself. Produces a structural perception gap, not a satisfaction survey.",
   },
   {
-    label: "The issue may be systemic",
+    label: "The pressure is institutional, not local",
     href: "/diagnostics/enterprise-assessment",
     route: "Enterprise assessment",
-    detail: "Use this when the pressure is no longer local to one person or team.",
+    detail: "Stress-tests leadership coherence, governance reliability, execution variance, and institutional risk posture. Routes to Executive Reporting or WATCH.",
   },
   {
-    label: "Free diagnosis has already established the signal",
+    label: "Evidence is established — consequence needs pricing",
     href: "/diagnostics/executive-reporting",
-    route: "Executive Reporting",
-    detail: "Use this when you need consequence, exposure, and a governed priority stack.",
+    route: "Executive Reporting · Flagship",
+    detail: "The governed executive brief. Translates accumulated diagnostic evidence into financial exposure, institutional constraint, and a priority stack that can be acted on.",
   },
 ];
 
@@ -120,6 +120,7 @@ function RouteStrip() {
   const items = [
     { label: "STRATEGY", color: GOLD },
     { label: "DIAGNOSTIC", color: "rgba(255,255,255,0.48)" },
+    { label: "WATCH", color: AMBER },
     { label: "REJECT", color: "rgba(255,255,255,0.24)" },
   ];
 
@@ -327,11 +328,11 @@ function StartingSignalCard({ signal }: { signal: (typeof STARTING_SIGNALS)[numb
 
 export default function DiagnosticsIndexPage() {
   return (
-    <Layout title="Diagnostic Ladder | Abraham of London">
+    <Layout title="Governed Diagnostic System | Abraham of London">
       <Head>
         <meta
           name="description"
-          content="The governed diagnostic ladder for classifying structural problems, qualifying serious matters, and routing them toward reporting or escalation."
+          content="The governed diagnostic evidence ladder. Identifies structural condition, accumulates tension, and escalates to Executive Reporting when consequence must be priced."
         />
       </Head>
 
@@ -339,7 +340,7 @@ export default function DiagnosticsIndexPage() {
         <section>
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="py-16 lg:py-24">
-              <Eyebrow>DIAGNOSTICS · INSTRUMENT MODE</Eyebrow>
+              <Eyebrow>GOVERNED DIAGNOSTIC SYSTEM</Eyebrow>
               <h1
                 style={{
                   marginTop: "1rem",
@@ -366,7 +367,7 @@ export default function DiagnosticsIndexPage() {
                   maxWidth: "56ch",
                 }}
               >
-                Start with the situation that most closely matches what is happening. The system routes from signal to diagnosis, then escalates only when consequence justifies it.
+                A staged evidence ladder that identifies structural condition, accumulates tension across stages, and escalates only when consequence justifies it. Each stage produces evidence. Executive Reporting is where that evidence becomes a governed position.
               </p>
               <div className="mt-6 grid gap-3 md:grid-cols-2">
                 {STARTING_SIGNALS.map((signal) => (
@@ -383,7 +384,7 @@ export default function DiagnosticsIndexPage() {
                   color: "rgba(255,255,255,0.28)",
                 }}
               >
-                Public entry · staged assessment · no account required for diagnostic stages
+                Governed entry · staged evidence ladder · no account required for diagnostic stages
               </div>
             </div>
           </div>
@@ -462,7 +463,29 @@ export default function DiagnosticsIndexPage() {
                 }}
               >
                 <span style={{ display: "inline-block", width: "16px", height: "1px", backgroundColor: "rgba(255,255,255,0.12)" }} />
-                Escalates to Strategy Room only if earlier stages do not resolve the matter
+                WATCH = governed observation, not escalation · STRATEGY = escalation justified · Strategy Room opens only when evidence warrants intervention
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Product hierarchy */}
+        <section>
+          <div className="mx-auto max-w-6xl px-6 lg:px-12">
+            <div className="py-8 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <Eyebrow>How the system works</Eyebrow>
+              <div
+                className="mt-4 grid gap-x-8 gap-y-2 md:grid-cols-2"
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "0.92rem",
+                  lineHeight: 1.55,
+                  color: "rgba(255,255,255,0.38)",
+                }}
+              >
+                <p>Diagnostics identify condition. Team assessment strengthens evidence. Enterprise assessment stress-tests the institution.</p>
+                <p>Executive Reporting states position and consequence. WATCH governs observation. Strategy Room is the escalation environment. Monitoring extends the flagship over time.</p>
               </div>
             </div>
           </div>

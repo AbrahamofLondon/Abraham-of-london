@@ -124,14 +124,13 @@ function CampaignNotFound() {
           Campaign Not Found
         </h1>
         <p className="text-sm text-neutral-500 leading-relaxed mb-8">
-          The requested campaign could not be found in the Sovereign Alignment
-          Registry.
+          The requested campaign could not be found.
         </p>
         <Link
           href="/admin/campaigns"
           className="inline-block px-6 py-3 bg-neutral-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-colors"
         >
-          Return to Campaign Registry
+          Return to campaigns
         </Link>
       </div>
     </div>
@@ -243,7 +242,7 @@ export default async function CampaignManagementPage({ params }: PageProps) {
           </Link>
           <span className="text-neutral-200">/</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-black">
-            Campaign Registry
+            Campaign
           </span>
         </nav>
 
@@ -274,7 +273,7 @@ export default async function CampaignManagementPage({ params }: PageProps) {
 
             <div className="flex items-center gap-4 flex-wrap">
               <p className="text-[11px] font-medium text-neutral-500 uppercase tracking-widest">
-                Strategic Alignment Protocol for{" "}
+                Team assessment campaign for{" "}
                 <span className="text-black font-black">
                   {campaign.organisation.name}
                 </span>
@@ -333,7 +332,7 @@ export default async function CampaignManagementPage({ params }: PageProps) {
                     Executive Intelligence Brief
                   </h3>
                   <p className="text-[9px] text-white/50 mt-1">
-                    Sovereign alignment report • Predictive analytics • Market intelligence
+                    Executive report · Team evidence · Constitutional guidance
                   </p>
                 </div>
               </div>

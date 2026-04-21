@@ -5,10 +5,10 @@ import Head from "next/head";
 import Link from "next/link";
 import {
   ArrowRight,
-  Download as DownloadIcon,
   Archive,
   Shield,
   FileText,
+  Lock,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -149,14 +149,14 @@ const DownloadsIndexPage: NextPage<{
 
   return (
     <Layout
-      title="Downloads | Abraham of London"
-      description="Operational packs, templates, worksheets, and strategic assets."
+      title="Decision Assets | Abraham of London"
+      description="Frameworks, worksheets, intelligence briefs, and decision assets. Designed for use in decision-grade environments."
       canonicalUrl="/downloads"
       fullWidth
       className="bg-black text-white"
     >
       <Head>
-        <title>Downloads | Abraham of London</title>
+        <title>Decision Assets | Abraham of London</title>
       </Head>
 
       <main className="min-h-screen bg-[#050505] text-white">
@@ -165,17 +165,17 @@ const DownloadsIndexPage: NextPage<{
           <div className="relative mx-auto max-w-7xl">
             <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.36em] text-amber-300/90">
               <Archive className="h-4 w-4" />
-              Operational Assets
+              Decision Assets
             </div>
 
             <h1 className="mt-6 max-w-5xl font-serif text-5xl leading-[0.95] text-white md:text-7xl lg:text-8xl">
-              Downloads
+              Asset
               <span className="ml-3 italic text-amber-200/90">Vault.</span>
             </h1>
 
             <p className="mt-8 max-w-3xl text-lg leading-relaxed text-white/65">
-              Templates, packs, cue cards, worksheets, and decision assets designed for use,
-              not decoration.
+              Frameworks, intelligence briefs, worksheets, and decision assets.
+              Designed for use, not decoration.
             </p>
           </div>
         </section>
@@ -199,68 +199,76 @@ const DownloadsIndexPage: NextPage<{
                   </div>
 
                   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                    {(byCategory[cat] ?? []).map((item) => (
-                      <article
-                        key={item.slug}
-                        className="group rounded-[2rem] border border-white/10 bg-white/[0.03] transition-all duration-300 hover:border-amber-500/30 hover:bg-white/[0.05]"
-                      >
-                        <div className="p-7">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.28em] text-amber-300/85">
-                              <FileText className="h-3.5 w-3.5" />
-                              {item.accessLevel}
+                    {(byCategory[cat] ?? []).map((item) => {
+                      const accessLabel =
+                        item.accessLevel === "public" ? "Available" :
+                        item.accessLevel === "inner-circle" ? "Inner Circle" :
+                        "Restricted";
+                      const AccessIcon = item.accessLevel === "public" ? FileText : Lock;
+
+                      return (
+                        <article
+                          key={item.slug}
+                          className="group rounded-[2rem] border border-white/10 bg-white/[0.03] transition-all duration-300 hover:border-amber-500/30 hover:bg-white/[0.05]"
+                        >
+                          <div className="p-7">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.28em] text-amber-300/85">
+                                <AccessIcon className="h-3.5 w-3.5" />
+                                {accessLabel}
+                              </div>
+
+                              <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/40">
+                                {item.readTime || "Asset"}
+                              </span>
                             </div>
 
-                            <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/40">
-                              {item.readTime || "Asset"}
-                            </span>
-                          </div>
+                            <h2 className="mt-6 font-serif text-2xl leading-tight text-white transition-colors group-hover:text-amber-100">
+                              {item.title}
+                            </h2>
 
-                          <h2 className="mt-6 font-serif text-2xl leading-tight text-white transition-colors group-hover:text-amber-100">
-                            {item.title}
-                          </h2>
-
-                          {item.excerpt ? (
-                            <p className="mt-4 text-sm leading-relaxed text-white/65">
-                              {item.excerpt}
-                            </p>
-                          ) : null}
-
-                          <div className="mt-6 flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">
-                            {item.formattedDate ? <span>{item.formattedDate}</span> : null}
-                            {item.formattedDate ? <span className="h-1 w-1 rounded-full bg-white/15" /> : null}
-                            <span>{item.category}</span>
-                          </div>
-
-                          <div className="mt-8 flex flex-wrap gap-3">
-                            <Link
-                              href={item.pageHref}
-                              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-white/85 transition-all hover:bg-white/[0.10]"
-                            >
-                              Open Page
-                              <ArrowRight className="h-4 w-4" />
-                            </Link>
-
-                            {item.assetUrl && item.accessLevel === "public" ? (
-                              <a
-                                href={item.assetUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-amber-300 transition-all hover:bg-amber-500/18"
-                              >
-                                <DownloadIcon className="h-4 w-4" />
-                                Download
-                              </a>
-                            ) : item.accessLevel !== "public" ? (
-                              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-white/45">
-                                <Shield className="h-4 w-4 text-amber-300/80" />
-                                Restricted
-                              </span>
+                            {item.excerpt ? (
+                              <p className="mt-4 text-sm leading-relaxed text-white/65">
+                                {item.excerpt}
+                              </p>
                             ) : null}
+
+                            <div className="mt-6 flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">
+                              {item.formattedDate ? <span>{item.formattedDate}</span> : null}
+                              {item.formattedDate ? <span className="h-1 w-1 rounded-full bg-white/15" /> : null}
+                              <span>{item.category}</span>
+                            </div>
+
+                            <div className="mt-8 flex flex-wrap gap-3">
+                              <Link
+                                href={item.pageHref}
+                                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-white/85 transition-all hover:bg-white/[0.10]"
+                              >
+                                View asset
+                                <ArrowRight className="h-4 w-4" />
+                              </Link>
+
+                              {item.assetUrl && item.accessLevel === "public" ? (
+                                <a
+                                  href={item.assetUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-amber-300 transition-all hover:bg-amber-500/18"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                  Access
+                                </a>
+                              ) : item.accessLevel !== "public" ? (
+                                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-white/45">
+                                  <Shield className="h-4 w-4 text-amber-300/80" />
+                                  {item.accessLevel === "inner-circle" ? "Inner Circle" : "Unlock required"}
+                                </span>
+                              ) : null}
+                            </div>
                           </div>
-                        </div>
-                      </article>
-                    ))}
+                        </article>
+                      );
+                    })}
                   </div>
                 </section>
               ))}

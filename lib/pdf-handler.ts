@@ -14,7 +14,7 @@ export type PdfItem = {
   id: string;          // e.g. "leadership-standards-blueprint"
   filename: string;    // e.g. "leadership-standards-blueprint.pdf"
   absPath: string;     // absolute file path on disk
-  outputPath: string;  // public web path, e.g. "/assets/downloads/public-assets/resources/pdfs/leadership-standards-blueprint.pdf"
+  outputPath: string;  // controlled download path
 };
 
 const fsp = fs.promises;
@@ -37,7 +37,7 @@ const DEFAULT_PDFS_DIR = path.join(
  * Default public URL prefix that maps to DEFAULT_PDFS_DIR.
  * Must match your public folder structure.
  */
-const DEFAULT_PUBLIC_PREFIX = "/assets/downloads/public-assets/resources/pdfs";
+const DEFAULT_PUBLIC_PREFIX = "/api/downloads";
 
 /**
  * Windows-safe stat helper. Returns null on any failure.

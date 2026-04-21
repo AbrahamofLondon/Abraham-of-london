@@ -15,6 +15,7 @@ import {
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import EngagementReadinessPanel from "@/components/diagnostics/results/EngagementReadinessPanel";
 import { inferTrajectory, deriveEngagementReadiness, type EngagementReadiness } from "@/lib/diagnostics/prognosis";
+import { buildBasisOfBrief } from "@/lib/positioning/proof-model";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -39,6 +40,7 @@ import {
   setCommercialAccessCookie,
   verifyCheckoutSessionForProduct,
 } from "@/lib/server/billing/commercial-access";
+import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 
 type ExecutiveReportingIntakeForm = {
   fullName: string;
@@ -632,6 +634,180 @@ function Select({
   );
 }
 
+function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
+  const claims = canonical?.claimDecisions;
+  if (!claims) return null;
+
+  const blocks: React.ReactNode[] = [];
+
+  // Benchmark position — only when claim-governor permits
+  if (claims.benchmarked?.allowed) {
+    blocks.push(
+      <div key="benchmark" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+          Benchmark position · Cohort comparison
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+          This report includes benchmark positioning against an anonymised cohort of comparable organisations. Cohort sample meets the minimum threshold for governed comparison.
+        </p>
+      </div>,
+    );
+  }
+
+  // Predictive / trajectory outlook — only when claim-governor permits
+  if (claims.predictive?.allowed) {
+    blocks.push(
+      <div key="predictive" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+          Trajectory outlook · {claims.predictive.reason?.includes("Bounded") ? "Bounded scenario mode" : "Longitudinal projection"}
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+          {claims.predictive.reason?.includes("Bounded")
+            ? "Scenario outlook is derived from bounded modeling of current structural conditions. This is not a statistical forecast — it is a governed projection of three possible trajectories given the current evidence base."
+            : "Trajectory projection is supported by longitudinal diagnostic depth. The outlook reflects observed movement across multiple diagnostic snapshots."}
+        </p>
+      </div>,
+    );
+  }
+
+  // Team evidence — three-tier claim expression
+  const sentimentBlock = canonical?.teamSentimentReality || canonical?.sections?.teamSentimentReality;
+  const sentimentMode = sentimentBlock?.mode;
+  const respondentDerived = sentimentBlock?.respondentDerived === true;
+  const sentimentConfidence = typeof sentimentBlock?.confidence === "number" ? sentimentBlock.confidence : null;
+
+  if (claims["team-wide sentiment"]?.allowed && respondentDerived) {
+    // Tier 3: Full team-wide sentiment — threshold met
+    blocks.push(
+      <div key="sentiment" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+          Respondent-derived team sentiment{sentimentConfidence !== null ? ` · ${sentimentConfidence}% confidence` : ""}
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+          Team evidence in this report is derived from structured responses collected directly from team members. Confidence reflects respondent coverage and completion rate. This is observed team sentiment, not leadership estimate.
+        </p>
+      </div>,
+    );
+  } else if (sentimentMode === "multi_respondent" || (respondentDerived && !claims["team-wide sentiment"]?.allowed)) {
+    // Tier 2: Directional team signal — respondents exist but below threshold
+    blocks.push(
+      <div key="sentiment-directional" style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.75rem" }}>
+          Directional team signal{sentimentConfidence !== null ? ` · ${sentimentConfidence}% confidence` : ""}
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.48)" }}>
+          Team evidence includes respondent data but has not yet reached the threshold for full team-wide sentiment. The signal is directional — it indicates tendency but cannot be presented as comprehensive team reality. Additional respondents would strengthen this section.
+        </p>
+      </div>,
+    );
+  } else {
+    // Tier 1: Leader view only
+    blocks.push(
+      <div key="sentiment-leader" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>
+          Team evidence · Leadership view
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
+          Team evidence in this report reflects leadership&apos;s view of team reality, not direct team input. Confidence is correspondingly limited. A respondent-based team assessment would produce stronger, independently verifiable evidence for this section.
+        </p>
+      </div>,
+    );
+  }
+
+  // Monitoring — only when claim-governor permits
+  if (claims.monitoring?.allowed) {
+    blocks.push(
+      <div key="monitoring" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+          Monitoring posture · Longitudinal tracking active
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+          This report is part of a longitudinal monitoring sequence. Movement over time, persistent tensions, and trajectory direction are tracked. Intervention effect is assessed where prior corrective action is documented.
+        </p>
+      </div>,
+    );
+  }
+
+  // Data-integrated — only when claim-governor permits
+  if (claims["data-integrated"]?.allowed) {
+    blocks.push(
+      <div key="data" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+          Enterprise signal integration · Data-supported evidence
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+          This report incorporates imported enterprise signals as structured evidence inputs. Signal quality and constitutional relevance are assessed before inclusion.
+        </p>
+      </div>,
+    );
+  }
+
+  if (blocks.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+        Capability provenance
+      </div>
+      {blocks}
+    </div>
+  );
+}
+
+function BasisOfBriefBlock({ canonical, thread }: { canonical: any; thread: any }) {
+  const sections = canonical?.sections;
+  const constitution = sections?.constitutionalPosture ?? canonical?.constitution;
+  if (!constitution) return null;
+
+  const ladderStages: string[] = [];
+  if (thread?.stagesCompleted?.length) {
+    ladderStages.push(...thread.stagesCompleted);
+  } else {
+    if (constitution) ladderStages.push("constitutional_diagnostic");
+    if (canonical?.ladderContext?.team) ladderStages.push("team_assessment");
+    if (canonical?.ladderContext?.enterprise) ladderStages.push("enterprise_assessment");
+    ladderStages.push("executive_reporting");
+  }
+
+  const sentimentBlock = canonical?.teamSentimentReality ?? sections?.teamSentimentReality;
+  const basis = buildBasisOfBrief({
+    ladderStages,
+    teamMode: sentimentBlock?.mode,
+    respondentCount: sentimentBlock?.respondentCount ?? 0,
+    teamConfidence: sentimentBlock?.confidence ?? 0,
+    benchmarkSampleSize: canonical?.benchmarkPosition?.cohort?.sampleSize ?? 0,
+    longitudinalDepth: canonical?.longitudinalMonitoring?.snapshotCount ?? 0,
+    boundedScenarioMode: true,
+    importedSignalCount: canonical?.enterpriseSignals?.signalCount ?? 0,
+    intakeMode: canonical?.ladderContext?.intakeMode ?? "ladder",
+    snapshotCount: canonical?.longitudinalMonitoring?.snapshotCount ?? 0,
+  });
+
+  const notes = basis.proofBlock.confidenceNotes;
+  if (!notes.length) return null;
+
+  return (
+    <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.012)", padding: "1.5rem" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "1rem" }}>
+        Basis of this brief
+      </div>
+      <div className="space-y-1.5">
+        {notes.map((note, i) => (
+          <div key={i} className="flex items-start gap-2.5">
+            <span className="mt-1.5 h-1 w-1 rounded-full shrink-0" style={{ backgroundColor: "rgba(255,255,255,0.18)" }} />
+            <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
+              {note}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.16)" }}>
+        Intake mode: {basis.intakeMode === "sponsored_direct" ? "Sponsored direct" : basis.intakeMode === "monitoring_rerun" ? "Monitoring rerun" : "Diagnostic ladder"}
+      </div>
+    </div>
+  );
+}
+
 function GroupHeader({ label }: { label: string }) {
   return (
     <div style={{ marginBottom: "1.25rem" }}>
@@ -772,7 +948,7 @@ function ResultSurface({
       <div className="mx-auto max-w-7xl px-6 py-14 lg:px-12">
         <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
-            <Eyebrow>Executive intelligence brief</Eyebrow>
+            <Eyebrow>Executive Report</Eyebrow>
             <h1
               style={{
                 marginTop: "1rem",
@@ -785,7 +961,7 @@ function ResultSurface({
                 maxWidth: "18ch",
               }}
             >
-              {summary?.headline ?? canonical?.sections?.executiveSummary?.headline ?? "Executive intelligence brief generated."}
+              {summary?.headline ?? canonical?.sections?.executiveSummary?.headline ?? "Executive Report generated."}
             </h1>
 
             <p
@@ -859,6 +1035,13 @@ function ResultSurface({
 
             <TrajectoryLine trajectory={trajectory} />
             <EngagementReadinessPanel readiness={engagementReadiness} title="Engagement readiness prognosis" />
+
+            {/* Claim-governed capability sections */}
+            <ClaimGovernedCapabilities canonical={result.canonical} />
+
+            {/* Basis of this brief — proof layer */}
+            <BasisOfBriefBlock canonical={result.canonical} thread={thread} />
+
             <ProofCapturePrompt
               sourceStage="executive_reporting"
               routeResultType={route}
@@ -2270,7 +2453,7 @@ function ExecutiveReportingIntake({
     <div style={{ backgroundColor: BASE }}>
       <div className="mx-auto max-w-4xl px-6 py-16 lg:px-12 lg:py-20">
         <div className="mb-10">
-          <Eyebrow>Mandate intake</Eyebrow>
+          <Eyebrow>Executive Reporting · Governed intake</Eyebrow>
           <h2
             style={{
               marginTop: "1.25rem",
@@ -2282,7 +2465,7 @@ function ExecutiveReportingIntake({
               color: "rgba(255,255,255,0.92)",
             }}
           >
-            Complete the paid interpretation intake.
+            Structured executive intake.
           </h2>
           <p
             style={{
@@ -2295,9 +2478,9 @@ function ExecutiveReportingIntake({
               maxWidth: "48ch",
             }}
           >
-            This is the £95 Executive Reporting instrument. Expect 10–15 minutes. Your
-            answers are translated into a constitutional verdict, financial exposure,
-            priority stack, and Strategy Room escalation logic where warranted.
+            This intake governs what the executive brief can address. Expect 10–15 minutes.
+            Your answers are translated into a constitutional position, financial exposure,
+            governed priority stack, and escalation logic where evidence warrants it.
           </p>
           <div
             className="mt-5 grid gap-3 sm:grid-cols-3"
@@ -2310,13 +2493,13 @@ function ExecutiveReportingIntake({
             }}
           >
             <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
-              One-time report · £95
+              Governed executive brief · One-time
             </div>
             <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
-              Output generated from your submission
+              Derived from your specific evidence
             </div>
             <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
-              No subscription or account required
+              Deterministic logic — no generic output
             </div>
           </div>
         </div>
@@ -2404,7 +2587,7 @@ function ExecutiveReportingIntake({
             </div>
 
             <div>
-              <GroupHeader label="The matter" />
+              <GroupHeader label="Current condition" />
               <div className="space-y-4">
                 <Field label="Problem statement" required>
                   <Textarea
@@ -2446,7 +2629,7 @@ function ExecutiveReportingIntake({
             </div>
 
             <div>
-              <GroupHeader label="Authority & governance" />
+              <GroupHeader label="Authority & decision scope" />
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Authority scope" required>
                   <Select
@@ -2498,7 +2681,7 @@ function ExecutiveReportingIntake({
             </div>
 
             <div>
-              <GroupHeader label="Economics & exposure" />
+              <GroupHeader label="Economics & consequence" />
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Revenue band" required>
                   <Select
@@ -2562,7 +2745,7 @@ function ExecutiveReportingIntake({
             </div>
 
             <div>
-              <GroupHeader label="Evidence & history" />
+              <GroupHeader label="Evidence quality & prior attempts" />
               <div className="space-y-4">
                 <Field label="Evidence quality" required>
                   <Select
@@ -2602,7 +2785,7 @@ function ExecutiveReportingIntake({
             </div>
 
             <div>
-              <GroupHeader label="Decision need" />
+              <GroupHeader label="Timing & consequence" />
               <div className="space-y-4">
                 <Field label="Decision question" required>
                   <Textarea
@@ -2696,11 +2879,11 @@ function ExecutiveReportingIntake({
                     className="h-3.5 w-3.5 animate-spin border border-current border-t-transparent"
                     style={{ borderRadius: "50%" }}
                   />
-                  Generating executive brief…
+                  Generating executive report…
                 </>
               ) : (
                 <>
-                  Generate executive intelligence brief
+                  Generate executive report
                   <ArrowRight style={{ width: "12px", height: "12px" }} />
                 </>
               )}
@@ -3042,7 +3225,7 @@ export default function ExecutiveReportingRunPage({
                   marginBottom: "0.85rem",
                 }}
               >
-                Assembling constitutional guidance…
+                Assembling governed executive position…
               </div>
               <p
                 style={{
@@ -3053,7 +3236,7 @@ export default function ExecutiveReportingRunPage({
                   fontStyle: "italic",
                 }}
               >
-                Scoring posture, pressure, exposure, and governed correction path.
+                Evaluating constitutional posture, financial exposure, priority stack, and trajectory outlook.
               </p>
             </div>
           </div>
@@ -3073,7 +3256,7 @@ export default function ExecutiveReportingRunPage({
                     className="mb-8 h-px w-8"
                     style={{ background: `linear-gradient(to right, ${GOLD}35, transparent)` }}
                   />
-                  <Eyebrow>Executive intelligence brief · Generated</Eyebrow>
+                  <Eyebrow>Executive Report · Generated</Eyebrow>
                 </div>
               </div>
             </section>
@@ -3088,6 +3271,26 @@ export default function ExecutiveReportingRunPage({
 
 
 export const getServerSideProps: GetServerSideProps<ExecutiveReportingRunPageProps> = async (ctx) => {
+  const accessDecision = await enforceExecutiveReportingAccess({
+    email: typeof ctx.query.email === "string" ? ctx.query.email : null,
+    subjectId: typeof ctx.query.subjectId === "string" ? ctx.query.subjectId : null,
+    campaignId: typeof ctx.query.campaignId === "string" ? ctx.query.campaignId : null,
+    intakeMode: typeof ctx.query.intakeMode === "string" ? ctx.query.intakeMode : "ladder",
+    sponsoredDirect: ctx.query.sponsoredDirect === "true",
+    sponsorNameOrSeat: typeof ctx.query.sponsor === "string" ? ctx.query.sponsor : null,
+    monitoringAccountId: typeof ctx.query.monitoringAccountId === "string" ? ctx.query.monitoringAccountId : null,
+    monitoringContext: ctx.query.monitoring === "true",
+  });
+
+  if (!accessDecision.allowed) {
+    return {
+      redirect: {
+        destination: `${accessDecision.requiredPath || "/diagnostics/watch"}?executive=blocked`,
+        permanent: false,
+      },
+    };
+  }
+
   const hasCookie = hasCommercialAccessCookie(ctx.req.headers.cookie, "executive_reporting");
   if (hasCookie) return { props: { checkoutConfirmed: ctx.query.checkout === "success" } };
 

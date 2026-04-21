@@ -6,6 +6,13 @@ import { prisma } from "@/lib/prisma.server";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
 import { buildExecutiveReportViewModel } from "@/lib/admin/reporting/executive-report-view-model";
+import { buildExecutiveCapabilityStack } from "@/lib/admin/reporting/capability-stack";
+import type { BenchmarkFact } from "@/lib/benchmarks/benchmark-engine";
+import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
+import {
+  getMonitoringSnapshots,
+  persistDiagnosticStage,
+} from "@/lib/diagnostics/journey-store";
 import { resolveLadderContext } from "@/lib/diagnostics/ladder-context-resolver";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 
@@ -28,6 +35,8 @@ type ExecutiveReportingRunSuccess = {
 type ExecutiveReportingRunFailure = {
   ok: false;
   error: string;
+  requiredPath?: string;
+  intakeMode?: "ladder" | "direct_sponsored" | "monitoring";
 };
 
 type ExecutiveReportingRunResponse =
@@ -425,6 +434,91 @@ function validateIntake(intake: AnyRecord): string | null {
   return null;
 }
 
+function benchmarkFactsFromRuns(runs: Array<{ runKey: string; canonicalSnapshot: unknown; createdAt: Date }>): BenchmarkFact[] {
+  return runs.map((run) => {
+    const canonical = getObject(run.canonicalSnapshot);
+    const sections = getObject(canonical.sections);
+    const strategic = getObject(sections.strategicDomainAnalysis);
+    const constitution = getObject(sections.constitutionalPosture);
+    const exposure = getObject(sections.financialExposure);
+    return {
+      id: run.runKey,
+      anonymized: true,
+      recordedAt: run.createdAt.toISOString(),
+      dimensions: {
+        sector: s(getObject(canonical.campaign).sector, "unknown"),
+        revenueBand: s(constitution.revenueBand, "unknown"),
+        maturity: s(constitution.readinessTier, "unknown"),
+        assessmentType: "executive_reporting",
+      },
+      metrics: [
+        { metric: "averageDissonance", value: n(strategic.averageDissonance) },
+        { metric: "severityScore", value: n(constitution.severityScore) },
+        { metric: "governanceScore", value: n(constitution.governanceScore) },
+        { metric: "totalExposure", value: n(exposure.totalExposure) },
+      ],
+    };
+  });
+}
+
+function parseJson<T>(value: unknown, fallback: T): T {
+  if (typeof value !== "string" || !value.trim()) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+async function loadTeamAssessmentAggregate(campaignId: string | null) {
+  if (!campaignId) return null;
+  try {
+    const p = prisma as any;
+    if (!p?.teamAssessmentCampaign?.findUnique) return null;
+    const campaign = await p.teamAssessmentCampaign.findUnique({
+      where: { id: campaignId },
+      include: { aggregate: true },
+    });
+    if (!campaign?.aggregate) return null;
+    return {
+      campaignId,
+      mode: campaign.mode,
+      status: campaign.status,
+      respondentCount: campaign.aggregate.respondentCount,
+      invitedCount: campaign.aggregate.invitedCount,
+      completionRate: campaign.aggregate.completionRate,
+      confidence: campaign.aggregate.confidence,
+      minimumResponseThreshold: campaign.minimumResponseThreshold,
+      claimLevel: campaign.aggregate.claimLevel,
+      domains: parseJson(campaign.aggregate.domainsJson, {}),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function persistBenchmarkFact(input: {
+  subjectHash: string;
+  assessmentType: string;
+  dimensions: Record<string, unknown>;
+  metrics: Array<{ metric: string; value: number }>;
+}) {
+  try {
+    const p = prisma as any;
+    if (!p?.benchmarkFact?.create) return;
+    await p.benchmarkFact.create({
+      data: {
+        subjectHash: input.subjectHash,
+        assessmentType: input.assessmentType,
+        dimensions: input.dimensions,
+        metrics: input.metrics,
+      },
+    });
+  } catch (error) {
+    console.warn("[EXECUTIVE_REPORTING_BENCHMARK_FACT_SKIPPED]", error);
+  }
+}
+
 function jsonFailure(
   error: string,
   status: number,
@@ -451,6 +545,29 @@ export async function POST(
     const email = s(intake.email).toLowerCase();
     const subjectId = s(intake.subjectId) || null;
     const campaignId = s(intake.campaignId) || null;
+    const accessDecision = await enforceExecutiveReportingAccess({
+      email,
+      subjectId,
+      campaignId,
+      intakeMode: s(intake.intakeMode, "ladder"),
+      sponsoredDirect: Boolean(intake.sponsoredDirect),
+      sponsorNameOrSeat: s(getObject(intake.governance).sponsorNameOrSeat),
+      monitoringAccountId: s(intake.monitoringAccountId),
+      monitoringContext: Boolean(intake.monitoringContext),
+    });
+
+    if (!accessDecision.allowed) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: accessDecision.reason || "Executive Reporting access blocked.",
+          requiredPath: accessDecision.requiredPath,
+          intakeMode: accessDecision.intakeMode,
+        },
+        { status: 403 },
+      );
+    }
+
     const ladderContext = await resolveLadderContext(subjectId, email, campaignId);
     const runKey = makeRunKey();
 
@@ -497,6 +614,51 @@ export async function POST(
       n(constitution.severityScore, 0),
       evidenceQuality,
     );
+
+    const priorRuns = await prisma.executiveReportingRun.findMany({
+      where: { status: "completed" },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: { runKey: true, canonicalSnapshot: true, createdAt: true },
+    });
+    const journeySnapshots = await getMonitoringSnapshots({ email, subjectId, campaignId });
+
+    const teamAssessmentCampaignId = s(intake.teamAssessmentCampaignId) || campaignId;
+    const persistedTeamAggregate = await loadTeamAssessmentAggregate(teamAssessmentCampaignId);
+    const suppliedTeamAggregate = getObject(intake.teamAssessmentAggregate);
+
+    const capabilityStack = buildExecutiveCapabilityStack({
+      subjectId,
+      campaignId,
+      intake: {
+        ...intake,
+        teamAssessmentAggregate: Object.keys(suppliedTeamAggregate).length
+          ? suppliedTeamAggregate
+          : persistedTeamAggregate,
+      },
+      report: {
+        state: s(constitution.orgState, "DRIFTING"),
+        resonance: { telemetry: { averageDissonance, domains: telemetryDomains } },
+        financialExposure: exposure,
+      },
+      constitution,
+      ladderContext,
+      journeySnapshots,
+      benchmarkFacts: benchmarkFactsFromRuns(priorRuns),
+    });
+
+    const intakeGovernance = {
+      intakeMode: accessDecision.intakeMode,
+      evidenceProvenance: [
+        accessDecision.reason || "access decision recorded",
+        ladderContext.constitutional ? "constitutional ladder context" : "",
+        ladderContext.team ? "team ladder context" : "",
+        ladderContext.enterprise ? "enterprise ladder context" : "",
+      ].filter(Boolean),
+      ladderSatisfied: accessDecision.intakeMode === "ladder",
+      sponsoredDirect: accessDecision.intakeMode === "direct_sponsored",
+      monitoringContext: accessDecision.intakeMode === "monitoring",
+    };
 
     const canonical = buildCanonicalReportContract({
       report: {
@@ -556,6 +718,8 @@ export async function POST(
           sovereignCertainty: clamp(n(constitution.clarityScore, 0), 0, 100),
           isAuthorizedToExecute: route === "STRATEGY",
         },
+        intakeGovernance,
+        ...capabilityStack.blocks,
       },
       // Pass the typed assembler outputs directly into buildCanonicalReportContract.
       // The local `constitution`/`guidance` consts are AnyRecord (intentionally
@@ -584,6 +748,7 @@ export async function POST(
       subjectId,
       campaignId,
       ladderContext,
+      claimDecisions: capabilityStack.claims,
     };
 
     const viewModel = buildExecutiveReportViewModel(enrichedCanonical as typeof canonical);
@@ -613,6 +778,50 @@ export async function POST(
               },
             }
           : {}),
+      },
+    });
+
+    await persistBenchmarkFact({
+      subjectHash: runKey,
+      assessmentType: "executive_reporting",
+      dimensions: {
+        sector: s(intake.sector, "unknown"),
+        revenueBand: s(constitution.revenueBand, s(economics.revenueBand, "unknown")),
+        headcountBand: n(economics.headcountAffected) >= 250 ? "250_plus" : "under_250",
+        geography: s(intake.geography, "unknown"),
+        maturity: s(constitution.readinessTier, "unknown"),
+      },
+      metrics: [
+        { metric: "averageDissonance", value: averageDissonance },
+        { metric: "severityScore", value: n(constitution.severityScore) },
+        { metric: "governanceScore", value: n(constitution.governanceScore) },
+        { metric: "totalExposure", value: exposure.totalExposure },
+      ],
+    });
+
+    await persistDiagnosticStage({
+      email,
+      subjectId,
+      campaignId,
+      organisation: s(intake.organisation),
+      stage: "executive_reporting",
+      payload: enrichedCanonical,
+      tensions: arr(constitution.failureModes),
+      routeDecision: { route, runKey, intakeMode: accessDecision.intakeMode },
+      escalationEvent: { route, createdAt: new Date().toISOString() },
+      snapshot: {
+        timestamp: new Date().toISOString(),
+        stage: "executive_reporting",
+        coreMetrics: {
+          severityScore: n(constitution.severityScore),
+          governanceScore: n(constitution.governanceScore),
+          averageDissonance,
+        },
+        tensions: arr(constitution.failureModes),
+        escalationLevel: route === "STRATEGY" ? 3 : route === "DIAGNOSTIC" ? 2 : 1,
+        directive: s(guidance.nextAction),
+        benchmarkPosition: capabilityStack.blocks.benchmarkPosition,
+        trajectoryResult: capabilityStack.blocks.trajectoryOutlook,
       },
     });
 

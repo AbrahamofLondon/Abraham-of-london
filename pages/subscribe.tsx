@@ -21,9 +21,6 @@ const SubscribePage: NextPage = () => {
   const pageDescription =
     "Early access to The Architecture of Human Purpose Canon for fathers, founders, and institutional architects shaping the future of civilization.";
 
-  // Mock counter for social proof / urgency
-  const [spotsRemaining] = React.useState(842);
-
   return (
     <Layout>
       <Head>
@@ -116,28 +113,21 @@ const SubscribePage: NextPage = () => {
                 </div>
               </div>
 
-              {/* URGENCY & SOCIAL PROOF */}
+              {/* Value proposition */}
               <div className="rounded-2xl border border-white/5 bg-zinc-900/40 p-8 backdrop-blur-md">
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Availability</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-gold">{spotsRemaining} / 1000 Spots Left</span>
-                </div>
-                <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: "0%" }}
-                    animate={{ width: `${(spotsRemaining / 1000) * 100}%` }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    className="h-full bg-gold"
-                  />
-                </div>
-                <blockquote className="mt-8 border-l border-gold/30 pl-6 py-2">
-                  <p className="text-sm italic leading-relaxed text-gray-400">
-                    "Essential reading for anyone building institutions meant to last generations."
-                  </p>
-                  <footer className="mt-3 text-[10px] font-bold uppercase tracking-widest text-gold">
-                    — Institutional Architect, Early Reader
-                  </footer>
-                </blockquote>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gold mb-4">
+                  Why this exists
+                </p>
+                <p className="text-sm leading-relaxed text-gray-400">
+                  The Founding Readers Circle is for those who intend to work with
+                  these frameworks seriously — not browse them casually. Early access
+                  means shaping the architecture alongside its creation.
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-gray-400">
+                  This is structured access to a body of work designed for
+                  decision environments. The circle remains open while the Canon
+                  is in active development.
+                </p>
               </div>
             </motion.div>
 
@@ -155,10 +145,11 @@ const SubscribePage: NextPage = () => {
                 </div>
 
                 <div className="relative">
-                  <h2 className="mb-4 font-serif text-3xl font-bold text-white">Secure Access</h2>
+                  <h2 className="mb-4 font-serif text-3xl font-bold text-white">Register Access</h2>
                   <p className="mb-10 text-sm leading-relaxed text-gray-400">
-                    Enter your details to join the distribution list and receive 
-                    the <span className="text-gold italic">Prelude MiniBook</span> immediately.
+                    Enter your details to receive the{" "}
+                    <span className="text-gold italic">Prelude MiniBook</span> and
+                    join the founding distribution for Canon volumes as they are released.
                   </p>
 
                   <div className="mb-10 rounded-xl border border-white/5 bg-white/[0.02] p-6">
@@ -175,7 +166,7 @@ const SubscribePage: NextPage = () => {
 
                   <NewsletterForm
                     variant="premium"
-                    buttonText="Join the Foundational Circle"
+                    buttonText="Join the Founding Readers Circle"
                   />
 
                   <div className="mt-8 space-y-4 text-center">
@@ -199,8 +190,9 @@ const SubscribePage: NextPage = () => {
           {/* FOOTER CALLOUT */}
           <div className="border-t border-white/5 pt-16 text-center">
             <p className="mx-auto max-w-3xl text-sm leading-relaxed text-gray-500 italic">
-              "The Founding Readers Circle is limited to ensure meaningful engagement and strategic focus. 
-              This is the beginning of a movement to rebuild the architecture of human purpose."
+              Designed for those building institutions meant to last generations.
+              The Canon is a body of work, not a product — and this circle
+              exists for those who intend to use it.
             </p>
           </div>
         </section>

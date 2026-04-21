@@ -7,7 +7,7 @@ import { GENERATED_PDF_CONFIGS } from "./pdf-registry.generated";
 export type PDFItem = (typeof GENERATED_PDF_CONFIGS)[number];
 
 function fileExistsOnDisk(publicPath: string): boolean {
-  // publicPath like "/assets/downloads/foo.pdf"
+  // publicPath is a public asset path stored in the generated registry.
   const abs = path.join(process.cwd(), "public", publicPath.replace(/^\//, ""));
   try {
     return fs.existsSync(abs);

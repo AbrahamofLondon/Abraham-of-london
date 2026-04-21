@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
 function PageFooter({ right }: { right: string }) {
   return (
     <View fixed style={styles.footer}>
-      <Text style={styles.footerLeft}>Sovereign Protocol v2.2</Text>
+      <Text style={styles.footerLeft}>Abraham of London · Executive Reporting</Text>
       <Text style={styles.footerRight}>{right}</Text>
     </View>
   );
@@ -600,7 +600,7 @@ export function ExecutiveReportPdfDocument({
       <Page size="A4" style={styles.coverPage}>
         <View style={styles.eyebrowRow}>
           <View style={styles.eyebrowLine} />
-          <Text style={styles.eyebrow}>Sovereign Alignment Registry</Text>
+          <Text style={styles.eyebrow}>Executive Report · Abraham of London</Text>
         </View>
 
         <Text style={styles.title}>{payload.title}</Text>

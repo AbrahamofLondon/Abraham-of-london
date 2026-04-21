@@ -13,6 +13,7 @@ import {
   type DiagnosticAnswers,
 } from "@/lib/constitution/constitutional-diagnostic-derivation";
 import { buildConstitutionalBridgeBundle } from "@/lib/diagnostics/constitutional-bridge";
+import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 
 type ApiSuccess = {
   ok: true;
@@ -146,6 +147,35 @@ export default async function handler(
       },
       select: {
         id: true,
+      },
+    });
+
+    await persistDiagnosticStage({
+      email: asString(body.email).toLowerCase() || null,
+      campaignId,
+      organisation: asString(body.organisation) || null,
+      stage: "constitutional",
+      payload: {
+        report: bundle.report,
+        decision: bundle.decision,
+        bridge,
+      },
+      tensions: Array.isArray((bundle.decision as any)?.disqualifiersTriggered)
+        ? (bundle.decision as any).disqualifiersTriggered
+        : [],
+      routeDecision: bundle.decision,
+      snapshot: {
+        timestamp: new Date().toISOString(),
+        stage: "constitutional",
+        coreMetrics: {
+          confidence: Number((bundle.decision as any)?.confidence || 0),
+          seriousnessScore: Number((bundle.report as any)?.seriousnessScore || 0),
+        },
+        tensions: Array.isArray((bundle.decision as any)?.disqualifiersTriggered)
+          ? (bundle.decision as any).disqualifiersTriggered
+          : [],
+        escalationLevel: (bundle.decision as any)?.route === "STRATEGY" ? 3 : 1,
+        directive: (bundle.decision as any)?.route || null,
       },
     });
 

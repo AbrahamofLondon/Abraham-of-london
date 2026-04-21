@@ -139,7 +139,7 @@ export default function ExecutiveBriefingPdfDocument({
         <View style={styles.header}>
           <View>
             <Text style={styles.eyebrow}>Abraham of London · Executive Reporting</Text>
-            <Text style={styles.title}>Boardroom Briefing</Text>
+            <Text style={styles.title}>Executive Briefing</Text>
             <Text>{safeString(campaign?.organisationName, "Prospective Organisation")}</Text>
           </View>
 
@@ -190,7 +190,7 @@ export default function ExecutiveBriefingPdfDocument({
         )}
 
         <View style={styles.footer} fixed>
-          <Text>Confidential · Sovereign Protocol v2.2</Text>
+          <Text>Confidential · Abraham of London · Executive Reporting</Text>
           <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
         </View>
       </Page>

@@ -1,8 +1,10 @@
 import Head from "next/head";
+import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
 import ExecutiveReportingPaywall from "@/components/diagnostics/ExecutiveReportingPaywall";
+import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 
 export default function ExecutiveReportingEntryPage() {
   const router = useRouter();
@@ -12,7 +14,7 @@ export default function ExecutiveReportingEntryPage() {
   return (
     <Layout
       title="Executive Reporting | Abraham of London"
-      description="The first consequence layer in the diagnostic ladder. Translate structural strain into financial exposure, strategic consequence, and a priority stack."
+      description="Governed executive reporting. The flagship brief that translates diagnostic evidence into financial exposure, institutional constraint, and a governed priority stack."
       canonicalUrl="/diagnostics/executive-reporting"
       fullWidth
       headerTransparent
@@ -28,32 +30,58 @@ export default function ExecutiveReportingEntryPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 max-w-3xl">
             <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-200/70">
-              Consequence interpretation layer
+              Flagship · Executive Reporting
             </div>
             <h1 className="mt-4 font-serif text-4xl font-light leading-[0.98] tracking-[-0.04em] text-white md:text-6xl">
-              Free diagnosis has established the signal.
-              <span className="block text-white/35">Executive Reporting prices the consequence.</span>
+              The governed executive brief.
+              <span className="block text-white/35">Position. Consequence. Priority.</span>
             </h1>
             <p className="mt-5 max-w-2xl font-serif text-lg leading-8 text-white/52">
-              Executive Reporting is the first escalation step in the ladder. It translates
-              constitutional strain into financial exposure, institutional constraint, and a governed
-              priority stack.
+              Executive Reporting is the flagship output of the diagnostic system. It takes accumulated
+              constitutional evidence — tension signals, failure modes, authority posture, institutional
+              strain — and produces a board-grade position: financial exposure, institutional constraint,
+              governed priority stack, and trajectory outlook where evidence supports it.
             </p>
+          </div>
+
+          {/* What it uses / what it produces / who it is for */}
+          <div className="mb-8 grid gap-4 md:grid-cols-3">
+            <div className="border border-white/10 bg-white/[0.025] p-5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">What it uses</p>
+              <p className="mt-3 text-sm leading-6 text-white/58">
+                Constitutional diagnostic evidence, team assessment findings, enterprise pressure readings,
+                and a structured executive intake. Evidence quality is assessed and surfaced in the report.
+              </p>
+            </div>
+            <div className="border border-white/10 bg-white/[0.025] p-5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">What it produces</p>
+              <p className="mt-3 text-sm leading-6 text-white/58">
+                A constitutional position statement, financial exposure estimate, governed priority stack,
+                failure mode identification, and directed next action. PDF briefing available for board distribution.
+              </p>
+            </div>
+            <div className="border border-white/10 bg-white/[0.025] p-5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">Who it is for</p>
+              <p className="mt-3 text-sm leading-6 text-white/58">
+                Executives, board members, and institutional principals who need structured interpretation
+                before making consequential decisions. Not a general assessment — a governed brief for serious conditions.
+              </p>
+            </div>
           </div>
 
           <ExecutiveReportingPaywall
             price={95}
             ctaHref="/diagnostics/executive-reporting/run"
             checkoutPriceCode="executive_reporting"
-            primaryCtaLabel="Continue to Executive Reporting"
+            primaryCtaLabel="Begin Executive Reporting intake"
             secondaryHref="/diagnostics"
-            secondaryLabel="Return to free ladder"
+            secondaryLabel="Return to diagnostic ladder"
             eyebrow="Executive Reporting · £95"
-            title="The first moment diagnosis becomes commercial interpretation."
-            description="The free ladder shows what is structurally wrong. Executive Reporting turns that signal into consequence: financial exposure, board-level implications, and the next move that can be acted on."
+            title="Where diagnostic evidence becomes a governed position."
+            description="The diagnostic ladder accumulates structural evidence. Executive Reporting translates that evidence into consequence: financial exposure, institutional constraint, and the priority decisions that follow."
             sampleLines={[
               {
-                label: "Report headline",
+                label: "Position statement",
                 value: "Execution coherence collapsing under governance drift",
               },
               {
@@ -103,23 +131,26 @@ export default function ExecutiveReportingEntryPage() {
 
             <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-6 md:p-8">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/42">
-                What changes in Stage 4
+                How evidence escalates
               </p>
               <div className="mt-5 space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/38">
-                    Stages 1-3
+                    Diagnostic ladder (Stages 1–3)
                   </p>
                   <p className="mt-2 text-sm leading-6 text-white/62">
-                    Signal detection: constitutional strain, team divergence, enterprise pressure.
+                    Constitutional routing, team perception gaps, enterprise pressure mapping.
+                    Tension accumulates across stages. Evidence builds.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-4">
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-200/70">
-                    Stage 4
+                    Executive Reporting (Stage 4)
                   </p>
                   <p className="mt-2 text-sm leading-6 text-white/70">
-                    Interpretation: financial exposure, institutional constraint, and priority decisions.
+                    Interpretation layer. Takes accumulated evidence, adds executive intake,
+                    produces financial exposure, governed priority stack, and a position that
+                    can be acted on or escalated to Strategy Room.
                   </p>
                 </div>
               </div>
@@ -139,21 +170,20 @@ export default function ExecutiveReportingEntryPage() {
             </div>
           )}
 
-          {/* Paywall credibility reinforcement */}
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-            <span>One-time analysis — no subscription</span>
-            <span>Generated from your actual inputs</span>
-            <span>No generic output</span>
+            <span>One-time report — no subscription</span>
+            <span>Derived from your specific evidence</span>
+            <span>Deterministic logic — no generic output</span>
           </div>
 
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+          <div className="mt-4 border border-white/10 bg-white/[0.02] p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/38">
-              Secure checkout
+              Commercial access
             </p>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
-              Checkout opens through Stripe. Successful payment returns directly
-              to the Executive Reporting intake. The commercial step does not
-              interrupt the diagnostic journey.
+              £95 one-time access. Payment is processed through Stripe and returns directly
+              to the Executive Reporting intake. Also available through Inner Circle access
+              without per-report cost.
             </p>
           </div>
         </div>
@@ -161,3 +191,28 @@ export default function ExecutiveReportingEntryPage() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const accessDecision = await enforceExecutiveReportingAccess({
+    email: typeof ctx.query.email === "string" ? ctx.query.email : null,
+    subjectId: typeof ctx.query.subjectId === "string" ? ctx.query.subjectId : null,
+    campaignId: typeof ctx.query.campaignId === "string" ? ctx.query.campaignId : null,
+    intakeMode: typeof ctx.query.intakeMode === "string" ? ctx.query.intakeMode : "ladder",
+    sponsoredDirect: ctx.query.sponsoredDirect === "true",
+    sponsorNameOrSeat: typeof ctx.query.sponsor === "string" ? ctx.query.sponsor : null,
+    monitoringAccountId:
+      typeof ctx.query.monitoringAccountId === "string" ? ctx.query.monitoringAccountId : null,
+    monitoringContext: ctx.query.monitoring === "true",
+  });
+
+  if (!accessDecision.allowed) {
+    return {
+      redirect: {
+        destination: `${accessDecision.requiredPath || "/diagnostics/constitutional-diagnostic"}?executive=blocked`,
+        permanent: false,
+      },
+    };
+  }
+
+  return { props: {} };
+};
