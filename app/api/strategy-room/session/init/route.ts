@@ -87,6 +87,13 @@ function logStrategyRoomInitError(stage: string, error: unknown): void {
 }
 
 export async function POST(request: Request) {
+  return Response.json({
+    success: false,
+    reason: "TRACE_STRATEGY_ROOM_INIT_V2",
+    source: "app/api/strategy-room/session/init/route.ts",
+    commit: "ae2b7de91",
+  });
+
   let stage = "parse_request";
 
   try {
