@@ -260,7 +260,7 @@ export default function OperatorBriefing({
               </div>
 
               <Link
-                href="/downloads/vault"
+                href="/vault"
                 className="inline-flex items-center gap-2 transition-all duration-300"
                 style={{
                   padding: "9px 18px",

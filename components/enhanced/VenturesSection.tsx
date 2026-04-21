@@ -73,7 +73,7 @@ const DESTINATIONS: Destination[] = [
     title:       "The Vault",
     tag:         "Deployables",
     description: "Templates, operator packs, and execution artifacts. Practical, clean, and deployable.",
-    href:        "/downloads/vault",
+    href:        "/vault",
   },
   {
     Icon:        Compass,
@@ -155,7 +155,7 @@ export default function EnhancedVenturesSection() {
               <ArrowRight style={{ width: "11px", height: "11px" }} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="/downloads/vault"
+              href="/vault"
               className="inline-flex items-center gap-2 transition-all duration-300"
               style={{
                 padding: "11px 22px",

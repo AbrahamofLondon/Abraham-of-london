@@ -30,7 +30,7 @@ export default function InstitutionalClose(): React.ReactElement {
               </Link>
 
               <Link
-                href="/downloads/vault"
+                href="/vault"
                 className="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-6 py-3 text-sm text-white/70 hover:border-white/22 hover:bg-white/10 transition-all"
               >
                 <Vault className="h-4 w-4" style={{ color: "#C9A96E" }} />

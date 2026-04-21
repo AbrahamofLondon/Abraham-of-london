@@ -128,7 +128,7 @@ export default function InstitutionalTrailer() {
           </Link>
 
           <Link
-            href="/downloads/vault"
+            href="/vault"
             className="inline-flex items-center gap-2 transition-all duration-300"
             style={{
               padding: "13px 28px",

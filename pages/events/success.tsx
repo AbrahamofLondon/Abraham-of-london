@@ -23,7 +23,7 @@ export default function EventSuccess() {
 
           <div className="pt-8 flex flex-col gap-4">
             <Link 
-              href="/dashboard/briefings" 
+              href="/access" 
               className="group flex items-center justify-between p-5 bg-white text-black hover:bg-amber-500 transition-colors"
             >
               <span className="font-black uppercase tracking-widest text-[10px]">Access Briefing Vault</span>

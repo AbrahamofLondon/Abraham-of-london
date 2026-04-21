@@ -20,7 +20,7 @@ const NAV = [
   { href: "/ventures", label: "Ventures" },
   { href: "/shorts", label: "Shorts" },
   { href: "/about", label: "About" },
-  { href: "/downloads/vault", label: "Vault" },
+  { href: "/vault", label: "Vault" },
 ] as const;
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@abrahamoflondon.com";
@@ -294,7 +294,7 @@ export default function Navbar(): React.ReactElement {
 
               <div className="pt-8 mt-auto border-t border-white/10">
                 <Link
-                  href="/downloads/vault"
+                  href="/vault"
                   className="flex items-center justify-between p-4 bg-amber-500/5 border border-amber-500/20 text-amber-200 text-[10px] font-black uppercase tracking-widest mb-4"
                   onClick={() => setOpen(false)}
                 >

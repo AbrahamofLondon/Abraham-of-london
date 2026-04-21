@@ -69,7 +69,7 @@ export default function ExecutiveReportSampleDownload() {
           </div>
 
           <a
-            href="/downloads/executive-report-sample.pdf"
+            href="#" /* TODO: executive-report-sample.pdf needs to be created and placed in /public/assets/downloads/ */
             className="group mt-10 inline-flex items-center gap-3 border border-amber-500/30 bg-amber-500/[0.06] px-6 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-amber-300 transition-all hover:bg-amber-500/12"
           >
             <Download className="h-4 w-4" />

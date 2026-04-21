@@ -242,7 +242,6 @@ const TIER3_PREFIXES = [
 ];
 
 const TIER3_EXACT = new Set<string>([
-  "/board/dashboard",
 ]);
 
 const TIER2_PREFIXES = [

@@ -158,7 +158,7 @@ export default function InstitutionalHero(): React.ReactElement {
 
               {/* Secondary — ghost */}
               <Link
-                href="/downloads/vault"
+                href="/vault"
                 className="inline-flex items-center gap-2 transition-all duration-300"
                 style={{
                   padding: "12px 24px",

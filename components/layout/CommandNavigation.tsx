@@ -27,7 +27,7 @@ const MetadataTag = ({ icon: Icon, children }: { icon: any, children: React.Reac
 const navModules = [
   { name: "The Canon", href: "/canon", id: "01", detail: "Core Doctrine" },
   { name: "Briefings", href: "/shorts", id: "02", detail: "Field Intelligence" },
-  { name: "The Vault", href: "/downloads/vault", id: "03", detail: "Technical Assets" },
+  { name: "The Vault", href: "/vault", id: "03", detail: "Technical Assets" },
   { name: "Protocol", href: "/contact", id: "04", detail: "Engagement" },
 ];
 
@@ -97,7 +97,7 @@ export default function CommandNavigation() {
           {/* --- System Actions --- */}
           <div className="flex items-center gap-6">
             <Link
-              href="/downloads/vault"
+              href="/vault"
               className="hidden md:flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-brand-amber/80 transition-all hover:bg-white/10 hover:border-brand-amber/30"
             >
               <Lock className="h-3 w-3" />

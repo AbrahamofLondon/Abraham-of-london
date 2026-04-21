@@ -53,7 +53,7 @@ const ITEMS: readonly ServiceItem[] = [
     title: "The Vault",
     tag:   "Deployables",
     body:  "Templates, operator packs, and implementation tools — built for execution under pressure.",
-    href:  "/downloads/vault",
+    href:  "/vault",
   },
 ] as const;
 

@@ -15,7 +15,7 @@ const NAV = [
   { href: "/ventures", label: "Ventures" },
   { href: "/shorts", label: "Shorts" },
   { href: "/about", label: "About" },
-  { href: "/downloads/vault", label: "Vault" },
+  { href: "/vault", label: "Vault" },
 ];
 
 export default function Navbar(): React.ReactElement {

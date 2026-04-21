@@ -252,7 +252,7 @@ export default function OGRFlagshipSection() {
                 transition={{ duration: 0.85, delay: 0.28 }}
               >
                 <Link
-                  href="/dashboard/live"
+                  href="/admin"
                   className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
                 >
                   <span>Enter OGR Terminal</span>

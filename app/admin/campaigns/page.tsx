@@ -339,7 +339,7 @@ export default async function CampaignsPage() {
                           {/* Live Analytics (if completed participants) */}
                           {completedCount > 0 && (
                             <Link
-                              href={`/dashboard/live?campaign=${campaign.id}`}
+                              href={`/admin?campaign=${campaign.id}`}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider border border-neutral-300 text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all rounded"
                               title="Live Analytics"
                             >
