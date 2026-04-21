@@ -344,6 +344,34 @@ function buildFailureModes(decision: ConstitutionalDecision, scores: DerivedScor
   return Array.from(new Set(modes));
 }
 
+function extractConstitutionalTensions(decision: ConstitutionalDecision, scores: DerivedScores): import("@/lib/diagnostics/tension-thread").TensionSignal[] {
+  const signals: import("@/lib/diagnostics/tension-thread").TensionSignal[] = [];
+  const src = "constitutional" as const;
+
+  if (decision.route === "REJECT") {
+    signals.push({ domain: "constitutional", signal: "structural_failure", severity: "high", source: src, evidence: `Constitutional route: REJECT. Multiple thresholds failing. Coherence: ${scores.coherence}%, Trust: ${scores.trust}%.` });
+  }
+
+  if (scores.trust > 60 && scores.authorityType === "UNCLEAR") {
+    signals.push({ domain: "authority", signal: "trust_asymmetry", severity: "medium", source: src, evidence: `Trust reads at ${scores.trust}% but authority is UNCLEAR — people trust the mission but not who decides.` });
+  }
+
+  if (scores.coherence > 55 && scores.friction >= 55) {
+    signals.push({ domain: "execution", signal: "execution_drift", severity: "medium", source: src, evidence: `Coherence at ${scores.coherence}% but friction at ${scores.friction}% — governance intent is present but execution contradicts it.` });
+  }
+
+  if (scores.pressure >= 65 && scores.coherence < 50) {
+    signals.push({ domain: "risk", signal: "unmanaged_risk", severity: "high", source: src, evidence: `High pressure (${scores.pressure}%) on a system with low coherence (${scores.coherence}%) — consequence is building without adequate clarity.` });
+  }
+
+  // Recursive failure: pattern domain flagged
+  if (decision.disqualifiersTriggered.some(d => /pattern|correction/i.test(d))) {
+    signals.push({ domain: "pattern", signal: "recursive_failure", severity: "medium", source: src, evidence: "Previous correction attempts failed for structural reasons — the root cause has not been addressed." });
+  }
+
+  return signals;
+}
+
 function buildConstitutionalThread(
   decision: ConstitutionalDecision,
   scores: DerivedScores,
@@ -495,6 +523,16 @@ export default function ConstitutionalDiagnosticSuite() {
       completeFired.current = true;
       resultViewStart.current = Date.now();
       if (thread) saveConstitutionalThread(thread);
+      // Extract and merge tension signals into cross-stage thread
+      if (decision && scores) {
+        try {
+          const tensions = extractConstitutionalTensions(decision, scores);
+          if (tensions.length > 0) {
+            const { mergeAndSaveTensions: mergeTensions } = require("@/lib/diagnostics/thread-engine");
+            mergeTensions(tensions, "constitutional");
+          }
+        } catch {}
+      }
       import("@/lib/analytics/funnel").then(({ trackStageComplete }) => {
         const outcome = decision.route === "REJECT" ? "reject" as const
           : decision.route === "STRATEGY" ? "strategy" as const
@@ -988,6 +1026,31 @@ export default function ConstitutionalDiagnosticSuite() {
               </div>
 
               <TrajectoryLine trajectory={inferTrajectory(scores.coherence, readinessNumeric(scores.readinessTier), decision.disqualifiersTriggered || [])} />
+
+              {/* Cross-stage tension narrative — shows only if prior stages exist */}
+              {(() => {
+                try {
+                  const { readTensionThread } = require("@/lib/diagnostics/tension-thread");
+                  const { buildThreadNarrative } = require("@/lib/diagnostics/narrative-engine");
+                  const tt = readTensionThread();
+                  if (tt && tt.stagesCompleted.length >= 2) {
+                    const narrative = buildThreadNarrative(tt);
+                    if (narrative) {
+                      return (
+                        <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06`, padding: "1.25rem 1.5rem" }}>
+                          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>
+                            What is becoming clear
+                          </div>
+                          <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.72, color: "rgba(255,255,255,0.62)" }}>
+                            {narrative}
+                          </p>
+                        </div>
+                      );
+                    }
+                  }
+                } catch {}
+                return null;
+              })()}
 
               <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
                 {/* Left */}

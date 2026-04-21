@@ -30,5 +30,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(403).json({ error: "INVALID_SIGNATURE" });
   }
 
-  return res.redirect(asset.fileUrl);
+  const separator = asset.fileUrl.includes("?") ? "&" : "?";
+  return res.redirect(`${asset.fileUrl}${separator}downloadToken=${encodeURIComponent(signature)}`);
 }

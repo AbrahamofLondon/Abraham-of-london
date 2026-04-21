@@ -51,6 +51,95 @@ import {
 } from "@/lib/server/billing/commercial-access";
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DECISION AUTHORITY GATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function StrategyRoomGate() {
+  const [directive, setDirective] = React.useState<{
+    level: string; reason: string; requiredAction?: string; recommendedPath?: string; summary?: string;
+  } | null>(null);
+
+  React.useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("aol:tension-thread");
+      if (!raw) return;
+      const thread = JSON.parse(raw);
+      if (!thread?.tensions?.length) return;
+
+      // Dynamic import to avoid SSR issues
+      import("@/lib/diagnostics/decision-authority").then(({ deriveDecisionDirective }) => {
+        const d = deriveDecisionDirective(thread);
+        if (d.level !== "allow") {
+          setDirective(d);
+
+          // Run consistency check in development
+          if (process.env.NODE_ENV !== "production") {
+            import("@/lib/diagnostics/narrative-engine").then(({ buildThreadNarrative }) => {
+              import("@/lib/diagnostics/consistency-check").then(({ validateDiagnosticConsistency }) => {
+                const narrative = buildThreadNarrative(thread);
+                validateDiagnosticConsistency({ thread, directive: d, narrative });
+              });
+            });
+          }
+        }
+      });
+    } catch {}
+  }, []);
+
+  if (!directive) return null;
+
+  const borderColor = directive.level === "block" ? "rgba(252,165,165,0.30)"
+    : directive.level === "restrict" ? "rgba(252,165,165,0.22)"
+    : `${GOLD}25`;
+  const bgColor = directive.level === "block" ? "rgba(252,165,165,0.06)"
+    : directive.level === "restrict" ? "rgba(252,165,165,0.04)"
+    : `${GOLD}06`;
+  const labelColor = directive.level === "block" ? "rgba(252,165,165,0.80)"
+    : directive.level === "restrict" ? "rgba(252,165,165,0.70)"
+    : `${GOLD}85`;
+  const label = directive.level === "block" ? "System position: escalation not justified"
+    : directive.level === "restrict" ? "System position: prerequisite required"
+    : "System position: proceeding with structural warning";
+
+  return (
+    <div className="mx-auto max-w-6xl px-6 pt-8 lg:px-12">
+      <div style={{ border: `1px solid ${borderColor}`, backgroundColor: bgColor, padding: "1.25rem 1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: labelColor, marginBottom: "0.65rem" }}>
+          {label}
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.68, color: "rgba(255,255,255,0.60)" }}>
+          {directive.reason}
+        </p>
+        {directive.requiredAction && (
+          <p style={{ marginTop: "0.65rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.60, color: "rgba(255,255,255,0.45)", fontStyle: "italic" }}>
+            {directive.requiredAction}
+          </p>
+        )}
+        {directive.recommendedPath && (directive.level === "restrict" || directive.level === "block") && (
+          <div style={{ marginTop: "1rem" }}>
+            <Link
+              href={directive.recommendedPath}
+              className="inline-flex items-center gap-2 transition-all duration-200"
+              style={{
+                padding: "8px 18px",
+                border: `1px solid ${GOLD}35`,
+                backgroundColor: `${GOLD}0D`,
+                color: `${GOLD}BB`,
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
+              }}
+            >
+              {directive.level === "block" ? "Return to diagnostics" : "Address this first"}
+              <ArrowRight style={{ width: "11px", height: "11px" }} />
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1087,16 +1176,33 @@ export default function StrategyRoomPage({
   }
 
   async function initDecisionSession(intake: ConstitutionalIntake) {
+    // Include cross-stage tension thread if available
+    let tensionThread = null;
+    try {
+      const raw = sessionStorage.getItem("aol:tension-thread");
+      if (raw) tensionThread = JSON.parse(raw);
+    } catch {}
+
     const res = await fetch("/api/strategy-room/session/init", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ intake }),
+      body: JSON.stringify({ intake, tensionThread }),
     });
-    const data: SessionInitResponse = await res.json();
+    const data = await res.json();
+
+    // Handle server-side decision authority enforcement
+    if (res.status === 403 && data?.directive) {
+      const d = data.directive;
+      const msg = d.level === "block"
+        ? `Escalation denied: ${d.reason || "structural condition does not support strategic intervention."}`
+        : `Progression restricted: ${d.reason || "prerequisite conditions must be addressed first."}`;
+      throw new Error(msg);
+    }
+
     if (!res.ok || !data.success || !data.sessionKey) {
       throw new Error(data.error || "Failed to initialize decision session.");
     }
-    return data.sessionKey;
+    return (data as SessionInitResponse).sessionKey!;
   }
 
   async function logRecommendationImpressions(nextSessionKey: string, envelope: CanonicalSectionsEnvelope) {
@@ -1260,6 +1366,9 @@ export default function StrategyRoomPage({
         {/* ── STATE: CHAMBER (pre-submission) ────────────────────────────── */}
         {!isSubmitting && !canonical && (
           <>
+            {/* ── SYSTEM POSITION — decision authority gating ── */}
+            <StrategyRoomGate />
+
             <section>
               <div className="mx-auto max-w-6xl px-6 lg:px-12">
                 <div className="py-20 lg:py-24">

@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-04-21T14:58:57.808Z",
+  "scannedRoots": [
+    "components",
+    "pages",
+    "app",
+    "content",
+    "data"
+  ],
+  "totals": {
+    "rawPdfLinks": 0,
+    "rawCanonicalDownloadLinks": 0
+  },
+  "governance": {
+    "primaryUxDownloadSurface": "pass",
+    "requiredSurface": "/downloads/{slug}",
+    "rawPdfLinks": []
+  }
+}

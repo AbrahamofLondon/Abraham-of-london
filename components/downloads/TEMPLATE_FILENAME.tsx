@@ -74,7 +74,7 @@ export const metadata: DownloadMetadata = {
 
   format: "PDF",
   formats: ["A4"],
-  fileUrl: "/assets/downloads/the-file-slug.pdf",
+  fileUrl: "/downloads/the-file-slug",
   fileSize: "0 B",
   version: "1.0.0",
 

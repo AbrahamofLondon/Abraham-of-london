@@ -124,7 +124,7 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
     },
     secondaryCta: {
       label: "Download the teaser",
-      href: "/assets/downloads/fathering-without-fear.pdf",
+      href: "/downloads/fathering-without-fear",
     },
     enabled: true,
   },
@@ -204,4 +204,3 @@ const heroBannersApi = {
 };
 
 export default heroBannersApi;
-

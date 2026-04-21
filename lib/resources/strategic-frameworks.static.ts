@@ -89,7 +89,6 @@ const FOUNDATION_TRACK: Framework[] = [
     boardQuestions: ["If our primary cloud provider pivots, do we exist?"],
     failureModes: ["Treating sovereignty as isolationism rather than resilience."],
     whatToDoNext: ["Execute a 'Dark Node' simulation with your executive team."],
-    artifactHref: "/artifacts/sovereignty-index-v1.pdf",
   },
 ];
 

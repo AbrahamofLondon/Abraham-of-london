@@ -182,6 +182,23 @@ const LOCKDOWN_EXEMPT_PATHS = [
   "/api/purpose-alignment/report",
 ];
 
+function guardedPdfDownloadResponse(req: NextRequest, pathname: string): NextResponse | null {
+  const match = pathname.match(/^\/assets\/downloads\/([^/]+)\.pdf$/i);
+  if (!match) return null;
+
+  const hasSignedToken = Boolean(req.nextUrl.searchParams.get("downloadToken"));
+  const referrer = req.headers.get("referer") || "";
+  const allowedReferrer = referrer.includes("/downloads/") || referrer.includes("/api/dl/");
+
+  if (hasSignedToken || allowedReferrer) return null;
+
+  const slug = match[1] || "";
+  const url = req.nextUrl.clone();
+  url.pathname = `/downloads/${slug}`;
+  url.search = "";
+  return NextResponse.redirect(url, 307);
+}
+
 const TRACKABLE_PATHS = [
   "/pdf-dashboard",
   "/admin/reporting",
@@ -1161,6 +1178,13 @@ export async function proxy(req: NextRequest) {
   const startTime = Date.now();
   const pathname = req.nextUrl.pathname;
   const method = req.method;
+
+  const guardedPdf = guardedPdfDownloadResponse(req, pathname);
+  if (guardedPdf) {
+    setSecurityHeaders(guardedPdf, req);
+    guardedPdf.headers.set("X-PDF-Access", "download-surface-required");
+    return guardedPdf;
+  }
 
   const isApi = pathname.startsWith("/api/");
   const isAdmin = isAdminPath(pathname);

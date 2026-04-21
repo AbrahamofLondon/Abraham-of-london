@@ -1,0 +1,1860 @@
+{
+  "generatedAt": "2026-04-21T14:40:29.666Z",
+  "totals": {
+    "actions": 264,
+    "copiedCanonical": 176,
+    "overwrittenCanonical": 0,
+    "deletedIdenticalAliases": 0,
+    "archivedDuplicates": 88
+  },
+  "actions": [
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/busy-is-not-the-same-as-anchored.pdf",
+      "to": "/assets/downloads/busy-is-not-the-same-as-anchored.pdf",
+      "slug": "busy-is-not-the-same-as-anchored",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
+      "to": "/assets/downloads/download-legacy-architecture-canvas.pdf",
+      "slug": "download-legacy-architecture-canvas",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/freedom-begins-where-ego-ends.pdf",
+      "to": "/assets/downloads/freedom-begins-where-ego-ends.pdf",
+      "slug": "freedom-begins-where-ego-ends",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/institutional-sovereignty.pdf",
+      "to": "/assets/downloads/institutional-sovereignty.pdf",
+      "slug": "institutional-sovereignty",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
+      "to": "/assets/downloads/life-alignment-assessment.pdf",
+      "slug": "life-alignment-assessment",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/pleasure-is-loud-purpose-is-quiet.pdf",
+      "to": "/assets/downloads/pleasure-is-loud-purpose-is-quiet.pdf",
+      "slug": "pleasure-is-loud-purpose-is-quiet",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/principles-of-surrender-framework.pdf",
+      "to": "/assets/downloads/principles-of-surrender-framework.pdf",
+      "slug": "principles-of-surrender-framework",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/sovereignty-001.pdf",
+      "to": "/assets/downloads/sovereignty-001.pdf",
+      "slug": "sovereignty-001",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/the-builders-catechism.pdf",
+      "to": "/assets/downloads/the-builders-catechism.pdf",
+      "slug": "the-builders-catechism",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/the-cost-of-refusing-formation.pdf",
+      "to": "/assets/downloads/the-cost-of-refusing-formation.pdf",
+      "slug": "the-cost-of-refusing-formation",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/this-is-not-a-comfort-platform.pdf",
+      "to": "/assets/downloads/this-is-not-a-comfort-platform.pdf",
+      "slug": "this-is-not-a-comfort-platform",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-a-single-yes-changes-everything.pdf",
+      "to": "/assets/downloads/when-a-single-yes-changes-everything.pdf",
+      "slug": "when-a-single-yes-changes-everything",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-all-you-can-do-is-breathe.pdf",
+      "to": "/assets/downloads/when-all-you-can-do-is-breathe.pdf",
+      "slug": "when-all-you-can-do-is-breathe",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-avoidance-becomes-your-personality.pdf",
+      "to": "/assets/downloads/when-avoidance-becomes-your-personality.pdf",
+      "slug": "when-avoidance-becomes-your-personality",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-busyness-becomes-your-brand.pdf",
+      "to": "/assets/downloads/when-busyness-becomes-your-brand.pdf",
+      "slug": "when-busyness-becomes-your-brand",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-comfort-becomes-your-cage.pdf",
+      "to": "/assets/downloads/when-comfort-becomes-your-cage.pdf",
+      "slug": "when-comfort-becomes-your-cage",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-conflict-feels-like-betrayal.pdf",
+      "to": "/assets/downloads/when-conflict-feels-like-betrayal.pdf",
+      "slug": "when-conflict-feels-like-betrayal",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-doctrine-feels-safer-than-god.pdf",
+      "to": "/assets/downloads/when-doctrine-feels-safer-than-god.pdf",
+      "slug": "when-doctrine-feels-safer-than-god",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-every-promotion-feels-hollow.pdf",
+      "to": "/assets/downloads/when-every-promotion-feels-hollow.pdf",
+      "slug": "when-every-promotion-feels-hollow",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-grace-finds-you-in-the-mess.pdf",
+      "to": "/assets/downloads/when-grace-finds-you-in-the-mess.pdf",
+      "slug": "when-grace-finds-you-in-the-mess",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-hope-feels-reckless.pdf",
+      "to": "/assets/downloads/when-hope-feels-reckless.pdf",
+      "slug": "when-hope-feels-reckless",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-kindness-feels-like-rebellion.pdf",
+      "to": "/assets/downloads/when-kindness-feels-like-rebellion.pdf",
+      "slug": "when-kindness-feels-like-rebellion",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-later-became-never.pdf",
+      "to": "/assets/downloads/when-later-became-never.pdf",
+      "slug": "when-later-became-never",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-numbness-feels-safer-than-joy.pdf",
+      "to": "/assets/downloads/when-numbness-feels-safer-than-joy.pdf",
+      "slug": "when-numbness-feels-safer-than-joy",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-productivity-becomes-punishment.pdf",
+      "to": "/assets/downloads/when-productivity-becomes-punishment.pdf",
+      "slug": "when-productivity-becomes-punishment",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-rest-starts-to-feel-dangerous.pdf",
+      "to": "/assets/downloads/when-rest-starts-to-feel-dangerous.pdf",
+      "slug": "when-rest-starts-to-feel-dangerous",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-argue-with-god-in-your-head.pdf",
+      "to": "/assets/downloads/when-you-argue-with-god-in-your-head.pdf",
+      "slug": "when-you-argue-with-god-in-your-head",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-cant-stop-overthinking.pdf",
+      "to": "/assets/downloads/when-you-cant-stop-overthinking.pdf",
+      "slug": "when-you-cant-stop-overthinking",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+      "to": "/assets/downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+      "slug": "when-you-cant-tell-if-youre-growing-or-drifting",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-dont-know-what-you-want-anymore.pdf",
+      "to": "/assets/downloads/when-you-dont-know-what-you-want-anymore.pdf",
+      "slug": "when-you-dont-know-what-you-want-anymore",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-dont-trust-your-own-decisions.pdf",
+      "to": "/assets/downloads/when-you-dont-trust-your-own-decisions.pdf",
+      "slug": "when-you-dont-trust-your-own-decisions",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-fear-being-wrong-about-god.pdf",
+      "to": "/assets/downloads/when-you-fear-being-wrong-about-god.pdf",
+      "slug": "when-you-fear-being-wrong-about-god",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-fear-success-more-than-failure.pdf",
+      "to": "/assets/downloads/when-you-fear-success-more-than-failure.pdf",
+      "slug": "when-you-fear-success-more-than-failure",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-feel-like-god-is-delaying-you.pdf",
+      "to": "/assets/downloads/when-you-feel-like-god-is-delaying-you.pdf",
+      "slug": "when-you-feel-like-god-is-delaying-you",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-feel-too-busy-to-care.pdf",
+      "to": "/assets/downloads/when-you-feel-too-busy-to-care.pdf",
+      "slug": "when-you-feel-too-busy-to-care",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-finally-let-yourself-cry.pdf",
+      "to": "/assets/downloads/when-you-finally-let-yourself-cry.pdf",
+      "slug": "when-you-finally-let-yourself-cry",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-give-more-than-you-get.pdf",
+      "to": "/assets/downloads/when-you-give-more-than-you-get.pdf",
+      "slug": "when-you-give-more-than-you-get",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-keep-blaming-your-childhood.pdf",
+      "to": "/assets/downloads/when-you-keep-blaming-your-childhood.pdf",
+      "slug": "when-you-keep-blaming-your-childhood",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
+      "to": "/assets/downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
+      "slug": "when-you-keep-choosing-people-who-cant-choose-you",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
+      "to": "/assets/downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
+      "slug": "when-you-keep-confusing-niceness-with-goodness",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-miss-who-you-used-to-be.pdf",
+      "to": "/assets/downloads/when-you-miss-who-you-used-to-be.pdf",
+      "slug": "when-you-miss-who-you-used-to-be",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-mistake-familiarity-for-loyalty.pdf",
+      "to": "/assets/downloads/when-you-mistake-familiarity-for-loyalty.pdf",
+      "slug": "when-you-mistake-familiarity-for-loyalty",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-need-god-to-interrupt-you.pdf",
+      "to": "/assets/downloads/when-you-need-god-to-interrupt-you.pdf",
+      "slug": "when-you-need-god-to-interrupt-you",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-no-longer-recognise-your-own-voice.pdf",
+      "to": "/assets/downloads/when-you-no-longer-recognise-your-own-voice.pdf",
+      "slug": "when-you-no-longer-recognise-your-own-voice",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-outgrow-your-circle.pdf",
+      "to": "/assets/downloads/when-you-outgrow-your-circle.pdf",
+      "slug": "when-you-outgrow-your-circle",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-realise-prayer-is-war.pdf",
+      "to": "/assets/downloads/when-you-realise-prayer-is-war.pdf",
+      "slug": "when-you-realise-prayer-is-war",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-realise-you-were-the-problem.pdf",
+      "to": "/assets/downloads/when-you-realise-you-were-the-problem.pdf",
+      "slug": "when-you-realise-you-were-the-problem",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-realise-youre-not-behind.pdf",
+      "to": "/assets/downloads/when-you-realise-youre-not-behind.pdf",
+      "slug": "when-you-realise-youre-not-behind",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-stop-waiting-for-permission.pdf",
+      "to": "/assets/downloads/when-you-stop-waiting-for-permission.pdf",
+      "slug": "when-you-stop-waiting-for-permission",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-you-want-to-quit-but-cant.pdf",
+      "to": "/assets/downloads/when-you-want-to-quit-but-cant.pdf",
+      "slug": "when-you-want-to-quit-but-cant",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
+      "to": "/assets/downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
+      "slug": "when-your-calendar-is-full-but-your-life-is-empty",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-calling-stops-being-cute.pdf",
+      "to": "/assets/downloads/when-your-calling-stops-being-cute.pdf",
+      "slug": "when-your-calling-stops-being-cute",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-character-is-leaking.pdf",
+      "to": "/assets/downloads/when-your-character-is-leaking.pdf",
+      "slug": "when-your-character-is-leaking",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-confidence-feels-manufactured.pdf",
+      "to": "/assets/downloads/when-your-confidence-feels-manufactured.pdf",
+      "slug": "when-your-confidence-feels-manufactured",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-convictions-feel-like-costumes.pdf",
+      "to": "/assets/downloads/when-your-convictions-feel-like-costumes.pdf",
+      "slug": "when-your-convictions-feel-like-costumes",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-dreams-feel-too-heavy.pdf",
+      "to": "/assets/downloads/when-your-dreams-feel-too-heavy.pdf",
+      "slug": "when-your-dreams-feel-too-heavy",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-excuses-become-your-identity.pdf",
+      "to": "/assets/downloads/when-your-excuses-become-your-identity.pdf",
+      "slug": "when-your-excuses-become-your-identity",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-faith-feels-numb.pdf",
+      "to": "/assets/downloads/when-your-faith-feels-numb.pdf",
+      "slug": "when-your-faith-feels-numb",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-hustle-has-no-soul.pdf",
+      "to": "/assets/downloads/when-your-hustle-has-no-soul.pdf",
+      "slug": "when-your-hustle-has-no-soul",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-legacy-terrifies-you.pdf",
+      "to": "/assets/downloads/when-your-legacy-terrifies-you.pdf",
+      "slug": "when-your-legacy-terrifies-you",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-silence-says-too-much.pdf",
+      "to": "/assets/downloads/when-your-silence-says-too-much.pdf",
+      "slug": "when-your-silence-says-too-much",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-standards-keep-you-lonely.pdf",
+      "to": "/assets/downloads/when-your-standards-keep-you-lonely.pdf",
+      "slug": "when-your-standards-keep-you-lonely",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-vision-outgrows-your-environment.pdf",
+      "to": "/assets/downloads/when-your-vision-outgrows-your-environment.pdf",
+      "slug": "when-your-vision-outgrows-your-environment",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-your-work-becomes-your-hiding-place.pdf",
+      "to": "/assets/downloads/when-your-work-becomes-your-hiding-place.pdf",
+      "slug": "when-your-work-becomes-your-hiding-place",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-addicted-to-distraction.pdf",
+      "to": "/assets/downloads/when-youre-addicted-to-distraction.pdf",
+      "slug": "when-youre-addicted-to-distraction",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-afraid-of-your-own-potential.pdf",
+      "to": "/assets/downloads/when-youre-afraid-of-your-own-potential.pdf",
+      "slug": "when-youre-afraid-of-your-own-potential",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-afraid-to-be-radical.pdf",
+      "to": "/assets/downloads/when-youre-afraid-to-be-radical.pdf",
+      "slug": "when-youre-afraid-to-be-radical",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-always-the-strong-one.pdf",
+      "to": "/assets/downloads/when-youre-always-the-strong-one.pdf",
+      "slug": "when-youre-always-the-strong-one",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-attracted-to-potential-not-reality.pdf",
+      "to": "/assets/downloads/when-youre-attracted-to-potential-not-reality.pdf",
+      "slug": "when-youre-attracted-to-potential-not-reality",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-building-someone-elses-legacy.pdf",
+      "to": "/assets/downloads/when-youre-building-someone-elses-legacy.pdf",
+      "slug": "when-youre-building-someone-elses-legacy",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-done-fixing-adults.pdf",
+      "to": "/assets/downloads/when-youre-done-fixing-adults.pdf",
+      "slug": "when-youre-done-fixing-adults",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-exhausted-but-still-available.pdf",
+      "to": "/assets/downloads/when-youre-exhausted-but-still-available.pdf",
+      "slug": "when-youre-exhausted-but-still-available",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-keeping-faith-out-of-habit.pdf",
+      "to": "/assets/downloads/when-youre-keeping-faith-out-of-habit.pdf",
+      "slug": "when-youre-keeping-faith-out-of-habit",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-living-for-weekends.pdf",
+      "to": "/assets/downloads/when-youre-living-for-weekends.pdf",
+      "slug": "when-youre-living-for-weekends",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-loved-without-earning-it.pdf",
+      "to": "/assets/downloads/when-youre-loved-without-earning-it.pdf",
+      "slug": "when-youre-loved-without-earning-it",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-measuring-everything-but-meaning.pdf",
+      "to": "/assets/downloads/when-youre-measuring-everything-but-meaning.pdf",
+      "slug": "when-youre-measuring-everything-but-meaning",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-not-lazy-youre-undisciplined.pdf",
+      "to": "/assets/downloads/when-youre-not-lazy-youre-undisciplined.pdf",
+      "slug": "when-youre-not-lazy-youre-undisciplined",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
+      "to": "/assets/downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
+      "slug": "when-youre-preparing-for-rooms-you-havent-entered",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-productive-but-not-present.pdf",
+      "to": "/assets/downloads/when-youre-productive-but-not-present.pdf",
+      "slug": "when-youre-productive-but-not-present",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-scared-to-start-over.pdf",
+      "to": "/assets/downloads/when-youre-scared-to-start-over.pdf",
+      "slug": "when-youre-scared-to-start-over",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-the-only-one-doing-the-work.pdf",
+      "to": "/assets/downloads/when-youre-the-only-one-doing-the-work.pdf",
+      "slug": "when-youre-the-only-one-doing-the-work",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-tired-of-being-the-bigger-person.pdf",
+      "to": "/assets/downloads/when-youre-tired-of-being-the-bigger-person.pdf",
+      "slug": "when-youre-tired-of-being-the-bigger-person",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-tired-of-starting-over.pdf",
+      "to": "/assets/downloads/when-youre-tired-of-starting-over.pdf",
+      "slug": "when-youre-tired-of-starting-over",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
+      "to": "/assets/downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
+      "slug": "when-youre-winning-at-work-but-losing-yourself",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youve-become-chronically-online.pdf",
+      "to": "/assets/downloads/when-youve-become-chronically-online.pdf",
+      "slug": "when-youve-become-chronically-online",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/when-youve-worshipped-the-wrong-metrics.pdf",
+      "to": "/assets/downloads/when-youve-worshipped-the-wrong-metrics.pdf",
+      "slug": "when-youve-worshipped-the-wrong-metrics",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/assets/downloads/content-downloads/you-were-built-to-carry-weight.pdf",
+      "to": "/assets/downloads/you-were-built-to-carry-weight.pdf",
+      "slug": "you-were-built-to-carry-weight",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/downloads/brotherhood-cue-card.pdf",
+      "to": "/assets/downloads/brotherhood-cue-card.pdf",
+      "slug": "brotherhood-cue-card",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/canon-system-constitution.pdf",
+      "to": "/assets/downloads/canon-system-constitution.pdf",
+      "slug": "canon-system-constitution",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-beyond-survival-mode.pdf",
+      "to": "/assets/downloads/frontier-resilience-beyond-survival-mode.pdf",
+      "slug": "frontier-resilience-beyond-survival-mode",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-crisis-loops-and-lost-judgment.pdf",
+      "to": "/assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf",
+      "slug": "frontier-resilience-crisis-loops-and-lost-judgment",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-decision-latency-as-hidden-risk.pdf",
+      "to": "/assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf",
+      "slug": "frontier-resilience-decision-latency-as-hidden-risk",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-drift-in-the-second-line.pdf",
+      "to": "/assets/downloads/frontier-resilience-drift-in-the-second-line.pdf",
+      "slug": "frontier-resilience-drift-in-the-second-line",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-drift-inside-the-winning-season.pdf",
+      "to": "/assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf",
+      "slug": "frontier-resilience-drift-inside-the-winning-season",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-fatigue-at-the-top.pdf",
+      "to": "/assets/downloads/frontier-resilience-fatigue-at-the-top.pdf",
+      "slug": "frontier-resilience-fatigue-at-the-top",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-founder-endurance-is-not-a-plan.pdf",
+      "to": "/assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf",
+      "slug": "frontier-resilience-founder-endurance-is-not-a-plan",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-fragility-of-unowned-decisions.pdf",
+      "to": "/assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf",
+      "slug": "frontier-resilience-fragility-of-unowned-decisions",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-holding-standard-when-cash-tightens.pdf",
+      "to": "/assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf",
+      "slug": "frontier-resilience-holding-standard-when-cash-tightens",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-institutions-that-cannot-say-no.pdf",
+      "to": "/assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf",
+      "slug": "frontier-resilience-institutions-that-cannot-say-no",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-operating-cadence-under-strain.pdf",
+      "to": "/assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf",
+      "slug": "frontier-resilience-operating-cadence-under-strain",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-pressure-tests-for-key-person-risk.pdf",
+      "to": "/assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf",
+      "slug": "frontier-resilience-pressure-tests-for-key-person-risk",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-resilience-before-expansion.pdf",
+      "to": "/assets/downloads/frontier-resilience-resilience-before-expansion.pdf",
+      "slug": "frontier-resilience-resilience-before-expansion",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-restoring-command-after-confusion.pdf",
+      "to": "/assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf",
+      "slug": "frontier-resilience-restoring-command-after-confusion",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-stress-reveals-the-real-culture.pdf",
+      "to": "/assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf",
+      "slug": "frontier-resilience-stress-reveals-the-real-culture",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-surviving-bad-information.pdf",
+      "to": "/assets/downloads/frontier-resilience-surviving-bad-information.pdf",
+      "slug": "frontier-resilience-surviving-bad-information",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-the-cost-of-living-in-escalation.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf",
+      "slug": "frontier-resilience-the-cost-of-living-in-escalation",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-the-discipline-of-bounded-adaptation.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf",
+      "slug": "frontier-resilience-the-discipline-of-bounded-adaptation",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-the-false-order-of-busy-teams.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf",
+      "slug": "frontier-resilience-the-false-order-of-busy-teams",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-the-fragility-of-heroic-leadership.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf",
+      "slug": "frontier-resilience-the-fragility-of-heroic-leadership",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-the-tax-of-constant-reaction.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf",
+      "slug": "frontier-resilience-the-tax-of-constant-reaction",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-when-clarity-has-no-owner.pdf",
+      "to": "/assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf",
+      "slug": "frontier-resilience-when-clarity-has-no-owner",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-when-growth-hides-breakdown.pdf",
+      "to": "/assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf",
+      "slug": "frontier-resilience-when-growth-hides-breakdown",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-when-recovery-needs-governance.pdf",
+      "to": "/assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf",
+      "slug": "frontier-resilience-when-recovery-needs-governance",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/frontier-resilience-when-urgency-corrupts-sequencing.pdf",
+      "to": "/assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf",
+      "slug": "frontier-resilience-when-urgency-corrupts-sequencing",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-false-confidence-from-aggregated-metrics.pdf",
+      "to": "/assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf",
+      "slug": "institutional-alpha-false-confidence-from-aggregated-metrics",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-intelligence-after-the-founder-myth.pdf",
+      "to": "/assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf",
+      "slug": "institutional-alpha-intelligence-after-the-founder-myth",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-intelligence-debt-in-scaling-firms.pdf",
+      "to": "/assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf",
+      "slug": "institutional-alpha-intelligence-debt-in-scaling-firms",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf",
+      "to": "/assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf",
+      "slug": "institutional-alpha-intelligence-drift-after-rapid-expansion",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-overinterpreting-motion-as-momentum.pdf",
+      "to": "/assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf",
+      "slug": "institutional-alpha-overinterpreting-motion-as-momentum",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-pattern-recognition-without-operating-truth.pdf",
+      "to": "/assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf",
+      "slug": "institutional-alpha-pattern-recognition-without-operating-truth",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-reporting-systems-that-reward-optimism.pdf",
+      "to": "/assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf",
+      "slug": "institutional-alpha-reporting-systems-that-reward-optimism",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-signal-decay-in-reporting-chains.pdf",
+      "to": "/assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf",
+      "slug": "institutional-alpha-signal-decay-in-reporting-chains",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-blindness-of-clean-narratives.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf",
+      "slug": "institutional-alpha-the-blindness-of-clean-narratives",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-breakdown-of-field-intelligence.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf",
+      "slug": "institutional-alpha-the-breakdown-of-field-intelligence",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-comfort-of-lagging-indicators.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf",
+      "slug": "institutional-alpha-the-comfort-of-lagging-indicators",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-danger-of-unaudited-assumptions.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf",
+      "slug": "institutional-alpha-the-danger-of-unaudited-assumptions",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-difference-between-insight-and-surveillance.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf",
+      "slug": "institutional-alpha-the-difference-between-insight-and-surveillance",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf",
+      "slug": "institutional-alpha-the-discipline-of-decision-grade-intelligence",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-hidden-cost-of-flattering-data.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf",
+      "slug": "institutional-alpha-the-hidden-cost-of-flattering-data",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-institutional-price-of-guesswork.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf",
+      "slug": "institutional-alpha-the-institutional-price-of-guesswork",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
+      "slug": "institutional-alpha-the-politics-of-suppressed-bad-news",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-weak-signals-before-reputational-fracture.pdf",
+      "to": "/assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf",
+      "slug": "institutional-alpha-weak-signals-before-reputational-fracture",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf",
+      "slug": "institutional-alpha-when-analysts-inherit-a-broken-mandate",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-when-dashboards-outpace-judgment.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf",
+      "slug": "institutional-alpha-when-dashboards-outpace-judgment",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
+      "slug": "institutional-alpha-when-risk-travels-faster-than-reporting",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-when-scenario-planning-becomes-theatre.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf",
+      "slug": "institutional-alpha-when-scenario-planning-becomes-theatre",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-when-the-board-sees-a-different-company.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf",
+      "slug": "institutional-alpha-when-the-board-sees-a-different-company",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-why-executive-summaries-mislead.pdf",
+      "to": "/assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf",
+      "slug": "institutional-alpha-why-executive-summaries-mislead",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/institutional-alpha-why-leaders-stop-hearing-reality.pdf",
+      "to": "/assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf",
+      "slug": "institutional-alpha-why-leaders-stop-hearing-reality",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-alignment-without-sovereignty.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf",
+      "slug": "sovereign-intelligence-alignment-without-sovereignty",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-control-without-ownership.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-control-without-ownership.pdf",
+      "slug": "sovereign-intelligence-control-without-ownership",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-dependence-disguised-as-partnership.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf",
+      "slug": "sovereign-intelligence-dependence-disguised-as-partnership",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf",
+      "slug": "sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf",
+      "slug": "sovereign-intelligence-identity-drift-in-institutions-under-external-pressure",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf",
+      "slug": "sovereign-intelligence-internal-empires-and-the-loss-of-common-rule",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf",
+      "slug": "sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf",
+      "slug": "sovereign-intelligence-sovereignty-at-the-edge-of-regulation",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf",
+      "slug": "sovereign-intelligence-strategic-ambition-without-sovereign-capacity",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-strategic-exposure-without-red-lines.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf",
+      "slug": "sovereign-intelligence-strategic-exposure-without-red-lines",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf",
+      "slug": "sovereign-intelligence-the-cost-of-borrowed-legitimacy",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf",
+      "slug": "sovereign-intelligence-the-discipline-of-institutional-self-government",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf",
+      "slug": "sovereign-intelligence-the-false-safety-of-strategic-silence",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-geography-of-hidden-influence.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf",
+      "slug": "sovereign-intelligence-the-geography-of-hidden-influence",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf",
+      "slug": "sovereign-intelligence-the-governance-cost-of-permanent-exception",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf",
+      "slug": "sovereign-intelligence-the-illusion-of-neutral-platforms",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf",
+      "slug": "sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf",
+      "slug": "sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf",
+      "slug": "sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf",
+      "slug": "sovereign-intelligence-the-tax-of-strategic-appeasement",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf",
+      "slug": "sovereign-intelligence-the-vulnerability-of-narrative-capture",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf",
+      "slug": "sovereign-intelligence-the-weakness-of-outsourced-judgment",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf",
+      "slug": "sovereign-intelligence-when-institutions-become-too-easy-to-pressure",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-when-optionality-quietly-dies.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf",
+      "slug": "sovereign-intelligence-when-optionality-quietly-dies",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/resources/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf",
+      "slug": "sovereign-intelligence-why-power-concentrates-around-the-decisive",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-001-modern-household.pdf",
+      "to": "/assets/downloads/brief-001-modern-household.pdf",
+      "slug": "brief-001-modern-household",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-002-economic-fortress.pdf",
+      "to": "/assets/downloads/brief-002-economic-fortress.pdf",
+      "slug": "brief-002-economic-fortress",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-003-education-of-heirs.pdf",
+      "to": "/assets/downloads/brief-003-education-of-heirs.pdf",
+      "slug": "brief-003-education-of-heirs",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-004-parallel-estate.pdf",
+      "to": "/assets/downloads/brief-004-parallel-estate.pdf",
+      "slug": "brief-004-parallel-estate",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-005-brotherhood-protocol.pdf",
+      "to": "/assets/downloads/brief-005-brotherhood-protocol.pdf",
+      "slug": "brief-005-brotherhood-protocol",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-006-sisterhood-and-hearth.pdf",
+      "to": "/assets/downloads/brief-006-sisterhood-and-hearth.pdf",
+      "slug": "brief-006-sisterhood-and-hearth",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-007-covenantal-oath.pdf",
+      "to": "/assets/downloads/brief-007-covenantal-oath.pdf",
+      "slug": "brief-007-covenantal-oath",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-008-ledger-of-legacy.pdf",
+      "to": "/assets/downloads/brief-008-ledger-of-legacy.pdf",
+      "slug": "brief-008-ledger-of-legacy",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-009-sovereignty-of-time.pdf",
+      "to": "/assets/downloads/brief-009-sovereignty-of-time.pdf",
+      "slug": "brief-009-sovereignty-of-time",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-010-geometry-of-inner-circle.pdf",
+      "to": "/assets/downloads/brief-010-geometry-of-inner-circle.pdf",
+      "slug": "brief-010-geometry-of-inner-circle",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-011-geography-of-estate.pdf",
+      "to": "/assets/downloads/brief-011-geography-of-estate.pdf",
+      "slug": "brief-011-geography-of-estate",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "copied_canonical",
+      "from": "/vault/briefs/brief-012-aesthetics-of-order.pdf",
+      "to": "/assets/downloads/brief-012-aesthetics-of-order.pdf",
+      "slug": "brief-012-aesthetics-of-order",
+      "reason": "Single active PDF was materialised at the canonical endpoint."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/downloads/brotherhood-cue-card.pdf",
+      "to": "/_archive/pdfs/downloads/brotherhood-cue-card.pdf",
+      "slug": "brotherhood-cue-card",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/busy-is-not-the-same-as-anchored.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/busy-is-not-the-same-as-anchored.pdf",
+      "slug": "busy-is-not-the-same-as-anchored",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
+      "slug": "download-legacy-architecture-canvas",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/freedom-begins-where-ego-ends.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/freedom-begins-where-ego-ends.pdf",
+      "slug": "freedom-begins-where-ego-ends",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/institutional-sovereignty.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/institutional-sovereignty.pdf",
+      "slug": "institutional-sovereignty",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/life-alignment-assessment.pdf",
+      "slug": "life-alignment-assessment",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/pleasure-is-loud-purpose-is-quiet.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/pleasure-is-loud-purpose-is-quiet.pdf",
+      "slug": "pleasure-is-loud-purpose-is-quiet",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/principles-of-surrender-framework.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/principles-of-surrender-framework.pdf",
+      "slug": "principles-of-surrender-framework",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/sovereignty-001.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/sovereignty-001.pdf",
+      "slug": "sovereignty-001",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/the-builders-catechism.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/the-builders-catechism.pdf",
+      "slug": "the-builders-catechism",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/the-cost-of-refusing-formation.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/the-cost-of-refusing-formation.pdf",
+      "slug": "the-cost-of-refusing-formation",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/this-is-not-a-comfort-platform.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/this-is-not-a-comfort-platform.pdf",
+      "slug": "this-is-not-a-comfort-platform",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-a-single-yes-changes-everything.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-a-single-yes-changes-everything.pdf",
+      "slug": "when-a-single-yes-changes-everything",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-all-you-can-do-is-breathe.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-all-you-can-do-is-breathe.pdf",
+      "slug": "when-all-you-can-do-is-breathe",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-avoidance-becomes-your-personality.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-avoidance-becomes-your-personality.pdf",
+      "slug": "when-avoidance-becomes-your-personality",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-busyness-becomes-your-brand.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-busyness-becomes-your-brand.pdf",
+      "slug": "when-busyness-becomes-your-brand",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-comfort-becomes-your-cage.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-comfort-becomes-your-cage.pdf",
+      "slug": "when-comfort-becomes-your-cage",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-conflict-feels-like-betrayal.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-conflict-feels-like-betrayal.pdf",
+      "slug": "when-conflict-feels-like-betrayal",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-doctrine-feels-safer-than-god.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-doctrine-feels-safer-than-god.pdf",
+      "slug": "when-doctrine-feels-safer-than-god",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-every-promotion-feels-hollow.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-every-promotion-feels-hollow.pdf",
+      "slug": "when-every-promotion-feels-hollow",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-grace-finds-you-in-the-mess.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-grace-finds-you-in-the-mess.pdf",
+      "slug": "when-grace-finds-you-in-the-mess",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-hope-feels-reckless.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-hope-feels-reckless.pdf",
+      "slug": "when-hope-feels-reckless",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-kindness-feels-like-rebellion.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-kindness-feels-like-rebellion.pdf",
+      "slug": "when-kindness-feels-like-rebellion",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-later-became-never.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-later-became-never.pdf",
+      "slug": "when-later-became-never",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-numbness-feels-safer-than-joy.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-numbness-feels-safer-than-joy.pdf",
+      "slug": "when-numbness-feels-safer-than-joy",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-productivity-becomes-punishment.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-productivity-becomes-punishment.pdf",
+      "slug": "when-productivity-becomes-punishment",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-rest-starts-to-feel-dangerous.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-rest-starts-to-feel-dangerous.pdf",
+      "slug": "when-rest-starts-to-feel-dangerous",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-argue-with-god-in-your-head.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-argue-with-god-in-your-head.pdf",
+      "slug": "when-you-argue-with-god-in-your-head",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-cant-stop-overthinking.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-cant-stop-overthinking.pdf",
+      "slug": "when-you-cant-stop-overthinking",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+      "slug": "when-you-cant-tell-if-youre-growing-or-drifting",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-dont-know-what-you-want-anymore.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-dont-know-what-you-want-anymore.pdf",
+      "slug": "when-you-dont-know-what-you-want-anymore",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-dont-trust-your-own-decisions.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-dont-trust-your-own-decisions.pdf",
+      "slug": "when-you-dont-trust-your-own-decisions",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-fear-being-wrong-about-god.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-fear-being-wrong-about-god.pdf",
+      "slug": "when-you-fear-being-wrong-about-god",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-fear-success-more-than-failure.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-fear-success-more-than-failure.pdf",
+      "slug": "when-you-fear-success-more-than-failure",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-feel-like-god-is-delaying-you.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-feel-like-god-is-delaying-you.pdf",
+      "slug": "when-you-feel-like-god-is-delaying-you",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-feel-too-busy-to-care.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-feel-too-busy-to-care.pdf",
+      "slug": "when-you-feel-too-busy-to-care",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-finally-let-yourself-cry.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-finally-let-yourself-cry.pdf",
+      "slug": "when-you-finally-let-yourself-cry",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-give-more-than-you-get.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-give-more-than-you-get.pdf",
+      "slug": "when-you-give-more-than-you-get",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-keep-blaming-your-childhood.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-keep-blaming-your-childhood.pdf",
+      "slug": "when-you-keep-blaming-your-childhood",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
+      "slug": "when-you-keep-choosing-people-who-cant-choose-you",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
+      "slug": "when-you-keep-confusing-niceness-with-goodness",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-miss-who-you-used-to-be.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-miss-who-you-used-to-be.pdf",
+      "slug": "when-you-miss-who-you-used-to-be",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-mistake-familiarity-for-loyalty.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-mistake-familiarity-for-loyalty.pdf",
+      "slug": "when-you-mistake-familiarity-for-loyalty",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-need-god-to-interrupt-you.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-need-god-to-interrupt-you.pdf",
+      "slug": "when-you-need-god-to-interrupt-you",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-no-longer-recognise-your-own-voice.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-no-longer-recognise-your-own-voice.pdf",
+      "slug": "when-you-no-longer-recognise-your-own-voice",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-outgrow-your-circle.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-outgrow-your-circle.pdf",
+      "slug": "when-you-outgrow-your-circle",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-realise-prayer-is-war.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-realise-prayer-is-war.pdf",
+      "slug": "when-you-realise-prayer-is-war",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-realise-you-were-the-problem.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-realise-you-were-the-problem.pdf",
+      "slug": "when-you-realise-you-were-the-problem",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-realise-youre-not-behind.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-realise-youre-not-behind.pdf",
+      "slug": "when-you-realise-youre-not-behind",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-stop-waiting-for-permission.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-stop-waiting-for-permission.pdf",
+      "slug": "when-you-stop-waiting-for-permission",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-you-want-to-quit-but-cant.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-you-want-to-quit-but-cant.pdf",
+      "slug": "when-you-want-to-quit-but-cant",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
+      "slug": "when-your-calendar-is-full-but-your-life-is-empty",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-calling-stops-being-cute.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-calling-stops-being-cute.pdf",
+      "slug": "when-your-calling-stops-being-cute",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-character-is-leaking.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-character-is-leaking.pdf",
+      "slug": "when-your-character-is-leaking",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-confidence-feels-manufactured.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-confidence-feels-manufactured.pdf",
+      "slug": "when-your-confidence-feels-manufactured",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-convictions-feel-like-costumes.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-convictions-feel-like-costumes.pdf",
+      "slug": "when-your-convictions-feel-like-costumes",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-dreams-feel-too-heavy.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-dreams-feel-too-heavy.pdf",
+      "slug": "when-your-dreams-feel-too-heavy",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-excuses-become-your-identity.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-excuses-become-your-identity.pdf",
+      "slug": "when-your-excuses-become-your-identity",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-faith-feels-numb.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-faith-feels-numb.pdf",
+      "slug": "when-your-faith-feels-numb",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-hustle-has-no-soul.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-hustle-has-no-soul.pdf",
+      "slug": "when-your-hustle-has-no-soul",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-legacy-terrifies-you.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-legacy-terrifies-you.pdf",
+      "slug": "when-your-legacy-terrifies-you",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-silence-says-too-much.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-silence-says-too-much.pdf",
+      "slug": "when-your-silence-says-too-much",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-standards-keep-you-lonely.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-standards-keep-you-lonely.pdf",
+      "slug": "when-your-standards-keep-you-lonely",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-vision-outgrows-your-environment.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-vision-outgrows-your-environment.pdf",
+      "slug": "when-your-vision-outgrows-your-environment",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-your-work-becomes-your-hiding-place.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-your-work-becomes-your-hiding-place.pdf",
+      "slug": "when-your-work-becomes-your-hiding-place",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-addicted-to-distraction.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-addicted-to-distraction.pdf",
+      "slug": "when-youre-addicted-to-distraction",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-afraid-of-your-own-potential.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-afraid-of-your-own-potential.pdf",
+      "slug": "when-youre-afraid-of-your-own-potential",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-afraid-to-be-radical.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-afraid-to-be-radical.pdf",
+      "slug": "when-youre-afraid-to-be-radical",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-always-the-strong-one.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-always-the-strong-one.pdf",
+      "slug": "when-youre-always-the-strong-one",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-attracted-to-potential-not-reality.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-attracted-to-potential-not-reality.pdf",
+      "slug": "when-youre-attracted-to-potential-not-reality",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-building-someone-elses-legacy.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-building-someone-elses-legacy.pdf",
+      "slug": "when-youre-building-someone-elses-legacy",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-done-fixing-adults.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-done-fixing-adults.pdf",
+      "slug": "when-youre-done-fixing-adults",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-exhausted-but-still-available.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-exhausted-but-still-available.pdf",
+      "slug": "when-youre-exhausted-but-still-available",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-keeping-faith-out-of-habit.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-keeping-faith-out-of-habit.pdf",
+      "slug": "when-youre-keeping-faith-out-of-habit",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-living-for-weekends.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-living-for-weekends.pdf",
+      "slug": "when-youre-living-for-weekends",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-loved-without-earning-it.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-loved-without-earning-it.pdf",
+      "slug": "when-youre-loved-without-earning-it",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-measuring-everything-but-meaning.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-measuring-everything-but-meaning.pdf",
+      "slug": "when-youre-measuring-everything-but-meaning",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-not-lazy-youre-undisciplined.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-not-lazy-youre-undisciplined.pdf",
+      "slug": "when-youre-not-lazy-youre-undisciplined",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
+      "slug": "when-youre-preparing-for-rooms-you-havent-entered",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-productive-but-not-present.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-productive-but-not-present.pdf",
+      "slug": "when-youre-productive-but-not-present",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-scared-to-start-over.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-scared-to-start-over.pdf",
+      "slug": "when-youre-scared-to-start-over",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-the-only-one-doing-the-work.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-the-only-one-doing-the-work.pdf",
+      "slug": "when-youre-the-only-one-doing-the-work",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-tired-of-being-the-bigger-person.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-tired-of-being-the-bigger-person.pdf",
+      "slug": "when-youre-tired-of-being-the-bigger-person",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-tired-of-starting-over.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-tired-of-starting-over.pdf",
+      "slug": "when-youre-tired-of-starting-over",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
+      "slug": "when-youre-winning-at-work-but-losing-yourself",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youve-become-chronically-online.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youve-become-chronically-online.pdf",
+      "slug": "when-youve-become-chronically-online",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/when-youve-worshipped-the-wrong-metrics.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/when-youve-worshipped-the-wrong-metrics.pdf",
+      "slug": "when-youve-worshipped-the-wrong-metrics",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    },
+    {
+      "action": "archived_duplicate",
+      "from": "/assets/downloads/content-downloads/you-were-built-to-carry-weight.pdf",
+      "to": "/_archive/pdfs/assets/downloads/content-downloads/you-were-built-to-carry-weight.pdf",
+      "slug": "you-were-built-to-carry-weight",
+      "reason": "Non-canonical duplicate retained outside active public surface."
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-re
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
 import { createStrategyRoomSession } from "@/lib/strategy-room/persistence";
 import { randomUUID } from "crypto";
+import { enforceStrategyRoomAccess } from "@/lib/diagnostics/authority-enforcement";
 
 function makeSessionKey(): string {
   return `sr_${randomUUID().replace(/-/g, "")}`;
@@ -92,11 +93,33 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const intake = body?.intake;
+    const tensionThread = body?.tensionThread ?? null; // Cross-stage tension memory (optional)
 
     if (!intake || typeof intake !== "object") {
       return NextResponse.json(
         { success: false, error: "Invalid intake payload." },
         { status: 400 }
+      );
+    }
+
+    // ── DECISION AUTHORITY ENFORCEMENT ──
+    // Server-side hard gate: restrict/block directives prevent session creation.
+    // Uses durable DB-backed thread (email lookup) as sovereign authority,
+    // with client-supplied thread as supplemental context.
+    stage = "enforce_authority";
+    const intakeEmail = typeof intake.email === "string" ? intake.email.trim().toLowerCase() : null;
+    const enforcement = await enforceStrategyRoomAccess(intakeEmail, tensionThread);
+    if (!enforcement.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Strategy Room access restricted by diagnostic authority.",
+          directive: enforcement.directive,
+          reason: enforcement.reason,
+          recommendedPath: enforcement.recommendedPath,
+          threadSource: enforcement.threadSource,
+        },
+        { status: 403 }
       );
     }
 
@@ -184,6 +207,7 @@ export async function POST(request: Request) {
       route: assembled.constitution.route,
       readinessTier: assembled.constitution.readinessTier,
       authorityType: assembled.constitution.authorityType,
+      ...(tensionThread ? { tensionThread: toJsonString(tensionThread) } : {}),
     });
 
     return NextResponse.json({

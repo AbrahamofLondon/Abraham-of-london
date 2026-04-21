@@ -6,7 +6,8 @@ const DownloadCTA = ({
   title = "Download The Legacy Architecture Canvas",
   description = "Heirloom-grade PDF with integrated fillable fields and implementation notes",
   badge,
-  level = "premium"
+  level = "premium",
+  slug = "legacy-architecture-canvas"
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   
@@ -15,7 +16,7 @@ const DownloadCTA = ({
     // Download logic
     setTimeout(() => {
       setIsDownloading(false);
-      window.open('/assets/downloads/sample.pdf', '_blank');
+      window.open(`/downloads/${slug}`, '_blank');
     }, 800);
   };
 
@@ -65,6 +66,14 @@ const DownloadCTA = ({
       </button>
     </div>
   );
+};
+
+DownloadCTA.propTypes = {
+  title: PropTypes.string,
+  description: PropTypes.string,
+  badge: PropTypes.string,
+  level: PropTypes.string,
+  slug: PropTypes.string,
 };
 
 export default DownloadCTA;

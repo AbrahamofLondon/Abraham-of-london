@@ -74,6 +74,12 @@ function validateDownloadAccess(params: {
   return { allowed: true };
 }
 
+function appendDownloadToken(url: string, token: string): string {
+  if (!url.startsWith("/assets/downloads/")) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}downloadToken=${encodeURIComponent(token)}`;
+}
+
 async function resolveDeliveryTarget(params: {
   contentType: string;
   slug: string;
@@ -107,7 +113,7 @@ async function resolveDeliveryTarget(params: {
     return {
       kind: "document",
       slug: asset.slug,
-      redirectUrl: asset.downloadUrl,
+      redirectUrl: appendDownloadToken(asset.downloadUrl, params.rawToken),
     };
   }
 

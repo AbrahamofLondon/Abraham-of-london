@@ -12,7 +12,7 @@ coverImage: /assets/images/resources/leadership-standards-blueprint.jpg
 accessLevel: public
 resourceType: guide
 docKind: Resource
-downloadUrl: /assets/resources/pdfs/leadership-standards-blueprint.pdf
+downloadUrl: /downloads/leadership-standards-blueprint
 ogTitle: "Leadership Standards Blueprint | Abraham of London"
 ogDescription: >-
   A structural doctrine outlining the 12 non-negotiable standards for enduring leadership.
@@ -42,7 +42,7 @@ status: published
 <DownloadCard
   title="Download the Leadership Blueprint (PDF)"
   label="Download PDF"
-  href="/assets/resources/pdfs/leadership-standards-blueprint.pdf"
+  href="/downloads/leadership-standards-blueprint"
 >
   The full 12-standard framework with audit prompts, drift detection, and governance alignment tools.
 </DownloadCard>

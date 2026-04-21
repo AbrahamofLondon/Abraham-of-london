@@ -1,0 +1,434 @@
+{
+  "generatedAt": "2026-04-21T14:31:07.406Z",
+  "totals": {
+    "rewrites": 85,
+    "files": 40
+  },
+  "rewrites": [
+    {
+      "file": "components/downloads/DownloadsGrid.tsx",
+      "from": "/downloads/Mentorship_Starter_Kit.pdf",
+      "to": "/downloads/Mentorship_Starter_Kit"
+    },
+    {
+      "file": "components/events/EventResources.tsx",
+      "from": "/downloads/leadership-playbook.pdf",
+      "to": "/downloads/leadership-playbook"
+    },
+    {
+      "file": "components/events/EventResources.tsx",
+      "from": "/downloads/weekly-operating-rhythm.pdf",
+      "to": "/downloads/weekly-operating-rhythm"
+    },
+    {
+      "file": "components/events/EventResources.tsx",
+      "from": "/downloads/board-investor-onepager.pdf",
+      "to": "/downloads/board-investor-onepager"
+    },
+    {
+      "file": "components/events/EventResources.tsx",
+      "from": "/downloads/entrepreneur-operating-pack.pdf",
+      "to": "/downloads/entrepreneur-operating-pack"
+    },
+    {
+      "file": "components/events/EventResources.tsx",
+      "from": "/downloads/entrepreneur-survival-checklist.pdf",
+      "to": "/downloads/entrepreneur-survival-checklist"
+    },
+    {
+      "file": "components/events/EventResources.tsx",
+      "from": "/downloads/communication-script-bpf.pdf",
+      "to": "/downloads/communication-script-bpf"
+    },
+    {
+      "file": "content/blog/fathering-principles.mdx",
+      "from": "/assets/downloads/family-court-practical-pack.pdf",
+      "to": "/downloads/family-court-practical-pack"
+    },
+    {
+      "file": "content/blog/lessons-from-noah.mdx",
+      "from": "/assets/downloads/fathering-without-fear.pdf",
+      "to": "/downloads/fathering-without-fear"
+    },
+    {
+      "file": "content/blog/reclaiming-the-narrative.mdx",
+      "from": "/assets/downloads/family-court-practical-pack.pdf",
+      "to": "/downloads/family-court-practical-pack"
+    },
+    {
+      "file": "content/blog/reclaiming-the-narrative.mdx",
+      "from": "/assets/downloads/family-court-practical-pack.pdf",
+      "to": "/downloads/family-court-practical-pack"
+    },
+    {
+      "file": "content/blog/surrender-not-submission.mdx",
+      "from": "/assets/downloads/principles-of-surrender.pdf",
+      "to": "/downloads/principles-of-surrender"
+    },
+    {
+      "file": "content/blog/surrender-not-submission.mdx",
+      "from": "/assets/downloads/purpose-alignment.pdf",
+      "to": "/downloads/purpose-alignment"
+    },
+    {
+      "file": "content/blog/surrender-not-submission.mdx",
+      "from": "/assets/downloads/principles-of-surrender.pdf",
+      "to": "/downloads/principles-of-surrender"
+    },
+    {
+      "file": "content/blog/surrender-not-submission.mdx",
+      "from": "/assets/downloads/purpose-alignment.pdf",
+      "to": "/downloads/purpose-alignment"
+    },
+    {
+      "file": "content/blog/surrender-not-submission.mdx",
+      "from": "/assets/downloads/principles-of-surrender.pdf",
+      "to": "/downloads/principles-of-surrender"
+    },
+    {
+      "file": "content/blog/surrender-not-submission.mdx",
+      "from": "/assets/downloads/purpose-alignment.pdf",
+      "to": "/downloads/purpose-alignment"
+    },
+    {
+      "file": "content/blog/the-brotherhood-code.mdx",
+      "from": "/resources/brotherhood-starter-kit.pdf",
+      "to": "/downloads/brotherhood-starter-kit"
+    },
+    {
+      "file": "content/blog/the-brotherhood-code.mdx",
+      "from": "/resources/brotherhood-leader-guide.pdf",
+      "to": "/downloads/brotherhood-leader-guide"
+    },
+    {
+      "file": "content/blog/the-brotherhood-code.mdx",
+      "from": "/downloads/brotherhood-covenant.pdf",
+      "to": "/downloads/brotherhood-covenant"
+    },
+    {
+      "file": "content/blog/the-brotherhood-code.mdx",
+      "from": "/assets/downloads/leaders-cue-card-two-up.pdf",
+      "to": "/downloads/leaders-cue-card-two-up"
+    },
+    {
+      "file": "content/blog/when-the-system-breaks-you.mdx",
+      "from": "/assets/downloads/family-court-practical-pack.pdf",
+      "to": "/downloads/family-court-practical-pack"
+    },
+    {
+      "file": "content/blog/when-the-system-breaks-you.mdx",
+      "from": "/assets/downloads/family-court-practical-pack.pdf",
+      "to": "/downloads/family-court-practical-pack"
+    },
+    {
+      "file": "content/downloads/abraham-vault-pack.mdx",
+      "from": "/assets/downloads/abraham-vault-pack.pdf",
+      "to": "/downloads/abraham-vault-pack"
+    },
+    {
+      "file": "content/downloads/abraham-vault-pack.mdx",
+      "from": "/downloads/abraham-vault-pack.pdf",
+      "to": "/downloads/abraham-vault-pack"
+    },
+    {
+      "file": "content/downloads/board-decision-log-template.mdx",
+      "from": "/assets/downloads/board-decision-log-template.pdf",
+      "to": "/downloads/board-decision-log-template"
+    },
+    {
+      "file": "content/downloads/board-decision-log-template.mdx",
+      "from": "/assets/downloads/board-decision-log-template.pdf",
+      "to": "/downloads/board-decision-log-template"
+    },
+    {
+      "file": "content/downloads/board-decision-log-template.mdx",
+      "from": "/assets/downloads/board-decision-log-template.pdf",
+      "to": "/downloads/board-decision-log-template"
+    },
+    {
+      "file": "content/downloads/board-investor-onepager.mdx",
+      "from": "/assets/downloads/board-investor-onepager.pdf",
+      "to": "/downloads/board-investor-onepager"
+    },
+    {
+      "file": "content/downloads/board-investor-onepager.mdx",
+      "from": "/assets/downloads/board-investor-onepager.pdf",
+      "to": "/downloads/board-investor-onepager"
+    },
+    {
+      "file": "content/downloads/canon-volume-iv-diagnostic-toolkit.mdx",
+      "from": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "to": "/downloads/canon-volume-iv-diagnostic-toolkit"
+    },
+    {
+      "file": "content/downloads/canon-volume-iv-diagnostic-toolkit.mdx",
+      "from": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "to": "/downloads/canon-volume-iv-diagnostic-toolkit"
+    },
+    {
+      "file": "content/downloads/canon-volume-v-governance-diagnostic-toolkit.mdx",
+      "from": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "to": "/downloads/canon-volume-v-governance-diagnostic-toolkit"
+    },
+    {
+      "file": "content/downloads/canon-volume-v-governance-diagnostic-toolkit.mdx",
+      "from": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "to": "/downloads/canon-volume-v-governance-diagnostic-toolkit"
+    },
+    {
+      "file": "content/downloads/decision-log-template.mdx",
+      "from": "/assets/downloads/decision-log-template.pdf",
+      "to": "/downloads/decision-log-template"
+    },
+    {
+      "file": "content/downloads/decision-log-template.mdx",
+      "from": "/assets/downloads/decision-log-template.pdf",
+      "to": "/downloads/decision-log-template"
+    },
+    {
+      "file": "content/downloads/decision-log-template.mdx",
+      "from": "/assets/downloads/decision-log-template.pdf",
+      "to": "/downloads/decision-log-template"
+    },
+    {
+      "file": "content/downloads/decision-matrix-scorecard.mdx",
+      "from": "/assets/downloads/decision-matrix-scorecard.pdf",
+      "to": "/downloads/decision-matrix-scorecard"
+    },
+    {
+      "file": "content/downloads/decision-matrix-scorecard.mdx",
+      "from": "/assets/downloads/decision-matrix-scorecard.pdf",
+      "to": "/downloads/decision-matrix-scorecard"
+    },
+    {
+      "file": "content/downloads/decision-matrix-scorecard.mdx",
+      "from": "/assets/downloads/decision-matrix-scorecard.pdf",
+      "to": "/downloads/decision-matrix-scorecard"
+    },
+    {
+      "file": "content/downloads/family-court-practical-pack.mdx",
+      "from": "/assets/downloads/family-court-practical-pack.pdf",
+      "to": "/downloads/family-court-practical-pack"
+    },
+    {
+      "file": "content/downloads/fathering-without-fear.mdx",
+      "from": "/assets/downloads/fathering-without-fear.pdf",
+      "to": "/downloads/fathering-without-fear"
+    },
+    {
+      "file": "content/downloads/global-market-intelligence-board-deck-q1-2026.mdx",
+      "from": "/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf",
+      "to": "/downloads/global-market-intelligence-board-deck-q1-2026"
+    },
+    {
+      "file": "content/downloads/global-market-intelligence-report-q1-2026.mdx",
+      "from": "/assets/downloads/global-market-intelligence-report-q1-2026.pdf",
+      "to": "/downloads/global-market-intelligence-report-q1-2026"
+    },
+    {
+      "file": "content/downloads/leadership-playbook.mdx",
+      "from": "/assets/downloads/leadership-playbook.pdf",
+      "to": "/downloads/leadership-playbook"
+    },
+    {
+      "file": "content/downloads/legacy-canvas.mdx",
+      "from": "/assets/downloads/legacy-architecture-canvas.pdf",
+      "to": "/downloads/legacy-architecture-canvas"
+    },
+    {
+      "file": "content/downloads/legacy-canvas.mdx",
+      "from": "/assets/downloads/legacy-architecture-canvas.pdf",
+      "to": "/downloads/legacy-architecture-canvas"
+    },
+    {
+      "file": "content/downloads/legacy-canvas.mdx",
+      "from": "/assets/downloads/legacy-canvas.pdf",
+      "to": "/downloads/legacy-canvas"
+    },
+    {
+      "file": "content/downloads/life-alignment-assessment.mdx",
+      "from": "/assets/downloads/purpose-alignment.pdf",
+      "to": "/downloads/purpose-alignment"
+    },
+    {
+      "file": "content/downloads/mentorship-starter-kit.mdx",
+      "from": "/assets/downloads/mentorship-starter-kit.pdf",
+      "to": "/downloads/mentorship-starter-kit"
+    },
+    {
+      "file": "content/downloads/mentorship-starter-kit.mdx",
+      "from": "/assets/downloads/mentorship-starter-kit.pdf",
+      "to": "/downloads/mentorship-starter-kit"
+    },
+    {
+      "file": "content/downloads/operating-cadence-pack.mdx",
+      "from": "/assets/downloads/operating-cadence-pack.pdf",
+      "to": "/downloads/operating-cadence-pack"
+    },
+    {
+      "file": "content/downloads/operating-cadence-pack.mdx",
+      "from": "/assets/downloads/operating-cadence-pack.pdf",
+      "to": "/downloads/operating-cadence-pack"
+    },
+    {
+      "file": "content/downloads/operating-cadence-pack.mdx",
+      "from": "/assets/downloads/operating-cadence-pack.pdf",
+      "to": "/downloads/operating-cadence-pack"
+    },
+    {
+      "file": "content/downloads/principles-for-my-son.mdx",
+      "from": "/assets/downloads/principles-for-my-son.pdf",
+      "to": "/downloads/principles-for-my-son"
+    },
+    {
+      "file": "content/downloads/principles-for-my-son.mdx",
+      "from": "/assets/downloads/principles-for-my-son.pdf",
+      "to": "/downloads/principles-for-my-son"
+    },
+    {
+      "file": "content/downloads/principles-of-surrender-framework.mdx",
+      "from": "/assets/downloads/principles-of-surrender.pdf",
+      "to": "/downloads/principles-of-surrender"
+    },
+    {
+      "file": "content/downloads/purpose-pyramid-worksheet.mdx",
+      "from": "/downloads/purpose-pyramid-worksheet.pdf",
+      "to": "/downloads/purpose-pyramid-worksheet"
+    },
+    {
+      "file": "content/downloads/purpose-pyramid-worksheet.mdx",
+      "from": "/downloads/purpose-pyramid-worksheet.pdf",
+      "to": "/downloads/purpose-pyramid-worksheet"
+    },
+    {
+      "file": "content/downloads/purpose-pyramid-worksheet.mdx",
+      "from": "/assets/downloads/purpose-pyramid-worksheet.pdf",
+      "to": "/downloads/purpose-pyramid-worksheet"
+    },
+    {
+      "file": "content/downloads/purpose-pyramid-worksheet.mdx",
+      "from": "/downloads/purpose-pyramid-worksheet.pdf",
+      "to": "/downloads/purpose-pyramid-worksheet"
+    },
+    {
+      "file": "content/downloads/scripture-track-john14.mdx",
+      "from": "/assets/downloads/scripture-track-john14.pdf",
+      "to": "/downloads/scripture-track-john14"
+    },
+    {
+      "file": "content/downloads/scripture-track-john14.mdx",
+      "from": "/assets/downloads/scripture-track-john14.pdf",
+      "to": "/downloads/scripture-track-john14"
+    },
+    {
+      "file": "content/downloads/standards-brief.mdx",
+      "from": "/assets/downloads/standards-brief.pdf",
+      "to": "/downloads/standards-brief"
+    },
+    {
+      "file": "content/downloads/the-builders-catechism.mdx",
+      "from": "/assets/downloads/the-builders-catechism-founders-illuminated-edition-xl.pdf",
+      "to": "/downloads/the-builders-catechism-founders-illuminated-edition-xl"
+    },
+    {
+      "file": "content/downloads/ultimate-purpose-of-man-editorial.mdx",
+      "from": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+      "to": "/downloads/ultimate-purpose-of-man-editorial"
+    },
+    {
+      "file": "content/downloads/ultimate-purpose-of-man-editorial.mdx",
+      "from": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+      "to": "/downloads/ultimate-purpose-of-man-editorial"
+    },
+    {
+      "file": "content/resources/canon-council-table-agenda.mdx",
+      "from": "/assets/downloads/canon-council-table-agenda.pdf",
+      "to": "/downloads/canon-council-table-agenda"
+    },
+    {
+      "file": "content/resources/canon-household-charter-template.mdx",
+      "from": "/assets/downloads/canon-household-charter-template.pdf",
+      "to": "/downloads/canon-household-charter-template"
+    },
+    {
+      "file": "content/resources/canon-household-charter-template.mdx",
+      "from": "/assets/downloads/canon-household-charter-template.pdf",
+      "to": "/downloads/canon-household-charter-template"
+    },
+    {
+      "file": "content/resources/canon-household-charter-template.mdx",
+      "from": "/assets/downloads/fatherhood-impact-framework.pdf",
+      "to": "/downloads/fatherhood-impact-framework"
+    },
+    {
+      "file": "content/resources/canon-household-charter-template.mdx",
+      "from": "/assets/downloads/multi-generational-legacy-ledger.pdf",
+      "to": "/downloads/multi-generational-legacy-ledger"
+    },
+    {
+      "file": "content/resources/canon-household-charter.mdx",
+      "from": "/assets/downloads/canon-household-charter-template.pdf",
+      "to": "/downloads/canon-household-charter-template"
+    },
+    {
+      "file": "content/resources/canon-household-charter.mdx",
+      "from": "/assets/downloads/canon-household-charter-template.pdf",
+      "to": "/downloads/canon-household-charter-template"
+    },
+    {
+      "file": "content/resources/destiny-mapping-worksheet.mdx",
+      "from": "/assets/resources/pdfs/destiny-mapping-worksheet.pdf",
+      "to": "/downloads/destiny-mapping-worksheet"
+    },
+    {
+      "file": "content/resources/destiny-mapping-worksheet.mdx",
+      "from": "/assets/resources/pdfs/destiny-mapping-worksheet.pdf",
+      "to": "/downloads/destiny-mapping-worksheet"
+    },
+    {
+      "file": "content/resources/fatherhood-impact-framework.md",
+      "from": "/assets/downloads/fatherhood-impact-framework.pdf",
+      "to": "/downloads/fatherhood-impact-framework"
+    },
+    {
+      "file": "content/resources/fatherhood-impact-framework.md",
+      "from": "/assets/downloads/fatherhood-impact-framework.pdf",
+      "to": "/downloads/fatherhood-impact-framework"
+    },
+    {
+      "file": "content/resources/institutional-health-scorecard.mdx",
+      "from": "/assets/resources/pdfs/institutional-health-scorecard.pdf",
+      "to": "/downloads/institutional-health-scorecard"
+    },
+    {
+      "file": "content/resources/institutional-health-scorecard.mdx",
+      "from": "/assets/resources/pdfs/institutional-health-scorecard.pdf",
+      "to": "/downloads/institutional-health-scorecard"
+    },
+    {
+      "file": "content/resources/leadership-standards-blueprint.md",
+      "from": "/assets/resources/pdfs/leadership-standards-blueprint.pdf",
+      "to": "/downloads/leadership-standards-blueprint"
+    },
+    {
+      "file": "content/resources/leadership-standards-blueprint.md",
+      "from": "/assets/resources/pdfs/leadership-standards-blueprint.pdf",
+      "to": "/downloads/leadership-standards-blueprint"
+    },
+    {
+      "file": "content/resources/multi-generational-legacy-ledger.mdx",
+      "from": "/assets/downloads/multi-generational-legacy-ledger.pdf",
+      "to": "/downloads/multi-generational-legacy-ledger"
+    },
+    {
+      "file": "content/resources/multi-generational-legacy-ledger.mdx",
+      "from": "/assets/downloads/multi-generational-legacy-ledger.pdf",
+      "to": "/downloads/multi-generational-legacy-ledger"
+    },
+    {
+      "file": "content/resources/purpose-alignment-checklist.mdx",
+      "from": "/resources/purpose-alignment-checklist.pdf",
+      "to": "/downloads/purpose-alignment-checklist"
+    }
+  ]
+}

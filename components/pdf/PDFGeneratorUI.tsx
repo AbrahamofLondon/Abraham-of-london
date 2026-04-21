@@ -188,8 +188,7 @@ export default function PDFGeneratorUI() {
               Assets are saved to /public/assets/downloads
             </span>
             <a
-              href="/assets/downloads/legacy-architecture-canvas-a4-premium.pdf"
-              download
+              href="/downloads/legacy-architecture-canvas"
               className="text-xs font-bold underline"
             >
               DOWNLOAD LATEST (A4)

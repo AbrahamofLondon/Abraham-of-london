@@ -1,0 +1,1701 @@
+{
+  "generatedAt": "2026-04-21T14:59:09.620Z",
+  "candidates": [
+    {
+      "from": "/lexicon/brotherhood.pdf",
+      "to": "/assets/downloads/brotherhood.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brotherhood.pdf",
+      "sha256": "c05427caee3c3b4afa25c1aadb6f6d9f55a8fc6fe7947ca9c7e27f69f90e7e53"
+    },
+    {
+      "from": "/lexicon/clarity.pdf",
+      "to": "/assets/downloads/clarity.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "clarity.pdf",
+      "sha256": "c91732a7d7ac1a40c666ce284349d8720b6abeab52191bcd2f68e4988ee6950b"
+    },
+    {
+      "from": "/lexicon/covenant.pdf",
+      "to": "/assets/downloads/covenant.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "covenant.pdf",
+      "sha256": "e1c1a545fea1afffffbf4e947531e30617adbb9ccff578677129f651e34c807d"
+    },
+    {
+      "from": "/lexicon/family.pdf",
+      "to": "/assets/downloads/family.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "family.pdf",
+      "sha256": "dbbd63c936725438d7fa11b851fe5c90f6383d791b7f5c20dc17f8608701a841"
+    },
+    {
+      "from": "/lexicon/father.pdf",
+      "to": "/assets/downloads/father.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "father.pdf",
+      "sha256": "63b9d00edc7c1de55c6393f5ebf3fb81468a1bb82427c133988d6e562cac8329"
+    },
+    {
+      "from": "/lexicon/governance.pdf",
+      "to": "/assets/downloads/governance.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "governance.pdf",
+      "sha256": "e90598bb2c77572f0e1fc337cb2a7a4936bb33202a6d84ac2f6bd7d5a993bd0f"
+    },
+    {
+      "from": "/lexicon/identity.pdf",
+      "to": "/assets/downloads/identity.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "identity.pdf",
+      "sha256": "74b07ed6197bcefaf3f017e6f03125084d837652c821f65ea40e3aa9b44ed9ac"
+    },
+    {
+      "from": "/lexicon/integrity.pdf",
+      "to": "/assets/downloads/integrity.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "integrity.pdf",
+      "sha256": "b5f153dd20bbeb9d63df650711e8f7d733a1647623447b7592b0607bb4f6435f"
+    },
+    {
+      "from": "/lexicon/leadership.pdf",
+      "to": "/assets/downloads/leadership.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "leadership.pdf",
+      "sha256": "5b54f3145e5459d9d4f006ff74e779d5231c0877a7d5ae56c4c62d6e742ae012"
+    },
+    {
+      "from": "/lexicon/legacy.pdf",
+      "to": "/assets/downloads/legacy.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "legacy.pdf",
+      "sha256": "e1e3039a3a4de15936044bb55529c136c6377c51c72be859fc488c9936102126"
+    },
+    {
+      "from": "/lexicon/purpose.pdf",
+      "to": "/assets/downloads/purpose.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "purpose.pdf",
+      "sha256": "e72ac19c88839df67728be2bc2d06c8c458869e411654e4637ecb89785482bb4"
+    },
+    {
+      "from": "/lexicon/responsibility.pdf",
+      "to": "/assets/downloads/responsibility.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "responsibility.pdf",
+      "sha256": "6596828a9f20773ed66b8faa267136868109cc7eb084adc1d68d16fd9604e751"
+    },
+    {
+      "from": "/lexicon/sisterhood.pdf",
+      "to": "/assets/downloads/sisterhood.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sisterhood.pdf",
+      "sha256": "dfe509599a2ac3cb7b1b22e3fad7ca2e7876ce6e81acc6424a7f4b0acb1278bb"
+    },
+    {
+      "from": "/lexicon/sovereignty.pdf",
+      "to": "/assets/downloads/sovereignty.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereignty.pdf",
+      "sha256": "63f51744cd5e65cd0648cc9cbe4397ae5bd554f3e6b8aa279a41d71ea60d540e"
+    },
+    {
+      "from": "/lexicon/strategic-autonomy.pdf",
+      "to": "/assets/downloads/strategic-autonomy.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "strategic-autonomy.pdf",
+      "sha256": "939d3889350828efdac4d9eae173e4d3b470aeb6a98353edade60069a71ba4eb"
+    },
+    {
+      "from": "/lexicon/strategy.pdf",
+      "to": "/assets/downloads/strategy.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "strategy.pdf",
+      "sha256": "7fd21f59471f3e779b85b068c9cf9b5cf439827f4a4fe4ce118dc1b44cdad116"
+    },
+    {
+      "from": "/lexicon/surrender.pdf",
+      "to": "/assets/downloads/surrender.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "surrender.pdf",
+      "sha256": "bf10ba2b4393667230783a216282b4454d3515fc265d39714e940cb26f3705f3"
+    },
+    {
+      "from": "/prints/entrepreneur-operating-pack.pdf",
+      "to": "/assets/downloads/entrepreneur-operating-pack.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "entrepreneur-operating-pack.pdf",
+      "sha256": "bcca5c9fa6eabcd586dd814338dbdb8cd6759a71af61e5a7ad10420d106ac21d"
+    },
+    {
+      "from": "/prints/fatherhood-standards-card.pdf",
+      "to": "/assets/downloads/fatherhood-standards-card.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "fatherhood-standards-card.pdf",
+      "sha256": "ea07d9e68992c758bb0404abbc89ece308bd35b975a1c30b132b3955d653d2d1"
+    },
+    {
+      "from": "/prints/leadership-playbook.pdf",
+      "to": "/assets/downloads/leadership-playbook.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "leadership-playbook.pdf",
+      "sha256": "52ca242095f2b2a5302ec5aaaa6c4d30d90d03cec581254a3c9a9ae4577c9869"
+    },
+    {
+      "from": "/prints/mentorship-starter-kit.pdf",
+      "to": "/assets/downloads/mentorship-starter-kit.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "mentorship-starter-kit.pdf",
+      "sha256": "5718328da6ef82d06e79413bceb69e5f211aa09125876f7cf8d8fd28b9203b7e"
+    },
+    {
+      "from": "/prints/standards-brief.pdf",
+      "to": "/assets/downloads/standards-brief.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "standards-brief.pdf",
+      "sha256": "fc62a7cc36689a24725bd067f39cb51ea197ecc75f3c440e91b1f3bc9e76574c"
+    },
+    {
+      "from": "/prints/weekly-operating-rhythm.pdf",
+      "to": "/assets/downloads/weekly-operating-rhythm.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "weekly-operating-rhythm.pdf",
+      "sha256": "6ecb3e51a27cd135fecb1992e59d84a6e8d5983bd4c028ea0befd3dd39397954"
+    },
+    {
+      "from": "/resources/brotherhood-leader-guide.pdf",
+      "to": "/assets/downloads/brotherhood-leader-guide.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brotherhood-leader-guide.pdf",
+      "sha256": "9ca089911051f41d0044eaf8cf4a47f039ffa5d90d81987cdd97f2f99eee16ed"
+    },
+    {
+      "from": "/resources/brotherhood-starter-kit.pdf",
+      "to": "/assets/downloads/brotherhood-starter-kit.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brotherhood-starter-kit.pdf",
+      "sha256": "c7c8c2dde08d6feb0eae2da873af86654dc48759cd025d3c989e1ef2d52cf99c"
+    },
+    {
+      "from": "/resources/canon-campaign.pdf",
+      "to": "/assets/downloads/canon-campaign.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "canon-campaign.pdf",
+      "sha256": "9b445677430d464408d4ea0e9a04277ce41b6d900f8ff43bb5cb45ed5e65a612"
+    },
+    {
+      "from": "/resources/canon-council-table-agenda.pdf",
+      "to": "/assets/downloads/canon-council-table-agenda.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "canon-council-table-agenda.pdf",
+      "sha256": "fb5d68a741be89069f9b05bee6294dc8d346c6f3221d9e2217da7693b997988f"
+    },
+    {
+      "from": "/resources/canon-household-charter-template.pdf",
+      "to": "/assets/downloads/canon-household-charter-template.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "canon-household-charter-template.pdf",
+      "sha256": "de003f168d88e84587db0aa91cdc243aa599c45e8def9686b99ffca869e4658c"
+    },
+    {
+      "from": "/resources/canon-household-charter.pdf",
+      "to": "/assets/downloads/canon-household-charter.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "canon-household-charter.pdf",
+      "sha256": "c86902e773e03da4ad6df57e7881b7ed49831b704f57b3a808b1a6e26e235851"
+    },
+    {
+      "from": "/resources/canon-reading-plan-year-one.pdf",
+      "to": "/assets/downloads/canon-reading-plan-year-one.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "canon-reading-plan-year-one.pdf",
+      "sha256": "8ce051f0c27cd8558ba3a22fcf7a6c3e0a80f3c7c09639c131a4e6fdc677bd34"
+    },
+    {
+      "from": "/resources/canon-system-constitution.pdf",
+      "to": "/assets/downloads/canon-system-constitution.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "canon-system-constitution.pdf",
+      "sha256": "eb8ce5ec3d43fe2929f628a8b7b4398b47bac1a68c42af76bae5129545698a09"
+    },
+    {
+      "from": "/resources/destiny-mapping-worksheet.pdf",
+      "to": "/assets/downloads/destiny-mapping-worksheet.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "destiny-mapping-worksheet.pdf",
+      "sha256": "bc89a2aef0178b3398cb7eb207071aa3036c7b9ca2bd31b3fa9c4daa605c4834"
+    },
+    {
+      "from": "/resources/fatherhood-impact-framework.pdf",
+      "to": "/assets/downloads/fatherhood-impact-framework.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "fatherhood-impact-framework.pdf",
+      "sha256": "f249416f192985aaaaaf4a68c113a0af9ca9dec57c8d8ebf463825331949c16a"
+    },
+    {
+      "from": "/resources/frontier-resilience-beyond-survival-mode.pdf",
+      "to": "/assets/downloads/frontier-resilience-beyond-survival-mode.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-beyond-survival-mode.pdf",
+      "sha256": "e3f5a8fb503f0df9e85f1c9a8eca1a81aa43aabcf4460e8d6fd929b3c0cc23d6"
+    },
+    {
+      "from": "/resources/frontier-resilience-crisis-loops-and-lost-judgment.pdf",
+      "to": "/assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-crisis-loops-and-lost-judgment.pdf",
+      "sha256": "bd943d98e0e3ba93db7486a27fb7da807721db5bf488f68a0c68f5e02d5e78df"
+    },
+    {
+      "from": "/resources/frontier-resilience-decision-latency-as-hidden-risk.pdf",
+      "to": "/assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-decision-latency-as-hidden-risk.pdf",
+      "sha256": "00a77d351becf98b95fff5af9e31ff4adeb9a3f2fcbbeb6632d182b8564cda8b"
+    },
+    {
+      "from": "/resources/frontier-resilience-drift-in-the-second-line.pdf",
+      "to": "/assets/downloads/frontier-resilience-drift-in-the-second-line.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-drift-in-the-second-line.pdf",
+      "sha256": "3d7b7ba2c57925cc7be9238a79a98b26bf15c716aa3dbb0a267db1cfd81da6c2"
+    },
+    {
+      "from": "/resources/frontier-resilience-drift-inside-the-winning-season.pdf",
+      "to": "/assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-drift-inside-the-winning-season.pdf",
+      "sha256": "2c48ab6001154e711a2de07ebc645fa37339e956d471fb3de291c52d7ad5996e"
+    },
+    {
+      "from": "/resources/frontier-resilience-fatigue-at-the-top.pdf",
+      "to": "/assets/downloads/frontier-resilience-fatigue-at-the-top.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-fatigue-at-the-top.pdf",
+      "sha256": "e4115f642c39f299337d9e1b8a204db13487324e0179884795679af6600836a6"
+    },
+    {
+      "from": "/resources/frontier-resilience-founder-endurance-is-not-a-plan.pdf",
+      "to": "/assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-founder-endurance-is-not-a-plan.pdf",
+      "sha256": "8b60e3e832235006585e486bb2f7210088c8b779091198166018e3f0dbc2ed31"
+    },
+    {
+      "from": "/resources/frontier-resilience-fragility-of-unowned-decisions.pdf",
+      "to": "/assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-fragility-of-unowned-decisions.pdf",
+      "sha256": "ea9d7772bbe950e911f1dddb22ed20f28bc48c39a1275ad76713463ae42d6cbc"
+    },
+    {
+      "from": "/resources/frontier-resilience-holding-standard-when-cash-tightens.pdf",
+      "to": "/assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-holding-standard-when-cash-tightens.pdf",
+      "sha256": "a195273a4b0b4fe3f7f5da02b37b6d0fc8080d3df398d93a0cd2a5773c537755"
+    },
+    {
+      "from": "/resources/frontier-resilience-institutions-that-cannot-say-no.pdf",
+      "to": "/assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-institutions-that-cannot-say-no.pdf",
+      "sha256": "433cad1a8b3cde94a3f52e7cf11a632297fb62b240d6c9782655e5c977180e92"
+    },
+    {
+      "from": "/resources/frontier-resilience-operating-cadence-under-strain.pdf",
+      "to": "/assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-operating-cadence-under-strain.pdf",
+      "sha256": "bc69c7e4b3fa1bf536ea386df2a551d469f541c7fa67dab317391b5215450cda"
+    },
+    {
+      "from": "/resources/frontier-resilience-pressure-tests-for-key-person-risk.pdf",
+      "to": "/assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-pressure-tests-for-key-person-risk.pdf",
+      "sha256": "6f606c6ed32d2a3698f390ab7cf2f85197bf5b3177dc73303f9f16bdb9d9eb59"
+    },
+    {
+      "from": "/resources/frontier-resilience-resilience-before-expansion.pdf",
+      "to": "/assets/downloads/frontier-resilience-resilience-before-expansion.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-resilience-before-expansion.pdf",
+      "sha256": "df63ca843e6a4090ff3c13fff4f10b7d4e1a4a60ec38cdf90baa0f886f15f4c5"
+    },
+    {
+      "from": "/resources/frontier-resilience-restoring-command-after-confusion.pdf",
+      "to": "/assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-restoring-command-after-confusion.pdf",
+      "sha256": "19286259bff075bfa417f7eae5029ceaeed3085146ec00ea96563565b33d3b53"
+    },
+    {
+      "from": "/resources/frontier-resilience-stress-reveals-the-real-culture.pdf",
+      "to": "/assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-stress-reveals-the-real-culture.pdf",
+      "sha256": "665c100b5058df31a59279f21b6e50ff57584f6456946db7324da3b791165d08"
+    },
+    {
+      "from": "/resources/frontier-resilience-surviving-bad-information.pdf",
+      "to": "/assets/downloads/frontier-resilience-surviving-bad-information.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-surviving-bad-information.pdf",
+      "sha256": "8e286505da53e92b8b42cc6272c5e303abff2d98f5c63da9b30863c43643cd90"
+    },
+    {
+      "from": "/resources/frontier-resilience-the-cost-of-living-in-escalation.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-the-cost-of-living-in-escalation.pdf",
+      "sha256": "b5f59126f28ce193f9c67d3d0bb0971f991b6724557b90476c45702909dedb27"
+    },
+    {
+      "from": "/resources/frontier-resilience-the-discipline-of-bounded-adaptation.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-the-discipline-of-bounded-adaptation.pdf",
+      "sha256": "014a56b22aec835e2b87dafdb93c82b9fe828613513fa76852434af67e5eac99"
+    },
+    {
+      "from": "/resources/frontier-resilience-the-false-order-of-busy-teams.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-the-false-order-of-busy-teams.pdf",
+      "sha256": "3d7d59c32aed3290c11d95ffa8083a4a7d9812de1c34ed76e0fae240e1649528"
+    },
+    {
+      "from": "/resources/frontier-resilience-the-fragility-of-heroic-leadership.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-the-fragility-of-heroic-leadership.pdf",
+      "sha256": "3540e8335ae3010b7b241a76f9c4299befb21f6f33b989984b5bdf1903b9ef95"
+    },
+    {
+      "from": "/resources/frontier-resilience-the-tax-of-constant-reaction.pdf",
+      "to": "/assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-the-tax-of-constant-reaction.pdf",
+      "sha256": "caa9bafe7638c661f80039c0156d44d5b42f6148e038913d8c616b1d253ef410"
+    },
+    {
+      "from": "/resources/frontier-resilience-when-clarity-has-no-owner.pdf",
+      "to": "/assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-when-clarity-has-no-owner.pdf",
+      "sha256": "47861be98a1adf5c316d38211a30018c0332c7653c5b023fab318361b86e88fb"
+    },
+    {
+      "from": "/resources/frontier-resilience-when-growth-hides-breakdown.pdf",
+      "to": "/assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-when-growth-hides-breakdown.pdf",
+      "sha256": "29e60a6163d6517afdf3af4a3e6c25003b6da5033412330c240700a4ee6f9162"
+    },
+    {
+      "from": "/resources/frontier-resilience-when-recovery-needs-governance.pdf",
+      "to": "/assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-when-recovery-needs-governance.pdf",
+      "sha256": "ede54b4e5ea40955c1e4512ff8704a1e0e49c488b1775df8b9c84bfdc943cfa8"
+    },
+    {
+      "from": "/resources/frontier-resilience-when-urgency-corrupts-sequencing.pdf",
+      "to": "/assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "frontier-resilience-when-urgency-corrupts-sequencing.pdf",
+      "sha256": "95eb86f99b163d94cf554fe61011d57af711cd3751c69ad45ea544951f1ff1be"
+    },
+    {
+      "from": "/resources/getting-started.pdf",
+      "to": "/assets/downloads/getting-started.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "getting-started.pdf",
+      "sha256": "6bc9881b015538f52dc9a53b8185f88808dbe5ea4f65978b349a04a4d4123770"
+    },
+    {
+      "from": "/resources/institutional-alpha-false-confidence-from-aggregated-metrics.pdf",
+      "to": "/assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-false-confidence-from-aggregated-metrics.pdf",
+      "sha256": "c83cee906d60ccb151957139166ef16c842571eb382e65e78dc35d5fd2f4d374"
+    },
+    {
+      "from": "/resources/institutional-alpha-intelligence-after-the-founder-myth.pdf",
+      "to": "/assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-intelligence-after-the-founder-myth.pdf",
+      "sha256": "7254950fd7bba0c941a1988f35af60d0740172270caee4ccf226167f192bbf8d"
+    },
+    {
+      "from": "/resources/institutional-alpha-intelligence-debt-in-scaling-firms.pdf",
+      "to": "/assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-intelligence-debt-in-scaling-firms.pdf",
+      "sha256": "7a629980c1bec6f54a07348248b1de5f2a1a8af6a0aefeb77b8e032e90eb55ee"
+    },
+    {
+      "from": "/resources/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf",
+      "to": "/assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-intelligence-drift-after-rapid-expansion.pdf",
+      "sha256": "22365ff29a834b7c8711e715af9cb6546bf74ced120ab9e564473c880f6fc1db"
+    },
+    {
+      "from": "/resources/institutional-alpha-overinterpreting-motion-as-momentum.pdf",
+      "to": "/assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-overinterpreting-motion-as-momentum.pdf",
+      "sha256": "412faa1654c05732dfc1fd68b8db0901d590e45aa33063980479b612991513cb"
+    },
+    {
+      "from": "/resources/institutional-alpha-pattern-recognition-without-operating-truth.pdf",
+      "to": "/assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-pattern-recognition-without-operating-truth.pdf",
+      "sha256": "8ac92176cd89c417b77dca2f7e69e2060dc42484cafa64598eb8ef2f2c5a3ffc"
+    },
+    {
+      "from": "/resources/institutional-alpha-reporting-systems-that-reward-optimism.pdf",
+      "to": "/assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-reporting-systems-that-reward-optimism.pdf",
+      "sha256": "63f61366965593113463c7d848bf8ee69fabd1b4e34909e77f9cba49ac65ca03"
+    },
+    {
+      "from": "/resources/institutional-alpha-signal-decay-in-reporting-chains.pdf",
+      "to": "/assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-signal-decay-in-reporting-chains.pdf",
+      "sha256": "90272b5238335512a5f6236fb601126a828f35e3cbe437f49398f4c61d672a10"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-blindness-of-clean-narratives.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-blindness-of-clean-narratives.pdf",
+      "sha256": "95dde3fa84973d9356451f871107b9ec6f0f82e0d3a22fc2f8bc59d38f31e7ea"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-breakdown-of-field-intelligence.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-breakdown-of-field-intelligence.pdf",
+      "sha256": "3cc8f1e5c81601741114fbed6e575aadfd1c9d129096c824e18002e65dd8fc49"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-comfort-of-lagging-indicators.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-comfort-of-lagging-indicators.pdf",
+      "sha256": "fcad6c6deec4f6649cca6c822fc52484aba795c02fe201f0871c5fe3a13e29bd"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-danger-of-unaudited-assumptions.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-danger-of-unaudited-assumptions.pdf",
+      "sha256": "5a61fc4abff3044d69cd97fbf14dd96647cf1e25794cd4e934232abc389210a0"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-difference-between-insight-and-surveillance.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-difference-between-insight-and-surveillance.pdf",
+      "sha256": "981880e32fc20d6b96768cd20a7bf5a96e989dc02cf0fb7f053768636be8f9d5"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf",
+      "sha256": "afd67ccf851e7a7e9d9c390a29e6ed7a0b42ecf30e28f389c68773a57cf97aaa"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-hidden-cost-of-flattering-data.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-hidden-cost-of-flattering-data.pdf",
+      "sha256": "168ce3e99af2357b429a48eca1cf11f109f44b5435911af2c10d40364349116a"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-institutional-price-of-guesswork.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-institutional-price-of-guesswork.pdf",
+      "sha256": "79a79fa70a0cf7271f8bfb933a1067001a8a9948d1a0cddea031ab47ad6f3482"
+    },
+    {
+      "from": "/resources/institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
+      "to": "/assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
+      "sha256": "37f3efc98238d53da59892a76176ea86c1792fba397c1ba3da01b4d62d396558"
+    },
+    {
+      "from": "/resources/institutional-alpha-weak-signals-before-reputational-fracture.pdf",
+      "to": "/assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-weak-signals-before-reputational-fracture.pdf",
+      "sha256": "22e8c12024e30bec797289448396d204cdbe1354d54bddb2b83472c3c76f50b5"
+    },
+    {
+      "from": "/resources/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf",
+      "sha256": "a13ba507302a773286154e5646115e7490105de3a7602c49e8947e18a603fa40"
+    },
+    {
+      "from": "/resources/institutional-alpha-when-dashboards-outpace-judgment.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-when-dashboards-outpace-judgment.pdf",
+      "sha256": "5c2ef0b450437f2c0747944e1a83ddbc940918bf909fac8edd86aeff085f6701"
+    },
+    {
+      "from": "/resources/institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
+      "sha256": "b5c679a5888ddba1cb0be38e3b36ea8ecfc54d8f97d5b7466be93ba0507bd30c"
+    },
+    {
+      "from": "/resources/institutional-alpha-when-scenario-planning-becomes-theatre.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-when-scenario-planning-becomes-theatre.pdf",
+      "sha256": "567ac162c3372db9055b990d81bd0d177920f2be9b9033ba65121c5e50b27bab"
+    },
+    {
+      "from": "/resources/institutional-alpha-when-the-board-sees-a-different-company.pdf",
+      "to": "/assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-when-the-board-sees-a-different-company.pdf",
+      "sha256": "c40e2544c4ebff08f126bf62e7da490b16b0ebbf0d488acde9d84aacb3d5ddb0"
+    },
+    {
+      "from": "/resources/institutional-alpha-why-executive-summaries-mislead.pdf",
+      "to": "/assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-why-executive-summaries-mislead.pdf",
+      "sha256": "e94d1dcec8dfbea1bc3cf76a96888a857095d4c1df77fbee451dd81327cbb84d"
+    },
+    {
+      "from": "/resources/institutional-alpha-why-leaders-stop-hearing-reality.pdf",
+      "to": "/assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-alpha-why-leaders-stop-hearing-reality.pdf",
+      "sha256": "a73802221829a52e91700d39b6f3ad369bccdab7c7071d9e0cec0b99c29518a1"
+    },
+    {
+      "from": "/resources/institutional-health-scorecard.pdf",
+      "to": "/assets/downloads/institutional-health-scorecard.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "institutional-health-scorecard.pdf",
+      "sha256": "d81959b29cdfc9cd00ece29a3bfc0e56742dbc4f70039847f12218da32ec83fa"
+    },
+    {
+      "from": "/resources/leadership-standards-blueprint.pdf",
+      "to": "/assets/downloads/leadership-standards-blueprint.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "leadership-standards-blueprint.pdf",
+      "sha256": "4cd90231b0f4e3c3ce66dfd0b9513b52ec90e57e396aba17749df44d095652e3"
+    },
+    {
+      "from": "/resources/multi-generational-legacy-ledger.pdf",
+      "to": "/assets/downloads/multi-generational-legacy-ledger.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "multi-generational-legacy-ledger.pdf",
+      "sha256": "646b7adab1b2ce97534953116ead8e006a31c3fa867cf6025b4f7ec709c3c4f8"
+    },
+    {
+      "from": "/resources/purpose-alignment-checklist.pdf",
+      "to": "/assets/downloads/purpose-alignment-checklist.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "purpose-alignment-checklist.pdf",
+      "sha256": "a5ba4e18c71ef29d190bab9130c310d5552e13ce959c6b21059316f2a0ca481f"
+    },
+    {
+      "from": "/resources/purpose-alignment.pdf",
+      "to": "/assets/downloads/purpose-alignment.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "purpose-alignment.pdf",
+      "sha256": "6389fac48c9ccb512cd56441862ec82220206bd6582b31b319a28d0869f3561c"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-alignment-without-sovereignty.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-alignment-without-sovereignty.pdf",
+      "sha256": "6b17dd9119dbd83c8c6385787b3ab7fe84d2d91ceca660f2a2f8fc5bb7f7a56c"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-control-without-ownership.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-control-without-ownership.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-control-without-ownership.pdf",
+      "sha256": "acc11e79ac8dc5fb6fefab3d5c85a59f3f51a3c2239686782907a7822b93cad5"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-dependence-disguised-as-partnership.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-dependence-disguised-as-partnership.pdf",
+      "sha256": "8163c02a8330ab7fd59e8092b677960f998043a9b3d661a7c3d4b525b7d18b21"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf",
+      "sha256": "062b19e1ca73deab56f7028fa72663c7c5adada39bc27a8f0c2a77a6636b343f"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf",
+      "sha256": "9b8286585d8be445a4e01b99c5cd9e4d5bc53903baa13c6ac1459ac2ea33a800"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf",
+      "sha256": "1eedf9966d4b1bbd0c00173ac737c3cf9e7682796ac6f5e79e85fbbbcaa58bdb"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf",
+      "sha256": "773cd26581ea6f40bf7af511681ced28d713e5313e2790e85623a11fe0f6749f"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf",
+      "sha256": "b53c2425bad10d0cb92c092bcb29c70842c4bcf35dcaa2a9ec31d0e51ae2b52b"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf",
+      "sha256": "8857f3ea0082f7dfbf515f7b2068daf8478b79a8190604c0231f320e493661af"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-strategic-exposure-without-red-lines.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-strategic-exposure-without-red-lines.pdf",
+      "sha256": "3f9750c7c589de2783e5d87538a7055255190111e085d95fcbfbb06ce94ae86c"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf",
+      "sha256": "f37f0d8ef9841e585a438c5c7c517d0a303791e7c8c4ed4ccdb2cf0666d0605e"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-discipline-of-institutional-self-government.pdf",
+      "sha256": "4b5fd6cc971f04e7a43d4a98ce2cab7c0373cdacb80e3fdeb13f0f0f2c77c7ff"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-false-safety-of-strategic-silence.pdf",
+      "sha256": "7229d49176c4355758110c79a92858d0f3eae1af5cc1a47c571a841d048dc0a2"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-geography-of-hidden-influence.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-geography-of-hidden-influence.pdf",
+      "sha256": "5eb2a794849a621f9f4a714260416df0dfc113a81cd193979f3e8c50fedc6eef"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf",
+      "sha256": "43972a10de957ee5c45c8e31de76fe30138cf26feab156a198bc128d94ed6bf3"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-illusion-of-neutral-platforms.pdf",
+      "sha256": "673a313022aed15d6ec4af46b7570204077ae73c5498c669a435015a767f303f"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf",
+      "sha256": "1d52303f0466e507effead7e7c71e64a15ae8866e4969580d851f02a0ca4901e"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf",
+      "sha256": "0470737d9411cc8fe45f28eb5676be972afd194efe984e2900b2521ffc8e12df"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf",
+      "sha256": "996db3211848963ea80835941634f97be849ac9e26034700e6baf5186c8f4282"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-tax-of-strategic-appeasement.pdf",
+      "sha256": "c8bd8f0fcff493315b5ad2cd5f96ccb8309f80457392c82dbe1ead82b89b68fb"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf",
+      "sha256": "05712937b5b4b0a6235cb7beceea709f3d7df628e414973ec5ed0b9f97a9271a"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf",
+      "sha256": "87b18b8785435ac57f627fc2685441f8e526e09024d6dbff40360e0eb725903a"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf",
+      "sha256": "c59a0fac7ba625e14994c920a1981b9ac314fef6404c570a73d8170c41e4f9de"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-when-optionality-quietly-dies.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-when-optionality-quietly-dies.pdf",
+      "sha256": "29fef71203ccd341807807d6a8a48d4d974e9342ca9b57b44cbd50ce06429325"
+    },
+    {
+      "from": "/resources/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf",
+      "to": "/assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf",
+      "sha256": "43c97da67734c25a31a52dbdfe797b5a274b518305be17683bf5d58d4bb1cdb7"
+    },
+    {
+      "from": "/resources/strategic-frameworks.pdf",
+      "to": "/assets/downloads/strategic-frameworks.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "strategic-frameworks.pdf",
+      "sha256": "34fa375b8c4fe730f1fa0490d7e42ac05e97e175c4741a745156b0979c3a6f96"
+    },
+    {
+      "from": "/resources/strategy-room-intake.pdf",
+      "to": "/assets/downloads/strategy-room-intake.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "strategy-room-intake.pdf",
+      "sha256": "a4d3c88295030f6e38abfad28462edb5622afed00df4389f0b2f4bfb177bccea"
+    },
+    {
+      "from": "/resources/surrender-operational-framework.pdf",
+      "to": "/assets/downloads/surrender-operational-framework.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "surrender-operational-framework.pdf",
+      "sha256": "e7f8ad799c55962d4b7dde910ca9b75ffc63072abe3fd28527087b83d95f8b2d"
+    },
+    {
+      "from": "/resources/v4.pdf",
+      "to": "/assets/downloads/v4.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "v4.pdf",
+      "sha256": "c1914ce603e1b193d94310bf024e794e51fe5e439b806061d6fd9029604184c2"
+    },
+    {
+      "from": "/resources/vault-index.pdf",
+      "to": "/assets/downloads/vault-index.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "vault-index.pdf",
+      "sha256": "b051f001122f34ff5da8cbdb19bdfc51371edc35dad5495a2fab07f61a9c60b5"
+    },
+    {
+      "from": "/resources/vault.pdf",
+      "to": "/assets/downloads/vault.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "vault.pdf",
+      "sha256": "9d7930f769faa0bf7765440193ce59918ad994cbb089b69adc2e9ac35d636bcf"
+    },
+    {
+      "from": "/vault/briefs/brief-001-modern-household.pdf",
+      "to": "/assets/downloads/brief-001-modern-household.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-001-modern-household.pdf",
+      "sha256": "7893d23b6c44d9d6040f2ced02ddef87290bcf714395e9b7e21b0e6000a6d294"
+    },
+    {
+      "from": "/vault/briefs/brief-002-economic-fortress.pdf",
+      "to": "/assets/downloads/brief-002-economic-fortress.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-002-economic-fortress.pdf",
+      "sha256": "f0b2cfe8ab855d7e2f04b880ba9a7c22070e0b9587bcf65b7e128d20da80326e"
+    },
+    {
+      "from": "/vault/briefs/brief-003-education-of-heirs.pdf",
+      "to": "/assets/downloads/brief-003-education-of-heirs.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-003-education-of-heirs.pdf",
+      "sha256": "6d9f16c421400776dec6949b345071b1e3556b26f4eadeb20aa12d19652ac266"
+    },
+    {
+      "from": "/vault/briefs/brief-004-parallel-estate.pdf",
+      "to": "/assets/downloads/brief-004-parallel-estate.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-004-parallel-estate.pdf",
+      "sha256": "730ae3089876a4c62948866abb3cd41ab4544247599f00fcfaea510aa9824b0d"
+    },
+    {
+      "from": "/vault/briefs/brief-005-brotherhood-protocol.pdf",
+      "to": "/assets/downloads/brief-005-brotherhood-protocol.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-005-brotherhood-protocol.pdf",
+      "sha256": "db459ab42c839a00101e0ba97b3d12b95f4c061424ce6f51e293691b662a30d4"
+    },
+    {
+      "from": "/vault/briefs/brief-006-sisterhood-and-hearth.pdf",
+      "to": "/assets/downloads/brief-006-sisterhood-and-hearth.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-006-sisterhood-and-hearth.pdf",
+      "sha256": "f95aa936c0bec5068368a690b5996e50d7771cf44415c611152ecc151ed9faf7"
+    },
+    {
+      "from": "/vault/briefs/brief-007-covenantal-oath.pdf",
+      "to": "/assets/downloads/brief-007-covenantal-oath.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-007-covenantal-oath.pdf",
+      "sha256": "f8fe8994e5ffe08e705a7585a6bb607f3cc8e716136543e1a0dd58692eee9373"
+    },
+    {
+      "from": "/vault/briefs/brief-008-ledger-of-legacy.pdf",
+      "to": "/assets/downloads/brief-008-ledger-of-legacy.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-008-ledger-of-legacy.pdf",
+      "sha256": "f0ffea7781689a10fe0ab786faca70c59ce287c099cae8d9befae53accd507f2"
+    },
+    {
+      "from": "/vault/briefs/brief-009-sovereignty-of-time.pdf",
+      "to": "/assets/downloads/brief-009-sovereignty-of-time.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-009-sovereignty-of-time.pdf",
+      "sha256": "1e8b72734bcbe32f19a99de0666db9673108dd1095ced331e72aeed3547f3735"
+    },
+    {
+      "from": "/vault/briefs/brief-010-geometry-of-inner-circle.pdf",
+      "to": "/assets/downloads/brief-010-geometry-of-inner-circle.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-010-geometry-of-inner-circle.pdf",
+      "sha256": "710d37c26c2967c931276da1fe1ca665954557e67b280162bbe1d103c688ed0b"
+    },
+    {
+      "from": "/vault/briefs/brief-011-geography-of-estate.pdf",
+      "to": "/assets/downloads/brief-011-geography-of-estate.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-011-geography-of-estate.pdf",
+      "sha256": "f7aa18836eaed67815b640834c9d59d9fa58a70ccd51e58edfb9877b1d939dc2"
+    },
+    {
+      "from": "/vault/briefs/brief-012-aesthetics-of-order.pdf",
+      "to": "/assets/downloads/brief-012-aesthetics-of-order.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "brief-012-aesthetics-of-order.pdf",
+      "sha256": "83a6f2df3a810c1a261e6850e173352a9ffada56167cc3a8378949b76a312b5c"
+    },
+    {
+      "from": "/vault/CB-CONVICTION-VS-COERCION.pdf",
+      "to": "/assets/downloads/CB-CONVICTION-VS-COERCION.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-CONVICTION-VS-COERCION.pdf",
+      "sha256": "8638088f5dbe14a867e6aa22f4cb9be2ddc17d8141ea42874abe5d5b66042b38"
+    },
+    {
+      "from": "/vault/CB-FR-001.pdf",
+      "to": "/assets/downloads/CB-FR-001.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-001.pdf",
+      "sha256": "5bbdb7642d6f38f997cca7cded3bcac1ae207d1035dd6dccb5c010a06c59437c"
+    },
+    {
+      "from": "/vault/CB-FR-004.pdf",
+      "to": "/assets/downloads/CB-FR-004.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-004.pdf",
+      "sha256": "fe9fcf8f77cd5f7850583666b86e780eb715617300074feb61eadcbf2f6063ef"
+    },
+    {
+      "from": "/vault/CB-FR-007.pdf",
+      "to": "/assets/downloads/CB-FR-007.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-007.pdf",
+      "sha256": "026d31aa166a295321ca6781c12cc8fecc1599854427d4aae372f8874147dc3b"
+    },
+    {
+      "from": "/vault/CB-FR-010.pdf",
+      "to": "/assets/downloads/CB-FR-010.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-010.pdf",
+      "sha256": "c311f60d4a63140a0bddf61874ae4c401c8cc003359b5303b3f5819fcdbb4997"
+    },
+    {
+      "from": "/vault/CB-FR-013.pdf",
+      "to": "/assets/downloads/CB-FR-013.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-013.pdf",
+      "sha256": "55296b0c8acd694da040e251ec51c4cee8cb32bfae57e79e46212de9d9efcce1"
+    },
+    {
+      "from": "/vault/CB-FR-016.pdf",
+      "to": "/assets/downloads/CB-FR-016.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-016.pdf",
+      "sha256": "c3f0b8a4cdc48b7abb5309ffd9bf41191629e225af8ed56c3c4ac68d2829c672"
+    },
+    {
+      "from": "/vault/CB-FR-019.pdf",
+      "to": "/assets/downloads/CB-FR-019.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-019.pdf",
+      "sha256": "ecb9e09c7f8d9df4a1ac5b58380dae3d5bb4d3595398566f320152bf034966eb"
+    },
+    {
+      "from": "/vault/CB-FR-022.pdf",
+      "to": "/assets/downloads/CB-FR-022.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-022.pdf",
+      "sha256": "419817ea0f986a1258da462eedcdc09131c40880161d93fc256cde8e8a40f695"
+    },
+    {
+      "from": "/vault/CB-FR-025.pdf",
+      "to": "/assets/downloads/CB-FR-025.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-025.pdf",
+      "sha256": "6bfd7823fc6939e993288eaaecff76e468a10c99ef56bfa5130dba78946a179d"
+    },
+    {
+      "from": "/vault/CB-FR-028.pdf",
+      "to": "/assets/downloads/CB-FR-028.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-028.pdf",
+      "sha256": "9bef63d328aa70fff731b4c5984854fc9242b05aff4fe4758447dfc29ee5a53b"
+    },
+    {
+      "from": "/vault/CB-FR-031.pdf",
+      "to": "/assets/downloads/CB-FR-031.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-031.pdf",
+      "sha256": "50ebb69c3144a7578eca262e6af79c59383ca3fc2e960e93c2720882129a9f64"
+    },
+    {
+      "from": "/vault/CB-FR-034.pdf",
+      "to": "/assets/downloads/CB-FR-034.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-034.pdf",
+      "sha256": "82ceda9df3f42cb9f68d66e1d4a49198a771abc54ca288e8ad395bf5ea761969"
+    },
+    {
+      "from": "/vault/CB-FR-037.pdf",
+      "to": "/assets/downloads/CB-FR-037.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-037.pdf",
+      "sha256": "5fc357b38c75ab1080adb12069c07f1315be40d391ec60c4384669b49d96d9e3"
+    },
+    {
+      "from": "/vault/CB-FR-040.pdf",
+      "to": "/assets/downloads/CB-FR-040.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-040.pdf",
+      "sha256": "1f8e24d3e0fcf64622222b2cb76b5bb0cc50a73e0becf202d6a4539d6b9f4c96"
+    },
+    {
+      "from": "/vault/CB-FR-043.pdf",
+      "to": "/assets/downloads/CB-FR-043.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-043.pdf",
+      "sha256": "ef7cd8562e1731c7ba89daa254ca5d0005f2b25187ec0f458242577d66b0db6c"
+    },
+    {
+      "from": "/vault/CB-FR-046.pdf",
+      "to": "/assets/downloads/CB-FR-046.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-046.pdf",
+      "sha256": "e048bae482e3b3748e150c93323720a49f4b23ee54e45d16778ed1756ca58a15"
+    },
+    {
+      "from": "/vault/CB-FR-049.pdf",
+      "to": "/assets/downloads/CB-FR-049.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-049.pdf",
+      "sha256": "a57e979a7f3fedffcdb55d665c67edbde84500b4cee13357f963ec0eb101d7ca"
+    },
+    {
+      "from": "/vault/CB-FR-052.pdf",
+      "to": "/assets/downloads/CB-FR-052.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-052.pdf",
+      "sha256": "2d50c75e4f6518995bfe4d808ce404c420a895cdc50a06b91bd25ff4a219e43a"
+    },
+    {
+      "from": "/vault/CB-FR-055.pdf",
+      "to": "/assets/downloads/CB-FR-055.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-055.pdf",
+      "sha256": "bc1f3cd1b65cfd5ddeebfba916e2894de0c51ef2bf1d27ff68d5ca94fa4e406c"
+    },
+    {
+      "from": "/vault/CB-FR-058.pdf",
+      "to": "/assets/downloads/CB-FR-058.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-058.pdf",
+      "sha256": "30ff0dcef182a4583cf5e3185a238c95e820fc6a3404a3303684b10c8ae59efe"
+    },
+    {
+      "from": "/vault/CB-FR-061.pdf",
+      "to": "/assets/downloads/CB-FR-061.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-061.pdf",
+      "sha256": "689762283ede5a442bb6856734c52f091e98e6fd62abc36dbcf548f21acbb0c4"
+    },
+    {
+      "from": "/vault/CB-FR-064.pdf",
+      "to": "/assets/downloads/CB-FR-064.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-064.pdf",
+      "sha256": "e56dcda5b7ad2638c32776b2104813cd84db15334d487120723d24a088bad104"
+    },
+    {
+      "from": "/vault/CB-FR-067.pdf",
+      "to": "/assets/downloads/CB-FR-067.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-067.pdf",
+      "sha256": "de6138383f611e9bc44ad6fdea15089d66ec533e5696aa5573ff4446c085bc61"
+    },
+    {
+      "from": "/vault/CB-FR-070.pdf",
+      "to": "/assets/downloads/CB-FR-070.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-070.pdf",
+      "sha256": "0ca5e93dd8aaa2a59c243fef05894100b73134416d6620e434fb2a48a9688569"
+    },
+    {
+      "from": "/vault/CB-FR-073.pdf",
+      "to": "/assets/downloads/CB-FR-073.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FR-073.pdf",
+      "sha256": "85efc62c9773c994370f0de12df4c6096156f1b775e41b23c57ca66e2a6f3c22"
+    },
+    {
+      "from": "/vault/CB-FRONTIER-RESILIENCE-01.pdf",
+      "to": "/assets/downloads/CB-FRONTIER-RESILIENCE-01.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-FRONTIER-RESILIENCE-01.pdf",
+      "sha256": "872bff4525501989226841fc30119aca3b36cb1451671fda6880eb621ec73128"
+    },
+    {
+      "from": "/vault/CB-IA-003.pdf",
+      "to": "/assets/downloads/CB-IA-003.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-003.pdf",
+      "sha256": "f05071751a200267a07ad7ce1e1f4deb390011ab7dafb6251bb7950ecab86183"
+    },
+    {
+      "from": "/vault/CB-IA-006.pdf",
+      "to": "/assets/downloads/CB-IA-006.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-006.pdf",
+      "sha256": "3b0adc9c6212ff61fdfde5485cb09c3d4dc9702faee750fe26e0d5855fda2a39"
+    },
+    {
+      "from": "/vault/CB-IA-009.pdf",
+      "to": "/assets/downloads/CB-IA-009.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-009.pdf",
+      "sha256": "afa955959eab2e17e206110259fbe17b16400b943fae7fc5f8ae4efdc39c3b7c"
+    },
+    {
+      "from": "/vault/CB-IA-012.pdf",
+      "to": "/assets/downloads/CB-IA-012.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-012.pdf",
+      "sha256": "1b6a0042e0767a7c21f426572ed63f261b51554bf5a262f2bc0d8e6c1c59ee4e"
+    },
+    {
+      "from": "/vault/CB-IA-015.pdf",
+      "to": "/assets/downloads/CB-IA-015.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-015.pdf",
+      "sha256": "7488683a8d15a0be098023d83467dae783ba7ca68482451a4ac7c9ce083245b3"
+    },
+    {
+      "from": "/vault/CB-IA-018.pdf",
+      "to": "/assets/downloads/CB-IA-018.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-018.pdf",
+      "sha256": "22807dfc3de662f2c07f9a8ab58a8962f0939db506c0700c9da004b930024316"
+    },
+    {
+      "from": "/vault/CB-IA-021.pdf",
+      "to": "/assets/downloads/CB-IA-021.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-021.pdf",
+      "sha256": "3e9ad7c8f8827436fe366b9c54b0dff7758b5979e29310a4726a7024c85bb24d"
+    },
+    {
+      "from": "/vault/CB-IA-024.pdf",
+      "to": "/assets/downloads/CB-IA-024.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-024.pdf",
+      "sha256": "15fc9e1eb455c649c551d7b21d2885c24c173d7ff4f579053ff501a7e5a0e8e1"
+    },
+    {
+      "from": "/vault/CB-IA-027.pdf",
+      "to": "/assets/downloads/CB-IA-027.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-027.pdf",
+      "sha256": "8f6320be814e25cbeb430ea43944173e1fe6355975dcb522e0e484c105069d42"
+    },
+    {
+      "from": "/vault/CB-IA-030.pdf",
+      "to": "/assets/downloads/CB-IA-030.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-030.pdf",
+      "sha256": "089ebde6f540d9a8a1154089f923683748d5fa228e157a7a26b0fdb93cb151f9"
+    },
+    {
+      "from": "/vault/CB-IA-033.pdf",
+      "to": "/assets/downloads/CB-IA-033.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-033.pdf",
+      "sha256": "ba2eafee91439cc6fa343f154e0547977e42fb76cb9eee23db722bb74e17a6fe"
+    },
+    {
+      "from": "/vault/CB-IA-036.pdf",
+      "to": "/assets/downloads/CB-IA-036.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-036.pdf",
+      "sha256": "21ff026ee76e372b575611e2c5c07ff170d2ade2e11e185061751686aabe8240"
+    },
+    {
+      "from": "/vault/CB-IA-039.pdf",
+      "to": "/assets/downloads/CB-IA-039.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-039.pdf",
+      "sha256": "378a245230025481a4c3ced4b677eba67fb35c19ae6c06ff06d6d84a03dbf48c"
+    },
+    {
+      "from": "/vault/CB-IA-042.pdf",
+      "to": "/assets/downloads/CB-IA-042.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-042.pdf",
+      "sha256": "89c955387ab11718d8fafb3529894b3dd3d24b52359610b7a4209d0597388be8"
+    },
+    {
+      "from": "/vault/CB-IA-045.pdf",
+      "to": "/assets/downloads/CB-IA-045.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-045.pdf",
+      "sha256": "03e50d06234d423ff5d904970e76fea587475b5aae853561268b27666aff16d4"
+    },
+    {
+      "from": "/vault/CB-IA-048.pdf",
+      "to": "/assets/downloads/CB-IA-048.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-048.pdf",
+      "sha256": "77b75be3f770efe0f77c2f73bc87c757fabd367a4a5a406c9c6fddacffc9b818"
+    },
+    {
+      "from": "/vault/CB-IA-051.pdf",
+      "to": "/assets/downloads/CB-IA-051.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-051.pdf",
+      "sha256": "37849d6b67973a1a29c146381e0a0fdbbcf7c0d4557f6612cadd048a9875d066"
+    },
+    {
+      "from": "/vault/CB-IA-054.pdf",
+      "to": "/assets/downloads/CB-IA-054.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-054.pdf",
+      "sha256": "d497cdc40ffe398a52178963b263448391db4041e9d8fe4a73df6db8b0982910"
+    },
+    {
+      "from": "/vault/CB-IA-057.pdf",
+      "to": "/assets/downloads/CB-IA-057.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-057.pdf",
+      "sha256": "16e240c6293b90a1dec82a662f0c8fb05cad64cd2d2afe383639bbf17e752209"
+    },
+    {
+      "from": "/vault/CB-IA-060.pdf",
+      "to": "/assets/downloads/CB-IA-060.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-060.pdf",
+      "sha256": "23a8ea2a509a3915b62f4e1b1d4e430250d3ef371940de3497662679e6d2ffab"
+    },
+    {
+      "from": "/vault/CB-IA-063.pdf",
+      "to": "/assets/downloads/CB-IA-063.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-063.pdf",
+      "sha256": "57900e15571a797dbfcef8c78f4112865043b815d55cf4dd8273de65e3fdbb74"
+    },
+    {
+      "from": "/vault/CB-IA-066.pdf",
+      "to": "/assets/downloads/CB-IA-066.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-066.pdf",
+      "sha256": "b0097feb6a46cdff99628bfa09612dd15eb5211a50928c28a614a918392270aa"
+    },
+    {
+      "from": "/vault/CB-IA-069.pdf",
+      "to": "/assets/downloads/CB-IA-069.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-069.pdf",
+      "sha256": "31d8a8a10f257cfb111bfc39d7307d8f17b27cd3a2f0e2bc7b3e823a92a553f5"
+    },
+    {
+      "from": "/vault/CB-IA-072.pdf",
+      "to": "/assets/downloads/CB-IA-072.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-072.pdf",
+      "sha256": "42217c50177c35a4fda210912ecf9627afe74407594c073f4aec7a52fefe3838"
+    },
+    {
+      "from": "/vault/CB-IA-075.pdf",
+      "to": "/assets/downloads/CB-IA-075.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-IA-075.pdf",
+      "sha256": "b0ef088586c2680cd56a2e79a463753724f8b58ea7c1df40dc2e7efba2e3e29a"
+    },
+    {
+      "from": "/vault/CB-SI-002.pdf",
+      "to": "/assets/downloads/CB-SI-002.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-002.pdf",
+      "sha256": "d671647af855a8f5efd63827700adbda09d53009b554547367b5bf33a5b65674"
+    },
+    {
+      "from": "/vault/CB-SI-005.pdf",
+      "to": "/assets/downloads/CB-SI-005.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-005.pdf",
+      "sha256": "5147e3755404b38dd87b4868e668aff624de5954c0527b0733f71d8af67b1cd5"
+    },
+    {
+      "from": "/vault/CB-SI-008.pdf",
+      "to": "/assets/downloads/CB-SI-008.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-008.pdf",
+      "sha256": "c70e89958752bcfc932fdcfef28e4c0032b32f11cd7c57c9e873d01f159fe8ee"
+    },
+    {
+      "from": "/vault/CB-SI-011.pdf",
+      "to": "/assets/downloads/CB-SI-011.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-011.pdf",
+      "sha256": "d3d8534cea6a3ef933207c2421031302c595c97586a4473113d1bd9c2a614c7e"
+    },
+    {
+      "from": "/vault/CB-SI-014.pdf",
+      "to": "/assets/downloads/CB-SI-014.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-014.pdf",
+      "sha256": "bcb81d74a0e48436e061c0cd166c39b9f24e1614c603d5a3ef2a5106ca683531"
+    },
+    {
+      "from": "/vault/CB-SI-017.pdf",
+      "to": "/assets/downloads/CB-SI-017.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-017.pdf",
+      "sha256": "43dcd4c195f930512b174ade786bf26b589188d36f51a3b9b18f8fdc772c4248"
+    },
+    {
+      "from": "/vault/CB-SI-020.pdf",
+      "to": "/assets/downloads/CB-SI-020.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-020.pdf",
+      "sha256": "4ba4a908339a5cc78885429745d1acc11bf6941c58a739ac196f0cd20d517078"
+    },
+    {
+      "from": "/vault/CB-SI-023.pdf",
+      "to": "/assets/downloads/CB-SI-023.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-023.pdf",
+      "sha256": "6df62577c9315b8e22a4e45e8a815c4c5e8aec49d49895d69fb2e9557ab8233b"
+    },
+    {
+      "from": "/vault/CB-SI-026.pdf",
+      "to": "/assets/downloads/CB-SI-026.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-026.pdf",
+      "sha256": "e6532a4ecc72c36b84d7dfd8fc38336354f61e1d8fccc99364516918bd03410d"
+    },
+    {
+      "from": "/vault/CB-SI-029.pdf",
+      "to": "/assets/downloads/CB-SI-029.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-029.pdf",
+      "sha256": "a6d6538b09bc526ae41447e6b43117a219801bb4cded214553617a2d8fcdd1be"
+    },
+    {
+      "from": "/vault/CB-SI-032.pdf",
+      "to": "/assets/downloads/CB-SI-032.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-032.pdf",
+      "sha256": "2dd584a2e1e851d518ffd6783294fdb8907aa724ea9d5d611996857699ec586c"
+    },
+    {
+      "from": "/vault/CB-SI-035.pdf",
+      "to": "/assets/downloads/CB-SI-035.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-035.pdf",
+      "sha256": "8d524999ab79f08354f2d9d24afaf01e4a2633afb91579a2c6c3023ae8a0fd34"
+    },
+    {
+      "from": "/vault/CB-SI-038.pdf",
+      "to": "/assets/downloads/CB-SI-038.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-038.pdf",
+      "sha256": "7a4de49b0035521f3d5677b8671dfe9542136dbaf0131944c474d6e1893ad1c2"
+    },
+    {
+      "from": "/vault/CB-SI-041.pdf",
+      "to": "/assets/downloads/CB-SI-041.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-041.pdf",
+      "sha256": "8ecd2a61d2f7d9c2b874ee80e6ebd73936df830ad67fc193fbf01886b9017219"
+    },
+    {
+      "from": "/vault/CB-SI-044.pdf",
+      "to": "/assets/downloads/CB-SI-044.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-044.pdf",
+      "sha256": "42e1948ee4ca9eb81428183fb0867e7c3e86035cebf49bd9a30245b170f37fae"
+    },
+    {
+      "from": "/vault/CB-SI-047.pdf",
+      "to": "/assets/downloads/CB-SI-047.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-047.pdf",
+      "sha256": "8a31b5fde37abe14c086c01759cdaf7822c7bc042a00469c98e413a540a29d2a"
+    },
+    {
+      "from": "/vault/CB-SI-050.pdf",
+      "to": "/assets/downloads/CB-SI-050.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-050.pdf",
+      "sha256": "2a4dc1b1bc5a41ba489bf01ebf9b4029ad6cdf02285586f532013041c68faad6"
+    },
+    {
+      "from": "/vault/CB-SI-053.pdf",
+      "to": "/assets/downloads/CB-SI-053.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-053.pdf",
+      "sha256": "9bfd69fbf6461e1d97367e3bd517764cd022d55bd7cbe41ed3fb80c0a099fc6c"
+    },
+    {
+      "from": "/vault/CB-SI-056.pdf",
+      "to": "/assets/downloads/CB-SI-056.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-056.pdf",
+      "sha256": "5f27b1610eb35d87ce4b6c7a468af54cd42880e7a6e2c5b0bc0468a38743f44e"
+    },
+    {
+      "from": "/vault/CB-SI-059.pdf",
+      "to": "/assets/downloads/CB-SI-059.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-059.pdf",
+      "sha256": "be9494b079e9674ff443b0ffa8631d1dc287cc123559160118480d80df0f9444"
+    },
+    {
+      "from": "/vault/CB-SI-062.pdf",
+      "to": "/assets/downloads/CB-SI-062.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-062.pdf",
+      "sha256": "7126806b983d4d15a6a21f6198e93b0f9372201e3ded2ad0b902d6e6e77208de"
+    },
+    {
+      "from": "/vault/CB-SI-065.pdf",
+      "to": "/assets/downloads/CB-SI-065.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-065.pdf",
+      "sha256": "c8b37540eff291b6c84365e2b939098850330987703106efb8d64b9f7fd3c55b"
+    },
+    {
+      "from": "/vault/CB-SI-068.pdf",
+      "to": "/assets/downloads/CB-SI-068.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-068.pdf",
+      "sha256": "36c022cfbc8c127af9650999769b314cf7da66373cb66abcdf02fad19c94d966"
+    },
+    {
+      "from": "/vault/CB-SI-071.pdf",
+      "to": "/assets/downloads/CB-SI-071.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-071.pdf",
+      "sha256": "2411ef0acd3ad3bcef54ff2826591d0f80e106f6467a2f5e3d0015452356583c"
+    },
+    {
+      "from": "/vault/CB-SI-074.pdf",
+      "to": "/assets/downloads/CB-SI-074.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "CB-SI-074.pdf",
+      "sha256": "5d191e1f3be2edd7e3a995d6e32d5d47520222301ffaeb85d8e5a78e2687b942"
+    },
+    {
+      "from": "/vault/general/founders-salon.pdf",
+      "to": "/assets/downloads/founders-salon.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "founders-salon.pdf",
+      "sha256": "803c1c955e422c142cea58d2f9f25496518eda30cf70548a9d094c6775cae11c"
+    },
+    {
+      "from": "/vault/general/leadership-workshop.pdf",
+      "to": "/assets/downloads/leadership-workshop.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "leadership-workshop.pdf",
+      "sha256": "37496487cd0f1bf1cbab08b342e2af57ba5929d58947250bf5a2c30c0e3ea653"
+    },
+    {
+      "from": "/vault/general/rise-decay-index.pdf",
+      "to": "/assets/downloads/rise-decay-index.pdf",
+      "status": 301,
+      "reason": "byte_identical_legacy_alias",
+      "filename": "rise-decay-index.pdf",
+      "sha256": "ff32a42703dbd32191a99be61f492530ae722f8d47fe587e805b0493d8ddfbff"
+    }
+  ]
+}

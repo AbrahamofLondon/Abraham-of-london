@@ -32,7 +32,7 @@ function inferSlugFromFilename(filename: string): string {
 }
 
 function inferPdfPath(slug: string): string {
-  return `/assets/downloads/${slug}.pdf`;
+  return `/downloads/${slug}`;
 }
 
 function inferEpubPath(slug: string): string {

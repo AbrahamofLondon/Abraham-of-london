@@ -5,8 +5,8 @@ type Props = { name?: string; siteUrl: string };
 
 export default function TeaserEmail({ name, siteUrl }: Props) {
   const base = siteUrl.replace(/\/$/, "");
-  const A4 = `${base}/assets/downloads/fathering-without-fear.pdf`;
-  const Mobile = `${base}/assets/downloads/fathering-without-fear.pdf`;
+  const A4 = `${base}/downloads/fathering-without-fear`;
+  const Mobile = `${base}/downloads/fathering-without-fear`;
 
   const link = (href: string, label: string) => (
     <a
@@ -62,4 +62,3 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
     </div>
   );
 }
-

@@ -273,7 +273,7 @@ const LegacyCanvasInteractive: React.FC = () => {
       const startTime = Date.now();
       const timestamp = safeDateSlice(new Date(), 0, 10);
       const filename = `Legacy-Architecture-Canvas-${format}-${timestamp}.pdf`;
-      const pdfUrl = `/assets/downloads/download-legacy-architecture-canvas-${format.toLowerCase()}-premium.pdf`;
+      const pdfUrl = `/downloads/download-legacy-architecture-canvas?format=${format.toLowerCase()}`;
       const link = document.createElement('a');
       link.href = pdfUrl;
       link.download = filename;

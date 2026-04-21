@@ -10,7 +10,6 @@ import {
   getAllDownloads,
   getPublishedBooks,
   getAllCanons,
-  resolveDocDownloadUrl,
 } from "@/lib/content/server";
 
 import {
@@ -18,6 +17,7 @@ import {
   getPremiumContentById,
   type PremiumContentItem,
 } from "@/lib/premium/content-registry";
+import { getPdfAssetBySlug } from "@/lib/assets/pdf-identity";
 
 export type DownloadAssetContentType =
   | "books"
@@ -182,6 +182,7 @@ function toDocAssetRecord(
       doc?._raw?.flattenedPath ||
       requestedSlug,
   );
+  const identity = getPdfAssetBySlug(lastSegment(slug) || requestedSlug);
 
   return {
     id: slug,
@@ -193,7 +194,7 @@ function toDocAssetRecord(
     source: "content-doc",
 
     bodyCode: extractBodyCode(doc),
-    downloadUrl: resolveDocDownloadUrl(doc) || null,
+    downloadUrl: identity?.canonicalPath || null,
     watermarkRequired: false,
     maxDownloads: null,
 
@@ -202,6 +203,7 @@ function toDocAssetRecord(
       coverImage: doc?.coverImage || null,
       tags: Array.isArray(doc?.tags) ? doc.tags : [],
       flattenedPath: doc?._raw?.flattenedPath || null,
+      pdfIdentity: identity,
     },
   };
 }
@@ -283,6 +285,24 @@ export async function resolveDownloadAsset(params: {
 
   const doc = resolveFromDocs(contentType, slug);
   if (doc) return doc;
+
+  const identity = getPdfAssetBySlug(slug);
+  if (identity) {
+    return {
+      id: identity.slug,
+      slug: identity.slug,
+      title: identity.title,
+      contentType,
+      requiredTier: "public",
+      isPublic: true,
+      source: "content-doc",
+      bodyCode: "",
+      downloadUrl: identity.canonicalPath,
+      watermarkRequired: false,
+      maxDownloads: null,
+      metadata: { pdfIdentity: identity },
+    };
+  }
 
   return null;
 }

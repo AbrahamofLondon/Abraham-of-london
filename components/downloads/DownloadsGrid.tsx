@@ -13,7 +13,7 @@ import clsx from "clsx";
 // is robust against variations in the data it receives.
 // ----------------------------------------------------------------------
 export type DownloadItem = {
-  href: string; // public URL (e.g. "/downloads/Mentorship_Starter_Kit.pdf")
+  href: string; // public URL (e.g. "/downloads/Mentorship_Starter_Kit")
   title: string; // pretty title (e.g. "Mentorship Starter Kit")
   sub?: string | null; // Optional subtitle/descriptor for display (e.g., "A4 / US Letter")
 

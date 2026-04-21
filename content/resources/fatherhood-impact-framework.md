@@ -12,7 +12,7 @@ coverImage: /assets/images/canon/canon-resources.jpg
 accessLevel: public
 resourceType: guide
 docKind: Resource
-downloadUrl: /assets/downloads/fatherhood-impact-framework.pdf
+downloadUrl: /downloads/fatherhood-impact-framework
 ogTitle: "Fatherhood Impact Framework | Abraham of London"
 ogDescription: "A generational model for building identity, order, and destiny."
 socialCaption: "The architect of the home: The Fatherhood Impact Framework."
@@ -39,7 +39,7 @@ status: published
 <DownloadCard
   title="Download the Impact Framework (PDF)"
   label="Download PDF"
-  href="/assets/downloads/fatherhood-impact-framework.pdf"
+  href="/downloads/fatherhood-impact-framework"
 >
   A strategic fatherhood guide featuring the five-domain audit, family governance prompts, and generational planning framework.
 </DownloadCard>

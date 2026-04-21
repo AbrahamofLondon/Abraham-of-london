@@ -167,6 +167,56 @@ export function scorePurposeProfile(
   };
 }
 
+/* ── Tension signal extraction for cross-stage memory ── */
+
+import type { TensionSignal } from "@/lib/diagnostics/tension-thread";
+
+type DualAxisAnswerForExtraction = { resonance: number; certainty: number };
+
+export function extractPurposeTensions(
+  profile: { domainProfiles: Array<{ domain: string; percent: number }>; weakestDomains: string[] },
+  answers: Record<string, DualAxisAnswerForExtraction>,
+): TensionSignal[] {
+  const signals: TensionSignal[] = [];
+  const src = "purpose_alignment" as const;
+
+  for (const dp of profile.domainProfiles) {
+    if (dp.domain === "identity" && dp.percent < 45) {
+      signals.push({ domain: "identity", signal: "mandate_vacuum", severity: dp.percent < 30 ? "high" : "medium", source: src, evidence: `Identity domain scored ${dp.percent}% — mandate clarity is below structural threshold.` });
+    }
+    if (dp.domain === "decision" && dp.percent < 45) {
+      signals.push({ domain: "decision", signal: "reactive_decision_pattern", severity: dp.percent < 30 ? "high" : "medium", source: src, evidence: `Decision Integrity scored ${dp.percent}% — decisions are driven by pressure rather than principle.` });
+    }
+    if (dp.domain === "environment" && dp.percent < 45) {
+      signals.push({ domain: "environment", signal: "environmental_drag", severity: "medium", source: src, evidence: `Environmental Alignment scored ${dp.percent}% — the operating environment is working against stated direction.` });
+    }
+  }
+
+  // Structural inconsistency: high variance between strongest and weakest
+  const pcts = profile.domainProfiles.map(d => d.percent);
+  if (Math.max(...pcts) - Math.min(...pcts) > 35) {
+    signals.push({ domain: "mixed", signal: "structural_inconsistency", severity: "low", source: src, evidence: "Alignment varies significantly across domains — performing well in some areas while misaligned in others." });
+  }
+
+  // False alignment: high resonance, low certainty on any question
+  for (const [id, a] of Object.entries(answers)) {
+    if (a.resonance >= 7 && a.certainty <= 3) {
+      signals.push({ domain: "mixed", signal: "false_alignment", severity: "low", source: src, evidence: `Stated high alignment but very low confidence on "${id}" — possible self-deception.` });
+      break; // one is enough
+    }
+  }
+
+  // Acknowledged failure: low resonance, high certainty
+  for (const [id, a] of Object.entries(answers)) {
+    if (a.resonance <= 3 && a.certainty >= 7) {
+      signals.push({ domain: "mixed", signal: "acknowledged_failure", severity: "medium", source: src, evidence: `Clearly acknowledged weakness on "${id}" — known problem, not a blind spot.` });
+      break;
+    }
+  }
+
+  return signals;
+}
+
 /* ── Legacy boolean scoring (backward compat) ── */
 
 export function scorePurposeAlignment(

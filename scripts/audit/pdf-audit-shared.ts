@@ -59,6 +59,7 @@ export type PdfReferenceClassification =
   | "missing"
   | "placeholder"
   | "private_registry_reference"
+  | "redirect_source"
   | "comment_or_example"
   | "needs_manual_review";
 
@@ -180,7 +181,11 @@ export function canonicalityStatus(publicUrl: string): CanonicalityStatus {
 }
 
 export function scanPublicPdfAssets(): PdfAssetRecord[] {
-  const files = walkFiles(PUBLIC_ROOT, (abs) => abs.toLowerCase().endsWith(".pdf"));
+  const archiveRoot = path.join(PUBLIC_ROOT, "_archive");
+  const files = walkFiles(
+    PUBLIC_ROOT,
+    (abs) => abs.toLowerCase().endsWith(".pdf") && !abs.startsWith(archiveRoot),
+  );
   const records = files.map((abs) => {
     const publicUrl = toPublicUrl(abs);
     const filename = path.basename(abs);
@@ -317,7 +322,8 @@ export function isLikelyCommentOrExample(file: string, line: string): boolean {
     normalized.startsWith("//") ||
     normalized.startsWith("*") ||
     normalized.startsWith("/*") ||
-    normalized.includes(" e.g.") ||
+    normalized.includes("e.g.") ||
+    normalized.includes("e.g.,") ||
     normalized.includes("example") ||
     normalized.includes("placeholder")
   );
@@ -351,6 +357,9 @@ export function classifyPdfReference(params: {
   const { file, lineText, publicUrl, exists } = params;
 
   if (exists) return { classification: "ok" };
+  if (file.replace(/\\/g, "/").toLowerCase().endsWith("netlify.toml") && /from\s*=/.test(lineText)) {
+    return { classification: "redirect_source", note: "Redirect source URL does not need a public file." };
+  }
   if (isPrivateRegistryReference(file, publicUrl)) {
     return { classification: "private_registry_reference", note: "Private storage relative path, not a public URL." };
   }

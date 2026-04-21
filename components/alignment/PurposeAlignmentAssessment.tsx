@@ -43,7 +43,8 @@ import {
   ALIGNMENT_DOMAIN_LABELS,
 } from "@/lib/alignment/checklist";
 import { getOrCreateSubjectId } from "@/lib/diagnostics/subject-id";
-import { scorePurposeProfile } from "@/lib/alignment/scoring";
+import { scorePurposeProfile, extractPurposeTensions } from "@/lib/alignment/scoring";
+import { mergeAndSaveTensions } from "@/lib/diagnostics/thread-engine";
 import type {
   AlignmentDomain,
   DualAxisAnswer,
@@ -907,6 +908,14 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
       );
       sessionStorage.setItem("aol_diagnostics_origin", "purpose_alignment");
     } catch {}
+    // Extract tension signals and merge into cross-stage thread
+    try {
+      const tensions = extractPurposeTensions(scored, answers);
+      if (tensions.length > 0) {
+        mergeAndSaveTensions(tensions, "purpose_alignment");
+      }
+    } catch {}
+
     track("purpose_alignment_completed", {
       band: scored.coherenceBand,
       percent: scored.percent,
