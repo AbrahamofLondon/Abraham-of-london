@@ -248,7 +248,7 @@ export function getCanonicalHref(kind: DocKind, slug: string): string {
     case "intelligence":
       return joinHref("intelligence", s);
     case "lexicon":
-      return joinHref("vault/lexicon", s);
+      return joinHref("lexicon", s);
     default:
       return s.includes("/") ? "/" + s : joinHref("content", s);
   }
