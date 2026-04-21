@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Head from "next/head";
 import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -5,11 +6,16 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import ExecutiveReportingPaywall from "@/components/diagnostics/ExecutiveReportingPaywall";
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
+import { trackExecGateView } from "@/lib/analytics/journey-client";
 
 export default function ExecutiveReportingEntryPage() {
   const router = useRouter();
   const checkoutCancelled = router.query.checkout === "cancelled";
   const accessRequired = router.query.access === "required";
+
+  useEffect(() => {
+    trackExecGateView();
+  }, []);
 
   return (
     <Layout

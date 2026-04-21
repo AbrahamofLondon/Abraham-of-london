@@ -255,6 +255,18 @@ export interface ExecutiveIntakeGovernanceBlock {
   monitoringContext: boolean;
 }
 
+export interface ExecutiveObservedOutcomeEvidenceBlock {
+  title: "Observed Outcomes (System Evidence)";
+  processedDecisionCases: number;
+  comparableCaseCount: number;
+  improvedPercent: number;
+  averageTimeToImprovementDays: number | null;
+  failureRateWhenIgnored: number;
+  medianResolutionWindowDays: number | null;
+  confidence: "insufficient" | "directional" | "governed";
+  statements: string[];
+}
+
 export interface ReturnTypeSerializeExecutiveReportToPdfPayload {
   title: string;
   subtitle: string;
@@ -339,6 +351,7 @@ export interface CanonicalExecutiveReportExport {
       teamReality?: TeamRealityBlock;
       teamSentimentReality?: ExecutiveSentimentBlock;
       trajectoryOutlook?: ExecutiveTrajectoryBlock;
+      observedOutcomeEvidence?: ExecutiveObservedOutcomeEvidenceBlock;
       longitudinalMonitoring?: ExecutiveLongitudinalBlock;
       enterpriseSignals?: ExecutiveEnterpriseSignalBlock;
       monitoringRecommendation?: {

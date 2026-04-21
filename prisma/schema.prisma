@@ -2578,3 +2578,79 @@ model FrameworkAccessLog {
   @@index([slug])
   @@map("framework_access_logs")
 }
+
+// ============================================================================
+// DECISION JOURNEY INSTRUMENTATION (Brief C)
+// ============================================================================
+
+model DecisionJourneyEvent {
+  id        String   @id @default(cuid())
+  sessionId String
+  userId    String?
+  stage     String
+  context   String?  // JSON: bundleId, entryPath, buyerState, evidenceDepth, escalationLevel
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([stage])
+  @@index([createdAt])
+  @@map("decision_journey_events")
+}
+
+// ============================================================================
+// STRATEGY ROOM EXECUTION (Brief D)
+// ============================================================================
+
+model StrategyRoomExecutionSession {
+  id                    String   @id @default(cuid())
+  sessionKey            String   @unique
+  strategyRoomSessionId String?
+  userId                String?
+  email                 String?
+
+  // Entry state
+  directive        String?  // allow | warn | restrict | block
+  escalationLevel  String?
+  conditionSummary String?
+
+  // Decision frame
+  coreProblem      String?
+  decisionQuestion String?
+  constraints      String?  // JSON array
+  exposureLevel    String?
+
+  // Intervention stack
+  interventionStack String?  // JSON: InterventionStep[]
+
+  // Constraint map
+  constraintMap String?  // JSON: authority gaps, resource constraints, stakeholder resistance
+
+  // Canonical snapshot from Strategy Room
+  canonicalSnapshot String?
+
+  status    String   @default("active")  // active | completed | escalated | monitoring
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  decisions StrategyDecisionLog[]
+
+  @@index([email])
+  @@index([status])
+  @@map("strategy_room_execution_sessions")
+}
+
+model StrategyDecisionLog {
+  id        String   @id @default(cuid())
+  sessionId String
+  decision  String
+  status    String   @default("pending")  // pending | executed | blocked
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  session StrategyRoomExecutionSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+  @@index([status])
+  @@map("strategy_decision_logs")
+}

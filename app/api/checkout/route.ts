@@ -6,10 +6,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { getPdfAssetIdentityBySlug } from "@/lib/assets/pdf-identity";
 import { resolveAssetPricing } from "@/lib/commercial/pricing-engine";
-import {
-  getUserEntitlements,
-  grantEntitlement,
-} from "@/lib/commercial/entitlements";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 import type { UserContext } from "@/lib/assets/pdf-access";
 
 type CheckoutPayload = {
@@ -49,6 +47,7 @@ export async function POST(req: NextRequest) {
 
   const identity = await resolveIdentity(req);
   const userId = identity.subjectId || payload.userId || null;
+  const email = identity.email || null;
 
   if (!userId) {
     return NextResponse.json(
@@ -57,13 +56,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const entitlements = await getUserEntitlements(userId);
+  const entitlement = await resolveCanonicalEntitlement({
+    userId,
+    email,
+    slug: asset.slug,
+  });
   const user: UserContext = {
     id: userId,
     authenticated: true,
     tier: identity.tier,
     flags: identity.flags,
-    entitlementSlugs: entitlements.map((entry) => entry.slug),
+    entitlementSlugs: entitlement.granted ? [asset.slug] : [],
   };
 
   const pricing = resolveAssetPricing(user, asset);
@@ -81,11 +84,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const entitlement = await grantEntitlement(
+  const checkoutSessionId = `simulated:${asset.slug}:${Date.now()}`;
+  const verified = await ensureEntitlementAfterPayment({
+    checkoutSessionId,
+    slug: asset.slug,
     userId,
-    asset.slug,
-    pricing.price === 0 ? "checkout-free" : "checkout-simulated",
-  );
+    email,
+  });
+
+  if (!verified.ok || !verified.entitlement?.granted) {
+    return NextResponse.json(
+      {
+        ok: false,
+        slug: asset.slug,
+        price: pricing.price,
+        reason: "PAYMENT_SUCCEEDED_ENTITLEMENT_SYNC_FAILED",
+      },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json({
     ok: true,
@@ -94,7 +111,9 @@ export async function POST(req: NextRequest) {
     originalPrice: pricing.originalPrice,
     discounted: pricing.discounted,
     reason: pricing.reason,
-    entitlement,
+    entitlement: verified.entitlement,
+    entitlementVerified: verified.entitlement.verified,
+    entitlementRepaired: verified.repaired,
     nextAction: `/api/downloads/${encodeURIComponent(asset.slug)}`,
   });
 }

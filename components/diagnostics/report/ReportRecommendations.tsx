@@ -36,6 +36,17 @@ export default function ReportRecommendations({
             <p className="mt-4 text-sm leading-relaxed text-white/62">{rec.detail}</p>
           </div>
         ))}
+        <div className="border border-amber-500/20 bg-black/40 p-5">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300/70">
+            Action layer
+          </div>
+          <div className="mt-3 font-serif text-2xl text-white">
+            If intervention is required, move to Strategy Room.
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-white/62">
+            Executive Reporting prices the consequence. Strategy Room executes the intervention.
+          </p>
+        </div>
       </div>
     </section>
   );

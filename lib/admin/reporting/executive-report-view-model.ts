@@ -1,6 +1,7 @@
 // lib/admin/reporting/executive-report-view-model.ts
 
 import type { CanonicalExecutiveReportExport } from "@/lib/admin/reporting/types";
+import { buildObservedOutcomeEvidence } from "@/lib/outcomes/evidence";
 
 export interface ExecutiveReportRecommendationView {
   id: string;
@@ -81,6 +82,9 @@ export interface ExecutiveReportViewModel {
     executionLossFormatted: string;
     totalExposureFormatted: string;
   };
+  observedOutcomes: NonNullable<
+    CanonicalExecutiveReportExport["sections"]["observedOutcomeEvidence"]
+  >;
   constitution: CanonicalExecutiveReportExport["sections"]["constitutionalPosture"];
   recommendations: {
     summary: string;
@@ -257,6 +261,8 @@ export function buildExecutiveReportViewModel(
   const failureModes = sections.failureModes.items;
   const dominantDomains = sections.dominantDomains.items;
   const severity = severityFromScore(safeNumber(constitution.severityScore, 0));
+  const observedOutcomes =
+    sections.observedOutcomeEvidence ?? buildObservedOutcomeEvidence([]);
 
   const findings: ExecutiveReportFindingView[] = [
     ...failureModes.slice(0, 3).map((mode) => ({
@@ -373,6 +379,7 @@ export function buildExecutiveReportViewModel(
       executionLossFormatted: sections.financialExposure.executionLossFormatted,
       totalExposureFormatted: sections.financialExposure.totalExposureFormatted,
     },
+    observedOutcomes,
     constitution,
     recommendations: {
       summary: sections.governedRecommendations.summary,

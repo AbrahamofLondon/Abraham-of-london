@@ -3,6 +3,7 @@ import { canAccessArtifact, canAccessProduct, canAccessTier } from "@/lib/access
 import { ACCESS_DOWNLOADS, createSignedDownloadToken } from "@/lib/access/downloads";
 import { logAccessAudit } from "@/lib/access/audit";
 import { requireAuthenticatedApi } from "@/lib/access/server";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 
 export default async function handler(
   req: NextApiRequest,
@@ -28,7 +29,16 @@ export default async function handler(
   const access = resolved.access;
   const sessionUser = resolved.session?.user;
 
+  const canonical = await resolveCanonicalEntitlement({
+    userId: access.userId,
+    email: sessionUser?.email ?? access.email,
+    slug: artifactKey,
+    tier: access.tier,
+    requiredTier: asset.requiredTier ?? null,
+  });
+
   const hasAccess =
+    canonical.granted ||
     canAccessArtifact(access, artifactKey) ||
     canAccessProduct(access, artifactKey) ||
     (asset.requiredTier ? canAccessTier(access, asset.requiredTier) : false);

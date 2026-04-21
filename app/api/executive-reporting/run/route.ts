@@ -15,6 +15,8 @@ import {
 } from "@/lib/diagnostics/journey-store";
 import { resolveLadderContext } from "@/lib/diagnostics/ladder-context-resolver";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
+import { buildObservedOutcomeEvidence } from "@/lib/outcomes/evidence";
+import type { OutcomeSnapshot } from "@/lib/outcomes/outcome-model";
 
 type AnyRecord = Record<string, unknown>;
 
@@ -519,6 +521,54 @@ async function persistBenchmarkFact(input: {
   }
 }
 
+function outcomeSnapshotsFromFollowups(
+  followups: Array<{ metadata: string | null; createdAt?: Date }>,
+): OutcomeSnapshot[] {
+  const snapshots: OutcomeSnapshot[] = [];
+
+  for (const followup of followups) {
+    const metadata = parseJson<Record<string, unknown>>(followup.metadata, {});
+    const raw = getObject(metadata.outcomeSnapshot);
+    if (!Object.keys(raw).length) continue;
+
+    const baseline = getObject(raw.baseline);
+    const followUp = getObject(raw.followUp);
+    const delta = getObject(raw.delta);
+    const organisation = s(raw.organisation);
+
+    snapshots.push({
+      id: s(raw.id),
+      sessionId: s(raw.sessionId),
+      ...(organisation ? { organisation } : {}),
+      baseline: {
+        dissonance: n(baseline.dissonance, Number.NaN),
+        burnoutIndex: n(baseline.burnoutIndex, Number.NaN),
+        sovereignCertainty: n(baseline.sovereignCertainty, Number.NaN),
+        escalationLevel: s(baseline.escalationLevel),
+      },
+      followUp: {
+        dissonance: n(followUp.dissonance, Number.NaN),
+        burnoutIndex: n(followUp.burnoutIndex, Number.NaN),
+        sovereignCertainty: n(followUp.sovereignCertainty, Number.NaN),
+        escalationLevel: s(followUp.escalationLevel),
+      },
+      delta: {
+        dissonanceChange: n(delta.dissonanceChange, 0),
+        burnoutChange: n(delta.burnoutChange, 0),
+        certaintyChange: n(delta.certaintyChange, 0),
+      },
+      outcomeClassification:
+        s(raw.outcomeClassification, "invalid") as OutcomeSnapshot["outcomeClassification"],
+      timeToOutcomeDays: n(raw.timeToOutcomeDays, Number.NaN),
+      createdAt: raw.createdAt
+        ? new Date(String(raw.createdAt))
+        : followup.createdAt ?? new Date(),
+    });
+  }
+
+  return snapshots;
+}
+
 function jsonFailure(
   error: string,
   status: number,
@@ -646,6 +696,14 @@ export async function POST(
       journeySnapshots,
       benchmarkFacts: benchmarkFactsFromRuns(priorRuns),
     });
+    const outcomeFollowups = await prisma.strategyRoomFollowup.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      select: { metadata: true, createdAt: true },
+    });
+    const observedOutcomeEvidence = buildObservedOutcomeEvidence(
+      outcomeSnapshotsFromFollowups(outcomeFollowups),
+    );
 
     const intakeGovernance = {
       intakeMode: accessDecision.intakeMode,
@@ -719,6 +777,7 @@ export async function POST(
           isAuthorizedToExecute: route === "STRATEGY",
         },
         intakeGovernance,
+        observedOutcomeEvidence,
         ...capabilityStack.blocks,
       },
       // Pass the typed assembler outputs directly into buildCanonicalReportContract.

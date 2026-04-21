@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/consulting/strategy-room/index.tsx  (or pages/strategy-room.tsx — match your route)
+// pages/strategy-room/index.tsx
 // Design: Institutional Monumentalism — the highest-consequence page on the platform
 // Three states: CHAMBER (pre-submission) → LOADING → VERDICT (post-submission)
 // Typography: Cormorant Garamond display · JetBrains Mono data/labels
@@ -12,10 +12,17 @@ import Link from "next/link";
 import { trackStrategyRoomEntry, trackStrategyRoomConversion } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
 import {
+  trackStrategyGateView,
+  trackStrategyAttempt,
+  trackStrategyAllowed,
+  trackStrategyBlocked,
+} from "@/lib/analytics/journey-client";
+import {
   AlertTriangle,
   ArrowRight,
   CheckSquare,
   Lock,
+  Clock3,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -69,6 +76,13 @@ function StrategyRoomGate() {
       // Dynamic import to avoid SSR issues
       import("@/lib/diagnostics/decision-authority").then(({ deriveDecisionDirective }) => {
         const d = deriveDecisionDirective(thread);
+        if (d.level === "allow") {
+          trackStrategyAllowed();
+        } else if (d.level === "block") {
+          trackStrategyBlocked(d.level);
+        } else {
+          trackStrategyBlocked(d.level);
+        }
         if (d.level !== "allow") {
           setDirective(d);
 
@@ -205,7 +219,18 @@ const INITIAL_FORM: ConstitutionalIntake = {
 };
 
 const STORAGE_KEY = "aol_strategy_room_intake_v1";
+const DECISION_LOG_KEY = "aol_strategy_room_decision_log_v1";
 const AUTOSAVE_MS = 700;
+
+type DecisionLogStatus = "pending" | "executed" | "blocked";
+
+type DecisionLogEntry = {
+  id: string;
+  text: string;
+  status: DecisionLogStatus;
+  blockReason: string;
+  createdAt: string;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -213,6 +238,53 @@ const AUTOSAVE_MS = 700;
 
 function safeText(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function formatTimeStamp(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function buildExecutionContext(
+  thread: ConstitutionalThread | null,
+  canonical: CanonicalSectionsEnvelope | null,
+) {
+  const posture = canonical ? localSummary(canonical) : null;
+  const executive = thread?.executiveFindings as Record<string, unknown> | undefined;
+  const failureModes = [
+    ...(Array.isArray(thread?.failureModes) ? thread.failureModes : []),
+    ...(Array.isArray(posture?.failureModes) ? posture.failureModes : []),
+  ].map((item) => safeText(item)).filter(Boolean);
+  const dominantCondition =
+    failureModes[0] ||
+    safeText(executive?.primaryConcern) ||
+    safeText(executive?.route) ||
+    safeText(posture?.orgState) ||
+    "Authority and execution are not sufficiently ordered.";
+  const escalationLevel =
+    safeText(posture?.priority) ||
+    safeText(executive?.readinessTier) ||
+    "INTERVENTION REQUIRED";
+  const directive =
+    safeText(posture?.route) ||
+    safeText(executive?.route) ||
+    "STRATEGY";
+  const consequence =
+    posture?.nextAction ||
+    "If ignored, decision drift compounds and the wrong intervention path becomes more likely.";
+
+  return {
+    escalationLevel,
+    dominantCondition,
+    consequence,
+    directive,
+  };
 }
 
 function validateForm(form: ConstitutionalIntake): string | null {
@@ -367,6 +439,521 @@ function RouteStrip() {
         </React.Fragment>
       ))}
     </div>
+  );
+}
+
+function ExecutionEntryState({
+  thread,
+  canonical,
+  checkoutConfirmed,
+}: {
+  thread: ConstitutionalThread | null;
+  canonical: CanonicalSectionsEnvelope | null;
+  checkoutConfirmed?: boolean;
+}) {
+  const context = buildExecutionContext(thread, canonical);
+  const metrics = [
+    { label: "Escalation level", value: context.escalationLevel },
+    { label: "Dominant condition", value: context.dominantCondition },
+    { label: "Ignored consequence", value: context.consequence },
+    { label: "Directive", value: context.directive },
+  ];
+
+  return (
+    <section style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
+        {checkoutConfirmed && (
+          <div
+            className="mb-4"
+            style={{
+              border: `1px solid ${GOLD}24`,
+              backgroundColor: "rgba(0,0,0,0.72)",
+              padding: "0.85rem 1rem",
+            }}
+          >
+            <div style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7.5px",
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: `${GOLD}AA`,
+            }}>
+              Access granted. Execution environment ready.
+            </div>
+          </div>
+        )}
+
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div>
+            <Eyebrow>Strategy Room · Execution Environment</Eyebrow>
+            <h1 style={{
+              marginTop: "1rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(2rem, 4.2vw, 3.35rem)",
+              lineHeight: 0.98,
+              letterSpacing: "-0.02em",
+              color: "rgba(255,255,255,0.92)",
+            }}>
+              Intervention begins here.
+            </h1>
+            <p style={{
+              marginTop: "0.85rem",
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              lineHeight: 1.7,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.64)",
+              maxWidth: "58ch",
+            }}>
+              The system has determined that action—not analysis—is required.
+            </p>
+          </div>
+
+          <div
+            className="grid gap-px sm:grid-cols-2"
+            style={{ border: "1px solid rgba(255,255,255,0.11)", backgroundColor: "rgba(255,255,255,0.08)" }}
+          >
+            {metrics.map((metric) => (
+              <div
+                key={metric.label}
+                style={{ backgroundColor: "rgb(5 6 8)", padding: "0.95rem 1rem", minHeight: "76px" }}
+              >
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "6.5px",
+                  letterSpacing: "0.28em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                  marginBottom: "0.45rem",
+                }}>
+                  {metric.label}
+                </div>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  lineHeight: 1.55,
+                  color: metric.label === "Ignored consequence" ? "rgba(252,165,165,0.82)" : "rgba(255,255,255,0.72)",
+                }}>
+                  {metric.value}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FirstActionPrompt() {
+  return (
+    <div
+      className="mx-auto max-w-7xl px-6 pt-6 lg:px-12"
+      style={{ backgroundColor: VOID }}
+    >
+      <div className="grid gap-px md:grid-cols-2" style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}20` }}>
+        <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.25rem" }}>
+          <div style={{
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "7px",
+            letterSpacing: "0.32em",
+            textTransform: "uppercase",
+            color: `${GOLD}AA`,
+            marginBottom: "0.55rem",
+          }}>
+            First action prompt
+          </div>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
+            Start with the first intervention. Do not optimise. Execute.
+          </p>
+        </div>
+        <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.25rem" }}>
+          <div style={{
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "7px",
+            letterSpacing: "0.32em",
+            textTransform: "uppercase",
+            color: "rgba(252,165,165,0.72)",
+            marginBottom: "0.55rem",
+          }}>
+            System constraint
+          </div>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
+            Only act on what is defined here. Deviation introduces risk.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExecutionDecisionFrame({
+  canonical,
+  thread,
+}: {
+  canonical: CanonicalSectionsEnvelope | null;
+  thread: ConstitutionalThread | null;
+}) {
+  const context = buildExecutionContext(thread, canonical);
+  const posture = canonical ? localSummary(canonical) : null;
+  const constraints = [
+    context.consequence,
+    safeText(posture?.authorityType) ? `Authority state: ${posture?.authorityType}` : "",
+    safeText(posture?.readinessTier) ? `Readiness: ${posture?.readinessTier}` : "",
+  ].filter(Boolean);
+
+  return (
+    <section style={{ backgroundColor: VOID }}>
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
+        <div className="grid gap-px lg:grid-cols-3" style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.08)" }}>
+          {[
+            ["Condition", context.dominantCondition],
+            ["Required decision", posture?.nextAction || "Select and execute the first governed intervention."],
+            ["Constraints (non-negotiable)", constraints.join(" · ") || "No undefined intervention outside the system frame."],
+          ].map(([label, value]) => (
+            <div key={label} style={{ backgroundColor: "rgb(5 6 8)", padding: "1.15rem 1.25rem" }}>
+              <div style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+                color: label === "Constraints (non-negotiable)" ? "rgba(252,165,165,0.68)" : `${GOLD}90`,
+                marginBottom: "0.65rem",
+              }}>
+                {label}
+              </div>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.68)" }}>
+                {value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function inferFriction(index: number, item: string): "LOW" | "MEDIUM" | "HIGH" {
+  const value = item.toLowerCase();
+  if (value.includes("board") || value.includes("authority") || value.includes("escalat")) return "HIGH";
+  if (value.includes("constraint") || value.includes("governance") || index > 1) return "MEDIUM";
+  return "LOW";
+}
+
+function ExecutionFrictionBadge({ level }: { level: "LOW" | "MEDIUM" | "HIGH" }) {
+  const color =
+    level === "HIGH" ? "rgba(252,165,165,0.86)" :
+    level === "MEDIUM" ? `${GOLD}CC` :
+    "rgba(110,231,183,0.86)";
+  return (
+    <span style={{
+      border: `1px solid ${color.replace("0.86", "0.28").replace("CC", "45")}`,
+      color,
+      padding: "0.25rem 0.45rem",
+      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+      fontSize: "6.5px",
+      letterSpacing: "0.22em",
+    }}>
+      {level}
+    </span>
+  );
+}
+
+function InterventionStack({
+  canonical,
+}: {
+  canonical: CanonicalSectionsEnvelope | null;
+}) {
+  const posture = canonical ? localSummary(canonical) : null;
+  const interventions = (posture?.interventions.length ? posture.interventions : [
+    "Stabilise the decision owner and confirm intervention authority.",
+    "Define the first constrained move and execute it before expanding scope.",
+    "Record the decision outcome and move unresolved blockage into escalation.",
+  ]).slice(0, 5);
+
+  return (
+    <section style={{ backgroundColor: VOID }}>
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
+        <div style={{
+          border: "1px solid rgba(255,255,255,0.10)",
+          backgroundColor: "rgb(5 6 8)",
+        }}>
+          <div style={{
+            padding: "0.9rem 1.1rem",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+          }}>
+            <span style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.34em",
+              textTransform: "uppercase",
+              color: `${GOLD}AA`,
+            }}>
+              Intervention stack
+            </span>
+            <span style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.30)",
+            }}>
+              Execute in order
+            </span>
+          </div>
+          <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+            {interventions.map((item, index) => {
+              const friction = inferFriction(index, item);
+              return (
+                <div key={`${item}-${index}`} className="grid gap-4 p-4 lg:grid-cols-[48px_1fr_1fr]">
+                  <div style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "10px",
+                    color: `${GOLD}AA`,
+                  }}>
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+                  <div>
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <ExecutionFrictionBadge level={friction} />
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                        Execution friction
+                      </span>
+                    </div>
+                    <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.76)" }}>
+                      <span style={{ color: `${GOLD}AA` }}>Intent:</span> {item}
+                    </p>
+                    <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>
+                      <span style={{ color: "rgba(255,255,255,0.72)" }}>Expected effect:</span> ambiguity collapses into a named action path.
+                    </p>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                    {[
+                      ["Risk if ignored", "Delay compounds and stakeholders improvise around the unresolved condition."],
+                      ["Urgency", index === 0 ? "Immediate" : "After prior step is logged"],
+                      ["Dependency", index === 0 ? "Named owner" : "Previous step completed or blocked"],
+                      ["Failure signal", "Owner cannot execute, evidence is contested, or constraint remains unchanged."],
+                    ].map(([label, value]) => (
+                      <div key={label} style={{ borderLeft: "1px solid rgba(255,255,255,0.08)", paddingLeft: "0.7rem" }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                          {label}
+                        </div>
+                        <div style={{ marginTop: "0.2rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.5, color: label === "Risk if ignored" ? "rgba(252,165,165,0.72)" : "rgba(255,255,255,0.52)" }}>
+                          {value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ConstraintMap({
+  canonical,
+}: {
+  canonical: CanonicalSectionsEnvelope | null;
+}) {
+  const posture = canonical ? localSummary(canonical) : null;
+  const constraints = [
+    safeText(posture?.authorityType) || "Authority boundary unresolved",
+    safeText(posture?.orgState) || "Operating state unstable",
+    safeText(posture?.temperature) || "Decision temperature elevated",
+  ];
+
+  return (
+    <section style={{ backgroundColor: VOID }}>
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
+        <div className="grid gap-px md:grid-cols-3" style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.08)" }}>
+          {constraints.map((constraint, index) => (
+            <div key={`${constraint}-${index}`} style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.15rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)", marginBottom: "0.75rem" }}>
+                Blocking constraint
+              </div>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.6, color: "rgba(255,255,255,0.70)" }}>
+                {constraint}
+              </p>
+              <div style={{ marginTop: "0.85rem", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "0.75rem" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(255,255,255,0.48)" }}>
+                  <span style={{ color: `${GOLD}AA` }}>Workaround required:</span> assign a temporary owner and decision boundary.
+                </p>
+                <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(252,165,165,0.68)" }}>
+                  If unresolved → escalation.
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DecisionLog({
+  entries,
+  onAdd,
+  onStatusChange,
+  onBlockReasonChange,
+}: {
+  entries: DecisionLogEntry[];
+  onAdd: (text: string) => void;
+  onStatusChange: (id: string, status: DecisionLogStatus) => void;
+  onBlockReasonChange: (id: string, reason: string) => void;
+}) {
+  const [draft, setDraft] = React.useState("");
+
+  function submitDecision(e: React.FormEvent) {
+    e.preventDefault();
+    if (!draft.trim()) return;
+    onAdd(draft.trim());
+    setDraft("");
+  }
+
+  return (
+    <section style={{ backgroundColor: VOID }}>
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
+        <div style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgb(2 3 5)" }}>
+          <div style={{
+            padding: "0.9rem 1.1rem",
+            borderBottom: "1px solid rgba(255,255,255,0.09)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+          }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+              Decision log
+            </span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+              Pending · Executed · Blocked
+            </span>
+          </div>
+
+          <form onSubmit={submitDecision} className="grid gap-3 p-4 md:grid-cols-[1fr_auto]">
+            <input
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="Log the decision made from the first intervention"
+              style={{
+                ...inputStyle,
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                backgroundColor: "rgba(255,255,255,0.025)",
+              }}
+            />
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-2"
+              style={{
+                border: `1px solid ${GOLD}45`,
+                backgroundColor: `${GOLD}10`,
+                color: GOLD,
+                padding: "0.7rem 1rem",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7.5px",
+                letterSpacing: "0.24em",
+                textTransform: "uppercase",
+              }}
+            >
+              Log decision
+              <ArrowRight style={{ width: "11px", height: "11px" }} />
+            </button>
+          </form>
+
+          <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+            {entries.length === 0 ? (
+              <div className="p-4" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+                No decision logged. The environment is not active until the first decision is recorded.
+              </div>
+            ) : entries.map((entry) => (
+              <div key={entry.id} className="grid gap-3 p-4 lg:grid-cols-[150px_1fr_170px] lg:items-start">
+                <div className="flex items-center gap-2" style={{ color: "rgba(255,255,255,0.38)" }}>
+                  <Clock3 style={{ width: "12px", height: "12px" }} />
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                    {formatTimeStamp(entry.createdAt)}
+                  </span>
+                </div>
+                <div>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.74)" }}>
+                    {entry.text}
+                  </p>
+                  {entry.status === "blocked" && (
+                    <input
+                      value={entry.blockReason}
+                      onChange={(event) => onBlockReasonChange(entry.id, event.target.value)}
+                      placeholder="Reason for block is mandatory"
+                      style={{
+                        ...inputStyle,
+                        marginTop: "0.75rem",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7.5px",
+                        borderColor: entry.blockReason.trim() ? "rgba(255,255,255,0.14)" : "rgba(252,165,165,0.45)",
+                        backgroundColor: "rgba(252,165,165,0.035)",
+                      }}
+                    />
+                  )}
+                </div>
+                <select
+                  value={entry.status}
+                  onChange={(event) => onStatusChange(entry.id, event.target.value as DecisionLogStatus)}
+                  style={{
+                    ...inputStyle,
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7.5px",
+                    backgroundColor: "rgb(2 3 5)",
+                  }}
+                >
+                  <option value="pending" style={{ backgroundColor: "rgb(2 3 5)" }}>pending</option>
+                  <option value="executed" style={{ backgroundColor: "rgb(2 3 5)" }}>executed</option>
+                  <option value="blocked" style={{ backgroundColor: "rgb(2 3 5)" }}>blocked</option>
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ExitStates() {
+  const exits = [
+    ["Continue execution", "Wrong exit cost: unresolved dependency keeps compounding."],
+    ["Return to monitoring", "Wrong exit cost: early monitoring hides active intervention failure."],
+    ["Escalate further", "Wrong exit cost: escalation without evidence damages authority."],
+  ];
+
+  return (
+    <section style={{ backgroundColor: VOID }}>
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
+        <div className="grid gap-px md:grid-cols-3" style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.08)" }}>
+          {exits.map(([label, cost]) => (
+            <div key={label} style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.15rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.65rem" }}>
+                {label}
+              </div>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(252,165,165,0.68)" }}>
+                {cost}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p style={{ marginTop: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+          If execution stabilises, move to monitoring.
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -1081,11 +1668,16 @@ export default function StrategyRoomPage({
   const [draftSaved,  setDraftSaved]  = React.useState(false);
   const [thread, setThread] = React.useState<ConstitutionalThread | null>(null);
   const [threadLoaded, setThreadLoaded] = React.useState(false);
+  const [decisionLog, setDecisionLog] = React.useState<DecisionLogEntry[]>([]);
+  const [showAccessTransition, setShowAccessTransition] = React.useState(checkoutConfirmed);
+  const [executionSessionId, setExecutionSessionId] = React.useState<string | null>(null);
+  const [persistError, setPersistError] = React.useState<string | null>(null);
   const hasExecutiveReportingContext = Boolean(thread?.executiveFindings);
 
   // Track entry
   React.useEffect(() => {
     trackStrategyRoomEntry();
+    trackStrategyGateView();
     if (checkoutConfirmed) {
       track("strategy_room_checkout_returned_success", {
         stage: "strategy-room",
@@ -1098,6 +1690,12 @@ export default function StrategyRoomPage({
     setThreadLoaded(true);
   }, []);
 
+  React.useEffect(() => {
+    if (!checkoutConfirmed) return;
+    const timer = window.setTimeout(() => setShowAccessTransition(false), 1200);
+    return () => window.clearTimeout(timer);
+  }, [checkoutConfirmed]);
+
   // Load draft
   React.useEffect(() => {
     try {
@@ -1105,6 +1703,15 @@ export default function StrategyRoomPage({
       if (!raw) return;
       const parsed = JSON.parse(raw) as ConstitutionalIntake;
       setForm({ ...INITIAL_FORM, ...parsed });
+    } catch { /* ignore */ }
+  }, []);
+
+  React.useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(DECISION_LOG_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) setDecisionLog(parsed as DecisionLogEntry[]);
     } catch { /* ignore */ }
   }, []);
 
@@ -1120,6 +1727,12 @@ export default function StrategyRoomPage({
     return () => window.clearTimeout(timer);
   }, [form]);
 
+  React.useEffect(() => {
+    try {
+      window.localStorage.setItem(DECISION_LOG_KEY, JSON.stringify(decisionLog));
+    } catch { /* ignore */ }
+  }, [decisionLog]);
+
   if (!hasPaidAccess) {
     return (
       <Layout
@@ -1133,28 +1746,294 @@ export default function StrategyRoomPage({
           <meta name="robots" content="noindex, nofollow" />
         </Head>
         <main style={{ backgroundColor: VOID, minHeight: "100vh", color: "white" }}>
-          <div className="mx-auto max-w-7xl px-6 py-24 lg:px-12">
-            {checkoutCancelled && (
-              <div
-                className="mb-6 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-5"
+
+          {/* ── SYSTEM POSITION — decision authority gating ── */}
+          <StrategyRoomGate />
+
+          <div className="mx-auto max-w-6xl px-6 lg:px-12">
+            <div className="py-20 lg:py-24">
+
+              {checkoutCancelled && (
+                <div
+                  className="mb-8"
+                  style={{
+                    border: "1px solid rgba(252,165,165,0.18)",
+                    backgroundColor: "rgba(252,165,165,0.04)",
+                    padding: "1rem 1.25rem",
+                  }}
+                >
+                  <div style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.32em",
+                    textTransform: "uppercase",
+                    color: "rgba(252,165,165,0.70)",
+                    marginBottom: "0.45rem",
+                  }}>
+                    Checkout cancelled
+                  </div>
+                  <p style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "0.95rem",
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.45)",
+                  }}>
+                    No payment was taken. Strategy Room remains available when the decision requires intervention.
+                  </p>
+                </div>
+              )}
+
+              {/* ── 1) OPENING ── */}
+              <Eyebrow>Escalation Environment</Eyebrow>
+              <h1
+                style={{
+                  marginTop: "1rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(2.5rem, 6vw, 4rem)",
+                  lineHeight: 0.98,
+                  letterSpacing: "-0.03em",
+                  color: "rgba(255,255,255,0.92)",
+                  maxWidth: "48ch",
+                  fontStyle: "italic",
+                }}
               >
-                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-amber-200/75">
-                  Checkout cancelled
-                </p>
-                <p className="mt-2 text-sm leading-6 text-white/58">
-                  No payment was taken. Strategy Room remains available when the decision requires intervention.
-                </p>
+                This is where decisions are executed under pressure.
+              </h1>
+              <p
+                style={{
+                  marginTop: "1rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "1rem",
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.48)",
+                  maxWidth: "50ch",
+                }}
+              >
+                Entry is governed by evidence, not request.
+              </p>
+
+              <GoldRule soft />
+
+              {/* ── 3) WHAT THIS IS ── */}
+              <div className="mt-10">
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                  marginBottom: "1rem",
+                }}>
+                  Execution value
+                </div>
+                <div className="grid gap-3 md:grid-cols-2" style={{ maxWidth: "44rem" }}>
+                  {[
+                    "Decision compression",
+                    "Decision sequencing",
+                    "Constraint navigation",
+                    "Authority clarification",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        backgroundColor: "rgba(255,255,255,0.018)",
+                        padding: "0.75rem 1rem",
+                      }}
+                    >
+                      <span style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.95rem",
+                        color: "rgba(255,255,255,0.58)",
+                      }}>
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
-            <StrategyRoomConversionBridge
-              price={395}
-              checkoutPriceCode="strategy_room"
-              originPath="/strategy-room"
-              ctaHref="/strategy-room"
-              primaryCtaLabel="Continue to Strategy Room criteria"
-              title="Strategy Room is for decisions with real consequence."
-              description="Executive Reporting gives the interpretation. Strategy Room exists when the decision now requires governed intervention, constraint removal, and action logic. Not for exploratory use."
-            />
+
+              {/* ── 4) WHAT THIS IS NOT ── */}
+              <div className="mt-8">
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                  color: "rgba(252,165,165,0.45)",
+                  marginBottom: "1rem",
+                }}>
+                  Exclusions
+                </div>
+                <div className="space-y-2" style={{ maxWidth: "44rem" }}>
+                  {[
+                    "No advisory dependency",
+                    "No exploratory drift",
+                    "No passive reporting surface",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.95rem",
+                        lineHeight: 1.55,
+                        color: "rgba(255,255,255,0.38)",
+                        paddingLeft: "0.85rem",
+                        position: "relative",
+                      }}
+                    >
+                      <span style={{
+                        position: "absolute",
+                        left: 0,
+                        color: "rgba(252,165,165,0.35)",
+                      }}>
+                        &mdash;
+                      </span>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <GoldRule soft />
+
+              {/* ── 5) ENTRY CONDITIONS ── */}
+              <div className="mt-10">
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                  marginBottom: "1rem",
+                }}>
+                  You should not proceed unless
+                </div>
+                <div className="space-y-3" style={{ maxWidth: "44rem" }}>
+                  {[
+                    "Evidence has been established",
+                    "Consequence is defined",
+                    "Escalation is justified",
+                  ].map((condition) => (
+                    <div
+                      key={condition}
+                      className="flex items-center gap-3"
+                    >
+                      <CheckSquare style={{ width: "12px", height: "12px", color: `${GOLD}60`, flexShrink: 0 }} />
+                      <span style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.95rem",
+                        color: "rgba(255,255,255,0.55)",
+                      }}>
+                        {condition}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── 6) OUTCOME CLARITY ── */}
+              <div className="mt-10">
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                  marginBottom: "1rem",
+                }}>
+                  What changes
+                </div>
+                <div className="space-y-2" style={{ maxWidth: "44rem" }}>
+                  {[
+                    "Decisions are made",
+                    "Sequence is enforced",
+                    "Drift is removed",
+                  ].map((outcome) => (
+                    <div
+                      key={outcome}
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.95rem",
+                        lineHeight: 1.55,
+                        color: "rgba(255,255,255,0.52)",
+                      }}
+                    >
+                      {outcome}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <GoldRule soft />
+
+              {/* ── 7) COMMERCIAL FRAMING ── */}
+              <div className="mt-10">
+                <div
+                  style={{
+                    border: `1px solid ${GOLD}22`,
+                    backgroundColor: `${GOLD}06`,
+                    padding: "1.5rem",
+                    maxWidth: "44rem",
+                  }}
+                >
+                  <div style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                    color: `${GOLD}90`,
+                  }}>
+                    &pound;395 &mdash; intervention engagement
+                  </div>
+                  <p
+                    style={{
+                      marginTop: "0.65rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "0.95rem",
+                      lineHeight: 1.6,
+                      color: "rgba(255,255,255,0.42)",
+                    }}
+                  >
+                    Entry subject to system condition.
+                  </p>
+                </div>
+              </div>
+
+              {/* ── 8) CTA ── */}
+              <div className="mt-8">
+                <StrategyRoomConversionBridge
+                  price={395}
+                  checkoutPriceCode="strategy_room"
+                  originPath="/strategy-room"
+                  ctaHref="/strategy-room"
+                  primaryCtaLabel="Enter Strategy Room"
+                  title=""
+                  description=""
+                />
+              </div>
+
+              <div
+                className="mt-6"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.18)",
+                }}
+              >
+                Entry is gated by evidence, not request
+              </div>
+            </div>
           </div>
         </main>
       </Layout>
@@ -1175,7 +2054,83 @@ export default function StrategyRoomPage({
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }
 
+  function addDecisionLogEntry(text: string) {
+    const entry: DecisionLogEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      text,
+      status: "pending",
+      blockReason: "",
+      createdAt: new Date().toISOString(),
+    };
+    setDecisionLog((prev) => [entry, ...prev]);
+    setPersistError(null);
+    track("strategy_room_decision_logged", {
+      has_canonical: Boolean(canonical),
+      entry_count: decisionLog.length + 1,
+    });
+
+    // Server persistence (non-blocking on UI, but explicit error if fails)
+    if (executionSessionId) {
+      fetch(`/api/strategy-room/execution/${executionSessionId}/decisions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: text }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.ok && data.decision?.id) {
+            // Update local entry with server ID for future status changes
+            setDecisionLog((prev) =>
+              prev.map((e) => (e.id === entry.id ? { ...e, id: data.decision.id } : e)),
+            );
+          } else {
+            setPersistError("Decision logged locally but server persistence failed. Data may not survive session.");
+          }
+        })
+        .catch(() => {
+          setPersistError("Decision logged locally but server persistence failed. Data may not survive session.");
+        });
+    }
+  }
+
+  function updateDecisionLogStatus(id: string, status: DecisionLogStatus) {
+    setDecisionLog((prev) =>
+      prev.map((entry) =>
+        entry.id === id
+          ? {
+              ...entry,
+              status,
+              blockReason: status === "blocked" ? entry.blockReason : "",
+            }
+          : entry,
+      ),
+    );
+    setPersistError(null);
+    track("strategy_room_decision_status_changed", { status });
+
+    // Server persistence
+    if (executionSessionId) {
+      fetch(`/api/strategy-room/execution/${executionSessionId}/decisions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decisionId: id, status }),
+      }).catch(() => {
+        setPersistError("Status update saved locally but server sync failed.");
+      });
+    }
+  }
+
+  function updateDecisionBlockReason(id: string, reason: string) {
+    setDecisionLog((prev) =>
+      prev.map((entry) =>
+        entry.id === id ? { ...entry, blockReason: reason } : entry,
+      ),
+    );
+  }
+
   async function initDecisionSession(intake: ConstitutionalIntake) {
+    trackStrategyAttempt();
+
     // Include cross-stage tension thread if available
     let tensionThread = null;
     try {
@@ -1262,6 +2217,24 @@ export default function StrategyRoomPage({
       setCanonical(nextCanonical);
       trackStrategyRoomConversion();
       await logRecommendationImpressions(nextSessionKey, nextCanonical);
+
+      // Create server-persisted execution session for decision log
+      try {
+        const execRes = await fetch("/api/strategy-room/execution", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            strategyRoomSessionId: nextSessionKey,
+            email: form.email || null,
+            canonicalSnapshot: nextCanonical,
+          }),
+        });
+        const execData = await execRes.json();
+        if (execData.ok && execData.id) {
+          setExecutionSessionId(execData.id);
+        }
+      } catch { /* execution session creation is best-effort */ }
+
       try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -1300,10 +2273,40 @@ export default function StrategyRoomPage({
     await trackFollowup({ sessionKey, routeAfter: "STRATEGY", readinessTierAfter: posture.readinessTier, authorityTypeAfter: posture.authorityType, clarityDelta: 0.2, authorityDelta: 0.1, convertedAfterGuidance: true, metadata: { action: "strategy_path_accepted", constitutionalSource: true }, canonical });
   }
 
+  if (hasPaidAccess && showAccessTransition) {
+    return (
+      <Layout
+        title="Strategy Room | Abraham of London"
+        description="A governed execution environment for decisions that cannot remain theoretical."
+        canonicalUrl="/strategy-room"
+        fullWidth
+        headerTransparent
+      >
+        <main style={{ backgroundColor: VOID, minHeight: "100vh", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{
+            border: `1px solid ${GOLD}28`,
+            backgroundColor: "rgb(2 3 5)",
+            padding: "1.2rem 1.4rem",
+          }}>
+            <div style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.30em",
+              textTransform: "uppercase",
+              color: `${GOLD}AA`,
+            }}>
+              Access granted. Execution environment ready.
+            </div>
+          </div>
+        </main>
+      </Layout>
+    );
+  }
+
   return (
     <Layout
       title="Strategy Room | Abraham of London"
-      description="Governed constitutional intelligence for founders, executives, and boards. Not a booking form — a qualified advisory gate."
+      description="A governed execution environment for decisions that cannot remain theoretical."
       canonicalUrl="/strategy-room"
       fullWidth
       headerTransparent
@@ -1354,6 +2357,37 @@ export default function StrategyRoomPage({
         {/* ── STATE: VERDICT ─────────────────────────────────────────────── */}
         {!isSubmitting && canonical && (
           <>
+            <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
+            <FirstActionPrompt />
+            <ExecutionDecisionFrame canonical={canonical} thread={thread} />
+            <InterventionStack canonical={canonical} />
+            <ConstraintMap canonical={canonical} />
+            <DecisionLog
+              entries={decisionLog}
+              onAdd={addDecisionLogEntry}
+              onStatusChange={updateDecisionLogStatus}
+              onBlockReasonChange={updateDecisionBlockReason}
+            />
+            {persistError && (
+              <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+                <div style={{
+                  border: "1px solid rgba(252,165,165,0.20)",
+                  backgroundColor: "rgba(252,165,165,0.04)",
+                  padding: "0.65rem 1rem",
+                }}>
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.24em",
+                    textTransform: "uppercase",
+                    color: "rgba(252,165,165,0.70)",
+                  }}>
+                    {persistError}
+                  </span>
+                </div>
+              </div>
+            )}
+            <ExitStates />
             <Verdict
               canonical={canonical}
               onMarkDiagnosticStarted={handleMarkDiagnosticStarted}
@@ -1368,192 +2402,18 @@ export default function StrategyRoomPage({
           <>
             {/* ── SYSTEM POSITION — decision authority gating ── */}
             <StrategyRoomGate />
-
-            <section>
-              <div className="mx-auto max-w-6xl px-6 lg:px-12">
-                <div className="py-20 lg:py-24">
-                  <Eyebrow>STRATEGY ROOM · QUALIFIED INTERVENTION ENTRY</Eyebrow>
-                  <h1
-                    style={{
-                      marginTop: "1rem",
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "clamp(2.5rem, 6vw, 4rem)",
-                      lineHeight: 0.98,
-                      letterSpacing: "-0.03em",
-                      color: "rgba(255,255,255,0.92)",
-                      maxWidth: "48ch",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Only when consequence is real.
-                  </h1>
-                  <p
-                    style={{
-                      marginTop: "1rem",
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "1rem",
-                      lineHeight: 1.6,
-                      color: "rgba(255,255,255,0.48)",
-                      maxWidth: "56ch",
-                    }}
-                  >
-                    Strategy Room is the escalation layer for live decisions under
-                    material consequence. It turns a constitutional reading into
-                    governed intervention logic. Not exploratory. Not theoretical.
-                  </p>
-                  {hasExecutiveReportingContext && (
-                    <div
-                      className="mt-5 max-w-3xl"
-                      style={{
-                        border: `1px solid ${GOLD}22`,
-                        backgroundColor: `${GOLD}07`,
-                        padding: "1rem 1.25rem",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
-                          letterSpacing: "0.28em",
-                          textTransform: "uppercase",
-                          color: `${GOLD}A0`,
-                          marginBottom: "0.45rem",
-                        }}
-                      >
-                        Executive Reporting handoff
-                      </div>
-                      <p
-                        style={{
-                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                          fontWeight: 300,
-                          fontSize: "0.98rem",
-                          lineHeight: 1.6,
-                          color: "rgba(255,255,255,0.62)",
-                        }}
-                      >
-                        Your Executive Reporting result suggests this now requires intervention:
-                        {` ${thread?.executiveFindings?.route ?? "STRATEGY"} · ${thread?.executiveFindings?.readinessTier ?? "decision-ready"}`}.
-                      </p>
-                    </div>
-                  )}
-                  {checkoutConfirmed && (
-                    <div
-                      className="mt-5 max-w-3xl"
-                      style={{
-                        border: `1px solid ${GOLD}22`,
-                        backgroundColor: `${GOLD}07`,
-                        padding: "1rem 1.25rem",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
-                          letterSpacing: "0.28em",
-                          textTransform: "uppercase",
-                          color: `${GOLD}A0`,
-                        }}
-                      >
-                        Strategy Room access confirmed · continue to intervention intake
-                      </div>
-                    </div>
-                  )}
-                  {thread && (
-                    <div className="mt-6 max-w-3xl">
-                      <InheritedThreadContext thread={thread} title="Inherited journey context" />
-                    </div>
-                  )}
-                  {threadLoaded && !thread && (
-                    <div
-                      className="mt-6 grid gap-4 md:grid-cols-2"
-                      style={{ maxWidth: "56rem" }}
-                    >
-                      <div
-                        style={{
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          backgroundColor: "rgba(255,255,255,0.018)",
-                          padding: "1rem 1.25rem",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7px",
-                            letterSpacing: "0.28em",
-                            textTransform: "uppercase",
-                            color: `${GOLD}A0`,
-                            marginBottom: "0.55rem",
-                          }}
-                        >
-                          You are entering at the intervention layer
-                        </div>
-                        <p
-                          style={{
-                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                            fontWeight: 300,
-                            fontSize: "0.96rem",
-                            lineHeight: 1.6,
-                            color: "rgba(255,255,255,0.52)",
-                          }}
-                        >
-                          This surface is designed for live institutional decisions. If you have
-                          not completed the diagnostic ladder, the system will still assess your
-                          situation, but you are entering without accumulated stage context.
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          backgroundColor: "rgba(255,255,255,0.018)",
-                          padding: "1rem 1.25rem",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7px",
-                            letterSpacing: "0.28em",
-                            textTransform: "uppercase",
-                            color: "rgba(255,255,255,0.34)",
-                            marginBottom: "0.55rem",
-                          }}
-                        >
-                          Best for
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                            fontWeight: 300,
-                            fontSize: "0.94rem",
-                            lineHeight: 1.7,
-                            color: "rgba(255,255,255,0.48)",
-                          }}
-                        >
-                          <div>• when the decision is already real</div>
-                          <div>• when cost of delay is material</div>
-                          <div>• when generic advice is no longer enough</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <RouteStrip />
-                  <div
-                    className="mt-8"
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.16em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.28)",
-                    }}
-                  >
-                    Required: Strategic context · Authority signal · Problem articulation · £395 entry
-                  </div>
-                </div>
-              </div>
-            </section>
+            <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
+            <FirstActionPrompt />
+            <ExecutionDecisionFrame canonical={canonical} thread={thread} />
+            <InterventionStack canonical={canonical} />
+            <ConstraintMap canonical={canonical} />
+            <DecisionLog
+              entries={decisionLog}
+              onAdd={addDecisionLogEntry}
+              onStatusChange={updateDecisionLogStatus}
+              onBlockReasonChange={updateDecisionBlockReason}
+            />
+            <ExitStates />
             <IntakeForm
               form={form}
               onChange={handleChange}

@@ -10,16 +10,26 @@ export type PricingDecision = {
   originalPrice: number;
   discounted: boolean;
   reason: string;
+  currency?: string;
 };
 
 export const BASE_PRICING = {
-  worksheet: 0,
-  framework: 19,
-  brief: 29,
+  worksheet: 19,
+  framework: 29,
   playbook: 49,
+  brief: 29,
   report: 79,
   toolkit: 129,
+  case_evidence: 0,
 } as const;
+
+export type AssetPricingOverride = {
+  slug: string;
+  price: number;
+  originalPrice?: number | null;
+  currency?: string;
+  rationale?: string;
+};
 
 function free(reason: string): PricingDecision {
   return {
@@ -44,12 +54,22 @@ function discount(
   };
 }
 
+function applyOverride(override: AssetPricingOverride): PricingDecision {
+  return {
+    price: override.price,
+    originalPrice: override.originalPrice ?? override.price,
+    discounted:
+      typeof override.originalPrice === "number" &&
+      override.originalPrice > override.price,
+    reason: override.rationale || "Curated asset pricing override",
+    currency: override.currency || "gbp",
+  };
+}
+
 export function resolveAssetPricing(
   user: UserContext | null,
   asset: PdfAssetIdentityResolved,
 ): PricingDecision {
-  const basePrice = BASE_PRICING[asset.category];
-
   if (asset.access === "public") {
     return free("Public asset");
   }
@@ -58,9 +78,14 @@ export function resolveAssetPricing(
     return free("Asset entitlement applied");
   }
 
-  if (basePrice === 0) {
-    return free("Base price is free");
+  const override = (asset as PdfAssetIdentityResolved & {
+    pricingOverride?: AssetPricingOverride | null;
+  }).pricingOverride;
+  if (override && override.slug.trim().toLowerCase() === asset.slug.trim().toLowerCase()) {
+    return applyOverride(override);
   }
+
+  const basePrice = BASE_PRICING[asset.category];
 
   if (hasAccess(user?.tier, "inner_circle")) {
     if (asset.category === "framework" || asset.category === "brief") {

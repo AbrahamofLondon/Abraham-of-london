@@ -119,11 +119,11 @@ function getEditionLabel(item: PremiumContentItem): string {
 }
 
 function getPrimaryLaunchHref(item: PremiumContentItem): string {
-  return (
-    item.metadata?.surfaceHref ||
-    item.metadata?.directDownloadHref ||
-    `/artifacts/${item.id}`
-  );
+  if (item.metadata?.directDownloadHref) {
+    return `/downloads/${item.id}`;
+  }
+
+  return item.metadata?.surfaceHref || `/artifacts/${item.id}`;
 }
 
 export default function ArtifactDetailPage({
@@ -176,10 +176,6 @@ export default function ArtifactDetailPage({
     : item.asset.mimeType?.includes("presentationml")
       ? "Controlled distribution"
       : "Open circulation";
-
-  const directDownloadHref =
-    item.metadata?.directDownloadHref ||
-    `/api/premium/content/download/${item.id}`;
 
   return (
     <Layout>
@@ -405,9 +401,11 @@ export default function ArtifactDetailPage({
                       )}
                     </div>
 
-                    <Link
-                      href={directDownloadHref}
-                      className="inline-flex w-full items-center justify-center rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.04]"
+                    <PremiumAssetLaunchButton
+                      contentId={item.id}
+                      fallbackHref={getPrimaryLaunchHref(item)}
+                      variant="secondary"
+                      className="w-full justify-center"
                     >
                       {formatLabel === "PowerPoint" ? (
                         <Presentation className="mr-2 h-4 w-4 text-[#C9A96A]" />
@@ -415,7 +413,7 @@ export default function ArtifactDetailPage({
                         <Scale className="mr-2 h-4 w-4 text-[#C9A96A]" />
                       )}
                       Download {formatLabel}
-                    </Link>
+                    </PremiumAssetLaunchButton>
                   </div>
                 </div>
 

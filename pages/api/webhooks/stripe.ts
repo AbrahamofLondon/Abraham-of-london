@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { auditLogger } from "@/lib/audit/audit-logger";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
+import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
@@ -136,6 +137,26 @@ export default async function handler(
         },
         severity: "info",
       });
+
+      const paidSlug = session.metadata?.slug || session.metadata?.productCode;
+      if (paidSlug) {
+        const verified = await ensureEntitlementAfterPayment({
+          checkoutSessionId: session.id,
+          slug: paidSlug,
+          userId,
+          email: userEmail,
+        });
+
+        if (!verified.ok || !verified.entitlement?.granted) {
+          console.error("[STRIPE_WEBHOOK_ENTITLEMENT_SYNC_FAILED]", {
+            sessionId: session.id,
+            userId,
+            email: userEmail,
+            slug: paidSlug,
+          });
+          return res.status(500).json({ error: "Entitlement sync failed" });
+        }
+      }
     }
 
     if (event.type === "customer.subscription.deleted") {

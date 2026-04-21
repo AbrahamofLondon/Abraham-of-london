@@ -1,0 +1,613 @@
+/* pages/strategy-room/session/[id].tsx
+   STRATEGY ROOM EXECUTION SURFACE — the real product
+   Design: darker than rest of site, tighter spacing, less explanation, more structure
+   Typography: JetBrains Mono data · Cormorant Garamond headings (weight 300)
+*/
+
+import * as React from "react";
+import type { GetServerSideProps } from "next";
+import Head from "next/head";
+import Link from "next/link";
+import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } from "lucide-react";
+
+import Layout from "@/components/Layout";
+import { prisma } from "@/lib/prisma.server";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────────────────────────────
+
+type InterventionStep = {
+  order: number;
+  action: string;
+  intent: string;
+  expectedEffect: string;
+  riskIfIgnored: string;
+  dependency?: number;
+  urgency: "immediate" | "short_term" | "structural";
+};
+
+type ConstraintMap = {
+  authorityGaps: string[];
+  resourceConstraints: string[];
+  stakeholderResistance: string[];
+};
+
+type DecisionLog = {
+  id: string;
+  decision: string;
+  status: "pending" | "executed" | "blocked";
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type SessionData = {
+  id: string;
+  sessionKey: string;
+  directive: string | null;
+  escalationLevel: string | null;
+  conditionSummary: string | null;
+  coreProblem: string | null;
+  decisionQuestion: string | null;
+  constraints: string[];
+  exposureLevel: string | null;
+  interventionStack: InterventionStep[];
+  constraintMap: ConstraintMap | null;
+  status: string;
+  decisions: DecisionLog[];
+  createdAt: string;
+};
+
+type PageProps = {
+  session: SessionData | null;
+  error?: string;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS — darker than rest of site
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD = "#C9A96E";
+const DEEP = "rgb(2 2 3)";
+const AMBER = "#F59E0B";
+
+const mono: React.CSSProperties = {
+  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  fontSize: "7.5px",
+  letterSpacing: "0.28em",
+  textTransform: "uppercase",
+};
+
+const serif: React.CSSProperties = {
+  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+  fontWeight: 300,
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIMITIVES
+// ─────────────────────────────────────────────────────────────────────────────
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="h-4 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+      <span style={{ ...mono, fontSize: "7px", color: `${GOLD}90` }}>{children}</span>
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.24)", marginBottom: "0.65rem" }}>
+      {children}
+    </div>
+  );
+}
+
+function urgencyColor(u: string): string {
+  if (u === "immediate") return "rgba(252,165,165,0.70)";
+  if (u === "short_term") return "rgba(253,186,116,0.70)";
+  return "rgba(255,255,255,0.40)";
+}
+
+function statusIcon(s: string) {
+  if (s === "executed") return <CheckCircle style={{ width: 12, height: 12, color: "rgba(110,231,183,0.70)" }} />;
+  if (s === "blocked") return <XCircle style={{ width: 12, height: 12, color: "rgba(252,165,165,0.70)" }} />;
+  return <Clock style={{ width: 12, height: 12, color: "rgba(255,255,255,0.35)" }} />;
+}
+
+function statusColor(s: string): string {
+  if (s === "executed") return "rgba(110,231,183,0.70)";
+  if (s === "blocked") return "rgba(252,165,165,0.70)";
+  return "rgba(255,255,255,0.45)";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+export default function StrategyRoomSessionPage({ session: initial, error }: PageProps) {
+  const [session, setSession] = React.useState(initial);
+  const [newDecision, setNewDecision] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [localError, setLocalError] = React.useState("");
+
+  if (error || !session) {
+    return (
+      <Layout title="Strategy Room Session | Abraham of London" fullWidth headerTransparent>
+        <Head><meta name="robots" content="noindex, nofollow" /></Head>
+        <div style={{ backgroundColor: DEEP, minHeight: "100vh", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div>
+            <div style={{ ...mono, color: "rgba(252,165,165,0.70)" }}>Session not found</div>
+            <Link href="/strategy-room" style={{ ...mono, color: AMBER, marginTop: "1rem", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+              Return to Strategy Room <ArrowRight style={{ width: 10, height: 10 }} />
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  async function logDecision() {
+    if (!newDecision.trim() || !session) return;
+    setSubmitting(true);
+    setLocalError("");
+    try {
+      const res = await fetch(`/api/strategy-room/execution/${session.id}/decisions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: newDecision.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to log decision");
+      setSession((prev) => prev ? { ...prev, decisions: [...prev.decisions, data.decision] } : prev);
+      setNewDecision("");
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : "Error logging decision");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function updateDecisionStatus(decisionId: string, status: "executed" | "blocked") {
+    if (!session) return;
+    try {
+      const res = await fetch(`/api/strategy-room/execution/${session.id}/decisions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decisionId, status }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setSession((prev) => prev ? {
+        ...prev,
+        decisions: prev.decisions.map((d) => d.id === decisionId ? { ...d, status } : d),
+      } : prev);
+    } catch {
+      // Silent — UI will reflect current state
+    }
+  }
+
+  async function updateSessionStatus(status: "completed" | "monitoring" | "escalated") {
+    if (!session) return;
+    try {
+      await fetch(`/api/strategy-room/execution/${session.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      setSession((prev) => prev ? { ...prev, status } : prev);
+    } catch {
+      // Silent
+    }
+  }
+
+  const interventions: InterventionStep[] = session.interventionStack ?? [];
+  const constraints: ConstraintMap | null = session.constraintMap;
+  const decisions: DecisionLog[] = session.decisions ?? [];
+  const isActive = session.status === "active";
+
+  return (
+    <Layout title="Strategy Room Session | Abraham of London" fullWidth headerTransparent>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
+
+      <div style={{ backgroundColor: DEEP, minHeight: "100vh", color: "white" }}>
+        <div style={{ maxWidth: "56rem", margin: "0 auto", padding: "1.5rem 1.25rem 3rem" }}>
+
+          {/* ── 1. ENTRY STATE — immediate grounding ── */}
+          <section style={{ paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+            <Eyebrow>Execution Session</Eyebrow>
+            <div style={{ marginTop: "0.75rem", display: "grid", gap: "0.5rem", gridTemplateColumns: "repeat(3, 1fr)" }}>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
+                <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Directive</div>
+                <div style={{ ...mono, fontSize: "9px", marginTop: "0.25rem", color: session.directive === "allow" ? "rgba(110,231,183,0.80)" : session.directive === "block" ? "rgba(252,165,165,0.80)" : `${GOLD}CC` }}>
+                  {session.directive ?? "allow"}
+                </div>
+              </div>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
+                <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Escalation</div>
+                <div style={{ ...mono, fontSize: "9px", marginTop: "0.25rem", color: "rgba(255,255,255,0.65)" }}>
+                  {session.escalationLevel ?? "standard"}
+                </div>
+              </div>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
+                <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Status</div>
+                <div style={{ ...mono, fontSize: "9px", marginTop: "0.25rem", color: isActive ? GOLD : "rgba(255,255,255,0.45)" }}>
+                  {session.status}
+                </div>
+              </div>
+            </div>
+            {session.conditionSummary && (
+              <p style={{ ...serif, marginTop: "0.75rem", fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)", fontStyle: "italic" }}>
+                {session.conditionSummary}
+              </p>
+            )}
+          </section>
+
+          {/* ── 2. DECISION FRAME ── */}
+          <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+            <SectionLabel>Decision Frame</SectionLabel>
+            <div style={{ display: "grid", gap: "0.5rem" }}>
+              {session.coreProblem && (
+                <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
+                  <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Core Problem</div>
+                  <div style={{ ...serif, marginTop: "0.3rem", fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.72)" }}>
+                    {session.coreProblem}
+                  </div>
+                </div>
+              )}
+              {session.decisionQuestion && (
+                <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "0.65rem 0.85rem" }}>
+                  <div style={{ ...mono, fontSize: "6px", color: `${GOLD}80` }}>Decision Question</div>
+                  <div style={{ ...serif, marginTop: "0.3rem", fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>
+                    {session.decisionQuestion}
+                  </div>
+                </div>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+                {session.constraints.length > 0 && (
+                  <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
+                    <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Constraints</div>
+                    {session.constraints.map((c, i) => (
+                      <div key={i} style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.48)", marginTop: "0.2rem" }}>{c}</div>
+                    ))}
+                  </div>
+                )}
+                {session.exposureLevel && (
+                  <div style={{ border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "rgba(252,165,165,0.03)", padding: "0.65rem 0.85rem" }}>
+                    <div style={{ ...mono, fontSize: "6px", color: "rgba(252,165,165,0.55)" }}>Exposure Level</div>
+                    <div style={{ ...mono, fontSize: "10px", marginTop: "0.3rem", color: "rgba(252,165,165,0.80)" }}>
+                      {session.exposureLevel}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* ── 3. INTERVENTION STACK ── */}
+          {interventions.length > 0 && (
+            <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <SectionLabel>Intervention Stack</SectionLabel>
+              <div style={{ display: "grid", gap: "0.4rem" }}>
+                {interventions.sort((a, b) => a.order - b.order).map((step) => (
+                  <div
+                    key={step.order}
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      backgroundColor: "rgba(255,255,255,0.015)",
+                      padding: "0.75rem 0.85rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
+                      <span style={{ ...mono, fontSize: "8px", color: `${GOLD}80` }}>
+                        {String(step.order).padStart(2, "0")}
+                      </span>
+                      <span style={{ ...mono, fontSize: "7px", color: urgencyColor(step.urgency) }}>
+                        {step.urgency}
+                      </span>
+                      {step.dependency && (
+                        <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>
+                          depends on {String(step.dependency).padStart(2, "0")}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.45, color: "rgba(255,255,255,0.72)" }}>
+                      {step.action}
+                    </div>
+                    <div style={{ marginTop: "0.4rem", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem" }}>
+                      <div>
+                        <div style={{ ...mono, fontSize: "5.5px", color: "rgba(255,255,255,0.18)" }}>Intent</div>
+                        <div style={{ ...serif, fontSize: "0.8rem", lineHeight: 1.45, color: "rgba(255,255,255,0.42)" }}>{step.intent}</div>
+                      </div>
+                      <div>
+                        <div style={{ ...mono, fontSize: "5.5px", color: "rgba(255,255,255,0.18)" }}>Expected Effect</div>
+                        <div style={{ ...serif, fontSize: "0.8rem", lineHeight: 1.45, color: "rgba(255,255,255,0.42)" }}>{step.expectedEffect}</div>
+                      </div>
+                      <div>
+                        <div style={{ ...mono, fontSize: "5.5px", color: "rgba(252,165,165,0.35)" }}>Risk if Ignored</div>
+                        <div style={{ ...serif, fontSize: "0.8rem", lineHeight: 1.45, color: "rgba(252,165,165,0.55)" }}>{step.riskIfIgnored}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── 5. CONSTRAINT MAPPING ── */}
+          {constraints && (
+            <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <SectionLabel>Constraint Map</SectionLabel>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem" }}>
+                {[
+                  { label: "Authority Gaps", items: constraints.authorityGaps, color: "rgba(252,165,165,0.55)" },
+                  { label: "Resource Constraints", items: constraints.resourceConstraints, color: "rgba(253,186,116,0.55)" },
+                  { label: "Stakeholder Resistance", items: constraints.stakeholderResistance, color: "rgba(255,255,255,0.40)" },
+                ].map((col) => (
+                  <div key={col.label} style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
+                    <div style={{ ...mono, fontSize: "6px", color: col.color }}>{col.label}</div>
+                    {col.items.length === 0 ? (
+                      <div style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.22)", marginTop: "0.25rem" }}>None identified</div>
+                    ) : (
+                      col.items.map((item, i) => (
+                        <div key={i} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.48)", marginTop: "0.2rem" }}>{item}</div>
+                      ))
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── 6. DECISION LOG ── */}
+          <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+            <SectionLabel>Decision Log</SectionLabel>
+
+            {decisions.length === 0 && (
+              <div style={{ ...serif, fontSize: "0.88rem", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
+                No decisions logged. Record decisions as they are made.
+              </div>
+            )}
+
+            {decisions.map((d) => (
+              <div
+                key={d.id}
+                style={{
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  backgroundColor: "rgba(255,255,255,0.015)",
+                  padding: "0.65rem 0.85rem",
+                  marginBottom: "0.35rem",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                    {statusIcon(d.status)}
+                    <span style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.45, color: "rgba(255,255,255,0.72)" }}>{d.decision}</span>
+                  </div>
+                  <span style={{ ...mono, fontSize: "7px", color: statusColor(d.status) }}>{d.status}</span>
+                </div>
+                {d.notes && (
+                  <p style={{ ...serif, fontSize: "0.8rem", color: "rgba(255,255,255,0.35)", marginTop: "0.25rem", fontStyle: "italic" }}>{d.notes}</p>
+                )}
+                {isActive && d.status === "pending" && (
+                  <div style={{ marginTop: "0.4rem", display: "flex", gap: "0.5rem" }}>
+                    <button
+                      onClick={() => updateDecisionStatus(d.id, "executed")}
+                      style={{
+                        ...mono,
+                        fontSize: "6.5px",
+                        background: "none",
+                        border: "1px solid rgba(110,231,183,0.25)",
+                        color: "rgba(110,231,183,0.70)",
+                        padding: "4px 10px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Mark executed
+                    </button>
+                    <button
+                      onClick={() => updateDecisionStatus(d.id, "blocked")}
+                      style={{
+                        ...mono,
+                        fontSize: "6.5px",
+                        background: "none",
+                        border: "1px solid rgba(252,165,165,0.25)",
+                        color: "rgba(252,165,165,0.70)",
+                        padding: "4px 10px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Mark blocked
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* New decision input */}
+            {isActive && (
+              <div style={{ marginTop: "0.75rem" }}>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <input
+                    value={newDecision}
+                    onChange={(e) => setNewDecision(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") logDecision(); }}
+                    placeholder="Record a decision..."
+                    style={{
+                      flex: 1,
+                      backgroundColor: "transparent",
+                      border: "1px solid rgba(255,255,255,0.09)",
+                      outline: "none",
+                      padding: "8px 10px",
+                      ...serif,
+                      fontSize: "0.9rem",
+                      color: "rgba(255,255,255,0.75)",
+                    }}
+                  />
+                  <button
+                    onClick={logDecision}
+                    disabled={submitting || !newDecision.trim()}
+                    style={{
+                      ...mono,
+                      fontSize: "7px",
+                      background: "none",
+                      border: `1px solid ${GOLD}35`,
+                      color: `${GOLD}BB`,
+                      padding: "8px 14px",
+                      cursor: submitting ? "not-allowed" : "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                    }}
+                  >
+                    <Plus style={{ width: 10, height: 10 }} />
+                    Log
+                  </button>
+                </div>
+                {localError && (
+                  <div style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.70)", marginTop: "0.35rem" }}>
+                    {localError}
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
+          {/* ── 8. EXIT STATES ── */}
+          <section style={{ padding: "1.25rem 0" }}>
+            <SectionLabel>Session Control</SectionLabel>
+            {isActive ? (
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => updateSessionStatus("completed")}
+                  style={{
+                    ...mono,
+                    fontSize: "7.5px",
+                    background: "none",
+                    border: `1px solid ${GOLD}35`,
+                    color: `${GOLD}BB`,
+                    padding: "8px 16px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                  }}
+                >
+                  <CheckCircle style={{ width: 10, height: 10 }} />
+                  Continue execution
+                </button>
+                <button
+                  onClick={() => updateSessionStatus("monitoring")}
+                  style={{
+                    ...mono,
+                    fontSize: "7.5px",
+                    background: "none",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    color: "rgba(255,255,255,0.50)",
+                    padding: "8px 16px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                  }}
+                >
+                  Return to monitoring
+                </button>
+                <button
+                  onClick={() => updateSessionStatus("escalated")}
+                  disabled
+                  title="Escalation capability — future release"
+                  style={{
+                    ...mono,
+                    fontSize: "7.5px",
+                    background: "none",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    color: "rgba(255,255,255,0.22)",
+                    padding: "8px 16px",
+                    cursor: "not-allowed",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                  }}
+                >
+                  <Lock style={{ width: 9, height: 9 }} />
+                  Escalate further
+                </button>
+              </div>
+            ) : (
+              <div style={{ ...mono, fontSize: "8px", color: statusColor(session.status) }}>
+                Session {session.status} &middot;{" "}
+                <Link href="/strategy-room" style={{ color: AMBER, textDecoration: "underline" }}>
+                  Return to Strategy Room
+                </Link>
+              </div>
+            )}
+          </section>
+
+          {/* Footer */}
+          <div style={{ paddingTop: "1.5rem" }}>
+            <Link
+              href="/strategy-room"
+              style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.22)", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}
+            >
+              Back to Strategy Room
+            </Link>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SERVER SIDE
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => {
+  const id = ctx.params?.id;
+  if (!id || typeof id !== "string") {
+    return { props: { session: null, error: "Invalid session ID" } };
+  }
+
+  try {
+    const raw = await prisma.strategyRoomExecutionSession.findUnique({
+      where: { id },
+      include: { decisions: { orderBy: { createdAt: "asc" } } },
+    });
+
+    if (!raw) {
+      return { props: { session: null, error: "Session not found" } };
+    }
+
+    const session: SessionData = {
+      id: raw.id,
+      sessionKey: raw.sessionKey,
+      directive: raw.directive,
+      escalationLevel: raw.escalationLevel,
+      conditionSummary: raw.conditionSummary,
+      coreProblem: raw.coreProblem,
+      decisionQuestion: raw.decisionQuestion,
+      constraints: raw.constraints ? JSON.parse(raw.constraints) : [],
+      exposureLevel: raw.exposureLevel,
+      interventionStack: raw.interventionStack ? JSON.parse(raw.interventionStack) : [],
+      constraintMap: raw.constraintMap ? JSON.parse(raw.constraintMap) : null,
+      status: raw.status,
+      decisions: raw.decisions.map((d) => ({
+        id: d.id,
+        decision: d.decision,
+        status: d.status as "pending" | "executed" | "blocked",
+        notes: d.notes,
+        createdAt: d.createdAt.toISOString(),
+        updatedAt: d.updatedAt.toISOString(),
+      })),
+      createdAt: raw.createdAt.toISOString(),
+    };
+
+    return { props: { session } };
+  } catch (err) {
+    console.error("[strategy-room-session]", err);
+    return { props: { session: null, error: "Failed to load session" } };
+  }
+};

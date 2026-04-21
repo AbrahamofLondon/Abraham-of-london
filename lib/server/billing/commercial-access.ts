@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import type { GetServerSidePropsContext } from "next";
 import Stripe from "stripe";
-import { prisma } from "@/lib/prisma.server";
+import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 
 export type CommercialProduct = "executive_reporting" | "strategy_room";
 
@@ -42,17 +43,30 @@ export const COMMERCIAL_PRODUCTS: Record<
 
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24;
 
-function signingSecret(): string {
-  return (
-    process.env.COMMERCIAL_ACCESS_SECRET ||
+export function getCommercialCookieSecret(): string {
+  const dedicated =
+    process.env.COMMERCIAL_COOKIE_SECRET ||
+    process.env.COMMERCIAL_ACCESS_SECRET;
+
+  if (dedicated?.trim()) return dedicated.trim();
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("COMMERCIAL_COOKIE_SECRET is required in production.");
+  }
+
+  const fallback =
     process.env.NEXTAUTH_SECRET ||
     process.env.STRIPE_WEBHOOK_SECRET ||
-    "aol-local-commercial-access"
+    "aol-local-commercial-access";
+
+  console.warn(
+    "[COMMERCIAL_COOKIE_SECRET_MISSING] Using development-only commercial cookie fallback.",
   );
+  return fallback;
 }
 
 function sign(value: string): string {
-  return crypto.createHmac("sha256", signingSecret()).update(value).digest("hex");
+  return crypto.createHmac("sha256", getCommercialCookieSecret()).update(value).digest("hex");
 }
 
 function cookieValue(product: CommercialProduct, sessionId: string): string {
@@ -112,24 +126,34 @@ export async function verifyCheckoutSessionForProduct(
   if (!sessionId || Array.isArray(sessionId)) return false;
   const expected = COMMERCIAL_PRODUCTS[product];
 
-  const entitlement = await prisma.clientEntitlement.findFirst({
-    where: {
-      externalRef: sessionId,
-      productCode: expected.productCode,
-      status: "active",
-    },
-  });
-  if (entitlement) return true;
-
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeKey) return false;
 
   const stripe = new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any });
   const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const email =
+    String(session.metadata?.email || session.customer_details?.email || "")
+      .trim()
+      .toLowerCase() || null;
 
-  return (
+  const existing = await resolveCanonicalEntitlement({
+    email,
+    slug: expected.productCode,
+  });
+  if (existing.granted && existing.verified) return true;
+
+  const paid =
     session.payment_status === "paid" &&
     session.metadata?.priceCode === expected.priceCode &&
-    session.metadata?.productCode === expected.productCode
-  );
+    session.metadata?.productCode === expected.productCode;
+
+  if (!paid) return false;
+
+  const verified = await ensureEntitlementAfterPayment({
+    checkoutSessionId: sessionId,
+    slug: expected.productCode,
+    email,
+  });
+
+  return verified.ok && Boolean(verified.entitlement?.granted);
 }

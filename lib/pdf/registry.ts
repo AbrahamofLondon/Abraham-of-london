@@ -72,6 +72,17 @@ function formatFileSize(bytes: number): string {
   return `${size.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
+function isExplicitlyAllowedLowQuality(pdf: unknown): boolean {
+  const item = pdf as { metadata?: Record<string, unknown>; allowLowQualityPremium?: boolean };
+  return item.allowLowQualityPremium === true || item.metadata?.allowLowQualityPremium === true;
+}
+
+function hasPremiumBlockingQualityFlag(pdf: unknown): boolean {
+  const item = pdf as { qualityFlag?: unknown; tier?: unknown; accessLevel?: unknown };
+  const tier = normalizeTierValue(item.tier ?? item.accessLevel ?? "public");
+  return tier !== "public" && Boolean(item.qualityFlag) && !isExplicitlyAllowedLowQuality(pdf);
+}
+
 export function getAllPDFsWithNormalizedTier(): PDFWithNormalizedTier[] {
   return getStaticAllPDFs().map((pdf) => {
     const tierValue = normalizeTierValue(
@@ -136,7 +147,9 @@ export function getAllPDFItems(options?: { includeMissing?: boolean }): PDFItem[
     };
   });
 
-  return options?.includeMissing ? items : items.filter((x) => x.existsOnDisk === true);
+  return options?.includeMissing
+    ? items
+    : items.filter((x) => x.existsOnDisk === true && !hasPremiumBlockingQualityFlag(x));
 }
 
 export function getAccessiblePDFs(
@@ -158,6 +171,12 @@ export function getAccessiblePDFs(
   const userRank = rank[user] ?? 0;
 
   return getStaticAllPDFs().filter((pdf) => {
+    const exists =
+      Boolean((pdf as any).exists) ||
+      Boolean((pdf as any).existsOnDisk) ||
+      Number((pdf as any).fileSizeBytes || 0) > 0;
+    if (!exists || hasPremiumBlockingQualityFlag(pdf)) return false;
+
     const pdfTier = normalizeTierValue(
       (pdf as any).tier ?? (pdf as any).accessLevel ?? "public",
     );

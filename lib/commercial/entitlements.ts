@@ -1,4 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import {
+  grantCanonicalEntitlement,
+  resolveCanonicalEntitlement,
+} from "@/lib/commercial/entitlement-authority";
 
 export type AssetEntitlement = {
   userId: string;
@@ -75,12 +79,11 @@ export async function hasAssetEntitlement(
   userId: string | null | undefined,
   slug: string,
 ): Promise<boolean> {
-  if (!userId) return false;
-  const normalized = normalizeSlug(slug);
-  if (!normalized) return false;
-
-  const entitlements = await getUserEntitlements(userId);
-  return entitlements.some((entry) => entry.slug === normalized);
+  const entitlement = await resolveCanonicalEntitlement({
+    userId: userId ?? null,
+    slug,
+  });
+  return entitlement.granted;
 }
 
 export async function grantEntitlement(
@@ -102,42 +105,11 @@ export async function grantEntitlement(
   };
 
   try {
-    const existing = await prisma.entitlement.findFirst({
-      where: {
-        userId,
-        type: "ARTIFACT",
-        key: normalized,
-      },
-      orderBy: { createdAt: "desc" },
-      select: { id: true },
+    await grantCanonicalEntitlement({
+      userId,
+      slug: normalized,
+      source: source === "tier" || source === "manual" ? source : "purchase",
     });
-
-    if (existing) {
-      await prisma.entitlement.update({
-        where: { id: existing.id },
-        data: {
-          status: "ACTIVE",
-          startsAt: null,
-          expiresAt: null,
-          revokedAt: null,
-          revokedBy: null,
-          reason: null,
-          issuedBy: source,
-          metadata: { source },
-        },
-      });
-    } else {
-      await prisma.entitlement.create({
-        data: {
-          userId,
-          type: "ARTIFACT",
-          key: normalized,
-          status: "ACTIVE",
-          issuedBy: source,
-          metadata: { source },
-        },
-      });
-    }
   } catch {
     memoryEntitlements.set(memoryKey(userId, normalized), entitlement);
   }

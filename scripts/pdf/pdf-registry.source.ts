@@ -924,6 +924,44 @@ export const EXISTING_PDFS: SourcePDFItem[] = [
     category: "family-court",
     description: "Vault library version of family court pack",
   }),
+
+  // ── DECISION INSTRUMENTS (premium paid assets) ──
+  definePDF({
+    id: "decision-exposure-instrument",
+    title: "Decision Exposure Instrument",
+    type: "worksheet",
+    tier: "client",
+    outputPath: "/assets/downloads/decision-exposure-instrument.pdf",
+    category: "decision-instruments",
+    description: "Quantifies the cost of being wrong before the market enforces it. Produces classification, consequence, and next action.",
+    paper: "A4",
+    version: "1.0.0",
+    priority: 95,
+  }),
+  definePDF({
+    id: "mandate-clarity-framework",
+    title: "Mandate Clarity Framework",
+    type: "framework",
+    tier: "client",
+    outputPath: "/assets/downloads/mandate-clarity-framework.pdf",
+    category: "decision-instruments",
+    description: "Maps where authority is real, assumed, fragmented, or absent. Produces mandate classification and corrective next move.",
+    paper: "A4",
+    version: "1.0.0",
+    priority: 95,
+  }),
+  definePDF({
+    id: "intervention-path-selector",
+    title: "Intervention Path Selector",
+    type: "toolkit",
+    tier: "client",
+    outputPath: "/assets/downloads/intervention-path-selector.pdf",
+    category: "decision-instruments",
+    description: "Determines what should happen next when action can no longer be deferred. Produces selected path, ordered actions, and escalation decision.",
+    paper: "A4",
+    version: "1.0.0",
+    priority: 95,
+  }),
 ];
 
 /**

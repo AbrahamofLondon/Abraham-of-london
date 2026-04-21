@@ -22,6 +22,7 @@ import ConstitutionalDiagnosticSuite from "@/components/assessments/Constitution
 import { getOrCreateSubjectId } from "@/lib/diagnostics/subject-id";
 import { trackFunnelEntry, trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
+import { trackDiagnosticStart } from "@/lib/analytics/journey-client";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -63,6 +64,7 @@ export default function ConstitutionalDiagnosticPage() {
     getOrCreateSubjectId();
     trackFunnelEntry("/diagnostics/constitutional-diagnostic");
     trackStageStart("constitutional");
+    trackDiagnosticStart("constitutional");
 
     const handleUnload = () => trackDropoff("constitutional");
     window.addEventListener("beforeunload", handleUnload);

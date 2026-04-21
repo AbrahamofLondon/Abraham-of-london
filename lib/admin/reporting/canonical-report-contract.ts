@@ -324,6 +324,7 @@ export function buildCanonicalReportContract(
     "teamReality",
     "teamSentimentReality",
     "trajectoryOutlook",
+    "observedOutcomeEvidence",
     "longitudinalMonitoring",
     "enterpriseSignals",
     "monitoringRecommendation",

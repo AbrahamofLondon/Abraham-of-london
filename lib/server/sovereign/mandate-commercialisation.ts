@@ -31,7 +31,7 @@ export async function commercialiseMandate(
     executionStatus: "ACTIVE",
     monetised: true,
     metadata: {
-      lastEntitlementId: entitlement.id,
+      lastEntitlementId: entitlement.slug,
       lastEntitlementProductCode: input.productCode,
       lastEntitlementTier: input.tier,
     },

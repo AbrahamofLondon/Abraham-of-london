@@ -161,9 +161,9 @@ const EDITIONS = [
   {
     eyebrow: "Institutional Edition",
     title:   "Full intelligence briefing",
-    body:    "The restricted document for strategic operators. Stronger framing, deeper implications, board-grade decision utility.",
+    body:    "The £59 decision-support intelligence brief for operators navigating structural fragmentation. Full country analysis, scenarios, board actions, and case evidence.",
     href:    ROUTES.institutionalEdition,
-    cta:     "Institutional edition",
+    cta:     "Unlock decision brief",
     icon:    Lock,
     primary: false,
     gold:    true,
@@ -290,6 +290,26 @@ function HeroSection() {
             They are pricing <em style={{ color: `${GOLD}CC`, fontStyle: "normal" }}>survivability within fragmentation</em>.
           </motion.p>
 
+          <motion.div variants={fadeUp} style={{
+            marginTop: "1.5rem",
+            maxWidth: "54ch",
+            borderLeft: `1px solid ${GOLD}55`,
+            paddingLeft: "1rem",
+          }}>
+            <p style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              lineHeight: 1.85,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.72)",
+            }}>
+              This is not a research report.
+              <br />
+              This is a decision-support intelligence brief used by operators navigating structural fragmentation.
+            </p>
+          </motion.div>
+
           {/* CTA row */}
           <motion.div variants={fadeUp} style={{ marginTop: "2.5rem" }}>
             <div className="flex flex-wrap gap-3">
@@ -327,7 +347,7 @@ function HeroSection() {
                 onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}45`; el.style.backgroundColor = `${GOLD}0E`; }}
               >
                 <Lock style={{ width: "12px", height: "12px" }} />
-                Institutional edition
+                Unlock decision brief — £59
               </Link>
 
               <Link href={ROUTES.boardDeck}
@@ -715,6 +735,150 @@ function CoreThesis() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DECISION USE SECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function DecisionUseSection() {
+  const whenToUse = [
+    "Board or leadership review is due within 30 days.",
+    "Supplier exposure needs repricing below country level.",
+    "Supply chain strategy is still optimised for efficiency.",
+    "Cash policy assumes stable credit and benign demand.",
+    "Policy risk is not yet a standing board variable.",
+  ];
+
+  const outputs = [
+    "Growth assumptions repriced against tariff-adjusted conditions.",
+    "Supplier-node exposure mapped before margin compression appears.",
+    "Supply chain posture shifted from optimisation to optionality.",
+    "Cash positioning moved from efficiency to protection.",
+    "Policy risk elevated into board-level decision cadence.",
+  ];
+
+  return (
+    <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <motion.div
+          variants={stagger(0.08)}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-60px" }}
+          className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]"
+        >
+          <motion.div variants={fadeUp}>
+            <Eyebrow>Decision support</Eyebrow>
+            <h2 style={{
+              marginTop: "1.25rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(1.9rem, 3.2vw, 3rem)",
+              lineHeight: 1.0,
+              letterSpacing: "-0.025em",
+              color: "rgba(255,255,255,0.92)",
+            }}>
+              Use it when the decision cannot wait for perfect certainty.
+            </h2>
+            <p style={{
+              marginTop: "1rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "1.05rem",
+              lineHeight: 1.78,
+              color: "rgba(255,255,255,0.58)",
+              maxWidth: "48ch",
+            }}>
+              Free = tension. Paid = resolution. The institutional brief converts the market condition into board-level operating moves.
+            </p>
+            <Link href={ROUTES.institutionalEdition}
+              className="mt-8 inline-flex items-center gap-3 transition-all duration-300"
+              style={{
+                padding: "14px 28px",
+                border: `1px solid ${GOLD}50`,
+                backgroundColor: `${GOLD}12`,
+                color: GOLD,
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "9px",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+              }}
+            >
+              <Lock style={{ width: "12px", height: "12px" }} />
+              Unlock decision advantage — £59
+            </Link>
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="grid gap-4 md:grid-cols-2">
+            <div style={{
+              padding: "1.75rem",
+              border: "1px solid rgba(255,255,255,0.10)",
+              backgroundColor: "rgba(255,255,255,0.035)",
+            }}>
+              <div style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.36em",
+                textTransform: "uppercase",
+                color: `${GOLD}AA`,
+                marginBottom: "1.1rem",
+              }}>
+                When to use this
+              </div>
+              <div className="space-y-3">
+                {whenToUse.map((line) => (
+                  <div key={line} className="flex gap-3">
+                    <AlertTriangle style={{ width: "13px", height: "13px", color: `${GOLD}80`, flexShrink: 0, marginTop: "4px" }} />
+                    <span style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontSize: "0.98rem",
+                      lineHeight: 1.58,
+                      color: "rgba(255,255,255,0.72)",
+                    }}>
+                      {line}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{
+              padding: "1.75rem",
+              border: `1px solid ${GOLD}24`,
+              backgroundColor: `${GOLD}08`,
+            }}>
+              <div style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.36em",
+                textTransform: "uppercase",
+                color: `${GOLD}AA`,
+                marginBottom: "1.1rem",
+              }}>
+                What this changes
+              </div>
+              <div className="space-y-3">
+                {outputs.map((line) => (
+                  <div key={line} className="flex gap-3">
+                    <ShieldCheck style={{ width: "13px", height: "13px", color: `${GOLD}90`, flexShrink: 0, marginTop: "4px" }} />
+                    <span style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontSize: "0.98rem",
+                      lineHeight: 1.58,
+                      color: "rgba(255,255,255,0.76)",
+                    }}>
+                      {line}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // EDITION LADDER
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1074,6 +1238,7 @@ const IntelligenceLandingPage: NextPage = () => {
         <HeroSection />
         <MacroSignalsStrip />
         <CoreThesis />
+        <DecisionUseSection />
         <EditionLadder />
         <UtilitySection />
         <CloseSection />

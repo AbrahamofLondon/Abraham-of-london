@@ -9,6 +9,7 @@ import {
 } from "@/lib/server/billing/entitlements";
 import { prisma } from "@/lib/prisma.server";
 import { hubspotSync } from "@/lib/hubspot/sync";
+import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 
 const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
 
@@ -100,6 +101,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         source: "stripe",
         externalRef: session.id,
       });
+
+      const verified = await ensureEntitlementAfterPayment({
+        checkoutSessionId: session.id,
+        slug: productCode,
+        email,
+      });
+
+      if (!verified.ok || !verified.entitlement?.granted) {
+        console.error("[BILLING_WEBHOOK_ENTITLEMENT_SYNC_FAILED]", {
+          sessionId: session.id,
+          email,
+          productCode,
+        });
+        return res.status(500).json({
+          error: "ENTITLEMENT_SYNC_FAILED",
+        });
+      }
     } else if (email && productCode) {
       console.warn(
         `[BILLING_WEBHOOK] Rejected unknown productCode from Stripe metadata: ${productCode}`,

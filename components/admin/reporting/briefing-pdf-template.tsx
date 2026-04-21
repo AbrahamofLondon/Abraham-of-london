@@ -383,6 +383,48 @@ export default function BriefingPDFTemplate({
         </div>
       </section>
 
+      <section className="border-b border-neutral-200 py-6">
+        <SectionTitle
+          eyebrow="Observed outcomes"
+          title="Observed Outcomes (System Evidence)"
+          subtitle={
+            report.observedOutcomes.confidence === "insufficient"
+              ? "Outcome evidence is present as a governed section and will strengthen as follow-up records accumulate."
+              : "Comparable decision cases are now included as outcome evidence."
+          }
+        />
+
+        <div className="mt-4 grid grid-cols-3 gap-4">
+          <MetricCard
+            label="Improved"
+            value={pct(report.observedOutcomes.improvedPercent)}
+            sub="Similar recorded cases"
+          />
+          <MetricCard
+            label="Time"
+            value={
+              typeof report.observedOutcomes.averageTimeToImprovementDays === "number"
+                ? `${Math.round(report.observedOutcomes.averageTimeToImprovementDays)}d`
+                : "Pending"
+            }
+            sub="Average improvement window"
+          />
+          <MetricCard
+            label="Failure"
+            value={pct(report.observedOutcomes.failureRateWhenIgnored)}
+            sub="Deterioration rate"
+          />
+        </div>
+
+        <div className="mt-4 space-y-1.5">
+          {report.observedOutcomes.statements.slice(0, 3).map((item) => (
+            <div key={item} className="text-[10px] leading-6 text-neutral-700">
+              {item}
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="grid grid-cols-3 gap-4 border-b border-neutral-200 py-6">
         <div className="border border-neutral-200 p-4">
           <div className="flex items-center gap-2 text-[7px] font-mono uppercase tracking-[0.18em] text-neutral-500">

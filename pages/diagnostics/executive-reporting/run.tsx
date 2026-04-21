@@ -139,6 +139,17 @@ type ExecutiveReportViewModel = {
     executionLossFormatted: string;
     totalExposureFormatted: string;
   };
+  observedOutcomes?: {
+    title: "Observed Outcomes (System Evidence)";
+    processedDecisionCases: number;
+    comparableCaseCount: number;
+    improvedPercent: number;
+    averageTimeToImprovementDays: number | null;
+    failureRateWhenIgnored: number;
+    medianResolutionWindowDays: number | null;
+    confidence: "insufficient" | "directional" | "governed";
+    statements: string[];
+  };
   constitution: {
     route: string;
     confidence?: number;
@@ -278,6 +289,17 @@ type CanonicalReport = {
     worldviewAnchors?: { items?: string[] };
     sponsorTypes?: { items?: string[] };
     rationale?: { items?: string[] };
+    observedOutcomeEvidence?: {
+      title?: string;
+      processedDecisionCases?: number;
+      comparableCaseCount?: number;
+      improvedPercent?: number;
+      averageTimeToImprovementDays?: number | null;
+      failureRateWhenIgnored?: number;
+      medianResolutionWindowDays?: number | null;
+      confidence?: "insufficient" | "directional" | "governed";
+      statements?: string[];
+    };
   };
 };
 
@@ -903,6 +925,43 @@ function MetricRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function MetricTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        border: "1px solid rgba(255,255,255,0.07)",
+        backgroundColor: "rgba(0,0,0,0.18)",
+        padding: "0.85rem",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "6.5px",
+          letterSpacing: "0.24em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.28)",
+          minHeight: "1.7rem",
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          marginTop: "0.45rem",
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 400,
+          fontSize: "1.35rem",
+          lineHeight: 1,
+          color: "rgba(255,255,255,0.88)",
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
 function ResultSurface({
   result,
   onRerun,
@@ -918,6 +977,8 @@ function ResultSurface({
   const summary = vm?.summary;
   const telemetry = vm?.telemetry;
   const financialExposure = vm?.financialExposure;
+  const observedOutcomes =
+    vm?.observedOutcomes ?? canonical?.sections?.observedOutcomeEvidence;
   const constitution = vm?.constitution;
   const recommendations = vm?.recommendations;
   const findings = vm?.findings ?? [];
@@ -1354,6 +1415,90 @@ function ResultSurface({
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {observedOutcomes && (
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: "rgba(255,255,255,0.02)" }}>
+                <div
+                  style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: `1px solid ${GOLD}10`,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: `${GOLD}90`,
+                    }}
+                  >
+                    Observed Outcomes (System Evidence)
+                  </span>
+                </div>
+
+                <div style={{ padding: "1.1rem 1.25rem" }}>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <MetricTile
+                      label="Similar cases improved"
+                      value={`${Math.round(safeNumber(observedOutcomes.improvedPercent, 0))}%`}
+                    />
+                    <MetricTile
+                      label="Avg time to improvement"
+                      value={
+                        typeof observedOutcomes.averageTimeToImprovementDays === "number"
+                          ? `${Math.round(observedOutcomes.averageTimeToImprovementDays)} days`
+                          : "Pending"
+                      }
+                    />
+                    <MetricTile
+                      label="Failure rate when ignored"
+                      value={`${Math.round(safeNumber(observedOutcomes.failureRateWhenIgnored, 0))}%`}
+                    />
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    {(observedOutcomes.statements ?? []).slice(0, 3).map((statement, i) => (
+                      <div
+                        key={`${statement}-${i}`}
+                        className="flex items-start gap-2.5"
+                        style={{
+                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                          fontWeight: 300,
+                          fontSize: "0.94rem",
+                          lineHeight: 1.65,
+                          color: "rgba(255,255,255,0.68)",
+                        }}
+                      >
+                        <Scale
+                          style={{
+                            width: "13px",
+                            height: "13px",
+                            color: `${GOLD}85`,
+                            flexShrink: 0,
+                            marginTop: "5px",
+                          }}
+                        />
+                        <span>{statement}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "0.9rem",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "6.5px",
+                      letterSpacing: "0.24em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.24)",
+                    }}
+                  >
+                    Cases processed: {safeNumber(observedOutcomes.processedDecisionCases, 0)} · Confidence: {observedOutcomes.confidence ?? "insufficient"}
+                  </div>
                 </div>
               </div>
             )}

@@ -9,6 +9,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { track } from "@/lib/analytics/track";
+import { trackLanding } from "@/lib/analytics/journey-client";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import {
   AlertTriangle,
@@ -1883,6 +1884,10 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
     return () => observer.disconnect();
   }, []);
 
+  React.useEffect(() => {
+    trackLanding("/");
+  }, []);
+
   const trackHeroClick = React.useCallback((variant: string) => {
     const elapsed = typeof performance !== "undefined" ? Math.round(performance.now() - heroMountTime.current) : 0;
     track(`hero_${variant}_clicked`, { time_to_action_ms: elapsed });
@@ -2758,6 +2763,46 @@ function ProofLayer() {
   );
 }
 
+function HomeEvidenceSection() {
+  const cases = [
+    { slug: "tariff-shock-growth-break", title: "When Growth Models Broke Under Tariff Shock", signal: "Assumptions collapsed before models were updated." },
+    { slug: "team-alignment-illusion", title: "The Illusion of Team Alignment Under Pressure", signal: "Alignment failure was hidden until measured." },
+    { slug: "escalation-denied-case", title: "Why Escalation Was Denied (And That Saved the System)", signal: "Premature escalation would have increased systemic risk." },
+  ];
+
+  return (
+    <Section id="observed-in-practice" variant="void">
+      <div className="mx-auto max-w-[1100px]">
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#F5F5F5", fontWeight: 700 }}>
+          Observed in practice
+        </div>
+        <div className="mt-2 h-px w-16" style={{ backgroundColor: "rgba(201,169,110,0.35)" }} />
+        <div className="mt-8 grid gap-3 md:grid-cols-3">
+          {cases.map((c) => (
+            <Link
+              key={c.slug}
+              href={`/evidence/${c.slug}`}
+              className="group block transition-all duration-200 hover:-translate-y-px"
+              style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem" }}
+            >
+              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.2, color: "rgba(255,255,255,0.82)" }}>
+                {c.title}
+              </div>
+              <div className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.38)" }}>
+                {c.signal}
+              </div>
+              <div className="mt-3 inline-flex items-center gap-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#F59E0B" }}>
+                View evidence
+                <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-1" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 function HomeDecisionSection() {
   return (
     <Section id="escalation-paths" variant="surface">
@@ -2995,6 +3040,9 @@ const HomePage: NextPage<HomePageProps> = ({
 
       {/* 4. Evidence — proof that earns trust */}
       <ProofLayer />
+
+      {/* 4b. Case evidence — observed in practice */}
+      <HomeEvidenceSection />
 
       {/* 5. Audience qualification */}
       <WhoThisIsFor />

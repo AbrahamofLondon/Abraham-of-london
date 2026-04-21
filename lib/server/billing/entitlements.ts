@@ -1,5 +1,9 @@
 // server-only guard removed — Pages Router incompatible
 import { prisma } from "@/lib/prisma.server";
+import {
+  grantCanonicalEntitlement,
+  resolveCanonicalEntitlement,
+} from "@/lib/commercial/entitlement-authority";
 
 export const PRODUCT_CODES = {
   // Original catalog
@@ -19,6 +23,9 @@ export const PRODUCT_CODES = {
   EXECUTIVE_REPORT_INTERVENTION:        "executive-report.intervention-export",
   STRATEGY_ROOM_ARTEFACTS_V2:           "strategy-room.private-artefacts",
   STRATEGY_ROOM_ENTRY:                  "strategy-room.entry",
+  DECISION_EXPOSURE_INSTRUMENT:         "decision-exposure-instrument",
+  MANDATE_CLARITY_FRAMEWORK:            "mandate-clarity-framework",
+  INTERVENTION_PATH_SELECTOR:           "intervention-path-selector",
 } as const;
 
 export type ProductCode = (typeof PRODUCT_CODES)[keyof typeof PRODUCT_CODES];
@@ -32,38 +39,10 @@ export async function grantEntitlement(input: {
   endsAt?: Date | null;
 }) {
   const email = input.email.trim().toLowerCase();
-
-  const existing = await prisma.clientEntitlement.findFirst({
-    where: {
-      email,
-      productCode: input.productCode,
-      status: "active",
-    },
-  });
-
-  if (existing) {
-    return prisma.clientEntitlement.update({
-      where: { id: existing.id },
-      data: {
-        tier: input.tier,
-        source: input.source || existing.source,
-        externalRef: input.externalRef || existing.externalRef,
-        endsAt: input.endsAt ?? existing.endsAt,
-        status: "active",
-      },
-    });
-  }
-
-  return prisma.clientEntitlement.create({
-    data: {
-      email,
-      productCode: input.productCode,
-      tier: input.tier,
-      source: input.source || "manual",
-      externalRef: input.externalRef || null,
-      endsAt: input.endsAt || null,
-      status: "active",
-    },
+  return grantCanonicalEntitlement({
+    email,
+    slug: input.productCode,
+    source: input.source === "manual" ? "manual" : "purchase",
   });
 }
 
@@ -85,16 +64,11 @@ export async function hasEntitlement(
   email: string,
   productCode: ProductCode
 ) {
-  const now = new Date();
-  const match = await prisma.clientEntitlement.findFirst({
-    where: {
-      email: email.trim().toLowerCase(),
-      productCode,
-      status: "active",
-      OR: [{ endsAt: null }, { endsAt: { gt: now } }],
-    },
+  const entitlement = await resolveCanonicalEntitlement({
+    email: email.trim().toLowerCase(),
+    slug: productCode,
   });
-  return !!match;
+  return entitlement.granted;
 }
 
 export async function getEntitlements(email: string) {

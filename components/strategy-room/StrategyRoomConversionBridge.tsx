@@ -18,7 +18,7 @@ type StrategyRoomConversionBridgeProps = {
 const DEFAULT_SIGNALS = [
   "The report has identified a material constraint that requires a decision",
   "The next risk is delay, avoidance, or fragmented execution",
-  "You need intervention logic, not another layer of interpretation",
+  "Intervention logic is now required",
 ];
 
 export default function StrategyRoomConversionBridge({
@@ -26,9 +26,9 @@ export default function StrategyRoomConversionBridge({
   price = 395,
   checkoutPriceCode = "strategy_room",
   originPath = "/strategy-room",
-  primaryCtaLabel = "Enter Strategy Room",
-  title = "From Diagnosis to Intervention",
-  description = "You now have a diagnosis. Strategy Room exists when the next move requires governed intervention logic.",
+  primaryCtaLabel = "Enter execution environment",
+  title = "Action layer",
+  description = "A governed execution environment for decisions that cannot remain theoretical.",
   signals = DEFAULT_SIGNALS,
 }: StrategyRoomConversionBridgeProps) {
   const [loading, setLoading] = useState(false);
@@ -52,7 +52,7 @@ export default function StrategyRoomConversionBridge({
     if (storedEmail) setEmail(storedEmail);
     if (params.get("checkout") === "cancelled") {
       setCheckoutCancelled(true);
-      setMessage("Checkout cancelled. No payment was taken. Your progress has been preserved where possible.");
+      setMessage("Entry cancelled. No payment was taken. The decision remains unresolved.");
     }
     track("strategy_room_bridge_viewed", {
       checkout_cancelled: params.get("checkout") === "cancelled",
@@ -72,7 +72,7 @@ export default function StrategyRoomConversionBridge({
 
   async function handleCheckout() {
     setLoading(true);
-    setMessage("Preparing Strategy Room access...");
+    setMessage("Preparing execution environment...");
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem("aol_strategy_room_checkout_email", email);
     }
@@ -102,7 +102,7 @@ export default function StrategyRoomConversionBridge({
       window.location.href = data.url;
     } else {
       setLoading(false);
-      setMessage("Checkout could not be prepared. Check the email field and try again.");
+      setMessage("Execution entry could not be prepared. Check the email field and try again.");
       track("checkout_failed", {
         price_code: checkoutPriceCode,
         reason: data?.error || "no_url_returned",
@@ -114,7 +114,7 @@ export default function StrategyRoomConversionBridge({
     <div className={`${className} border-t border-neutral-800 pt-10`}>
       {checkoutCancelled && (
         <div className="mb-6 border border-amber-700/30 bg-amber-950/20 p-4 text-sm text-amber-100/75">
-          Checkout cancelled. No payment was taken. Your progress has been preserved where possible.
+          Entry cancelled. No payment was taken. The decision remains unresolved.
         </div>
       )}
 
@@ -123,18 +123,18 @@ export default function StrategyRoomConversionBridge({
 
       <div className="grid gap-4 md:grid-cols-2 mb-6">
         <div className="border border-white/10 bg-white/[0.025] p-5">
-          <h3 className="font-medium mb-3">What this report does not do</h3>
+          <h3 className="font-medium mb-3">Diagnostics stops at position</h3>
           <ul className="space-y-2 text-sm text-white/62">
             <li>• It clarifies the problem</li>
             <li>• It does not execute the intervention</li>
           </ul>
         </div>
         <div className="border border-amber-700/30 bg-amber-950/10 p-5">
-          <h3 className="font-medium mb-3">What Strategy Room adds</h3>
+          <h3 className="font-medium mb-3">Strategy Room executes</h3>
           <ul className="space-y-2 text-sm text-white/72">
-            <li>• intervention logic</li>
-            <li>• governed next moves</li>
-            <li>• action under live constraints</li>
+            <li>• decision compression</li>
+            <li>• error prevention</li>
+            <li>• execution clarity</li>
           </ul>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function StrategyRoomConversionBridge({
       </div>
 
       <div className="mb-6 border border-white/10 bg-white/[0.025] p-5">
-        <h3 className="font-medium mb-3">Sample intervention fragment</h3>
+        <h3 className="font-medium mb-3">Intervention fragment</h3>
         <div className="space-y-2 text-sm text-white/62">
           <p>Intervention priority: restore decision authority boundary</p>
           <p>Immediate constraint: governance conflict at reporting layer</p>
@@ -168,7 +168,7 @@ export default function StrategyRoomConversionBridge({
 
       <div className="text-2xl font-semibold mb-2">£{price}</div>
       <div className="mb-4 text-sm text-white/50">
-        One-time intervention entry • No subscription
+        One-time execution entry · No subscription
       </div>
 
       <input
@@ -189,7 +189,7 @@ export default function StrategyRoomConversionBridge({
         disabled={loading}
         className="min-h-[44px] w-full bg-white py-3 font-medium text-black disabled:opacity-60"
       >
-        {loading ? "Preparing Strategy Room access..." : primaryCtaLabel}
+        {loading ? "Preparing execution environment..." : primaryCtaLabel}
       </button>
       {message && <p className="mt-3 text-sm text-white/56">{message}</p>}
     </div>

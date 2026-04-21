@@ -26,6 +26,24 @@ const COMMERCIAL_PRICE_CONFIG = {
 };
 
 const INLINE_PRICE_MAP: Record<string, { amount: number; name: string; productCode: string; tier: string }> = {
+  "decision-exposure-instrument": {
+    amount: 2900,
+    name: "Decision Exposure Instrument",
+    productCode: "decision-exposure-instrument",
+    tier: "decision-instrument",
+  },
+  "mandate-clarity-framework": {
+    amount: 4900,
+    name: "Mandate Clarity Framework",
+    productCode: "mandate-clarity-framework",
+    tier: "decision-instrument",
+  },
+  "intervention-path-selector": {
+    amount: 7900,
+    name: "Intervention Path Selector",
+    productCode: "intervention-path-selector",
+    tier: "decision-instrument",
+  },
   diagnostic_report_basic: {
     amount: 25000,
     name: "Diagnostic Report Basic",
@@ -99,7 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const returnPaths = RETURN_PATHS[normalizedPriceCode];
   const origin = typeof originPath === "string" && originPath.startsWith("/") ? originPath : "";
-  const successPath = returnPaths?.successPath || "/dashboard";
+  const successPath = returnPaths?.successPath || origin || "/dashboard";
   const cancelPath = origin || returnPaths?.cancelPath || "/dashboard";
   const baseUrl = siteUrl(req);
   const productCode = commercialConfig ? commercialConfig.productCode : inlinePrice!.productCode;
@@ -165,7 +183,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   hubspotSync({
     event: hsEvent,
     email: String(email || ""),
-    data: { amount: normalizedPriceCode === "strategy_room" ? 395 : 95 },
+    data: { amount: inlinePrice ? inlinePrice.amount / 100 : normalizedPriceCode === "strategy_room" ? 395 : 95 },
   }).catch(() => {});
 
   return res.json({ ok: true, url: session.url });

@@ -7,7 +7,7 @@ import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
-import { getUserEntitlements } from "@/lib/commercial/entitlements";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import {
   getPdfAssetIdentityBySlug,
   type PdfAssetIdentityResolved,
@@ -24,18 +24,27 @@ async function getSlug(params: RouteContext["params"]): Promise<string> {
   return String(resolved.slug || "").replace(/\.pdf$/i, "");
 }
 
-async function buildUserContext(req: NextRequest): Promise<UserContext | null> {
+async function buildUserContext(
+  req: NextRequest,
+  asset: PdfAssetIdentityResolved,
+): Promise<UserContext | null> {
   const identity = await resolveIdentity(req);
   if (!identity.authenticated || !identity.subjectId) return null;
 
-  const entitlements = await getUserEntitlements(identity.subjectId);
+  const entitlement = await resolveCanonicalEntitlement({
+    userId: identity.subjectId,
+    email: identity.email,
+    slug: asset.slug,
+    tier: identity.tier,
+    requiredTier: asset.access === "inner_circle" ? "inner_circle" : null,
+  });
 
   return {
     id: identity.subjectId,
     authenticated: identity.authenticated,
     tier: identity.tier,
     flags: identity.flags,
-    entitlementSlugs: entitlements.map((entry) => entry.slug),
+    entitlementSlugs: entitlement.granted ? [asset.slug] : [],
   };
 }
 
@@ -72,7 +81,7 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
     );
   }
 
-  const user = await buildUserContext(req);
+  const user = await buildUserContext(req, asset);
   const delivery = resolvePdfDelivery(user, asset);
 
   if (!delivery.allowed) {
@@ -80,10 +89,27 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
   }
 
   const relativePath = asset.canonicalPath.replace(/^\/+/, "");
-  const absolutePath = path.resolve(process.cwd(), "public", relativePath);
-  const publicRoot = path.resolve(process.cwd(), "public");
+  const cwd = process.cwd();
 
-  if (!absolutePath.startsWith(publicRoot + path.sep)) {
+  // Resolve file path based on asset type:
+  // 1. Paid instruments → private/assets/paid-instruments/
+  // 2. Case dossiers → private_storage/premium-content/case-dossiers/
+  // 3. Everything else → public/
+  let absolutePath: string;
+  let allowedRoot: string;
+
+  if (asset.access === "paid") {
+    absolutePath = path.resolve(cwd, "private", "assets", "paid-instruments", `${asset.slug}.pdf`);
+    allowedRoot = path.resolve(cwd, "private");
+  } else if (relativePath.startsWith("private_storage/") || asset.slug.startsWith("case-dossier-")) {
+    absolutePath = path.resolve(cwd, relativePath);
+    allowedRoot = path.resolve(cwd, "private_storage");
+  } else {
+    absolutePath = path.resolve(cwd, "public", relativePath);
+    allowedRoot = path.resolve(cwd, "public");
+  }
+
+  if (!absolutePath.startsWith(allowedRoot + path.sep)) {
     return NextResponse.json(
       { ok: false, error: "Invalid PDF asset path" },
       { status: 500 },
@@ -103,7 +129,13 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
     });
   } catch {
     return NextResponse.json(
-      { ok: false, error: "PDF binary missing" },
+      {
+        ok: false,
+        error: "PDF unavailable",
+        state: "unavailable",
+        slug: asset.slug,
+        htmlFallback: `/downloads/${encodeURIComponent(asset.slug)}`,
+      },
       { status: 404 },
     );
   }

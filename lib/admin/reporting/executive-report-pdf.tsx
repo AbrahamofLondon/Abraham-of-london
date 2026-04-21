@@ -483,6 +483,16 @@ function RecommendationHierarchy({
           </Text>
         </View>
       )}
+
+      <View style={styles.recommendationCard}>
+        <Text style={styles.recommendationMeta}>ACTION LAYER</Text>
+        <Text style={styles.recommendationTitle}>
+          If intervention is required, move to Strategy Room.
+        </Text>
+        <Text style={styles.recommendationSummary}>
+          Executive Reporting prices the consequence. Strategy Room executes the intervention.
+        </Text>
+      </View>
     </View>
   );
 }

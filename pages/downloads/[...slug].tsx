@@ -26,9 +26,9 @@ const GOLD = "#C9A96E";
 /** Price map for paid assets (pence → display) */
 const PAID_ASSET_PRICES: Record<string, { amount: number; display: string; justification: string }> = {
   "global-market-intelligence-report-q1-2026": {
-    amount: 9500,
-    display: "£95",
-    justification: "Part of the paid decision layer. Used where clarity matters more than convenience.",
+    amount: 5900,
+    display: "£59",
+    justification: "Decision-support intelligence brief for operators navigating structural fragmentation.",
   },
   "global-market-intelligence-board-deck-q1-2026": {
     amount: 4500,

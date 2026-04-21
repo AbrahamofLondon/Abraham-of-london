@@ -1,10 +1,10 @@
 {
   "generatedAt": "2026-04-21T14:59:05.797Z",
   "totals": {
-    "assetGroups": 428,
-    "resolved": 428,
+    "assetGroups": 434,
+    "resolved": 434,
     "unresolved": 0,
-    "canonical": 216,
+    "canonical": 222,
     "alias": 212,
     "duplicate": 0,
     "conflict": 0
@@ -6522,6 +6522,84 @@
       "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/you-were-built-to-carry-weight.pdf.",
       "sourcePaths": [
         "/assets/downloads/you-were-built-to-carry-weight.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "decision-exposure-instrument",
+      "canonicalPath": "/assets/downloads/decision-exposure-instrument.pdf",
+      "decision": "canonical",
+      "reason": "Premium decision instrument. Canonical endpoint.",
+      "sourcePaths": [
+        "/assets/downloads/decision-exposure-instrument.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "mandate-clarity-framework",
+      "canonicalPath": "/assets/downloads/mandate-clarity-framework.pdf",
+      "decision": "canonical",
+      "reason": "Premium decision framework. Canonical endpoint.",
+      "sourcePaths": [
+        "/assets/downloads/mandate-clarity-framework.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "intervention-path-selector",
+      "canonicalPath": "/assets/downloads/intervention-path-selector.pdf",
+      "decision": "canonical",
+      "reason": "Premium decision toolkit. Canonical endpoint.",
+      "sourcePaths": [
+        "/assets/downloads/intervention-path-selector.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "case-dossier-tariff-shock",
+      "canonicalPath": "/private_storage/premium-content/case-dossiers/case-dossier-tariff-shock.pdf",
+      "decision": "canonical",
+      "reason": "Case evidence dossier. Controlled delivery.",
+      "sourcePaths": [
+        "/private_storage/premium-content/case-dossiers/case-dossier-tariff-shock.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "case-dossier-team-alignment-illusion",
+      "canonicalPath": "/private_storage/premium-content/case-dossiers/case-dossier-team-alignment-illusion.pdf",
+      "decision": "canonical",
+      "reason": "Case evidence dossier. Controlled delivery.",
+      "sourcePaths": [
+        "/private_storage/premium-content/case-dossiers/case-dossier-team-alignment-illusion.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "case-dossier-escalation-denied",
+      "canonicalPath": "/private_storage/premium-content/case-dossiers/case-dossier-escalation-denied.pdf",
+      "decision": "canonical",
+      "reason": "Case evidence dossier. Controlled delivery.",
+      "sourcePaths": [
+        "/private_storage/premium-content/case-dossiers/case-dossier-escalation-denied.pdf"
       ],
       "resolved": true,
       "aliasPaths": [],

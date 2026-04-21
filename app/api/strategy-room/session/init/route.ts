@@ -7,6 +7,7 @@ import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonica
 import { createStrategyRoomSession } from "@/lib/strategy-room/persistence";
 import { randomUUID } from "crypto";
 import { enforceStrategyRoomAccess } from "@/lib/diagnostics/authority-enforcement";
+import { createDecisionOutcomeLink } from "@/lib/outcomes/outcome-model";
 
 function makeSessionKey(): string {
   return `sr_${randomUUID().replace(/-/g, "")}`;
@@ -190,9 +191,18 @@ export async function POST(request: Request) {
       },
     });
 
+    const decisionOutcomeLink = createDecisionOutcomeLink({
+      decisionId: sessionKey,
+      interventionStack: assembled.constitution.requiredInterventions,
+    });
+    const canonicalWithDecisionLink = {
+      ...canonical,
+      decisionOutcomeLink,
+    };
+
     stage = "normalize_canonical_snapshot";
     const canonicalSnapshot = normalizeCanonicalSectionsSnapshot({
-      envelope: canonical,
+      envelope: canonicalWithDecisionLink,
       source: "session-init",
       sessionKey,
     });
@@ -223,7 +233,8 @@ export async function POST(request: Request) {
         revenueBand: assembled.constitution.revenueBand,
         marketRiskBand: assembled.constitution.marketRiskBand,
       },
-      canonical,
+      canonical: canonicalWithDecisionLink,
+      decisionOutcomeLink,
     });
   } catch (error) {
     logStrategyRoomInitError(stage, error);
