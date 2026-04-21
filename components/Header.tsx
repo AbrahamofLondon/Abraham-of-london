@@ -185,6 +185,7 @@ export default function Header({
     <>
       {/* ── Fixed header bar ─────────────────────────────────────────────── */}
       <header
+        suppressHydrationWarning
         className={cn(
           "fixed inset-x-0 top-0 z-[100] w-full transition-all duration-500",
           elevated

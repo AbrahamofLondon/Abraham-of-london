@@ -110,6 +110,7 @@ export default function MyApp({
 
       <div
         className="min-h-screen bg-[#050505] font-sans text-white antialiased"
+        suppressHydrationWarning
       >
         <AppProviders
           session={session}

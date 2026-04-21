@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, ArrowLeft, ShieldAlert } from "lucide-react";
-import { fontConfig } from "@/lib/next-fonts";
+// Fonts loaded via CSS (styles/fonts.css) — no next/font import needed
 import Layout from "@/components/Layout";
 
 function sanitizeLocalPath(input: string | null, fallback: string) {
@@ -42,7 +42,7 @@ const LockedPage: React.FC = () => {
 
   return (
     <Layout title="Access Restricted | Abraham of London">
-      <main className={`flex min-h-screen items-center justify-center px-6 py-20 bg-black overflow-hidden relative ${fontConfig?.fontSans?.variable} ${fontConfig?.fontSerif?.variable}`}>
+      <main className="flex min-h-screen items-center justify-center px-6 py-20 bg-black overflow-hidden relative">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl max-h-4xl bg-amber-500/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
         <motion.div

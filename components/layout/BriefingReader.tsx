@@ -1,6 +1,6 @@
 /* components/content/BriefingReader.tsx — SSOT ALIGNED */
 import * as React from "react";
-import { fontConfig } from "@/lib/next-fonts";
+// Fonts loaded via CSS (styles/fonts.css) — no next/font import needed
 import { MetadataTag } from "@/components/ui/BrandAssets";
 import { Clock, Shield, Share2, Printer, ChevronLeft, Lock } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +25,7 @@ export default function BriefingReader({ content, children }: BriefingReaderProp
 
   return (
     <article 
-      className={`relative min-h-screen bg-black text-white selection:bg-amber-500/30 ${fontConfig?.fontSans?.variable} ${fontConfig?.fontSerif?.variable}`}
+      className="relative min-h-screen bg-black text-white selection:bg-amber-500/30"
     >
       
       {/* Protocol Bar: Optimized for high-clearance navigation */}
