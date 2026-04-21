@@ -182,7 +182,7 @@ export default function NewsletterPage(): JSX.Element {
             
             <div className="mt-16 text-center">
               <p className="text-xs text-gray-600">
-                For deeper concerns, view our <Link href="/privacy-policy" className="text-gold/60 hover:text-gold transition-colors">Privacy Policy</Link>.
+                For deeper concerns, view our <Link href="/privacy" className="text-gold/60 hover:text-gold transition-colors">Privacy Policy</Link>.
               </p>
             </div>
           </div>

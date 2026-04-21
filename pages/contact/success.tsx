@@ -82,7 +82,7 @@ export default function ContactSuccessPage() {
               </Link>
 
               <Link
-                href="/membership"
+                href="/inner-circle"
                 className="flex items-center justify-center gap-3 bg-zinc-900 text-zinc-400 border border-zinc-800 px-10 py-4 rounded-sm text-[10px] font-black uppercase tracking-[0.2em] hover:text-white hover:border-zinc-700 transition-all w-full sm:w-auto"
               >
                 Inner Circle Access

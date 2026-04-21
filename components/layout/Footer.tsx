@@ -28,17 +28,17 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/inner-circle/content" className="text-gray-600 hover:text-blue-600">
+                <Link href="/inner-circle/dashboard" className="text-gray-600 hover:text-blue-600">
                   Content Library
                 </Link>
               </li>
               <li>
-                <Link href="/inner-circle/profile" className="text-gray-600 hover:text-blue-600">
+                <Link href="/inner-circle/dashboard" className="text-gray-600 hover:text-blue-600">
                   Your Profile
                 </Link>
               </li>
               <li>
-                <Link href="/inner-circle/settings" className="text-gray-600 hover:text-blue-600">
+                <Link href="/inner-circle/dashboard" className="text-gray-600 hover:text-blue-600">
                   Settings
                 </Link>
               </li>
@@ -50,7 +50,7 @@ const Footer = () => {
             <h4 className="font-medium text-gray-900 mb-4">Support</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/help" className="text-gray-600 hover:text-blue-600">
+                <Link href="/contact" className="text-gray-600 hover:text-blue-600">
                   Help Center
                 </Link>
               </li>

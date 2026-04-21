@@ -137,7 +137,7 @@ function StrategySuccessContent() {
 
         {/* Action Grid */}
         <div className="grid md:grid-cols-2 gap-4">
-          <Link href="/briefings" className="group flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all">
+          <Link href="/vault/briefs" className="group flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all">
             <div className="flex items-center gap-4">
               <div className="bg-amber-500/20 p-3 rounded-xl group-hover:bg-amber-500 group-hover:text-black transition-all">
                 <ChevronRight size={20} />

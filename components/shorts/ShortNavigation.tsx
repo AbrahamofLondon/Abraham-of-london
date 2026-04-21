@@ -55,7 +55,7 @@ const ShortNavigation: React.FC<ShortNavigationProps> = ({
         {/* Playlist */}
         {playlistId && (
           <div className="text-center">
-            <Link href={`/playlists/${playlistId}`}>
+            <Link href="/shorts">
               <div className="group p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all cursor-pointer">
                 <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 mb-2">
                   <PlaylistIcon className="w-4 h-4 group-hover:text-purple-600" />

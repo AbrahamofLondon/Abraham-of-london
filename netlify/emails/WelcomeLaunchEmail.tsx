@@ -24,20 +24,11 @@ export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
       <ul>
         <li>
           <a
-            href={`${base}/downloads/Fathering_Without_Fear.pdf`}
+            href={`${base}/assets/downloads/fathering-without-fear.pdf`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Teaser PDF (A4/Letter)
-          </a>
-        </li>
-        <li>
-          <a
-            href={`${base}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Teaser PDF (Mobile)
+            Fathering Without Fear (PDF)
           </a>
         </li>
       </ul>

@@ -66,13 +66,18 @@ export default function ProtocolFooter() {
                 Directives
               </h4>
               <nav className="flex flex-col gap-4">
-                {['The Canon', 'Field Briefs', 'The Vault', 'Case Studies'].map((link) => (
-                  <Link 
-                    key={link} 
-                    href={`/${link.toLowerCase().replace(' ', '-')}`}
+                {[
+                  { label: 'The Canon', href: '/canon' },
+                  { label: 'Field Briefs', href: '/vault/briefs' },
+                  { label: 'The Vault', href: '/vault' },
+                  { label: 'Case Studies', href: '/vault' },
+                ].map((link) => (
+                  <Link
+                    key={link.label}
+                    href={link.href}
                     className="text-xs font-light text-white/40 hover:text-brand-amber transition-colors"
                   >
-                    {link}
+                    {link.label}
                   </Link>
                 ))}
               </nav>
@@ -82,13 +87,18 @@ export default function ProtocolFooter() {
                 Governance
               </h4>
               <nav className="flex flex-col gap-4">
-                {['Terms', 'Privacy', 'Ethics', 'Mandates'].map((link) => (
-                  <Link 
-                    key={link} 
-                    href={`/${link.toLowerCase()}`}
+                {[
+                  { label: 'Terms', href: '/terms' },
+                  { label: 'Privacy', href: '/privacy' },
+                  { label: 'Ethics', href: '/about' },
+                  { label: 'Mandates', href: '/canon' },
+                ].map((link) => (
+                  <Link
+                    key={link.label}
+                    href={link.href}
                     className="text-xs font-light text-white/40 hover:text-brand-amber transition-colors"
                   >
-                    {link}
+                    {link.label}
                   </Link>
                 ))}
               </nav>

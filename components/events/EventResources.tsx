@@ -50,15 +50,15 @@ const PRESETS: Record<PresetKey, PresetData> = {
     ],
     downloads: [
       {
-        href: "/downloads/Leadership_Playbook.pdf",
+        href: "/downloads/leadership-playbook.pdf",
         label: "Leadership Playbook (30•60•90)",
       },
       {
-        href: "/downloads/Weekly_Operating_Rhythm.pdf",
+        href: "/downloads/weekly-operating-rhythm.pdf",
         label: "Weekly Operating Rhythm",
       },
       {
-        href: "/downloads/Board_Update_Onepager.pdf",
+        href: "/downloads/board-investor-onepager.pdf",
         label: "Board Update One-Pager",
       },
     ],
@@ -83,15 +83,15 @@ const PRESETS: Record<PresetKey, PresetData> = {
     ],
     downloads: [
       {
-        href: "/downloads/Entrepreneur_Operating_Pack.pdf",
+        href: "/downloads/entrepreneur-operating-pack.pdf",
         label: "Entrepreneur Operating Pack",
       },
       {
-        href: "/downloads/Entrepreneur_Survival_Checklist.pdf",
+        href: "/downloads/entrepreneur-survival-checklist.pdf",
         label: "Entrepreneur Survival Checklist",
       },
       {
-        href: "/downloads/Communication_Script_BPF.pdf",
+        href: "/downloads/communication-script-bpf.pdf",
         label: "Communication Script (B•P•F)",
       },
     ],

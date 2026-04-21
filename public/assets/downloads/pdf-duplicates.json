@@ -1,7 +1,71 @@
 {
-  "generatedAt": "2026-04-17T15:37:22.237Z",
-  "totalDuplicateIds": 10,
+  "generatedAt": "2026-04-21T08:40:12.643Z",
+  "totalDuplicateIds": 115,
   "duplicates": [
+    {
+      "id": "abraham-vault-pack",
+      "chosen": "/assets/downloads/content-downloads/abraham-vault-pack.pdf",
+      "dropped": [
+        "/assets/downloads/abraham-vault-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(99KB) > mtime"
+    },
+    {
+      "id": "board-decision-log-template",
+      "chosen": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
+      "dropped": [
+        "/assets/downloads/board-decision-log-template.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "board-investor-onepager",
+      "chosen": "/assets/downloads/content-downloads/board-investor-onepager.pdf",
+      "dropped": [
+        "/assets/downloads/board-investor-onepager.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(85KB) > mtime"
+    },
+    {
+      "id": "brotherhood-covenant",
+      "chosen": "/assets/downloads/content-downloads/brotherhood-covenant.pdf",
+      "dropped": [
+        "/assets/downloads/brotherhood-covenant.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(139KB) > mtime"
+    },
+    {
+      "id": "brotherhood-leader-guide",
+      "chosen": "/assets/downloads/lib-pdf/brotherhood-leader-guide.pdf",
+      "dropped": [
+        "/assets/downloads/brotherhood-leader-guide.pdf"
+      ],
+      "reason": "bucket(lib-pdf) > type(.pdf) > size(258KB) > mtime"
+    },
+    {
+      "id": "brotherhood-starter-kit",
+      "chosen": "/assets/downloads/lib-pdf/brotherhood-starter-kit.pdf",
+      "dropped": [
+        "/assets/downloads/brotherhood-starter-kit.pdf"
+      ],
+      "reason": "bucket(lib-pdf) > type(.pdf) > size(346KB) > mtime"
+    },
+    {
+      "id": "canon-volume-iv-diagnostic-toolkit",
+      "chosen": "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "dropped": [
+        "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(159KB) > mtime"
+    },
+    {
+      "id": "canon-volume-v-governance-diagnostic-toolkit",
+      "chosen": "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "dropped": [
+        "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(138KB) > mtime"
+    },
     {
       "id": "clarity",
       "chosen": "/assets/downloads/lexicon/clarity.pdf",
@@ -9,6 +73,46 @@
         "/assets/downloads/clarity.pdf"
       ],
       "reason": "bucket(other) > type(.pdf) > size(26KB) > mtime"
+    },
+    {
+      "id": "communication-script-bpf",
+      "chosen": "/assets/downloads/content-downloads/communication-script-bpf.pdf",
+      "dropped": [
+        "/assets/downloads/communication-script-bpf.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(142KB) > mtime"
+    },
+    {
+      "id": "decision-log-template",
+      "chosen": "/assets/downloads/content-downloads/decision-log-template.pdf",
+      "dropped": [
+        "/assets/downloads/decision-log-template.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(87KB) > mtime"
+    },
+    {
+      "id": "decision-matrix-scorecard",
+      "chosen": "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf",
+      "dropped": [
+        "/assets/downloads/decision-matrix-scorecard.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "entrepreneur-operating-pack",
+      "chosen": "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
+      "dropped": [
+        "/assets/downloads/entrepreneur-operating-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(104KB) > mtime"
+    },
+    {
+      "id": "entrepreneur-survival-checklist",
+      "chosen": "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf",
+      "dropped": [
+        "/assets/downloads/entrepreneur-survival-checklist.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(136KB) > mtime"
     },
     {
       "id": "extremism-shield",
@@ -19,12 +123,460 @@
       "reason": "bucket(other) > type(.pdf) > size(43KB) > mtime"
     },
     {
+      "id": "family-altar-liturgy",
+      "chosen": "/assets/downloads/content-downloads/family-altar-liturgy.pdf",
+      "dropped": [
+        "/assets/downloads/family-altar-liturgy.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(130KB) > mtime"
+    },
+    {
+      "id": "family-court-practical-pack",
+      "chosen": "/assets/downloads/content-downloads/family-court-practical-pack.pdf",
+      "dropped": [
+        "/assets/downloads/family-court-practical-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(202KB) > mtime"
+    },
+    {
+      "id": "fr-001",
+      "chosen": "/assets/downloads/content-downloads/fr-001.pdf",
+      "dropped": [
+        "/assets/downloads/fr-001.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "fr-004",
+      "chosen": "/assets/downloads/content-downloads/fr-004.pdf",
+      "dropped": [
+        "/assets/downloads/fr-004.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "fr-007",
+      "chosen": "/assets/downloads/content-downloads/fr-007.pdf",
+      "dropped": [
+        "/assets/downloads/fr-007.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-010",
+      "chosen": "/assets/downloads/content-downloads/fr-010.pdf",
+      "dropped": [
+        "/assets/downloads/fr-010.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "fr-013",
+      "chosen": "/assets/downloads/content-downloads/fr-013.pdf",
+      "dropped": [
+        "/assets/downloads/fr-013.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-016",
+      "chosen": "/assets/downloads/content-downloads/fr-016.pdf",
+      "dropped": [
+        "/assets/downloads/fr-016.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-019",
+      "chosen": "/assets/downloads/content-downloads/fr-019.pdf",
+      "dropped": [
+        "/assets/downloads/fr-019.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-022",
+      "chosen": "/assets/downloads/content-downloads/fr-022.pdf",
+      "dropped": [
+        "/assets/downloads/fr-022.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "fr-025",
+      "chosen": "/assets/downloads/content-downloads/fr-025.pdf",
+      "dropped": [
+        "/assets/downloads/fr-025.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-028",
+      "chosen": "/assets/downloads/content-downloads/fr-028.pdf",
+      "dropped": [
+        "/assets/downloads/fr-028.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-031",
+      "chosen": "/assets/downloads/content-downloads/fr-031.pdf",
+      "dropped": [
+        "/assets/downloads/fr-031.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-034",
+      "chosen": "/assets/downloads/content-downloads/fr-034.pdf",
+      "dropped": [
+        "/assets/downloads/fr-034.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-037",
+      "chosen": "/assets/downloads/content-downloads/fr-037.pdf",
+      "dropped": [
+        "/assets/downloads/fr-037.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-040",
+      "chosen": "/assets/downloads/content-downloads/fr-040.pdf",
+      "dropped": [
+        "/assets/downloads/fr-040.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-043",
+      "chosen": "/assets/downloads/content-downloads/fr-043.pdf",
+      "dropped": [
+        "/assets/downloads/fr-043.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-046",
+      "chosen": "/assets/downloads/content-downloads/fr-046.pdf",
+      "dropped": [
+        "/assets/downloads/fr-046.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-049",
+      "chosen": "/assets/downloads/content-downloads/fr-049.pdf",
+      "dropped": [
+        "/assets/downloads/fr-049.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-052",
+      "chosen": "/assets/downloads/content-downloads/fr-052.pdf",
+      "dropped": [
+        "/assets/downloads/fr-052.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-055",
+      "chosen": "/assets/downloads/content-downloads/fr-055.pdf",
+      "dropped": [
+        "/assets/downloads/fr-055.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-058",
+      "chosen": "/assets/downloads/content-downloads/fr-058.pdf",
+      "dropped": [
+        "/assets/downloads/fr-058.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-061",
+      "chosen": "/assets/downloads/content-downloads/fr-061.pdf",
+      "dropped": [
+        "/assets/downloads/fr-061.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-064",
+      "chosen": "/assets/downloads/content-downloads/fr-064.pdf",
+      "dropped": [
+        "/assets/downloads/fr-064.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-067",
+      "chosen": "/assets/downloads/content-downloads/fr-067.pdf",
+      "dropped": [
+        "/assets/downloads/fr-067.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-070",
+      "chosen": "/assets/downloads/content-downloads/fr-070.pdf",
+      "dropped": [
+        "/assets/downloads/fr-070.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-073",
+      "chosen": "/assets/downloads/content-downloads/fr-073.pdf",
+      "dropped": [
+        "/assets/downloads/fr-073.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "frontier-resilience-01",
+      "chosen": "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
+      "dropped": [
+        "/assets/downloads/frontier-resilience-01.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "ia-003",
+      "chosen": "/assets/downloads/content-downloads/ia-003.pdf",
+      "dropped": [
+        "/assets/downloads/ia-003.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-006",
+      "chosen": "/assets/downloads/content-downloads/ia-006.pdf",
+      "dropped": [
+        "/assets/downloads/ia-006.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-009",
+      "chosen": "/assets/downloads/content-downloads/ia-009.pdf",
+      "dropped": [
+        "/assets/downloads/ia-009.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-012",
+      "chosen": "/assets/downloads/content-downloads/ia-012.pdf",
+      "dropped": [
+        "/assets/downloads/ia-012.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(89KB) > mtime"
+    },
+    {
+      "id": "ia-015",
+      "chosen": "/assets/downloads/content-downloads/ia-015.pdf",
+      "dropped": [
+        "/assets/downloads/ia-015.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-018",
+      "chosen": "/assets/downloads/content-downloads/ia-018.pdf",
+      "dropped": [
+        "/assets/downloads/ia-018.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-021",
+      "chosen": "/assets/downloads/content-downloads/ia-021.pdf",
+      "dropped": [
+        "/assets/downloads/ia-021.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(89KB) > mtime"
+    },
+    {
+      "id": "ia-024",
+      "chosen": "/assets/downloads/content-downloads/ia-024.pdf",
+      "dropped": [
+        "/assets/downloads/ia-024.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-027",
+      "chosen": "/assets/downloads/content-downloads/ia-027.pdf",
+      "dropped": [
+        "/assets/downloads/ia-027.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-030",
+      "chosen": "/assets/downloads/content-downloads/ia-030.pdf",
+      "dropped": [
+        "/assets/downloads/ia-030.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-033",
+      "chosen": "/assets/downloads/content-downloads/ia-033.pdf",
+      "dropped": [
+        "/assets/downloads/ia-033.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-036",
+      "chosen": "/assets/downloads/content-downloads/ia-036.pdf",
+      "dropped": [
+        "/assets/downloads/ia-036.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-039",
+      "chosen": "/assets/downloads/content-downloads/ia-039.pdf",
+      "dropped": [
+        "/assets/downloads/ia-039.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-042",
+      "chosen": "/assets/downloads/content-downloads/ia-042.pdf",
+      "dropped": [
+        "/assets/downloads/ia-042.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-045",
+      "chosen": "/assets/downloads/content-downloads/ia-045.pdf",
+      "dropped": [
+        "/assets/downloads/ia-045.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-048",
+      "chosen": "/assets/downloads/content-downloads/ia-048.pdf",
+      "dropped": [
+        "/assets/downloads/ia-048.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-051",
+      "chosen": "/assets/downloads/content-downloads/ia-051.pdf",
+      "dropped": [
+        "/assets/downloads/ia-051.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-054",
+      "chosen": "/assets/downloads/content-downloads/ia-054.pdf",
+      "dropped": [
+        "/assets/downloads/ia-054.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-057",
+      "chosen": "/assets/downloads/content-downloads/ia-057.pdf",
+      "dropped": [
+        "/assets/downloads/ia-057.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-060",
+      "chosen": "/assets/downloads/content-downloads/ia-060.pdf",
+      "dropped": [
+        "/assets/downloads/ia-060.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-063",
+      "chosen": "/assets/downloads/content-downloads/ia-063.pdf",
+      "dropped": [
+        "/assets/downloads/ia-063.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-066",
+      "chosen": "/assets/downloads/content-downloads/ia-066.pdf",
+      "dropped": [
+        "/assets/downloads/ia-066.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-069",
+      "chosen": "/assets/downloads/content-downloads/ia-069.pdf",
+      "dropped": [
+        "/assets/downloads/ia-069.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-072",
+      "chosen": "/assets/downloads/content-downloads/ia-072.pdf",
+      "dropped": [
+        "/assets/downloads/ia-072.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-075",
+      "chosen": "/assets/downloads/content-downloads/ia-075.pdf",
+      "dropped": [
+        "/assets/downloads/ia-075.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
       "id": "integrity",
       "chosen": "/assets/downloads/lexicon/integrity.pdf",
       "dropped": [
         "/assets/downloads/integrity.pdf"
       ],
       "reason": "bucket(other) > type(.pdf) > size(22KB) > mtime"
+    },
+    {
+      "id": "leaders-cue-card-two-up",
+      "chosen": "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf",
+      "dropped": [
+        "/assets/downloads/leaders-cue-card-two-up.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(70KB) > mtime"
+    },
+    {
+      "id": "leadership-playbook",
+      "chosen": "/assets/downloads/content-downloads/leadership-playbook.pdf",
+      "dropped": [
+        "/assets/downloads/leadership-playbook.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "legacy-canvas",
+      "chosen": "/assets/downloads/content-downloads/legacy-canvas.pdf",
+      "dropped": [
+        "/assets/downloads/legacy-canvas.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(134KB) > mtime"
     },
     {
       "id": "legacy",
@@ -35,6 +587,46 @@
       "reason": "bucket(other) > type(.pdf) > size(22KB) > mtime"
     },
     {
+      "id": "mentorship-starter-kit",
+      "chosen": "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
+      "dropped": [
+        "/assets/downloads/mentorship-starter-kit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(106KB) > mtime"
+    },
+    {
+      "id": "operating-cadence-pack",
+      "chosen": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
+      "dropped": [
+        "/assets/downloads/operating-cadence-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "principles-for-my-son-cue-card",
+      "chosen": "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf",
+      "dropped": [
+        "/assets/downloads/principles-for-my-son-cue-card.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(67KB) > mtime"
+    },
+    {
+      "id": "principles-for-my-son",
+      "chosen": "/assets/downloads/content-downloads/principles-for-my-son.pdf",
+      "dropped": [
+        "/assets/downloads/principles-for-my-son.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(141KB) > mtime"
+    },
+    {
+      "id": "purpose-pyramid-worksheet",
+      "chosen": "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf",
+      "dropped": [
+        "/assets/downloads/purpose-pyramid-worksheet.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(150KB) > mtime"
+    },
+    {
       "id": "rise-decay-index",
       "chosen": "/assets/downloads/rise-decay-index.pdf",
       "dropped": [
@@ -43,12 +635,236 @@
       "reason": "bucket(other) > type(.pdf) > size(26KB) > mtime"
     },
     {
+      "id": "scripture-track-john14",
+      "chosen": "/assets/downloads/content-downloads/scripture-track-john14.pdf",
+      "dropped": [
+        "/assets/downloads/scripture-track-john14.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(137KB) > mtime"
+    },
+    {
+      "id": "si-002",
+      "chosen": "/assets/downloads/content-downloads/si-002.pdf",
+      "dropped": [
+        "/assets/downloads/si-002.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-005",
+      "chosen": "/assets/downloads/content-downloads/si-005.pdf",
+      "dropped": [
+        "/assets/downloads/si-005.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-008",
+      "chosen": "/assets/downloads/content-downloads/si-008.pdf",
+      "dropped": [
+        "/assets/downloads/si-008.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-011",
+      "chosen": "/assets/downloads/content-downloads/si-011.pdf",
+      "dropped": [
+        "/assets/downloads/si-011.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-014",
+      "chosen": "/assets/downloads/content-downloads/si-014.pdf",
+      "dropped": [
+        "/assets/downloads/si-014.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-017",
+      "chosen": "/assets/downloads/content-downloads/si-017.pdf",
+      "dropped": [
+        "/assets/downloads/si-017.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-020",
+      "chosen": "/assets/downloads/content-downloads/si-020.pdf",
+      "dropped": [
+        "/assets/downloads/si-020.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-023",
+      "chosen": "/assets/downloads/content-downloads/si-023.pdf",
+      "dropped": [
+        "/assets/downloads/si-023.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-026",
+      "chosen": "/assets/downloads/content-downloads/si-026.pdf",
+      "dropped": [
+        "/assets/downloads/si-026.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-029",
+      "chosen": "/assets/downloads/content-downloads/si-029.pdf",
+      "dropped": [
+        "/assets/downloads/si-029.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-032",
+      "chosen": "/assets/downloads/content-downloads/si-032.pdf",
+      "dropped": [
+        "/assets/downloads/si-032.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-035",
+      "chosen": "/assets/downloads/content-downloads/si-035.pdf",
+      "dropped": [
+        "/assets/downloads/si-035.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "si-038",
+      "chosen": "/assets/downloads/content-downloads/si-038.pdf",
+      "dropped": [
+        "/assets/downloads/si-038.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "si-041",
+      "chosen": "/assets/downloads/content-downloads/si-041.pdf",
+      "dropped": [
+        "/assets/downloads/si-041.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-044",
+      "chosen": "/assets/downloads/content-downloads/si-044.pdf",
+      "dropped": [
+        "/assets/downloads/si-044.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-047",
+      "chosen": "/assets/downloads/content-downloads/si-047.pdf",
+      "dropped": [
+        "/assets/downloads/si-047.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-050",
+      "chosen": "/assets/downloads/content-downloads/si-050.pdf",
+      "dropped": [
+        "/assets/downloads/si-050.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-053",
+      "chosen": "/assets/downloads/content-downloads/si-053.pdf",
+      "dropped": [
+        "/assets/downloads/si-053.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "si-056",
+      "chosen": "/assets/downloads/content-downloads/si-056.pdf",
+      "dropped": [
+        "/assets/downloads/si-056.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-059",
+      "chosen": "/assets/downloads/content-downloads/si-059.pdf",
+      "dropped": [
+        "/assets/downloads/si-059.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "si-062",
+      "chosen": "/assets/downloads/content-downloads/si-062.pdf",
+      "dropped": [
+        "/assets/downloads/si-062.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-065",
+      "chosen": "/assets/downloads/content-downloads/si-065.pdf",
+      "dropped": [
+        "/assets/downloads/si-065.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-068",
+      "chosen": "/assets/downloads/content-downloads/si-068.pdf",
+      "dropped": [
+        "/assets/downloads/si-068.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-071",
+      "chosen": "/assets/downloads/content-downloads/si-071.pdf",
+      "dropped": [
+        "/assets/downloads/si-071.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-074",
+      "chosen": "/assets/downloads/content-downloads/si-074.pdf",
+      "dropped": [
+        "/assets/downloads/si-074.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
       "id": "sovereignty",
       "chosen": "/assets/downloads/lexicon/sovereignty.pdf",
       "dropped": [
         "/assets/downloads/sovereignty.pdf"
       ],
       "reason": "bucket(other) > type(.pdf) > size(22KB) > mtime"
+    },
+    {
+      "id": "standards-brief",
+      "chosen": "/assets/downloads/content-downloads/standards-brief.pdf",
+      "dropped": [
+        "/assets/downloads/standards-brief.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(70KB) > mtime"
+    },
+    {
+      "id": "strategic-autonomy-002",
+      "chosen": "/assets/downloads/content-downloads/strategic-autonomy-002.pdf",
+      "dropped": [
+        "/assets/downloads/strategic-autonomy-002.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(65KB) > mtime"
     },
     {
       "id": "strategic-autonomy",
@@ -75,12 +891,36 @@
       "reason": "bucket(other) > type(.pdf) > size(22KB) > mtime"
     },
     {
+      "id": "the-builders-catechism-founders-illuminated-edition",
+      "chosen": "/assets/downloads/content-downloads/the-builders-catechism-founders-illuminated-edition.pdf",
+      "dropped": [
+        "/assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(163KB) > mtime"
+    },
+    {
+      "id": "ultimate-purpose-of-man-editorial",
+      "chosen": "/assets/downloads/content-downloads/ultimate-purpose-of-man-editorial.pdf",
+      "dropped": [
+        "/assets/downloads/ultimate-purpose-of-man-editorial.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(159KB) > mtime"
+    },
+    {
       "id": "v4",
       "chosen": "/assets/downloads/v4.pdf",
       "dropped": [
         "/assets/downloads/strategic-frameworks/v4.pdf"
       ],
       "reason": "bucket(other) > type(.pdf) > size(40KB) > mtime"
+    },
+    {
+      "id": "weekly-operating-rhythm",
+      "chosen": "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
+      "dropped": [
+        "/assets/downloads/weekly-operating-rhythm.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(86KB) > mtime"
     }
   ]
 }

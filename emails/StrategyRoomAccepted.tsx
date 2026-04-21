@@ -46,14 +46,14 @@ export const StrategyRoomAcceptedEmail = ({
           </Text>
 
           <Link
-            href="https://www.abrahamoflondon.org/downloads/purpose-pyramid.pdf"
+            href="https://www.abrahamoflondon.org/downloads/purpose-pyramid-worksheet.pdf"
             style={link}
           >
             → The Purpose Pyramid (Strategic Dossier)
           </Link>
 
           <Link
-            href="https://www.abrahamoflondon.org/downloads/decision-matrix.pdf"
+            href="https://www.abrahamoflondon.org/downloads/decision-matrix-scorecard.pdf"
             style={link}
           >
             → The Decision Matrix (Operational Logic)

@@ -50,7 +50,7 @@ const BlogFooter: React.FC<BlogFooterProps> = ({
                 </Link>
               </li>
               <li>
-                <Link href="/courses" className="text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/playbooks" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Courses
                 </Link>
               </li>

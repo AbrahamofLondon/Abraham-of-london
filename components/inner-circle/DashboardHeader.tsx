@@ -212,7 +212,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   />
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
                     <Link
-                      href="/inner-circle/profile"
+                      href="/inner-circle/dashboard"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -220,7 +220,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       Your Profile
                     </Link>
                     <Link
-                      href="/inner-circle/settings"
+                      href="/inner-circle/dashboard"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -251,31 +251,31 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             Dashboard
           </Link>
           <Link
-            href="/inner-circle/content"
+            href="/inner-circle/dashboard"
             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
           >
             Content Library
           </Link>
           <Link
-            href="/inner-circle/insights"
+            href="/inner-circle/dashboard"
             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
           >
             Insights
           </Link>
           <Link
-            href="/inner-circle/community"
+            href="/inner-circle/dashboard"
             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
           >
             Community
           </Link>
           <Link
-            href="/inner-circle/tools"
+            href="/inner-circle/dashboard"
             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
           >
             Tools
           </Link>
           <Link
-            href="/inner-circle/upgrade"
+            href="/inner-circle/dashboard"
             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors ml-auto"
           >
             Upgrade Plan

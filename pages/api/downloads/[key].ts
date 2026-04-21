@@ -13,20 +13,8 @@ type ProtectedAsset = {
   fileUrl: string;
 };
 
-const ASSETS: Record<string, ProtectedAsset> = {
-  "gmi-q1-2026-pdf": {
-    key: "gmi-q1-2026-pdf",
-    kind: "artifact",
-    requiredTier: "inner-circle",
-    fileUrl: "/assets/downloads/global-market-intelligence-report-q1-2026.pdf",
-  },
-  "gmi-q1-2026-deck": {
-    key: "gmi-q1-2026-deck",
-    kind: "artifact",
-    requiredTier: "architect",
-    fileUrl: "/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf",
-  },
-};
+// TODO: Add entries here when GMI PDFs are published to public/assets/downloads/
+const ASSETS: Record<string, ProtectedAsset> = {};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {

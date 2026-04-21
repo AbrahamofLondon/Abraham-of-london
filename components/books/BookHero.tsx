@@ -163,7 +163,7 @@ const BookHero: React.FC<BookHeroProps> = ({
                       {lockMessage}
                     </p>
                     <Link
-                      href="/membership"
+                      href="/inner-circle"
                       className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-amber-600 to-amber-700 text-white font-semibold hover:from-amber-700 hover:to-amber-800 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       Join Inner Circle
