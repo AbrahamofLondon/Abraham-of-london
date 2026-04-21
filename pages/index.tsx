@@ -219,11 +219,15 @@ function Panel({
     <div
       className={cn("relative overflow-hidden border", className)}
       style={{
-        borderColor: gold ? "var(--ds-accent-soft)" : "var(--ds-border)",
-        backgroundColor: gold ? "var(--ds-accent-soft)" : "var(--ds-panel-alt)",
+        borderColor: gold ? "rgba(240, 185, 79, 0.24)" : "var(--ds-border)",
+        backgroundColor: gold
+          ? "rgba(240, 185, 79, 0.055)"
+          : surface === "card"
+            ? "var(--ds-panel-alt)"
+            : "var(--ds-panel)",
         boxShadow: gold
-          ? "0 0 90px -35px var(--ds-accent-soft)"
-          : "var(--ds-shadow-xl)",
+          ? "inset 0 1px 0 rgba(255,255,255,0.045)"
+          : "inset 0 1px 0 rgba(255,255,255,0.035), 0 1px 0 rgba(255,255,255,0.025)",
       }}
     >
       <div
@@ -234,9 +238,22 @@ function Panel({
             : "linear-gradient(to right, transparent, var(--ds-border), transparent)",
         }}
       />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.016),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.026),transparent_55%)]" />
       <div className="relative z-10">{children}</div>
     </div>
+  );
+}
+
+function ScanFragments({ items, className = "" }: { items: string[]; className?: string }) {
+  return (
+    <ul className={cn("mt-4 space-y-2.5", className)}>
+      {items.map((item) => (
+        <li key={item} className="flex max-w-[65ch] items-start gap-2.5 text-[13.5px] leading-[1.75] ds-text-muted">
+          <span className="mt-[0.68em] h-1 w-1 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -370,7 +387,7 @@ function SectionHeader({
       </Eyebrow>
       <h2
         className={cn(
-          "mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.95] tracking-[-0.025em] ds-text",
+          "mt-4 font-['Cormorant_Garamond',Georgia,serif] font-normal leading-[1.02] tracking-[0em] ds-text",
           large
             ? smaller
               ? "text-[1.75rem] md:text-3xl lg:text-[2.6rem]"
@@ -383,7 +400,7 @@ function SectionHeader({
         {title}
       </h2>
       {description && (
-        <p className={cn("mt-4 text-[14px] leading-[1.75] ds-text-muted", center && "mx-auto max-w-2xl")}>
+        <p className={cn("mt-4 max-w-[65ch] text-[14px] leading-[1.85] ds-text-muted", center && "mx-auto")}>
           {description}
         </p>
       )}
@@ -608,8 +625,8 @@ function HeroSection({
 
             {/* Hero message with commanding phrasing */}
             <motion.p
-              className="mt-14 max-w-[32ch] font-['Cormorant_Garamond',Georgia,serif] font-light leading-[1.6] ds-text"
-              style={{ fontSize: "clamp(1.1rem, 2.1vw, 1.4rem)", opacity: 0.92 }}
+              className="mt-14 max-w-[42ch] text-[15px] font-normal leading-[1.85] ds-text"
+              style={{ fontSize: "clamp(1rem, 1.7vw, 1.25rem)", opacity: 0.92 }}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 0.92, y: 0 }}
               transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -809,7 +826,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                         {item.title}
                       </span>
                     </div>
-                    <p className="mt-2 text-[13px] leading-relaxed ds-text-subtle">{item.body}</p>
+                    <p className="mt-2 max-w-[58ch] text-[13px] leading-[1.8] ds-text-muted">{item.body}</p>
                   </div>
                 </Link>
               </motion.div>
@@ -973,7 +990,7 @@ function FlagshipIntelligence({ report }: { report: QuarterlyReport | null }) {
               >
                 {title}
               </h3>
-              <p className="mt-4 text-[13.5px] leading-relaxed ds-text-muted">{description}</p>
+              <p className="mt-4 max-w-[62ch] text-[13.5px] leading-[1.85] ds-text-muted">{description}</p>
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {["Public orientation", "Institutional edition", "Boardroom PDF"].map((tag) => (
@@ -1061,7 +1078,7 @@ function FlagshipIntelligence({ report }: { report: QuarterlyReport | null }) {
                   }}
                 >
                   <TrendingUp className="mt-0.5 h-3.5 w-3.5 shrink-0 ds-accent" />
-                  <span className="text-[12px] leading-relaxed ds-text-muted">{f}</span>
+                  <span className="text-[12px] leading-[1.75] ds-text-muted">{f}</span>
                 </motion.div>
               ))}
             </div>
@@ -1120,11 +1137,12 @@ function FlagshipAdvisory() {
                 <span className="ds-text-muted">to decision-grade output.</span>
               </h3>
 
-              <p className="mt-4 text-[13.5px] leading-relaxed ds-text-muted">
-                The governed layer between raw diagnostic assessment and private mandate work.
-                A structured intake produces a board-grade report. The point is not to sound wise.
-                The point is to read the institutional condition precisely enough that the decision
-                path stops hiding.
+              <p className="mt-4 max-w-[62ch] text-[13.5px] leading-[1.85] ds-text-muted">
+                The governed layer between raw assessment and private mandate work.
+                <br />
+                Structured intake produces a board-grade report.
+                <br />
+                The decision path stops hiding.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -1380,8 +1398,8 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
               >
                 {item.title}
               </h3>
-              {item.subtitle && <p className="mt-4 text-[13.5px] leading-relaxed text-white/40">{item.subtitle}</p>}
-              {item.description && <p className="mt-3 text-[12.5px] leading-relaxed text-white/32">{item.description}</p>}
+              {item.subtitle && <p className="mt-4 max-w-[62ch] text-[13.5px] leading-[1.85] ds-text-muted">{item.subtitle}</p>}
+              {item.description && <p className="mt-3 max-w-[62ch] text-[12.5px] leading-[1.85] ds-text-muted">{item.description}</p>}
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
@@ -1448,7 +1466,7 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                     backgroundColor: "var(--ds-panel)",
                   }}
                 >
-                  <span className="flex items-center gap-3 text-[12px] text-white/45">
+                  <span className="flex items-center gap-3 text-[12px] ds-text-muted">
                     <Download className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.56 }} />
                     Premium PDF
                   </span>
@@ -1467,7 +1485,7 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                     backgroundColor: "var(--ds-panel)",
                   }}
                 >
-                  <span className="flex items-center gap-3 text-[12px] text-white/45">
+                  <span className="flex items-center gap-3 text-[12px] ds-text-muted">
                     <BookOpen className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.56 }} />
                     EPUB edition
                   </span>
@@ -1485,7 +1503,7 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                   backgroundColor: "var(--ds-panel)",
                 }}
               >
-                <span className="flex items-center gap-3 text-[12px] text-white/45">
+                <span className="flex items-center gap-3 text-[12px] ds-text-muted">
                   <FileText className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.56 }} />
                   Citation record
                 </span>
@@ -1526,7 +1544,7 @@ function PubCard({ item }: { item: PublicationItem }) {
           {item.title}
         </h3>
 
-        {item.description && <p className="mt-3 text-[12.5px] leading-relaxed text-white/38">{item.description}</p>}
+        {item.description && <p className="mt-3 max-w-[60ch] text-[12.5px] leading-[1.8] ds-text-muted">{item.description}</p>}
 
         <div className="mt-5 flex flex-wrap gap-3">
           <Link
@@ -1593,7 +1611,7 @@ function PlaybookCard({ item }: { item: PlaybookItem }) {
           {item.title}
         </h3>
 
-        {item.description && <p className="mt-3 text-[12.5px] leading-relaxed text-white/38">{item.description}</p>}
+        {item.description && <p className="mt-3 max-w-[60ch] text-[12.5px] leading-[1.8] ds-text-muted">{item.description}</p>}
 
         <div className="mt-5">
           <Link
@@ -1714,7 +1732,7 @@ function DiagnosticLadder() {
                     {p.title}
                   </h3>
 
-                  <p className="mt-3 text-[12.5px] leading-relaxed text-white/35 transition-colors group-hover:text-white/50">
+                  <p className="mt-3 max-w-[58ch] text-[12.5px] leading-[1.8] ds-text-muted transition-colors group-hover:text-white/80">
                     {p.body}
                   </p>
                 </div>
@@ -1770,9 +1788,10 @@ function EscalationClose() {
               </span>
             </h2>
 
-            <p className="mx-auto mt-6 max-w-lg text-[14.5px] leading-[1.85] text-white/35">
-              The diagnostic ladder surfaces the correct entry point. Products for
-              interpretation. Advisory for situations where interpretation is insufficient.
+            <p className="mx-auto mt-6 max-w-[60ch] text-[14.5px] leading-[1.85] ds-text-muted">
+              The diagnostic ladder surfaces the correct entry point.
+              <br />
+              Products for interpretation. Advisory when interpretation is insufficient.
             </p>
 
             <div className="mt-11 flex flex-wrap justify-center gap-3">
@@ -1887,18 +1906,21 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
             }}
           >
             Structured evidence in.
-            <span style={{ color: "rgba(184,184,184,0.72)" }}> Decision-ready position out.</span>
+            <span className="ds-text-muted"> Decision-ready position out.</span>
           </h1>
 
           <p
-            className="mt-2.5 font-['Cormorant_Garamond',Georgia,serif] font-light italic sm:mt-3"
-            style={{ fontSize: "1rem", lineHeight: 1.45, color: "rgba(184,184,184,0.85)" }}
+            className="mt-3 max-w-[54ch] text-[15px] font-normal leading-[1.8] ds-text-muted sm:mt-4"
           >
-            Diagnostic evidence produces a governed executive brief: financial exposure, priority stack, and next action.
+            Diagnostic evidence becomes a governed executive brief.
+            <br />
+            Financial exposure. Priority stack. Next action.
           </p>
 
-          <p className="mt-3 max-w-[48ch] text-[13.5px] leading-[1.55] sm:mt-4 sm:text-[14px]" style={{ color: "#B8B8B8" }}>
-            Start with a 6-minute diagnostic. The system accumulates evidence across stages and produces Executive Reporting when consequence must be priced.
+          <p className="mt-4 max-w-[58ch] text-[14px] leading-[1.85] ds-text-muted">
+            Start with a 6-minute diagnostic.
+            <br />
+            Escalate only when consequence must be priced.
           </p>
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -1906,9 +1928,9 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
               href="/diagnostics/constitutional-diagnostic"
               className="group inline-flex w-full items-center justify-between gap-3 border px-5 py-3.5 transition-all duration-200 hover:-translate-y-0.5 sm:w-auto sm:justify-center"
               style={{
-                borderColor: "rgba(201,169,110,0.45)",
-                backgroundColor: "rgba(201,169,110,0.16)",
-                color: "#F5F5F5",
+                borderColor: "rgba(240,185,79,0.58)",
+                backgroundColor: "rgba(240,185,79,0.22)",
+                color: "var(--text-primary)",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "8.5px",
                 letterSpacing: "0.18em",
@@ -1931,7 +1953,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
               fontSize: "8px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: "rgba(184,184,184,0.80)",
+              color: "var(--text-secondary)",
             }}
           >
             Free to start. No subscription. No commitment.
@@ -1944,7 +1966,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
           <div ref={cardsRef} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
             <Link
               href="/diagnostics/purpose-alignment"
-              className="group min-w-0 border border-white/[0.10] bg-white/[0.03] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06] sm:p-5"
+              className="group min-w-0 border border-white/[0.12] bg-white/[0.04] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06] sm:p-5"
               onClick={() => trackHeroClick("personal")}
             >
               <div className="flex items-start gap-3">
@@ -1958,7 +1980,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                   Your decisions feel off — start here
                 </div>
               </div>
-              <p className="mt-2.5 text-[13px] leading-[1.55]" style={{ color: "#B8B8B8" }}>
+              <p className="mt-2.5 text-[13px] leading-[1.8] ds-text-muted">
                 Identify where your decisions are breaking down — and why.
               </p>
               <div className="mt-3 inline-flex items-center gap-2 border-b border-white/20 pb-1 transition-colors group-hover:border-white/45" style={{
@@ -1973,7 +1995,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
             <Link
               href="/diagnostics/constitutional-diagnostic"
-              className="group min-w-0 border border-white/[0.10] bg-white/[0.03] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06] sm:p-5"
+              className="group min-w-0 border border-white/[0.12] bg-white/[0.04] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06] sm:p-5"
               onClick={() => trackHeroClick("institutional")}
             >
               <div className="flex items-start gap-3">
@@ -1987,7 +2009,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                   Something is breaking in the business — start here
                 </div>
               </div>
-              <p className="mt-2.5 text-[13px] leading-[1.55]" style={{ color: "#B8B8B8" }}>
+              <p className="mt-2.5 text-[13px] leading-[1.8] ds-text-muted">
                 Diagnose structural failure, misalignment, and execution risk.
               </p>
               <div className="mt-3 inline-flex items-center gap-2 border-b pb-1 transition-colors group-hover:border-[#C9A96E]/70" style={{
@@ -2004,9 +2026,9 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
           {/* Start here — routing panel */}
           <div
-            className="mt-3 overflow-hidden border border-white/[0.06] opacity-85"
+            className="mt-3 overflow-hidden border border-white/[0.12]"
             style={{
-              background: "rgba(0,0,0,0.30)",
+              background: "rgba(255,255,255,0.04)",
               backdropFilter: "blur(8px)",
             }}
           >
@@ -2017,7 +2039,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                   fontSize: "7px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
-                  color: "rgba(184,184,184,0.52)",
+                  color: "var(--text-muted)",
                 }}
               >
                 If neither option fits exactly
@@ -2048,11 +2070,11 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                     />
                     <div className="flex-1 min-w-0">
                       <p
-                        className="leading-[1.45] transition-colors duration-150 truncate"
+                        className="leading-[1.65] transition-colors duration-150"
                         style={{
                           fontSize: "11.5px",
-                          color: item.tier === "personal" ? "rgba(245,245,245,0.66)" : "rgba(184,184,184,0.64)",
-                          fontWeight: item.tier === "personal" ? 500 : 350,
+                          color: "var(--text-secondary)",
+                          fontWeight: 500,
                         }}
                       >
                         {item.trigger}
@@ -2078,8 +2100,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
           {/* Reassurance line */}
           <p
-            className="mt-3 text-[12px] leading-[1.55]"
-            style={{ color: "rgba(184,184,184,0.62)" }}
+            className="mt-3 text-[12px] leading-[1.8] ds-text-muted"
           >
             You will know within minutes whether this is accurate. If it isn&rsquo;t, stop there.
           </p>
@@ -2098,7 +2119,7 @@ function WhatThisPlatformIs() {
           <>
             Diagnostics identify condition.
             <br />
-            <span className="text-white/35">Executive Reporting states position and consequence.</span>
+            <span className="ds-text-muted">Executive Reporting states position and consequence.</span>
           </>
         }
         description="A governed system that turns structured diagnostic evidence into a decision-ready executive brief — position, financial exposure, priority stack, and next action."
@@ -2107,10 +2128,10 @@ function WhatThisPlatformIs() {
 
       <div className="mt-8 grid gap-3 lg:grid-cols-4">
         {[
-          ["Diagnose", "Surface what is structurally wrong — in decisions, team alignment, or institutional architecture."],
-          ["Classify", "Compute trajectory, readiness, and failure modes. Structural classifications, not scores."],
+          ["Diagnose", "Surface the structural problem: decision drift, team misalignment, or institutional pressure."],
+          ["Classify", "Name the trajectory, readiness state, and active failure modes."],
           ["Escalate", "Move only when signal, authority, and consequence justify it."],
-          ["Report", "Executive Reporting translates evidence into position, exposure, and priority stack."],
+          ["Report", "Translate evidence into position, exposure, priority stack, and next action."],
         ].map(([title, body]) => (
           <Panel key={title} surface="lift">
             <div className="p-6">
@@ -2125,7 +2146,7 @@ function WhatThisPlatformIs() {
               >
                 {title}
               </div>
-              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{body}</p>
+              <p className="mt-4 max-w-[60ch] text-[14px] leading-[1.85] ds-text-muted">{body}</p>
             </div>
           </Panel>
         ))}
@@ -2152,7 +2173,11 @@ function HowItWorksLadder() {
       href: "/diagnostics/constitutional-diagnostic",
       cta: "Start diagnostic",
       effort: "6 minutes · Free",
-      explanation: "Constitutional entry point. Identifies structural condition, pressure, authority posture, and failure mode density.",
+      explanation: [
+        "Constitutional entry point.",
+        "Identifies structural condition.",
+        "Reads pressure, authority posture, and failure mode density.",
+      ],
       outcome: "Route decision (STRATEGY / DIAGNOSTIC / WATCH) with confidence score and rationale.",
     },
     {
@@ -2160,7 +2185,11 @@ function HowItWorksLadder() {
       href: "/diagnostics",
       cta: "Explore assessments",
       effort: "10-25 minutes · Free",
-      explanation: "Team perception gap analysis and institutional stress test. Strengthens evidence for Executive Reporting.",
+      explanation: [
+        "Team perception gap analysis.",
+        "Institutional stress test.",
+        "Strengthens the evidence base for Executive Reporting.",
+      ],
       outcome: "Perception gaps, fragility classification, enterprise pressure map, escalation routing.",
     },
     {
@@ -2168,7 +2197,11 @@ function HowItWorksLadder() {
       href: "/diagnostics/executive-reporting",
       cta: "View Executive Reporting",
       effort: "£95 · One-time",
-      explanation: "The governed executive brief. Takes accumulated diagnostic evidence and produces a decision-ready position.",
+      explanation: [
+        "The governed executive brief.",
+        "Uses accumulated diagnostic evidence.",
+        "Produces a decision-ready position.",
+      ],
       outcome: "Financial exposure, governed priority stack, position statement, trajectory outlook.",
     },
     {
@@ -2176,7 +2209,10 @@ function HowItWorksLadder() {
       href: "/strategy-room",
       cta: "View Strategy Room",
       effort: "£395",
-      explanation: "Escalation environment. Opens when constitutional evidence warrants governed intervention.",
+      explanation: [
+        "Escalation environment.",
+        "Opens only when constitutional evidence warrants governed intervention.",
+      ],
       outcome: "Decision architecture, mandate development, intervention framework.",
     },
   ];
@@ -2189,10 +2225,10 @@ function HowItWorksLadder() {
           <>
             Free diagnostics build evidence.
             <br />
-            <span className="text-white/35">Executive Reporting is the destination.</span>
+            <span className="ds-text-muted">Executive Reporting is the destination.</span>
           </>
         }
-        description="The route is earned by signal, seriousness, and authority. Free stages come first. Escalation into the governed executive brief happens only when the evidence justifies it."
+        description="Signal comes first. Free stages build the evidence. Executive Reporting opens when the evidence justifies a governed brief."
         large
       />
 
@@ -2210,9 +2246,10 @@ function HowItWorksLadder() {
             >
               Personal path
             </div>
-            <p className="mt-3 max-w-3xl text-[14px] leading-[1.8] ds-text-muted">
-              Purpose Alignment reads the person before the Constitutional Diagnostic
-              reads the organisation. A parallel entry point.
+            <p className="mt-3 max-w-[62ch] text-[14px] leading-[1.85] ds-text-muted">
+              Purpose Alignment reads the person first.
+              <br />
+              Constitutional Diagnostic reads the organisation.
             </p>
           </div>
           <Link
@@ -2242,8 +2279,8 @@ function HowItWorksLadder() {
                 </div>
                 <div className="text-[11px] ds-text-subtle">{stage.effort}</div>
               </div>
-              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{stage.explanation}</p>
-              <p className="mt-3 text-[13px] leading-[1.75] ds-text-subtle">
+              <ScanFragments items={stage.explanation} />
+              <p className="mt-4 max-w-[62ch] text-[13px] leading-[1.8] ds-text-muted">
                 <span className="ds-text">Outcome:</span> {stage.outcome}
               </p>
               <div className="mt-4">
@@ -2270,10 +2307,10 @@ function WhoThisIsFor() {
               <>
                 Built for operators
                 <br />
-                <span className="text-white/35">carrying real consequence.</span>
+                <span className="ds-text-muted">carrying real consequence.</span>
               </>
             }
-            description="For founders, executives, and institutional leaders facing structural problems where the cost of inaction is real and the next decision matters."
+            description="For founders, executives, and institutional leaders facing structural problems where inaction has a real cost."
           />
           <div className="mt-6 space-y-2.5">
             {[
@@ -2285,7 +2322,7 @@ function WhoThisIsFor() {
             ].map((trigger) => (
               <div key={trigger} className="flex items-start gap-2.5">
                 <span className="mt-1.5 h-1 w-1 rounded-full shrink-0" style={{ backgroundColor: "var(--ds-accent)", opacity: 0.65 }} />
-                <p className="text-[13.5px] leading-[1.6] ds-text-muted">{trigger}</p>
+                <p className="text-[13.5px] leading-[1.8] ds-text-muted">{trigger}</p>
               </div>
             ))}
           </div>
@@ -2304,9 +2341,16 @@ function WhoThisIsFor() {
               >
                 What you receive
               </div>
-              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">
-                An executive report: position statement, financial exposure estimate,
-                governed priority stack, failure mode identification, and directed next action.
+              <ScanFragments
+                items={[
+                  "Position statement.",
+                  "Financial exposure estimate.",
+                  "Governed priority stack.",
+                  "Failure mode identification.",
+                  "Directed next action.",
+                ]}
+              />
+              <p className="mt-4 max-w-[60ch] text-[14px] leading-[1.85] ds-text-muted">
                 Board-grade. Derived from your specific evidence.
               </p>
             </div>
@@ -2319,14 +2363,15 @@ function WhoThisIsFor() {
                   fontSize: "8px",
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
-                  color: "rgba(184,184,184,0.50)",
+                  color: "var(--text-muted)",
                 }}
               >
                 Poor Fit
               </div>
-              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">
+              <p className="mt-4 max-w-[60ch] text-[14px] leading-[1.85] ds-text-muted">
                 Poor fit when the situation is low-stakes, exploratory, or purely informational.
-                The system is built for decisions where clarity has operational consequence.
+                <br />
+                Built for decisions where clarity has operational consequence.
               </p>
             </div>
           </Panel>
@@ -2376,10 +2421,10 @@ function ContentLibrarySection({
           <>
             Depth, doctrine,
             <br />
-            <span className="text-white/35">and applied tools.</span>
+            <span className="ds-text-muted">and applied tools.</span>
           </>
         }
-        description="The diagnostic system is not assembled from borrowed parts. Below is the body of work it is built on — available for verification, deeper reading, and operational use."
+        description="The body of work behind the diagnostic system. Doctrine, analysis, and tools for verification and operational use."
         large
       />
 
@@ -2409,7 +2454,7 @@ function ContentLibrarySection({
                       {title}
                       <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                     </Link>
-                    <p className="mt-2 text-[13px] leading-[1.65] ds-text-muted">{body}</p>
+                    <p className="mt-2 max-w-[56ch] text-[13px] leading-[1.8] ds-text-muted">{body}</p>
                   </div>
                 ))}
               </div>
@@ -2490,28 +2535,28 @@ function ContentLibrarySection({
             The model behind the diagnostic system
           </div>
           <h3
-            className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light italic leading-[1.05]"
+            className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-normal italic leading-[1.08]"
             style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", color: "rgba(255,255,255,0.92)" }}
           >
             The Architecture
             <span style={{ color: "var(--ds-accent)" }}> of Human Purpose</span>
           </h3>
           <p
-            className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light italic"
+            className="mt-4 font-['Cormorant_Garamond',Georgia,serif] font-normal italic"
             style={{
               fontSize: "1rem",
-              lineHeight: 1.6,
-              color: "rgba(255,255,255,0.50)",
+              lineHeight: 1.8,
+              color: "var(--text-secondary)",
               borderLeft: "2px solid rgba(201,169,110,0.25)",
               paddingLeft: "1rem",
             }}
           >
             &ldquo;Human flourishing is not accidental. It is architectural.&rdquo;
           </p>
-          <p className="mt-4 text-[13.5px] leading-[1.7] ds-text-muted">
-            This is the framework the system uses to classify, interpret, and govern its outputs.
-            Purpose, governance, formation, and legacy become operating disciplines,
-            not abstract aspirations.
+          <p className="mt-4 max-w-[62ch] text-[13.5px] leading-[1.85] ds-text-muted">
+            The framework used to classify, interpret, and govern outputs.
+            <br />
+            Purpose, governance, formation, and legacy become operating disciplines.
           </p>
           <div className="mt-5">
             <Link
@@ -2549,9 +2594,10 @@ function ContentLibrarySection({
           >
             The Canon — applied doctrine
           </div>
-          <p className="mt-4 text-[13.5px] leading-[1.7] ds-text-muted">
-            Foundational frameworks applied to governance, execution, leadership,
-            and institutional integrity. The thinking that precedes the diagnostic engine.
+          <p className="mt-4 max-w-[60ch] text-[13.5px] leading-[1.85] ds-text-muted">
+            Foundational frameworks for governance, execution, leadership, and institutional integrity.
+            <br />
+            The thinking that precedes the diagnostic engine.
           </p>
           <div className="mt-5">
             <Link
@@ -2621,10 +2667,14 @@ function ProofLayer() {
               </div>
             </div>
             <div style={{ padding: "1.25rem 1.75rem 1.5rem" }}>
-              <p className="text-[13.5px] leading-[1.65]" style={{ color: "#B8B8B8" }}>
-                Stabilise governance cadence within 30 days. Decision authority is not ordered — three concurrent owners are producing conflicting mandates. Execution layer is compensating with informal authority, accelerating drift.
+              <p className="max-w-[62ch] text-[13.5px] leading-[1.85] ds-text-muted">
+                Stabilise governance cadence within 30 days.
+                <br />
+                Three concurrent owners are producing conflicting mandates.
+                <br />
+                Execution is compensating with informal authority.
               </p>
-              <p className="mt-4 border-t border-white/[0.08] pt-4 text-[12.5px] leading-[1.6]" style={{ color: "#F87171", fontWeight: 700 }}>
+              <p className="mt-4 border-t border-white/[0.08] pt-4 text-[12.5px] leading-[1.8]" style={{ color: "#F87171", fontWeight: 700 }}>
                 Without intervention, conditions like this typically deteriorate within 30–90 days.
               </p>
             </div>
@@ -2646,7 +2696,7 @@ function ProofLayer() {
             Observed outcomes
           </div>
           <ObservedOutcomesBlock />
-          <p className="mt-4 text-[13px] leading-[1.6]" style={{ color: "rgba(184,184,184,0.70)" }}>
+          <p className="mt-4 max-w-[60ch] text-[13px] leading-[1.85] ds-text-muted">
             The system does not improve outcomes directly. It makes the correct action visible.
           </p>
         </div>
@@ -2680,7 +2730,7 @@ function ProofLayer() {
               >
                 Method
               </div>
-              <p className="text-[13.5px] leading-[1.65]" style={{ color: "rgba(184,184,184,0.78)" }}>
+              <p className="max-w-[60ch] text-[13.5px] leading-[1.85] ds-text-muted">
                 See how the system captures signal, classifies condition, and governs interpretation.
               </p>
             </div>
@@ -2718,12 +2768,14 @@ function HomeDecisionSection() {
           style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
         >
           Executive Reporting is the destination.
-          <span className="text-white/35"> Strategy Room is the escalation.</span>
+          <span className="ds-text-muted"> Strategy Room is the escalation.</span>
         </h2>
-        <p className="mt-4 max-w-2xl text-[14.5px] leading-[1.75] ds-text-muted">
-          The free diagnostic ladder accumulates evidence. Executive Reporting translates
-          that evidence into a governed executive brief. Strategy Room opens only when
-          the constitutional signal warrants direct intervention.
+        <p className="mt-4 max-w-[62ch] text-[14.5px] leading-[1.85] ds-text-muted">
+          Free diagnostics accumulate evidence.
+          <br />
+          Executive Reporting translates that evidence into a governed brief.
+          <br />
+          Strategy Room opens only when direct intervention is warranted.
         </p>
       </div>
 
@@ -2744,14 +2796,16 @@ function HomeDecisionSection() {
             <h3 className="mt-4 font-['Cormorant_Garamond',Georgia,serif] text-[1.5rem] font-light leading-[1.1] ds-text">
               Understand the consequence
             </h3>
-            <p className="mt-3 text-[14px] leading-[1.75] ds-text-muted">
-              Translates structural strain into financial exposure, institutional
-              constraint, and a governed priority stack. Board-grade interpretation
-              from your actual inputs.
-            </p>
+            <ScanFragments
+              items={[
+                "Translates structural strain into financial exposure.",
+                "Names the institutional constraint.",
+                "Builds a governed priority stack from your actual inputs.",
+              ]}
+            />
             <div className="mt-5 space-y-1.5">
               {["One-time · £95 · No subscription", "Derived from your specific evidence", "Deterministic logic — no generic output"].map((line) => (
-                <p key={line} className="text-[12px] leading-[1.6] ds-text-subtle">{line}</p>
+                <p key={line} className="text-[12px] leading-[1.7] ds-text-muted">{line}</p>
               ))}
             </div>
             <div className="mt-5">
@@ -2781,14 +2835,16 @@ function HomeDecisionSection() {
             <h3 className="mt-4 font-['Cormorant_Garamond',Georgia,serif] text-[1.5rem] font-light leading-[1.1] ds-text">
               Decide what to do
             </h3>
-            <p className="mt-3 text-[14px] leading-[1.75] ds-text-muted">
-              Governed intervention logic for situations where a real decision with
-              consequence is already on the table. Decision architecture, trade-offs,
-              owners, and execution cadence.
-            </p>
+            <ScanFragments
+              items={[
+                "For decisions where consequence is already on the table.",
+                "Clarifies trade-offs, owners, and execution cadence.",
+                "Turns intervention into decision architecture.",
+              ]}
+            />
             <div className="mt-5 space-y-1.5">
               {["Not exploratory — not theoretical", "Qualified by signal and seriousness", "Escalation is earned, not purchased"].map((line) => (
-                <p key={line} className="text-[12px] leading-[1.6] ds-text-subtle">{line}</p>
+                <p key={line} className="text-[12px] leading-[1.7] ds-text-muted">{line}</p>
               ))}
             </div>
             <div className="mt-5">
@@ -2816,10 +2872,12 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
             <h2 className="mt-5 font-['Cormorant_Garamond',Georgia,serif] text-4xl font-light leading-[0.95] tracking-[-0.03em] ds-text">
               Start the diagnostic. Build the evidence. Get the brief.
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.9] ds-text-muted">
-              Start with a free diagnostic if you need signal. Go directly to Executive Reporting
-              if the evidence is already established. Strategy Room opens only when the constitutional
-              signal warrants intervention.
+            <p className="mx-auto mt-6 max-w-[62ch] text-[15px] leading-[1.9] ds-text-muted">
+              Need signal? Start with a free diagnostic.
+              <br />
+              Evidence already established? Go to Executive Reporting.
+              <br />
+              Strategy Room opens only when intervention is warranted.
             </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-3">

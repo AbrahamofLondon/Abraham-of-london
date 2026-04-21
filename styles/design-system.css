@@ -110,13 +110,20 @@
 :root {
   --ds-background: var(--ds-neutral-900);
   --ds-background-muted: var(--ds-neutral-800);
-  --ds-panel: rgba(255, 255, 255, 0.05);
-  --ds-panel-alt: rgba(255, 255, 255, 0.08);
-  --ds-border: rgba(255, 255, 255, 0.10);
-  --ds-border-strong: rgba(255, 255, 255, 0.16);
-  --ds-text: rgba(255, 255, 255, 0.94);
-  --ds-text-muted: rgba(255, 255, 255, 0.72);
-  --ds-text-subtle: rgba(255, 255, 255, 0.56);
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-muted: rgba(255, 255, 255, 0.58);
+  --surface-read: rgba(255, 255, 255, 0.04);
+  --surface-read-strong: rgba(255, 255, 255, 0.06);
+  --border-read: rgba(255, 255, 255, 0.12);
+  --border-read-strong: rgba(255, 255, 255, 0.18);
+  --ds-panel: var(--surface-read);
+  --ds-panel-alt: var(--surface-read-strong);
+  --ds-border: var(--border-read);
+  --ds-border-strong: var(--border-read-strong);
+  --ds-text: var(--text-primary);
+  --ds-text-muted: var(--text-secondary);
+  --ds-text-subtle: var(--text-muted);
   --ds-link: var(--ds-amber-300);
   --ds-accent: var(--ds-amber-400);
   --ds-accent-soft: rgba(240, 185, 79, 0.20);

@@ -39,9 +39,15 @@
   --aol-dark:   #0b0b0b;
   --aol-darker: #060606;
   --aol-border: rgba(255, 255, 255, 0.12);
-  --aol-surface: rgba(255, 255, 255, 0.02);
-  --aol-surface-2: rgba(255, 255, 255, 0.03);
+  --aol-surface: rgba(255, 255, 255, 0.04);
+  --aol-surface-2: rgba(255, 255, 255, 0.06);
   --aol-watermark: "";
+
+  /* Executive readability standard */
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-muted: rgba(255, 255, 255, 0.58);
+  --readable-measure: 65ch;
 
   /* ── Typography ──────────────────────────────────────────────────────────── */
   /* These are picked up by Tailwind fontFamily config */
@@ -75,9 +81,21 @@
     color: rgb(var(--aol-ink));
     /* Prefer CSS var; fall back through the stack */
     font-family: var(--font-family-sans);
+    font-weight: 400;
+    line-height: 1.8;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  p,
+  li {
+    max-width: var(--readable-measure);
+  }
+
+  p {
+    color: var(--text-secondary);
+    line-height: 1.82;
   }
 
   #__next {
