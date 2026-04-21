@@ -4,7 +4,10 @@ import { NextResponse } from "next/server";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
-import { createStrategyRoomSession } from "@/lib/strategy-room/persistence";
+import {
+  createStrategyRoomSession,
+  getStrategyRoomPersistenceBranch,
+} from "@/lib/strategy-room/persistence";
 import { randomUUID } from "crypto";
 
 function makeSessionKey(): string {
@@ -87,14 +90,10 @@ function logStrategyRoomInitError(stage: string, error: unknown): void {
 }
 
 export async function POST(request: Request) {
-  return Response.json({
-    success: false,
-    reason: "TRACE_STRATEGY_ROOM_INIT_V2",
-    source: "app/api/strategy-room/session/init/route.ts",
-    commit: "ae2b7de91",
-  });
-
   let stage = "parse_request";
+  let persistenceBranch:
+    | ReturnType<typeof getStrategyRoomPersistenceBranch>
+    | undefined;
 
   try {
     const body = await request.json();
@@ -182,6 +181,7 @@ export async function POST(request: Request) {
     });
 
     stage = "persist_strategy_room_session";
+    persistenceBranch = getStrategyRoomPersistenceBranch();
     await createStrategyRoomSession({
       sessionKey,
       status: "active",
@@ -207,6 +207,7 @@ export async function POST(request: Request) {
         marketRiskBand: assembled.constitution.marketRiskBand,
       },
       canonical,
+      persistenceBranch,
     });
   } catch (error) {
     logStrategyRoomInitError(stage, error);
@@ -221,6 +222,7 @@ export async function POST(request: Request) {
         error: "Failed to initialize governed session.",
         reason: "STRATEGY_ROOM_SESSION_INIT_FAILED",
         stage,
+        persistenceBranch,
         diagnostic: diagnostic ?? null,
       },
       { status: 500 }

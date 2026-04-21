@@ -49,6 +49,24 @@ function isPostgresDatabaseUrl(): boolean {
   return url.startsWith("postgres://") || url.startsWith("postgresql://");
 }
 
+export function getStrategyRoomPersistenceBranch():
+  | "sqlite_prisma"
+  | "postgres_neon"
+  | "missing_database_url"
+  | "unsupported_database_url" {
+  const url = getDatabaseUrl();
+  if (!url) {
+    return "missing_database_url";
+  }
+  if (url.startsWith("file:")) {
+    return "sqlite_prisma";
+  }
+  if (isPostgresDatabaseUrl()) {
+    return "postgres_neon";
+  }
+  return "unsupported_database_url";
+}
+
 function makePersistenceId(prefix: string): string {
   return `${prefix}_${randomUUID().replace(/-/g, "")}`;
 }
@@ -126,9 +144,15 @@ async function ensurePostgresStrategyRoomTables(): Promise<void> {
 export async function createStrategyRoomSession(
   data: StrategyRoomSessionData
 ): Promise<void> {
-  if (!isPostgresDatabaseUrl()) {
+  const branch = getStrategyRoomPersistenceBranch();
+
+  if (branch === "sqlite_prisma") {
     await prisma.strategyRoomSession.create({ data });
     return;
+  }
+
+  if (branch !== "postgres_neon") {
+    throw new Error(`Strategy Room persistence unsupported branch: ${branch}`);
   }
 
   await ensurePostgresStrategyRoomTables();
