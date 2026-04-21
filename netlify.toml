@@ -124,6 +124,24 @@
   to = "/vault/:splat"
   status = 301
 
+[[redirects]]
+  from = "/insights/:slug"
+  to = "/blog/:slug"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact-us"
+  to = "/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/vault/lexicon/:slug"
+  to = "/lexicon/:slug"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
