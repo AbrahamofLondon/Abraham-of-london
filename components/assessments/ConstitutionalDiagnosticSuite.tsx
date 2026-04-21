@@ -75,15 +75,15 @@ type Question = {
 };
 
 const QUESTIONS: readonly Question[] = [
-  { id: "q1",  text: "Where we spend time and money matches what we say matters.",    domain: "coherence" },
+  { id: "q1",  text: "If you followed the money and the calendar for the last quarter, you would see exactly what this organisation actually values — and it matches what leadership says.", domain: "coherence" },
   { id: "q2",  text: "Everyone knows who has the final say — and that person actually decides.", domain: "authority" },
   { id: "q3",  text: "The environment has changed faster than the organisation has adapted.", domain: "environment", reverse: true },
-  { id: "q4",  text: "We keep drifting from what we said we were going to do.",       domain: "execution",   reverse: true },
-  { id: "q5",  text: "Trust between leadership and execution is intact.",             domain: "trust" },
+  { id: "q4",  text: "If you asked ten people in the organisation what the actual priority is right now, you would get at least three different answers.", domain: "execution", reverse: true },
+  { id: "q5",  text: "The people doing the work believe that leadership understands what it is actually asking of them.", domain: "trust" },
   { id: "q6",  text: "Things that should be simple keep getting slowed down from the inside.", domain: "friction", reverse: true },
   { id: "q7",  text: "There is one person who is clearly responsible for this decision — and they have the authority to make it.", domain: "authority" },
-  { id: "q8",  text: "If we get this wrong, the damage will be real and significant.", domain: "stakes" },
-  { id: "q9",  text: "We have tried to fix this before and it did not work — and the reasons go deeper than people or effort.", domain: "pattern", reverse: true },
+  { id: "q8",  text: "There is a specific decision in front of us right now where getting it wrong would cost something we cannot recover easily.", domain: "stakes" },
+  { id: "q9",  text: "The last time we tried to fix this, the fix itself failed — and we still have not addressed why.", domain: "pattern", reverse: true },
   { id: "q10", text: "Outside forces — market, regulators, competitors — are making this impossible to ignore.", domain: "pressure" },
 ] as const;
 
@@ -286,36 +286,46 @@ function readinessColor(tier: string): string {
 
 function verdictNarrative(decision: ConstitutionalDecision, scores: DerivedScores): string {
   const { route } = decision;
-  const { posture, readinessTier, authorityType, coherence, trust } = scores;
+  const { posture, readinessTier, authorityType, coherence, trust, friction, governance } = scores;
+
+  // Identify the central tension for mirror-back
+  const tensions: string[] = [];
+  if (coherence > 60 && friction >= 55) tensions.push("high coherence on paper but visible execution friction");
+  if (trust > 60 && authorityType !== "DIRECT") tensions.push("trust present but authority unclear — people trust the mission but not who decides");
+  if (scores.pressure >= 65 && coherence < 50) tensions.push("intense external pressure on a system that is not internally coherent");
+  if (governance > 60 && friction >= 55) tensions.push("governance intent is present but the operating reality contradicts it");
+  const tensionLine = tensions.length > 0
+    ? ` The central tension: ${tensions[0]}.`
+    : "";
 
   if (route === "STRATEGY") {
-    return `The system reads as sufficiently ordered for direct strategic engagement. Coherence is above threshold, authority is sufficiently ordered, and the current posture (${posture.toLowerCase()}) can bear intervention without losing judgment. The threshold has been met for escalation. The next move is structured strategy, not further clarification.`;
+    return `The constitutional reading is clear: this system can bear direct strategic engagement. Coherence reads at ${coherence}%, authority is ${authorityType.toLowerCase()}, and the posture (${posture.toLowerCase()}) is stable enough to carry intervention without losing judgment.${tensionLine} The next move is structured strategy — not further clarification.`;
   }
 
   if (route === "REJECT") {
     if (decision.disqualifiersTriggered.some(d => /clarity|coherence/i.test(d))) {
-      return `The signal is not yet coherent enough to carry constitutional judgment. Pressure may be present, but pressure without coherence displaces judgment rather than sharpening it. The threshold for escalation has not been met because the problem has not been reduced to a stable form. The next move is clarification, not escalation.`;
+      return `This is not a strategy problem yet — it is a coherence problem. Coherence reads at ${coherence}%, which means the signal has not been reduced to a stable form. Pressure may be real, but pressure without coherence displaces judgment rather than sharpening it.${tensionLine} The next move is clarification: make the problem nameable before attempting to solve it.`;
     }
     if (decision.disqualifiersTriggered.some(d => /authority/i.test(d))) {
-      return `Authority is not sufficiently ordered for private intervention. A matter can be serious and still remain constitutionally unready if no decision-bearing sponsor can carry it. The threshold fails at the level of authority, not importance. The next move is to establish mandate and re-enter with ordered sponsorship.`;
+      return `The problem may be real but there is no one who can carry the decision. Authority reads as ${authorityType.toLowerCase()}. A matter can be serious and still remain constitutionally unready if no single person has both the responsibility and the power to act.${tensionLine} The next move is to establish who decides — then re-enter.`;
     }
     if (decision.disqualifiersTriggered.some(d => /seriousness|mandate/i.test(d))) {
-      return `The signal does not yet register as decision-grade. There may be concern, but the current state reads as exploratory rather than constitutionally consequential. The threshold for premium escalation is not reached while seriousness remains this thin. The next move is foundational diagnostic work, not private advisory.`;
+      return `The signal reads as exploratory rather than consequential. There may be concern, but it has not yet reached the threshold where the cost of inaction is material.${tensionLine} The next move is foundational diagnostic work — the system needs to confirm whether this is a real structural problem or a passing discomfort.`;
     }
-    return `Multiple constitutional thresholds are failing at once. This usually indicates disorder in purpose, authority, or coherence rather than a single isolated defect. The threshold for escalation is closed while those conditions remain unordered. The next move is diagnostic correction before any higher route is attempted.`;
+    return `Multiple constitutional thresholds are failing simultaneously. This usually means the disorder is in purpose, authority, or coherence — not a single defect but a systemic condition. Coherence: ${coherence}%. Trust: ${trust}%. Governance: ${governance}%.${tensionLine} The next move is diagnostic correction before escalation.`;
   }
 
   // DIAGNOSTIC
   if (authorityType === "UNCLEAR") {
-    return `The signal is real, but authority is not sufficiently ordered. Coherence reads at ${coherence}% and trust at ${trust}%, which means the issue is not absence of strain but instability in who can carry judgment. The threshold for direct escalation fails at the authority layer. The next move is diagnostic work that distinguishes governance failure from simple ambiguity.`;
+    return `The strain is real — coherence reads at ${coherence}% and trust at ${trust}%. But authority is unclear, which means no one can cleanly carry the judgment this situation requires.${tensionLine} This is not an importance problem. It is a governance problem. The next move is diagnostic work that separates authority confusion from the underlying structural issue.`;
   }
   if (posture === "DISORDERED" || posture === "MISALIGNED") {
-    return `The posture reads as ${posture.toLowerCase()}, which means the system is carrying constitutional strain. Consequence may already be material, but strain at this level distorts correction if it is rushed. The threshold for direct intervention is not met while coherence remains this unstable. The next move is formal diagnosis before any premium escalation.`;
+    return `The posture reads as ${posture.toLowerCase()}. The system is carrying constitutional strain, and consequence may already be material. But strain at this level distorts correction if it is rushed — fixing a disordered system requires more precision than fixing a drifting one.${tensionLine} The next move is formal diagnosis before any escalation.`;
   }
   if (readinessTier === "FRAGILE" || readinessTier === "EMERGING") {
-    return `Readiness is currently ${readinessTier.toLowerCase()}, which means the system can register strain but cannot yet bear heavy intervention cleanly. Consequence is visible, but readiness this low turns escalation into additional friction. The threshold closes at the level of load-bearing capacity, not relevance. The next move is ordered preparation through the diagnostic layer.`;
+    return `Readiness is ${readinessTier.toLowerCase()}. The system can register that something is wrong, but it cannot yet bear heavy intervention without creating new friction.${tensionLine} The consequence is visible. The capacity to absorb correction is not. The next move is preparation through the diagnostic layer — build the capacity, then apply the pressure.`;
   }
-  return `The system is carrying a genuine signal, but the constitutional reading remains below strategy threshold. There is enough coherence to proceed, yet not enough ordering to justify direct intervention without further reading. The threshold is close, but not met. The next move is diagnostic refinement to determine whether escalation should open.`;
+  return `The system is carrying a genuine signal. Coherence: ${coherence}%. Trust: ${trust}%. The reading is below strategy threshold but close.${tensionLine} There is enough order to proceed with diagnostic refinement — the question now is whether one more pass reveals the conditions for escalation, or confirms that this level of intervention is sufficient.`;
 }
 
 function buildFailureModes(decision: ConstitutionalDecision, scores: DerivedScores): string[] {
@@ -449,6 +459,8 @@ export default function ConstitutionalDiagnosticSuite() {
   const [index,   setIndex]   = React.useState(0);
   const [answers, setAnswers] = React.useState<Record<string, Answer>>({});
   const [verdict, setVerdict] = React.useState(false);
+  const [reading, setReading] = React.useState(false);
+  const [readingText, setReadingText] = React.useState("");
 
   const current        = QUESTIONS[index]!;
   const currentAnswer  = answers[current.id] || { resonance: 5 as Likert, certainty: 5 as Likert };
@@ -510,6 +522,28 @@ export default function ConstitutionalDiagnosticSuite() {
       window.removeEventListener("beforeunload", handleUnload);
     };
   }, [verdict, decision.route]);
+
+  function revealVerdict() {
+    if (verdict || reading) return;
+    setReading(true);
+    const lines = [
+      "Reading where your answers converge.",
+      "Testing whether this is a coherence problem, a trust problem, or a pressure problem.",
+      "Separating the visible symptom from the structural strain beneath it.",
+    ];
+    let i = 0;
+    setReadingText(lines[0]!);
+    const interval = setInterval(() => {
+      i++;
+      if (i < lines.length) {
+        setReadingText(lines[i]!);
+      } else {
+        clearInterval(interval);
+        setReading(false);
+        setVerdict(true);
+      }
+    }, 900);
+  }
 
   function setResonance(v: number) {
     setAnswers(prev => {
@@ -723,7 +757,7 @@ export default function ConstitutionalDiagnosticSuite() {
                       ) : (
                         <button
                           type="button"
-                          onClick={() => complete && setVerdict(true)}
+                          onClick={() => complete && revealVerdict()}
                           disabled={!complete}
                           className="inline-flex items-center gap-2 transition-all duration-300"
                           style={{
@@ -836,7 +870,7 @@ export default function ConstitutionalDiagnosticSuite() {
                   {complete && (
                     <button
                       type="button"
-                      onClick={() => setVerdict(true)}
+                      onClick={() => revealVerdict()}
                       className="w-full inline-flex items-center justify-center gap-2 transition-all duration-300"
                       style={{
                         padding: "12px 20px",
@@ -856,6 +890,45 @@ export default function ConstitutionalDiagnosticSuite() {
                 </div>
               </div>
             </div>
+          </motion.div>
+        )}
+
+        {/* ── READING TRANSITION ─────────────────────────────────────────── */}
+        {reading && (
+          <motion.div
+            key="reading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="py-20 text-center"
+          >
+            <div style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.32em",
+              textTransform: "uppercase",
+              color: `${GOLD}90`,
+              marginBottom: "1.5rem",
+            }}>
+              Constitutional reading
+            </div>
+            <motion.p
+              key={readingText}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "1.15rem",
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.55)",
+                fontStyle: "italic",
+                maxWidth: "36ch",
+                margin: "0 auto",
+              }}
+            >
+              {readingText}
+            </motion.p>
           </motion.div>
         )}
 

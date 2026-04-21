@@ -184,62 +184,75 @@ function derivePatternReading(
   const highVariance  = result.domainProfiles.some(d => d.percent >= 70) &&
                         result.domainProfiles.some(d => d.percent < 40);
 
-  // Primary pattern reading — specific to the combination of weakest domains
+  // ── OPENING DIAGNOSIS — names the kind of problem, not just the band ──
   let primaryPattern = "";
   let patternTitle   = "";
+
+  // Find strongest statement for mirror-back
+  const strongest = [...scored].sort((a, b) => b.weighted - a.weighted)[0] ?? null;
+
+  const wkPct = result.domainProfiles.find(d => d.domain === weakestDomain)?.percent ?? 0;
+  const skPct = result.domainProfiles.find(d => d.domain === secondWeakest)?.percent ?? 0;
+  const bandWord = result.coherenceBand === "FRAGMENTED" ? "fragmented" : result.coherenceBand === "DRIFTING" ? "drifting" : result.coherenceBand === "ALIGNED" ? "aligned" : "sovereign";
 
   if (weakestDomain === "identity" || weakestDomain === "decision") {
     if (weakestDomain === "identity" && secondWeakest === "decision") {
       patternTitle   = "Mandate without architecture";
-      primaryPattern = "Both Identity and Decision Integrity are below baseline. This is not a performance problem — it is a direction problem. Decisions are being made, but not from a coherent centre. The downstream effect will be misalignment between what you say matters and where time and resource actually go.";
+      primaryPattern = `Your alignment reads as ${bandWord}. This is not a motivation problem or a capability problem — it is a direction problem. Identity scored ${wkPct}% and Decision Integrity scored ${skPct}%. Together, these create a specific condition: decisions are being made, but not from a coherent centre. The downstream effect is predictable — where time and money go will keep drifting from what you say matters.`;
     } else if (weakestDomain === "identity") {
       patternTitle   = "Unclear mandate driving downstream confusion";
-      primaryPattern = "Identity & Mandate is your lowest domain. This is the root layer of the alignment stack — everything downstream is affected by clarity here. Weak scores in Identity typically surface as difficulty prioritising, overcommitment, and decisions that feel right individually but do not cohere over time.";
+      primaryPattern = `Your alignment reads as ${bandWord}, with Identity & Mandate at ${wkPct}% — the lowest in your profile. This is the root layer. When identity is unclear, everything downstream becomes harder to prioritise. The pattern is not poor decisions individually — it is decisions that do not cohere over time, because they are not anchored to a stable mandate.`;
     } else {
       patternTitle   = "Principled intent, pressure-driven execution";
-      primaryPattern = "Decision Integrity is your lowest domain while Identity shows relative strength. This is the pattern of someone who knows what they stand for but is not yet translating that into consistent decision architecture. The gap between stated values and recent decisions is the structural problem.";
+      primaryPattern = `Your alignment reads as ${bandWord}. You know what you stand for — Identity is relatively strong — but Decision Integrity scored ${wkPct}%. This is the pattern of someone whose values are clear but whose recent decisions do not reflect them under pressure. The gap between stated principle and actual choices is the structural problem.`;
     }
   } else if (weakestDomain === "environment" || weakestDomain === "behaviour") {
     if (weakestDomain === "environment" && secondWeakest === "behaviour") {
       patternTitle   = "Environmental drag producing behavioural erosion";
-      primaryPattern = "Both Environmental Alignment and Operational Behaviour are below baseline. The environment is not reinforcing your direction — and the behavioural evidence confirms it. This combination means that even clear intention will struggle to hold because the operating conditions are producing friction faster than discipline can absorb it.";
+      primaryPattern = `Your alignment reads as ${bandWord}. Environment scored ${wkPct}% and Behaviour scored ${skPct}%. The environment is not reinforcing your direction — and the behavioural evidence confirms it. Even clear intention will struggle to hold when operating conditions produce friction faster than discipline can absorb.`;
     } else if (weakestDomain === "environment") {
       patternTitle   = "Environment working against direction";
-      primaryPattern = "Your lowest domain is Environmental Alignment. The relationships, inputs, and operating contexts around you are not reinforcing your stated direction. This is a structural problem, not a motivation problem. You cannot consistently outperform an environment that is working against you.";
+      primaryPattern = `Your alignment reads as ${bandWord}, with Environmental Alignment at ${wkPct}%. The relationships, inputs, and operating contexts around you are not reinforcing your stated direction. This is a structural problem, not a willpower problem. You cannot consistently outperform an environment that is working against you.`;
     } else {
       patternTitle   = "Declared priorities not reflected in daily operation";
-      primaryPattern = "Operational Behaviour is your weakest domain. The calendar, habits, and measurable output are not tracking with stated purpose. This is the most observable form of misalignment — it shows up in how time is spent, not just in what is believed. It is also the most correctable, once the identity layer is stable.";
+      primaryPattern = `Your alignment reads as ${bandWord}. Operational Behaviour scored ${wkPct}% — the most observable domain in the system. The calendar, habits, and measurable output are not tracking with stated purpose. This is where intention meets evidence: it shows up in how time is actually spent.`;
     }
   } else if (weakestDomain === "emotional_order") {
     patternTitle   = "Internal instability constraining strategic capacity";
-    primaryPattern = "Emotional & Internal Order is your lowest domain. Under-regulation here costs more than it appears — reactive decisions under pressure, over-dependence on external validation, and slow recovery from disruption are compounding costs that do not appear on any report but determine the quality of everything else.";
+    primaryPattern = `Your alignment reads as ${bandWord}, with Emotional & Internal Order at ${wkPct}%. Under-regulation here is expensive — reactive decisions, dependency on external validation, slow recovery from disruption. These costs do not appear on any report but they determine the quality of everything else.`;
   } else if (weakestDomain === "legacy") {
     patternTitle   = "Operating in the immediate at the expense of the structural";
-    primaryPattern = "Legacy Orientation is your lowest domain. The current operating posture is weighted toward managing the present rather than building a structure that outlasts it. This is not a character deficiency — it is a sequencing problem. But without correction, tactical competence will continue to substitute for strategic architecture.";
+    primaryPattern = `Your alignment reads as ${bandWord}, with Legacy Orientation at ${wkPct}%. The operating posture is weighted toward managing the present rather than building what outlasts it. This is a sequencing problem, not a character one — but without correction, tactical competence will continue to substitute for strategic architecture.`;
   } else {
     patternTitle   = "Distributed misalignment across multiple domains";
-    primaryPattern = "Misalignment is distributed across domains rather than concentrated in one. This pattern is harder to correct than single-domain weakness because there is no single root cause. The work is sequential: stabilise Identity first, then Decision Integrity, then the operational domains.";
+    primaryPattern = `Your alignment reads as ${bandWord}. Misalignment is distributed across domains rather than concentrated in one. There is no single root cause, which makes correction harder. The work is sequential: stabilise Identity first, then Decision Integrity, then the operational domains.`;
   }
 
-  // High variance pattern override
+  // ── TENSION NAMING — the central contradiction in the answers ──
   if (highVariance) {
-    primaryPattern += " The significant gap between your strongest and weakest domains indicates that alignment is situational rather than structural — performing well in some contexts while operating from misalignment in others.";
+    primaryPattern += ` The significant gap between your strongest and weakest domains reveals that your alignment is situational — performing well in some areas while operating from misalignment in others. That inconsistency is itself the tension.`;
   }
 
-  // Urgent statement (the one lowest-weighted answered statement)
+  // ── MIRROR-BACK — reflect the user's actual answer pattern ──
+  if (lowest && strongest && lowest.id !== strongest.id) {
+    const mirrorBack = ` Your sharpest weak signal is "${lowest.statement}" (${lowest.weighted.toFixed(1)} weighted). Your strongest signal is "${strongest.statement}" (${strongest.weighted.toFixed(1)} weighted). The distance between those two points defines your current operating condition.`;
+    primaryPattern += mirrorBack;
+  }
+
+  // ── URGENT STATEMENT — the single sharpest pain point ──
   let urgentStatement: string | null = null;
   if (lowest && lowest.weighted < 3) {
-    urgentStatement = `"${lowest.statement}" — scored ${lowest.resonance}/10 resonance with ${lowest.certainty}/10 certainty. This is your sharpest signal.`;
+    urgentStatement = `"${lowest.statement}" — you scored ${lowest.resonance}/10 resonance with ${lowest.certainty}/10 certainty. This is not a soft weakness. It is the point where your alignment is most visibly failing.`;
   }
 
-  // Uncertainty note (when low resonance meets low certainty — the person isn't sure how bad it is)
+  // ── TENSION NOTE — acknowledged problems vs unexamined blind spots ──
   let uncertaintyNote: string | null = null;
   if (unexaminedWeakness.length > 0 && acknowledgedProblems.length === 0) {
     const q = unexaminedWeakness[0]!;
-    uncertaintyNote = `You scored low on "${q.statement}" with low certainty in your assessment. This is a signal worth examining — uncertainty about a core domain is often more consequential than confident weakness, because it cannot be corrected until it is seen clearly.`;
+    uncertaintyNote = `You scored low on "${q.statement}" — but with low certainty. You are not sure how bad this is. That uncertainty is more dangerous than a known weakness, because you cannot correct what you have not yet seen clearly.`;
   } else if (acknowledgedProblems.length > 0) {
     const q = acknowledgedProblems[0]!;
-    uncertaintyNote = `You scored "${q.statement}" at ${q.resonance}/10 with ${q.certainty}/10 certainty — meaning this is a clearly acknowledged weakness, not a blind spot. That clarity is an asset. Acknowledged problems can be corrected; unexamined ones compound.`;
+    uncertaintyNote = `You scored "${q.statement}" at ${q.resonance}/10 resonance with ${q.certainty}/10 certainty. You know this is failing. That clarity is an asset — acknowledged problems can be corrected. Unexamined ones compound.`;
   }
 
   // First concrete action — domain-specific, not generic
