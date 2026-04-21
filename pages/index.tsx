@@ -139,11 +139,11 @@ const GRAIN_STYLE: React.CSSProperties = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 8 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
 
@@ -183,13 +183,13 @@ function Eyebrow({
   dim?: boolean;
 }) {
   return (
-    <div className={cn("flex items-center gap-3", align === "center" && "justify-center")}>
-      <span className="h-5 w-px" style={{ backgroundColor: "var(--ds-accent)", opacity: 0.55 }} />
+    <div className={cn("flex items-center gap-2.5", align === "center" && "justify-center")}>
+      <span className="h-4 w-px" style={{ backgroundColor: "var(--ds-accent)", opacity: 0.45 }} />
       <span
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
           fontSize: "8px",
-          letterSpacing: "0.40em",
+          letterSpacing: "0.30em",
           textTransform: "uppercase",
           color: dim ? "var(--ds-text-subtle)" : "var(--ds-accent)",
         }}
@@ -305,14 +305,14 @@ function Section({
         className={cn(
           "relative z-10 mx-auto max-w-[1200px] px-6 sm:px-8",
           id === "hero"
-            ? "pb-16 pt-24 sm:pb-20 sm:pt-28 lg:pb-28 lg:pt-32"
+            ? "pb-14 pt-20 sm:pb-16 sm:pt-24 lg:pb-20 lg:pt-28"
             : compact
-              ? "py-16 lg:py-20"
-              : "py-20 lg:py-24",
+              ? "py-12 lg:py-16"
+              : "py-14 lg:py-18",
         )}
       >
         {cap && (
-          <div className="mb-14 flex items-center gap-6">
+          <div className="mb-10 flex items-center gap-6">
             <div className="flex-1">
               <GoldRule soft />
             </div>
@@ -370,24 +370,24 @@ function SectionHeader({
       </Eyebrow>
       <h2
         className={cn(
-          "mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.93] tracking-[-0.028em] ds-text",
+          "mt-4 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.95] tracking-[-0.025em] ds-text",
           large
             ? smaller
-              ? "text-3xl md:text-4xl lg:text-[3.1rem]"
-              : "text-4xl md:text-5xl lg:text-[3.6rem]"
+              ? "text-[1.75rem] md:text-3xl lg:text-[2.6rem]"
+              : "text-3xl md:text-4xl lg:text-[3rem]"
             : smaller
-              ? "text-[1.75rem] md:text-3xl lg:text-4xl"
-              : "text-3xl md:text-4xl lg:text-5xl",
+              ? "text-[1.5rem] md:text-[1.75rem] lg:text-3xl"
+              : "text-[1.75rem] md:text-3xl lg:text-4xl",
         )}
       >
         {title}
       </h2>
       {description && (
-        <p className={cn("mt-5 text-[15px] leading-[1.8] ds-text-muted", center && "mx-auto max-w-2xl")}>
+        <p className={cn("mt-4 text-[14px] leading-[1.75] ds-text-muted", center && "mx-auto max-w-2xl")}>
           {description}
         </p>
       )}
-      <div className={cn("mt-8 w-10", center && "mx-auto")}>
+      <div className={cn("mt-6 w-8", center && "mx-auto")}>
         <GoldRule />
       </div>
     </motion.div>
@@ -2105,12 +2105,12 @@ function WhatThisPlatformIs() {
         large
       />
 
-      <div className="mt-12 grid gap-4 lg:grid-cols-4">
+      <div className="mt-8 grid gap-3 lg:grid-cols-4">
         {[
-          ["Diagnose", "Surface what is actually wrong — in your own decisions, your team's alignment, or your institution's structure."],
-          ["Classify", "The engine computes trajectory, readiness, and failure modes — not just scores, but structural classifications."],
-          ["Escalate", "Move only when the signal, authority, and consequence justify a higher-order container."],
-          ["Intervene", "Executive Reporting and Strategy Room escalation layers — used only when free diagnostics confirm the need."],
+          ["Diagnose", "Surface what is structurally wrong — in decisions, team alignment, or institutional architecture."],
+          ["Classify", "Compute trajectory, readiness, and failure modes. Structural classifications, not scores."],
+          ["Escalate", "Move only when signal, authority, and consequence justify it."],
+          ["Report", "Executive Reporting translates evidence into position, exposure, and priority stack."],
         ].map(([title, body]) => (
           <Panel key={title} surface="lift">
             <div className="p-6">
@@ -2139,7 +2139,7 @@ function WhatThisPlatformIs() {
             Not {item.toLowerCase()}
           </span>
         ))}
-        <span style={{ color: "var(--ds-accent)", opacity: 0.90 }}>It is a governed executive reporting system.</span>
+        <span style={{ color: "var(--ds-text)", opacity: 0.80 }}>It is a governed executive reporting system.</span>
       </div>
     </Section>
   );
@@ -2371,7 +2371,7 @@ function ContentLibrarySection({
   return (
     <Section id="library" variant="void">
       <SectionHeader
-        eyebrow="The library behind the system"
+        eyebrow="Supporting work"
         title={
           <>
             Depth, doctrine,
@@ -2727,9 +2727,9 @@ function HomeDecisionSection() {
         </p>
       </div>
 
-      <div className="mx-auto mt-10 grid max-w-4xl gap-4 md:grid-cols-2">
-        <Panel surface="lift">
-          <div className="p-6">
+      <div className="mx-auto mt-8 grid max-w-4xl gap-4 md:grid-cols-[1.15fr_0.85fr]">
+        <Panel surface="lift" gold>
+          <div className="p-6 md:p-8">
             <div
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -2739,7 +2739,7 @@ function HomeDecisionSection() {
                 color: "var(--ds-accent)",
               }}
             >
-              Executive Reporting · £95
+              Flagship · Executive Reporting · £95
             </div>
             <h3 className="mt-4 font-['Cormorant_Garamond',Georgia,serif] text-[1.5rem] font-light leading-[1.1] ds-text">
               Understand the consequence
@@ -2750,7 +2750,7 @@ function HomeDecisionSection() {
               from your actual inputs.
             </p>
             <div className="mt-5 space-y-1.5">
-              {["One-time analysis — no subscription", "Generated from your actual submission", "If it reads like generic advice, do not proceed"].map((line) => (
+              {["One-time · £95 · No subscription", "Derived from your specific evidence", "Deterministic logic — no generic output"].map((line) => (
                 <p key={line} className="text-[12px] leading-[1.6] ds-text-subtle">{line}</p>
               ))}
             </div>
@@ -2765,7 +2765,7 @@ function HomeDecisionSection() {
           </div>
         </Panel>
 
-        <Panel surface="lift" gold>
+        <Panel surface="lift">
           <div className="p-6">
             <div
               style={{
@@ -2773,10 +2773,10 @@ function HomeDecisionSection() {
                 fontSize: "8px",
                 letterSpacing: "0.26em",
                 textTransform: "uppercase",
-                color: "var(--ds-accent)",
+                color: "var(--ds-text-subtle)",
               }}
             >
-              Strategy Room · £395
+              Escalation · Strategy Room · £395
             </div>
             <h3 className="mt-4 font-['Cormorant_Garamond',Georgia,serif] text-[1.5rem] font-light leading-[1.1] ds-text">
               Decide what to do
@@ -2945,7 +2945,7 @@ const HomePage: NextPage<HomePageProps> = ({
       <HomeDecisionSection />
 
       {/* — mode change: conversion system → content library — */}
-      <Bridge text="diagnostic system · content library" />
+      <Bridge text="supporting body of work" />
 
       {/* 7. The governed library */}
       <ContentLibrarySection

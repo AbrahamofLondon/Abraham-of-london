@@ -9,13 +9,13 @@ const MethodPage: NextPage = () => {
   return (
     <Layout
       title="Method | Abraham of London"
-      description="How the diagnostic intelligence system works — from signal detection to governed intervention."
+      description="How the governed executive reporting system works — from diagnostic evidence through constitutional analysis to a decision-ready executive brief."
       canonicalUrl="/method"
       fullWidth
       headerTransparent
     >
       <Head>
-        <meta name="description" content="How the Abraham of London diagnostic intelligence system works — from signal detection through constitutional analysis to governed intervention." />
+        <meta name="description" content="How the Abraham of London governed executive reporting system works — from diagnostic evidence through constitutional routing to a board-grade executive brief." />
         <meta property="og:type" content="website" />
         <meta name="robots" content="index, follow" />
       </Head>
@@ -40,7 +40,7 @@ const MethodPage: NextPage = () => {
                 color: "rgba(255,255,255,0.92)",
               }}
             >
-              How this system thinks.
+              How this system works.
             </h1>
 
             <p
@@ -55,9 +55,9 @@ const MethodPage: NextPage = () => {
                 maxWidth: "56ch",
               }}
             >
-              Not a personality test. Not a sentiment survey. A structured diagnostic
-              engine built to surface what is actually wrong — and what it will cost
-              if left unresolved.
+              A governed executive reporting system. Structured diagnostic evidence
+              produces a board-grade brief: position, financial exposure, priority
+              stack, and next action.
             </p>
 
             <p
@@ -129,16 +129,16 @@ const MethodPage: NextPage = () => {
           >
             {[
               {
-                label: "Signal detection",
-                body: "Every diagnostic begins by measuring structural condition — not opinion, not mood. The system captures how decisions are actually being made, where authority is exercised, and where execution has drifted from governance.",
+                label: "Evidence accumulation",
+                body: "Diagnostic stages accumulate structured evidence: constitutional posture, team perception gaps, enterprise pressure readings, and failure mode density. Each stage adds to the evidence base. Tension signals persist and escalate across stages when confirmed by multiple sources.",
               },
               {
-                label: "Constitutional analysis",
-                body: "Inputs are evaluated against a constitutional framework: clarity of purpose, coherence of execution, readiness for intervention. The system routes each case to the appropriate depth of analysis based on what the signal actually warrants.",
+                label: "Constitutional routing",
+                body: "Evidence is evaluated against a deterministic constitutional framework — clarity, authority, coherence, readiness. The system routes to STRATEGY, DIAGNOSTIC, or WATCH based on what the evidence actually warrants. No probabilistic guessing. No generic scoring.",
               },
               {
-                label: "Governed interpretation",
-                body: "Results are not generated freely. Every output passes through governance constraints that prevent overreach, premature escalation, or recommendations the situation does not justify. The system will refuse to interpret beyond what the evidence supports.",
+                label: "Governed executive reporting",
+                body: "The flagship output. Takes accumulated evidence plus a structured executive intake and produces a board-grade position: financial exposure, governed priority stack, trajectory outlook. Claim governance prevents the report from stating capabilities the evidence does not support.",
               },
             ].map((item) => (
               <div
@@ -193,42 +193,43 @@ const MethodPage: NextPage = () => {
                 marginBottom: "2rem",
               }}
             >
-              The system operates as an escalation ladder. Each stage increases in depth,
-              precision, and commercial commitment. You begin with free signal detection
-              and escalate only if the situation justifies it.
+              The system operates as a governed evidence ladder. Free diagnostic stages build
+              structural evidence. Executive Reporting is the flagship output — where evidence
+              becomes a decision-ready position. Escalation beyond that is governed by constitutional
+              authority.
             </p>
 
             <div className="space-y-4">
               {[
                 {
-                  stage: "Stage 1",
-                  name: "Purpose Alignment",
-                  access: "Free",
-                  desc: "Personal diagnostic. Identifies where your own decisions are breaking down and why.",
-                },
-                {
-                  stage: "Stage 2",
+                  stage: "Evidence",
                   name: "Constitutional Diagnostic",
                   access: "Free",
-                  desc: "Institutional diagnostic. Measures structural condition across governance, authority, and execution coherence.",
+                  desc: "Entry gate. 10 dual-axis questions across 9 constitutional domains. Routes to STRATEGY, DIAGNOSTIC, or WATCH with confidence score and failure mode density.",
                 },
                 {
-                  stage: "Stage 3",
-                  name: "Team & Enterprise Assessment",
+                  stage: "Evidence",
+                  name: "Team Assessment",
                   access: "Free",
-                  desc: "Extends the diagnosis to team dynamics and enterprise-level pressure. Confirms or challenges the initial signal.",
+                  desc: "Perception gap analysis. Leader View (fast directional read) or Respondent-Based (team-wide campaign with measurable confidence). Strengthens Executive Reporting evidence.",
                 },
                 {
-                  stage: "Stage 4",
+                  stage: "Evidence",
+                  name: "Enterprise Assessment",
+                  access: "Free",
+                  desc: "Institutional stress test. Leadership coherence, governance reliability, execution variance, risk posture. Routes to Executive Reporting or WATCH.",
+                },
+                {
+                  stage: "Flagship",
                   name: "Executive Reporting",
                   access: "£95",
-                  desc: "The first paid interpretation layer. Translates structural strain into financial exposure, institutional consequence, and a governed priority stack.",
+                  desc: "The governed executive brief. Takes accumulated diagnostic evidence, adds structured intake, produces position statement, financial exposure, priority stack, and trajectory outlook.",
                 },
                 {
-                  stage: "Stage 5",
+                  stage: "Escalation",
                   name: "Strategy Room",
                   access: "£395",
-                  desc: "Governed intervention logic. Moves from diagnosis to an ordered path of institutional correction.",
+                  desc: "Governed escalation environment. Opens only when constitutional evidence warrants direct intervention. Decision authority enforcement at the gate.",
                 },
               ].map((s) => (
                 <div
@@ -274,20 +275,20 @@ const MethodPage: NextPage = () => {
             <div className="space-y-6">
               {[
                 {
-                  principle: "The system will not escalate beyond what the evidence supports.",
-                  detail: "If a situation warrants only a diagnostic reading, the system will not recommend paid interpretation. Commercial commitment is gated by signal strength, not sales pressure.",
+                  principle: "Escalation is governed by evidence, not by sales logic.",
+                  detail: "If the evidence warrants only a diagnostic reading, the system will not recommend paid interpretation. Commercial commitment is gated by signal strength and constitutional routing.",
                 },
                 {
-                  principle: "Outputs are governed, not generated.",
-                  detail: "Every recommendation passes through constitutional constraints. The system can refuse to produce output if the inputs do not meet the threshold for responsible interpretation.",
+                  principle: "Claims are governed by proof, not by marketing.",
+                  detail: "The report will not claim benchmarked position without sufficient cohort data, team-wide sentiment without respondent threshold, or monitoring posture without recurring snapshots. A claim governor enforces this at runtime.",
                 },
                 {
-                  principle: "Accuracy is measured, not assumed.",
-                  detail: "Users are invited to evaluate whether the diagnostic accurately reflected their situation. This feedback loop is a design feature, not an afterthought.",
+                  principle: "Team evidence is mode-declared.",
+                  detail: "Leader View (single-person estimate) and Respondent-Based (multi-respondent campaign) are distinct modes. The report states which mode was used and adjusts confidence accordingly. Leader estimate is never presented as team sentiment.",
                 },
                 {
                   principle: "The method is disclosed. The implementation is not.",
-                  detail: "You are entitled to understand how this system thinks. You are not entitled to its scoring thresholds, routing logic, or proprietary analytical models.",
+                  detail: "You are entitled to understand how this system works. You are not entitled to its scoring thresholds, routing logic, or proprietary analytical models.",
                 },
               ].map((g) => (
                 <div key={g.principle}>
@@ -312,10 +313,11 @@ const MethodPage: NextPage = () => {
             </p>
             <div className="space-y-3">
               {[
-                "The diagnostic ladder is structured — free stages precede paid interpretation.",
-                "Escalation is staged — the system will not recommend intervention the evidence does not support.",
-                "Interpretation is governed — outputs pass through constitutional constraints before reaching you.",
-                "Accuracy is measured — after every result, users are asked whether the output reflected reality.",
+                "The evidence ladder is structured — free diagnostic stages precede the paid executive brief.",
+                "Escalation is governed — the system will not recommend intervention the evidence does not support.",
+                "Claims are proof-gated — benchmark, trajectory, team sentiment, and monitoring claims require runtime evidence thresholds.",
+                "Team evidence mode is declared — leader-estimate vs respondent-derived is stated explicitly with confidence.",
+                "Executive Reporting is the flagship — every other product feeds, extends, or supports it.",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <div className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: `${GOLD}70` }} />
@@ -329,20 +331,36 @@ const MethodPage: NextPage = () => {
 
           {/* CTA */}
           <div className="mt-20">
-            <Link
-              href="/diagnostics/purpose-alignment"
-              className="inline-flex items-center gap-2 border-b pb-1 transition-colors hover:border-white/45"
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8.5px",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "rgba(245,245,245,0.70)",
-                borderColor: "rgba(255,255,255,0.20)",
-              }}
-            >
-              Run the diagnostic →
-            </Link>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/diagnostics"
+                className="inline-flex items-center gap-2 border-b pb-1 transition-colors hover:border-white/45"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: `${GOLD}CC`,
+                  borderColor: `${GOLD}40`,
+                }}
+              >
+                Start the diagnostic ladder →
+              </Link>
+              <Link
+                href="/diagnostics/executive-reporting"
+                className="inline-flex items-center gap-2 border-b pb-1 transition-colors hover:border-white/45"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "rgba(245,245,245,0.70)",
+                  borderColor: "rgba(255,255,255,0.20)",
+                }}
+              >
+                View Executive Reporting →
+              </Link>
+            </div>
           </div>
         </section>
       </main>

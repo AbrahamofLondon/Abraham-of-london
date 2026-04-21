@@ -15,36 +15,15 @@ import Script from "next/script";
 import React, { ReactElement, ReactNode, useMemo } from "react";
 import { useRouter } from "next/router";
 import { SessionProvider } from "next-auth/react";
-import { Inter, JetBrains_Mono, Cormorant_Garamond } from "next/font/google";
-
 import "@/styles/globals.css";
 import "@/styles/design-system.css";
 import "@/styles/reader.css";
+import "@/styles/fonts.css";
 import { ThemeScript, ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { InnerCircleProvider } from "@/lib/inner-circle/InnerCircleContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
 import { PDFDashboardProvider } from "@/contexts/PDFDashboardContext";
-
-const aolSans = Inter({
-  subsets: ["latin"],
-  variable: "--font-family-sans",
-  display: "swap",
-});
-
-const aolMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-family-mono",
-  display: "swap",
-});
-
-const aolSerif = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300"],
-  style: ["normal", "italic"],
-  variable: "--font-family-serif",
-  display: "swap",
-});
 
 type ProviderComposerProps = {
   children: ReactNode;
@@ -130,16 +109,7 @@ export default function MyApp({
       ) : null}
 
       <div
-        className={[
-          aolSans.variable,
-          aolMono.variable,
-          aolSerif.variable,
-          "min-h-screen",
-          "bg-[#050505]",
-          "font-sans",
-          "text-white",
-          "antialiased",
-        ].join(" ")}
+        className="min-h-screen bg-[#050505] font-sans text-white antialiased"
       >
         <AppProviders
           session={session}
