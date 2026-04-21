@@ -83,18 +83,21 @@ export default function ActivityFeed({
         <span className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/40">
           {title}
         </span>
-        {loading && (
-          <span className="text-[8px] font-mono text-white/20 animate-pulse">
-            loading...
-          </span>
-        )}
       </div>
+
+      {loading && (
+        <div className="space-y-2 animate-pulse">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-14 border border-white/5 bg-white/[0.02]" />
+          ))}
+        </div>
+      )}
 
       {!loading && entries.length === 0 && (
         <p className="text-[11px] text-white/25 py-4">{emptyMessage}</p>
       )}
 
-      <div className="space-y-2">
+      {!loading && <div className="space-y-2">
         {entries.map((entry) => {
           const Wrapper = entry.href ? "a" : "div";
           const wrapperProps = entry.href
@@ -140,7 +143,7 @@ export default function ActivityFeed({
             </Wrapper>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }

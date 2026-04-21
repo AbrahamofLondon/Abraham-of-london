@@ -1,3 +1,6 @@
+// REFERENCE ONLY — patterns absorbed into components/admin/ActivityFeed.tsx
+// Skeleton loading state extracted. OGR-specific data model replaced with generic FeedEntry.
+// Do not import. Do not wire. Safe to delete when no longer needed as reference.
 "use client";
 
 import React, { useEffect, useState } from "react";
