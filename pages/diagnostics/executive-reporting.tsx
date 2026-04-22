@@ -40,24 +40,24 @@ export default function ExecutiveReportingEntryPage() {
               Flagship · Executive Reporting
             </div>
             <h1 className="mt-4 font-serif text-4xl font-light leading-[0.98] tracking-[-0.04em] text-white md:text-6xl">
-              The governed executive brief.
-              <span className="block text-white/35">Position. Consequence. Priority.</span>
+              The consequence is now priced.
+              <span className="block text-white/35">Decision. Exposure. Priority.</span>
             </h1>
             <p className="mt-5 max-w-2xl font-serif text-lg leading-8 text-white/52">
-              Executive Reporting is the flagship output of the diagnostic system. It takes accumulated
-              constitutional evidence — tension signals, failure modes, authority posture, institutional
-              strain — and produces a board-grade position: financial exposure, institutional constraint,
-              governed priority stack, and trajectory outlook where evidence supports it.
+              Every contradiction identified across your diagnostic stages converges here. The system
+              prices the annual cost of inaction, names the decision you are avoiding, and produces
+              a priority stack that cannot be ignored. This is not a report. It is a governed position
+              with visible math.
             </p>
           </div>
 
           {/* What it uses / what it produces / who it is for */}
           <div className="mb-8 grid gap-4 md:grid-cols-3">
             <div className="border border-white/10 bg-white/[0.025] p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">What it uses</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">What it consumes</p>
               <p className="mt-3 text-sm leading-6 text-white/58">
-                Constitutional diagnostic evidence, team assessment findings, enterprise pressure readings,
-                and a structured executive intake. Evidence quality is assessed and surfaced in the report.
+                Every contradiction from prior stages. Your stated decision, constraint, delay cost,
+                and prior attempts. The evidence graph accumulated across your diagnostic journey.
               </p>
             </div>
             <div className="border border-white/10 bg-white/[0.025] p-5">

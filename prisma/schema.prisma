@@ -2086,10 +2086,67 @@ model DiagnosticJourney {
   stages              DiagnosticStageRecord[]
   threadSnapshots     DiagnosticThreadSnapshot[]
   monitoringSnapshots MonitoringSnapshot[]
+  evidenceNodes       DiagnosticEvidenceNode[]
+  decisionObjects     DiagnosticDecisionObject[]
 
   @@index([subjectKey])
   @@index([email])
   @@index([status])
+}
+
+model DiagnosticEvidenceNode {
+  id           String   @id @default(cuid())
+  journeyId    String?
+  assessmentId String?
+  sessionId    String?
+  userId       String?
+  email        String?
+  sourceStage  String
+  kind         String
+  label        String
+  summary      String
+  evidenceText String?
+  confidence   Float    @default(0.5)
+  severity     String   @default("medium")
+  payload      Json?
+  createdAt    DateTime @default(now())
+
+  journey      DiagnosticJourney? @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+
+  @@index([journeyId])
+  @@index([email])
+  @@index([sourceStage])
+  @@index([kind])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+model DiagnosticDecisionObject {
+  id                String   @id @default(cuid())
+  journeyId          String?
+  decisionKey        String?
+  sessionId          String?
+  userId             String?
+  email              String?
+  sourceStage        String
+  decisionText       String
+  constraintText     String?
+  priorAttemptText   String?
+  costOfDelayText    String?
+  stakeholderText    String?
+  affectedDomain     String?
+  normalized         Json?
+  confidence         Float    @default(0.5)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  journey            DiagnosticJourney? @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+
+  @@index([journeyId])
+  @@index([email])
+  @@index([decisionKey])
+  @@index([sourceStage])
+  @@index([createdAt])
 }
 
 model DiagnosticStageRecord {

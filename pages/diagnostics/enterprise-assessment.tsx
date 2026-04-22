@@ -669,7 +669,37 @@ export default function EnterpriseAssessmentPage() {
       respondent: { name: identity.name || null, email: identity.email || null, organisation: identity.organisation || null, role: identity.role || null },
       answers: answerList, notes: identity.notes || null,
       summary: { totalScore, maxScore, pct: totalPct, severity: severityFromPct(totalPct), band: bandFromPct(totalPct), sectionScores: BLOCKS.map(b => buildSectionScore({ sectionId: b.id, title: b.title, answers: answerList.filter(a => a.sectionId === b.id) })) },
-      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct, recentDecision: identity.recentDecision, decisionSignal: reading?.decisionSignal ?? null },
+      metadata: {
+        ui: "enterprise-assessment",
+        nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting",
+        nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute,
+        teamAlignmentPct,
+        recentDecision: identity.recentDecision,
+        decisionSignal: reading?.decisionSignal ?? null,
+        authorityInput: reading ? {
+          condition: reading.patternTitle,
+          contradiction: reading.primaryReading,
+          decisionText: identity.recentDecision,
+          constraintText: identity.notes,
+          costOfDelayText: reading.escalationNote,
+          stakeholderText: identity.organisation,
+          affectedDomain: reading.dominantFailure ?? sections.sort((a, b) => a.pct - b.pct)[0]?.title ?? "enterprise",
+          firstMove: reading.firstAction,
+          skippedConsequence: reading.escalationNote,
+          escalationCondition: reading.route === "EXECUTIVE_REPORTING"
+            ? "Proceed to Executive Reporting because enterprise consequence requires governed interpretation."
+            : "Monitor and escalate if the same failure evidence appears in two or more domains.",
+          riskScore: Math.min(100, Math.max(0, 100 - totalPct + (reading.decisionSignal.structuralRisk * 0.35))),
+          formula: "(100 - enterprise percent) + decision structural risk x 0.35",
+          reasoning: [
+            `Enterprise score: ${totalPct}%`,
+            `Decision clarity: ${reading.decisionSignal.clarityScore}%`,
+            `Decision structural risk: ${reading.decisionSignal.structuralRisk}%`,
+            `Dominant failure: ${reading.dominantFailure ?? "none"}`,
+          ],
+          confidence: Math.min(0.88, 0.54 + (identity.recentDecision.trim().length >= 160 ? 0.14 : 0) + (teamAlignmentPct !== null ? 0.08 : 0)),
+        } : null,
+      },
     });
     setSubmitResult(res);
 

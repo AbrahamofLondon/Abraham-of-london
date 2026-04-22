@@ -1,5 +1,6 @@
 // app/api/assessments/team/run/route.ts
 import { NextResponse } from "next/server";
+import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 
 type TeamRow = {
@@ -63,6 +64,32 @@ export async function POST(request: Request) {
       varianceIndex >= 20 || trustGap >= 20 || avgFriction >= 65
         ? "EXECUTIVE_REPORTING"
         : "CONSTITUTIONAL";
+    const authorityPacket = buildGenericAuthorityPacket({
+      stage: "team",
+      condition: nextLayer === "EXECUTIVE_REPORTING" ? "Team divergence has executive consequence" : "Team variance remains locally governable",
+      contradiction: `Authority variance ${varianceIndex}, trust gap ${trustGap}, operating friction ${avgFriction}.`,
+      decisionText: `Decide whether team variance can be corrected locally or must be escalated.`,
+      constraintText: `Rows submitted: ${rows.length}`,
+      costOfDelayText: avgFriction >= 65 ? "Operating friction is already high enough to slow coordination." : "Delay risks making variance normal.",
+      stakeholderText: organisation,
+      affectedDomain: varianceIndex >= trustGap ? "authority" : "trust",
+      firstMove: varianceIndex >= trustGap
+        ? "Run a decision-rights audit across the highest-variance teams."
+        : "Run individual trust signal interviews before group correction.",
+      skippedConsequence: "Leadership continues making decisions from a map the team does not share.",
+      escalationCondition: nextLayer === "EXECUTIVE_REPORTING"
+        ? "Escalate now because variance, trust, or friction crossed executive threshold."
+        : "Escalate if the same gap widens on the next measurement.",
+      riskScore: Math.min(100, varianceIndex + trustGap + Math.round(avgFriction / 2)),
+      formula: "authority variance + trust gap + average friction / 2",
+      reasoning: [
+        `Authority variance: ${varianceIndex}`,
+        `Trust gap: ${trustGap}`,
+        `Average friction: ${avgFriction}`,
+      ],
+      confidence: rows.reduce((sum, row) => sum + n(row.respondents), 0) >= 3 ? 0.58 : 0.38,
+      payload: { rows, nextLayer },
+    });
 
     const result = {
       ok: true,
@@ -97,6 +124,8 @@ export async function POST(request: Request) {
         avgFriction >= 65 ? "operating friction" : "",
       ].filter(Boolean),
       routeDecision: { nextLayer },
+      evidenceNodes: authorityPacket.nodes,
+      decisionObject: authorityPacket.decisionObject,
       snapshot: {
         timestamp: new Date().toISOString(),
         stage: "team",

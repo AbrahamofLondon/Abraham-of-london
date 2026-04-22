@@ -354,7 +354,7 @@ export default function DiagnosticsIndexPage() {
                   fontStyle: "italic",
                 }}
               >
-                Choose your starting signal.
+                Where is the contradiction?
               </h1>
               <p
                 style={{
@@ -367,7 +367,7 @@ export default function DiagnosticsIndexPage() {
                   maxWidth: "56ch",
                 }}
               >
-                A staged evidence ladder that identifies structural condition, accumulates tension across stages, and escalates only when consequence justifies it. Each stage produces evidence. Executive Reporting is where that evidence becomes a governed position.
+                Each stage identifies contradictions between what you claim and what is evidenced. Patterns that persist across stages are structural, not accidental. When consequence must be priced, the system escalates.
               </p>
               <div className="mt-6 grid gap-3 md:grid-cols-2">
                 {STARTING_SIGNALS.map((signal) => (
@@ -484,8 +484,8 @@ export default function DiagnosticsIndexPage() {
                   color: "rgba(255,255,255,0.38)",
                 }}
               >
-                <p>Diagnostics identify condition. Team assessment strengthens evidence. Enterprise assessment stress-tests the institution.</p>
-                <p>Executive Reporting forces position and consequence. WATCH governs observation. Strategy Room is the escalation environment. Monitoring extends the flagship over time.</p>
+                <p>Diagnostics identify contradiction. Team assessment measures perception divergence. Enterprise assessment prices institutional drag.</p>
+                <p>Executive Reporting forces a decision with priced consequence. Strategy Room sequences the intervention. Each layer increases what is at stake.</p>
               </div>
             </div>
           </div>

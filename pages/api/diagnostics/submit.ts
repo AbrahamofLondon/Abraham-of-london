@@ -19,6 +19,8 @@ import {
 import { pushToCRM } from "@/lib/server/crm/pushToCRM";
 import { hubspotSync } from "@/lib/hubspot/sync";
 import { saveDiagnosticRecord } from "@/lib/server/diagnostics/store";
+import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
+import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 
 import type {
   DiagnosticAnswer,
@@ -165,6 +167,57 @@ function getDashboardHrefForTier(tier: string): string {
     return "/inner-circle/dashboard?tab=diagnostics";
   }
   return "/dashboard?tab=diagnostics";
+}
+
+function stageFromKind(kind: string): Parameters<typeof persistDiagnosticStage>[0]["stage"] | null {
+  const safeKind = safeString(kind).toLowerCase();
+  if (safeKind === "team-alignment" || safeKind === "team-assessment") return "team";
+  if (safeKind === "enterprise" || safeKind === "enterprise-assessment") return "enterprise";
+  if (safeKind === "executive-reporting") return "executive_reporting";
+  if (safeKind === "purpose-alignment") return "purpose_alignment";
+  if (safeKind === "constitutional" || safeKind === "constitutional-diagnostic") return "constitutional";
+  return null;
+}
+
+function readAuthorityPacket(stage: Parameters<typeof persistDiagnosticStage>[0]["stage"] | null, metadata: unknown): {
+  nodes: any[];
+  decisionObject: any | null;
+} {
+  if (!isObject(metadata)) return { nodes: [], decisionObject: null };
+  const packet = isObject(metadata.authorityPacket) ? metadata.authorityPacket : null;
+  if (packet) {
+    const nodes = Array.isArray(packet.nodes) ? packet.nodes : [];
+    const decisionObject = isObject(packet.decisionObject) ? packet.decisionObject : null;
+    return { nodes, decisionObject };
+  }
+
+  const authorityInput = isObject(metadata.authorityInput) ? metadata.authorityInput : null;
+  if (!stage || !authorityInput) return { nodes: [], decisionObject: null };
+
+  const generated = buildGenericAuthorityPacket({
+    stage,
+    condition: safeString(authorityInput.condition, "Diagnostic condition"),
+    contradiction: safeString(authorityInput.contradiction, "Contradiction evidence recorded."),
+    decisionText: safeString(authorityInput.decisionText) || null,
+    constraintText: safeString(authorityInput.constraintText) || null,
+    priorAttemptText: safeString(authorityInput.priorAttemptText) || null,
+    costOfDelayText: safeString(authorityInput.costOfDelayText) || null,
+    stakeholderText: safeString(authorityInput.stakeholderText) || null,
+    affectedDomain: safeString(authorityInput.affectedDomain) || null,
+    firstMove: safeString(authorityInput.firstMove, "Name the first corrective move and owner."),
+    skippedConsequence: safeString(authorityInput.skippedConsequence, "The condition remains unpriced and unmanaged."),
+    escalationCondition: safeString(authorityInput.escalationCondition, "Escalate if the contradiction repeats in the next stage."),
+    riskScore: typeof authorityInput.riskScore === "number" ? authorityInput.riskScore : 50,
+    formula: safeString(authorityInput.formula, "stage risk score"),
+    reasoning: Array.isArray(authorityInput.reasoning)
+      ? authorityInput.reasoning.map(String).filter(Boolean)
+      : [],
+    confidence: typeof authorityInput.confidence === "number" ? authorityInput.confidence : 0.65,
+    payload: isObject(authorityInput.payload) ? authorityInput.payload : undefined,
+  });
+  const nodes = generated.nodes;
+  const decisionObject = generated.decisionObject;
+  return { nodes, decisionObject };
 }
 
 type ActorContext = {
@@ -318,6 +371,32 @@ export default async function handler(
       },
       report: null,
     });
+
+    const stage = stageFromKind(payload.kind);
+    const authority = readAuthorityPacket(stage, payload.metadata);
+    if (stage && (authority.nodes.length || authority.decisionObject)) {
+      await persistDiagnosticStage({
+        email: safeString(payload.respondent?.email) || actor.email || null,
+        organisation: safeString(payload.respondent?.organisation) || null,
+        stage,
+        payload: {
+          diagnosticRef,
+          payload,
+          authorityPacket: isObject(payload.metadata?.authorityPacket)
+            ? payload.metadata?.authorityPacket
+            : null,
+        },
+        tensions: authority.nodes
+          .filter((node) => isObject(node) && safeString(node.kind) === "contradiction")
+          .map((node) => safeString((node as Record<string, unknown>).label))
+          .filter(Boolean),
+        routeDecision: payload.metadata?.nextRoute
+          ? { nextRoute: payload.metadata.nextRoute, diagnosticRef }
+          : { diagnosticRef },
+        evidenceNodes: authority.nodes,
+        decisionObject: authority.decisionObject,
+      });
+    }
   } catch (error) {
     console.error("[diagnostics.submit] persistence failure", error);
     return res.status(500).json({

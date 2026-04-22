@@ -10,6 +10,8 @@ import {
   listPurposeAlignmentAssessments,
 } from "@/lib/alignment/repository";
 import { getOrCreatePurposeAlignmentSessionKey } from "@/lib/alignment/session";
+import { buildPurposeAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
+import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -69,14 +71,15 @@ export async function POST(req: NextRequest) {
 
     validatePurposeAlignmentAnswers(parsed.answers);
 
+    const sessionKey = await getOrCreatePurposeAlignmentSessionKey();
+    const context = {
+      reflections: parsed.reflections ?? null,
+    };
+
     const result = scorePurposeProfile({
       answers: parsed.answers,
-      context: {
-        reflections: parsed.reflections ?? null,
-      },
+      context,
     });
-
-    const sessionKey = await getOrCreatePurposeAlignmentSessionKey();
 
     const assessmentId = await createPurposeAlignmentAssessment({
       sessionKey,
@@ -87,10 +90,41 @@ export async function POST(req: NextRequest) {
       result,
     });
 
+    const authorityPacket = buildPurposeAuthorityPacket(result, context);
+    await persistDiagnosticStage({
+      subjectId: sessionKey,
+      stage: "purpose_alignment",
+      payload: {
+        result,
+        authorityPacket,
+      },
+      tensions: authorityPacket.nodes
+        .filter((node) => node.kind === "contradiction" || node.kind === "escalation_trigger")
+        .map((node) => node.label),
+      routeDecision: {
+        nextStep: result.routingRecommendation?.href ?? null,
+        condition: authorityPacket.condition,
+      },
+      evidenceNodes: authorityPacket.nodes,
+      decisionObject: authorityPacket.decisionObject,
+      snapshot: {
+        timestamp: new Date().toISOString(),
+        stage: "purpose_alignment",
+        coreMetrics: {
+          percent: result.percent,
+          consequenceRisk: Number(authorityPacket.consequence.value ?? 0),
+        },
+        tensions: [authorityPacket.contradiction],
+        escalationLevel: result.routingRecommendation?.spilloverLikely ? 2 : 1,
+        directive: authorityPacket.action.firstMove,
+      },
+    });
+
     return NextResponse.json({
       ok: true,
       assessmentId,
       result,
+      authorityPacket,
       isPreview: true,
       nextSteps: {
         exploreStrategyRoom: "/strategy-room",

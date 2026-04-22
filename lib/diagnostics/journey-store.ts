@@ -1,6 +1,10 @@
 import { createHash } from "crypto";
 
 import { prisma } from "@/lib/prisma";
+import type {
+  CanonicalDecisionObject,
+  DiagnosticEvidenceNodeInput,
+} from "@/lib/diagnostics/evidence-graph";
 import type { DiagnosticSnapshot } from "@/lib/monitoring/longitudinal-engine";
 
 export type DiagnosticJourneyStage =
@@ -21,6 +25,8 @@ export type DiagnosticJourneyRecord = {
   escalationHistory: unknown[];
   routeDecisions: unknown[];
   snapshots: DiagnosticSnapshot[];
+  evidenceNodes: DiagnosticEvidenceNodeInput[];
+  decisionObjects: CanonicalDecisionObject[];
 };
 
 const memoryJourneys = new Map<string, DiagnosticJourneyRecord>();
@@ -50,6 +56,8 @@ function emptyJourney(input: {
     escalationHistory: [],
     routeDecisions: [],
     snapshots: [],
+    evidenceNodes: [],
+    decisionObjects: [],
   };
 }
 
@@ -101,6 +109,30 @@ function fromPrismaJourney(row: any, fallback: {
     .map((entry: any) => normalizeSnapshot(entry.snapshot))
     .filter(Boolean) as DiagnosticSnapshot[];
 
+  const evidenceNodes = (row?.evidenceNodes || []).map((node: any) => ({
+    sourceStage: node.sourceStage,
+    kind: node.kind,
+    label: node.label,
+    summary: node.summary,
+    evidenceText: node.evidenceText ?? null,
+    confidence: typeof node.confidence === "number" ? node.confidence : 0.5,
+    severity: node.severity ?? "medium",
+    payload: readJsonObject(node.payload),
+  })) as DiagnosticEvidenceNodeInput[];
+
+  const decisionObjects = (row?.decisionObjects || []).map((item: any) => ({
+    sourceStage: item.sourceStage,
+    decisionKey: item.decisionKey,
+    decisionText: item.decisionText,
+    constraintText: item.constraintText ?? null,
+    priorAttemptText: item.priorAttemptText ?? null,
+    costOfDelayText: item.costOfDelayText ?? null,
+    stakeholderText: item.stakeholderText ?? null,
+    affectedDomain: item.affectedDomain ?? null,
+    confidence: typeof item.confidence === "number" ? item.confidence : 0.5,
+    normalized: readJsonObject(item.normalized),
+  })) as CanonicalDecisionObject[];
+
   return {
     journeyKey: row?.journeyKey || getJourneyKey(fallback),
     subjectKey: row?.subjectKey || subjectKey(fallback),
@@ -111,6 +143,8 @@ function fromPrismaJourney(row: any, fallback: {
     escalationHistory: readJsonArray(row?.escalationHistory),
     routeDecisions: readJsonArray(row?.routeDecisions),
     snapshots: [...threadSnapshots, ...monitoringSnapshots],
+    evidenceNodes,
+    decisionObjects,
   };
 }
 
@@ -133,6 +167,8 @@ export async function getDiagnosticJourney(input: {
           stages: { orderBy: { createdAt: "asc" } },
           threadSnapshots: { orderBy: { createdAt: "asc" } },
           monitoringSnapshots: { orderBy: { createdAt: "asc" } },
+          evidenceNodes: { orderBy: { createdAt: "asc" } },
+          decisionObjects: { orderBy: { createdAt: "asc" } },
         },
       });
       if (row) {
@@ -173,6 +209,8 @@ export async function persistDiagnosticStage(input: {
   routeDecision?: unknown;
   escalationEvent?: unknown;
   snapshot?: DiagnosticSnapshot;
+  evidenceNodes?: DiagnosticEvidenceNodeInput[];
+  decisionObject?: CanonicalDecisionObject | null;
 }): Promise<DiagnosticJourneyRecord> {
   const journey = await getDiagnosticJourney(input);
   journey.stages[input.stage] = input.payload;
@@ -184,6 +222,8 @@ export async function persistDiagnosticStage(input: {
   if (input.routeDecision) journey.routeDecisions.push(input.routeDecision);
   if (input.escalationEvent) journey.escalationHistory.push(input.escalationEvent);
   if (input.snapshot) journey.snapshots.push(input.snapshot);
+  if (input.evidenceNodes?.length) journey.evidenceNodes.push(...input.evidenceNodes);
+  if (input.decisionObject) journey.decisionObjects.push(input.decisionObject);
 
   memoryJourneys.set(journey.journeyKey, journey);
 
@@ -228,10 +268,51 @@ export async function persistDiagnosticStage(input: {
             tensions: input.tensions || [],
             routeDecision: input.routeDecision || null,
             escalationEvent: input.escalationEvent || null,
+            evidenceNodes: input.evidenceNodes || [],
+            decisionObject: input.decisionObject || null,
             capturedAt: new Date().toISOString(),
           },
         },
       });
+
+      if (input.evidenceNodes?.length && p?.diagnosticEvidenceNode?.createMany) {
+        await p.diagnosticEvidenceNode.createMany({
+          data: input.evidenceNodes.map((node) => ({
+            journeyId: persisted.id,
+            assessmentId: null,
+            sessionId: input.subjectId || input.campaignId || null,
+            email: input.email || null,
+            sourceStage: node.sourceStage,
+            kind: node.kind,
+            label: node.label,
+            summary: node.summary,
+            evidenceText: node.evidenceText || null,
+            confidence: node.confidence,
+            severity: node.severity,
+            payload: node.payload || null,
+          })),
+        });
+      }
+
+      if (input.decisionObject && p?.diagnosticDecisionObject?.create) {
+        await p.diagnosticDecisionObject.create({
+          data: {
+            journeyId: persisted.id,
+            decisionKey: input.decisionObject.decisionKey,
+            sessionId: input.subjectId || input.campaignId || null,
+            email: input.email || null,
+            sourceStage: input.decisionObject.sourceStage,
+            decisionText: input.decisionObject.decisionText,
+            constraintText: input.decisionObject.constraintText || null,
+            priorAttemptText: input.decisionObject.priorAttemptText || null,
+            costOfDelayText: input.decisionObject.costOfDelayText || null,
+            stakeholderText: input.decisionObject.stakeholderText || null,
+            affectedDomain: input.decisionObject.affectedDomain || null,
+            normalized: input.decisionObject.normalized,
+            confidence: input.decisionObject.confidence,
+          },
+        });
+      }
 
       if (input.snapshot) {
         await p.monitoringSnapshot.create({

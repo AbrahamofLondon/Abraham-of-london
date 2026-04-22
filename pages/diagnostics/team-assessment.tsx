@@ -614,6 +614,7 @@ export default function TeamAssessmentPage() {
   async function handleSubmit() {
     setIsSubmitting(true);
     const criticalGaps = gaps.filter((gap) => gap.gapSeverity === "CRITICAL");
+    const highGaps = gaps.filter((gap) => gap.gapSeverity === "HIGH");
     const answers: DiagnosticAnswer[] = [
       ...DOMAINS.flatMap(d => [0, 1, 2].map(idx => ({ sectionId: d.id, questionId: qKey("leader", d.id, idx), prompt: `[Leader] ${d.leaderPrefix} ${d.prompts[idx]}`, value: (leaderScores[qKey("leader", d.id, idx)] ?? 3) as DiagnosticAnswerValue }))),
       ...DOMAINS.flatMap(d => [0, 1, 2].map(idx => ({ sectionId: d.id, questionId: qKey("reality", d.id, idx), prompt: `[Reality] ${d.realityPrefix} ${d.prompts[idx]}`, value: (realityScores[qKey("reality", d.id, idx)] ?? 3) as DiagnosticAnswerValue }))),
@@ -627,7 +628,40 @@ export default function TeamAssessmentPage() {
       respondent: { name: identity.respondentName || null, email: identity.respondentEmail || null, organisation: identity.organisation || null, role: identity.respondentRole || null },
       answers, notes: identity.notes || null,
       summary: { totalScore, maxScore, pct, severity: severityFromPct(pct), band: bandFromPct(pct), sectionScores: DOMAINS.map(d => buildSectionScore({ sectionId: d.id, title: d.label, answers: answers.filter(a => a.sectionId === d.id) })) },
-      metadata: { ui: "team-assessment", teamName: identity.teamName || null, nextStepHref: "/diagnostics/enterprise-assessment", nextRoute: reading.route === "ENTERPRISE" ? "ENTERPRISE" : "TEAM", overallLeader, overallReality, overallGap: overallLeader - overallReality, fragilityStatus: fragility.status, purposeAlignmentPct: purposePct },
+      metadata: {
+        ui: "team-assessment",
+        teamName: identity.teamName || null,
+        nextStepHref: "/diagnostics/enterprise-assessment",
+        nextRoute: reading.route === "ENTERPRISE" ? "ENTERPRISE" : "TEAM",
+        overallLeader,
+        overallReality,
+        overallGap: overallLeader - overallReality,
+        fragilityStatus: fragility.status,
+        purposeAlignmentPct: purposePct,
+        authorityInput: {
+          condition: reading.title,
+          contradiction: reading.pattern,
+          decisionText: `Leadership must decide how to correct ${reading.urgentDomain ?? "the team perception gap"}.`,
+          constraintText: `Leader reading ${overallLeader}% vs estimated team reality ${overallReality}%.`,
+          costOfDelayText: reading.escalationNote,
+          stakeholderText: identity.teamName || "Team",
+          affectedDomain: reading.urgentDomain ?? criticalGaps[0]?.label ?? "team alignment",
+          firstMove: reading.firstAction,
+          skippedConsequence: reading.escalationNote,
+          escalationCondition: reading.route === "ENTERPRISE"
+            ? "Proceed to Enterprise Assessment because the gap is too distributed for local correction."
+            : "Reassess if the gap widens or repeats after the first intervention.",
+          riskScore: Math.min(100, Math.max(0, Math.abs(overallLeader - overallReality) * 2 + criticalGaps.length * 18 + highGaps.length * 10)),
+          formula: "absolute leadership/reality gap x 2 + critical gaps x 18 + high gaps x 10",
+          reasoning: [
+            `Leader score: ${overallLeader}%`,
+            `Estimated team reality: ${overallReality}%`,
+            `Critical gaps: ${criticalGaps.length}`,
+            `High gaps: ${highGaps.length}`,
+          ],
+          confidence: Math.min(0.84, 0.42 + criticalGaps.length * 0.1 + highGaps.length * 0.06),
+        },
+      },
     });
     setSubmitResult(res);
     trackStageComplete("team", "diagnostic", "/diagnostics/enterprise-assessment");

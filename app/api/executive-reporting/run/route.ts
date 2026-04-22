@@ -10,9 +10,11 @@ import { buildExecutiveCapabilityStack } from "@/lib/admin/reporting/capability-
 import type { BenchmarkFact } from "@/lib/benchmarks/benchmark-engine";
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 import {
+  getDiagnosticJourney,
   getMonitoringSnapshots,
   persistDiagnosticStage,
 } from "@/lib/diagnostics/journey-store";
+import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
 import { resolveLadderContext } from "@/lib/diagnostics/ladder-context-resolver";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 import { buildObservedOutcomeEvidence } from "@/lib/outcomes/evidence";
@@ -155,6 +157,11 @@ function buildNarrativeSummary(input: {
     team?: { band: string | null } | null;
     enterprise?: { reading: string | null } | null;
   };
+  evidenceGraph?: {
+    decisionText?: string;
+    contradictionLabels: string[];
+    consequenceLabels: string[];
+  };
 }): string {
   const ladderNotes: string[] = [];
   if (input.ladderContext?.constitutional?.route) {
@@ -169,6 +176,12 @@ function buildNarrativeSummary(input: {
     ladderNotes.push(
       `Institutional reading: ${input.ladderContext.enterprise.reading}.`,
     );
+  }
+  if (input.evidenceGraph?.decisionText) {
+    ladderNotes.push(`Canonical decision object: ${input.evidenceGraph.decisionText}.`);
+  }
+  if (input.evidenceGraph?.contradictionLabels.length) {
+    ladderNotes.push(`Evidence graph contradictions: ${input.evidenceGraph.contradictionLabels.slice(0, 3).join("; ")}.`);
   }
 
   const constitutionalNarrative = s(input.constitution.narrativeSummary);
@@ -368,6 +381,11 @@ function buildPriorityStack(input: {
   constitution: AnyRecord;
   intake: AnyRecord;
   guidance: AnyRecord;
+  evidenceGraph?: {
+    decisionText?: string;
+    contradictionLabels: string[];
+    consequenceLabels: string[];
+  };
 }): string[] {
   const constitutionItems = arr(input.constitution.requiredInterventions);
   const failureModes = arr(input.constitution.failureModes);
@@ -386,6 +404,12 @@ function buildPriorityStack(input: {
 
   if (decisionQuestion) {
     stack.push(`Resolve decision question: ${decisionQuestion}`);
+  }
+  if (input.evidenceGraph?.decisionText) {
+    stack.unshift(`Force decision: ${input.evidenceGraph.decisionText}`);
+  }
+  for (const contradiction of input.evidenceGraph?.contradictionLabels.slice(0, 2) ?? []) {
+    stack.push(`Price contradiction: ${contradiction}`);
   }
 
   return [...new Set(stack)].filter(Boolean).slice(0, 8);
@@ -619,6 +643,24 @@ export async function POST(
     }
 
     const ladderContext = await resolveLadderContext(subjectId, email, campaignId);
+    const evidenceJourney = await getDiagnosticJourney({
+      email,
+      subjectId,
+      campaignId,
+      organisation: s(intake.organisation),
+    });
+    const latestDecisionObject = [...evidenceJourney.decisionObjects].reverse()[0] ?? null;
+    const evidenceGraphSummary = {
+      decisionText: latestDecisionObject?.decisionText,
+      contradictionLabels: evidenceJourney.evidenceNodes
+        .filter((node) => node.kind === "contradiction")
+        .slice(-6)
+        .map((node) => node.label),
+      consequenceLabels: evidenceJourney.evidenceNodes
+        .filter((node) => node.kind === "consequence" || node.kind === "exposure_estimate")
+        .slice(-6)
+        .map((node) => node.summary),
+    };
     const runKey = makeRunKey();
 
     const assembled = await assembleConstitutionalGuidance({
@@ -739,6 +781,7 @@ export async function POST(
             priorAttemptOutcome: s(history.priorAttemptOutcome),
             evidenceQuality,
             ladderContext,
+            evidenceGraph: evidenceGraphSummary,
           }),
           mandate: buildNarrativeMandate({
             guidance,
@@ -771,6 +814,7 @@ export async function POST(
           constitution,
           intake,
           guidance,
+          evidenceGraph: evidenceGraphSummary,
         }),
         ogr: {
           sovereignCertainty: clamp(n(constitution.clarityScore, 0), 0, 100),
@@ -807,6 +851,11 @@ export async function POST(
       subjectId,
       campaignId,
       ladderContext,
+      evidenceGraph: {
+        nodes: evidenceJourney.evidenceNodes,
+        decisionObjects: evidenceJourney.decisionObjects,
+        summary: evidenceGraphSummary,
+      },
       claimDecisions: capabilityStack.claims,
     };
 
@@ -858,6 +907,40 @@ export async function POST(
       ],
     });
 
+    const executiveAuthorityPacket = buildGenericAuthorityPacket({
+      stage: "executive_reporting",
+      condition: `${s(constitution.orgState, "DRIFTING")} executive position`,
+      contradiction: evidenceGraphSummary.contradictionLabels.length
+        ? `Cross-stage contradiction convergence: ${evidenceGraphSummary.contradictionLabels.slice(0, 3).join("; ")}.`
+        : `The intake describes ${s(decisionNeed.decisionQuestion, "a decision need")} under ${s(governance.authorityScope, "unclear")} authority.`,
+      decisionText: s(decisionNeed.decisionQuestion) || latestDecisionObject?.decisionText || null,
+      constraintText: s(intake.currentConstraint) || latestDecisionObject?.constraintText || null,
+      priorAttemptText: s(history.priorAttemptOutcome) || latestDecisionObject?.priorAttemptText || null,
+      costOfDelayText: s(decisionNeed.whatHappensIfNothingChanges) || latestDecisionObject?.costOfDelayText || null,
+      stakeholderText: s(governance.stakeholderBreadth) || latestDecisionObject?.stakeholderText || null,
+      affectedDomain: arr(constitution.dominantDomains)[0] ?? null,
+      firstMove: s(guidance.nextAction) || "Force the executive decision and assign accountable ownership.",
+      skippedConsequence: `Unpriced exposure remains at ${exposure.totalExposure}.`,
+      escalationCondition: route === "STRATEGY"
+        ? "Strategy Room is ready because the route is strategy-authorized."
+        : "Do not enter Strategy Room until the blocked authority or evidence condition is corrected.",
+      riskScore: Math.min(100, Math.round(averageDissonance + n(constitution.severityScore, 0) * 0.55 + (exposure.totalExposure > 0 ? 12 : 0))),
+      formula: "average dissonance + severity score x 0.55 + exposure presence",
+      reasoning: [
+        `Average dissonance: ${averageDissonance}`,
+        `Severity score: ${n(constitution.severityScore, 0)}`,
+        `Total exposure: ${exposure.totalExposure}`,
+        `Route: ${route}`,
+      ],
+      confidence: evidenceQuality === "HIGH" ? 0.82 : evidenceQuality === "LOW" ? 0.58 : 0.7,
+      payload: {
+        runKey,
+        route,
+        exposure,
+        evidenceGraphSummary,
+      },
+    });
+
     await persistDiagnosticStage({
       email,
       subjectId,
@@ -868,6 +951,8 @@ export async function POST(
       tensions: arr(constitution.failureModes),
       routeDecision: { route, runKey, intakeMode: accessDecision.intakeMode },
       escalationEvent: { route, createdAt: new Date().toISOString() },
+      evidenceNodes: executiveAuthorityPacket.nodes,
+      decisionObject: executiveAuthorityPacket.decisionObject,
       snapshot: {
         timestamp: new Date().toISOString(),
         stage: "executive_reporting",

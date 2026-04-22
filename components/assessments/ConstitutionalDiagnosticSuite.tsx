@@ -614,6 +614,54 @@ export default function ConstitutionalDiagnosticSuite() {
             mergeTensions(tensions, "constitutional");
           }
         } catch {}
+        fetch("/api/diagnostics/evidence", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            stage: "constitutional",
+            payload: {
+              decision,
+              scores,
+              reflections: constitutionalReflections,
+            },
+            routeDecision: decision,
+            authorityInput: {
+              condition: `${decision.route} constitutional condition`,
+              contradiction:
+                constitutionalReflections.shadowAuthority
+                  ? `Formal authority and shadow authority diverge: ${constitutionalReflections.shadowAuthority}`
+                  : `Route ${decision.route} was earned by coherence ${scores.coherence}%, authority ${scores.authority}% and trust ${scores.trust}%.`,
+              decisionText: constitutionalReflections.structuralProblem,
+              constraintText: constitutionalReflections.shadowAuthority,
+              priorAttemptText: constitutionalReflections.priorAttempts,
+              costOfDelayText:
+                decision.route === "STRATEGY"
+                  ? "Delay keeps a strategy-ready condition in analysis mode."
+                  : decision.route === "REJECT"
+                    ? "Escalation before structural clarity would compound disorder."
+                    : "Delay keeps the authority problem unresolved while pressure accumulates.",
+              affectedDomain: scores.authorityType,
+              firstMove:
+                decision.recommendedInterventions[0] ||
+                "Name the authority holder, decision constraint and failed correction before escalation.",
+              skippedConsequence:
+                "The next diagnostic layer inherits an unresolved authority contradiction.",
+              escalationCondition:
+                decision.route === "STRATEGY"
+                  ? "Move to Strategy Room if the decision owner can act within the current window."
+                  : "Move to Executive Reporting if the same contradiction appears at team or enterprise level.",
+              riskScore: Math.min(100, Math.max(0, scores.severity + scores.failureModeCount * 8)),
+              formula: "constitutional severity + failure mode count x 8",
+              reasoning: [
+                `Severity: ${scores.severity}`,
+                `Failure modes: ${scores.failureModeCount}`,
+                `Authority type: ${scores.authorityType}`,
+                `Route: ${decision.route}`,
+              ],
+              confidence: decision.confidence,
+            },
+          }),
+        }).catch(() => {});
       }
       if (!decision) return;
       import("@/lib/analytics/funnel").then(({ trackStageComplete }) => {
