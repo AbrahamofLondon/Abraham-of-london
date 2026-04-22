@@ -422,11 +422,17 @@ function SystemReadout({ domains }: { domains: EnterpriseDomain[] }) {
   );
 }
 
-function deriveEnterpriseReading(posture: string, heatDomains: string[]): string {
+function deriveEnterpriseReading(posture: string, heatDomains: string[], domains?: EnterpriseDomain[]): string {
   const heat = heatDomains.length;
-  if (posture === "DISORDERED") return `The institution is structurally disordered. ${heat} domain${heat === 1 ? "" : "s"} under active stress. Governance and execution are both below the threshold needed for coherent decision-making. This is not drift — it is structural failure requiring immediate attention.`;
-  if (posture === "MISALIGNED") return `Significant misalignment detected across ${heat} domain${heat === 1 ? "" : "s"}. The institution is operating under internal contradiction — governance says one thing, execution does another. This gap will widen under pressure.`;
-  return `The enterprise is drifting but not yet in crisis. ${heat > 0 ? `${heat} domain${heat === 1 ? " shows" : "s show"} early stress signals.` : "No acute heat domains detected."} Intervention now is preventive, not reactive.`;
+  // Find domains with documented failures for evidence-grounded reading
+  const failureDomains = domains?.filter((d) => d.failureNote?.trim()) ?? [];
+  const failureEvidence = failureDomains.length > 0
+    ? ` Documented failure evidence in ${failureDomains.map((d) => d.label || "unnamed").join(", ")} confirms this is not theoretical risk.`
+    : "";
+
+  if (posture === "DISORDERED") return `The institution is structurally disordered. ${heat} domain${heat === 1 ? "" : "s"} under active stress. Governance and execution are both below the threshold needed for coherent decision-making.${failureEvidence} This is not drift — it is structural failure requiring immediate attention.`;
+  if (posture === "MISALIGNED") return `Significant misalignment detected across ${heat} domain${heat === 1 ? "" : "s"}. The institution is operating under internal contradiction — governance says one thing, execution does another.${failureEvidence} This gap will widen under pressure.`;
+  return `The enterprise is drifting but not yet in crisis. ${heat > 0 ? `${heat} domain${heat === 1 ? " shows" : "s show"} early stress signals.` : "No acute heat domains detected."}${failureEvidence} Intervention now is preventive, not reactive.`;
 }
 
 function deriveEnterpriseAction(posture: string, heatDomains: string[]): string {
@@ -437,11 +443,11 @@ function deriveEnterpriseAction(posture: string, heatDomains: string[]): string 
 }
 
 /** Result panel */
-function ResultPanel({ result }: { result: any }) {
+function ResultPanel({ result, domains }: { result: any; domains?: EnterpriseDomain[] }) {
   const posture = String(result.enterprisePosture ?? "DRIFTING");
   const heatDomains: string[] = Array.isArray(result.heatDomains) ? result.heatDomains : [];
   const postureColor = posture === "DISORDERED" ? "text-red-300/80" : posture === "MISALIGNED" ? "text-red-300/70" : "text-amber-300/80";
-  const reading = deriveEnterpriseReading(posture, heatDomains);
+  const reading = deriveEnterpriseReading(posture, heatDomains, domains);
   const nextAction = deriveEnterpriseAction(posture, heatDomains);
 
   return (
@@ -596,8 +602,19 @@ function CriticalPath({ domains }: { domains: EnterpriseDomain[] }) {
   if (domains.length === 0) return null;
   const ranked = domains.map((d) => {
     const composite = domainHealth(d);
-    const cascadeRisk = Math.round((100 - composite) * 1.4);
-    return { label: d.label || "Unnamed", composite, cascadeRisk };
+    // Base cascade risk from health deficit
+    let cascadeRisk = Math.round((100 - composite) * 1.4);
+    // Amplify if domain has documented failure — confirmed cascade path
+    const hasFailureEvidence = Boolean(d.failureNote?.trim());
+    if (hasFailureEvidence) {
+      cascadeRisk = Math.min(100, Math.round(cascadeRisk * 1.35));
+    }
+    return {
+      label: d.label || "Unnamed",
+      composite,
+      cascadeRisk,
+      failureNote: d.failureNote?.trim() || null,
+    };
   }).sort((a, b) => b.cascadeRisk - a.cascadeRisk);
 
   return (
@@ -605,15 +622,23 @@ function CriticalPath({ domains }: { domains: EnterpriseDomain[] }) {
       <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">Critical Path Analysis</div>
       <div className="space-y-2">
         {ranked.map((d, i) => (
-          <div key={d.label} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[8px] text-white/20">{i + 1}.</span>
-              <span className="text-[11px] text-white/55">{d.label}</span>
+          <div key={d.label}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[8px] text-white/20">{i + 1}.</span>
+                <span className="text-[11px] text-white/55">{d.label}</span>
+                {d.failureNote && <span className="font-mono text-[6px] uppercase tracking-[0.18em] text-red-400/40">evidenced</span>}
+              </div>
+              <span className={cn("font-mono text-[9px]",
+                d.cascadeRisk >= 60 ? "text-red-400/70" : d.cascadeRisk >= 35 ? "text-amber-400/70" : "text-white/35")}>
+                {d.cascadeRisk} risk
+              </span>
             </div>
-            <span className={cn("font-mono text-[9px]",
-              d.cascadeRisk >= 60 ? "text-red-400/70" : d.cascadeRisk >= 35 ? "text-amber-400/70" : "text-white/35")}>
-              {d.cascadeRisk} risk
-            </span>
+            {d.failureNote && (
+              <p style={{ marginTop: "0.2rem", marginLeft: "1.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.78rem", lineHeight: 1.45, color: "rgba(252,165,165,0.40)", fontStyle: "italic" }}>
+                Documented failure: {d.failureNote}
+              </p>
+            )}
           </div>
         ))}
       </div>
@@ -793,7 +818,7 @@ export default function EnterpriseAssessmentSuite() {
         </button>
 
         <AnimatePresence>
-          {result && <ResultPanel result={result} />}
+          {result && <ResultPanel result={result} domains={domains} />}
         </AnimatePresence>
       </div>
 

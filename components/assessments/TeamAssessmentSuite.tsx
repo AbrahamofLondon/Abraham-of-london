@@ -47,7 +47,13 @@ function stddev(values: number[]): number {
   return Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / n);
 }
 
-function computeAdvancedMetrics(rows: TeamRow[]) {
+type TeamReflections = {
+  confidenceBaseline: number;
+  falseAssumption: string;
+  showScoresReaction: string;
+};
+
+function computeAdvancedMetrics(rows: TeamRow[], reflections?: TeamReflections) {
   const filled = rows.filter(r => r.teamName.trim());
   if (filled.length < 2) return null;
   const metricStddevs = METRICS.map(m => stddev(filled.map(r => r[m.key] as number)));
@@ -59,16 +65,50 @@ function computeAdvancedMetrics(rows: TeamRow[]) {
   const healths    = filled.map(r => Math.round((r.authorityClarity + r.executionTrust + (100 - r.operatingFriction) + r.strategicCoherence) / 4));
   const executionCoherence = Math.max(0, Math.round(100 - stddev(healths)));
   const metricAvgs = Object.fromEntries(METRICS.map(m => [m.key, Math.round(filled.reduce((s, r) => s + (r[m.key] as number), 0) / filled.length)]));
-  return { varianceIndex, trustGap, executionCoherence, metricAvgs };
+
+  // Contradiction severity: confidence baseline vs measured gap
+  // If leader says 90% confident but gap is 40 points → contradiction = 50
+  const contradictionSeverity = reflections
+    ? Math.max(0, Math.round(reflections.confidenceBaseline - (100 - varianceIndex)))
+    : 0;
+
+  return { varianceIndex, trustGap, executionCoherence, metricAvgs, contradictionSeverity };
 }
 
-function generateNarrative(adv: NonNullable<ReturnType<typeof computeAdvancedMetrics>>): string {
+function generateNarrative(adv: NonNullable<ReturnType<typeof computeAdvancedMetrics>>, reflections?: TeamReflections): string {
   const parts: string[] = [];
-  if (adv.varianceIndex > 30) parts.push(`Team alignment shows significant divergence (variance index ${adv.varianceIndex}), indicating systemic misalignment rather than localised drift.`);
-  else if (adv.varianceIndex > 15) parts.push(`Moderate variance detected across teams (index ${adv.varianceIndex}). Attention is needed before it compounds.`);
-  else parts.push(`Teams are operating with reasonable consistency (variance index ${adv.varianceIndex}).`);
+
+  // Contradiction is the headline when confidence baseline contradicts measured gap
+  if (adv.contradictionSeverity > 30 && reflections) {
+    parts.push(`Leadership confidence was ${reflections.confidenceBaseline}% but the measured divergence is ${adv.varianceIndex} points. That ${adv.contradictionSeverity}-point contradiction is the primary finding — the gap is larger than leadership believes.`);
+  } else if (adv.varianceIndex > 30) {
+    parts.push(`Team alignment shows significant divergence (variance index ${adv.varianceIndex}), indicating systemic misalignment rather than localised drift.`);
+  } else if (adv.varianceIndex > 15) {
+    parts.push(`Moderate variance detected across teams (index ${adv.varianceIndex}). Attention is needed before it compounds.`);
+  } else {
+    parts.push(`Teams are operating with reasonable consistency (variance index ${adv.varianceIndex}).`);
+  }
+
   if (adv.trustGap > 25) parts.push(`A ${adv.trustGap}-point trust gap between leadership and teams signals a dangerous perception disconnect.`);
   else if (adv.trustGap > 10) parts.push(`The ${adv.trustGap}-point trust gap warrants monitoring.`);
+
+  // Inject false assumption as evidence if provided
+  if (reflections?.falseAssumption?.trim()) {
+    parts.push(`Leadership's stated blind spot: "${reflections.falseAssumption.trim()}". This is what the gap is about.`);
+  }
+
+  // Inject political sensitivity signal
+  if (reflections?.showScoresReaction?.trim()) {
+    const reaction = reflections.showScoresReaction.trim().toLowerCase();
+    if (reaction.includes("anger") || reaction.includes("angry") || reaction.includes("defensive")) {
+      parts.push("Predicted reaction to these scores: resistance. This indicates a trust gap, not just an information gap.");
+    } else if (reaction.includes("relief") || reaction.includes("relieved")) {
+      parts.push("Predicted reaction: relief. The team already knows. The gap is structural, not perceptual.");
+    } else if (reaction.includes("surprise") || reaction.includes("surprised")) {
+      parts.push("Predicted reaction: surprise. Leadership genuinely does not see the divergence. This is a governance blind spot.");
+    }
+  }
+
   return parts.join(" ");
 }
 
@@ -283,13 +323,13 @@ function deriveTeamNextAction(vi: number, tg: number, af: number): string {
   return "Continue monitoring. Current alignment is within acceptable bounds. Reassess if conditions change.";
 }
 
-function ResultPanel({ result, rows }: { result: Record<string, unknown>; rows: TeamRow[] }) {
+function ResultPanel({ result, rows, reflections }: { result: Record<string, unknown>; rows: TeamRow[]; reflections?: TeamReflections }) {
   const vi = Number(result.varianceIndex ?? 0);
   const tg = Number(result.trustGap ?? 0);
   const af = Number(result.avgFriction ?? 0);
   const condition = deriveTeamCondition(vi, tg);
-  const adv = computeAdvancedMetrics(rows);
-  const narrative = adv ? generateNarrative(adv) : "";
+  const adv = computeAdvancedMetrics(rows, reflections);
+  const narrative = adv ? generateNarrative(adv, reflections) : "";
   const nextAction = deriveTeamNextAction(vi, tg, af);
   const nextLayer = String(result.nextLayer === "EXECUTIVE_REPORTING" ? "Executive Reporting" : result.nextLayer === "CONSTITUTIONAL" ? "Constitutional Diagnostic" : result.nextLayer ?? "Enterprise Assessment");
 
@@ -482,7 +522,7 @@ export default function TeamAssessmentSuite() {
           {loading ? (<><Loader2 style={{ width: "14px", height: "14px" }} /> Processing team data…</>) : (<><ShieldCheck style={{ width: "14px", height: "14px" }} /> Run team assessment <ArrowRight style={{ width: "13px", height: "13px" }} /></>)}
         </button>
 
-        <AnimatePresence>{result && <ResultPanel result={result} rows={rows} />}</AnimatePresence>
+        <AnimatePresence>{result && <ResultPanel result={result} rows={rows} reflections={teamReflections} />}</AnimatePresence>
       </div>
 
       <div className="space-y-4 xl:sticky xl:top-24">
