@@ -138,9 +138,11 @@ function resolveFit(fit?: CoverFit | null): CoverFit {
 
 function parseAspectRatio(aspect: string): number {
   const cleaned = String(aspect || "").trim();
-  const parts = cleaned.split("/").map((p) => Number(p.trim()));
-  if (parts.length === 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1]) && parts[1] > 0) {
-    return parts[0] / parts[1];
+  const [rawWidth, rawHeight] = cleaned.split("/");
+  const width = Number(rawWidth?.trim());
+  const height = Number(rawHeight?.trim());
+  if (rawWidth && rawHeight && Number.isFinite(width) && Number.isFinite(height) && height > 0) {
+    return width / height;
   }
   return 16 / 10;
 }

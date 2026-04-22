@@ -1,4 +1,4 @@
-// pages/api/billing/webhook.ts
+// pages/api/billing/webhook.ts — CANONICAL PRODUCT WEBHOOK
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
@@ -10,6 +10,11 @@ import {
 import { prisma } from "@/lib/prisma.server";
 import { hubspotSync } from "@/lib/hubspot/sync";
 import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
+import {
+  resolveProductCode,
+  resolveEntitlementSlugs,
+  getProductByStripePriceId,
+} from "@/lib/commercial/catalog";
 
 const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
 
@@ -94,6 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (email && productCode && isProductCode(productCode)) {
+      // Grant primary entitlement
       await grantEntitlement({
         email,
         productCode,
@@ -101,6 +107,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         source: "stripe",
         externalRef: session.id,
       });
+
+      // Resolve bundle entitlements from catalog SSOT
+      const bundleMeta = session.metadata?.bundleEntitlements;
+      const catalogProduct = resolveProductCode(priceCode) ?? resolveProductCode(productCode);
+      const allSlugs = bundleMeta
+        ? bundleMeta.split(",").filter(Boolean)
+        : catalogProduct
+          ? resolveEntitlementSlugs(catalogProduct.code)
+          : [productCode];
+
+      // Grant each included entitlement (for bundles)
+      for (const slug of allSlugs) {
+        if (slug !== productCode) {
+          try {
+            await grantEntitlement({ email, productCode: slug as ProductCode, tier, source: "stripe", externalRef: session.id });
+          } catch {
+            console.error("[BILLING_WEBHOOK_BUNDLE_GRANT_PARTIAL_FAILURE]", { slug, email });
+          }
+        }
+      }
 
       const verified = await ensureEntitlementAfterPayment({
         checkoutSessionId: session.id,

@@ -1569,6 +1569,8 @@ model PurposeAlignmentAssessment {
   corrections        String
   answers            String
   domainScores       String
+  canonicalResult    String?
+  responseMode       String        @default("dual_axis")
   reportVersion      String        @default("1.0.0")
   sourceInstrumentId String        @default("IA-PAC-001")
   createdAt          DateTime      @default(now())
@@ -2653,4 +2655,24 @@ model StrategyDecisionLog {
   @@index([sessionId])
   @@index([status])
   @@map("strategy_decision_logs")
+}
+
+// ============================================================================
+// COMMERCIAL RECOVERY
+// ============================================================================
+
+model FailedEntitlementGrant {
+  id        String   @id @default(cuid())
+  email     String
+  slug      String
+  source    String
+  error     String
+  resolved  Boolean  @default(false)
+  resolvedAt DateTime?
+  resolvedBy String?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([resolved])
+  @@map("_failed_entitlement_grants")
 }

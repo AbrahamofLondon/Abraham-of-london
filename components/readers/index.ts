@@ -1,6 +1,19 @@
 // components/readers/index.ts
 // Reader System Exports
 
+import {
+  CanonCallout,
+  CanonReader,
+  validateCanonContent,
+} from "./CanonReader";
+import {
+  VaultCallout,
+  VaultCodeBlock,
+  VaultDataBlock,
+  VaultReader,
+  validateVaultContent,
+} from "./VaultReader";
+
 // Canon Reader (Editorial Authority)
 export { CanonReader, CanonCallout, validateCanonContent } from './CanonReader';
 export type { CanonReaderProps } from './CanonReader';

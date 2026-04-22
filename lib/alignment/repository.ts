@@ -7,19 +7,24 @@ import {
 import type {
   AlignmentAssessmentInput,
   AlignmentAssessmentResult,
+  AlignmentDomain,
+  DualAxisAnswer,
+  PurposeProfileResult,
   StoredPurposeAlignmentAssessment,
 } from "./types";
 
-function toPrismaBand(
-  band: AlignmentAssessmentResult["band"]
-): PrismaAlignmentBand {
+function toPrismaBand(band: AlignmentAssessmentResult["band"] | PurposeProfileResult["coherenceBand"]): PrismaAlignmentBand {
   switch (band) {
+    case "SOVEREIGN":
+    case "ALIGNED":
     case "aligned":
       return "ALIGNED";
+    case "DRIFTING":
     case "drifting":
       return "DRIFTING";
     case "misaligned":
       return "MISALIGNED";
+    case "FRAGMENTED":
     default:
       return "DISORDERED";
   }
@@ -55,11 +60,19 @@ function mapAssessment(row: {
   corrections: unknown;
   answers: unknown;
   domainScores: unknown;
+  canonicalResult?: unknown;
   reportVersion: string;
   sourceInstrumentId: string;
   createdAt: Date;
   updatedAt: Date;
 }): StoredPurposeAlignmentAssessment {
+  const canonicalResult = parseJson<PurposeProfileResult | null>(row.canonicalResult, null);
+  const weakestDomains = parseJson<AlignmentDomain[]>(row.weakestDomains, []);
+  const strengths = parseJson<string[]>(row.strengths, []);
+  const corrections = parseJson<string[]>(row.corrections, []);
+  const answers = parseJson<Record<string, boolean> | Record<string, DualAxisAnswer>>(row.answers, {});
+  const domainScores = parseJson<StoredPurposeAlignmentAssessment["domainScores"]>(row.domainScores, []);
+
   return {
     id: row.id,
     userId: row.userId,
@@ -70,11 +83,12 @@ function mapAssessment(row: {
     possibleScore: row.possibleScore,
     percentScore: row.percentScore,
     band: fromPrismaBand(row.band),
-    weakestDomains: row.weakestDomains as StoredPurposeAlignmentAssessment["weakestDomains"],
-    strengths: row.strengths as string[],
-    corrections: row.corrections as string[],
-    answers: row.answers as Record<string, boolean>,
-    domainScores: row.domainScores as StoredPurposeAlignmentAssessment["domainScores"],
+    weakestDomains,
+    strengths,
+    corrections,
+    answers,
+    domainScores,
+    canonicalResult,
     reportVersion: row.reportVersion,
     sourceInstrumentId: row.sourceInstrumentId,
     createdAt: row.createdAt.toISOString(),
@@ -82,26 +96,44 @@ function mapAssessment(row: {
   };
 }
 
+function parseJson<T>(value: unknown, fallback: T): T {
+  if (typeof value !== "string") return (value as T) ?? fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 export async function createPurposeAlignmentAssessment(params: {
   userId?: string | null;
   sessionKey?: string | null;
-  input: AlignmentAssessmentInput;
-  result: AlignmentAssessmentResult;
+  input: AlignmentAssessmentInput | { answers: Record<string, DualAxisAnswer>; notes?: string };
+  result: PurposeProfileResult;
 }): Promise<string> {
-  const created = await prisma.purposeAlignmentAssessment.create({
+  const created = await (prisma.purposeAlignmentAssessment as any).create({
     data: {
       userId: params.userId ?? null,
       sessionKey: params.sessionKey ?? null,
       notes: params.input.notes || null,
       totalScore: params.result.totalScore,
-      possibleScore: params.result.possibleScore,
+      possibleScore: params.result.maxScore,
       percentScore: params.result.percent,
-      band: toPrismaBand(params.result.band),
+      band: toPrismaBand(params.result.coherenceBand),
       weakestDomains: JSON.stringify(params.result.weakestDomains),
       strengths: JSON.stringify(params.result.strengths),
       corrections: JSON.stringify(params.result.corrections),
       answers: JSON.stringify(params.input.answers),
-      domainScores: JSON.stringify(params.result.domainScores),
+      domainScores: JSON.stringify(
+        params.result.domainProfiles.map((domain) => ({
+          domain: domain.domain,
+          earned: domain.weighted,
+          possible: 10,
+          percent: domain.percent,
+        })),
+      ),
+      varianceScores: JSON.stringify(params.result.domainStates ?? []),
+      canonicalResult: JSON.stringify(params.result),
       reportVersion: PURPOSE_ALIGNMENT_REPORT_VERSION,
       sourceInstrumentId: PURPOSE_ALIGNMENT_INSTRUMENT_ID,
     },

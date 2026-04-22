@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma.server";
+import type { Prisma } from "@prisma/client";
 import { logAccessAudit } from "./audit";
 import { auditGrantedEntitlements, grantEntitlements } from "./entitlement-service";
 import type { EntitlementGrant } from "./types";
@@ -41,7 +42,7 @@ export async function createInvite(
       maxUses: input.maxUses ?? 1,
       expiresAt: input.expiresAt ?? null,
       issuedBy: input.issuedBy,
-      metadata: input.metadata ?? {},
+      metadata: (input.metadata ?? {}) as Prisma.InputJsonObject,
     },
   });
 

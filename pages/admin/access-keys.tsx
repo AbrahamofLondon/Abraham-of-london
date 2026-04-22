@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: string }) {
     EXPIRED:  { bg: "rgba(150,150,150,0.06)", text: "var(--ds-text-subtle)", border: "var(--ds-border)" },
     DEPLETED: { bg: "rgba(150,150,150,0.06)", text: "var(--ds-text-subtle)", border: "var(--ds-border)" },
   };
-  const c = colors[status] || colors.EXPIRED;
+  const c = colors[status] ?? colors.EXPIRED!;
   return (
     <span
       className="rounded-full border px-2.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.2em]"
@@ -664,7 +664,10 @@ const AccessKeysPage: NextPage<PageProps> = ({ initialKeys, initialInvites }) =>
 export default AccessKeysPage;
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => {
-  const guard = await requireAdminPage(ctx);
+  const guard = await requireAdminPage<PageProps>(ctx, {
+    initialKeys: [],
+    initialInvites: [],
+  });
   if (!guard.authorized) return guard.redirect;
 
   const [dbKeys, dbInvites] = await Promise.all([

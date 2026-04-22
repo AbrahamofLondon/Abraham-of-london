@@ -82,7 +82,7 @@ export default function RecommendedPlaybooks({
                   color: "rgba(255,255,255,0.36)",
                 }}
               >
-                Matched because {playbook.reasons[0].charAt(0).toLowerCase() + playbook.reasons[0].slice(1)}.
+                Matched because {playbook.reasons[0]!.charAt(0).toLowerCase() + playbook.reasons[0]!.slice(1)}.
               </p>
             )}
             <Link

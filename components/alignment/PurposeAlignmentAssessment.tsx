@@ -148,6 +148,27 @@ function derivePatternReading(
   answers: Record<string, DualAxisAnswer>,
   result: PurposeProfileResult,
 ): PatternReading {
+  if (result.primaryPattern && result.reportNarrative) {
+    return {
+      primaryPattern: [
+        result.reportNarrative.conditionStatement,
+        result.reportNarrative.classificationExplanation,
+        result.reportNarrative.contradictionExplanation,
+        result.reportNarrative.consequenceBlock,
+        result.reportNarrative.nextStepBlock,
+      ].join(" "),
+      patternTitle: result.primaryPattern.label,
+      urgentStatement: result.evidence?.sharpestWeakSignal
+        ? `"${result.evidence.sharpestWeakSignal.statement}" — ${result.evidence.sharpestWeakSignal.resonance}/10 resonance with ${result.evidence.sharpestWeakSignal.certainty}/10 certainty. This is the sharpest weak evidence in the profile.`
+        : null,
+      uncertaintyNote: result.contradictions?.length
+        ? result.contradictions.map((item) => item.evidence).join(" ")
+        : null,
+      firstAction: result.firstAction ?? result.reportNarrative.firstActionBlock,
+      escalationNote: result.routingRecommendation?.reason ?? result.reportNarrative.nextStepBlock,
+    };
+  }
+
   // Score every answered statement
   const scored: ScoredStatement[] = PURPOSE_ALIGNMENT_QUESTIONS
     .filter(q => answers[q.id])
@@ -586,15 +607,17 @@ function ResultSurface({
   const weakDomains = result.domainProfiles
     .filter((domain) => domain.percent < 45)
     .map((domain) => domain.domain);
-  const structuralSpilloverLikely = weakDomains.some((domain) =>
-    ["identity", "decision", "environment"].includes(domain),
-  );
+  const structuralSpilloverLikely =
+    result.routingRecommendation?.spilloverLikely ??
+    weakDomains.some((domain) =>
+      ["identity", "decision", "environment"].includes(domain),
+    );
 
   // Determine escalation path
   const escalationPath = {
-    href: "/diagnostics/constitutional-diagnostic?origin=purpose_alignment",
-    label: "Continue to Constitutional Diagnostic",
-    note: "Personal clarity becomes useful when it is tested against organisational structure.",
+    href: result.routingRecommendation?.href ?? "/diagnostics/constitutional-diagnostic?origin=purpose_alignment",
+    label: result.routingRecommendation?.label ?? "Continue to Constitutional Diagnostic",
+    note: result.routingRecommendation?.reason ?? "Personal clarity becomes useful when it is tested against organisational structure.",
   };
 
   React.useEffect(() => {
@@ -846,6 +869,14 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   const [answers,   setAnswers]   = React.useState<Record<string, DualAxisAnswer>>({});
   const [result,    setResult]    = React.useState<PurposeProfileResult | null>(null);
   const [status,    setStatus]    = React.useState<"idle" | "loading" | "success" | "error">("idle");
+
+  // Diagnostic reflection gate — free-text fields that create bespoke specificity
+  const [showReflection, setShowReflection] = React.useState(false);
+  const [reflections, setReflections] = React.useState({
+    avoidedDecision: "",
+    lastSevenDays: "",
+    dissenter: "",
+  });
   const [direction, setDirection] = React.useState(1);
 
   const isResult       = stage === STAGE_DOMAINS.length;
@@ -886,6 +917,10 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   function advance() {
     if (stage < STAGE_DOMAINS.length - 1) {
       setDirection(1); setStage(s => s + 1);
+    } else if (!showReflection) {
+      // Show diagnostic reflection gate before computing result
+      setShowReflection(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       handleComplete();
     }
@@ -904,7 +939,15 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
     try {
       sessionStorage.setItem(
         "purpose-alignment-result",
-        JSON.stringify({ ...scored, subjectId: getOrCreateSubjectId() }),
+        JSON.stringify({
+          ...scored,
+          subjectId: getOrCreateSubjectId(),
+          reflections: {
+            avoidedDecision: reflections.avoidedDecision || null,
+            lastSevenDays: reflections.lastSevenDays || null,
+            dissenter: reflections.dissenter || null,
+          },
+        }),
       );
       sessionStorage.setItem("aol_diagnostics_origin", "purpose_alignment");
     } catch {}
@@ -925,7 +968,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
     try {
       await fetch("/api/purpose-alignment/assessments", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, result: scored }),
+        body: JSON.stringify({ answers, result: scored, reflections }),
       });
       setStatus("success");
     } catch { setStatus("error"); }
@@ -965,7 +1008,92 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
         {/* Main panel */}
         <div>
           <AnimatePresence mode="wait" custom={direction}>
-            {!isResult ? (
+            {showReflection && !isResult ? (
+              <motion.div
+                key="reflection-gate"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div style={{ marginBottom: "1.75rem" }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                    Diagnostic Reflection
+                  </span>
+                  <h2 style={{
+                    marginTop: "0.5rem",
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300, fontSize: "clamp(1.4rem, 2.5vw, 1.8rem)",
+                    lineHeight: 1.1, color: "rgba(255,255,255,0.88)",
+                  }}>
+                    Three questions that change the reading.
+                  </h2>
+                  <p style={{
+                    marginTop: "0.5rem",
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.35)", fontStyle: "italic",
+                  }}>
+                    Your scores are recorded. These answers make the interpretation specific to you.
+                  </p>
+                </div>
+
+                <div className="space-y-5">
+                  <div>
+                    <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+                      What is the one decision you are currently avoiding?
+                    </label>
+                    <textarea
+                      value={reflections.avoidedDecision}
+                      onChange={(e) => setReflections((r) => ({ ...r, avoidedDecision: e.target.value }))}
+                      rows={2}
+                      placeholder="Name it directly. Not the topic — the decision."
+                      style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "10px 12px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.75)", resize: "none", outline: "none" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+                      Describe your last 7 days in one sentence.
+                    </label>
+                    <textarea
+                      value={reflections.lastSevenDays}
+                      onChange={(e) => setReflections((r) => ({ ...r, lastSevenDays: e.target.value }))}
+                      rows={2}
+                      placeholder="Not what you planned. What actually happened."
+                      style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "10px 12px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.75)", resize: "none", outline: "none" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+                      Who would disagree with your self-assessment, and why?
+                    </label>
+                    <textarea
+                      value={reflections.dissenter}
+                      onChange={(e) => setReflections((r) => ({ ...r, dissenter: e.target.value }))}
+                      rows={2}
+                      placeholder="Name the person. State what they would say."
+                      style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "10px 12px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.75)", resize: "none", outline: "none" }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-6 mt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                  <button type="button" onClick={() => setShowReflection(false)} className="inline-flex items-center gap-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", cursor: "pointer", background: "none", border: "none" }}>
+                    <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back to questions
+                  </button>
+                  <button
+                    type="button"
+                    onClick={advance}
+                    className="inline-flex items-center gap-2.5 transition-all duration-300"
+                    style={{ padding: "11px 24px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: "pointer" }}
+                  >
+                    Generate reading <ArrowRight style={{ width: "11px", height: "11px" }} />
+                  </button>
+                </div>
+              </motion.div>
+            ) : !isResult ? (
               <motion.div
                 key={`stage-${stage}`}
                 custom={direction}

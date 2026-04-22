@@ -2,7 +2,7 @@ import React from "react";
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { StoredPurposeAlignmentAssessment } from "@/lib/alignment/types";
 import { ALIGNMENT_DOMAIN_LABELS } from "@/lib/alignment/checklist";
-import { buildAlignmentNarrativeFromResult } from "@/lib/alignment/report-language";
+import { buildAlignmentNarrative } from "@/lib/alignment/report-language";
 import type { WatermarkPayload } from "@/lib/intelligence/watermark-delegate";
 
 import BriefCoverPage from "@/components/print/BriefCoverPage";
@@ -310,17 +310,7 @@ export default function AlignmentReportDocument({
   watermark: WatermarkPayload;
   qrCode?: string;
 }) {
-  const narrative = buildAlignmentNarrativeFromResult({
-    totalScore: assessment.totalScore,
-    possibleScore: assessment.possibleScore,
-    percent: assessment.percentScore,
-    band: assessment.band,
-    domainScores: assessment.domainScores,
-    weakestDomains: assessment.weakestDomains,
-    strengths: assessment.strengths,
-    corrections: assessment.corrections,
-    createdAt: assessment.createdAt,
-  });
+  const narrative = buildAlignmentNarrative(assessment);
 
   const reference = `ALIGN-${assessment.id.slice(0, 8).toUpperCase()}`;
   const classification = "PUBLIC";
@@ -424,7 +414,15 @@ export default function AlignmentReportDocument({
               <Text style={styles.domainMetricHeader}>Percent</Text>
             </View>
 
-            {assessment.domainScores.map((item, index) => (
+            {(assessment.canonicalResult?.domainStates
+              ? assessment.canonicalResult.domainStates.map((state) => ({
+                  domain: state.domain,
+                  earned: Math.round(state.alignmentScore / 10),
+                  possible: 10,
+                  percent: state.alignmentScore,
+                }))
+              : assessment.domainScores
+            ).map((item, index) => (
               <View
                 key={item.domain}
                 style={[

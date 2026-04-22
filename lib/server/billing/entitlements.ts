@@ -27,6 +27,8 @@ export const PRODUCT_CODES = {
   MANDATE_CLARITY_FRAMEWORK:            "mandate-clarity-framework",
   INTERVENTION_PATH_SELECTOR:           "intervention-path-selector",
   GLOBAL_MARKET_INTELLIGENCE_Q1_2026:   "global-market-intelligence-report-q1-2026",
+  DIAGNOSTIC_REPORT_BASIC:              "diagnostic_report_basic",
+  DIAGNOSTIC_REPORT_PRO:                "diagnostic_report_pro",
 } as const;
 
 export type ProductCode = (typeof PRODUCT_CODES)[keyof typeof PRODUCT_CODES];

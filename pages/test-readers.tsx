@@ -45,15 +45,11 @@ export default function TestReadersPage() {
                     surface="canon"
                     title="The Architecture of Decision"
                     subtitle="How institutional memory shapes strategic choice"
-                    meta={
-                      <>
-                        <span>Abraham of London</span>
-                        <span>•</span>
-                        <span>24 March 2025</span>
-                        <span>•</span>
-                        <span>28 minute read</span>
-                      </>
-                    }
+                    meta={[
+                      { label: "Author", value: "Abraham of London" },
+                      { label: "Date", value: "24 March 2025" },
+                      { label: "Read time", value: "28 minute read" },
+                    ]}
                   />
 
                   <ReaderBody surface="canon">
@@ -132,15 +128,11 @@ export default function TestReadersPage() {
                     surface="vault"
                     title="API Rate Limit Implementation v3.2"
                     subtitle="Distributed token-bucket controls with operational safeguards and migration notes."
-                    meta={
-                      <>
-                        <span>TECHNICAL SPECIFICATION</span>
-                        <span>•</span>
-                        <span>VERSION 3.2</span>
-                        <span>•</span>
-                        <span>LAST UPDATED: 2025-03-24</span>
-                      </>
-                    }
+                    meta={[
+                      { label: "Type", value: "TECHNICAL SPECIFICATION" },
+                      { label: "Version", value: "VERSION 3.2" },
+                      { label: "Updated", value: "LAST UPDATED: 2025-03-24" },
+                    ]}
                   />
 
                   <ReaderBody surface="vault">

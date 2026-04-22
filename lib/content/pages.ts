@@ -5,6 +5,7 @@
  */
 
 import { normalizeSlug, isDraftContent } from "@/lib/content/shared";
+import { resolveDocCoverImage } from "@/lib/image-resolver";
 
 // Import from books.ts
 import {
@@ -77,7 +78,7 @@ export const getDocHref = (doc: any): string => {
  * Resolves the primary visual asset for a document
  * Re-exported from unified image resolver for consistency
  */
-export { resolveDocCoverImage } from '@/lib/image-resolver';
+export { resolveDocCoverImage };
 
 /**
  * A composite lookup function that scans all local collection modules for a specific slug

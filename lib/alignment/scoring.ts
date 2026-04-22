@@ -3,6 +3,7 @@ import {
   ALIGNMENT_DOMAIN_ORDER,
   PURPOSE_ALIGNMENT_QUESTIONS,
 } from "./checklist";
+import { runPurposeAlignmentEngine } from "./intelligence-engine";
 import type {
   AlignmentAssessmentInput,
   AlignmentAssessmentResult,
@@ -110,61 +111,7 @@ function buildNextActions(
 export function scorePurposeProfile(
   input: import("./types").DualAxisInput,
 ): import("./types").PurposeProfileResult {
-  const domainProfiles: import("./types").DomainProfile[] = ALIGNMENT_DOMAIN_ORDER.map((domain) => {
-    const domainQuestions = PURPOSE_ALIGNMENT_QUESTIONS.filter((q) => q.domain === domain);
-    let resSum = 0;
-    let certSum = 0;
-    let count = 0;
-
-    for (const q of domainQuestions) {
-      const answer = input.answers[q.id];
-      if (answer) {
-        resSum += answer.resonance;
-        certSum += answer.certainty;
-        count++;
-      }
-    }
-
-    const resonance = count > 0 ? Math.round(resSum / count) : 0;
-    const certainty = count > 0 ? Math.round(certSum / count) : 0;
-    const weighted = Math.round(resonance * (certainty / 10));
-    const percent = Math.round(weighted * 10);
-
-    return {
-      domain,
-      label: ALIGNMENT_DOMAIN_LABELS[domain],
-      resonance,
-      certainty,
-      weighted,
-      percent,
-    };
-  });
-
-  const totalWeighted = domainProfiles.reduce((s, d) => s + d.weighted, 0);
-  const maxScore = domainProfiles.length * 10;
-  const percent = Math.round((totalWeighted / maxScore) * 100);
-  const coherenceBand = getCoherenceBand(percent);
-
-  const weakestDomains = [...domainProfiles]
-    .sort((a, b) => a.percent - b.percent)
-    .slice(0, 2)
-    .map((d) => d.domain);
-
-  return {
-    totalScore: totalWeighted,
-    maxScore,
-    percent,
-    coherenceBand,
-    domainProfiles,
-    weakestDomains,
-    strengths: getStrengths(
-      domainProfiles.map((d) => ({ domain: d.domain, earned: d.weighted, possible: 10, percent: d.percent })),
-    ),
-    corrections: getCorrections(weakestDomains),
-    narrative: buildNarrative(coherenceBand, weakestDomains),
-    nextActions: buildNextActions(coherenceBand, weakestDomains),
-    createdAt: new Date().toISOString(),
-  };
+  return runPurposeAlignmentEngine(input);
 }
 
 /* ── Tension signal extraction for cross-stage memory ── */
@@ -174,11 +121,42 @@ import type { TensionSignal } from "@/lib/diagnostics/tension-thread";
 type DualAxisAnswerForExtraction = { resonance: number; certainty: number };
 
 export function extractPurposeTensions(
-  profile: { domainProfiles: Array<{ domain: string; percent: number }>; weakestDomains: string[] },
+  profile: {
+    domainProfiles: Array<{ domain: string; percent: number }>;
+    weakestDomains: string[];
+    contradictions?: Array<{ type: string; severity: "low" | "medium" | "high" | "critical"; domains: string[]; evidence: string }>;
+    primaryPattern?: { id: string; label: string; consequence: string };
+  },
   answers: Record<string, DualAxisAnswerForExtraction>,
 ): TensionSignal[] {
   const signals: TensionSignal[] = [];
   const src = "purpose_alignment" as const;
+
+  if (profile.contradictions?.length || profile.primaryPattern) {
+    for (const contradiction of profile.contradictions ?? []) {
+      signals.push({
+        domain: contradiction.domains.join(","),
+        signal: contradiction.type,
+        severity: contradiction.severity === "critical" ? "high" : contradiction.severity,
+        source: src,
+        evidence: contradiction.evidence,
+      });
+    }
+
+    if (profile.primaryPattern) {
+      signals.push({
+        domain: profile.weakestDomains.join(",") || "mixed",
+        signal: profile.primaryPattern.id,
+        severity: profile.contradictions?.some((item) => item.severity === "high" || item.severity === "critical")
+          ? "high"
+          : "medium",
+        source: src,
+        evidence: `${profile.primaryPattern.label}: ${profile.primaryPattern.consequence}`,
+      });
+    }
+
+    return signals;
+  }
 
   for (const dp of profile.domainProfiles) {
     if (dp.domain === "identity" && dp.percent < 45) {

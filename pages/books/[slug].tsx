@@ -87,10 +87,9 @@ function pickBookSlug(doc: any): string {
 
 function normalizeCoverAspect(
   input: unknown,
-): "square" | "video" | "wide" | "book" | null {
+): "square" | "wide" | "book" | null {
   const v = String(input ?? "").trim().toLowerCase();
   if (v === "square") return "square";
-  if (v === "video") return "video";
   if (v === "wide") return "wide";
   if (v === "book") return "book";
   return null;
@@ -103,9 +102,13 @@ function normalizeCoverFit(input: unknown): "cover" | "contain" | null {
   return null;
 }
 
-function normalizeCoverPosition(input: unknown): string | null {
+function normalizeCoverPosition(
+  input: unknown,
+): "center" | "top" | "bottom" | "left" | "right" | null {
   const v = String(input ?? "").trim();
-  return v ? v : null;
+  return v === "center" || v === "top" || v === "bottom" || v === "left" || v === "right"
+    ? v
+    : null;
 }
 
 const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {

@@ -228,7 +228,6 @@ export async function resolveCanonicalEntitlement(input: {
     };
   }
 
-  const memoryKey = `${canonicalEmailKey(input) ?? normalizeUserId(input.userId) ?? "anon"}:${slug}`;
   const candidates: CanonicalEntitlement[] = [];
 
   const tier = tierEntitlement({ ...input, slug });
@@ -249,9 +248,6 @@ export async function resolveCanonicalEntitlement(input: {
       error,
     });
   }
-
-  const memory = canonicalMemory.get(memoryKey);
-  if (memory) candidates.push(memory);
 
   return winner(candidates, {
     userId: normalizeUserId(input.userId),
@@ -320,14 +316,38 @@ export async function grantCanonicalEntitlement(input: {
       });
     }
   } catch (error) {
-    console.warn("[CANONICAL_ENTITLEMENT_DB_WRITE_FAILED]", {
+    // CRITICAL: DB write failed. Do NOT treat memory-only as success.
+    console.error("[CANONICAL_ENTITLEMENT_DB_WRITE_FAILED]", {
       slug,
       userId,
       email,
       source: input.source,
-      error,
+      error: error instanceof Error ? error.message : String(error),
     });
-    canonicalMemory.set(`${key}:${slug}`, entitlement);
+
+    // Log failed grant for admin recovery
+    try {
+      await prisma.failedEntitlementGrant.create({
+        data: {
+          email: key,
+          slug,
+          source: input.source,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      });
+    } catch {
+      // If even the failure log fails, console is last resort
+      console.error("[ENTITLEMENT_FAILURE_LOG_ALSO_FAILED]", { key, slug });
+    }
+
+    return {
+      granted: false,
+      source: input.source,
+      userId,
+      email,
+      slug,
+      verified: false,
+    };
   }
 
   canonicalMemory.set(`${key}:${slug}`, entitlement);

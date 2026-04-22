@@ -53,7 +53,7 @@ export async function grantEntitlements(
           revokedBy: null,
           reason: null,
           issuedBy: params.issuedBy,
-          metadata: params.metadata ?? {},
+          metadata: (params.metadata ?? {}) as Prisma.InputJsonObject,
         },
       });
     } else {
@@ -66,7 +66,7 @@ export async function grantEntitlements(
           startsAt: params.startsAt ?? null,
           expiresAt: params.expiresAt ?? null,
           issuedBy: params.issuedBy,
-          metadata: params.metadata ?? {},
+          metadata: (params.metadata ?? {}) as Prisma.InputJsonObject,
         },
       });
     }

@@ -36,7 +36,7 @@ export const COMMERCIAL_PRODUCTS: Record<
     amount: 39500,
     name: "Strategy Room",
     successPath: "/strategy-room",
-    cancelPath: "/diagnostics/executive-reporting",
+    cancelPath: "/strategy-room",
     cookieName: "aol_paid_strategy_room",
   },
 };

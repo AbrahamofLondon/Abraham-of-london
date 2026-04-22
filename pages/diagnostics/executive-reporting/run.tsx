@@ -36,10 +36,10 @@ import ThresholdProximityLine, {
 import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
 import {
-  hasCommercialAccessCookie,
   setCommercialAccessCookie,
   verifyCheckoutSessionForProduct,
 } from "@/lib/server/billing/commercial-access";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 
 type ExecutiveReportingIntakeForm = {
@@ -3459,9 +3459,24 @@ export default function ExecutiveReportingRunPage({
 
 
 export const getServerSideProps: GetServerSideProps<ExecutiveReportingRunPageProps> = async (ctx) => {
+  // Resolve identity from session/cookies first, fall back to query params
+  let resolvedEmail: string | null = typeof ctx.query.email === "string" ? ctx.query.email : null;
+  let resolvedUserId: string | null = typeof ctx.query.subjectId === "string" ? ctx.query.subjectId : null;
+  try {
+    const { resolveIdentity } = await import("@/lib/auth/resolve-identity");
+    const cookieHeader = ctx.req.headers.cookie ?? "";
+    const headers = new Headers();
+    headers.set("cookie", cookieHeader);
+    if (ctx.req.headers.host) headers.set("host", ctx.req.headers.host);
+    const fakeReq = new Request(`http://${ctx.req.headers.host ?? "localhost"}${ctx.req.url}`, { headers });
+    const identity = await resolveIdentity(fakeReq as any);
+    resolvedEmail = identity.email ?? resolvedEmail;
+    resolvedUserId = identity.subjectId ?? resolvedUserId;
+  } catch { /* identity resolution is best-effort */ }
+
   const accessDecision = await enforceExecutiveReportingAccess({
-    email: typeof ctx.query.email === "string" ? ctx.query.email : null,
-    subjectId: typeof ctx.query.subjectId === "string" ? ctx.query.subjectId : null,
+    email: resolvedEmail,
+    subjectId: resolvedUserId,
     campaignId: typeof ctx.query.campaignId === "string" ? ctx.query.campaignId : null,
     intakeMode: typeof ctx.query.intakeMode === "string" ? ctx.query.intakeMode : "ladder",
     sponsoredDirect: ctx.query.sponsoredDirect === "true",
@@ -3479,9 +3494,6 @@ export const getServerSideProps: GetServerSideProps<ExecutiveReportingRunPagePro
     };
   }
 
-  const hasCookie = hasCommercialAccessCookie(ctx.req.headers.cookie, "executive_reporting");
-  if (hasCookie) return { props: { checkoutConfirmed: ctx.query.checkout === "success" } };
-
   if (ctx.query.checkout === "success") {
     try {
       const valid = await verifyCheckoutSessionForProduct(
@@ -3495,6 +3507,16 @@ export const getServerSideProps: GetServerSideProps<ExecutiveReportingRunPagePro
     } catch {
       // Fall through to the paywall with a clean state.
     }
+  }
+
+  const entitlement = await resolveCanonicalEntitlement({
+    userId: resolvedUserId,
+    email: resolvedEmail,
+    slug: "assessment.executive_reporting",
+  });
+
+  if (entitlement.granted) {
+    return { props: { checkoutConfirmed: false } };
   }
 
   return {

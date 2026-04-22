@@ -20,6 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
+  const body = req.body ?? {};
   const {
     name,
     email,
@@ -30,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     sessionDepth,
     timeOnSite,
     returnVisitor,
-  } = req.body ?? {};
+  } = body;
 
   if (!name || !email || !revenue || !problem || !urgency || !authority) {
     return res.status(400).json({ ok: false, error: "Invalid input" });

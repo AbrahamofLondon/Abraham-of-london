@@ -145,7 +145,7 @@ function buildCanonicalIntakeFromReport(args: {
     symptoms: [
       safeString(report?.narrative?.summary),
       ...failureModes,
-      ...dominantDomains.map((domain) => `${domain} dissonance visible`),
+      ...dominantDomains.map((domain: string) => `${domain} dissonance visible`),
     ]
       .filter(Boolean)
       .join(" "),
@@ -206,6 +206,8 @@ function buildConstitutionSeedFromReport(args: {
       totalExposure >= 1_000_000 ? "CRITICAL" : totalExposure >= 250_000 ? "HIGH" : "MEDIUM",
     temperature: certainty >= 85 ? "HOT" : certainty >= 65 ? "WARM" : "COLD",
     orgState: safeString(report?.state, "DRIFTING") as any,
+    posture: safeString(report?.state, "DRIFTING") as any,
+    confidence: clamp(certainty, 0, 100),
     readinessTier: report?.state === "ORDERED" ? "EXECUTION_READY" : report?.state === "DISORDERED" ? "FRAGILE" : "STABILIZING",
     authorityType: args.participantCount >= 12 ? "DIRECT" : args.participantCount >= 7 ? "PROXY" : "UNCLEAR",
     revenueBand:
@@ -235,6 +237,8 @@ function buildConstitutionSeedFromReport(args: {
     sponsorTypes:
       args.participantCount >= 12 ? ["BOARD", "EXECUTIVE"] : ["EXECUTIVE"],
     worldviewAnchors: ["ORDER", "STEWARDSHIP", "TRUTH", "RESPONSIBILITY"],
+    disqualifiersTriggered: report?.state === "DISORDERED" ? ["DISORDERED_STATE"] : [],
+    escalationAllowed: report?.state !== "DISORDERED",
     narrativeSummary: safeString(report?.narrative?.summary),
     rationale: [
       `Route derived from report state: ${safeString(report?.state, "DRIFTING")}.`,

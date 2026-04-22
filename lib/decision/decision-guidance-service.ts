@@ -138,9 +138,16 @@ function toExecutiveConstitution(
 ): ExecutiveReportConstitution {
   return {
     route: assessment.route,
+    confidence: Math.round(
+      (assessment.clarityScore +
+        assessment.authorityScore +
+        assessment.governanceScore) /
+        3,
+    ),
     priority: assessment.priority,
     temperature: assessment.temperature,
     orgState: assessment.orgState,
+    posture: assessment.orgState,
     readinessTier: assessment.readinessTier,
     authorityType: assessment.authorityType,
     revenueBand: assessment.revenueBand,
@@ -155,6 +162,9 @@ function toExecutiveConstitution(
     requiredInterventions: assessment.requiredInterventions,
     sponsorTypes: assessment.sponsorTypes,
     worldviewAnchors: assessment.worldviewAnchors,
+    disqualifiersTriggered:
+      assessment.route === "REJECT" ? ["CONSTITUTIONAL_REJECTION"] : [],
+    escalationAllowed: assessment.route !== "REJECT",
     narrativeSummary: assessment.narrativeSummary,
     rationale: assessment.rationale,
   };

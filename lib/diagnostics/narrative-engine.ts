@@ -153,13 +153,12 @@ export function buildDirectiveNarrative(
       );
       break;
 
-    case "allow":
-      // No directive narrative needed for allow — the system proceeds silently
+    default:
       return "";
   }
 
   // Add escalation context if relevant
-  if (thread.stagesCompleted.length >= 2 && directive.level !== "allow") {
+  if (thread.stagesCompleted.length >= 2) {
     parts.push(
       `This position is based on ${thread.tensions.length} signal${thread.tensions.length > 1 ? "s" : ""} accumulated across ${thread.stagesCompleted.length} diagnostic stages.`,
     );

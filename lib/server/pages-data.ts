@@ -110,7 +110,7 @@ function fromMdxMeta(meta: MdxMeta): Page {
     tags: safeArray(m.tags),
     featured: safeBoolean(m.featured),
     readTime: safeString((m as any).readTime) || (safeNumber((m as any).readTime) as any),
-    coverImage: resolveDocCoverImage(m, { contentType: 'PAGE' }),
+    coverImage: resolveDocCoverImage(m, { contentType: 'DEFAULT' }),
     pageType: safeString((m as any).pageType) || "page",
     parentPage: safeString((m as any).parentPage),
     order: safeNumber((m as any).order),

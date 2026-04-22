@@ -3,13 +3,16 @@ import type {
   AlignmentAssessmentResult,
   AlignmentBand,
   AlignmentDomain,
+  PurposeProfileResult,
   StoredPurposeAlignmentAssessment,
 } from "./types";
 
 type AssessmentLike = Pick<
   StoredPurposeAlignmentAssessment,
   "band" | "weakestDomains" | "domainScores"
->;
+> & {
+  canonicalResult?: PurposeProfileResult | null;
+};
 
 export type AlignmentNarrativeBundle = {
   posture: string;
@@ -244,6 +247,36 @@ function reminderPrompt(assessment: AssessmentLike): string {
 export function buildAlignmentNarrative(
   assessment: AssessmentLike
 ): AlignmentNarrativeBundle {
+  const canonicalResult = assessment.canonicalResult;
+  if (canonicalResult?.reportNarrative && canonicalResult.primaryPattern) {
+    const result = canonicalResult;
+    const primaryPattern = result.primaryPattern!;
+    const narrative = result.reportNarrative!;
+    return {
+      posture: narrative.conditionStatement,
+      executiveSummary: [
+        narrative.classificationExplanation,
+        narrative.contradictionExplanation,
+        narrative.consequenceBlock,
+      ].join(" "),
+      bandInterpretationTitle: `Condition: ${primaryPattern.label}`,
+      bandInterpretationBody: narrative.classificationExplanation,
+      correctivePriorityTitle: "First Action",
+      correctivePriorityBody: narrative.firstActionBlock,
+      strongestSignalTitle: result.evidence?.strongestStabilisingSignal
+        ? `Strongest Signal: ${domainLabel(result.evidence.strongestStabilisingSignal.domain)}`
+        : "Strongest Signal",
+      strongestSignalBody: result.evidence?.strongestStabilisingSignal
+        ? `"${result.evidence.strongestStabilisingSignal.statement}" scored ${result.evidence.strongestStabilisingSignal.resonance}/10 resonance with ${result.evidence.strongestStabilisingSignal.certainty}/10 certainty.`
+        : "No stabilising signal was isolated.",
+      dashboardSummary: `${primaryPattern.label}: ${narrative.consequenceBlock}`,
+      ctaTitle: result.routingRecommendation?.label ?? "Recommended Action",
+      ctaBody: narrative.nextStepBlock,
+      reportClosingNote: narrative.nextStepBlock,
+      reminderPrompt: `Reassess after completing the first action for ${primaryPattern.label}.`,
+    };
+  }
+
   const bandRead = bandInterpretation(assessment.band);
   const corrective = correctivePriority(assessment);
   const strongest = strongestSignal(assessment);
@@ -267,7 +300,26 @@ export function buildAlignmentNarrative(
 }
 
 export function buildAlignmentNarrativeFromResult(
-  result: AlignmentAssessmentResult
+  result: AlignmentAssessmentResult | PurposeProfileResult
 ): AlignmentNarrativeBundle {
+  if ("coherenceBand" in result) {
+    return buildAlignmentNarrative({
+      band:
+        result.coherenceBand === "SOVEREIGN" || result.coherenceBand === "ALIGNED"
+          ? "aligned"
+          : result.coherenceBand === "DRIFTING"
+            ? "drifting"
+            : "disordered",
+      weakestDomains: result.weakestDomains,
+      domainScores: result.domainProfiles.map((domain) => ({
+        domain: domain.domain,
+        earned: domain.weighted,
+        possible: 10,
+        percent: domain.percent,
+      })),
+      canonicalResult: result,
+    });
+  }
+
   return buildAlignmentNarrative(result);
 }

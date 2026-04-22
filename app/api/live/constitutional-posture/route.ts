@@ -15,6 +15,8 @@ export async function GET() {
       priority: "HIGH",
       temperature: "WARM",
       orgState: "DRIFTING",
+      posture: "DRIFTING",
+      confidence: 74,
       readinessTier: "STABILIZING",
       authorityType: "PROXY",
       revenueBand: "ENTERPRISE",
@@ -37,6 +39,8 @@ export async function GET() {
       ],
       sponsorTypes: ["EXECUTIVE"],
       worldviewAnchors: ["ORDER", "TRUTH", "RESPONSIBILITY"],
+      disqualifiersTriggered: [],
+      escalationAllowed: true,
       narrativeSummary:
         "The live terminal is reporting a diagnostic constitutional posture, with governance and execution strain requiring intervention before full escalation.",
       rationale: [

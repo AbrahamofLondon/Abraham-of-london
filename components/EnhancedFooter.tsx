@@ -11,6 +11,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { getSocialLinks, type SocialLink } from "@/config/site";
 import {
   ArrowRight,
   BookOpen,
@@ -22,6 +23,15 @@ import {
   FileText,
   Calendar,
   ShieldCheck,
+  Twitter,
+  Linkedin,
+  Instagram,
+  Youtube,
+  Facebook,
+  Globe,
+  Mail,
+  Phone,
+  Music2,
 } from "lucide-react";
 
 type FooterLink = {
@@ -41,6 +51,19 @@ type GatewayCardProps = {
 };
 
 const SOFT_GOLD = "#C9A96E";
+
+const SOCIAL_ICON_MAP: Partial<Record<SocialLink["kind"], React.ElementType>> = {
+  x: Twitter,
+  twitter: Twitter,
+  linkedin: Linkedin,
+  instagram: Instagram,
+  youtube: Youtube,
+  facebook: Facebook,
+  website: Globe,
+  email: Mail,
+  phone: Phone,
+  tiktok: Music2,
+};
 
 function GatewayCard({
   href,
@@ -161,6 +184,48 @@ function DirectoryColumn({
   );
 }
 
+function SocialChannel({ social }: { social: SocialLink }) {
+  const Icon = SOCIAL_ICON_MAP[social.kind] ?? Globe;
+  const isExternal = /^https?:\/\//i.test(social.href);
+  const descriptor =
+    social.handle ??
+    (social.kind === "email"
+      ? "Direct"
+      : social.kind === "phone"
+        ? "Office"
+        : "Official");
+
+  return (
+    <Link
+      href={social.href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noreferrer" : undefined}
+      aria-label={`${social.label}: ${descriptor}`}
+      className={[
+        "group flex min-h-[72px] items-center justify-between gap-4 border border-white/10 bg-white/[0.022] px-4 py-3",
+        "transition-colors duration-300 hover:border-[#C9A96E]/35 hover:bg-[#C9A96E]/[0.055]",
+      ].join(" ")}
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-white/10 bg-black/25 text-white/56 transition-colors duration-300 group-hover:border-[#C9A96E]/35 group-hover:text-[#D7B77E]">
+          <Icon className="h-3.5 w-3.5" />
+        </span>
+
+        <span className="min-w-0">
+          <span className="block font-mono text-[8px] uppercase tracking-[0.28em] text-white/68 transition-colors duration-300 group-hover:text-white/88">
+            {social.label}
+          </span>
+          <span className="mt-1 block truncate font-mono text-[7px] uppercase tracking-[0.2em] text-white/38 transition-colors duration-300 group-hover:text-[#C9A96E]/72">
+            {descriptor}
+          </span>
+        </span>
+      </div>
+
+      <ArrowRight className="h-3 w-3 shrink-0 text-white/28 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-[#C9A96E]/70" />
+    </Link>
+  );
+}
+
 export default function EnhancedFooter(): React.ReactElement {
   // Hardcoded to avoid hydration mismatch between server build time and client render time.
   // Update annually.
@@ -248,6 +313,7 @@ export default function EnhancedFooter(): React.ReactElement {
     { label: "Security", href: "/security" },
     { label: "Cookies", href: "/cookies" },
   ] as const;
+  const socialLinks = getSocialLinks();
 
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-[#030305]">
@@ -311,6 +377,30 @@ export default function EnhancedFooter(): React.ReactElement {
             {Object.entries(directory).map(([title, links]) => (
               <DirectoryColumn key={title} title={title} links={links} />
             ))}
+          </div>
+        </div>
+
+        <div className="mt-16 border-t border-white/10 pt-12">
+          <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
+            <div className="lg:col-span-4">
+              <div className="flex items-center gap-3">
+                <div className="h-px w-10 bg-[#C9A96E]/60" />
+                <span className="font-mono text-[8px] uppercase tracking-[0.42em] text-[#C9A96E]/86">
+                  Signal channels
+                </span>
+              </div>
+
+              <p className="mt-4 max-w-[34ch] text-[12px] leading-6 text-white/62">
+                Official channels for essays, briefings, public notes, and direct
+                institutional contact.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:col-span-8 lg:grid-cols-3">
+              {socialLinks.map((social) => (
+                <SocialChannel key={`${social.kind}-${social.href}`} social={social} />
+              ))}
+            </div>
           </div>
         </div>
 

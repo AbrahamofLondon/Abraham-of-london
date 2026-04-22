@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma.server";
+import type { Prisma } from "@prisma/client";
 
 type AuditInput = {
   actorType: "USER" | "SYSTEM" | "ADMIN";
@@ -24,7 +25,7 @@ export async function logAccessAudit(input: AuditInput): Promise<void> {
         targetKey: input.targetKey ?? null,
         success: input.success ?? true,
         reason: input.reason ?? null,
-        metadata: input.metadata ?? {},
+        metadata: (input.metadata ?? {}) as Prisma.InputJsonObject,
       },
     });
   } catch {

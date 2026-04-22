@@ -1,99 +1,19 @@
-// pages/api/billing/checkout.ts
+// pages/api/billing/checkout.ts — CANONICAL CHECKOUT ROUTE
+// All products resolve from lib/commercial/catalog.ts SSOT.
+// Stripe Price IDs are embedded in catalog, not env vars.
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { COMMERCIAL_PRODUCTS } from "@/lib/server/billing/commercial-access";
+import {
+  checkCheckoutEligibility,
+  resolveEntitlementSlugs,
+} from "@/lib/commercial/catalog";
 import { hubspotSync } from "@/lib/hubspot/sync";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any }) : null;
-
-const PRICE_MAP: Record<"executive_reporting" | "strategy_room", string> = {
-  executive_reporting: process.env.STRIPE_EXECUTIVE_REPORTING_PRICE_ID || "",
-  strategy_room: process.env.STRIPE_STRATEGY_ROOM_PRICE_ID || "",
-};
-
-const COMMERCIAL_PRICE_CONFIG = {
-  executive_reporting: {
-    name: COMMERCIAL_PRODUCTS.executive_reporting.name,
-    productCode: COMMERCIAL_PRODUCTS.executive_reporting.productCode,
-    tier: COMMERCIAL_PRODUCTS.executive_reporting.tier,
-  },
-  strategy_room: {
-    name: COMMERCIAL_PRODUCTS.strategy_room.name,
-    productCode: COMMERCIAL_PRODUCTS.strategy_room.productCode,
-    tier: COMMERCIAL_PRODUCTS.strategy_room.tier,
-  },
-};
-
-const INLINE_PRICE_MAP: Record<string, { amount: number; name: string; productCode: string; tier: string }> = {
-  "decision-exposure-instrument": {
-    amount: 2900,
-    name: "Decision Exposure Instrument",
-    productCode: "decision-exposure-instrument",
-    tier: "decision-instrument",
-  },
-  "mandate-clarity-framework": {
-    amount: 4900,
-    name: "Mandate Clarity Framework",
-    productCode: "mandate-clarity-framework",
-    tier: "decision-instrument",
-  },
-  "intervention-path-selector": {
-    amount: 7900,
-    name: "Intervention Path Selector",
-    productCode: "intervention-path-selector",
-    tier: "decision-instrument",
-  },
-  "global-market-intelligence-report-q1-2026": {
-    amount: 5900,
-    name: "Global Market Intelligence Report Q1 2026",
-    productCode: "global-market-intelligence-report-q1-2026",
-    tier: "premium-report",
-  },
-  diagnostic_report_basic: {
-    amount: 25000,
-    name: "Diagnostic Report Basic",
-    productCode: "diagnostic_report_basic",
-    tier: "report-basic",
-  },
-  diagnostic_report_pro: {
-    amount: 75000,
-    name: "Diagnostic Report Pro",
-    productCode: "diagnostic_report_pro",
-    tier: "report-pro",
-  },
-};
-
-const RETURN_PATHS: Record<string, { successPath: string; cancelPath: string }> = {
-  executive_reporting: {
-    successPath: COMMERCIAL_PRODUCTS.executive_reporting.successPath,
-    cancelPath: COMMERCIAL_PRODUCTS.executive_reporting.cancelPath,
-  },
-  strategy_room: {
-    successPath: COMMERCIAL_PRODUCTS.strategy_room.successPath,
-    cancelPath: COMMERCIAL_PRODUCTS.strategy_room.cancelPath,
-  },
-};
-
-function stripeErrorDetails(error: unknown): Record<string, unknown> {
-  if (!error || typeof error !== "object") {
-    return { message: String(error || "Unknown Stripe checkout error") };
-  }
-
-  const stripeError = error as Stripe.errors.StripeError & {
-    requestId?: string;
-    statusCode?: number;
-  };
-
-  return {
-    type: stripeError.type,
-    code: stripeError.code,
-    declineCode: stripeError.decline_code,
-    message: stripeError.message,
-    requestId: stripeError.requestId,
-    statusCode: stripeError.statusCode,
-  };
-}
+const stripe = stripeKey
+  ? new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any })
+  : null;
 
 function siteUrl(req: NextApiRequest): string {
   return (
@@ -103,93 +23,87 @@ function siteUrl(req: NextApiRequest): string {
   ).replace(/\/$/, "");
 }
 
+function stripeErrorDetails(error: unknown): Record<string, unknown> {
+  if (!error || typeof error !== "object") {
+    return { message: String(error || "Unknown Stripe checkout error") };
+  }
+  const e = error as Stripe.errors.StripeError & { requestId?: string; statusCode?: number };
+  return {
+    type: e.type,
+    code: e.code,
+    declineCode: e.decline_code,
+    message: e.message,
+    requestId: e.requestId,
+    statusCode: e.statusCode,
+  };
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
   if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
 
   const { email, priceCode, originPath } = req.body || {};
-  const normalizedPriceCode = String(priceCode || "");
-  const commercialPriceId = PRICE_MAP[normalizedPriceCode as keyof typeof PRICE_MAP];
-  const commercialConfig =
-    COMMERCIAL_PRICE_CONFIG[normalizedPriceCode as keyof typeof COMMERCIAL_PRICE_CONFIG];
-  const inlinePrice = INLINE_PRICE_MAP[normalizedPriceCode];
+  const code = String(priceCode || "").trim();
 
-  if (!email || (!commercialConfig && !inlinePrice)) {
-    return res.status(400).json({ ok: false, reason: "INVALID_PAYLOAD" });
-  }
-  if (commercialConfig && !commercialPriceId) {
-    return res.status(500).json({ ok: false, reason: "STRIPE_PRICE_NOT_CONFIGURED" });
+  // ── Resolve product from catalog SSOT with guardrails ──
+  if (!email) {
+    return res.status(400).json({ ok: false, reason: "EMAIL_REQUIRED" });
   }
 
-  const returnPaths = RETURN_PATHS[normalizedPriceCode];
+  const eligibility = checkCheckoutEligibility(code);
+  if (!eligibility.eligible) {
+    return res.status(400).json({ ok: false, reason: eligibility.reason, code });
+  }
+
+  const product = eligibility.product;
+
+  // ── Paths ──
   const origin = typeof originPath === "string" && originPath.startsWith("/") ? originPath : "";
-  const successPath = returnPaths?.successPath || origin || "/dashboard";
-  const cancelPath = origin || returnPaths?.cancelPath || "/dashboard";
+  const successPath = product.successPath || origin || "/dashboard";
+  const cancelPath = origin || product.cancelPath || "/dashboard";
   const baseUrl = siteUrl(req);
-  const productCode = commercialConfig ? commercialConfig.productCode : inlinePrice!.productCode;
-  const tier = commercialConfig ? commercialConfig.tier : inlinePrice!.tier;
 
+  // ── Metadata (attached to Stripe session, used by webhooks) ──
+  const entitlementSlugs = resolveEntitlementSlugs(code);
+  const metadata: Record<string, string> = {
+    productCode: product.entitlementSlug,
+    priceCode: code,
+    tier: product.tier,
+    email: String(email).trim().toLowerCase(),
+    originPath: origin,
+    // For bundles, include the full list of entitlement slugs
+    ...(entitlementSlugs.length > 1
+      ? { bundleEntitlements: entitlementSlugs.join(",") }
+      : {}),
+  };
+
+  // ── Create Stripe checkout session ──
   let session: Stripe.Checkout.Session;
-
   try {
     session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: String(email).trim().toLowerCase(),
-      line_items: [
-        commercialConfig
-          ? {
-              price: commercialPriceId,
-              quantity: 1,
-            }
-          : {
-              price_data: {
-                currency: process.env.DIAGNOSTIC_DEFAULT_CURRENCY || "gbp",
-                unit_amount: inlinePrice!.amount,
-                product_data: {
-                  name: inlinePrice!.name,
-                  metadata: {
-                    productCode,
-                    tier,
-                  },
-                },
-              },
-              quantity: 1,
-            },
-      ],
+      // checkCheckoutEligibility guarantees stripePriceId exists for all eligible products
+      line_items: [{ price: product.stripePriceId!, quantity: 1 }],
       success_url: `${baseUrl}${successPath}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}${cancelPath}?checkout=cancelled`,
-      metadata: {
-        productCode,
-        priceCode: normalizedPriceCode,
-        tier,
-        email: String(email).trim().toLowerCase(),
-        originPath: origin,
-      },
+      metadata,
     });
   } catch (error) {
     const details = stripeErrorDetails(error);
-    console.error("[BILLING_CHECKOUT_ERROR]", {
-      priceCode: normalizedPriceCode,
-      productCode,
-      tier,
-      originPath: origin,
-      stripe: details,
-    });
-
+    console.error("[BILLING_CHECKOUT_ERROR]", { priceCode: code, ...details });
     return res.status(502).json({
       ok: false,
       reason: "STRIPE_CHECKOUT_CREATE_FAILED",
       code: typeof details.code === "string" ? details.code : undefined,
-      type: typeof details.type === "string" ? details.type : undefined,
     });
   }
 
-  // HubSpot sync — fire and forget
-  const hsEvent = normalizedPriceCode === "strategy_room" ? "strategy_room_checkout" as const : "executive_reporting_checkout" as const;
+  // ── HubSpot sync (fire and forget) ──
   hubspotSync({
-    event: hsEvent,
+    event: code === "strategy_room" ? "strategy_room_checkout" : "executive_reporting_checkout",
     email: String(email || ""),
-    data: { amount: inlinePrice ? inlinePrice.amount / 100 : normalizedPriceCode === "strategy_room" ? 395 : 95 },
+    data: { amount: product.amount / 100 },
   }).catch(() => {});
 
   return res.json({ ok: true, url: session.url });

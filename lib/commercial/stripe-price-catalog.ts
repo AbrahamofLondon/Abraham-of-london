@@ -1,51 +1,223 @@
-// lib/commercial/stripe-price-catalog.ts
+// lib/commercial/catalog.ts
 
-export const STRIPE_PRICE_CATALOG = {
-  executive_reporting: "price_1TOLggQFpelVFMXJKSSxZvKv",
-  strategy_room: "price_1TOLsPQFpelVFMXJ5ieJsFas",
-  "decision-exposure-instrument": "price_1TP1XIQFpelVFMXJ35YurntT2",
-  "mandate-clarity-framework": "price_1TP1ZaQFpelVFMXJovfynFoS",
-  "intervention-path-selector": "price_1TP1dRQFpelVFMXJvVlFQjWH",
-  "operator-decision-pack": "price_1TP1idQFpelVFMXJG77Vj5bE",
-  "case-dossier-tariff-shock": "price_1TP1lhQFpelVFMXJN4xf1yxW",
-  "case-dossier-team-alignment": "price_1TP1nMQFpelVFMXJukt9E22Z",
-  "case-dossier-escalation-denied": "price_1TP1omQFpelVFMXJtUTNXdkc",
-  "global-market-intelligence-report-q1-2026": "price_1TP1rRQFpelVFMXJWaFMOpJQ",
-  diagnostic_report_basic: "price_1TP1ufQFpelVFMXJ4NqwIXjv",
-  diagnostic_report_pro: "price_1TP1w5QFpelVFMXJvIQUVqgz",
-  inner_circle: "price_1TP20xQFpelVFMXJwBO0Kz1h",
-  executive_reporting_priority: "price_1TP22XQFpelVFMXJ4IWRIaqb",
-  strategy_room_extended: "price_1TP26NQFpelVFMXJgMpsREew",
-} as const;
+export type CommercialCategory =
+  | "reporting"
+  | "execution"
+  | "decision_tools"
+  | "bundle"
+  | "intelligence"
+  | "membership"
+  | "service";
 
-export type StripePriceCode = keyof typeof STRIPE_PRICE_CATALOG;
-export type StripePriceId = (typeof STRIPE_PRICE_CATALOG)[StripePriceCode];
+export type CommercialAccessType =
+  | "one_time"
+  | "subscription"
+  | "free"
+  | "gated";
 
-const STRIPE_PRICE_ALIASES = {
-  STRIPE_EXECUTIVE_REPORTING_PRICE_ID: "executive_reporting",
-  STRIPE_STRATEGY_ROOM_PRICE_ID: "strategy_room",
-  decision_exposure_instrument: "decision-exposure-instrument",
-  mandate_clarity_framework: "mandate-clarity-framework",
-  intervention_path_selector: "intervention-path-selector",
-  operator_decision_pack: "operator-decision-pack",
-  case_dossier_tariff_shock: "case-dossier-tariff-shock",
-  case_dossier_team_alignment: "case-dossier-team-alignment",
-  case_dossier_escalation_denied: "case-dossier-escalation-denied",
-  gmi_q1_2026: "global-market-intelligence-report-q1-2026",
-} as const satisfies Record<string, StripePriceCode>;
+export type CommercialDuration =
+  | "lifetime"
+  | "membership_bound"
+  | "time_limited";
 
-export type StripePriceAlias = keyof typeof STRIPE_PRICE_ALIASES;
+export type CommercialProductCode =
+  | "executive_reporting"
+  | "strategy_room"
+  | "decision_exposure_instrument"
+  | "mandate_clarity_framework"
+  | "intervention_path_selector"
+  | "operator_decision_pack"
+  | "gmi_q1_2026"
+  | "diagnostic_report_basic"
+  | "diagnostic_report_pro"
+  | "executive_reporting_priority"
+  | "inner_circle";
 
-export function isStripePriceCode(value: string): value is StripePriceCode {
-  return Object.prototype.hasOwnProperty.call(STRIPE_PRICE_CATALOG, value);
+export type CommercialCatalogEntry = {
+  productCode: CommercialProductCode;
+  displayName: string;
+  stripeProductId: string;
+  stripePriceId: string;
+  entitlementSlug: string;
+  category: CommercialCategory;
+  accessType: CommercialAccessType;
+  duration: CommercialDuration;
+  unitAmountGbp: number;
+  active: boolean;
+  includes?: CommercialProductCode[];
+};
+
+export const COMMERCIAL_CATALOG: Record<
+  CommercialProductCode,
+  CommercialCatalogEntry
+> = {
+  executive_reporting: {
+    productCode: "executive_reporting",
+    displayName: "Executive Reporting",
+    stripeProductId: "prod_REPLACE_EXECUTIVE_REPORTING",
+    stripePriceId: "price_REPLACE_EXECUTIVE_REPORTING",
+    entitlementSlug: "assessment.executive_reporting",
+    category: "reporting",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 9500,
+    active: true,
+  },
+
+  strategy_room: {
+    productCode: "strategy_room",
+    displayName: "Strategy Room",
+    stripeProductId: "prod_REPLACE_STRATEGY_ROOM",
+    stripePriceId: "price_REPLACE_STRATEGY_ROOM",
+    entitlementSlug: "strategy_room",
+    category: "execution",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 39500,
+    active: true,
+  },
+
+  decision_exposure_instrument: {
+    productCode: "decision_exposure_instrument",
+    displayName: "Decision Exposure Instrument",
+    stripeProductId: "prod_REPLACE_DECISION_EXPOSURE",
+    stripePriceId: "price_REPLACE_DECISION_EXPOSURE",
+    entitlementSlug: "decision-exposure-instrument",
+    category: "decision_tools",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 2900,
+    active: true,
+  },
+
+  mandate_clarity_framework: {
+    productCode: "mandate_clarity_framework",
+    displayName: "Mandate Clarity Framework",
+    stripeProductId: "prod_REPLACE_MANDATE_CLARITY",
+    stripePriceId: "price_REPLACE_MANDATE_CLARITY",
+    entitlementSlug: "mandate-clarity-framework",
+    category: "decision_tools",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 4900,
+    active: true,
+  },
+
+  intervention_path_selector: {
+    productCode: "intervention_path_selector",
+    displayName: "Intervention Path Selector",
+    stripeProductId: "prod_REPLACE_INTERVENTION_PATH",
+    stripePriceId: "price_REPLACE_INTERVENTION_PATH",
+    entitlementSlug: "intervention-path-selector",
+    category: "decision_tools",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 7900,
+    active: true,
+  },
+
+  operator_decision_pack: {
+    productCode: "operator_decision_pack",
+    displayName: "Operator Decision Pack",
+    stripeProductId: "prod_REPLACE_OPERATOR_PACK",
+    stripePriceId: "price_REPLACE_OPERATOR_PACK",
+    entitlementSlug: "operator-decision-pack",
+    category: "bundle",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 12900,
+    active: true,
+    includes: [
+      "decision_exposure_instrument",
+      "mandate_clarity_framework",
+      "intervention_path_selector",
+    ],
+  },
+
+  gmi_q1_2026: {
+    productCode: "gmi_q1_2026",
+    displayName: "Global Market Intelligence Report — Q1 2026",
+    stripeProductId: "prod_REPLACE_GMI_Q1_2026",
+    stripePriceId: "price_REPLACE_GMI_Q1_2026",
+    entitlementSlug: "global-market-intelligence-report-q1-2026",
+    category: "intelligence",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 5900,
+    active: true,
+  },
+
+  diagnostic_report_basic: {
+    productCode: "diagnostic_report_basic",
+    displayName: "Diagnostic Report — Basic",
+    stripeProductId: "prod_REPLACE_DIAGNOSTIC_BASIC",
+    stripePriceId: "price_REPLACE_DIAGNOSTIC_BASIC",
+    entitlementSlug: "diagnostic-report-basic",
+    category: "service",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 25000,
+    active: true,
+  },
+
+  diagnostic_report_pro: {
+    productCode: "diagnostic_report_pro",
+    displayName: "Diagnostic Report — Pro",
+    stripeProductId: "prod_REPLACE_DIAGNOSTIC_PRO",
+    stripePriceId: "price_REPLACE_DIAGNOSTIC_PRO",
+    entitlementSlug: "diagnostic-report-pro",
+    category: "service",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 75000,
+    active: true,
+  },
+
+  executive_reporting_priority: {
+    productCode: "executive_reporting_priority",
+    displayName: "Executive Reporting — Priority",
+    stripeProductId: "prod_REPLACE_EXEC_REPORT_PRIORITY",
+    stripePriceId: "price_REPLACE_EXEC_REPORT_PRIORITY",
+    entitlementSlug: "executive-reporting-priority",
+    category: "service",
+    accessType: "one_time",
+    duration: "lifetime",
+    unitAmountGbp: 125000,
+    active: true,
+  },
+
+  inner_circle: {
+    productCode: "inner_circle",
+    displayName: "Inner Circle",
+    stripeProductId: "prod_REPLACE_INNER_CIRCLE",
+    stripePriceId: "price_REPLACE_INNER_CIRCLE",
+    entitlementSlug: "inner-circle",
+    category: "membership",
+    accessType: "subscription",
+    duration: "membership_bound",
+    unitAmountGbp: 0, // replace when finalised
+    active: true,
+  },
+};
+
+export function getCommercialProduct(productCode: CommercialProductCode) {
+  return COMMERCIAL_CATALOG[productCode];
 }
 
-export function resolveStripePriceCode(value: string): StripePriceCode | null {
-  if (isStripePriceCode(value)) return value;
-  return STRIPE_PRICE_ALIASES[value as StripePriceAlias] ?? null;
+export function getCommercialProductBySlug(slug: string) {
+  return Object.values(COMMERCIAL_CATALOG).find(
+    (entry) => entry.entitlementSlug === slug,
+  );
 }
 
-export function getStripePriceId(value: string): StripePriceId | null {
-  const priceCode = resolveStripePriceCode(value);
-  return priceCode ? STRIPE_PRICE_CATALOG[priceCode] : null;
+export function getCommercialProductByPriceId(priceId: string) {
+  return Object.values(COMMERCIAL_CATALOG).find(
+    (entry) => entry.stripePriceId === priceId,
+  );
+}
+
+export function getCommercialProductByStripeProductId(productId: string) {
+  return Object.values(COMMERCIAL_CATALOG).find(
+    (entry) => entry.stripeProductId === productId,
+  );
 }

@@ -23,8 +23,11 @@ export const handler: Handler = async (event) => {
   try {
     // Scoring + report metadata — pure functions, no Prisma in any of
     // these modules (verified via grep of lib/alignment/*).
-    const { scorePurposeAlignment } = await import(
+    const { scorePurposeProfile } = await import(
       "../../../lib/alignment/scoring"
+    );
+    const { PURPOSE_ALIGNMENT_QUESTIONS } = await import(
+      "../../../lib/alignment/checklist"
     );
     const { PURPOSE_ALIGNMENT_INSTRUMENT_ID, PURPOSE_ALIGNMENT_REPORT_VERSION } =
       await import("../../../lib/alignment/checklist");
@@ -34,7 +37,13 @@ export const handler: Handler = async (event) => {
     type StoredPurposeAlignmentAssessment =
       import("../../../lib/alignment/types").StoredPurposeAlignmentAssessment;
 
-    const sampleResult = scorePurposeAlignment({ answers: {} });
+    const sampleAnswers = Object.fromEntries(
+      PURPOSE_ALIGNMENT_QUESTIONS.map((question) => [
+        question.id,
+        { resonance: 6, certainty: 6 },
+      ]),
+    );
+    const sampleResult = scorePurposeProfile({ answers: sampleAnswers });
 
     const sampleAssessment: StoredPurposeAlignmentAssessment = {
       id: "sample-purpose-alignment-report",
@@ -43,14 +52,25 @@ export const handler: Handler = async (event) => {
       title: "Purpose Alignment Report",
       notes: null,
       totalScore: sampleResult.totalScore,
-      possibleScore: sampleResult.possibleScore,
+      possibleScore: sampleResult.maxScore,
       percentScore: sampleResult.percent,
-      band: sampleResult.band,
+      band:
+        sampleResult.coherenceBand === "SOVEREIGN" || sampleResult.coherenceBand === "ALIGNED"
+          ? "aligned"
+          : sampleResult.coherenceBand === "DRIFTING"
+            ? "drifting"
+            : "disordered",
       weakestDomains: sampleResult.weakestDomains,
       strengths: sampleResult.strengths,
       corrections: sampleResult.corrections,
-      answers: {},
-      domainScores: sampleResult.domainScores,
+      answers: sampleAnswers,
+      domainScores: sampleResult.domainProfiles.map((domain) => ({
+        domain: domain.domain,
+        earned: domain.weighted,
+        possible: 10,
+        percent: domain.percent,
+      })),
+      canonicalResult: sampleResult,
       reportVersion: PURPOSE_ALIGNMENT_REPORT_VERSION,
       sourceInstrumentId: PURPOSE_ALIGNMENT_INSTRUMENT_ID,
       createdAt: sampleResult.createdAt,

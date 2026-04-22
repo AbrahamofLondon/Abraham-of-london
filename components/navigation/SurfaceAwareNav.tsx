@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Menu, X, Lock } from "lucide-react";
 
-import type { SurfaceContract } from "@/lib/design-system/surfaces";
+import type { SurfaceContract, SurfaceId } from "@/lib/design-system/surfaces";
 import { getAllSurfaces } from "@/lib/design-system/surfaces";
 
 function cn(...classes: Array<string | false | null | undefined>) {
@@ -31,9 +31,9 @@ const PRIMARY_ORDER = [
   "vault-briefs",
   "shorts",
   "vault",
-  "consulting",
+  "resources",
   "inner-circle",
-] as const;
+] as const satisfies readonly SurfaceId[];
 
 function buildNavItems(): NavItem[] {
   const surfaces = getAllSurfaces();
@@ -45,7 +45,7 @@ function buildNavItems(): NavItem[] {
 
   return ordered.map((surface) => ({
     id: surface.id,
-    href: surface.path,
+    href: surface.pathPrefix,
     label:
       "label" in surface && typeof surface.label === "string"
         ? surface.label
@@ -98,7 +98,7 @@ function getSurfaceContextLinks(surface?: SurfaceContract): Array<{ href: string
         { href: "/inner-circle/library", label: "Library" },
       ];
     default:
-      return [{ href: surface.path, label: "Overview" }];
+      return [{ href: surface.pathPrefix, label: "Overview" }];
   }
 }
 

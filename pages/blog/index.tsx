@@ -25,7 +25,7 @@ type PostItem = {
   date: string | null;
   dateIso: string | null;
   readTime: string | null;
-  coverImage: string | null;
+  coverImage: string;
   tags: string[];
   author: string | null;
   featured?: boolean;

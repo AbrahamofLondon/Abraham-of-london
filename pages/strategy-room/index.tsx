@@ -52,7 +52,10 @@ import ThresholdProximityLine, {
 import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
-import { verifyCheckoutSessionForProduct } from "@/lib/server/billing/commercial-access";
+import {
+  setCommercialAccessCookie,
+  verifyCheckoutSessionForProduct,
+} from "@/lib/server/billing/commercial-access";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION AUTHORITY GATE
@@ -2536,7 +2539,11 @@ export const getServerSideProps: GetServerSideProps<StrategyRoomPageProps> = asy
   if (ctx.query.checkout === "success") {
     try {
       const valid = await verifyCheckoutSessionForProduct(ctx.query.session_id, "strategy_room");
-      checkoutConfirmed = Boolean(valid);
+      if (valid && typeof ctx.query.session_id === "string") {
+        checkoutConfirmed = true;
+        // Set short-lived cookie for immediate return-access smoothing
+        setCommercialAccessCookie(ctx, "strategy_room", ctx.query.session_id);
+      }
     } catch {
       // Keep the page on the paid entry surface if session verification fails.
     }

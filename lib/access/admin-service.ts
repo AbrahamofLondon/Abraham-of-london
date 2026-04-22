@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma.server";
+import type { Prisma } from "@prisma/client";
 import type { EntitlementGrant } from "./types";
 import { generateAccessKey, hashAccessKey, previewAccessKey } from "./access-key";
 
@@ -24,7 +25,7 @@ export async function issueAccessKey(input: {
       startsAt: input.startsAt ?? null,
       expiresAt: input.expiresAt ?? null,
       issuedBy: input.issuedBy,
-      metadata: input.metadata ?? {},
+      metadata: (input.metadata ?? {}) as Prisma.InputJsonObject,
     },
   });
 

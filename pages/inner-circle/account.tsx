@@ -205,7 +205,7 @@ export const getServerSideProps: GetServerSideProps<AccountProps> = async (
 
   const email = (unified.user?.email ?? "").toLowerCase() || null;
   const name = unified.user?.name ?? null;
-  const tier = String(unified.user?.tier ?? unified.innerCircle.tier ?? "public");
+  const tier = String(unified.innerCircle.tier ?? "public");
 
   let activeKey: ActiveKeyInfo | null = null;
 

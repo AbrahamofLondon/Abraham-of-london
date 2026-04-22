@@ -43,11 +43,11 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 function resolveErrorMessage(raw: string): string {
-  if (ERROR_MESSAGES[raw]) return ERROR_MESSAGES[raw];
-  if (/already.*redeemed/i.test(raw)) return ERROR_MESSAGES.ALREADY_REDEEMED;
-  if (/not found|invalid/i.test(raw)) return ERROR_MESSAGES.INVALID_KEY;
-  if (/expired/i.test(raw)) return ERROR_MESSAGES.KEY_EXPIRED;
-  if (/deplet/i.test(raw)) return ERROR_MESSAGES.KEY_EXHAUSTED;
+  if (ERROR_MESSAGES[raw]) return ERROR_MESSAGES[raw] ?? raw;
+  if (/already.*redeemed/i.test(raw)) return ERROR_MESSAGES.ALREADY_REDEEMED!;
+  if (/not found|invalid/i.test(raw)) return ERROR_MESSAGES.INVALID_KEY!;
+  if (/expired/i.test(raw)) return ERROR_MESSAGES.KEY_EXPIRED!;
+  if (/deplet/i.test(raw)) return ERROR_MESSAGES.KEY_EXHAUSTED!;
   return raw || "Unable to complete this request. Please try again.";
 }
 

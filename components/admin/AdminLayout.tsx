@@ -59,6 +59,12 @@ const navItems = [
     icon: Key,
     description: "Issue & manage keys",
   },
+  {
+    href: "/admin/validation",
+    label: "Validation",
+    icon: Activity,
+    description: "Launch readiness",
+  },
 ];
 
 export default function AdminLayout({ children, title }: AdminLayoutProps) {

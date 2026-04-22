@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { scorePurposeAlignment } from "@/lib/alignment/scoring";
+import { scorePurposeProfile } from "@/lib/alignment/scoring";
 import {
   purposeAlignmentInputSchema,
   validatePurposeAlignmentAnswers,
@@ -69,9 +69,8 @@ export async function POST(req: NextRequest) {
 
     validatePurposeAlignmentAnswers(parsed.answers);
 
-    const result = scorePurposeAlignment({
+    const result = scorePurposeProfile({
       answers: parsed.answers,
-      notes: parsed.notes || undefined,
     });
 
     const sessionKey = await getOrCreatePurposeAlignmentSessionKey();

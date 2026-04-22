@@ -240,7 +240,9 @@ export const UnifiedCard: React.FC<UnifiedCardProps> = ({
       icon={icon}
       progressBar={progressBar}
       authorSection={authorSection}
-    />
+    >
+      {null}
+    </EnhancedCardShell>
   );
 };
 

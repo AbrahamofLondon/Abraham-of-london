@@ -1,5 +1,6 @@
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import type { NextApiRequest, NextApiResponse } from "next";
+import type { Session } from "next-auth";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma.server";
@@ -8,15 +9,21 @@ import { getUserAccess } from "./get-user-access";
 import type { AccessTier, EffectiveAccess } from "./types";
 
 type ApiResolution = {
-  session: Awaited<ReturnType<typeof getServerSession>>;
+  session: AccessSession | null;
   access: EffectiveAccess;
+};
+
+type AccessSession = Session & {
+  user?: Session["user"] & {
+    id?: string | null;
+  };
 };
 
 export async function resolveRequestAccess(
   req: NextApiRequest,
   res: NextApiResponse,
 ): Promise<ApiResolution> {
-  const session = await getServerSession(req, res, authOptions);
+  const session = (await getServerSession(req, res, authOptions)) as AccessSession | null;
   const access = await getUserAccess(prisma, session?.user?.id ?? null);
   return { session, access };
 }
@@ -112,7 +119,7 @@ export async function requireProductApi(
 export async function resolvePageAccess(
   ctx: GetServerSidePropsContext,
 ): Promise<ApiResolution> {
-  const session = await getServerSession(ctx.req, ctx.res, authOptions);
+  const session = (await getServerSession(ctx.req, ctx.res, authOptions)) as AccessSession | null;
   const access = await getUserAccess(prisma, session?.user?.id ?? null);
   return { session, access };
 }

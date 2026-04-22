@@ -44,7 +44,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
     <UnifiedCard
       title={title}
       href={safeHref}
-      subtitle={subtitle}
+      subtitle={subtitle ?? undefined}
       excerpt={displayText}
       coverImage={coverImage || undefined}
       coverAlt={title}

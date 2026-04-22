@@ -68,7 +68,7 @@ function fromMdxMeta(meta: MdxMeta): Post {
     featured: b(m.featured),
     readTime: s(m.readTime) || (n(m.readTime) as any) || (n(m.readingTime) as any),
 
-    coverImage: resolveDocCoverImage(m, { contentType: 'POST' }),
+    coverImage: resolveDocCoverImage(m, { contentType: 'BLOG' }),
     ogImage: s(m.ogImage),
 
     series: s(m.series),

@@ -275,11 +275,11 @@ export default async function handler(
     event: "diagnostic_submitted",
     email: safeString(payload.respondent?.email) || actor.email || "",
     data: {
-      fullName: safeString(payload.respondent?.name) || actor.name,
+      fullName: safeString(payload.respondent?.name) || actor.name || "",
       organisation: safeString(payload.respondent?.organisation),
       diagnosticType: payload.kind,
-      score: payload.score,
-      severity: payload.severity,
+      score: payload.summary.totalScore,
+      severity: payload.summary.severity,
     },
   }).catch(() => {});
 

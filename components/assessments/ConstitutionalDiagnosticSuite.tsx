@@ -38,6 +38,7 @@ import {
   saveConstitutionalThread,
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
+import { track } from "@/lib/analytics/track";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
@@ -490,6 +491,14 @@ export default function ConstitutionalDiagnosticSuite() {
   const [reading, setReading] = React.useState(false);
   const [readingText, setReadingText] = React.useState("");
 
+  // Diagnostic reflection gate — structural free-text
+  const [showReflection, setShowReflection] = React.useState(false);
+  const [constitutionalReflections, setConstitutionalReflections] = React.useState({
+    structuralProblem: "",
+    priorAttempts: "",
+    shadowAuthority: "",
+  });
+
   const current        = QUESTIONS[index]!;
   const currentAnswer  = answers[current.id] || { resonance: 5 as Likert, certainty: 5 as Likert };
   const answeredCount  = Object.keys(answers).length;
@@ -522,7 +531,18 @@ export default function ConstitutionalDiagnosticSuite() {
     if (verdict && !completeFired.current) {
       completeFired.current = true;
       resultViewStart.current = Date.now();
-      if (thread) saveConstitutionalThread(thread);
+      if (thread) {
+        // Attach free-text reflections to thread for interpretation engine
+        const enrichedThread = {
+          ...thread,
+          reflections: {
+            structuralProblem: constitutionalReflections.structuralProblem || null,
+            priorAttempts: constitutionalReflections.priorAttempts || null,
+            shadowAuthority: constitutionalReflections.shadowAuthority || null,
+          },
+        };
+        saveConstitutionalThread(enrichedThread);
+      }
       // Extract and merge tension signals into cross-stage thread
       if (decision && scores) {
         try {
@@ -533,6 +553,7 @@ export default function ConstitutionalDiagnosticSuite() {
           }
         } catch {}
       }
+      if (!decision) return;
       import("@/lib/analytics/funnel").then(({ trackStageComplete }) => {
         const outcome = decision.route === "REJECT" ? "reject" as const
           : decision.route === "STRATEGY" ? "strategy" as const
@@ -540,11 +561,11 @@ export default function ConstitutionalDiagnosticSuite() {
         trackStageComplete("constitutional", outcome, routeHref);
       }).catch(() => {});
     }
-  }, [verdict, decision.route, routeHref, thread]);
+  }, [verdict, decision, routeHref, thread, scores]);
 
   // Track result engagement depth — fire on unmount or page leave
   React.useEffect(() => {
-    if (!verdict) return;
+    if (!verdict || !decision) return;
     const handleUnload = () => {
       if (resultViewStart.current) {
         track("result_engagement", {
@@ -559,7 +580,7 @@ export default function ConstitutionalDiagnosticSuite() {
       handleUnload();
       window.removeEventListener("beforeunload", handleUnload);
     };
-  }, [verdict, decision.route]);
+  }, [verdict, decision]);
 
   function revealVerdict() {
     if (verdict || reading) return;
@@ -641,7 +662,54 @@ export default function ConstitutionalDiagnosticSuite() {
                   </div>
                 </div>
 
-                {/* Question card */}
+                {/* Reflection gate or Question card */}
+                {showReflection && !verdict ? (
+                  <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: LIFT, padding: "1.5rem" }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                      Structural Reflection
+                    </span>
+                    <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+                      Your scores are recorded. These answers ground the reading in your specific condition.
+                    </p>
+                    <div className="mt-5 space-y-4">
+                      <div>
+                        <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                          What is the single biggest structural problem in this organisation right now?
+                        </label>
+                        <textarea
+                          value={constitutionalReflections.structuralProblem}
+                          onChange={(e) => setConstitutionalReflections((r) => ({ ...r, structuralProblem: e.target.value }))}
+                          rows={2} placeholder="Not symptoms. The structural condition."
+                          style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                          What has been tried before, and what happened?
+                        </label>
+                        <textarea
+                          value={constitutionalReflections.priorAttempts}
+                          onChange={(e) => setConstitutionalReflections((r) => ({ ...r, priorAttempts: e.target.value }))}
+                          rows={2} placeholder="If nothing: say nothing. If something failed: say what and why."
+                          style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }}
+                        />
+                      </div>
+                      {scores && scores.authority < 50 && (
+                        <div>
+                          <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)", marginBottom: "0.4rem" }}>
+                            Who actually makes this decision in practice, even if they shouldn&apos;t?
+                          </label>
+                          <textarea
+                            value={constitutionalReflections.shadowAuthority}
+                            onChange={(e) => setConstitutionalReflections((r) => ({ ...r, shadowAuthority: e.target.value }))}
+                            rows={2} placeholder="Name the person or group."
+                            style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(252,165,165,0.12)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`q-${index}`}
@@ -795,7 +863,15 @@ export default function ConstitutionalDiagnosticSuite() {
                       ) : (
                         <button
                           type="button"
-                          onClick={() => complete && revealVerdict()}
+                          onClick={() => {
+                            if (!complete) return;
+                            if (!showReflection) {
+                              setShowReflection(true);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            } else {
+                              revealVerdict();
+                            }
+                          }}
                           disabled={!complete}
                           className="inline-flex items-center gap-2 transition-all duration-300"
                           style={{
@@ -815,6 +891,7 @@ export default function ConstitutionalDiagnosticSuite() {
                     </div>
                   </motion.div>
                 </AnimatePresence>
+                )}
               </div>
 
               {/* Right — live readout */}

@@ -41,7 +41,7 @@ function scorePlaybook(
   );
   if (dominantOverlap.length > 0) {
     score += dominantOverlap.length * 8;
-    reasons.push(`Aligned to ${dominantOverlap[0].toLowerCase()} pressure`);
+    reasons.push(`Aligned to ${dominantOverlap[0]!.toLowerCase()} pressure`);
   }
 
   if (

@@ -139,8 +139,6 @@ function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
     href:      `/shorts/${slug}`,
     coverImage: resolveDocCoverImage(doc, { contentType: 'SHORT' }),
     views:     safeNumber(doc.views, 0),
-    likes:     safeNumber(doc.likes, 0),
-    saves:     safeNumber(doc.saves, 0),
     intensity,
     lineage:   safeString(doc.lineage).trim() || null,
     date:      safeString(doc.date).trim() || null,
@@ -225,7 +223,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   const [activeCategory, setActiveCategory] = React.useState("");
 
   const categories = React.useMemo(() => {
-    const set = new Set(shorts.map((short) => short.category).filter(Boolean));
+    const set = new Set(
+      shorts
+        .map((short) => short.category)
+        .filter((category): category is string => Boolean(category)),
+    );
     return Array.from(set).sort();
   }, [shorts]);
 

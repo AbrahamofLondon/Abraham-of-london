@@ -90,12 +90,15 @@ export default async function handler(
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.userId;
-      const userEmail = session.customer_details?.email || null;
+      const userId = session.metadata?.userId || null;
+      const userEmail =
+        session.metadata?.email ||
+        session.customer_details?.email ||
+        null;
 
-      if (!userId) {
-        console.error("[STRIPE_WEBHOOK] Missing metadata.userId");
-        return res.status(400).json({ error: "Missing identity metadata" });
+      if (!userId && !userEmail) {
+        console.error("[STRIPE_WEBHOOK] No userId or email in session metadata");
+        return res.status(400).json({ error: "Missing identity metadata — neither userId nor email available" });
       }
 
       const membershipTierRaw =
@@ -105,6 +108,8 @@ export default async function handler(
 
       const tier = mapStripeTierToAccessTier(membershipTierRaw);
 
+      // Membership elevation only possible with userId
+      if (userId) {
       const existingUser = await prisma.innerCircleMember.findUnique({
         where: { id: userId },
         select: { metadata: true },
@@ -128,7 +133,7 @@ export default async function handler(
 
       await auditLogger.log({
         action: "membership_elevation_success",
-        actorId: userId,
+        actorId: userId ?? userEmail ?? "unknown",
         details: {
           email: userEmail,
           sessionId: session.id,
@@ -137,6 +142,7 @@ export default async function handler(
         },
         severity: "info",
       });
+      } // end if (userId) — membership elevation block
 
       const paidSlug = session.metadata?.slug || session.metadata?.productCode;
       if (paidSlug) {

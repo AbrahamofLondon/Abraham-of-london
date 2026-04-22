@@ -2,24 +2,32 @@
 
 import React from "react";
 import { PURPOSE_ALIGNMENT_QUESTIONS } from "@/lib/alignment/checklist";
-import { scorePurposeAlignment } from "@/lib/alignment/scoring";
-import type { AlignmentAssessmentResult } from "@/lib/alignment/types";
+import { scorePurposeProfile } from "@/lib/alignment/scoring";
+import type { DualAxisAnswer, PurposeProfileResult } from "@/lib/alignment/types";
 
 type Props = {
-  onScored?: (result: AlignmentAssessmentResult, answers: Record<string, boolean>) => void;
+  onScored?: (result: PurposeProfileResult, answers: Record<string, DualAxisAnswer>) => void;
 };
 
 export default function PurposeAlignmentAssessment({ onScored }: Props) {
-  const [answers, setAnswers] = React.useState<Record<string, boolean>>({});
-  const [result, setResult] = React.useState<AlignmentAssessmentResult | null>(null);
+  const [checked, setChecked] = React.useState<Record<string, boolean>>({});
+  const [result, setResult] = React.useState<PurposeProfileResult | null>(null);
   const [saving, setSaving] = React.useState(false);
 
   const toggle = (id: string) => {
-    setAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
+    setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleScore = async () => {
-    const scored = scorePurposeAlignment({ answers });
+    const answers = Object.fromEntries(
+      PURPOSE_ALIGNMENT_QUESTIONS.map((question) => [
+        question.id,
+        checked[question.id]
+          ? { resonance: 8, certainty: 8 }
+          : { resonance: 2, certainty: 8 },
+      ]),
+    ) as Record<string, DualAxisAnswer>;
+    const scored = scorePurposeProfile({ answers });
     setResult(scored);
     onScored?.(scored, answers);
 
@@ -35,7 +43,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
     }
   };
 
-  const checkedCount = Object.values(answers).filter(Boolean).length;
+  const checkedCount = Object.values(checked).filter(Boolean).length;
 
   return (
     <div className="grid gap-8">
@@ -59,7 +67,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
             >
               <input
                 type="checkbox"
-                checked={Boolean(answers[q.id])}
+                checked={Boolean(checked[q.id])}
                 onChange={() => toggle(q.id)}
                 className="mt-1"
               />
@@ -89,9 +97,9 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
         <div className="rounded-2xl border p-6 shadow-sm bg-white">
           <h2 className="text-xl font-semibold">Assessment Result</h2>
           <p className="mt-2 text-sm text-neutral-600">
-            Score: {result.totalScore}/{result.possibleScore} ({result.percent}%)
+            Score: {result.totalScore}/{result.maxScore} ({result.percent}%)
           </p>
-          <p className="mt-1 text-sm text-neutral-600">Band: {result.band}</p>
+          <p className="mt-1 text-sm text-neutral-600">Band: {result.coherenceBand}</p>
 
           <div className="mt-4">
             <h3 className="font-medium">Corrections</h3>

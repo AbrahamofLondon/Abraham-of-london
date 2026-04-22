@@ -15,7 +15,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/config";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
-import type { AccessTier } from "@/lib/access/tier-policy";
+import { TIER_ORDER, type AccessTier } from "@/lib/access/tier-policy";
 
 /**
  * A NextAuth session augmented with the resolved Inner Circle entitlement
@@ -30,6 +30,13 @@ export type UnifiedSession = Session & {
     expiresAt: string | null;
   };
 };
+
+function coercePolicyTier(value: string | null | undefined): AccessTier {
+  const normalized = String(value ?? "public").replace(/-/g, "_");
+  return (TIER_ORDER as readonly string[]).includes(normalized)
+    ? (normalized as AccessTier)
+    : "public";
+}
 
 /**
  * Resolve the unified session for a getServerSideProps handler.
@@ -73,7 +80,7 @@ export async function getUnifiedSession(
         ...nextAuthSession,
         innerCircle: {
           hasValidToken: true,
-          tier: ctx.tier ?? "public",
+          tier: coercePolicyTier(ctx.tier),
           expiresAt: ctx.expiresAt ?? null,
         },
       };

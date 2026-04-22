@@ -93,6 +93,7 @@ export default function ShortsSignalRail({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return;
         setIsInView(entry.isIntersecting && entry.intersectionRatio >= 0.45);
       },
       { threshold: [0.25, 0.45, 0.7] }
