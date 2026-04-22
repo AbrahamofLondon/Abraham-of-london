@@ -41,6 +41,7 @@ import {
 import { track } from "@/lib/analytics/track";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
+import { useInterpretation } from "@/lib/ai/use-interpretation";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import DiagnosticFeedback from "@/components/diagnostics/results/DiagnosticFeedback";
@@ -524,6 +525,35 @@ export default function ConstitutionalDiagnosticSuite() {
         : [],
     [thread],
   );
+
+  // Intelligence layer — async interpretation enrichment for constitutional verdict
+  const { interpretation: constitutionalInterpretation } = useInterpretation({
+    canonicalResult: decision && scores ? {
+      route: decision.route,
+      confidence: decision.confidence,
+      posture: scores.posture,
+      readinessTier: scores.readinessTier,
+      authorityType: scores.authorityType,
+      domainScores: {
+        coherence: scores.coherence,
+        authority: scores.authority,
+        trust: scores.trust,
+        pressure: scores.pressure,
+        friction: scores.friction,
+      },
+      failureModes: decision.disqualifiersTriggered,
+    } : {},
+    userInputs: {
+      problemStatement: constitutionalReflections.structuralProblem,
+      constraints: constitutionalReflections.priorAttempts,
+      objective: constitutionalReflections.shadowAuthority,
+    },
+    stage: "constitutional",
+    enabled: verdict && Boolean(decision) && (
+      Boolean(constitutionalReflections.structuralProblem) ||
+      Boolean(constitutionalReflections.priorAttempts)
+    ),
+  });
 
   // Fire stage-complete event once when verdict is shown
   const completeFired = React.useRef(false);
@@ -1136,7 +1166,31 @@ export default function ConstitutionalDiagnosticSuite() {
               <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
                 {/* Left */}
                 <div className="space-y-5">
-                  {/* Constitutional reading */}
+                  {/* LLM-enriched interpretation (when available) */}
+                  {constitutionalInterpretation && constitutionalInterpretation.source === "llm" && (
+                    <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "1.5rem" }}>
+                      <Eyebrow>Structural interpretation</Eyebrow>
+                      <h3 style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.2rem", lineHeight: 1.15, color: "rgba(255,255,255,0.88)" }}>
+                        {constitutionalInterpretation.conditionLabel}
+                      </h3>
+                      <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>
+                        {constitutionalInterpretation.conditionExplanation}
+                      </p>
+                      {constitutionalInterpretation.contradictionInsight && (
+                        <div style={{ marginTop: "0.75rem", borderTop: `1px solid ${GOLD}15`, paddingTop: "0.65rem" }}>
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>Contradiction</span>
+                          <p style={{ marginTop: "0.2rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(252,165,165,0.50)" }}>
+                            {constitutionalInterpretation.contradictionInsight}
+                          </p>
+                        </div>
+                      )}
+                      <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", fontStyle: "italic" }}>
+                        {constitutionalInterpretation.narrative}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Constitutional reading (deterministic baseline) */}
                   <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT, overflow: "hidden" }}>
                     <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}>
                       <Eyebrow>Constitutional reading</Eyebrow>

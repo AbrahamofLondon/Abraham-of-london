@@ -892,6 +892,8 @@ export async function POST(
       viewModel,
       entitlements,
       diagnostics: assembled.diagnostics,
+      // Include intake for client-side interpretation engine
+      intake,
     });
   } catch (error) {
     console.error("[EXECUTIVE_REPORTING_RUN_ERROR]", error);
