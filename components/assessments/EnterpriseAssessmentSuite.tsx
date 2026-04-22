@@ -23,6 +23,8 @@ type EnterpriseDomain = {
   execution: number;
   trust: number;
   exposure: number;
+  /** Most expensive failure in this domain — binds to cascade risk and exposure reasoning */
+  failureNote?: string;
 };
 
 const DOMAIN_METRICS: Array<{
@@ -259,6 +261,20 @@ function DomainCard({
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Failure grounding — binds to cascade risk and exposure */}
+              <div className="mt-4 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)", marginBottom: "0.35rem" }}>
+                  Most expensive failure in this domain (last 12 months)
+                </label>
+                <textarea
+                  value={domain.failureNote ?? ""}
+                  onChange={(e) => onUpdate("failureNote", e.target.value)}
+                  rows={2}
+                  placeholder="What went wrong, what it cost, and whether it was resolved."
+                  style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.07)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(255,255,255,0.65)", resize: "none" as const, outline: "none" }}
+                />
               </div>
             </div>
           </motion.div>

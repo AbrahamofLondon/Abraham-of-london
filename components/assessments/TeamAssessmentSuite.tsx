@@ -376,6 +376,16 @@ export default function TeamAssessmentSuite() {
   const [result, setResult] = React.useState<Record<string, unknown> | null>(null);
   const [error, setError] = React.useState("");
 
+  // Diagnostic reflection fields — each has a bound downstream consumer
+  const [teamReflections, setTeamReflections] = React.useState({
+    /** Pre-assessment: baseline confidence. Consumer: contradiction severity = confidence - measuredGap */
+    confidenceBaseline: 70,
+    /** Post-data: what leadership assumes wrong. Consumer: explains WHAT the gap is about */
+    falseAssumption: "",
+    /** Post-data: political sensitivity. Consumer: determines if gap is structural or political */
+    showScoresReaction: "",
+  });
+
   function updateRow(index: number, key: keyof TeamRow, value: string | number) { setRows(prev => prev.map((row, i) => i === index ? { ...row, [key]: value } : row)); }
   function addRow() { setRows(prev => [...prev, { teamName: "", respondents: 5, authorityClarity: 50, executionTrust: 50, operatingFriction: 50, strategicCoherence: 50 }]); }
   function removeRow(index: number) { setRows(prev => prev.filter((_, i) => i !== index)); }
@@ -383,7 +393,7 @@ export default function TeamAssessmentSuite() {
   async function run() {
     setLoading(true); setError(""); setResult(null);
     try {
-      const res = await fetch("/api/assessments/team/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, organisation, rows }) });
+      const res = await fetch("/api/assessments/team/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, organisation, rows, reflections: teamReflections }) });
       const json = await res.json();
       if (!res.ok || !json?.ok) throw new Error(json?.error || "Failed to run team assessment.");
       setResult(json);
@@ -413,6 +423,54 @@ export default function TeamAssessmentSuite() {
           <div className="flex items-center justify-between"><Eyebrow>Team data</Eyebrow><span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{rows.length} {rows.length === 1 ? "team" : "teams"}</span></div>
           <AnimatePresence mode="popLayout">{rows.map((row, i) => <TeamCard key={i} row={row} index={i} onUpdate={(key, value) => updateRow(i, key, value)} onRemove={() => removeRow(i)} canRemove={rows.length > 1} />)}</AnimatePresence>
           <button type="button" onClick={addRow} className="w-full flex items-center justify-center gap-2 transition-all duration-300" style={{ padding: "12px", border: "1px dashed rgba(255,255,255,0.09)", backgroundColor: "transparent", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", cursor: "pointer" }} onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}28`; el.style.color = `${GOLD}80`; }} onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.25)"; }}>+ Add team</button>
+        </div>
+
+        {/* Diagnostic reflection — bound to gap interpretation */}
+        <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
+          <Eyebrow>Diagnostic reflection</Eyebrow>
+          <p style={{ marginTop: "0.4rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>
+            These answers determine what the gap means — not just how large it is.
+          </p>
+          <div className="mt-4 space-y-3">
+            <div>
+              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.4rem" }}>
+                Confidence: How confident are you that your team would agree with your data above? (0–100)
+              </label>
+              <input
+                type="range" min={0} max={100}
+                value={teamReflections.confidenceBaseline}
+                onChange={(e) => setTeamReflections((r) => ({ ...r, confidenceBaseline: Number(e.target.value) }))}
+                style={{ width: "100%", accentColor: GOLD }}
+              />
+              <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", color: "rgba(255,255,255,0.22)" }}>
+                <span>They would strongly disagree</span>
+                <span style={{ color: `${GOLD}80` }}>{teamReflections.confidenceBaseline}%</span>
+                <span>They would fully agree</span>
+              </div>
+            </div>
+            <div>
+              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.4rem" }}>
+                What is one thing your team would say you don&apos;t understand about their experience?
+              </label>
+              <textarea
+                value={teamReflections.falseAssumption}
+                onChange={(e) => setTeamReflections((r) => ({ ...r, falseAssumption: e.target.value }))}
+                rows={2} placeholder="Name the assumption. Not the symptom."
+                style={{ ...inputStyle, resize: "none" as const }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.4rem" }}>
+                What would happen if you showed your team these scores?
+              </label>
+              <textarea
+                value={teamReflections.showScoresReaction}
+                onChange={(e) => setTeamReflections((r) => ({ ...r, showScoresReaction: e.target.value }))}
+                rows={2} placeholder="Relief? Anger? Surprise? Indifference?"
+                style={{ ...inputStyle, resize: "none" as const }}
+              />
+            </div>
+          </div>
         </div>
 
         <AnimatePresence>{error && (<motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ border: "1px solid rgba(252,165,165,0.20)", backgroundColor: "rgba(252,165,165,0.04)", padding: "0.85rem 1.25rem", display: "flex", alignItems: "flex-start", gap: "0.75rem" }}><AlertTriangle style={{ width: "13px", height: "13px", color: "rgba(252,165,165,0.80)", flexShrink: 0, marginTop: "2px" }} /><span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", color: "rgba(252,165,165,0.85)" }}>{error}</span></motion.div>)}</AnimatePresence>
