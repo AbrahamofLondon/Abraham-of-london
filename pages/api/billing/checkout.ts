@@ -44,6 +44,12 @@ const INLINE_PRICE_MAP: Record<string, { amount: number; name: string; productCo
     productCode: "intervention-path-selector",
     tier: "decision-instrument",
   },
+  "global-market-intelligence-report-q1-2026": {
+    amount: 5900,
+    name: "Global Market Intelligence Report Q1 2026",
+    productCode: "global-market-intelligence-report-q1-2026",
+    tier: "premium-report",
+  },
   diagnostic_report_basic: {
     amount: 25000,
     name: "Diagnostic Report Basic",

@@ -11,10 +11,12 @@ import {
   trackAssetOpen,
   trackAssetPurchase,
   trackAssetPurchaseStart,
+  trackAssetStarted,
   trackAssetTransition,
   trackExecGateView,
 } from "@/lib/analytics/journey-client";
-import { resolveCanonicalEntitlement, grantCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -58,6 +60,7 @@ type InstrumentData = {
   outcomePromise: string[];
   guidedChecklist: string[];
   completionPrompt: string;
+  consequenceIfSkipped: string[];
   transition: {
     state: "LOW_IMPACT" | "STRUCTURAL_CONDITION" | "HIGH_SEVERITY";
     label: string;
@@ -103,7 +106,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
     checkoutCode: "decision-exposure-instrument",
     outcomeLine: "Quantifies the cost of being wrong before the market enforces it",
     usedWhenCondition: "Used when financial consequence is unclear",
-    timeExpectation: "15 min",
+    timeExpectation: "15 minutes to a decision position",
     outcomePromise: [
       "exposure classification",
       "decision consequence statement",
@@ -116,6 +119,11 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       "Classify exposure as contained, exposed, or critical.",
     ],
     completionPrompt: "Mark complete after classification, consequence, and next action are written.",
+    consequenceIfSkipped: [
+      "Exposure remains unquantified \u2014 decisions proceed on assumption, not data",
+      "Financial risk compounds silently while waiting for consensus confirmation",
+      "Escalation lacks grounding \u2014 no concrete figure to anchor the board conversation",
+    ],
     transition: {
       state: "STRUCTURAL_CONDITION",
       label: "Condition confirmed. Consequence not yet priced.",
@@ -159,7 +167,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
     checkoutCode: "mandate-clarity-framework",
     outcomeLine: "Defines who decides and where authority is breaking",
     usedWhenCondition: "Used when decision ownership is unclear or contested",
-    timeExpectation: "20 min",
+    timeExpectation: "20 minutes to a decision position",
     outcomePromise: [
       "mandate classification",
       "authority clarity",
@@ -172,6 +180,11 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       "Classify mandate as clear, fragmented, absent, or delayed.",
     ],
     completionPrompt: "Mark complete after the authority map and corrective action are stated.",
+    consequenceIfSkipped: [
+      "Authority gaps persist \u2014 decisions stall or get made by the wrong person",
+      "Restructuring proceeds on assumed alignment that does not exist at execution level",
+      "Escalation paths remain undocumented \u2014 crisis response becomes improvised",
+    ],
     transition: {
       state: "STRUCTURAL_CONDITION",
       label: "Condition confirmed. Consequence not yet priced.",
@@ -215,7 +228,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
     checkoutCode: "intervention-path-selector",
     outcomeLine: "Selects the intervention path when inaction is no longer viable",
     usedWhenCondition: "Used when action is required but the path is contested",
-    timeExpectation: "15–25 min",
+    timeExpectation: "15\u201325 minutes to a decision position",
     outcomePromise: [
       "intervention classification",
       "ordered action stack",
@@ -228,6 +241,11 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       "Choose the dominant path and first action.",
     ],
     completionPrompt: "Mark complete after the path, dependency, and first action are defined.",
+    consequenceIfSkipped: [
+      "Wrong intervention selected \u2014 stabilisation attempted where restructuring was required",
+      "Action delayed while options are debated without scoring framework",
+      "Escalation happens reactively instead of through governed criteria",
+    ],
     transition: {
       state: "HIGH_SEVERITY",
       label: "Intervention likely required.",
@@ -456,7 +474,13 @@ function DeliveryState({
   );
 }
 
-function InstrumentEnvironment({ instrument }: { instrument: InstrumentData }) {
+function InstrumentEnvironment({
+  instrument,
+  onComplete,
+}: {
+  instrument: InstrumentData;
+  onComplete?: () => void;
+}) {
   const [opened, setOpened] = React.useState(false);
   const [checked, setChecked] = React.useState<Record<string, boolean>>({});
   const [complete, setComplete] = React.useState(false);
@@ -470,6 +494,7 @@ function InstrumentEnvironment({ instrument }: { instrument: InstrumentData }) {
   function markComplete() {
     setComplete(true);
     trackAssetComplete(instrument.slug, instrument.transition.state);
+    onComplete?.();
   }
 
   const transition = instrument.transition;
@@ -477,7 +502,7 @@ function InstrumentEnvironment({ instrument }: { instrument: InstrumentData }) {
   return (
     <div id="instrument-environment" className="py-8" style={{ maxWidth: "65ch" }}>
       {!opened ? (
-        <DeliveryState instrument={instrument} onOpen={() => setOpened(true)} />
+        <DeliveryState instrument={instrument} onOpen={() => { setOpened(true); trackAssetStarted(instrument.slug); }} />
       ) : (
         <div className="space-y-5">
           <div style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgb(5 6 8)", padding: "1.25rem" }}>
@@ -553,30 +578,96 @@ function InstrumentEnvironment({ instrument }: { instrument: InstrumentData }) {
             </button>
           </div>
 
-          {complete && (
-            <div style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgb(2 3 5)", padding: "1.25rem" }}>
-              <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA` }}>
-                {transition.label}
+          {complete && transition.state !== "HIGH_SEVERITY" && (
+            <div style={{ border: `1px solid ${GOLD}28`, backgroundColor: "rgb(2 3 5)", padding: "1.25rem" }}>
+              <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}CC` }}>
+                This decision now carries consequence
               </div>
-              <SystemText>{transition.body}</SystemText>
+              <div className="mt-3 space-y-1.5">
+                {instrument.outcomePromise.map((item) => (
+                  <div key={item} className="flex items-center gap-2">
+                    <CheckSquare style={{ width: 10, height: 10, color: "rgba(110,231,183,0.60)", flexShrink: 0 }} />
+                    <SystemText color="rgba(255,255,255,0.60)">{item}</SystemText>
+                  </div>
+                ))}
+              </div>
               <Link
-                href={transition.href}
+                href="/diagnostics/executive-reporting"
                 onClick={() => {
                   trackAssetTransition(instrument.slug, transition.state);
-                  if (transition.href.includes("executive")) trackExecGateView();
+                  trackExecGateView();
                 }}
                 className="mt-4 inline-flex items-center gap-2"
                 style={{
                   border: `1px solid ${AMBER}45`,
+                  backgroundColor: `${AMBER}08`,
                   color: AMBER,
-                  padding: "0.75rem 1rem",
+                  padding: "0.7rem 1rem",
                   ...monoStyle,
                   fontSize: "8px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                 }}
               >
-                {transition.cta}
+                Price consequence in Executive Reporting
+                <ArrowRight style={{ width: 11, height: 11 }} />
+              </Link>
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => { trackAssetTransition(instrument.slug, "LOW_IMPACT"); }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    ...monoStyle,
+                    fontSize: "7px",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.22)",
+                  }}
+                >
+                  Continue without pricing
+                </button>
+              </div>
+            </div>
+          )}
+
+          {complete && transition.state === "HIGH_SEVERITY" && (
+            <div style={{ border: "1px solid rgba(252,165,165,0.22)", backgroundColor: "rgb(2 3 5)", padding: "1.25rem" }}>
+              <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.80)" }}>
+                Action is now required
+              </div>
+              <div className="mt-3 grid gap-px grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
+                {[
+                  { label: "Selected path", value: "Defined" },
+                  { label: "Confidence", value: "Scored" },
+                  { label: "Failure risk", value: "Assessed" },
+                ].map((m) => (
+                  <div key={m.label} style={{ backgroundColor: "rgb(4 5 7)", padding: "0.6rem 0.75rem" }}>
+                    <div style={{ ...monoStyle, fontSize: "5.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{m.label}</div>
+                    <div style={{ ...monoStyle, fontSize: "8px", marginTop: "0.2rem", color: "rgba(252,165,165,0.70)" }}>{m.value}</div>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/strategy-room"
+                onClick={() => {
+                  trackAssetTransition(instrument.slug, transition.state);
+                }}
+                className="mt-4 inline-flex items-center gap-2"
+                style={{
+                  border: "1px solid rgba(252,165,165,0.35)",
+                  backgroundColor: "rgba(252,165,165,0.06)",
+                  color: "rgba(252,165,165,0.80)",
+                  padding: "0.7rem 1rem",
+                  ...monoStyle,
+                  fontSize: "8px",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Enter Strategy Room
                 <ArrowRight style={{ width: 11, height: 11 }} />
               </Link>
             </div>
@@ -599,7 +690,7 @@ function InstrumentEnvironment({ instrument }: { instrument: InstrumentData }) {
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AccessState = "NO_ACCESS" | "HAS_ACCESS" | "JUST_PURCHASED";
+type AccessState = "NO_ACCESS" | "HAS_ACCESS" | "JUST_PURCHASED" | "FIRST_USE_COMPLETE";
 
 type PageProps = {
   instrument: InstrumentData;
@@ -609,7 +700,8 @@ type PageProps = {
 
 export default function InstrumentProductPage({ instrument, checkoutVerified, accessState }: PageProps) {
   const checkoutGranted = checkoutVerified;
-  const hasAccess = accessState === "HAS_ACCESS" || accessState === "JUST_PURCHASED";
+  const [firstUseComplete, setFirstUseComplete] = React.useState(accessState === "FIRST_USE_COMPLETE");
+  const hasAccess = accessState === "HAS_ACCESS" || accessState === "JUST_PURCHASED" || firstUseComplete;
 
   React.useEffect(() => {
     if (checkoutGranted) {
@@ -666,7 +758,11 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
               {hasAccess ? (
                 <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}06`, padding: "1rem", maxWidth: "65ch" }}>
                   <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA` }}>
-                    {accessState === "JUST_PURCHASED" ? "Access granted. Instrument ready." : "You have access to this instrument."}
+                    {accessState === "JUST_PURCHASED"
+                      ? "Access granted. Instrument ready."
+                      : firstUseComplete
+                        ? "Access retained. Resume or reopen."
+                        : "You have access to this instrument."}
                   </div>
                 </div>
               ) : (
@@ -710,10 +806,44 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
             </div>
           </div>
 
+          <SoftRule />
+
+          {/* ── WHAT HAPPENS IF YOU DON'T USE THIS ── */}
+          <div className="py-10 lg:py-12" style={{ maxWidth: "60ch" }}>
+            <SectionLabel>What happens if you don&apos;t use this</SectionLabel>
+            <div className="space-y-1.5">
+              {instrument.consequenceIfSkipped.map((line) => (
+                <p key={line} style={{ ...serifStyle, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.55)", paddingLeft: "0.75rem", position: "relative" }}>
+                  <span style={{ position: "absolute", left: 0, color: "rgba(252,165,165,0.30)" }}>&middot;</span>
+                  {line}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <SoftRule />
+
+          {/* ── BUNDLE PRESSURE ── */}
+          <div className="py-8" style={{ maxWidth: "60ch" }}>
+            <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "0.85rem 1rem" }}>
+              <p style={{ ...serifStyle, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.42)" }}>
+                This is one part of the decision. Exposure, authority, and intervention logic must all resolve for the decision to hold.
+              </p>
+              <Link
+                href="/api/checkout?bundle=operator-decision-pack"
+                className="mt-2.5 inline-flex items-center gap-2"
+                style={{ ...monoStyle, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}
+              >
+                Resolve the decision fully &middot; Operator Pack &pound;129
+                <ArrowRight style={{ width: 9, height: 9 }} />
+              </Link>
+            </div>
+          </div>
+
           <GoldRule />
 
           {hasAccess ? (
-            <InstrumentEnvironment instrument={instrument} />
+            <InstrumentEnvironment instrument={instrument} onComplete={() => setFirstUseComplete(true)} />
           ) : (
             <div className="py-8" style={{ maxWidth: "65ch" }}>
               <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgb(5 6 8)", padding: "1.25rem" }}>
@@ -807,19 +937,25 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
 async function verifyInstrumentCheckout(
   sessionId: string | string[] | undefined,
   instrument: InstrumentData,
-): Promise<boolean> {
-  if (!sessionId || Array.isArray(sessionId)) return false;
+): Promise<{ verified: boolean; email: string | null }> {
+  if (!sessionId || Array.isArray(sessionId)) return { verified: false, email: null };
   const stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) return false;
+  if (!stripeKey) return { verified: false, email: null };
 
   const stripe = new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any });
   const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const email =
+    String(session.metadata?.email || session.customer_details?.email || "")
+      .trim()
+      .toLowerCase() || null;
 
-  return (
-    session.payment_status === "paid" &&
-    session.metadata?.priceCode === instrument.checkoutCode &&
-    session.metadata?.productCode === instrument.checkoutCode
-  );
+  return {
+    verified:
+      session.payment_status === "paid" &&
+      session.metadata?.priceCode === instrument.checkoutCode &&
+      session.metadata?.productCode === instrument.checkoutCode,
+    email,
+  };
 }
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => {
@@ -831,13 +967,15 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   }
 
   // 1. Check for checkout return
-  const checkoutVerified =
+  const checkoutResult =
     ctx.query.checkout === "success"
-      ? await verifyInstrumentCheckout(ctx.query.session_id, instrument).catch(() => false)
-      : false;
+      ? await verifyInstrumentCheckout(ctx.query.session_id, instrument).catch(() => ({ verified: false, email: null }))
+      : { verified: false, email: null };
+  const checkoutVerified = checkoutResult.verified;
 
   // 2. Extract user identity from cookies (email for entitlement lookup)
-  let email: string | null = null;
+  let email: string | null =
+    typeof ctx.query.email === "string" ? ctx.query.email.trim().toLowerCase() : checkoutResult.email;
   let userId: string | null = null;
   try {
     const { resolveIdentity } = await import("@/lib/auth/resolve-identity");
@@ -852,16 +990,16 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     userId = identity.subjectId ?? null;
   } catch { /* identity resolution is best-effort here */ }
 
-  // 3. If checkout just verified, grant entitlement immediately
-  if (checkoutVerified && (email || userId)) {
+  // 3. If checkout just verified, verify/repair canonical entitlement exactly once
+  if (checkoutVerified && typeof ctx.query.session_id === "string" && (email || userId)) {
     try {
-      await grantCanonicalEntitlement({
+      await ensureEntitlementAfterPayment({
+        checkoutSessionId: ctx.query.session_id,
         userId,
         email,
         slug: instrument.checkoutCode,
-        source: "purchase",
       });
-    } catch { /* grant is best-effort — will be repaired by payment verification */ }
+    } catch { /* explicit access falls back to canonical resolver below */ }
   }
 
   // 4. Resolve canonical entitlement (survives logout, device switch)

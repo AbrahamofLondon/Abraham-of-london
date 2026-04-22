@@ -73,7 +73,6 @@ const PRIMARY_NAV_HINTS: Record<string, string> = {
 };
 
 const SECONDARY_NAV: readonly NavItem[] = [
-  { href: "/decision-instruments",  label: "Instruments", sub: "Decision tools · £29–£79",  icon: Fingerprint },
   { href: "/artifacts",  label: "Intelligence", sub: "Market intelligence", icon: Zap,     signal: true },
   { href: "/playbooks",  label: "Playbooks",    sub: "Execution Frameworks",        icon: Layers   },
   { href: "/canon",      label: "Canon",         sub: "Doctrine & Method",           icon: Compass  },
@@ -90,7 +89,6 @@ const MOBILE_NAV: readonly NavItem[] = [
   { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: "Consequence layer · £95",     icon: ScrollText },
   { href: "/strategy-room",                    label: "Strategy Room",    sub: "Decision intervention · £395", icon: Crown      },
   // Content & authority
-  { href: "/decision-instruments", label: "Instruments", sub: "Decision tools · £29–£79", icon: Fingerprint },
   { href: "/artifacts",    label: "Intelligence",  sub: "Market intelligence",          icon: Zap,       signal: true },
   { href: "/playbooks",    label: "Playbooks",     sub: "Execution Frameworks",         icon: Layers     },
   { href: "/canon",        label: "Canon",          sub: "Doctrine & Method",            icon: Compass    },

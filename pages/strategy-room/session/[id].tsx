@@ -11,6 +11,7 @@ import Link from "next/link";
 import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { prisma } from "@/lib/prisma.server";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -579,6 +580,35 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
 
     if (!raw) {
       return { props: { session: null, error: "Session not found" } };
+    }
+
+    let email: string | null =
+      typeof ctx.query.email === "string" ? ctx.query.email.trim().toLowerCase() : null;
+    let userId: string | null = null;
+    try {
+      const { resolveIdentity } = await import("@/lib/auth/resolve-identity");
+      const headers = new Headers();
+      if (ctx.req.headers.cookie) headers.set("cookie", ctx.req.headers.cookie);
+      if (ctx.req.headers.host) headers.set("host", ctx.req.headers.host);
+      const fakeReq = new Request(`http://${ctx.req.headers.host ?? "localhost"}${ctx.req.url}`, { headers });
+      const identity = await resolveIdentity(fakeReq as any);
+      email = identity.email ?? email;
+      userId = identity.subjectId ?? null;
+    } catch {
+      // no authenticated identity available
+    }
+
+    const entitlement = await resolveCanonicalEntitlement({
+      userId,
+      email,
+      slug: "strategy-room.entry",
+    });
+
+    const sessionEmailMatches =
+      !raw.email || (email && raw.email.toLowerCase() === email.toLowerCase());
+
+    if (!entitlement.granted || !sessionEmailMatches) {
+      return { props: { session: null, error: "Access denied" } };
     }
 
     const session: SessionData = {

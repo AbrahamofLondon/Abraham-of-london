@@ -1,0 +1,7 @@
+export enum ConvictionState {
+  UNDEFINED = "UNDEFINED",
+  RECOGNISED = "RECOGNISED",
+  CLARIFIED = "CLARIFIED",
+  PRICED = "PRICED",
+  COMMITTED = "COMMITTED",
+}

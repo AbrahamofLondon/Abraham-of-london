@@ -2,6 +2,7 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import Stripe from "stripe";
 import {
   ArrowLeft,
   FileText,
@@ -19,6 +20,8 @@ import NextStepCTA from "@/components/content/NextStepCTA";
 import DownloadButton from "@/components/premium/DownloadButton";
 import PremiumAssetLaunchButton from "@/components/premium/PremiumAssetLaunchButton";
 import PremiumAssetCard from "@/components/premium/PremiumAssetCard";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 import {
   getPremiumContentById,
   getRelatedPremiumContent,
@@ -28,6 +31,8 @@ import {
 type Props = {
   item: PremiumContentItem | null;
   related: PremiumContentItem[];
+  hasAccess: boolean;
+  accessState: "PUBLIC" | "NO_ACCESS" | "HAS_ACCESS";
 };
 
 function safeStr(value: unknown): string {
@@ -49,6 +54,30 @@ function isMarketIntelligenceItem(item: PremiumContentItem): boolean {
   );
 }
 
+async function verifyArtifactCheckout(
+  sessionId: string | string[] | undefined,
+  productCode: string,
+): Promise<{ verified: boolean; email: string | null }> {
+  if (!sessionId || Array.isArray(sessionId)) return { verified: false, email: null };
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) return { verified: false, email: null };
+
+  const stripe = new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any });
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const email =
+    String(session.metadata?.email || session.customer_details?.email || "")
+      .trim()
+      .toLowerCase() || null;
+
+  return {
+    verified:
+      session.payment_status === "paid" &&
+      session.metadata?.priceCode === productCode &&
+      session.metadata?.productCode === productCode,
+    email,
+  };
+}
+
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const rawId = typeof ctx.params?.id === "string" ? ctx.params.id : "";
   const id = safeStr(rawId);
@@ -59,11 +88,50 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   }
 
   const related = getRelatedPremiumContent(item.id);
+  const isPublic =
+    !item.metadata?.allowedTiers?.length ||
+    item.metadata.allowedTiers.includes("public");
+
+  const checkoutResult =
+    ctx.query.checkout === "success"
+      ? await verifyArtifactCheckout(ctx.query.session_id, item.id).catch(() => ({ verified: false, email: null }))
+      : { verified: false, email: null };
+
+  let email: string | null =
+    typeof ctx.query.email === "string" ? ctx.query.email.trim().toLowerCase() : checkoutResult.email;
+  let userId: string | null = null;
+  try {
+    const { resolveIdentity } = await import("@/lib/auth/resolve-identity");
+    const headers = new Headers();
+    if (ctx.req.headers.cookie) headers.set("cookie", ctx.req.headers.cookie);
+    if (ctx.req.headers.host) headers.set("host", ctx.req.headers.host);
+    const fakeReq = new Request(`http://${ctx.req.headers.host ?? "localhost"}${ctx.req.url}`, { headers });
+    const identity = await resolveIdentity(fakeReq as any);
+    email = identity.email ?? email;
+    userId = identity.subjectId ?? null;
+  } catch {
+    // unauthenticated public browsing remains available
+  }
+
+  if (checkoutResult.verified && typeof ctx.query.session_id === "string" && (email || userId)) {
+    await ensureEntitlementAfterPayment({
+      checkoutSessionId: ctx.query.session_id,
+      slug: item.id,
+      userId,
+      email,
+    }).catch(() => null);
+  }
+
+  const entitlement = isPublic
+    ? { granted: true }
+    : await resolveCanonicalEntitlement({ userId, email, slug: item.id });
 
   return {
     props: {
       item,
       related,
+      hasAccess: isPublic || entitlement.granted,
+      accessState: isPublic ? "PUBLIC" : entitlement.granted ? "HAS_ACCESS" : "NO_ACCESS",
     },
   };
 
@@ -126,9 +194,64 @@ function getPrimaryLaunchHref(item: PremiumContentItem): string {
   return item.metadata?.surfaceHref || `/artifacts/${item.id}`;
 }
 
+function ArtifactCheckout({ item }: { item: PremiumContentItem }) {
+  const [email, setEmail] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  async function beginCheckout(event: React.FormEvent) {
+    event.preventDefault();
+    setError("");
+    if (!email.trim()) {
+      setError("Email is required to attach access.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const response = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          priceCode: item.id,
+          originPath: `/artifacts/${item.id}`,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok || !data.url) throw new Error(data.reason || "Checkout failed");
+      window.location.href = data.url;
+    } catch (checkoutError) {
+      setError(checkoutError instanceof Error ? checkoutError.message : "Checkout failed");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={beginCheckout} className="space-y-3">
+      <input
+        type="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        placeholder="Entitlement email"
+        className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-white/28"
+      />
+      <button
+        type="submit"
+        disabled={busy}
+        className="inline-flex w-full items-center justify-center rounded-2xl border border-[#C9A96A]/35 bg-[#C9A96A]/10 px-5 py-3 text-sm font-semibold text-[#D7B77E] transition hover:bg-[#C9A96A]/15 disabled:opacity-50"
+      >
+        {busy ? "Confirming access" : "Confirm access"}
+      </button>
+      {error ? <p className="text-xs text-red-300/80">{error}</p> : null}
+    </form>
+  );
+}
+
 export default function ArtifactDetailPage({
   item,
   related,
+  hasAccess,
+  accessState,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   if (!item) {
     return (
@@ -378,14 +501,18 @@ export default function ArtifactDetailPage({
                   </div>
 
                   <div className="space-y-4">
-                    <PremiumAssetLaunchButton
-                      contentId={item.id}
-                      fallbackHref={getPrimaryLaunchHref(item)}
-                      variant="primary"
-                      className="w-full justify-center"
-                    >
-                      Open current edition
-                    </PremiumAssetLaunchButton>
+                    {hasAccess ? (
+                      <PremiumAssetLaunchButton
+                        contentId={item.id}
+                        fallbackHref={getPrimaryLaunchHref(item)}
+                        variant="primary"
+                        className="w-full justify-center"
+                      >
+                        {accessState === "HAS_ACCESS" ? "Resume current edition" : "Open current edition"}
+                      </PremiumAssetLaunchButton>
+                    ) : (
+                      <ArtifactCheckout item={item} />
+                    )}
 
                     <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
                       {item.metadata?.watermarkRequired ? (
@@ -401,32 +528,36 @@ export default function ArtifactDetailPage({
                       )}
                     </div>
 
-                    <PremiumAssetLaunchButton
-                      contentId={item.id}
-                      fallbackHref={getPrimaryLaunchHref(item)}
-                      variant="secondary"
-                      className="w-full justify-center"
-                    >
-                      {formatLabel === "PowerPoint" ? (
-                        <Presentation className="mr-2 h-4 w-4 text-[#C9A96A]" />
-                      ) : (
-                        <Scale className="mr-2 h-4 w-4 text-[#C9A96A]" />
-                      )}
-                      Download {formatLabel}
-                    </PremiumAssetLaunchButton>
+                    {hasAccess ? (
+                      <PremiumAssetLaunchButton
+                        contentId={item.id}
+                        fallbackHref={getPrimaryLaunchHref(item)}
+                        variant="secondary"
+                        className="w-full justify-center"
+                      >
+                        {formatLabel === "PowerPoint" ? (
+                          <Presentation className="mr-2 h-4 w-4 text-[#C9A96A]" />
+                        ) : (
+                          <Scale className="mr-2 h-4 w-4 text-[#C9A96A]" />
+                        )}
+                        Download {formatLabel}
+                      </PremiumAssetLaunchButton>
+                    ) : null}
                   </div>
                 </div>
 
-                <DownloadButton
-                  contentId={item.id}
-                  assetTitle={item.title}
-                  assetType={assetType}
-                  classification={classification}
-                  tierLabel={tierLabel}
-                  fileName={item.asset.filename || `${item.id}.bin`}
-                  maxDownloads={item.metadata?.maxDownloads || 1}
-                  usedCount={0}
-                />
+                {hasAccess ? (
+                  <DownloadButton
+                    contentId={item.id}
+                    assetTitle={item.title}
+                    assetType={assetType}
+                    classification={classification}
+                    tierLabel={tierLabel}
+                    fileName={item.asset.filename || `${item.id}.bin`}
+                    maxDownloads={item.metadata?.maxDownloads || 1}
+                    usedCount={0}
+                  />
+                ) : null}
 
                 {isMarket ? (
                   <div className="rounded-[28px] border border-[#C9A96A]/20 bg-white/[0.03] p-8">

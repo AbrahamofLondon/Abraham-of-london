@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import Head from "next/head";
 import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
+import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import ExecutiveReportingPaywall from "@/components/diagnostics/ExecutiveReportingPaywall";
@@ -166,7 +167,7 @@ export default function ExecutiveReportingEntryPage() {
           {(checkoutCancelled || accessRequired) && (
             <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-amber-200/75">
-                {checkoutCancelled ? "Checkout cancelled" : "Access required"}
+                {checkoutCancelled ? "Session cancelled" : "Access required"}
               </p>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/58">
                 {checkoutCancelled
@@ -193,6 +194,25 @@ export default function ExecutiveReportingEntryPage() {
             </p>
           </div>
         </div>
+
+          {/* External Conditions */}
+          <section className="mt-10 mb-8">
+            <div className="border border-white/8 bg-white/[0.02] p-5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/28">
+                External conditions
+              </p>
+              <p className="mt-3 max-w-2xl font-serif text-sm leading-6 text-white/45">
+                Executive Reporting prices internal consequence. External market conditions affect the urgency and magnitude of that consequence.
+              </p>
+              <a
+                href="/artifacts/global-market-intelligence-report-q1-2026"
+                className="mt-3 inline-flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.22em] text-amber-200/70 transition-all hover:text-amber-200/90"
+              >
+                Global Market Intelligence &middot; &pound;59
+                <ArrowRight className="h-2.5 w-2.5" />
+              </a>
+            </div>
+          </section>
       </main>
     </Layout>
   );

@@ -4,10 +4,15 @@ import type { GetServerSideProps } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 import { requireAdminPage } from "@/lib/access/server";
+import { getConversionIntelligenceMetrics } from "@/lib/analytics/decision-journey";
 
 const GOLD = "#C9A96E";
 
 type MetricRow = { label: string; value: string; target: string; status: "good" | "warn" | "fail" };
+
+type ConversionDashboardProps = {
+  conversionIntelligence: Awaited<ReturnType<typeof getConversionIntelligenceMetrics>>;
+};
 
 function Metric({ row }: { row: MetricRow }) {
   const color = row.status === "good" ? "rgba(110,231,183,0.80)"
@@ -31,7 +36,18 @@ function Metric({ row }: { row: MetricRow }) {
   );
 }
 
-export default function ConversionDashboard() {
+function pct(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
+function duration(ms: number): string {
+  if (!ms) return "—";
+  const minutes = Math.round(ms / 60000);
+  if (minutes < 60) return `${minutes}m`;
+  return `${Math.round(minutes / 60)}h`;
+}
+
+export default function ConversionDashboard({ conversionIntelligence }: ConversionDashboardProps) {
   return (
     <Layout title="Conversion Dashboard | Admin" fullWidth>
       <Head><meta name="robots" content="noindex,nofollow" /></Head>
@@ -49,6 +65,39 @@ export default function ConversionDashboard() {
           </p>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Metric row={{
+              label: "Evidence → Instrument rate",
+              value: pct(conversionIntelligence.evidenceToInstrumentRate.rate),
+              target: "≥ 18%",
+              status: conversionIntelligence.evidenceToInstrumentRate.rate >= 0.18 ? "good" : "warn",
+            }} />
+            <Metric row={{
+              label: "Instrument completion rate",
+              value: pct(conversionIntelligence.instrumentCompletionRate.rate),
+              target: "≥ 65%",
+              status: conversionIntelligence.instrumentCompletionRate.rate >= 0.65 ? "good" : "warn",
+            }} />
+            <Metric row={{
+              label: "Escalation rate",
+              value: pct(conversionIntelligence.escalationRate.rate),
+              target: "≥ 12%",
+              status: conversionIntelligence.escalationRate.rate >= 0.12 ? "good" : "warn",
+            }} />
+            <Metric row={{
+              label: "Commitment rate",
+              value: pct(conversionIntelligence.commitmentRate.rate),
+              target: "≥ 8%",
+              status: conversionIntelligence.commitmentRate.rate >= 0.08 ? "good" : "warn",
+            }} />
+            <Metric row={{
+              label: "Conviction velocity",
+              value: duration(conversionIntelligence.convictionVelocity.avgMs),
+              target: "< 24h",
+              status: conversionIntelligence.convictionVelocity.avgMs > 0 && conversionIntelligence.convictionVelocity.avgMs < 86400000 ? "good" : "warn",
+            }} />
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Metric row={{ label: "A1 — Activation", value: "—", target: "≥ 35%", status: "warn" }} />
             <Metric row={{ label: "A2 — Completion", value: "—", target: "≥ 70%", status: "warn" }} />
             <Metric row={{ label: "A3 — Trust Conversion", value: "—", target: "≥ 20%", status: "warn" }} />
@@ -98,6 +147,10 @@ export default function ConversionDashboard() {
               <p>result_engagement → result depth (time_on_result_ms, route)</p>
               <p>executive_reporting_paywall_abandoned → exit signal (time &gt; 5s)</p>
               <p>strategy_room_bridge_abandoned → exit signal (time &gt; 5s)</p>
+              <p>evidence_viewed / evidence_scrolled / evidence_exited / evidence_cta_click → evidence ambiguity</p>
+              <p>asset_open / asset_started / asset_complete / asset_abandoned / asset_escalated → instrument progression</p>
+              <p>exec_gate_view / exec_report_generated / strategy_checkout_start / strategy_completed → conviction progression</p>
+              <p>hesitation_time_on_cta / hesitation_repeated_scroll / hesitation_exit_after_hover → hesitation tracking</p>
             </div>
           </div>
         </div>
@@ -109,5 +162,6 @@ export default function ConversionDashboard() {
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const guard = await requireAdminPage(ctx);
   if (!guard.authorized) return guard.redirect;
-  return { props: {} };
+  const conversionIntelligence = await getConversionIntelligenceMetrics();
+  return { props: { conversionIntelligence } };
 };

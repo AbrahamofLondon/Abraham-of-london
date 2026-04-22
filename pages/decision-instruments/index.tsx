@@ -188,20 +188,20 @@ export default function DecisionInstrumentsPage() {
                       padding: "1.15rem",
                     }}
                   >
-                    {/* Title + price row */}
-                    <div className="flex items-baseline justify-between gap-2">
+                    {/* Outcome first */}
+                    <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.50)" }}>
+                      {inst.outcome}
+                    </p>
+
+                    {/* Title + price */}
+                    <div className="mt-2 flex items-baseline justify-between gap-2">
                       <h3 style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.12, color: "rgba(255,255,255,0.88)" }}>
                         {inst.title}
                       </h3>
-                      <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.06em", color: "rgba(255,255,255,0.65)", flexShrink: 0 }}>
+                      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.06em", color: "rgba(255,255,255,0.30)", flexShrink: 0 }}>
                         {inst.price}
                       </span>
                     </div>
-
-                    {/* Outcome */}
-                    <p style={{ ...serif, marginTop: "0.55rem", fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(255,255,255,0.50)" }}>
-                      {inst.outcome}
-                    </p>
 
                     {/* Used when */}
                     <div style={{ marginTop: "0.6rem" }}>
@@ -260,22 +260,14 @@ export default function DecisionInstrumentsPage() {
                       Operator Decision Pack
                     </div>
                     <div style={{ ...serif, marginTop: "0.35rem", fontSize: "0.92rem", color: "rgba(255,255,255,0.45)" }}>
-                      Exposure &rarr; Authority &rarr; Action
+                      Resolve the decision fully. Exposure, authority, and intervention in one pass.
                     </div>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span style={{ ...mono, fontSize: "14px", letterSpacing: "0.04em", color: GOLD }}>&pound;129</span>
-                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.28)" }}>separately &pound;157</span>
-                  </div>
+                  <span style={{ ...mono, fontSize: "14px", letterSpacing: "0.04em", color: GOLD }}>&pound;129</span>
                 </div>
 
-                <div className="mt-3" style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
-                  Used when
-                </div>
-                <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5">
-                  {["Consequence unclear", "Authority unstable", "Action unavoidable"].map((c) => (
-                    <span key={c} style={{ ...serif, fontSize: "0.85rem", color: "rgba(255,255,255,0.40)" }}>{c}</span>
-                  ))}
+                <div className="mt-2" style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.30)" }}>
+                  Using one instrument without the others leaves the decision partially resolved. Partial resolution compounds risk.
                 </div>
 
                 <div className="mt-4">

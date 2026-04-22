@@ -6,6 +6,7 @@
  */
 
 import { prisma } from "@/lib/prisma.server";
+import { ConvictionState } from "./conviction-state";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -13,6 +14,10 @@ import { prisma } from "@/lib/prisma.server";
 
 export type JourneyStage =
   | "landing"
+  | "evidence_viewed"
+  | "evidence_scrolled"
+  | "evidence_exited"
+  | "evidence_cta_click"
   | "bundle_click"
   | "diagnostic_start"
   | "diagnostic_complete"
@@ -32,12 +37,22 @@ export type JourneyStage =
   | "asset_purchase_start"
   | "asset_purchase"
   | "asset_open"
+  | "asset_started"
   | "asset_complete"
+  | "asset_abandoned"
+  | "asset_escalated"
   | "asset_transition"
   | "strategy_gate_view"
+  | "strategy_viewed"
+  | "strategy_checkout_start"
+  | "strategy_completed"
+  | "strategy_exited"
   | "strategy_attempt"
   | "strategy_allowed"
-  | "strategy_blocked";
+  | "strategy_blocked"
+  | "hesitation_time_on_cta"
+  | "hesitation_repeated_scroll"
+  | "hesitation_exit_after_hover";
 
 export type JourneyContext = {
   bundleId?: string;
@@ -49,6 +64,11 @@ export type JourneyContext = {
   diagnosticRoute?: string;
   price?: number;
   sessionKey?: string;
+  convictionState?: ConvictionState;
+  target?: string;
+  durationMs?: number;
+  scrollCount?: number;
+  hovered?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -418,5 +438,126 @@ export async function getStrategyRoomQualification(
     allowed,
     blocked,
     ratio: attempted > 0 ? allowed / attempted : 0,
+  };
+}
+
+async function uniqueSessionsForStages(
+  stages: JourneyStage[],
+  range: DateRange,
+): Promise<Set<string>> {
+  const rows = await prisma.decisionJourneyEvent.groupBy({
+    by: ["sessionId"],
+    where: {
+      stage: { in: stages },
+      createdAt: { gte: range.from, lte: range.to },
+    },
+  });
+  return new Set(rows.map((row) => row.sessionId));
+}
+
+function ratio(numerator: number, denominator: number): number {
+  return denominator > 0 ? numerator / denominator : 0;
+}
+
+export async function getConversionIntelligenceMetrics(
+  range: DateRange = defaultRange(),
+): Promise<{
+  evidenceToInstrumentRate: { rate: number; evidence: number; instruments: number };
+  instrumentCompletionRate: { rate: number; opened: number; completed: number };
+  escalationRate: { rate: number; eligible: number; escalated: number };
+  commitmentRate: { rate: number; priced: number; committed: number };
+  convictionVelocity: { avgMs: number; sessions: number };
+}> {
+  const [
+    evidenceSessions,
+    instrumentSessions,
+    openedSessions,
+    completedSessions,
+    eligibleSessions,
+    escalatedSessions,
+    pricedSessions,
+    committedSessions,
+  ] = await Promise.all([
+    uniqueSessionsForStages(["evidence_viewed", "diagnostic_start", "landing"], range),
+    uniqueSessionsForStages(["asset_open", "asset_started", "asset_purchase_start"], range),
+    uniqueSessionsForStages(["asset_open", "asset_started"], range),
+    uniqueSessionsForStages(["asset_complete"], range),
+    uniqueSessionsForStages(["exec_report_generated", "asset_complete", "strategy_gate_view"], range),
+    uniqueSessionsForStages(["asset_escalated", "strategy_checkout_start", "strategy_allowed"], range),
+    uniqueSessionsForStages(["exec_gate_view", "asset_purchase_start", "strategy_checkout_start"], range),
+    uniqueSessionsForStages(["exec_purchase", "asset_purchase", "strategy_allowed", "strategy_completed"], range),
+  ]);
+
+  const eventRows = await prisma.decisionJourneyEvent.findMany({
+    where: {
+      createdAt: { gte: range.from, lte: range.to },
+      stage: {
+        in: [
+          "evidence_viewed",
+          "diagnostic_start",
+          "exec_gate_view",
+          "asset_purchase_start",
+          "strategy_checkout_start",
+          "exec_purchase",
+          "asset_purchase",
+          "strategy_allowed",
+          "strategy_completed",
+        ],
+      },
+    },
+    orderBy: { createdAt: "asc" },
+    select: { sessionId: true, stage: true, createdAt: true },
+  });
+
+  const bySession = new Map<string, typeof eventRows>();
+  for (const event of eventRows) {
+    const current = bySession.get(event.sessionId) ?? [];
+    current.push(event);
+    bySession.set(event.sessionId, current);
+  }
+
+  let velocityTotal = 0;
+  let velocitySessions = 0;
+  for (const events of bySession.values()) {
+    const firstRecognition = events.find((event) =>
+      event.stage === "evidence_viewed" || event.stage === "diagnostic_start"
+    );
+    const firstCommitment = events.find((event) =>
+      event.stage === "exec_purchase" ||
+      event.stage === "asset_purchase" ||
+      event.stage === "strategy_allowed" ||
+      event.stage === "strategy_completed"
+    );
+    if (firstRecognition && firstCommitment && firstCommitment.createdAt >= firstRecognition.createdAt) {
+      velocityTotal += firstCommitment.createdAt.getTime() - firstRecognition.createdAt.getTime();
+      velocitySessions += 1;
+    }
+  }
+
+  return {
+    evidenceToInstrumentRate: {
+      rate: ratio(instrumentSessions.size, evidenceSessions.size),
+      evidence: evidenceSessions.size,
+      instruments: instrumentSessions.size,
+    },
+    instrumentCompletionRate: {
+      rate: ratio(completedSessions.size, openedSessions.size),
+      opened: openedSessions.size,
+      completed: completedSessions.size,
+    },
+    escalationRate: {
+      rate: ratio(escalatedSessions.size, eligibleSessions.size),
+      eligible: eligibleSessions.size,
+      escalated: escalatedSessions.size,
+    },
+    commitmentRate: {
+      rate: ratio(committedSessions.size, pricedSessions.size),
+      priced: pricedSessions.size,
+      committed: committedSessions.size,
+    },
+    convictionVelocity: {
+      avgMs: velocitySessions > 0 ? Math.round(velocityTotal / velocitySessions) : 0,
+      sessions: velocitySessions,
+    },
   };
 }

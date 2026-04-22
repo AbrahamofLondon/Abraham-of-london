@@ -9,6 +9,7 @@ import { twMerge } from "tailwind-merge";
 
 import Header from "@/components/Header";
 import EnhancedFooter from "@/components/EnhancedFooter";
+import ConversionIntelligenceTracker from "@/components/analytics/ConversionIntelligenceTracker";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -127,6 +128,8 @@ export default function Layout({
         className="relative isolate min-h-screen text-white"
         style={{ backgroundColor: "rgb(var(--aol-bg))" }}
       >
+        <ConversionIntelligenceTracker />
+
         {/* Header — z-50 so it floats above page content */}
         <div className="relative z-50">
           <Header transparent={headerTransparent} />

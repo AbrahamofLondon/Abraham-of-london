@@ -51,11 +51,8 @@ import ThresholdProximityLine, {
 } from "@/components/diagnostics/results/ThresholdProximityLine";
 import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
-import {
-  hasCommercialAccessCookie,
-  setCommercialAccessCookie,
-  verifyCheckoutSessionForProduct,
-} from "@/lib/server/billing/commercial-access";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { verifyCheckoutSessionForProduct } from "@/lib/server/billing/commercial-access";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION AUTHORITY GATE
@@ -219,7 +216,6 @@ const INITIAL_FORM: ConstitutionalIntake = {
 };
 
 const STORAGE_KEY = "aol_strategy_room_intake_v1";
-const DECISION_LOG_KEY = "aol_strategy_room_decision_log_v1";
 const AUTOSAVE_MS = 700;
 
 type DecisionLogStatus = "pending" | "executed" | "blocked";
@@ -485,7 +481,7 @@ function ExecutionEntryState({
 
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div>
-            <Eyebrow>Strategy Room · Execution Environment</Eyebrow>
+            <Eyebrow>Execution Environment</Eyebrow>
             <h1 style={{
               marginTop: "1rem",
               fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
@@ -495,7 +491,7 @@ function ExecutionEntryState({
               letterSpacing: "-0.02em",
               color: "rgba(255,255,255,0.92)",
             }}>
-              Intervention begins here.
+              Execution begins now.
             </h1>
             <p style={{
               marginTop: "0.85rem",
@@ -929,29 +925,32 @@ function DecisionLog({
 
 function ExitStates() {
   const exits = [
-    ["Continue execution", "Wrong exit cost: unresolved dependency keeps compounding."],
-    ["Return to monitoring", "Wrong exit cost: early monitoring hides active intervention failure."],
-    ["Escalate further", "Wrong exit cost: escalation without evidence damages authority."],
+    { label: "Stabilised", classification: "Condition contained. Execution holds.", action: "Re-enter if condition resurfaces.", color: "rgba(110,231,183,0.70)" },
+    { label: "Monitoring", classification: "Condition managed but not resolved.", action: "System continues to track trajectory.", color: `${GOLD}90` },
+    { label: "Further intervention", classification: "Current path insufficient. Escalation required.", action: "Re-enter with updated evidence.", color: "rgba(252,165,165,0.70)" },
   ];
 
   return (
     <section style={{ backgroundColor: VOID }}>
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.65rem" }}>
+          Exit classification
+        </div>
         <div className="grid gap-px md:grid-cols-3" style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.08)" }}>
-          {exits.map(([label, cost]) => (
-            <div key={label} style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.15rem" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.65rem" }}>
-                {label}
+          {exits.map((exit) => (
+            <div key={exit.label} style={{ backgroundColor: "rgb(5 6 8)", padding: "0.85rem 1rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: exit.color, fontWeight: 700, marginBottom: "0.35rem" }}>
+                {exit.label}
               </div>
-              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(252,165,165,0.68)" }}>
-                {cost}
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.45)" }}>
+                {exit.classification}
+              </p>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)", marginTop: "0.3rem" }}>
+                {exit.action}
               </p>
             </div>
           ))}
         </div>
-        <p style={{ marginTop: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-          If execution stabilises, move to monitoring.
-        </p>
       </div>
     </section>
   );
@@ -1706,15 +1705,6 @@ export default function StrategyRoomPage({
     } catch { /* ignore */ }
   }, []);
 
-  React.useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(DECISION_LOG_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) setDecisionLog(parsed as DecisionLogEntry[]);
-    } catch { /* ignore */ }
-  }, []);
-
   // Autosave
   React.useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -1726,12 +1716,6 @@ export default function StrategyRoomPage({
     }, AUTOSAVE_MS);
     return () => window.clearTimeout(timer);
   }, [form]);
-
-  React.useEffect(() => {
-    try {
-      window.localStorage.setItem(DECISION_LOG_KEY, JSON.stringify(decisionLog));
-    } catch { /* ignore */ }
-  }, [decisionLog]);
 
   if (!hasPaidAccess) {
     return (
@@ -1817,83 +1801,96 @@ export default function StrategyRoomPage({
 
               <GoldRule soft />
 
-              {/* ── 3) WHAT THIS IS ── */}
+              {/* ── PAST PASSIVE ANALYSIS ── */}
               <div className="mt-10">
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.28)",
-                  marginBottom: "1rem",
-                }}>
-                  Execution value
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.75rem" }}>
+                  You are past the point of passive analysis
                 </div>
-                <div className="grid gap-3 md:grid-cols-2" style={{ maxWidth: "44rem" }}>
+                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
                   {[
-                    "Decision compression",
-                    "Decision sequencing",
-                    "Constraint navigation",
-                    "Authority clarification",
+                    "The condition is active",
+                    "Delay compounds the exposure",
+                    "Partial action increases risk",
                   ].map((item) => (
-                    <div
-                      key={item}
-                      style={{
-                        border: "1px solid rgba(255,255,255,0.06)",
-                        backgroundColor: "rgba(255,255,255,0.018)",
-                        padding: "0.75rem 1rem",
-                      }}
-                    >
-                      <span style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.95rem",
-                        color: "rgba(255,255,255,0.58)",
-                      }}>
-                        {item}
-                      </span>
+                    <div key={item} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+                      {item}
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* ── 4) WHAT THIS IS NOT ── */}
+              {/* ── THIS IS NOT AN UPGRADE ── */}
+              <div className="mt-8" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem 1rem", maxWidth: "44rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.45rem" }}>
+                  This is not an upgrade
+                </div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
+                  Strategy Room is system-routed. It exists because the diagnostic evidence determined that intervention is required. This is not optional assessment.
+                </p>
+              </div>
+
+              <GoldRule soft />
+
+              {/* ── WHAT THIS IS ── */}
+              <div className="mt-10">
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
+                  Execution value
+                </div>
+                <div className="grid gap-3 md:grid-cols-2" style={{ maxWidth: "44rem" }}>
+                  {["Decision compression", "Decision sequencing", "Constraint navigation", "Authority resolution"].map((item) => (
+                    <div key={item} style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.018)", padding: "0.65rem 0.85rem" }}>
+                      <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", color: "rgba(255,255,255,0.55)" }}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── WHAT THIS IS NOT ── */}
               <div className="mt-8">
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                  color: "rgba(252,165,165,0.45)",
-                  marginBottom: "1rem",
-                }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)", marginBottom: "0.75rem" }}>
                   Exclusions
                 </div>
-                <div className="space-y-2" style={{ maxWidth: "44rem" }}>
+                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
+                  {["No advisory dependency", "No open-ended assessment", "No passive reporting surface"].map((item) => (
+                    <div key={item} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.35)", paddingLeft: "0.75rem", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, color: "rgba(252,165,165,0.30)" }}>&mdash;</span>{item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <GoldRule soft />
+
+              {/* ── WHAT HAPPENS NEXT ── */}
+              <div className="mt-10">
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
+                  What happens next
+                </div>
+                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
                   {[
-                    "No advisory dependency",
-                    "No exploratory drift",
-                    "No passive reporting surface",
+                    "Controlled execution environment with structured intake",
+                    "Defined intervention path based on scored condition",
+                    "Action against identified constraints with governed sequencing",
                   ].map((item) => (
-                    <div
-                      key={item}
-                      style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.95rem",
-                        lineHeight: 1.55,
-                        color: "rgba(255,255,255,0.38)",
-                        paddingLeft: "0.85rem",
-                        position: "relative",
-                      }}
-                    >
-                      <span style={{
-                        position: "absolute",
-                        left: 0,
-                        color: "rgba(252,165,165,0.35)",
-                      }}>
-                        &mdash;
-                      </span>
+                    <div key={item} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── IF YOU DO NOTHING ── */}
+              <div className="mt-8">
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.75rem" }}>
+                  If you do nothing
+                </div>
+                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
+                  {[
+                    "The condition persists under its current trajectory",
+                    "Exposure compounds with each decision cycle that passes without intervention",
+                    "The window for effective action narrows until the system chooses for you",
+                  ].map((item) => (
+                    <div key={item} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.50)" }}>
                       {item}
                     </div>
                   ))}
@@ -1902,123 +1899,81 @@ export default function StrategyRoomPage({
 
               <GoldRule soft />
 
-              {/* ── 5) ENTRY CONDITIONS ── */}
+              {/* ── COMMERCIAL FRAMING ── */}
               <div className="mt-10">
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.28)",
-                  marginBottom: "1rem",
-                }}>
-                  You should not proceed unless
-                </div>
-                <div className="space-y-3" style={{ maxWidth: "44rem" }}>
-                  {[
-                    "Evidence has been established",
-                    "Consequence is defined",
-                    "Escalation is justified",
-                  ].map((condition) => (
-                    <div
-                      key={condition}
-                      className="flex items-center gap-3"
-                    >
-                      <CheckSquare style={{ width: "12px", height: "12px", color: `${GOLD}60`, flexShrink: 0 }} />
-                      <span style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.95rem",
-                        color: "rgba(255,255,255,0.55)",
-                      }}>
-                        {condition}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── 6) OUTCOME CLARITY ── */}
-              <div className="mt-10">
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.28)",
-                  marginBottom: "1rem",
-                }}>
-                  What changes
-                </div>
-                <div className="space-y-2" style={{ maxWidth: "44rem" }}>
-                  {[
-                    "Decisions are made",
-                    "Sequence is enforced",
-                    "Drift is removed",
-                  ].map((outcome) => (
-                    <div
-                      key={outcome}
-                      style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.95rem",
-                        lineHeight: 1.55,
-                        color: "rgba(255,255,255,0.52)",
-                      }}
-                    >
-                      {outcome}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <GoldRule soft />
-
-              {/* ── 7) COMMERCIAL FRAMING ── */}
-              <div className="mt-10">
-                <div
-                  style={{
-                    border: `1px solid ${GOLD}22`,
-                    backgroundColor: `${GOLD}06`,
-                    padding: "1.5rem",
-                    maxWidth: "44rem",
-                  }}
-                >
-                  <div style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px",
-                    letterSpacing: "0.28em",
-                    textTransform: "uppercase",
-                    color: `${GOLD}90`,
-                  }}>
-                    &pound;395 &mdash; intervention engagement
+                <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06`, padding: "1.25rem", maxWidth: "44rem" }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                    &pound;395 &mdash; execution environment
                   </div>
-                  <p
-                    style={{
-                      marginTop: "0.65rem",
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "0.95rem",
-                      lineHeight: 1.6,
-                      color: "rgba(255,255,255,0.42)",
-                    }}
-                  >
-                    Entry subject to system condition.
+                  <p style={{ marginTop: "0.55rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
+                    At this stage, the cost of error exceeds the cost of intervention.
                   </p>
                 </div>
               </div>
 
-              {/* ── 8) CTA ── */}
-              <div className="mt-8">
+              {/* ── AUTHORITY TRANSFER + CTA ── */}
+              <div className="mt-6" style={{ maxWidth: "44rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
+                  The system has already determined that intervention is required.
+                </div>
                 <StrategyRoomConversionBridge
                   price={395}
                   checkoutPriceCode="strategy_room"
                   originPath="/strategy-room"
                   ctaHref="/strategy-room"
-                  primaryCtaLabel="Enter Strategy Room"
+                  primaryCtaLabel="Enter execution environment"
                   title=""
                   description=""
                 />
+              </div>
+
+              {/* What this prevents */}
+              <div className="mt-8">
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                  color: "rgba(252,165,165,0.45)",
+                  marginBottom: "0.65rem",
+                }}>
+                  What this prevents
+                </div>
+                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
+                  {[
+                    "Misdirected intervention that targets symptoms instead of structure",
+                    "Escalation without evidence that burns credibility for future need",
+                    "Fragmented execution where multiple parties act without coordination",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.88rem",
+                        lineHeight: 1.55,
+                        color: "rgba(255,255,255,0.38)",
+                        paddingLeft: "0.75rem",
+                        position: "relative",
+                      }}
+                    >
+                      <span style={{ position: "absolute", left: 0, color: "rgba(252,165,165,0.30)" }}>&middot;</span>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+                <div
+                  className="mt-3"
+                  style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "0.85rem",
+                    color: "rgba(255,255,255,0.30)",
+                    fontStyle: "italic",
+                  }}
+                >
+                  The cost of error exceeds the cost of intervention.
+                </div>
               </div>
 
               <div
@@ -2054,46 +2009,57 @@ export default function StrategyRoomPage({
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }
 
-  function addDecisionLogEntry(text: string) {
-    const entry: DecisionLogEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      text,
-      status: "pending",
-      blockReason: "",
-      createdAt: new Date().toISOString(),
-    };
-    setDecisionLog((prev) => [entry, ...prev]);
+  async function addDecisionLogEntry(text: string) {
     setPersistError(null);
-    track("strategy_room_decision_logged", {
-      has_canonical: Boolean(canonical),
-      entry_count: decisionLog.length + 1,
-    });
+    if (!executionSessionId) {
+      setPersistError("Execution session is not yet persisted. Submit the Strategy Room intake before logging decisions.");
+      return;
+    }
 
-    // Server persistence (non-blocking on UI, but explicit error if fails)
-    if (executionSessionId) {
-      fetch(`/api/strategy-room/execution/${executionSessionId}/decisions`, {
+    try {
+      const response = await fetch(`/api/strategy-room/execution/${executionSessionId}/decisions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ decision: text }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.ok && data.decision?.id) {
-            // Update local entry with server ID for future status changes
-            setDecisionLog((prev) =>
-              prev.map((e) => (e.id === entry.id ? { ...e, id: data.decision.id } : e)),
-            );
-          } else {
-            setPersistError("Decision logged locally but server persistence failed. Data may not survive session.");
-          }
-        })
-        .catch(() => {
-          setPersistError("Decision logged locally but server persistence failed. Data may not survive session.");
-        });
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok || !data.decision?.id) {
+        throw new Error(data.error || "Decision persistence failed.");
+      }
+      const entry: DecisionLogEntry = {
+        id: data.decision.id,
+        text: data.decision.text ?? data.decision.decision,
+        status: data.decision.status,
+        blockReason: data.decision.blockReason ?? "",
+        createdAt: data.decision.createdAt,
+      };
+      setDecisionLog((prev) => [entry, ...prev]);
+      track("strategy_room_decision_logged", {
+        has_canonical: Boolean(canonical),
+        entry_count: decisionLog.length + 1,
+      });
+    } catch (error) {
+      setPersistError(error instanceof Error ? error.message : "Decision persistence failed.");
     }
   }
 
-  function updateDecisionLogStatus(id: string, status: DecisionLogStatus) {
+  async function updateDecisionLogStatus(id: string, status: DecisionLogStatus) {
+    const current = decisionLog.find((entry) => entry.id === id);
+    if (!current || !executionSessionId) {
+      setPersistError("Execution session persistence is unavailable. Status was not changed.");
+      return;
+    }
+
+    if (status === "blocked" && !current.blockReason.trim()) {
+      setDecisionLog((prev) =>
+        prev.map((entry) =>
+          entry.id === id ? { ...entry, status, blockReason: entry.blockReason } : entry,
+        ),
+      );
+      setPersistError("Reason for block is mandatory. Add the reason to persist blocked status.");
+      return;
+    }
+
     setDecisionLog((prev) =>
       prev.map((entry) =>
         entry.id === id
@@ -2108,15 +2074,21 @@ export default function StrategyRoomPage({
     setPersistError(null);
     track("strategy_room_decision_status_changed", { status });
 
-    // Server persistence
-    if (executionSessionId) {
-      fetch(`/api/strategy-room/execution/${executionSessionId}/decisions`, {
+    try {
+      const response = await fetch(`/api/strategy-room/execution/${executionSessionId}/decisions`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decisionId: id, status }),
-      }).catch(() => {
-        setPersistError("Status update saved locally but server sync failed.");
+        body: JSON.stringify({ decisionId: id, status, reason: current.blockReason }),
       });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || "Decision update failed.");
+    } catch (error) {
+      setDecisionLog((prev) =>
+        prev.map((entry) =>
+          entry.id === id ? { ...entry, status: current.status, blockReason: current.blockReason } : entry,
+        ),
+      );
+      setPersistError(error instanceof Error ? error.message : "Decision update failed.");
     }
   }
 
@@ -2126,6 +2098,22 @@ export default function StrategyRoomPage({
         entry.id === id ? { ...entry, blockReason: reason } : entry,
       ),
     );
+    if (!executionSessionId || !reason.trim()) return;
+    const current = decisionLog.find((entry) => entry.id === id);
+    if (current?.status !== "blocked") return;
+    fetch(`/api/strategy-room/execution/${executionSessionId}/decisions`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decisionId: id, status: "blocked", reason }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || "Block reason persistence failed.");
+        setPersistError(null);
+      })
+      .catch((error) => {
+        setPersistError(error instanceof Error ? error.message : "Block reason persistence failed.");
+      });
   }
 
   async function initDecisionSession(intake: ConstitutionalIntake) {
@@ -2232,8 +2220,23 @@ export default function StrategyRoomPage({
         const execData = await execRes.json();
         if (execData.ok && execData.id) {
           setExecutionSessionId(execData.id);
+          const saved = await fetch(`/api/strategy-room/execution/${execData.id}/decisions`);
+          const savedData = await saved.json();
+          if (saved.ok && savedData.ok && Array.isArray(savedData.decisions)) {
+            setDecisionLog(savedData.decisions.map((entry: any) => ({
+              id: String(entry.id),
+              text: String(entry.text ?? entry.decision ?? ""),
+              status: entry.status as DecisionLogStatus,
+              blockReason: String(entry.blockReason ?? entry.notes ?? ""),
+              createdAt: String(entry.createdAt ?? new Date().toISOString()),
+            })));
+          }
+        } else {
+          throw new Error(execData.error || "Execution session persistence failed.");
         }
-      } catch { /* execution session creation is best-effort */ }
+      } catch (execError) {
+        setPersistError(execError instanceof Error ? execError.message : "Execution session persistence failed.");
+      }
 
       try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2387,6 +2390,47 @@ export default function StrategyRoomPage({
                 </div>
               </div>
             )}
+
+            {/* Trajectory feedback from decision log */}
+            {decisionLog.length > 0 && (() => {
+              const executed = decisionLog.filter((d) => d.status === "executed").length;
+              const blocked = decisionLog.filter((d) => d.status === "blocked").length;
+              const total = decisionLog.length;
+              const execRate = total > 0 ? executed / total : 0;
+              const blockRate = total > 0 ? blocked / total : 0;
+              const traj = execRate > 0.6 ? "ASCENDING" : blockRate > 0.4 ? "DETERIORATING" : execRate > 0.3 ? "STAGNANT" : "FRAGILE";
+              const trajColor = traj === "ASCENDING" ? "rgba(110,231,183,0.70)" : traj === "DETERIORATING" ? "rgba(252,165,165,0.70)" : traj === "FRAGILE" ? "rgba(253,186,116,0.70)" : "rgba(255,255,255,0.40)";
+              return (
+                <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.75rem" }}>
+                  <div className="flex items-center gap-3">
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                      Execution trajectory
+                    </span>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", color: trajColor, fontWeight: 700 }}>
+                      {traj}
+                    </span>
+                    {executed > 0 && (
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", color: "rgba(255,255,255,0.22)" }}>
+                        {executed}/{total} executed
+                      </span>
+                    )}
+                  </div>
+                  {execRate > 0.5 && (
+                    <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(110,231,183,0.55)", marginTop: "0.3rem", fontStyle: "italic" }}>
+                      The condition is responding to intervention.
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Constraint line */}
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.30)" }}>
+                Deviation from the intervention path introduces risk.
+              </div>
+            </div>
+
             <ExitStates />
             <Verdict
               canonical={canonical}
@@ -2452,26 +2496,44 @@ export default function StrategyRoomPage({
 }
 
 export const getServerSideProps: GetServerSideProps<StrategyRoomPageProps> = async (ctx) => {
-  const hasCookie = hasCommercialAccessCookie(ctx.req.headers.cookie, "strategy_room");
-  if (hasCookie) {
-    return { props: { hasPaidAccess: true, checkoutConfirmed: ctx.query.checkout === "success" } };
+  let email: string | null =
+    typeof ctx.query.email === "string" ? ctx.query.email.trim().toLowerCase() : null;
+  let userId: string | null = null;
+
+  try {
+    const { resolveIdentity } = await import("@/lib/auth/resolve-identity");
+    const cookieHeader = ctx.req.headers.cookie ?? "";
+    const headers = new Headers();
+    headers.set("cookie", cookieHeader);
+    if (ctx.req.headers.host) headers.set("host", ctx.req.headers.host);
+    const fakeReq = new Request(`http://${ctx.req.headers.host ?? "localhost"}${ctx.req.url}`, { headers });
+    const identity = await resolveIdentity(fakeReq as any);
+    email = identity.email ?? email;
+    userId = identity.subjectId ?? null;
+  } catch {
+    // unauthenticated access may still resolve by explicit email entitlement
   }
 
+  let checkoutConfirmed = false;
   if (ctx.query.checkout === "success") {
     try {
       const valid = await verifyCheckoutSessionForProduct(ctx.query.session_id, "strategy_room");
-      if (valid && typeof ctx.query.session_id === "string") {
-        setCommercialAccessCookie(ctx, "strategy_room", ctx.query.session_id);
-        return { props: { hasPaidAccess: true, checkoutConfirmed: true } };
-      }
+      checkoutConfirmed = Boolean(valid);
     } catch {
       // Keep the page on the paid entry surface if session verification fails.
     }
   }
 
+  const entitlement = await resolveCanonicalEntitlement({
+    userId,
+    email,
+    slug: "strategy-room.entry",
+  });
+
   return {
     props: {
-      hasPaidAccess: false,
+      hasPaidAccess: entitlement.granted || checkoutConfirmed,
+      checkoutConfirmed,
       checkoutCancelled: ctx.query.checkout === "cancelled",
     },
   };

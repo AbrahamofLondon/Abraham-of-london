@@ -2475,21 +2475,64 @@ function ResultSurface({
           </div>
         </div>
 
-        <StrategyRoomConversionBridge
-          className="mt-10"
-          price={395}
-          ctaHref="/strategy-room"
-          checkoutPriceCode="strategy_room"
-          originPath="/diagnostics/executive-reporting/run"
-          primaryCtaLabel="Enter Strategy Room"
-          title="You now have the interpretation. Strategy Room is where it becomes intervention."
-          description="Executive Reporting shows the constitutional constraint, exposure, and priority stack. Strategy Room is the premium escalation for turning that reading into governed action under real decision pressure."
-          signals={[
-            "The report has identified a material constraint that requires a decision",
-            "The next risk is delay, avoidance, or fragmented execution",
-            "You need intervention logic, not another layer of interpretation",
-          ]}
-        />
+        {/* Intervention Requirement Classification */}
+        <div className="mt-10" style={{ border: `1px solid ${route === "STRATEGY" ? "rgba(252,165,165,0.22)" : `${GOLD}20`}`, backgroundColor: route === "STRATEGY" ? "rgba(252,165,165,0.03)" : `${GOLD}04`, padding: "1.25rem 1.5rem" }}>
+          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: route === "STRATEGY" ? "rgba(252,165,165,0.70)" : `${GOLD}80`, marginBottom: "0.65rem" }}>
+            Intervention Requirement
+          </div>
+          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", color: route === "STRATEGY" ? "rgba(252,165,165,0.85)" : "rgba(255,255,255,0.70)", fontWeight: 700 }}>
+            {route === "STRATEGY" ? "EXECUTION REQUIRED" : route === "DIAGNOSTIC" ? "DIAGNOSTIC" : trajectory === "DETERIORATING" ? "STRATEGY" : "MONITOR"}
+          </div>
+
+          {route === "STRATEGY" && (
+            <div className="mt-4 grid gap-px sm:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
+              <div style={{ backgroundColor: "rgb(4 5 7)", padding: "0.75rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.3rem" }}>
+                  Dominant condition
+                </div>
+                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.45, color: "rgba(255,255,255,0.58)" }}>
+                  {failureModes[0] || dominantDomains[0] || "Structural constraint identified"}
+                </div>
+              </div>
+              <div style={{ backgroundColor: "rgb(4 5 7)", padding: "0.75rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.3rem" }}>
+                  Required decision
+                </div>
+                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.45, color: "rgba(255,255,255,0.58)" }}>
+                  {nextAction || "Governed intervention under structured conditions"}
+                </div>
+              </div>
+              <div style={{ backgroundColor: "rgb(4 5 7)", padding: "0.75rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)", marginBottom: "0.3rem" }}>
+                  Risk if delayed
+                </div>
+                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.45, color: "rgba(252,165,165,0.60)" }}>
+                  {trajectory === "DETERIORATING" ? "Condition deteriorating under current trajectory" : "Decision delay compounds structural exposure"}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {route === "STRATEGY" && (
+          <StrategyRoomConversionBridge
+            className="mt-4"
+            price={395}
+            ctaHref="/strategy-room"
+            checkoutPriceCode="strategy_room"
+            originPath="/diagnostics/executive-reporting/run"
+            primaryCtaLabel="Enter Strategy Room"
+            title="Execution required. Strategy Room is where this becomes intervention."
+            description=""
+            signals={[]}
+          />
+        )}
+
+        {route !== "STRATEGY" && (
+          <div className="mt-4" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            {route === "DIAGNOSTIC" ? "Return to diagnostic ladder to strengthen evidence." : "Monitor condition. Re-evaluate if trajectory changes."}
+          </div>
+        )}
       </div>
     </div>
   );

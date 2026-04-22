@@ -5,6 +5,7 @@
  * Uses navigator.sendBeacon where available for reliability on unload.
  */
 
+import { ConvictionState } from "./conviction-state";
 import type { JourneyStage, JourneyContext } from "./decision-journey";
 
 // Re-export types for convenience
@@ -12,6 +13,7 @@ export type { JourneyStage, JourneyContext };
 
 const ENDPOINT = "/api/analytics/journey";
 const SESSION_KEY = "aol_journey_session_id";
+const CONVICTION_KEY = "aol_conviction_state";
 
 // ---------------------------------------------------------------------------
 // Session ID management
@@ -32,6 +34,74 @@ function getSessionId(): string {
   }
 }
 
+function readConvictionState(): ConvictionState {
+  if (typeof window === "undefined") return ConvictionState.UNDEFINED;
+  try {
+    const stored = sessionStorage.getItem(CONVICTION_KEY);
+    if (stored && Object.values(ConvictionState).includes(stored as ConvictionState)) {
+      return stored as ConvictionState;
+    }
+  } catch {
+    // ignore
+  }
+  return ConvictionState.UNDEFINED;
+}
+
+function stateRank(state: ConvictionState): number {
+  return [
+    ConvictionState.UNDEFINED,
+    ConvictionState.RECOGNISED,
+    ConvictionState.CLARIFIED,
+    ConvictionState.PRICED,
+    ConvictionState.COMMITTED,
+  ].indexOf(state);
+}
+
+export function setConvictionState(next: ConvictionState): ConvictionState {
+  if (typeof window === "undefined") return next;
+  const current = readConvictionState();
+  const resolved = stateRank(next) >= stateRank(current) ? next : current;
+  try {
+    sessionStorage.setItem(CONVICTION_KEY, resolved);
+  } catch {
+    // ignore
+  }
+  return resolved;
+}
+
+function convictionForStage(stage: JourneyStage): ConvictionState | null {
+  if (stage === "landing" || stage === "evidence_viewed" || stage === "diagnostic_start") {
+    return ConvictionState.RECOGNISED;
+  }
+  if (
+    stage === "diagnostic_complete" ||
+    stage === "enterprise_complete" ||
+    stage === "asset_open" ||
+    stage === "asset_started" ||
+    stage === "exec_report_generated"
+  ) {
+    return ConvictionState.CLARIFIED;
+  }
+  if (
+    stage === "exec_gate_view" ||
+    stage === "exec_purchase_start" ||
+    stage === "asset_purchase_start" ||
+    stage === "strategy_checkout_start"
+  ) {
+    return ConvictionState.PRICED;
+  }
+  if (
+    stage === "exec_purchase" ||
+    stage === "asset_purchase" ||
+    stage === "asset_complete" ||
+    stage === "strategy_allowed" ||
+    stage === "strategy_completed"
+  ) {
+    return ConvictionState.COMMITTED;
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Core emit function
 // ---------------------------------------------------------------------------
@@ -41,11 +111,13 @@ export function emitJourneyEvent(
   context?: JourneyContext,
 ): void {
   if (typeof window === "undefined") return;
+  const mapped = convictionForStage(stage);
+  const convictionState = mapped ? setConvictionState(mapped) : readConvictionState();
 
   const payload = JSON.stringify({
     sessionId: getSessionId(),
     stage,
-    context: context ?? {},
+    context: { ...(context ?? {}), convictionState },
   });
 
   // Prefer sendBeacon for reliability (works during page unload)
@@ -154,8 +226,20 @@ export function trackAssetOpen(bundleId: string): void {
   emitJourneyEvent("asset_open", { bundleId });
 }
 
+export function trackAssetStarted(bundleId: string): void {
+  emitJourneyEvent("asset_started", { bundleId });
+}
+
 export function trackAssetComplete(bundleId: string, diagnosticRoute?: string): void {
   emitJourneyEvent("asset_complete", { bundleId, diagnosticRoute });
+}
+
+export function trackAssetAbandoned(bundleId: string): void {
+  emitJourneyEvent("asset_abandoned", { bundleId });
+}
+
+export function trackAssetEscalated(bundleId: string, diagnosticRoute?: string): void {
+  emitJourneyEvent("asset_escalated", { bundleId, diagnosticRoute });
 }
 
 export function trackAssetTransition(bundleId: string, diagnosticRoute: string): void {
@@ -176,6 +260,22 @@ export function trackStrategyGateView(): void {
   emitJourneyEvent("strategy_gate_view");
 }
 
+export function trackStrategyViewed(): void {
+  emitJourneyEvent("strategy_viewed");
+}
+
+export function trackStrategyCheckoutStart(): void {
+  emitJourneyEvent("strategy_checkout_start");
+}
+
+export function trackStrategyCompleted(): void {
+  emitJourneyEvent("strategy_completed");
+}
+
+export function trackStrategyExited(): void {
+  emitJourneyEvent("strategy_exited");
+}
+
 export function trackStrategyAttempt(escalationLevel?: string): void {
   emitJourneyEvent("strategy_attempt", { escalationLevel });
 }
@@ -186,4 +286,32 @@ export function trackStrategyAllowed(): void {
 
 export function trackStrategyBlocked(escalationLevel?: string): void {
   emitJourneyEvent("strategy_blocked", { escalationLevel });
+}
+
+export function trackEvidenceViewed(entryPath?: string): void {
+  emitJourneyEvent("evidence_viewed", { entryPath: entryPath ?? window.location.pathname });
+}
+
+export function trackEvidenceScrolled(scrollCount: number): void {
+  emitJourneyEvent("evidence_scrolled", { scrollCount });
+}
+
+export function trackEvidenceExited(): void {
+  emitJourneyEvent("evidence_exited");
+}
+
+export function trackEvidenceCtaClick(target: string): void {
+  emitJourneyEvent("evidence_cta_click", { target });
+}
+
+export function trackCtaDwell(target: string, durationMs: number): void {
+  emitJourneyEvent("hesitation_time_on_cta", { target, durationMs });
+}
+
+export function trackRepeatedScroll(scrollCount: number): void {
+  emitJourneyEvent("hesitation_repeated_scroll", { scrollCount });
+}
+
+export function trackExitAfterHover(target: string): void {
+  emitJourneyEvent("hesitation_exit_after_hover", { target, hovered: true });
 }

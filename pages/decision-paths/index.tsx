@@ -855,7 +855,7 @@ export default function DecisionPathsPage() {
                   e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
                 }}
               >
-                Learn about Strategy Room &middot; &pound;395
+                Strategy Room &middot; &pound;395
                 <ArrowRight style={{ width: "11px", height: "11px" }} />
               </Link>
             </div>

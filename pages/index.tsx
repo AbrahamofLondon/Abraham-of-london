@@ -2188,7 +2188,7 @@ function HowItWorksLadder() {
     {
       label: "Evidence: Team + Enterprise",
       href: "/diagnostics",
-      cta: "Explore assessments",
+      cta: "Begin assessments",
       effort: "10-25 minutes · Free",
       explanation: [
         "Team perception gap analysis.",
@@ -2803,6 +2803,149 @@ function HomeEvidenceSection() {
   );
 }
 
+function HomeDecisionLayer() {
+  const instruments = [
+    {
+      slug: "decision-exposure-instrument",
+      title: "Decision Exposure Instrument",
+      price: "\u00a329",
+      outcome: "Produces a bounded annual exposure figure and forces a classification before the market does it for you.",
+      usedWhen: "Financial consequence is unclear but decision cannot wait.",
+      time: "15 min",
+    },
+    {
+      slug: "mandate-clarity-framework",
+      title: "Mandate Clarity Framework",
+      price: "\u00a349",
+      outcome: "Maps formal, actual, and shadow authority into a scored mandate classification with a corrective path.",
+      usedWhen: "Ownership is unclear or contested.",
+      time: "20 min",
+    },
+    {
+      slug: "intervention-path-selector",
+      title: "Intervention Path Selector",
+      price: "\u00a379",
+      outcome: "Scores four intervention paths, resolves conflicts with tie-breaker logic, and produces an ordered action stack.",
+      usedWhen: "Action is required but direction is unclear.",
+      time: "15\u201325 min",
+    },
+  ];
+
+  const GOLD = "#C9A96E";
+  const AMBER = "#F59E0B";
+  const VOID = "rgb(3 3 5)";
+
+  return (
+    <Section id="decision-layer" variant="void">
+      <div className="mx-auto max-w-[1100px]">
+        {/* Label + headline */}
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#F5F5F5", fontWeight: 700 }}>
+          Decision layer
+        </div>
+        <div className="mt-2 h-px w-16" style={{ backgroundColor: "rgba(201,169,110,0.35)" }} />
+        <h2
+          className="mt-5"
+          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", lineHeight: 1.05, color: "rgba(255,255,255,0.90)" }}
+        >
+          When the decision cannot wait.
+        </h2>
+        <p
+          className="mt-2"
+          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.42)", maxWidth: "52ch" }}
+        >
+          Three instruments used under pressure to quantify exposure, define authority, and determine action.
+        </p>
+
+        {/* 3 instrument cards */}
+        <div className="mt-8 grid gap-3 md:grid-cols-3">
+          {instruments.map((inst) => (
+            <Link
+              key={inst.slug}
+              href={`/decision-instruments/${inst.slug}`}
+              className="group flex flex-col transition-all duration-200 hover:-translate-y-px"
+              style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.1rem" }}
+            >
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.50)" }}>
+                {inst.outcome}
+              </p>
+              <div className="mt-2 flex items-baseline justify-between gap-2">
+                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.12, color: "rgba(255,255,255,0.88)" }}>
+                  {inst.title}
+                </div>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.06em", color: "rgba(255,255,255,0.30)", flexShrink: 0 }}>
+                  {inst.price}
+                </span>
+              </div>
+              <div className="mt-1.5" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                Used when: {inst.usedWhen}
+              </div>
+              <div className="mt-auto pt-3 inline-flex items-center gap-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: AMBER }}>
+                Use instrument
+                <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-1" />
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* System strip */}
+        <div className="mt-6 grid gap-px md:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
+          {["Quantify exposure", "Resolve authority", "Select action"].map((step, i) => (
+            <div key={step} className="flex items-center gap-3 px-4 py-2.5" style={{ backgroundColor: VOID }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.06em", color: `${GOLD}45` }}>{String(i + 1).padStart(2, "0")}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>{step}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Bundle panel */}
+        <div className="mt-6" style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "1.1rem" }}>
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <div>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                Operator Decision Pack
+              </div>
+              <div className="mt-1" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.45)" }}>
+                Resolve the decision fully. Exposure, authority, and intervention in one pass.
+              </div>
+            </div>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "14px", letterSpacing: "0.04em", color: GOLD }}>&pound;129</span>
+          </div>
+          <div className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(255,255,255,0.30)" }}>
+            Using one instrument without the others leaves the decision partially resolved. Partial resolution compounds risk.
+          </div>
+          <Link
+            href="/api/checkout?bundle=operator-decision-pack"
+            className="mt-3 inline-flex items-center gap-2 transition-all duration-200"
+            style={{ padding: "8px 16px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}08`, color: GOLD, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}
+          >
+            Get the Operator Pack
+            <ArrowRight style={{ width: 10, height: 10 }} />
+          </Link>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Link
+            href="/diagnostics/executive-reporting"
+            className="inline-flex items-center gap-2 transition-all duration-200"
+            style={{ padding: "8px 16px", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}06`, color: GOLD, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+          >
+            If consequence must be priced &rarr; Executive Reporting
+            <ArrowRight style={{ width: 9, height: 9 }} />
+          </Link>
+          <Link
+            href="/strategy-room"
+            className="inline-flex items-center gap-2"
+            style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
+          >
+            If action must be executed &rarr; Strategy Room
+          </Link>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 function HomeDecisionSection() {
   return (
     <Section id="escalation-paths" variant="surface">
@@ -3029,26 +3172,25 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta property="og:image" content="/assets/images/social/og-image.jpg" />
       </Head>
 
-      {/* 1. Recognition + Choice */}
+      {/* 1. Recognition */}
       <HomeHero intelligenceHref={intelligenceHref} />
 
-      {/* 2. Mechanism — what happens after you click */}
-      <WhatThisPlatformIs />
-
-      {/* 3. Product path — the ladder */}
-      <HowItWorksLadder />
-
-      {/* 4. Evidence — proof that earns trust */}
+      {/* 2. Evidence — proof layer */}
       <ProofLayer />
-
-      {/* 4b. Case evidence — observed in practice */}
       <HomeEvidenceSection />
 
-      {/* 5. Audience qualification */}
-      <WhoThisIsFor />
+      {/* 3. Decision — instruments */}
+      <HomeDecisionLayer />
 
-      {/* 6. Escalation decision — commercial clarity */}
+      {/* 4. Diagnostics — the ladder */}
+      <WhatThisPlatformIs />
+      <HowItWorksLadder />
+
+      {/* 5. Reporting — Executive Reporting */}
       <HomeDecisionSection />
+
+      {/* 6. Audience gate */}
+      <WhoThisIsFor />
 
       {/* — mode change: conversion system → content library — */}
       <Bridge text="supporting body of work" />
