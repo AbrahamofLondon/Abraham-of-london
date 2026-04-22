@@ -13,6 +13,7 @@ export type DiagnosticJourneyStage =
   | "team"
   | "enterprise"
   | "executive_reporting"
+  | "strategy_room"
   | "monitoring";
 
 export type DiagnosticJourneyRecord = {

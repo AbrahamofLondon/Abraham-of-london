@@ -997,6 +997,19 @@ function ResultSurface({
   const rc = routeColor(route);
   const entitlements = result.entitlements;
   const clarityScore = safeNumber(constitution?.clarityScore, header?.confidence ?? 0);
+  const evidenceGraph = (canonical as any)?.evidenceGraph ?? {};
+  const evidenceNodes = Array.isArray(evidenceGraph.nodes) ? evidenceGraph.nodes : [];
+  const decisionObjects = Array.isArray(evidenceGraph.decisionObjects) ? evidenceGraph.decisionObjects : [];
+  const latestDecisionObject = [...decisionObjects].reverse()[0] as any;
+  const graphContradictions = evidenceNodes
+    .filter((node: any) => node?.kind === "contradiction")
+    .slice(-5);
+  const graphConsequences = evidenceNodes
+    .filter((node: any) => node?.kind === "consequence" || node?.kind === "exposure_estimate")
+    .slice(-4);
+  const graphActions = evidenceNodes
+    .filter((node: any) => node?.kind === "action")
+    .slice(-4);
 
   const dominantDomains = summary?.dominantDomains ?? constitution?.dominantDomains ?? [];
   const failureModes = summary?.failureModes ?? constitution?.failureModes ?? [];
@@ -1189,6 +1202,70 @@ function ResultSurface({
               {thread.failureModes.length > 0 ? ` Failure modes identified: ${thread.failureModes.join(", ")}.` : ""}
               {thread.readinessTier ? ` Readiness: ${thread.readinessTier}.` : ""}
             </p>
+          </div>
+        )}
+
+        {(latestDecisionObject || graphContradictions.length > 0 || graphConsequences.length > 0) && (
+          <div className="mb-8" style={{ border: `1px solid ${GOLD}24`, backgroundColor: "rgba(201,169,110,0.035)", padding: "1.35rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>
+              Evidence convergence
+            </div>
+            {latestDecisionObject?.decisionText && (
+              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(0,0,0,0.22)", padding: "0.9rem 1rem", marginBottom: "0.75rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.35rem" }}>
+                  Decision object locked
+                </div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.76)" }}>
+                  {latestDecisionObject.decisionText}
+                </p>
+                {[latestDecisionObject.constraintText, latestDecisionObject.priorAttemptText, latestDecisionObject.costOfDelayText, latestDecisionObject.stakeholderText]
+                  .filter(Boolean)
+                  .slice(0, 3)
+                  .map((item: string, index: number) => (
+                    <div key={`${item}-${index}`} style={{ marginTop: "0.35rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+                      {index === 0 ? "Constraint" : index === 1 ? "Prior evidence" : "Delay cost"}: {item}
+                    </div>
+                  ))}
+              </div>
+            )}
+            <div className="grid gap-3 md:grid-cols-3">
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(252,165,165,0.58)", marginBottom: "0.4rem" }}>
+                  Contradictions
+                </div>
+                {graphContradictions.length > 0 ? graphContradictions.map((node: any, index: number) => (
+                  <p key={`${node.label}-${index}`} style={{ margin: "0 0 0.45rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", lineHeight: 1.45, color: "rgba(252,165,165,0.62)" }}>
+                    {node.summary || node.label}
+                  </p>
+                )) : (
+                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", color: "rgba(255,255,255,0.28)" }}>No graph contradiction recorded.</p>
+                )}
+              </div>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                  Consequence math
+                </div>
+                {graphConsequences.length > 0 ? graphConsequences.map((node: any, index: number) => (
+                  <p key={`${node.label}-${index}`} style={{ margin: "0 0 0.45rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", lineHeight: 1.45, color: "rgba(255,255,255,0.58)" }}>
+                    {node.summary}{node.evidenceText ? ` · ${node.evidenceText}` : ""}
+                  </p>
+                )) : (
+                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", color: "rgba(255,255,255,0.28)" }}>No graph consequence recorded.</p>
+                )}
+              </div>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(110,231,183,0.58)", marginBottom: "0.4rem" }}>
+                  Required moves
+                </div>
+                {graphActions.length > 0 ? graphActions.map((node: any, index: number) => (
+                  <p key={`${node.summary}-${index}`} style={{ margin: "0 0 0.45rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", lineHeight: 1.45, color: "rgba(110,231,183,0.58)" }}>
+                    {node.summary}
+                  </p>
+                )) : (
+                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", color: "rgba(255,255,255,0.28)" }}>No graph action recorded.</p>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

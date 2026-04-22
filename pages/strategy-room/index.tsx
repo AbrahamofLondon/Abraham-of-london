@@ -1730,7 +1730,7 @@ export default function StrategyRoomPage({
     return (
       <Layout
         title="Strategy Room | Abraham of London"
-        description="The governed intervention layer for live institutional decisions where consequence is already real."
+        description="Execution environment. The system has determined that intervention is required."
         canonicalUrl="/strategy-room"
         fullWidth
         headerTransparent
@@ -1740,200 +1740,62 @@ export default function StrategyRoomPage({
         </Head>
         <main style={{ backgroundColor: VOID, minHeight: "100vh", color: "white" }}>
 
-          {/* ── SYSTEM POSITION — decision authority gating ── */}
           <StrategyRoomGate />
 
-          <div className="mx-auto max-w-6xl px-6 lg:px-12">
+          <div className="mx-auto max-w-5xl px-6 lg:px-12">
             <div className="py-20 lg:py-24">
 
               {checkoutCancelled && (
-                <div
-                  className="mb-8"
-                  style={{
-                    border: "1px solid rgba(252,165,165,0.18)",
-                    backgroundColor: "rgba(252,165,165,0.04)",
-                    padding: "1rem 1.25rem",
-                  }}
-                >
-                  <div style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.32em",
-                    textTransform: "uppercase",
-                    color: "rgba(252,165,165,0.70)",
-                    marginBottom: "0.45rem",
-                  }}>
-                    Checkout cancelled
-                  </div>
-                  <p style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "0.95rem",
-                    lineHeight: 1.6,
-                    color: "rgba(255,255,255,0.45)",
-                  }}>
-                    No payment was taken. Strategy Room remains available when the decision requires intervention.
-                  </p>
+                <div className="mb-6" style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.04)", padding: "0.85rem 1rem" }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)" }}>Session cancelled. No payment taken.</span>
                 </div>
               )}
 
-              {/* ── 1) OPENING ── */}
-              <Eyebrow>Escalation Environment</Eyebrow>
-              <h1
-                style={{
-                  marginTop: "1rem",
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "clamp(2.5rem, 6vw, 4rem)",
-                  lineHeight: 0.98,
-                  letterSpacing: "-0.03em",
-                  color: "rgba(255,255,255,0.92)",
-                  maxWidth: "48ch",
-                  fontStyle: "italic",
-                }}
-              >
-                This is where decisions are executed when delay is no longer viable.
+              {/* ── STATE 1: MINIMAL HARD GATE ── */}
+              <Eyebrow>Execution Environment</Eyebrow>
+              <h1 style={{
+                marginTop: "1rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "clamp(2rem, 5vw, 3rem)",
+                lineHeight: 0.98,
+                color: "rgba(255,255,255,0.92)",
+                maxWidth: "36ch",
+              }}>
+                The system has determined that intervention is required.
               </h1>
-              <p
-                style={{
-                  marginTop: "1rem",
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "1rem",
-                  lineHeight: 1.6,
-                  color: "rgba(255,255,255,0.48)",
-                  maxWidth: "50ch",
-                }}
-              >
-                Entry is governed by evidence, not request.
+
+              <p style={{
+                marginTop: "1rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "0.95rem",
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.40)",
+                maxWidth: "48ch",
+              }}>
+                Strategy Room inherits your diagnostic evidence, names the decision,
+                identifies the blocker, and sequences intervention. Execution, not analysis.
               </p>
 
-              <GoldRule soft />
-
-              {/* ── PAST PASSIVE ANALYSIS ── */}
-              <div className="mt-10">
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.75rem" }}>
-                  You are past the point of passive analysis
-                </div>
-                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
-                  {[
-                    "The condition is active",
-                    "Delay compounds the exposure",
-                    "Partial action increases risk",
-                  ].map((item) => (
-                    <div key={item} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── THIS IS NOT AN UPGRADE ── */}
-              <div className="mt-8" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem 1rem", maxWidth: "44rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.45rem" }}>
-                  This is not an upgrade
-                </div>
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
-                  Strategy Room is system-routed. It exists because the diagnostic evidence determined that intervention is required. This is not optional assessment.
-                </p>
-              </div>
-
-              <GoldRule soft />
-
-              {/* ── WHAT THIS IS ── */}
-              <div className="mt-10">
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.40)", marginBottom: "0.75rem" }}>
-                  The system removes ambiguity from action.
-                </p>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
-                  Execution value
-                </div>
-                <div className="grid gap-3 md:grid-cols-2" style={{ maxWidth: "44rem" }}>
-                  {["Decision compression", "Decision sequencing", "Constraint navigation", "Authority resolution"].map((item) => (
-                    <div key={item} style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.018)", padding: "0.65rem 0.85rem" }}>
-                      <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", color: "rgba(255,255,255,0.55)" }}>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── WHAT THIS IS NOT ── */}
-              <div className="mt-8">
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)", marginBottom: "0.75rem" }}>
-                  Exclusions
-                </div>
-                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
-                  {["No advisory dependency", "No open-ended assessment", "No passive reporting surface"].map((item) => (
-                    <div key={item} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.35)", paddingLeft: "0.75rem", position: "relative" }}>
-                      <span style={{ position: "absolute", left: 0, color: "rgba(252,165,165,0.30)" }}>&mdash;</span>{item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <GoldRule soft />
-
-              {/* ── WHAT HAPPENS NEXT ── */}
-              <div className="mt-10">
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
-                  What happens next
-                </div>
-                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
-                  {[
-                    "Controlled execution environment with structured intake",
-                    "Defined intervention path based on scored condition",
-                    "Action against identified constraints with governed sequencing",
-                  ].map((item) => (
-                    <div key={item} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── IF YOU DO NOTHING ── */}
-              <div className="mt-8">
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
-                  Most organisations stop here.
-                </p>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.75rem" }}>
-                  If you do nothing
-                </div>
-                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
-                  {[
-                    "The condition persists under its current trajectory",
-                    "Exposure compounds with each decision cycle that passes without intervention",
-                    "The window for effective action narrows until the system chooses for you",
-                  ].map((item) => (
-                    <div key={item} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.50)" }}>
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <GoldRule soft />
-
-              {/* ── COMMERCIAL FRAMING ── */}
-              <div className="mt-10">
-                <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06`, padding: "1.25rem", maxWidth: "44rem" }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", marginBottom: "0.5rem" }}>
-                    Intervention logic is now required.
+              <div className="mt-4 grid gap-px grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)", maxWidth: "36rem" }}>
+                {["Decision sequencing", "Constraint removal", "Execution verification"].map((item) => (
+                  <div key={item} style={{ backgroundColor: VOID, padding: "0.65rem 0.85rem" }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{item}</span>
                   </div>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
-                    &pound;395 &mdash; execution environment
-                  </div>
-                  <p style={{ marginTop: "0.55rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
-                    At this stage, the cost of error exceeds the cost of intervention.
-                  </p>
+                ))}
+              </div>
+
+              <div className="mt-8" style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06`, padding: "1.25rem", maxWidth: "36rem" }}>
+                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem" }}>
+                  At this stage, the cost of error exceeds the cost of intervention.
+                </div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                  &pound;395 &mdash; execution environment
                 </div>
               </div>
 
-              {/* ── AUTHORITY TRANSFER + CTA ── */}
-              <div className="mt-6" style={{ maxWidth: "44rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
-                  The system has already determined that intervention is required.
-                </div>
+              <div className="mt-6">
                 <StrategyRoomConversionBridge
                   price={395}
                   checkoutPriceCode="strategy_room"
@@ -1943,71 +1805,10 @@ export default function StrategyRoomPage({
                   title=""
                   description=""
                 />
-                <div className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.78rem", color: "rgba(255,255,255,0.22)" }}>
-                  Structured intake. Governed sequencing. No open-ended engagement.
-                </div>
               </div>
 
-              {/* What this prevents */}
-              <div className="mt-8">
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                  color: "rgba(252,165,165,0.45)",
-                  marginBottom: "0.65rem",
-                }}>
-                  What this prevents
-                </div>
-                <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
-                  {[
-                    "Misdirected intervention that targets symptoms instead of structure",
-                    "Escalation without evidence that burns credibility for future need",
-                    "Fragmented execution where multiple parties act without coordination",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.88rem",
-                        lineHeight: 1.55,
-                        color: "rgba(255,255,255,0.38)",
-                        paddingLeft: "0.75rem",
-                        position: "relative",
-                      }}
-                    >
-                      <span style={{ position: "absolute", left: 0, color: "rgba(252,165,165,0.30)" }}>&middot;</span>
-                      {item}
-                    </div>
-                  ))}
-                </div>
-                <div
-                  className="mt-3"
-                  style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "0.85rem",
-                    color: "rgba(255,255,255,0.30)",
-                    fontStyle: "italic",
-                  }}
-                >
-                  The cost of error exceeds the cost of intervention.
-                </div>
-              </div>
-
-              <div
-                className="mt-6"
-                style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.24em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
-                }}
-              >
-                Entry is gated by evidence, not request
+              <div className="mt-3" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
+                Structured intake. Governed sequencing. No open-ended engagement.
               </div>
             </div>
           </div>
@@ -2015,7 +1816,6 @@ export default function StrategyRoomPage({
       </Layout>
     );
   }
-
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));

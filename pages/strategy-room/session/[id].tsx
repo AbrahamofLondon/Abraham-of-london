@@ -55,6 +55,23 @@ type SessionData = {
   exposureLevel: string | null;
   interventionStack: InterventionStep[];
   constraintMap: ConstraintMap | null;
+  evidenceGraph: {
+    decisionObjects: Array<{
+      decisionText?: string;
+      constraintText?: string | null;
+      priorAttemptText?: string | null;
+      costOfDelayText?: string | null;
+      stakeholderText?: string | null;
+    }>;
+    nodes: Array<{
+      kind?: string;
+      label?: string;
+      summary?: string;
+      evidenceText?: string | null;
+      severity?: string;
+      confidence?: number;
+    }>;
+  } | null;
   status: string;
   decisions: DecisionLog[];
   createdAt: string;
@@ -122,6 +139,15 @@ function statusColor(s: string): string {
   if (s === "executed") return "rgba(110,231,183,0.70)";
   if (s === "blocked") return "rgba(252,165,165,0.70)";
   return "rgba(255,255,255,0.45)";
+}
+
+function parseJsonFallback<T>(value: string | null, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -208,6 +234,10 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
   const constraints: ConstraintMap | null = session.constraintMap;
   const decisions: DecisionLog[] = session.decisions ?? [];
   const isActive = session.status === "active";
+  const graphNodes = session.evidenceGraph?.nodes ?? [];
+  const graphDecision = [...(session.evidenceGraph?.decisionObjects ?? [])].reverse()[0];
+  const graphContradictions = graphNodes.filter((node) => node.kind === "contradiction").slice(-3);
+  const graphConsequences = graphNodes.filter((node) => node.kind === "consequence" || node.kind === "exposure_estimate").slice(-3);
 
   return (
     <Layout title="Strategy Room Session | Abraham of London" fullWidth headerTransparent>
@@ -245,6 +275,52 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
               </p>
             )}
           </section>
+
+          {(graphDecision || graphContradictions.length > 0 || graphConsequences.length > 0) && (
+            <section style={{ padding: "1.15rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <SectionLabel>Evidence Case</SectionLabel>
+              <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: "rgba(201,169,110,0.035)", padding: "0.85rem 0.95rem" }}>
+                {graphDecision?.decisionText && (
+                  <div style={{ marginBottom: "0.75rem" }}>
+                    <div style={{ ...mono, fontSize: "6px", color: `${GOLD}80` }}>Decision under execution</div>
+                    <div style={{ ...serif, marginTop: "0.25rem", fontSize: "1rem", lineHeight: 1.45, color: "rgba(255,255,255,0.78)" }}>
+                      {graphDecision.decisionText}
+                    </div>
+                    {[graphDecision.constraintText, graphDecision.priorAttemptText, graphDecision.costOfDelayText, graphDecision.stakeholderText]
+                      .filter(Boolean)
+                      .slice(0, 3)
+                      .map((item, index) => (
+                        <div key={`${item}-${index}`} style={{ ...mono, marginTop: "0.35rem", fontSize: "6px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.30)" }}>
+                          {index === 0 ? "Constraint" : index === 1 ? "Prior failure" : "Delay cost"}: {item}
+                        </div>
+                      ))}
+                  </div>
+                )}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  <div>
+                    <div style={{ ...mono, fontSize: "6px", color: "rgba(252,165,165,0.52)", marginBottom: "0.35rem" }}>Contradiction evidence</div>
+                    {graphContradictions.length ? graphContradictions.map((node, index) => (
+                      <div key={`${node.label}-${index}`} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(252,165,165,0.58)", marginBottom: "0.35rem" }}>
+                        {node.summary || node.label}
+                      </div>
+                    )) : (
+                      <div style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.24)" }}>No contradiction evidence attached.</div>
+                    )}
+                  </div>
+                  <div>
+                    <div style={{ ...mono, fontSize: "6px", color: `${GOLD}80`, marginBottom: "0.35rem" }}>Consequence evidence</div>
+                    {graphConsequences.length ? graphConsequences.map((node, index) => (
+                      <div key={`${node.label}-${index}`} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.52)", marginBottom: "0.35rem" }}>
+                        {node.summary}{node.evidenceText ? ` · ${node.evidenceText}` : ""}
+                      </div>
+                    )) : (
+                      <div style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.24)" }}>No consequence evidence attached.</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* ── 2. DECISION FRAME ── */}
           <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
@@ -619,10 +695,14 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       conditionSummary: raw.conditionSummary,
       coreProblem: raw.coreProblem,
       decisionQuestion: raw.decisionQuestion,
-      constraints: raw.constraints ? JSON.parse(raw.constraints) : [],
+      constraints: parseJsonFallback(raw.constraints, []),
       exposureLevel: raw.exposureLevel,
-      interventionStack: raw.interventionStack ? JSON.parse(raw.interventionStack) : [],
-      constraintMap: raw.constraintMap ? JSON.parse(raw.constraintMap) : null,
+      interventionStack: parseJsonFallback(raw.interventionStack, []),
+      constraintMap: parseJsonFallback(raw.constraintMap, null),
+      evidenceGraph: parseJsonFallback<{ evidenceGraph?: SessionData["evidenceGraph"] }>(
+        raw.canonicalSnapshot,
+        {},
+      ).evidenceGraph ?? null,
       status: raw.status,
       decisions: raw.decisions.map((d) => ({
         id: d.id,
