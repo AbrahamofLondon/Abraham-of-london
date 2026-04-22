@@ -1925,6 +1925,9 @@ export default function StrategyRoomPage({
                   title=""
                   description=""
                 />
+                <div className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.78rem", color: "rgba(255,255,255,0.22)" }}>
+                  Structured intake. Governed sequencing. No open-ended engagement.
+                </div>
               </div>
 
               {/* What this prevents */}

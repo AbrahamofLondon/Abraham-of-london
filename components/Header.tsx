@@ -32,7 +32,6 @@ import {
   Compass,
   Archive,
   BookOpen,
-  Briefcase,
   ScrollText,
   Layers,
   Zap,
@@ -60,16 +59,14 @@ type NavItem = {
 // Desktop nav — system-first. Primary = conversion surfaces, Secondary = content/authority.
 const PRIMARY_NAV: readonly NavItem[] = [
   { href: "/diagnostics",                     label: "Diagnostics",       sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/decision-paths",                   label: "Decision Paths",    sub: "Governed progression paths",  icon: Briefcase  },
   { href: "/diagnostics/executive-reporting",  label: "Executive Report",  sub: "Consequence layer · £95",     icon: ScrollText },
   { href: "/strategy-room",                    label: "Strategy Room",     sub: "Decision intervention · £395", icon: Crown      },
 ] as const;
 
 const PRIMARY_NAV_HINTS: Record<string, string> = {
-  Diagnostics: "find the problem",
-  "Decision Paths": "build the evidence",
-  "Executive Report": "understand the consequence",
-  "Strategy Room": "decide what to do",
+  Diagnostics: "identify the condition",
+  "Executive Report": "price the consequence",
+  "Strategy Room": "execute the intervention",
 };
 
 const SECONDARY_NAV: readonly NavItem[] = [
@@ -85,7 +82,6 @@ const DESKTOP_NAV: readonly NavItem[] = [...PRIMARY_NAV, ...SECONDARY_NAV] as co
 const MOBILE_NAV: readonly NavItem[] = [
   // Product surfaces
   { href: "/diagnostics",                     label: "Diagnostics",      sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/decision-paths",                   label: "Decision Paths",   sub: "Governed progression paths",  icon: Briefcase  },
   { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: "Consequence layer · £95",     icon: ScrollText },
   { href: "/strategy-room",                    label: "Strategy Room",    sub: "Decision intervention · £395", icon: Crown      },
   // Content & authority

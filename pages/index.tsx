@@ -2941,6 +2941,9 @@ function HomeDecisionLayer() {
             If action must be executed &rarr; Strategy Room
           </Link>
         </div>
+        <div className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.78rem", color: "rgba(255,255,255,0.22)" }}>
+          The system advances when the condition requires it.
+        </div>
       </div>
     </Section>
   );
