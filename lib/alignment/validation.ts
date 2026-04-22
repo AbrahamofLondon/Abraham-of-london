@@ -9,6 +9,13 @@ const dualAxisAnswerSchema = z.object({
 export const purposeAlignmentInputSchema = z.object({
   answers: z.record(z.string(), dualAxisAnswerSchema),
   notes: z.string().trim().max(5000).optional().or(z.literal("")),
+  reflections: z
+    .object({
+      avoidedDecision: z.string().trim().max(1000).nullable().optional(),
+      lastSevenDays: z.string().trim().max(1000).nullable().optional(),
+      dissenter: z.string().trim().max(1000).nullable().optional(),
+    })
+    .optional(),
 });
 
 export type PurposeAlignmentInputSchema = z.infer<

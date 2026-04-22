@@ -74,6 +74,11 @@ export type ConstitutionalThread = {
   failureModes: string[];
   recommendedInterventions: string[];
   rationale: string[];
+  reflections?: {
+    structuralProblem?: string | null;
+    priorAttempts?: string | null;
+    shadowAuthority?: string | null;
+  };
   summary: {
     title: string;
     narrative: string;

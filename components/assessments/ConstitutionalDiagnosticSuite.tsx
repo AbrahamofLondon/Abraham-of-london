@@ -149,6 +149,12 @@ type DerivedScores = {
   authorityType: AuthorityType; posture: OrgPosture; readinessTier: ReadinessTier;
 };
 
+type ConstitutionalReflections = {
+  structuralProblem: string;
+  priorAttempts: string;
+  shadowAuthority: string;
+};
+
 function buildDecision(answers: Record<string, Answer>): {
   decision: ConstitutionalDecision | null;
   scores: DerivedScores | null;
@@ -287,9 +293,28 @@ function readinessColor(tier: string): string {
 // VERDICT READING — what the constitutional engine found
 // ─────────────────────────────────────────────────────────────────────────────
 
-function verdictNarrative(decision: ConstitutionalDecision, scores: DerivedScores): string {
+function cleanReflection(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.trim().replace(/\s+/g, " ").slice(0, 260);
+}
+
+function reflectionEvidenceLine(reflections?: ConstitutionalReflections): string {
+  if (!reflections) return "";
+  const structuralProblem = cleanReflection(reflections.structuralProblem);
+  const priorAttempts = cleanReflection(reflections.priorAttempts);
+  const shadowAuthority = cleanReflection(reflections.shadowAuthority);
+  const parts = [
+    structuralProblem ? ` Stated structural problem: ${structuralProblem}.` : "",
+    priorAttempts ? ` Prior correction evidence: ${priorAttempts}.` : "",
+    shadowAuthority ? ` Shadow authority test: ${shadowAuthority}.` : "",
+  ].filter(Boolean);
+  return parts.length ? parts.join("") : "";
+}
+
+function verdictNarrative(decision: ConstitutionalDecision, scores: DerivedScores, reflections?: ConstitutionalReflections): string {
   const { route } = decision;
   const { posture, readinessTier, authorityType, coherence, trust, friction, governance } = scores;
+  const evidenceLine = reflectionEvidenceLine(reflections);
 
   // Identify the central tension for mirror-back
   const tensions: string[] = [];
@@ -302,33 +327,33 @@ function verdictNarrative(decision: ConstitutionalDecision, scores: DerivedScore
     : "";
 
   if (route === "STRATEGY") {
-    return `The constitutional reading is clear: this system can bear direct strategic engagement. Coherence reads at ${coherence}%, authority is ${authorityType.toLowerCase()}, and the posture (${posture.toLowerCase()}) is stable enough to carry intervention without losing judgment.${tensionLine} The next move is structured strategy — not further clarification.`;
+    return `The constitutional reading is clear: this system can bear direct strategic engagement. Coherence reads at ${coherence}%, authority is ${authorityType.toLowerCase()}, and the posture (${posture.toLowerCase()}) is stable enough to carry intervention without losing judgment.${tensionLine}${evidenceLine} The next move is structured strategy — not further clarification.`;
   }
 
   if (route === "REJECT") {
     if (decision.disqualifiersTriggered.some(d => /clarity|coherence/i.test(d))) {
-      return `This is not a strategy problem yet — it is a coherence problem. Coherence reads at ${coherence}%, which means the signal has not been reduced to a stable form. Pressure may be real, but pressure without coherence displaces judgment rather than sharpening it.${tensionLine} The next move is clarification: make the problem nameable before attempting to solve it.`;
+      return `This is not a strategy problem yet — it is a coherence problem. Coherence reads at ${coherence}%, which means the signal has not been reduced to a stable form. Pressure may be real, but pressure without coherence displaces judgment rather than sharpening it.${tensionLine}${evidenceLine} The next move is clarification: make the problem nameable before attempting to solve it.`;
     }
     if (decision.disqualifiersTriggered.some(d => /authority/i.test(d))) {
-      return `The problem may be real but there is no one who can carry the decision. Authority reads as ${authorityType.toLowerCase()}. A matter can be serious and still remain constitutionally unready if no single person has both the responsibility and the power to act.${tensionLine} The next move is to establish who decides — then re-enter.`;
+      return `The problem may be real but there is no one who can carry the decision. Authority reads as ${authorityType.toLowerCase()}. A matter can be serious and still remain constitutionally unready if no single person has both the responsibility and the power to act.${tensionLine}${evidenceLine} The next move is to establish who decides — then re-enter.`;
     }
     if (decision.disqualifiersTriggered.some(d => /seriousness|mandate/i.test(d))) {
-      return `The signal reads as exploratory rather than consequential. There may be concern, but it has not yet reached the threshold where the cost of inaction is material.${tensionLine} The next move is foundational diagnostic work — the system needs to confirm whether this is a real structural problem or a passing discomfort.`;
+      return `The signal reads as exploratory rather than consequential. There may be concern, but it has not yet reached the threshold where the cost of inaction is material.${tensionLine}${evidenceLine} The next move is foundational diagnostic work — the system needs to confirm whether this is a real structural problem or a passing discomfort.`;
     }
-    return `Multiple constitutional thresholds are failing simultaneously. This usually means the disorder is in purpose, authority, or coherence — not a single defect but a systemic condition. Coherence: ${coherence}%. Trust: ${trust}%. Governance: ${governance}%.${tensionLine} The next move is diagnostic correction before escalation.`;
+    return `Multiple constitutional thresholds are failing simultaneously. This usually means the disorder is in purpose, authority, or coherence — not a single defect but a systemic condition. Coherence: ${coherence}%. Trust: ${trust}%. Governance: ${governance}%.${tensionLine}${evidenceLine} The next move is diagnostic correction before escalation.`;
   }
 
   // DIAGNOSTIC
   if (authorityType === "UNCLEAR") {
-    return `The strain is real — coherence reads at ${coherence}% and trust at ${trust}%. But authority is unclear, which means no one can cleanly carry the judgment this situation requires.${tensionLine} This is not an importance problem. It is a governance problem. The next move is diagnostic work that separates authority confusion from the underlying structural issue.`;
+    return `The strain is real — coherence reads at ${coherence}% and trust at ${trust}%. But authority is unclear, which means no one can cleanly carry the judgment this situation requires.${tensionLine}${evidenceLine} This is not an importance problem. It is a governance problem. The next move is diagnostic work that separates authority confusion from the underlying structural issue.`;
   }
   if (posture === "DISORDERED" || posture === "MISALIGNED") {
-    return `The posture reads as ${posture.toLowerCase()}. The system is carrying constitutional strain, and consequence may already be material. But strain at this level distorts correction if it is rushed — fixing a disordered system requires more precision than fixing a drifting one.${tensionLine} The next move is formal diagnosis before any escalation.`;
+    return `The posture reads as ${posture.toLowerCase()}. The system is carrying constitutional strain, and consequence may already be material. But strain at this level distorts correction if it is rushed — fixing a disordered system requires more precision than fixing a drifting one.${tensionLine}${evidenceLine} The next move is formal diagnosis before any escalation.`;
   }
   if (readinessTier === "FRAGILE" || readinessTier === "EMERGING") {
-    return `Readiness is ${readinessTier.toLowerCase()}. The system can register that something is wrong, but it cannot yet bear heavy intervention without creating new friction.${tensionLine} The consequence is visible. The capacity to absorb correction is not. The next move is preparation through the diagnostic layer — build the capacity, then apply the pressure.`;
+    return `Readiness is ${readinessTier.toLowerCase()}. The system can register that something is wrong, but it cannot yet bear heavy intervention without creating new friction.${tensionLine}${evidenceLine} The consequence is visible. The capacity to absorb correction is not. The next move is preparation through the diagnostic layer — build the capacity, then apply the pressure.`;
   }
-  return `The system is carrying a genuine signal. Coherence: ${coherence}%. Trust: ${trust}%. The reading is below strategy threshold but close.${tensionLine} There is enough order to proceed with diagnostic refinement — the question now is whether one more pass reveals the conditions for escalation, or confirms that this level of intervention is sufficient.`;
+  return `The system is carrying a genuine signal. Coherence: ${coherence}%. Trust: ${trust}%. The reading is below strategy threshold but close.${tensionLine}${evidenceLine} There is enough order to proceed with diagnostic refinement — the question now is whether one more pass reveals the conditions for escalation, or confirms that this level of intervention is sufficient.`;
 }
 
 function buildFailureModes(decision: ConstitutionalDecision, scores: DerivedScores): string[] {
@@ -379,9 +404,10 @@ function buildConstitutionalThread(
   decision: ConstitutionalDecision,
   scores: DerivedScores,
   routeHref: string,
+  reflections?: ConstitutionalReflections,
 ): ConstitutionalThread {
   const failureModes = buildFailureModes(decision, scores);
-  const narrative = verdictNarrative(decision, scores);
+  const narrative = verdictNarrative(decision, scores, reflections);
 
   return {
     source: "constitutional-diagnostic",
@@ -404,6 +430,11 @@ function buildConstitutionalThread(
     failureModes,
     recommendedInterventions: decision.recommendedInterventions,
     rationale: decision.rationale,
+    reflections: reflections ? {
+      structuralProblem: cleanReflection(reflections.structuralProblem) || null,
+      priorAttempts: cleanReflection(reflections.priorAttempts) || null,
+      shadowAuthority: cleanReflection(reflections.shadowAuthority) || null,
+    } : undefined,
     summary: {
       title: `${decision.route} constitutional reading`,
       narrative,
@@ -509,8 +540,8 @@ export default function ConstitutionalDiagnosticSuite() {
 
   const { decision, scores, routeHref } = React.useMemo(() => buildDecision(answers), [answers]);
   const thread = React.useMemo(
-    () => (decision && scores ? buildConstitutionalThread(decision, scores, routeHref) : null),
-    [decision, routeHref, scores],
+    () => (decision && scores ? buildConstitutionalThread(decision, scores, routeHref, constitutionalReflections) : null),
+    [constitutionalReflections, decision, routeHref, scores],
   );
   const matchedPlaybooks = React.useMemo(
     () =>
@@ -592,7 +623,7 @@ export default function ConstitutionalDiagnosticSuite() {
         trackStageComplete("constitutional", outcome, routeHref);
       }).catch(() => {});
     }
-  }, [verdict, decision, routeHref, thread, scores]);
+  }, [constitutionalReflections, verdict, decision, routeHref, thread, scores]);
 
   // Track result engagement depth — fire on unmount or page leave
   React.useEffect(() => {
@@ -1016,7 +1047,14 @@ export default function ConstitutionalDiagnosticSuite() {
                   {complete && (
                     <button
                       type="button"
-                      onClick={() => revealVerdict()}
+                      onClick={() => {
+                        if (!showReflection) {
+                          setShowReflection(true);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                          return;
+                        }
+                        revealVerdict();
+                      }}
                       className="w-full inline-flex items-center justify-center gap-2 transition-all duration-300"
                       style={{
                         padding: "12px 20px",
@@ -1030,7 +1068,7 @@ export default function ConstitutionalDiagnosticSuite() {
                       onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = "rgba(52,211,153,0.55)"; el.style.backgroundColor = "rgba(52,211,153,0.12)"; }}
                       onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = "rgba(52,211,153,0.35)"; el.style.backgroundColor = "rgba(52,211,153,0.08)"; }}
                     >
-                      Reveal constitutional verdict <ArrowRight style={{ width: "11px", height: "11px" }} />
+                      {showReflection ? "Reveal constitutional verdict" : "Add structural evidence"} <ArrowRight style={{ width: "11px", height: "11px" }} />
                     </button>
                   )}
                 </div>
@@ -1201,7 +1239,7 @@ export default function ConstitutionalDiagnosticSuite() {
                         fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.78,
                         color: "rgba(255,255,255,0.70)",
                       }}>
-                        {verdictNarrative(decision, scores)}
+                        {verdictNarrative(decision, scores, constitutionalReflections)}
                       </p>
                     </div>
                   </div>

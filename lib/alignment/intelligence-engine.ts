@@ -16,6 +16,7 @@ import type {
   DualAxisInput,
   EvidenceQuestion,
   PatternScore,
+  PurposeAlignmentContext,
   PurposeAlignmentEvidence,
   PurposePatternId,
   PurposeProfileResult,
@@ -420,9 +421,19 @@ function buildNarrative(params: {
   evidence: PurposeAlignmentEvidence;
   routing: RoutingRecommendation;
   severity: DiagnosticSeverity;
+  context?: PurposeAlignmentContext;
 }): PurposeReportNarrative {
   const weak = params.evidence.sharpestWeakSignal;
   const strong = params.evidence.strongestStabilisingSignal;
+  const reflections = params.context?.reflections ?? null;
+  const avoidedDecision = cleanContextText(reflections?.avoidedDecision);
+  const lastSevenDays = cleanContextText(reflections?.lastSevenDays);
+  const dissenter = cleanContextText(reflections?.dissenter);
+  const contextSignals = [
+    avoidedDecision ? `Avoided decision: ${avoidedDecision}` : "",
+    lastSevenDays ? `Recent behavioural evidence: ${lastSevenDays}` : "",
+    dissenter ? `Dissenting evidence: ${dissenter}` : "",
+  ].filter(Boolean);
   const contradictionText = params.contradictions.length
     ? params.contradictions
         .slice(0, 2)
@@ -430,18 +441,43 @@ function buildNarrative(params: {
         .join(" ")
     : "No major contradiction dominates the profile; the reading is governed by domain state and pattern competition.";
 
+  const contextExplanation = contextSignals.length
+    ? ` The qualitative evidence changes the reading: ${contextSignals.join(" ")}.`
+    : "";
+  const decisionAction = avoidedDecision
+    ? `Name the avoided decision as a binary choice and record the consequence of choosing neither option: ${avoidedDecision}`
+    : params.primaryPattern.firstAction;
+  const consequence = [
+    params.primaryPattern.consequence,
+    lastSevenDays
+      ? `The last-seven-days evidence shows how the pattern is already entering behaviour: ${lastSevenDays}`
+      : "",
+    dissenter
+      ? `The dissenter test prevents false certainty: ${dissenter}`
+      : "",
+  ].filter(Boolean).join(" ");
+
   return {
-    conditionStatement: `Primary condition: ${params.primaryPattern.label}. Severity is ${params.severity}.`,
-    classificationExplanation: `The system selected this condition because ${params.primaryPattern.reasons.join(" ")}${params.secondaryPattern ? ` Secondary pressure: ${params.secondaryPattern.label}.` : ""}`,
-    contradictionExplanation: contradictionText,
-    consequenceBlock: params.primaryPattern.consequence,
-    firstActionBlock: params.primaryPattern.firstAction,
+    conditionStatement: `Primary condition: ${params.primaryPattern.label}. Severity is ${params.severity}.${avoidedDecision ? ` The live decision under pressure is: ${avoidedDecision}` : ""}`,
+    classificationExplanation: `The system selected this condition because ${params.primaryPattern.reasons.join(" ")}${params.secondaryPattern ? ` Secondary pressure: ${params.secondaryPattern.label}.` : ""}${contextExplanation}`,
+    contradictionExplanation: contextSignals.length
+      ? `${contradictionText} User-supplied evidence: ${contextSignals.join(" ")}.`
+      : contradictionText,
+    consequenceBlock: consequence,
+    firstActionBlock: decisionAction,
     nextStepBlock: `${params.routing.label}. ${params.routing.reason}${weak ? ` Sharpest weak evidence: "${weak.statement}" (${weak.resonance}/10 resonance, ${weak.certainty}/10 certainty).` : ""}${strong ? ` Strongest stabilising evidence: "${strong.statement}" (${strong.resonance}/10 resonance, ${strong.certainty}/10 certainty).` : ""}`,
   };
 }
 
+function cleanContextText(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.trim().replace(/\s+/g, " ").slice(0, 280);
+}
+
 export function runPurposeAlignmentEngine(
-  input: DualAxisInput | { answers: Record<string, DualAxisAnswer | boolean> },
+  input: (DualAxisInput | { answers: Record<string, DualAxisAnswer | boolean> }) & {
+    context?: PurposeAlignmentContext;
+  },
 ): PurposeProfileResult {
   const rawResponses = normalizePurposeResponses(input);
   const domainStates = buildDomainStates(rawResponses);
@@ -477,6 +513,7 @@ export function runPurposeAlignmentEngine(
     evidence,
     routing: routingRecommendation,
     severity,
+    context: input.context,
   });
 
   return {
@@ -489,9 +526,9 @@ export function runPurposeAlignmentEngine(
     strengths: domainStates
       .filter((state) => state.state === "stable_strength")
       .map((state) => `${state.label} is a stabilising strength.`),
-    corrections: [primaryPattern.firstAction, secondaryPattern?.firstAction].filter(Boolean) as string[],
+    corrections: [reportNarrative.firstActionBlock, secondaryPattern?.firstAction].filter(Boolean) as string[],
     narrative: reportNarrative.conditionStatement,
-    nextActions: [primaryPattern.firstAction, routingRecommendation.label],
+    nextActions: [reportNarrative.firstActionBlock, routingRecommendation.label],
     createdAt: new Date().toISOString(),
     rawResponses,
     domainStates,
@@ -501,7 +538,7 @@ export function runPurposeAlignmentEngine(
     secondaryPattern,
     severity,
     consequenceLogic: primaryPattern.consequence,
-    firstAction: primaryPattern.firstAction,
+    firstAction: reportNarrative.firstActionBlock,
     evidence,
     routingRecommendation,
     reportNarrative,

@@ -190,4 +190,30 @@ describe("Purpose Alignment intelligence engine", () => {
     expect(balanced.coherenceBand).toBe("SOVEREIGN");
     expect(balanced.reportNarrative?.conditionStatement).toContain("Latent coherence");
   });
+
+  it("uses reflection evidence in the canonical result instead of treating it as display-only metadata", () => {
+    const answers = Object.fromEntries(
+      PURPOSE_ALIGNMENT_QUESTIONS.map((question) => [
+        question.id,
+        { resonance: 7, certainty: 7 } satisfies DualAxisAnswer,
+      ]),
+    );
+
+    const baseline = scorePurposeProfile({ answers });
+    const contextual = scorePurposeProfile({
+      answers,
+      context: {
+        reflections: {
+          avoidedDecision: "Whether to remove the senior operator who keeps blocking execution.",
+          lastSevenDays: "Two escalation meetings were postponed and the team kept operating around the issue.",
+          dissenter: "The strongest counterargument is that removing them could expose a succession gap.",
+        },
+      },
+    });
+
+    expect(contextual.firstAction).toContain("senior operator");
+    expect(contextual.reportNarrative?.classificationExplanation).toContain("qualitative evidence");
+    expect(contextual.reportNarrative?.consequenceBlock).toContain("Two escalation meetings");
+    expect(contextual.reportNarrative?.conditionStatement).not.toBe(baseline.reportNarrative?.conditionStatement);
+  });
 });

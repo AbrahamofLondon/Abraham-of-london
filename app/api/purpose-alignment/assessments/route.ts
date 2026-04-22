@@ -71,6 +71,9 @@ export async function POST(req: NextRequest) {
 
     const result = scorePurposeProfile({
       answers: parsed.answers,
+      context: {
+        reflections: parsed.reflections ?? null,
+      },
     });
 
     const sessionKey = await getOrCreatePurposeAlignmentSessionKey();

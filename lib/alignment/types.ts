@@ -32,6 +32,15 @@ export type DualAxisAnswer = {
 
 export type DualAxisInput = {
   answers: Record<string, DualAxisAnswer>;
+  context?: PurposeAlignmentContext;
+};
+
+export type PurposeAlignmentContext = {
+  reflections?: {
+    avoidedDecision?: string | null;
+    lastSevenDays?: string | null;
+    dissenter?: string | null;
+  } | null;
 };
 
 export type CanonicalPurposeResponse = {

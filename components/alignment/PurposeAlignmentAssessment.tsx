@@ -53,6 +53,16 @@ import type {
   CoherenceBand,
 } from "@/lib/alignment/types";
 import { track } from "@/lib/analytics/track";
+import ResultInterruption from "@/components/diagnostics/results/ResultInterruption";
+import ResultCondition from "@/components/diagnostics/results/ResultCondition";
+import ResultContradiction from "@/components/diagnostics/results/ResultContradiction";
+import ResultCost from "@/components/diagnostics/results/ResultCost";
+import ResultTrajectory from "@/components/diagnostics/results/ResultTrajectory";
+import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
+import ResultDecision from "@/components/diagnostics/results/ResultDecision";
+import ResultAction from "@/components/diagnostics/results/ResultAction";
+import ResultEscalation from "@/components/diagnostics/results/ResultEscalation";
+import ResultDiagnostics from "@/components/diagnostics/results/ResultDiagnostics";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -857,6 +867,174 @@ function ResultSurface({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AUTHORITY RESULT SURFACE — 10-block architecture
+// Replaces generic score-first rendering with decision-grade output
+// ─────────────────────────────────────────────────────────────────────────────
+
+function AuthorityResultSurface({
+  result,
+  answers,
+  reflections,
+  onRestart,
+}: {
+  result: PurposeProfileResult;
+  answers: Record<string, DualAxisAnswer>;
+  reflections: { avoidedDecision: string; lastSevenDays: string; dissenter: string };
+  onRestart: () => void;
+}) {
+  const pattern = result.primaryPattern;
+  const narrative = result.reportNarrative;
+  const evidence = result.evidence;
+
+  // BLOCK 1 — Interruption line: challenge the user
+  const interruptionLine = narrative?.conditionStatement
+    ?? pattern?.consequence
+    ?? (result.percent >= 70
+      ? "Alignment is not the problem. The decision you are avoiding is."
+      : result.percent >= 45
+        ? "You are not misaligned. You are structurally undecided."
+        : "This is not drift. This is a mandate that was never built.");
+
+  // BLOCK 3 — Contradiction evidence: score vs free-text vs behaviour
+  const contradictionEvidence: Array<{ scoreLabel: string; scoreValue: string; textEvidence: string; contradictionType: string }> = [];
+
+  // Primary: weakest domain vs user's self-assessment
+  if (evidence?.sharpestWeakSignal) {
+    const ws = evidence.sharpestWeakSignal;
+    contradictionEvidence.push({
+      scoreLabel: "Weakest signal",
+      scoreValue: `${ws.domain}: resonance ${ws.resonance}/10, certainty ${ws.certainty}/10`,
+      textEvidence: `"${ws.statement}"`,
+      contradictionType: "score_vs_reality",
+    });
+  }
+
+  // Free-text vs scores: if user described avoiding a decision but scored decision integrity high
+  const decisionDomain = result.domainProfiles.find((d) => d.domain === "decision");
+  if (reflections.avoidedDecision && decisionDomain && decisionDomain.percent >= 50) {
+    contradictionEvidence.push({
+      scoreLabel: "Decision Integrity",
+      scoreValue: `${decisionDomain.percent}%`,
+      textEvidence: `You also stated you are avoiding: "${reflections.avoidedDecision}"`,
+      contradictionType: "score_vs_stated",
+    });
+  }
+
+  // Contradictions from the engine
+  if (result.contradictions) {
+    for (const c of result.contradictions.slice(0, 2)) {
+      contradictionEvidence.push({
+        scoreLabel: c.type.replace(/_/g, " "),
+        scoreValue: `Severity: ${c.severity}`,
+        textEvidence: c.evidence,
+        contradictionType: c.type,
+      });
+    }
+  }
+
+  // BLOCK 4 — Cost: for Purpose Alignment we derive personal cost, not £ figures
+  // At this stage we don't have revenue data, so we frame cost as structural
+  const costCalc = result.percent < 60 ? {
+    inputs: [
+      { label: "Alignment", value: `${result.percent}%` },
+      { label: "Weak domains", value: String(result.weakestDomains.length) },
+      { label: "Contradiction count", value: String(result.contradictions?.length ?? 0) },
+    ],
+    formula: `${result.weakestDomains.length} structural gaps × ${result.contradictions?.length ?? 0} active contradictions`,
+    result: result.percent < 40 ? "High personal exposure" : "Moderate personal exposure",
+    explanation: "Every day under this condition compounds. Decisions made from this position carry the misalignment into their outcomes.",
+  } : null;
+
+  // BLOCK 5 — Trajectory consequences
+  const trajectoryConsequences = [
+    pattern?.consequence ?? "The current pattern will persist unless directly addressed.",
+    ...(result.corrections?.slice(0, 2) ?? []),
+  ].filter(Boolean);
+
+  // BLOCK 7 — Decision extraction from reflections
+  const extractedDecision = reflections.avoidedDecision || pattern?.firstAction || "";
+
+  // BLOCK 8 — Action steps
+  const actionSteps = [
+    { step: pattern?.firstAction ?? result.nextActions?.[0] ?? "Identify the decision you are avoiding", timeframe: "Today" },
+    ...(result.nextActions?.slice(1, 3) ?? []).map((a) => ({ step: a })),
+  ].filter((s) => s.step);
+
+  // BLOCK 9 — Escalation
+  const routing = result.routingRecommendation;
+  const qualifiesForEscalation = result.percent < 55 || (result.contradictions?.length ?? 0) >= 2;
+
+  return (
+    <div className="space-y-4" style={{ maxWidth: "56rem" }}>
+      <ResultInterruption line={interruptionLine} />
+
+      <ResultCondition
+        name={pattern?.label ?? result.coherenceBand}
+        definition={narrative?.classificationExplanation ?? pattern?.reasons?.join(". ") ?? ""}
+      />
+
+      <ResultContradiction evidence={contradictionEvidence} />
+
+      <ResultCost calc={costCalc} />
+
+      <ResultTrajectory
+        timeHorizon="30–60 days"
+        consequences={trajectoryConsequences}
+      />
+
+      <SystemMemoryBlock currentStage="purpose_alignment" />
+
+      <ResultDecision decision={extractedDecision} />
+
+      <ResultAction
+        steps={actionSteps}
+        consequence={narrative?.consequenceBlock ?? "Inaction compounds the condition."}
+      />
+
+      <ResultEscalation
+        qualifies={qualifiesForEscalation}
+        nextStep={routing?.label ?? "Constitutional Diagnostic"}
+        href={routing?.href ?? "/diagnostics/constitutional-diagnostic"}
+        reason={routing?.reason ?? (qualifiesForEscalation
+          ? "This condition has structural implications beyond personal alignment. The constitutional diagnostic will determine whether the organisation carries the same pattern."
+          : "Continue when ready. The diagnostic system advances when the condition requires it.")}
+      />
+
+      <ResultDiagnostics
+        domains={result.domainProfiles.map((d) => ({
+          domain: d.domain,
+          label: d.label,
+          percent: d.percent,
+          resonance: Math.round(d.resonance * 10) / 10,
+          certainty: Math.round(d.certainty * 10) / 10,
+        }))}
+        percent={result.percent}
+        band={result.coherenceBand}
+      />
+
+      {/* Restart */}
+      <button
+        type="button"
+        onClick={onRestart}
+        style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "7px",
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.18)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          marginTop: "1rem",
+        }}
+      >
+        Restart assessment
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -892,8 +1070,11 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
 
   const liveProfile = React.useMemo(() => {
     if (totalAnswered === 0) return null;
-    return scorePurposeProfile({ answers });
-  }, [answers, totalAnswered]);
+    return scorePurposeProfile({
+      answers,
+      context: { reflections },
+    });
+  }, [answers, reflections, totalAnswered]);
 
   React.useEffect(() => {
     if (totalAnswered === 1) {
@@ -932,7 +1113,10 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
 
   async function handleComplete() {
     setStatus("loading");
-    const scored = scorePurposeProfile({ answers });
+    const scored = scorePurposeProfile({
+      answers,
+      context: { reflections },
+    });
     setResult(scored);
     setDirection(1);
     setStage(STAGE_DOMAINS.length);
@@ -1194,7 +1378,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.60 }}
               >
-                <ResultSurface result={result} answers={answers} onRestart={handleRestart} />
+                <AuthorityResultSurface result={result} answers={answers} reflections={reflections} onRestart={handleRestart} />
               </motion.div>
             ) : null}
           </AnimatePresence>
