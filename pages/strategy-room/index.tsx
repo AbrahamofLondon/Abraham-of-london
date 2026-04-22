@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // pages/strategy-room/index.tsx
 // Design: Institutional Monumentalism — the highest-consequence page on the platform
-// Three states: CHAMBER (pre-submission) → LOADING → VERDICT (post-submission)
+// Three states: GATE (locked) -> ENTRY BRIEF (paid) -> EXECUTION CHAMBER (active)
 // Typography: Cormorant Garamond display · JetBrains Mono data/labels
 // Palette: #060609 base · #C9A96E softGold · sharp panels throughout
 
@@ -18,10 +18,7 @@ import {
   trackStrategyBlocked,
 } from "@/lib/analytics/journey-client";
 import {
-  AlertTriangle,
   ArrowRight,
-  CheckSquare,
-  Lock,
   Clock3,
 } from "lucide-react";
 
@@ -30,26 +27,12 @@ import {
   STRATEGY_ROOM_FORM_SPEC,
   type ConstitutionalIntake,
 } from "@/lib/decision/system-constitution";
-import {
-  trackConversion,
-  trackFollowup,
-} from "@/lib/strategy-room/client-trackers";
 import type { CanonicalSectionsEnvelope } from "@/lib/decision/canonical-sections";
 import { hasCanonicalSections } from "@/lib/decision/canonical-sections";
 import {
   readConstitutionalThread,
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
-import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
-import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
-import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
-import EngagementReadinessPanel from "@/components/diagnostics/results/EngagementReadinessPanel";
-import { inferTrajectory, deriveEngagementReadiness } from "@/lib/diagnostics/prognosis";
-import { matchPlaybooks } from "@/lib/playbooks/matcher";
-import ThresholdProximityLine, {
-  thresholdProximityText,
-} from "@/components/diagnostics/results/ThresholdProximityLine";
-import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import {
@@ -179,23 +162,12 @@ type StrategyRoomPageProps = {
   checkoutCancelled?: boolean;
 };
 
-type RecommendationItem = {
-  id?: string;
-  title?: string;
-  href?: string | null;
-  kind?: string;
-  score?: number;
-  reasons?: string[];
-};
-
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GOLD = "#C9A96E";
 const VOID = "rgb(3 3 5)";
-const LIFT = "rgb(10 14 20)";
-const AMBER = "#F59E0B";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -229,6 +201,17 @@ type DecisionLogEntry = {
   status: DecisionLogStatus;
   blockReason: string;
   createdAt: string;
+};
+
+type StrategyEntryBrief = {
+  decisionText: string;
+  constraintText: string;
+  costOfDelayText: string;
+  ownerDomain: string;
+  contradiction: string;
+  contradictionSources: string[];
+  confidenceLabel: string;
+  missingFields: Array<keyof ConstitutionalIntake>;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -286,63 +269,156 @@ function buildExecutionContext(
   };
 }
 
-function validateForm(form: ConstitutionalIntake): string | null {
-  for (const field of STRATEGY_ROOM_FORM_SPEC) {
-    const value = form[field.name];
-    if (field.required && !String(value || "").trim()) {
-      return `${field.label} is required.`;
+function evidenceGraphFrom(value: unknown): Record<string, unknown> {
+  const root = value && typeof value === "object" ? value as Record<string, unknown> : {};
+  const canonical = root.canonical && typeof root.canonical === "object"
+    ? root.canonical as Record<string, unknown>
+    : root;
+  const graph = canonical.evidenceGraph && typeof canonical.evidenceGraph === "object"
+    ? canonical.evidenceGraph as Record<string, unknown>
+    : {};
+  return graph;
+}
+
+function latestGraphDecisionObject(value: unknown): Record<string, unknown> | null {
+  const graph = evidenceGraphFrom(value);
+  const decisions = Array.isArray(graph.decisionObjects) ? graph.decisionObjects : [];
+  const latest = [...decisions].reverse().find((item) => item && typeof item === "object");
+  return latest ? latest as Record<string, unknown> : null;
+}
+
+function graphNodes(value: unknown): Array<Record<string, unknown>> {
+  const graph = evidenceGraphFrom(value);
+  return Array.isArray(graph.nodes)
+    ? graph.nodes.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
+    : [];
+}
+
+function uniqueLabels(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function urgencyFromTemperature(value: string): string {
+  if (value === "SCORCHING") return "IMMEDIATE";
+  if (value === "HOT") return "NEAR_TERM";
+  return "NEAR_TERM";
+}
+
+function buildStrategyEntryBrief(input: {
+  thread: ConstitutionalThread | null;
+  canonical: CanonicalSectionsEnvelope | null;
+  executiveResult: unknown;
+  form: ConstitutionalIntake;
+}): StrategyEntryBrief {
+  const graphSource = input.canonical || input.executiveResult || {};
+  const decisionObject = latestGraphDecisionObject(graphSource);
+  const nodes = graphNodes(graphSource);
+  const contradictions = nodes.filter((node) => node.kind === "contradiction");
+  const consequences = nodes.filter((node) => node.kind === "consequence" || node.kind === "exposure_estimate");
+  const posture = input.canonical ? localSummary(input.canonical) : null;
+  const context = buildExecutionContext(input.thread, input.canonical);
+
+  const decisionText =
+    safeText(decisionObject?.decisionText) ||
+    safeText(input.thread?.executiveFindings?.nextAction) ||
+    safeText(posture?.nextAction) ||
+    "Execute the first governed intervention.";
+
+  const constraintText =
+    safeText(decisionObject?.constraintText) ||
+    safeText(input.thread?.reflections?.shadowAuthority) ||
+    safeText(input.form.currentConstraint) ||
+    context.dominantCondition;
+
+  const costOfDelayText =
+    safeText(decisionObject?.costOfDelayText) ||
+    safeText(consequences.at(-1)?.summary) ||
+    safeText(consequences.at(-1)?.evidenceText) ||
+    context.consequence;
+
+  const ownerDomain =
+    safeText(decisionObject?.stakeholderText) ||
+    safeText(decisionObject?.affectedDomain) ||
+    safeText(input.form.authorityRole) ||
+    safeText(posture?.authorityType) ||
+    safeText(input.thread?.authorityType) ||
+    "Decision owner not confirmed";
+
+  const contradiction =
+    safeText(contradictions.at(-1)?.summary) ||
+    safeText(contradictions.at(-1)?.label) ||
+    uniqueLabels([...(input.thread?.failureModes ?? []), context.dominantCondition]).slice(0, 2).join(" / ") ||
+    "The system has insufficient execution evidence to treat this as a solved condition.";
+
+  const graphConfidence = Number(decisionObject?.confidence ?? contradictions.at(-1)?.confidence);
+  const confidence = Number.isFinite(graphConfidence)
+    ? Math.round(graphConfidence <= 1 ? graphConfidence * 100 : graphConfidence)
+    : posture?.confidence ?? input.thread?.confidence ?? 0;
+
+  const missingFields: Array<keyof ConstitutionalIntake> = [];
+  (["fullName", "email", "organisation", "authorityRole", "authorityScope", "urgencyWindow"] as Array<keyof ConstitutionalIntake>)
+    .forEach((field) => {
+      if (!safeText(input.form[field])) missingFields.push(field);
+    });
+  if (!safeText(input.form.currentConstraint) && !safeText(decisionObject?.constraintText)) {
+    missingFields.push("currentConstraint");
+  }
+
+  return {
+    decisionText,
+    constraintText,
+    costOfDelayText,
+    ownerDomain,
+    contradiction,
+    contradictionSources: uniqueLabels(contradictions.map((node) => safeText(node.sourceStage))).slice(0, 4),
+    confidenceLabel: confidence ? `${confidence}%` : "Evidence limited",
+    missingFields,
+  };
+}
+
+function validateExecutionEntry(form: ConstitutionalIntake, brief: StrategyEntryBrief): string | null {
+  const required: Array<keyof ConstitutionalIntake> = ["fullName", "email", "organisation", "authorityRole", "authorityScope", "urgencyWindow"];
+  for (const field of required) {
+    if (!safeText(form[field])) {
+      const spec = STRATEGY_ROOM_FORM_SPEC.find((item) => item.name === field);
+      return `${spec?.label || field} is required.`;
     }
   }
-  if (form.problemStatement.trim().length < 100) {
-    return "Problem Statement is insufficient. State the structural problem with more precision.";
-  }
-  if (form.symptoms.trim().length < 80) {
-    return "Observed Symptoms is too thin. Describe the operating reality in fuller detail.";
-  }
-  if (form.desiredOutcome.trim().length < 50) {
-    return "Desired Outcome is too vague. Name the decision-grade outcome required.";
-  }
-  if (form.currentConstraint.trim().length < 30) {
-    return "Current Constraint is too thin. Name the pressure materially obstructing movement.";
+  if (!safeText(form.currentConstraint) && !safeText(brief.constraintText)) {
+    return "Constraint clarification is required.";
   }
   return null;
 }
 
-function routeMeta(route?: string | null) {
-  switch (route) {
-    case "STRATEGY":
-      return {
-        label: "Strategy route",
-        description: "The signal is sufficiently ordered for direct strategic engagement.",
-        ctaHref: "/contact?intent=strategy-room-mandate",
-        ctaLabel: "Request private mandate review",
-        tone: "green" as const,
-      };
-    case "REJECT":
-      return {
-        label: "Foundational route",
-        description: "The matter is carrying strain, but not in a form ordered enough for premium escalation.",
-        ctaHref: "/diagnostics/directional-integrity?source=strategy-room&entry=redirect&intent=foundational-correction",
-        ctaLabel: "Start foundational diagnostic",
-        tone: "red" as const,
-      };
-    default:
-      return {
-        label: "Diagnostic route",
-        description: "The signal is real, but readiness and authority are not yet ordered enough for direct intervention.",
-        ctaHref: "/diagnostics?source=strategy-room&entry=redirect&intent=diagnostic-escalation",
-        ctaLabel: "Start the Diagnostic",
-        tone: "gold" as const,
-      };
-  }
-}
-
-function toneColors(tone: "green" | "red" | "gold") {
-  switch (tone) {
-    case "green": return { border: "rgba(52,211,153,0.22)", bg: "rgba(52,211,153,0.06)", text: "rgba(110,231,183,0.90)" };
-    case "red":   return { border: "rgba(248,113,113,0.22)", bg: "rgba(248,113,113,0.06)", text: "rgba(252,165,165,0.90)" };
-    default:      return { border: `${GOLD}35`, bg: `${GOLD}09`, text: `${GOLD}CC` };
-  }
+function buildExecutionIntake(
+  form: ConstitutionalIntake,
+  brief: StrategyEntryBrief,
+  canonical: CanonicalSectionsEnvelope | null,
+  thread: ConstitutionalThread | null,
+): ConstitutionalIntake {
+  const posture = canonical ? localSummary(canonical) : null;
+  return {
+    ...form,
+    sector: safeText(form.sector, "strategy execution"),
+    revenueBand: safeText(form.revenueBand, "SMB"),
+    authorityScope: safeText(form.authorityScope, safeText(posture?.authorityType, safeText(thread?.authorityType, "UNCLEAR"))),
+    urgencyWindow: safeText(form.urgencyWindow, urgencyFromTemperature(safeText(posture?.temperature))),
+    problemStatement: safeText(
+      form.problemStatement,
+      `${brief.decisionText}. Blocking condition: ${brief.constraintText}.`,
+    ),
+    symptoms: safeText(
+      form.symptoms,
+      `${brief.contradiction}. ${(thread?.failureModes ?? []).slice(0, 3).join(". ")}`,
+    ),
+    desiredOutcome: safeText(
+      form.desiredOutcome,
+      `Execute the required decision: ${brief.decisionText}.`,
+    ),
+    currentConstraint: safeText(form.currentConstraint, brief.constraintText),
+    marketExposure: safeText(form.marketExposure, "MEDIUM"),
+    boardInvolved: safeText(form.boardInvolved, brief.ownerDomain.toLowerCase().includes("board") ? "YES" : "UNCERTAIN"),
+  };
 }
 
 function localSummary(canonical: CanonicalSectionsEnvelope | null) {
@@ -363,11 +439,6 @@ function localSummary(canonical: CanonicalSectionsEnvelope | null) {
     rationale:     Array.isArray(posture?.rationale) ? posture.rationale : [],
     nextAction:    safeText(canonical?.sections?.governedRecommendations?.nextAction, ""),
   };
-}
-
-function recommendations(canonical: CanonicalSectionsEnvelope | null): RecommendationItem[] {
-  const raw = canonical?.sections?.governedRecommendations?.recommendations ?? [];
-  return Array.isArray(raw) ? (raw as RecommendationItem[]) : [];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -588,6 +659,210 @@ function FirstActionPrompt() {
   );
 }
 
+function CompactEntryField({
+  field,
+  value,
+  onChange,
+}: {
+  field: typeof STRATEGY_ROOM_FORM_SPEC[0];
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+}) {
+  const id = `sr-entry-${String(field.name)}`;
+  return (
+    <div>
+      <label htmlFor={id} style={labelStyle}>
+        {field.name === "currentConstraint" ? "Constraint clarification" : field.label}
+      </label>
+      {field.type === "textarea" ? (
+        <textarea
+          id={id}
+          name={String(field.name)}
+          value={value}
+          onChange={onChange}
+          rows={3}
+          placeholder={field.placeholder}
+          style={{ ...inputStyle, resize: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px" }}
+        />
+      ) : field.type === "select" ? (
+        <select
+          id={id}
+          name={String(field.name)}
+          value={value}
+          onChange={onChange}
+          style={{ ...inputStyle, appearance: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px" }}
+        >
+          <option value="" style={{ backgroundColor: "rgb(6 6 9)" }}>Select...</option>
+          {(field.options || []).map((option) => (
+            <option key={option.value} value={option.value} style={{ backgroundColor: "rgb(6 6 9)" }}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          id={id}
+          name={String(field.name)}
+          type={field.type}
+          value={value}
+          onChange={onChange}
+          placeholder={field.placeholder}
+          style={{ ...inputStyle, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px" }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EntryBrief({
+  brief,
+  form,
+  onChange,
+  onSubmit,
+  onClearDraft,
+  error,
+  draftSaved,
+}: {
+  brief: StrategyEntryBrief;
+  form: ConstitutionalIntake;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onClearDraft: () => void;
+  error: string;
+  draftSaved: boolean;
+}) {
+  const visibleFields = brief.missingFields
+    .map((name) => STRATEGY_ROOM_FORM_SPEC.find((field) => field.name === name))
+    .filter((field): field is typeof STRATEGY_ROOM_FORM_SPEC[0] => Boolean(field));
+
+  return (
+    <section style={{ backgroundColor: VOID }}>
+      <div className="mx-auto max-w-6xl px-6 py-10 lg:px-12">
+        <div className="mb-7">
+          <Eyebrow>Entry brief</Eyebrow>
+          <h1 style={{
+            marginTop: "1rem",
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "clamp(2rem, 4vw, 3rem)",
+            lineHeight: 1,
+            color: "rgba(255,255,255,0.92)",
+          }}>
+            Decision locked. Execution not yet begun.
+          </h1>
+        </div>
+
+        <div className="grid gap-px lg:grid-cols-[1.15fr_0.85fr]" style={{ border: "1px solid rgba(255,255,255,0.11)", backgroundColor: "rgba(255,255,255,0.08)" }}>
+          <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1.2rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.75rem" }}>
+              Decision to be executed
+            </div>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", lineHeight: 1.7, color: "rgba(255,255,255,0.82)" }}>
+              {brief.decisionText}
+            </p>
+            <div className="mt-5 grid gap-px sm:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.07)" }}>
+              {[
+                ["Constraint", brief.constraintText],
+                ["Cost of delay", brief.costOfDelayText],
+                ["Owner domain", brief.ownerDomain],
+              ].map(([label, value]) => (
+                <div key={label} style={{ backgroundColor: "rgb(5 6 8)", padding: "0.85rem" }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.45rem" }}>
+                    {label}
+                  </div>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: label === "Cost of delay" ? "rgba(252,165,165,0.76)" : "rgba(255,255,255,0.58)" }}>
+                    {value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1.2rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.74)", marginBottom: "0.75rem" }}>
+              Contradiction snapshot
+            </div>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
+              {brief.contradiction}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {(brief.contradictionSources.length ? brief.contradictionSources : ["strategy_room"]).map((source) => (
+                <span key={source} style={{ border: "1px solid rgba(255,255,255,0.10)", padding: "0.32rem 0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.36)" }}>
+                  {source.replace(/_/g, " ")}
+                </span>
+              ))}
+              <span style={{ border: `1px solid ${GOLD}24`, padding: "0.32rem 0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                Confidence {brief.confidenceLabel}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={onSubmit} noValidate className="mt-8">
+          <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgb(5 6 8)", padding: "1.2rem" }}>
+            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.5rem" }}>
+                  What the system still needs
+                </div>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.6, color: "rgba(255,255,255,0.46)" }}>
+                  Only missing execution inputs are requested. Captured evidence is not repeated.
+                </p>
+              </div>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                {draftSaved ? "Draft saved" : "Autosave active"}
+              </span>
+            </div>
+
+            {visibleFields.length ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {visibleFields.map((field) => (
+                  <CompactEntryField
+                    key={String(field.name)}
+                    field={field}
+                    value={String(form[field.name] || "")}
+                    onChange={onChange}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "0.85rem 1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                No further execution inputs required.
+              </div>
+            )}
+
+            {error && (
+              <div style={{ marginTop: "1rem", border: "1px solid rgba(248,113,113,0.22)", backgroundColor: "rgba(248,113,113,0.05)", padding: "0.85rem 1rem" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(252,165,165,0.80)" }}>
+                  {error}
+                </span>
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-2"
+                style={{ border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}10`, color: GOLD, padding: "0.8rem 1.05rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase" }}
+              >
+                Begin execution session
+                <ArrowRight style={{ width: "12px", height: "12px" }} />
+              </button>
+              <button
+                type="button"
+                onClick={onClearDraft}
+                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}
+              >
+                Clear entry
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+}
+
 function ExecutionDecisionFrame({
   canonical,
   thread,
@@ -666,6 +941,7 @@ function InterventionStack({
   canonical: CanonicalSectionsEnvelope | null;
 }) {
   const posture = canonical ? localSummary(canonical) : null;
+  const requiredDecision = posture?.nextAction || "Execute the required decision.";
   const interventions = (posture?.interventions.length ? posture.interventions : [
     "Stabilise the decision owner and confirm intervention authority.",
     "Define the first constrained move and execute it before expanding scope.",
@@ -729,7 +1005,7 @@ function InterventionStack({
                       <span style={{ color: `${GOLD}AA` }}>Intent:</span> {item}
                     </p>
                     <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>
-                      <span style={{ color: "rgba(255,255,255,0.72)" }}>Expected effect:</span> ambiguity collapses into a named action path.
+                      <span style={{ color: "rgba(255,255,255,0.72)" }}>Decision link:</span> this step exists to unblock: {requiredDecision}
                     </p>
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
@@ -926,6 +1202,41 @@ function DecisionLog({
   );
 }
 
+function EscalationTriggers({ entries }: { entries: DecisionLogEntry[] }) {
+  const blocked = entries.filter((entry) => entry.status === "blocked").length;
+  const triggers = [
+    "First move not logged inside the active execution window.",
+    "Constraint unresolved after a recorded attempt.",
+    "Decision blocked without a valid reason.",
+  ];
+
+  return (
+    <section style={{ backgroundColor: VOID }}>
+      <div className="mx-auto max-w-7xl px-6 py-6 lg:px-12">
+        <div style={{ border: "1px solid rgba(252,165,165,0.16)", backgroundColor: "rgb(5 6 8)" }}>
+          <div style={{ padding: "0.85rem 1rem", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.76)" }}>
+              Escalation triggers
+            </span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: blocked ? "rgba(252,165,165,0.72)" : "rgba(255,255,255,0.28)" }}>
+              {blocked ? `${blocked} blocked` : "Armed"}
+            </span>
+          </div>
+          <div className="grid gap-px md:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.07)" }}>
+            {triggers.map((trigger) => (
+              <div key={trigger} style={{ backgroundColor: "rgb(5 6 8)", padding: "0.9rem 1rem" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(255,255,255,0.62)" }}>
+                  {trigger}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ExitStates() {
   const exits = [
     { label: "Stabilised", classification: "Condition contained. Execution holds.", action: "Re-enter if condition resurfaces.", color: "rgba(110,231,183,0.70)" },
@@ -988,672 +1299,6 @@ const labelStyle: React.CSSProperties = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CHAMBER HERO — the proposition before the form
-// ─────────────────────────────────────────────────────────────────────────────
-
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// INTAKE FORM
-// ─────────────────────────────────────────────────────────────────────────────
-
-type IntakeFormProps = {
-  form: ConstitutionalIntake;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onClearDraft: () => void;
-  isSubmitting: boolean;
-  error: string;
-  draftSaved: boolean;
-};
-
-function IntakeForm({ form, onChange, onSubmit, onClearDraft, isSubmitting, error, draftSaved }: IntakeFormProps) {
-  // Group fields for visual rhythm
-  const identityFields  = STRATEGY_ROOM_FORM_SPEC.slice(0, 5);   // fullName, email, org, sector, revenue
-  const authorityFields = STRATEGY_ROOM_FORM_SPEC.slice(5, 8);   // authorityRole, authorityScope, urgency
-  const substanceFields = STRATEGY_ROOM_FORM_SPEC.slice(8, 12);  // problemStatement, symptoms, outcome, constraint
-  const contextFields   = STRATEGY_ROOM_FORM_SPEC.slice(12);     // marketExposure, boardInvolved
-
-  function renderField(field: typeof STRATEGY_ROOM_FORM_SPEC[0]) {
-    const value = form[field.name] || "";
-    const id = `sr-${String(field.name)}`;
-
-    return (
-      <div key={String(field.name)}>
-        <label htmlFor={id} style={labelStyle}>
-          {field.label}
-          {field.required && (
-            <span style={{ marginLeft: "0.4rem", color: `${GOLD}80` }}>*</span>
-          )}
-        </label>
-
-        {field.type === "textarea" ? (
-          <textarea
-            id={id}
-            name={String(field.name)}
-            value={value}
-            onChange={onChange}
-            rows={5}
-            placeholder={field.placeholder}
-            style={{ ...inputStyle, resize: "none", lineHeight: 1.75 }}
-          />
-        ) : field.type === "select" ? (
-          <select
-            id={id}
-            name={String(field.name)}
-            value={value}
-            onChange={onChange}
-            style={{ ...inputStyle, appearance: "none", cursor: "pointer" }}
-          >
-            <option value="" style={{ backgroundColor: "rgb(6 6 9)" }}>Select…</option>
-            {(field.options || []).map(opt => (
-              <option key={opt.value} value={opt.value} style={{ backgroundColor: "rgb(6 6 9)" }}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            id={id}
-            name={String(field.name)}
-            type={field.type}
-            value={value}
-            onChange={onChange}
-            placeholder={field.placeholder}
-            style={inputStyle}
-          />
-        )}
-
-        {field.helpText && (
-          <p style={{
-            marginTop: "0.5rem",
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "0.85rem",
-            lineHeight: 1.60,
-            color: "rgba(255,255,255,0.28)",
-          }}>
-            {field.helpText}
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  function FieldGroup({ label, fields, cols = 1 }: { label: string; fields: typeof STRATEGY_ROOM_FORM_SPEC; cols?: 1 | 2 }) {
-    return (
-      <div>
-        {/* Group header */}
-        <div style={{ marginBottom: "1.25rem" }}>
-          <GoldRule soft />
-          <div style={{ marginTop: "1.25rem" }}>
-            <Eyebrow>{label}</Eyebrow>
-          </div>
-        </div>
-        <div className={cols === 2 ? "grid gap-4 sm:grid-cols-2" : "space-y-4"}>
-          {fields.map(renderField)}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ backgroundColor: VOID }}>
-      <div className="mx-auto max-w-4xl px-6 py-8 lg:px-12 lg:py-10">
-
-        <form onSubmit={onSubmit} noValidate>
-          <div className="space-y-10">
-
-            <FieldGroup label="Identity" fields={identityFields} cols={2} />
-            <FieldGroup label="Authority" fields={authorityFields} cols={2} />
-            <FieldGroup label="The matter" fields={substanceFields} />
-            <FieldGroup label="Context" fields={contextFields} cols={2} />
-
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div style={{
-              marginTop: "2rem",
-              padding: "1.25rem 1.5rem",
-              border: "1px solid rgba(248,113,113,0.22)",
-              backgroundColor: "rgba(248,113,113,0.05)",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "0.85rem",
-            }}>
-              <AlertTriangle style={{ width: "14px", height: "14px", color: "rgba(252,165,165,0.80)", flexShrink: 0, marginTop: "2px" }} />
-              <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                fontWeight: 300,
-                fontSize: "0.97rem",
-                lineHeight: 1.65,
-                color: "rgba(252,165,165,0.85)",
-              }}>
-                {error}
-              </p>
-            </div>
-          )}
-
-          {/* Submit */}
-          <div style={{ marginTop: "2.5rem" }}>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="group w-full inline-flex items-center justify-center gap-3 transition-all duration-300"
-              style={{
-                padding: "14px 20px",
-                border: `1px solid ${isSubmitting ? "rgba(255,255,255,0.07)" : `${AMBER}42`}`,
-                backgroundColor: "transparent",
-                color: isSubmitting ? "rgba(255,255,255,0.25)" : AMBER,
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "9px",
-                letterSpacing: "0.32em",
-                textTransform: "uppercase",
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-              }}
-              onMouseEnter={e => {
-                if (!isSubmitting) {
-                  const el = e.currentTarget;
-                  el.style.borderColor = `${AMBER}65`;
-                }
-              }}
-              onMouseLeave={e => {
-                if (!isSubmitting) {
-                  const el = e.currentTarget;
-                  el.style.borderColor = `${AMBER}42`;
-                }
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="h-3.5 w-3.5 animate-spin border border-current border-t-transparent" style={{ borderRadius: "50%" }} />
-                  Assessing constitutional signal…
-                </>
-              ) : (
-                <>
-                  Submit for constitutional diagnosis
-                  <ArrowRight style={{ width: "13px", height: "13px" }} />
-                </>
-              )}
-            </button>
-
-            <div style={{
-              marginTop: "1rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1rem",
-            }}>
-              <button
-                type="button"
-                onClick={onClearDraft}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
-                }}
-              >
-                Clear draft
-              </button>
-              <span style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
-                letterSpacing: "0.24em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.16)",
-              }}>
-                {draftSaved ? "Draft saved" : "Autosave active"}
-              </span>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// VERDICT — the constitutional outcome
-// ─────────────────────────────────────────────────────────────────────────────
-
-type VerdictProps = {
-  canonical: CanonicalSectionsEnvelope;
-  onMarkDiagnosticStarted: () => void;
-  onMarkStrategyAccepted: () => void;
-  thread: ConstitutionalThread | null;
-};
-
-function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, thread }: VerdictProps) {
-  const posture = localSummary(canonical);
-  const recs    = recommendations(canonical);
-  const route   = routeMeta(posture.route);
-  const tc      = toneColors(route.tone);
-  const matchedPlaybooks = thread
-    ? matchPlaybooks({
-        route: "STRATEGY_ROOM",
-        readiness: posture.readinessTier,
-        failureModes: [...thread.failureModes, ...posture.failureModes],
-        dominantDomains: [],
-        authorityType: posture.authorityType,
-        teamFragility: thread.teamFindings?.fragilityStatus ?? null,
-        enterprisePattern: thread.enterpriseFindings?.patternTitle ?? null,
-      })
-    : [];
-
-  const readinessNum = ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[posture.readinessTier] ?? 50;
-  const clarityScore = posture.confidence ?? 50;
-  const trajectory = inferTrajectory(clarityScore, readinessNum, posture.failureModes ?? []);
-  const rawPosture = canonical?.sections?.constitutionalPosture as Record<string, unknown> | undefined;
-  const engagementReadiness = deriveEngagementReadiness({
-    revenueBand: String(rawPosture?.revenueBand ?? ""),
-    problemStatement: "",
-    urgencyWindow: posture.temperature === "SCORCHING" ? "IMMEDIATE" : posture.temperature === "HOT" ? "NEAR_TERM" : "MID_TERM",
-    authorityScope: posture.authorityType,
-    boardInvolved: undefined,
-  });
-
-  // Metric display
-  function MetricRow({ label, value }: { label: string; value: string }) {
-    return (
-      <div className="flex items-center justify-between gap-4 py-2.5"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-      >
-        <span style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "6.5px",
-          letterSpacing: "0.32em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.22)",
-        }}>
-          {label}
-        </span>
-        <span style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
-          letterSpacing: "0.12em",
-          color: "rgba(255,255,255,0.65)",
-        }}>
-          {value}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-20">
-
-        {/* Verdict header */}
-        <div className="mb-10 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-start">
-          <div>
-            <Eyebrow>Constitutional verdict</Eyebrow>
-            <h2 style={{
-              marginTop: "1.25rem",
-              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-              fontWeight: 300,
-              fontSize: "clamp(2rem, 4vw, 3.2rem)",
-              lineHeight: 1.0,
-              letterSpacing: "-0.028em",
-              color: "rgba(255,255,255,0.92)",
-            }}>
-              The system has read the signal.
-            </h2>
-            {posture.narrative && (
-              <p style={{
-                marginTop: "1rem",
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                fontWeight: 300,
-                fontSize: "1.05rem",
-                lineHeight: 1.72,
-                color: "rgba(255,255,255,0.45)",
-                maxWidth: "56ch",
-                fontStyle: "italic",
-              }}>
-                {posture.narrative}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <GoldRule soft />
-
-        {/* Main verdict grid */}
-        <div className="grid gap-6 mt-10 lg:grid-cols-[1.2fr_0.8fr]">
-
-          {/* Left — route reading + narrative + interventions */}
-          <div className="space-y-5">
-            {thread && (
-              <InheritedThreadContext thread={thread} title="Journey context" />
-            )}
-
-            <TrajectoryLine trajectory={trajectory} />
-            <EngagementReadinessPanel readiness={engagementReadiness} />
-            <ProofCapturePrompt
-              sourceStage="strategy_room"
-              routeResultType={posture.route}
-              mode="paid"
-              isPaidStage
-            />
-
-            {/* Route reading panel */}
-            <div style={{
-              border: `1px solid ${tc.border}`,
-              backgroundColor: tc.bg,
-              padding: "1.75rem 2rem",
-            }}>
-              <div style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
-                letterSpacing: "0.40em",
-                textTransform: "uppercase",
-                color: tc.text,
-                opacity: 0.85,
-                marginBottom: "1rem",
-              }}>
-                Route reading
-              </div>
-              <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                fontWeight: 300,
-                fontSize: "1.08rem",
-                lineHeight: 1.72,
-                color: "rgba(255,255,255,0.72)",
-                marginBottom: "1.5rem",
-              }}>
-                {route.description}
-              </p>
-              <ThresholdProximityLine
-                text={thresholdProximityText({
-                  label: "Clarity",
-                  value: posture.confidence,
-                  thresholdLabel: "STRATEGY",
-                  threshold: 65,
-                })}
-              />
-              {posture.nextAction && (
-                <p style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "0.95rem",
-                  lineHeight: 1.65,
-                  color: "rgba(255,255,255,0.45)",
-                  borderTop: "1px solid rgba(255,255,255,0.06)",
-                  paddingTop: "1.1rem",
-                  fontStyle: "italic",
-                }}>
-                  {posture.nextAction}
-                </p>
-              )}
-            </div>
-
-            {/* Failure modes */}
-            {posture.failureModes.length > 0 && (
-              <div style={{
-                border: "1px solid rgba(252,165,165,0.12)",
-                backgroundColor: "rgba(252,165,165,0.03)",
-                padding: "1.5rem 1.75rem",
-              }}>
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.40em",
-                  textTransform: "uppercase",
-                  color: "rgba(252,165,165,0.65)",
-                  marginBottom: "1rem",
-                }}>
-                  Identified failure modes
-                </div>
-                <div className="space-y-2.5">
-                  {posture.failureModes.slice(0, 5).map((item) => (
-                    <div key={item} className="flex items-start gap-3">
-                      <AlertTriangle style={{ width: "12px", height: "12px", color: "rgba(252,165,165,0.60)", flexShrink: 0, marginTop: "3px" }} />
-                      <span style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.97rem",
-                        lineHeight: 1.60,
-                        color: "rgba(255,255,255,0.60)",
-                      }}>
-                        {item}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Required interventions */}
-            {posture.interventions.length > 0 && (
-              <div style={{
-                border: `1px solid ${GOLD}18`,
-                backgroundColor: `${GOLD}06`,
-                padding: "1.5rem 1.75rem",
-              }}>
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.40em",
-                  textTransform: "uppercase",
-                  color: `${GOLD}90`,
-                  marginBottom: "1rem",
-                }}>
-                  Required interventions
-                </div>
-                <div className="space-y-2.5">
-                  {posture.interventions.slice(0, 5).map((item) => (
-                    <div key={item} className="flex items-start gap-3">
-                      <CheckSquare style={{ width: "12px", height: "12px", color: `${GOLD}80`, flexShrink: 0, marginTop: "3px" }} />
-                      <span style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.97rem",
-                        lineHeight: 1.60,
-                        color: "rgba(255,255,255,0.62)",
-                      }}>
-                        {item}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <RecommendedPlaybooks playbooks={matchedPlaybooks} />
-
-            <Link
-              href={route.ctaHref}
-              onClick={() => {
-                if (posture.route === "STRATEGY") void onMarkStrategyAccepted();
-                else void onMarkDiagnosticStarted();
-              }}
-              className="inline-flex items-center gap-2 pt-2 transition-all hover:underline"
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px",
-                letterSpacing: "0.24em",
-                textTransform: "uppercase",
-                color: route.tone === "gold" ? AMBER : tc.text,
-              }}
-            >
-              {route.ctaLabel}
-              <ArrowRight style={{ width: "11px", height: "11px" }} />
-            </Link>
-          </div>
-
-          {/* Right — posture metrics + recommendations */}
-          <div className="space-y-5">
-
-            {/* Constitutional posture */}
-            <div style={{
-              border: "1px solid rgba(255,255,255,0.07)",
-              backgroundColor: LIFT,
-            }}>
-              <div style={{
-                padding: "0.85rem 1.25rem",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
-              }}>
-                <span style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.38em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.22)",
-                }}>
-                  Constitutional posture
-                </span>
-              </div>
-              <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
-                <MetricRow label="Route"          value={posture.route} />
-                <MetricRow label="Org state"      value={posture.orgState} />
-                <MetricRow label="Readiness tier" value={posture.readinessTier} />
-                <MetricRow label="Authority"      value={posture.authorityType} />
-                <MetricRow label="Priority"       value={posture.priority} />
-                <MetricRow label="Temperature"    value={posture.temperature} />
-                <MetricRow label="Clarity score"  value={`${posture.confidence}`} />
-              </div>
-            </div>
-
-            {/* Governed recommendations */}
-            {recs.length > 0 && (
-              <div style={{
-                border: `1px solid ${GOLD}18`,
-                backgroundColor: `${GOLD}06`,
-              }}>
-                <div style={{
-                  padding: "0.85rem 1.25rem",
-                  borderBottom: `1px solid ${GOLD}12`,
-                }}>
-                  <span style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.38em",
-                    textTransform: "uppercase",
-                    color: `${GOLD}90`,
-                  }}>
-                    Governed recommendations
-                  </span>
-                </div>
-                <div className="divide-y" style={{ borderColor: `${GOLD}10` }}>
-                  {recs.slice(0, 4).map((item, idx) => (
-                    <div key={`${item.id ?? item.title ?? "rec"}-${idx}`}
-                      style={{ padding: "1rem 1.25rem" }}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p style={{
-                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                            fontWeight: 300,
-                            fontSize: "0.97rem",
-                            lineHeight: 1.45,
-                            color: "rgba(255,255,255,0.78)",
-                            marginBottom: "0.35rem",
-                          }}>
-                            {safeText(item.title, "Governed recommendation")}
-                          </p>
-                          <span style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "6.5px",
-                            letterSpacing: "0.28em",
-                            textTransform: "uppercase",
-                            color: "rgba(255,255,255,0.25)",
-                          }}>
-                            {safeText(item.kind, "asset")}
-                          </span>
-                        </div>
-                        {typeof item.score === "number" && (
-                          <span style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "9px",
-                            color: `${GOLD}AA`,
-                            flexShrink: 0,
-                          }}>
-                            {Math.round(item.score)}
-                          </span>
-                        )}
-                      </div>
-
-                      {Array.isArray(item.reasons) && item.reasons.length > 0 && (
-                        <div style={{ marginTop: "0.6rem" }}>
-                          {item.reasons.slice(0, 2).map((reason) => (
-                            <p key={reason} style={{
-                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                              fontWeight: 300,
-                              fontSize: "0.85rem",
-                              lineHeight: 1.55,
-                              color: "rgba(255,255,255,0.38)",
-                            }}>
-                              — {reason}
-                            </p>
-                          ))}
-                        </div>
-                      )}
-
-                      {item.href && (
-                        <Link href={item.href}
-                          className="inline-flex items-center gap-1.5 mt-2.5 transition-opacity hover:opacity-75"
-                          style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7.5px",
-                            letterSpacing: "0.28em",
-                            textTransform: "uppercase",
-                            color: `${GOLD}AA`,
-                          }}
-                        >
-                          Open asset <ArrowRight style={{ width: "10px", height: "10px" }} />
-                        </Link>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Rationale */}
-            {posture.rationale.length > 0 && (
-              <div style={{
-                border: "1px solid rgba(255,255,255,0.05)",
-                backgroundColor: "rgba(255,255,255,0.01)",
-                padding: "1.25rem",
-              }}>
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.36em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
-                  marginBottom: "0.85rem",
-                }}>
-                  Scoring rationale
-                </div>
-                <div className="space-y-1.5">
-                  {posture.rationale.slice(0, 8).map((item) => (
-                    <p key={item} style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.12em",
-                      color: "rgba(255,255,255,0.25)",
-                      lineHeight: 1.55,
-                    }}>
-                      {item}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1666,15 +1311,13 @@ export default function StrategyRoomPage({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error,       setError]       = React.useState("");
   const [canonical,   setCanonical]   = React.useState<CanonicalSectionsEnvelope | null>(null);
-  const [sessionKey,  setSessionKey]  = React.useState<string | null>(null);
   const [draftSaved,  setDraftSaved]  = React.useState(false);
   const [thread, setThread] = React.useState<ConstitutionalThread | null>(null);
-  const [threadLoaded, setThreadLoaded] = React.useState(false);
   const [decisionLog, setDecisionLog] = React.useState<DecisionLogEntry[]>([]);
   const [showAccessTransition, setShowAccessTransition] = React.useState(checkoutConfirmed);
   const [executionSessionId, setExecutionSessionId] = React.useState<string | null>(null);
   const [persistError, setPersistError] = React.useState<string | null>(null);
-  const hasExecutiveReportingContext = Boolean(thread?.executiveFindings);
+  const [executiveResult, setExecutiveResult] = React.useState<unknown>(null);
 
   // Track entry
   React.useEffect(() => {
@@ -1695,7 +1338,12 @@ export default function StrategyRoomPage({
 
   React.useEffect(() => {
     setThread(readConstitutionalThread());
-    setThreadLoaded(true);
+    try {
+      const raw = window.sessionStorage.getItem("executive-report-result");
+      if (raw) setExecutiveResult(JSON.parse(raw));
+    } catch {
+      setExecutiveResult(null);
+    }
   }, []);
 
   React.useEffect(() => {
@@ -1725,6 +1373,11 @@ export default function StrategyRoomPage({
     }, AUTOSAVE_MS);
     return () => window.clearTimeout(timer);
   }, [form]);
+
+  const entryBrief = React.useMemo(
+    () => buildStrategyEntryBrief({ thread, canonical, executiveResult, form }),
+    [thread, canonical, executiveResult, form],
+  );
 
   if (!hasPaidAccess) {
     return (
@@ -1774,8 +1427,8 @@ export default function StrategyRoomPage({
                 color: "rgba(255,255,255,0.40)",
                 maxWidth: "48ch",
               }}>
-                Strategy Room inherits your diagnostic evidence, names the decision,
-                identifies the blocker, and sequences intervention. Execution, not analysis.
+                Strategy Room inherits diagnostic evidence, names the decision,
+                identifies the blocker, and sequences intervention.
               </p>
 
               <div className="mt-4 grid gap-px grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)", maxWidth: "36rem" }}>
@@ -1788,7 +1441,7 @@ export default function StrategyRoomPage({
 
               <div className="mt-8" style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06`, padding: "1.25rem", maxWidth: "36rem" }}>
                 <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem" }}>
-                  At this stage, the cost of error exceeds the cost of intervention.
+                  Intervention required.
                 </div>
                 <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
                   &pound;395 &mdash; execution environment
@@ -1825,7 +1478,6 @@ export default function StrategyRoomPage({
   function clearDraft() {
     setForm(INITIAL_FORM);
     setCanonical(null);
-    setSessionKey(null);
     setError("");
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }
@@ -1994,23 +1646,22 @@ export default function StrategyRoomPage({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const validationError = validateForm(form);
+    const executionIntake = buildExecutionIntake(form, entryBrief, canonical, thread);
+    const validationError = validateExecutionEntry(executionIntake, entryBrief);
     if (validationError) { setError(validationError); return; }
 
     setError("");
     setIsSubmitting(true);
     setCanonical(null);
-    setSessionKey(null);
 
     try {
-      const nextSessionKey = await initDecisionSession(form);
-      setSessionKey(nextSessionKey);
+      const nextSessionKey = await initDecisionSession(executionIntake);
 
       const guidanceRes = await fetch("/api/decision/guidance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          intake: form,
+          intake: executionIntake,
           options: { assetLimit: 6, minAssetScore: 18, source: "strategy-room" },
         }),
       });
@@ -2034,7 +1685,7 @@ export default function StrategyRoomPage({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             strategyRoomSessionId: nextSessionKey,
-            email: form.email || null,
+            email: executionIntake.email || null,
             canonicalSnapshot: nextCanonical,
           }),
         });
@@ -2066,35 +1717,6 @@ export default function StrategyRoomPage({
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  async function handleResubmit() {
-    if (!sessionKey || !canonical) return;
-    const posture = canonical.sections.constitutionalPosture;
-    await trackFollowup({
-      sessionKey, routeAfter: "DIAGNOSTIC", readinessTierAfter: "EMERGING",
-      authorityTypeAfter: posture.authorityType, clarityDelta: 0.35, authorityDelta: 0.15,
-      convertedAfterGuidance: false,
-      metadata: { action: "resubmit_requested", previousConstitution: posture },
-      canonical,
-    });
-    setCanonical(null);
-    setError("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  async function handleMarkDiagnosticStarted() {
-    if (!sessionKey || !canonical) return;
-    const posture = canonical.sections.constitutionalPosture;
-    await trackConversion({ sessionKey, conversionType: "diagnostic_started", metadata: { source: "strategy_room_result", constitution: posture }, canonical });
-    await trackFollowup({ sessionKey, routeAfter: "DIAGNOSTIC", readinessTierAfter: "EMERGING", authorityTypeAfter: posture.authorityType, clarityDelta: 0.4, authorityDelta: 0.2, convertedAfterGuidance: true, metadata: { action: "diagnostic_started", constitutionalSource: true }, canonical });
-  }
-
-  async function handleMarkStrategyAccepted() {
-    if (!sessionKey || !canonical) return;
-    const posture = canonical.sections.constitutionalPosture;
-    await trackConversion({ sessionKey, conversionType: "strategy_path_accepted", metadata: { source: "strategy_room_result", constitution: posture }, canonical });
-    await trackFollowup({ sessionKey, routeAfter: "STRATEGY", readinessTierAfter: posture.readinessTier, authorityTypeAfter: posture.authorityType, clarityDelta: 0.2, authorityDelta: 0.1, convertedAfterGuidance: true, metadata: { action: "strategy_path_accepted", constitutionalSource: true }, canonical });
   }
 
   if (hasPaidAccess && showAccessTransition) {
@@ -2163,7 +1785,7 @@ export default function StrategyRoomPage({
                 color: `${GOLD}90`,
                 marginBottom: "0.85rem",
               }}>
-                Reading the constitutional signal…
+                Preparing execution environment...
               </div>
               <p style={{
                 fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
@@ -2172,13 +1794,13 @@ export default function StrategyRoomPage({
                 color: "rgba(255,255,255,0.30)",
                 fontStyle: "italic",
               }}>
-                The system is assessing mandate fit, authority, and readiness.
+                The system is binding the decision, constraint, and intervention path.
               </p>
             </div>
           </div>
         )}
 
-        {/* ── STATE: VERDICT ─────────────────────────────────────────────── */}
+        {/* ── STATE 3: EXECUTION CHAMBER ─────────────────────────────────── */}
         {!isSubmitting && canonical && (
           <>
             <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
@@ -2192,6 +1814,7 @@ export default function StrategyRoomPage({
               onStatusChange={updateDecisionLogStatus}
               onBlockReasonChange={updateDecisionBlockReason}
             />
+            <EscalationTriggers entries={decisionLog} />
             {persistError && (
               <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
                 <div style={{
@@ -2253,38 +1876,19 @@ export default function StrategyRoomPage({
             </div>
 
             <ExitStates />
-            <Verdict
-              canonical={canonical}
-              onMarkDiagnosticStarted={handleMarkDiagnosticStarted}
-              onMarkStrategyAccepted={handleMarkStrategyAccepted}
-              thread={thread}
-            />
           </>
         )}
 
-        {/* ── STATE: CHAMBER (pre-submission) ────────────────────────────── */}
+        {/* ── STATE 2: ENTRY BRIEF ───────────────────────────────────────── */}
         {!isSubmitting && !canonical && (
           <>
-            {/* ── SYSTEM POSITION — decision authority gating ── */}
             <StrategyRoomGate />
-            <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
-            <FirstActionPrompt />
-            <ExecutionDecisionFrame canonical={canonical} thread={thread} />
-            <InterventionStack canonical={canonical} />
-            <ConstraintMap canonical={canonical} />
-            <DecisionLog
-              entries={decisionLog}
-              onAdd={addDecisionLogEntry}
-              onStatusChange={updateDecisionLogStatus}
-              onBlockReasonChange={updateDecisionBlockReason}
-            />
-            <ExitStates />
-            <IntakeForm
+            <EntryBrief
+              brief={entryBrief}
               form={form}
               onChange={handleChange}
               onSubmit={handleSubmit}
               onClearDraft={clearDraft}
-              isSubmitting={isSubmitting}
               error={error}
               draftSaved={draftSaved}
             />

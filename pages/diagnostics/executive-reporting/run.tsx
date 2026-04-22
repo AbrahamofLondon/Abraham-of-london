@@ -341,6 +341,7 @@ type ExecutiveReportingRunPageProps = {
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
+const AMBER = "#F59E0B";
 const VOID = "rgb(3 3 5)";
 const LIFT = "rgb(10 14 20)";
 
@@ -1041,1679 +1042,179 @@ function ResultSurface({
     authorityScope: safeString(constitution?.authorityType),
   });
 
+  // Decision object — canonical across ER and SR
+  const decisionText = latestDecisionObject?.decisionText
+    ?? safeString(intake?.decisionQuestion)
+    ?? safeString((canonical?.sections as any)?.executiveSummary?.mandate)
+    ?? nextAction;
+  const constraintText = latestDecisionObject?.constraintText
+    ?? safeString(intake?.currentConstraint)
+    ?? "";
+  const costOfDelayText = safeString(intake?.whatHappensIfNothingChanges) || "";
+  const exposureFormatted = financialExposure?.totalExposureFormatted
+    ?? financialExposure?.totalExposureFormatted
+    ?? (financialExposure?.totalExposure ? `\u00a3${Math.round(Number(financialExposure.totalExposure)).toLocaleString()}` : null);
+
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
-      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-12">
-        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <div>
-            <Eyebrow>Executive Report</Eyebrow>
-            <h1
-              style={{
-                marginTop: "1rem",
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                fontWeight: 300,
-                fontSize: "clamp(1.8rem, 3.5vw, 3rem)",
-                lineHeight: 1.0,
-                letterSpacing: "-0.025em",
-                color: "rgba(255,255,255,0.92)",
-                maxWidth: "18ch",
-              }}
-            >
-              {summary?.headline ?? canonical?.sections?.executiveSummary?.headline ?? "Executive Report generated."}
-            </h1>
+      <div className="mx-auto max-w-6xl px-6 py-14 lg:px-12">
 
-            <p
-              style={{
-                marginTop: "0.75rem",
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                fontWeight: 300,
-                fontSize: "0.98rem",
-                lineHeight: 1.68,
-                color: "rgba(255,255,255,0.36)",
-                maxWidth: "56ch",
-              }}
-            >
-              {[header?.organisationName, summary?.state, header?.classification]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          </div>
-
-          <div className="mt-1 flex shrink-0 flex-wrap items-center gap-2.5">
-            <span
-              style={{
-                padding: "5px 14px",
-                border: `1px solid ${rc.border}`,
-                backgroundColor: rc.bg,
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
-                letterSpacing: "0.30em",
-                textTransform: "uppercase",
-                color: rc.text,
-              }}
-            >
-              {route}
+        {/* ── BLOCK 1: OPENING COST LINE ── */}
+        <div style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(252,165,165,0.15)" }}>
+          <p style={{
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "clamp(1.2rem, 2.5vw, 1.6rem)",
+            lineHeight: 1.15,
+            color: "rgba(252,165,165,0.70)",
+            fontStyle: "italic",
+            maxWidth: "44ch",
+          }}>
+            {exposureFormatted
+              ? `This condition is already costing you ${exposureFormatted}.`
+              : interpretation?.conditionLabel
+                ? interpretation.conditionLabel
+                : summary?.headline ?? "The consequence is now priced."}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+              {[header?.organisationName, route, safeString(constitution?.readinessTier)].filter(Boolean).join(" \u00b7 ")}
             </span>
-
-            {header?.readinessTier && (
-              <span
-                style={{
-                  padding: "5px 14px",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.20em",
-                  color: "rgba(255,255,255,0.28)",
-                }}
-              >
-                {header.readinessTier}
-              </span>
-            )}
-
-            <span
-              style={{
-                padding: "5px 14px",
-                border: "1px solid rgba(255,255,255,0.07)",
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
-                letterSpacing: "0.20em",
-                color: "rgba(255,255,255,0.25)",
-              }}
-            >
-              {result.runKey}
-            </span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", color: rc.text }}>{route}</span>
           </div>
         </div>
 
-        {/* ── INTELLIGENCE LAYER — bespoke interpretation (async enrichment) ── */}
-        {interpretation && interpretation.source === "llm" && (
-          <div className="mb-8" style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "1.5rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
-              Position Statement
-            </div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.3rem, 2.5vw, 1.8rem)", lineHeight: 1.15, color: "rgba(255,255,255,0.88)" }}>
-              {interpretation.conditionLabel}
-            </h2>
-            <p style={{ marginTop: "0.6rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>
+        {/* ── BLOCK 2: NAMED CONDITION ── */}
+        <div className="py-4">
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>Identified condition</span>
+          <h2 style={{ marginTop: "0.3rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "clamp(0.85rem, 1.8vw, 1.1rem)", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.88)", fontWeight: 700 }}>
+            {interpretation?.conditionLabel ?? summary?.headline ?? safeString(constitution?.posture) ?? "CONDITION IDENTIFIED"}
+          </h2>
+          {interpretation?.conditionExplanation && (
+            <p style={{ marginTop: "0.4rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", maxWidth: "52ch" }}>
               {interpretation.conditionExplanation}
             </p>
+          )}
+        </div>
 
-            {/* Contradiction map */}
-            {interpretation.contradictionInsight && (
-              <div className="mt-4" style={{ borderTop: `1px solid ${GOLD}15`, paddingTop: "0.75rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.35rem" }}>
-                  Contradiction
-                </div>
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.55)" }}>
-                  {interpretation.contradictionInsight}
-                </p>
-              </div>
-            )}
-
-            {/* Governed priority stack */}
-            {interpretation.priorityStack.length > 0 && (
-              <div className="mt-4" style={{ borderTop: `1px solid ${GOLD}15`, paddingTop: "0.75rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>
-                  Governed Priority Stack
-                </div>
-                {interpretation.priorityStack.map((p, i) => (
-                  <div key={i} className="flex items-start gap-3 py-1.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", color: `${GOLD}60`, flexShrink: 0, marginTop: "2px" }}>{String(i + 1).padStart(2, "0")}</span>
-                    <div>
-                      <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(255,255,255,0.62)" }}>{p.action}</span>
-                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.78rem", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>{p.rationale}</p>
-                    </div>
-                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "5.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: p.urgency === "immediate" ? "rgba(252,165,165,0.60)" : p.urgency === "near_term" ? `${GOLD}60` : "rgba(255,255,255,0.25)", flexShrink: 0 }}>{p.urgency.replace("_", " ")}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Narrative */}
-            <div className="mt-4" style={{ borderTop: `1px solid ${GOLD}15`, paddingTop: "0.75rem" }}>
-              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)", fontStyle: "italic" }}>
-                {interpretation.narrative}
+        {/* ── BLOCK 3: CONTRADICTION ── */}
+        {(graphContradictions.length > 0 || interpretation?.contradictionInsight) && (
+          <div style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.03)", padding: "1.25rem", marginBottom: "0.75rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>Contradiction</span>
+            {interpretation?.contradictionInsight && (
+              <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.55)" }}>
+                {interpretation.contradictionInsight}
               </p>
-            </div>
+            )}
+            {graphContradictions.map((c: any, i: number) => (
+              <p key={i} style={{ marginTop: "0.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(252,165,165,0.40)" }}>
+                {String(c.summary || c.label || "")}
+              </p>
+            ))}
+          </div>
+        )}
 
-            {/* Escalation decision */}
-            {interpretation.escalationJustification && (
-              <div className="mt-3" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
-                {interpretation.escalationJustification}
+        {/* ── BLOCK 4: CONSEQUENCE MODEL (visible math) ── */}
+        {financialExposure && (
+          <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1.25rem", marginBottom: "0.75rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>Consequence model</span>
+            <div className="mt-3 flex flex-wrap gap-3">
+              {[
+                { label: "Execution loss", value: financialExposure.executionLossFormatted ?? financialExposure.executionLossFormatted },
+                { label: "Replacement cost", value: financialExposure.replacementCostFormatted ?? financialExposure.replacementCostFormatted },
+                { label: "Total exposure", value: exposureFormatted },
+              ].filter((m) => m.value).map((m) => (
+                <div key={m.label} style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.5rem 0.75rem" }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "5.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{m.label}</span>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", color: GOLD, marginTop: "0.15rem" }}>{m.value}</div>
+                </div>
+              ))}
+            </div>
+            {costOfDelayText && (
+              <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(255,255,255,0.30)" }}>
+                If delayed: {costOfDelayText}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ── BLOCK 5: DECISION OBJECT (visually dominant) ── */}
+        {decisionText && (
+          <div style={{ border: `1px solid ${GOLD}28`, backgroundColor: `${GOLD}06`, padding: "1.25rem", marginBottom: "0.75rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>Decision required</span>
+            <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>
+              {decisionText}
+            </p>
+            {constraintText && (
+              <div className="mt-2">
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Constraint</span>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(255,255,255,0.38)", marginTop: "0.15rem" }}>{constraintText}</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── BLOCK 6: PRIORITY STACK ── */}
+        {boardActions.length > 0 && (
+          <div style={{ border: `1px solid ${AMBER}25`, backgroundColor: `${AMBER}05`, padding: "1.25rem", marginBottom: "0.75rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: AMBER }}>Required actions</span>
+            {boardActions.slice(0, 5).map((action: unknown, i: number) => (
+              <div key={i} className="flex items-start gap-2 py-1.5" style={{ borderBottom: i < Math.min(boardActions.length, 5) - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: `${AMBER}70`, flexShrink: 0 }}>{String(i + 1).padStart(2, "0")}</span>
+                <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.55)" }}>{String(action)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── BLOCK 7: IF IGNORED ── */}
+        <div style={{ padding: "0.75rem 0", marginBottom: "0.75rem" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)" }}>If ignored</span>
+          <p style={{ marginTop: "0.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.45)" }}>
+            {interpretation?.narrative ?? summary?.mandate ?? "The condition persists. Exposure compounds. The window for effective action narrows."}
+          </p>
+        </div>
+
+        {/* ── BLOCK 8: ESCALATION PATH ── */}
+        {route === "STRATEGY" && (
+          <div style={{ border: "1px solid rgba(252,165,165,0.22)", backgroundColor: "rgba(252,165,165,0.03)", padding: "1.25rem", marginBottom: "1.5rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)", fontWeight: 700 }}>EXECUTION REQUIRED</span>
+            <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(255,255,255,0.40)" }}>
+              This condition requires governed intervention. Strategy Room inherits this evidence.
+            </p>
+            <Link href="/strategy-room" className="mt-3 inline-flex items-center gap-2" style={{ padding: "8px 16px", border: "1px solid rgba(252,165,165,0.30)", color: "rgba(252,165,165,0.70)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+              Enter Strategy Room <ArrowRight style={{ width: 9, height: 9 }} />
+            </Link>
           </div>
         )}
 
         {interpretLoading && (
-          <div className="mb-6" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)", marginBottom: "1rem" }}>
             Interpreting condition...
           </div>
         )}
 
-        {/* ── CROSS-STAGE MEMORY — what the system has now confirmed ── */}
+        {/* ── SECONDARY: evidence convergence + diagnostic data ── */}
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-6" />
+
+        {/* Cross-stage memory */}
         {thread && (
-          <div className="mb-8" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.55rem" }}>
-              What the system has now confirmed
-            </div>
-            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
-              Constitutional diagnostic classified this as {thread.posture} with {thread.route} routing at {Math.round(thread.confidence * 100)}% confidence.
-              {thread.failureModes.length > 0 ? ` Failure modes identified: ${thread.failureModes.join(", ")}.` : ""}
-              {thread.readinessTier ? ` Readiness: ${thread.readinessTier}.` : ""}
+          <div className="mb-4" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Evidence convergence</span>
+            <p style={{ marginTop: "0.3rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.35)" }}>
+              Constitutional diagnostic: {thread.posture} · {thread.route} · {Math.round(thread.confidence * 100)}% confidence.
+              {thread.failureModes.length > 0 ? ` Failure modes: ${thread.failureModes.join(", ")}.` : ""}
             </p>
           </div>
         )}
 
-        {(latestDecisionObject || graphContradictions.length > 0 || graphConsequences.length > 0) && (
-          <div className="mb-8" style={{ border: `1px solid ${GOLD}24`, backgroundColor: "rgba(201,169,110,0.035)", padding: "1.35rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>
-              Evidence convergence
-            </div>
-            {latestDecisionObject?.decisionText && (
-              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(0,0,0,0.22)", padding: "0.9rem 1rem", marginBottom: "0.75rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.35rem" }}>
-                  Decision object locked
-                </div>
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.76)" }}>
-                  {latestDecisionObject.decisionText}
-                </p>
-                {[latestDecisionObject.constraintText, latestDecisionObject.priorAttemptText, latestDecisionObject.costOfDelayText, latestDecisionObject.stakeholderText]
-                  .filter(Boolean)
-                  .slice(0, 3)
-                  .map((item: string, index: number) => (
-                    <div key={`${item}-${index}`} style={{ marginTop: "0.35rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-                      {index === 0 ? "Constraint" : index === 1 ? "Prior evidence" : "Delay cost"}: {item}
-                    </div>
-                  ))}
-              </div>
-            )}
-            <div className="grid gap-3 md:grid-cols-3">
-              <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(252,165,165,0.58)", marginBottom: "0.4rem" }}>
-                  Contradictions
-                </div>
-                {graphContradictions.length > 0 ? graphContradictions.map((node: any, index: number) => (
-                  <p key={`${node.label}-${index}`} style={{ margin: "0 0 0.45rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", lineHeight: 1.45, color: "rgba(252,165,165,0.62)" }}>
-                    {node.summary || node.label}
-                  </p>
-                )) : (
-                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", color: "rgba(255,255,255,0.28)" }}>No graph contradiction recorded.</p>
-                )}
-              </div>
-              <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
-                  Consequence math
-                </div>
-                {graphConsequences.length > 0 ? graphConsequences.map((node: any, index: number) => (
-                  <p key={`${node.label}-${index}`} style={{ margin: "0 0 0.45rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", lineHeight: 1.45, color: "rgba(255,255,255,0.58)" }}>
-                    {node.summary}{node.evidenceText ? ` · ${node.evidenceText}` : ""}
-                  </p>
-                )) : (
-                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", color: "rgba(255,255,255,0.28)" }}>No graph consequence recorded.</p>
-                )}
-              </div>
-              <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(110,231,183,0.58)", marginBottom: "0.4rem" }}>
-                  Required moves
-                </div>
-                {graphActions.length > 0 ? graphActions.map((node: any, index: number) => (
-                  <p key={`${node.summary}-${index}`} style={{ margin: "0 0 0.45rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", lineHeight: 1.45, color: "rgba(110,231,183,0.58)" }}>
-                    {node.summary}
-                  </p>
-                )) : (
-                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", color: "rgba(255,255,255,0.28)" }}>No graph action recorded.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="space-y-6">
-            {thread && (
-              <InheritedThreadContext thread={thread} title="Diagnostic progression" />
-            )}
-
-            <TrajectoryLine trajectory={trajectory} />
-            <EngagementReadinessPanel readiness={engagementReadiness} title="Engagement readiness prognosis" />
-
-            {/* Claim-governed capability sections */}
-            <ClaimGovernedCapabilities canonical={result.canonical} />
-
-            {/* Basis of this brief — proof layer */}
-            <BasisOfBriefBlock canonical={result.canonical} thread={thread} />
-
-            <ProofCapturePrompt
-              sourceStage="executive_reporting"
-              routeResultType={route}
-              mode="paid"
-              isPaidStage
-            />
-
-            {(summary?.summary || summary?.mandate) && (
-              <div
-                style={{
-                  border: `1px solid ${GOLD}20`,
-                  backgroundColor: `${GOLD}07`,
-                  padding: "2rem",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.40em",
-                    textTransform: "uppercase",
-                    color: `${GOLD}90`,
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Executive summary
-                </div>
-
-                {summary?.summary && (
-                  <p
-                    style={{
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "1.05rem",
-                      lineHeight: 1.8,
-                      color: "rgba(255,255,255,0.70)",
-                    }}
-                  >
-                    {summary.summary}
-                  </p>
-                )}
-
-                {summary?.mandate && (
-                  <p
-                    style={{
-                      marginTop: "1rem",
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "0.97rem",
-                      lineHeight: 1.7,
-                      color: "rgba(255,255,255,0.45)",
-                      fontStyle: "italic",
-                      borderTop: "1px solid rgba(255,255,255,0.06)",
-                      paddingTop: "1rem",
-                    }}
-                  >
-                    {summary.mandate}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {(summary?.primaryConstraint ||
-              summary?.structuralImplication ||
-              summary?.routeReason) && (
-              <div
-                style={{
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  backgroundColor: "rgba(255,255,255,0.015)",
-                  padding: "1.5rem 1.75rem",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.38em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.22)",
-                    marginBottom: "0.9rem",
-                  }}
-                >
-                  Constitutional verdict
-                </div>
-
-                {summary?.primaryConstraint && (
-                  <p
-                    style={{
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "1.02rem",
-                      lineHeight: 1.65,
-                      color: "rgba(255,255,255,0.72)",
-                    }}
-                  >
-                    Primary institutional constraint: {summary.primaryConstraint}
-                  </p>
-                )}
-
-                {summary?.routeReason && (
-                  <p
-                    style={{
-                      marginTop: "0.65rem",
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "0.92rem",
-                      lineHeight: 1.68,
-                      color: "rgba(255,255,255,0.48)",
-                    }}
-                  >
-                    Route decision: {summary.routeReason}
-                  </p>
-                )}
-
-                <ThresholdProximityLine
-                  text={thresholdProximityText({
-                    label: "Clarity",
-                    value: clarityScore,
-                    thresholdLabel: "STRATEGY",
-                    threshold: 65,
-                  })}
-                />
-
-                {summary?.structuralImplication && (
-                  <p
-                    style={{
-                      marginTop: "0.65rem",
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "0.92rem",
-                      lineHeight: 1.68,
-                      color: "rgba(255,255,255,0.38)",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {summary.structuralImplication}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {findings.length > 0 && (
-              <div>
-                <div
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.38em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.22)",
-                    marginBottom: "0.85rem",
-                  }}
-                >
-                  Board-level findings ({findings.length})
-                </div>
-
-                <div className="space-y-3">
-                  {findings.map((f, i) => {
-                    const severity = f.severity ?? "LOW";
-                    const sc = severityColor(severity);
-
-                    return (
-                      <div
-                        key={`${f.headline ?? "finding"}-${i}`}
-                        style={{
-                          border: `1px solid ${sc.border}`,
-                          backgroundColor: sc.bg,
-                          padding: "1.5rem",
-                        }}
-                      >
-                        <div className="mb-3 flex items-start justify-between gap-3">
-                          <span
-                            style={{
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "7px",
-                              letterSpacing: "0.32em",
-                              textTransform: "uppercase",
-                              color: sc.text,
-                            }}
-                          >
-                            {f.domain ?? "DOMAIN"}
-                          </span>
-
-                          <span
-                            style={{
-                              padding: "2px 8px",
-                              border: `1px solid ${sc.border}`,
-                              backgroundColor: "rgba(0,0,0,0.20)",
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "6.5px",
-                              letterSpacing: "0.28em",
-                              textTransform: "uppercase",
-                              color: sc.text,
-                              flexShrink: 0,
-                            }}
-                          >
-                            {severity}
-                          </span>
-                        </div>
-
-                        <p
-                          style={{
-                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                            fontWeight: 300,
-                            fontSize: "1.02rem",
-                            lineHeight: 1.45,
-                            color: "rgba(255,255,255,0.82)",
-                            marginBottom: "0.6rem",
-                          }}
-                        >
-                          {f.headline ?? "Finding"}
-                        </p>
-
-                        {f.reading && (
-                          <p
-                            style={{
-                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                              fontWeight: 300,
-                              fontSize: "0.92rem",
-                              lineHeight: 1.65,
-                              color: "rgba(255,255,255,0.50)",
-                              marginBottom: "0.6rem",
-                            }}
-                          >
-                            {f.reading}
-                          </p>
-                        )}
-
-                        {f.signal && (
-                          <p
-                            style={{
-                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                              fontWeight: 300,
-                              fontSize: "0.88rem",
-                              lineHeight: 1.60,
-                              color: "rgba(255,255,255,0.32)",
-                              fontStyle: "italic",
-                            }}
-                          >
-                            Signal: {f.signal}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {telemetry?.domains && telemetry.domains.length > 0 && (
-              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                    }}
-                  >
-                    Strategic domain analysis
-                  </span>
-                </div>
-
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {telemetry.domains.slice(0, 5).map((d, i) => (
-                    <div key={`${d.label}-${i}`} style={{ padding: "0.95rem 1.25rem" }}>
-                      <div className="mb-2 flex items-center justify-between gap-3">
-                        <span
-                          style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7px",
-                            letterSpacing: "0.30em",
-                            textTransform: "uppercase",
-                            color: `${GOLD}B0`,
-                          }}
-                        >
-                          {d.label}
-                        </span>
-                        <span
-                          style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "6.5px",
-                            letterSpacing: "0.18em",
-                            color: "rgba(255,255,255,0.38)",
-                          }}
-                        >
-                          Dissonance {Math.round(d.dissonance)}
-                        </span>
-                      </div>
-
-                      <div
-                        className="grid gap-3 sm:grid-cols-3"
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
-                          letterSpacing: "0.18em",
-                          color: "rgba(255,255,255,0.50)",
-                        }}
-                      >
-                        <div>Intent {Math.round(d.intent)}</div>
-                        <div>Reality {Math.round(d.reality)}</div>
-                        <div>Gap {Math.round(d.dissonance)}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {observedOutcomes && (
-              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: "rgba(255,255,255,0.02)" }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: `1px solid ${GOLD}10`,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: `${GOLD}90`,
-                    }}
-                  >
-                    Observed Outcomes (System Evidence)
-                  </span>
-                </div>
-
-                <div style={{ padding: "1.1rem 1.25rem" }}>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <MetricTile
-                      label="Similar cases improved"
-                      value={`${Math.round(safeNumber(observedOutcomes.improvedPercent, 0))}%`}
-                    />
-                    <MetricTile
-                      label="Avg time to improvement"
-                      value={
-                        typeof observedOutcomes.averageTimeToImprovementDays === "number"
-                          ? `${Math.round(observedOutcomes.averageTimeToImprovementDays)} days`
-                          : "Pending"
-                      }
-                    />
-                    <MetricTile
-                      label="Failure rate when ignored"
-                      value={`${Math.round(safeNumber(observedOutcomes.failureRateWhenIgnored, 0))}%`}
-                    />
-                  </div>
-
-                  <div className="mt-4 space-y-2">
-                    {(observedOutcomes.statements ?? []).slice(0, 3).map((statement, i) => (
-                      <div
-                        key={`${statement}-${i}`}
-                        className="flex items-start gap-2.5"
-                        style={{
-                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                          fontWeight: 300,
-                          fontSize: "0.94rem",
-                          lineHeight: 1.65,
-                          color: "rgba(255,255,255,0.68)",
-                        }}
-                      >
-                        <Scale
-                          style={{
-                            width: "13px",
-                            height: "13px",
-                            color: `${GOLD}85`,
-                            flexShrink: 0,
-                            marginTop: "5px",
-                          }}
-                        />
-                        <span>{statement}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: "0.9rem",
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "6.5px",
-                      letterSpacing: "0.24em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.24)",
-                    }}
-                  >
-                    Cases processed: {safeNumber(observedOutcomes.processedDecisionCases, 0)} · Confidence: {observedOutcomes.confidence ?? "insufficient"}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {boardActions.length > 0 && (
-              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                    }}
-                  >
-                    Board actions
-                  </span>
-                </div>
-
-                <div style={{ padding: "1rem 1.25rem" }}>
-                  {boardActions.map((a, i) => (
-                    <div
-                      key={`${a}-${i}`}
-                      className="flex items-start gap-3 py-2.5"
-                      style={{
-                        borderBottom: i < boardActions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
-                      }}
-                    >
-                      <CheckSquare
-                        style={{
-                          width: "13px",
-                          height: "13px",
-                          color: `${GOLD}80`,
-                          flexShrink: 0,
-                          marginTop: "2px",
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                          fontWeight: 300,
-                          fontSize: "0.97rem",
-                          lineHeight: 1.60,
-                          color: "rgba(255,255,255,0.65)",
-                        }}
-                      >
-                        {a}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {recommendations?.recommendations && recommendations.recommendations.length > 0 && (
-              <div
-                style={{
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  backgroundColor: "rgba(255,255,255,0.01)",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.18)",
-                    }}
-                  >
-                    Governed recommendations
-                  </span>
-                </div>
-
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {recommendations.recommendations.slice(0, 4).map((rec, i) => (
-                    <div key={`${rec.id}-${i}`} style={{ padding: "1rem 1.25rem" }}>
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p
-                            style={{
-                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                              fontWeight: 300,
-                              fontSize: "0.98rem",
-                              color: "rgba(255,255,255,0.76)",
-                              marginBottom: "0.25rem",
-                            }}
-                          >
-                            {rec.title}
-                          </p>
-
-                          <div
-                            style={{
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "6.5px",
-                              letterSpacing: "0.26em",
-                              textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.22)",
-                              marginBottom: "0.45rem",
-                            }}
-                          >
-                            {rec.kind} · {rec.priority} · Score {Math.round(rec.score)}
-                          </div>
-
-                          <p
-                            style={{
-                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                              fontWeight: 300,
-                              fontSize: "0.9rem",
-                              lineHeight: 1.6,
-                              color: "rgba(255,255,255,0.44)",
-                              marginBottom: rec.reasons.length ? "0.5rem" : 0,
-                            }}
-                          >
-                            {rec.description}
-                          </p>
-
-                          {rec.reasons.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                              {rec.reasons.slice(0, 3).map((reason) => (
-                                <span
-                                  key={reason}
-                                  style={{
-                                    padding: "3px 7px",
-                                    border: "1px solid rgba(255,255,255,0.08)",
-                                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                                    fontSize: "6px",
-                                    letterSpacing: "0.16em",
-                                    textTransform: "uppercase",
-                                    color: "rgba(255,255,255,0.24)",
-                                  }}
-                                >
-                                  {reason}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {rec.href && (
-                          <Link
-                            href={rec.href}
-                            className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-70"
-                            style={{
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "7px",
-                              letterSpacing: "0.24em",
-                              textTransform: "uppercase",
-                              color: `${GOLD}AA`,
-                            }}
-                          >
-                            Open
-                            <ArrowRight style={{ width: "10px", height: "10px" }} />
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {recommendations?.matchedAssets && recommendations.matchedAssets.length > 0 && (
-              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                    }}
-                  >
-                    Matched assets
-                  </span>
-                </div>
-
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {recommendations.matchedAssets.slice(0, 4).map((asset, i) => (
-                    <div key={`${asset.id}-${i}`} style={{ padding: "1rem 1.25rem" }}>
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p
-                            style={{
-                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                              fontWeight: 300,
-                              fontSize: "0.98rem",
-                              color: "rgba(255,255,255,0.76)",
-                              marginBottom: "0.25rem",
-                            }}
-                          >
-                            {asset.title}
-                          </p>
-
-                          <div
-                            style={{
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "6.5px",
-                              letterSpacing: "0.26em",
-                              textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.22)",
-                              marginBottom: "0.45rem",
-                            }}
-                          >
-                            {asset.kind} · Confidence {Math.round(asset.confidence)}
-                          </div>
-
-                          {asset.commercialUseCases && asset.commercialUseCases.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                              {asset.commercialUseCases.slice(0, 3).map((tag) => (
-                                <span
-                                  key={tag}
-                                  style={{
-                                    padding: "3px 7px",
-                                    border: `1px solid ${GOLD}22`,
-                                    backgroundColor: `${GOLD}08`,
-                                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                                    fontSize: "6px",
-                                    letterSpacing: "0.16em",
-                                    textTransform: "uppercase",
-                                    color: `${GOLD}BE`,
-                                  }}
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {asset.href && (
-                          <Link
-                            href={asset.href}
-                            className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-70"
-                            style={{
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "7px",
-                              letterSpacing: "0.24em",
-                              textTransform: "uppercase",
-                              color: `${GOLD}AA`,
-                            }}
-                          >
-                            Open
-                            <ArrowRight style={{ width: "10px", height: "10px" }} />
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {nextAction && (
-              <div
-                style={{
-                  border: `1px solid ${GOLD}22`,
-                  backgroundColor: `${GOLD}06`,
-                  padding: "1.25rem 1.5rem",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.38em",
-                    textTransform: "uppercase",
-                    color: `${GOLD}90`,
-                    marginBottom: "0.65rem",
-                  }}
-                >
-                  Constitutional mandate
-                </div>
-                <p
-                  style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "1.05rem",
-                    lineHeight: 1.65,
-                    color: "rgba(255,255,255,0.72)",
-                    fontStyle: "italic",
-                  }}
-                >
-                  {nextAction}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            {header && (
-              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                    }}
-                  >
-                    Report header
-                  </span>
-                </div>
-                <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
-                  <MetricRow label="Report ID" value={header.reportId} />
-                  <MetricRow label="Organisation" value={header.organisationName} />
-                  <MetricRow label="Route" value={header.route} />
-                  <MetricRow label="Authority" value={header.authorityType} />
-                  <MetricRow label="Readiness tier" value={header.readinessTier} />
-                  <MetricRow label="Confidence" value={fmtPercent(header.confidence)} />
-                  <MetricRow label="Generated" value={formatDate(header.generatedAt)} />
-                </div>
-              </div>
-            )}
-
-            {constitution && (
-              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                    }}
-                  >
-                    Constitutional posture
-                  </span>
-                </div>
-                <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
-                  <MetricRow label="Org state" value={constitution.orgState} />
-                  <MetricRow label="Priority" value={constitution.priority} />
-                  <MetricRow label="Temperature" value={constitution.temperature} />
-                  <MetricRow label="Clarity score" value={fmtPercent(constitution.clarityScore)} />
-                  <MetricRow label="Authority score" value={fmtPercent(constitution.authorityScore)} />
-                  <MetricRow label="Governance score" value={fmtPercent(constitution.governanceScore)} />
-                  <MetricRow label="Severity score" value={fmtPercent(constitution.severityScore)} />
-                  <MetricRow label="Revenue band" value={constitution.revenueBand} />
-                  <MetricRow label="Market risk band" value={constitution.marketRiskBand} />
-                </div>
-              </div>
-            )}
-
-            {telemetry && (
-              <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06` }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: `1px solid ${GOLD}10`,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: `${GOLD}90`,
-                    }}
-                  >
-                    Integrity snapshot
-                  </span>
-                </div>
-                <div style={{ padding: "0.75rem 1.25rem" }}>
-                  <MetricRow label="Sovereign certainty" value={fmtPercent(telemetry.sovereignCertainty)} />
-                  <MetricRow label="Burnout index" value={fmtPercent(telemetry.burnoutIndex)} />
-                  <MetricRow label="Average dissonance" value={String(Math.round(telemetry.averageDissonance))} />
-                  <MetricRow label="Authorized" value={telemetry.authorized ? "YES" : "NO"} />
-                </div>
-              </div>
-            )}
-
-            {financialExposure && (
-              <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06` }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: `1px solid ${GOLD}10`,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: `${GOLD}90`,
-                    }}
-                  >
-                    Financial exposure estimate
-                  </span>
-                </div>
-                <div style={{ padding: "0.75rem 1.25rem" }}>
-                  <MetricRow label="Replacement cost" value={financialExposure.replacementCostFormatted} />
-                  <MetricRow label="Execution loss" value={financialExposure.executionLossFormatted} />
-                  <MetricRow label="Total exposure" value={financialExposure.totalExposureFormatted} />
-                </div>
-              </div>
-            )}
-
-            {summary?.priorityStack && summary.priorityStack.length > 0 && (
-              <div
-                style={{
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  backgroundColor: "rgba(255,255,255,0.01)",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.18)",
-                    }}
-                  >
-                    Priority stack
-                  </span>
-                </div>
-                <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
-                  {summary.priorityStack.slice(0, 6).map((item, i) => (
-                    <div
-                      key={`${item}-${i}`}
-                      className="flex items-start gap-2.5 py-2"
-                      style={{
-                        borderBottom: i < summary.priorityStack.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                          fontWeight: 300,
-                          fontSize: "1.4rem",
-                          lineHeight: 1,
-                          color: `${GOLD}25`,
-                          flexShrink: 0,
-                          minWidth: "22px",
-                        }}
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                          fontWeight: 300,
-                          fontSize: "0.88rem",
-                          lineHeight: 1.55,
-                          color: "rgba(255,255,255,0.55)",
-                        }}
-                      >
-                        {item}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {requiredInterventions.length > 0 && (
-              <div
-                style={{
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  backgroundColor: "rgba(255,255,255,0.01)",
-                  padding: "1rem 1.25rem",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.36em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.18)",
-                    marginBottom: "0.75rem",
-                  }}
-                >
-                  Required interventions
-                </div>
-                {requiredInterventions.slice(0, 6).map((m, i) => (
-                  <div key={`${m}-${i}`} className="flex items-start gap-2.5 py-1.5">
-                    <Target
-                      style={{
-                        width: "11px",
-                        height: "11px",
-                        color: `${GOLD}75`,
-                        flexShrink: 0,
-                        marginTop: "3px",
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.88rem",
-                        lineHeight: 1.55,
-                        color: "rgba(255,255,255,0.50)",
-                      }}
-                    >
-                      {m}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {failureModes.length > 0 && (
-              <div
-                style={{
-                  border: "1px solid rgba(252,165,165,0.12)",
-                  backgroundColor: "rgba(252,165,165,0.03)",
-                  padding: "1rem 1.25rem",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.36em",
-                    textTransform: "uppercase",
-                    color: "rgba(252,165,165,0.60)",
-                    marginBottom: "0.75rem",
-                  }}
-                >
-                  Failure modes
-                </div>
-
-                {failureModes.map((m, i) => (
-                  <div key={`${m}-${i}`} className="flex items-start gap-2.5 py-1.5">
-                    <AlertTriangle
-                      style={{
-                        width: "11px",
-                        height: "11px",
-                        color: "rgba(252,165,165,0.55)",
-                        flexShrink: 0,
-                        marginTop: "3px",
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontSize: "0.88rem",
-                        lineHeight: 1.55,
-                        color: "rgba(255,255,255,0.50)",
-                      }}
-                    >
-                      {m}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {(dominantDomains.length > 0 ||
-              recommendations?.audience?.length ||
-              recommendations?.commercialUseCases?.length ||
-              recommendations?.transformationStage?.length ||
-              summary?.rationale?.length ||
-              entitlements) && (
-              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                    }}
-                  >
-                    Diagnostic metadata
-                  </span>
-                </div>
-                <div style={{ padding: "1rem 1.25rem" }}>
-                  {dominantDomains.length > 0 && (
-                    <>
-                      <div
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "6.5px",
-                          letterSpacing: "0.30em",
-                          textTransform: "uppercase",
-                          color: `${GOLD}9A`,
-                          marginBottom: "0.55rem",
-                        }}
-                      >
-                        Dominant domains
-                      </div>
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {dominantDomains.slice(0, 5).map((item) => (
-                          <span
-                            key={item}
-                            style={{
-                              padding: "4px 8px",
-                              border: `1px solid ${GOLD}22`,
-                              backgroundColor: `${GOLD}08`,
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "6px",
-                              letterSpacing: "0.18em",
-                              textTransform: "uppercase",
-                              color: `${GOLD}BE`,
-                            }}
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  )}
-
-                  {recommendations?.audience?.length ? (
-                    <>
-                      <div
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "6.5px",
-                          letterSpacing: "0.30em",
-                          textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
-                          marginBottom: "0.55rem",
-                        }}
-                      >
-                        Audience
-                      </div>
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {recommendations.audience.slice(0, 4).map((item) => (
-                          <span
-                            key={item}
-                            style={{
-                              padding: "4px 8px",
-                              border: "1px solid rgba(255,255,255,0.08)",
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "6px",
-                              letterSpacing: "0.18em",
-                              textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.26)",
-                            }}
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  ) : null}
-
-                  {recommendations?.commercialUseCases?.length ? (
-                    <>
-                      <div
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "6.5px",
-                          letterSpacing: "0.30em",
-                          textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
-                          marginBottom: "0.55rem",
-                        }}
-                      >
-                        Commercial use cases
-                      </div>
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {recommendations.commercialUseCases.slice(0, 4).map((item) => (
-                          <span
-                            key={item}
-                            style={{
-                              padding: "4px 8px",
-                              border: "1px solid rgba(255,255,255,0.08)",
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "6px",
-                              letterSpacing: "0.18em",
-                              textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.26)",
-                            }}
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  ) : null}
-
-                  {recommendations?.transformationStage?.length ? (
-                    <>
-                      <div
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "6.5px",
-                          letterSpacing: "0.30em",
-                          textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
-                          marginBottom: "0.55rem",
-                        }}
-                      >
-                        Transformation stage
-                      </div>
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {recommendations.transformationStage.slice(0, 4).map((item) => (
-                          <span
-                            key={item}
-                            style={{
-                              padding: "4px 8px",
-                              border: "1px solid rgba(255,255,255,0.08)",
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "6px",
-                              letterSpacing: "0.18em",
-                              textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.26)",
-                            }}
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  ) : null}
-
-                  {summary?.rationale?.length ? (
-                    <>
-                      <div
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "6.5px",
-                          letterSpacing: "0.30em",
-                          textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
-                          marginBottom: "0.65rem",
-                        }}
-                      >
-                        Rationale
-                      </div>
-                      <div className="space-y-2">
-                        {summary.rationale.slice(0, 4).map((item, i) => (
-                          <div key={`${item}-${i}`} className="flex items-start gap-2.5">
-                            <Scale
-                              style={{
-                                width: "11px",
-                                height: "11px",
-                                color: "rgba(255,255,255,0.22)",
-                                flexShrink: 0,
-                                marginTop: "4px",
-                              }}
-                            />
-                            <span
-                              style={{
-                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                                fontWeight: 300,
-                                fontSize: "0.87rem",
-                                lineHeight: 1.55,
-                                color: "rgba(255,255,255,0.44)",
-                              }}
-                            >
-                              {item}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : null}
-
-                  {entitlements && (
-                    <div style={{ marginTop: summary?.rationale?.length ? "1rem" : 0 }}>
-                      <GoldRule soft />
-                      <div style={{ marginTop: "1rem" }}>
-                        <div
-                          style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "6.5px",
-                            letterSpacing: "0.30em",
-                            textTransform: "uppercase",
-                            color: "rgba(255,255,255,0.24)",
-                            marginBottom: "0.55rem",
-                          }}
-                        >
-                          Access status
-                        </div>
-                        <div className="space-y-1.5">
-                          {"status" in entitlements && (
-                            <div
-                              style={{
-                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                                fontWeight: 300,
-                                fontSize: "0.9rem",
-                                color: "rgba(255,255,255,0.50)",
-                              }}
-                            >
-                              Status: {safeString(entitlements.status, "active")}
-                            </div>
-                          )}
-                          {"tier" in entitlements && (
-                            <div
-                              style={{
-                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                                fontWeight: 300,
-                                fontSize: "0.9rem",
-                                color: "rgba(255,255,255,0.50)",
-                              }}
-                            >
-                              Tier: {safeString(entitlements.tier, "standard")}
-                            </div>
-                          )}
-                          {"remainingRuns" in entitlements && entitlements.remainingRuns != null && (
-                            <div
-                              style={{
-                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                                fontWeight: 300,
-                                fontSize: "0.9rem",
-                                color: "rgba(255,255,255,0.50)",
-                              }}
-                            >
-                              Remaining runs: {String(entitlements.remainingRuns)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Run key */}
+        <div className="mb-4 flex items-center gap-2">
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>
+            {result.runKey}
+          </span>
         </div>
 
-        <div
-          style={{
-            marginTop: "3rem",
-            padding: "1.75rem 2rem",
-            border: "1px solid rgba(255,255,255,0.06)",
-            backgroundColor: "rgba(255,255,255,0.01)",
-          }}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p
-                style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "0.97rem",
-                  color: "rgba(255,255,255,0.35)",
-                  fontStyle: "italic",
-                }}
-              >
-                {route === "STRATEGY"
-                  ? "The constitutional signal warrants direct strategic engagement."
-                  : route === "REJECT"
-                    ? "The matter is not yet at decision-grade threshold. Foundational work should precede escalation."
-                    : "A diagnostic reading has been produced. Structured correction should precede premium escalation."}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              {route === "STRATEGY" && (
-                <Link
-                  href="/strategy-room"
-                  className="inline-flex items-center gap-2 transition-all duration-300"
-                  style={{
-                    padding: "10px 20px",
-                    border: `1px solid ${GOLD}35`,
-                    backgroundColor: `${GOLD}0D`,
-                    color: `${GOLD}BB`,
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px",
-                    letterSpacing: "0.26em",
-                    textTransform: "uppercase",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = `${GOLD}60`;
-                    e.currentTarget.style.backgroundColor = `${GOLD}18`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = `${GOLD}35`;
-                    e.currentTarget.style.backgroundColor = `${GOLD}0D`;
-                  }}
-                >
-                  Strategy Room
-                  <ArrowRight style={{ width: "11px", height: "11px" }} />
-                </Link>
-              )}
-
-              {(route === "DIAGNOSTIC" || route === "REJECT") && (
-                <Link
-                  href="/diagnostics"
-                  className="inline-flex items-center gap-2 transition-all duration-300"
-                  style={{
-                    padding: "10px 20px",
-                    border: `1px solid ${GOLD}28`,
-                    backgroundColor: `${GOLD}08`,
-                    color: `${GOLD}AA`,
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px",
-                    letterSpacing: "0.26em",
-                    textTransform: "uppercase",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = `${GOLD}4A`;
-                    e.currentTarget.style.backgroundColor = `${GOLD}12`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = `${GOLD}28`;
-                    e.currentTarget.style.backgroundColor = `${GOLD}08`;
-                  }}
-                >
-                  Diagnostic ladder
-                  <ChevronRight style={{ width: "11px", height: "11px" }} />
-                </Link>
-              )}
-
-              <button
-                type="button"
-                onClick={onRerun}
-                style={{
-                  padding: "10px 20px",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  backgroundColor: "transparent",
-                  color: "rgba(255,255,255,0.28)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
-                  letterSpacing: "0.26em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)";
-                  e.currentTarget.style.color = "rgba(255,255,255,0.55)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
-                  e.currentTarget.style.color = "rgba(255,255,255,0.28)";
-                }}
-              >
-                Rerun diagnostic
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Intervention Requirement Classification */}
-        <div className="mt-10" style={{ border: `1px solid ${route === "STRATEGY" ? "rgba(252,165,165,0.22)" : `${GOLD}20`}`, backgroundColor: route === "STRATEGY" ? "rgba(252,165,165,0.03)" : `${GOLD}04`, padding: "1.25rem 1.5rem" }}>
-          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: route === "STRATEGY" ? "rgba(252,165,165,0.70)" : `${GOLD}80`, marginBottom: "0.65rem" }}>
-            Intervention Requirement
-          </div>
-          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", color: route === "STRATEGY" ? "rgba(252,165,165,0.85)" : "rgba(255,255,255,0.70)", fontWeight: 700 }}>
-            {route === "STRATEGY" ? "EXECUTION REQUIRED" : route === "DIAGNOSTIC" ? "DIAGNOSTIC" : trajectory === "DETERIORATING" ? "STRATEGY" : "MONITOR"}
-          </div>
-
-          {route === "STRATEGY" && (
-            <div className="mt-4 grid gap-px sm:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
-              <div style={{ backgroundColor: "rgb(4 5 7)", padding: "0.75rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.3rem" }}>
-                  Dominant condition
-                </div>
-                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.45, color: "rgba(255,255,255,0.58)" }}>
-                  {failureModes[0] || dominantDomains[0] || "Structural constraint identified"}
-                </div>
-              </div>
-              <div style={{ backgroundColor: "rgb(4 5 7)", padding: "0.75rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.3rem" }}>
-                  Required decision
-                </div>
-                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.45, color: "rgba(255,255,255,0.58)" }}>
-                  {nextAction || "Governed intervention under structured conditions"}
-                </div>
-              </div>
-              <div style={{ backgroundColor: "rgb(4 5 7)", padding: "0.75rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)", marginBottom: "0.3rem" }}>
-                  Risk if delayed
-                </div>
-                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.45, color: "rgba(252,165,165,0.60)" }}>
-                  {trajectory === "DETERIORATING" ? "Condition deteriorating under current trajectory" : "Decision delay compounds structural exposure"}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {route === "STRATEGY" && (
-          <StrategyRoomConversionBridge
-            className="mt-4"
-            price={395}
-            ctaHref="/strategy-room"
-            checkoutPriceCode="strategy_room"
-            originPath="/diagnostics/executive-reporting/run"
-            primaryCtaLabel="Enter Strategy Room"
-            title="Execution required. Strategy Room is where this becomes intervention."
-            description=""
-            signals={[]}
-          />
-        )}
-
-        {route !== "STRATEGY" && (
-          <div className="mt-4" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
-            {route === "DIAGNOSTIC" ? "Return to diagnostic ladder to strengthen evidence." : "Monitor condition. Re-evaluate if trajectory changes."}
-          </div>
-        )}
       </div>
     </div>
   );
