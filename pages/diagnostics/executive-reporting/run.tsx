@@ -7,6 +7,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
+import { useInterpretation } from "@/lib/ai/use-interpretation";
 import {
   mergeExecutiveFindingsIntoThread,
   readConstitutionalThread,
@@ -43,29 +44,37 @@ import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-author
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 
 type ExecutiveReportingIntakeForm = {
+  // Identity (minimal)
   fullName: string;
   email: string;
   organisation: string;
   role: string;
   sector: string;
+  // Structured context
+  authorityScope: string;
+  boardInvolved: string;
+  revenueBand: string;
+  decisionWindow: string;
+  headcountAffected: string;
+  stakeholderBreadth: string;
+  // High-yield free-text — each has a direct downstream consumer
+  /** Consumer: position statement, contradiction map */
+  decisionQuestion: string;
+  /** Consumer: consequence pricing, cost of delay */
+  whatHappensIfNothingChanges: string;
+  /** Consumer: priority stack constraints, action sequencing */
+  currentConstraint: string;
+  /** Consumer: pattern engine, correction history */
+  priorAttemptOutcome: string;
+  // Legacy fields (maintained for API compat, not shown in form)
   problemStatement: string;
   symptoms: string;
   desiredOutcome: string;
-  currentConstraint: string;
-  authorityScope: string;
   sponsorNameOrSeat: string;
-  boardInvolved: string;
-  stakeholderBreadth: string;
-  revenueBand: string;
   marketExposure: string;
   estimatedExposureGBP: string;
-  decisionWindow: string;
-  headcountAffected: string;
   evidenceQuality: string;
   evidenceNotes: string;
-  priorAttemptOutcome: string;
-  decisionQuestion: string;
-  whatHappensIfNothingChanges: string;
 };
 
 type ExecutiveReportRecommendationView = {
@@ -994,6 +1003,21 @@ function ResultSurface({
   const requiredInterventions =
     summary?.requiredInterventions ?? constitution?.requiredInterventions ?? [];
 
+  // Intelligence layer — async interpretation enrichment
+  const intake = (result as any)?.intake;
+  const { interpretation, loading: interpretLoading } = useInterpretation({
+    canonicalResult: canonical?.sections ?? {},
+    userInputs: {
+      problemStatement: intake?.decisionQuestion ?? intake?.problemStatement ?? "",
+      constraints: intake?.currentConstraint ?? "",
+      objective: intake?.whatHappensIfNothingChanges ?? "",
+      symptoms: intake?.priorAttemptOutcome ?? "",
+    },
+    stage: "executive",
+    tensionThread: thread as Record<string, unknown> | null,
+    enabled: Boolean(canonical?.sections),
+  });
+
   // Prognostic layer
   const readinessNum = ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[safeString(constitution?.readinessTier)] ?? 50;
   const trajectory = inferTrajectory(clarityScore, readinessNum, failureModes);
@@ -1087,6 +1111,86 @@ function ResultSurface({
             </span>
           </div>
         </div>
+
+        {/* ── INTELLIGENCE LAYER — bespoke interpretation (async enrichment) ── */}
+        {interpretation && interpretation.source === "llm" && (
+          <div className="mb-8" style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "1.5rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+              Position Statement
+            </div>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.3rem, 2.5vw, 1.8rem)", lineHeight: 1.15, color: "rgba(255,255,255,0.88)" }}>
+              {interpretation.conditionLabel}
+            </h2>
+            <p style={{ marginTop: "0.6rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>
+              {interpretation.conditionExplanation}
+            </p>
+
+            {/* Contradiction map */}
+            {interpretation.contradictionInsight && (
+              <div className="mt-4" style={{ borderTop: `1px solid ${GOLD}15`, paddingTop: "0.75rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.35rem" }}>
+                  Contradiction
+                </div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.55)" }}>
+                  {interpretation.contradictionInsight}
+                </p>
+              </div>
+            )}
+
+            {/* Governed priority stack */}
+            {interpretation.priorityStack.length > 0 && (
+              <div className="mt-4" style={{ borderTop: `1px solid ${GOLD}15`, paddingTop: "0.75rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>
+                  Governed Priority Stack
+                </div>
+                {interpretation.priorityStack.map((p, i) => (
+                  <div key={i} className="flex items-start gap-3 py-1.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", color: `${GOLD}60`, flexShrink: 0, marginTop: "2px" }}>{String(i + 1).padStart(2, "0")}</span>
+                    <div>
+                      <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(255,255,255,0.62)" }}>{p.action}</span>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.78rem", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>{p.rationale}</p>
+                    </div>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "5.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: p.urgency === "immediate" ? "rgba(252,165,165,0.60)" : p.urgency === "near_term" ? `${GOLD}60` : "rgba(255,255,255,0.25)", flexShrink: 0 }}>{p.urgency.replace("_", " ")}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Narrative */}
+            <div className="mt-4" style={{ borderTop: `1px solid ${GOLD}15`, paddingTop: "0.75rem" }}>
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)", fontStyle: "italic" }}>
+                {interpretation.narrative}
+              </p>
+            </div>
+
+            {/* Escalation decision */}
+            {interpretation.escalationJustification && (
+              <div className="mt-3" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
+                {interpretation.escalationJustification}
+              </div>
+            )}
+          </div>
+        )}
+
+        {interpretLoading && (
+          <div className="mb-6" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+            Interpreting condition...
+          </div>
+        )}
+
+        {/* ── CROSS-STAGE MEMORY — what the system has now confirmed ── */}
+        {thread && (
+          <div className="mb-8" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.55rem" }}>
+              What the system has now confirmed
+            </div>
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
+              Constitutional diagnostic classified this as {thread.posture} with {thread.route} routing at {Math.round(thread.confidence * 100)}% confidence.
+              {thread.failureModes.length > 0 ? ` Failure modes identified: ${thread.failureModes.join(", ")}.` : ""}
+              {thread.readinessTier ? ` Readiness: ${thread.readinessTier}.` : ""}
+            </p>
+          </div>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
           <div className="space-y-6">
@@ -2753,6 +2857,8 @@ function ExecutiveReportingIntake({
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="space-y-10">
+
+            {/* ── GROUP 1: IDENTITY (minimal) ── */}
             <div>
               <GroupHeader label="Identity" />
               <div className="grid gap-4 sm:grid-cols-2">
@@ -2768,114 +2874,33 @@ function ExecutiveReportingIntake({
                 <Field label="Role" required>
                   <Input name="role" value={form.role} onChange={handleChange} placeholder="Founder, CEO, Chair, Director..." />
                 </Field>
-                <Field label="Sector">
-                  <Input name="sector" value={form.sector} onChange={handleChange} placeholder="Sector or operating context" />
-                </Field>
               </div>
             </div>
 
+            {/* ── GROUP 2: STRUCTURED CONTEXT ── */}
             <div>
-              <GroupHeader label="Current condition" />
-              <div className="space-y-4">
-                <Field label="Problem statement" required>
-                  <Textarea
-                    name="problemStatement"
-                    value={form.problemStatement}
-                    onChange={handleChange}
-                    rows={6}
-                    placeholder="State the structural problem, not just the symptoms. Minimum 120 characters."
-                  />
-                </Field>
-                <Field label="Observed symptoms" required>
-                  <Textarea
-                    name="symptoms"
-                    value={form.symptoms}
-                    onChange={handleChange}
-                    rows={5}
-                    placeholder="Describe what is visible on the ground."
-                  />
-                </Field>
-                <Field label="Desired outcome" required>
-                  <Textarea
-                    name="desiredOutcome"
-                    value={form.desiredOutcome}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder="What decision-grade outcome is required?"
-                  />
-                </Field>
-                <Field label="Current constraint" required>
-                  <Textarea
-                    name="currentConstraint"
-                    value={form.currentConstraint}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder="What is materially preventing movement?"
-                  />
-                </Field>
-              </div>
-            </div>
-
-            <div>
-              <GroupHeader label="Authority & decision scope" />
+              <GroupHeader label="Decision scope" />
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Authority scope" required>
-                  <Select
-                    name="authorityScope"
-                    value={form.authorityScope}
-                    onChange={handleChange}
+                  <Select name="authorityScope" value={form.authorityScope} onChange={handleChange}
                     options={[
-                      { label: "I decide directly (DIRECT)", value: "DIRECT" },
-                      { label: "I influence and sponsor (PROXY)", value: "PROXY" },
-                      { label: "I am exploring only (UNCLEAR)", value: "UNCLEAR" },
+                      { label: "I decide directly", value: "DIRECT" },
+                      { label: "I influence and sponsor", value: "PROXY" },
+                      { label: "I am exploring", value: "UNCLEAR" },
                     ]}
                   />
                 </Field>
-                <Field label="Decision sponsor or seat" required>
-                  <Input
-                    name="sponsorNameOrSeat"
-                    value={form.sponsorNameOrSeat}
-                    onChange={handleChange}
-                    placeholder="Name or position of decision sponsor"
-                  />
-                </Field>
-                <Field label="Board involved">
-                  <Select
-                    name="boardInvolved"
-                    value={form.boardInvolved}
-                    onChange={handleChange}
+                <Field label="Board involvement">
+                  <Select name="boardInvolved" value={form.boardInvolved} onChange={handleChange}
                     options={[
                       { label: "Yes", value: "YES" },
                       { label: "No", value: "NO" },
-                      { label: "Not yet / uncertain", value: "UNCERTAIN" },
+                      { label: "Pending", value: "UNCERTAIN" },
                     ]}
                   />
                 </Field>
-                <Field label="Stakeholder breadth">
-                  <Select
-                    name="stakeholderBreadth"
-                    value={form.stakeholderBreadth}
-                    onChange={handleChange}
-                    options={[
-                      { label: "Individual / local", value: "LOCAL" },
-                      { label: "Multi-team", value: "MULTI_TEAM" },
-                      { label: "Executive level", value: "EXECUTIVE" },
-                      { label: "Board level", value: "BOARD" },
-                      { label: "Institutional", value: "INSTITUTIONAL" },
-                    ]}
-                  />
-                </Field>
-              </div>
-            </div>
-
-            <div>
-              <GroupHeader label="Economics & consequence" />
-              <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Revenue band" required>
-                  <Select
-                    name="revenueBand"
-                    value={form.revenueBand}
-                    onChange={handleChange}
+                  <Select name="revenueBand" value={form.revenueBand} onChange={handleChange}
                     options={[
                       { label: "Under £50k", value: "MICRO" },
                       { label: "£50k – £250k", value: "SMB" },
@@ -2885,112 +2910,80 @@ function ExecutiveReportingIntake({
                     ]}
                   />
                 </Field>
-                <Field label="Market exposure" required>
-                  <Select
-                    name="marketExposure"
-                    value={form.marketExposure}
-                    onChange={handleChange}
+                <Field label="Decision window" required>
+                  <Select name="decisionWindow" value={form.decisionWindow} onChange={handleChange}
                     options={[
-                      { label: "Stable", value: "LOW" },
-                      { label: "Some volatility", value: "MEDIUM" },
-                      { label: "Meaningful pressure", value: "HIGH" },
-                      { label: "Severe instability", value: "CRITICAL" },
-                    ]}
-                  />
-                </Field>
-                <Field label="Estimated financial exposure (£)" required>
-                  <Input
-                    name="estimatedExposureGBP"
-                    value={form.estimatedExposureGBP}
-                    onChange={handleChange}
-                    type="number"
-                    placeholder="e.g. 500000"
-                  />
-                </Field>
-                <Field label="Decision window">
-                  <Select
-                    name="decisionWindow"
-                    value={form.decisionWindow}
-                    onChange={handleChange}
-                    options={[
-                      { label: "Immediate / 30 days", value: "IMMEDIATE" },
-                      { label: "Quarter / 90 days", value: "NEAR_TERM" },
+                      { label: "30 days", value: "IMMEDIATE" },
+                      { label: "90 days", value: "NEAR_TERM" },
                       { label: "6–12 months", value: "MID_TERM" },
-                      { label: "Long horizon", value: "LONG_HORIZON" },
+                      { label: "Strategic horizon", value: "LONG_HORIZON" },
                     ]}
                   />
                 </Field>
                 <Field label="Headcount affected">
-                  <Input
-                    name="headcountAffected"
-                    value={form.headcountAffected}
-                    onChange={handleChange}
-                    type="number"
-                    placeholder="Number of people affected"
-                  />
-                </Field>
-              </div>
-            </div>
-
-            <div>
-              <GroupHeader label="Evidence quality & prior attempts" />
-              <div className="space-y-4">
-                <Field label="Evidence quality" required>
-                  <Select
-                    name="evidenceQuality"
-                    value={form.evidenceQuality}
-                    onChange={handleChange}
+                  <Select name="headcountAffected" value={form.headcountAffected} onChange={handleChange}
                     options={[
-                      { label: "High — documented, recent, cross-verified", value: "HIGH" },
-                      { label: "Medium — partial documentation", value: "MEDIUM" },
-                      { label: "Low — largely anecdotal", value: "LOW" },
+                      { label: "Under 20", value: "20" },
+                      { label: "20–100", value: "100" },
+                      { label: "100–500", value: "500" },
+                      { label: "500+", value: "1000" },
                     ]}
                   />
                 </Field>
-                <Field label="Evidence notes" required>
-                  <Textarea
-                    name="evidenceNotes"
-                    value={form.evidenceNotes}
-                    onChange={handleChange}
-                    rows={4}
-                    placeholder="Describe the evidence base and its quality."
-                  />
-                </Field>
-                <Field label="Prior correction attempts">
-                  <Select
-                    name="priorAttemptOutcome"
-                    value={form.priorAttemptOutcome}
-                    onChange={handleChange}
+                <Field label="Stakeholder scope">
+                  <Select name="stakeholderBreadth" value={form.stakeholderBreadth} onChange={handleChange}
                     options={[
-                      { label: "None — first attempt", value: "NONE" },
-                      { label: "Attempted — partially worked", value: "PARTIAL" },
-                      { label: "Attempted — did not hold", value: "FAILED" },
-                      { label: "Attempted — situation worsened", value: "WORSENED" },
+                      { label: "Local / team", value: "LOCAL" },
+                      { label: "Multi-team", value: "MULTI_TEAM" },
+                      { label: "Executive level", value: "EXECUTIVE" },
+                      { label: "Board / institutional", value: "INSTITUTIONAL" },
                     ]}
                   />
                 </Field>
               </div>
             </div>
 
+            {/* ── GROUP 3: HIGH-YIELD FREE TEXT — each field has a direct consumer ── */}
             <div>
-              <GroupHeader label="Timing & consequence" />
-              <div className="space-y-4">
-                <Field label="Decision question" required>
+              <GroupHeader label="The decision" />
+              <p style={{ marginTop: "-0.5rem", marginBottom: "1rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>
+                Four questions. Each one changes the report. No fluff — write what is real.
+              </p>
+              <div className="space-y-5">
+                <Field label="What decision is actually on the table?" required>
                   <Textarea
                     name="decisionQuestion"
                     value={form.decisionQuestion}
                     onChange={handleChange}
                     rows={3}
-                    placeholder="What specific decision needs to be made?"
+                    placeholder="Not the topic. The decision. One sentence if possible."
                   />
                 </Field>
-                <Field label="Cost of inaction" required>
+                <Field label="What becomes more expensive if this is delayed?" required>
                   <Textarea
                     name="whatHappensIfNothingChanges"
                     value={form.whatHappensIfNothingChanges}
                     onChange={handleChange}
                     rows={3}
-                    placeholder="What compounds if nothing changes?"
+                    placeholder="Name the specific cost — financial, structural, political, reputational."
+                  />
+                </Field>
+                <Field label="What is the real constraint?" required>
+                  <Textarea
+                    name="currentConstraint"
+                    value={form.currentConstraint}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Not symptoms. The thing preventing this decision from being made right now."
+                  />
+                </Field>
+                <Field label="What has already been tried, and what specifically went wrong?">
+                  <Textarea
+                    name="priorAttemptOutcome"
+                    value={form.priorAttemptOutcome}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="If nothing: say nothing. If something failed: state what and why."
                   />
                 </Field>
               </div>
