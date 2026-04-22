@@ -14,6 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
 
 type EnterpriseDomain = {
   label: string;
@@ -450,6 +451,8 @@ function ResultPanel({ result }: { result: any }) {
       transition={{ duration: 0.5 }}
       className="space-y-4"
     >
+      {/* Cross-stage memory */}
+      <SystemMemoryBlock currentStage="enterprise" />
       {/* Condition */}
       <div className="border border-amber-500/20 bg-amber-500/[0.04] p-5">
         <div className="flex items-center gap-2 mb-4">

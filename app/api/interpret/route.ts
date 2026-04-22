@@ -51,6 +51,18 @@ export async function POST(req: NextRequest) {
       tensionThread: tensionThread ?? null,
     });
 
+    // Log quality metrics for monitoring
+    if (output.source === "llm" && output.latencyMs) {
+      console.info("[INTERPRET_API]", {
+        stage,
+        source: output.source,
+        latencyMs: output.latencyMs,
+        model: output.model,
+        hasContradiction: Boolean(output.contradictionInsight),
+        priorityCount: output.priorityStack.length,
+      });
+    }
+
     return NextResponse.json({ ok: true, ...output });
   } catch (err) {
     console.error("[INTERPRET_API]", err);

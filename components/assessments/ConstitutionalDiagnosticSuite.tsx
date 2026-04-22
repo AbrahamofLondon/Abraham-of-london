@@ -40,6 +40,7 @@ import {
 } from "@/lib/diagnostics/session-thread";
 import { track } from "@/lib/analytics/track";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
+import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import DiagnosticFeedback from "@/components/diagnostics/results/DiagnosticFeedback";
@@ -1055,6 +1056,9 @@ export default function ConstitutionalDiagnosticSuite() {
             transition={{ duration: 0.55 }}
           >
             <div className="py-12 space-y-6">
+              {/* Cross-stage memory from prior stages */}
+              <SystemMemoryBlock currentStage="constitutional" />
+
               {/* Verdict headline */}
               <div style={{ border: `1px solid ${rc.border}`, backgroundColor: rc.bg, padding: "2rem" }}>
                 <Eyebrow>Constitutional verdict</Eyebrow>

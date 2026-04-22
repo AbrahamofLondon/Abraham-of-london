@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from "recharts";
 import Link from "next/link";
+import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
 
 const GOLD = "#C9A96E";
 const LIFT = "rgb(10 14 20)";
@@ -294,6 +295,8 @@ function ResultPanel({ result, rows }: { result: Record<string, unknown>; rows: 
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.50 }} className="space-y-4">
+      {/* Cross-stage memory */}
+      <SystemMemoryBlock currentStage="team" />
       {/* Condition */}
       <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}08`, padding: "1.5rem" }}>
         <div className="flex items-center gap-2 mb-4">

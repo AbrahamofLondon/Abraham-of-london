@@ -237,16 +237,58 @@ export async function interpret(input: InterpretationInput): Promise<Interpretat
       latencyMs,
     };
 
-    // Anti-generic guards
-    if (!passesSpecificityCheck(output, input)) {
-      console.warn("[INTERPRETATION_ENGINE] Output failed specificity check. Retrying with emphasis...");
-      // Don't retry — return with a flag. The caller can decide.
-      output.conditionLabel = `[LOW_SPECIFICITY] ${output.conditionLabel}`;
-    }
+    // Anti-generic enforcement — retry once if output is weak
+    const specificityPass = passesSpecificityCheck(output, input);
+    const languagePass = passesLanguageGuard(output);
 
-    if (!passesLanguageGuard(output)) {
-      console.warn("[INTERPRETATION_ENGINE] Output contains banned generic phrases.");
-      output.conditionLabel = `[GENERIC_LANGUAGE] ${output.conditionLabel}`;
+    if (!specificityPass || !languagePass) {
+      const reasons = [
+        !specificityPass ? "low specificity — does not reference user inputs" : "",
+        !languagePass ? "generic language detected" : "",
+      ].filter(Boolean).join("; ");
+
+      console.warn(`[INTERPRETATION_ENGINE] Output rejected: ${reasons}. Retrying with emphasis.`);
+
+      // Retry with emphasis prompt
+      try {
+        const retryResponse = await client.messages.create({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 2000,
+          system: systemPrompt,
+          messages: [
+            { role: "user", content: userMessage },
+            { role: "assistant", content: textBlock.text },
+            { role: "user", content: `REJECTED: ${reasons}. Your output was too generic. It must reference the user's specific inputs: their stated decision, their constraint, their prior attempts. Rewrite the entire output. Do not use phrases like "organisations often" or "typically". Every statement must be grounded in THIS user's situation. Return the corrected JSON.` },
+          ],
+        });
+
+        const retryText = retryResponse.content.find((b) => b.type === "text");
+        if (retryText && retryText.type === "text") {
+          try {
+            const retryRaw = retryText.text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+            const retryParsed = JSON.parse(retryRaw) as Record<string, unknown>;
+            // Use retry output if it parses
+            output.conditionLabel = String(retryParsed.conditionLabel ?? output.conditionLabel);
+            output.conditionExplanation = String(retryParsed.conditionExplanation ?? output.conditionExplanation);
+            output.contradictionInsight = String(retryParsed.contradictionInsight ?? output.contradictionInsight);
+            output.narrative = String(retryParsed.narrative ?? output.narrative);
+            if (Array.isArray(retryParsed.contextualRisks)) output.contextualRisks = retryParsed.contextualRisks.map(String);
+            if (Array.isArray(retryParsed.priorityStack)) {
+              output.priorityStack = retryParsed.priorityStack.map((p: Record<string, unknown>) => ({
+                action: String(p.action ?? ""),
+                rationale: String(p.rationale ?? ""),
+                urgency: (["immediate", "near_term", "structural"].includes(String(p.urgency)) ? String(p.urgency) : "near_term") as PriorityAction["urgency"],
+              }));
+            }
+            output.latencyMs = Date.now() - startMs;
+            console.info("[INTERPRETATION_ENGINE] Retry produced improved output.");
+          } catch {
+            console.warn("[INTERPRETATION_ENGINE] Retry parse failed. Using original output.");
+          }
+        }
+      } catch {
+        console.warn("[INTERPRETATION_ENGINE] Retry call failed. Using original output.");
+      }
     }
 
     return output;
