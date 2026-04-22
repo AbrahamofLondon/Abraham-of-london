@@ -485,7 +485,7 @@ export default function DiagnosticsIndexPage() {
                 }}
               >
                 <p>Diagnostics identify condition. Team assessment strengthens evidence. Enterprise assessment stress-tests the institution.</p>
-                <p>Executive Reporting states position and consequence. WATCH governs observation. Strategy Room is the escalation environment. Monitoring extends the flagship over time.</p>
+                <p>Executive Reporting forces position and consequence. WATCH governs observation. Strategy Room is the escalation environment. Monitoring extends the flagship over time.</p>
               </div>
             </div>
           </div>

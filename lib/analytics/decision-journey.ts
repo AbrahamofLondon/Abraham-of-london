@@ -52,7 +52,17 @@ export type JourneyStage =
   | "strategy_blocked"
   | "hesitation_time_on_cta"
   | "hesitation_repeated_scroll"
-  | "hesitation_exit_after_hover";
+  | "hesitation_exit_after_hover"
+  | "home_scroll_50"
+  | "home_scroll_90"
+  | "evidence_scroll_80"
+  | "instrument_hesitation"
+  | "instrument_card_hover"
+  | "report_hesitation"
+  | "strategy_hesitation"
+  | "conviction_advance"
+  | "cta_doubt"
+  | "exit_after_cta";
 
 export type JourneyContext = {
   bundleId?: string;

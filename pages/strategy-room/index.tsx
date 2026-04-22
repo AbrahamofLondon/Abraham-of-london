@@ -1677,11 +1677,17 @@ export default function StrategyRoomPage({
   React.useEffect(() => {
     trackStrategyRoomEntry();
     trackStrategyGateView();
+    // Behavioural tracking
+    const { trackHesitation, trackExitAfterCtaView } = require("@/lib/analytics/hesitation");
+    const cleanH = trackHesitation({ page: "strategy_room", idleTimeout: 10000 });
+    const cleanE = trackExitAfterCtaView("strategy_room", "[data-sr-cta]");
+    const cleanups = [cleanH, cleanE];
     if (checkoutConfirmed) {
       track("strategy_room_checkout_returned_success", {
         stage: "strategy-room",
       });
     }
+    return () => { cleanups.forEach((fn) => fn()); };
   }, []);
 
   React.useEffect(() => {
@@ -1783,7 +1789,7 @@ export default function StrategyRoomPage({
                   fontStyle: "italic",
                 }}
               >
-                This is where decisions are executed under pressure.
+                This is where decisions are executed when delay is no longer viable.
               </h1>
               <p
                 style={{
@@ -1833,6 +1839,9 @@ export default function StrategyRoomPage({
 
               {/* ── WHAT THIS IS ── */}
               <div className="mt-10">
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.40)", marginBottom: "0.75rem" }}>
+                  The system removes ambiguity from action.
+                </p>
                 <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
                   Execution value
                 </div>
@@ -1881,7 +1890,10 @@ export default function StrategyRoomPage({
 
               {/* ── IF YOU DO NOTHING ── */}
               <div className="mt-8">
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.75rem" }}>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+                  Most organisations stop here.
+                </p>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.75rem" }}>
                   If you do nothing
                 </div>
                 <div className="space-y-1.5" style={{ maxWidth: "44rem" }}>
@@ -1902,6 +1914,9 @@ export default function StrategyRoomPage({
               {/* ── COMMERCIAL FRAMING ── */}
               <div className="mt-10">
                 <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06`, padding: "1.25rem", maxWidth: "44rem" }}>
+                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", marginBottom: "0.5rem" }}>
+                    Intervention logic is now required.
+                  </div>
                   <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
                     &pound;395 &mdash; execution environment
                   </div>

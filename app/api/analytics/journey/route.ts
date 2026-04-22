@@ -5,29 +5,11 @@ import {
   type JourneyContext,
 } from "@/lib/analytics/decision-journey";
 
-const VALID_STAGES = new Set<JourneyStage>([
-  "landing",
-  "bundle_click",
-  "diagnostic_start",
-  "diagnostic_complete",
-  "diagnostic_abandon",
-  "team_mode_selected",
-  "campaign_created",
-  "first_respondent",
-  "campaign_closed",
-  "enterprise_complete",
-  "exec_gate_view",
-  "exec_purchase_start",
-  "exec_purchase",
-  "exec_run_start",
-  "exec_report_generated",
-  "watch_state",
-  "watch_followup",
-  "strategy_gate_view",
-  "strategy_attempt",
-  "strategy_allowed",
-  "strategy_blocked",
-]);
+// Accept any non-empty string as stage — the JourneyStage type union is
+// enforced at the client. Server persists all events for behavioural analysis.
+function isValidStage(stage: unknown): stage is JourneyStage {
+  return typeof stage === "string" && stage.length > 0 && stage.length < 100;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,7 +28,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!stage || !VALID_STAGES.has(stage as JourneyStage)) {
+    if (!stage || !isValidStage(stage)) {
       return NextResponse.json(
         { error: "Invalid or missing stage" },
         { status: 400 },

@@ -70,6 +70,16 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function EvidencePage() {
+  React.useEffect(() => {
+    const { trackScrollDepth, trackHesitation, advanceConviction } = require("@/lib/analytics/hesitation");
+    const { emitJourneyEvent } = require("@/lib/analytics/journey-client");
+    emitJourneyEvent("evidence_viewed", { entryPath: "/evidence" });
+    const cleanScroll = trackScrollDepth("evidence", [80]);
+    const cleanHesitation = trackHesitation({ page: "evidence", idleTimeout: 6000 });
+    advanceConviction("RECOGNISED");
+    return () => { cleanScroll(); cleanHesitation(); };
+  }, []);
+
   return (
     <Layout
       title="Case Evidence | Abraham of London"
@@ -201,6 +211,17 @@ export default function EvidencePage() {
                   </Link>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── INTERVENTION LINE ── */}
+        <section>
+          <div className="mx-auto max-w-6xl px-6 lg:px-12">
+            <div className="py-6" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <p style={{ ...serif, fontSize: "0.88rem", color: "rgba(252,165,165,0.45)", fontStyle: "italic" }}>
+                This requires intervention, not analysis.
+              </p>
             </div>
           </div>
         </section>

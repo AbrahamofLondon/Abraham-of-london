@@ -177,6 +177,9 @@ export default function DecisionInstrumentsPage() {
         <section id="instruments">
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="py-10 lg:py-14">
+              <p style={{ ...serif, fontSize: "0.85rem", color: "rgba(252,165,165,0.40)", fontStyle: "italic", marginBottom: "1rem" }}>
+                If you cannot delay the decision, use one of these now.
+              </p>
               <div className="grid gap-3 md:grid-cols-3">
                 {INSTRUMENTS.map((inst) => (
                   <div

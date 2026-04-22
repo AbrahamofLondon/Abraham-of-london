@@ -1886,6 +1886,11 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
   React.useEffect(() => {
     trackLanding("/");
+    // Behavioural tracking
+    const { trackScrollDepth, trackHesitation } = require("@/lib/analytics/hesitation");
+    const cleanScroll = trackScrollDepth("home", [50, 90]);
+    const cleanHesitation = trackHesitation({ page: "home", idleTimeout: 5000 });
+    return () => { cleanScroll(); cleanHesitation(); };
   }, []);
 
   const trackHeroClick = React.useCallback((variant: string) => {
@@ -1920,6 +1925,10 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
             Diagnostic evidence becomes a governed executive brief.
             <br />
             Financial exposure. Priority stack. Next action.
+          </p>
+
+          <p className="mt-2 max-w-[58ch] text-[13px] leading-[1.7]" style={{ color: "rgba(252,165,165,0.40)", fontStyle: "italic" }}>
+            Used when decisions cannot wait and the cost of delay is compounding.
           </p>
 
           <p className="mt-4 max-w-[58ch] text-[14px] leading-[1.85] ds-text-muted">
@@ -2124,7 +2133,7 @@ function WhatThisPlatformIs() {
           <>
             Diagnostics identify condition.
             <br />
-            <span className="ds-text-muted">Executive Reporting states position and consequence.</span>
+            <span className="ds-text-muted">Executive Reporting forces position and consequence.</span>
           </>
         }
         description="A governed system that turns structured diagnostic evidence into a decision-ready executive brief — position, financial exposure, priority stack, and next action."
@@ -2682,6 +2691,9 @@ function ProofLayer() {
               <p className="mt-4 border-t border-white/[0.08] pt-4 text-[12.5px] leading-[1.8]" style={{ color: "#F87171", fontWeight: 700 }}>
                 Without intervention, conditions like this typically deteriorate within 30–90 days.
               </p>
+              <p className="mt-2 text-[12px] leading-[1.7]" style={{ color: "rgba(252,165,165,0.50)", fontStyle: "italic" }}>
+                This condition requires intervention, not further analysis.
+              </p>
             </div>
           </div>
         </div>
@@ -2857,7 +2869,10 @@ function HomeDecisionLayer() {
         </p>
 
         {/* 3 instrument cards */}
-        <div className="mt-8 grid gap-3 md:grid-cols-3">
+        <p className="mt-6" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(252,165,165,0.40)", fontStyle: "italic" }}>
+          If you cannot delay the decision, use one of these now.
+        </p>
+        <div className="mt-3 grid gap-3 md:grid-cols-3">
           {instruments.map((inst) => (
             <Link
               key={inst.slug}
@@ -3188,6 +3203,14 @@ const HomePage: NextPage<HomePageProps> = ({
       {/* 4. Diagnostics — the ladder */}
       <WhatThisPlatformIs />
       <HowItWorksLadder />
+
+      {/* Flow reinforcement */}
+      <div className="mx-auto max-w-[1100px] px-6 py-3 lg:px-12">
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+        <p className="mt-3 text-center" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.78rem", color: "rgba(255,255,255,0.18)" }}>
+          The system advances when the condition requires it.
+        </p>
+      </div>
 
       {/* 5. Reporting — Executive Reporting */}
       <HomeDecisionSection />

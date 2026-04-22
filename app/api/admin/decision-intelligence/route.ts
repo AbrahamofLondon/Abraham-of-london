@@ -8,6 +8,7 @@ import {
   getBuyerPathEfficiency,
   getRevenueByPath,
   getStrategyRoomQualification,
+  getConversionIntelligenceMetrics,
 } from "@/lib/analytics/decision-journey";
 
 export async function GET() {
@@ -26,6 +27,7 @@ export async function GET() {
       buyerEfficiency,
       revenueByPath,
       strategyQualification,
+      conversionIntelligence,
     ] = await Promise.all([
       getFunnelProgression(range),
       getDropOffMap(range),
@@ -35,6 +37,7 @@ export async function GET() {
       getBuyerPathEfficiency(range),
       getRevenueByPath(range),
       getStrategyRoomQualification(range),
+      getConversionIntelligenceMetrics(range),
     ]);
 
     return NextResponse.json({
@@ -47,6 +50,7 @@ export async function GET() {
       buyerEfficiency,
       revenueByPath,
       strategyQualification,
+      conversionIntelligence,
     });
   } catch (err) {
     console.error("[decision-intelligence]", err);
