@@ -15,6 +15,10 @@ import {
 } from "@/lib/diagnostics/session-thread";
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import EngagementReadinessPanel from "@/components/diagnostics/results/EngagementReadinessPanel";
+import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
+import MultiStakeholderDivergence from "@/components/diagnostics/results/MultiStakeholderDivergence";
+import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 import { inferTrajectory, deriveEngagementReadiness, type EngagementReadiness } from "@/lib/diagnostics/prognosis";
 import { buildBasisOfBrief } from "@/lib/positioning/proof-model";
 import {
@@ -976,11 +980,14 @@ function ResultSurface({
   result,
   onRerun,
   thread,
+  email,
 }: {
   result: Extract<ExecutiveReportingResult, { ok: true }>;
   onRerun: () => void;
   thread: ConstitutionalThread | null;
+  email?: string | null;
 }) {
+  const { longitudinal, multiStakeholder, outcome } = useInstitutionalLayers({ email, stage: "executive", enabled: !!email });
   const vm = result.viewModel;
   const canonical = result.canonical;
   const header = vm?.header;
@@ -1194,6 +1201,11 @@ function ResultSurface({
           </div>
         )}
 
+        {/* Institutional intelligence layers */}
+        <LongitudinalIntelligence data={longitudinal} />
+        <MultiStakeholderDivergence data={multiStakeholder} />
+        <OutcomeVerification data={outcome} />
+
         {/* ── SECONDARY: evidence convergence + diagnostic data ── */}
         <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-6" />
 
@@ -1224,10 +1236,12 @@ function ExecutiveReportingIntake({
   onGenerating,
   onResult,
   onError,
+  onEmailCaptured,
 }: {
   onGenerating: () => void;
   onResult: (r: Extract<ExecutiveReportingResult, { ok: true }>) => void;
   onError: () => void;
+  onEmailCaptured?: (email: string) => void;
 }) {
   const [form, setForm] = React.useState<ExecutiveReportingIntakeForm>(INITIAL);
   const [isSubmitting, setSubmitting] = React.useState(false);
@@ -1311,6 +1325,7 @@ function ExecutiveReportingIntake({
       }
 
       onResult(data);
+      if (form.email) onEmailCaptured?.(form.email);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setError("Network error. Please try again.");
@@ -1676,6 +1691,7 @@ export default function ExecutiveReportingRunPage({
     null,
   );
   const [thread, setThread] = React.useState<ConstitutionalThread | null>(null);
+  const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     trackStageStart("executive");
@@ -1949,6 +1965,7 @@ export default function ExecutiveReportingRunPage({
               onGenerating={handleGenerating}
               onResult={handleResult}
               onError={handleError}
+              onEmailCaptured={setSubmittedEmail}
             />
           </>
         )}
@@ -2020,7 +2037,7 @@ export default function ExecutiveReportingRunPage({
               </div>
             </section>
 
-            <ResultSurface result={result} onRerun={handleRerun} thread={thread} />
+            <ResultSurface result={result} onRerun={handleRerun} thread={thread} email={submittedEmail} />
           </>
         )}
       </div>

@@ -17,9 +17,17 @@ export type DiagnosticJourneyStage =
   | "monitoring";
 
 export type DiagnosticJourneyRecord = {
+  id?: string;
   journeyKey: string;
   subjectKey: string;
+  userId?: string | null;
   organisation?: string | null;
+  organisationKey?: string | null;
+  diagnosticType?: string | null;
+  parentJourneyId?: string | null;
+  monitoringCadence?: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
   email?: string | null;
   stages: Partial<Record<DiagnosticJourneyStage, unknown>>;
   mergedTensionThread: string[];
@@ -46,11 +54,22 @@ function emptyJourney(input: {
   subjectId?: string | null;
   campaignId?: string | null;
   organisation?: string | null;
+  organisationKey?: string | null;
+  diagnosticType?: string | null;
+  parentJourneyId?: string | null;
+  monitoringCadence?: string | null;
 }): DiagnosticJourneyRecord {
   return {
     journeyKey: getJourneyKey(input),
     subjectKey: subjectKey(input),
+    userId: input.subjectId ?? null,
     organisation: input.organisation ?? null,
+    organisationKey: input.organisationKey ?? null,
+    diagnosticType: input.diagnosticType ?? "diagnostic_journey",
+    parentJourneyId: input.parentJourneyId ?? null,
+    monitoringCadence: input.monitoringCadence ?? "ad_hoc",
+    startedAt: new Date().toISOString(),
+    completedAt: null,
     email: input.email ?? null,
     stages: {},
     mergedTensionThread: [],
@@ -96,6 +115,10 @@ function fromPrismaJourney(row: any, fallback: {
   subjectId?: string | null;
   campaignId?: string | null;
   organisation?: string | null;
+  organisationKey?: string | null;
+  diagnosticType?: string | null;
+  parentJourneyId?: string | null;
+  monitoringCadence?: string | null;
 }): DiagnosticJourneyRecord {
   const stages: Partial<Record<DiagnosticJourneyStage, unknown>> = {};
   for (const stage of row?.stages || []) {
@@ -135,9 +158,17 @@ function fromPrismaJourney(row: any, fallback: {
   })) as CanonicalDecisionObject[];
 
   return {
+    id: row?.id,
     journeyKey: row?.journeyKey || getJourneyKey(fallback),
     subjectKey: row?.subjectKey || subjectKey(fallback),
+    userId: row?.userId ?? fallback.subjectId ?? null,
     organisation: row?.organisation ?? fallback.organisation ?? null,
+    organisationKey: row?.organisationKey ?? fallback.organisationKey ?? null,
+    diagnosticType: row?.diagnosticType ?? fallback.diagnosticType ?? "diagnostic_journey",
+    parentJourneyId: row?.parentJourneyId ?? fallback.parentJourneyId ?? null,
+    monitoringCadence: row?.monitoringCadence ?? fallback.monitoringCadence ?? "ad_hoc",
+    startedAt: row?.startedAt ? new Date(row.startedAt).toISOString() : null,
+    completedAt: row?.completedAt ? new Date(row.completedAt).toISOString() : null,
     email: row?.email ?? fallback.email ?? null,
     stages,
     mergedTensionThread: readJsonArray(row?.mergedTensionThread).map(String),
@@ -154,6 +185,10 @@ export async function getDiagnosticJourney(input: {
   subjectId?: string | null;
   campaignId?: string | null;
   organisation?: string | null;
+  organisationKey?: string | null;
+  diagnosticType?: string | null;
+  parentJourneyId?: string | null;
+  monitoringCadence?: string | null;
 }): Promise<DiagnosticJourneyRecord> {
   const key = getJourneyKey(input);
   const cached = memoryJourneys.get(key);
@@ -204,6 +239,11 @@ export async function persistDiagnosticStage(input: {
   subjectId?: string | null;
   campaignId?: string | null;
   organisation?: string | null;
+  organisationKey?: string | null;
+  diagnosticType?: string | null;
+  parentJourneyId?: string | null;
+  monitoringCadence?: string | null;
+  completedAt?: Date | string | null;
   stage: DiagnosticJourneyStage;
   payload: unknown;
   tensions?: string[];
@@ -216,6 +256,13 @@ export async function persistDiagnosticStage(input: {
   const journey = await getDiagnosticJourney(input);
   journey.stages[input.stage] = input.payload;
   journey.organisation = input.organisation ?? journey.organisation ?? null;
+  journey.organisationKey = input.organisationKey ?? journey.organisationKey ?? null;
+  journey.diagnosticType = input.diagnosticType ?? journey.diagnosticType ?? "diagnostic_journey";
+  journey.parentJourneyId = input.parentJourneyId ?? journey.parentJourneyId ?? null;
+  journey.monitoringCadence = input.monitoringCadence ?? journey.monitoringCadence ?? "ad_hoc";
+  journey.completedAt = input.completedAt
+    ? new Date(input.completedAt).toISOString()
+    : journey.completedAt ?? null;
   journey.email = input.email ?? journey.email ?? null;
   journey.mergedTensionThread = [
     ...new Set([...journey.mergedTensionThread, ...(input.tensions || [])]),
@@ -236,15 +283,27 @@ export async function persistDiagnosticStage(input: {
         create: {
           journeyKey: journey.journeyKey,
           subjectKey: journey.subjectKey,
+          userId: input.subjectId || null,
           email: journey.email,
           organisation: journey.organisation,
+          organisationKey: journey.organisationKey,
+          diagnosticType: journey.diagnosticType || "diagnostic_journey",
+          parentJourneyId: journey.parentJourneyId,
+          monitoringCadence: journey.monitoringCadence || "ad_hoc",
+          completedAt: journey.completedAt ? new Date(journey.completedAt) : null,
           mergedTensionThread: journey.mergedTensionThread,
           escalationHistory: journey.escalationHistory,
           routeDecisions: journey.routeDecisions,
         },
         update: {
+          userId: input.subjectId || null,
           email: journey.email,
           organisation: journey.organisation,
+          organisationKey: journey.organisationKey,
+          diagnosticType: journey.diagnosticType || "diagnostic_journey",
+          parentJourneyId: journey.parentJourneyId,
+          monitoringCadence: journey.monitoringCadence || "ad_hoc",
+          completedAt: journey.completedAt ? new Date(journey.completedAt) : null,
           mergedTensionThread: journey.mergedTensionThread,
           escalationHistory: journey.escalationHistory,
           routeDecisions: journey.routeDecisions,
@@ -295,9 +354,8 @@ export async function persistDiagnosticStage(input: {
         });
       }
 
-      if (input.decisionObject && p?.diagnosticDecisionObject?.create) {
-        await p.diagnosticDecisionObject.create({
-          data: {
+      if (input.decisionObject && p?.diagnosticDecisionObject?.findFirst) {
+        const decisionData = {
             journeyId: persisted.id,
             decisionKey: input.decisionObject.decisionKey,
             sessionId: input.subjectId || input.campaignId || null,
@@ -311,8 +369,22 @@ export async function persistDiagnosticStage(input: {
             affectedDomain: input.decisionObject.affectedDomain || null,
             normalized: input.decisionObject.normalized,
             confidence: input.decisionObject.confidence,
+        };
+        const existingDecision = await p.diagnosticDecisionObject.findFirst({
+          where: {
+            journeyId: persisted.id,
+            decisionKey: input.decisionObject.decisionKey,
           },
+          orderBy: { createdAt: "desc" },
         });
+        if (existingDecision) {
+          await p.diagnosticDecisionObject.update({
+            where: { id: existingDecision.id },
+            data: decisionData,
+          });
+        } else if (p?.diagnosticDecisionObject?.create) {
+          await p.diagnosticDecisionObject.create({ data: decisionData });
+        }
       }
 
       if (input.snapshot) {

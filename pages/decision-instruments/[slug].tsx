@@ -495,6 +495,25 @@ function InstrumentEnvironment({
     setComplete(true);
     trackAssetComplete(instrument.slug, instrument.transition.state);
     onComplete?.();
+
+    // Persist instrument completion as evidence node in the decision graph
+    // This feeds forward into downstream diagnostics (ER, SR, longitudinal)
+    fetch("/api/diagnostics/evidence", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        stage: "decision_instrument",
+        payload: { instrument: instrument.slug, transitionState: instrument.transition.state },
+        evidenceNodes: [{
+          sourceStage: "decision_instrument",
+          kind: instrument.transition.state === "HIGH_SEVERITY" ? "contradiction" : "action",
+          label: `Instrument: ${instrument.title}`,
+          summary: `${instrument.title} completed. Transition state: ${instrument.transition.state}. Checklist items: ${instrument.guidedChecklist.length}. Outcome: ${instrument.outcomePromise.join("; ")}.`,
+          severity: instrument.transition.state === "HIGH_SEVERITY" ? "high" : "medium",
+          confidence: 0.85,
+        }],
+      }),
+    }).catch(() => {});
   }
 
   const transition = instrument.transition;

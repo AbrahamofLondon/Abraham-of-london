@@ -102,8 +102,8 @@ const FoundersPage: NextPage = () => {
 
   return (
     <Layout
-      title="Builders"
-      description="Formation path and tooling for founders, fathers, and leaders building what lasts across generations."
+      title="Founders"
+      description="Decision authority for founders facing non-delegable decisions under structural uncertainty."
       className="bg-black text-cream"
     >
       <main>
@@ -112,19 +112,20 @@ const FoundersPage: NextPage = () => {
           <div className="absolute inset-0 bg-[url('/assets/images/texture-grain.png')] opacity-20 mix-blend-overlay" />
           <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
-              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">Builders · Founders · Fathers</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">Founders · Decision Authority</p>
               <h1 className="mt-6 font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-                Build what <span className="italic text-gold">lasts</span>
+                Decide under <span className="italic text-gold">uncertainty</span>
               </h1>
               <p className="mt-8 text-lg leading-relaxed text-gray-400 sm:text-xl">
-                Formation and tooling for builders who want to create institutions that outlast them.
+                For founders facing non-delegable decisions under structural ambiguity.
+                Identify the contradictions in your positioning. Price what they cost. Execute with verification.
               </p>
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                <Link href="#formation" className="rounded-xl bg-gold px-8 py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-gold/80 transition-all flex items-center justify-center">
-                  Begin Formation <ArrowRight className="ml-2 h-4 w-4" />
+                <Link href="/diagnostics" className="rounded-xl bg-gold px-8 py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-gold/80 transition-all flex items-center justify-center">
+                  Enter the system <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
-                <Link href="/resources/strategic-frameworks" className="rounded-xl border border-gold/30 bg-gold/10 px-8 py-4 text-sm font-bold uppercase tracking-widest text-gold hover:bg-gold/15 transition-all flex items-center justify-center">
-                  Get Frameworks <Map className="ml-2 h-4 w-4" />
+                <Link href="/method" className="rounded-xl border border-gold/30 bg-gold/10 px-8 py-4 text-sm font-bold uppercase tracking-widest text-gold hover:bg-gold/15 transition-all flex items-center justify-center">
+                  How it works <Map className="ml-2 h-4 w-4" />
                 </Link>
               </div>
             </div>
@@ -139,7 +140,7 @@ const FoundersPage: NextPage = () => {
         {/* FORMATION PATH */}
         <section id="formation" className="bg-zinc-950 py-20 lg:py-28">
           <div className="mx-auto max-w-6xl px-4">
-            <h2 className="font-serif text-3xl font-semibold text-white mb-16">Formation for Builders</h2>
+            <h2 className="font-serif text-3xl font-semibold text-white mb-16">Decision authority sequence</h2>
             <div className="space-y-6">
               {formationPath.map((stage, index) => (
                 <div key={index} className="group rounded-3xl border border-white/8 bg-white/[0.02] p-8 transition-all hover:border-gold/25">

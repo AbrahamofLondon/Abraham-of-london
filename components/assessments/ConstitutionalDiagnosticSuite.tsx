@@ -45,6 +45,8 @@ import { useInterpretation } from "@/lib/ai/use-interpretation";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import DiagnosticFeedback from "@/components/diagnostics/results/DiagnosticFeedback";
+import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
+import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 
 function readinessNumeric(tier: string): number {
@@ -1333,6 +1335,10 @@ export default function ConstitutionalDiagnosticSuite() {
                   <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
                   <DiagnosticFeedback stage="constitutional" routeResultType={decision.route} />
+
+                  {/* Institutional intelligence layers — render when prior data exists */}
+                  <LongitudinalIntelligence data={null} />
+                  <OutcomeVerification data={null} />
 
                   {/* Escalation routing */}
                   {(() => {

@@ -304,6 +304,8 @@ model AlignmentCampaign {
   title                 String
   objective             String?
   status                String    @default("draft")
+  stage                 String    @default("intake")
+  diagnosticType        String    @default("enterprise")
   opensAt               DateTime?
   closesAt              DateTime?
   cadenceType           String    @default("ad_hoc")
@@ -330,6 +332,8 @@ model AlignmentCampaign {
 
   @@index([organisationId])
   @@index([status])
+  @@index([diagnosticType])
+  @@index([stage])
   @@index([opensAt])
   @@index([closesAt])
 }
@@ -578,6 +582,8 @@ model CampaignParticipant {
   id              String    @id @default(cuid())
   campaignId      String
   membershipId    String?
+  journeyId       String?
+  respondentType  String?
   email           String
   inviteTokenHash String
   status          String    @default("invited")
@@ -594,6 +600,8 @@ model CampaignParticipant {
   @@unique([campaignId, email])
   @@index([campaignId])
   @@index([membershipId])
+  @@index([journeyId])
+  @@index([respondentType])
   @@index([email])
   @@index([status])
 }
@@ -2074,12 +2082,19 @@ model DiagnosticJourney {
   id                  String   @id @default(cuid())
   journeyKey          String   @unique
   subjectKey          String
+  userId              String?
   email               String?
   organisation        String?
+  organisationKey     String?
+  diagnosticType      String   @default("diagnostic_journey")
+  parentJourneyId     String?
+  monitoringCadence   String   @default("ad_hoc")
   status              String   @default("active")
   mergedTensionThread Json?
   escalationHistory   Json?
   routeDecisions      Json?
+  startedAt           DateTime @default(now())
+  completedAt         DateTime?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -2090,7 +2105,12 @@ model DiagnosticJourney {
   decisionObjects     DiagnosticDecisionObject[]
 
   @@index([subjectKey])
+  @@index([userId])
   @@index([email])
+  @@index([organisationKey])
+  @@index([diagnosticType])
+  @@index([parentJourneyId])
+  @@index([monitoringCadence])
   @@index([status])
 }
 
@@ -2160,6 +2180,73 @@ model DiagnosticStageRecord {
 
   @@index([journeyId])
   @@index([stage])
+}
+
+model LongitudinalComparisonRecord {
+  id                String   @id @default(cuid())
+  journeyId          String
+  baselineJourneyId  String?
+  subjectKey         String?
+  email              String?
+  organisationKey    String?
+  diagnosticType     String
+  cadence            String   @default("ad_hoc")
+  deltaSummary       Json
+  recurrenceSummary  Json?
+  evidenceNodes      Json?
+  createdAt          DateTime @default(now())
+
+  @@index([journeyId])
+  @@index([baselineJourneyId])
+  @@index([subjectKey])
+  @@index([email])
+  @@index([organisationKey])
+  @@index([diagnosticType])
+  @@index([createdAt])
+}
+
+model MultiStakeholderResult {
+  id             String   @id @default(cuid())
+  campaignId     String
+  organisationId String?
+  organisationKey String?
+  diagnosticType String
+  respondentCount Int
+  payload        Json
+  evidenceNodes  Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([campaignId, diagnosticType])
+  @@index([campaignId])
+  @@index([organisationId])
+  @@index([organisationKey])
+  @@index([diagnosticType])
+  @@index([createdAt])
+}
+
+model OutcomeVerificationRecord {
+  id                       String   @id @default(cuid())
+  baselineJourneyId         String?
+  followUpJourneyId         String?
+  decisionObjectId          String?
+  sessionId                 String?
+  organisationKey           String?
+  outcomeClassification     String
+  magnitudeOfChange         Float
+  effectivenessScore        Float
+  unresolvedContradictions  Json?
+  payload                   Json
+  evidenceNodes             Json?
+  createdAt                 DateTime @default(now())
+
+  @@index([baselineJourneyId])
+  @@index([followUpJourneyId])
+  @@index([decisionObjectId])
+  @@index([sessionId])
+  @@index([organisationKey])
+  @@index([outcomeClassification])
+  @@index([createdAt])
 }
 
 model DiagnosticThreadSnapshot {

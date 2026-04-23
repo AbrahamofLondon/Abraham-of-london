@@ -19,6 +19,9 @@ import {
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from "recharts";
 import Link from "next/link";
 import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
+import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
+import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 const GOLD = "#C9A96E";
 const LIFT = "rgb(10 14 20)";
@@ -323,7 +326,8 @@ function deriveTeamNextAction(vi: number, tg: number, af: number): string {
   return "Continue monitoring. Current alignment is within acceptable bounds. Reassess if conditions change.";
 }
 
-function ResultPanel({ result, rows, reflections }: { result: Record<string, unknown>; rows: TeamRow[]; reflections?: TeamReflections }) {
+function ResultPanel({ result, rows, reflections, email }: { result: Record<string, unknown>; rows: TeamRow[]; reflections?: TeamReflections; email?: string }) {
+  const { longitudinal, outcome } = useInstitutionalLayers({ email, stage: "team", enabled: !!email });
   const vi = Number(result.varianceIndex ?? 0);
   const tg = Number(result.trustGap ?? 0);
   const af = Number(result.avgFriction ?? 0);
@@ -387,6 +391,10 @@ function ResultPanel({ result, rows, reflections }: { result: Record<string, unk
           {nextAction}
         </p>
       </div>
+
+      {/* Institutional intelligence layers */}
+      <LongitudinalIntelligence data={longitudinal} />
+      <OutcomeVerification data={outcome} />
 
       {/* Escalation */}
       <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem 1.5rem" }}>
@@ -522,7 +530,7 @@ export default function TeamAssessmentSuite() {
           {loading ? (<><Loader2 style={{ width: "14px", height: "14px" }} /> Processing team data…</>) : (<><ShieldCheck style={{ width: "14px", height: "14px" }} /> Run team assessment <ArrowRight style={{ width: "13px", height: "13px" }} /></>)}
         </button>
 
-        <AnimatePresence>{result && <ResultPanel result={result} rows={rows} reflections={teamReflections} />}</AnimatePresence>
+        <AnimatePresence>{result && <ResultPanel result={result} rows={rows} reflections={teamReflections} email={email} />}</AnimatePresence>
       </div>
 
       <div className="space-y-4 xl:sticky xl:top-24">

@@ -170,8 +170,8 @@ function statusLabel(status: AccessStatus) {
 const LeadershipPage: NextPage = () => {
   return (
     <Layout
-      title="Leadership Formation"
-      description="Formation path and tooling for leaders building institutions and legacies that survive them."
+      title="Decision Authority Formation"
+      description="Decision authority architecture for executives who must make non-delegable decisions under structural ambiguity."
       className="bg-black text-white"
       fullWidth
     >
@@ -183,17 +183,18 @@ const LeadershipPage: NextPage = () => {
           <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-36 lg:px-12 lg:pb-32 lg:pt-44">
             <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
               <div className="max-w-4xl">
-                <RailLabel>Leadership · Formation · Legacy</RailLabel>
+                <RailLabel>Decision · Authority · Architecture</RailLabel>
 
                 <h1 className="mt-8 font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.7rem]">
-                  Lead what
-                  <span className="mt-3 block text-white/58">lasts</span>
+                  Decide under
+                  <span className="mt-3 block text-white/58">ambiguity</span>
                 </h1>
 
                 <p className="mt-8 max-w-2xl text-xl font-light leading-relaxed text-white/56">
-                  A structured formation path for serious leaders — from
-                  self-discovery to institution building and generational
-                  stewardship.
+                  Decision authority architecture for executives who must
+                  identify contradictions their team cannot dismiss, price what
+                  ignoring them costs, and sequence decisions that survive
+                  scrutiny.
                 </p>
 
                 <div className="mt-12 flex flex-wrap gap-4">
@@ -201,7 +202,7 @@ const LeadershipPage: NextPage = () => {
                     href="#progression"
                     className="group inline-flex items-center gap-3 bg-white px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-all duration-500 hover:bg-amber-50"
                   >
-                    <span>Begin Formation</span>
+                    <span>Enter the system</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
 
@@ -217,7 +218,7 @@ const LeadershipPage: NextPage = () => {
                 <div className="mt-12 flex items-center gap-4">
                   <div className="h-px w-12 bg-gradient-to-r from-amber-400/28 to-transparent" />
                   <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">
-                    Formation before influence
+                    This is not leadership development
                   </span>
                 </div>
               </div>
@@ -248,10 +249,10 @@ const LeadershipPage: NextPage = () => {
 
                   <div className="mt-5 border border-white/10 bg-black/45 p-5">
                     <p className="font-serif text-lg text-white">
-                      Institutional leadership
+                      Decision architecture
                     </p>
                     <p className="mt-2 text-sm text-white/60">
-                      Ordered formation for men expected to carry weight well.
+                      Contradiction detection. Consequence pricing. Execution enforcement.
                     </p>
                   </div>
                 </div>
@@ -275,13 +276,14 @@ const LeadershipPage: NextPage = () => {
         <section id="progression" className="relative py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-16">
-              <RailLabel>Leadership Progression</RailLabel>
+              <RailLabel>Decision Authority Progression</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                The formation sequence
+                The authority sequence
               </h2>
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/48">
-                Serious leadership should mature in order. Start with the man,
-                then the mandate, then the architecture, then the tools.
+                Decision authority develops in sequence. Start with the
+                contradiction, then the consequence, then the execution
+                architecture, then the verification.
               </p>
             </div>
 

@@ -22,7 +22,21 @@ export type EvidenceNodeKind =
   | "failed_attempt"
   | "escalation_trigger"
   | "decision_object"
-  | "exposure_estimate";
+  | "exposure_estimate"
+  | "historical_comparison"
+  | "pattern_recurrence"
+  | "delta_summary"
+  | "monitoring_signal"
+  | "respondent_divergence"
+  | "respondent_agreement"
+  | "leadership_gap"
+  | "stakeholder_conflict"
+  | "outcome_delta"
+  | "intervention_effectiveness"
+  | "resolved_condition"
+  | "partial_resolution"
+  | "persistent_root_cause"
+  | "behavior_pattern";
 
 export type EvidenceSeverity = "low" | "medium" | "high" | "critical";
 

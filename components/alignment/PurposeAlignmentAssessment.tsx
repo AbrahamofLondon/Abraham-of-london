@@ -63,6 +63,9 @@ import ResultDecision from "@/components/diagnostics/results/ResultDecision";
 import ResultAction from "@/components/diagnostics/results/ResultAction";
 import ResultEscalation from "@/components/diagnostics/results/ResultEscalation";
 import ResultDiagnostics from "@/components/diagnostics/results/ResultDiagnostics";
+import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
+import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -999,6 +1002,10 @@ function AuthorityResultSurface({
           ? "This condition has structural implications beyond personal alignment. The constitutional diagnostic will determine whether the organisation carries the same pattern."
           : "Continue when ready. The diagnostic system advances when the condition requires it.")}
       />
+
+      {/* Institutional layers — render when prior data exists */}
+      <LongitudinalIntelligence data={null} />
+      <OutcomeVerification data={null} />
 
       <ResultDiagnostics
         domains={result.domainProfiles.map((d) => ({

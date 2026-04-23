@@ -9,7 +9,7 @@ const AboutPage: NextPage = () => {
         <title>About | Abraham of London</title>
         <meta
           name="description"
-          content="Faith-rooted strategy, fatherhood architecture, and institutional thinking for serious builders."
+          content="Decision authority system for founder-led and executive teams under structural ambiguity. Contradiction detection, consequence pricing, execution enforcement, verified outcomes."
         />
         <meta property="og:type" content="website" />
         <meta name="robots" content="index, follow" />
@@ -20,27 +20,34 @@ const AboutPage: NextPage = () => {
         <section className="mx-auto max-w-5xl px-6 pb-16 pt-28 lg:px-12 lg:pb-20 lg:pt-36">
           <div className="max-w-3xl">
             <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/38">
-              ABOUT · INSTITUTIONAL
+              ABOUT · DECISION AUTHORITY
             </p>
 
             <h1 className="mt-6 font-serif text-[clamp(2.5rem,6vw,4rem)] font-light italic leading-[0.95] text-white/92">
-              The house.
+              The system.
             </h1>
 
             <p className="mt-5 max-w-[56ch] text-base italic leading-[1.6] text-white/48">
-              Stewardship. Order. Responsibility.
+              Contradiction. Consequence. Enforcement. Verification.
             </p>
 
             <p className="mt-10 max-w-[65ch] text-[1.0625rem] leading-[1.8] text-white/72">
-              Abraham of London is an institutional intelligence practice. We
-              operate at the intersection of moral order and strategic
-              execution. Our work serves principals, families, and executives
-              who understand that human flourishing is architectural, not
-              accidental.
+              Abraham of London is a decision authority system for founder-led
+              and executive teams under structural ambiguity. We identify
+              contradictions that cannot be dismissed, price what they cost to
+              ignore, sequence the interventions that resolve them, and verify
+              whether action worked.
+            </p>
+
+            <p className="mt-6 max-w-[65ch] text-[1.0625rem] leading-[1.8] text-white/52">
+              The system accumulates evidence across diagnostic stages, detects
+              where authority says one thing and evidence shows another, and
+              enforces decisions with priced consequence. Outcomes are verified,
+              not assumed.
             </p>
 
             <p className="mt-8 font-mono text-[8px] uppercase tracking-[0.2em] text-[#C9A96E]">
-              Governed by purpose. Oriented to legacy.
+              Outcome-verified decision intelligence.
             </p>
 
             <div className="mt-12">
@@ -48,7 +55,7 @@ const AboutPage: NextPage = () => {
                 href="/diagnostics"
                 className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber-500 transition-colors hover:underline"
               >
-                Begin the diagnostic →
+                Enter the system →
               </Link>
             </div>
           </div>

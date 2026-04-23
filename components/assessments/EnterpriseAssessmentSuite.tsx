@@ -15,6 +15,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
+import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
+import MultiStakeholderDivergence from "@/components/diagnostics/results/MultiStakeholderDivergence";
+import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 type EnterpriseDomain = {
   label: string;
@@ -443,7 +447,8 @@ function deriveEnterpriseAction(posture: string, heatDomains: string[]): string 
 }
 
 /** Result panel */
-function ResultPanel({ result, domains }: { result: any; domains?: EnterpriseDomain[] }) {
+function ResultPanel({ result, domains, email, campaignId }: { result: any; domains?: EnterpriseDomain[]; email?: string; campaignId?: string }) {
+  const { longitudinal, multiStakeholder, outcome } = useInstitutionalLayers({ email, stage: "enterprise", campaignId, enabled: !!email });
   const posture = String(result.enterprisePosture ?? "DRIFTING");
   const heatDomains: string[] = Array.isArray(result.heatDomains) ? result.heatDomains : [];
   const postureColor = posture === "DISORDERED" ? "text-red-300/80" : posture === "MISALIGNED" ? "text-red-300/70" : "text-amber-300/80";
@@ -517,6 +522,11 @@ function ResultPanel({ result, domains }: { result: any; domains?: EnterpriseDom
           {nextAction}
         </p>
       </div>
+
+      {/* Institutional intelligence layers */}
+      <LongitudinalIntelligence data={longitudinal} />
+      <MultiStakeholderDivergence data={multiStakeholder} />
+      <OutcomeVerification data={outcome} />
 
       {/* Escalation */}
       <div className="border border-white/[0.06] bg-white/[0.01] p-5">
@@ -818,7 +828,7 @@ export default function EnterpriseAssessmentSuite() {
         </button>
 
         <AnimatePresence>
-          {result && <ResultPanel result={result} domains={domains} />}
+          {result && <ResultPanel result={result} domains={domains} email={email} campaignId={result.campaignId} />}
         </AnimatePresence>
       </div>
 
