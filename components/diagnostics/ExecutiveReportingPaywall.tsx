@@ -114,14 +114,20 @@ export default function ExecutiveReportingPaywall({
     const data = await res.json();
 
     if (data?.url) {
-      setMessage("Securing your interpretation session...");
+      setMessage("Securing your decision session...");
       window.location.href = data.url;
     } else {
       setLoading(false);
-      setMessage("Checkout could not be prepared. Check the email field and try again.");
+      const reason = data?.reason || data?.error || "no_url_returned";
+      const errorMessage = reason === "EMAIL_REQUIRED"
+        ? "A valid email is required before the decision session can begin."
+        : reason === "STRIPE_CHECKOUT_CREATE_FAILED"
+        ? "Decision pricing could not be resolved. Please try again."
+        : "Decision session could not be prepared. Please try again or return to diagnostics.";
+      setMessage(errorMessage);
       track("checkout_failed", {
         price_code: selectedTier.productCode,
-        reason: data?.error || "no_url_returned",
+        reason,
       });
     }
   }

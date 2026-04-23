@@ -118,10 +118,18 @@ export default function StrategyRoomConversionBridge({
       window.location.href = data.url;
     } else {
       setLoading(false);
-      setMessage("Execution entry could not be prepared. Check the email field and try again.");
+      const reason = data?.reason || data?.error || "no_url_returned";
+      const errorMessage = reason === "EMAIL_REQUIRED"
+        ? "A valid email is required before execution can be prepared."
+        : reason === "STRIPE_CHECKOUT_CREATE_FAILED"
+        ? "Execution pricing could not be resolved. Please try again."
+        : reason === "PRODUCT_INACTIVE" || reason === "NOT_FOUND"
+        ? "This execution tier is not currently available."
+        : "Execution entry could not be prepared. Please try again or return to diagnostics.";
+      setMessage(errorMessage);
       track("checkout_failed", {
         price_code: selectedTier.productCode,
-        reason: data?.error || "no_url_returned",
+        reason,
       });
     }
   }

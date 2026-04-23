@@ -355,7 +355,7 @@ function CheckoutPanel({ instrument }: { instrument: InstrumentData }) {
     }
 
     setBusy(false);
-    setMessage("Access could not be prepared. Check the email field and try again.");
+    setMessage("Instrument access could not be prepared. Please try again.");
   }
 
   return (

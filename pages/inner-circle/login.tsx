@@ -101,7 +101,7 @@ export default function InnerCircleLoginPage() {
     } catch (err) {
       console.error("[login:request] unexpected error:", err);
       setError(
-        "Unexpected error while requesting access. If you already have an issued credential, use manual sign-in below."
+        "Access request could not be completed. If you already have access, sign in below."
       );
     } finally {
       setLoading(false);
@@ -189,7 +189,23 @@ export default function InnerCircleLoginPage() {
 
               {error ? (
                 <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                  {error}
+                  <p>{error}</p>
+                  <div className="mt-3 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setError(""); setStep("credential"); }}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 hover:bg-white/10"
+                    >
+                      Continue to sign in
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setError(""); setStep("request"); }}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 hover:bg-white/10"
+                    >
+                      Request access again
+                    </button>
+                  </div>
                 </div>
               ) : null}
 
@@ -265,7 +281,16 @@ export default function InnerCircleLoginPage() {
 
               {error ? (
                 <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                  {error}
+                  <p>{error}</p>
+                  <div className="mt-3 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setError(""); setStep("request"); }}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 hover:bg-white/10"
+                    >
+                      Request new access
+                    </button>
+                  </div>
                 </div>
               ) : null}
 
