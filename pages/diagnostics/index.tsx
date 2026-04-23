@@ -384,7 +384,9 @@ export default function DiagnosticsIndexPage() {
                   color: "rgba(255,255,255,0.28)",
                 }}
               >
-                Governed entry · staged evidence ladder · no account required for diagnostic stages
+                Governed entry · staged evidence ladder · no account required
+                <br />
+                No preparation required. The system extracts the decision.
                 <br />
                 Decisions evaluated against an AI-accelerated market baseline.
               </div>

@@ -603,6 +603,24 @@ function ExecutionEntryState({
             }}>
               This is not only about correcting risk. It determines whether you fall behind or move ahead.
             </p>
+            <p style={{
+              marginTop: "0.35rem",
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.12em",
+              color: "rgba(255,255,255,0.18)",
+            }}>
+              Every decision is evaluated against cost, speed, and competitive position.
+            </p>
+            <p style={{
+              marginTop: "0.25rem",
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "6.5px",
+              letterSpacing: "0.10em",
+              color: "rgba(255,255,255,0.13)",
+            }}>
+              Decisions are evaluated against an AI-accelerated market baseline.
+            </p>
           </div>
 
           <div
@@ -975,6 +993,15 @@ function InterventionStack({
   return (
     <section style={{ backgroundColor: VOID }}>
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
+        <p style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "7px",
+          letterSpacing: "0.12em",
+          color: "rgba(252,165,165,0.30)",
+          marginBottom: "0.5rem",
+        }}>
+          Every delay cycle increases cost and reduces decision advantage.
+        </p>
         <div style={{
           border: "1px solid rgba(255,255,255,0.10)",
           backgroundColor: "rgb(5 6 8)",
@@ -1289,6 +1316,18 @@ function ExitStates() {
             </div>
           ))}
         </div>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300,
+          fontSize: "0.85rem",
+          lineHeight: 1.5,
+          color: "rgba(255,255,255,0.20)",
+          fontStyle: "italic",
+          marginTop: "1rem",
+          textAlign: "center",
+        }}>
+          This is where the decision is enforced and the outcome is measured.
+        </p>
       </div>
     </section>
   );

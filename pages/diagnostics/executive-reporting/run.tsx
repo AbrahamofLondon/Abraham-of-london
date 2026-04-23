@@ -25,6 +25,7 @@ import DecisionTerrainStatus, { deriveTerrainState } from "@/components/diagnost
 import { assessAITerrain } from "@/lib/diagnostics/ai-terrain";
 import { assessAdvantageTerrain } from "@/lib/diagnostics/advantage-terrain";
 import CompetitivePositionSignal from "@/components/diagnostics/results/CompetitivePosition";
+import BoardSnapshot from "@/components/diagnostics/results/BoardSnapshot";
 import AdvantagePathBlock from "@/components/strategy-room/AdvantagePathBlock";
 import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
 import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
@@ -1136,6 +1137,19 @@ function ResultSurface({
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
       <div className="mx-auto max-w-6xl px-6 py-14 lg:px-12">
 
+        {/* ── BLOCK 0: BOARD SNAPSHOT ── */}
+        <BoardSnapshot data={{
+          primaryContradiction: graphContradictions[0]
+            ? String((graphContradictions[0] as any).summary ?? (graphContradictions[0] as any).label ?? "Structural contradiction detected")
+            : (summary as any)?.headline ?? (header as any)?.headline ?? "Condition identified — contradiction active",
+          costOfInaction90Days: consequenceProjection.estimatedExposure.quarterly > 0
+            ? `£${consequenceProjection.estimatedExposure.quarterly.toLocaleString()}`
+            : exposureFormatted || "Requires pricing",
+          decisionVelocityRisk: `${aiTerrain.decisionVelocity.gapPercent}% behind AI baseline (${aiTerrain.decisionVelocity.current}d vs ${aiTerrain.decisionVelocity.baseline}d)`,
+          competitivePosition: advantagePath.competitivePosition.replace("_", " "),
+          requiredAction: safeString(nextAction) || boardActions[0] || "Action required — see priority stack",
+        }} />
+
         {/* ── BLOCK 1: OPENING COST LINE ── */}
         <div style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(252,165,165,0.15)" }}>
           <p style={{
@@ -1364,6 +1378,11 @@ function ResultSurface({
           </div>
         )}
 
+        {/* Closing inevitability */}
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(252,165,165,0.35)", fontStyle: "italic", marginBottom: "1.5rem" }}>
+          If unresolved, this condition compounds.
+        </p>
+
         {/* Run key */}
         <div className="mb-4 flex items-center gap-2">
           <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>
@@ -1511,6 +1530,9 @@ function ExecutiveReportingIntake({
             Your answers are translated into a constitutional position, financial exposure,
             governed priority stack, and escalation logic where evidence warrants it.
           </p>
+          <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)" }}>
+            Every decision is evaluated against cost, speed, and competitive position.
+          </p>
           <div
             className="mt-5 grid gap-3 sm:grid-cols-3"
             style={{
@@ -1529,6 +1551,9 @@ function ExecutiveReportingIntake({
             </div>
             <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
               Deterministic logic — no generic output
+            </div>
+            <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
+              This is not advisory. This is decision enforcement.
             </div>
           </div>
         </div>

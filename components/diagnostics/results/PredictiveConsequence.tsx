@@ -35,7 +35,7 @@ export default function PredictiveConsequence({ data }: { data: ConsequenceProje
     <div style={{ border: `1px solid ${config.color}25`, backgroundColor: `${config.color}05`, padding: "1.25rem", marginBottom: "1rem" }}>
       <div className="flex items-center gap-3 mb-2">
         <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
-          Projected cost of inaction (AI-adjusted)
+          Projected financial exposure (90 days)
         </span>
         <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.18)" }}>
           {Math.round(data.confidence * 100)}% confidence
@@ -51,7 +51,7 @@ export default function PredictiveConsequence({ data }: { data: ConsequenceProje
       {data.estimatedExposure.quarterly > 0 && (
         <div style={{ border: "1px solid rgba(252,165,165,0.28)", backgroundColor: "rgba(252,165,165,0.045)", padding: "0.75rem", marginBottom: "0.75rem" }}>
           <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(252,165,165,0.68)" }}>
-            Projected Cost of Inaction (90 days)
+            Projected Financial Exposure (90 days)
           </span>
           <div style={{ ...mono, fontSize: "18px", color: "rgba(252,165,165,0.88)", marginTop: "0.25rem", fontWeight: 700 }}>
             £{data.estimatedExposure.quarterly.toLocaleString()}

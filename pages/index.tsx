@@ -1940,6 +1940,10 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
             A strategy that ignores AI acceleration is not neutral. It is a liability.
           </p>
 
+          <p className="mt-3 max-w-[58ch] text-[12px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.06em" }}>
+            Every decision is evaluated against cost, speed, and competitive position.
+          </p>
+
           <p className="mt-4 max-w-[58ch] text-[14px] leading-[1.85] ds-text-muted">
             Start with a 6-minute diagnostic.
             <br />
@@ -1961,7 +1965,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
               }}
               onClick={() => trackHeroClick("primary")}
             >
-              <span>Start diagnostic</span>
+              <span>Expose the decision</span>
               <span className="inline-flex items-center gap-2 text-[8px] opacity-75">
                 6-8 min
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
@@ -2014,7 +2018,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                 fontSize: "8px", letterSpacing: 0, textTransform: "uppercase",
                 color: "rgba(245,245,245,0.78)",
               }}>
-                Run personal diagnostic · 8 min
+                Expose the decision · 8 min
                 <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
               </div>
             </Link>
@@ -2044,7 +2048,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                 fontSize: "8px", letterSpacing: 0, textTransform: "uppercase",
                 color: "#C9A96E",
               }}>
-                Run constitutional diagnostic · 6 min
+                Expose the contradiction · 6 min
                 <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
               </div>
             </Link>
@@ -2722,7 +2726,7 @@ function ProofLayer() {
               marginBottom: "1rem",
             }}
           >
-            Observed outcomes
+            Verified outcomes
           </div>
           <ObservedOutcomesBlock />
           <p className="mt-4 max-w-[60ch] text-[13px] leading-[1.85] ds-text-muted">

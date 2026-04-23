@@ -1053,8 +1053,8 @@ const ConsultingPage: NextPage = () => {
                 color: "rgba(255,255,255,0.38)",
                 maxWidth: "44ch",
               }}>
-                Advisory applies the system under conditions it cannot fully model.
-                The evidence carries forward. The counsel is direct.
+                Applied when the system identifies conditions it cannot fully model.
+                Used in high-stakes decisions where authority, risk, and timing converge.
               </p>
 
               <div className="flex flex-col justify-center gap-3 mt-10 sm:flex-row">

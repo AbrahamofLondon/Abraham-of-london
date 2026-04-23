@@ -64,26 +64,34 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
         color: "rgba(255,255,255,0.50)",
         marginBottom: "0.75rem",
       }}>
-        Without sustained enforcement, the contradiction will persist.
+        The contradiction will persist without sustained enforcement.
       </p>
       <p style={{
         ...serif,
         fontSize: "0.95rem",
         lineHeight: 1.5,
-        color: "rgba(255,255,255,0.35)",
-        fontStyle: "italic",
-        marginBottom: "1rem",
+        color: "rgba(255,255,255,0.40)",
+        marginBottom: "0.5rem",
       }}>
-        This is what the retainer exists for.
+        This determines whether you fall behind or move ahead.
+      </p>
+      <p style={{
+        ...mono,
+        fontSize: "7px",
+        letterSpacing: "0.12em",
+        color: "rgba(255,255,255,0.22)",
+        marginBottom: "0.75rem",
+      }}>
+        At scale, unresolved decisions become financial and competitive liabilities.
       </p>
       <p style={{
         ...mono,
         fontSize: "6.5px",
-        letterSpacing: "0.18em",
-        color: "rgba(255,255,255,0.20)",
+        letterSpacing: "0.12em",
+        color: "rgba(255,255,255,0.15)",
         marginBottom: "0.75rem",
       }}>
-        Ongoing enforcement is not only about correcting risk. It determines whether you fall behind or move ahead.
+        Decisions are evaluated against an AI-accelerated market baseline.
       </p>
 
       {/* Evidence — why this qualifies */}
