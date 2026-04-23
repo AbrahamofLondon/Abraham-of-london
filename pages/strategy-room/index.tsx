@@ -34,6 +34,10 @@ import {
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
+import DecisionStateBanner from "@/components/strategy-room/DecisionStateBanner";
+import DynamicConsequencePanel from "@/components/strategy-room/DynamicConsequencePanel";
+import EscalationTriggerPanel from "@/components/strategy-room/EscalationTriggerPanel";
+import AvoidancePatternNotice from "@/components/strategy-room/AvoidancePatternNotice";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import {
   setCommercialAccessCookie,
@@ -1319,6 +1323,41 @@ export default function StrategyRoomPage({
   const [persistError, setPersistError] = React.useState<string | null>(null);
   const [executiveResult, setExecutiveResult] = React.useState<unknown>(null);
 
+  // Enforcement state — reactive system visibility
+  const [enforcement, setEnforcement] = React.useState<{
+    decisionState: string;
+    escalationLevel: number;
+    avoidanceCount: number;
+    repeatedPatternLabel?: string | null;
+    consequence?: { currentExposure: number; previousExposure?: number | null; baseRisk?: number | null; timePenalty?: number | null; failurePenalty?: number | null };
+    escalationTriggers: Array<{ triggerType: string; message: string; createdAt?: string }>;
+    directive?: string | null;
+  } | null>(null);
+
+  // Fetch enforcement state when execution session exists
+  const fetchEnforcementState = React.useCallback(async () => {
+    if (!executionSessionId) return;
+    try {
+      const res = await fetch(`/api/strategy-room/execution/${executionSessionId}/state`);
+      const data = await res.json();
+      if (data.ok) {
+        setEnforcement({
+          decisionState: data.state ?? "PENDING",
+          escalationLevel: data.escalationLevel ?? 0,
+          avoidanceCount: data.avoidanceCount ?? 0,
+          repeatedPatternLabel: data.repeatedPatternLabel ?? null,
+          consequence: data.consequence ?? undefined,
+          escalationTriggers: data.triggers ?? [],
+          directive: data.directive ?? null,
+        });
+      }
+    } catch { /* non-blocking */ }
+  }, [executionSessionId]);
+
+  React.useEffect(() => {
+    fetchEnforcementState();
+  }, [fetchEnforcementState]);
+
   // Track entry
   React.useEffect(() => {
     trackStrategyRoomEntry();
@@ -1511,6 +1550,8 @@ export default function StrategyRoomPage({
         has_canonical: Boolean(canonical),
         entry_count: decisionLog.length + 1,
       });
+      // Refresh enforcement state after decision logged
+      fetchEnforcementState();
     } catch (error) {
       setPersistError(error instanceof Error ? error.message : "Decision persistence failed.");
     }
@@ -1555,6 +1596,8 @@ export default function StrategyRoomPage({
       });
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || "Decision update failed.");
+      // Refresh enforcement state after status change
+      fetchEnforcementState();
     } catch (error) {
       setDecisionLog((prev) =>
         prev.map((entry) =>
@@ -1804,16 +1847,57 @@ export default function StrategyRoomPage({
         {!isSubmitting && canonical && (
           <>
             <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
+
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+              <DecisionStateBanner
+                state={enforcement?.decisionState ?? "PENDING"}
+                escalationLevel={enforcement?.escalationLevel ?? 0}
+              />
+            </div>
+
             <FirstActionPrompt />
             <ExecutionDecisionFrame canonical={canonical} thread={thread} />
+
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+              <DynamicConsequencePanel
+                currentExposure={enforcement?.consequence?.currentExposure ?? 0}
+                previousExposure={enforcement?.consequence?.previousExposure ?? null}
+                baseRisk={enforcement?.consequence?.baseRisk ?? null}
+                timePenalty={enforcement?.consequence?.timePenalty ?? null}
+                failurePenalty={enforcement?.consequence?.failurePenalty ?? null}
+              />
+            </div>
+
             <InterventionStack canonical={canonical} />
             <ConstraintMap canonical={canonical} />
+
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+              <AvoidancePatternNotice
+                avoidanceCount={enforcement?.avoidanceCount ?? 0}
+                repeatedPatternLabel={enforcement?.repeatedPatternLabel ?? null}
+              />
+            </div>
+
             <DecisionLog
               entries={decisionLog}
               onAdd={addDecisionLogEntry}
               onStatusChange={updateDecisionLogStatus}
               onBlockReasonChange={updateDecisionBlockReason}
             />
+
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+              <EscalationTriggerPanel triggers={enforcement?.escalationTriggers ?? []} />
+            </div>
+
+            {enforcement?.directive && (
+              <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+                <div style={{ border: "1px solid rgba(252,165,165,0.25)", backgroundColor: "rgba(252,165,165,0.04)", padding: "0.75rem 1rem" }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)" }}>System directive</div>
+                  <p style={{ marginTop: "0.2rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(252,165,165,0.50)" }}>{enforcement.directive}</p>
+                </div>
+              </div>
+            )}
+
             <EscalationTriggers entries={decisionLog} />
             {persistError && (
               <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
