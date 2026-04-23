@@ -64,10 +64,10 @@ export type CanonicalDecisionObject = {
   stakeholderText?: string | null;
   affectedDomain?: string | null;
   confidence: number;
-  aiExposureLevel: AIExposureLevel;
-  aiDisplacementRisk: boolean;
-  decisionVelocityScore: number;
-  aiRiskClassification: string;
+  aiExposureLevel?: AIExposureLevel;
+  aiDisplacementRisk?: boolean;
+  decisionVelocityScore?: number;
+  aiRiskClassification?: string;
   normalized: {
     avoidedOrFaced: boolean;
     hasConstraint: boolean;

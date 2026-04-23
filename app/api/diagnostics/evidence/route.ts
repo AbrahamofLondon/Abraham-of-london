@@ -7,6 +7,7 @@ import type {
   DiagnosticEvidenceNodeInput,
   EvidenceSourceStage,
 } from "@/lib/diagnostics/evidence-graph";
+import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,6 +46,16 @@ function decisionObjectFrom(value: unknown): CanonicalDecisionObject | null {
   const sourceStage = s(value.sourceStage) as EvidenceSourceStage;
   const decisionKey = s(value.decisionKey);
   if (!decisionText || !sourceStage || !decisionKey) return null;
+  const aiRisk = classifyAIDecisionRisk({
+    decisionText,
+    constraintText: s(value.constraintText) || null,
+    priorAttemptText: s(value.priorAttemptText) || null,
+    costOfDelayText: s(value.costOfDelayText) || null,
+    affectedDomain: s(value.affectedDomain) || null,
+    aiExposureLevel: s(value.aiExposureLevel) || null,
+    aiDisplacementRisk: Boolean(value.aiDisplacementRisk),
+    decisionVelocityScore: typeof value.decisionVelocityScore === "number" ? value.decisionVelocityScore : null,
+  });
   return {
     sourceStage,
     decisionKey,
@@ -55,6 +66,10 @@ function decisionObjectFrom(value: unknown): CanonicalDecisionObject | null {
     stakeholderText: s(value.stakeholderText) || null,
     affectedDomain: s(value.affectedDomain) || null,
     confidence: typeof value.confidence === "number" ? value.confidence : 0.5,
+    aiExposureLevel: aiRisk.aiExposureLevel,
+    aiDisplacementRisk: aiRisk.aiDisplacementRisk,
+    decisionVelocityScore: aiRisk.decisionVelocityScore,
+    aiRiskClassification: aiRisk.classification,
     normalized: isObject(value.normalized)
       ? value.normalized as CanonicalDecisionObject["normalized"]
       : {

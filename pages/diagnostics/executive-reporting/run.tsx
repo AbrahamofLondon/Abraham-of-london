@@ -1061,9 +1061,9 @@ function ResultSurface({
 
   // AI Terrain Assessment
   const aiTerrain = React.useMemo(() => assessAITerrain({
-    sector: safeString(intake?.sector ?? constitution?.sector, "professional_services"),
+    sector: safeString(intake?.sector ?? (constitution as any)?.sector, "professional_services"),
     revenueBand: safeString(constitution?.revenueBand ?? intake?.revenueBand, ""),
-    avgDecisionCycleDays: safeNumber(constitution?.decisionCycleDays, 21),
+    avgDecisionCycleDays: safeNumber((constitution as any)?.decisionCycleDays, 21),
     aiMentionedInProblem: safeString(intake?.problemStatement ?? intake?.decisionQuestion).toLowerCase().includes("ai") ||
       safeString(intake?.symptoms ?? intake?.currentConstraint).toLowerCase().includes("automat"),
     competitorAIAdoption: safeString(intake?.sector).toLowerCase().includes("tech") ||
