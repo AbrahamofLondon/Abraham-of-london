@@ -351,9 +351,9 @@ const LeadershipPage: NextPage = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-amber-400/[0.03] to-transparent" />
           <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-16">
-              <RailLabel>Institutional Tooling</RailLabel>
+              <RailLabel>Decision Assets</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                Tools for execution
+                Execution architecture
               </h2>
             </div>
 

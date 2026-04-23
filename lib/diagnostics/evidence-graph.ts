@@ -9,6 +9,7 @@ export type EvidenceSourceStage =
   | "enterprise"
   | "executive_reporting"
   | "strategy_room"
+  | "instrument"
   | "monitoring";
 
 export type EvidenceNodeKind =

@@ -11,6 +11,7 @@ import {
   type DecisionAction,
   type SessionExecutionState,
 } from "@/lib/execution/decision-state-engine";
+import { buildDecisionSurfacePayload } from "@/lib/contracts/decision-surface";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -36,10 +37,18 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     const { id: sessionId } = await ctx.params;
     const body = await req.json();
     const { decision, notes } = body;
+    const decisionObjectId = typeof body?.decisionObjectId === "string" ? body.decisionObjectId.trim() : "";
 
     if (!decision || typeof decision !== "string") {
       return NextResponse.json(
         { error: "Decision text is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!decisionObjectId) {
+      return NextResponse.json(
+        { error: "decisionObjectId is required" },
         { status: 400 },
       );
     }
@@ -66,9 +75,20 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
       })),
     );
 
+    const linkedDecisionObject = await prisma.diagnosticDecisionObject.findUnique({
+      where: { id: decisionObjectId },
+    });
+    if (!linkedDecisionObject) {
+      return NextResponse.json(
+        { error: "decisionObjectId does not resolve to a canonical decision object" },
+        { status: 400 },
+      );
+    }
+
     const log = await prisma.strategyDecisionLog.create({
       data: {
         sessionId,
+        decisionObjectId,
         decision,
         notes: notes ?? null,
         status: "pending",
@@ -107,7 +127,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
         session.conditionSummary ? `Condition: ${session.conditionSummary}` : "",
       ].filter(Boolean),
       confidence: 0.78,
-      payload: { sessionId, decisionLogId: log.id, status: log.status },
+      payload: { sessionId, decisionLogId: log.id, decisionObjectId, status: log.status },
     });
     persistDiagnosticStage({
       email: session.email,
@@ -182,9 +202,30 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
       }).catch(() => {});
     }
 
+    const decisionSurface = buildDecisionSurfacePayload({
+      decisionId: decisionObjectId,
+      contradictions: packet.nodes
+        .filter((node) => node.kind === "contradiction")
+        .map((node) => ({
+          label: node.label,
+          summary: node.summary,
+          severity: node.severity,
+          confidence: node.confidence,
+          sourceStage: node.sourceStage,
+        })),
+      enforcementState: transition.newState === "ESCALATED" || transition.newState === "FAILED"
+        ? "ESCALATED"
+        : transition.newState === "EXECUTED"
+          ? "RESOLVED"
+          : "ACTIVE",
+      consequenceScore: consequence.score,
+    });
+
     return NextResponse.json({
       ok: true,
       decision: log,
+      decisionSurface,
+      decisionSurfacePayload: decisionSurface,
       systemState: transition.newState,
       consequence,
       directive: transition.directive,
@@ -232,6 +273,13 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       where: { id: sessionId },
     });
 
+    if (!log.decisionObjectId) {
+      return NextResponse.json(
+        { error: "Decision log is missing canonical decisionObjectId" },
+        { status: 409 },
+      );
+    }
+
     // Fire feedback loop (non-blocking)
     propagateDecisionChange(sessionId, "status_changed", decisionId).catch(() => {});
     if (session) {
@@ -261,7 +309,7 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
           session.coreProblem ? `Core problem: ${session.coreProblem}` : "",
         ].filter(Boolean),
         confidence: 0.76,
-        payload: { sessionId, decisionLogId: log.id, status: status || log.status },
+        payload: { sessionId, decisionLogId: log.id, decisionObjectId: log.decisionObjectId, status: status || log.status },
       });
       persistDiagnosticStage({
         email: session.email,
@@ -310,9 +358,38 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       }).catch(() => {});
     }
 
+    const decisionSurface = buildDecisionSurfacePayload({
+      decisionId: log.decisionObjectId,
+      contradictions: session
+        ? [{
+            label: status === "blocked" ? "Execution blocked" : "Execution status changed",
+            summary: status === "blocked"
+              ? "Execution decision is blocked; the intervention path has hit a constraint."
+              : "Execution decision status changed; the system records movement against the intervention path.",
+            severity: status === "blocked" ? "high" : "medium",
+            confidence: 0.76,
+            sourceStage: "strategy_room",
+          }]
+        : [{
+            label: "Strategy Room session missing",
+            summary: "The decision log exists but the execution session could not be resolved.",
+            severity: "high",
+            confidence: 0.7,
+            sourceStage: "strategy_room",
+          }],
+      enforcementState: transition.newState === "ESCALATED" || transition.newState === "FAILED"
+        ? "ESCALATED"
+        : transition.newState === "EXECUTED"
+          ? "RESOLVED"
+          : "ACTIVE",
+      consequenceScore: consequence.score,
+    });
+
     return NextResponse.json({
       ok: true,
       decision: log,
+      decisionSurface,
+      decisionSurfacePayload: decisionSurface,
       systemState: transition.newState,
       consequence,
       directive: transition.directive,

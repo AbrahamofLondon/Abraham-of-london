@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import { analyseLongitudinalChange, type DiagnosticSnapshot } from "@/lib/monitoring/longitudinal-engine";
+import {
+  buildDecisionSurfacePayload,
+  insufficientEvidenceContradiction,
+} from "@/lib/contracts/decision-surface";
 
 /**
  * GET /api/diagnostics/longitudinal?email=...&stage=constitutional
@@ -24,7 +28,15 @@ export async function GET(req: NextRequest) {
     });
 
     if (journeys.length < 1) {
-      return NextResponse.json({ ok: true, hasBaseline: false, classification: "insufficient" });
+      const decisionSurface = {
+        decisionId: `${email.toLowerCase()}:${stage}`,
+        contradictions: [insufficientEvidenceContradiction({
+          id: `longitudinal:${email.toLowerCase()}:${stage}:insufficient`,
+          sourceStage: stage,
+        })],
+        enforcementState: "PENDING" as const,
+      };
+      return NextResponse.json({ ok: true, hasBaseline: false, classification: "insufficient", decisionSurface, decisionSurfacePayload: decisionSurface });
     }
 
     // Get stage records for these journeys
@@ -48,7 +60,15 @@ export async function GET(req: NextRequest) {
     }).filter((s) => Object.keys(s.coreMetrics).length > 0);
 
     if (snapshots.length < 2) {
-      return NextResponse.json({ ok: true, hasBaseline: false, classification: "insufficient" });
+      const decisionSurface = {
+        decisionId: journeys[0]!.id,
+        contradictions: [insufficientEvidenceContradiction({
+          id: `longitudinal:${journeys[0]!.id}:insufficient`,
+          sourceStage: stage,
+        })],
+        enforcementState: "PENDING" as const,
+      };
+      return NextResponse.json({ ok: true, hasBaseline: false, classification: "insufficient", decisionSurface, decisionSurfacePayload: decisionSurface });
     }
 
     const analysis = analyseLongitudinalChange(snapshots);
@@ -78,12 +98,25 @@ export async function GET(req: NextRequest) {
     });
 
     const contradictions = contradictionNodes.map((n) => ({
+      id: n.id,
       label: n.label,
       summary: n.summary,
       confidence: n.confidence,
       severity: n.severity,
       sourceStage: n.sourceStage,
     }));
+    const decisionSurface = buildDecisionSurfacePayload({
+      decisionId: journeys[0]!.id,
+      contradictions: contradictions.length
+        ? contradictions
+        : [insufficientEvidenceContradiction({
+            id: `longitudinal:${journeys[0]!.id}:no-contradictions`,
+            sourceStage: stage,
+            summary: "Longitudinal movement exists, but no persisted contradiction node is available yet.",
+          })],
+      enforcementState: classification === "deterioration" || classification === "recurring" ? "ESCALATED" : "ACTIVE",
+      consequenceScore: classification === "deterioration" || classification === "recurring" ? 75 : 45,
+    });
 
     // Identify contradictions that persist across journeys
     const persistingContradictions = contradictions.filter((c) =>
@@ -102,9 +135,27 @@ export async function GET(req: NextRequest) {
       },
     }).catch(() => {});
 
+    // Authority contract: every diagnostic response includes these fields
+    const highestSeverity = contradictions.reduce((s, c) =>
+      c.severity === "critical" ? "critical" : s === "critical" ? "critical" : c.severity === "high" ? "high" : s,
+      "medium" as string,
+    );
+    const avgConfidence = contradictions.length > 0
+      ? contradictions.reduce((s, c) => s + c.confidence, 0) / contradictions.length
+      : 0;
+
     return NextResponse.json({
       ok: true,
       hasBaseline: true,
+      decisionSurface,
+      decisionSurfacePayload: decisionSurface,
+      // Authority contract
+      decisionId: journeys[0]?.id ?? null,
+      contradictions,
+      severity: highestSeverity,
+      confidence: Math.round(avgConfidence * 100) / 100,
+      enforcementState: classification === "deterioration" || classification === "recurring" ? "escalation_required" : "monitoring",
+      // Longitudinal data
       classification,
       metricChanges: analysis.metricChanges,
       tensionPersistence: analysis.tensionPersistence,
@@ -113,7 +164,6 @@ export async function GET(req: NextRequest) {
       baselineDate: ordered[0]?.timestamp,
       currentDate: ordered[ordered.length - 1]?.timestamp,
       snapshotCount: snapshots.length,
-      contradictions,
       persistingContradictions: persistingContradictions.map((c) => c.label),
     });
   } catch (err) {

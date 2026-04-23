@@ -18,6 +18,7 @@ import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBloc
 import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
 import MultiStakeholderDivergence from "@/components/diagnostics/results/MultiStakeholderDivergence";
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 type EnterpriseDomain = {
@@ -528,19 +529,18 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
       <MultiStakeholderDivergence data={multiStakeholder} />
       <OutcomeVerification data={outcome} />
 
-      {/* Escalation */}
-      <div className="border border-white/[0.06] bg-white/[0.01] p-5">
-        <Eyebrow>Next layer</Eyebrow>
-        <p className="mt-2 font-serif text-[0.95rem] font-light italic leading-[1.65] text-white/50 mb-4">
-          The enterprise signal warrants deeper interpretation. Executive Reporting translates structural strain into financial exposure and a governed priority stack.
-        </p>
-        <Link
-          href="/diagnostics/executive-reporting"
-          className="group inline-flex items-center gap-2 border border-amber-500/25 bg-amber-500/[0.06] px-5 py-2.5 font-mono text-[8px] uppercase tracking-[0.24em] text-amber-300/80 transition-all hover:border-amber-500/40 hover:bg-amber-500/10"
-        >
-          Continue to Executive Reporting <ArrowRight className="h-3 w-3" />
-        </Link>
-      </div>
+      {/* Forced ladder progression */}
+      <LadderProgressionGate
+        severity={posture === "DISORDERED" ? "critical" : posture === "CONTESTED" ? "high" : "medium"}
+        nextStage={{
+          label: "Executive Reporting",
+          href: "/diagnostics/executive-reporting",
+          reason: "The enterprise signal warrants deeper interpretation. Executive Reporting translates structural strain into financial exposure and a governed priority stack.",
+        }}
+        consequenceOfExit={`Enterprise posture is ${posture}. ${heatDomains.length > 0 ? `Heat domains (${heatDomains.join(", ")}) are producing active stress.` : ""} Without pricing this condition, institutional drag compounds and the cost of inaction increases with each decision cycle.`}
+        trajectoryWarning={posture === "DISORDERED" || posture === "CONTESTED" ? "At current posture, structural disorder produces cascading execution failures within 30-60 days." : undefined}
+        canDefer={posture !== "DISORDERED"}
+      />
     </motion.div>
   );
 }

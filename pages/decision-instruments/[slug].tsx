@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import { ArrowRight, CheckSquare, Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import CheckoutButton from "@/components/commercial/CheckoutButton";
 import {
   trackAssetComplete,
   trackAssetOpen,
@@ -502,16 +503,13 @@ function InstrumentEnvironment({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        stage: "decision_instrument",
+        type: instrument.transition.state === "HIGH_SEVERITY" ? "CONTRADICTION" : "ACTION",
+        severity: instrument.transition.state === "HIGH_SEVERITY" ? 85 : 55,
+        confidence: 85,
+        source: "instrument",
+        decisionId: `${instrument.slug}:${instrument.transition.state}`,
+        summary: `${instrument.title} completed. Transition state: ${instrument.transition.state}. Checklist items: ${instrument.guidedChecklist.length}. Outcome: ${instrument.outcomePromise.join("; ")}.`,
         payload: { instrument: instrument.slug, transitionState: instrument.transition.state },
-        evidenceNodes: [{
-          sourceStage: "decision_instrument",
-          kind: instrument.transition.state === "HIGH_SEVERITY" ? "contradiction" : "action",
-          label: `Instrument: ${instrument.title}`,
-          summary: `${instrument.title} completed. Transition state: ${instrument.transition.state}. Checklist items: ${instrument.guidedChecklist.length}. Outcome: ${instrument.outcomePromise.join("; ")}.`,
-          severity: instrument.transition.state === "HIGH_SEVERITY" ? "high" : "medium",
-          confidence: 0.85,
-        }],
       }),
     }).catch(() => {});
   }
@@ -543,6 +541,9 @@ function InstrumentEnvironment({
             <div style={{ marginTop: "1rem", ...monoStyle, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}AA` }}>
               Time expectation · {instrument.timeExpectation}
             </div>
+            <SystemText color="rgba(255,255,255,0.58)" size="12px">
+              This input will affect your enforcement trajectory.
+            </SystemText>
           </div>
 
           <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
@@ -848,14 +849,15 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
               <p style={{ ...serifStyle, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.42)" }}>
                 This is one part of the decision. Exposure, authority, and intervention logic must all resolve for the decision to hold.
               </p>
-              <Link
-                href="/api/checkout?bundle=operator-decision-pack"
+              <CheckoutButton
+                productCode="operator_decision_pack"
+                originPath={`/decision-instruments/${instrument.slug}`}
                 className="mt-2.5 inline-flex items-center gap-2"
                 style={{ ...monoStyle, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}
               >
                 Resolve the decision fully &middot; Operator Pack &pound;129
                 <ArrowRight style={{ width: 9, height: 9 }} />
-              </Link>
+              </CheckoutButton>
             </div>
           </div>
 

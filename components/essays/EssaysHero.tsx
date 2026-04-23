@@ -19,7 +19,7 @@ type Props = {
 };
 
 export default function EssaysHero({
-  title = "Essays & Insights",
+  title = "Essays",
   subtitle = "Explorations in the craft of building meaningful institutions.",
   coverImage,
   ctaHref,

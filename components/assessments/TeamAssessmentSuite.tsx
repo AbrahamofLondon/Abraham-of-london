@@ -21,6 +21,7 @@ import Link from "next/link";
 import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
 import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 const GOLD = "#C9A96E";
@@ -396,22 +397,19 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
       <LongitudinalIntelligence data={longitudinal} />
       <OutcomeVerification data={outcome} />
 
-      {/* Escalation */}
-      <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem 1.5rem" }}>
-        <Eyebrow>Next layer</Eyebrow>
-        <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", fontStyle: "italic", marginBottom: "1rem" }}>
-          {nextLayer === "Executive Reporting"
-            ? "The team signal warrants deeper interpretation. Executive Reporting translates this into financial exposure and a governed priority stack."
-            : "Team alignment is within bounds. The Constitutional Diagnostic can test whether the institutional structure matches."}
-        </p>
-        <Link
-          href={nextLayer === "Executive Reporting" ? "/diagnostics/executive-reporting" : "/diagnostics/constitutional-diagnostic"}
-          className="group inline-flex items-center gap-2 transition-all duration-300"
-          style={{ padding: "10px 20px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase" }}
-        >
-          Continue to {nextLayer} <ArrowRight style={{ width: "11px", height: "11px" }} />
-        </Link>
-      </div>
+      {/* Forced ladder progression */}
+      <LadderProgressionGate
+        severity={vi > 40 || tg > 35 ? "high" : "medium"}
+        nextStage={{
+          label: nextLayer,
+          href: nextLayer === "Executive Reporting" ? "/diagnostics/executive-reporting" : "/diagnostics/constitutional-diagnostic",
+          reason: nextLayer === "Executive Reporting"
+            ? "The team signal warrants deeper interpretation. Executive Reporting translates structural strain into financial exposure and a governed priority stack."
+            : "Team alignment is within bounds. The Constitutional Diagnostic tests whether the institutional structure matches.",
+        }}
+        consequenceOfExit={`Team divergence of ${vi}% variance and ${tg}% trust gap is already producing coordination cost. Without pricing this condition, decisions will be made under disagreement — creating conflicting execution streams.`}
+        trajectoryWarning={vi > 40 ? "At current variance levels, execution drift compounds within 30 days." : undefined}
+      />
     </motion.div>
   );
 }

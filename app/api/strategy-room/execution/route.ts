@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import { randomUUID } from "crypto";
 import { getDiagnosticJourney } from "@/lib/diagnostics/journey-store";
+import {
+  buildDecisionSurfacePayload,
+  insufficientEvidenceContradiction,
+} from "@/lib/contracts/decision-surface";
 
 /**
  * POST — Create a new Strategy Room execution session
@@ -42,6 +46,13 @@ export async function POST(req: NextRequest) {
           .slice(-3)
           .map((node) => node.summary)
       : [];
+
+    if (!latestDecisionObject) {
+      return NextResponse.json(
+        { error: "Strategy Room requires a canonical decision object before execution can start" },
+        { status: 409 },
+      );
+    }
 
     const session = await prisma.strategyRoomExecutionSession.create({
       data: {
@@ -88,7 +99,26 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ ok: true, id: session.id, sessionKey: session.sessionKey });
+    const decisionSurface = buildDecisionSurfacePayload({
+      decisionId: latestDecisionObject.decisionKey,
+      contradictions: latestContradictions.length
+        ? latestContradictions.map((node) => ({
+            label: node.label,
+            summary: node.summary,
+            severity: node.severity,
+            confidence: node.confidence,
+            sourceStage: node.sourceStage,
+          }))
+        : [insufficientEvidenceContradiction({
+            id: `strategy-room:${session.id}:no-contradictions`,
+            sourceStage: "strategy_room",
+            summary: "Execution session has a decision object but no persisted contradiction node.",
+          })],
+      enforcementState: "ACTIVE",
+      consequenceScore: 70,
+    });
+
+    return NextResponse.json({ ok: true, id: session.id, sessionKey: session.sessionKey, decisionSurface, decisionSurfacePayload: decisionSurface });
   } catch (err) {
     console.error("[execution-session-create]", err);
     return NextResponse.json(

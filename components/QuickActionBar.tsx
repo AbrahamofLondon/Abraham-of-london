@@ -39,7 +39,7 @@ export default function QuickActionBar({
 
   const quickLinks = [
     { href: "/books", label: "Books", icon: "📚", badge: null },
-    { href: "/blog", label: "Insights", icon: "💭", badge: "New" },
+    { href: "/blog", label: "Essays", icon: "💭", badge: "New" },
     { href: "/events", label: "Events", icon: "📅", badge: "Live" },
     { href: "/downloads", label: "Resources", icon: "📥", badge: "Free" },
     { href: "/consulting", label: "Consulting", icon: "🎯", badge: null },

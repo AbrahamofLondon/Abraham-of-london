@@ -27,6 +27,7 @@ CREATE INDEX IF NOT EXISTS "strategy_room_execution_sessions_status_idx" ON "str
 CREATE TABLE IF NOT EXISTS "strategy_decision_logs" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "sessionId" TEXT NOT NULL,
+  "decisionObjectId" TEXT NOT NULL,
   "decision" TEXT NOT NULL,
   "status" TEXT NOT NULL DEFAULT 'pending',
   "notes" TEXT,
@@ -37,11 +38,14 @@ CREATE TABLE IF NOT EXISTS "strategy_decision_logs" (
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "strategy_decision_logs_sessionId_fkey"
-    FOREIGN KEY ("sessionId") REFERENCES "strategy_room_execution_sessions"("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY ("sessionId") REFERENCES "strategy_room_execution_sessions"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "strategy_decision_logs_decisionObjectId_fkey"
+    FOREIGN KEY ("decisionObjectId") REFERENCES "DiagnosticDecisionObject"("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS "strategy_decision_logs_sessionId_idx" ON "strategy_decision_logs"("sessionId");
 CREATE INDEX IF NOT EXISTS "strategy_decision_logs_status_idx" ON "strategy_decision_logs"("status");
+CREATE INDEX IF NOT EXISTS "strategy_decision_logs_decisionObjectId_idx" ON "strategy_decision_logs"("decisionObjectId");
 
 CREATE TABLE IF NOT EXISTS "consequence_timeline" (
   "id" TEXT NOT NULL PRIMARY KEY,

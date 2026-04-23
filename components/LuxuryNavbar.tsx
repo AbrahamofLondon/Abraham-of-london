@@ -15,7 +15,7 @@ const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(
 
 const NAV = [
   { href: "/canon", label: "Canon" },
-  { href: "/resources/strategic-frameworks", label: "Frameworks" },
+  { href: "/resources/strategic-frameworks", label: "Decision assets" },
   { href: "/library", label: "Library" },
   { href: "/ventures", label: "Ventures" },
   { href: "/shorts", label: "Shorts" },

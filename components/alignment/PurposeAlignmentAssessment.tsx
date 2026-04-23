@@ -65,6 +65,7 @@ import ResultEscalation from "@/components/diagnostics/results/ResultEscalation"
 import ResultDiagnostics from "@/components/diagnostics/results/ResultDiagnostics";
 import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -994,13 +995,15 @@ function AuthorityResultSurface({
         consequence={narrative?.consequenceBlock ?? "Inaction compounds the condition."}
       />
 
-      <ResultEscalation
-        qualifies={qualifiesForEscalation}
-        nextStep={routing?.label ?? "Constitutional Diagnostic"}
-        href={routing?.href ?? "/diagnostics/constitutional-diagnostic"}
-        reason={routing?.reason ?? (qualifiesForEscalation
-          ? "This condition has structural implications beyond personal alignment. The constitutional diagnostic will determine whether the organisation carries the same pattern."
-          : "Continue when ready. The diagnostic system advances when the condition requires it.")}
+      <LadderProgressionGate
+        severity={result.percent < 40 ? "critical" : result.percent < 55 ? "high" : "medium"}
+        nextStage={{
+          label: routing?.label ?? "Constitutional Diagnostic",
+          href: routing?.href ?? "/diagnostics/constitutional-diagnostic",
+          reason: routing?.reason ?? "This condition has structural implications beyond personal alignment. The constitutional diagnostic will determine whether the organisation carries the same pattern.",
+        }}
+        consequenceOfExit={`Your condition remains unpriced. Without constitutional validation, this ${pattern?.label ?? "pattern"} cannot be distinguished from a personal preference. The cost compounds at approximately ${result.percent < 55 ? "3-5%" : "1-2%"} per month of delay.`}
+        trajectoryWarning={result.percent < 55 ? "Current trajectory suggests escalation within 30-60 days if the condition remains unexamined." : undefined}
       />
 
       {/* Institutional layers — render when prior data exists */}

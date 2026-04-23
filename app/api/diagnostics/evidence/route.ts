@@ -68,10 +68,49 @@ function decisionObjectFrom(value: unknown): CanonicalDecisionObject | null {
   };
 }
 
+function severityFromNumber(value: unknown): DiagnosticEvidenceNodeInput["severity"] {
+  const score = typeof value === "number" && Number.isFinite(value) ? value : 50;
+  if (score >= 85) return "critical";
+  if (score >= 70) return "high";
+  if (score >= 40) return "medium";
+  return "low";
+}
+
+function confidenceFrom(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return 0.65;
+  return Math.max(0, Math.min(1, value > 1 ? value / 100 : value));
+}
+
+function instrumentNodeFrom(body: Record<string, unknown>): DiagnosticEvidenceNodeInput | null {
+  const source = s(body.source);
+  const type = s(body.type).toUpperCase();
+  const decisionId = s(body.decisionId);
+  if (source !== "instrument" || !decisionId) return null;
+  if (type !== "CONTRADICTION" && type !== "ACTION") return null;
+
+  const severity = typeof body.severity === "number" ? body.severity : 50;
+  const kind: DiagnosticEvidenceNodeInput["kind"] =
+    severity >= 70 || type === "CONTRADICTION" ? "contradiction" : "action";
+
+  return {
+    sourceStage: "instrument",
+    kind,
+    label: kind === "contradiction" ? "Instrument contradiction" : "Instrument action",
+    summary: s(body.summary) || (kind === "contradiction"
+      ? "Decision stage recorded a high-severity contradiction."
+      : "Decision stage recorded an action signal."),
+    evidenceText: s(body.evidenceText) || null,
+    confidence: confidenceFrom(body.confidence),
+    severity: severityFromNumber(severity),
+    payload: { decisionId, source: "instrument", type, severity },
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const stage = s(body?.stage) as EvidenceSourceStage;
+    const instrumentNode = isObject(body) ? instrumentNodeFrom(body) : null;
+    const stage = (instrumentNode ? "instrument" : s(body?.stage)) as EvidenceSourceStage;
     if (!stage) {
       return NextResponse.json({ ok: false, error: "stage is required" }, { status: 400 });
     }
@@ -101,7 +140,7 @@ export async function POST(request: Request) {
         })
       : null;
 
-    const nodes = generatedPacket?.nodes ?? (Array.isArray(body?.evidenceNodes)
+    const nodes = instrumentNode ? [instrumentNode] : generatedPacket?.nodes ?? (Array.isArray(body?.evidenceNodes)
       ? body.evidenceNodes.map(nodeFrom).filter(Boolean) as DiagnosticEvidenceNodeInput[]
       : []);
     const decisionObject = generatedPacket?.decisionObject ?? decisionObjectFrom(body?.decisionObject);
@@ -119,7 +158,11 @@ export async function POST(request: Request) {
       campaignId: s(body?.campaignId) || null,
       organisation: s(body?.organisation) || null,
       stage: stage as Parameters<typeof persistDiagnosticStage>[0]["stage"],
-      payload: isObject(body?.payload) ? body.payload : { stage },
+      payload: isObject(body?.payload)
+        ? body.payload
+        : instrumentNode
+          ? { stage, decisionId: s(body?.decisionId), source: "instrument" }
+          : { stage },
       tensions: nodes
         .filter((node) => node.kind === "contradiction")
         .map((node) => node.label),
@@ -134,6 +177,10 @@ export async function POST(request: Request) {
       journeyKey: journey.journeyKey,
       evidenceNodeCount: nodes.length,
       decisionObjectRecorded: Boolean(decisionObject),
+      deprecated: {
+        type: "Use evidenceNodes[].kind; type remains accepted for decision-stage compatibility.",
+        source: "Use sourceStage; source remains accepted for decision-stage compatibility.",
+      },
     });
   } catch (error) {
     console.error("[DIAGNOSTIC_EVIDENCE_POST_ERROR]", error);

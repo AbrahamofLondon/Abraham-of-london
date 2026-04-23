@@ -18,6 +18,9 @@ import EngagementReadinessPanel from "@/components/diagnostics/results/Engagemen
 import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
 import MultiStakeholderDivergence from "@/components/diagnostics/results/MultiStakeholderDivergence";
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
+import PredictiveConsequence from "@/components/diagnostics/results/PredictiveConsequence";
+import { projectConsequence } from "@/lib/diagnostics/predictive-consequence";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 import { inferTrajectory, deriveEngagementReadiness, type EngagementReadiness } from "@/lib/diagnostics/prognosis";
 import { buildBasisOfBrief } from "@/lib/positioning/proof-model";
@@ -178,6 +181,7 @@ type ExecutiveReportViewModel = {
     authorityScore: number;
     governanceScore: number;
     severityScore: number;
+    escalationLevel?: number;
     revenueScore: number;
     dominantDomains: string[];
     failureModes: string[];
@@ -249,6 +253,7 @@ type CanonicalReport = {
       authorityScore?: number;
       governanceScore?: number;
       severityScore?: number;
+      escalationLevel?: number;
       revenueScore?: number;
       dominantDomains?: string[];
       failureModes?: string[];
@@ -1026,6 +1031,20 @@ function ResultSurface({
 
   // Intelligence layer — async interpretation enrichment
   const intake = (result as any)?.intake;
+
+  // Predictive consequence — "Cost of Non-Decision"
+  const consequenceProjection = React.useMemo(() => projectConsequence({
+    contradictions: graphContradictions.map((n: any) => ({
+      severity: String(n.severity ?? "medium"),
+      confidence: typeof n.confidence === "number" ? n.confidence : 0.5,
+    })),
+    recurrenceCount: 0,
+    maxDivergenceGap: 0,
+    escalationLevel: safeNumber(constitution?.escalationLevel, 0),
+    daysSinceIdentification: 0,
+    revenueBand: safeString(constitution?.revenueBand ?? intake?.revenueBand),
+    priorInterventionCount: 0,
+  }), [graphContradictions, constitution, intake]);
   const { interpretation, loading: interpretLoading } = useInterpretation({
     canonicalResult: canonical?.sections ?? {},
     userInputs: {
@@ -1182,17 +1201,33 @@ function ResultSurface({
           </p>
         </div>
 
-        {/* ── BLOCK 8: ESCALATION PATH ── */}
+        {/* ── BLOCK 7b: COST OF NON-DECISION ── */}
+        <PredictiveConsequence data={consequenceProjection} />
+
+        {/* ── BLOCK 8: FORCED LADDER PROGRESSION ── */}
         {route === "STRATEGY" && (
-          <div style={{ border: "1px solid rgba(252,165,165,0.22)", backgroundColor: "rgba(252,165,165,0.03)", padding: "1.25rem", marginBottom: "1.5rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)", fontWeight: 700 }}>EXECUTION REQUIRED</span>
-            <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(255,255,255,0.40)" }}>
-              This condition requires governed intervention. Strategy Room inherits this evidence.
-            </p>
-            <Link href="/strategy-room" className="mt-3 inline-flex items-center gap-2" style={{ padding: "8px 16px", border: "1px solid rgba(252,165,165,0.30)", color: "rgba(252,165,165,0.70)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-              Enter Strategy Room <ArrowRight style={{ width: 9, height: 9 }} />
-            </Link>
-          </div>
+          <LadderProgressionGate
+            severity="critical"
+            nextStage={{
+              label: "Strategy Room",
+              href: "/strategy-room",
+              reason: "This condition requires governed intervention. The Strategy Room inherits this evidence, sequences the intervention, and enforces execution.",
+            }}
+            consequenceOfExit="Your condition has been priced. Exiting without entering execution means this exposure compounds unchecked. The system has recorded this decision point — delay will be visible in your next assessment."
+            trajectoryWarning="Executive Reporting has classified this as STRATEGY route. Without execution, the priced consequence increases with each decision cycle."
+            canDefer={false}
+          />
+        )}
+        {route !== "STRATEGY" && (
+          <LadderProgressionGate
+            severity="medium"
+            nextStage={{
+              label: "Strategy Room",
+              href: "/strategy-room",
+              reason: "The Strategy Room is available when execution is required. Your current route does not mandate it, but the evidence is preserved.",
+            }}
+            consequenceOfExit="Your condition has been documented but not yet enforced. Re-entry is available when the condition escalates."
+          />
         )}
 
         {interpretLoading && (

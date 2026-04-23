@@ -2161,6 +2161,7 @@ model DiagnosticDecisionObject {
   updatedAt          DateTime @updatedAt
 
   journey            DiagnosticJourney? @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  strategyLogs       StrategyDecisionLog[]
 
   @@index([journeyId])
   @@index([email])
@@ -2786,22 +2787,25 @@ model StrategyRoomExecutionSession {
 }
 
 model StrategyDecisionLog {
-  id             String    @id @default(cuid())
-  sessionId      String
-  decision       String
-  status         String    @default("pending")  // pending | executed | blocked | escalated | failed
-  notes          String?
-  deadline       DateTime?
-  avoidanceCount Int       @default(0)
-  executedAt     DateTime?
-  escalatedAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  sessionId        String
+  decisionObjectId String
+  decision         String
+  status           String    @default("pending")  // pending | executed | blocked | escalated | failed
+  notes            String?
+  deadline         DateTime?
+  avoidanceCount   Int       @default(0)
+  executedAt       DateTime?
+  escalatedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  session StrategyRoomExecutionSession @relation(fields: [sessionId], references: [id])
+  session        StrategyRoomExecutionSession @relation(fields: [sessionId], references: [id])
+  decisionObject DiagnosticDecisionObject     @relation(fields: [decisionObjectId], references: [id])
 
   @@index([sessionId])
   @@index([status])
+  @@index([decisionObjectId])
   @@map("strategy_decision_logs")
 }
 

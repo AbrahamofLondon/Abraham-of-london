@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import CheckoutButton from "@/components/commercial/CheckoutButton";
 import {
   trackLanding,
   trackBundleClick,
@@ -32,102 +33,62 @@ type DecisionPath = {
   outcome: string;
   cta: string;
   ctaHref: string;
+  secondaryCta?: string;
+  secondaryProductCode?: string;
   accent?: "gold" | "emphasis";
 };
 
 const PATHS: DecisionPath[] = [
   {
     id: 1,
-    name: "Structural Clarity",
-    price: "£59",
-    positioning: "When something is wrong but not yet defined.",
-    trigger: "Pressure is felt but the source is unnamed. Leadership senses drift but cannot locate it.",
+    name: "Decision Instruments",
+    price: "£29–£79",
+    positioning: "When one decision condition must be isolated before it compounds.",
+    trigger: "Use this stage when exposure, authority, or intervention path is unclear and the system needs a specific decision signal.",
     includes: [
-      "Structural Failure Diagnostic Canvas",
-      "Decision Exposure Calculator",
-      "Governance Drift Detector (summary)",
+      "Decision Exposure Instrument",
+      "Mandate Clarity Framework",
+      "Intervention Path Selector",
     ],
-    outcome: "You can name the problem in concrete terms.",
-    cta: "Get clarity",
-    ctaHref: "/api/checkout?bundle=structural-clarity",
+    outcome: "You produce a bounded output that feeds Executive Reporting when consequence must be priced.",
+    cta: "View instruments",
+    ctaHref: "/decision-instruments",
+    secondaryCta: "Acquire Operator Pack · £129",
+    secondaryProductCode: "operator_decision_pack",
   },
   {
     id: 2,
-    name: "Team Reality",
-    price: "£79",
-    positioning: "When alignment looks stable but execution says otherwise.",
-    trigger: "Leadership believes the team is aligned. Results contradict that belief.",
+    name: "Executive Reporting",
+    price: "£95",
+    positioning: "When accumulated evidence must become a governed position.",
+    trigger: "Use this stage when contradiction is established and the cost of delay or wrong action must be stated clearly.",
     includes: [
-      "Team Alignment Gap Map",
-      "Escalation Readiness Scorecard",
-      "Mandate Clarity Framework (extract)",
+      "Evidence convergence",
+      "Contradiction hierarchy",
+      "Consequence pricing",
+      "Priority stack",
     ],
-    outcome: "You see where perception diverges from reality.",
-    cta: "Validate alignment",
-    ctaHref: "/api/checkout?bundle=team-reality",
-  },
-  {
-    id: 3,
-    name: "Decision Stack Builder",
-    price: "£129",
-    positioning: "When the problem is known but action is unclear.",
-    trigger: "The failure mode is identified. Priorities compete. Sequence is missing.",
-    includes: [
-      "Strategic Priority Stack Builder",
-      "Decision Exposure Calculator",
-      "Execution Risk Index",
-      "Intervention Path Selector (routing only)",
-    ],
-    outcome: "You have a structured sequence of decisions.",
-    cta: "Structure decisions",
-    ctaHref: "/api/checkout?bundle=decision-stack",
-  },
-  {
-    id: 4,
-    name: "Board Readiness",
-    price: "£149",
-    positioning: "When a decision must stand under scrutiny.",
-    trigger: "Evidence exists. A board or senior authority must receive it in a form that holds.",
-    includes: [
-      "Board Brief Template (Structured)",
-      "Governance Drift Detector",
-      "Execution Risk Index",
-    ],
-    outcome: "You can present a defensible position.",
-    cta: "Prepare the brief",
-    ctaHref: "/api/checkout?bundle=board-readiness",
-  },
-  {
-    id: 5,
-    name: "Executive Decision Path",
-    price: "��165\u2013£175",
-    positioning: "When consequence must be stated clearly.",
-    trigger: "Diagnostic evidence is established. The institution needs a governed position with financial exposure and priority stack.",
-    includes: [
-      "Executive Reporting (flagship)",
-      "Decision Exposure Calculator",
-      "Strategic Priority Stack Builder",
-    ],
-    outcome: "You receive a governed executive brief.",
-    cta: "Get the executive report",
+    outcome: "You receive a decision document that names the condition, consequence, and next required move.",
+    cta: "Open Executive Reporting",
     ctaHref: "/diagnostics/executive-reporting",
     accent: "gold",
   },
   {
-    id: 6,
-    name: "Pre-Escalation",
-    price: "£195",
-    positioning: "When escalation is likely and must be justified.",
-    trigger: "The decision exceeds current authority. Intervention is required. Evidence must justify the escalation.",
+    id: 3,
+    name: "Strategy Room",
+    price: "£395",
+    positioning: "When analysis is over and intervention must be sequenced.",
+    trigger: "Use this stage when the system has determined that action, ownership, and constraint resolution are now required.",
     includes: [
-      "Escalation Readiness Scorecard",
-      "Intervention Path Selector",
-      "Mandate Clarity Framework",
-      "Board Brief Template (Structured)",
+      "Decision object",
+      "Execution blocker",
+      "First three moves",
+      "Decision log",
+      "Escalation triggers",
     ],
-    outcome: "You are prepared for intervention.",
-    cta: "Prepare for escalation",
-    ctaHref: "/api/checkout?bundle=pre-escalation",
+    outcome: "You enter a controlled execution environment for the decision already determined.",
+    cta: "Enter Strategy Room",
+    ctaHref: "/consulting/strategy-room",
     accent: "emphasis",
   },
 ];
@@ -389,6 +350,26 @@ function PathCard({ path }: { path: DecisionPath }) {
           {path.cta}
           <ArrowRight style={{ width: "10px", height: "10px" }} />
         </Link>
+        {path.secondaryProductCode && path.secondaryCta && (
+          <CheckoutButton
+            productCode={path.secondaryProductCode}
+            originPath="/decision-paths"
+            onCheckoutStart={() => trackBundleClick(path.secondaryProductCode || path.name, 129)}
+            className="mt-2 inline-flex w-full items-center justify-center gap-2 transition-all duration-200"
+            style={{
+              padding: "9px 14px",
+              border: `1px solid ${GOLD}35`,
+              backgroundColor: `${GOLD}08`,
+              color: GOLD,
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+            }}
+          >
+            {path.secondaryCta}
+          </CheckoutButton>
+        )}
       </div>
     </div>
   );

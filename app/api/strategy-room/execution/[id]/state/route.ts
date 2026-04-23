@@ -8,6 +8,10 @@ import {
   type DecisionAction,
   type SessionExecutionState,
 } from "@/lib/execution/decision-state-engine";
+import {
+  buildDecisionSurfacePayload,
+  insufficientEvidenceContradiction,
+} from "@/lib/contracts/decision-surface";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -28,6 +32,14 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
 
     if (!session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    const linkedDecisionObjectId = session.decisions.find((decision) => decision.decisionObjectId)?.decisionObjectId;
+    if (!linkedDecisionObjectId && session.decisions.length > 0) {
+      return NextResponse.json(
+        { error: "Strategy Room decision logs are missing canonical decisionObjectId" },
+        { status: 409 },
+      );
     }
 
     // Build action list with avoidance detection
@@ -112,8 +124,34 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
       ...triggers.filter((t) => !persistedEscalations.some((e) => e.triggerType === t.triggerType)),
     ];
 
+    const decisionSurface = buildDecisionSurfacePayload({
+      decisionId: linkedDecisionObjectId || session.sessionKey,
+      contradictions: allTriggers.length
+        ? allTriggers.map((trigger, index) => ({
+            id: `strategy-room:${id}:${trigger.triggerType}:${index}`,
+            label: String(trigger.triggerType),
+            summary: trigger.message,
+            severity: transition.newState === "ESCALATED" || transition.newState === "FAILED" ? "high" : "medium",
+            confidence: 0.76,
+            sourceStage: "strategy_room",
+          }))
+        : [insufficientEvidenceContradiction({
+            id: `strategy-room:${id}:no-active-trigger`,
+            sourceStage: "strategy_room",
+            summary: "No active escalation trigger is present on this Strategy Room execution session.",
+          })],
+      enforcementState: transition.newState === "ESCALATED" || transition.newState === "FAILED"
+        ? "ESCALATED"
+        : transition.newState === "EXECUTED"
+          ? "RESOLVED"
+          : "ACTIVE",
+      consequenceScore: consequence.score,
+    });
+
     return NextResponse.json({
       ok: true,
+      decisionSurface,
+      decisionSurfacePayload: decisionSurface,
       state: transition.newState,
       escalationLevel: Math.max(transition.triggers.length, persistedEscalations.length),
       avoidanceCount: maxAvoidance,

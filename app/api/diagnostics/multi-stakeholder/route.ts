@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
+import {
+  buildDecisionSurfacePayload,
+  insufficientEvidenceContradiction,
+} from "@/lib/contracts/decision-surface";
 
 /**
  * GET /api/diagnostics/multi-stakeholder?campaignId=...
@@ -21,7 +25,16 @@ export async function GET(req: NextRequest) {
     });
 
     if (participants.length < 2) {
-      return NextResponse.json({ ok: true, hasData: false, respondentCount: participants.length });
+      const decisionSurface = {
+        decisionId: campaignId,
+        contradictions: [insufficientEvidenceContradiction({
+          id: `multi-stakeholder:${campaignId}:insufficient`,
+          sourceStage: "team",
+          summary: "At least two completed respondents are required to resolve stakeholder contradiction.",
+        })],
+        enforcementState: "PENDING" as const,
+      };
+      return NextResponse.json({ ok: true, hasData: false, respondentCount: participants.length, decisionSurface, decisionSurfacePayload: decisionSurface });
     }
 
     // Get latest assessment per participant
@@ -61,7 +74,16 @@ export async function GET(req: NextRequest) {
     }
 
     if (allScores.length === 0) {
-      return NextResponse.json({ ok: true, hasData: false, respondentCount: participants.length });
+      const decisionSurface = {
+        decisionId: campaignId,
+        contradictions: [insufficientEvidenceContradiction({
+          id: `multi-stakeholder:${campaignId}:no-scores`,
+          sourceStage: "team",
+          summary: "Respondents completed the campaign, but no score evidence could be resolved.",
+        })],
+        enforcementState: "PENDING" as const,
+      };
+      return NextResponse.json({ ok: true, hasData: false, respondentCount: participants.length, decisionSurface, decisionSurfacePayload: decisionSurface });
     }
 
     // Group scores by domain
@@ -126,15 +148,51 @@ export async function GET(req: NextRequest) {
     const structuralContradictions = divergences
       .filter((d) => d.gap >= 35)
       .map((d) => ({
+        id: `multi-stakeholder:${campaignId}:${d.domain}`,
         domain: d.domain,
+        label: `${d.domain} stakeholder contradiction`,
         severity: d.gap >= 50 ? "critical" as const : "high" as const,
         summary: `${d.domain}: ${d.respondentA.label} sees ${d.respondentA.score}%, ${d.respondentB.label} sees ${d.respondentB.score}%. Authority is not operating from the same reality in this domain.`,
         gap: d.gap,
+        confidence: participants.length >= 3 ? 0.85 : 0.65,
+        sourceStage: "team",
       }));
+    const decisionSurface = buildDecisionSurfacePayload({
+      decisionId: campaignId,
+      contradictions: structuralContradictions.length
+        ? structuralContradictions
+        : [insufficientEvidenceContradiction({
+            id: `multi-stakeholder:${campaignId}:aligned-no-structural-contradiction`,
+            sourceStage: "team",
+            summary: "Respondent evidence is available, but no structural contradiction threshold has been crossed.",
+          })],
+      enforcementState: structuralContradictions.length > 2
+        ? "ESCALATED"
+        : structuralContradictions.length > 0
+          ? "ACTIVE"
+          : "RESOLVED",
+      consequenceScore: highestCost?.gap ?? 0,
+    });
+
+    // Authority contract
+    const highestSeverity = structuralContradictions.length > 0
+      ? structuralContradictions.some((c) => c.severity === "critical") ? "critical" : "high"
+      : divergences.length > 0 ? "medium" : "low";
 
     return NextResponse.json({
       ok: true,
       hasData: true,
+      decisionSurface,
+      decisionSurfacePayload: decisionSurface,
+      // Authority contract
+      decisionId: campaignId,
+      contradictions: structuralContradictions,
+      severity: highestSeverity,
+      confidence: participants.length >= 3 ? 0.85 : 0.65,
+      enforcementState: structuralContradictions.length > 2 ? "escalation_required"
+        : structuralContradictions.length > 0 ? "intervention_needed"
+        : "aligned",
+      // Multi-stakeholder data
       respondentCount: participants.length,
       sharedAgreement: agreements,
       criticalDivergences: divergences.slice(0, 5),

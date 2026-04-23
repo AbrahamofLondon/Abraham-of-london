@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import CheckoutButton from "@/components/commercial/CheckoutButton";
 import { trackLanding, trackBundleClick } from "@/lib/analytics/journey-client";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -274,9 +275,10 @@ export default function DecisionInstrumentsPage() {
                 </div>
 
                 <div className="mt-4">
-                  <Link
-                    href="/api/checkout?bundle=operator-decision-pack"
-                    onClick={() => trackBundleClick("operator-decision-pack", 129)}
+                  <CheckoutButton
+                    productCode="operator_decision_pack"
+                    originPath="/decision-instruments"
+                    onCheckoutStart={() => trackBundleClick("operator_decision_pack", 129)}
                     className="inline-flex items-center gap-2 transition-all duration-200"
                     style={{
                       padding: "9px 18px",
@@ -293,7 +295,7 @@ export default function DecisionInstrumentsPage() {
                   >
                     Get the Operator Pack
                     <ArrowRight style={{ width: 10, height: 10 }} />
-                  </Link>
+                  </CheckoutButton>
                 </div>
               </div>
             </div>

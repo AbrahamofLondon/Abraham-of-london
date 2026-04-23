@@ -43,12 +43,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") return res.status(405).end();
   if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
 
-  const { email, priceCode, originPath } = req.body || {};
-  const rawCode = String(priceCode || "").trim();
+  const { email, priceCode, productCode, entitlementSlug, contentId, originPath } = req.body || {};
+  const rawCode = String(productCode || entitlementSlug || contentId || priceCode || "").trim();
 
   // Resolve canonical product code — accepts catalog key OR content ID OR entitlement slug
   const identity = resolveProductIdentity(rawCode);
-  const code = identity?.productCode ?? rawCode;
+  if (!identity) {
+    return res.status(400).json({ ok: false, error: "Invalid product identifier" });
+  }
+
+  const code = identity.productCode;
 
   // ── Resolve product from catalog SSOT with guardrails ──
   if (!email) {

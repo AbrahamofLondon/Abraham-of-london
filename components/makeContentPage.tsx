@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { href: "/ventures", label: "Ventures" },
   { href: "/books", label: "Books" },
   { href: "/shorts", label: "Shorts" },
-  { href: "/blog", label: "Insights" },
+  { href: "/blog", label: "Essays" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/downloads", label: "Downloads" },

@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import CheckoutButton from "@/components/commercial/CheckoutButton";
 import ShortsSignalRail from "@/components/shorts/ShortsSignalRail";
 import { AccuracyMetricsBlock, ObservedOutcomesBlock } from "@/components/proof/PublicProofBlocks";
 
@@ -1915,20 +1916,20 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
               overflowWrap: "break-word",
             }}
           >
-            Structured evidence in.
-            <span className="ds-text-muted"> Decision-ready position out.</span>
+            Most decisions fail because
+            <span className="ds-text-muted"> contradictions are ignored.</span>
           </h1>
 
           <p
             className="mt-3 max-w-[54ch] text-[15px] font-normal leading-[1.8] ds-text-muted sm:mt-4"
           >
-            Diagnostic evidence becomes a governed executive brief.
+            We identify contradictions. Price what they cost.
             <br />
-            Financial exposure. Priority stack. Next action.
+            Sequence the intervention. Verify whether action worked.
           </p>
 
           <p className="mt-2 max-w-[58ch] text-[13px] leading-[1.7]" style={{ color: "rgba(252,165,165,0.40)", fontStyle: "italic" }}>
-            Used when decisions cannot wait and the cost of delay is compounding.
+            You don&apos;t have a strategy problem. You have an enforcement failure.
           </p>
 
           <p className="mt-4 max-w-[58ch] text-[14px] leading-[1.85] ds-text-muted">
@@ -2418,7 +2419,7 @@ function ContentLibrarySection({
       ],
     },
     {
-      label: "Tools",
+      label: "Decision assets",
       items: [
         ["Playbooks", "Operational responses to diagnosed failure modes. Practical, structured, reusable.", "/playbooks"],
         ["Shorts", "Concise signal for fast orientation and quick entry into the deeper body of work.", "/shorts"],
@@ -2928,14 +2929,15 @@ function HomeDecisionLayer() {
           <div className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(255,255,255,0.30)" }}>
             Using one instrument without the others leaves the decision partially resolved. Partial resolution compounds risk.
           </div>
-          <Link
-            href="/api/checkout?bundle=operator-decision-pack"
+          <CheckoutButton
+            productCode="operator_decision_pack"
+            originPath="/"
             className="mt-3 inline-flex items-center gap-2 transition-all duration-200"
             style={{ padding: "8px 16px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}08`, color: GOLD, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}
           >
             Get the Operator Pack
             <ArrowRight style={{ width: 10, height: 10 }} />
-          </Link>
+          </CheckoutButton>
         </div>
 
         {/* Bottom CTA */}

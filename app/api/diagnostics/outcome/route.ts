@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import { analyseLongitudinalChange } from "@/lib/monitoring/longitudinal-engine";
+import {
+  buildDecisionSurfacePayload,
+  insufficientEvidenceContradiction,
+} from "@/lib/contracts/decision-surface";
 
 /**
  * GET /api/diagnostics/outcome?email=...&sessionId=...
@@ -34,7 +38,17 @@ export async function GET(req: NextRequest) {
     });
 
     if (journeys.length < 2) {
-      return NextResponse.json({ ok: true, hasOutcome: false });
+      const decisionId = sessionId || email?.toLowerCase() || "outcome";
+      const decisionSurface = {
+        decisionId,
+        contradictions: [insufficientEvidenceContradiction({
+          id: `outcome:${decisionId}:insufficient`,
+          sourceStage: "monitoring",
+          summary: "Outcome verification requires baseline and follow-up journeys.",
+        })],
+        enforcementState: "PENDING" as const,
+      };
+      return NextResponse.json({ ok: true, hasOutcome: false, decisionSurface, decisionSurfacePayload: decisionSurface });
     }
 
     const baseline = journeys[0]!;
@@ -58,7 +72,16 @@ export async function GET(req: NextRequest) {
     const currentSnapshot = buildSnapshot(current);
 
     if (!baselineSnapshot || !currentSnapshot) {
-      return NextResponse.json({ ok: true, hasOutcome: false });
+      const decisionSurface = {
+        decisionId: current.id,
+        contradictions: [insufficientEvidenceContradiction({
+          id: `outcome:${current.id}:missing-snapshot`,
+          sourceStage: "monitoring",
+          summary: "Outcome verification could not resolve comparable stage snapshots.",
+        })],
+        enforcementState: "PENDING" as const,
+      };
+      return NextResponse.json({ ok: true, hasOutcome: false, decisionSurface, decisionSurfacePayload: decisionSurface });
     }
 
     const analysis = analyseLongitudinalChange([baselineSnapshot, currentSnapshot]);
@@ -82,12 +105,29 @@ export async function GET(req: NextRequest) {
       .slice(0, 5);
     const contradictions = contradictionNodes.map((n) => n.summary ?? n.label);
     const contradictionEvidence = contradictionNodes.map((n) => ({
+      id: n.id,
       label: n.label,
       summary: n.summary,
       confidence: n.confidence,
       severity: n.severity,
       sourceStage: n.sourceStage,
     }));
+    const decisionSurface = buildDecisionSurfacePayload({
+      decisionId: current.id,
+      contradictions: contradictionEvidence.length
+        ? contradictionEvidence
+        : [insufficientEvidenceContradiction({
+            id: `outcome:${current.id}:no-persisted-contradictions`,
+            sourceStage: "monitoring",
+            summary: "Outcome can be classified, but no unresolved contradiction node is persisted on the current journey.",
+          })],
+      enforcementState: classification === "deteriorated"
+        ? "ESCALATED"
+        : classification === "resolved"
+          ? "RESOLVED"
+          : "ACTIVE",
+      consequenceScore: Math.max(0, Math.min(100, 50 + avgDelta)),
+    });
 
     // Strategy Room linkage
     let strategyRoomHeld: string | null = null;
@@ -123,9 +163,29 @@ export async function GET(req: NextRequest) {
       },
     }).catch(() => {});
 
+    // Authority contract
+    const highestSeverity = contradictionEvidence.reduce((s: string, c) =>
+      c.severity === "critical" ? "critical" : s === "critical" ? "critical" : c.severity === "high" ? "high" : s,
+      contradictions.length > 0 ? "medium" : "low",
+    );
+
     return NextResponse.json({
       ok: true,
       hasOutcome: true,
+      decisionSurface,
+      decisionSurfacePayload: decisionSurface,
+      // Authority contract
+      decisionId: current.id,
+      contradictions: contradictionEvidence,
+      severity: highestSeverity,
+      confidence: contradictionEvidence.length > 0
+        ? Math.round(contradictionEvidence.reduce((s, c) => s + c.confidence, 0) / contradictionEvidence.length * 100) / 100
+        : 0.5,
+      enforcementState: classification === "deteriorated" ? "escalation_required"
+        : classification === "stable" ? "intervention_needed"
+        : classification === "improved" && contradictions.length > 0 ? "monitoring"
+        : "resolved",
+      // Outcome data
       classification,
       baselineCondition: `${baselineSnapshot.stage}: ${Object.entries(baselineSnapshot.coreMetrics).map(([k, v]) => `${k} ${v}%`).join(", ")}`,
       currentCondition: `${currentSnapshot.stage}: ${Object.entries(currentSnapshot.coreMetrics).map(([k, v]) => `${k} ${v}%`).join(", ")}`,
