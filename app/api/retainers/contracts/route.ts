@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
       startDate: body?.startDate ? new Date(String(body.startDate)) : undefined,
       endDate: body?.endDate ? new Date(String(body.endDate)) : null,
       stripeSubscriptionId: typeof body?.stripeSubscriptionId === "string" ? body.stripeSubscriptionId.trim() : null,
+      actorId: auth.userId,
     });
 
     return NextResponse.json({ ok: true, contract });
@@ -85,6 +86,17 @@ export async function PATCH(req: NextRequest) {
       where: { id },
       data: { status },
     });
+
+    const { recordAuditEvent } = await import("@/lib/enterprise-foundation/authority-foundation");
+    await recordAuditEvent({
+      actorType: "ADMIN",
+      actorId: auth.userId,
+      objectType: "CONTRACT",
+      objectId: id,
+      actionType: status === "TERMINATED" ? "TERMINATED" : "UPDATED",
+      summary: `Retainer contract state changed to ${status}.`,
+      metadata: { status },
+    }).catch(() => null);
 
     return NextResponse.json({ ok: true, contract });
   } catch (error) {

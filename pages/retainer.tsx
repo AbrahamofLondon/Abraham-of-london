@@ -33,6 +33,26 @@ type RetainedDecision = {
     decisionVelocityScore: number;
     accelerationRiskScore: number;
   };
+  dependencies: {
+    upstreamBlockers: Array<{ decisionId: string; relationshipType: string; decisionText: string }>;
+    downstreamConsequences: Array<{ decisionId: string; relationshipType: string; decisionText: string }>;
+  };
+  stakeholders: Array<{
+    id: string;
+    name: string;
+    role: string;
+    function: string;
+    influenceLevel: string;
+    alignmentState: string;
+    latestPosition: string | null;
+  }>;
+  playbookApplications: Array<{
+    id: string;
+    status: string;
+    playbookName: string;
+    triggerPattern: string;
+    createdAt: string;
+  }>;
   enforcementCycles: Cycle[];
 };
 
@@ -150,6 +170,46 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
                           </p>
                         </div>
                       </div>
+
+                      {(decision.dependencies.upstreamBlockers.length > 0 || decision.dependencies.downstreamConsequences.length > 0 || decision.stakeholders.length > 0) && (
+                        <div className="mt-5 grid gap-3 md:grid-cols-2">
+                          <div style={{ border: "1px solid rgba(252,165,165,0.12)", padding: "0.75rem" }}>
+                            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.56)" }}>Dependency pressure</div>
+                            {decision.dependencies.upstreamBlockers.length === 0 && decision.dependencies.downstreamConsequences.length === 0 ? (
+                              <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.34)", marginTop: "0.35rem" }}>No dependency chain recorded.</p>
+                            ) : (
+                              [...decision.dependencies.upstreamBlockers, ...decision.dependencies.downstreamConsequences].slice(0, 4).map((dep, index) => (
+                                <p key={`${dep.decisionId}-${index}`} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.48)", marginTop: "0.35rem" }}>
+                                  {dep.relationshipType}: {dep.decisionText}
+                                </p>
+                              ))
+                            )}
+                          </div>
+                          <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "0.75rem" }}>
+                            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Stakeholder friction</div>
+                            {decision.stakeholders.length === 0 ? (
+                              <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.34)", marginTop: "0.35rem" }}>No stakeholder map recorded.</p>
+                            ) : (
+                              decision.stakeholders.slice(0, 4).map((stakeholder) => (
+                                <p key={stakeholder.id} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.45, color: stakeholder.alignmentState === "BLOCKING" ? "rgba(252,165,165,0.62)" : "rgba(255,255,255,0.48)", marginTop: "0.35rem" }}>
+                                  {stakeholder.name} · {stakeholder.influenceLevel} · {stakeholder.alignmentState}
+                                </p>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {decision.playbookApplications.length > 0 && (
+                        <div className="mt-5" style={{ border: "1px solid rgba(201,169,110,0.18)", padding: "0.75rem" }}>
+                          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}>Applied enforcement playbooks</div>
+                          {decision.playbookApplications.map((application) => (
+                            <p key={application.id} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.48)", marginTop: "0.35rem" }}>
+                              {application.playbookName} · {application.triggerPattern}
+                            </p>
+                          ))}
+                        </div>
+                      )}
 
                       <div className="mt-5 space-y-2">
                         <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>

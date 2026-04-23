@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       contradictionsUpdated: body?.contradictionsUpdated ?? [],
       outcomeDelta: typeof body?.outcomeDelta === "number" ? body.outcomeDelta : null,
       aiDriftDelta: typeof body?.aiDriftDelta === "number" ? body.aiDriftDelta : null,
+      actorId: auth.userId,
     });
 
     return NextResponse.json({ ok: true, cycle });

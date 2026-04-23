@@ -2167,6 +2167,9 @@ model DiagnosticDecisionObject {
   journey            DiagnosticJourney? @relation(fields: [journeyId], references: [id], onDelete: Cascade)
   strategyLogs       StrategyDecisionLog[]
   retainedDecisions  RetainedDecision[]
+  parentDependencies DecisionDependency[] @relation("DecisionDependencyParent")
+  childDependencies  DecisionDependency[] @relation("DecisionDependencyChild")
+  stakeholders       DecisionStakeholder[]
 
   @@index([journeyId])
   @@index([email])
@@ -2174,6 +2177,125 @@ model DiagnosticDecisionObject {
   @@index([sourceStage])
   @@index([aiExposureLevel])
   @@index([decisionVelocityScore])
+  @@index([createdAt])
+}
+
+model DecisionDependency {
+  id               String   @id @default(cuid())
+  parentDecisionId String
+  childDecisionId  String
+  relationshipType String   // BLOCKS | ENABLES | AMPLIFIES | CONSTRAINS
+  createdAt        DateTime @default(now())
+
+  parentDecision   DiagnosticDecisionObject @relation("DecisionDependencyParent", fields: [parentDecisionId], references: [id], onDelete: Cascade)
+  childDecision    DiagnosticDecisionObject @relation("DecisionDependencyChild", fields: [childDecisionId], references: [id], onDelete: Cascade)
+
+  @@unique([parentDecisionId, childDecisionId, relationshipType])
+  @@index([parentDecisionId])
+  @@index([childDecisionId])
+  @@index([relationshipType])
+}
+
+model DecisionStakeholder {
+  id              String   @id @default(cuid())
+  decisionObjectId String
+  name            String
+  role            String
+  function        String
+  influenceLevel  String   // LOW | MEDIUM | HIGH | CRITICAL
+  alignmentState  String   // ALIGNED | DIVERGENT | BLOCKING | UNKNOWN
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  decisionObject  DiagnosticDecisionObject @relation(fields: [decisionObjectId], references: [id], onDelete: Cascade)
+  positions       StakeholderPosition[]
+
+  @@index([decisionObjectId])
+  @@index([influenceLevel])
+  @@index([alignmentState])
+}
+
+model StakeholderPosition {
+  id                String   @id @default(cuid())
+  stakeholderId     String
+  summary           String
+  confidence        Float    @default(0.5)
+  contradictionFlag Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  stakeholder       DecisionStakeholder @relation(fields: [stakeholderId], references: [id], onDelete: Cascade)
+
+  @@index([stakeholderId])
+  @@index([contradictionFlag])
+  @@index([createdAt])
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  actorType  String   // USER | ADMIN | SYSTEM
+  actorId    String?
+  objectType String   // DECISION | CONTRACT | ENFORCEMENT_CYCLE | STAKEHOLDER | OUTCOME
+  objectId   String
+  actionType String   // CREATED | UPDATED | LINKED | BLOCKED | RESOLVED | TERMINATED
+  summary    String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorType])
+  @@index([actorId])
+  @@index([objectType, objectId])
+  @@index([actionType])
+  @@index([createdAt])
+}
+
+model EnforcementPlaybook {
+  id              String   @id @default(cuid())
+  name            String
+  triggerPattern  String
+  actionSequence  Json
+  expectedOutcome String?
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  applications    PlaybookApplication[]
+
+  @@index([triggerPattern])
+  @@index([status])
+}
+
+model PlaybookApplication {
+  id                 String   @id @default(cuid())
+  playbookId          String
+  retainedDecisionId  String
+  appliedBy           String?
+  status              String   @default("APPLIED")
+  outcomeDelta        Float?
+  createdAt           DateTime @default(now())
+
+  playbook            EnforcementPlaybook @relation(fields: [playbookId], references: [id])
+  retainedDecision    RetainedDecision    @relation(fields: [retainedDecisionId], references: [id], onDelete: Cascade)
+
+  @@index([playbookId])
+  @@index([retainedDecisionId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model FoundationTelemetryEvent {
+  id             String   @id @default(cuid())
+  organisationId String?
+  contractId     String?
+  decisionObjectId String?
+  eventType      String
+  value          Float?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organisationId])
+  @@index([contractId])
+  @@index([decisionObjectId])
+  @@index([eventType])
   @@index([createdAt])
 }
 
@@ -2214,6 +2336,7 @@ model RetainedDecision {
   contract         RetainerContract         @relation(fields: [contractId], references: [id], onDelete: Cascade)
   decisionObject   DiagnosticDecisionObject @relation(fields: [decisionObjectId], references: [id])
   enforcementCycles EnforcementCycle[]
+  playbookApplications PlaybookApplication[]
 
   @@unique([contractId, decisionObjectId])
   @@index([contractId])

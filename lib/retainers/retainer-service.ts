@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma.server";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { aiStatusSignalFromDelta, classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
+import { recordAuditEvent, recordFoundationTelemetry } from "@/lib/enterprise-foundation/authority-foundation";
 
 export type RetainerTier = "CORE" | "OPERATIONAL" | "INSTITUTIONAL";
 export type RetainerStatus = "ACTIVE" | "PAUSED" | "TERMINATED";
@@ -42,6 +43,7 @@ export async function createRetainerContract(input: {
   startDate?: Date;
   endDate?: Date | null;
   stripeSubscriptionId?: string | null;
+  actorId?: string | null;
 }) {
   const tier = normalizeRetainerTier(input.tier);
   const organisation = await prisma.organisation.findUnique({
@@ -53,7 +55,7 @@ export async function createRetainerContract(input: {
     throw new Error("Organisation not found");
   }
 
-  return prisma.retainerContract.create({
+  const contract = await prisma.retainerContract.create({
     data: {
       organisationId: input.organisationId,
       tier,
@@ -66,6 +68,18 @@ export async function createRetainerContract(input: {
       entitlementSlug: getEntitlementSlugForTier(tier),
     },
   });
+
+  await recordAuditEvent({
+    actorType: input.actorId ? "ADMIN" : "SYSTEM",
+    actorId: input.actorId ?? null,
+    objectType: "CONTRACT",
+    objectId: contract.id,
+    actionType: "CREATED",
+    summary: `Retainer contract created for organisation ${input.organisationId}.`,
+    metadata: { tier, decisionCapacity: contract.decisionCapacity, entitlementSlug: contract.entitlementSlug },
+  }).catch(() => null);
+
+  return contract;
 }
 
 export async function syncRetainerContractFromSubscription(input: {
@@ -79,10 +93,21 @@ export async function syncRetainerContractFromSubscription(input: {
         ? "TERMINATED"
         : "PAUSED";
 
-  return prisma.retainerContract.updateMany({
+  const result = await prisma.retainerContract.updateMany({
     where: { stripeSubscriptionId: input.stripeSubscriptionId },
     data: { status },
   });
+
+  await recordAuditEvent({
+    actorType: "SYSTEM",
+    objectType: "CONTRACT",
+    objectId: input.stripeSubscriptionId,
+    actionType: status === "TERMINATED" ? "TERMINATED" : "UPDATED",
+    summary: `Stripe subscription changed retainer contract state to ${status}.`,
+    metadata: { stripeSubscriptionId: input.stripeSubscriptionId, stripeStatus: input.status },
+  }).catch(() => null);
+
+  return result;
 }
 
 export async function assertActiveRetainerContract(contractId: string) {
@@ -139,6 +164,7 @@ export async function createRetainedDecision(input: {
   decisionObjectId: string;
   priorityLevel?: RetainedDecisionPriority;
   aiLeverageAction?: string | null;
+  actorId?: string | null;
 }) {
   const contract = await assertActiveRetainerContract(input.contractId);
 
@@ -167,7 +193,7 @@ export async function createRetainedDecision(input: {
     throw new Error("Decision capacity exceeded");
   }
 
-  return prisma.retainedDecision.create({
+  const retainedDecision = await prisma.retainedDecision.create({
     data: {
       contractId: input.contractId,
       decisionObjectId: input.decisionObjectId,
@@ -176,6 +202,28 @@ export async function createRetainedDecision(input: {
       aiLeverageAction,
     },
   });
+
+  await Promise.all([
+    recordAuditEvent({
+      actorType: input.actorId ? "ADMIN" : "SYSTEM",
+      actorId: input.actorId ?? null,
+      objectType: "DECISION",
+      objectId: input.decisionObjectId,
+      actionType: "LINKED",
+      summary: `Decision linked to retainer contract ${input.contractId}.`,
+      metadata: { retainedDecisionId: retainedDecision.id, priorityLevel: retainedDecision.priorityLevel },
+    }),
+    recordFoundationTelemetry({
+      organisationId: contract.organisationId,
+      contractId: input.contractId,
+      decisionObjectId: input.decisionObjectId,
+      eventType: "decision_retained",
+      value: 1,
+      metadata: { priorityLevel: retainedDecision.priorityLevel, aiExposureLevel: decisionObject.aiExposureLevel },
+    }),
+  ]).catch(() => null);
+
+  return retainedDecision;
 }
 
 export async function recordEnforcementCycle(input: {
@@ -185,6 +233,7 @@ export async function recordEnforcementCycle(input: {
   contradictionsUpdated: unknown;
   outcomeDelta?: number | null;
   aiDriftDelta?: number | null;
+  actorId?: string | null;
 }) {
   const retainedDecision = await prisma.retainedDecision.findUnique({
     where: { id: input.retainedDecisionId },
@@ -199,7 +248,7 @@ export async function recordEnforcementCycle(input: {
     throw new Error("Retainer contract is not active");
   }
 
-  return prisma.enforcementCycle.create({
+  const cycle = await prisma.enforcementCycle.create({
     data: {
       retainedDecisionId: input.retainedDecisionId,
       cycleDate: input.cycleDate ?? new Date(),
@@ -210,6 +259,27 @@ export async function recordEnforcementCycle(input: {
       aiStatusSignal: aiStatusSignalFromDelta(input.aiDriftDelta ?? 0),
     },
   });
+
+  await Promise.all([
+    recordAuditEvent({
+      actorType: input.actorId ? "ADMIN" : "SYSTEM",
+      actorId: input.actorId ?? null,
+      objectType: "ENFORCEMENT_CYCLE",
+      objectId: cycle.id,
+      actionType: "CREATED",
+      summary: `Enforcement cycle recorded for retained decision ${input.retainedDecisionId}.`,
+      metadata: { retainedDecisionId: input.retainedDecisionId, outcomeDelta: cycle.outcomeDelta, aiStatusSignal: cycle.aiStatusSignal },
+    }),
+    recordFoundationTelemetry({
+      contractId: retainedDecision.contractId,
+      decisionObjectId: retainedDecision.decisionObjectId,
+      eventType: "enforcement_cycle_recorded",
+      value: cycle.outcomeDelta ?? 0,
+      metadata: { cycleId: cycle.id, aiDriftDelta: cycle.aiDriftDelta, aiStatusSignal: cycle.aiStatusSignal },
+    }),
+  ]).catch(() => null);
+
+  return cycle;
 }
 
 export async function getRetainerDecisionSurface(input: {
@@ -228,7 +298,18 @@ export async function getRetainerDecisionSurface(input: {
       retainedDecisions: {
         orderBy: [{ status: "asc" }, { createdAt: "desc" }],
         include: {
-          decisionObject: true,
+          decisionObject: {
+            include: {
+              childDependencies: { include: { parentDecision: true } },
+              parentDependencies: { include: { childDecision: true } },
+              stakeholders: { include: { positions: { orderBy: { createdAt: "desc" }, take: 2 } } },
+            },
+          },
+          playbookApplications: {
+            orderBy: { createdAt: "desc" },
+            take: 5,
+            include: { playbook: true },
+          },
           enforcementCycles: { orderBy: { cycleDate: "desc" }, take: 5 },
         },
       },
@@ -255,6 +336,36 @@ export async function getRetainerDecisionSurface(input: {
       sourceStage: decision.decisionObject.sourceStage,
       aiLeverageAction: decision.aiLeverageAction,
       ai: classifyAIDecisionRisk(decision.decisionObject),
+      dependencies: {
+        upstreamBlockers: decision.decisionObject.childDependencies
+          .filter((dep) => dep.relationshipType === "BLOCKS" || dep.relationshipType === "CONSTRAINS")
+          .map((dep) => ({
+            decisionId: dep.parentDecisionId,
+            relationshipType: dep.relationshipType,
+            decisionText: dep.parentDecision.decisionText,
+          })),
+        downstreamConsequences: decision.decisionObject.parentDependencies.map((dep) => ({
+          decisionId: dep.childDecisionId,
+          relationshipType: dep.relationshipType,
+          decisionText: dep.childDecision.decisionText,
+        })),
+      },
+      stakeholders: decision.decisionObject.stakeholders.map((stakeholder) => ({
+        id: stakeholder.id,
+        name: stakeholder.name,
+        role: stakeholder.role,
+        function: stakeholder.function,
+        influenceLevel: stakeholder.influenceLevel,
+        alignmentState: stakeholder.alignmentState,
+        latestPosition: stakeholder.positions[0]?.summary ?? null,
+      })),
+      playbookApplications: decision.playbookApplications.map((application) => ({
+        id: application.id,
+        status: application.status,
+        playbookName: application.playbook.name,
+        triggerPattern: application.playbook.triggerPattern,
+        createdAt: application.createdAt.toISOString(),
+      })),
       enforcementCycles: decision.enforcementCycles.map((cycle) => ({
         id: cycle.id,
         cycleDate: cycle.cycleDate.toISOString(),
