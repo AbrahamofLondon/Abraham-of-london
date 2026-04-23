@@ -2043,7 +2043,7 @@ export default function ExecutiveReportingRunPage({
                       color: "rgba(255,255,255,0.94)",
                     }}
                   >
-                    Paid interpretation intake.
+                    Governed decision intake.
                     <br />
                     <span style={{ color: "rgba(255,255,255,0.28)" }}>Receive the consequence map.</span>
                   </h1>
@@ -2059,9 +2059,8 @@ export default function ExecutiveReportingRunPage({
                       maxWidth: "46ch",
                     }}
                   >
-                    This is the first paid layer in the ladder: a board-grade interpretation
-                    of structural strain, financial exposure, priority order, and the next
-                    decision path.
+                    The first paid layer: priced consequence, required action,
+                    and enforcement path derived from your specific evidence.
                   </p>
                   {checkoutConfirmed && (
                     <div

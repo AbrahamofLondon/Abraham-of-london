@@ -641,8 +641,8 @@ function HeroSection({
               animate={{ opacity: 0.92, y: 0 }}
               transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              Diagnose structural problems. Clarify the real situation.<br />
-              Escalate only when it matters.
+              Identify structural contradictions. Price the consequence.<br />
+              Escalate only when evidence justifies it.
             </motion.p>
 
             {/* CTA hierarchy with strengthened primary dominance */}
@@ -1132,7 +1132,7 @@ function FlagshipAdvisory() {
                 color: "var(--ds-text-subtle)",
               }}
             >
-              Interpretation layer
+              Decision authority layer
             </div>
           </div>
 
@@ -1142,15 +1142,15 @@ function FlagshipAdvisory() {
                 className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[1.0] ds-text md:text-[2.3rem]"
                 style={{ fontSize: "clamp(2rem, 3vw, 2.3rem)" }}
               >
-                From diagnostic signal
+                From diagnostic evidence
                 <br />
-                <span className="ds-text-muted">to decision-grade output.</span>
+                <span className="ds-text-muted">to enforced decision.</span>
               </h3>
 
               <p className="mt-4 max-w-[62ch] text-[13.5px] leading-[1.85] ds-text-muted">
-                The governed layer between raw assessment and private mandate work.
+                Translates accumulated evidence into priced consequence and required action.
                 <br />
-                Structured intake produces a board-grade report.
+                The enforcement path opens when evidence justifies it.
                 <br />
                 The decision path stops hiding.
               </p>
@@ -2178,7 +2178,7 @@ function WhatThisPlatformIs() {
       {/* Anti-hype */}
       <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
         <span style={{ color: "var(--ds-text)" }}>What this is not:</span>
-        {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as insight"].map((item) => (
+        {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as analysis"].map((item) => (
           <span key={item} style={{ color: "var(--ds-text-muted)", opacity: 0.72 }}>
             Not {item.toLowerCase()}
           </span>
@@ -2723,7 +2723,7 @@ function ProofLayer() {
           </div>
           <ObservedOutcomesBlock />
           <p className="mt-4 max-w-[60ch] text-[13px] leading-[1.85] ds-text-muted">
-            The system does not improve outcomes directly. It makes the correct action visible.
+            The system does not produce outcomes. It enforces the decision and measures whether it worked.
           </p>
         </div>
 

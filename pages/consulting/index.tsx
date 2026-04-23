@@ -79,9 +79,9 @@ const DOMAINS: Pill[] = [
 ];
 
 const DELIVERABLES: Deliverable[] = [
-  { title: "Clearer decision pathways",    icon: Gavel },
+  { title: "Enforced decision pathways",    icon: Gavel },
   { title: "Documented strategic logic",   icon: FileText },
-  { title: "Reduced execution drift",      icon: Radar },
+  { title: "Execution drift measured and enforced",      icon: Radar },
   { title: "Governance and cadence",       icon: Workflow },
   { title: "Leadership alignment",         icon: Scale },
   { title: "Next-step architecture",       icon: Briefcase },
@@ -90,7 +90,7 @@ const DELIVERABLES: Deliverable[] = [
 const HOW: Step[] = [
   { step: "Diagnostic",           desc: "Where appropriate, the work begins with a structured reading of the real problem before counsel is applied." },
   { step: "Decision environment", desc: "Context, trade-offs, decision owners, and execution realities are brought into one disciplined frame." },
-  { step: "Documented output",    desc: "The engagement produces clear recommendations, explicit logic, and next-step control points." },
+  { step: "Documented output",    desc: "The engagement produces required actions, explicit logic, and next-step enforcement points." },
 ];
 
 const ENGAGEMENTS: Engagement[] = [
@@ -300,7 +300,7 @@ const ConsultingPage: NextPage = () => {
                   >
                     For founders, boards, and institutions facing decisions that carry
                     operational, financial, and reputational weight. This is not general advice.
-                    It is structured thinking applied to real situations.
+                    It is structured enforcement applied to real decisions.
                   </motion.p>
 
                   <motion.div className="flex flex-wrap gap-3 mt-10"
@@ -406,9 +406,9 @@ const ConsultingPage: NextPage = () => {
 
                     <div className="mt-7 space-y-4">
                       {[
-                        "Clearer decision pathways",
+                        "Enforced decision pathways",
                         "Documented strategic logic",
-                        "Reduced execution drift",
+                        "Execution drift measured and enforced",
                         "Governance and cadence under pressure",
                       ].map((line) => (
                         <div key={line} className="flex items-center gap-3">

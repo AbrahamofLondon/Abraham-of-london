@@ -155,7 +155,7 @@ export default function DecisionInstrumentsPage() {
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="grid gap-px md:grid-cols-3 border-y" style={{ borderColor: "rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.04)" }}>
               {[
-                { pre: "Not advice", post: "Structured decision tools" },
+                { pre: "Not advice", post: "Structured decision instruments" },
                 { pre: "Not analysis", post: "Immediate use" },
                 { pre: "Not content", post: "Outputs that force action" },
               ].map((item) => (

@@ -394,7 +394,7 @@ export default function DecisionPathsPage() {
       <Head>
         <meta
           name="description"
-          content="Governed decision paths. Structured tools that build evidence, define position, and prepare escalation when it is justified."
+          content="Governed decision paths. Structured instruments that build evidence, price consequence, and prepare escalation when it is justified."
         />
       </Head>
 
@@ -431,7 +431,7 @@ export default function DecisionPathsPage() {
                   maxWidth: "56ch",
                 }}
               >
-                Structured tools that build evidence, define position, and
+                Structured instruments that build evidence, price consequence, and
                 prepare escalation when it is justified.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-4">
@@ -879,8 +879,8 @@ export default function DecisionPathsPage() {
                     color: "rgba(255,255,255,0.38)",
                   }}
                 >
-                  <p>These are structured tools. They produce outputs, not insight.</p>
-                  <p>They build clarity. They do not build consensus.</p>
+                  <p>These are structured instruments. They produce decision objects, not commentary.</p>
+                  <p>They build evidence. They do not build consensus.</p>
                   <p>
                     They do not replace the executive report or escalation
                     environment. They prepare the conditions for both.
