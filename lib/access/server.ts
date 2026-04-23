@@ -138,7 +138,7 @@ export async function requireAdminPage<T = Record<string, never>>(
       authorized: false,
       redirect: {
         redirect: {
-          destination: `/api/auth/signin?callbackUrl=${encodeURIComponent(ctx.resolvedUrl)}`,
+          destination: `/admin/login?returnTo=${encodeURIComponent(ctx.resolvedUrl)}`,
           permanent: false,
         },
       },

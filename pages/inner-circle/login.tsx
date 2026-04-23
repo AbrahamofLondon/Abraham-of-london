@@ -193,7 +193,7 @@ export default function InnerCircleLoginPage() {
                   <div className="mt-3 flex gap-3">
                     <button
                       type="button"
-                      onClick={() => { setError(""); setStep("credential"); }}
+                      onClick={() => { setError(""); setStep("credentials"); }}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 hover:bg-white/10"
                     >
                       Continue to sign in

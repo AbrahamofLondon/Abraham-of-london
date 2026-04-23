@@ -63,7 +63,7 @@ export function resolvePdfDelivery(
       originalPrice: pricing.originalPrice,
       discounted: pricing.discounted,
       reason: access.reason || pricing.reason,
-      nextAction: `/checkout?slug=${encodeURIComponent(asset.slug)}`,
+      nextAction: `/artifacts/${encodeURIComponent(asset.slug)}`,
       pricing,
     };
   }

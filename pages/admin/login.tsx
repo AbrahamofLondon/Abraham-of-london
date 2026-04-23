@@ -49,8 +49,14 @@ const AdminLoginPage: NextPage = () => {
       const returnToRaw =
         params.get("returnTo") || params.get("callbackUrl");
 
-      if (returnToRaw && returnToRaw.startsWith("/")) {
-        setReturnTo(returnToRaw);
+      if (returnToRaw) {
+        // Decode twice to handle double-encoded URLs from server redirects
+        let decoded = returnToRaw;
+        try { decoded = decodeURIComponent(decoded); } catch { /* already decoded */ }
+        try { decoded = decodeURIComponent(decoded); } catch { /* already decoded */ }
+        if (decoded.startsWith("/")) {
+          setReturnTo(decoded);
+        }
       }
     }
   }, []);
