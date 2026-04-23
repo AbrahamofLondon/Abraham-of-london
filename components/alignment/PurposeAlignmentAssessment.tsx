@@ -585,7 +585,7 @@ function LiveProfileSidebar({ profile, totalAnswered, totalQuestions }: {
       ) : (
         <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.008)", padding: "1.25rem" }}>
           <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.28)", fontStyle: "italic" }}>
-            Your live purpose profile builds as you answer. Begin the first stage to see your domains take shape.
+            This will expose the decision and price the consequence. No preparation required. Takes 3–6 minutes.
           </p>
         </div>
       )}
@@ -1022,6 +1022,11 @@ function AuthorityResultSurface({
         band={result.coherenceBand}
       />
 
+      {/* Hard transition signal */}
+      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(252,165,165,0.28)", fontStyle: "italic", marginTop: "1rem" }}>
+        This is where the system stops. The decision is not yet enforced.
+      </p>
+
       {/* Restart */}
       <button
         type="button"
@@ -1174,6 +1179,13 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
 
   return (
     <div style={{ position: "relative", minHeight: "600px" }}>
+      {/* Midway signal */}
+      {!isResult && stage === Math.floor(STAGE_DOMAINS.length / 2) && (
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(252,165,165,0.30)", fontStyle: "italic", marginBottom: "1rem" }}>
+          Most teams don&apos;t see this until it&apos;s already costing them.
+        </p>
+      )}
+
       {/* Stage progress strip */}
       {!isResult && (
         <div style={{ marginBottom: "2rem" }}>
@@ -1375,7 +1387,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                       onMouseEnter={e => { if (stageAnswered) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
                       onMouseLeave={e => { if (stageAnswered) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                     >
-                      {stage === STAGE_DOMAINS.length - 1 ? "Complete assessment" : "Continue"}
+                      {stage === STAGE_DOMAINS.length - 1 ? "Proceed to consequence" : "Continue to decision exposure"}
                       <ArrowRight style={{ width: "11px", height: "11px" }} />
                     </button>
                   </div>

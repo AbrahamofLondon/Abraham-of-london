@@ -147,6 +147,14 @@ const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
               <p className="mt-1 text-xs text-white/40">
                 {new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
               </p>
+              <div className="mt-2 flex items-center gap-3">
+                <span className="text-[8px] font-mono uppercase tracking-wider text-white/25">
+                  {session?.user?.email ?? "—"}
+                </span>
+                <span className="text-[8px] font-mono uppercase tracking-wider text-amber-500/50">
+                  {(session?.user as any)?.role ?? "ADMIN"}
+                </span>
+              </div>
             </div>
             <div className="hidden md:block">
               <div className="flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1">
@@ -187,6 +195,9 @@ const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
         <div>
           <SectionLabel icon={Layers3}>Operational modules</SectionLabel>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <ModuleLink href="/admin/authority-center" title="Authority Center" description="Active leads, ER completions, SR entries, retainers, contradictions, stakeholders." icon={ShieldCheck} color="text-amber-500" bg="bg-amber-500/10" />
+            <ModuleLink href="/admin/enterprise-pipeline" title="Enterprise Pipeline" description="Lead pipeline with route, temperature, win probability, conversion status." icon={Activity} color="text-emerald-500" bg="bg-emerald-500/10" />
+            <ModuleLink href="/admin/outcome-ledger" title="Outcome Ledger" description="Decision → Contradiction → Enforcement → Outcome → Delta. Track record." icon={Layers3} color="text-sky-400" bg="bg-sky-500/10" />
             <ModuleLink href="/admin/proof" title="Proof Queue" description="Review, approve, anonymise, and publish diagnostic evidence." icon={FileCheck} color="text-emerald-400" bg="bg-emerald-500/10" />
             <ModuleLink href="/admin/access-keys" title="Access Management" description="Issue, revoke, and audit access keys for entitlements." icon={Key} color="text-amber-400" bg="bg-amber-500/10" />
             <ModuleLink href="/admin/conversion-dashboard" title="Conversion Metrics" description="A1-A5 targets, funnel health, and GA4 event reference." icon={LineChart} color="text-sky-400" bg="bg-sky-500/10" />

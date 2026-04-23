@@ -970,7 +970,7 @@ export default function ConstitutionalDiagnosticSuite() {
                           onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; }}
                           onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; }}
                         >
-                          Next <ArrowRight style={{ width: "11px", height: "11px" }} />
+                          Continue to decision exposure <ArrowRight style={{ width: "11px", height: "11px" }} />
                         </button>
                       ) : (
                         <button

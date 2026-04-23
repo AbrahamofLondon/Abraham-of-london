@@ -9,7 +9,12 @@ interface AdminGuardProps {
   fallback?: React.ReactNode;
 }
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@abrahamoflondon.com";
+const ADMIN_EMAILS = new Set([
+  process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
+  "info@abrahamoflondon.org",
+  "seunadaramola@gmail.com",
+  "abrahamadaramola@outlook.com",
+].filter(Boolean));
 
 export default function AdminGuard({ children, fallback }: AdminGuardProps) {
   const { data: session, status } = useSession();
@@ -20,7 +25,7 @@ export default function AdminGuard({ children, fallback }: AdminGuardProps) {
   React.useEffect(() => {
     if (status === "loading") return;
 
-    const isAdmin = session?.user?.email === ADMIN_EMAIL;
+    const isAdmin = ADMIN_EMAILS.has(session?.user?.email ?? "");
 
     if (!session || !isAdmin) {
       setIsAuthorized(false);
