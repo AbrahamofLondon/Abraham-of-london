@@ -1555,6 +1555,9 @@ function ExecutiveReportingIntake({
             <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
               This is not advisory. This is decision enforcement.
             </div>
+            <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
+              Decisions enforced. Outcomes tracked.
+            </div>
           </div>
         </div>
 

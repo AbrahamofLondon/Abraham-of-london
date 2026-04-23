@@ -64,7 +64,7 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
         color: "rgba(255,255,255,0.50)",
         marginBottom: "0.75rem",
       }}>
-        The contradiction will persist without sustained enforcement.
+        Without sustained enforcement, this does not resolve.
       </p>
       <p style={{
         ...serif,

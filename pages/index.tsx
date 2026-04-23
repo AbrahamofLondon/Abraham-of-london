@@ -1983,9 +1983,12 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
               color: "var(--text-secondary)",
             }}
           >
-            Free to start. No subscription. No commitment.
+            No preparation required. Free to start.
           </p>
-          <p className="mt-2 text-[11px] leading-[1.6]" style={{ color: "rgba(255,255,255,0.15)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.08em" }}>
+          <p className="mt-2 max-w-[50ch] text-[12px] leading-[1.6]" style={{ color: "rgba(252,165,165,0.28)", fontStyle: "italic" }}>
+            Most decisions fail after approval.
+          </p>
+          <p className="mt-1.5 text-[11px] leading-[1.6]" style={{ color: "rgba(255,255,255,0.13)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.08em" }}>
             Decisions are evaluated against an AI-accelerated market baseline.
           </p>
         </div>
