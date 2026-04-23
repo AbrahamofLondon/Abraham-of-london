@@ -89,15 +89,38 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
       createdAt: new Date().toISOString(),
     }));
 
+    // Read previous consequence from persisted timeline for delta
+    const previousConsequence = await prisma.consequenceTimeline.findFirst({
+      where: { sessionId: id },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // Read persisted escalation events
+    const persistedEscalations = await prisma.escalationEvent.findMany({
+      where: { sessionId: id, resolvedAt: null },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    });
+
+    // Merge computed triggers with persisted events
+    const allTriggers = [
+      ...persistedEscalations.map((e) => ({
+        triggerType: e.triggerType,
+        message: e.message,
+        createdAt: e.createdAt.toISOString(),
+      })),
+      ...triggers.filter((t) => !persistedEscalations.some((e) => e.triggerType === t.triggerType)),
+    ];
+
     return NextResponse.json({
       ok: true,
       state: transition.newState,
-      escalationLevel: transition.triggers.length,
+      escalationLevel: Math.max(transition.triggers.length, persistedEscalations.length),
       avoidanceCount: maxAvoidance,
       repeatedPatternLabel: maxAvoidance >= 2 ? "repeated_decision_avoidance" : null,
       consequence: {
         currentExposure: consequence.score,
-        previousExposure: null, // TODO: store previous for delta
+        previousExposure: previousConsequence?.score ?? null,
         baseRisk: null,
         timePenalty: null,
         failurePenalty: null,
@@ -106,7 +129,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
       consequenceExplanation: consequence.explanation,
       consequenceTrend: consequence.trend,
       directive: transition.directive,
-      triggers,
+      triggers: allTriggers,
     });
   } catch (err) {
     console.error("[execution-state]", err);

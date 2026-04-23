@@ -52,12 +52,28 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
+    // Detect avoidance from prior decisions
+    const priorDecisions = await prisma.strategyDecisionLog.findMany({
+      where: { sessionId },
+      orderBy: { createdAt: "asc" },
+    });
+    const avoidance = detectRepeatedAvoidance(
+      decision,
+      priorDecisions.map((d) => ({
+        id: d.id, text: d.decision, status: (d.status as any) || "PENDING",
+        deadline: d.deadline?.toISOString() ?? "", createdAt: d.createdAt.toISOString(),
+        updatedAt: d.updatedAt.toISOString(), avoidanceCount: d.avoidanceCount,
+      })),
+    );
+
     const log = await prisma.strategyDecisionLog.create({
       data: {
         sessionId,
         decision,
         notes: notes ?? null,
         status: "pending",
+        deadline: new Date(computeDefaultDeadline("near_term")),
+        avoidanceCount: avoidance,
       },
     });
 
@@ -134,6 +150,29 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     };
     const transition = evaluateStateTransition(executionState);
     const consequence = computeDynamicConsequence(executionState);
+
+    // Persist consequence timeline (durable)
+    await prisma.consequenceTimeline.create({
+      data: {
+        sessionId,
+        score: consequence.score,
+        label: consequence.label,
+        trend: consequence.trend,
+        explanation: consequence.explanation,
+      },
+    }).catch(() => {});
+
+    // Persist escalation events (durable)
+    for (const trigger of transition.triggers) {
+      await prisma.escalationEvent.create({
+        data: {
+          sessionId,
+          triggerType: trigger,
+          message: transition.directive ?? `Escalation trigger: ${trigger}`,
+          decisionId: log.id,
+        },
+      }).catch(() => {});
+    }
 
     // Update session status if state changed
     if (transition.newState !== session.status) {

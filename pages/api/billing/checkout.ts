@@ -8,6 +8,7 @@ import {
   checkCheckoutEligibility,
   resolveEntitlementSlugs,
 } from "@/lib/commercial/catalog";
+import { resolveProductIdentity } from "@/lib/commercial/product-identity";
 import { hubspotSync } from "@/lib/hubspot/sync";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -43,7 +44,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
 
   const { email, priceCode, originPath } = req.body || {};
-  const code = String(priceCode || "").trim();
+  const rawCode = String(priceCode || "").trim();
+
+  // Resolve canonical product code — accepts catalog key OR content ID OR entitlement slug
+  const identity = resolveProductIdentity(rawCode);
+  const code = identity?.productCode ?? rawCode;
 
   // ── Resolve product from catalog SSOT with guardrails ──
   if (!email) {

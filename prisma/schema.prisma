@@ -2699,13 +2699,17 @@ model StrategyRoomExecutionSession {
 }
 
 model StrategyDecisionLog {
-  id        String   @id @default(cuid())
-  sessionId String
-  decision  String
-  status    String   @default("pending")  // pending | executed | blocked
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String    @id @default(cuid())
+  sessionId      String
+  decision       String
+  status         String    @default("pending")  // pending | executed | blocked | escalated | failed
+  notes          String?
+  deadline       DateTime?
+  avoidanceCount Int       @default(0)
+  executedAt     DateTime?
+  escalatedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   session StrategyRoomExecutionSession @relation(fields: [sessionId], references: [id])
 
@@ -2732,4 +2736,39 @@ model FailedEntitlementGrant {
   @@index([email])
   @@index([resolved])
   @@map("_failed_entitlement_grants")
+}
+
+// ============================================================================
+// DURABLE ENFORCEMENT (Strategy Room)
+// ============================================================================
+
+model ConsequenceTimeline {
+  id        String   @id @default(cuid())
+  sessionId String
+  score     Int
+  label     String
+  trend     String   // STABLE | ESCALATING | CRITICAL
+  baseRisk  Int      @default(0)
+  timePenalty Int    @default(0)
+  failurePenalty Int @default(0)
+  explanation String?
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("consequence_timeline")
+}
+
+model EscalationEvent {
+  id          String   @id @default(cuid())
+  sessionId   String
+  triggerType String   // DEADLINE_EXCEEDED | ACTIONS_SKIPPED | BLOCKED_WITHOUT_REASON | REPEATED_AVOIDANCE
+  message     String
+  decisionId  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("escalation_events")
 }

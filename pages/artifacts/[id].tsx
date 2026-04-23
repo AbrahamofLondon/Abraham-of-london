@@ -213,7 +213,14 @@ function ArtifactCheckout({ item }: { item: PremiumContentItem }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim(),
-          priceCode: item.id,
+          // Resolve canonical product code from content ID
+          priceCode: (() => {
+            try {
+              const { resolveByContentId } = require("@/lib/commercial/product-identity");
+              const chain = resolveByContentId(item.id);
+              return chain?.productCode ?? item.id;
+            } catch { return item.id; }
+          })(),
           originPath: `/artifacts/${item.id}`,
         }),
       });
