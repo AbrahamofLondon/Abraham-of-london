@@ -15,6 +15,7 @@ import {
   persistDiagnosticStage,
 } from "@/lib/diagnostics/journey-store";
 import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
+import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
 import { resolveLadderContext } from "@/lib/diagnostics/ladder-context-resolver";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 import { buildObservedOutcomeEvidence } from "@/lib/outcomes/evidence";
@@ -846,6 +847,27 @@ export async function POST(
       },
     });
 
+    const aiDecisionRisk = classifyAIDecisionRisk({
+      decisionText: s(decisionNeed.decisionQuestion) || latestDecisionObject?.decisionText || null,
+      constraintText: s(intake.currentConstraint) || latestDecisionObject?.constraintText || null,
+      priorAttemptText: s(history.priorAttemptOutcome) || latestDecisionObject?.priorAttemptText || null,
+      costOfDelayText: s(decisionNeed.whatHappensIfNothingChanges) || latestDecisionObject?.costOfDelayText || null,
+      affectedDomain: arr(constitution.dominantDomains)[0] ?? latestDecisionObject?.affectedDomain ?? null,
+      aiExposureLevel: latestDecisionObject?.aiExposureLevel,
+      aiDisplacementRisk: latestDecisionObject?.aiDisplacementRisk,
+      decisionVelocityScore: latestDecisionObject?.decisionVelocityScore,
+    });
+    const aiAdjustedConsequence = {
+      ...aiDecisionRisk,
+      projectedAccelerationRisk: Math.min(100, Math.round(aiDecisionRisk.accelerationRiskScore + averageDissonance * 0.2)),
+      formula: "AI acceleration risk + average dissonance x 0.2",
+      reasoning: [
+        `Decision velocity: ${aiDecisionRisk.decisionVelocityScore}/100`,
+        `Inferred AI-enabled competitor baseline: ${aiDecisionRisk.competitorBaselineScore}/100`,
+        `Acceleration risk: ${aiDecisionRisk.accelerationRiskScore}/100`,
+      ],
+    };
+
     const enrichedCanonical = {
       ...canonical,
       subjectId,
@@ -857,6 +879,7 @@ export async function POST(
         summary: evidenceGraphSummary,
       },
       claimDecisions: capabilityStack.claims,
+      aiAdjustedConsequence,
     };
 
     const viewModel = buildExecutiveReportViewModel(enrichedCanonical as typeof canonical);
@@ -938,6 +961,7 @@ export async function POST(
         route,
         exposure,
         evidenceGraphSummary,
+        aiAdjustedConsequence,
       },
     });
 
@@ -975,6 +999,7 @@ export async function POST(
       route,
       canonical: enrichedCanonical,
       viewModel,
+      aiAdjustedConsequence,
       entitlements,
       diagnostics: assembled.diagnostics,
       // Include intake for client-side interpretation engine

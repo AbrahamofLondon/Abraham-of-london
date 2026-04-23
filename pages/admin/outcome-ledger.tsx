@@ -14,6 +14,8 @@ type LedgerEntry = {
   decisionText: string;
   sourceStage: string;
   decisionKey: string | null;
+  aiExposureLevel: string;
+  aiRiskClassification: string;
   // Contradiction
   contradictions: Array<{ label: string; severity: string; confidence: number }>;
   // Enforcement
@@ -26,6 +28,8 @@ type LedgerEntry = {
   outcomeClassification: string | null;
   magnitudeOfChange: number | null;
   effectivenessScore: number | null;
+  decisionVelocityDelta: number | null;
+  aiCapabilityShift: number | null;
   // Cost
   costOfDelay: string | null;
   constraintText: string | null;
@@ -92,6 +96,19 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
             This is the system&apos;s track record — provable, not claimed.
           </p>
 
+          <div className="mt-5 flex flex-wrap gap-2">
+            {[
+              { label: "All AI risk", href: "/admin/outcome-ledger" },
+              { label: "High AI exposure", href: "/admin/outcome-ledger?aiRisk=HIGH" },
+              { label: "Critical AI exposure", href: "/admin/outcome-ledger?aiRisk=CRITICAL" },
+              { label: "Velocity improved", href: "/admin/outcome-ledger?velocityImproved=true" },
+            ].map((filter) => (
+              <a key={filter.href} href={filter.href} style={{ ...mono, border: "1px solid rgba(255,255,255,0.08)", padding: "0.45rem 0.65rem", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(147,197,253,0.66)", textDecoration: "none" }}>
+                {filter.label}
+              </a>
+            ))}
+          </div>
+
           {/* Stats strip */}
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
             {[
@@ -129,6 +146,9 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
                         retained · {entry.retainer.tier} · {entry.retainer.priorityLevel}
                       </span>
                     )}
+                    <span className="ml-2" style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(147,197,253,0.62)" }}>
+                      AI {entry.aiExposureLevel} · {entry.aiRiskClassification}
+                    </span>
                     <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.60)", marginTop: "0.25rem" }}>
                       {entry.decisionText}
                     </p>
@@ -161,6 +181,8 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
                     { label: "Avoidance", value: entry.avoidanceCount > 0 ? `${entry.avoidanceCount}×` : "—" },
                     { label: "Effectiveness", value: entry.effectivenessScore != null ? `${Math.round(entry.effectivenessScore)}%` : "—" },
                     { label: "Magnitude", value: entry.magnitudeOfChange != null ? (entry.magnitudeOfChange > 0 ? `+${entry.magnitudeOfChange.toFixed(1)}` : entry.magnitudeOfChange.toFixed(1)) : "—" },
+                    { label: "Velocity delta", value: entry.decisionVelocityDelta != null ? (entry.decisionVelocityDelta > 0 ? `+${entry.decisionVelocityDelta}` : String(entry.decisionVelocityDelta)) : "—" },
+                    { label: "AI capability shift", value: entry.aiCapabilityShift != null ? (entry.aiCapabilityShift > 0 ? `+${entry.aiCapabilityShift}` : String(entry.aiCapabilityShift)) : "—" },
                     { label: "Cost of delay", value: entry.costOfDelay ?? "—" },
                     { label: "Retainer cycles", value: entry.retainer ? String(entry.retainer.cycleCount) : "—" },
                   ].map((d) => (
@@ -222,7 +244,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const outcomeByJourney = new Map(outcomeRecords.map((o) => [o.followUpJourneyId ?? o.baselineJourneyId, o]));
 
   // Build entries
-  const entries: LedgerEntry[] = decisionObjects.map((d) => {
+  let entries: LedgerEntry[] = decisionObjects.map((d) => {
     const log = d.strategyLogs[0];
     const retainedDecision = d.retainedDecisions[0];
     const contradictions = contradictionNodes
@@ -235,6 +257,8 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       decisionText: d.decisionText,
       sourceStage: d.sourceStage,
       decisionKey: d.decisionKey,
+      aiExposureLevel: d.aiExposureLevel,
+      aiRiskClassification: String((d.normalized as any)?.aiRiskClassification ?? d.aiExposureLevel),
       contradictions,
       enforcementStatus: log?.status ?? null,
       avoidanceCount: log?.avoidanceCount ?? 0,
@@ -256,8 +280,22 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
         cycleCount: retainedDecision.enforcementCycles.length,
         latestOutcomeDelta: retainedDecision.enforcementCycles[0]?.outcomeDelta ?? null,
       } : null,
+      decisionVelocityDelta: outcome?.decisionVelocityDelta ?? null,
+      aiCapabilityShift: outcome?.aiCapabilityShift ?? null,
     };
   });
+
+  const aiRiskFilter = typeof ctx.query.aiRisk === "string" ? ctx.query.aiRisk.toUpperCase() : "";
+  const velocityImproved = ctx.query.velocityImproved === "true";
+  if (aiRiskFilter) {
+    entries = entries.filter((entry) =>
+      entry.aiExposureLevel.toUpperCase() === aiRiskFilter ||
+      entry.aiRiskClassification.toUpperCase() === aiRiskFilter,
+    );
+  }
+  if (velocityImproved) {
+    entries = entries.filter((entry) => (entry.decisionVelocityDelta ?? 0) > 0);
+  }
 
   // Compute stats
   const withOutcome = entries.filter((e) => e.outcomeClassification);

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma.server";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { aiStatusSignalFromDelta, classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
 
 export type RetainerTier = "CORE" | "OPERATIONAL" | "INSTITUTIONAL";
 export type RetainerStatus = "ACTIVE" | "PAUSED" | "TERMINATED";
@@ -137,16 +138,22 @@ export async function createRetainedDecision(input: {
   contractId: string;
   decisionObjectId: string;
   priorityLevel?: RetainedDecisionPriority;
+  aiLeverageAction?: string | null;
 }) {
   const contract = await assertActiveRetainerContract(input.contractId);
 
   const decisionObject = await prisma.diagnosticDecisionObject.findUnique({
     where: { id: input.decisionObjectId },
-    select: { id: true },
   });
 
   if (!decisionObject) {
     throw new Error("decisionObjectId does not resolve to DiagnosticDecisionObject");
+  }
+
+  const aiRisk = classifyAIDecisionRisk(decisionObject);
+  const aiLeverageAction = input.aiLeverageAction?.trim() || null;
+  if (aiRisk.requiresAILeverageAction && !aiLeverageAction) {
+    throw new Error("AI leverage action is required for HIGH or CRITICAL AI exposure decisions");
   }
 
   const activeDecisions = await prisma.retainedDecision.count({
@@ -166,6 +173,7 @@ export async function createRetainedDecision(input: {
       decisionObjectId: input.decisionObjectId,
       priorityLevel: input.priorityLevel ?? "MEDIUM",
       status: "ACTIVE",
+      aiLeverageAction,
     },
   });
 }
@@ -176,6 +184,7 @@ export async function recordEnforcementCycle(input: {
   actionsTaken: unknown;
   contradictionsUpdated: unknown;
   outcomeDelta?: number | null;
+  aiDriftDelta?: number | null;
 }) {
   const retainedDecision = await prisma.retainedDecision.findUnique({
     where: { id: input.retainedDecisionId },
@@ -197,6 +206,8 @@ export async function recordEnforcementCycle(input: {
       actionsTaken: input.actionsTaken as never,
       contradictionsUpdated: input.contradictionsUpdated as never,
       outcomeDelta: input.outcomeDelta ?? null,
+      aiDriftDelta: input.aiDriftDelta ?? 0,
+      aiStatusSignal: aiStatusSignalFromDelta(input.aiDriftDelta ?? 0),
     },
   });
 }
@@ -242,12 +253,16 @@ export async function getRetainerDecisionSurface(input: {
       constraintText: decision.decisionObject.constraintText,
       costOfDelayText: decision.decisionObject.costOfDelayText,
       sourceStage: decision.decisionObject.sourceStage,
+      aiLeverageAction: decision.aiLeverageAction,
+      ai: classifyAIDecisionRisk(decision.decisionObject),
       enforcementCycles: decision.enforcementCycles.map((cycle) => ({
         id: cycle.id,
         cycleDate: cycle.cycleDate.toISOString(),
         actionsTaken: cycle.actionsTaken,
         contradictionsUpdated: cycle.contradictionsUpdated,
         outcomeDelta: cycle.outcomeDelta,
+        aiDriftDelta: cycle.aiDriftDelta,
+        aiStatusSignal: cycle.aiStatusSignal,
       })),
     })),
   }));

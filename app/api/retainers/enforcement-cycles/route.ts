@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       actionsTaken: body?.actionsTaken ?? [],
       contradictionsUpdated: body?.contradictionsUpdated ?? [],
       outcomeDelta: typeof body?.outcomeDelta === "number" ? body.outcomeDelta : null,
+      aiDriftDelta: typeof body?.aiDriftDelta === "number" ? body.aiDriftDelta : null,
     });
 
     return NextResponse.json({ ok: true, cycle });

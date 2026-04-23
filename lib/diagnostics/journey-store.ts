@@ -370,6 +370,9 @@ export async function persistDiagnosticStage(input: {
             affectedDomain: input.decisionObject.affectedDomain || null,
             normalized: input.decisionObject.normalized,
             confidence: input.decisionObject.confidence,
+            aiExposureLevel: input.decisionObject.aiExposureLevel,
+            aiDisplacementRisk: input.decisionObject.aiDisplacementRisk,
+            decisionVelocityScore: input.decisionObject.decisionVelocityScore,
         };
         const existingDecision = await p.diagnosticDecisionObject.findFirst({
           where: {

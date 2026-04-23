@@ -20,6 +20,9 @@ import MultiStakeholderDivergence from "@/components/diagnostics/results/MultiSt
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import PredictiveConsequence from "@/components/diagnostics/results/PredictiveConsequence";
+import AITerrainExposure from "@/components/diagnostics/results/AITerrainExposure";
+import DecisionTerrainStatus, { deriveTerrainState } from "@/components/diagnostics/results/DecisionTerrainStatus";
+import { assessAITerrain } from "@/lib/diagnostics/ai-terrain";
 import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
 import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
 import { projectConsequence } from "@/lib/diagnostics/predictive-consequence";
@@ -338,6 +341,7 @@ type ExecutiveReportingResult =
         remainingRuns?: number | null;
         [key: string]: unknown;
       };
+      aiAdjustedConsequence?: any;
       diagnostics?: any;
     }
   | {
@@ -1054,6 +1058,24 @@ function ResultSurface({
     revenueBand: safeString(constitution?.revenueBand ?? intake?.revenueBand),
     priorInterventionCount: 0,
   }), [graphContradictions, constitution, intake]);
+
+  // AI Terrain Assessment
+  const aiTerrain = React.useMemo(() => assessAITerrain({
+    sector: safeString(intake?.sector ?? constitution?.sector, "professional_services"),
+    revenueBand: safeString(constitution?.revenueBand ?? intake?.revenueBand, ""),
+    avgDecisionCycleDays: safeNumber(constitution?.decisionCycleDays, 21),
+    aiMentionedInProblem: safeString(intake?.problemStatement ?? intake?.decisionQuestion).toLowerCase().includes("ai") ||
+      safeString(intake?.symptoms ?? intake?.currentConstraint).toLowerCase().includes("automat"),
+    competitorAIAdoption: safeString(intake?.sector).toLowerCase().includes("tech") ||
+      safeString(intake?.sector).toLowerCase().includes("fintech") ||
+      safeString(intake?.problemStatement).toLowerCase().includes("competitor"),
+    blockedDecisionCount: graphContradictions.length,
+    contradictionCount: graphContradictions.length,
+    hasAIGovernance: false,
+    aiInOperations: safeString(intake?.problemStatement ?? "").toLowerCase().includes("ai") &&
+      safeString(intake?.currentConstraint ?? "").toLowerCase().includes("implement"),
+  }), [intake, constitution, graphContradictions]);
+
   const { interpretation, loading: interpretLoading } = useInterpretation({
     canonicalResult: canonical?.sections ?? {},
     userInputs: {
@@ -1093,6 +1115,7 @@ function ResultSurface({
     consequenceProjection.estimatedExposure.quarterly > 0
       ? `\u00a3${consequenceProjection.estimatedExposure.quarterly.toLocaleString()}`
       : exposureFormatted;
+  const aiAdjustedConsequence = (result as any).aiAdjustedConsequence ?? (canonical as any)?.aiAdjustedConsequence;
 
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
@@ -1131,6 +1154,32 @@ function ResultSurface({
             <div style={{ marginTop: "0.35rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "clamp(1.35rem, 3vw, 2rem)", color: "rgba(252,165,165,0.88)", fontWeight: 700 }}>
               {projectedCost90}
             </div>
+          </div>
+        )}
+
+        {aiAdjustedConsequence && (
+          <div style={{ border: "1px solid rgba(147,197,253,0.24)", backgroundColor: "rgba(147,197,253,0.045)", padding: "1rem 1.25rem", marginBottom: "1rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(147,197,253,0.72)" }}>
+              AI-adjusted consequence projection
+            </span>
+            <div className="mt-3 grid gap-3 sm:grid-cols-4">
+              {[
+                { label: "Exposure", value: aiAdjustedConsequence.aiExposureLevel },
+                { label: "Classification", value: aiAdjustedConsequence.classification },
+                { label: "Velocity", value: `${aiAdjustedConsequence.decisionVelocityScore}/100` },
+                { label: "Acceleration risk", value: `${aiAdjustedConsequence.projectedAccelerationRisk ?? aiAdjustedConsequence.accelerationRiskScore}/100` },
+              ].map((item) => (
+                <div key={item.label} style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.5rem 0.65rem" }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "5.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>{item.label}</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", color: "rgba(147,197,253,0.82)", marginTop: "0.2rem" }}>{String(item.value ?? "—")}</div>
+                </div>
+              ))}
+            </div>
+            {Array.isArray(aiAdjustedConsequence.reasoning) && (
+              <p style={{ marginTop: "0.65rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.42)" }}>
+                {aiAdjustedConsequence.reasoning.join(" ")}
+              </p>
+            )}
           </div>
         )}
 
@@ -1225,7 +1274,14 @@ function ResultSurface({
           </p>
         </div>
 
-        {/* ── BLOCK 7b: COST OF NON-DECISION ── */}
+        {/* ── BLOCK 7b: DECISION TERRAIN STATUS ── */}
+        <DecisionTerrainStatus
+          state={deriveTerrainState(aiTerrain.decisionVelocity.gapPercent)}
+          velocityGapPercent={aiTerrain.decisionVelocity.gapPercent}
+        />
+        <AITerrainExposure data={aiTerrain} />
+
+        {/* ── BLOCK 7c: COST OF NON-DECISION (AI-ADJUSTED) ── */}
         <PredictiveConsequence data={consequenceProjection} />
 
         {/* ── BLOCK 8: FORCED LADDER PROGRESSION ── */}

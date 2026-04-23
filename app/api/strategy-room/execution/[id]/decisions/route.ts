@@ -12,6 +12,7 @@ import {
   type SessionExecutionState,
 } from "@/lib/execution/decision-state-engine";
 import { buildDecisionSurfacePayload } from "@/lib/contracts/decision-surface";
+import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -47,6 +48,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     const { id: sessionId } = await ctx.params;
     const body = await req.json();
     const { decision, notes } = body;
+    const aiLeverageAction = typeof body?.aiLeverageAction === "string" ? body.aiLeverageAction.trim() : "";
     const decisionObjectId = typeof body?.decisionObjectId === "string" ? body.decisionObjectId.trim() : "";
 
     if (!decision || typeof decision !== "string") {
@@ -92,6 +94,18 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
       return NextResponse.json(
         { error: "decisionObjectId does not resolve to a canonical decision object" },
         { status: 400 },
+      );
+    }
+
+    const aiRisk = classifyAIDecisionRisk(linkedDecisionObject);
+    if (aiRisk.requiresAILeverageAction && !aiLeverageAction) {
+      return NextResponse.json(
+        {
+          error: "aiLeverageAction is required for HIGH or CRITICAL AI exposure decisions",
+          ai: aiRisk,
+          allowedActions: ["automate", "augment", "eliminate", "redesign"],
+        },
+        { status: 409 },
       );
     }
 
@@ -237,6 +251,13 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
           ? "RESOLVED"
           : "ACTIVE",
       consequenceScore: consequence.score,
+      ai: {
+        exposureLevel: aiRisk.aiExposureLevel,
+        classification: aiRisk.classification,
+        displacementRisk: aiRisk.aiDisplacementRisk,
+        decisionVelocityScore: aiRisk.decisionVelocityScore,
+        accelerationRiskScore: aiRisk.accelerationRiskScore,
+      },
     });
 
     return NextResponse.json({
@@ -303,6 +324,22 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       return NextResponse.json(
         { error: "Retainer contract is not active", contractStatus: inactiveRetainer.contract.status },
         { status: 403 },
+      );
+    }
+
+    const linkedDecisionObject = await prisma.diagnosticDecisionObject.findUnique({
+      where: { id: log.decisionObjectId },
+    });
+    const aiRisk = linkedDecisionObject ? classifyAIDecisionRisk(linkedDecisionObject) : null;
+    const aiLeverageAction = typeof body?.aiLeverageAction === "string" ? body.aiLeverageAction.trim() : "";
+    if (aiRisk?.requiresAILeverageAction && status === "executed" && !aiLeverageAction) {
+      return NextResponse.json(
+        {
+          error: "aiLeverageAction is required before executing a HIGH or CRITICAL AI exposure decision",
+          ai: aiRisk,
+          allowedActions: ["automate", "augment", "eliminate", "redesign"],
+        },
+        { status: 409 },
       );
     }
 
@@ -409,6 +446,13 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
           ? "RESOLVED"
           : "ACTIVE",
       consequenceScore: consequence.score,
+      ai: aiRisk ? {
+        exposureLevel: aiRisk.aiExposureLevel,
+        classification: aiRisk.classification,
+        displacementRisk: aiRisk.aiDisplacementRisk,
+        decisionVelocityScore: aiRisk.decisionVelocityScore,
+        accelerationRiskScore: aiRisk.accelerationRiskScore,
+      } : undefined,
     });
 
     return NextResponse.json({

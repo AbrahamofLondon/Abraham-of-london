@@ -147,6 +147,8 @@ export async function verifyAndPersistOutcome(
         outcomeClassification: result.outcomeClassification,
         magnitudeOfChange: result.magnitudeOfChange,
         effectivenessScore: result.interventionEffectivenessScore,
+        decisionVelocityDelta: Number((result.normalized as any)?.decisionVelocityDelta ?? result.magnitudeOfChange ?? 0),
+        aiCapabilityShift: Number((result.normalized as any)?.aiCapabilityShift ?? 0),
         unresolvedContradictions: result.unresolvedContradictionPersistence,
         payload: result.normalized,
         evidenceNodes: result.evidenceNodes,

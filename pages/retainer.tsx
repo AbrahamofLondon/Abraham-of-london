@@ -26,6 +26,13 @@ type RetainedDecision = {
   constraintText: string | null;
   costOfDelayText: string | null;
   sourceStage: string;
+  aiLeverageAction: string | null;
+  ai: {
+    classification: string;
+    aiExposureLevel: string;
+    decisionVelocityScore: number;
+    accelerationRiskScore: number;
+  };
   enforcementCycles: Cycle[];
 };
 
@@ -134,6 +141,12 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
                               : decision.enforcementCycles[0].outcomeDelta > 0
                                 ? `+${decision.enforcementCycles[0].outcomeDelta}`
                                 : String(decision.enforcementCycles[0].outcomeDelta)}
+                          </p>
+                        </div>
+                        <div>
+                          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>AI exposure</div>
+                          <p className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.58)" }}>
+                            {decision.ai.aiExposureLevel} · {decision.ai.classification} · velocity {decision.ai.decisionVelocityScore}/100
                           </p>
                         </div>
                       </div>

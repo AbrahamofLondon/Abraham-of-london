@@ -2158,6 +2158,9 @@ model DiagnosticDecisionObject {
   affectedDomain     String?
   normalized         Json?
   confidence         Float    @default(0.5)
+  aiExposureLevel    String   @default("MODERATE") // LOW | MODERATE | HIGH | CRITICAL
+  aiDisplacementRisk Boolean  @default(false)
+  decisionVelocityScore Int   @default(50)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -2169,6 +2172,8 @@ model DiagnosticDecisionObject {
   @@index([email])
   @@index([decisionKey])
   @@index([sourceStage])
+  @@index([aiExposureLevel])
+  @@index([decisionVelocityScore])
   @@index([createdAt])
 }
 
@@ -2202,6 +2207,7 @@ model RetainedDecision {
   decisionObjectId String
   priorityLevel    String   // HIGH | MEDIUM | LOW
   status           String   // ACTIVE | MONITORED | RESOLVED
+  aiLeverageAction String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -2224,6 +2230,8 @@ model EnforcementCycle {
   actionsTaken          Json
   contradictionsUpdated Json
   outcomeDelta          Float?
+  aiDriftDelta          Float  @default(0)
+  aiStatusSignal        String @default("PARITY HOLD") // VELOCITY LOSS | PARITY HOLD | ACCELERATION GAIN
   createdAt             DateTime @default(now())
 
   retainedDecision      RetainedDecision @relation(fields: [retainedDecisionId], references: [id], onDelete: Cascade)
@@ -2299,6 +2307,8 @@ model OutcomeVerificationRecord {
   outcomeClassification     String
   magnitudeOfChange         Float
   effectivenessScore        Float
+  decisionVelocityDelta     Float    @default(0)
+  aiCapabilityShift         Float    @default(0)
   unresolvedContradictions  Json?
   payload                   Json
   evidenceNodes             Json?
@@ -2926,4 +2936,3 @@ model EscalationEvent {
   @@index([createdAt])
   @@map("escalation_events")
 }
-

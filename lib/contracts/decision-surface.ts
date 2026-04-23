@@ -10,6 +10,13 @@ export type DecisionSurfacePayload = {
   }>;
   enforcementState: "PENDING" | "ACTIVE" | "ESCALATED" | "RESOLVED";
   consequenceScore?: number;
+  ai?: {
+    exposureLevel: "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
+    classification: string;
+    displacementRisk: boolean;
+    decisionVelocityScore: number;
+    accelerationRiskScore: number;
+  };
 };
 
 type RawContradiction = {
@@ -60,6 +67,7 @@ export function buildDecisionSurfacePayload(input: {
   contradictions: RawContradiction[];
   enforcementState: DecisionSurfacePayload["enforcementState"];
   consequenceScore?: number | null;
+  ai?: DecisionSurfacePayload["ai"] | null;
 }): DecisionSurfacePayload {
   const decisionId = String(input.decisionId || "").trim();
   if (!decisionId) throw new Error("Decision surface requires decisionId.");
@@ -76,6 +84,7 @@ export function buildDecisionSurfacePayload(input: {
     ...(typeof input.consequenceScore === "number" && Number.isFinite(input.consequenceScore)
       ? { consequenceScore: Math.max(0, Math.min(100, Math.round(input.consequenceScore))) }
       : {}),
+    ...(input.ai ? { ai: input.ai } : {}),
   };
 }
 

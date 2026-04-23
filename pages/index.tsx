@@ -1937,7 +1937,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
           </p>
 
           <p className="mt-2 max-w-[58ch] text-[13px] leading-[1.7]" style={{ color: "rgba(252,165,165,0.40)", fontStyle: "italic" }}>
-            You don&apos;t have a strategy problem. You have an enforcement failure.
+            A strategy that ignores AI acceleration is not neutral. It is a liability.
           </p>
 
           <p className="mt-4 max-w-[58ch] text-[14px] leading-[1.85] ds-text-muted">

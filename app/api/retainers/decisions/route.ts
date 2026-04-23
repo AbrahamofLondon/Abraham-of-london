@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       contractId,
       decisionObjectId,
       priorityLevel,
+      aiLeverageAction: typeof body?.aiLeverageAction === "string" ? body.aiLeverageAction : null,
     });
 
     return NextResponse.json({ ok: true, retainedDecision });

@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 
 import type { PurposeAlignmentContext, PurposeProfileResult } from "@/lib/alignment/types";
+import { classifyAIDecisionRisk, type AIExposureLevel } from "@/lib/diagnostics/ai-decision-risk";
 
 export type EvidenceSourceStage =
   | "purpose_alignment"
@@ -37,7 +38,8 @@ export type EvidenceNodeKind =
   | "resolved_condition"
   | "partial_resolution"
   | "persistent_root_cause"
-  | "behavior_pattern";
+  | "behavior_pattern"
+  | "ai_capability_contradiction";
 
 export type EvidenceSeverity = "low" | "medium" | "high" | "critical";
 
@@ -62,6 +64,10 @@ export type CanonicalDecisionObject = {
   stakeholderText?: string | null;
   affectedDomain?: string | null;
   confidence: number;
+  aiExposureLevel: AIExposureLevel;
+  aiDisplacementRisk: boolean;
+  decisionVelocityScore: number;
+  aiRiskClassification: string;
   normalized: {
     avoidedOrFaced: boolean;
     hasConstraint: boolean;
@@ -150,6 +156,17 @@ export function extractCanonicalDecisionObject(input: {
     Boolean(costOfDelayText),
     Boolean(stakeholderText || affectedDomain),
   ].filter(Boolean).length;
+  const preliminary = {
+    decisionText: decisionText || input.fallbackDecision || "",
+    constraintText,
+    priorAttemptText,
+    costOfDelayText,
+    affectedDomain,
+  };
+  const aiRisk = classifyAIDecisionRisk({
+    ...preliminary,
+    decisionVelocityScore: Math.max(10, Math.min(95, 72 - (costOfDelayText ? 12 : 0) - (priorAttemptText ? 8 : 0) - (constraintText ? 6 : 0))),
+  });
 
   return {
     sourceStage: input.sourceStage,
@@ -169,6 +186,10 @@ export function extractCanonicalDecisionObject(input: {
     stakeholderText: stakeholderText || null,
     affectedDomain: affectedDomain || null,
     confidence: clampConfidence(0.25 + completeness * 0.14),
+    aiExposureLevel: aiRisk.aiExposureLevel,
+    aiDisplacementRisk: aiRisk.aiDisplacementRisk,
+    decisionVelocityScore: aiRisk.decisionVelocityScore,
+    aiRiskClassification: aiRisk.classification,
     normalized: {
       avoidedOrFaced: Boolean(decisionText),
       hasConstraint: Boolean(constraintText),
@@ -278,6 +299,19 @@ export function buildPurposeAuthorityPacket(
   ];
 
   if (decisionObject) {
+    const aiRisk = classifyAIDecisionRisk(decisionObject);
+    if (aiRisk.contradiction) {
+      nodes.push({
+        sourceStage: "purpose_alignment",
+        kind: "ai_capability_contradiction",
+        label: aiRisk.contradiction.label,
+        summary: aiRisk.contradiction.summary,
+        evidenceText: `Velocity ${aiRisk.decisionVelocityScore}/100 vs inferred AI baseline ${aiRisk.competitorBaselineScore}/100.`,
+        confidence: 0.72,
+        severity: severityFromScore((consequence.value ?? 50) * aiRisk.contradiction.severityMultiplier),
+        payload: { type: aiRisk.contradiction.type, aiRisk },
+      });
+    }
     nodes.push({
       sourceStage: "purpose_alignment",
       kind: "decision_object",
@@ -388,6 +422,19 @@ export function buildGenericAuthorityPacket(input: {
   ];
 
   if (decisionObject) {
+    const aiRisk = classifyAIDecisionRisk(decisionObject);
+    if (aiRisk.contradiction) {
+      nodes.push({
+        sourceStage: input.stage,
+        kind: "ai_capability_contradiction",
+        label: aiRisk.contradiction.label,
+        summary: aiRisk.contradiction.summary,
+        evidenceText: `Velocity ${aiRisk.decisionVelocityScore}/100 vs inferred AI baseline ${aiRisk.competitorBaselineScore}/100.`,
+        confidence: 0.72,
+        severity: severityFromScore((consequence.value ?? 50) * aiRisk.contradiction.severityMultiplier),
+        payload: { type: aiRisk.contradiction.type, aiRisk },
+      });
+    }
     nodes.push({
       sourceStage: input.stage,
       kind: "decision_object",

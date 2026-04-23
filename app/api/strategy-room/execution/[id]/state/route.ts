@@ -12,6 +12,7 @@ import {
   buildDecisionSurfacePayload,
   insufficientEvidenceContradiction,
 } from "@/lib/contracts/decision-surface";
+import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -41,6 +42,11 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
         { status: 409 },
       );
     }
+
+    const linkedDecisionObject = linkedDecisionObjectId
+      ? await prisma.diagnosticDecisionObject.findUnique({ where: { id: linkedDecisionObjectId } })
+      : null;
+    const aiRisk = linkedDecisionObject ? classifyAIDecisionRisk(linkedDecisionObject) : null;
 
     if (linkedDecisionObjectId) {
       const inactiveRetainer = await prisma.retainedDecision.findFirst({
@@ -163,6 +169,13 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
           ? "RESOLVED"
           : "ACTIVE",
       consequenceScore: consequence.score,
+      ai: aiRisk ? {
+        exposureLevel: aiRisk.aiExposureLevel,
+        classification: aiRisk.classification,
+        displacementRisk: aiRisk.aiDisplacementRisk,
+        decisionVelocityScore: aiRisk.decisionVelocityScore,
+        accelerationRiskScore: aiRisk.accelerationRiskScore,
+      } : undefined,
     });
 
     return NextResponse.json({
@@ -183,6 +196,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
       consequenceLabel: consequence.label,
       consequenceExplanation: consequence.explanation,
       consequenceTrend: consequence.trend,
+      ai: aiRisk,
       directive: transition.directive,
       triggers: allTriggers,
     });

@@ -35,7 +35,7 @@ export default function PredictiveConsequence({ data }: { data: ConsequenceProje
     <div style={{ border: `1px solid ${config.color}25`, backgroundColor: `${config.color}05`, padding: "1.25rem", marginBottom: "1rem" }}>
       <div className="flex items-center gap-3 mb-2">
         <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
-          Predictive consequence
+          Projected cost of inaction (AI-adjusted)
         </span>
         <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.18)" }}>
           {Math.round(data.confidence * 100)}% confidence
