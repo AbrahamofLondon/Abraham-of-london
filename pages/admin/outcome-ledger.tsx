@@ -31,6 +31,16 @@ type LedgerEntry = {
   constraintText: string | null;
   // Timeline
   createdAt: string;
+  // Retainer
+  retainer: {
+    contractId: string;
+    tier: string;
+    status: string;
+    priorityLevel: string;
+    retainedDecisionStatus: string;
+    cycleCount: number;
+    latestOutcomeDelta: number | null;
+  } | null;
 };
 
 type PageProps = {
@@ -114,6 +124,11 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
                     <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                       {entry.sourceStage} · {new Date(entry.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
+                    {entry.retainer && (
+                      <span className="ml-2" style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(110,231,183,0.62)" }}>
+                        retained · {entry.retainer.tier} · {entry.retainer.priorityLevel}
+                      </span>
+                    )}
                     <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.60)", marginTop: "0.25rem" }}>
                       {entry.decisionText}
                     </p>
@@ -147,6 +162,7 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
                     { label: "Effectiveness", value: entry.effectivenessScore != null ? `${Math.round(entry.effectivenessScore)}%` : "—" },
                     { label: "Magnitude", value: entry.magnitudeOfChange != null ? (entry.magnitudeOfChange > 0 ? `+${entry.magnitudeOfChange.toFixed(1)}` : entry.magnitudeOfChange.toFixed(1)) : "—" },
                     { label: "Cost of delay", value: entry.costOfDelay ?? "—" },
+                    { label: "Retainer cycles", value: entry.retainer ? String(entry.retainer.cycleCount) : "—" },
                   ].map((d) => (
                     <div key={d.label}>
                       <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>{d.label}</span>
@@ -176,6 +192,17 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
         orderBy: { createdAt: "desc" },
         take: 1,
       },
+      retainedDecisions: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        include: {
+          contract: true,
+          enforcementCycles: {
+            orderBy: { cycleDate: "desc" },
+            take: 1,
+          },
+        },
+      },
     },
   });
 
@@ -197,6 +224,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   // Build entries
   const entries: LedgerEntry[] = decisionObjects.map((d) => {
     const log = d.strategyLogs[0];
+    const retainedDecision = d.retainedDecisions[0];
     const contradictions = contradictionNodes
       .filter((n) => n.journeyId === d.journeyId)
       .map((n) => ({ label: n.label, severity: n.severity, confidence: n.confidence }));
@@ -219,6 +247,15 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       costOfDelay: d.costOfDelayText,
       constraintText: d.constraintText,
       createdAt: d.createdAt.toISOString(),
+      retainer: retainedDecision ? {
+        contractId: retainedDecision.contractId,
+        tier: retainedDecision.contract.tier,
+        status: retainedDecision.contract.status,
+        priorityLevel: retainedDecision.priorityLevel,
+        retainedDecisionStatus: retainedDecision.status,
+        cycleCount: retainedDecision.enforcementCycles.length,
+        latestOutcomeDelta: retainedDecision.enforcementCycles[0]?.outcomeDelta ?? null,
+      } : null,
     };
   });
 

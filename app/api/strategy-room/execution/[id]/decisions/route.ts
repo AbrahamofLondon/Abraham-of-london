@@ -27,6 +27,16 @@ function parseJsonObject(value: string | null | undefined): Record<string, unkno
   }
 }
 
+async function findInactiveRetainerForDecision(decisionObjectId: string) {
+  return prisma.retainedDecision.findFirst({
+    where: {
+      decisionObjectId,
+      contract: { status: { not: "ACTIVE" } },
+    },
+    include: { contract: true },
+  });
+}
+
 /**
  * POST  — Log a new decision
  * PATCH — Update decision status (pending → executed | blocked)
@@ -82,6 +92,14 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
       return NextResponse.json(
         { error: "decisionObjectId does not resolve to a canonical decision object" },
         { status: 400 },
+      );
+    }
+
+    const inactiveRetainer = await findInactiveRetainerForDecision(decisionObjectId);
+    if (inactiveRetainer) {
+      return NextResponse.json(
+        { error: "Retainer contract is not active", contractStatus: inactiveRetainer.contract.status },
+        { status: 403 },
       );
     }
 
@@ -277,6 +295,14 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       return NextResponse.json(
         { error: "Decision log is missing canonical decisionObjectId" },
         { status: 409 },
+      );
+    }
+
+    const inactiveRetainer = await findInactiveRetainerForDecision(log.decisionObjectId);
+    if (inactiveRetainer) {
+      return NextResponse.json(
+        { error: "Retainer contract is not active", contractStatus: inactiveRetainer.contract.status },
+        { status: 403 },
       );
     }
 

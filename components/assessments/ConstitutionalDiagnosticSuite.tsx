@@ -1317,7 +1317,7 @@ export default function ConstitutionalDiagnosticSuite() {
                   {decision.recommendedInterventions.length > 0 && (
                     <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.25rem 1.5rem" }}>
                       <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.38em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>
-                        Recommended interventions
+                        Required interventions
                       </div>
                       <div className="space-y-2.5">
                         {decision.recommendedInterventions.map(iv => (

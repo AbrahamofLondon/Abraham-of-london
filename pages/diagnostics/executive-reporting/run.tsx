@@ -20,6 +20,8 @@ import MultiStakeholderDivergence from "@/components/diagnostics/results/MultiSt
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import PredictiveConsequence from "@/components/diagnostics/results/PredictiveConsequence";
+import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
+import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
 import { projectConsequence } from "@/lib/diagnostics/predictive-consequence";
 import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
@@ -1262,6 +1264,16 @@ function ResultSurface({
         <LongitudinalIntelligence data={longitudinal} />
         <MultiStakeholderDivergence data={multiStakeholder} />
         <OutcomeVerification data={outcome} />
+
+        {/* Retainer gate — conditional on longitudinal/multi-stakeholder evidence */}
+        <RetainerEntryGate qualification={evaluateRetainerQualification({
+          persistingContradictions: longitudinal?.persistingContradictions ?? [],
+          recurringPatterns: longitudinal?.tensionPersistence ?? [],
+          stakeholderContradictions: (multiStakeholder?.structuralContradictions ?? []).map((c) => ({
+            domain: c.domain, gap: c.gap, severity: c.severity,
+          })),
+          longitudinalClassification: longitudinal?.classification,
+        })} />
 
         {/* ── SECONDARY: evidence convergence + diagnostic data ── */}
         <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-6" />

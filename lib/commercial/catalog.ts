@@ -20,7 +20,8 @@ export type ProductCategory =
   | "reporting_premium"
   | "execution"
   | "execution_premium"
-  | "membership";
+  | "membership"
+  | "retainer";
 
 export type CatalogProduct = {
   code: string;
@@ -345,6 +346,68 @@ export const CATALOG: Record<string, CatalogProduct> = {
     active: false,
     successPath: "/inner-circle",
     cancelPath: "/",
+    cookieName: null,
+    includes: [],
+  },
+
+  // ═══ G. ENTERPRISE RETAINER LAYER ════════════════════════════════════════
+  // Stripe subscription price IDs are intentionally not guessed here. These
+  // products are first-class catalog identities, but inactive until contracted
+  // monthly prices are created in Stripe and inserted into this SSOT.
+
+  retainer_core: {
+    code: "retainer_core",
+    displayName: "Decision Authority Retainer — Core",
+    amount: 0,
+    displayPrice: "Contracted monthly",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "retainer_core",
+    tier: "CORE",
+    category: "retainer",
+    accessType: "subscription",
+    duration: "monthly",
+    active: false,
+    successPath: "/retainer",
+    cancelPath: "/retainer",
+    cookieName: null,
+    includes: [],
+  },
+
+  retainer_operational: {
+    code: "retainer_operational",
+    displayName: "Decision Authority Retainer — Operational",
+    amount: 0,
+    displayPrice: "Contracted monthly",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "retainer_operational",
+    tier: "OPERATIONAL",
+    category: "retainer",
+    accessType: "subscription",
+    duration: "monthly",
+    active: false,
+    successPath: "/retainer",
+    cancelPath: "/retainer",
+    cookieName: null,
+    includes: [],
+  },
+
+  retainer_institutional: {
+    code: "retainer_institutional",
+    displayName: "Decision Authority Retainer — Institutional",
+    amount: 0,
+    displayPrice: "Contracted monthly",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "retainer_institutional",
+    tier: "INSTITUTIONAL",
+    category: "retainer",
+    accessType: "subscription",
+    duration: "monthly",
+    active: false,
+    successPath: "/retainer",
+    cancelPath: "/retainer",
     cookieName: null,
     includes: [],
   },

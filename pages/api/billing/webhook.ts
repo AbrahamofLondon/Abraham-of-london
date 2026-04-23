@@ -15,6 +15,7 @@ import {
   resolveEntitlementSlugs,
   getProductByStripePriceId,
 } from "@/lib/commercial/catalog";
+import { syncRetainerContractFromSubscription } from "@/lib/retainers/retainer-service";
 
 const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
 
@@ -88,6 +89,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const priceCode = String(session.metadata?.priceCode || "");
     const tier = String(session.metadata?.tier || "report-basic");
     const paymentStatus = session.payment_status || null;
+    const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
+    const contractId = String(session.metadata?.contractId || "");
 
     await recordCheckoutCompletion({
       sessionId: session.id,
@@ -144,10 +147,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           error: "ENTITLEMENT_SYNC_FAILED",
         });
       }
+
+      if (subscriptionId && contractId) {
+        await prisma.retainerContract.updateMany({
+          where: { id: contractId },
+          data: {
+            stripeSubscriptionId: subscriptionId,
+            status: "ACTIVE",
+          },
+        });
+      }
     } else if (email && productCode) {
       console.warn(
         `[BILLING_WEBHOOK] Rejected unknown productCode from Stripe metadata: ${productCode}`,
       );
+    }
+  }
+
+  if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription;
+    if (subscription.id) {
+      await syncRetainerContractFromSubscription({
+        stripeSubscriptionId: subscription.id,
+        status: subscription.status,
+      });
     }
   }
 

@@ -81,7 +81,7 @@ export default function EngagementReadinessPanel({
               marginBottom: "0.4rem",
             }}
           >
-            Recommended next action
+            Required action
           </div>
           <p
             style={{

@@ -42,6 +42,23 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
       );
     }
 
+    if (linkedDecisionObjectId) {
+      const inactiveRetainer = await prisma.retainedDecision.findFirst({
+        where: {
+          decisionObjectId: linkedDecisionObjectId,
+          contract: { status: { not: "ACTIVE" } },
+        },
+        include: { contract: true },
+      });
+
+      if (inactiveRetainer) {
+        return NextResponse.json(
+          { error: "Retainer contract is not active", contractStatus: inactiveRetainer.contract.status },
+          { status: 403 },
+        );
+      }
+    }
+
     // Build action list with avoidance detection
     const rawActions = session.decisions;
     const actions: DecisionAction[] = rawActions.map((d) => ({

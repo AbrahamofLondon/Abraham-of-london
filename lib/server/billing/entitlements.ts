@@ -29,6 +29,9 @@ export const PRODUCT_CODES = {
   GLOBAL_MARKET_INTELLIGENCE_Q1_2026:   "global-market-intelligence-report-q1-2026",
   EXECUTIVE_REPORTING_PRIORITY:         "executive-reporting-priority",
   STRATEGY_ROOM_EXTENDED:               "strategy-room-extended",
+  RETAINER_CORE:                        "retainer_core",
+  RETAINER_OPERATIONAL:                 "retainer_operational",
+  RETAINER_INSTITUTIONAL:               "retainer_institutional",
 } as const;
 
 export type ProductCode = (typeof PRODUCT_CODES)[keyof typeof PRODUCT_CODES];

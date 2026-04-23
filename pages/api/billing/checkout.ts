@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") return res.status(405).end();
   if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
 
-  const { email, priceCode, productCode, entitlementSlug, contentId, originPath } = req.body || {};
+  const { email, priceCode, productCode, entitlementSlug, contentId, originPath, contractId, organisationId } = req.body || {};
   const rawCode = String(productCode || entitlementSlug || contentId || priceCode || "").trim();
 
   // Resolve canonical product code — accepts catalog key OR content ID OR entitlement slug
@@ -80,6 +80,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     tier: product.tier,
     email: String(email).trim().toLowerCase(),
     originPath: origin,
+    ...(typeof contractId === "string" && contractId.trim() ? { contractId: contractId.trim() } : {}),
+    ...(typeof organisationId === "string" && organisationId.trim() ? { organisationId: organisationId.trim() } : {}),
     // For bundles, include the full list of entitlement slugs
     ...(entitlementSlugs.length > 1
       ? { bundleEntitlements: entitlementSlugs.join(",") }
@@ -89,8 +91,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // ── Create Stripe checkout session ──
   let session: Stripe.Checkout.Session;
   try {
+    const mode = product.accessType === "subscription" ? "subscription" : "payment";
     session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode,
       customer_email: String(email).trim().toLowerCase(),
       line_items: [
         product.stripePriceId
@@ -99,6 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               price_data: {
                 currency: "gbp",
                 unit_amount: product.amount,
+                ...(mode === "subscription" ? { recurring: { interval: "month" as const } } : {}),
                 product_data: {
                   name: product.displayName,
                   metadata: {
@@ -113,6 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       success_url: `${baseUrl}${successPath}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}${cancelPath}?checkout=cancelled`,
       metadata,
+      ...(mode === "subscription" ? { subscription_data: { metadata } } : {}),
     });
   } catch (error) {
     const details = stripeErrorDetails(error);

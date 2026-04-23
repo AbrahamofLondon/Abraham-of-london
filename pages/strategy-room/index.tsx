@@ -38,6 +38,8 @@ import DecisionStateBanner from "@/components/strategy-room/DecisionStateBanner"
 import DynamicConsequencePanel from "@/components/strategy-room/DynamicConsequencePanel";
 import EscalationTriggerPanel from "@/components/strategy-room/EscalationTriggerPanel";
 import AvoidancePatternNotice from "@/components/strategy-room/AvoidancePatternNotice";
+import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
+import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
 import {
@@ -1889,6 +1891,23 @@ export default function StrategyRoomPage({
             <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
               <EscalationTriggerPanel triggers={enforcement?.escalationTriggers ?? []} />
             </div>
+
+            {/* Retainer gate — appears only when condition qualifies */}
+            {(() => {
+              const q = evaluateRetainerQualification({
+                persistingContradictions: enforcement?.escalationTriggers
+                  ?.filter((t) => t.triggerType === "contradiction_persists" || t.triggerType === "repeated_avoidance")
+                  .map((t) => t.message) ?? [],
+                recurringPatterns: enforcement?.repeatedPatternLabel ? [enforcement.repeatedPatternLabel] : [],
+                stakeholderContradictions: [],
+                longitudinalClassification: enforcement?.decisionState === "ESCALATED" ? "recurring" : undefined,
+              });
+              return q.qualifies ? (
+                <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+                  <RetainerEntryGate qualification={q} />
+                </div>
+              ) : null;
+            })()}
 
             {enforcement?.directive && (
               <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>

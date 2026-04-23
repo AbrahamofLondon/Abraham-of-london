@@ -292,6 +292,7 @@ model Organisation {
   invites       OrganisationInvite[]
   interventions StrategicIntervention[]
   snapshots     AlignmentSnapshot[]
+  retainerContracts RetainerContract[]
 
   @@index([name])
   @@index([status])
@@ -2162,12 +2163,74 @@ model DiagnosticDecisionObject {
 
   journey            DiagnosticJourney? @relation(fields: [journeyId], references: [id], onDelete: Cascade)
   strategyLogs       StrategyDecisionLog[]
+  retainedDecisions  RetainedDecision[]
 
   @@index([journeyId])
   @@index([email])
   @@index([decisionKey])
   @@index([sourceStage])
   @@index([createdAt])
+}
+
+model RetainerContract {
+  id                   String   @id @default(cuid())
+  organisationId       String
+  tier                 String   // CORE | OPERATIONAL | INSTITUTIONAL
+  status               String   // ACTIVE | PAUSED | TERMINATED
+  decisionCapacity     Int
+  startDate            DateTime
+  endDate              DateTime?
+  billingCycle         String   // MONTHLY
+  stripeSubscriptionId String?  @unique
+  entitlementSlug      String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  organisation         Organisation       @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  retainedDecisions    RetainedDecision[]
+
+  @@index([organisationId])
+  @@index([organisationId, status])
+  @@index([tier])
+  @@index([status])
+  @@index([stripeSubscriptionId])
+}
+
+model RetainedDecision {
+  id               String   @id @default(cuid())
+  contractId       String
+  decisionObjectId String
+  priorityLevel    String   // HIGH | MEDIUM | LOW
+  status           String   // ACTIVE | MONITORED | RESOLVED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  contract         RetainerContract         @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  decisionObject   DiagnosticDecisionObject @relation(fields: [decisionObjectId], references: [id])
+  enforcementCycles EnforcementCycle[]
+
+  @@unique([contractId, decisionObjectId])
+  @@index([contractId])
+  @@index([decisionObjectId])
+  @@index([contractId, status])
+  @@index([priorityLevel])
+  @@index([status])
+}
+
+model EnforcementCycle {
+  id                    String   @id @default(cuid())
+  retainedDecisionId    String
+  cycleDate             DateTime
+  actionsTaken          Json
+  contradictionsUpdated Json
+  outcomeDelta          Float?
+  createdAt             DateTime @default(now())
+
+  retainedDecision      RetainedDecision @relation(fields: [retainedDecisionId], references: [id], onDelete: Cascade)
+
+  @@index([retainedDecisionId])
+  @@index([cycleDate])
+  @@index([retainedDecisionId, cycleDate])
 }
 
 model DiagnosticStageRecord {
@@ -2863,3 +2926,4 @@ model EscalationEvent {
   @@index([createdAt])
   @@map("escalation_events")
 }
+

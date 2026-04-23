@@ -387,7 +387,7 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
 
       {/* Next action */}
       <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.25rem 1.5rem" }}>
-        <Eyebrow>Recommended action</Eyebrow>
+        <Eyebrow>Required action</Eyebrow>
         <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.72, color: "rgba(255,255,255,0.70)" }}>
           {nextAction}
         </p>

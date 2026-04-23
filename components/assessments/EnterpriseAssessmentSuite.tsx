@@ -518,7 +518,7 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
 
       {/* Next action */}
       <div className="border border-amber-500/15 bg-amber-500/[0.04] p-5">
-        <Eyebrow>Recommended action</Eyebrow>
+        <Eyebrow>Required action</Eyebrow>
         <p className="mt-3 font-serif text-[1rem] font-light leading-[1.72] text-white/70">
           {nextAction}
         </p>
