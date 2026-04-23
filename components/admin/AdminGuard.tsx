@@ -14,7 +14,6 @@ const ADMIN_EMAILS = new Set([
   "info@abrahamoflondon.org",
   "seunadaramola@gmail.com",
   "abrahamadaramola@outlook.com",
-  "abrahamadaromola@yahoo.co.uk",
 ].filter(Boolean));
 
 export default function AdminGuard({ children, fallback }: AdminGuardProps) {

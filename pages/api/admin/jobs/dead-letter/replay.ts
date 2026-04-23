@@ -16,13 +16,11 @@ import { issueDiagnosticReportFromRecord } from "@/lib/server/diagnostics/report
 import { runDiagnosticsRetentionSweep } from "@/lib/server/diagnostics/retention";
 import { processPendingDiagnosticReports } from "@/lib/server/diagnostics/jobs";
 
+import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
+
 function isAdmin(session: any) {
   const email = String(session?.user?.email || "").toLowerCase();
-  return [
-    "info@abrahamoflondon.org",
-    "seunadaramola@gmail.com",
-    "abrahamadaramola@outlook.com",
-  ].includes(email);
+  return BOOTSTRAP_ADMIN_EMAILS.has(email);
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
