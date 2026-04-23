@@ -87,7 +87,7 @@ export default function InnerCircleLoginPage() {
       if (!res.ok || !data?.ok) {
         console.warn("[login:request] register failed:", data?.error);
         setError(
-          "We could not complete your access request at this time. If you already have an issued credential, use manual sign-in below."
+          "Access could not be verified. If you have existing access, sign in below."
         );
         return;
       }

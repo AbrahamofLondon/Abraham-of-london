@@ -1552,7 +1552,7 @@ export default function StrategyRoomPage({
                   checkoutPriceCode="strategy_room"
                   originPath="/strategy-room"
                   ctaHref="/strategy-room"
-                  primaryCtaLabel="Enter execution environment"
+                  primaryCtaLabel="Proceed to execution"
                   title=""
                   description=""
                 />

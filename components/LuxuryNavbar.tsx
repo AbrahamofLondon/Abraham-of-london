@@ -28,6 +28,7 @@ const ADMIN_EMAILS = new Set([
   "info@abrahamoflondon.org",
   "seunadaramola@gmail.com",
   "abrahamadaramola@outlook.com",
+  "abrahamadaromola@yahoo.co.uk",
 ].filter(Boolean));
 
 export default function Navbar(): React.ReactElement {
@@ -140,6 +141,14 @@ export default function Navbar(): React.ReactElement {
                 
                 {showAdminMenu && (
                   <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-sm border border-white/10 bg-black/95 backdrop-blur-xl py-2 shadow-2xl z-50">
+                    <Link
+                      href="/admin/authority-center"
+                      className="flex items-center gap-3 px-4 py-2 text-xs text-amber-400/70 hover:text-amber-400 hover:bg-white/5 transition-colors"
+                      onClick={() => setShowAdminMenu(false)}
+                    >
+                      <Shield className="h-3.5 w-3.5" />
+                      Authority Center
+                    </Link>
                     <Link
                       href="/admin"
                       className="flex items-center gap-3 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-colors"
