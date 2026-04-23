@@ -76,6 +76,15 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
       }}>
         This is what the retainer exists for.
       </p>
+      <p style={{
+        ...mono,
+        fontSize: "6.5px",
+        letterSpacing: "0.18em",
+        color: "rgba(255,255,255,0.20)",
+        marginBottom: "0.75rem",
+      }}>
+        Ongoing enforcement is not only about correcting risk. It determines whether you fall behind or move ahead.
+      </p>
 
       {/* Evidence — why this qualifies */}
       <div style={{

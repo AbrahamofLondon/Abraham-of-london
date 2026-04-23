@@ -1981,6 +1981,9 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
           >
             Free to start. No subscription. No commitment.
           </p>
+          <p className="mt-2 text-[11px] leading-[1.6]" style={{ color: "rgba(255,255,255,0.15)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.08em" }}>
+            Decisions are evaluated against an AI-accelerated market baseline.
+          </p>
         </div>
 
         {/* RIGHT — choose / act */}
@@ -2178,7 +2181,7 @@ function WhatThisPlatformIs() {
       {/* Anti-hype */}
       <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
         <span style={{ color: "var(--ds-text)" }}>What this is not:</span>
-        {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as analysis"].map((item) => (
+        {["Coaching", "Personality profiling", "Generic consulting", "Opinion dressed as evidence"].map((item) => (
           <span key={item} style={{ color: "var(--ds-text-muted)", opacity: 0.72 }}>
             Not {item.toLowerCase()}
           </span>
@@ -2723,7 +2726,7 @@ function ProofLayer() {
           </div>
           <ObservedOutcomesBlock />
           <p className="mt-4 max-w-[60ch] text-[13px] leading-[1.85] ds-text-muted">
-            The system does not produce outcomes. It enforces the decision and measures whether it worked.
+            The system does not produce outcomes. It enforces the decision and measures the result.
           </p>
         </div>
 

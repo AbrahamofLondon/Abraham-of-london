@@ -299,8 +299,8 @@ const ConsultingPage: NextPage = () => {
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.90, delay: 0.18 }}
                   >
                     For founders, boards, and institutions where the structured system
-                    has identified the condition but the decision requires direct human counsel.
-                    This is not the system. It is the layer above it.
+                    has identified the condition but the decision exceeds what it can fully model.
+                    This applies the system under conditions it cannot reach alone.
                   </motion.p>
 
                   <motion.div className="flex flex-wrap gap-3 mt-10"
@@ -1053,7 +1053,7 @@ const ConsultingPage: NextPage = () => {
                 color: "rgba(255,255,255,0.38)",
                 maxWidth: "44ch",
               }}>
-                Advisory begins where the system's structured products end.
+                Advisory applies the system under conditions it cannot fully model.
                 The evidence carries forward. The counsel is direct.
               </p>
 

@@ -1819,6 +1819,7 @@ function ExecutiveReportingIntake({
               }}
             >
               Intake is governed. Run record is persisted. Not stored for marketing use.
+              Decisions evaluated against an AI-accelerated market baseline.
             </p>
           </div>
         </form>

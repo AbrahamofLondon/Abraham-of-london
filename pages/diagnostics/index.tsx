@@ -385,6 +385,8 @@ export default function DiagnosticsIndexPage() {
                 }}
               >
                 Governed entry · staged evidence ladder · no account required for diagnostic stages
+                <br />
+                Decisions evaluated against an AI-accelerated market baseline.
               </div>
             </div>
           </div>

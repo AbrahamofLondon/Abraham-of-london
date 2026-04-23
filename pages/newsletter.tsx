@@ -22,7 +22,7 @@ export default function NewsletterPage(): JSX.Element {
   return (
     <Layout
       title={pageTitle}
-      description="Join the Inner Circle - a curated brief for founders, boards, and leaders under consequence. High-signal strategic evidence and early access to mandates."
+      description="Join the Inner Circle - a curated brief for founders, boards, and leaders under consequence. High-signal strategic briefing and early access to mandates."
       className="bg-black text-cream"
     >
       <div className="min-h-screen bg-black">

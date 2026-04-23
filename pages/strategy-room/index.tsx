@@ -591,6 +591,18 @@ function ExecutionEntryState({
             }}>
               The system has determined that action—not analysis—is required.
             </p>
+            <p style={{
+              marginTop: "0.5rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "0.88rem",
+              lineHeight: 1.55,
+              color: "rgba(255,255,255,0.30)",
+              fontStyle: "italic",
+              maxWidth: "52ch",
+            }}>
+              This is not only about correcting risk. It determines whether you fall behind or move ahead.
+            </p>
           </div>
 
           <div
