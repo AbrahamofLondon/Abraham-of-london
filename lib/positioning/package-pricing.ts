@@ -3,6 +3,7 @@
 
 import type { OfferPackage } from "./package-model";
 import type { CommercialProduct } from "@/lib/server/billing/commercial-access";
+import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
 
 export type PackagePricing = {
   packageId: OfferPackage;
@@ -17,20 +18,20 @@ export type PackagePricing = {
 const PACKAGE_PRICING: Record<OfferPackage, PackagePricing> = {
   executive_report_single: {
     packageId: "executive_report_single",
-    priceGBP: 95,
+    priceGBP: getProductAmountGbp("executive_reporting"),
     stripePriceCode: "executive_reporting",
     commercialProductKey: "executive_reporting",
     billingMode: "one_time",
-    displayPrice: "£95",
+    displayPrice: getProductDisplayPrice("executive_reporting"),
     pricingRationale: "One-time governed executive brief. Evidence-derived, not generic.",
   },
   executive_report_sponsored: {
     packageId: "executive_report_sponsored",
-    priceGBP: 95,
+    priceGBP: getProductAmountGbp("executive_reporting"),
     stripePriceCode: "executive_reporting",
     commercialProductKey: "executive_reporting",
     billingMode: "one_time",
-    displayPrice: "£95",
+    displayPrice: getProductDisplayPrice("executive_reporting"),
     pricingRationale: "Direct institutional intake. Same output, bypasses public ladder.",
   },
   team_reality_campaign: {
@@ -53,11 +54,11 @@ const PACKAGE_PRICING: Record<OfferPackage, PackagePricing> = {
   },
   strategy_room_escalation: {
     packageId: "strategy_room_escalation",
-    priceGBP: 395,
+    priceGBP: getProductAmountGbp("strategy_room"),
     stripePriceCode: "strategy_room",
     commercialProductKey: "strategy_room",
     billingMode: "one_time",
-    displayPrice: "£395",
+    displayPrice: getProductDisplayPrice("strategy_room"),
     pricingRationale: "Escalation environment. Opens when constitutional evidence warrants intervention.",
   },
   asset_access_membership: {

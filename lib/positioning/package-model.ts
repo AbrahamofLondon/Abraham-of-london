@@ -2,6 +2,7 @@
 // Canonical offer/package architecture. Executive Reporting = core. Everything else orbits.
 
 import type { BuyerType } from "./category-model";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 
 export type OfferPackage =
   | "executive_report_single"
@@ -44,7 +45,7 @@ export const PACKAGES: Record<OfferPackage, PackageDefinition> = {
     flagshipRole: "core",
     entrySurface: "/diagnostics/executive-reporting",
     nextValidOffers: ["strategy_room_escalation", "monitoring_subscription", "team_reality_campaign"],
-    priceIndicator: "£95",
+    priceIndicator: getProductDisplayPrice("executive_reporting"),
   },
   executive_report_sponsored: {
     id: "executive_report_sponsored",
@@ -62,7 +63,7 @@ export const PACKAGES: Record<OfferPackage, PackageDefinition> = {
     flagshipRole: "core",
     entrySurface: "/diagnostics/executive-reporting",
     nextValidOffers: ["strategy_room_escalation", "monitoring_subscription"],
-    priceIndicator: "£95",
+    priceIndicator: getProductDisplayPrice("executive_reporting"),
   },
   team_reality_campaign: {
     id: "team_reality_campaign",
@@ -122,7 +123,7 @@ export const PACKAGES: Record<OfferPackage, PackageDefinition> = {
     flagshipRole: "adjacent",
     entrySurface: "/strategy-room",
     nextValidOffers: ["monitoring_subscription"],
-    priceIndicator: "£395",
+    priceIndicator: getProductDisplayPrice("strategy_room"),
   },
   asset_access_membership: {
     id: "asset_access_membership",

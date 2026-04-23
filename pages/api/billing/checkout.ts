@@ -92,8 +92,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: String(email).trim().toLowerCase(),
-      // checkCheckoutEligibility guarantees stripePriceId exists for all eligible products
-      line_items: [{ price: product.stripePriceId!, quantity: 1 }],
+      line_items: [
+        product.stripePriceId
+          ? { price: product.stripePriceId, quantity: 1 }
+          : {
+              price_data: {
+                currency: "gbp",
+                unit_amount: product.amount,
+                product_data: {
+                  name: product.displayName,
+                  metadata: {
+                    productCode: product.code,
+                    entitlementSlug: product.entitlementSlug,
+                  },
+                },
+              },
+              quantity: 1,
+            },
+      ],
       success_url: `${baseUrl}${successPath}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}${cancelPath}?checkout=cancelled`,
       metadata,
@@ -112,7 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   hubspotSync({
     event: code === "strategy_room" ? "strategy_room_checkout" : "executive_reporting_checkout",
     email: String(email || ""),
-    data: { amount: product.amount / 100 },
+    data: { amount: product.amount / 100, productCode: code },
   }).catch(() => {});
 
   return res.json({ ok: true, url: session.url });

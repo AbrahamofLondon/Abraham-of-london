@@ -214,11 +214,11 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
   executive_reporting: {
     code: "executive_reporting",
-    displayName: "Executive Reporting",
-    amount: 9500,
-    displayPrice: "\u00a395",
+    displayName: "Executive Reporting — Standard",
+    amount: 19500,
+    displayPrice: "\u00a3195",
     stripeProductId: "prod_SQGrT5cFHJ3MFH",
-    stripePriceId: "price_1TOLggQFpelVFMXJKSSxZvKv",
+    stripePriceId: null,
     entitlementSlug: "assessment.executive_reporting",
     tier: "one-time-executive-reporting",
     category: "reporting",
@@ -271,9 +271,9 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
   executive_reporting_priority: {
     code: "executive_reporting_priority",
-    displayName: "Executive Reporting \u2014 Priority",
-    amount: 125000,
-    displayPrice: "\u00a31,250",
+    displayName: "Executive Reporting \u2014 Advanced",
+    amount: 29500,
+    displayPrice: "\u00a3295",
     stripeProductId: null,
     stripePriceId: null,
     entitlementSlug: "executive-reporting-priority",
@@ -281,7 +281,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     category: "reporting_premium",
     accessType: "one_time",
     duration: "lifetime",
-    active: false,
+    active: true,
     successPath: "/diagnostics/executive-reporting/run",
     cancelPath: "/diagnostics/executive-reporting",
     cookieName: "aol_paid_executive_reporting",
@@ -292,11 +292,11 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
   strategy_room: {
     code: "strategy_room",
-    displayName: "Strategy Room",
-    amount: 39500,
-    displayPrice: "\u00a3395",
+    displayName: "Strategy Room \u2014 Entry",
+    amount: 75000,
+    displayPrice: "\u00a3750",
     stripeProductId: "prod_SQGsGHhBiAFnG2",
-    stripePriceId: "price_1TOLsPQFpelVFMXJ5ieJsFas",
+    stripePriceId: null,
     entitlementSlug: "strategy-room.entry",
     tier: "one-time-strategy-room",
     category: "execution",
@@ -311,17 +311,17 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
   strategy_room_extended: {
     code: "strategy_room_extended",
-    displayName: "Strategy Room \u2014 Extended Intervention",
-    amount: 380000,
-    displayPrice: "\u00a33,800",
+    displayName: "Strategy Room \u2014 Active / Multi-Decision",
+    amount: 125000,
+    displayPrice: "\u00a31,250",
     stripeProductId: null,
     stripePriceId: null,
     entitlementSlug: "strategy-room-extended",
     tier: "execution-premium",
     category: "execution_premium",
-    accessType: "subscription",
-    duration: "semi_annual",
-    active: false,
+    accessType: "one_time",
+    duration: "lifetime",
+    active: true,
     successPath: "/strategy-room",
     cancelPath: "/strategy-room",
     cookieName: "aol_paid_strategy_room",
@@ -356,6 +356,22 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
 export function getProduct(code: string): CatalogProduct | null {
   return CATALOG[code] ?? null;
+}
+
+export function requireProduct(code: string): CatalogProduct {
+  const product = getProduct(code);
+  if (!product) {
+    throw new Error(`Unknown commercial product: ${code}`);
+  }
+  return product;
+}
+
+export function getProductDisplayPrice(code: string): string {
+  return requireProduct(code).displayPrice;
+}
+
+export function getProductAmountGbp(code: string): number {
+  return requireProduct(code).amount / 100;
 }
 
 export function getAllProducts(): CatalogProduct[] {
@@ -434,7 +450,6 @@ export function checkCheckoutEligibility(code: string): CheckoutEligibility {
   if (!product.active) return { eligible: false, reason: "PRODUCT_INACTIVE" };
   if (product.accessType === "free") return { eligible: false, reason: "FREE_PRODUCT_NOT_PURCHASABLE" };
   if (product.amount <= 0) return { eligible: false, reason: "ZERO_AMOUNT" };
-  if (!product.stripePriceId) return { eligible: false, reason: "MISSING_STRIPE_PRICE_ID" };
   return { eligible: true, product };
 }
 

@@ -20,25 +20,11 @@ import {
   pdfAccessToRequiredTier,
   type PdfAssetIdentityResolved,
 } from "@/lib/assets/pdf-identity";
+import { getProductByEntitlementSlug } from "@/lib/commercial/catalog";
 
 const GOLD = "#C9A96E";
 
-/** Price map for paid assets (pence → display) */
-const PAID_ASSET_PRICES: Record<string, { amount: number; display: string; justification: string }> = {
-  "global-market-intelligence-report-q1-2026": {
-    amount: 5900,
-    display: "£59",
-    justification: "Decision-support intelligence brief for operators navigating structural fragmentation.",
-  },
-  "global-market-intelligence-board-deck-q1-2026": {
-    amount: 4500,
-    display: "£45",
-    justification: "Board-grade intelligence designed for environments where decisions carry weight.",
-  },
-};
-
 const DEFAULT_PAID_PRICE = {
-  amount: 0,
   display: "Paid",
   justification: "Part of the paid decision layer. Used where clarity matters more than convenience.",
 };
@@ -351,7 +337,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
   const requiredTier = tiers.normalizeRequired(identityTier || (doc ? requiredTierFromDoc(doc as Parameters<typeof requiredTierFromDoc>[0]) : "public"));
   const isPublic = requiredTier === "public";
 
-  const priceEntry = PAID_ASSET_PRICES[identity.slug] || (identity.access === "paid" ? DEFAULT_PAID_PRICE : null);
+  const catalogProduct = getProductByEntitlementSlug(identity.slug);
+  const priceEntry = catalogProduct
+    ? {
+        display: catalogProduct.displayPrice,
+        justification: "Catalog-governed paid decision asset.",
+      }
+    : identity.access === "paid"
+      ? DEFAULT_PAID_PRICE
+      : null;
 
   return {
     props: {

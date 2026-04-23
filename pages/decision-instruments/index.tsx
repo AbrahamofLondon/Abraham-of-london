@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import CheckoutButton from "@/components/commercial/CheckoutButton";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { trackLanding, trackBundleClick } from "@/lib/analytics/journey-client";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -32,7 +33,7 @@ const INSTRUMENTS = [
   {
     slug: "decision-exposure-instrument",
     title: "Decision Exposure Instrument",
-    price: "\u00a329",
+    price: getProductDisplayPrice("decision_exposure_instrument"),
     outcome: "Quantifies the cost of being wrong before the market enforces it.",
     usedWhen: "Financial consequence is unclear but decision cannot wait.",
     time: "15 min",
@@ -40,7 +41,7 @@ const INSTRUMENTS = [
   {
     slug: "mandate-clarity-framework",
     title: "Mandate Clarity Framework",
-    price: "\u00a349",
+    price: getProductDisplayPrice("mandate_clarity_framework"),
     outcome: "Defines who decides\u2014and where authority is breaking.",
     usedWhen: "Ownership is unclear or contested.",
     time: "20 min",
@@ -48,7 +49,7 @@ const INSTRUMENTS = [
   {
     slug: "intervention-path-selector",
     title: "Intervention Path Selector",
-    price: "\u00a379",
+    price: getProductDisplayPrice("intervention_path_selector"),
     outcome: "Determines the correct action when inaction is no longer viable.",
     usedWhen: "Action is required but direction is unclear.",
     time: "15\u201325 min",
@@ -142,7 +143,7 @@ export default function DecisionInstrumentsPage() {
                   href="/diagnostics/executive-reporting"
                   style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
                 >
-                  Go to Executive Reporting (&pound;95)
+                  Go to Executive Reporting ({getProductDisplayPrice("executive_reporting")})
                 </Link>
               </div>
             </div>
@@ -267,7 +268,7 @@ export default function DecisionInstrumentsPage() {
                       Resolve the decision fully. Exposure, authority, and intervention in one pass.
                     </div>
                   </div>
-                  <span style={{ ...mono, fontSize: "14px", letterSpacing: "0.04em", color: GOLD }}>&pound;129</span>
+                  <span style={{ ...mono, fontSize: "14px", letterSpacing: "0.04em", color: GOLD }}>{getProductDisplayPrice("operator_decision_pack")}</span>
                 </div>
 
                 <div className="mt-2" style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.30)" }}>
@@ -351,7 +352,7 @@ export default function DecisionInstrumentsPage() {
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${GOLD}50`; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${GOLD}30`; }}
               >
-                Executive Reporting &middot; &pound;95
+                Executive Reporting &middot; {getProductDisplayPrice("executive_reporting")}
                 <ArrowRight style={{ width: 10, height: 10 }} />
               </Link>
             </div>

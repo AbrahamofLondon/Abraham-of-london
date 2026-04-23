@@ -3,6 +3,7 @@ import type { GetServerSidePropsContext } from "next";
 import Stripe from "stripe";
 import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { requireProduct } from "@/lib/commercial/catalog";
 
 export type CommercialProduct = "executive_reporting" | "strategy_room";
 
@@ -10,36 +11,38 @@ export const COMMERCIAL_PRODUCTS: Record<
   CommercialProduct,
   {
     priceCode: CommercialProduct;
-    productCode: "assessment.executive_reporting" | "strategy-room.entry";
+    productCode: string;
     tier: string;
-    amount: number;
     name: string;
     successPath: string;
     cancelPath: string;
     cookieName: string;
   }
-> = {
-  executive_reporting: {
+> = (() => {
+  const executiveReporting = requireProduct("executive_reporting");
+  const strategyRoom = requireProduct("strategy_room");
+
+  return {
+    executive_reporting: {
     priceCode: "executive_reporting",
-    productCode: "assessment.executive_reporting",
-    tier: "one-time-executive-reporting",
-    amount: 9500,
-    name: "Executive Reporting",
-    successPath: "/diagnostics/executive-reporting/run",
-    cancelPath: "/diagnostics/executive-reporting",
-    cookieName: "aol_paid_executive_reporting",
-  },
-  strategy_room: {
-    priceCode: "strategy_room",
-    productCode: "strategy-room.entry",
-    tier: "one-time-strategy-room",
-    amount: 39500,
-    name: "Strategy Room",
-    successPath: "/strategy-room",
-    cancelPath: "/strategy-room",
-    cookieName: "aol_paid_strategy_room",
-  },
-};
+    productCode: executiveReporting.entitlementSlug,
+    tier: executiveReporting.tier,
+    name: executiveReporting.displayName,
+    successPath: executiveReporting.successPath,
+    cancelPath: executiveReporting.cancelPath,
+    cookieName: executiveReporting.cookieName || "aol_paid_executive_reporting",
+    },
+    strategy_room: {
+      priceCode: "strategy_room",
+      productCode: strategyRoom.entitlementSlug,
+      tier: strategyRoom.tier,
+      name: strategyRoom.displayName,
+      successPath: strategyRoom.successPath,
+      cancelPath: strategyRoom.cancelPath,
+      cookieName: strategyRoom.cookieName || "aol_paid_strategy_room",
+    },
+  };
+})();
 
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24;
 

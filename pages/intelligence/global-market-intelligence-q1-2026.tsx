@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTES
@@ -161,7 +162,7 @@ const EDITIONS = [
   {
     eyebrow: "Institutional Edition",
     title:   "Full intelligence briefing",
-    body:    "The £59 decision-support intelligence brief for operators navigating structural fragmentation. Full country analysis, scenarios, board actions, and case evidence.",
+    body:    `The ${getProductDisplayPrice("gmi_q1_2026")} decision-support intelligence brief for operators navigating structural fragmentation. Full country analysis, scenarios, board actions, and case evidence.`,
     href:    ROUTES.institutionalEdition,
     cta:     "Unlock decision brief",
     icon:    Lock,
@@ -347,7 +348,7 @@ function HeroSection() {
                 onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}45`; el.style.backgroundColor = `${GOLD}0E`; }}
               >
                 <Lock style={{ width: "12px", height: "12px" }} />
-                Unlock decision brief — £59
+                Unlock decision brief — {getProductDisplayPrice("gmi_q1_2026")}
               </Link>
 
               <Link href={ROUTES.boardDeck}
@@ -803,7 +804,7 @@ function DecisionUseSection() {
               }}
             >
               <Lock style={{ width: "12px", height: "12px" }} />
-              Unlock decision advantage — £59
+              Unlock decision advantage — {getProductDisplayPrice("gmi_q1_2026")}
             </Link>
           </motion.div>
 

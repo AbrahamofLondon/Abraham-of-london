@@ -124,10 +124,6 @@ export function validateProductIdentity(code: string): {
   if (!chain.entitlementSlug) issues.push("Missing entitlementSlug");
   if (!chain.postPurchaseDestination) issues.push("Missing postPurchaseDestination");
 
-  if (product.active && product.amount > 0 && !product.stripePriceId) {
-    issues.push("Active paid product missing Stripe Price ID");
-  }
-
   if (chain.accessAuthority === "canonical_entitlement" && !chain.entitlementSlug) {
     issues.push("Canonical entitlement authority requires entitlementSlug");
   }

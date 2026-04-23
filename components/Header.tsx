@@ -38,6 +38,7 @@ import {
   Lock,
   Key,
 } from "lucide-react";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES + CONSTANTS
@@ -59,8 +60,8 @@ type NavItem = {
 // Desktop nav — system-first. Primary = conversion surfaces, Secondary = content/authority.
 const PRIMARY_NAV: readonly NavItem[] = [
   { href: "/diagnostics",                     label: "Diagnostics",       sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/diagnostics/executive-reporting",  label: "Executive Report",  sub: "Consequence layer · £95",     icon: ScrollText },
-  { href: "/strategy-room",                    label: "Strategy Room",     sub: "Decision intervention · £395", icon: Crown      },
+  { href: "/diagnostics/executive-reporting",  label: "Executive Report",  sub: `Consequence layer · ${getProductDisplayPrice("executive_reporting")}`,     icon: ScrollText },
+  { href: "/strategy-room",                    label: "Strategy Room",     sub: `Decision intervention · ${getProductDisplayPrice("strategy_room")}`, icon: Crown      },
 ] as const;
 
 const PRIMARY_NAV_HINTS: Record<string, string> = {
@@ -82,8 +83,8 @@ const DESKTOP_NAV: readonly NavItem[] = [...PRIMARY_NAV, ...SECONDARY_NAV] as co
 const MOBILE_NAV: readonly NavItem[] = [
   // Product surfaces
   { href: "/diagnostics",                     label: "Diagnostics",      sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: "Consequence layer · £95",     icon: ScrollText },
-  { href: "/strategy-room",                    label: "Strategy Room",    sub: "Decision intervention · £395", icon: Crown      },
+  { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: `Consequence layer · ${getProductDisplayPrice("executive_reporting")}`,     icon: ScrollText },
+  { href: "/strategy-room",                    label: "Strategy Room",    sub: `Decision intervention · ${getProductDisplayPrice("strategy_room")}`, icon: Crown      },
   // Content & authority
   { href: "/artifacts",    label: "Intelligence",  sub: "Market intelligence",          icon: Zap,       signal: true },
   { href: "/playbooks",    label: "Playbooks",     sub: "Execution Frameworks",         icon: Layers     },

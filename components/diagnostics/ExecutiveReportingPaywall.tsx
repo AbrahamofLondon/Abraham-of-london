@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { readConstitutionalThread } from "@/lib/diagnostics/session-thread";
 import { track } from "@/lib/analytics/track";
+import { getProductAmountGbp } from "@/lib/commercial/catalog";
 
 type ExecutiveReportingPaywallProps = {
   price?: number;
@@ -18,10 +19,25 @@ type ExecutiveReportingPaywallProps = {
 };
 
 export default function ExecutiveReportingPaywall({
-  price = 95,
+  price = getProductAmountGbp("executive_reporting"),
   checkoutPriceCode = "executive_reporting",
   primaryCtaLabel = "Continue to Executive Interpretation",
 }: ExecutiveReportingPaywallProps) {
+  const tiers = [
+    {
+      label: "Standard",
+      productCode: checkoutPriceCode,
+      price,
+      description: "Consequence pricing, contradiction hierarchy, and governed priority stack.",
+    },
+    {
+      label: "Advanced — deeper consequence modelling",
+      productCode: "executive_reporting_priority",
+      price: getProductAmountGbp("executive_reporting_priority"),
+      description: "Adds deeper predictive consequence modelling and escalation-readiness pressure.",
+    },
+  ];
+  const [selectedTier, setSelectedTier] = useState(tiers[0]!);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -79,7 +95,7 @@ export default function ExecutiveReportingPaywall({
     }
     const hesitation_ms = Date.now() - paywallMountTime.current;
     track("executive_reporting_checkout_clicked", {
-      price_code: checkoutPriceCode,
+      price_code: selectedTier.productCode,
       has_email: Boolean(email.trim()),
       hesitation_ms,
     });
@@ -90,7 +106,7 @@ export default function ExecutiveReportingPaywall({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        priceCode: checkoutPriceCode,
+        productCode: selectedTier.productCode,
         email,
       }),
     });
@@ -104,7 +120,7 @@ export default function ExecutiveReportingPaywall({
       setLoading(false);
       setMessage("Checkout could not be prepared. Check the email field and try again.");
       track("checkout_failed", {
-        price_code: checkoutPriceCode,
+        price_code: selectedTier.productCode,
         reason: data?.error || "no_url_returned",
       });
     }
@@ -198,7 +214,23 @@ export default function ExecutiveReportingPaywall({
 
       {/* PRICE */}
       <div className="mb-6">
-        <div className="text-2xl font-semibold">£{price}</div>
+        <div className="mb-3 grid gap-2 sm:grid-cols-2">
+          {tiers.map((tier) => {
+            const active = tier.productCode === selectedTier.productCode;
+            return (
+              <button
+                key={tier.productCode}
+                type="button"
+                onClick={() => setSelectedTier(tier)}
+                className={`border p-4 text-left ${active ? "border-amber-400/45 bg-amber-400/[0.07]" : "border-white/10 bg-white/[0.02]"}`}
+              >
+                <div className="text-sm font-medium text-white">{tier.label}</div>
+                <div className="mt-1 text-2xl font-semibold">£{tier.price}</div>
+                <div className="mt-2 text-xs leading-5 text-white/50">{tier.description}</div>
+              </button>
+            );
+          })}
+        </div>
         <div className="text-sm text-white/50">
           One-time analysis • No subscription
         </div>

@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import CheckoutButton from "@/components/commercial/CheckoutButton";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import {
   trackLanding,
   trackBundleClick,
@@ -42,7 +43,7 @@ const PATHS: DecisionPath[] = [
   {
     id: 1,
     name: "Decision Instruments",
-    price: "£29–£79",
+    price: `${getProductDisplayPrice("decision_exposure_instrument")}\u2013${getProductDisplayPrice("intervention_path_selector")}`,
     positioning: "When one decision condition must be isolated before it compounds.",
     trigger: "Use this stage when exposure, authority, or intervention path is unclear and the system needs a specific decision signal.",
     includes: [
@@ -53,13 +54,13 @@ const PATHS: DecisionPath[] = [
     outcome: "You produce a bounded output that feeds Executive Reporting when consequence must be priced.",
     cta: "View instruments",
     ctaHref: "/decision-instruments",
-    secondaryCta: "Acquire Operator Pack · £129",
+    secondaryCta: `Acquire Operator Pack · ${getProductDisplayPrice("operator_decision_pack")}`,
     secondaryProductCode: "operator_decision_pack",
   },
   {
     id: 2,
     name: "Executive Reporting",
-    price: "£95",
+    price: getProductDisplayPrice("executive_reporting"),
     positioning: "When accumulated evidence must become a governed position.",
     trigger: "Use this stage when contradiction is established and the cost of delay or wrong action must be stated clearly.",
     includes: [
@@ -76,7 +77,7 @@ const PATHS: DecisionPath[] = [
   {
     id: 3,
     name: "Strategy Room",
-    price: "£395",
+    price: getProductDisplayPrice("strategy_room"),
     positioning: "When analysis is over and intervention must be sequenced.",
     trigger: "Use this stage when the system has determined that action, ownership, and constraint resolution are now required.",
     includes: [
@@ -739,7 +740,7 @@ export default function DecisionPathsPage() {
                       e.currentTarget.style.borderColor = `${GOLD}40`;
                     }}
                   >
-                    View Executive Reporting &middot; &pound;95
+                    View Executive Reporting &middot; {getProductDisplayPrice("executive_reporting")}
                     <ArrowRight style={{ width: "11px", height: "11px" }} />
                   </Link>
                 </div>
@@ -836,7 +837,7 @@ export default function DecisionPathsPage() {
                   e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
                 }}
               >
-                Strategy Room &middot; &pound;395
+                Strategy Room &middot; {getProductDisplayPrice("strategy_room")}
                 <ArrowRight style={{ width: "11px", height: "11px" }} />
               </Link>
             </div>

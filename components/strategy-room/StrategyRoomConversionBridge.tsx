@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { track } from "@/lib/analytics/track";
+import { getProductAmountGbp } from "@/lib/commercial/catalog";
 
 type StrategyRoomConversionBridgeProps = {
   className?: string;
@@ -23,7 +24,7 @@ const DEFAULT_SIGNALS = [
 
 export default function StrategyRoomConversionBridge({
   className = "mt-16",
-  price = 395,
+  price = getProductAmountGbp("strategy_room"),
   checkoutPriceCode = "strategy_room",
   originPath = "/strategy-room",
   primaryCtaLabel = "Enter execution environment",
@@ -31,6 +32,21 @@ export default function StrategyRoomConversionBridge({
   description = "A governed execution environment for decisions that cannot remain theoretical.",
   signals = DEFAULT_SIGNALS,
 }: StrategyRoomConversionBridgeProps) {
+  const tiers = [
+    {
+      label: "Entry",
+      productCode: checkoutPriceCode,
+      price,
+      description: "One controlled execution environment for the active decision.",
+    },
+    {
+      label: "Active / multi-decision",
+      productCode: "strategy_room_extended",
+      price: getProductAmountGbp("strategy_room_extended"),
+      description: "Execution sequencing across multiple linked decisions.",
+    },
+  ];
+  const [selectedTier, setSelectedTier] = useState(tiers[0]!);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -78,7 +94,7 @@ export default function StrategyRoomConversionBridge({
     }
     const hesitation_ms = Date.now() - bridgeMountTime.current;
     track("strategy_room_checkout_clicked", {
-      price_code: checkoutPriceCode,
+      price_code: selectedTier.productCode,
       has_email: Boolean(email.trim()),
       hesitation_ms,
     });
@@ -89,7 +105,7 @@ export default function StrategyRoomConversionBridge({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        priceCode: checkoutPriceCode,
+        productCode: selectedTier.productCode,
         email,
         originPath,
       }),
@@ -104,7 +120,7 @@ export default function StrategyRoomConversionBridge({
       setLoading(false);
       setMessage("Execution entry could not be prepared. Check the email field and try again.");
       track("checkout_failed", {
-        price_code: checkoutPriceCode,
+        price_code: selectedTier.productCode,
         reason: data?.error || "no_url_returned",
       });
     }
@@ -166,7 +182,23 @@ export default function StrategyRoomConversionBridge({
         </div>
       </div>
 
-      <div className="text-2xl font-semibold mb-2">£{price}</div>
+      <div className="mb-4 grid gap-2 sm:grid-cols-2">
+        {tiers.map((tier) => {
+          const active = tier.productCode === selectedTier.productCode;
+          return (
+            <button
+              key={tier.productCode}
+              type="button"
+              onClick={() => setSelectedTier(tier)}
+              className={`border p-4 text-left ${active ? "border-amber-400/45 bg-amber-400/[0.07]" : "border-white/10 bg-white/[0.02]"}`}
+            >
+              <div className="text-sm font-medium text-white">{tier.label}</div>
+              <div className="mt-1 text-2xl font-semibold">£{tier.price}</div>
+              <div className="mt-2 text-xs leading-5 text-white/50">{tier.description}</div>
+            </button>
+          );
+        })}
+      </div>
       <div className="mb-4 text-sm text-white/50">
         One-time execution entry · No subscription
       </div>

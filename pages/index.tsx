@@ -33,6 +33,7 @@ import {
 
 import Layout from "@/components/Layout";
 import CheckoutButton from "@/components/commercial/CheckoutButton";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import ShortsSignalRail from "@/components/shorts/ShortsSignalRail";
 import { AccuracyMetricsBlock, ObservedOutcomesBlock } from "@/components/proof/PublicProofBlocks";
 
@@ -42,6 +43,13 @@ import { getPublicationCatalogue, getPublicationBySlug } from "@/lib/editorial/c
 import type { PublicationRecord } from "@/lib/editorial/types";
 import type { PublicationItem as _PublicationItemBase } from "@/lib/editorial/server-readers";
 import { HOMEPAGE_SHORT_SIGNALS } from "@/lib/shorts/homepage-signals";
+
+const PRICE_DECISION_EXPOSURE = getProductDisplayPrice("decision_exposure_instrument");
+const PRICE_MANDATE_CLARITY = getProductDisplayPrice("mandate_clarity_framework");
+const PRICE_INTERVENTION_PATH = getProductDisplayPrice("intervention_path_selector");
+const PRICE_OPERATOR_PACK = getProductDisplayPrice("operator_decision_pack");
+const PRICE_EXECUTIVE_REPORTING = getProductDisplayPrice("executive_reporting");
+const PRICE_STRATEGY_ROOM = getProductDisplayPrice("strategy_room");
 
 // Extend the base type with optional fields used by publicationToItem
 type PublicationItem = _PublicationItemBase & {
@@ -2211,7 +2219,7 @@ function HowItWorksLadder() {
       label: "Flagship: Executive Reporting",
       href: "/diagnostics/executive-reporting",
       cta: "View Executive Reporting",
-      effort: "£95 · One-time",
+      effort: `${PRICE_EXECUTIVE_REPORTING} · One-time`,
       explanation: [
         "The governed executive brief.",
         "Uses accumulated diagnostic evidence.",
@@ -2223,7 +2231,7 @@ function HowItWorksLadder() {
       label: "Escalation: Strategy Room",
       href: "/strategy-room",
       cta: "View Strategy Room",
-      effort: "£395",
+      effort: PRICE_STRATEGY_ROOM,
       explanation: [
         "Escalation environment.",
         "Opens only when constitutional evidence warrants governed intervention.",
@@ -2821,7 +2829,7 @@ function HomeDecisionLayer() {
     {
       slug: "decision-exposure-instrument",
       title: "Decision Exposure Instrument",
-      price: "\u00a329",
+      price: PRICE_DECISION_EXPOSURE,
       outcome: "Produces a bounded annual exposure figure and forces a classification before the market does it for you.",
       usedWhen: "Financial consequence is unclear but decision cannot wait.",
       time: "15 min",
@@ -2829,7 +2837,7 @@ function HomeDecisionLayer() {
     {
       slug: "mandate-clarity-framework",
       title: "Mandate Clarity Framework",
-      price: "\u00a349",
+      price: PRICE_MANDATE_CLARITY,
       outcome: "Maps formal, actual, and shadow authority into a scored mandate classification with a corrective path.",
       usedWhen: "Ownership is unclear or contested.",
       time: "20 min",
@@ -2837,7 +2845,7 @@ function HomeDecisionLayer() {
     {
       slug: "intervention-path-selector",
       title: "Intervention Path Selector",
-      price: "\u00a379",
+      price: PRICE_INTERVENTION_PATH,
       outcome: "Scores four intervention paths, resolves conflicts with tie-breaker logic, and produces an ordered action stack.",
       usedWhen: "Action is required but direction is unclear.",
       time: "15\u201325 min",
@@ -2924,7 +2932,7 @@ function HomeDecisionLayer() {
                 Resolve the decision fully. Exposure, authority, and intervention in one pass.
               </div>
             </div>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "14px", letterSpacing: "0.04em", color: GOLD }}>&pound;129</span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "14px", letterSpacing: "0.04em", color: GOLD }}>{PRICE_OPERATOR_PACK}</span>
           </div>
           <div className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(255,255,255,0.30)" }}>
             Using one instrument without the others leaves the decision partially resolved. Partial resolution compounds risk.
@@ -2999,7 +3007,7 @@ function HomeDecisionSection() {
                 color: "var(--ds-accent)",
               }}
             >
-              Flagship · Executive Reporting · £95
+              Flagship · Executive Reporting · {PRICE_EXECUTIVE_REPORTING}
             </div>
             <h3 className="mt-4 font-['Cormorant_Garamond',Georgia,serif] text-[1.5rem] font-light leading-[1.1] ds-text">
               Understand the consequence
@@ -3012,7 +3020,7 @@ function HomeDecisionSection() {
               ]}
             />
             <div className="mt-5 space-y-1.5">
-              {["One-time · £95 · No subscription", "Derived from your specific evidence", "Deterministic logic — no generic output"].map((line) => (
+              {[`One-time · ${PRICE_EXECUTIVE_REPORTING} · No subscription`, "Derived from your specific evidence", "Deterministic logic — no generic output"].map((line) => (
                 <p key={line} className="text-[12px] leading-[1.7] ds-text-muted">{line}</p>
               ))}
             </div>
@@ -3038,7 +3046,7 @@ function HomeDecisionSection() {
                 color: "var(--ds-text-subtle)",
               }}
             >
-              Escalation · Strategy Room · £395
+              Escalation · Strategy Room · {PRICE_STRATEGY_ROOM}
             </div>
             <h3 className="mt-4 font-['Cormorant_Garamond',Georgia,serif] text-[1.5rem] font-light leading-[1.1] ds-text">
               Decide what to do
@@ -3119,7 +3127,7 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
                 }}
               >
                 Executive Reporting
-                <span className="text-[8px] opacity-70">£95</span>
+                <span className="text-[8px] opacity-70">{PRICE_EXECUTIVE_REPORTING}</span>
               </Link>
               <Link
                 href={intelligenceHref}

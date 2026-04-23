@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
 
@@ -138,7 +139,7 @@ const MethodPage: NextPage = () => (
             Enter the system <ArrowRight style={{ width: 11, height: 11 }} />
           </Link>
           <Link href="/diagnostics/executive-reporting" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
-            Executive Reporting &middot; &pound;95
+            Executive Reporting &middot; {getProductDisplayPrice("executive_reporting")}
           </Link>
         </div>
       </div>

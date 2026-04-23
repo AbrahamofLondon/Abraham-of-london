@@ -7,6 +7,7 @@ import { ArrowRight, CheckSquare, Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import CheckoutButton from "@/components/commercial/CheckoutButton";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import {
   trackAssetComplete,
   trackAssetOpen,
@@ -75,7 +76,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
   "decision-exposure-instrument": {
     slug: "decision-exposure-instrument",
     title: "Decision Exposure Instrument",
-    price: "\u00a329",
+    price: getProductDisplayPrice("decision_exposure_instrument"),
     priceNum: 29,
     category: "Worksheet",
     headline: "Know the cost before you carry it.",
@@ -103,7 +104,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       "It clarifies consequence before it is formally priced in Executive Reporting.",
       "If exposure is material, move forward.",
     ],
-    secondaryCta: { label: "Executive Reporting \u00b7 \u00a395", href: "/diagnostics/executive-reporting" },
+    secondaryCta: { label: `Executive Reporting \u00b7 ${getProductDisplayPrice("executive_reporting")}`, href: "/diagnostics/executive-reporting" },
     checkoutCode: "decision-exposure-instrument",
     outcomeLine: "Quantifies the cost of being wrong before the market enforces it",
     usedWhenCondition: "Used when financial consequence is unclear",
@@ -129,14 +130,14 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       state: "STRUCTURAL_CONDITION",
       label: "Condition confirmed. Consequence not yet priced.",
       body: "Use Executive Reporting to price exposure and formalise the recommendation.",
-      cta: "Executive Reporting · £95",
+      cta: `Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`,
       href: "/diagnostics/executive-reporting",
     },
   },
   "mandate-clarity-framework": {
     slug: "mandate-clarity-framework",
     title: "Mandate Clarity Framework",
-    price: "\u00a349",
+    price: getProductDisplayPrice("mandate_clarity_framework"),
     priceNum: 49,
     category: "Framework",
     headline: "Clarity of authority determines the quality of decisions.",
@@ -164,7 +165,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       "If authority is misaligned, Executive Reporting formalises the consequence.",
       "If escalation is required, move to Strategy Room.",
     ],
-    secondaryCta: { label: "Executive Reporting \u00b7 \u00a395", href: "/diagnostics/executive-reporting" },
+    secondaryCta: { label: `Executive Reporting \u00b7 ${getProductDisplayPrice("executive_reporting")}`, href: "/diagnostics/executive-reporting" },
     checkoutCode: "mandate-clarity-framework",
     outcomeLine: "Defines who decides and where authority is breaking",
     usedWhenCondition: "Used when decision ownership is unclear or contested",
@@ -190,14 +191,14 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       state: "STRUCTURAL_CONDITION",
       label: "Condition confirmed. Consequence not yet priced.",
       body: "Use Executive Reporting to price the cost of authority fragmentation.",
-      cta: "Executive Reporting · £95",
+      cta: `Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`,
       href: "/diagnostics/executive-reporting",
     },
   },
   "intervention-path-selector": {
     slug: "intervention-path-selector",
     title: "Intervention Path Selector",
-    price: "\u00a379",
+    price: getProductDisplayPrice("intervention_path_selector"),
     priceNum: 79,
     category: "Toolkit",
     headline: "When action is required, the wrong move makes it worse.",
@@ -225,7 +226,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       "If consequence still needs formal pricing \u2192 Executive Reporting.",
       "If intervention is confirmed \u2192 Strategy Room.",
     ],
-    secondaryCta: { label: "Strategy Room \u00b7 \u00a3395", href: "/strategy-room" },
+    secondaryCta: { label: `Strategy Room \u00b7 ${getProductDisplayPrice("strategy_room")}`, href: "/strategy-room" },
     checkoutCode: "intervention-path-selector",
     outcomeLine: "Selects the intervention path when inaction is no longer viable",
     usedWhenCondition: "Used when action is required but the path is contested",
@@ -251,7 +252,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       state: "HIGH_SEVERITY",
       label: "Intervention likely required.",
       body: "Move to Strategy Room if the selected path requires governed execution.",
-      cta: "Strategy Room · £395",
+      cta: `Strategy Room · ${getProductDisplayPrice("strategy_room")}`,
       href: "/strategy-room",
     },
   },
@@ -855,7 +856,7 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
                 className="mt-2.5 inline-flex items-center gap-2"
                 style={{ ...monoStyle, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}
               >
-                Resolve the decision fully &middot; Operator Pack &pound;129
+                Resolve the decision fully &middot; Operator Pack {getProductDisplayPrice("operator_decision_pack")}
                 <ArrowRight style={{ width: 9, height: 9 }} />
               </CheckoutButton>
             </div>

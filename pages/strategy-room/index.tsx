@@ -39,6 +39,7 @@ import DynamicConsequencePanel from "@/components/strategy-room/DynamicConsequen
 import EscalationTriggerPanel from "@/components/strategy-room/EscalationTriggerPanel";
 import AvoidancePatternNotice from "@/components/strategy-room/AvoidancePatternNotice";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
 import {
   setCommercialAccessCookie,
   verifyCheckoutSessionForProduct,
@@ -1483,13 +1484,13 @@ export default function StrategyRoomPage({
                   Intervention required.
                 </div>
                 <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
-                  &pound;395 &mdash; execution environment
+                  {getProductDisplayPrice("strategy_room")} &mdash; execution environment
                 </div>
               </div>
 
               <div className="mt-6">
                 <StrategyRoomConversionBridge
-                  price={395}
+                  price={getProductAmountGbp("strategy_room")}
                   checkoutPriceCode="strategy_room"
                   originPath="/strategy-room"
                   ctaHref="/strategy-room"

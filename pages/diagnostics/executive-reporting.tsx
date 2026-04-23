@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import ExecutiveReportingPaywall from "@/components/diagnostics/ExecutiveReportingPaywall";
+import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 import { trackExecGateView } from "@/lib/analytics/journey-client";
 
@@ -77,13 +78,13 @@ export default function ExecutiveReportingEntryPage() {
           </div>
 
           <ExecutiveReportingPaywall
-            price={95}
+            price={getProductAmountGbp("executive_reporting")}
             ctaHref="/diagnostics/executive-reporting/run"
             checkoutPriceCode="executive_reporting"
             primaryCtaLabel="Begin Executive Reporting intake"
             secondaryHref="/diagnostics"
             secondaryLabel="Return to diagnostic ladder"
-            eyebrow="Executive Reporting · £95"
+            eyebrow={`Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`}
             title="Where diagnostic evidence becomes a governed position."
             description="The diagnostic ladder accumulates structural evidence. Executive Reporting translates that evidence into consequence: financial exposure, institutional constraint, and the priority decisions that follow."
             sampleLines={[
@@ -188,7 +189,7 @@ export default function ExecutiveReportingEntryPage() {
               Commercial access
             </p>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
-              £95 one-time access. Payment is processed through Stripe and returns directly
+              {getProductDisplayPrice("executive_reporting")} one-time access. Payment is processed through Stripe and returns directly
               to the Executive Reporting intake. Also available through Inner Circle access
               without per-report cost.
             </p>
@@ -208,7 +209,7 @@ export default function ExecutiveReportingEntryPage() {
                 href="/artifacts/global-market-intelligence-report-q1-2026"
                 className="mt-3 inline-flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.22em] text-amber-200/70 transition-all hover:text-amber-200/90"
               >
-                Global Market Intelligence &middot; &pound;59
+                Global Market Intelligence &middot; {getProductDisplayPrice("gmi_q1_2026")}
                 <ArrowRight className="h-2.5 w-2.5" />
               </a>
             </div>

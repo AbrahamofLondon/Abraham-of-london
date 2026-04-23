@@ -9,6 +9,8 @@ import { isHubSpotConfigured } from "./client";
 import { upsertContact } from "./contacts";
 import { createDeal } from "./deals";
 import { logActivity } from "./activities";
+import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
+import { resolveProductIdentity } from "@/lib/commercial/product-identity";
 
 export type HubSpotEvent =
   | "deal_flow_qualified"
@@ -41,6 +43,7 @@ export type HubSpotSyncInput = {
     revenue?: string;
     problem?: string;
     urgency?: string;
+    productCode?: string;
   };
 };
 
@@ -85,19 +88,23 @@ export async function hubspotSync(input: HubSpotSyncInput): Promise<void> {
     }
 
     if (event === "executive_reporting_checkout") {
+      const amount = resolveHubSpotProductAmount(data.productCode);
+      if (amount == null) return;
       await createDeal({
         contactId,
         dealName: `${data.organisation || email} — Executive Reporting`,
-        amount: 95,
+        amount,
         stage: "report_purchased",
       });
     }
 
     if (event === "strategy_room_checkout") {
+      const amount = resolveHubSpotProductAmount(data.productCode);
+      if (amount == null) return;
       await createDeal({
         contactId,
         dealName: `${data.organisation || email} — Strategy Room`,
-        amount: 395,
+        amount,
         stage: "strategy_room",
       });
     }
@@ -139,6 +146,20 @@ function parseRevenueEstimate(revenue?: string): number | undefined {
   return Number.isFinite(num) && num > 0 ? num : undefined;
 }
 
+function resolveHubSpotProductAmount(identifier?: string): number | undefined {
+  if (!identifier) return undefined;
+  const identity = resolveProductIdentity(identifier);
+  if (!identity) return undefined;
+  return getProductAmountGbp(identity.productCode);
+}
+
+function resolveHubSpotProductPrice(identifier?: string): string | undefined {
+  if (!identifier) return undefined;
+  const identity = resolveProductIdentity(identifier);
+  if (!identity) return undefined;
+  return getProductDisplayPrice(identity.productCode);
+}
+
 function buildActivityBody(
   event: HubSpotEvent,
   data: HubSpotSyncInput["data"],
@@ -152,9 +173,9 @@ function buildActivityBody(
     case "diagnostic_completed":
       return `Diagnostic completed: type=${d.diagnosticType || "—"}, verdict=${d.verdict || "—"}, trajectory=${d.trajectory || "—"}`;
     case "executive_reporting_checkout":
-      return `Executive Reporting checkout initiated (£95). Organisation: ${d.organisation || "—"}`;
+      return `Executive Reporting checkout initiated (${resolveHubSpotProductPrice(d.productCode) || "catalog price unavailable"}). Organisation: ${d.organisation || "—"}`;
     case "strategy_room_checkout":
-      return `Strategy Room checkout initiated (£395). Organisation: ${d.organisation || "—"}`;
+      return `Strategy Room checkout initiated (${resolveHubSpotProductPrice(d.productCode) || "catalog price unavailable"}). Organisation: ${d.organisation || "—"}`;
     case "payment_confirmed":
       return `Payment confirmed: £${d.amount ?? "—"}`;
     case "inner_circle_registered":

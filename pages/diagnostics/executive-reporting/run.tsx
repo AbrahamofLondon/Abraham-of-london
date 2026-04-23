@@ -21,6 +21,7 @@ import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerific
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import PredictiveConsequence from "@/components/diagnostics/results/PredictiveConsequence";
 import { projectConsequence } from "@/lib/diagnostics/predictive-consequence";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 import { inferTrajectory, deriveEngagementReadiness, type EngagementReadiness } from "@/lib/diagnostics/prognosis";
 import { buildBasisOfBrief } from "@/lib/positioning/proof-model";
@@ -346,6 +347,12 @@ type PageState = "intake" | "generating" | "result";
 
 type ExecutiveReportingRunPageProps = {
   checkoutConfirmed?: boolean;
+  attribution?: {
+    source: string | null;
+    medium: string | null;
+    campaign: string | null;
+    referrer: string | null;
+  };
 };
 
 const GOLD = "#C9A96E";
@@ -1080,6 +1087,10 @@ function ResultSurface({
   const exposureFormatted = financialExposure?.totalExposureFormatted
     ?? financialExposure?.totalExposureFormatted
     ?? (financialExposure?.totalExposure ? `\u00a3${Math.round(Number(financialExposure.totalExposure)).toLocaleString()}` : null);
+  const projectedCost90 =
+    consequenceProjection.estimatedExposure.quarterly > 0
+      ? `\u00a3${consequenceProjection.estimatedExposure.quarterly.toLocaleString()}`
+      : exposureFormatted;
 
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
@@ -1109,6 +1120,17 @@ function ResultSurface({
             <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", color: rc.text }}>{route}</span>
           </div>
         </div>
+
+        {projectedCost90 && (
+          <div style={{ border: "1px solid rgba(252,165,165,0.32)", backgroundColor: "rgba(252,165,165,0.055)", padding: "1rem 1.25rem", marginTop: "1rem", marginBottom: "1rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.65)" }}>
+              Projected Cost of Inaction (90 days)
+            </span>
+            <div style={{ marginTop: "0.35rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "clamp(1.35rem, 3vw, 2rem)", color: "rgba(252,165,165,0.88)", fontWeight: 700 }}>
+              {projectedCost90}
+            </div>
+          </div>
+        )}
 
         {/* ── BLOCK 2: NAMED CONDITION ── */}
         <div className="py-4">
@@ -1720,6 +1742,7 @@ function ExecutiveReportingIntake({
 
 export default function ExecutiveReportingRunPage({
   checkoutConfirmed = false,
+  attribution,
 }: ExecutiveReportingRunPageProps) {
   const [pageState, setPageState] = React.useState<PageState>("intake");
   const [result, setResult] = React.useState<Extract<ExecutiveReportingResult, { ok: true }> | null>(
@@ -1730,8 +1753,16 @@ export default function ExecutiveReportingRunPage({
 
   React.useEffect(() => {
     trackStageStart("executive");
+    if (attribution?.source) {
+      track("enterprise_attribution_captured", {
+        source: attribution.source,
+        medium: attribution.medium,
+        campaign: attribution.campaign,
+      });
+    }
     track("executive_reporting_intake_started", {
       checkout_confirmed: checkoutConfirmed,
+      attribution_source: attribution?.source ?? "organic",
     });
     if (checkoutConfirmed) {
       track("executive_reporting_checkout_returned_success", {
@@ -1912,7 +1943,7 @@ export default function ExecutiveReportingRunPage({
               <div className="relative z-10 mx-auto max-w-4xl px-6 lg:px-12">
                 <div className="pb-12 pt-28 text-center md:pt-32">
                   <div className="mb-8 flex justify-center">
-                    <Eyebrow>Executive Reporting · £95</Eyebrow>
+                    <Eyebrow>Executive Reporting · {getProductDisplayPrice("executive_reporting")}</Eyebrow>
                   </div>
 
                   <h1
@@ -2082,6 +2113,14 @@ export default function ExecutiveReportingRunPage({
 
 
 export const getServerSideProps: GetServerSideProps<ExecutiveReportingRunPageProps> = async (ctx) => {
+  // Capture UTM attribution
+  const attribution = {
+    source: typeof ctx.query.utm_source === "string" ? ctx.query.utm_source : typeof ctx.query.source === "string" ? ctx.query.source : null,
+    medium: typeof ctx.query.utm_medium === "string" ? ctx.query.utm_medium : null,
+    campaign: typeof ctx.query.utm_campaign === "string" ? ctx.query.utm_campaign : null,
+    referrer: ctx.req.headers.referer ?? null,
+  };
+
   // Resolve identity from session/cookies first, fall back to query params
   let resolvedEmail: string | null = typeof ctx.query.email === "string" ? ctx.query.email : null;
   let resolvedUserId: string | null = typeof ctx.query.subjectId === "string" ? ctx.query.subjectId : null;
@@ -2125,7 +2164,7 @@ export const getServerSideProps: GetServerSideProps<ExecutiveReportingRunPagePro
       );
       if (valid && typeof ctx.query.session_id === "string") {
         setCommercialAccessCookie(ctx, "executive_reporting", ctx.query.session_id);
-        return { props: { checkoutConfirmed: true } };
+        return { props: { checkoutConfirmed: true, attribution } };
       }
     } catch {
       // Fall through to the paywall with a clean state.
@@ -2139,7 +2178,7 @@ export const getServerSideProps: GetServerSideProps<ExecutiveReportingRunPagePro
   });
 
   if (entitlement.granted) {
-    return { props: { checkoutConfirmed: false } };
+    return { props: { checkoutConfirmed: false, attribution } };
   }
 
   return {

@@ -48,6 +48,17 @@ export default function PredictiveConsequence({ data }: { data: ConsequenceProje
         </span>
       </div>
 
+      {data.estimatedExposure.quarterly > 0 && (
+        <div style={{ border: "1px solid rgba(252,165,165,0.28)", backgroundColor: "rgba(252,165,165,0.045)", padding: "0.75rem", marginBottom: "0.75rem" }}>
+          <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(252,165,165,0.68)" }}>
+            Projected Cost of Inaction (90 days)
+          </span>
+          <div style={{ ...mono, fontSize: "18px", color: "rgba(252,165,165,0.88)", marginTop: "0.25rem", fontWeight: 700 }}>
+            £{data.estimatedExposure.quarterly.toLocaleString()}
+          </div>
+        </div>
+      )}
+
       {/* 30/60/90 trajectory */}
       <div className="grid gap-2 md:grid-cols-3 mb-3">
         {[

@@ -6,8 +6,7 @@ export type ProductClass =
   | "executive_reporting"
   | "strategy_room"
   | "decision_instrument"
-  | "gmi"
-  | "diagnostic_report";
+  | "gmi";
 
 export type ValidationEntry = {
   id: string;
@@ -48,11 +47,6 @@ export const PRODUCT_CLASSES: Array<{
     id: "gmi",
     label: "GMI",
     productCodes: ["global-market-intelligence-report-q1-2026"],
-  },
-  {
-    id: "diagnostic_report",
-    label: "Diagnostic Report",
-    productCodes: ["diagnostic_report_basic", "diagnostic_report_pro"],
   },
 ];
 

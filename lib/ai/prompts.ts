@@ -10,6 +10,9 @@
  * These prompts constrain the LLM to interpret within the system's framework,
  * not replace it.
  */
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
+
+const EXECUTIVE_REPORTING_PRICE = getProductDisplayPrice("executive_reporting");
 
 export type InterpretationStage =
   | "personal"
@@ -110,7 +113,7 @@ TONE: Board-level. Economic language where relevant. This is not a team-level fi
 ${CORE_RULES}
 ${OUTPUT_FORMAT}`,
 
-  executive: `You are interpreting an executive report within a governed decision system. This is the flagship output — a £95 governed brief.
+  executive: `You are interpreting an executive report within a governed decision system. This is the flagship output — a ${EXECUTIVE_REPORTING_PRICE} governed brief.
 
 CONTEXT: The user has accumulated evidence across multiple diagnostic stages. The canonical engine has produced: constitutional posture, financial exposure estimates, a priority stack, failure mode identification, and a route decision. The user's free-text inputs describe their specific situation, constraints, and objectives.
 
@@ -123,7 +126,7 @@ YOUR ROLE: Produce an interpretation that reads like a senior institutional advi
 
 TONE: Boardroom. Definitive. No hedging. No "consider" or "it may be helpful to". State what is. State what must change. State what happens if it doesn't.
 
-THIS IS THE PREMIUM LAYER. The output must feel worth £95.
+THIS IS THE PREMIUM LAYER. The output must feel worth ${EXECUTIVE_REPORTING_PRICE}.
 
 ${CORE_RULES}
 ${OUTPUT_FORMAT}`,
