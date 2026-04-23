@@ -3,6 +3,14 @@ import { prisma } from "@/lib/prisma.server";
 import { propagateDecisionChange } from "@/lib/strategy-room/execution-feedback";
 import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
+import {
+  evaluateStateTransition,
+  computeDynamicConsequence,
+  computeDefaultDeadline,
+  detectRepeatedAvoidance,
+  type DecisionAction,
+  type SessionExecutionState,
+} from "@/lib/execution/decision-state-engine";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -96,7 +104,53 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
       decisionObject: packet.decisionObject,
     }).catch(() => {});
 
-    return NextResponse.json({ ok: true, decision: log });
+    // Evaluate system state after decision logged
+    const allDecisions = await prisma.strategyDecisionLog.findMany({
+      where: { sessionId },
+      orderBy: { createdAt: "asc" },
+    });
+    const executionState: SessionExecutionState = {
+      sessionId,
+      systemState: (session.status as any) || "PENDING",
+      actions: allDecisions.map((d) => ({
+        id: d.id,
+        text: d.decision,
+        status: (d.status as any) || "PENDING",
+        deadline: computeDefaultDeadline("near_term"),
+        createdAt: d.createdAt.toISOString(),
+        updatedAt: d.updatedAt.toISOString(),
+        blockReason: d.notes,
+        avoidanceCount: detectRepeatedAvoidance(d.decision, allDecisions.map((dd) => ({
+          id: dd.id, text: dd.decision, status: (dd.status as any) || "PENDING",
+          deadline: "", createdAt: dd.createdAt.toISOString(), updatedAt: dd.updatedAt.toISOString(),
+          avoidanceCount: 0,
+        }))),
+      })),
+      escalationTriggers: [],
+      consequenceScore: 0,
+      lastEscalationCheck: new Date().toISOString(),
+      avoidancePatterns: [],
+      directive: null,
+    };
+    const transition = evaluateStateTransition(executionState);
+    const consequence = computeDynamicConsequence(executionState);
+
+    // Update session status if state changed
+    if (transition.newState !== session.status) {
+      await prisma.strategyRoomExecutionSession.update({
+        where: { id: sessionId },
+        data: { status: transition.newState },
+      }).catch(() => {});
+    }
+
+    return NextResponse.json({
+      ok: true,
+      decision: log,
+      systemState: transition.newState,
+      consequence,
+      directive: transition.directive,
+      avoidancePattern: transition.avoidancePattern,
+    });
   } catch (err) {
     console.error("[decision-log-create]", err);
     return NextResponse.json(
@@ -182,7 +236,49 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       }).catch(() => {});
     }
 
-    return NextResponse.json({ ok: true, decision: log });
+    // Evaluate system state after status change
+    const allDecisions = await prisma.strategyDecisionLog.findMany({
+      where: { sessionId },
+      orderBy: { createdAt: "asc" },
+    });
+    const executionState: SessionExecutionState = {
+      sessionId,
+      systemState: (session?.status as any) || "PENDING",
+      actions: allDecisions.map((d) => ({
+        id: d.id,
+        text: d.decision,
+        status: (d.status as any) || "PENDING",
+        deadline: computeDefaultDeadline("near_term"),
+        createdAt: d.createdAt.toISOString(),
+        updatedAt: d.updatedAt.toISOString(),
+        blockReason: d.notes,
+        avoidanceCount: 0,
+      })),
+      escalationTriggers: [],
+      consequenceScore: 0,
+      lastEscalationCheck: new Date().toISOString(),
+      avoidancePatterns: [],
+      directive: null,
+    };
+    const transition = evaluateStateTransition(executionState);
+    const consequence = computeDynamicConsequence(executionState);
+
+    // Update session status if escalated
+    if (session && transition.newState !== session.status) {
+      await prisma.strategyRoomExecutionSession.update({
+        where: { id: sessionId },
+        data: { status: transition.newState },
+      }).catch(() => {});
+    }
+
+    return NextResponse.json({
+      ok: true,
+      decision: log,
+      systemState: transition.newState,
+      consequence,
+      directive: transition.directive,
+      avoidancePattern: transition.avoidancePattern,
+    });
   } catch (err) {
     console.error("[decision-log-update]", err);
     return NextResponse.json(
