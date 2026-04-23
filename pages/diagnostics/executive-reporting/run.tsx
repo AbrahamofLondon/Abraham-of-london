@@ -23,6 +23,9 @@ import PredictiveConsequence from "@/components/diagnostics/results/PredictiveCo
 import AITerrainExposure from "@/components/diagnostics/results/AITerrainExposure";
 import DecisionTerrainStatus, { deriveTerrainState } from "@/components/diagnostics/results/DecisionTerrainStatus";
 import { assessAITerrain } from "@/lib/diagnostics/ai-terrain";
+import { assessAdvantageTerrain } from "@/lib/diagnostics/advantage-terrain";
+import CompetitivePositionSignal from "@/components/diagnostics/results/CompetitivePosition";
+import AdvantagePathBlock from "@/components/strategy-room/AdvantagePathBlock";
 import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
 import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
 import { projectConsequence } from "@/lib/diagnostics/predictive-consequence";
@@ -1076,6 +1079,18 @@ function ResultSurface({
       safeString(intake?.currentConstraint ?? "").toLowerCase().includes("implement"),
   }), [intake, constitution, graphContradictions]);
 
+  // Advantage terrain assessment
+  const advantagePath = React.useMemo(() => assessAdvantageTerrain({
+    velocityGapPercent: aiTerrain.decisionVelocity.gapPercent,
+    aiClassification: aiTerrain.classification,
+    contradictionCount: graphContradictions.length,
+    resolvedContradictionCount: 0,
+    sector: safeString(intake?.sector, "professional_services"),
+    competitorAIAdoption: aiTerrain.decisionVelocity.gapPercent > 30,
+    activeDomains: dominantDomains.map(String),
+    revenueBand: safeString(constitution?.revenueBand ?? intake?.revenueBand, ""),
+  }), [aiTerrain, graphContradictions, intake, constitution, dominantDomains]);
+
   const { interpretation, loading: interpretLoading } = useInterpretation({
     canonicalResult: canonical?.sections ?? {},
     userInputs: {
@@ -1274,7 +1289,8 @@ function ResultSurface({
           </p>
         </div>
 
-        {/* ── BLOCK 7b: DECISION TERRAIN STATUS ── */}
+        {/* ── BLOCK 7b: COMPETITIVE POSITION ── */}
+        <CompetitivePositionSignal position={advantagePath.competitivePosition} />
         <DecisionTerrainStatus
           state={deriveTerrainState(aiTerrain.decisionVelocity.gapPercent)}
           velocityGapPercent={aiTerrain.decisionVelocity.gapPercent}
@@ -1283,6 +1299,9 @@ function ResultSurface({
 
         {/* ── BLOCK 7c: COST OF NON-DECISION (AI-ADJUSTED) ── */}
         <PredictiveConsequence data={consequenceProjection} />
+
+        {/* ── BLOCK 7d: ADVANTAGE PATH ── */}
+        <AdvantagePathBlock data={advantagePath} />
 
         {/* ── BLOCK 8: FORCED LADDER PROGRESSION ── */}
         {route === "STRATEGY" && (

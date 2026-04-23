@@ -39,7 +39,10 @@ import DynamicConsequencePanel from "@/components/strategy-room/DynamicConsequen
 import EscalationTriggerPanel from "@/components/strategy-room/EscalationTriggerPanel";
 import AvoidancePatternNotice from "@/components/strategy-room/AvoidancePatternNotice";
 import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
+import AdvantagePathBlock from "@/components/strategy-room/AdvantagePathBlock";
+import CompetitivePositionSignal from "@/components/diagnostics/results/CompetitivePosition";
 import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
+import { assessAdvantageTerrain } from "@/lib/diagnostics/advantage-terrain";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
 import {
@@ -1891,6 +1894,26 @@ export default function StrategyRoomPage({
             <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
               <EscalationTriggerPanel triggers={enforcement?.escalationTriggers ?? []} />
             </div>
+
+            {/* Advantage path — where the organisation can move ahead */}
+            {(() => {
+              const adv = assessAdvantageTerrain({
+                velocityGapPercent: 40,
+                aiClassification: "AI_LAG",
+                contradictionCount: enforcement?.escalationTriggers?.length ?? 0,
+                resolvedContradictionCount: decisionLog.filter((d: any) => d.status === "executed").length,
+                sector: "professional_services",
+                competitorAIAdoption: true,
+                activeDomains: [],
+                revenueBand: "",
+              });
+              return (
+                <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+                  <CompetitivePositionSignal position={adv.competitivePosition} />
+                  <AdvantagePathBlock data={adv} />
+                </div>
+              );
+            })()}
 
             {/* Retainer gate — appears only when condition qualifies */}
             {(() => {
