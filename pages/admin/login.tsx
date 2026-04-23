@@ -73,6 +73,20 @@ const AdminLoginPage: NextPage = () => {
     await signIn("google", { callbackUrl: returnTo });
   };
 
+  const handleMagicLink = async () => {
+    const normalized = email.trim().toLowerCase();
+    if (!normalized) { setError("Enter your admin email first."); return; }
+    if (!ADMIN_EMAILS.has(normalized)) { setError("Administrative access is restricted."); return; }
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await signIn("email", { email: normalized, redirect: false, callbackUrl: returnTo });
+      if (result?.error) { setError("Magic link could not be sent. Check email provider config."); setLoading(false); return; }
+      setSent(true);
+    } catch (err: any) { setError(err?.message || "Failed to send magic link."); }
+    finally { setLoading(false); }
+  };
+
   const handleCredentialsLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -197,6 +211,31 @@ const AdminLoginPage: NextPage = () => {
                   )}
                 </span>
               </button>
+
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-white/10" />
+                <span className="text-[8px] font-mono uppercase tracking-wider text-white/20">or email</span>
+                <div className="h-px flex-1 bg-white/10" />
+              </div>
+
+              {/* Magic link */}
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin email"
+                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-amber-500/50 focus:outline-none transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={handleMagicLink}
+                  disabled={loading || sent}
+                  className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-[9px] uppercase tracking-[0.15em] text-white/50 transition-all hover:border-amber-500/30 hover:text-white/80 disabled:opacity-50"
+                >
+                  {sent ? "Sent" : "Send link"}
+                </button>
+              </div>
 
               <div className="flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/10" />
