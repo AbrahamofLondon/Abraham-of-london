@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma.server";
 
 export function emailOnlyAdapter(): Adapter {
   return {
-    async createUser(user) {
+    async createUser(user: any) {
       const created = await prisma.user.upsert({
         where: { email: user.email },
         create: { email: user.email, name: user.name ?? null },
@@ -43,7 +43,7 @@ export function emailOnlyAdapter(): Adapter {
       });
       return { ...updated, email: updated.email ?? "", emailVerified: updated.emailVerified };
     },
-    async linkAccount(account) {
+    async linkAccount(account: any) {
       await prisma.account.create({
         data: {
           userId: account.userId,

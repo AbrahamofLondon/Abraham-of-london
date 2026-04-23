@@ -87,50 +87,6 @@ const AdminLoginPage: NextPage = () => {
     finally { setLoading(false); }
   };
 
-  const handleCredentialsLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const normalized = email.trim().toLowerCase();
-    if (!normalized) {
-      setError("Administrative email is required.");
-      setLoading(false);
-      return;
-    }
-
-    if (!ADMIN_EMAILS.has(normalized)) {
-      setError("Administrative access is restricted.");
-      setLoading(false);
-      return;
-    }
-
-    const passwordField = (e.target as HTMLFormElement).elements.namedItem("password") as HTMLInputElement | null;
-    const password = passwordField?.value ?? "";
-
-    try {
-      const result = await signIn("credentials", {
-        email: normalized,
-        password,
-        redirect: false,
-        callbackUrl: returnTo,
-      });
-
-      if (result?.error) {
-        setError("Authentication failed. Check credentials.");
-        setLoading(false);
-        return;
-      }
-
-      if (result?.ok) {
-        void router.push(returnTo);
-      }
-    } catch (err: any) {
-      setError(err?.message || "Authentication failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (!mounted) {
     return (
@@ -189,94 +145,69 @@ const AdminLoginPage: NextPage = () => {
               </div>
             </div>
 
-            {/* Primary: Google OAuth */}
+            {/* Primary: Email magic link */}
             <div className="space-y-4">
+              <div className="space-y-3">
+                <label className="block text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-500">
+                  Administrative Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setError(null); }}
+                  placeholder="you@abrahamoflondon.org"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-5 py-4 text-sm text-white placeholder:text-white/20 focus:border-amber-500/50 focus:outline-none transition-colors"
+                  autoComplete="email"
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleMagicLink(); } }}
+                />
+              </div>
+
+              {/* Error */}
+              {error && (
+                <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+                  <p className="text-xs text-red-400">{error}</p>
+                </div>
+              )}
+
               <button
                 type="button"
-                onClick={handleGoogleLogin}
-                disabled={loading}
+                onClick={handleMagicLink}
+                disabled={loading || sent}
                 className="group relative w-full overflow-hidden rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 font-mono text-[10px] font-black uppercase tracking-[0.2em] text-black transition-all hover:shadow-lg disabled:opacity-50"
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
                   {loading ? (
                     <>
                       <div className="h-3 w-3 animate-spin rounded-full border-2 border-black border-t-transparent" />
-                      Authenticating…
+                      Sending…
                     </>
+                  ) : sent ? (
+                    <>Sign-in link sent</>
                   ) : (
                     <>
-                      Sign in with Google
+                      Send sign-in link
                       <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                     </>
                   )}
                 </span>
               </button>
 
+              {/* Google OAuth fallback */}
               <div className="flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/10" />
-                <span className="text-[8px] font-mono uppercase tracking-wider text-white/20">or email</span>
+                <span className="text-[8px] font-mono uppercase tracking-wider text-white/20">or</span>
                 <div className="h-px flex-1 bg-white/10" />
               </div>
 
-              {/* Magic link */}
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin email"
-                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-amber-500/50 focus:outline-none transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={handleMagicLink}
-                  disabled={loading || sent}
-                  className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-[9px] uppercase tracking-[0.15em] text-white/50 transition-all hover:border-amber-500/30 hover:text-white/80 disabled:opacity-50"
-                >
-                  {sent ? "Sent" : "Send link"}
-                </button>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-white/10" />
-                <span className="text-[8px] font-mono uppercase tracking-wider text-white/20">or credentials</span>
-                <div className="h-px flex-1 bg-white/10" />
-              </div>
-
-              {/* Fallback: Credentials */}
-              <form onSubmit={handleCredentialsLogin} className="space-y-3">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@abrahamoflondon.org"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-amber-500/50 focus:outline-none transition-colors"
-                  autoComplete="email"
-                />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-amber-500/50 focus:outline-none transition-colors"
-                  autoComplete="current-password"
-                />
-
-                {/* Error */}
-                {error && (
-                  <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-                    <p className="text-xs text-red-400">{error}</p>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white/50 transition-all hover:border-amber-500/30 hover:text-white/80 disabled:opacity-50"
-                >
-                  {loading ? "Authenticating…" : "Sign in with credentials"}
-                </button>
-              </form>
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white/50 transition-all hover:border-amber-500/30 hover:text-white/80 disabled:opacity-50"
+              >
+                Sign in with Google
+              </button>
             </div>
 
             {/* Legacy magic-link reference removed — use Google or credentials */}
