@@ -2158,10 +2158,11 @@ model DiagnosticDecisionObject {
   affectedDomain     String?
   normalized         Json?
   confidence         Float    @default(0.5)
-  aiExposureLevel    String   @default("MODERATE") // LOW | MODERATE | HIGH | CRITICAL
-  aiDisplacementRisk Boolean  @default(false)
-  decisionVelocityScore Int   @default(50)
-  createdAt          DateTime @default(now())
+  aiExposureLevel       String   @default("MODERATE") // LOW | MODERATE | HIGH | CRITICAL
+  aiDisplacementRisk    Boolean  @default(false)
+  decisionVelocityScore Int      @default(50)
+  forwardTerrainState   String   @default("STABLE") // STABLE | SHIFTING | ACCELERATING | DISRUPTING
+  createdAt             DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   journey            DiagnosticJourney? @relation(fields: [journeyId], references: [id], onDelete: Cascade)
@@ -2353,8 +2354,10 @@ model EnforcementCycle {
   actionsTaken          Json
   contradictionsUpdated Json
   outcomeDelta          Float?
-  aiDriftDelta          Float  @default(0)
-  aiStatusSignal        String @default("PARITY HOLD") // VELOCITY LOSS | PARITY HOLD | ACCELERATION GAIN
+  aiDriftDelta          Float    @default(0)
+  aiStatusSignal        String   @default("PARITY HOLD") // VELOCITY LOSS | PARITY HOLD | ACCELERATION GAIN
+  advantageDelta         Float    @default(0)
+  advantageSignal        String   @default("PARITY") // DEFENSIVE | PARITY | ADVANCING | LEADING
   createdAt             DateTime @default(now())
 
   retainedDecision      RetainedDecision @relation(fields: [retainedDecisionId], references: [id], onDelete: Cascade)
@@ -2432,6 +2435,8 @@ model OutcomeVerificationRecord {
   effectivenessScore        Float
   decisionVelocityDelta     Float    @default(0)
   aiCapabilityShift         Float    @default(0)
+  competitivePositionShift  Float    @default(0)
+  timeToAdvantage           Float    @default(0)   // estimated days to competitive advantage
   unresolvedContradictions  Json?
   payload                   Json
   evidenceNodes             Json?

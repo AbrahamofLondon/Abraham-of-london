@@ -40,7 +40,9 @@ import EscalationTriggerPanel from "@/components/strategy-room/EscalationTrigger
 import AvoidancePatternNotice from "@/components/strategy-room/AvoidancePatternNotice";
 import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
 import AdvantagePathBlock from "@/components/strategy-room/AdvantagePathBlock";
+import AIInterventionSuggestions from "@/components/strategy-room/AIInterventionSuggestions";
 import CompetitivePositionSignal from "@/components/diagnostics/results/CompetitivePosition";
+import { suggestInterventions } from "@/lib/diagnostics/ai-interventions";
 import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
 import { assessAdvantageTerrain } from "@/lib/diagnostics/advantage-terrain";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
@@ -1911,6 +1913,14 @@ export default function StrategyRoomPage({
                 <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
                   <CompetitivePositionSignal position={adv.competitivePosition} />
                   <AdvantagePathBlock data={adv} />
+                  <AIInterventionSuggestions suggestions={suggestInterventions({
+                    aiExposureLevel: "HIGH",
+                    forwardTerrainState: "SHIFTING",
+                    contradictionCount: enforcement?.escalationTriggers?.length ?? 0,
+                    velocityGapPercent: 40,
+                    hasMultiStakeholder: false,
+                    competitivePosition: adv.competitivePosition,
+                  })} />
                 </div>
               );
             })()}
