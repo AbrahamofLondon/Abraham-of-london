@@ -101,9 +101,9 @@ const ENGAGEMENTS: Engagement[] = [
     bullets: ["Pressure, drift, and misalignment surfaced", "Fit established before escalation", "Correction priority clarified"],
   },
   {
-    label: "Engagement", title: "Strategy Room",
-    desc:  "A controlled decision environment for founders, boards, and institutions facing high-consequence choices.",
-    href:  "/consulting/strategy-room", tier: "private", icon: ShieldCheck,
+    label: "Engagement", title: "Private Decision Environment",
+    desc:  "A governed advisory session for founders, boards, and institutions where the system has identified a condition requiring direct counsel.",
+    href:  "/contact?context=private-decision", tier: "private", icon: ShieldCheck,
     bullets: ["Constraint-aware options + explicit trade-offs", "Artifacts: memo, matrix, cadence, controls", "Designed for irreversible decisions"],
   },
   {
@@ -298,15 +298,15 @@ const ConsultingPage: NextPage = () => {
                     }}
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.90, delay: 0.18 }}
                   >
-                    For founders, boards, and institutions facing decisions that carry
-                    operational, financial, and reputational weight. This is not general advice.
-                    It is structured enforcement applied to real decisions.
+                    For founders, boards, and institutions where the structured system
+                    has identified the condition but the decision requires direct human counsel.
+                    This is not the system. It is the layer above it.
                   </motion.p>
 
                   <motion.div className="flex flex-wrap gap-3 mt-10"
                     initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.28 }}
                   >
-                    <Link href="/consulting/strategy-room"
+                    <Link href="/contact?context=advisory"
                       className="group inline-flex items-center gap-3 transition-all duration-300"
                       style={{
                         padding: "14px 28px",
@@ -320,7 +320,7 @@ const ConsultingPage: NextPage = () => {
                       onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,1)"}
                       onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.96)"}
                     >
-                      Enter strategy room
+                      Request advisory engagement
                       <ArrowRight style={{ width: "13px", height: "13px" }} />
                     </Link>
 
@@ -1041,7 +1041,7 @@ const ConsultingPage: NextPage = () => {
                 letterSpacing: "-0.025em",
                 color: "rgba(255,255,255,0.90)",
               }}>
-                When the decision matters, structure matters.
+                When the system is insufficient, counsel begins.
               </h2>
 
               <p style={{
@@ -1053,8 +1053,8 @@ const ConsultingPage: NextPage = () => {
                 color: "rgba(255,255,255,0.38)",
                 maxWidth: "44ch",
               }}>
-                Engage for diagnostic clarity, a structured decision environment,
-                or ongoing strategic counsel.
+                Advisory begins where the system's structured products end.
+                The evidence carries forward. The counsel is direct.
               </p>
 
               <div className="flex flex-col justify-center gap-3 mt-10 sm:flex-row">
@@ -1076,7 +1076,7 @@ const ConsultingPage: NextPage = () => {
                   <ArrowRight style={{ width: "12px", height: "12px" }} />
                 </Link>
 
-                <Link href="/consulting/strategy-room"
+                <Link href="/contact?context=advisory"
                   className="group inline-flex items-center justify-center gap-3 transition-all duration-300"
                   style={{
                     padding: "14px 32px",
@@ -1090,7 +1090,7 @@ const ConsultingPage: NextPage = () => {
                   onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,1)"}
                   onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.96)"}
                 >
-                  Enter strategy room
+                  Request advisory engagement
                   <ArrowRight style={{ width: "12px", height: "12px" }} />
                 </Link>
               </div>
