@@ -1,9 +1,14 @@
 import * as React from "react";
 
-// Dynamic import to avoid "react-dom/server" being statically imported in App Router
-async function renderToHtml(element: React.ReactElement): Promise<string> {
-  const { renderToStaticMarkup } = await import("react-dom/server");
-  return renderToStaticMarkup(element);
+// Lazy-loaded to avoid static import of react-dom/server in App Router.
+// The function remains sync because callers return TemplateResult synchronously.
+let _renderToStaticMarkup: ((element: React.ReactElement) => string) | null = null;
+function getRenderer(): (element: React.ReactElement) => string {
+  if (!_renderToStaticMarkup) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    _renderToStaticMarkup = require("react-dom/server").renderToStaticMarkup;
+  }
+  return _renderToStaticMarkup!;
 }
 
 import { siteConfig } from "@/config/site";
@@ -21,9 +26,8 @@ type TemplateResult = {
 
 type Builder = (data: Record<string, any>) => TemplateResult;
 
-async function renderReactEmail(element: React.ReactElement): Promise<string> {
-  const html = await renderToHtml(element);
-  return `<!DOCTYPE html>${html}`;
+function renderReactEmail(element: React.ReactElement): string {
+  return `<!DOCTYPE html>${getRenderer()(element)}`;
 }
 
 function escapeHtml(input: unknown): string {
