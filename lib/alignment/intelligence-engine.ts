@@ -74,9 +74,13 @@ export function normalizePurposeResponses(
     let answer: DualAxisAnswer;
 
     if (typeof raw === "boolean") {
+      // Boolean true/false doesn't carry certainty information.
+      // Use moderate certainty (5) rather than assuming high certainty (8).
+      // True = somewhat resonant, moderately certain.
+      // False = low resonance, slightly more certain (they know it doesn't fit).
       answer = raw
-        ? { resonance: 8, certainty: 8 }
-        : { resonance: 2, certainty: 8 };
+        ? { resonance: 7, certainty: 5 }
+        : { resonance: 3, certainty: 6 };
     } else if (raw && typeof raw === "object") {
       answer = {
         resonance: clampAxis(raw.resonance),

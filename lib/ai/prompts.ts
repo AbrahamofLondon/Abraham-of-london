@@ -152,16 +152,27 @@ export function buildUserMessage(input: {
   parts.push("=== CANONICAL ENGINE OUTPUT ===");
   parts.push(JSON.stringify(input.canonicalResult, null, 2));
 
-  parts.push("\n=== USER INPUTS (raw, unprocessed) ===");
-  if (input.userInputs.problemStatement) parts.push(`Problem Statement: ${input.userInputs.problemStatement}`);
-  if (input.userInputs.symptoms) parts.push(`Symptoms: ${input.userInputs.symptoms}`);
-  if (input.userInputs.constraints) parts.push(`Constraints: ${input.userInputs.constraints}`);
-  if (input.userInputs.objective) parts.push(`Objective: ${input.userInputs.objective}`);
+  // Sanitize user inputs to prevent prompt injection.
+  // Strip control characters, limit length, escape instruction-like patterns.
+  const sanitize = (text: string): string =>
+    text
+      .slice(0, 2000)
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "") // strip control chars
+      .replace(/^(ignore|disregard|forget|override|system:|instruction:)/gim, "[FILTERED] $1"); // neuter injection attempts
 
-  // Include any additional user fields
+  const KNOWN_FIELDS = ["problemStatement", "symptoms", "constraints", "objective"];
+
+  parts.push("\n=== USER INPUTS (sanitized) ===");
+  if (input.userInputs.problemStatement) parts.push(`Problem Statement: ${sanitize(input.userInputs.problemStatement)}`);
+  if (input.userInputs.symptoms) parts.push(`Symptoms: ${sanitize(input.userInputs.symptoms)}`);
+  if (input.userInputs.constraints) parts.push(`Constraints: ${sanitize(input.userInputs.constraints)}`);
+  if (input.userInputs.objective) parts.push(`Objective: ${sanitize(input.userInputs.objective)}`);
+
+  // Include additional user fields — sanitized, only known safe keys
   for (const [key, value] of Object.entries(input.userInputs)) {
-    if (!["problemStatement", "symptoms", "constraints", "objective"].includes(key) && typeof value === "string" && value.trim()) {
-      parts.push(`${key}: ${value}`);
+    if (!KNOWN_FIELDS.includes(key) && typeof value === "string" && value.trim()) {
+      const safeKey = key.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 50);
+      parts.push(`${safeKey}: ${sanitize(value)}`);
     }
   }
 

@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { sendEmail } from "@/lib/email/core/sendEmail";
 
 interface VerifyResponseBody {
   ok: boolean;
@@ -12,40 +13,31 @@ const ADMIN_NOTIFICATION_RECIPIENTS = [
   "abrahamadaramola@outlook.com",
 ];
 
-async function sendVerificationNotification(email: string): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (!apiKey) {
-    console.warn("[VERIFY_NEWSLETTER] RESEND_API_KEY missing; admin notification skipped.");
-    return;
-  }
-
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Abraham of London <info@abrahamoflondon.org>",
-        to: ADMIN_NOTIFICATION_RECIPIENTS,
-        reply_to: email,
-        subject: "New Verified Newsletter Subscriber",
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #2c5530;">New Verified Subscriber</h2>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Verified At:</strong> ${new Date().toISOString()}</p>
-            <p style="color: #2c5530; font-weight: bold;">
-              This subscriber has successfully verified their email and is now fully subscribed.
-            </p>
-          </div>
-        `,
-      }),
-    });
-  } catch (error) {
-    console.error("[VERIFY_NEWSLETTER] Failed to send notification:", error);
-  }
+async function sendVerificationNotification(email: string) {
+  return sendEmail({
+    type: "SYSTEM",
+    to: ADMIN_NOTIFICATION_RECIPIENTS,
+    replyTo: email,
+    subject: "New Verified Newsletter Subscriber",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c5530;">New Verified Subscriber</h2>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Verified At:</strong> ${new Date().toISOString()}</p>
+        <p style="color: #2c5530; font-weight: bold;">
+          This subscriber has successfully verified their email and is now fully subscribed.
+        </p>
+      </div>
+    `,
+    text: [
+      "New Verified Newsletter Subscriber",
+      `Email: ${email}`,
+      `Verified At: ${new Date().toISOString()}`,
+    ].join("\n"),
+    meta: {
+      source: "newsletter:verified-notify",
+    },
+  });
 }
 
 export default async function handler(
@@ -90,7 +82,14 @@ export default async function handler(
       });
     }
 
-    await sendVerificationNotification(email.trim().toLowerCase());
+    const notifyResult = await sendVerificationNotification(email.trim().toLowerCase());
+    if (!notifyResult.ok) {
+      return res.status(502).json({
+        ok: false,
+        message: "Verification succeeded, but notification delivery failed.",
+        error: notifyResult.error || "EMAIL_SEND_FAILED",
+      });
+    }
 
     return res.status(200).json({
       ok: true,

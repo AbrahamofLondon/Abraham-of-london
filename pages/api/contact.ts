@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Resend } from "resend";
 
 import { withSecurity } from "@/lib/apiGuard";
+import { sendEmail } from "@/lib/email/core/sendEmail";
 import { hubspotSync } from "@/lib/hubspot/sync";
 import {
   rateLimit,
@@ -11,8 +11,6 @@ import {
   RATE_LIMIT_CONFIGS,
 } from "@/lib/server/rateLimit";
 import { notifyDiscord } from "@/lib/notifications/discord";
-import TeaserEmail from "@/components/emails/TeaserEmail";
-
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   process.env.SITE_URL?.trim() ||
@@ -39,6 +37,35 @@ const ContactSchema = z.object({
   botField: z.string().optional(),
 });
 
+async function syncResendAudienceContact(args: {
+  email: string;
+  name: string;
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const audienceId = process.env.RESEND_AUDIENCE_ID?.trim();
+  if (!apiKey || !audienceId) return;
+
+  const [firstName, ...rest] = args.name.split(" ");
+  const response = await fetch(`https://api.resend.com/audiences/${encodeURIComponent(audienceId)}/contacts`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: args.email,
+      firstName: firstName || undefined,
+      lastName: rest.join(" ") || undefined,
+      unsubscribed: false,
+    }),
+  });
+
+  if (!response.ok && response.status !== 409) {
+    const body = await response.text().catch(() => "");
+    throw new Error(`RESEND_CONTACT_SYNC_FAILED:${response.status}:${body}`);
+  }
+}
+
 function escapeHtml(input: unknown): string {
   return String(input ?? "")
     .replace(/&/g, "&amp;")
@@ -52,10 +79,6 @@ function getRateLimitExceeded(result: unknown): boolean {
   if (typeof rl.ok === "boolean") return !rl.ok;
   if (typeof rl.allowed === "boolean") return !rl.allowed;
   return false;
-}
-
-function getResendClient(): Resend {
-  return new Resend(process.env.RESEND_API_KEY?.trim() || "");
 }
 
 async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
@@ -77,7 +100,6 @@ async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
-    const resend = getResendClient();
     const parsed = ContactSchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -107,6 +129,7 @@ async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
     const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
 
     const tasks: Array<Promise<unknown>> = [];
+    const emailTasks: Array<Promise<{ ok: boolean; provider: string; error?: string }>> = [];
 
     const isHighValue =
       enquiryType === "Inner Circle" || enquiryType === "Briefing";
@@ -142,70 +165,90 @@ async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
 
     if (newsletterOptIn && process.env.RESEND_AUDIENCE_ID?.trim()) {
       tasks.push(
-        resend.contacts.create({
-          email,
-          firstName: name.split(" ")[0] || undefined,
-          lastName: name.split(" ").slice(1).join(" ") || undefined,
-          unsubscribed: false,
-          audienceId: process.env.RESEND_AUDIENCE_ID.trim(),
-        }),
+        syncResendAudienceContact({ email, name }),
       );
     }
 
-    tasks.push(
-      resend.emails.send({
-        from: MAIL_FROM,
+    const internalEmailTask = sendEmail({
+        type: "CONTACT",
         to: CONTACT_RECEIVERS,
-        replyTo: email,
         subject: `[STRATEGIC BRIEF] ${enquiryType.toUpperCase()} - ${name}`,
-        html: `
-          <div style="font-family: Georgia, serif; padding: 40px; background: #000; color: #fff; border: 1px solid #333;">
-            <h2 style="color: #d4af37; letter-spacing: 2px;">ENGAGEMENT BRIEF</h2>
-            <hr style="border: 0; border-top: 1px solid #222; margin: 20px 0;" />
-            <p><strong>PRINCIPAL:</strong> ${safeName}</p>
-            <p><strong>EMAIL:</strong> ${safeEmail}</p>
-            <p><strong>NATURE:</strong> ${safeEnquiryType}</p>
-            <p><strong>TEASER REQUESTED:</strong> ${teaserOptIn ? "YES" : "NO"}</p>
-            <p><strong>NEWSLETTER OPT-IN:</strong> ${newsletterOptIn ? "YES" : "NO"}</p>
-            <div style="margin-top: 30px; border-left: 3px solid #d4af37; padding-left: 20px; font-style: italic; color: #ccc;">
-              ${safeMessage}
-            </div>
-          </div>
-        `,
-      }),
-    );
+        template: {
+          name: "contact-internal",
+          data: {
+            name: safeName,
+            email: safeEmail,
+            message,
+            subject: enquiryType,
+            teaserOptIn,
+            newsletterOptIn,
+            siteUrl: SITE_URL,
+            submittedAt: new Date().toISOString(),
+            userAgentSnippet: String(req.headers["user-agent"] || ""),
+          },
+        },
+        replyTo: email,
+        from: MAIL_FROM,
+        meta: {
+          source: "contact-form:internal",
+        },
+      });
+    tasks.push(internalEmailTask);
+    emailTasks.push(internalEmailTask);
 
     if (teaserOptIn) {
-      tasks.push(
-        resend.emails.send({
-          from: MAIL_FROM,
+      const teaserEmailTask = sendEmail({
+          type: "CONTACT",
           to: [email],
           bcc: ["info@abrahamoflondon.org"],
           subject: "Fathering Without Fear: The First Briefing",
-          react: TeaserEmail({
-            name: name.split(" ")[0] || "Reader",
-            siteUrl: SITE_URL,
-          }),
-        }),
-      );
+          template: {
+            name: "contact-teaser",
+            data: {
+              name: name.split(" ")[0] || "Reader",
+              siteUrl: SITE_URL,
+            },
+          },
+          from: MAIL_FROM,
+          meta: {
+            source: "contact-form:teaser",
+          },
+        });
+      tasks.push(teaserEmailTask);
+      emailTasks.push(teaserEmailTask);
     }
 
     const results = await Promise.allSettled(tasks);
     const mailAudit = results.map((result, i) => ({
       index: i,
       ok: result.status === "fulfilled",
-      provider: "resend",
+      provider: result.status === "fulfilled" && (result.value as any)?.provider
+        ? (result.value as any).provider
+        : "resend",
       error: result.status === "rejected"
         ? (result.reason instanceof Error ? result.reason.message : String(result.reason))
+        : result.status === "fulfilled" && !(result.value as any)?.ok
+        ? String((result.value as any)?.error || "EMAIL_SEND_FAILED")
         : undefined,
     }));
 
     results.forEach((result, i) => {
-      if (result.status === "rejected") {
-        console.error(`[CONTACT_TASK_${i}_FAILED]`, result.reason);
+      if (result.status === "rejected" || ("value" in result && (result.value as any)?.ok === false)) {
+        console.error(`[CONTACT_TASK_${i}_FAILED]`, result);
       }
     });
     console.info("[CONTACT_EMAIL_AUDIT]", mailAudit);
+
+    const emailResults = await Promise.allSettled(emailTasks);
+    const failedMail = emailResults.find(
+      (entry) => entry.status === "rejected" || (entry.status === "fulfilled" && !entry.value.ok),
+    );
+    if (failedMail) {
+      return res.status(502).json({
+        ok: false,
+        message: "Email delivery failed. Please try again shortly.",
+      });
+    }
 
     // HubSpot sync — fire and forget
     hubspotSync({

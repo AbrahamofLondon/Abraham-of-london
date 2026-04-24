@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { resend } from "@/lib/resend"; // Assuming Resend for email
+import { sendEmail } from "@/lib/email/core/sendEmail";
 
 export async function nudgeIncompleteParticipants(campaignId: string) {
   const participants = await db.campaignParticipant.findMany({
@@ -13,13 +13,20 @@ export async function nudgeIncompleteParticipants(campaignId: string) {
   });
 
   for (const participant of participants) {
-    // Send email logic...
-    await resend.emails.send({
-      from: 'Sovereign Intelligence <intelligence@yourdomain.com>',
+    const emailResult = await sendEmail({
+      type: "ENTERPRISE",
       to: participant.email,
+      from: "Sovereign Intelligence <intelligence@yourdomain.com>",
       subject: `Action Required: ${participant.campaign.title}`,
-      html: `<p>Your participation in the strategic alignment audit is pending. Access your terminal here...</p>`
+      html: `<p>Your participation in the strategic alignment audit is pending. Access your terminal here...</p>`,
+      text: `Your participation in the strategic alignment audit is pending.`,
+      meta: {
+        source: "alignment-campaign-actions:nudge",
+      },
     });
+    if (!emailResult.ok) {
+      throw new Error(emailResult.error || "EMAIL_SEND_FAILED");
+    }
 
     // Increment reminder count
     await db.campaignParticipant.update({

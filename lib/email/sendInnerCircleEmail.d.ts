@@ -9,14 +9,19 @@ export type InnerCircleEmailPayload = {
   };
 };
 
+export type InnerCircleEmailSendResult = {
+  ok: boolean;
+  provider: "resend";
+  error?: string;
+};
+
 export function sendInnerCircleEmail(
   payload: InnerCircleEmailPayload
-): Promise<void>;
+): Promise<InnerCircleEmailSendResult>;
 
 export function sendInnerCircleEmail(
   email: string,
   key: string,
   name?: string
-): Promise<void>;
-
+): Promise<InnerCircleEmailSendResult>;
 

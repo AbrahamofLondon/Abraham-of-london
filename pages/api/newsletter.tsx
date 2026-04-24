@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { sendEmail } from "@/lib/email/core/sendEmail";
 import { verifyRecaptcha } from "@/lib/recaptchaServer";
 import {
   rateLimit,
@@ -183,42 +184,34 @@ async function sendNotificationToAbraham(subscriberData: {
   email: string;
   name?: string;
   source: string;
-}): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (!apiKey) {
-    console.warn("[NEWSLETTER] RESEND_API_KEY missing; admin notification skipped.");
-    return;
-  }
-
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Abraham of London <info@abrahamoflondon.org>",
-        to: ADMIN_NOTIFICATION_RECIPIENTS,
-        reply_to: subscriberData.email,
-        subject: "New Newsletter Subscriber",
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #2c5530;">New Newsletter Subscriber</h2>
-            <p><strong>Email:</strong> ${subscriberData.email}</p>
-            <p><strong>Name:</strong> ${subscriberData.name || "Not provided"}</p>
-            <p><strong>Source:</strong> ${subscriberData.source}</p>
-            <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
-            <p style="color: #2c5530; font-weight: bold;">
-              This subscriber has been added to the Mailchimp audience.
-            </p>
-          </div>
-        `,
-      }),
-    });
-  } catch (error) {
-    console.error("[NEWSLETTER] Failed to send admin notification:", error);
-  }
+}): Promise<{ ok: boolean; error?: string }> {
+  return sendEmail({
+    type: "SYSTEM",
+    to: ADMIN_NOTIFICATION_RECIPIENTS,
+    replyTo: subscriberData.email,
+    subject: "New Newsletter Subscriber",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c5530;">New Newsletter Subscriber</h2>
+        <p><strong>Email:</strong> ${subscriberData.email}</p>
+        <p><strong>Name:</strong> ${subscriberData.name || "Not provided"}</p>
+        <p><strong>Source:</strong> ${subscriberData.source}</p>
+        <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+        <p style="color: #2c5530; font-weight: bold;">
+          This subscriber has been added to the Mailchimp audience.
+        </p>
+      </div>
+    `,
+    text: [
+      "New Newsletter Subscriber",
+      `Email: ${subscriberData.email}`,
+      `Name: ${subscriberData.name || "Not provided"}`,
+      `Source: ${subscriberData.source}`,
+    ].join("\n"),
+    meta: {
+      source: "newsletter:admin-notify",
+    },
+  });
 }
 
 export default async function handler(
@@ -410,11 +403,17 @@ export default async function handler(
       return;
     }
 
-    await sendNotificationToAbraham({
+    const notifyResult = await sendNotificationToAbraham({
       email,
       name: name || undefined,
       source,
     });
+    if (!notifyResult.ok) {
+      return res.status(502).json({
+        ok: false,
+        error: "Newsletter notification delivery failed. Please try again later.",
+      });
+    }
 
     logSecurityEvent("Newsletter subscription successful", {
       ip: anonymizeIp(ip),

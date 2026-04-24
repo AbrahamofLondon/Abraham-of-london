@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
+import { sendEmail } from "@/lib/email/core/sendEmail";
+import { EmailLinks } from "@/lib/email/links";
 import { prisma } from "@/lib/prisma.server";
 import crypto from "crypto";
 
@@ -64,49 +66,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   });
 
   // Build sign-in link
-  const baseUrl = process.env.NEXTAUTH_URL || `https://${req.headers.host}`;
   const safeReturnTo = typeof returnTo === "string" && returnTo.startsWith("/") ? returnTo : "/admin";
-  const signInUrl = `${baseUrl}/api/admin/auth/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(normalized)}&returnTo=${encodeURIComponent(safeReturnTo)}`;
+  const signInUrl = EmailLinks.adminVerify(token, normalized, safeReturnTo);
 
   // Send via Resend
-  const resendApiKey = process.env.RESEND_API_KEY;
-  if (!resendApiKey) {
-    console.error("[admin-auth] RESEND_API_KEY not configured");
-    // Clean up token
-    await prisma.verificationToken.delete({
-      where: { identifier_token: { identifier: normalized, token } },
-    }).catch(() => {});
-    return res.status(500).json({
-      ok: false,
-      error: "EMAIL_NOT_CONFIGURED",
-      message: "Email delivery is not configured. Set RESEND_API_KEY.",
-    });
-  }
+  const mailResult = await sendEmail({
+    type: "SYSTEM",
+    to: normalized,
+    subject: "Sign in to Abraham of London",
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
+        <p style="font-size: 14px; color: #666; margin-bottom: 24px;">
+          Sign in to the Abraham of London system.
+        </p>
+        <a href="${signInUrl}" style="display: inline-block; padding: 12px 24px; background: #C9A96E; color: #000; text-decoration: none; font-family: monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;">
+          Sign in
+        </a>
+        <p style="font-size: 12px; color: #999; margin-top: 24px;">
+          This link expires in 15 minutes. If you did not request this, ignore this email.
+        </p>
+      </div>
+    `,
+    text: [
+      "Sign in to Abraham of London.",
+      "",
+      `Sign in: ${signInUrl}`,
+      "This link expires in 15 minutes.",
+    ].join("\n"),
+    from: process.env.EMAIL_FROM || "Abraham of London <noreply@abrahamoflondon.org>",
+    meta: {
+      source: "admin-auth:send-link",
+    },
+  });
 
-  try {
-    const { Resend } = await import("resend");
-    const resend = new Resend(resendApiKey);
-
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM || "Abraham of London <noreply@abrahamoflondon.org>",
-      to: normalized,
-      subject: "Sign in to Abraham of London",
-      html: `
-        <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
-          <p style="font-size: 14px; color: #666; margin-bottom: 24px;">
-            Sign in to the Abraham of London system.
-          </p>
-          <a href="${signInUrl}" style="display: inline-block; padding: 12px 24px; background: #C9A96E; color: #000; text-decoration: none; font-family: monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;">
-            Sign in
-          </a>
-          <p style="font-size: 12px; color: #999; margin-top: 24px;">
-            This link expires in 15 minutes. If you did not request this, ignore this email.
-          </p>
-        </div>
-      `,
-    });
-  } catch (err) {
-    console.error("[admin-auth] Resend send failed:", err);
+  if (!mailResult.ok) {
+    console.error("[admin-auth] Email send failed:", mailResult.error);
     return res.status(500).json({
       ok: false,
       error: "EMAIL_SEND_FAILED",

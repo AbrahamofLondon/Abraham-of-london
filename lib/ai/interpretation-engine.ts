@@ -56,7 +56,7 @@ export type InterpretationOutput = {
   narrative: string;
   escalationJustification: string | null;
   /** Metadata: was this produced by LLM or is it a fallback? */
-  source: "llm" | "fallback";
+  source: "llm" | "fallback" | "cached";
   /** Metadata: model used */
   model?: string;
   /** Metadata: latency in ms */
@@ -308,9 +308,11 @@ const _cache = new Map<string, { output: InterpretationOutput; timestamp: number
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 function cacheKey(input: InterpretationInput): string {
+  // SECURITY: cacheScope MUST be user-specific to prevent cross-user data leakage.
+  // If no scope is provided, generate a unique key that never collides with another user.
   const scope = typeof input.cacheScope === "string" && input.cacheScope.trim()
     ? input.cacheScope.trim().toLowerCase()
-    : "anonymous";
+    : `unscoped_${Date.now()}_${Math.random().toString(36).slice(2)}`; // unique per call, never shared
   return [
     scope,
     input.stage,
@@ -329,7 +331,7 @@ export async function interpretCached(input: InterpretationInput): Promise<Inter
   const cached = _cache.get(key);
 
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return { ...cached.output, source: "llm" }; // Don't expose cache hit
+    return { ...cached.output, source: "cached" };
   }
 
   const output = await interpret(input);

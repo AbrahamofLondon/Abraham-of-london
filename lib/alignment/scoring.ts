@@ -195,52 +195,6 @@ export function extractPurposeTensions(
   return signals;
 }
 
-/* ── Legacy boolean scoring (backward compat) ── */
-
-export function scorePurposeAlignment(
-  input: AlignmentAssessmentInput
-): AlignmentAssessmentResult {
-  const possibleScore = PURPOSE_ALIGNMENT_QUESTIONS.length;
-  const totalScore = PURPOSE_ALIGNMENT_QUESTIONS.reduce(
-    (sum, question) => sum + (input.answers[question.id] ? 1 : 0),
-    0
-  );
-
-  const domainScores: AlignmentDomainScore[] = ALIGNMENT_DOMAIN_ORDER.map((domain) => {
-    const domainQuestions = PURPOSE_ALIGNMENT_QUESTIONS.filter(
-      (question) => question.domain === domain
-    );
-
-    const earned = domainQuestions.reduce(
-      (sum, question) => sum + (input.answers[question.id] ? 1 : 0),
-      0
-    );
-
-    const possible = domainQuestions.length;
-    const percent = possible === 0 ? 0 : Math.round((earned / possible) * 100);
-
-    return {
-      domain,
-      earned,
-      possible,
-      percent,
-    };
-  });
-
-  const weakestDomains = [...domainScores]
-    .sort((a, b) => a.percent - b.percent)
-    .slice(0, 2)
-    .map((item) => item.domain);
-
-  return {
-    totalScore,
-    possibleScore,
-    percent: Math.round((totalScore / possibleScore) * 100),
-    band: getBand(totalScore),
-    domainScores,
-    weakestDomains,
-    strengths: getStrengths(domainScores),
-    corrections: getCorrections(weakestDomains),
-    createdAt: new Date().toISOString(),
-  };
-}
+// Legacy scorePurposeAlignment() deleted.
+// Only scorePurposeProfile() (dual-axis engine) is authoritative.
+// All callers must use scorePurposeProfile() which runs the full intelligence engine.

@@ -1,5 +1,10 @@
 import * as React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+
+// Dynamic import to avoid "react-dom/server" being statically imported in App Router
+async function renderToHtml(element: React.ReactElement): Promise<string> {
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  return renderToStaticMarkup(element);
+}
 
 import { siteConfig } from "@/config/site";
 import ContactEmail from "@/emails/ContactEmail";
@@ -16,8 +21,9 @@ type TemplateResult = {
 
 type Builder = (data: Record<string, any>) => TemplateResult;
 
-function renderReactEmail(element: React.ReactElement): string {
-  return `<!DOCTYPE html>${renderToStaticMarkup(element)}`;
+async function renderReactEmail(element: React.ReactElement): Promise<string> {
+  const html = await renderToHtml(element);
+  return `<!DOCTYPE html>${html}`;
 }
 
 function escapeHtml(input: unknown): string {
@@ -198,5 +204,9 @@ export function renderEmailTemplate(
   name: EmailTemplateName,
   data: Record<string, any>,
 ): TemplateResult {
-  return EmailTemplates[name](data);
+  const builder = EmailTemplates[name];
+  if (!builder) {
+    throw new Error(`EMAIL_TEMPLATE_NOT_REGISTERED:${name}`);
+  }
+  return builder(data);
 }

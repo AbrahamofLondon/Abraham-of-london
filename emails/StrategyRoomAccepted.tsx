@@ -1,7 +1,3 @@
-/**
- * @deprecated Not wired to any live send path.
- * Do not use until routed through the canonical outbound email sender.
- */
 /* emails/StrategyRoomAccepted.tsx */
 import "server-only";
 import * as React from "react";
@@ -17,6 +13,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { EmailLinks } from "@/lib/email/links";
 
 interface EmailProps {
   fullName: string;
@@ -29,38 +26,42 @@ export const StrategyRoomAcceptedEmail = ({
 }: EmailProps) => (
   <EmailHtml lang="en">
     <EmailHead />
-    <Preview>Strategy Room Intake: Accepted</Preview>
+    <Preview>Strategy Room access confirmed</Preview>
 
     <Body style={main}>
       <Container style={container}>
         <Text style={eyebrow}>STRATEGIC INTAKE · BOARD-GRADE</Text>
-        <Heading style={h1}>Intake Accepted</Heading>
+        <Heading style={h1}>Execution Access Confirmed</Heading>
 
         <Text style={text}>Greetings {fullName},</Text>
 
         <Text style={text}>
-          Your intake for the Strategy Room regarding the decision:
-          <strong style={highlight}> “{decisionStatement}”</strong> has been reviewed and accepted.
+          Your Strategy Room entry regarding the decision:
+          <strong style={highlight}> “{decisionStatement}”</strong> has been accepted.
         </Text>
 
         <Section style={section}>
-          <Text style={sectionTitle}>Pre-Read Materials</Text>
+          <Text style={sectionTitle}>Execution References</Text>
           <Text style={text}>
-            Before we schedule the session, please review the strategic frameworks that govern our decision environment:
+            The execution environment is now live. Use the decision references below before you proceed:
           </Text>
 
           <Link
-            href="https://www.abrahamoflondon.org/downloads/purpose-pyramid-worksheet.pdf"
+            href={EmailLinks.downloads("purpose-pyramid-worksheet")}
             style={link}
           >
             → The Purpose Pyramid (Strategic Dossier)
           </Link>
 
           <Link
-            href="https://www.abrahamoflondon.org/downloads/decision-matrix-scorecard.pdf"
+            href={EmailLinks.downloads("decision-matrix-scorecard")}
             style={link}
           >
             → The Decision Matrix (Operational Logic)
+          </Link>
+
+          <Link href={EmailLinks.strategyRoom} style={link}>
+            → Enter Strategy Room
           </Link>
         </Section>
 

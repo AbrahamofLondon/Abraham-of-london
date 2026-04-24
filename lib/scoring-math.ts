@@ -126,7 +126,8 @@ export function matchDensity(text: string, patterns: string[]): number {
   if (!text || patterns.length === 0) return 0;
   const lower = text.toLowerCase();
   const matches = patterns.filter((p) => lower.includes(p.toLowerCase())).length;
-  return Math.min(1, matches / Math.max(1, Math.ceil(patterns.length * 0.4)));
+  // Require 65% pattern match for full density (was 40% — too easy to game)
+  return Math.min(1, matches / Math.max(1, Math.ceil(patterns.length * 0.65)));
 }
 
 /**
@@ -271,12 +272,16 @@ export function specificityScore(text: string): number {
   // Length with diminishing returns (log scale)
   const lengthScore = Math.min(1, Math.log(Math.max(1, words) / 8) / Math.log(80 / 8));
 
-  // Composite: entities matter most, then causality, then structure, then length
+  // Composite: causality matters most, then entities in context, then structure, then length.
+  // Entities are capped at 25 points (not 60) to prevent gaming via number-listing.
+  // Causal language is the strongest signal — it means the user understands cause and effect.
   const raw = (
-    Math.min(entityCount, 5) * 12 +    // up to 60 points from entities
-    graduatedBonus(causalCount, 20) +    // up to 20 from causal language
-    structuralDensity * 10 +             // up to 10 from structure
-    lengthScore * 10                     // up to 10 from length (diminishing)
+    Math.min(entityCount, 3) * 8 +       // up to 24 points from entities (capped at 3)
+    graduatedBonus(causalCount, 35, 2) +  // up to 35 from causal language (primary signal)
+    structuralDensity * 18 +              // up to 18 from multi-sentence structure
+    lengthScore * 8 +                     // up to 8 from length (diminishing)
+    // Bonus: entities used WITH causal language = contextual specificity
+    (causalCount > 0 && entityCount > 0 ? 15 : 0)
   );
 
   return Math.round(clamp(raw, 0, 100));

@@ -1,5 +1,6 @@
 /* lib/strategy-room/enrol-core.ts — SSOT intake pipeline + consulting evaluation wiring */
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email/core/sendEmail";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
 import { vetStrategyInquiry } from "@/lib/intelligence/vetting-engine";
 import {
@@ -518,6 +519,26 @@ export async function processStrategyRoomEnrolment(
       },
     });
 
+    const emailResult = await sendEmail({
+      type: "TRANSACTIONAL",
+      to: email,
+      subject: "Strategy Room access confirmed",
+      template: {
+        name: "strategy-room-accepted",
+        data: {
+          fullName: name,
+          decisionStatement: intent,
+        },
+      },
+      meta: {
+        source: "strategy-room:accepted",
+      },
+    });
+
+    const finalWarning = [combinedWarning || null, emailResult.ok ? null : "strategy_room_email_delivery_failed"]
+      .filter(Boolean)
+      .join(" | ");
+
     return {
       ok: true,
       message: consultingEvaluation.result.ok
@@ -525,7 +546,7 @@ export async function processStrategyRoomEnrolment(
         : "Institutional sequence initialized. Additional clarification will strengthen routing.",
       referenceId: entry.id,
       priorityStatus: vettedEntry?.status || null,
-      warning: combinedWarning || undefined,
+      warning: finalWarning || undefined,
     };
   } catch (error) {
     console.error("[STRATEGY_ROOM_ENROL_ERROR]:", error);

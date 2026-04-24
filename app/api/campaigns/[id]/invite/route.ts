@@ -2,19 +2,11 @@ export const dynamic = "force-dynamic";
 /* app/api/campaigns/[id]/invite/route.ts — NODE AUTHORIZATION PROTOCOL */
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { db } from "@/lib/db";
+import { sendEmail } from "@/lib/email/core/sendEmail";
+import { EmailLinks } from "@/lib/email/links";
 
 export const runtime = "nodejs";
-
-function getResendClient(): Resend {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY_MISSING");
-  }
-
-  return new Resend(apiKey);
-}
 
 function normalizeEmail(value: unknown): string {
   return String(value || "").trim().toLowerCase();
@@ -22,15 +14,6 @@ function normalizeEmail(value: unknown): string {
 
 function normalizeString(value: unknown): string {
   return String(value || "").trim();
-}
-
-function buildBaseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    process.env.SITE_URL?.trim() ||
-    "https://www.abrahamoflondon.org"
-  ).replace(/\/+$/, "");
 }
 
 function createInviteToken(): string {
@@ -163,59 +146,60 @@ export async function POST(
       },
     });
 
-    const assessmentUrl = `${buildBaseUrl()}/enterprise/assessment/${encodeURIComponent(
-      rawInviteToken,
-    )}`;
+    const assessmentUrl = EmailLinks.enterpriseAssessment(rawInviteToken);
 
     // 5. DISPATCH EMAIL VIA RESEND
-    if (!process.env.RESEND_API_KEY?.trim()) {
-      console.warn(
-        "[CAMPAIGN_INVITE] RESEND_API_KEY missing. Participant created but email not sent.",
-      );
-    } else {
-      await getResendClient().emails.send({
-        from: "Abraham of London <info@abrahamoflondon.org>",
-        to: [email],
-        bcc: [
-          "info@abrahamoflondon.org",
-          "seunadaramola@gmail.com",
-          "abrahamadaramola@outlook.com",
-        ],
-        subject: `Institutional Authorization: ${campaign.title}`,
-        html: `
-          <div style="font-family: Helvetica, Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #111; padding: 50px; background-color: #fff;">
-            <div style="margin-bottom: 40px;">
-              <span style="background: #000; color: #fff; padding: 4px 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">
-                New Audit Authorization
-              </span>
-            </div>
-
-            <h2 style="text-transform: uppercase; letter-spacing: -0.5px; font-size: 24px; font-weight: 900; color: #000; margin-bottom: 20px;">
-              Institutional Alignment Audit
-            </h2>
-
-            <p style="font-size: 14px; line-height: 1.6; color: #444; margin-bottom: 30px;">
-              You have been authorized as a participating node for the 
-              <strong>${campaign.title}</strong> audit under 
-              <strong>${campaign.organisation?.name || "the organisation"}</strong>.
-              Your perspective is required for calibration of the institutional alignment reading.
-            </p>
-
-            <div style="margin: 40px 0;">
-              <a
-                href="${assessmentUrl}"
-                style="background: #8A6A2F; color: #fff; padding: 15px 35px; text-decoration: none; font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 2px; display: inline-block;"
-              >
-                Initiate Audit Protocol
-              </a>
-            </div>
-
-            <p style="font-size: 11px; color: #888; font-style: italic; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
-              Note: all audit telemetry is mathematically decoupled from identity at reporting level to preserve confidentiality.
-            </p>
+    const emailResult = await sendEmail({
+      type: "ENTERPRISE",
+      to: [email],
+      bcc: [
+        "info@abrahamoflondon.org",
+        "seunadaramola@gmail.com",
+        "abrahamadaramola@outlook.com",
+      ],
+      from: "Abraham of London <info@abrahamoflondon.org>",
+      subject: `Institutional Authorization: ${campaign.title}`,
+      html: `
+        <div style="font-family: Helvetica, Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #111; padding: 50px; background-color: #fff;">
+          <div style="margin-bottom: 40px;">
+            <span style="background: #000; color: #fff; padding: 4px 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">
+              New Audit Authorization
+            </span>
           </div>
-        `,
-      });
+          <h2 style="text-transform: uppercase; letter-spacing: -0.5px; font-size: 24px; font-weight: 900; color: #000; margin-bottom: 20px;">
+            Institutional Alignment Audit
+          </h2>
+          <p style="font-size: 14px; line-height: 1.6; color: #444; margin-bottom: 30px;">
+            You have been authorized as a participating node for the 
+            <strong>${campaign.title}</strong> audit under 
+            <strong>${campaign.organisation?.name || "the organisation"}</strong>.
+            Your perspective is required for calibration of the institutional alignment reading.
+          </p>
+          <div style="margin: 40px 0;">
+            <a
+              href="${assessmentUrl}"
+              style="background: #8A6A2F; color: #fff; padding: 15px 35px; text-decoration: none; font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 2px; display: inline-block;"
+            >
+              Initiate Audit Protocol
+            </a>
+          </div>
+        </div>
+      `,
+      text: [
+        `Institutional Alignment Audit`,
+        `Campaign: ${campaign.title}`,
+        `Organisation: ${campaign.organisation?.name || "the organisation"}`,
+        `Start: ${assessmentUrl}`,
+      ].join("\n"),
+      meta: {
+        source: "campaign-invite",
+      },
+    });
+    if (!emailResult.ok) {
+      return NextResponse.json(
+        { ok: false, error: emailResult.error || "EMAIL_SEND_FAILED" },
+        { status: 502 },
+      );
     }
 
     return NextResponse.json({

@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/email/core/sendEmail";
 
 type MailSendResult = {
   success: boolean;
@@ -20,16 +20,6 @@ type CampaignNudgeParams = {
   organisationName: string;
   inviteToken: string;
 };
-
-function getResendClient(): Resend {
-  const resendApiKey = process.env.RESEND_API_KEY?.trim() || "";
-
-  if (!resendApiKey) {
-    throw new Error("RESEND_API_KEY_MISSING");
-  }
-
-  return new Resend(resendApiKey);
-}
 
 function requiredEnv(name: string, fallback?: string): string {
   const value = process.env[name]?.trim();
@@ -149,56 +139,34 @@ async function sendHtmlEmail(args: {
   cc?: string | string[];
   bcc?: string | string[];
 }): Promise<MailSendResult> {
-  try {
-    if (!(process.env.RESEND_API_KEY?.trim() || "")) {
-      throw new Error("RESEND_API_KEY_MISSING");
-    }
+  const to = sanitizeRecipientList(Array.isArray(args.to) ? args.to : [args.to]);
+  const cc = sanitizeRecipientList(Array.isArray(args.cc) ? args.cc : args.cc ? [args.cc] : []);
+  const bcc = sanitizeRecipientList(Array.isArray(args.bcc) ? args.bcc : args.bcc ? [args.bcc] : []);
+  const replyTo = sanitizeRecipientList(
+    Array.isArray(args.replyTo)
+      ? args.replyTo
+      : args.replyTo
+      ? [args.replyTo]
+      : getDefaultReplyToList()
+  );
 
-    const to = sanitizeRecipientList(
-      Array.isArray(args.to) ? args.to : [args.to]
-    );
+  const result = await sendEmail({
+    type: "ENTERPRISE",
+    to,
+    cc,
+    bcc,
+    replyTo,
+    subject: args.subject,
+    html: args.html,
+    from: args.from || getMailFrom(),
+    meta: {
+      source: "mail",
+    },
+  });
 
-    const cc = sanitizeRecipientList(
-      Array.isArray(args.cc) ? args.cc : args.cc ? [args.cc] : []
-    );
-
-    const bcc = sanitizeRecipientList(
-      Array.isArray(args.bcc) ? args.bcc : args.bcc ? [args.bcc] : []
-    );
-
-    const replyTo = sanitizeRecipientList(
-      Array.isArray(args.replyTo)
-        ? args.replyTo
-        : args.replyTo
-        ? [args.replyTo]
-        : getDefaultReplyToList()
-    );
-
-    if (!to.length) {
-      throw new Error("MAIL_TO_MISSING");
-    }
-
-    const response = await getResendClient().emails.send({
-      from: args.from || getMailFrom(),
-      to,
-      cc: cc.length ? cc : undefined,
-      bcc: bcc.length ? bcc : undefined,
-      replyTo: replyTo.length ? replyTo : undefined,
-      subject: args.subject,
-      html: args.html,
-    });
-
-    return {
-      success: true,
-      id: typeof response?.data?.id === "string" ? response.data.id : null,
-    };
-  } catch (error) {
-    console.error("[MAIL_SEND_ERROR]", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "MAIL_SEND_FAILED",
-    };
-  }
+  return result.ok
+    ? { success: true, id: null }
+    : { success: false, error: result.error || "MAIL_SEND_FAILED" };
 }
 
 export async function sendAccessRequestEmail(

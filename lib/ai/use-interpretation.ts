@@ -28,7 +28,7 @@ type UseInterpretationResult = {
   interpretation: InterpretationOutput | null;
   loading: boolean;
   error: string | null;
-  source: "llm" | "fallback" | "pending";
+  source: "llm" | "fallback" | "cached" | "pending";
 };
 
 export function useInterpretation(input: UseInterpretationInput): UseInterpretationResult {

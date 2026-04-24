@@ -42,7 +42,12 @@ export type DiagnosticJourneyRecord = {
 const memoryJourneys = new Map<string, DiagnosticJourneyRecord>();
 
 function subjectKey(input: { email?: string | null; subjectId?: string | null; campaignId?: string | null }): string {
-  const raw = input.subjectId || input.campaignId || input.email || "anonymous";
+  const raw = input.subjectId || input.campaignId || input.email;
+  if (!raw) {
+    // SECURITY: never share a journey key across anonymous users.
+    // Each anonymous user gets a unique, non-colliding key.
+    return createHash("sha256").update(`anon_${Date.now()}_${Math.random()}`).digest("hex");
+  }
   return createHash("sha256").update(String(raw).toLowerCase()).digest("hex");
 }
 

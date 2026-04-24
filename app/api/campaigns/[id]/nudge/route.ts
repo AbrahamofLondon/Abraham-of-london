@@ -2,7 +2,8 @@ export const dynamic = "force-dynamic";
 /* app/api/campaigns/[id]/nudge/route.ts — SOVEREIGN NUDGE DISPATCHER */
 
 import { db } from "@/lib/db";
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/email/core/sendEmail";
+import { EmailLinks } from "@/lib/email/links";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
@@ -20,15 +21,6 @@ type EligibleParticipant = {
     email: string | null;
   } | null;
 };
-
-function getResendClient(): Resend {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY_MISSING");
-  }
-
-  return new Resend(apiKey);
-}
 
 function safeRefId(value: string | null | undefined): string {
   const raw = typeof value === "string" ? value.trim() : "";
@@ -103,8 +95,6 @@ export async function POST(req: Request, { params }: RouteContext) {
       );
     }
 
-    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "").replace(/\/+$/, "");
-
     const emailPayloads = targets
       .filter(isEligibleEmailTarget)
       .map((participant) => ({
@@ -126,7 +116,7 @@ export async function POST(req: Request, { params }: RouteContext) {
             </p>
 
             <div style="margin: 40px 0;">
-              <a href="${baseUrl}/audit/${participant.id}"
+              <a href="${EmailLinks.auditParticipant(participant.id)}"
                  style="background: #000; color: #fff; padding: 15px 35px; text-decoration: none; font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 2px; display: inline-block;">
                 Resume Audit Protocol
               </a>
@@ -141,6 +131,11 @@ export async function POST(req: Request, { params }: RouteContext) {
             </p>
           </div>
         `,
+        text: [
+          `Action Required: ${participant.campaign.title} Audit Calibration`,
+          `Resume audit protocol: ${EmailLinks.auditParticipant(participant.id)}`,
+          `Ref ID: ${safeRefId(participant.id)}`,
+        ].join("\n"),
       }));
 
     if (emailPayloads.length === 0) {
@@ -153,11 +148,21 @@ export async function POST(req: Request, { params }: RouteContext) {
       );
     }
 
-    const CHUNK_SIZE = 100;
-    const resend = getResendClient();
-    for (let i = 0; i < emailPayloads.length; i += CHUNK_SIZE) {
-      const chunk = emailPayloads.slice(i, i + CHUNK_SIZE);
-      await resend.batch.send(chunk);
+    for (const payload of emailPayloads) {
+      const result = await sendEmail({
+        type: "ENTERPRISE",
+        to: payload.to,
+        from: payload.from,
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text,
+        meta: {
+          source: "campaign-nudge",
+        },
+      });
+      if (!result.ok) {
+        return new NextResponse("Email delivery failed", { status: 502 });
+      }
     }
 
     return NextResponse.json({
