@@ -80,11 +80,34 @@ const AdminLoginPage: NextPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await signIn("email", { email: normalized, redirect: false, callbackUrl: returnTo });
-      if (result?.error) { setError("Magic link could not be sent. Check email provider config."); setLoading(false); return; }
+      const response = await fetch("/api/admin/auth/send-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalized, returnTo }),
+      });
+
+      // Defensive JSON parsing — never crash on non-JSON response
+      const contentType = response.headers.get("content-type") || "";
+      let data: { ok?: boolean; message?: string; error?: string };
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(text.length < 300 ? text : "Authentication service returned an invalid response.");
+      }
+
+      if (!response.ok || !data.ok) {
+        setError(data.message || data.error || "Unable to send sign-in link.");
+        setLoading(false);
+        return;
+      }
+
       setSent(true);
-    } catch (err: any) { setError(err?.message || "Failed to send magic link."); }
-    finally { setLoading(false); }
+    } catch (err: any) {
+      setError(err?.message || "Failed to send magic link.");
+    } finally {
+      setLoading(false);
+    }
   };
 
 

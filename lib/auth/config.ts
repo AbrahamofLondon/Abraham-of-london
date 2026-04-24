@@ -2,9 +2,6 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import EmailProvider from "next-auth/providers/email";
-import { Resend } from "resend";
-import { emailOnlyAdapter } from "./email-adapter";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma.server";
 import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
@@ -95,51 +92,15 @@ function buildProviders() {
     );
   }
 
-  // Email magic-link provider via Resend
-  const resendApiKey = firstEnv("RESEND_API_KEY");
-  if (resendApiKey) {
-    providers.push(
-      EmailProvider({
-        server: {
-          host: "smtp.resend.com",
-          port: 465,
-          auth: {
-            user: "resend",
-            pass: resendApiKey,
-          },
-        },
-        from: process.env.EMAIL_FROM || "Abraham of London <noreply@abrahamoflondon.org>",
-        async sendVerificationRequest({ identifier: email, url }) {
-          const resend = new Resend(resendApiKey);
-          await resend.emails.send({
-            from: process.env.EMAIL_FROM || "Abraham of London <noreply@abrahamoflondon.org>",
-            to: email,
-            subject: "Sign in to Abraham of London",
-            html: `
-              <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
-                <p style="font-size: 14px; color: #666; margin-bottom: 24px;">
-                  Sign in to the Abraham of London system.
-                </p>
-                <a href="${url}" style="display: inline-block; padding: 12px 24px; background: #C9A96E; color: #000; text-decoration: none; font-family: monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;">
-                  Sign in
-                </a>
-                <p style="font-size: 12px; color: #999; margin-top: 24px;">
-                  If you did not request this, ignore this email.
-                </p>
-              </div>
-            `,
-          });
-        },
-      }),
-    );
-  }
+  // Note: Email magic-link is handled by /api/admin/auth/send-link (custom route),
+  // NOT by NextAuth's EmailProvider. This avoids the adapter requirement and
+  // ensures the login page always gets JSON responses.
 
   if (providers.length === 0) {
     console.warn("[AUTH_PROVIDER_CONFIG] No NextAuth providers configured", {
       google: Boolean(googleClientId && googleClientSecret),
       github: Boolean(githubId && githubSecret),
       credentials: Boolean(adminUserEmail && adminUserPassword),
-      email: Boolean(resendApiKey),
     });
   }
 
@@ -147,7 +108,6 @@ function buildProviders() {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: emailOnlyAdapter(),
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
