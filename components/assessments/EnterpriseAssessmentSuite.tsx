@@ -22,6 +22,8 @@ import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundar
 import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { buildDecisionObjectFromSignals } from "@/lib/diagnostics/decision-engine";
+import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChainSurface";
+import { buildEnterpriseResult } from "@/lib/diagnostics/assessment-result-builders";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 type EnterpriseDomain = {
@@ -490,6 +492,24 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
       transition={{ duration: 0.5 }}
       className="space-y-4"
     >
+      {/* CANONICAL EVIDENCE CHAIN */}
+      <EvidenceChainSurface result={buildEnterpriseResult({
+        posture,
+        composite: (computePosture(domains ?? []) as any).composite ?? 50,
+        heatDomains,
+        domains: (domains ?? []).map((d) => ({
+          label: d.label,
+          authority: d.authority,
+          governance: d.governance,
+          clarity: d.clarity,
+          execution: d.execution,
+          trust: d.trust,
+        })),
+        nextAction,
+      })} />
+
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />
+
       {/* Cross-stage memory */}
       <SystemMemoryBlock currentStage="enterprise" />
       {/* Condition */}

@@ -50,6 +50,8 @@ import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerific
 import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
 import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
 import { buildConstitutionalDecisionObject } from "@/lib/diagnostics/decision-engine";
+import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChainSurface";
+import { buildConstitutionalResult } from "@/lib/diagnostics/assessment-result-builders";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 
 function readinessNumeric(tier: string): number {
@@ -1188,6 +1190,26 @@ export default function ConstitutionalDiagnosticSuite() {
             transition={{ duration: 0.55 }}
           >
             <div className="py-12 space-y-6">
+              {/* CANONICAL EVIDENCE CHAIN */}
+              <EvidenceChainSurface result={buildConstitutionalResult({
+                route: decision.route,
+                confidence: decision.confidence,
+                scores: {
+                  coherence: scores.coherence,
+                  trust: scores.trust,
+                  governance: scores.governance,
+                  seriousness: scores.seriousness,
+                  authorityType: scores.authorityType,
+                  posture: scores.posture,
+                  readinessTier: scores.readinessTier,
+                },
+                disqualifiers: decision.disqualifiersTriggered,
+                failureModes: (decision as any).failureModes ?? [],
+                reflections: constitutionalReflections,
+              })} />
+
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />
+
               {/* Cross-stage memory from prior stages */}
               <SystemMemoryBlock currentStage="constitutional" />
 

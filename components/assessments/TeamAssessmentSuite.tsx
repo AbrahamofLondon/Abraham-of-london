@@ -25,6 +25,8 @@ import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundar
 import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { buildDecisionObjectFromSignals } from "@/lib/diagnostics/decision-engine";
+import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChainSurface";
+import { buildTeamResult } from "@/lib/diagnostics/assessment-result-builders";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 const GOLD = "#C9A96E";
@@ -367,6 +369,20 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.50 }} className="space-y-4">
+      {/* CANONICAL EVIDENCE CHAIN */}
+      <EvidenceChainSurface result={buildTeamResult({
+        varianceIndex: vi,
+        trustGap: tg,
+        avgFriction: af,
+        condition,
+        isMultiSource: false,
+        respondentCount: 1,
+        nextAction,
+        reflections,
+      })} />
+
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />
+
       {/* Cross-stage memory */}
       <SystemMemoryBlock currentStage="team" />
       {/* Condition */}
