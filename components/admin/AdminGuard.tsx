@@ -2,14 +2,13 @@
 import * as React from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { AlertCircle, Shield } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { hasAccess, normalizeUserTier } from "@/lib/access/tier-policy";
 
 interface AdminGuardProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
-
-import { isAdminEmail } from "@/lib/auth/admin-authority";
 
 export default function AdminGuard({ children, fallback }: AdminGuardProps) {
   const { data: session, status } = useSession();
@@ -20,7 +19,9 @@ export default function AdminGuard({ children, fallback }: AdminGuardProps) {
   React.useEffect(() => {
     if (status === "loading") return;
 
-    const isAdmin = isAdminEmail(session?.user?.email);
+    const user = session?.user as { tier?: string; role?: string } | undefined;
+    const tier = normalizeUserTier(user?.tier ?? user?.role ?? "public");
+    const isAdmin = hasAccess(tier, "architect");
 
     if (!session || !isAdmin) {
       setIsAuthorized(false);

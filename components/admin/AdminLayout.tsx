@@ -3,7 +3,6 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession, signOut } from "next-auth/react";
-import AdminGuard from "./AdminGuard";
 import {
   LayoutDashboard,
   Brain,
@@ -78,7 +77,6 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
   };
 
   return (
-    <AdminGuard>
       <div className="min-h-screen bg-black">
         {/* Admin Header */}
         <div className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-xl">
@@ -203,6 +201,5 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
           </main>
         </div>
       </div>
-    </AdminGuard>
   );
 }

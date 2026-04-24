@@ -4,9 +4,11 @@ import Layout from "@/components/Layout";
 import { requireAdminPage } from "@/lib/access/server";
 import { listProofEvidence, type ProofEvidenceRecord } from "@/lib/proof/evidence";
 import { track } from "@/lib/analytics/track";
+import AdminErrorState from "@/components/admin/AdminErrorState";
 
 type PageProps = {
   initialItems: ProofEvidenceRecord[];
+  error: string | null;
 };
 
 const statusOptions = ["PENDING", "APPROVED", "REJECTED"] as const;
@@ -163,7 +165,7 @@ function ProofRow({ item }: { item: ProofEvidenceRecord }) {
   );
 }
 
-const AdminProofPage: NextPage<PageProps> = ({ initialItems }) => {
+const AdminProofPage: NextPage<PageProps> = ({ initialItems, error }) => {
   const [items, setItems] = React.useState(initialItems);
   const [manual, setManual] = React.useState({
     anonymisedSummary: "",
@@ -202,6 +204,22 @@ const AdminProofPage: NextPage<PageProps> = ({ initialItems }) => {
     } catch {
       setManualStatus("error");
     }
+  }
+
+  if (error) {
+    return (
+      <Layout title="Proof Review" description="Admin proof evidence review" fullWidth>
+        <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "var(--ds-background)" }}>
+          <div className="mx-auto max-w-4xl">
+            <AdminErrorState
+              title="Proof system unavailable"
+              message="Evidence could not be loaded. System integrity is not affected."
+              action="Retry or inspect database connectivity and proof evidence storage."
+            />
+          </div>
+        </main>
+      </Layout>
+    );
   }
 
   return (
@@ -282,8 +300,18 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const auth = await requireAdminPage(ctx);
   if (!auth.authorized) return auth.redirect as any;
 
-  const initialItems = await listProofEvidence({ limit: 100 });
-  return { props: { initialItems } };
+  try {
+    const initialItems = await listProofEvidence({ limit: 100 });
+    return { props: { initialItems, error: null } };
+  } catch (error) {
+    console.error("[ADMIN_PROOF_LOAD_ERROR]", error);
+    return {
+      props: {
+        initialItems: [],
+        error: "PROOF_EVIDENCE_UNAVAILABLE",
+      },
+    };
+  }
 };
 
 export default AdminProofPage;

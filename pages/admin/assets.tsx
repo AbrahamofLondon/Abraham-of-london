@@ -11,7 +11,7 @@ import Head from "next/head";
 import type { GetServerSideProps, NextPage } from "next";
 import Layout from "@/components/Layout";
 import PdfSyncDashboard from "@/components/admin/PdfSyncDashboard";
-import { validateAdminAccess } from "@/lib/server/validation";
+import { requireAdminPage } from "@/lib/access/server";
 
 interface Props {
   admin: {
@@ -83,22 +83,14 @@ const AdminAssetsPage: NextPage<Props> = ({ admin }) => {
  * Strictly enforces admin validation before rendering the page.
  */
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const auth = await validateAdminAccess(context.req as any);
-
-  if (!auth.valid) {
-    return {
-      redirect: {
-        destination: "/404", // Obfuscation: Redirect to 404 instead of login
-        permanent: false,
-      },
-    };
-  }
+  const auth = await requireAdminPage(context);
+  if (!auth.authorized) return auth.redirect as any;
 
   return {
     props: {
       admin: {
         userId: auth.userId || "authorized_operator",
-        role: "admin",
+        role: auth.access.role || "admin",
       },
     },
   };

@@ -1,9 +1,9 @@
 /* pages/admin/intelligence.tsx — REAL-TIME AUDIT & INTELLIGENCE VIEW */
 import * as React from "react";
 import type { NextPage, GetServerSideProps } from "next";
-import { getSession } from "next-auth/react";
 import Layout from "@/components/Layout";
 import { prisma } from "@/lib/db";
+import { requireAdminPage } from "@/lib/access/server";
 import {
   TrendingUp,
   TrendingDown,
@@ -549,13 +549,8 @@ const IntelligenceView: NextPage<IntelligenceProps> = ({
 export const getServerSideProps: GetServerSideProps<IntelligenceProps> = async (
   context
 ) => {
-  const session = await getSession(context);
-  const adminEmail =
-    process.env.INITIAL_ADMIN_EMAIL || "admin@abrahamoflondon.com";
-
-  if (!session || session.user?.email !== adminEmail) {
-    return { redirect: { destination: "/404", permanent: false } };
-  }
+  const auth = await requireAdminPage(context);
+  if (!auth.authorized) return auth.redirect as any;
 
   const db = prisma;
 

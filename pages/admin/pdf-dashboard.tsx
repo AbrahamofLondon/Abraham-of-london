@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import type { GetServerSideProps, NextPage } from "next";
-import { getSession } from "next-auth/react";
 
-import { withAdminAuth } from "@/lib/auth/withAdminAuth";
+import { requireAdminPage } from "@/lib/access/server";
 import { usePDFDashboard } from "@/hooks/usePDFDashboard";
 import { useToast } from "@/hooks/useToast";
 import { getInstitutionalAnalyticsServer } from "@/lib/server/institutional-analytics";
@@ -82,25 +81,25 @@ function toActionsBarPDF(pdf: PDFItem | null): ActionsBarPDF | null {
 }
 
 export const getServerSideProps: GetServerSideProps<PDFDashboardProps> = async (context) => {
-  const session = await getSession(context);
-  const adminEmail = process.env.INITIAL_ADMIN_EMAIL || "admin@abrahamoflondon.com";
+  const auth = await requireAdminPage(context);
+  if (!auth.authorized) return auth.redirect as any;
 
-  if (!session || session.user?.email !== adminEmail) {
-    return { redirect: { destination: "/404", permanent: false } };
-  }
-
-  const sessionUser = session.user as any;
+  const access = auth.access as any;
+  const effectiveEmail = access.email || "admin@abrahamoflondon.org";
+  const effectiveName = effectiveEmail || "Administrator";
+  const effectiveRole = access.role || "admin";
+  const effectivePermissions = access.permissions;
 
   try {
     const result = await getInstitutionalAnalyticsServer();
     return {
       props: {
         user: {
-          id: String(sessionUser.id || "admin"),
-          email: String(session.user?.email || adminEmail),
-          name: String(sessionUser.name || "Administrator"),
-          role: String(sessionUser.role || "admin"),
-          permissions: extractPermissions(sessionUser.permissions),
+          id: String(auth.userId || "admin"),
+          email: String(effectiveEmail),
+          name: String(effectiveName),
+          role: String(effectiveRole),
+          permissions: extractPermissions(effectivePermissions),
         },
         initialAnalytics: result.success ? (result.data as InstitutionalAnalyticsPayload) : null,
         analyticsError: result.success ? null : result.error || "Analytics failed to load",
@@ -110,11 +109,11 @@ export const getServerSideProps: GetServerSideProps<PDFDashboardProps> = async (
     return {
       props: {
         user: {
-          id: String(sessionUser.id || "admin"),
-          email: String(session.user?.email || adminEmail),
-          name: String(sessionUser.name || "Administrator"),
-          role: String(sessionUser.role || "admin"),
-          permissions: extractPermissions(sessionUser.permissions),
+          id: String(auth.userId || "admin"),
+          email: String(effectiveEmail),
+          name: String(effectiveName),
+          role: String(effectiveRole),
+          permissions: extractPermissions(effectivePermissions),
         },
         initialAnalytics: null,
         analyticsError: e?.message || "Unknown SSR error",
@@ -452,4 +451,4 @@ const DashboardError: React.FC<{ onRetry: () => void }> = ({ onRetry }) => (
   </div>
 );
 
-export default withAdminAuth(PDFDashboardPage);
+export default PDFDashboardPage;

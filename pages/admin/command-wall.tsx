@@ -1,7 +1,7 @@
 /* pages/admin/command-wall.tsx — DIRECTORATE CONTROL SURFACE */
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
-import { withAdminAuth } from "@/lib/auth/withAdminAuth";
+import { requireAdminPage } from "@/lib/access/server";
 
 import { KnowledgeGraph } from "@/components/Intelligence/KnowledgeGraph";
 import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
@@ -25,9 +25,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const auth = await requireAdminPage(ctx);
+  if (!auth.authorized) return auth.redirect as any;
   return { props: {} };
-
 };
 
 type CommandView = "TOPOLOGY" | "SECURITY" | "LIBRARY" | "DECISION";
@@ -475,7 +476,7 @@ const CommandWallPage: NextPage = () => {
   );
 };
 
-export default withAdminAuth(CommandWallPage);
+export default CommandWallPage;
 
 type NavButtonProps = { active: boolean; onClick: () => void; label: string };
 const NavButton = ({ active, onClick, label }: NavButtonProps) => (

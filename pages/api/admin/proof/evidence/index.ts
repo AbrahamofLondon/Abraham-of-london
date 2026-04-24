@@ -19,31 +19,41 @@ export default async function handler(
   if (!admin) return;
 
   if (req.method === "GET") {
-    const items = await listProofEvidence({
-      approvalStatus: s(req.query.approvalStatus) || undefined,
-      displayStatus: s(req.query.displayStatus) || undefined,
-      limit: Number(req.query.limit || 100),
-    });
-    return res.status(200).json({ ok: true, items });
+    try {
+      const items = await listProofEvidence({
+        approvalStatus: s(req.query.approvalStatus) || undefined,
+        displayStatus: s(req.query.displayStatus) || undefined,
+        limit: Number(req.query.limit || 100),
+      });
+      return res.status(200).json({ ok: true, items });
+    } catch (error) {
+      console.error("[ADMIN_PROOF_LIST_ERROR]", error);
+      return res.status(500).json({ ok: false, error: "PROOF_EVIDENCE_UNAVAILABLE" });
+    }
   }
 
   if (req.method === "POST") {
-    const record = await createProofEvidence({
-      sourceStage: s(req.body?.sourceStage, "admin_observed"),
-      proofType: s(req.body?.proofType, "observed_outcome"),
-      outcomeCategory: s(req.body?.outcomeCategory) || null,
-      freeTextRaw: s(req.body?.freeTextRaw) || null,
-      anonymisedSummary: s(req.body?.anonymisedSummary) || null,
-      displayLabel: s(req.body?.displayLabel) || null,
-      userType: s(req.body?.userType) || null,
-      organisationType: s(req.body?.organisationType) || null,
-      sourceKind: "ADMIN_OBSERVED",
-      adminNotes: s(req.body?.adminNotes) || null,
-      approvalStatus: "PENDING",
-      displayStatus: "HIDDEN",
-      metadata: { adminUserId: admin.userId, adminEmail: admin.email },
-    });
-    return res.status(200).json({ ok: true, id: record.id });
+    try {
+      const record = await createProofEvidence({
+        sourceStage: s(req.body?.sourceStage, "admin_observed"),
+        proofType: s(req.body?.proofType, "observed_outcome"),
+        outcomeCategory: s(req.body?.outcomeCategory) || null,
+        freeTextRaw: s(req.body?.freeTextRaw) || null,
+        anonymisedSummary: s(req.body?.anonymisedSummary) || null,
+        displayLabel: s(req.body?.displayLabel) || null,
+        userType: s(req.body?.userType) || null,
+        organisationType: s(req.body?.organisationType) || null,
+        sourceKind: "ADMIN_OBSERVED",
+        adminNotes: s(req.body?.adminNotes) || null,
+        approvalStatus: "PENDING",
+        displayStatus: "HIDDEN",
+        metadata: { adminUserId: admin.userId, adminEmail: admin.email },
+      });
+      return res.status(200).json({ ok: true, id: record.id });
+    } catch (error) {
+      console.error("[ADMIN_PROOF_CREATE_ERROR]", error);
+      return res.status(500).json({ ok: false, error: "PROOF_EVIDENCE_CREATE_FAILED" });
+    }
   }
 
   res.setHeader("Allow", "GET, POST");

@@ -326,15 +326,15 @@ const FastDiagnosticPage: NextPage = () => {
 
           {sig && (
             <>
-              {/* 1. PRIMARY SIGNAL */}
+              {/* 1. VERDICT */}
               <div style={{ marginTop: "1.5rem" }}>
-                <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>Primary signal</span>
-                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.15rem", lineHeight: 1.55, color: "rgba(255,255,255,0.85)", marginTop: "0.35rem", maxWidth: "48ch" }}>{sig.primaryStatement}</p>
+                <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>Verdict</span>
+                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.15rem", lineHeight: 1.55, color: "rgba(255,255,255,0.88)", marginTop: "0.35rem", maxWidth: "48ch" }}>{sig.verdict}</p>
               </div>
 
-              {/* 2. EVIDENCE */}
+              {/* 2. WHAT YOUR ANSWERS EXPOSED */}
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", marginTop: "1.25rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>You indicated</span>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>What your answers exposed</span>
                 <div className="mt-2 space-y-1">
                   {[
                     { label: "Decision", value: decisionText },
@@ -352,28 +352,34 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               </div>
 
-              {/* 3. CONTRADICTION */}
-              {composedResult?.contradiction && (
-                <div style={{ border: "1px solid rgba(252,165,165,0.15)", backgroundColor: "rgba(252,165,165,0.03)", padding: "1rem", marginTop: "1rem" }}>
-                  <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>Contradiction</span>
-                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.2rem", maxWidth: "48ch" }}>{composedResult.contradiction}</p>
-                </div>
-              )}
+              {/* 3. THE CONTRADICTION */}
+              <div style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.04)", padding: "1rem", marginTop: "1rem" }}>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>The contradiction</span>
+                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.65)", marginTop: "0.2rem", maxWidth: "48ch" }}>{sig.contradiction}</p>
+              </div>
 
-              {/* 4. DECISION */}
+              {/* 4. THE MOVE */}
               <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>The decision this surfaces</span>
-                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.75)", marginTop: "0.25rem", maxWidth: "48ch" }}>{sig.decisionStatement}</p>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>The move — non-optional</span>
+                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.78)", marginTop: "0.2rem", maxWidth: "48ch" }}>{sig.move}</p>
               </div>
 
-              {/* 5. ONE MOVE */}
-              <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}03`, padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>One move — within 24 hours</span>
-                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.78)", marginTop: "0.2rem", maxWidth: "48ch" }}>{sig.moveStatement}</p>
+              {/* 5. IF IGNORED — 7/30/90 */}
+              <div style={{ border: "1px solid rgba(252,165,165,0.12)", padding: "1rem", marginTop: "1rem" }}>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)" }}>If ignored</span>
+                <div className="mt-2 space-y-2">
+                  {[
+                    { label: "7 days", text: sig.ignored7 },
+                    { label: "30 days", text: sig.ignored30 },
+                    { label: "90 days", text: sig.ignored90 },
+                  ].map((c) => (
+                    <div key={c.label} className="flex gap-3">
+                      <span style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.30)", minWidth: "50px" }}>{c.label}</span>
+                      <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>{c.text}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-
-              {/* 6. IF UNCHANGED */}
-              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(252,165,165,0.40)", marginTop: "1rem", fontStyle: "italic", maxWidth: "48ch" }}>{sig.consequenceStatement}</p>
 
               {/* COST OF DELAY */}
               {delayResult && (
@@ -421,9 +427,9 @@ const FastDiagnosticPage: NextPage = () => {
               {/* FINAL — after scenario */}
               {stage === "final" && scenarioChoice && (
                 <div style={{ border: "1px solid rgba(253,186,116,0.18)", backgroundColor: "rgba(253,186,116,0.03)", padding: "1rem", marginTop: "1rem" }}>
-                  <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.50)" }}>What this reveals</span>
-                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.65)", marginTop: "0.2rem", maxWidth: "48ch" }}>
-                    {evaluateBehaviour(sig.key, scenarioChoice).message}
+                  <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.50)" }}>Behaviour revealed</span>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.70)", marginTop: "0.2rem", maxWidth: "48ch" }}>
+                    {evaluateBehaviour(sig.key, scenarioChoice).aligned ? evaluateBehaviour(sig.key, scenarioChoice).message : sig.behaviourReveal}
                   </p>
                 </div>
               )}
@@ -435,7 +441,7 @@ const FastDiagnosticPage: NextPage = () => {
               {(stage === "final" || !activeScenario) && (
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem", marginTop: "1.5rem" }}>
                   <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.40)", maxWidth: "48ch" }}>
-                    You have enough to act at a basic level. Escalation is only required if the consequence must be priced, defended, or enforced.
+                    {sig.escalationLine}
                   </p>
                   <Link href="/diagnostics/executive-reporting" className="inline-flex items-center gap-2 mt-4" style={{ padding: "12px 24px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
                     Escalate decision <ArrowRight style={{ width: 10, height: 10 }} />
