@@ -1,15 +1,15 @@
 /**
  * Admin Authority — canonical admin identity enforcement.
  *
- * Single source of truth for admin access control.
+ * SINGLE SOURCE OF TRUTH for all admin access control.
  * Used by: proxy, middleware, server guards, client nav, API routes.
  *
  * Access requires BOTH:
  * 1. Email in ADMIN_EMAILS
  * 2. Role is admin/owner/root
- *
- * No public fallback. No client-only permission. No email-only access.
  */
+
+import type { Session } from "next-auth";
 
 export const ADMIN_EMAILS = [
   "info@abrahamoflondon.org",
@@ -17,22 +17,45 @@ export const ADMIN_EMAILS = [
   "abrahamadaramola@outlook.com",
 ] as const;
 
-export function normalizeEmail(email: unknown): string {
+export type AdminRole = "owner" | "admin" | "root";
+
+export function normalizeAdminEmail(email: unknown): string {
   return typeof email === "string" ? email.trim().toLowerCase() : "";
 }
 
 export function isAdminEmail(email: unknown): boolean {
-  return (ADMIN_EMAILS as readonly string[]).includes(normalizeEmail(email));
+  const normalized = normalizeAdminEmail(email);
+  return (ADMIN_EMAILS as readonly string[]).includes(normalized);
+}
+
+export function normalizeAdminRole(role: unknown): string {
+  return typeof role === "string" ? role.trim().toLowerCase() : "";
 }
 
 export function isAdminRole(role: unknown): boolean {
-  const r = typeof role === "string" ? role.trim().toLowerCase() : "";
-  return r === "admin" || r === "owner" || r === "root";
+  const normalized = normalizeAdminRole(role);
+  return normalized === "owner" || normalized === "admin" || normalized === "root";
 }
 
-export function isAuthorizedAdmin(subject: {
+export function extractSessionRole(session: Session | null | undefined): unknown {
+  return (
+    (session?.user as any)?.role ??
+    (session?.user as any)?.aol?.role ??
+    (session as any)?.role ??
+    null
+  );
+}
+
+export function isAuthorizedAdminSubject(subject: {
   email?: unknown;
   role?: unknown;
 }): boolean {
   return isAdminEmail(subject.email) && isAdminRole(subject.role);
+}
+
+export function isAuthorizedAdminSession(session: Session | null | undefined): boolean {
+  return isAuthorizedAdminSubject({
+    email: session?.user?.email,
+    role: extractSessionRole(session),
+  });
 }

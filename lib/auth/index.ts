@@ -7,10 +7,8 @@ export * from "./client";
 export * from "./server";
 
 // Export HOCs
-export { withAdminAuth, adminHelpers } from "./withAdminAuth";
 export { withInnerCircleAuth } from "./withInnerCircleAuth";
 export { withUnifiedAuth } from "./withUnifiedAuth";
 
 // Export types
-export type { AdminUser, WithAdminAuthProps } from "./withAdminAuth";
 export type { AccessTier } from "@/lib/access/tier-policy";

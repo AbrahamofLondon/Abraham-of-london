@@ -10,6 +10,7 @@ import {
   Menu, X, ArrowRight, Vault, Shield, Compass, Briefcase, 
   Terminal, Crown, LayoutDashboard, Brain, Activity, LogOut, User 
 } from "lucide-react";
+import { hasAccess, normalizeUserTier } from "@/lib/access/tier-policy";
 
 const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" ");
 
@@ -23,8 +24,6 @@ const NAV = [
   { href: "/vault", label: "Vault" },
 ] as const;
 
-import { isAdminEmail } from "@/lib/auth/admin-authority";
-
 export default function Navbar(): React.ReactElement {
   const [mounted, setMounted] = React.useState(false);
   const [open, setOpen] = React.useState(false);
@@ -33,7 +32,9 @@ export default function Navbar(): React.ReactElement {
   const { data: session, status } = useSession();
   const asPath = mounted ? router.asPath : "/";
   
-  const isAdmin = isAdminEmail(session?.user?.email);
+  const sessionUser = session?.user as { tier?: string; role?: string } | undefined;
+  const userTier = normalizeUserTier(sessionUser?.tier ?? sessionUser?.role ?? "public");
+  const isAdmin = hasAccess(userTier, "architect");
   const isAuthenticated = status === "authenticated";
   const isLoading = status === "loading";
 

@@ -6,7 +6,7 @@ import { getToken } from "next-auth/jwt";
 
 import { ROLE_HIERARCHY } from "@/types/auth";
 import { readAccessCookie } from "@/lib/auth/edge/cookies";
-import { isAuthorizedAdmin } from "@/lib/auth/admin-authority";
+import { isAuthorizedAdminSubject } from "@/lib/auth/admin-authority";
 
 const CANONICAL_HOST = "www.abrahamoflondon.org";
 
@@ -197,11 +197,11 @@ export async function proxy(req: NextRequest) {
         return NextResponse.redirect(url, 307);
       }
 
-      // Enforce BOTH email whitelist AND admin role — not role alone
+      // Enforce canonical admin authority: email + role at the edge.
       const tokenEmail = (token as any)?.email || (token as any)?.user?.email || (token as any)?.aol?.email;
       const tokenRole = (token as any)?.role || (token as any)?.user?.role || (token as any)?.aol?.role;
 
-      if (!isAuthorizedAdmin({ email: tokenEmail, role: tokenRole })) {
+      if (!isAuthorizedAdminSubject({ email: tokenEmail, role: tokenRole })) {
         return isApi
           ? jsonResponse({ error: "ADMIN_CLEARANCE_REQUIRED" }, 403)
           : NextResponse.redirect(new URL("/auth/access-denied", req.url));

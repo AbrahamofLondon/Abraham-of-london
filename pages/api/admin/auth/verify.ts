@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma.server";
-import { isAdminEmail } from "@/lib/auth/admin-authority";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 
@@ -46,11 +45,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   await prisma.verificationToken.delete({
     where: { identifier_token: { identifier: normalizedEmail, token: tokenStr } },
   }).catch(() => {});
-
-  // Verify this is an admin email
-  if (!isAdminEmail(normalizedEmail)) {
-    return res.redirect(302, "/admin/login?error=not_authorised");
-  }
 
   // Ensure user exists with admin role
   const user = await prisma.user.upsert({

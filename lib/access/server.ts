@@ -145,12 +145,14 @@ export async function requireAdminPage<T = Record<string, never>>(
     };
   }
 
-  if (!access.permissions.isAdmin) {
+  // Enforce canonical admin authority: email + role, not role alone
+  const { isAdminEmail } = require("@/lib/auth/admin-authority");
+  if (!access.permissions.isAdmin || !isAdminEmail(session?.user?.email)) {
     return {
       authorized: false,
       redirect: {
         redirect: {
-          destination: "/access",
+          destination: "/auth/access-denied",
           permanent: false,
         },
       },

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import type { GetServerSideProps, NextPage } from "next";
 
-import { requireAdminPage } from "@/lib/access/server";
+import { requireAdminPage } from "@/lib/auth/require-admin-page";
 import { usePDFDashboard } from "@/hooks/usePDFDashboard";
 import { useToast } from "@/hooks/useToast";
 import { getInstitutionalAnalyticsServer } from "@/lib/server/institutional-analytics";
@@ -81,21 +81,20 @@ function toActionsBarPDF(pdf: PDFItem | null): ActionsBarPDF | null {
 }
 
 export const getServerSideProps: GetServerSideProps<PDFDashboardProps> = async (context) => {
-  const auth = await requireAdminPage(context);
-  if (!auth.authorized) return auth.redirect as any;
+  const admin = await requireAdminPage(context);
+  if (!admin.ok) return { redirect: admin.redirect } as any;
 
-  const access = auth.access as any;
-  const effectiveEmail = access.email || "admin@abrahamoflondon.org";
+  const effectiveEmail = admin.adminEmail;
   const effectiveName = effectiveEmail || "Administrator";
-  const effectiveRole = access.role || "admin";
-  const effectivePermissions = access.permissions;
+  const effectiveRole = "admin";
+  const effectivePermissions = { isAdmin: true, isOwner: effectiveEmail === "info@abrahamoflondon.org", isAuthenticated: true };
 
   try {
     const result = await getInstitutionalAnalyticsServer();
     return {
       props: {
         user: {
-          id: String(auth.userId || "admin"),
+          id: String(admin.adminEmail || "admin"),
           email: String(effectiveEmail),
           name: String(effectiveName),
           role: String(effectiveRole),
@@ -109,7 +108,7 @@ export const getServerSideProps: GetServerSideProps<PDFDashboardProps> = async (
     return {
       props: {
         user: {
-          id: String(auth.userId || "admin"),
+          id: String(admin.adminEmail || "admin"),
           email: String(effectiveEmail),
           name: String(effectiveName),
           role: String(effectiveRole),
