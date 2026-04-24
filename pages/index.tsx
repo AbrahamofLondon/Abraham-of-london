@@ -2767,7 +2767,7 @@ function ProofLayer() {
                 Method
               </div>
               <p className="max-w-[60ch] text-[13.5px] leading-[1.85] ds-text-muted">
-                See how the system captures signal, classifies condition, and governs interpretation.
+                The system captures signal, classifies condition, and enforces interpretation.
               </p>
             </div>
             <div className="mt-4">
@@ -3152,7 +3152,7 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
                   textTransform: "uppercase",
                 }}
               >
-                Explore intelligence
+                Run the system
               </Link>
               <Link
                 href="/strategy-room"
