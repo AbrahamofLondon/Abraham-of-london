@@ -13,11 +13,15 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
+import { composeResult, type DiagnosticResult } from "@/lib/diagnostics/output-composer";
+import { selectScenario } from "@/lib/diagnostics/scenario-selector";
+import { evaluateBehaviour } from "@/lib/diagnostics/behaviour-map";
+import type { ScenarioDefinition } from "@/lib/diagnostics/scenarios";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
-type Stage = "entry" | "q1" | "q2" | "q3" | "interrupt" | "q4" | "q5" | "q6" | "result";
+type Stage = "entry" | "q1" | "q2" | "q3" | "interrupt" | "q4" | "q5" | "q6" | "result" | "scenario" | "final";
 
 const FastDiagnosticPage: NextPage = () => {
   const [stage, setStage] = React.useState<Stage>("entry");
@@ -27,6 +31,7 @@ const FastDiagnosticPage: NextPage = () => {
   const [decisionState, setDecisionState] = React.useState(0);
   const [clarity, setClarity] = React.useState(0);
   const [accountability, setAccountability] = React.useState(0);
+  const [scenarioChoice, setScenarioChoice] = React.useState("");
   const startTime = React.useRef(0);
 
   React.useEffect(() => {
@@ -84,46 +89,25 @@ const FastDiagnosticPage: NextPage = () => {
     }
   }
 
-  // ─── SCORING (deterministic, no AI) ───
-  const contradictions = React.useMemo(() => {
-    const c: string[] = [];
-    if (urgency >= 3 && ownership >= 3) c.push("authority_leakage");
-    if (clarity >= 3 && accountability >= 3) c.push("definition_failure");
-    if (urgency >= 3 && decisionState >= 3) c.push("execution_avoidance");
-    return c;
-  }, [urgency, ownership, clarity, accountability, decisionState]);
+  // ─── COMPOSED RESULT (deterministic, from signal dictionary) ───
+  const composedResult: DiagnosticResult | null = React.useMemo(() => {
+    if (stage !== "result" && stage !== "scenario" && stage !== "final") return null;
+    return composeResult({
+      urgency,
+      ownershipScore: ownership,
+      stateScore: decisionState,
+      clarityScore: clarity,
+      accountabilityScore: accountability,
+    });
+  }, [urgency, ownership, decisionState, clarity, accountability, stage]);
 
-  const primarySignal = contradictions[0] === "authority_leakage"
-    ? "Authority is unclear under urgency"
-    : contradictions[0] === "definition_failure"
-    ? "Decision is defined but not owned"
-    : contradictions[0] === "execution_avoidance"
-    ? "Execution is being deferred despite urgency"
-    : "Latent instability in decision handling";
+  const activeScenario: ScenarioDefinition | null = React.useMemo(() => {
+    if (!composedResult) return null;
+    return selectScenario(composedResult.signal.key);
+  }, [composedResult]);
 
-  const contradictionNarrative = contradictions[0] === "authority_leakage"
-    ? "This combination typically results in decisions being made informally rather than deliberately."
-    : contradictions[0] === "definition_failure"
-    ? "When the outcome is unclear and no one is accountable, the decision dissolves into discussion."
-    : contradictions[0] === "execution_avoidance"
-    ? "High urgency with repeated deferral means the decision is being avoided, not processed."
-    : "No single contradiction dominates, but the pattern suggests the decision lacks structural support.";
-
-  const decisionStatement = contradictions[0] === "authority_leakage"
-    ? "You must either assign ownership or accept that this decision will be made without control."
-    : contradictions[0] === "definition_failure"
-    ? "You must either define the outcome explicitly or accept that execution will interpret it for you."
-    : contradictions[0] === "execution_avoidance"
-    ? "You must either force the decision into the next cycle or acknowledge that avoidance is the decision."
-    : "You must either name what is blocking this decision or accept that the current state is the outcome.";
-
-  const oneMove = contradictions[0] === "authority_leakage"
-    ? "Within 24 hours, name the person responsible for making this decision and document what they can decide without escalation."
-    : contradictions[0] === "definition_failure"
-    ? "Within 24 hours, write the decision outcome in one sentence and name who is accountable if it fails."
-    : contradictions[0] === "execution_avoidance"
-    ? "Within 24 hours, set a 7-day deadline for this decision and name who reports on the outcome."
-    : "Within 24 hours, write this decision in one sentence and identify the single thing preventing it from being made.";
+  // All language now comes from the signal dictionary — no inline strings
+  const sig = composedResult?.signal;
 
   const urgencyLabel = ["", "No immediate consequence", "Minor disruption", "Noticeable impact", "Material consequence"][urgency] ?? "";
   const ownershipLabel = ["", "Clearly defined", "Likely known", "Unclear", "No one"][ownership] ?? "";
@@ -328,91 +312,99 @@ const FastDiagnosticPage: NextPage = () => {
             Decision check · {elapsed}s
           </span>
 
-          {/* 1. PRIMARY SIGNAL */}
-          <div style={{ marginTop: "1.5rem" }}>
-            <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>
-              Primary signal
-            </span>
-            <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.15rem", lineHeight: 1.55, color: "rgba(255,255,255,0.85)", marginTop: "0.35rem", maxWidth: "48ch" }}>
-              {primarySignal}
-            </p>
-          </div>
+          {sig && (
+            <>
+              {/* 1. PRIMARY SIGNAL */}
+              <div style={{ marginTop: "1.5rem" }}>
+                <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>Primary signal</span>
+                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.15rem", lineHeight: 1.55, color: "rgba(255,255,255,0.85)", marginTop: "0.35rem", maxWidth: "48ch" }}>{sig.primaryStatement}</p>
+              </div>
 
-          {/* 2. EVIDENCE */}
-          <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", marginTop: "1.25rem" }}>
-            <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
-              You indicated
-            </span>
-            <div className="mt-2 space-y-1">
-              {[
-                { label: "Decision", value: decisionText },
-                { label: "Urgency", value: urgencyLabel },
-                { label: "Ownership", value: ownershipLabel },
-                { label: "State", value: stateLabel },
-                { label: "Clarity", value: clarityLabel },
-                { label: "Accountability", value: accountabilityLabel },
-              ].map((item) => (
-                <div key={item.label} className="flex gap-3">
-                  <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", minWidth: "80px" }}>{item.label}</span>
-                  <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)" }}>{item.value}</span>
+              {/* 2. EVIDENCE */}
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", marginTop: "1.25rem" }}>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>You indicated</span>
+                <div className="mt-2 space-y-1">
+                  {[
+                    { label: "Decision", value: decisionText },
+                    { label: "Urgency", value: urgencyLabel },
+                    { label: "Ownership", value: ownershipLabel },
+                    { label: "State", value: stateLabel },
+                    { label: "Clarity", value: clarityLabel },
+                    { label: "Accountability", value: accountabilityLabel },
+                  ].map((item) => (
+                    <div key={item.label} className="flex gap-3">
+                      <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", minWidth: "80px" }}>{item.label}</span>
+                      <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)" }}>{item.value}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* 3. CONTRADICTION */}
-          <div style={{ border: "1px solid rgba(252,165,165,0.15)", backgroundColor: "rgba(252,165,165,0.03)", padding: "1rem", marginTop: "1rem" }}>
-            <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
-              Contradiction
-            </span>
-            <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.2rem", maxWidth: "48ch" }}>
-              {contradictionNarrative}
-            </p>
-          </div>
+              {/* 3. CONTRADICTION */}
+              {composedResult?.contradiction && (
+                <div style={{ border: "1px solid rgba(252,165,165,0.15)", backgroundColor: "rgba(252,165,165,0.03)", padding: "1rem", marginTop: "1rem" }}>
+                  <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>Contradiction</span>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.2rem", maxWidth: "48ch" }}>{composedResult.contradiction}</p>
+                </div>
+              )}
 
-          {/* 4. DECISION */}
-          <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginTop: "1rem" }}>
-            <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>
-              The decision this surfaces
-            </span>
-            <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.75)", marginTop: "0.25rem", maxWidth: "48ch" }}>
-              {decisionStatement}
-            </p>
-          </div>
+              {/* 4. DECISION */}
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginTop: "1rem" }}>
+                <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>The decision this surfaces</span>
+                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.75)", marginTop: "0.25rem", maxWidth: "48ch" }}>{sig.decisionStatement}</p>
+              </div>
 
-          {/* 5. ONE MOVE */}
-          <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}03`, padding: "1rem", marginTop: "1rem" }}>
-            <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
-              One move — within 24 hours
-            </span>
-            <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.78)", marginTop: "0.2rem", maxWidth: "48ch" }}>
-              {oneMove}
-            </p>
-          </div>
+              {/* 5. ONE MOVE */}
+              <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}03`, padding: "1rem", marginTop: "1rem" }}>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>One move — within 24 hours</span>
+                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.78)", marginTop: "0.2rem", maxWidth: "48ch" }}>{sig.moveStatement}</p>
+              </div>
 
-          {/* 6. IF UNCHANGED */}
-          <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(252,165,165,0.40)", marginTop: "1rem", fontStyle: "italic", maxWidth: "48ch" }}>
-            If unchanged, this pattern typically compounds within 7–30 days as urgency increases and control decreases.
-          </p>
+              {/* 6. IF UNCHANGED */}
+              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(252,165,165,0.40)", marginTop: "1rem", fontStyle: "italic", maxWidth: "48ch" }}>{sig.consequenceStatement}</p>
 
-          {/* 7. VALIDITY */}
-          <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.15)", marginTop: "1rem" }}>
-            This is based on your responses. It identifies a likely decision pattern, not a full organisational diagnosis.
-          </p>
+              {/* SCENARIO STRESS-TEST */}
+              {activeScenario && stage === "result" && (
+                <div style={{ border: "1px solid rgba(255,255,255,0.10)", padding: "1.25rem", marginTop: "1.5rem" }}>
+                  <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Under pressure</span>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.70)", marginTop: "0.5rem", maxWidth: "48ch" }}>{activeScenario.prompt}</p>
+                  <div className="mt-4 space-y-2">
+                    {activeScenario.options.map((opt) => (
+                      <button key={opt.id} type="button" onClick={() => { setScenarioChoice(opt.behaviourTag); setStage("final"); }} style={{ width: "100%", textAlign: "left", padding: "12px 16px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgba(255,255,255,0.55)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.6, cursor: "pointer" }}>
+                        <span style={{ ...mono, fontSize: "8px", color: `${GOLD}80`, marginRight: "0.75rem" }}>{opt.id}</span>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* 8. ESCALATION */}
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem", marginTop: "1.5rem" }}>
-            <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.40)", maxWidth: "48ch" }}>
-              You have enough to act at a basic level. Escalation is only required if the consequence must be priced, defended, or enforced.
-            </p>
-            <Link
-              href="/diagnostics/executive-reporting"
-              className="inline-flex items-center gap-2 mt-4"
-              style={{ padding: "12px 24px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}
-            >
-              Escalate decision <ArrowRight style={{ width: 10, height: 10 }} />
-            </Link>
-          </div>
+              {/* FINAL — after scenario */}
+              {stage === "final" && scenarioChoice && (
+                <div style={{ border: "1px solid rgba(253,186,116,0.18)", backgroundColor: "rgba(253,186,116,0.03)", padding: "1rem", marginTop: "1rem" }}>
+                  <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.50)" }}>What this reveals</span>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.65)", marginTop: "0.2rem", maxWidth: "48ch" }}>
+                    {evaluateBehaviour(sig.key, scenarioChoice).message}
+                  </p>
+                </div>
+              )}
+
+              {/* 7. VALIDITY */}
+              <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.15)", marginTop: "1rem" }}>{sig.boundaryStatement}</p>
+
+              {/* 8. ESCALATION — only after scenario is complete or if no scenario */}
+              {(stage === "final" || !activeScenario) && (
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem", marginTop: "1.5rem" }}>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.40)", maxWidth: "48ch" }}>
+                    You have enough to act at a basic level. Escalation is only required if the consequence must be priced, defended, or enforced.
+                  </p>
+                  <Link href="/diagnostics/executive-reporting" className="inline-flex items-center gap-2 mt-4" style={{ padding: "12px 24px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+                    Escalate decision <ArrowRight style={{ width: 10, height: 10 }} />
+                  </Link>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </main>
     </Layout>
