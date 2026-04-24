@@ -1,13 +1,10 @@
 // components/emails/TeaserEmail.tsx
 import * as React from "react";
+import { EmailLinks } from "@/lib/email/links";
 
 type Props = { name?: string; siteUrl: string };
 
-export default function TeaserEmail({ name, siteUrl }: Props) {
-  const base = siteUrl.replace(/\/$/, "");
-  const A4 = `${base}/downloads/fathering-without-fear`;
-  const Mobile = `${base}/downloads/fathering-without-fear`;
-
+export default function TeaserEmail({ name }: Props) {
   const link = (href: string, label: string) => (
     <a
       href={href}
@@ -38,13 +35,13 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
       <p>Here&apos;s a free, brand-styled teaser you can read and share:</p>
 
       <ul>
-        <li>Teaser PDF (A4/Letter): {link(A4, "Download A4/Letter")}</li>
-        <li>Teaser PDF (Mobile): {link(Mobile, "Download Mobile")}</li>
+        <li>Teaser PDF (A4/Letter): {link(EmailLinks.downloads("fathering-without-fear"), "Download A4/Letter")}</li>
+        <li>Teaser PDF (Mobile): {link(EmailLinks.downloads("fathering-without-fear"), "Download Mobile")}</li>
       </ul>
 
       <p>
         Want chapter drops and launch dates? Reply <em>&quot;keep me posted&quot;</em> or join the list here:{" "}
-        {link(`${base}/contact`, `${base}/contact`)}.
+        {link(EmailLinks.contact, "Contact us")}.
       </p>
 
       <p>

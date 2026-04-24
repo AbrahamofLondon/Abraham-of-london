@@ -114,7 +114,7 @@ export async function POST(
           inviteToken: participant.inviteTokenHash,
         });
 
-        if (!sent.success) {
+        if (!sent.ok) {
           throw new Error(
             sent.error || `Failed to send nudge to ${participant.email}`,
           );

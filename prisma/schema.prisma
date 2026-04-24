@@ -3073,3 +3073,44 @@ model EscalationEvent {
   @@index([createdAt])
   @@map("escalation_events")
 }
+
+// ============================================================================
+// CALIBRATION LOOP (Prediction → Outcome → Calibration)
+// ============================================================================
+
+model CalibrationState {
+  id               String    @id @default(cuid())
+  modelKey         String
+  modelVersion     String
+  status           String    @default("ACTIVE") // ACTIVE | SHADOW | RETIRED
+  calibrationData  Json
+  outcomeCount     Int       @default(0)
+  accuracyScore    Float?
+  biasScore        Float?
+  lastCalibratedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([modelKey, modelVersion])
+  @@index([modelKey])
+  @@index([status])
+  @@map("calibration_states")
+}
+
+model CalibrationEvent {
+  id                 String   @id @default(cuid())
+  sessionKey         String
+  modelKey           String
+  modelVersion       String
+  predictionSnapshot Json
+  outcomeSnapshot    Json
+  predictionError    Float?
+  adjustmentProposal Json?
+  applied            Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  @@index([modelKey, modelVersion])
+  @@index([sessionKey])
+  @@index([applied])
+  @@map("calibration_events")
+}

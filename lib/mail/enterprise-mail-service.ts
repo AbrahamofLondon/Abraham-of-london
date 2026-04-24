@@ -10,19 +10,12 @@ const DEFAULT_SITE_URL = String(
     "https://www.abrahamoflondon.org"
 ).replace(/\/+$/, "");
 
-type MailSuccess = {
-  success: true;
+export type SendEmailResult = {
+  ok: boolean;
   provider: "resend";
+  error?: string;
   id?: string | null;
 };
-
-type MailFailure = {
-  success: false;
-  provider: "resend";
-  error: string;
-};
-
-export type MailResult = MailSuccess | MailFailure;
 
 export interface ExecutiveBriefParams {
   email: string;
@@ -66,7 +59,7 @@ async function sendHtmlEmail(args: {
   html: string;
   from?: string;
   replyTo?: string;
-}): Promise<MailResult> {
+}): Promise<SendEmailResult> {
   const result = await sendEmail({
     type: "ENTERPRISE",
     to: Array.isArray(args.to) ? args.to : [args.to],
@@ -80,8 +73,8 @@ async function sendHtmlEmail(args: {
   });
 
   return result.ok
-    ? { success: true, provider: "resend", id: null }
-    : { success: false, provider: "resend", error: result.error || "MAIL_SEND_FAILED" };
+    ? { ok: true, provider: "resend", id: null }
+    : { ok: false, provider: "resend", error: result.error || "MAIL_SEND_FAILED" };
 }
 
 export async function sendExecutiveBriefNotification({
@@ -90,7 +83,7 @@ export async function sendExecutiveBriefNotification({
   campaignTitle,
   dashboardUrl,
   respondentCount,
-}: ExecutiveBriefParams): Promise<MailResult> {
+}: ExecutiveBriefParams): Promise<SendEmailResult> {
   const safeEmail = String(email || "").trim().toLowerCase();
   const safeOrg = escapeHtml(organisationName);
   const safeCampaign = escapeHtml(campaignTitle);
@@ -98,11 +91,11 @@ export async function sendExecutiveBriefNotification({
   const safeCount = Number.isFinite(respondentCount) ? respondentCount : 0;
 
   if (!isValidEmail(safeEmail)) {
-    return { success: false, provider: "resend", error: "INVALID_EMAIL" };
+    return { ok: false, provider: "resend", error: "INVALID_EMAIL" };
   }
 
   if (!safeUrl) {
-    return { success: false, provider: "resend", error: "MISSING_DASHBOARD_URL" };
+    return { ok: false, provider: "resend", error: "MISSING_DASHBOARD_URL" };
   }
 
   const date = formatDate();
@@ -181,18 +174,18 @@ export async function sendCampaignNudgeEmail({
   campaignTitle,
   organisationName,
   inviteToken,
-}: CampaignNudgeParams): Promise<MailResult> {
+}: CampaignNudgeParams): Promise<SendEmailResult> {
   const safeEmail = String(email || "").trim().toLowerCase();
   const safeCampaign = escapeHtml(campaignTitle);
   const safeOrg = escapeHtml(organisationName);
   const safeToken = String(inviteToken || "").trim();
 
   if (!isValidEmail(safeEmail)) {
-    return { success: false, provider: "resend", error: "INVALID_EMAIL" };
+    return { ok: false, provider: "resend", error: "INVALID_EMAIL" };
   }
 
   if (!safeToken) {
-    return { success: false, provider: "resend", error: "MISSING_INVITE_TOKEN" };
+    return { ok: false, provider: "resend", error: "MISSING_INVITE_TOKEN" };
   }
 
   const accessUrl = `${DEFAULT_SITE_URL}/alignment/enterprise/respond?token=${encodeURIComponent(
@@ -256,13 +249,13 @@ export async function sendInternalAccessRequestNotification(args: {
   userEmail: string;
   assetTitle: string;
   slug: string;
-}): Promise<MailResult> {
+}): Promise<SendEmailResult> {
   const safeEmail = String(args.userEmail || "").trim().toLowerCase();
   const safeTitle = escapeHtml(args.assetTitle);
   const safeSlug = escapeHtml(args.slug);
 
   if (!isValidEmail(safeEmail)) {
-    return { success: false, provider: "resend", error: "INVALID_EMAIL" };
+    return { ok: false, provider: "resend", error: "INVALID_EMAIL" };
   }
 
   const html = `
@@ -294,3 +287,6 @@ export async function sendInternalAccessRequestNotification(args: {
     html,
   });
 }
+
+/** Alias for backward compatibility */
+export const sendAccessRequestEmail = sendInternalAccessRequestNotification;

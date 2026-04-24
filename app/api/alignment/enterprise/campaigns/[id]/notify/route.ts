@@ -26,14 +26,17 @@ export async function POST(
 
     if (current >= target && !campaign.executiveNotified) {
       // 3. Dispatch the Premium Email
-      // This helper would use your Resend/Postmark/SendGrid integration
-      await sendExecutiveBriefNotification({
+      const mailResult = await sendExecutiveBriefNotification({
         email: campaign.executiveEmail, // The CEO/Lead contact
         organisationName: campaign.organisationName,
         campaignTitle: campaign.title,
         dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/enterprise/alignment/dashboard/${id}`,
         respondentCount: current
       });
+
+      if (!mailResult.ok) {
+        console.error('[NOTIFY_MAIL_FAIL]', mailResult.error);
+      }
 
       // 4. Mark as notified in DB to prevent duplicate pings
       // await updateCampaignNotificationStatus(id, true);

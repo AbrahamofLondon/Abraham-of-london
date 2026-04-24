@@ -50,13 +50,14 @@ export async function requestAccessAction(formData: FormData) {
     },
   });
 
-  const mailResult = await sendAccessRequestEmail(email, title, slug);
+  const mailResult = await sendAccessRequestEmail({ userEmail: email, assetTitle: title, slug });
 
-  if (mailResult?.success) {
+  if (mailResult?.ok) {
     return {
       message: 'Request received. An advisor will review your session.',
     };
   }
 
+  console.error('[ACCESS_REQUEST_MAIL_FAIL]', mailResult?.error || 'UNKNOWN');
   throw new Error('Connectivity error. Please retry.');
 }
