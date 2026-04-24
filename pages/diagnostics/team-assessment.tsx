@@ -722,7 +722,7 @@ export default function TeamAssessmentPage() {
             `Critical gaps: ${criticalGaps.length}`,
             `High gaps: ${highGaps.length}`,
           ],
-          confidence: reading.decisionObject.confidence === "high" ? 0.84 : reading.decisionObject.confidence === "medium" ? 0.66 : 0.48,
+          confidence: reading.decisionObject.signalStrength === "high" ? 0.84 : reading.decisionObject.signalStrength === "medium" ? 0.66 : 0.48,
         },
       },
     });

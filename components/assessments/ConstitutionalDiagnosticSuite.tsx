@@ -1047,7 +1047,7 @@ export default function ConstitutionalDiagnosticSuite() {
                         fontSize: "7.5px", letterSpacing: "0.20em",
                         color: "rgba(255,255,255,0.35)",
                       }}>
-                        {decision ? `${Math.round(decision.confidence * 100)}% confidence` : "Awaiting signal"}
+                        {decision ? `${Math.round(decision.confidence * 100)}% signal strength` : "Awaiting signal"}
                       </div>
                     </div>
                   </div>
@@ -1209,7 +1209,7 @@ export default function ConstitutionalDiagnosticSuite() {
                       fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.38)",
                     }}>
-                      {Math.round(decision.confidence * 100)}% constitutional confidence
+                      {Math.round(decision.confidence * 100)}% constitutional signal strength
                     </div>
                     <ThresholdProximityLine
                       text={thresholdProximityText({
@@ -1450,7 +1450,7 @@ export default function ConstitutionalDiagnosticSuite() {
                         { label: "Governance",     value: `${scores.governance}%`, color: undefined },
                         { label: "Seriousness",    value: `${scores.seriousness}%`,color: undefined },
                         { label: "Failure modes",  value: `${scores.failureModeCount}`, color: undefined },
-                        { label: "Confidence",     value: `${Math.round(decision.confidence * 100)}%`, color: undefined },
+                        { label: "Signal strength", value: `${Math.round(decision.confidence * 100)}%`, color: undefined },
                         { label: "Post. weight",   value: `${decision.postureWeight.toFixed(2)}`, color: undefined },
                         { label: "Read. weight",   value: `${decision.readinessWeight.toFixed(2)}`, color: undefined },
                       ].map(({ label, value, color }) => (

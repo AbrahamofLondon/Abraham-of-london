@@ -607,15 +607,25 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
 
 type InstitutionalPosture = "ORDERED" | "DRIFTING" | "CONTESTED" | "DISORDERED";
 
-function computePosture(domains: EnterpriseDomain[]): { posture: InstitutionalPosture; govAvg: number; execAvg: number } {
-  if (domains.length === 0) return { posture: "DISORDERED", govAvg: 0, execAvg: 0 };
-  const govAvg = Math.round(domains.reduce((s, d) => s + d.governance, 0) / domains.length);
-  const execAvg = Math.round(domains.reduce((s, d) => s + d.execution, 0) / domains.length);
+function computePosture(domains: EnterpriseDomain[]): { posture: InstitutionalPosture; govAvg: number; execAvg: number; composite: number } {
+  if (domains.length === 0) return { posture: "DISORDERED", govAvg: 0, execAvg: 0, composite: 0 };
+  const avg = (key: "authority" | "governance" | "clarity" | "execution" | "trust" | "exposure") => Math.round(domains.reduce((s, d) => s + (d[key] ?? 0), 0) / domains.length);
+  const govAvg = avg("governance");
+  const execAvg = avg("execution");
+  // Use ALL 6 metrics, not just 2. Weighted composite.
+  const composite = Math.round(
+    avg("authority") * 0.20 +
+    govAvg * 0.25 +
+    avg("clarity") * 0.15 +
+    execAvg * 0.20 +
+    avg("trust") * 0.20,
+  );
+  // Composite-based posture: 65+ ORDERED, 50-64 DRIFTING, 35-49 CONTESTED, <35 DISORDERED
   const posture: InstitutionalPosture =
-    govAvg >= 60 && execAvg >= 60 ? "ORDERED" :
-    govAvg >= 60 && execAvg < 60 ? "DRIFTING" :
-    govAvg < 60 && execAvg >= 60 ? "CONTESTED" : "DISORDERED";
-  return { posture, govAvg, execAvg };
+    composite >= 65 ? "ORDERED" :
+    composite >= 50 ? "DRIFTING" :
+    composite >= 35 ? "CONTESTED" : "DISORDERED";
+  return { posture, govAvg, execAvg, composite };
 }
 
 function PostureMatrix({ domains }: { domains: EnterpriseDomain[] }) {

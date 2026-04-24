@@ -6,6 +6,7 @@ import {
   type OrgPosture,
   type ReadinessTier,
 } from "@/lib/constitution/rules";
+import { specificityScore, graduatedBonus, matchDensity, matchCount } from "@/lib/scoring-math";
 import type {
   AssessmentInput,
   AssessmentReadout,
@@ -55,11 +56,11 @@ function includesAny(text: string, patterns: string[]): boolean {
   return patterns.some((pattern) => hay.includes(pattern.toLowerCase()));
 }
 
-function scoreLength(text: string, floor: number, ceiling: number): number {
-  const words = wordCount(text);
-  if (words <= floor) return 0;
-  if (words >= ceiling) return 100;
-  return ((words - floor) / (ceiling - floor)) * 100;
+function scoreLength(text: string, _floor: number, _ceiling: number): number {
+  // Replaced pure word-count scoring with specificity-based scoring.
+  // A concise 30-word statement with named entities and causal language
+  // now scores higher than an 80-word ramble with no specifics.
+  return specificityScore(text);
 }
 
 function extractPrimaryNarrative(input: AssessmentInput): string {
@@ -132,24 +133,20 @@ function deriveAuthorityType(input: AssessmentInput, scores: AssessmentScores): 
 }
 
 function derivePosture(scores: AssessmentScores): OrgPosture {
-  const { coherenceScore, frictionScore, governanceScore } = {
-    coherenceScore: scores.narrativeCoherence,
-    frictionScore: scores.frictionScore,
-    governanceScore: scores.governanceDiscipline,
-  };
+  // Weighted composite replaces AND-gated thresholds.
+  // Old logic: coherence=74, friction=34, governance=69 fell to MISALIGNED
+  // despite being 1 point from ORDERED on every axis.
+  // New logic: composite score produces monotonic degradation.
+  const composite = Math.round(
+    scores.narrativeCoherence * 0.35 +
+    (100 - scores.frictionScore) * 0.30 +
+    scores.governanceDiscipline * 0.20 +
+    (scores.trustCondition ?? 50) * 0.15,
+  );
 
-  if (coherenceScore >= 75 && frictionScore <= 35 && governanceScore >= 70) {
-    return "ORDERED";
-  }
-
-  if (coherenceScore >= 55 && frictionScore <= 55 && governanceScore >= 50) {
-    return "DRIFTING";
-  }
-
-  if (coherenceScore >= 35 && frictionScore <= 75) {
-    return "MISALIGNED";
-  }
-
+  if (composite >= 72) return "ORDERED";
+  if (composite >= 52) return "DRIFTING";
+  if (composite >= 32) return "MISALIGNED";
   return "DISORDERED";
 }
 
@@ -381,34 +378,41 @@ function deriveScores(input: AssessmentInput): AssessmentScores {
       (revenueBand ? 4 : 0),
   );
 
+  // Graduated scoring: keyword matches produce partial credit via sigmoid curve,
+  // not binary 34-or-0 jumps. Multiple matches give more credit than one.
+  const causalPatterns = ["because", "therefore", "which means", "as a result", "leading to", "causing"];
   const narrativeCoherence = toInt(
     clamp(
       clarityScore * 0.7 +
-        (sentenceCount(narrative) >= 4 ? 12 : 0) +
-        (includesAny(narrative, ["because", "therefore", "which means", "as a result"]) ? 8 : 0) -
+        graduatedBonus(sentenceCount(narrative), 12, 3) +
+        graduatedBonus(matchCount(narrative.toLowerCase(), causalPatterns), 8, 2) -
         coherencePenalty,
       0,
       100,
     ),
   );
 
+  const directAuthority = ["founder", "ceo", "owner", "director", "board", "principal", "chair"];
+  const proxyAuthority = ["manager", "lead", "head", "chief of staff", "vp", "partner"];
   const authorityClarityScore = toInt(
     clamp(
-      (role ? 38 : 0) +
+      (role ? 30 : 0) +
         (organisation ? 10 : 0) +
         (boardInvolved ? 10 : 0) +
-        (includesAny(role, ["founder", "ceo", "owner", "director", "board"]) ? 26 : 0) +
-        (includesAny(role, ["manager", "lead", "head", "chief of staff"]) ? 12 : 0) +
+        graduatedBonus(matchCount(role.toLowerCase(), directAuthority), 26, 1) +
+        graduatedBonus(matchCount(role.toLowerCase(), proxyAuthority), 14, 1) +
         (input.precomputed?.authorityClarity ?? 0) * 0.2,
       0,
       100,
     ),
   );
 
+  const urgencyPatterns = ["urgent", "immediate", "critical", "at risk", "deadline", "time-sensitive"];
+  const stakeholderPatterns = ["board", "investor", "regulator", "customer", "market", "shareholder"];
   const pressureScore = toInt(
     clamp(
-      (includesAny(narrative, ["urgent", "immediate", "critical", "at risk", "deadline"]) ? 28 : 0) +
-        (includesAny(narrative, ["board", "investor", "regulator", "customer", "market"]) ? 20 : 0) +
+      graduatedBonus(matchCount(narrative.toLowerCase(), urgencyPatterns), 28, 2) +
+        graduatedBonus(matchCount(narrative.toLowerCase(), stakeholderPatterns), 20, 2) +
         (urgencyWindow ? 16 : 0) +
         marketDepth * 0.2 +
         (input.precomputed?.pressure ?? 0) * 0.4,
@@ -417,10 +421,12 @@ function deriveScores(input: AssessmentInput): AssessmentScores {
     ),
   );
 
+  const frictionPatterns = ["friction", "conflict", "duplicated", "silo", "blocked", "misaligned", "overlap"];
+  const failurePatterns = ["failed", "stalled", "stuck", "delay", "rework", "collapsed", "broke down"];
   const frictionScore = toInt(
     clamp(
-      (includesAny(narrative, ["friction", "conflict", "duplicated", "silo", "blocked", "misaligned"]) ? 34 : 0) +
-        (includesAny(narrative, ["failed", "stalled", "stuck", "delay", "rework"]) ? 18 : 0) +
+      graduatedBonus(matchCount(narrative.toLowerCase(), frictionPatterns), 34, 2) +
+        graduatedBonus(matchCount(narrative.toLowerCase(), failurePatterns), 18, 2) +
         symptomDepth * 0.3 +
         (input.precomputed?.friction ?? 0) * 0.4,
       0,
@@ -428,21 +434,24 @@ function deriveScores(input: AssessmentInput): AssessmentScores {
     ),
   );
 
+  const distrustPatterns = ["mistrust", "politics", "breakdown", "distrust", "suspicion", "hidden agenda"];
   const trustCondition = toInt(
     clamp(
       (input.precomputed?.trustCondition ?? 55) -
-        (includesAny(narrative, ["mistrust", "politics", "breakdown", "distrust"]) ? 22 : 0) -
+        graduatedBonus(matchCount(narrative.toLowerCase(), distrustPatterns), 22, 1) -
         (frrictionPenaltyFromNarrative(narrative) * 0.25),
       0,
       100,
     ),
   );
 
+  const govPositive = ["cadence", "board pack", "governance", "decision rights", "accountability", "review cycle"];
+  const govNegative = ["unclear ownership", "scope creep", "decision bottleneck", "no one owns", "vacuum"];
   const governanceDiscipline = toInt(
     clamp(
       (input.precomputed?.governanceDiscipline ?? 55) +
-        (includesAny(narrative, ["cadence", "board pack", "governance", "decision rights"]) ? 12 : 0) -
-        (includesAny(narrative, ["unclear ownership", "scope creep", "decision bottleneck"]) ? 16 : 0),
+        graduatedBonus(matchCount(narrative.toLowerCase(), govPositive), 12, 2) -
+        graduatedBonus(matchCount(narrative.toLowerCase(), govNegative), 16, 1),
       0,
       100,
     ),

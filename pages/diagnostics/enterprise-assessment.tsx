@@ -744,7 +744,7 @@ export default function EnterpriseAssessmentPage() {
             `Decision structural risk: ${reading.decisionSignal.structuralRisk}%`,
             `Dominant failure: ${reading.dominantFailure ?? "none"}`,
           ],
-          confidence: reading.decisionObject.confidence === "high" ? 0.88 : reading.decisionObject.confidence === "medium" ? 0.7 : 0.5,
+          confidence: reading.decisionObject.signalStrength === "high" ? 0.88 : reading.decisionObject.signalStrength === "medium" ? 0.7 : 0.5,
         } : null,
       },
     });

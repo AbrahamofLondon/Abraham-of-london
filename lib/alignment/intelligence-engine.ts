@@ -44,9 +44,11 @@ function maxSeverity(...values: DiagnosticSeverity[]): DiagnosticSeverity {
 }
 
 function getCoherenceBand(percent: number): CoherenceBand {
-  if (percent >= 82) return "SOVEREIGN";
-  if (percent >= 62) return "ALIGNED";
-  if (percent >= 40) return "DRIFTING";
+  // Calibrated for geometric mean scoring:
+  // 10/10 both axes = 100, 8/8 = 80, 6/6 = 60, 4/4 = 40
+  if (percent >= 78) return "SOVEREIGN";
+  if (percent >= 58) return "ALIGNED";
+  if (percent >= 38) return "DRIFTING";
   return "FRAGMENTED";
 }
 
@@ -95,10 +97,17 @@ export function normalizePurposeResponses(
 }
 
 function domainSeverity(resonanceMean: number, certaintyMean: number, gap: number): DiagnosticSeverity {
-  if (resonanceMean <= 2.5 && certaintyMean >= 6.5) return "critical";
-  if (resonanceMean <= 3.5) return "high";
-  if (Math.abs(gap) >= 4) return "high";
-  if (resonanceMean < 5 || certaintyMean < 4.5) return "medium";
+  // Composite severity score using both axes + gap, then classify.
+  // This eliminates 1-point threshold flips: resonance=2.5 vs 2.6 no longer
+  // produces a 2-level severity jump.
+  const dualScore = Math.sqrt(Math.max(0, resonanceMean * certaintyMean)) * 10; // 0-100
+  const gapPenalty = Math.min(30, Math.abs(gap) * 5); // 0-30 penalty for axis divergence
+  const severityScore = Math.max(0, 100 - dualScore - gapPenalty);
+
+  // Smooth classification: 70+ = critical, 50-69 = high, 25-49 = medium, <25 = low
+  if (severityScore >= 70) return "critical";
+  if (severityScore >= 50) return "high";
+  if (severityScore >= 25) return "medium";
   return "low";
 }
 
@@ -123,7 +132,9 @@ export function buildDomainStates(responses: CanonicalPurposeResponse[]): Domain
         Math.max(1, domainResponses.length),
     );
     const confidenceGap = round1(resonanceMean - certaintyMean);
-    const alignmentScore = Math.round(resonanceMean * 10);
+    // Geometric mean: both axes must be present for a strong score.
+    // R=7,C=2 → 37 (low certainty drags down). R=7,C=8 → 75 (both present).
+    const alignmentScore = Math.round(Math.sqrt(Math.max(0, resonanceMean * certaintyMean)) * 10);
     const severity = domainSeverity(resonanceMean, certaintyMean, confidenceGap);
     const state = domainState(resonanceMean, certaintyMean, confidenceGap);
     const weakest = [...domainResponses].sort((a, b) => a.resonance - b.resonance)[0];
