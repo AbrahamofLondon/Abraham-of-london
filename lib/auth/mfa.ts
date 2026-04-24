@@ -584,15 +584,16 @@ async function sendVerificationCode(method: "sms" | "email", userId: string, cod
 
     if (method === "email") {
       try {
-        const { sendEmail } = await import("@/lib/email/dispatcher");
+        const { sendEmail } = await import("@/lib/email/core/sendEmail");
         await sendEmail({
+          type: "TRANSACTIONAL",
           to: userId,
           subject: "Your Verification Code",
           text: `Your verification code is: ${code}`,
           html: `<p>Your verification code is: <strong>${code}</strong></p>`,
         });
       } catch (error) {
-        console.warn("[MFA] Email dispatcher not available, logging code only:", error);
+        console.warn("[MFA] Email sender not available, logging code only:", error);
       }
     }
   } catch (error) {

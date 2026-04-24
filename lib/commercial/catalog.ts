@@ -282,7 +282,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     category: "reporting_premium",
     accessType: "one_time",
     duration: "lifetime",
-    active: true,
+    active: false, // DEACTIVATED: no Stripe product or price configured. Reactivate when IDs are set.
     successPath: "/diagnostics/executive-reporting/run",
     cancelPath: "/diagnostics/executive-reporting",
     cookieName: "aol_paid_executive_reporting",
