@@ -1,9 +1,17 @@
 /**
  * BLOCK 5 — TRAJECTORY
- * Time-bound consequences. 2-3 specific outcomes.
+ * Time-bound consequences. Used for limited free warning, not priced escalation.
  */
 
-export default function ResultTrajectory({ timeHorizon, consequences }: { timeHorizon: string; consequences: string[] }) {
+export default function ResultTrajectory({
+  timeHorizon,
+  consequences,
+  label = "If unresolved",
+}: {
+  timeHorizon: string;
+  consequences: string[];
+  label?: string;
+}) {
   if (consequences.length === 0) return null;
 
   return (
@@ -16,16 +24,16 @@ export default function ResultTrajectory({ timeHorizon, consequences }: { timeHo
         color: "rgba(252,165,165,0.45)",
         marginBottom: "0.5rem",
       }}>
-        If unresolved &middot; {timeHorizon}
+        {label} &middot; {timeHorizon}
       </div>
       <div className="space-y-1.5">
         {consequences.map((c, i) => (
           <p key={i} style={{
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "0.85rem",
-            lineHeight: 1.5,
-            color: "rgba(252,165,165,0.50)",
+            fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+            fontSize: "0.9rem",
+            lineHeight: 1.7,
+            color: "rgba(255,255,255,0.70)",
+            maxWidth: "62ch",
           }}>
             {c}
           </p>

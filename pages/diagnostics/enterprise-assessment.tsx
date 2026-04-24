@@ -60,6 +60,7 @@ import InheritedThreadContext from "@/components/diagnostics/results/InheritedTh
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -350,7 +351,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
 }) {
   const bc = bandColor(reading.band);
   const routeConfig = {
-    EXECUTIVE_REPORTING: { href: "/diagnostics/executive-reporting", label: "Run Executive Reporting", border: `${GOLD}35`, bg: `${GOLD}0D`, text: `${GOLD}BB` },
+    EXECUTIVE_REPORTING: { href: "/diagnostics/executive-reporting", label: "Move to Executive Reporting", border: `${GOLD}35`, bg: `${GOLD}0D`, text: `${GOLD}BB` },
     STRATEGY_ROOM:       { href: "/strategy-room", label: "Enter Strategy Room", border: "rgba(52,211,153,0.30)", bg: "rgba(52,211,153,0.07)", text: "rgba(110,231,183,0.90)" },
     WATCH:               { href: "/diagnostics/watch?source=enterprise-assessment", label: "Enter Watch State", border: "rgba(255,255,255,0.10)", bg: "rgba(255,255,255,0.02)", text: "rgba(255,255,255,0.55)" },
   }[reading.route];
@@ -426,6 +427,13 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             </div>
           </div>
 
+          <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem 1.5rem" }}>
+            <Eyebrow>Evidence from this assessment</Eyebrow>
+            <p style={{ marginTop: "0.75rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.94rem", lineHeight: 1.8, color: "rgba(255,255,255,0.80)", maxWidth: "62ch" }}>
+              The overall enterprise reading is {reading.band.toLowerCase()} at {totalPct}%. The strongest pressure sits in {reading.dominantFailure ?? "the weakest operating domain"}, and the recent decision signal is {reading.decisionSignal.clarityScore}% clear against {reading.decisionSignal.structuralRisk}% structural risk.
+            </p>
+          </div>
+
           <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1.25rem 1.5rem" }}>
             <Eyebrow>Recent decision signal</Eyebrow>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -475,15 +483,20 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
 
           {/* First action */}
           <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.5rem" }}>
-            <Eyebrow>First structural action</Eyebrow>
+            <Eyebrow>Immediate governance action</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.firstAction}</p>
           </div>
 
           <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
+          <FreeLayerBoundary
+            summary="This assessment identifies the enterprise condition, the dominant failure pressure, and the first governance action."
+            limitation="It does not price consequence, order interventions, or enforce execution sequencing. That begins in Executive Reporting and Strategy Room."
+          />
+
           {/* Escalation */}
           <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
-            <Eyebrow>Constitutional next move</Eyebrow>
+            <Eyebrow>Earned next move</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.escalationNote}</p>
             <p style={{ marginBottom: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
               Next: Executive Reporting translates condition into consequence, exposure, and ordered decisions.

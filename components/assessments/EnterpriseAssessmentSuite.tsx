@@ -18,7 +18,10 @@ import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBloc
 import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
 import MultiStakeholderDivergence from "@/components/diagnostics/results/MultiStakeholderDivergence";
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
+import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
+import { buildDecisionObjectFromSignals } from "@/lib/diagnostics/decision-engine";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 type EnterpriseDomain = {
@@ -455,6 +458,30 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
   const postureColor = posture === "DISORDERED" ? "text-red-300/80" : posture === "MISALIGNED" ? "text-red-300/70" : "text-amber-300/80";
   const reading = deriveEnterpriseReading(posture, heatDomains, domains);
   const nextAction = deriveEnterpriseAction(posture, heatDomains);
+  const decisionObject = buildDecisionObjectFromSignals({
+    condition: posture,
+    signals: [
+      {
+        id:
+          posture === "DISORDERED" || posture === "MISALIGNED"
+            ? "structural_inconsistency"
+            : heatDomains.length > 0
+              ? "execution_drift"
+              : "reactive_decision_pattern",
+        label: "Enterprise posture",
+        summary: `Enterprise posture ${posture} with heat domains: ${heatDomains.join(", ") || "none"}.`,
+        severity:
+          posture === "DISORDERED" ? 9 :
+          posture === "MISALIGNED" ? 7 :
+          heatDomains.length > 0 ? 5 : 3,
+      },
+    ],
+    consequence:
+      posture === "DISORDERED" || posture === "CONTESTED"
+        ? "Institutional disorder is already affecting who really decides and how quickly the organisation degrades under pressure."
+        : "Institutional drag will continue to compound quietly if the current governance condition is left unattended.",
+    action: nextAction,
+  });
 
   return (
     <motion.div
@@ -516,13 +543,41 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
         </div>
       </div>
 
+      <div className="border border-white/[0.08] bg-white/[0.02] p-5">
+        <Eyebrow>Evidence from this assessment</Eyebrow>
+        <p className="mt-3" style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.94rem", lineHeight: 1.8, color: "rgba(255,255,255,0.80)", maxWidth: "62ch" }}>
+          Enterprise posture is {posture.toLowerCase()}.
+          {heatDomains.length > 0 ? ` Active stress is concentrated in ${heatDomains.join(", ")}.` : " No single heat domain is dominant yet."}
+          The strongest contradiction is between governance and execution ordering across the current domain set.
+        </p>
+      </div>
+
       {/* Next action */}
       <div className="border border-amber-500/15 bg-amber-500/[0.04] p-5">
-        <Eyebrow>Required action</Eyebrow>
+        <Eyebrow>Immediate governance action</Eyebrow>
         <p className="mt-3 font-serif text-[1rem] font-light leading-[1.72] text-white/70">
           {nextAction}
         </p>
       </div>
+
+      <DecisionGradeBlocks data={{
+        decisionDeclaration: posture === "DISORDERED"
+          ? { optionA: "Intervene at governance level immediately", optionB: "Accept structural disorder as the operating norm" }
+          : posture === "CONTESTED"
+          ? { optionA: "Resolve the contested authority before the next decision cycle", optionB: "Allow execution to continue under conflicting mandates" }
+          : heatDomains.length > 0
+          ? { optionA: "Concentrate governance on the heat domain", optionB: "Spread attention across all domains equally" }
+          : { optionA: "Lock the current governance cadence", optionB: "Restructure operational authority" },
+        ifUnchanged: decisionObject.consequence,
+        minimumViableMove: decisionObject.action,
+        confidence: posture === "DISORDERED" || posture === "CONTESTED" ? "strong" : "moderate",
+        scaleBreak: "At scale, institutional drag becomes indistinguishable from normal operating friction. The organisation adapts to dysfunction rather than resolving it, and recovery cost increases non-linearly.",
+      }} />
+
+      <FreeLayerBoundary
+        summary="This assessment identifies the enterprise condition, shows the dominant failure pressure, and gives one governance action you can take immediately."
+        limitation="It does not price consequence, rank intervention options, or sequence execution ownership. That begins in Executive Reporting and Strategy Room."
+      />
 
       {/* Institutional intelligence layers */}
       <LongitudinalIntelligence data={longitudinal} />
@@ -535,11 +590,12 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
         nextStage={{
           label: "Executive Reporting",
           href: "/diagnostics/executive-reporting",
-          reason: "The enterprise signal warrants deeper interpretation. Executive Reporting translates structural strain into financial exposure and a governed priority stack.",
+          reason: "You now know the enterprise condition. Executive Reporting is the next layer when that condition must be translated into consequence, exposure, and ordered decisions.",
         }}
-        consequenceOfExit={`Enterprise posture is ${posture}. ${heatDomains.length > 0 ? `Heat domains (${heatDomains.join(", ")}) are producing active stress.` : ""} Without pricing this condition, institutional drag compounds and the cost of inaction increases with each decision cycle.`}
-        trajectoryWarning={posture === "DISORDERED" || posture === "CONTESTED" ? "At current posture, structural disorder produces cascading execution failures within 30-60 days." : undefined}
+        consequenceOfExit="This result is intentionally diagnostic. The next layer adds priced consequence, intervention ordering, and execution readiness."
+        trajectoryWarning={posture === "DISORDERED" || posture === "CONTESTED" ? "Current posture is unstable enough that leaving the condition ungoverned usually worsens the next decision cycle." : undefined}
         canDefer={posture !== "DISORDERED"}
+        deferNote={posture !== "DISORDERED" ? "If the condition is still containable, act on the governance correction first. Escalate when exposure must be priced." : undefined}
       />
     </motion.div>
   );

@@ -30,12 +30,11 @@ export default function ResultCondition({ name, definition }: { name: string; de
       </h2>
       <p style={{
         marginTop: "0.5rem",
-        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-        fontWeight: 300,
-        fontSize: "0.92rem",
-        lineHeight: 1.6,
-        color: "rgba(255,255,255,0.50)",
-        maxWidth: "56ch",
+        fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+        fontSize: "0.95rem",
+        lineHeight: 1.8,
+        color: "rgba(255,255,255,0.74)",
+        maxWidth: "62ch",
       }}>
         {definition}
       </p>

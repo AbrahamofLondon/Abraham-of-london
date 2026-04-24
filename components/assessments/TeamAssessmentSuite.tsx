@@ -21,7 +21,10 @@ import Link from "next/link";
 import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
 import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
+import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
+import { buildDecisionObjectFromSignals } from "@/lib/diagnostics/decision-engine";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 const GOLD = "#C9A96E";
@@ -336,6 +339,30 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
   const adv = computeAdvancedMetrics(rows, reflections);
   const narrative = adv ? generateNarrative(adv, reflections) : "";
   const nextAction = deriveTeamNextAction(vi, tg, af);
+  const decisionObject = buildDecisionObjectFromSignals({
+    condition: condition.label,
+    signals: [
+      {
+        id: tg >= 35 ? "trust_asymmetry" : vi >= 35 ? "structural_inconsistency" : "reactive_decision_pattern",
+        label: "Primary team signal",
+        summary: `Variance ${vi}%, trust gap ${tg}%, friction ${af}%.`,
+        severity: Math.max(2, Math.round(Math.max(vi, tg, af) / 12)),
+      },
+      ...(reflections?.falseAssumption
+        ? [{
+            id: "trust_asymmetry",
+            label: "Leadership false assumption",
+            summary: reflections.falseAssumption,
+            severity: 5,
+          }]
+        : []),
+    ],
+    consequence:
+      vi > 40
+        ? "High team variance will continue to produce silent instruction failure and fragmented execution."
+        : "The team condition will worsen under pressure if the current signal is ignored.",
+    action: nextAction,
+  });
   const nextLayer = String(result.nextLayer === "EXECUTIVE_REPORTING" ? "Executive Reporting" : result.nextLayer === "CONSTITUTIONAL" ? "Constitutional Diagnostic" : result.nextLayer ?? "Enterprise Assessment");
 
   return (
@@ -385,13 +412,38 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
         </div>
       </div>
 
+      <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem 1.5rem" }}>
+        <Eyebrow>Evidence from this assessment</Eyebrow>
+        <p style={{ marginTop: "0.75rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.94rem", lineHeight: 1.8, color: "rgba(255,255,255,0.80)", maxWidth: "62ch" }}>
+          Leadership and estimated team reality are separated by {vi}% variance and a {tg}% trust gap. The most exposed team domain is {condition.label.toLowerCase()}.
+          {reflections?.falseAssumption ? ` You also named a likely false assumption: "${reflections.falseAssumption}".` : ""}
+        </p>
+      </div>
+
       {/* Next action */}
       <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.25rem 1.5rem" }}>
-        <Eyebrow>Required action</Eyebrow>
+        <Eyebrow>Immediate direction</Eyebrow>
         <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.72, color: "rgba(255,255,255,0.70)" }}>
           {nextAction}
         </p>
       </div>
+
+      <DecisionGradeBlocks data={{
+        decisionDeclaration: vi > 40
+          ? { optionA: "Address the perception gap directly with the team", optionB: "Continue operating on leadership assumptions" }
+          : tg > 30
+          ? { optionA: "Rebuild execution trust through visible follow-through", optionB: "Accept the trust deficit as normal friction" }
+          : { optionA: "Maintain current team structure", optionB: "Restructure communication ownership" },
+        ifUnchanged: decisionObject.consequence,
+        minimumViableMove: decisionObject.action,
+        confidence: vi > 50 || tg > 40 ? "strong" : vi > 25 ? "moderate" : "weak",
+        scaleBreak: "At scale, leadership-team perception divergence produces instruction failure. Directives are interpreted differently across teams, and the variance compounds with each layer of management.",
+      }} />
+
+      <FreeLayerBoundary
+        summary="This assessment names the team condition, shows where leadership and estimated team reality diverge, and gives one practical correction."
+        limitation="It does not measure direct respondent sentiment, price enterprise consequence, or sequence intervention."
+      />
 
       {/* Institutional intelligence layers */}
       <LongitudinalIntelligence data={longitudinal} />
@@ -404,11 +456,12 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
           label: nextLayer,
           href: nextLayer === "Executive Reporting" ? "/diagnostics/executive-reporting" : "/diagnostics/constitutional-diagnostic",
           reason: nextLayer === "Executive Reporting"
-            ? "The team signal warrants deeper interpretation. Executive Reporting translates structural strain into financial exposure and a governed priority stack."
-            : "Team alignment is within bounds. The Constitutional Diagnostic tests whether the institutional structure matches.",
+            ? "You now know the team condition. Executive Reporting is the next layer only when that condition must be priced and ordered."
+            : "You now know the team condition. The Constitutional Diagnostic is the next layer when you need to test whether structure, not just team perception, is driving it.",
         }}
-        consequenceOfExit={`Team divergence of ${vi}% variance and ${tg}% trust gap is already producing coordination cost. Without pricing this condition, decisions will be made under disagreement — creating conflicting execution streams.`}
-        trajectoryWarning={vi > 40 ? "At current variance levels, execution drift compounds within 30 days." : undefined}
+        consequenceOfExit="This result remains useful on its own. The next layer adds structural confirmation or priced consequence, depending on how serious the condition is."
+        trajectoryWarning={vi > 40 ? "Variance is high enough that a delayed response usually hardens the gap rather than shrinking it." : undefined}
+        deferNote="Use the immediate direction first if the condition is still local. Escalate when the consequence must be governed."
       />
     </motion.div>
   );

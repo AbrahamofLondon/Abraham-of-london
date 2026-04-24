@@ -56,16 +56,17 @@ import { track } from "@/lib/analytics/track";
 import ResultInterruption from "@/components/diagnostics/results/ResultInterruption";
 import ResultCondition from "@/components/diagnostics/results/ResultCondition";
 import ResultContradiction from "@/components/diagnostics/results/ResultContradiction";
-import ResultCost from "@/components/diagnostics/results/ResultCost";
 import ResultTrajectory from "@/components/diagnostics/results/ResultTrajectory";
 import SystemMemoryBlock from "@/components/diagnostics/results/SystemMemoryBlock";
 import ResultDecision from "@/components/diagnostics/results/ResultDecision";
 import ResultAction from "@/components/diagnostics/results/ResultAction";
-import ResultEscalation from "@/components/diagnostics/results/ResultEscalation";
 import ResultDiagnostics from "@/components/diagnostics/results/ResultDiagnostics";
 import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
+import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
+import { buildPurposeDecisionObject } from "@/lib/diagnostics/decision-engine";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -936,20 +937,7 @@ function AuthorityResultSurface({
     }
   }
 
-  // BLOCK 4 — Cost: for Purpose Alignment we derive personal cost, not £ figures
-  // At this stage we don't have revenue data, so we frame cost as structural
-  const costCalc = result.percent < 60 ? {
-    inputs: [
-      { label: "Alignment", value: `${result.percent}%` },
-      { label: "Weak domains", value: String(result.weakestDomains.length) },
-      { label: "Contradiction count", value: String(result.contradictions?.length ?? 0) },
-    ],
-    formula: `${result.weakestDomains.length} structural gaps × ${result.contradictions?.length ?? 0} active contradictions`,
-    result: result.percent < 40 ? "High personal exposure" : "Moderate personal exposure",
-    explanation: "Every day under this condition compounds. Decisions made from this position carry the misalignment into their outcomes.",
-  } : null;
-
-  // BLOCK 5 — Trajectory consequences
+  // BLOCK 5 — Repetition warning
   const trajectoryConsequences = [
     pattern?.consequence ?? "The current pattern will persist unless directly addressed.",
     ...(result.corrections?.slice(0, 2) ?? []),
@@ -957,6 +945,10 @@ function AuthorityResultSurface({
 
   // BLOCK 7 — Decision extraction from reflections
   const extractedDecision = reflections.avoidedDecision || pattern?.firstAction || "";
+  const decisionObject = buildPurposeDecisionObject({
+    result,
+    context: { reflections },
+  });
 
   // BLOCK 8 — Action steps
   const actionSteps = [
@@ -964,9 +956,7 @@ function AuthorityResultSurface({
     ...(result.nextActions?.slice(1, 3) ?? []).map((a) => ({ step: a })),
   ].filter((s) => s.step);
 
-  // BLOCK 9 — Escalation
   const routing = result.routingRecommendation;
-  const qualifiesForEscalation = result.percent < 55 || (result.contradictions?.length ?? 0) >= 2;
 
   return (
     <div className="space-y-4" style={{ maxWidth: "56rem" }}>
@@ -979,20 +969,39 @@ function AuthorityResultSurface({
 
       <ResultContradiction evidence={contradictionEvidence} />
 
-      <ResultCost calc={costCalc} />
+      <SystemMemoryBlock currentStage="purpose_alignment" />
+
+      <ResultDecision decision={decisionObject.decision || extractedDecision} />
+
+      <ResultAction
+        steps={actionSteps}
+        consequence={decisionObject.consequence}
+        title="Immediate correction"
+      />
 
       <ResultTrajectory
         timeHorizon="30–60 days"
         consequences={trajectoryConsequences}
+        label="If repeated"
       />
 
-      <SystemMemoryBlock currentStage="purpose_alignment" />
+      <DecisionGradeBlocks data={{
+        decisionDeclaration: result.percent < 45
+          ? { optionA: "Confront the avoided decision now", optionB: "Continue operating around it" }
+          : result.percent < 65
+          ? { optionA: "Commit to the direction you stated", optionB: "Re-evaluate before the next pressure point" }
+          : { optionA: "Lock the current direction", optionB: "Test whether the organisation shares it" },
+        ifUnchanged: pattern?.consequence
+          ?? "This decision behaviour pattern will repeat under pressure, producing inconsistent execution and eroding trust in your own judgement.",
+        minimumViableMove: pattern?.firstAction
+          ?? "Write the decision you are avoiding in one sentence and name who is affected by the delay.",
+        confidence: result.percent < 35 ? "strong" : result.percent < 60 ? "moderate" : "strong",
+        scaleBreak: "At scale, personal decision avoidance becomes organisational drift. Teams compensate by creating informal authority structures that bypass the stated chain.",
+      }} />
 
-      <ResultDecision decision={extractedDecision} />
-
-      <ResultAction
-        steps={actionSteps}
-        consequence={narrative?.consequenceBlock ?? "Inaction compounds the condition."}
+      <FreeLayerBoundary
+        summary="This assessment identifies your current decision behaviour pattern, shows the contradiction in your answers, and gives one correction you can act on immediately."
+        limitation="It does not test whether the same condition is structural in your organisation, price the consequence of delay, or sequence enforcement."
       />
 
       <LadderProgressionGate
@@ -1000,10 +1009,11 @@ function AuthorityResultSurface({
         nextStage={{
           label: routing?.label ?? "Constitutional Diagnostic",
           href: routing?.href ?? "/diagnostics/constitutional-diagnostic",
-          reason: routing?.reason ?? "This condition has structural implications beyond personal alignment. The constitutional diagnostic will determine whether the organisation carries the same pattern.",
+          reason: routing?.reason ?? "You now know the personal condition. The next layer tests whether the same pattern exists structurally in the organisation around you.",
         }}
-        consequenceOfExit={`Your condition remains unpriced. Without constitutional validation, this ${pattern?.label ?? "pattern"} cannot be distinguished from a personal preference. The cost compounds at approximately ${result.percent < 55 ? "3-5%" : "1-2%"} per month of delay.`}
-        trajectoryWarning={result.percent < 55 ? "Current trajectory suggests escalation within 30-60 days if the condition remains unexamined." : undefined}
+        consequenceOfExit={`Without constitutional validation, this ${pattern?.label ?? "pattern"} remains personal signal rather than tested structural reality. Executive consequence and intervention sequencing belong to the next layers, not this one.`}
+        trajectoryWarning={result.percent < 55 ? "If the same contradiction is already affecting live decisions, move to the next layer now." : undefined}
+        deferNote="You can keep this result and act on the immediate correction first. Continue only when you need structural confirmation."
       />
 
       {/* Institutional layers — render when prior data exists */}
@@ -1021,11 +1031,6 @@ function AuthorityResultSurface({
         percent={result.percent}
         band={result.coherenceBand}
       />
-
-      {/* Hard transition signal */}
-      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(252,165,165,0.28)", fontStyle: "italic", marginTop: "1rem" }}>
-        This is where the system stops. The decision is not yet enforced.
-      </p>
 
       {/* Restart */}
       <button

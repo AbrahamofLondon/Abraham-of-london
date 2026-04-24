@@ -52,6 +52,8 @@ import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
+import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
+import { buildTeamDecisionResult } from "@/lib/diagnostics/decision-engine";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 import ThresholdProximityLine, {
   thresholdProximityText,
@@ -414,6 +416,14 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             </div>
           </div>
 
+          <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem 1.5rem" }}>
+            <Eyebrow>Evidence from this assessment</Eyebrow>
+            <p style={{ marginTop: "0.75rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.94rem", lineHeight: 1.8, color: "rgba(255,255,255,0.80)", maxWidth: "62ch" }}>
+              Leadership and estimated team reality are separated by {gapAbs}% overall. The most stressed domain is {reading.urgentDomain ?? "the dominant gap"}.
+              {purposePct !== null ? ` Your linked purpose alignment score is ${purposePct}%.` : ""}
+            </p>
+          </div>
+
           {/* Domain gaps */}
           <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgb(5 5 7)" }}>
             <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}><Eyebrow>Perception gaps by domain</Eyebrow></div>
@@ -449,15 +459,20 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
 
           {/* First action */}
           <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.5rem" }}>
-            <Eyebrow>First structural action</Eyebrow>
+            <Eyebrow>Immediate direction</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.firstAction}</p>
           </div>
 
           <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
+          <FreeLayerBoundary
+            summary="This assessment names the team condition, shows where leadership and estimated team reality diverge, and gives one practical correction."
+            limitation="It does not measure direct respondent sentiment, price enterprise consequence, or sequence intervention ownership."
+          />
+
           {/* Escalation */}
           <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
-            <Eyebrow>Next layer — escalation rationale</Eyebrow>
+            <Eyebrow>Earned next move</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.escalationNote}</p>
             <p style={{ marginBottom: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
               Next: Enterprise Assessment stress-tests governance, execution, and recent decision quality.
@@ -586,7 +601,27 @@ export default function TeamAssessmentPage() {
   const overallLeader  = ovPct("leader");
   const overallReality = ovPct("reality");
   const fragility    = React.useMemo(() => calculateFragility(gaps.map(g => g.realityPct)), [gaps]);
-  const reading      = React.useMemo(() => deriveGapReading(gaps, overallLeader, overallReality, purposePct), [gaps, overallLeader, overallReality, purposePct]);
+  const reading = React.useMemo(
+    () =>
+      buildTeamDecisionResult({
+        gaps,
+        overallLeader,
+        overallReality,
+        purposePct,
+        confidenceBaseline: teamReflections.confidenceBaseline,
+        falseAssumption: teamReflections.falseAssumption,
+        showScoresReaction: teamReflections.showScoresReaction,
+      }),
+    [
+      gaps,
+      overallLeader,
+      overallReality,
+      purposePct,
+      teamReflections.confidenceBaseline,
+      teamReflections.falseAssumption,
+      teamReflections.showScoresReaction,
+    ],
+  );
   const matchedPlaybooks = React.useMemo(
     () =>
       matchPlaybooks({

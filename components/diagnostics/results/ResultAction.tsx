@@ -10,7 +10,15 @@ export type ActionStep = {
   timeframe?: string;
 };
 
-export default function ResultAction({ steps, consequence }: { steps: ActionStep[]; consequence: string }) {
+export default function ResultAction({
+  steps,
+  consequence,
+  title = "Immediate direction",
+}: {
+  steps: ActionStep[];
+  consequence: string;
+  title?: string;
+}) {
   if (steps.length === 0) return null;
 
   return (
@@ -27,7 +35,7 @@ export default function ResultAction({ steps, consequence }: { steps: ActionStep
         color: AMBER,
         marginBottom: "0.55rem",
       }}>
-        Required action
+        {title}
       </div>
       {steps.map((s, i) => (
         <div key={i} className="flex items-start gap-2 py-1" style={{ borderBottom: i < steps.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
@@ -49,14 +57,13 @@ export default function ResultAction({ steps, consequence }: { steps: ActionStep
       {consequence && (
         <p style={{
           marginTop: "0.65rem",
-          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-          fontWeight: 300,
-          fontSize: "0.82rem",
-          lineHeight: 1.5,
-          color: "rgba(252,165,165,0.45)",
-          fontStyle: "italic",
+          fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+          fontSize: "0.88rem",
+          lineHeight: 1.7,
+          color: "rgba(255,255,255,0.66)",
+          maxWidth: "62ch",
         }}>
-          If skipped: {consequence}
+          If ignored: {consequence}
         </p>
       )}
     </div>

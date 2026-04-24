@@ -21,7 +21,7 @@ type ExecutiveReportingPaywallProps = {
 export default function ExecutiveReportingPaywall({
   price = getProductAmountGbp("executive_reporting"),
   checkoutPriceCode = "executive_reporting",
-  primaryCtaLabel = "Continue to Executive Interpretation",
+  primaryCtaLabel = "Move to Executive Reporting",
 }: ExecutiveReportingPaywallProps) {
   const tiers = [
     {
@@ -136,16 +136,15 @@ export default function ExecutiveReportingPaywall({
     <div className="mx-auto max-w-3xl px-6 py-10 sm:py-16">
       {/* DIAGNOSIS PRESSURE */}
       <div className="mb-5 text-sm leading-6 text-white/58">
-        Your diagnostic signal is not inconclusive. It is incomplete.
+        Your diagnostic result is usable. This layer exists when consequence and decision order must be made explicit.
       </div>
 
       <h1 className="mb-4 text-2xl font-semibold leading-tight text-white sm:text-3xl">
-        Continue to Executive Interpretation
+        Move to Executive Reporting
       </h1>
 
       <p className="mb-6 text-sm leading-6 text-white/68">
-        You have reached the point where scoring is no longer sufficient.
-        Interpretation is required.
+        This is the layer that prices consequence, orders the decision stack, and prepares execution.
       </p>
 
       {checkoutCancelled && (
@@ -261,7 +260,7 @@ export default function ExecutiveReportingPaywall({
 
       {/* CTA */}
       <p className="mb-2 text-sm text-white/56">
-        This is where the system stops scoring and starts interpreting.
+        This is the point where the condition is translated into consequence, exposure, and ordered decisions.
       </p>
       <button
         onClick={handleCheckout}

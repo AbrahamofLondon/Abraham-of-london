@@ -28,7 +28,7 @@ export default function ResultContradiction({ evidence }: { evidence: Contradict
         color: "rgba(252,165,165,0.55)",
         marginBottom: "0.65rem",
       }}>
-        Contradiction
+        Evidence from your answers
       </div>
       {evidence.map((e, i) => (
         <div key={i} style={{ marginBottom: i < evidence.length - 1 ? "0.75rem" : 0 }}>
@@ -36,18 +36,27 @@ export default function ResultContradiction({ evidence }: { evidence: Contradict
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
               fontSize: "8px",
-              color: "rgba(255,255,255,0.55)",
+              color: "rgba(255,255,255,0.62)",
             }}>
               {e.scoreLabel}: {e.scoreValue}
+            </span>
+            <span style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(252,165,165,0.58)",
+            }}>
+              {e.contradictionType.replace(/_/g, " ")}
             </span>
           </div>
           <p style={{
             marginTop: "0.25rem",
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "0.88rem",
-            lineHeight: 1.55,
-            color: "rgba(252,165,165,0.60)",
+            fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+            fontSize: "0.92rem",
+            lineHeight: 1.75,
+            color: "rgba(255,255,255,0.78)",
+            maxWidth: "62ch",
           }}>
             {e.textEvidence}
           </p>

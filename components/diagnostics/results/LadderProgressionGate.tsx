@@ -1,12 +1,9 @@
 /**
- * LadderProgressionGate — forced progression through the decision ladder.
+ * LadderProgressionGate — earned progression through the next paid layer.
  *
- * After any diagnostic stage completes, this component:
- * 1. Names the next required stage
- * 2. Shows what happens if the user exits (consequence of inaction)
- * 3. Requires explicit acknowledgement to defer
- *
- * This is not optional navigation. This is enforcement.
+ * The free layer must already have delivered a useful result.
+ * This block explains what the next layer adds and gives the user
+ * a truthful choice about whether to continue.
  */
 
 import * as React from "react";
@@ -24,16 +21,14 @@ type LadderStage = {
 };
 
 export type LadderProgressionProps = {
-  /** Current condition severity — determines urgency tone */
   severity: "low" | "medium" | "high" | "critical";
-  /** The next stage in the ladder */
   nextStage: LadderStage;
-  /** What worsens if they don't continue */
   consequenceOfExit: string;
-  /** Projected trajectory text */
   trajectoryWarning?: string;
-  /** Whether the user has acknowledged and can defer */
   canDefer?: boolean;
+  ctaLabel?: string;
+  deferLabel?: string;
+  deferNote?: string;
 };
 
 export default function LadderProgressionGate({
@@ -42,9 +37,11 @@ export default function LadderProgressionGate({
   consequenceOfExit,
   trajectoryWarning,
   canDefer = true,
+  ctaLabel,
+  deferLabel = "Stay with this result for now",
+  deferNote,
 }: LadderProgressionProps) {
   const [deferred, setDeferred] = React.useState(false);
-  const [acknowledged, setAcknowledged] = React.useState(false);
 
   const borderColor = severity === "critical" ? "rgba(252,165,165,0.25)"
     : severity === "high" ? "rgba(253,186,116,0.22)"
@@ -54,39 +51,42 @@ export default function LadderProgressionGate({
     : severity === "high" ? "rgba(253,186,116,0.65)"
     : `${GOLD}BB`;
 
+  const resolvedCtaLabel = ctaLabel
+    ?? (nextStage.label === "Executive Reporting"
+      ? "Move to Executive Reporting"
+      : nextStage.label === "Strategy Room"
+        ? "Enter Strategy Room"
+        : `Continue to ${nextStage.label}`);
+
   if (deferred) return null;
 
   return (
-    <div style={{ border: `1px solid ${borderColor}`, backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem", marginBottom: "1rem" }}>
-      {/* Progression directive */}
+    <div style={{ border: `1px solid ${borderColor}`, backgroundColor: "rgba(255,255,255,0.03)", padding: "1.25rem", marginBottom: "1rem" }}>
       <div className="mb-3">
         <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: accentColor }}>
-          System directive
+          Earned escalation
         </span>
       </div>
 
-      <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.60)", marginBottom: "0.5rem" }}>
+      <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.8, color: "rgba(255,255,255,0.82)", marginBottom: "0.5rem", maxWidth: "62ch" }}>
         {nextStage.reason}
       </p>
 
-      {/* Consequence of exit */}
       <div style={{ border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "rgba(252,165,165,0.03)", padding: "0.65rem", marginBottom: "0.75rem" }}>
         <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
-          If you exit now
+          What this next layer adds
         </span>
-        <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(252,165,165,0.45)", marginTop: "0.15rem" }}>
+        <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.9rem", lineHeight: 1.75, color: "rgba(255,255,255,0.72)", marginTop: "0.2rem", maxWidth: "62ch" }}>
           {consequenceOfExit}
         </p>
       </div>
 
-      {/* Trajectory warning */}
       {trajectoryWarning && (
-        <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(253,186,116,0.45)", fontStyle: "italic", marginBottom: "0.75rem" }}>
+        <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(253,186,116,0.78)", marginBottom: "0.75rem", maxWidth: "62ch" }}>
           {trajectoryWarning}
         </p>
       )}
 
-      {/* Primary CTA — continue the ladder */}
       <Link
         href={nextStage.href}
         className="inline-flex items-center gap-2.5"
@@ -101,14 +101,13 @@ export default function LadderProgressionGate({
           textTransform: "uppercase",
         }}
       >
-        Continue to {nextStage.label} <ArrowRight style={{ width: 11, height: 11 }} />
+        {resolvedCtaLabel} <ArrowRight style={{ width: 11, height: 11 }} />
       </Link>
 
-      {/* Defer — requires acknowledgement */}
-      {canDefer && !acknowledged && (
+      {canDefer && (
         <button
           type="button"
-          onClick={() => setAcknowledged(true)}
+          onClick={() => setDeferred(true)}
           style={{
             display: "block",
             marginTop: "0.75rem",
@@ -119,36 +118,16 @@ export default function LadderProgressionGate({
             fontSize: "7px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.18)",
+            color: "rgba(255,255,255,0.28)",
           }}
         >
-          I understand the consequence — defer for now
+          {deferLabel}
         </button>
       )}
-
-      {/* Acknowledged — show cost and allow exit */}
-      {acknowledged && (
-        <div style={{ marginTop: "0.5rem" }}>
-          <p style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.40)", marginBottom: "0.35rem" }}>
-            The system has recorded this deferral. Your condition remains unpriced.
-          </p>
-          <button
-            type="button"
-            onClick={() => setDeferred(true)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              ...mono,
-              fontSize: "7px",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.15)",
-            }}
-          >
-            Exit without pricing
-          </button>
-        </div>
+      {deferNote && (
+        <p style={{ marginTop: "0.5rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.58)", maxWidth: "60ch" }}>
+          {deferNote}
+        </p>
       )}
     </div>
   );

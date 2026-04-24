@@ -47,6 +47,9 @@ import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import DiagnosticFeedback from "@/components/diagnostics/results/DiagnosticFeedback";
 import LongitudinalIntelligence from "@/components/diagnostics/results/LongitudinalIntelligence";
 import OutcomeVerification from "@/components/diagnostics/results/OutcomeVerification";
+import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
+import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
+import { buildConstitutionalDecisionObject } from "@/lib/diagnostics/decision-engine";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 
 function readinessNumeric(tier: string): number {
@@ -488,7 +491,7 @@ function routeConfig(route: string, scores: DerivedScores) {
         label:         "Strategy Route",
         destination:   "Strategy Room",
         href:          "/strategy-room",
-        note:          "The signal warrants direct private advisory engagement.",
+        note:          "This diagnostic has established the structural condition. Strategy Room is the next layer only when intervention must now be actively sequenced.",
         secondaryHref: "/diagnostics/executive-reporting",
         secondaryLabel:"Executive Reporting",
       };
@@ -497,18 +500,18 @@ function routeConfig(route: string, scores: DerivedScores) {
         label:         "Foundational Route",
         destination:   "Diagnostic Ladder",
         href:          "/diagnostics",
-        note:          "Foundational clarification precedes any premium escalation.",
+        note:          "This result is sufficient for foundational clarification. Continue only when a broader diagnostic comparison is needed.",
         secondaryHref: null,
         secondaryLabel: null,
       };
     default:
       return {
         label:         "Diagnostic Route",
-        destination:   "Executive Reporting",
+        destination:   "Move to Executive Reporting",
         href:          "/diagnostics/executive-reporting",
         note:          scores.authorityType === "UNCLEAR"
-          ? "Establish authority clarity before escalating to private advisory."
-          : "Diagnostic clarification will sharpen the constitutional case for private engagement.",
+          ? "You now know the structural condition. Executive Reporting is the next layer when consequence and decision order must be made explicit."
+          : "This result identifies the constitutional condition. Executive Reporting is the next layer when the implication must be priced and sequenced.",
         secondaryHref: "/strategy-room",
         secondaryLabel: "Strategy Room (pending diagnostic)",
       };
@@ -544,6 +547,17 @@ export default function ConstitutionalDiagnosticSuite() {
   const thread = React.useMemo(
     () => (decision && scores ? buildConstitutionalThread(decision, scores, routeHref, constitutionalReflections) : null),
     [constitutionalReflections, decision, routeHref, scores],
+  );
+  const decisionObject = React.useMemo(
+    () =>
+      decision && scores
+        ? buildConstitutionalDecisionObject({
+            decision,
+            scores,
+            reflections: constitutionalReflections,
+          })
+        : null,
+    [constitutionalReflections, decision, scores],
   );
   const matchedPlaybooks = React.useMemo(
     () =>
@@ -1294,6 +1308,14 @@ export default function ConstitutionalDiagnosticSuite() {
                     </div>
                   </div>
 
+                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem 1.5rem" }}>
+                    <Eyebrow>Evidence from this diagnostic</Eyebrow>
+                    <p style={{ marginTop: "0.75rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.94rem", lineHeight: 1.8, color: "rgba(255,255,255,0.80)", maxWidth: "62ch" }}>
+                      {decisionObject?.evidence[0]?.summary ?? `Your answers produced ${scores.coherence}% coherence, ${scores.governance}% governance reliability, and an authority posture classified as ${scores.authorityType.toLowerCase()}.`}
+                      {constitutionalReflections.shadowAuthority ? ` You also reported shadow authority: "${constitutionalReflections.shadowAuthority}".` : ""}
+                    </p>
+                  </div>
+
                   {/* Disqualifiers — if any triggered */}
                   {decision.disqualifiersTriggered.length > 0 && (
                     <div style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.04)", padding: "1.25rem 1.5rem" }}>
@@ -1336,6 +1358,29 @@ export default function ConstitutionalDiagnosticSuite() {
 
                   <DiagnosticFeedback stage="constitutional" routeResultType={decision.route} />
 
+                  <DecisionGradeBlocks data={{
+                    decisionDeclaration: decision.route === "STRATEGY"
+                      ? { optionA: "Escalate to governed intervention", optionB: "Contain with internal correction" }
+                      : scores.authorityType === "UNCLEAR"
+                      ? { optionA: "Clarify authority ownership now", optionB: "Continue with contested mandate" }
+                      : { optionA: "Enforce the constitutional boundary", optionB: "Accept the current governance gap" },
+                    ifUnchanged: decisionObject?.consequence
+                      ?? (scores.governance < 50
+                        ? "Governance gaps at this level typically produce authority leakage within 30 days. Decisions get made by whoever acts first, not by who should decide."
+                        : "The structural condition will persist as background friction. Execution quality will degrade incrementally rather than fail visibly."),
+                    minimumViableMove: decisionObject?.action
+                      ?? (scores.authorityType === "UNCLEAR"
+                        ? "Name who holds decision authority for the most contested domain and communicate it to the three people who need to hear it."
+                        : "Document the single constitutional boundary that is currently being ignored and enforce it in the next decision cycle."),
+                    confidence: scores.coherence > 65 ? "strong" : scores.coherence > 40 ? "moderate" : "strong",
+                    scaleBreak: "At scale, unresolved authority ambiguity produces parallel decision-making. Teams create informal power structures that contradict the stated governance model.",
+                  }} />
+
+                  <FreeLayerBoundary
+                    summary="This diagnostic identifies the structural condition, authority posture, and governance weakness, and it gives you a real constitutional boundary to clarify immediately."
+                    limitation="It does not price consequence, rank intervention options, or sequence execution ownership. That begins in Executive Reporting and Strategy Room."
+                  />
+
                   {/* Institutional intelligence layers — render when prior data exists */}
                   <LongitudinalIntelligence data={null} />
                   <OutcomeVerification data={null} />
@@ -1346,7 +1391,7 @@ export default function ConstitutionalDiagnosticSuite() {
                     const tc  = routeColor(decision.route);
                     return (
                       <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
-                        <Eyebrow>Constitutional next move</Eyebrow>
+                        <Eyebrow>Earned next move</Eyebrow>
                         <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>
                           {rc2.note}
                         </p>
