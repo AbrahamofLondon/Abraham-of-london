@@ -6,6 +6,7 @@ import Head from "next/head";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import type { GetServerSideProps, NextPage } from "next";
+import { isAdminEmail } from "@/lib/auth/admin-authority";
 import {
   Shield,
   ArrowRight,
@@ -30,17 +31,7 @@ const AdminLoginPage: NextPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const ADMIN_EMAILS = new Set([
-    "info@abrahamoflondon.org",
-    "seunadaramola@gmail.com",
-    "abrahamadaramola@outlook.com",
-  ]);
-
-  const sessionEmail = String(session?.user?.email || "")
-    .trim()
-    .toLowerCase();
-
-  const isAdmin = ADMIN_EMAILS.has(sessionEmail);
+  const isAdmin = isAdminEmail(session?.user?.email);
 
   React.useEffect(() => {
     setMounted(true);
@@ -76,7 +67,7 @@ const AdminLoginPage: NextPage = () => {
   const handleMagicLink = async () => {
     const normalized = email.trim().toLowerCase();
     if (!normalized) { setError("Enter your admin email first."); return; }
-    if (!ADMIN_EMAILS.has(normalized)) { setError("Administrative access is restricted."); return; }
+    if (!isAdminEmail(normalized)) { setError("Administrative access is restricted."); return; }
     setLoading(true);
     setError(null);
     try {

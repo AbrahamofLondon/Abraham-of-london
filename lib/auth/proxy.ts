@@ -6,6 +6,7 @@ import { getToken } from "next-auth/jwt";
 
 import { ROLE_HIERARCHY } from "@/types/auth";
 import { readAccessCookie } from "@/lib/auth/edge/cookies";
+import { isAuthorizedAdmin } from "@/lib/auth/admin-authority";
 
 const CANONICAL_HOST = "www.abrahamoflondon.org";
 
@@ -195,8 +196,16 @@ export async function proxy(req: NextRequest) {
         url.searchParams.set("returnTo", pathname);
         return NextResponse.redirect(url, 307);
       }
-      const rank = ROLE_HIERARCHY[(token as any)?.role as keyof typeof ROLE_HIERARCHY] ?? 0;
-      if (rank < 100) return isApi ? jsonResponse({ error: "RANK_LOW" }, 403) : NextResponse.redirect(new URL("/auth/access-denied", req.url));
+
+      // Enforce BOTH email whitelist AND admin role — not role alone
+      const tokenEmail = (token as any)?.email || (token as any)?.user?.email || (token as any)?.aol?.email;
+      const tokenRole = (token as any)?.role || (token as any)?.user?.role || (token as any)?.aol?.role;
+
+      if (!isAuthorizedAdmin({ email: tokenEmail, role: tokenRole })) {
+        return isApi
+          ? jsonResponse({ error: "ADMIN_CLEARANCE_REQUIRED" }, 403)
+          : NextResponse.redirect(new URL("/auth/access-denied", req.url));
+      }
     }
 
     if (requiresInstitutionalSession && !hasInstitutionalSession) {

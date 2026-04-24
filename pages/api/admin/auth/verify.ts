@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma.server";
-import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
+import { isAdminEmail } from "@/lib/auth/admin-authority";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 
@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }).catch(() => {});
 
   // Verify this is an admin email
-  if (!BOOTSTRAP_ADMIN_EMAILS.has(normalizedEmail)) {
+  if (!isAdminEmail(normalizedEmail)) {
     return res.redirect(302, "/admin/login?error=not_authorised");
   }
 

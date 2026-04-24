@@ -23,12 +23,7 @@ const NAV = [
   { href: "/vault", label: "Vault" },
 ] as const;
 
-const ADMIN_EMAILS = new Set([
-  process.env.NEXT_PUBLIC_ADMIN_EMAIL || "",
-  "info@abrahamoflondon.org",
-  "seunadaramola@gmail.com",
-  "abrahamadaramola@outlook.com",
-].filter(Boolean));
+import { isAdminEmail } from "@/lib/auth/admin-authority";
 
 export default function Navbar(): React.ReactElement {
   const [mounted, setMounted] = React.useState(false);
@@ -38,7 +33,7 @@ export default function Navbar(): React.ReactElement {
   const { data: session, status } = useSession();
   const asPath = mounted ? router.asPath : "/";
   
-  const isAdmin = ADMIN_EMAILS.has(session?.user?.email ?? "");
+  const isAdmin = isAdminEmail(session?.user?.email);
   const isAuthenticated = status === "authenticated";
   const isLoading = status === "loading";
 
