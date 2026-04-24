@@ -13,6 +13,7 @@ export type InnerCircleEmailSendResult = {
   ok: boolean;
   provider: "resend";
   error?: string;
+  id?: string;
 };
 
 export function sendInnerCircleEmail(
@@ -24,4 +25,3 @@ export function sendInnerCircleEmail(
   key: string,
   name?: string
 ): Promise<InnerCircleEmailSendResult>;
-

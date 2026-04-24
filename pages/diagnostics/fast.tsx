@@ -16,6 +16,7 @@ import { track } from "@/lib/analytics/track";
 import { composeResult, type DiagnosticResult } from "@/lib/diagnostics/output-composer";
 import { selectScenario } from "@/lib/diagnostics/scenario-selector";
 import { evaluateBehaviour } from "@/lib/diagnostics/behaviour-map";
+import { computeCostOfDelay, type CostOfDelayResult } from "@/lib/diagnostics/cost-of-delay-engine";
 import type { ScenarioDefinition } from "@/lib/diagnostics/scenarios";
 
 const GOLD = "#C9A96E";
@@ -105,6 +106,17 @@ const FastDiagnosticPage: NextPage = () => {
     if (!composedResult) return null;
     return selectScenario(composedResult.signal.key);
   }, [composedResult]);
+
+  const delayResult: CostOfDelayResult | null = React.useMemo(() => {
+    if (stage !== "result" && stage !== "scenario" && stage !== "final") return null;
+    return computeCostOfDelay({
+      urgencyScore: urgency,
+      ownershipScore: ownership,
+      clarityScore: clarity,
+      accountabilityScore: accountability,
+      stateScore: decisionState,
+    });
+  }, [urgency, ownership, clarity, accountability, decisionState, stage]);
 
   // All language now comes from the signal dictionary — no inline strings
   const sig = composedResult?.signal;
@@ -362,6 +374,33 @@ const FastDiagnosticPage: NextPage = () => {
 
               {/* 6. IF UNCHANGED */}
               <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(252,165,165,0.40)", marginTop: "1rem", fontStyle: "italic", maxWidth: "48ch" }}>{sig.consequenceStatement}</p>
+
+              {/* COST OF DELAY */}
+              {delayResult && (
+                <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "1rem", marginTop: "1.25rem" }}>
+                  <div className="flex items-center justify-between">
+                    <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Cost of delay</span>
+                    <span style={{ ...mono, fontSize: "8px", color: delayResult.band === "CRITICAL" ? "rgba(252,165,165,0.65)" : delayResult.band === "HIGH" ? "rgba(253,186,116,0.60)" : delayResult.band === "MODERATE" ? `${GOLD}BB` : "rgba(255,255,255,0.30)", fontWeight: 700 }}>
+                      {delayResult.band}
+                    </span>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {(["7_DAYS", "30_DAYS", "90_DAYS"] as const).map((h) => (
+                      <div key={h} className="flex gap-3">
+                        <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.18)", minWidth: "50px" }}>{h.replace("_", " ")}</span>
+                        <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>{delayResult.horizon[h]}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {delayResult.estimatedFinancialExposure != null && (
+                    <div style={{ marginTop: "0.75rem", borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "0.5rem" }}>
+                      <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Estimated exposure</span>
+                      <span style={{ ...mono, fontSize: "11px", color: `${GOLD}CC`, marginLeft: "0.5rem" }}>£{delayResult.estimatedFinancialExposure.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.12)", marginTop: "0.5rem" }}>{delayResult.disclosure}</p>
+                </div>
+              )}
 
               {/* SCENARIO STRESS-TEST */}
               {activeScenario && stage === "result" && (

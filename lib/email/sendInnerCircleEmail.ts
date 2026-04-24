@@ -22,6 +22,7 @@ export type InnerCircleEmailSendResult = {
   ok: boolean;
   provider: SendProvider;
   error?: string;
+  id?: string;
 };
 
 function fromAddress(): string {
@@ -149,4 +150,3 @@ export async function sendInnerCircleEmail(
     },
   });
 }
-

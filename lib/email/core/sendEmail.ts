@@ -35,6 +35,7 @@ export type SendEmailResult = {
   ok: boolean;
   provider: "resend";
   error?: string;
+  id?: string;
 };
 
 function normalizeList(value: string | string[] | undefined): string[] | undefined {
@@ -177,7 +178,11 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
       success: true,
       meta: input.meta,
     });
-    return { ok: true, provider: "resend" };
+    return {
+      ok: true,
+      provider: "resend",
+      id: typeof (response as any)?.data?.id === "string" ? (response as any).data.id : undefined,
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : "EMAIL_SEND_FAILED";
     logAudit({

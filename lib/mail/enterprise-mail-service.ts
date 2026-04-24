@@ -1,15 +1,10 @@
 // lib/mail/enterprise-mail-service.ts
 import { sendEmail } from "@/lib/email/core/sendEmail";
+import { EmailLinks } from "@/lib/email/links";
 
 const DEFAULT_FROM = "Abraham of London <info@abrahamoflondon.org>";
 const DEFAULT_REPLY_TO = "info@abrahamoflondon.org";
 const DEFAULT_ADMIN_EMAIL = "info@abrahamoflondon.org";
-const DEFAULT_SITE_URL = String(
-  process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    "https://www.abrahamoflondon.org"
-).replace(/\/+$/, "");
-
 export type SendEmailResult = {
   ok: boolean;
   provider: "resend";
@@ -73,7 +68,7 @@ async function sendHtmlEmail(args: {
   });
 
   return result.ok
-    ? { ok: true, provider: "resend", id: null }
+    ? { ok: true, provider: "resend", id: result.id ?? null }
     : { ok: false, provider: "resend", error: result.error || "MAIL_SEND_FAILED" };
 }
 
@@ -188,9 +183,7 @@ export async function sendCampaignNudgeEmail({
     return { ok: false, provider: "resend", error: "MISSING_INVITE_TOKEN" };
   }
 
-  const accessUrl = `${DEFAULT_SITE_URL}/alignment/enterprise/respond?token=${encodeURIComponent(
-    safeToken
-  )}`;
+  const accessUrl = EmailLinks.enterpriseRespond(safeToken);
 
   const html = `
     <!DOCTYPE html>

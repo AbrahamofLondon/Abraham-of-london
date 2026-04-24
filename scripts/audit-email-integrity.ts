@@ -33,17 +33,25 @@ const EMAIL_RELEVANT_PATHS = new Set([
   CORE_SENDER,
   TEMPLATE_REGISTRY,
   LINKS_MODULE,
+  "lib/email/dispatcher.ts",
   "lib/email/sendInnerCircleEmail.ts",
   "lib/email/sendInnerCircleEmail.d.ts",
+  "lib/access/invite-mail.ts",
   "lib/mail.ts",
   "lib/mail/enterprise-mail-service.ts",
+  "lib/alignment/campaign-actions.ts",
   "pages/api/contact.ts",
+  "pages/api/newsletter.tsx",
+  "pages/api/verify-newsletter.ts",
+  "pages/api/admin/auth/send-link.ts",
   "pages/api/inner-circle/register.ts",
   "pages/api/inner-circle/resend.ts",
+  "pages/api/admin/invites/create.ts",
   "lib/strategy-room/enrol-core.ts",
   "app/api/alignment/enterprise/campaigns/[id]/notify/route.ts",
   "app/api/alignment/enterprise/campaigns/[id]/nudge/route.ts",
-  "app/actions/request-access.ts",
+  "app/api/campaigns/[id]/invite/route.ts",
+  "app/api/campaigns/[id]/nudge/route.ts",
 ]);
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -120,9 +128,11 @@ for (const [file, content] of contentByFile.entries()) {
   // Check for direct imports from template directories
   const templateImportPatterns = [
     /from\s+["']@\/emails\//,
-    /from\s+["']\.\.\/\.\.\/emails\//,
     /from\s+["']@\/components\/emails\//,
-    /from\s+["']\.\.\/components\/emails\//,
+    /from\s+["']@\/lib\/email\/templates\/(?!index)/,
+    /from\s+["'][.\/]+.*emails\//,
+    /from\s+["'][.\/]+.*components\/emails\//,
+    /from\s+["'][.\/]+.*lib\/email\/templates\/(?!index)/,
   ];
 
   for (const pattern of templateImportPatterns) {
@@ -154,6 +164,7 @@ for (const [file, content] of contentByFile.entries()) {
     { pattern: /\/api\/downloads\//, desc: "API download route" },
     { pattern: /\/checkout\?slug=/, desc: "Hardcoded checkout slug" },
     { pattern: /\/consulting\/strategy-room/, desc: "Deprecated strategy-room route" },
+    { pattern: /https:\/\/www\.abrahamoflondon\.org\//, desc: "Hard-coded absolute production URL" },
   ];
 
   for (const { pattern, desc } of hardcodedPatterns) {

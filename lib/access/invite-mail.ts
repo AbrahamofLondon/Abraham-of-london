@@ -131,7 +131,7 @@ function fromAddress(): string {
 
 export async function sendInviteEmail(
   input: InviteEmailInput,
-): Promise<{ ok: boolean; provider: "resend" | "console"; error?: string }> {
+): Promise<{ ok: boolean; provider: "resend"; error?: string; id?: string }> {
   const subject = buildSubject(input.grants);
   return sendEmail({
     type: "INVITE",
