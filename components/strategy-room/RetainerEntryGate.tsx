@@ -73,7 +73,7 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
         color: "rgba(255,255,255,0.40)",
         marginBottom: "0.5rem",
       }}>
-        This determines whether you fall behind or move ahead.
+        Delay does not preserve the current state. It degrades it.
       </p>
       <p style={{
         ...mono,

@@ -191,12 +191,21 @@ async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const results = await Promise.allSettled(tasks);
+    const mailAudit = results.map((result, i) => ({
+      index: i,
+      ok: result.status === "fulfilled",
+      provider: "resend",
+      error: result.status === "rejected"
+        ? (result.reason instanceof Error ? result.reason.message : String(result.reason))
+        : undefined,
+    }));
 
     results.forEach((result, i) => {
       if (result.status === "rejected") {
         console.error(`[CONTACT_TASK_${i}_FAILED]`, result.reason);
       }
     });
+    console.info("[CONTACT_EMAIL_AUDIT]", mailAudit);
 
     // HubSpot sync — fire and forget
     hubspotSync({

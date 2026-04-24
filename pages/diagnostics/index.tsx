@@ -367,7 +367,7 @@ export default function DiagnosticsIndexPage() {
                   maxWidth: "56ch",
                 }}
               >
-                Each stage identifies contradictions between what you claim and what is evidenced. Patterns that persist across stages are structural, not accidental. When consequence must be priced, the system escalates.
+                Each stage identifies contradictions between what you claim and what is evidenced. Patterns that persist are structural, not accidental. The condition compounds whether or not you continue. When consequence must be priced, the system escalates.
               </p>
               <div className="mt-6 grid gap-3 md:grid-cols-2">
                 {STARTING_SIGNALS.map((signal) => (

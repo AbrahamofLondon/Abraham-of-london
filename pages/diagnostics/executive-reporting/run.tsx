@@ -2072,9 +2072,9 @@ export default function ExecutiveReportingRunPage({
                       color: "rgba(255,255,255,0.94)",
                     }}
                   >
-                    Governed decision intake.
+                    Decision enforcement intake.
                     <br />
-                    <span style={{ color: "rgba(255,255,255,0.28)" }}>Receive the consequence map.</span>
+                    <span style={{ color: "rgba(255,255,255,0.28)" }}>The consequence is already compounding.</span>
                   </h1>
 
                   <p
@@ -2088,8 +2088,8 @@ export default function ExecutiveReportingRunPage({
                       maxWidth: "46ch",
                     }}
                   >
-                    The first paid layer: priced consequence, required action,
-                    and enforcement path derived from your specific evidence.
+                    This prices the consequence, orders the decisions, and defines the enforcement path.
+                    The condition compounds whether or not you proceed.
                   </p>
                   {checkoutConfirmed && (
                     <div

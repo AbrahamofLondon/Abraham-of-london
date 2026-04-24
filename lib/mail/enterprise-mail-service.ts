@@ -1,5 +1,5 @@
 // lib/mail/enterprise-mail-service.ts
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/email/core/sendEmail";
 
 const DEFAULT_FROM = "Abraham of London <info@abrahamoflondon.org>";
 const DEFAULT_REPLY_TO = "info@abrahamoflondon.org";
@@ -60,11 +60,6 @@ function formatDate(date = new Date()): string {
   });
 }
 
-function getResendClient(): Resend | null {
-  const resendApiKey = String(process.env.RESEND_API_KEY || "").trim();
-  return resendApiKey ? new Resend(resendApiKey) : null;
-}
-
 async function sendHtmlEmail(args: {
   to: string | string[];
   subject: string;
@@ -72,37 +67,21 @@ async function sendHtmlEmail(args: {
   from?: string;
   replyTo?: string;
 }): Promise<MailResult> {
-  const resend = getResendClient();
-  if (!resend) {
-    return {
-      success: false,
-      provider: "resend",
-      error: "RESEND_API_KEY is missing.",
-    };
-  }
+  const result = await sendEmail({
+    type: "ENTERPRISE",
+    to: Array.isArray(args.to) ? args.to : [args.to],
+    subject: args.subject,
+    html: args.html,
+    from: args.from || DEFAULT_FROM,
+    replyTo: args.replyTo || DEFAULT_REPLY_TO,
+    meta: {
+      source: "enterprise-mail-service",
+    },
+  });
 
-  try {
-    const response = await resend.emails.send({
-      from: args.from || DEFAULT_FROM,
-      to: Array.isArray(args.to) ? args.to : [args.to],
-      subject: args.subject,
-      html: args.html,
-      replyTo: args.replyTo || DEFAULT_REPLY_TO,
-    });
-
-    return {
-      success: true,
-      provider: "resend",
-      id: typeof response?.data?.id === "string" ? response.data.id : null,
-    };
-  } catch (error) {
-    console.error("[enterprise-mail-service] sendHtmlEmail failed:", error);
-    return {
-      success: false,
-      provider: "resend",
-      error: "MAIL_SEND_FAILED",
-    };
-  }
+  return result.ok
+    ? { success: true, provider: "resend", id: null }
+    : { success: false, provider: "resend", error: result.error || "MAIL_SEND_FAILED" };
 }
 
 export async function sendExecutiveBriefNotification({
@@ -119,11 +98,11 @@ export async function sendExecutiveBriefNotification({
   const safeCount = Number.isFinite(respondentCount) ? respondentCount : 0;
 
   if (!isValidEmail(safeEmail)) {
-    return { success: false, error: "INVALID_EMAIL" };
+    return { success: false, provider: "resend", error: "INVALID_EMAIL" };
   }
 
   if (!safeUrl) {
-    return { success: false, error: "MISSING_DASHBOARD_URL" };
+    return { success: false, provider: "resend", error: "MISSING_DASHBOARD_URL" };
   }
 
   const date = formatDate();
@@ -209,11 +188,11 @@ export async function sendCampaignNudgeEmail({
   const safeToken = String(inviteToken || "").trim();
 
   if (!isValidEmail(safeEmail)) {
-    return { success: false, error: "INVALID_EMAIL" };
+    return { success: false, provider: "resend", error: "INVALID_EMAIL" };
   }
 
   if (!safeToken) {
-    return { success: false, error: "MISSING_INVITE_TOKEN" };
+    return { success: false, provider: "resend", error: "MISSING_INVITE_TOKEN" };
   }
 
   const accessUrl = `${DEFAULT_SITE_URL}/alignment/enterprise/respond?token=${encodeURIComponent(
@@ -283,7 +262,7 @@ export async function sendInternalAccessRequestNotification(args: {
   const safeSlug = escapeHtml(args.slug);
 
   if (!isValidEmail(safeEmail)) {
-    return { success: false, error: "INVALID_EMAIL" };
+    return { success: false, provider: "resend", error: "INVALID_EMAIL" };
   }
 
   const html = `

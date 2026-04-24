@@ -597,11 +597,11 @@ function ExecutionEntryState({
               fontWeight: 300,
               fontSize: "0.88rem",
               lineHeight: 1.55,
-              color: "rgba(255,255,255,0.30)",
+              color: "rgba(252,165,165,0.35)",
               fontStyle: "italic",
               maxWidth: "52ch",
             }}>
-              This is not only about correcting risk. It determines whether you fall behind or move ahead.
+              In an AI-accelerated environment, stagnation is negative movement. This condition compounds whether or not you act.
             </p>
             <p style={{
               marginTop: "0.35rem",

@@ -240,7 +240,7 @@ const ConsultingPage: NextPage = () => {
   return (
     <Layout
       title="Advisory & Strategy | Abraham of London"
-      description="Strategic counsel for leaders under consequence."
+      description="Decision enforcement for leaders under consequence."
       canonicalUrl="/consulting"
       fullWidth
       headerTransparent
@@ -280,7 +280,7 @@ const ConsultingPage: NextPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.95, delay: 0.08 }}
                   >
-                    Strategic counsel
+                    Decision enforcement
                     <span style={{ display: "block", color: "rgba(255,255,255,0.30)", marginTop: "0.2rem" }}>
                       for leaders under consequence
                     </span>
@@ -300,7 +300,8 @@ const ConsultingPage: NextPage = () => {
                   >
                     For founders, boards, and institutions where the structured system
                     has identified the condition but the decision exceeds what it can fully model.
-                    This applies the system under conditions it cannot reach alone.
+                    Applied where the system identifies conditions it cannot fully model.
+                    The consequence is already active. This is not advisory.
                   </motion.p>
 
                   <motion.div className="flex flex-wrap gap-3 mt-10"

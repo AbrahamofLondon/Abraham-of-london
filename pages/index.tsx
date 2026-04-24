@@ -1931,23 +1931,23 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
           <p
             className="mt-3 max-w-[54ch] text-[15px] font-normal leading-[1.8] ds-text-muted sm:mt-4"
           >
-            We identify contradictions. Price what they cost.
+            This system identifies the contradiction, prices the consequence,
             <br />
-            Sequence the intervention. Verify whether action worked.
+            enforces the decision, and verifies whether it held.
           </p>
 
           <p className="mt-2 max-w-[58ch] text-[13px] leading-[1.7]" style={{ color: "rgba(252,165,165,0.40)", fontStyle: "italic" }}>
-            A strategy that ignores AI acceleration is not neutral. It is a liability.
+            Delay does not preserve the current state. It degrades it.
           </p>
 
           <p className="mt-3 max-w-[58ch] text-[12px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.06em" }}>
-            Every decision is evaluated against cost, speed, and competitive position.
+            Every decision evaluated against cost, speed, and competitive position.
           </p>
 
           <p className="mt-4 max-w-[58ch] text-[14px] leading-[1.85] ds-text-muted">
-            Start with a 6-minute diagnostic.
+            This is where decision ambiguity ends.
             <br />
-            Escalate only when consequence must be priced.
+            6 minutes. No preparation required.
           </p>
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -2150,21 +2150,21 @@ function WhatThisPlatformIs() {
         eyebrow="How it works"
         title={
           <>
-            Diagnostics identify condition.
+            Diagnose. Price. Enforce. Verify.
             <br />
-            <span className="ds-text-muted">Executive Reporting forces position and consequence.</span>
+            <span className="ds-text-muted">This condition compounds even if you choose not to act.</span>
           </>
         }
-        description="A governed system that turns structured diagnostic evidence into a decision-ready executive brief — position, financial exposure, priority stack, and next action."
+        description="A decision enforcement system. Identifies the contradiction, prices the consequence, sequences the intervention, and measures whether action held."
         large
       />
 
       <div className="mt-8 grid gap-3 lg:grid-cols-4">
         {[
-          ["Diagnose", "Surface the structural problem: decision drift, team misalignment, or institutional pressure."],
-          ["Classify", "Name the trajectory, readiness state, and active failure modes."],
-          ["Escalate", "Move only when signal, authority, and consequence justify it."],
-          ["Report", "Translate evidence into position, exposure, priority stack, and next action."],
+          ["Diagnose", "Identify the contradiction the organisation cannot dismiss."],
+          ["Price", "Attach financial and competitive cost to inaction."],
+          ["Enforce", "Sequence the intervention. Track execution. Escalate failure."],
+          ["Verify", "Measure whether the decision held and the condition changed."],
         ].map(([title, body]) => (
           <Panel key={title} surface="lift">
             <div className="p-6">
@@ -2193,7 +2193,7 @@ function WhatThisPlatformIs() {
             Not {item.toLowerCase()}
           </span>
         ))}
-        <span style={{ color: "var(--ds-text)", opacity: 0.80 }}>It is a governed executive reporting system.</span>
+        <span style={{ color: "var(--ds-text)", opacity: 0.80 }}>It is a decision enforcement system.</span>
       </div>
     </Section>
   );
@@ -2733,7 +2733,7 @@ function ProofLayer() {
           </div>
           <ObservedOutcomesBlock />
           <p className="mt-4 max-w-[60ch] text-[13px] leading-[1.85] ds-text-muted">
-            The system does not produce outcomes. It enforces the decision and measures the result.
+            The system enforces decisions and tracks whether they held. Organisations with this pattern typically stall within 30 days without intervention. Those that act see measurable position change within one enforcement cycle.
           </p>
         </div>
 

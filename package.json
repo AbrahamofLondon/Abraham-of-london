@@ -154,6 +154,7 @@
     "verify:local": "cross-env TARGET_URL=http://localhost:3000 node scripts/system/verify-deployment.mjs",
     "verify:all": "pnpm verify:local && pnpm check:all",
     "audit:links": "node scripts/audit-links.mjs",
+    "audit:email": "tsx scripts/audit-email-integrity.ts",
     "audit:pricing": "tsx scripts/audit-pricing-authority.ts",
     "audit:checkout": "tsx scripts/audit-checkout-links.ts",
     "test:all": "pnpm test && pnpm check:all && pnpm pdf:audit",

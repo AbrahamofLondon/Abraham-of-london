@@ -461,7 +461,7 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
             ? "You now know the team condition. Executive Reporting is the next layer only when that condition must be priced and ordered."
             : "You now know the team condition. The Constitutional Diagnostic is the next layer when you need to test whether structure, not just team perception, is driving it.",
         }}
-        consequenceOfExit="You have the signal and one practical correction you can act on now. The next layer is only needed if the consequence must be priced, or if structural confirmation is required beyond leadership perception."
+        consequenceOfExit="You have the signal and one practical correction. The divergence continues to widen whether or not you proceed. The next layer is needed when consequence must be priced or structural confirmation is required."
         trajectoryWarning={vi > 40 ? "Variance is high enough that a delayed response usually hardens the gap rather than shrinking it." : undefined}
         deferNote="Use the immediate direction first if the condition is still local. Escalate when the consequence must be governed."
       />

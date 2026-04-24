@@ -594,7 +594,7 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
           href: "/diagnostics/executive-reporting",
           reason: "You now know the enterprise condition. Executive Reporting is the next layer when that condition must be translated into consequence, exposure, and ordered decisions.",
         }}
-        consequenceOfExit="You have the signal and one governance action. Executive Reporting is only needed if consequence must be priced or decisions must be ordered for a board or stakeholder audience."
+        consequenceOfExit="You have the signal and one governance action. Institutional drag compounds whether or not you proceed. Executive Reporting is needed when consequence must be priced or decisions ordered for a board audience."
         trajectoryWarning={posture === "DISORDERED" || posture === "CONTESTED" ? "Current posture is unstable enough that leaving the condition ungoverned usually worsens the next decision cycle." : undefined}
         canDefer={posture !== "DISORDERED"}
         deferNote={posture !== "DISORDERED" ? "If the condition is still containable, act on the governance correction first. Escalate when exposure must be priced." : undefined}

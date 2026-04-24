@@ -5,6 +5,8 @@
  * Falls back to console logging in development.
  */
 
+import { sendEmail } from "@/lib/email/core/sendEmail";
+
 import type { EntitlementGrant } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -131,38 +133,26 @@ export async function sendInviteEmail(
   input: InviteEmailInput,
 ): Promise<{ ok: boolean; provider: "resend" | "console"; error?: string }> {
   const subject = buildSubject(input.grants);
-  const text = buildPlainText(input);
-  const html = buildHtml(input);
-  const from = fromAddress();
-  const to = input.recipientEmail;
-
-  // Development: log to console
-  if (process.env.NODE_ENV !== "production" && !process.env.RESEND_API_KEY) {
-    console.log("[INVITE EMAIL]", { from, to, subject });
-    console.log("[INVITE URL]", input.inviteUrl);
-    return { ok: true, provider: "console" };
-  }
-
-  // Production: send via Resend
-  try {
-    const { Resend } = await import("resend");
-    const apiKey = (process.env.RESEND_API_KEY || "").trim();
-    if (!apiKey) {
-      console.warn("[INVITE EMAIL] RESEND_API_KEY not set — email not sent");
-      console.log("[INVITE EMAIL]", { from, to, subject });
-      return { ok: false, provider: "resend", error: "RESEND_API_KEY not configured" };
-    }
-
-    const resend = new Resend(apiKey);
-    const result = await resend.emails.send({ from, to, subject, html, text });
-
-    if (result.error) {
-      return { ok: false, error: result.error.message };
-    }
-
-    return { ok: true, provider: "resend" };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Email send failed";
-    return { ok: false, provider: "resend", error: message };
-  }
+  return sendEmail({
+    type: "INVITE",
+    to: input.recipientEmail,
+    subject,
+    template: {
+      name: "invite",
+      data: {
+        recipientEmail: input.recipientEmail,
+        inviteUrl: input.inviteUrl,
+        grants: input.grants,
+        expiresAt: input.expiresAt ?? null,
+        senderName: input.senderName,
+        subject,
+      },
+    },
+    html: buildHtml(input),
+    text: buildPlainText(input),
+    from: fromAddress(),
+    meta: {
+      source: "access-invite",
+    },
+  });
 }

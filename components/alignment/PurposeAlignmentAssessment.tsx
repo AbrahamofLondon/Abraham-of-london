@@ -1013,7 +1013,7 @@ function AuthorityResultSurface({
           href: routing?.href ?? "/diagnostics/constitutional-diagnostic",
           reason: routing?.reason ?? "You now know the personal condition. The next layer tests whether the same pattern exists structurally in the organisation around you.",
         }}
-        consequenceOfExit="You have the signal and one practical correction. Executive Reporting is only needed if the consequence must be priced or the decision must be defended to others. Constitutional Diagnostic is only needed if you want to test whether this pattern extends into organisational structure."
+        consequenceOfExit="You have the signal and one practical correction. The pattern continues to compound whether or not you proceed. Executive Reporting is needed when consequence must be priced. Constitutional Diagnostic is needed when you want to test whether this pattern is structural."
         trajectoryWarning={result.percent < 55 ? "If the same contradiction is already affecting live decisions, move to the next layer now." : undefined}
         deferNote="You can keep this result and act on the immediate correction first. Continue only when you need structural confirmation."
       />
