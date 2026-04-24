@@ -26,7 +26,9 @@ import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeB
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { buildDecisionObjectFromSignals } from "@/lib/diagnostics/decision-engine";
 import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChainSurface";
+import ProductAdvantageBlocks from "@/components/diagnostics/results/ProductAdvantageBlocks";
 import { buildTeamResult } from "@/lib/diagnostics/assessment-result-builders";
+import { detectSignal } from "@/lib/diagnostics/signal-detector";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 const GOLD = "#C9A96E";
@@ -380,6 +382,12 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
         nextAction,
         reflections,
       })} />
+
+      <ProductAdvantageBlocks
+        signalKey={detectSignal({ urgency: vi > 40 ? 3 : 2, ownershipScore: tg > 30 ? 3 : 2, stateScore: af > 50 ? 3 : 2, clarityScore: vi > 30 ? 3 : 2, accountabilityScore: tg > 25 ? 3 : 2 })}
+        scores={{ urgency: vi > 40 ? 3 : 2, ownership: tg > 30 ? 3 : 2, clarity: vi > 30 ? 3 : 2, accountability: tg > 25 ? 3 : 2, state: af > 50 ? 3 : 2 }}
+        layer="full"
+      />
 
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />
 

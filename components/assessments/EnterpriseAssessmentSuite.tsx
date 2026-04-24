@@ -23,7 +23,9 @@ import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeB
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { buildDecisionObjectFromSignals } from "@/lib/diagnostics/decision-engine";
 import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChainSurface";
+import ProductAdvantageBlocks from "@/components/diagnostics/results/ProductAdvantageBlocks";
 import { buildEnterpriseResult } from "@/lib/diagnostics/assessment-result-builders";
+import { detectSignal } from "@/lib/diagnostics/signal-detector";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 type EnterpriseDomain = {
@@ -507,6 +509,12 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
         })),
         nextAction,
       })} />
+
+      <ProductAdvantageBlocks
+        signalKey={detectSignal({ urgency: posture === "DISORDERED" ? 4 : posture === "CONTESTED" ? 3 : 2, ownershipScore: posture === "DISORDERED" ? 4 : 2, stateScore: heatDomains.length > 1 ? 3 : 2, clarityScore: posture === "DISORDERED" || posture === "CONTESTED" ? 3 : 2, accountabilityScore: posture === "DISORDERED" ? 4 : 2 })}
+        scores={{ urgency: posture === "DISORDERED" ? 4 : posture === "CONTESTED" ? 3 : 2, ownership: posture === "DISORDERED" ? 4 : 2, clarity: posture === "DISORDERED" || posture === "CONTESTED" ? 3 : 2, accountability: posture === "DISORDERED" ? 4 : 2, state: heatDomains.length > 1 ? 3 : 2 }}
+        layer="full"
+      />
 
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />
 

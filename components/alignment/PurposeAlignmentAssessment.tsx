@@ -68,7 +68,9 @@ import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeB
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { buildPurposeDecisionObject } from "@/lib/diagnostics/decision-engine";
 import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChainSurface";
+import ProductAdvantageBlocks from "@/components/diagnostics/results/ProductAdvantageBlocks";
 import { buildPurposeResult } from "@/lib/diagnostics/assessment-result-builders";
+import { detectSignal } from "@/lib/diagnostics/signal-detector";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -990,6 +992,13 @@ function AuthorityResultSurface({
     <div className="space-y-4" style={{ maxWidth: "56rem" }}>
       {/* CANONICAL EVIDENCE CHAIN — the definitive result */}
       <EvidenceChainSurface result={canonicalResult} />
+
+      {/* PRODUCT ADVANTAGE — scenario, cost-of-delay, behavioural divergence */}
+      <ProductAdvantageBlocks
+        signalKey={detectSignal({ urgency: result.percent < 50 ? 3 : 2, ownershipScore: result.percent < 40 ? 3 : 2, stateScore: result.percent < 45 ? 3 : 2, clarityScore: result.percent < 50 ? 3 : 2, accountabilityScore: result.percent < 45 ? 3 : 2 })}
+        scores={{ urgency: result.percent < 50 ? 3 : 2, ownership: result.percent < 40 ? 3 : 2, clarity: result.percent < 50 ? 3 : 2, accountability: result.percent < 45 ? 3 : 2, state: result.percent < 45 ? 3 : 2 }}
+        layer="full"
+      />
 
       {/* Separator */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />

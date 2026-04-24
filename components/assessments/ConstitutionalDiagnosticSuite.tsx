@@ -51,7 +51,9 @@ import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundar
 import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
 import { buildConstitutionalDecisionObject } from "@/lib/diagnostics/decision-engine";
 import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChainSurface";
+import ProductAdvantageBlocks from "@/components/diagnostics/results/ProductAdvantageBlocks";
 import { buildConstitutionalResult } from "@/lib/diagnostics/assessment-result-builders";
+import { detectSignal } from "@/lib/diagnostics/signal-detector";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 
 function readinessNumeric(tier: string): number {
@@ -1207,6 +1209,12 @@ export default function ConstitutionalDiagnosticSuite() {
                 failureModes: (decision as any).failureModes ?? [],
                 reflections: constitutionalReflections,
               })} />
+
+              <ProductAdvantageBlocks
+                signalKey={detectSignal({ urgency: scores.seriousness > 60 ? 3 : 2, ownershipScore: scores.authorityType === "UNCLEAR" ? 4 : 2, stateScore: scores.coherence < 50 ? 3 : 2, clarityScore: scores.governance < 50 ? 3 : 2, accountabilityScore: scores.trust < 50 ? 3 : 2 })}
+                scores={{ urgency: scores.seriousness > 60 ? 3 : 2, ownership: scores.authorityType === "UNCLEAR" ? 4 : 2, clarity: scores.governance < 50 ? 3 : 2, accountability: scores.trust < 50 ? 3 : 2, state: scores.coherence < 50 ? 3 : 2 }}
+                layer="full"
+              />
 
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />
 
