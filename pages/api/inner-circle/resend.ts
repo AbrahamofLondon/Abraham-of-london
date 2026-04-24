@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 import { rateLimitCheck, getClientIp, createRateLimitHeaders } from "@/lib/server/rate-limit-unified";
 import { hashAccessKey, getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
-import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
+import { sendInnerCircleEmail } from "@/lib/email/sendInnerCircleEmail";
 
 type ApiResponse =
   | { ok: true; message: string }
@@ -173,18 +173,27 @@ export default async function handler(
       rawKey
     )}`;
 
-    await sendInnerCircleEmail(
-      email,
-      "Access Recovered | Abraham of London",
-      {
+    const mailResult = await sendInnerCircleEmail({
+      to: email,
+      type: "resend",
+      data: {
         name: name || member.name || "Principal",
-        email,
         accessKey: rawKey,
         unlockUrl,
-        mode: "resend",
-        requestIp: getRequestIp(req),
-      }
-    );
+      },
+    });
+
+    if (!mailResult.ok) {
+      console.error("[INNER_CIRCLE_RESEND_EMAIL_FAILED]", {
+        email,
+        provider: mailResult.provider,
+        error: mailResult.error || "EMAIL_SEND_FAILED",
+      });
+      return res.status(502).json({
+        ok: false,
+        error: "Recovery email delivery failed. Please try again shortly.",
+      });
+    }
 
     return res.status(200).json({
       ok: true,

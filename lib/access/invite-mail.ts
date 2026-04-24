@@ -129,7 +129,7 @@ function fromAddress(): string {
 
 export async function sendInviteEmail(
   input: InviteEmailInput,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; provider: "resend" | "console"; error?: string }> {
   const subject = buildSubject(input.grants);
   const text = buildPlainText(input);
   const html = buildHtml(input);
@@ -140,7 +140,7 @@ export async function sendInviteEmail(
   if (process.env.NODE_ENV !== "production" && !process.env.RESEND_API_KEY) {
     console.log("[INVITE EMAIL]", { from, to, subject });
     console.log("[INVITE URL]", input.inviteUrl);
-    return { ok: true };
+    return { ok: true, provider: "console" };
   }
 
   // Production: send via Resend
@@ -150,7 +150,7 @@ export async function sendInviteEmail(
     if (!apiKey) {
       console.warn("[INVITE EMAIL] RESEND_API_KEY not set — email not sent");
       console.log("[INVITE EMAIL]", { from, to, subject });
-      return { ok: false, error: "RESEND_API_KEY not configured" };
+      return { ok: false, provider: "resend", error: "RESEND_API_KEY not configured" };
     }
 
     const resend = new Resend(apiKey);
@@ -160,9 +160,9 @@ export async function sendInviteEmail(
       return { ok: false, error: result.error.message };
     }
 
-    return { ok: true };
+    return { ok: true, provider: "resend" };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Email send failed";
-    return { ok: false, error: message };
+    return { ok: false, provider: "resend", error: message };
   }
 }

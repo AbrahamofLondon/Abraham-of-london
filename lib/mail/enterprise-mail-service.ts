@@ -12,11 +12,13 @@ const DEFAULT_SITE_URL = String(
 
 type MailSuccess = {
   success: true;
+  provider: "resend";
   id?: string | null;
 };
 
 type MailFailure = {
   success: false;
+  provider: "resend";
   error: string;
 };
 
@@ -74,6 +76,7 @@ async function sendHtmlEmail(args: {
   if (!resend) {
     return {
       success: false,
+      provider: "resend",
       error: "RESEND_API_KEY is missing.",
     };
   }
@@ -89,12 +92,14 @@ async function sendHtmlEmail(args: {
 
     return {
       success: true,
+      provider: "resend",
       id: typeof response?.data?.id === "string" ? response.data.id : null,
     };
   } catch (error) {
     console.error("[enterprise-mail-service] sendHtmlEmail failed:", error);
     return {
       success: false,
+      provider: "resend",
       error: "MAIL_SEND_FAILED",
     };
   }

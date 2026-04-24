@@ -20,6 +20,13 @@ type NewPayload = {
 
 // Old signature support: sendInnerCircleEmail(email, key, name?)
 type OldSig = [string, string, string?];
+type SendProvider = "resend" | "console" | "netlify" | "none";
+
+export type InnerCircleEmailSendResult = {
+  ok: boolean;
+  provider: SendProvider;
+  error?: string;
+};
 
 function isProd(): boolean {
   return process.env.NODE_ENV === "production";
@@ -125,14 +132,14 @@ async function dispatchEmail(args: {
   subject: string;
   text: string;
   html?: string;
-}): Promise<void> {
+}): Promise<InnerCircleEmailSendResult> {
   const safeTo = applyNonProdRecipientOverride(args.to);
   const p = provider();
 
   if (p === "console") {
     console.log("📧 [InnerCircle Email] (console)", { to: safeTo, subject: args.subject });
     console.log(args.text);
-    return;
+    return { ok: true, provider: "console" };
   }
 
   if (p === "resend") {
@@ -141,7 +148,7 @@ async function dispatchEmail(args: {
       console.warn("⚠️ [InnerCircle Email] EMAIL_PROVIDER=resend but RESEND_API_KEY missing. Falling back to console.");
       console.log("📧 [InnerCircle Email] (fallback)", { to: safeTo, subject: args.subject });
       console.log(args.text);
-      return;
+      return { ok: false, provider: "resend", error: "RESEND_API_KEY missing" };
     }
 
     const result = await resend.emails.send({
@@ -156,17 +163,22 @@ async function dispatchEmail(args: {
       console.warn("⚠️ [InnerCircle Email] Resend send failed. Falling back to console.", (result as any).error);
       console.log("📧 [InnerCircle Email] (fallback)", { to: safeTo, subject: args.subject });
       console.log(args.text);
-      return;
+      return {
+        ok: false,
+        provider: "resend",
+        error: String((result as any)?.error?.message || "RESEND_SEND_FAILED"),
+      };
     }
 
     console.log("✅ [InnerCircle Email] Sent", { to: safeTo, id: (result as any)?.data?.id });
-    return;
+    return { ok: true, provider: "resend" };
   }
 
   // Unknown provider → fail-safe
   console.warn(`⚠️ [InnerCircle Email] EMAIL_PROVIDER=${p} not wired. Falling back to console.`);
   console.log("📧 [InnerCircle Email] (fallback)", { to: safeTo, subject: args.subject });
   console.log(args.text);
+  return { ok: true, provider: p === "none" ? "none" : "console" };
 }
 
 function isNewPayload(x: any): x is NewPayload {
@@ -184,7 +196,7 @@ export async function sendInnerCircleEmail(
   a: NewPayload | OldSig[0],
   b?: OldSig[1],
   c?: OldSig[2]
-): Promise<void> {
+): Promise<InnerCircleEmailSendResult> {
   // New signature
   if (isNewPayload(a)) {
     const to = normalizeRecipients(a.to);
@@ -202,8 +214,7 @@ export async function sendInnerCircleEmail(
       });
     }
 
-    await dispatchEmail({ to, subject, text, html });
-    return;
+    return await dispatchEmail({ to, subject, text, html });
   }
 
   // Old signature
@@ -223,8 +234,7 @@ export async function sendInnerCircleEmail(
     html = await renderHtmlEmail({ name, accessKey: key, unlockUrl, mode: "resend" });
   }
 
-  await dispatchEmail({ to, subject, text, html });
+  return await dispatchEmail({ to, subject, text, html });
 }
-
 
 

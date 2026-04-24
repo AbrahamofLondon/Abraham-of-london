@@ -12,6 +12,12 @@ export type EmailSendInput = {
   tags?: string[];
 };
 
+export type EmailSendResult = {
+  ok: boolean;
+  provider: "resend" | "dispatcher" | "console" | "netlify" | "none";
+  error?: string;
+};
+
 type ProviderName = "console" | "netlify" | "none";
 
 function isProd(): boolean {
@@ -53,7 +59,7 @@ function assertBasic(input: EmailSendInput): void {
   if (!input.text || typeof input.text !== "string") throw new Error("Email 'text' is required");
 }
 
-async function sendViaConsole(input: EmailSendInput): Promise<void> {
+async function sendViaConsole(input: EmailSendInput): Promise<EmailSendResult> {
   const to = getSafeRecipient(input.to);
   const from = input.from || getFrom();
 
@@ -66,9 +72,10 @@ async function sendViaConsole(input: EmailSendInput): Promise<void> {
   });
   console.log(input.text);
   if (input.html) console.log("[html]\n", input.html);
+  return { ok: true, provider: "console" };
 }
 
-async function sendViaNetlify(input: EmailSendInput): Promise<void> {
+async function sendViaNetlify(input: EmailSendInput): Promise<EmailSendResult> {
   /**
    * IMPORTANT:
    * Netlify "emails" capabilities vary depending on your setup/add-on.
@@ -118,9 +125,10 @@ async function sendViaNetlify(input: EmailSendInput): Promise<void> {
     });
     return sendViaConsole(input);
   }
+  return { ok: true, provider: "netlify" };
 }
 
-export async function sendEmail(input: EmailSendInput): Promise<void> {
+export async function sendEmail(input: EmailSendInput): Promise<EmailSendResult> {
   assertBasic(input);
 
   const provider = getProvider();
@@ -133,7 +141,7 @@ export async function sendEmail(input: EmailSendInput): Promise<void> {
         subject: input.subject,
       });
     }
-    return;
+    return { ok: true, provider: "none" };
   }
 
   if (provider === "netlify") return sendViaNetlify(input);
@@ -150,5 +158,4 @@ export function emailHealthSnapshot() {
     hasNetlifyEndpoint: Boolean((process.env.NETLIFY_EMAILS_ENDPOINT || "").trim()),
   };
 }
-
 

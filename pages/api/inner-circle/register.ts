@@ -9,7 +9,7 @@ import { normalizeUserTier } from "@/lib/access/tier-policy";
 import { rateLimitCheck, getClientIp, createRateLimitHeaders } from "@/lib/server/rate-limit-unified";
 
 import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
-import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
+import { sendInnerCircleEmail } from "@/lib/email/sendInnerCircleEmail";
 
 type Ok = { ok: true; message: string };
 type Fail = { ok: false; error: string };
@@ -114,19 +114,26 @@ export default async function handler(
       ""
     )}/inner-circle/unlock?key=${encodeURIComponent(result.rawKey)}`;
 
-    try {
-      await sendInnerCircleEmail(email, "Access Granted | Abraham of London", {
+    const mailResult = await sendInnerCircleEmail({
+      to: email,
+      type: "welcome",
+      data: {
         name: name || "Principal",
-        email,
         accessKey: result.rawKey,
         unlockUrl,
-        mode: "register",
-        requestIp: ip,
+      },
+    });
+
+    if (!mailResult.ok) {
+      console.error("[REGISTER_EMAIL_FAILED]", {
+        email,
+        provider: mailResult.provider,
+        error: mailResult.error || "EMAIL_SEND_FAILED",
       });
-    } catch (mailErr) {
-      // Log mail failure but do NOT expose it to the client.
-      // The key is stored in DB — admin can resend if needed.
-      console.error("[REGISTER] Email delivery failed:", mailErr);
+      return res.status(502).json({
+        ok: false,
+        error: "Access was provisioned, but email delivery failed. Use Inner Circle recovery to request a fresh access link.",
+      });
     }
 
     // Do not expose raw access key in the API response.

@@ -1,3 +1,7 @@
+/**
+ * @deprecated Not wired to any live send path.
+ * Do not use until routed through the canonical outbound email sender.
+ */
 /* emails/ContactEmail.tsx */
 import "server-only";
 import * as React from "react";
