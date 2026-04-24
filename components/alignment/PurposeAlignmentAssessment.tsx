@@ -67,6 +67,8 @@ import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundar
 import DecisionGradeBlocks from "@/components/diagnostics/results/DecisionGradeBlocks";
 import LadderProgressionGate from "@/components/diagnostics/results/LadderProgressionGate";
 import { buildPurposeDecisionObject } from "@/lib/diagnostics/decision-engine";
+import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChainSurface";
+import { buildPurposeResult } from "@/lib/diagnostics/assessment-result-builders";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -958,8 +960,40 @@ function AuthorityResultSurface({
 
   const routing = result.routingRecommendation;
 
+  // Build canonical assessment decision result
+  const canonicalResult = buildPurposeResult({
+    percent: result.percent,
+    coherenceBand: result.coherenceBand,
+    primaryPattern: pattern ? {
+      label: pattern.label,
+      consequence: pattern.consequence,
+      firstAction: pattern.firstAction,
+      reasons: pattern.reasons,
+      score: pattern.score,
+    } : null,
+    domainProfiles: result.domainProfiles.map((d) => ({
+      domain: d.domain,
+      label: d.label,
+      percent: d.percent,
+      resonance: d.resonance,
+      certainty: d.certainty,
+    })),
+    contradictions: result.contradictions?.map((c) => ({
+      type: c.type,
+      severity: c.severity,
+      evidence: c.evidence,
+    })),
+    reflections,
+  });
+
   return (
     <div className="space-y-4" style={{ maxWidth: "56rem" }}>
+      {/* CANONICAL EVIDENCE CHAIN — the definitive result */}
+      <EvidenceChainSurface result={canonicalResult} />
+
+      {/* Separator */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />
+
       <ResultInterruption line={interruptionLine} />
 
       <ResultCondition
