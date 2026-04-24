@@ -1000,8 +1000,10 @@ function AuthorityResultSurface({
       }} />
 
       <FreeLayerBoundary
-        summary="This assessment identifies your current decision behaviour pattern, shows the contradiction in your answers, and gives one correction you can act on immediately."
-        limitation="It does not test whether the same condition is structural in your organisation, price the consequence of delay, or sequence enforcement."
+        summary="This assessment identifies a likely decision behaviour pattern from your self-reported answers, shows where your stated values and revealed choices diverge, and gives one practical correction."
+        limitation="It does not test whether the same pattern is structural in your organisation, price the consequence of delay, or sequence enforcement. It is a self-reported signal, not a complete psychological profile."
+        validityBasis="This result reflects your self-reported decision pattern from a single session. It identifies a likely pressure behaviour, not a confirmed organisational condition."
+        strengthenWith="Repeat this assessment under a live decision scenario — when a real decision is on the table, not retrospectively. Then compare with the Constitutional Diagnostic to test whether the pattern extends into organisational structure."
       />
 
       <LadderProgressionGate
@@ -1011,7 +1013,7 @@ function AuthorityResultSurface({
           href: routing?.href ?? "/diagnostics/constitutional-diagnostic",
           reason: routing?.reason ?? "You now know the personal condition. The next layer tests whether the same pattern exists structurally in the organisation around you.",
         }}
-        consequenceOfExit={`Without constitutional validation, this ${pattern?.label ?? "pattern"} remains personal signal rather than tested structural reality. Executive consequence and intervention sequencing belong to the next layers, not this one.`}
+        consequenceOfExit="You have the signal and one practical correction. Executive Reporting is only needed if the consequence must be priced or the decision must be defended to others. Constitutional Diagnostic is only needed if you want to test whether this pattern extends into organisational structure."
         trajectoryWarning={result.percent < 55 ? "If the same contradiction is already affecting live decisions, move to the next layer now." : undefined}
         deferNote="You can keep this result and act on the immediate correction first. Continue only when you need structural confirmation."
       />

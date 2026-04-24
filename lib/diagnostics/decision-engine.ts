@@ -21,7 +21,9 @@ export type DecisionObject = {
   decision: string;
   consequence: string;
   action: string;
+  signalStrength: DecisionConfidence;
   confidence: DecisionConfidence;
+  signalStrengthDisclosure: string;
 };
 
 export type DecisionSignal = {
@@ -133,7 +135,7 @@ function resolveArchetype(signals: DecisionSignal[]): DecisionArchetype {
 
   const ranked = [...scores.entries()].sort((a, b) => b[1] - a[1]);
   const [winner] = ranked[0] ?? ["structural_inconsistency", 1];
-  return ARCHETYPES[winner] ?? ARCHETYPES.structural_inconsistency;
+  return ARCHETYPES[winner] ?? ARCHETYPES["structural_inconsistency"]!;
 }
 
 export function buildDecisionObjectFromSignals(input: {
@@ -169,7 +171,10 @@ export function buildDecisionObjectFromSignals(input: {
     decision: input.decision ?? archetype.decision,
     consequence: input.consequence ?? archetype.defaultConsequence,
     action: input.action ?? archetype.defaultAction,
+    signalStrength: toConfidence(consistencyScore),
     confidence: toConfidence(consistencyScore),
+    signalStrengthDisclosure:
+      "This is a diagnostic signal strength based on response consistency, not a statistical prediction.",
   };
 }
 
@@ -767,7 +772,7 @@ export function buildPurposeDecisionObject(input: {
           : weak.domain === "decision"
             ? "reactive_decision_pattern"
             : "structural_inconsistency",
-      label: `${weak.label ?? weak.domain} weak signal`,
+      label: `${weak.domain} weak signal`,
       summary: `${weak.statement} (${weak.resonance}/10 resonance, ${weak.certainty}/10 certainty).`,
       severity: 6,
     });

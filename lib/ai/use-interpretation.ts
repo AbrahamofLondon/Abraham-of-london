@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect } from "react";
+import { stableInputHash } from "@/lib/diagnostics/runtime-validation";
 import type { InterpretationOutput } from "./interpretation-engine";
 import type { InterpretationStage } from "./prompts";
 
@@ -36,6 +37,12 @@ export function useInterpretation(input: UseInterpretationInput): UseInterpretat
   const [error, setError] = useState<string | null>(null);
 
   const enabled = input.enabled !== false;
+  const requestSignature = [
+    input.stage,
+    stableInputHash(input.canonicalResult),
+    stableInputHash(input.userInputs),
+    stableInputHash(input.tensionThread ?? null),
+  ].join(":");
 
   useEffect(() => {
     if (!enabled || !input.canonicalResult || !input.userInputs) return;
@@ -52,6 +59,11 @@ export function useInterpretation(input: UseInterpretationInput): UseInterpretat
         userInputs: input.userInputs,
         stage: input.stage,
         tensionThread: input.tensionThread ?? null,
+        cacheScope:
+          typeof input.userInputs.journeyId === "string" ? input.userInputs.journeyId :
+          typeof input.userInputs.sessionId === "string" ? input.userInputs.sessionId :
+          typeof input.userInputs.email === "string" ? input.userInputs.email :
+          null,
       }),
     })
       .then((res) => res.json())
@@ -73,7 +85,7 @@ export function useInterpretation(input: UseInterpretationInput): UseInterpretat
 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, input.stage, JSON.stringify(input.userInputs).slice(0, 200)]);
+  }, [enabled, requestSignature]);
 
   return {
     interpretation,

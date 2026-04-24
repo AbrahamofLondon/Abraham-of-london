@@ -53,7 +53,7 @@ import InheritedThreadContext from "@/components/diagnostics/results/InheritedTh
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
-import { buildTeamDecisionResult } from "@/lib/diagnostics/decision-engine";
+import { buildDecisionObjectFromSignals, buildTeamDecisionResult } from "@/lib/diagnostics/decision-engine";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 import ThresholdProximityLine, {
   thresholdProximityText,
@@ -131,6 +131,7 @@ type GapReading = {
   title: string; pattern: string;
   urgentDomain: string | null; firstAction: string; escalationNote: string;
   route: "ENTERPRISE" | "STRATEGY_ROOM" | "WATCH";
+  decisionObject: import("@/lib/diagnostics/decision-engine").DecisionObject;
 };
 
 function qKey(phase: "leader" | "reality", domainId: string, idx: number) {
@@ -231,7 +232,27 @@ function deriveGapReading(gaps: DomainGap[], overallLeader: number, overallReali
     }
   }
 
-  return { title, pattern, urgentDomain, firstAction, escalationNote, route };
+  return {
+    title,
+    pattern,
+    urgentDomain,
+    firstAction,
+    escalationNote,
+    route,
+    decisionObject: buildDecisionObjectFromSignals({
+      condition: title,
+      signals: [
+        {
+          id: hasSignalFailure ? "trust_asymmetry" : hasAuthorityBlindspot ? "mandate_vacuum" : hasExecutionDisconnect ? "execution_drift" : "reactive_decision_pattern",
+          label: "Legacy team reading",
+          summary: pattern,
+          severity: criticalGaps.length >= 2 ? 8 : highGaps.length > 0 ? 6 : 3,
+        },
+      ],
+      consequence: escalationNote,
+      action: firstAction,
+    }),
+  };
 }
 
 function GoldRule({ soft = false }: { soft?: boolean }) {
@@ -419,7 +440,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
           <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem 1.5rem" }}>
             <Eyebrow>Evidence from this assessment</Eyebrow>
             <p style={{ marginTop: "0.75rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.94rem", lineHeight: 1.8, color: "rgba(255,255,255,0.80)", maxWidth: "62ch" }}>
-              Leadership and estimated team reality are separated by {gapAbs}% overall. The most stressed domain is {reading.urgentDomain ?? "the dominant gap"}.
+              {reading.decisionObject.evidence[0]?.summary ?? `Leadership and estimated team reality are separated by ${gapAbs}% overall. The most stressed domain is ${reading.urgentDomain ?? "the dominant gap"}.`}
               {purposePct !== null ? ` Your linked purpose alignment score is ${purposePct}%.` : ""}
             </p>
           </div>
@@ -460,20 +481,22 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
           {/* First action */}
           <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.5rem" }}>
             <Eyebrow>Immediate direction</Eyebrow>
-            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.firstAction}</p>
+            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.decisionObject.action}</p>
           </div>
 
           <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
           <FreeLayerBoundary
-            summary="This assessment names the team condition, shows where leadership and estimated team reality diverge, and gives one practical correction."
-            limitation="It does not measure direct respondent sentiment, price enterprise consequence, or sequence intervention ownership."
+            summary="This assessment names a likely team pressure pattern from one respondent's estimate, showing where leadership perception and estimated team reality diverge."
+            limitation="This reflects one person's view, not the team itself. It does not measure direct respondent sentiment, price enterprise consequence, or sequence intervention."
+            validityBasis="Single-respondent leader estimate. Confidence is lower than multi-respondent assessment."
+            strengthenWith="Collect 3-5 direct team responses. The gap between what you estimated and what the team reports is itself diagnostic."
           />
 
           {/* Escalation */}
           <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
             <Eyebrow>Earned next move</Eyebrow>
-            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.escalationNote}</p>
+            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.decisionObject.consequence}</p>
             <p style={{ marginBottom: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
               Next: Enterprise Assessment stress-tests governance, execution, and recent decision quality.
             </p>
@@ -560,6 +583,11 @@ export default function TeamAssessmentPage() {
   const [purposePct,   setPurposePct]     = React.useState<number | null>(null);
   const [subjectId,    setSubjectId]      = React.useState("");
   const [constitutionalThread, setConstitutionalThread] = React.useState<ConstitutionalThread | null>(null);
+  const [teamReflections] = React.useState({
+    confidenceBaseline: 60,
+    falseAssumption: "",
+    showScoresReaction: "",
+  });
 
   React.useEffect(() => {
     trackStageStart("team");
@@ -676,13 +704,13 @@ export default function TeamAssessmentPage() {
         authorityInput: {
           condition: reading.title,
           contradiction: reading.pattern,
-          decisionText: `Leadership must decide how to correct ${reading.urgentDomain ?? "the team perception gap"}.`,
+          decisionText: reading.decisionObject.decision || `Leadership must decide how to correct ${reading.urgentDomain ?? "the team perception gap"}.`,
           constraintText: `Leader reading ${overallLeader}% vs estimated team reality ${overallReality}%.`,
-          costOfDelayText: reading.escalationNote,
+          costOfDelayText: reading.decisionObject.consequence,
           stakeholderText: identity.teamName || "Team",
           affectedDomain: reading.urgentDomain ?? criticalGaps[0]?.label ?? "team alignment",
-          firstMove: reading.firstAction,
-          skippedConsequence: reading.escalationNote,
+          firstMove: reading.decisionObject.action,
+          skippedConsequence: reading.decisionObject.consequence,
           escalationCondition: reading.route === "ENTERPRISE"
             ? "Proceed to Enterprise Assessment because the gap is too distributed for local correction."
             : "Reassess if the gap widens or repeats after the first intervention.",
@@ -694,7 +722,7 @@ export default function TeamAssessmentPage() {
             `Critical gaps: ${criticalGaps.length}`,
             `High gaps: ${highGaps.length}`,
           ],
-          confidence: Math.min(0.84, 0.42 + criticalGaps.length * 0.1 + highGaps.length * 0.06),
+          confidence: reading.decisionObject.confidence === "high" ? 0.84 : reading.decisionObject.confidence === "medium" ? 0.66 : 0.48,
         },
       },
     });

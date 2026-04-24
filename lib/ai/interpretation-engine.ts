@@ -16,6 +16,7 @@
  */
 
 import Anthropic from "@anthropic-ai/sdk";
+import { stableInputHash } from "@/lib/diagnostics/runtime-validation";
 import {
   STAGE_PROMPTS,
   buildUserMessage,
@@ -37,6 +38,7 @@ export type InterpretationInput = {
   };
   stage: InterpretationStage;
   tensionThread?: Record<string, unknown> | null;
+  cacheScope?: string | null;
 };
 
 export type PriorityAction = {
@@ -306,7 +308,16 @@ const _cache = new Map<string, { output: InterpretationOutput; timestamp: number
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 function cacheKey(input: InterpretationInput): string {
-  return `${input.stage}:${JSON.stringify(input.userInputs).slice(0, 200)}`;
+  const scope = typeof input.cacheScope === "string" && input.cacheScope.trim()
+    ? input.cacheScope.trim().toLowerCase()
+    : "anonymous";
+  return [
+    scope,
+    input.stage,
+    stableInputHash(input.canonicalResult),
+    stableInputHash(input.userInputs),
+    stableInputHash(input.tensionThread ?? null),
+  ].join(":");
 }
 
 /**

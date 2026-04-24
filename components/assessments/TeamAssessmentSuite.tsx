@@ -441,8 +441,10 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
       }} />
 
       <FreeLayerBoundary
-        summary="This assessment names the team condition, shows where leadership and estimated team reality diverge, and gives one practical correction."
-        limitation="It does not measure direct respondent sentiment, price enterprise consequence, or sequence intervention."
+        summary="This assessment names a likely team pressure pattern from one respondent's estimate of team dynamics, shows where leadership perception and estimated team reality diverge, and gives one practical correction."
+        limitation="This result reflects one person's view of the team, not the team itself. It does not measure direct respondent sentiment, price enterprise consequence, or sequence intervention. It should not be treated as team evidence until others respond."
+        validityBasis="Single-respondent leader estimate. The variance and trust gap figures reflect leadership perception, not measured team sentiment. Confidence is lower than multi-respondent assessment."
+        strengthenWith="Collect 3-5 direct team responses using the multi-respondent campaign mode. Compare leadership estimates against actual team scores. The gap between what you estimated and what the team reports is itself diagnostic."
       />
 
       {/* Institutional intelligence layers */}
@@ -459,7 +461,7 @@ function ResultPanel({ result, rows, reflections, email }: { result: Record<stri
             ? "You now know the team condition. Executive Reporting is the next layer only when that condition must be priced and ordered."
             : "You now know the team condition. The Constitutional Diagnostic is the next layer when you need to test whether structure, not just team perception, is driving it.",
         }}
-        consequenceOfExit="This result remains useful on its own. The next layer adds structural confirmation or priced consequence, depending on how serious the condition is."
+        consequenceOfExit="You have the signal and one practical correction you can act on now. The next layer is only needed if the consequence must be priced, or if structural confirmation is required beyond leadership perception."
         trajectoryWarning={vi > 40 ? "Variance is high enough that a delayed response usually hardens the gap rather than shrinking it." : undefined}
         deferNote="Use the immediate direction first if the condition is still local. Escalate when the consequence must be governed."
       />

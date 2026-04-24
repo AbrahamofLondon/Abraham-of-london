@@ -61,6 +61,7 @@ import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
+import { buildDecisionObjectFromSignals, buildEnterpriseDecisionResult } from "@/lib/diagnostics/decision-engine";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -145,6 +146,7 @@ type EnterpriseReading = {
     structuralRisk: number;
     signalStrength: number;
   };
+  decisionObject: import("@/lib/diagnostics/decision-engine").DecisionObject;
 };
 
 function sectionPct(answers: Record<string, DiagnosticAnswerValue>, blockId: string): number {
@@ -278,7 +280,29 @@ function deriveReading(
     primaryReading += ` The recent decision signal is sufficiently legible (${decisionSignal.clarityScore}% clarity), which gives the enterprise reading a concrete decision reference rather than a generic condition score.`;
   }
 
-  return { band, patternTitle, primaryReading, dominantFailure, firstAction, escalationNote, route, decisionSignal };
+  return {
+    band,
+    patternTitle,
+    primaryReading,
+    dominantFailure,
+    firstAction,
+    escalationNote,
+    route,
+    decisionSignal,
+    decisionObject: buildDecisionObjectFromSignals({
+      condition: patternTitle,
+      signals: [
+        {
+          id: govLeaderWeak ? "mandate_vacuum" : execRiskWeak ? "execution_drift" : govWeak ? "governance_failure" : "reactive_decision_pattern",
+          label: "Legacy enterprise reading",
+          summary: primaryReading,
+          severity: band === "ESCALATE" ? 9 : band === "FRAGILE" ? 7 : band === "WATCH" ? 4 : 2,
+        },
+      ],
+      consequence: escalationNote,
+      action: firstAction,
+    }),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -430,7 +454,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
           <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem 1.5rem" }}>
             <Eyebrow>Evidence from this assessment</Eyebrow>
             <p style={{ marginTop: "0.75rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.94rem", lineHeight: 1.8, color: "rgba(255,255,255,0.80)", maxWidth: "62ch" }}>
-              The overall enterprise reading is {reading.band.toLowerCase()} at {totalPct}%. The strongest pressure sits in {reading.dominantFailure ?? "the weakest operating domain"}, and the recent decision signal is {reading.decisionSignal.clarityScore}% clear against {reading.decisionSignal.structuralRisk}% structural risk.
+              {reading.decisionObject.evidence[0]?.summary ?? `The overall enterprise reading is ${reading.band.toLowerCase()} at ${totalPct}%. The strongest pressure sits in ${reading.dominantFailure ?? "the weakest operating domain"}, and the recent decision signal is ${reading.decisionSignal.clarityScore}% clear against ${reading.decisionSignal.structuralRisk}% structural risk.`}
             </p>
           </div>
 
@@ -484,20 +508,22 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
           {/* First action */}
           <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.5rem" }}>
             <Eyebrow>Immediate governance action</Eyebrow>
-            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.firstAction}</p>
+            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.decisionObject.action}</p>
           </div>
 
           <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
           <FreeLayerBoundary
-            summary="This assessment identifies the enterprise condition, the dominant failure pressure, and the first governance action."
-            limitation="It does not price consequence, order interventions, or enforce execution sequencing. That begins in Executive Reporting and Strategy Room."
+            summary="This assessment identifies organisational pressure signals and the first governance action from a single intake."
+            limitation="One respondent's domain scores cannot prove enterprise-wide condition. It does not price consequence, order interventions, or enforce execution."
+            validityBasis="Single-respondent enterprise intake. Posture classification is directional, not statistically validated across the organisation."
+            strengthenWith="Compare leadership, execution, and governance respondents independently using the multi-stakeholder campaign."
           />
 
           {/* Escalation */}
           <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
             <Eyebrow>Earned next move</Eyebrow>
-            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.escalationNote}</p>
+            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.decisionObject.consequence}</p>
             <p style={{ marginBottom: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
               Next: Executive Reporting translates condition into consequence, exposure, and ordered decisions.
             </p>
@@ -640,9 +666,17 @@ export default function EnterpriseAssessmentPage() {
     pct: sectionPct(answers, b.id),
   }));
 
-  const reading = React.useMemo(() =>
-    complete ? deriveReading(answers, totalPct, teamAlignmentPct, identity.recentDecision) : null,
-    [answers, totalPct, teamAlignmentPct, identity.recentDecision, complete]
+  const reading = React.useMemo(
+    () =>
+      complete
+        ? buildEnterpriseDecisionResult({
+            totalPct,
+            sections,
+            teamAlignmentPct,
+            recentDecision: identity.recentDecision,
+          })
+        : null,
+    [complete, identity.recentDecision, sections, teamAlignmentPct, totalPct]
   );
   const matchedPlaybooks = React.useMemo(
     () =>
@@ -692,13 +726,13 @@ export default function EnterpriseAssessmentPage() {
         authorityInput: reading ? {
           condition: reading.patternTitle,
           contradiction: reading.primaryReading,
-          decisionText: identity.recentDecision,
+          decisionText: reading.decisionObject.decision || identity.recentDecision,
           constraintText: identity.notes,
-          costOfDelayText: reading.escalationNote,
+          costOfDelayText: reading.decisionObject.consequence,
           stakeholderText: identity.organisation,
           affectedDomain: reading.dominantFailure ?? sections.sort((a, b) => a.pct - b.pct)[0]?.title ?? "enterprise",
-          firstMove: reading.firstAction,
-          skippedConsequence: reading.escalationNote,
+          firstMove: reading.decisionObject.action,
+          skippedConsequence: reading.decisionObject.consequence,
           escalationCondition: reading.route === "EXECUTIVE_REPORTING"
             ? "Proceed to Executive Reporting because enterprise consequence requires governed interpretation."
             : "Monitor and escalate if the same failure evidence appears in two or more domains.",
@@ -710,7 +744,7 @@ export default function EnterpriseAssessmentPage() {
             `Decision structural risk: ${reading.decisionSignal.structuralRisk}%`,
             `Dominant failure: ${reading.dominantFailure ?? "none"}`,
           ],
-          confidence: Math.min(0.88, 0.54 + (identity.recentDecision.trim().length >= 160 ? 0.14 : 0) + (teamAlignmentPct !== null ? 0.08 : 0)),
+          confidence: reading.decisionObject.confidence === "high" ? 0.88 : reading.decisionObject.confidence === "medium" ? 0.7 : 0.5,
         } : null,
       },
     });

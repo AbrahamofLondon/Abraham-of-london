@@ -21,6 +21,16 @@ import { hubspotSync } from "@/lib/hubspot/sync";
 import { saveDiagnosticRecord } from "@/lib/server/diagnostics/store";
 import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
+import {
+  diagnosticSubmissionSchema,
+  formatZodError,
+  stableInputHash,
+} from "@/lib/diagnostics/runtime-validation";
+import {
+  createSubmissionKey,
+  getCachedSubmissionResult,
+  setCachedSubmissionResult,
+} from "@/lib/diagnostics/submission-control";
 
 import type {
   DiagnosticAnswer,
@@ -75,49 +85,6 @@ function isValidSectionScore(score: unknown): score is DiagnosticSectionScore {
   if (!Number.isFinite(rawScore) || rawScore < 0) return false;
   if (!Number.isFinite(maxScore) || maxScore < 0) return false;
   if (!Number.isFinite(pct) || pct < 0 || pct > 100) return false;
-
-  return true;
-}
-
-function validatePayload(body: unknown): body is DiagnosticSubmissionPayload {
-  if (!isObject(body)) return false;
-
-  if (!safeString(body.kind)) return false;
-  if (!safeString(body.version)) return false;
-  if (!safeString(body.source)) return false;
-  if (!safeString(body.entry)) return false;
-  if (!safeString(body.title)) return false;
-
-  if (!Array.isArray(body.answers) || body.answers.length === 0) return false;
-  if (!body.answers.every(isValidAnswer)) return false;
-
-  if (!isObject(body.summary)) return false;
-
-  const totalScore = Number(body.summary.totalScore);
-  const maxScore = Number(body.summary.maxScore);
-  const pct = Number(body.summary.pct);
-
-  if (!Number.isFinite(totalScore) || totalScore < 0) return false;
-  if (!Number.isFinite(maxScore) || maxScore <= 0) return false;
-  if (!Number.isFinite(pct) || pct < 0 || pct > 100) return false;
-
-  if (!isDiagnosticSeverity(body.summary.severity)) return false;
-  if (!isDiagnosticBand(body.summary.band)) return false;
-
-  if (
-    !Array.isArray(body.summary.sectionScores) ||
-    !body.summary.sectionScores.every(isValidSectionScore)
-  ) {
-    return false;
-  }
-
-  if (body.respondent !== undefined && body.respondent !== null && !isObject(body.respondent)) {
-    return false;
-  }
-
-  if (body.metadata !== undefined && body.metadata !== null && !isObject(body.metadata)) {
-    return false;
-  }
 
   return true;
 }
@@ -184,13 +151,6 @@ function readAuthorityPacket(stage: Parameters<typeof persistDiagnosticStage>[0]
   decisionObject: any | null;
 } {
   if (!isObject(metadata)) return { nodes: [], decisionObject: null };
-  const packet = isObject(metadata.authorityPacket) ? metadata.authorityPacket : null;
-  if (packet) {
-    const nodes = Array.isArray(packet.nodes) ? packet.nodes : [];
-    const decisionObject = isObject(packet.decisionObject) ? packet.decisionObject : null;
-    return { nodes, decisionObject };
-  }
-
   const authorityInput = isObject(metadata.authorityInput) ? metadata.authorityInput : null;
   if (!stage || !authorityInput) return { nodes: [], decisionObject: null };
 
@@ -294,11 +254,28 @@ export default async function handler(
     return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
   }
 
-  if (!validatePayload(req.body)) {
-    return res.status(400).json({ ok: false, error: "INVALID_PAYLOAD" });
+  const parsed = diagnosticSubmissionSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: formatZodError(parsed.error) });
   }
 
-  const payload = req.body;
+  const payload = parsed.data as DiagnosticSubmissionPayload;
+  const duplicateKey = createSubmissionKey({
+    scope:
+      safeString(payload.respondent?.email) ||
+      safeString(payload.respondent?.organisation) ||
+      ip,
+    journeyId:
+      isObject(payload.metadata) && safeString(payload.metadata.campaignId)
+        ? safeString(payload.metadata.campaignId)
+        : null,
+    stage: payload.kind,
+    payload,
+  });
+  const cached = getCachedSubmissionResult<DiagnosticSubmitResponse & { diagnosticRef?: string }>(duplicateKey);
+  if (cached) {
+    return res.status(200).json(cached);
+  }
   const submittedAt = new Date().toISOString();
   const diagnosticRef = generateDiagnosticRef(payload.kind);
 
@@ -406,12 +383,15 @@ export default async function handler(
   }
 
   return res.status(200).json({
+    ...setCachedSubmissionResult(duplicateKey, {
+      ok: true,
+      diagnosticRef,
+      submittedAt,
+      dashboardHref,
+      crmForwarded,
+      reportReady: false,
+      nextStepHref,
+    }),
     ok: true,
-    diagnosticRef,
-    submittedAt,
-    dashboardHref,
-    crmForwarded,
-    reportReady: false,
-    nextStepHref,
   });
 }

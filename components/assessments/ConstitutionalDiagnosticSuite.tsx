@@ -1377,8 +1377,10 @@ export default function ConstitutionalDiagnosticSuite() {
                   }} />
 
                   <FreeLayerBoundary
-                    summary="This diagnostic identifies the structural condition, authority posture, and governance weakness, and it gives you a real constitutional boundary to clarify immediately."
-                    limitation="It does not price consequence, rank intervention options, or sequence execution ownership. That begins in Executive Reporting and Strategy Room."
+                    summary="This diagnostic identifies a likely authority signal, governance pressure point, and structural weakness from 10 self-reported responses, and gives one constitutional boundary to clarify immediately."
+                    limitation="10 questions cannot prove a constitution. This result identifies a dominant signal, not a confirmed structural condition. It does not price consequence, rank intervention options, or sequence execution ownership."
+                    validityBasis="This result reflects one respondent's self-assessment of organisational authority, coherence, and governance. It should be treated as a directional signal, not an institutional diagnosis."
+                    strengthenWith="Validate the authority ownership finding against actual decision records. Ask the person who should hold authority whether they agree they hold it. Compare with Team Assessment to check whether leadership perception matches team experience."
                   />
 
                   {/* Institutional intelligence layers — render when prior data exists */}

@@ -26,9 +26,9 @@ export type DecisionGradeProps = {
 };
 
 const CONFIDENCE_CONFIG: Record<ConfidenceLevel, { label: string; color: string }> = {
-  strong: { label: "Strong signal — clear pattern", color: "rgba(110,231,183,0.60)" },
-  moderate: { label: "Moderate signal — emerging pattern", color: `${GOLD}BB` },
-  weak: { label: "Weak signal — requires validation", color: "rgba(255,255,255,0.35)" },
+  strong: { label: "Consistent response pattern — likely real", color: "rgba(110,231,183,0.60)" },
+  moderate: { label: "Directional signal — pattern emerging, not yet confirmed", color: `${GOLD}BB` },
+  weak: { label: "Early signal — needs validation from additional evidence", color: "rgba(255,255,255,0.35)" },
 };
 
 export default function DecisionGradeBlocks({ data }: { data: DecisionGradeProps }) {
@@ -39,7 +39,7 @@ export default function DecisionGradeBlocks({ data }: { data: DecisionGradeProps
       {/* Decision declaration */}
       <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
         <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>
-          Based on this result, the decision in front of you is
+          Based on this signal, the likely decision in front of you is
         </span>
         <div className="mt-2 flex items-center gap-3">
           <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>

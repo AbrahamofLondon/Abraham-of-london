@@ -575,8 +575,10 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
       }} />
 
       <FreeLayerBoundary
-        summary="This assessment identifies the enterprise condition, shows the dominant failure pressure, and gives one governance action you can take immediately."
-        limitation="It does not price consequence, rank intervention options, or sequence execution ownership. That begins in Executive Reporting and Strategy Room."
+        summary="This assessment identifies organisational pressure signals from this single intake, shows the dominant failure pressure, and gives one governance action you can take immediately."
+        limitation="One respondent's domain scores cannot prove enterprise-wide condition. This identifies a pressure signal, not a confirmed institutional diagnosis. It does not price consequence, rank intervention options, or sequence execution."
+        validityBasis="Single-respondent enterprise intake. Domain scores are self-reported by one person. The posture classification is directional, not statistically validated across the organisation."
+        strengthenWith="Compare leadership, execution, and governance respondents independently. Run the multi-stakeholder campaign to identify where authority disagrees across roles. The divergence between respondents is more diagnostic than any single respondent's scores."
       />
 
       {/* Institutional intelligence layers */}
@@ -592,7 +594,7 @@ function ResultPanel({ result, domains, email, campaignId }: { result: any; doma
           href: "/diagnostics/executive-reporting",
           reason: "You now know the enterprise condition. Executive Reporting is the next layer when that condition must be translated into consequence, exposure, and ordered decisions.",
         }}
-        consequenceOfExit="This result is intentionally diagnostic. The next layer adds priced consequence, intervention ordering, and execution readiness."
+        consequenceOfExit="You have the signal and one governance action. Executive Reporting is only needed if consequence must be priced or decisions must be ordered for a board or stakeholder audience."
         trajectoryWarning={posture === "DISORDERED" || posture === "CONTESTED" ? "Current posture is unstable enough that leaving the condition ungoverned usually worsens the next decision cycle." : undefined}
         canDefer={posture !== "DISORDERED"}
         deferNote={posture !== "DISORDERED" ? "If the condition is still containable, act on the governance correction first. Escalate when exposure must be priced." : undefined}
