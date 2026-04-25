@@ -98,6 +98,27 @@ export type IntelligenceSpine = {
   /** Kernel output — accumulated contradiction graph + simulation */
   kernelOutput?: DecisionKernelOutput;
 
+  /** Pre-commitment intent from Fast Diagnostic */
+  preCommitment?: {
+    willing48h: boolean;
+    capturedAt: string;
+  };
+
+  /** User accuracy feedback */
+  accuracyFeedback?: {
+    response: "yes" | "partial" | "no";
+    reason?: string;
+    capturedAt: string;
+  };
+
+  /** Economic anchors — user-stated cost data */
+  economics?: {
+    estimatedMonthlyCost?: number;
+    costOfDelayMonthly?: number;
+    decisionOwner?: string;
+    deadline?: string;
+  };
+
   createdAt: string;
   updatedAt: string;
 };

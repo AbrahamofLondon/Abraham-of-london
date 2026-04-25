@@ -55,6 +55,7 @@ const FastDiagnosticPage: NextPage = () => {
   const [contradictionText, setContradictionText] = React.useState<string | null>(null);
   const [feedbackGiven, setFeedbackGiven] = React.useState<"yes" | "partial" | "no" | null>(null);
   const [committed, setCommitted] = React.useState(false);
+  const [feedbackReason, setFeedbackReason] = React.useState("");
   const startTime = React.useRef(0);
 
   React.useEffect(() => { track("fast_diagnostic_page_view"); }, []);
@@ -143,6 +144,11 @@ const FastDiagnosticPage: NextPage = () => {
         synthesis: result.synthesis,
         forecast,
       });
+      // Record pre-commitment intent on spine
+      newSpine.preCommitment = {
+        willing48h: committed,
+        capturedAt: new Date().toISOString(),
+      };
       setSpine(newSpine);
       saveSpineToSession(newSpine);
       void persistSpineToDB(newSpine);
@@ -478,12 +484,23 @@ const FastDiagnosticPage: NextPage = () => {
               </div>
             )}
 
-            {/* 5. YOUR MOVE — non-negotiable format */}
-            <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}06`, padding: "1rem", marginTop: "1rem" }}>
-              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}65` }}>Your move — within 48 hours</span>
-              <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.80)", marginTop: "0.2rem", fontWeight: 500 }}>
-                {synthesis.concreteMove}
-              </p>
+            {/* 5. YOUR MOVE — gated by pre-commitment */}
+            <div style={{ border: `1px solid ${committed ? `${GOLD}25` : "rgba(255,255,255,0.06)"}`, backgroundColor: committed ? `${GOLD}06` : "rgba(255,255,255,0.02)", padding: "1rem", marginTop: "1rem" }}>
+              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: committed ? `${GOLD}65` : "rgba(255,255,255,0.25)" }}>Your move — within 48 hours</span>
+              {committed ? (
+                <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.80)", marginTop: "0.2rem", fontWeight: 500 }}>
+                  {synthesis.concreteMove}
+                </p>
+              ) : (
+                <div style={{ marginTop: "0.3rem" }}>
+                  <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+                    You chose not to act within 48 hours. The system will not prescribe a full move.
+                  </p>
+                  <button type="button" onClick={() => { setCommitted(true); track("fast_precommit_upgrade"); }} style={{ marginTop: "0.5rem", padding: "8px 16px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}BB`, ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
+                    Switch to 48h commitment — unlock move
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* 6. DEFAULT PATH — pressure engine */}
@@ -566,9 +583,21 @@ const FastDiagnosticPage: NextPage = () => {
                 <>
                   <p style={{ ...serif, fontSize: "0.88rem", color: "rgba(255,255,255,0.45)" }}>Was this accurate?</p>
                   <div className="flex gap-2 mt-2">
-                    <FeedbackButton icon={<CheckCircle2 style={{ width: 12, height: 12 }} />} label="Yes — exactly it" color="rgba(110,231,183," onClick={() => { setFeedbackGiven("yes"); track("fast_feedback", { value: "yes" }); }} />
-                    <FeedbackButton icon={<MinusCircle style={{ width: 12, height: 12 }} />} label="Partially" color="rgba(253,186,116," onClick={() => { setFeedbackGiven("partial"); track("fast_feedback", { value: "partial" }); }} />
-                    <FeedbackButton icon={<XCircle style={{ width: 12, height: 12 }} />} label="No — missed" color={RED} onClick={() => { setFeedbackGiven("no"); track("fast_feedback", { value: "no" }); }} />
+                    <FeedbackButton icon={<CheckCircle2 style={{ width: 12, height: 12 }} />} label="Yes — exactly it" color="rgba(110,231,183," onClick={() => {
+                      setFeedbackGiven("yes");
+                      track("fast_feedback", { value: "yes" });
+                      if (spine) { spine.accuracyFeedback = { response: "yes", capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
+                    }} />
+                    <FeedbackButton icon={<MinusCircle style={{ width: 12, height: 12 }} />} label="Partially" color="rgba(253,186,116," onClick={() => {
+                      setFeedbackGiven("partial");
+                      track("fast_feedback", { value: "partial" });
+                      if (spine) { spine.accuracyFeedback = { response: "partial", capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
+                    }} />
+                    <FeedbackButton icon={<XCircle style={{ width: 12, height: 12 }} />} label="No — missed" color={RED} onClick={() => {
+                      setFeedbackGiven("no");
+                      track("fast_feedback", { value: "no" });
+                      if (spine) { spine.accuracyFeedback = { response: "no", capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
+                    }} />
                   </div>
                 </>
               ) : (
@@ -580,7 +609,26 @@ const FastDiagnosticPage: NextPage = () => {
                         See what this is already costing <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
                       </Link>
                     </>
-                  ) : feedbackGiven === "partial" ? "Noted. The Constitutional Diagnostic will sharpen this." : "Noted. A different framing may be needed — try the Constitutional Diagnostic."}
+                  ) : feedbackGiven === "partial" ? "Noted. The Constitutional Diagnostic will sharpen this." : (
+                    <span>
+                      Where is it wrong?
+                      <textarea
+                        value={feedbackReason}
+                        onChange={(e) => setFeedbackReason(e.target.value)}
+                        placeholder="What did the system get wrong about your decision?"
+                        rows={2}
+                        style={{ display: "block", width: "100%", marginTop: "0.5rem", padding: "8px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.70)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.5, resize: "none", outline: "none" }}
+                      />
+                      {feedbackReason.trim().length > 10 && (
+                        <button type="button" onClick={() => {
+                          track("fast_feedback_reason", { reason: feedbackReason.slice(0, 200) });
+                          if (spine) { spine.accuracyFeedback = { response: "no", reason: feedbackReason, capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
+                        }} style={{ marginTop: "0.4rem", padding: "6px 14px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}>
+                          Submit correction
+                        </button>
+                      )}
+                    </span>
+                  )}
                 </p>
               )}
             </div>

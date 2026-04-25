@@ -38,11 +38,15 @@ export default function ExecutiveReportingPaywall({
     "This stage translates condition into decision impact",
   ]);
 
+  const [estimatedMonthlyCost, setEstimatedMonthlyCost] = useState<string>("");
+
   // Case-linked data from spine
   const costOfDelay = spine?.case.costOfDelay ?? null;
   const hasCostText = costOfDelay && costOfDelay.trim().length > 5;
   const conditionClass = spine?.deterministic.conditionClass ?? null;
   const forcedAction = spine?.synthesis?.concreteMove ?? spine?.case.forcedAction ?? null;
+  const parsedCost = parseInt(estimatedMonthlyCost.replace(/[^0-9]/g, ""), 10);
+  const hasCostNumber = Number.isFinite(parsedCost) && parsedCost > 0;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -90,11 +94,18 @@ export default function ExecutiveReportingPaywall({
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem("aol_exec_checkout_email", email);
     }
+    // Persist economic anchor on spine
+    if (spine && hasCostNumber) {
+      spine.economics = { ...spine.economics, estimatedMonthlyCost: parsedCost };
+      try { const { saveSpineToSession: save } = require("@/lib/decision/spine-persistence"); save(spine); } catch {}
+    }
+
     track("executive_reporting_checkout_clicked", {
       price_code: checkoutPriceCode,
       has_email: Boolean(email.trim()),
       hesitation_ms: Date.now() - paywallMountTime.current,
       committed,
+      estimated_monthly_cost: hasCostNumber ? parsedCost : null,
     });
 
     const res = await fetch("/api/billing/checkout", {
@@ -215,6 +226,31 @@ export default function ExecutiveReportingPaywall({
         <p className="mt-1 text-xs leading-5 text-white/30" style={{ ...mono, letterSpacing: "0.08em" }}>
           Used when the decision cannot afford to drift.
         </p>
+      </div>
+
+      {/* ECONOMIC ANCHOR — required input */}
+      <div className="mb-6 border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+        <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "0.5rem" }}>
+          Estimated monthly cost of this issue (£)
+        </label>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={estimatedMonthlyCost}
+          onChange={(e) => setEstimatedMonthlyCost(e.target.value.replace(/[^0-9]/g, ""))}
+          placeholder="e.g. 5000"
+          className="w-full border border-white/16 bg-black p-3 text-white font-mono text-lg"
+        />
+        {hasCostNumber && (
+          <p className="mt-3 text-sm text-white/50">
+            If this continues for 90 days: <span className="font-semibold text-white/70">£{(parsedCost * 3).toLocaleString()}</span>
+          </p>
+        )}
+        {hasCostNumber && parsedCost < 200 && (
+          <p className="mt-2 text-xs text-white/30" style={{ fontStyle: "italic" }}>
+            If this number is trivial, do not buy this.
+          </p>
+        )}
       </div>
 
       {/* PRICE — single anchor, no tiers */}
