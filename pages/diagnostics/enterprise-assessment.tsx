@@ -65,6 +65,7 @@ import { buildDecisionObjectFromSignals, buildEnterpriseDecisionResult } from "@
 import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
 import { getInheritedContext } from "@/lib/decision/spine-guard";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
+import { generateAdaptiveQuestions, type AdaptiveQuestion } from "@/lib/decision/adaptive-question-engine";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -625,15 +626,30 @@ export default function EnterpriseAssessmentPage() {
   const [teamAlignmentPct, setTeamAlignmentPct] = React.useState<number | null>(null);
   const [subjectId, setSubjectId] = React.useState("");
   const [constitutionalThread, setConstitutionalThread] = React.useState<ConstitutionalThread | null>(null);
-  const [_spine, _setSpine]                             = React.useState<IntelligenceSpine | null>(null);
+  const [entSpine, setEntSpine]                           = React.useState<IntelligenceSpine | null>(null);
   const [_spineCtx, _setSpineCtx]                       = React.useState<ReturnType<typeof getInheritedContext> | null>(null);
+  const [adaptiveQuestions, setAdaptiveQuestions]         = React.useState<AdaptiveQuestion[]>([]);
+  const [adaptiveAnswers, setAdaptiveAnswers]             = React.useState<Record<string, string>>({});
+  const [showAdaptive, setShowAdaptive]                   = React.useState(false);
   const recentDecisionReady = identity.recentDecision.trim().length >= 80;
 
   React.useEffect(() => {
     trackStageStart("enterprise");
-    // Load spine for inherited context
+    // Load spine for inherited context + adaptive questions
     const loaded = loadSpineFromSession();
-    if (loaded) { _setSpine(loaded); _setSpineCtx(getInheritedContext(loaded)); }
+    if (loaded) {
+      setEntSpine(loaded);
+      _setSpineCtx(getInheritedContext(loaded));
+      const qs = generateAdaptiveQuestions({
+        conditionClass: loaded.deterministic.conditionClass,
+        contradiction: loaded.synthesis?.primaryContradiction ?? null,
+        c3Gaps: loaded.c3.missing,
+        memorySignals: [],
+        stage: "enterprise",
+        maxQuestions: 2,
+      });
+      setAdaptiveQuestions(qs);
+    }
     const handleUnload = () => trackDropoff("enterprise");
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
@@ -1030,18 +1046,50 @@ export default function EnterpriseAssessmentPage() {
                         })}
                       </div>
 
+                      {/* Adaptive free-text questions from spine */}
+                      {showAdaptive && adaptiveQuestions.length > 0 && (
+                        <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: "rgb(10,14,20)", padding: "1.5rem", marginTop: "1.5rem" }}>
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                            Structural evidence — from your specific decision
+                          </span>
+                          <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+                            The system identified a {entSpine?.deterministic.conditionClass ?? "decision"} condition. These questions test whether the condition is institutional.
+                          </p>
+                          <div className="mt-4 space-y-4">
+                            {adaptiveQuestions.map((q) => (
+                              <div key={q.id}>
+                                <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: q.purpose === "challenge" ? "rgba(252,165,165,0.50)" : "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                                  {q.prompt}
+                                </label>
+                                <textarea
+                                  value={adaptiveAnswers[q.id] ?? ""}
+                                  onChange={(e) => setAdaptiveAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                                  rows={2}
+                                  placeholder="Be specific to your situation."
+                                  style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                         <button type="button" onClick={() => advance("identity")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
                           <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
                         </button>
                         <div style={{ textAlign: "center" }}>
                           {!complete && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 12 questions to generate the reading</p>}
-                          <button type="button" onClick={() => complete && advance("result")} disabled={!complete}
+                          <button type="button" onClick={() => {
+                            if (!complete) return;
+                            if (adaptiveQuestions.length > 0 && !showAdaptive) { setShowAdaptive(true); return; }
+                            advance("result");
+                          }} disabled={!complete}
                             style={{ padding: "11px 24px", border: `1px solid ${complete ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: complete ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: complete ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: complete ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
                             onMouseEnter={e => { if (complete) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
                             onMouseLeave={e => { if (complete) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                           >
-                            Generate enterprise reading <ArrowRight style={{ width: "11px", height: "11px" }} />
+                            {showAdaptive ? "Generate enterprise reading" : adaptiveQuestions.length > 0 ? "Add structural evidence" : "Generate enterprise reading"} <ArrowRight style={{ width: "11px", height: "11px" }} />
                           </button>
                         </div>
                       </div>

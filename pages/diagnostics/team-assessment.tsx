@@ -58,6 +58,7 @@ import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
 import { getInheritedContext } from "@/lib/decision/spine-guard";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
+import { generateAdaptiveQuestions, type AdaptiveQuestion } from "@/lib/decision/adaptive-question-engine";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -588,7 +589,10 @@ export default function TeamAssessmentPage() {
   const [constitutionalThread, setConstitutionalThread] = React.useState<ConstitutionalThread | null>(null);
   const [spine, setSpine]                             = React.useState<IntelligenceSpine | null>(null);
   const [spineContext, setSpineContext]                 = React.useState<ReturnType<typeof getInheritedContext> | null>(null);
-  const [teamReflections] = React.useState({
+  const [adaptiveQuestions, setAdaptiveQuestions] = React.useState<AdaptiveQuestion[]>([]);
+  const [adaptiveAnswers, setAdaptiveAnswers] = React.useState<Record<string, string>>({});
+  const [showAdaptive, setShowAdaptive] = React.useState(false);
+  const [teamReflections, setTeamReflections] = React.useState({
     confidenceBaseline: 60,
     falseAssumption: "",
     showScoresReaction: "",
@@ -596,9 +600,21 @@ export default function TeamAssessmentPage() {
 
   React.useEffect(() => {
     trackStageStart("team");
-    // Load spine for inherited context
+    // Load spine for inherited context + adaptive questions
     const loaded = loadSpineFromSession();
-    if (loaded) { setSpine(loaded); setSpineContext(getInheritedContext(loaded)); }
+    if (loaded) {
+      setSpine(loaded);
+      setSpineContext(getInheritedContext(loaded));
+      const qs = generateAdaptiveQuestions({
+        conditionClass: loaded.deterministic.conditionClass,
+        contradiction: loaded.synthesis?.primaryContradiction ?? null,
+        c3Gaps: loaded.c3.missing,
+        memorySignals: [],
+        stage: "team",
+        maxQuestions: 2,
+      });
+      setAdaptiveQuestions(qs);
+    }
     const handleUnload = () => trackDropoff("team");
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
@@ -1013,17 +1029,49 @@ export default function TeamAssessmentPage() {
                     {DOMAINS.map(d => <QuestionBlock key={d.id} domain={d} phase="reality" scores={realityScores} onScore={setRS} />)}
                   </div>
 
+                  {/* Adaptive free-text questions from spine */}
+                  {showAdaptive && adaptiveQuestions.length > 0 && (
+                    <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: "rgb(10,14,20)", padding: "1.5rem", marginTop: "1.5rem" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                        Structural evidence — from your specific decision
+                      </span>
+                      <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+                        The system identified a {spine?.deterministic.conditionClass ?? "decision"} condition. These questions ground the team reading in your specific case.
+                      </p>
+                      <div className="mt-4 space-y-4">
+                        {adaptiveQuestions.map((q) => (
+                          <div key={q.id}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: q.purpose === "challenge" ? "rgba(252,165,165,0.50)" : "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                              {q.prompt}
+                            </label>
+                            <textarea
+                              value={adaptiveAnswers[q.id] ?? ""}
+                              onChange={(e) => setAdaptiveAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                              rows={2}
+                              placeholder="Be specific to your situation."
+                              style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                     <button type="button" onClick={() => retreat("leader")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
                       <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
                     </button>
                     <div style={{ textAlign: "center" }}>
                       {!realityComplete() && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 12 questions to generate the gap analysis</p>}
-                      <button type="button" onClick={() => realityComplete() && advance("result")} disabled={!realityComplete()} style={{ padding: "11px 24px", border: `1px solid ${realityComplete() ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: realityComplete() ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: realityComplete() ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: realityComplete() ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
+                      <button type="button" onClick={() => {
+                        if (!realityComplete()) return;
+                        if (adaptiveQuestions.length > 0 && !showAdaptive) { setShowAdaptive(true); return; }
+                        advance("result");
+                      }} disabled={!realityComplete()} style={{ padding: "11px 24px", border: `1px solid ${realityComplete() ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: realityComplete() ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: realityComplete() ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: realityComplete() ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
                         onMouseEnter={e => { if (realityComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
                         onMouseLeave={e => { if (realityComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                       >
-                        Generate gap analysis <ArrowRight style={{ width: "11px", height: "11px" }} />
+                        {showAdaptive ? "Generate gap analysis" : adaptiveQuestions.length > 0 ? "Add structural evidence" : "Generate gap analysis"} <ArrowRight style={{ width: "11px", height: "11px" }} />
                       </button>
                     </div>
                   </div>
