@@ -124,16 +124,25 @@ export type IntelligenceSpine = {
     avoidanceSuspected?: boolean;
     economicSanitySuspicious?: boolean;
     doNotSellTriggered?: boolean;
+    falseAuthority?: boolean;
   };
 
   /** Execution tracking — post-purchase behaviour */
   execution?: {
     breach?: boolean;
     breachAt?: string;
+    breachCount?: number;
     actionTaken?: boolean;
     actionTakenAt?: string;
     blockerReported?: string;
+    verifiedImpact?: "structural_change" | "temporary_fix" | "no_change";
   };
+
+  /** Anti-gaming integrity score (0-1). Below 0.5 = degraded. */
+  integrityScore?: number;
+
+  /** Cross-stage pressure index (0-100). Must only increase. */
+  pressureIndex?: number;
 
   createdAt: string;
   updatedAt: string;
