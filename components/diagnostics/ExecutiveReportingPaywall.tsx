@@ -6,6 +6,7 @@ import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { track } from "@/lib/analytics/track";
 import { getProductAmountGbp } from "@/lib/commercial/catalog";
+import { checkEconomicSanity, shouldBlockERPurchase } from "@/lib/follow-up/lie-detection";
 
 type ExecutiveReportingPaywallProps = {
   price?: number;
@@ -251,6 +252,20 @@ export default function ExecutiveReportingPaywall({
             If this number is trivial, do not buy this.
           </p>
         )}
+        {hasCostNumber && spine && (() => {
+          const sanity = checkEconomicSanity({
+            estimatedMonthlyCost: parsedCost,
+            conditionClass: spine.deterministic.conditionClass,
+            contradictionSeverity: spine.c3.confidenceBand === "high" ? "critical" : spine.c3.confidenceBand === "medium" ? "medium" : "low",
+            claimedOwner: spine.case.claimedOwner,
+            blocker: spine.case.blocker,
+          });
+          return sanity.suspicious ? (
+            <div className="mt-3 border border-amber-500/20 bg-amber-500/[0.04] p-3">
+              <p className="text-xs leading-5 text-amber-200/70">{sanity.reason}</p>
+            </div>
+          ) : null;
+        })()}
       </div>
 
       {/* PRICE — single anchor, no tiers */}
@@ -315,16 +330,24 @@ export default function ExecutiveReportingPaywall({
       ) : (
         /* CTA — only visible after commitment */
         <div>
-          <p className="mb-2 text-sm text-white/45">
-            You are about to make the cost of this decision visible. Once seen, it cannot be unseen.
-          </p>
-          <button
-            onClick={handleCheckout}
-            disabled={loading}
-            className="min-h-[44px] w-full bg-white py-3 font-medium text-black disabled:opacity-60"
-          >
-            {loading ? "Preparing decision session..." : primaryCtaLabel}
-          </button>
+          {spine && shouldBlockERPurchase(spine) ? (
+            <div className="border border-white/10 bg-white/[0.02] p-4">
+              <p className="text-sm text-white/50">{shouldBlockERPurchase(spine)}</p>
+            </div>
+          ) : (
+            <>
+              <p className="mb-2 text-sm text-white/45">
+                You are about to make the cost of this decision visible. Once seen, it cannot be unseen.
+              </p>
+              <button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="min-h-[44px] w-full bg-white py-3 font-medium text-black disabled:opacity-60"
+              >
+                {loading ? "Preparing decision session..." : primaryCtaLabel}
+              </button>
+            </>
+          )}
         </div>
       )}
 

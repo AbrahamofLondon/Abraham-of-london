@@ -119,6 +119,22 @@ export type IntelligenceSpine = {
     deadline?: string;
   };
 
+  /** System flags — avoidance, sanity checks, behavioural signals */
+  flags?: {
+    avoidanceSuspected?: boolean;
+    economicSanitySuspicious?: boolean;
+    doNotSellTriggered?: boolean;
+  };
+
+  /** Execution tracking — post-purchase behaviour */
+  execution?: {
+    breach?: boolean;
+    breachAt?: string;
+    actionTaken?: boolean;
+    actionTakenAt?: string;
+    blockerReported?: string;
+  };
+
   createdAt: string;
   updatedAt: string;
 };
