@@ -12,6 +12,10 @@
 
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 
+function stampIdempotencyKeys(spineId: string, msgs: Omit<PressureMessage, "idempotencyKey">[]): PressureMessage[] {
+  return msgs.map((m) => ({ ...m, idempotencyKey: `pl_${spineId}_${m.stage}_${Date.now()}` }));
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,6 +32,8 @@ export type PressureMessage = {
   sent: boolean;
   /** Whether the user has taken action since */
   actionRecorded: boolean;
+  /** Idempotency key — prevents duplicate sends */
+  idempotencyKey: string;
 };
 
 export type PressureLoop = {
@@ -120,7 +126,7 @@ export function createPressureLoop(spine: IntelligenceSpine): PressureLoop | nul
       costOfDelay,
       conditionClass,
       createdAt: now.toISOString(),
-      messages: [
+      messages: stampIdempotencyKeys(spine.id, [
         {
           stage: "48h",
           subject: "The decision is still open.",
@@ -145,7 +151,7 @@ export function createPressureLoop(spine: IntelligenceSpine): PressureLoop | nul
           sent: false,
           actionRecorded: false,
         },
-      ],
+      ]),
     };
   }
 
@@ -161,7 +167,7 @@ export function createPressureLoop(spine: IntelligenceSpine): PressureLoop | nul
     costOfDelay,
     conditionClass,
     createdAt: now.toISOString(),
-    messages: [
+    messages: stampIdempotencyKeys(spine.id, [
       {
         stage: "48h",
         subject: msg48h.subject,
@@ -186,7 +192,7 @@ export function createPressureLoop(spine: IntelligenceSpine): PressureLoop | nul
         sent: false,
         actionRecorded: false,
       },
-    ],
+    ]),
   };
 }
 
