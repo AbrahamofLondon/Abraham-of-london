@@ -520,7 +520,14 @@ const FastDiagnosticPage: NextPage = () => {
                 </>
               ) : (
                 <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", letterSpacing: "0.15em" }}>
-                  {feedbackGiven === "yes" ? "Noted. The structural problem is likely deeper than this surface read." : feedbackGiven === "partial" ? "Noted. The Constitutional Diagnostic will sharpen this." : "Noted. A different framing may be needed — try the Constitutional Diagnostic."}
+                  {feedbackGiven === "yes" ? (
+                    <>
+                      Then you already know this is real. Don&rsquo;t leave it unpriced.
+                      <Link href="/diagnostics/executive-reporting" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}CC`, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                        Make the cost visible <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
+                      </Link>
+                    </>
+                  ) : feedbackGiven === "partial" ? "Noted. The Constitutional Diagnostic will sharpen this." : "Noted. A different framing may be needed — try the Constitutional Diagnostic."}
                 </p>
               )}
             </div>

@@ -1537,12 +1537,30 @@ export default function StrategyRoomPage({
                 ))}
               </div>
 
-              <div className="mt-8" style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06`, padding: "1.25rem", maxWidth: "36rem" }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem" }}>
-                  Intervention required.
+              {/* Decision-weight price framing */}
+              <div className="mt-8 space-y-4" style={{ maxWidth: "36rem" }}>
+                <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "1.25rem" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                    If this decision slips another 30 days, it becomes:
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm" style={{ color: "rgba(252,165,165,0.55)" }}>
+                    <li>• Harder to escalate</li>
+                    <li>• More politically expensive</li>
+                    <li>• Less reversible</li>
+                  </ul>
                 </div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
-                  {getProductDisplayPrice("strategy_room")} &mdash; execution environment
+
+                <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06`, padding: "1.25rem" }}>
+                  <div className="flex items-baseline justify-between">
+                    <div>
+                      <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", color: "rgba(255,255,255,0.50)" }}>
+                        One delayed escalation vs {getProductDisplayPrice("strategy_room")}
+                      </div>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "0.25rem" }}>
+                        This is not the cost of the system. This is the cost of forcing the decision.
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1552,7 +1570,7 @@ export default function StrategyRoomPage({
                   checkoutPriceCode="strategy_room"
                   originPath="/strategy-room"
                   ctaHref="/strategy-room"
-                  primaryCtaLabel="Proceed to execution"
+                  primaryCtaLabel="Force the decision"
                   title=""
                   description=""
                 />
