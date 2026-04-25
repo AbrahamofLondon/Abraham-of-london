@@ -1850,7 +1850,7 @@ function EscalationClose() {
 // HOMEPAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
+function HomeHero({ intelligenceHref: _intelligenceHref }: { intelligenceHref: string }) {
   const heroMountTime = React.useRef(0);
 
   React.useEffect(() => {
@@ -1909,236 +1909,166 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
 
   return (
     <Section id="hero" variant="surface">
-      <div className="grid min-w-0 gap-5 sm:gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-8">
-        {/* LEFT — why / what */}
-        <div className="min-w-0 max-w-[560px]">
-          <Eyebrow>Governed Executive Reporting System</Eyebrow>
+      <div className="mx-auto max-w-[680px] text-center">
+        <h1
+          className="font-['Cormorant_Garamond',Georgia,serif] font-light"
+          style={{
+            fontSize: "clamp(2.2rem, 8vw, 4rem)",
+            lineHeight: 1.04,
+            color: "#F5F5F5",
+            letterSpacing: "-0.02em",
+          }}
+        >
+          Most decisions don&rsquo;t stall.
+          <br />
+          <span className="ds-text-muted">They are misdiagnosed.</span>
+        </h1>
 
-          <h1
-            className="mt-3 font-['Cormorant_Garamond',Georgia,serif] font-light sm:mt-4"
-            style={{
-              fontSize: "clamp(2rem, 10vw, 3.8rem)",
-              lineHeight: 1.04,
-              color: "#F5F5F5",
-              letterSpacing: 0,
-              overflowWrap: "break-word",
-            }}
-          >
-            Most decisions fail because
-            <span className="ds-text-muted"> contradictions are ignored.</span>
-          </h1>
-
-          <p
-            className="mt-3 max-w-[54ch] text-[15px] font-normal leading-[1.8] ds-text-muted sm:mt-4"
-          >
-            This system identifies the contradiction, prices the consequence,
-            <br />
-            enforces the decision, and verifies whether it held.
+          <p className="mt-4 max-w-[48ch] mx-auto text-[15px] leading-[1.85] ds-text-muted">
+            Describe the decision. The system will expose the real blocker, show what you are avoiding, and force the next move — using your own words.
           </p>
 
-          <p className="mt-2 max-w-[58ch] text-[13px] leading-[1.7]" style={{ color: "rgba(252,165,165,0.40)", fontStyle: "italic" }}>
-            Delay does not preserve the current state. It degrades it.
-          </p>
+          {/* Proof strip */}
+          <div className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-1" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+            <span>Runs in under 2 minutes</span>
+            <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
+            <span>No generic output</span>
+            <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
+            <span>Uses your inputs against your framing</span>
+          </div>
 
-          <p className="mt-3 max-w-[58ch] text-[12px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.06em" }}>
-            Every decision evaluated against cost, speed, and competitive position.
-          </p>
-
-          <p className="mt-4 max-w-[58ch] text-[14px] leading-[1.85] ds-text-muted">
-            This is where decision ambiguity ends.
-            <br />
-            6 minutes. No preparation required.
-          </p>
-
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+          {/* Primary CTA */}
+          <div className="mt-6 flex flex-col items-center gap-3">
             <Link
-              href="/diagnostics/constitutional-diagnostic"
-              className="group inline-flex w-full items-center justify-between gap-3 border px-5 py-3.5 transition-all duration-200 hover:-translate-y-0.5 sm:w-auto sm:justify-center"
+              href="/diagnostics/fast"
+              className="group inline-flex items-center gap-3 border px-7 py-4 transition-all duration-200 hover:-translate-y-0.5"
               style={{
                 borderColor: "rgba(240,185,79,0.58)",
                 backgroundColor: "rgba(240,185,79,0.22)",
-                color: "var(--text-primary)",
+                color: "#F5F5F5",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8.5px",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
+                fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase",
               }}
               onClick={() => trackHeroClick("primary")}
             >
-              <span>Expose the decision</span>
-              <span className="inline-flex items-center gap-2 text-[8px] opacity-75">
-                6-8 min
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
-              </span>
+              Describe the decision
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
+            <a href="#how-it-works" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+              See how it works
+            </a>
           </div>
+        </div>
+        {/* end text-center hero block, begin full-width content */}
 
-          <p
-            className="mt-2.5"
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--text-secondary)",
-            }}
-          >
-            No preparation required. Free to start.
-          </p>
-          <p className="mt-2 max-w-[50ch] text-[12px] leading-[1.6]" style={{ color: "rgba(252,165,165,0.28)", fontStyle: "italic" }}>
-            Most decisions fail after approval.
-          </p>
-          <p className="mt-1.5 text-[11px] leading-[1.6]" style={{ color: "rgba(255,255,255,0.13)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.08em" }}>
-            Decisions are evaluated against an AI-accelerated market baseline.
-          </p>
+        {/* Reality filter */}
+        <div className="mx-auto mt-12 max-w-[600px] grid gap-4 sm:grid-cols-2">
+          <div className="border border-white/[0.06] p-5">
+            <p className="text-[13px] font-medium leading-[1.7]" style={{ color: "rgba(252,165,165,0.55)" }}>This is not for you if:</p>
+            <ul className="mt-2 space-y-1.5 text-[12.5px] leading-[1.6] ds-text-muted">
+              <li>You are exploring ideas</li>
+              <li>You want general advice</li>
+              <li>Nothing important is currently stuck</li>
+            </ul>
+          </div>
+          <div className="border border-[#C9A96E]/20 bg-[#C9A96E]/[0.04] p-5">
+            <p className="text-[13px] font-medium leading-[1.7]" style={{ color: "#C9A96ECC" }}>This is for you if:</p>
+            <ul className="mt-2 space-y-1.5 text-[12.5px] leading-[1.6] ds-text-muted">
+              <li>A decision is dragging longer than it should</li>
+              <li>You&rsquo;ve already tried to resolve it</li>
+              <li>Something about it doesn&rsquo;t add up</li>
+            </ul>
+          </div>
         </div>
 
-        {/* RIGHT — choose / act */}
-        <div className="min-w-0">
-          {/* Dual-entry cards */}
-          <div ref={cardsRef} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            <Link
-              href="/diagnostics/purpose-alignment"
-              className="group min-w-0 border border-white/[0.12] bg-white/[0.04] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06] sm:p-5"
-              onClick={() => trackHeroClick("personal")}
-            >
-              <div className="flex items-start gap-3">
-                <Compass className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/70 transition-colors group-hover:text-white" />
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px", letterSpacing: 0, textTransform: "uppercase",
-                  color: "#F5F5F5",
-                  fontWeight: 650,
-                }}>
-                  Your decisions feel off — start here
-                </div>
+        {/* Demonstration block */}
+        <div className="mx-auto mt-12 max-w-[500px]">
+          <div className="border border-white/[0.08] p-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>User says</p>
+                <p className="mt-2 text-[13px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.50)" }}>&ldquo;We&rsquo;re waiting on finance.&rdquo;</p>
               </div>
-              <p className="mt-2.5 text-[13px] leading-[1.8] ds-text-muted">
-                Identify where your decisions are breaking down — and why.
-              </p>
-              <div className="mt-3 inline-flex items-center gap-2 border-b border-white/20 pb-1 transition-colors group-hover:border-white/45" style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: 0, textTransform: "uppercase",
-                color: "rgba(245,245,245,0.78)",
-              }}>
-                Expose the decision · 8 min
-                <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
-              </div>
-            </Link>
-
-            <Link
-              href="/diagnostics/constitutional-diagnostic"
-              className="group min-w-0 border border-white/[0.12] bg-white/[0.04] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.20] hover:bg-white/[0.06] sm:p-5"
-              onClick={() => trackHeroClick("institutional")}
-            >
-              <div className="flex items-start gap-3">
-                <Briefcase className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/55 transition-colors group-hover:text-white/80" />
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px", letterSpacing: 0, textTransform: "uppercase",
-                  color: "rgba(245,245,245,0.86)",
-                  fontWeight: 650,
-                }}>
-                  Something is breaking in the business — start here
-                </div>
-              </div>
-              <p className="mt-2.5 text-[13px] leading-[1.8] ds-text-muted">
-                Diagnose structural failure, misalignment, and execution risk.
-              </p>
-              <div className="mt-3 inline-flex items-center gap-2 border-b pb-1 transition-colors group-hover:border-[#C9A96E]/70" style={{
-                borderColor: "rgba(201,169,110,0.42)",
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: 0, textTransform: "uppercase",
-                color: "#C9A96E",
-              }}>
-                Expose the contradiction · 6 min
-                <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" />
-              </div>
-            </Link>
-          </div>
-
-          {/* Start here — routing panel */}
-          <div
-            className="mt-3 overflow-hidden border border-white/[0.12]"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <div className="px-4 py-3 sm:px-5 sm:py-3.5">
-              <div
-                style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: "var(--text-muted)",
-                }}
-              >
-                If neither option fits exactly
-              </div>
-              <div className="mt-2.5 space-y-0">
-                {[
-                  { trigger: "Something feels off — but you can\u2019t explain why", route: "Personal diagnostic", href: "/diagnostics/purpose-alignment", tier: "personal" },
-                  { trigger: "Your decisions change under pressure", route: "Personal diagnostic", href: "/diagnostics/purpose-alignment", tier: "personal" },
-                  { trigger: "Your team is misaligned with your direction", route: "Team assessment", href: "/diagnostics/team-assessment", tier: "institutional" },
-                  { trigger: "The organisation is under structural pressure", route: "Constitutional diagnostic", href: "/diagnostics/constitutional-diagnostic", tier: "institutional" },
-                  { trigger: "A high-stakes decision is already on the table", route: "Strategy Room criteria", href: "/strategy-room", tier: "premium" },
-                ].map((item) => (
-                  <Link
-                    key={item.trigger}
-                    href={item.href}
-                    className="group flex items-center gap-3 border-b border-white/[0.06] py-2.5 transition-all duration-150 last:border-b-0 hover:translate-x-1"
-                    onClick={() => track("start_here_clicked", { target: item.href })}
-                  >
-                    <div
-                      className="h-1.5 w-1.5 shrink-0 rounded-full transition-transform duration-200 group-hover:scale-[1.5]"
-                      style={{
-                        backgroundColor: item.tier === "personal"
-                          ? "rgba(110,231,183,0.65)"
-                          : item.tier === "premium"
-                            ? "rgba(252,165,165,0.65)"
-                            : "var(--ds-accent)",
-                      }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="leading-[1.65] transition-colors duration-150"
-                        style={{
-                          fontSize: "11.5px",
-                          color: "var(--text-secondary)",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {item.trigger}
-                      </p>
-                      <p
-                        style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "6.8px",
-                          letterSpacing: "0.08em",
-                          textTransform: "uppercase",
-                          color: item.tier === "premium" ? "rgba(252,165,165,0.75)" : "rgba(201,169,110,0.72)",
-                        }}
-                      >
-                        → {item.route}
-                      </p>
-                    </div>
-                    <ArrowRight className="h-3 w-3 shrink-0 text-white/0 transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-white/50" />
-                  </Link>
-                ))}
+              <div>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Forced answer</p>
+                <p className="mt-2 text-[13px] leading-[1.7]" style={{ color: "#C9A96ECC" }}>&ldquo;I&rsquo;d take it straight to the board.&rdquo;</p>
               </div>
             </div>
+            <div className="mt-4 border-t border-white/[0.06] pt-4">
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)" }}>System output</p>
+              <p className="mt-2 text-[14px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.75)" }}>
+                Finance is not the blocker. The board conversation is.
+              </p>
+            </div>
+            <Link href="/diagnostics/fast" className="mt-4 inline-flex items-center gap-2 text-[12px]" style={{ color: "#C9A96ECC", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.08em" }}>
+              Run yours <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
+        </div>
 
-          {/* Reassurance line */}
-          <p
-            className="mt-3 text-[12px] leading-[1.8] ds-text-muted"
-          >
-            You will know within minutes whether this is accurate. If it isn&rsquo;t, stop there.
+        {/* Value ladder */}
+        <div id="how-it-works" ref={cardsRef} className="mx-auto mt-14 max-w-[500px]">
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textAlign: "center", marginBottom: "1.5rem" }}>How it works</p>
+          {[
+            { step: "Start", name: "Fast Diagnostic", desc: "Exposes the real blocker", href: "/diagnostics/fast" },
+            { step: "Then", name: "Constitutional Diagnostic", desc: "Tests if the problem is structural", href: "/diagnostics/constitutional-diagnostic" },
+            { step: "Then", name: "Executive Reporting", desc: "Prices the consequence", href: "/diagnostics/executive-reporting" },
+            { step: "Then", name: "Strategy Room", desc: "Enforces the decision", href: "/strategy-room" },
+          ].map((item, i) => (
+            <Link key={i} href={item.href} className="group flex items-start gap-4 py-3 transition-colors" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: i === 0 ? "#C9A96EAA" : "rgba(255,255,255,0.18)", minWidth: "32px" }}>{item.step}</span>
+              <div className="flex-1">
+                <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.70)" }}>{item.name}</span>
+                <span className="ml-2 text-[12px] ds-text-muted">&mdash; {item.desc}</span>
+              </div>
+              <ArrowRight className="h-3 w-3 mt-1 shrink-0 opacity-0 transition-opacity group-hover:opacity-50" style={{ color: "rgba(255,255,255,0.30)" }} />
+            </Link>
+          ))}
+        </div>
+
+        {/* Hard positioning */}
+        <div className="mx-auto mt-14 max-w-[440px] text-center">
+          <p className="font-['Cormorant_Garamond',Georgia,serif] font-light text-[22px] leading-[1.4]" style={{ color: "rgba(255,255,255,0.55)" }}>
+            We do not generate insights.<br />We close the execution gap.
           </p>
         </div>
-      </div>
+
+        {/* Dual-entry cards — Product lines */}
+        <div className="mx-auto mt-10 grid max-w-[600px] gap-3 sm:grid-cols-2">
+          <Link
+            href="/diagnostics/purpose-alignment"
+            className="group border border-white/[0.08] bg-white/[0.02] p-5 transition-all hover:border-white/[0.15]"
+          >
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)", fontWeight: 600 }}>
+              Personal product
+            </div>
+            <p className="mt-2 text-[13px] leading-[1.7] ds-text-muted">
+              Your decisions feel misaligned? Purpose Alignment scores the gap and binds one corrective action.
+            </p>
+            <div className="mt-3 inline-flex items-center gap-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
+              Take the assessment <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+            </div>
+          </Link>
+          <Link
+            href="/diagnostics/fast"
+            className="group border border-[#C9A96E]/20 bg-[#C9A96E]/[0.04] p-5 transition-all hover:border-[#C9A96E]/35"
+          >
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#C9A96ECC", fontWeight: 600 }}>
+              Organisational product
+            </div>
+            <p className="mt-2 text-[13px] leading-[1.7] ds-text-muted">
+              A decision is stuck in the business? The system exposes the contradiction and forces the move.
+            </p>
+            <div className="mt-3 inline-flex items-center gap-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#C9A96EAA" }}>
+              Start with the stuck decision <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+            </div>
+          </Link>
+        </div>
+
+        {/* Reassurance line */}
+        <p className="mt-3 text-center text-[12px] leading-[1.8] ds-text-muted">
+          You will know within minutes whether this is accurate. If it isn&rsquo;t, stop there.
+        </p>
     </Section>
   );
 }
@@ -3094,21 +3024,16 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
       <Panel surface="lift" gold>
         <div className="p-8 md:p-12">
           <div className="mx-auto max-w-4xl text-center">
-            <Eyebrow align="center">Next step</Eyebrow>
-            <h2 className="mt-5 font-['Cormorant_Garamond',Georgia,serif] text-4xl font-light leading-[0.95] tracking-[-0.03em] ds-text">
-              Start the diagnostic. Build the evidence. Get the brief.
+            <h2 className="font-['Cormorant_Garamond',Georgia,serif] text-3xl font-light leading-[1.1] tracking-[-0.02em] ds-text">
+              If a decision is currently dragging, run it now.
             </h2>
-            <p className="mx-auto mt-6 max-w-[62ch] text-[15px] leading-[1.9] ds-text-muted">
-              Need signal? Start with a free diagnostic.
-              <br />
-              Evidence already established? Go to Executive Reporting.
-              <br />
-              Strategy Room opens only when intervention is warranted.
+            <p className="mx-auto mt-4 max-w-[48ch] text-[15px] leading-[1.9] ds-text-muted">
+              If not, come back when one is.
             </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-3">
               <Link
-                href="/diagnostics/constitutional-diagnostic"
+                href="/diagnostics/fast"
                 className="inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
                   borderColor: "var(--ds-accent-soft)",
@@ -3120,8 +3045,8 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
                   textTransform: "uppercase",
                 }}
               >
-                Start diagnostic
-                <span className="text-[8px] opacity-70">Free · 6 min</span>
+                Describe the decision
+                <span className="text-[8px] opacity-70">Free · 2 min</span>
               </Link>
               <Link
                 href="/diagnostics/executive-reporting"

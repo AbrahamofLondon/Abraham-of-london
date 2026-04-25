@@ -55,6 +55,9 @@ import TrajectoryLine from "@/components/diagnostics/results/TrajectoryLine";
 import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
 import { buildDecisionObjectFromSignals, buildTeamDecisionResult } from "@/lib/diagnostics/decision-engine";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
+import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
+import { getInheritedContext } from "@/lib/decision/spine-guard";
+import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -583,6 +586,8 @@ export default function TeamAssessmentPage() {
   const [purposePct,   setPurposePct]     = React.useState<number | null>(null);
   const [subjectId,    setSubjectId]      = React.useState("");
   const [constitutionalThread, setConstitutionalThread] = React.useState<ConstitutionalThread | null>(null);
+  const [spine, setSpine]                             = React.useState<IntelligenceSpine | null>(null);
+  const [spineContext, setSpineContext]                 = React.useState<ReturnType<typeof getInheritedContext> | null>(null);
   const [teamReflections] = React.useState({
     confidenceBaseline: 60,
     falseAssumption: "",
@@ -591,6 +596,9 @@ export default function TeamAssessmentPage() {
 
   React.useEffect(() => {
     trackStageStart("team");
+    // Load spine for inherited context
+    const loaded = loadSpineFromSession();
+    if (loaded) { setSpine(loaded); setSpineContext(getInheritedContext(loaded)); }
     const handleUnload = () => trackDropoff("team");
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
@@ -954,7 +962,7 @@ export default function TeamAssessmentPage() {
                     onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; }}
                     onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; }}
                   >
-                    Begin: Leader View <ArrowRight style={{ width: "12px", height: "12px" }} />
+                    Test the perception gap <ArrowRight style={{ width: "12px", height: "12px" }} />
                   </button>
                 </div>
               </motion.div>

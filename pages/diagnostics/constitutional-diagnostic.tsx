@@ -23,6 +23,10 @@ import { getOrCreateSubjectId } from "@/lib/diagnostics/subject-id";
 import { trackFunnelEntry, trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
 import { trackDiagnosticStart } from "@/lib/analytics/journey-client";
+import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
+import { advanceSpine, type IntelligenceSpine } from "@/lib/decision/intelligence-spine";
+import { saveSpineToSession, persistSpineToDB } from "@/lib/decision/spine-persistence";
+import { getInheritedContext } from "@/lib/decision/spine-guard";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -59,12 +63,21 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
 
 export default function ConstitutionalDiagnosticPage() {
   const router = useRouter();
+  const [spine, setSpine] = React.useState<IntelligenceSpine | null>(null);
+  const [inheritedContext, setInheritedContext] = React.useState<ReturnType<typeof getInheritedContext> | null>(null);
 
   React.useEffect(() => {
     getOrCreateSubjectId();
     trackFunnelEntry("/diagnostics/constitutional-diagnostic");
     trackStageStart("constitutional");
     trackDiagnosticStart("constitutional");
+
+    // Load spine for inherited context (non-blocking — page works without spine)
+    const loaded = loadSpineFromSession();
+    if (loaded) {
+      setSpine(loaded);
+      setInheritedContext(getInheritedContext(loaded));
+    }
 
     const handleUnload = () => trackDropoff("constitutional");
     window.addEventListener("beforeunload", handleUnload);
@@ -170,10 +183,10 @@ export default function ConstitutionalDiagnosticPage() {
                     color: "rgba(255,255,255,0.42)",
                     maxWidth: "50ch",
                   }}>
-                    Ten questions. Two axes. One constitutional route. The
-                    instrument reads posture, authority, readiness, and
-                    failure mode density — then routes the signal forward.
-                    No login. No output inflation. No generic recommendations.
+                    Ten questions. Two axes. One constitutional route. Tests
+                    whether the decision problem is structural — reads posture,
+                    authority, readiness, and failure mode density, then routes
+                    the signal forward. No login. No inflation. Deterministic output.
                   </p>
 
                   <div className="flex flex-wrap gap-3 mt-8">
@@ -190,7 +203,7 @@ export default function ConstitutionalDiagnosticPage() {
                       onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}16`; }}
                       onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}0E`; }}
                     >
-                      Start the Diagnostic
+                      Test the structure
                       <ArrowRight style={{ width: "12px", height: "12px" }} />
                     </Link>
                     <Link href="/diagnostics"
@@ -276,6 +289,47 @@ export default function ConstitutionalDiagnosticPage() {
             </div>
           </div>
         </section>
+
+        {/* ── INHERITED CONTEXT (from spine) ─────────────────────────────── */}
+        {inheritedContext && (
+          <section className="relative" style={{ backgroundColor: BASE }}>
+            <div className="mx-auto max-w-2xl px-6 py-8">
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <Shield className="h-4 w-4" style={{ color: `${GOLD}BB` }} />
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}88`,
+                  }}>
+                    Intelligence inherited from prior stage
+                  </span>
+                </div>
+                <p style={{
+                  fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+                  fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)",
+                  maxWidth: "48ch",
+                }}>
+                  {inheritedContext.headline}
+                </p>
+                {inheritedContext.contradiction && (
+                  <p style={{
+                    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+                    fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.40)",
+                    marginTop: "0.5rem",
+                  }}>
+                    Contradiction detected: {inheritedContext.contradiction.slice(0, 120)}...
+                  </p>
+                )}
+                <p style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px", color: "rgba(255,255,255,0.20)", marginTop: "0.75rem",
+                }}>
+                  This stage tests the structural conditions sustaining that state. {inheritedContext.stagesCompleted.length} stage{inheritedContext.stagesCompleted.length === 1 ? "" : "s"} completed.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── INSTRUMENT ────────────────────────────────────────────────── */}
         <section id="instrument" className="scroll-mt-0" style={{ backgroundColor: BASE }}>

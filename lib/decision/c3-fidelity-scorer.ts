@@ -2,21 +2,34 @@
  * C3 Fidelity Scorer — decides whether input deserves synthesis.
  *
  * Scores: Clarity, Context, Consequence.
- * If specificity < 0.7 → Precision Recovery Mode.
+ * Tiered enforcement:
+ *   < 0.5  → HARD_RECOVERY   (no synthesis, interrogation only)
+ *   0.5–0.7 → SOFT_RECOVERY  (deterministic only, no contradiction block)
+ *   ≥ 0.7  → FULL_SYNTHESIS  (full LLM synthesis + arbiter)
+ *
  * Do not synthesize vague input. Do not bluff intelligence.
  */
 
 import type { CaseObject } from "./case-object";
+import type { C3Tier, ConfidenceBand } from "./intelligence-spine";
 
 export type C3Score = {
   clarity: number;       // 0-1: is the decision itself clear?
   context: number;       // 0-1: is there enough surrounding information?
   consequence: number;   // 0-1: is the cost/stakes articulated?
   specificityScore: number; // 0-1: composite
+  /** @deprecated Use tier instead for new code */
   mode: "SYNTHESIS_READY" | "PRECISION_RECOVERY";
+  /** Tiered enforcement level */
+  tier: C3Tier;
+  /** Human-readable confidence band */
+  confidenceBand: ConfidenceBand;
   missing: Array<"clarity" | "context" | "consequence">;
   recoveryQuestion?: string;
 };
+
+// Re-export for convenience
+export type { C3Tier, ConfidenceBand } from "./intelligence-spine";
 
 /**
  * Score text specificity. Higher = more specific.
@@ -50,6 +63,22 @@ function textSpecificity(text: string | undefined | null): number {
   return Math.min(1, score);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// TIER DERIVATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function deriveTier(specificityScore: number): C3Tier {
+  if (specificityScore >= 0.7) return "FULL_SYNTHESIS";
+  if (specificityScore >= 0.5) return "SOFT_RECOVERY";
+  return "HARD_RECOVERY";
+}
+
+function deriveConfidenceBand(specificityScore: number): ConfidenceBand {
+  if (specificityScore >= 0.7) return "high";
+  if (specificityScore >= 0.5) return "medium";
+  return "low";
+}
+
 /**
  * Score a CaseObject on Clarity, Context, Consequence.
  */
@@ -75,20 +104,33 @@ export function scoreC3(caseObj: CaseObject): C3Score {
   if (context < 0.4) missing.push("context");
   if (consequence < 0.3) missing.push("consequence");
 
-  // Mode
-  const mode: C3Score["mode"] = specificityScore >= 0.45 ? "SYNTHESIS_READY" : "PRECISION_RECOVERY";
+  // Tiered enforcement
+  const tier = deriveTier(specificityScore);
+  const confidenceBand = deriveConfidenceBand(specificityScore);
 
-  // Recovery question
+  // Legacy mode for backward compat
+  const mode: C3Score["mode"] = tier === "FULL_SYNTHESIS" ? "SYNTHESIS_READY" : "PRECISION_RECOVERY";
+
+  // Recovery question — tiered by severity
   let recoveryQuestion: string | undefined;
-  if (mode === "PRECISION_RECOVERY") {
+  if (tier === "HARD_RECOVERY") {
+    // Interrogation mode — demand specifics
     if (missing.includes("clarity")) {
       recoveryQuestion = "The decision is not yet specific enough. What exactly must be decided — not the topic, the decision? One sentence.";
     } else if (missing.includes("context")) {
       recoveryQuestion = "The system cannot isolate the blocker yet. Who has authority to move this decision, and what specifically prevents them from acting?";
     } else if (missing.includes("consequence")) {
       recoveryQuestion = "The cost of delay is not yet visible. What specifically gets more expensive each week this sits unresolved?";
+    } else {
+      recoveryQuestion = "The input lacks the specificity required for analysis. Name a specific person, a specific deadline, and a specific cost.";
+    }
+  } else if (tier === "SOFT_RECOVERY") {
+    // Partial framing — acknowledge gaps but proceed with deterministic
+    if (missing.length > 0) {
+      const gapNames = missing.join(", ");
+      recoveryQuestion = `The system can produce a partial reading but lacks full ${gapNames}. Provide more detail for a stronger conclusion.`;
     }
   }
 
-  return { clarity, context, consequence, specificityScore, mode, missing, recoveryQuestion };
+  return { clarity, context, consequence, specificityScore, mode, tier, confidenceBand, missing, recoveryQuestion };
 }

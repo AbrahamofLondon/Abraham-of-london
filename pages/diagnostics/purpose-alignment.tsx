@@ -73,7 +73,7 @@ export default function PurposeAlignmentPage() {
                 color: "rgba(255,255,255,0.92)", maxWidth: "20ch",
                 fontStyle: "italic",
               }}>
-                Are you aligned with your own direction?
+                Your decisions reveal your real mandate.
               </h1>
 
               <p style={{
@@ -82,7 +82,7 @@ export default function PurposeAlignmentPage() {
                 fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.65,
                 color: "rgba(255,255,255,0.48)", maxWidth: "52ch",
               }}>
-                18 questions across six domains. Dual-axis scoring that distinguishes what you know from what you assume. Your result is specific to your exact pattern — not a generic label.
+                This is not a personality test. It scores how aligned your decisions, environment, and behaviour actually are with what you say matters — then forces one binding action. Your result is specific to your exact pattern.
               </p>
 
               <div style={{
@@ -161,7 +161,7 @@ export default function PurposeAlignmentPage() {
                   color: `${GOLD}`,
                 }}
               >
-                Continue to Constitutional Diagnostic
+                Test the organisational structure
                 <ArrowRight style={{ width: "11px", height: "11px" }} />
               </Link>
             </div>

@@ -62,6 +62,9 @@ import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import FreeLayerBoundary from "@/components/diagnostics/results/FreeLayerBoundary";
 import { buildDecisionObjectFromSignals, buildEnterpriseDecisionResult } from "@/lib/diagnostics/decision-engine";
+import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
+import { getInheritedContext } from "@/lib/decision/spine-guard";
+import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -202,7 +205,7 @@ function deriveReading(
   if (band === "ESCALATE" || (govLeaderWeak && execRiskWeak)) {
     patternTitle   = "Distributed constitutional strain";
     primaryReading = `All four domains are below threshold at once. That means the institution is not carrying a local defect but a distributed constitutional strain across leadership, governance, execution, and risk posture. The threshold from operational difficulty into structural danger has already been crossed. The next move is governed executive interpretation before any direct intervention is attempted.`;
-    firstAction    = "Pause discretionary strategic initiatives. Convene the executive decision-making group around one question only: what are the three decisions that must not be made until this diagnostic has produced a governed recommendation?";
+    firstAction    = "Pause discretionary strategic initiatives. Convene the executive decision-making group around one question only: what are the three decisions that must not be made until consequence has been priced and priority has been governed?";
     escalationNote = "Executive Reporting should come before any mandate or chamber work. Entering Strategy Room without that ordering would compound disorder rather than reduce it.";
     route = "EXECUTIVE_REPORTING";
 
@@ -250,7 +253,7 @@ function deriveReading(
 
   } else if (band === "STABLE") {
     patternTitle   = "Institutional posture remains ordered";
-    primaryReading = `All four domains are above threshold: leadership coherence (${leadership}%), governance reliability (${governance}%), execution consistency (${execution}%), and risk posture (${risk}%). The institution is therefore carrying enough order for judgment, execution, and correction to remain aligned. The threshold is on the ordered side of strain. The next move is not emergency escalation, but testing whether this posture remains stable under future pressure.`;
+    primaryReading = `All four domains are above threshold: leadership coherence (${leadership}%), governance reliability (${governance}%), execution consistency (${execution}%), and risk posture (${risk}%). Based on this single-respondent reading, the institution appears to carry enough order for judgment, execution, and correction to remain aligned. The threshold is on the ordered side of strain. The next move is not emergency escalation, but testing whether this posture holds under real pressure.`;
     firstAction    = "The most productive use of this reading is stress-testing: identify the three conditions under which this institutional coherence would be most likely to degrade, and verify whether governance, execution, and leadership are resilient to each.";
     escalationNote = "A stable institutional reading supports proactive Executive Reporting if leadership wants a governed planning brief rather than crisis correction.";
     route = "WATCH";
@@ -622,10 +625,15 @@ export default function EnterpriseAssessmentPage() {
   const [teamAlignmentPct, setTeamAlignmentPct] = React.useState<number | null>(null);
   const [subjectId, setSubjectId] = React.useState("");
   const [constitutionalThread, setConstitutionalThread] = React.useState<ConstitutionalThread | null>(null);
+  const [_spine, _setSpine]                             = React.useState<IntelligenceSpine | null>(null);
+  const [_spineCtx, _setSpineCtx]                       = React.useState<ReturnType<typeof getInheritedContext> | null>(null);
   const recentDecisionReady = identity.recentDecision.trim().length >= 80;
 
   React.useEffect(() => {
     trackStageStart("enterprise");
+    // Load spine for inherited context
+    const loaded = loadSpineFromSession();
+    if (loaded) { _setSpine(loaded); _setSpineCtx(getInheritedContext(loaded)); }
     const handleUnload = () => trackDropoff("enterprise");
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
@@ -970,7 +978,7 @@ export default function EnterpriseAssessmentPage() {
                     onMouseEnter={e => { if (recentDecisionReady) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
                     onMouseLeave={e => { if (recentDecisionReady) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                   >
-                    Continue the Assessment <ArrowRight style={{ width: "12px", height: "12px" }} />
+                    Test whether the condition is institutional <ArrowRight style={{ width: "12px", height: "12px" }} />
                   </button>
                 </div>
               </motion.div>

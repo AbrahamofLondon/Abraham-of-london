@@ -27,7 +27,9 @@
       "Bash(ls scripts/convert-tailwind-slash-opacity.mjs scripts/vault-master.ts scripts/postcss-guard-dryrun.mjs)",
       "Bash(ls scripts/audit-assets.js scripts/mdx-integrity-check.mjs scripts/mdx-illegal-jsx-gate.mjs)",
       "Bash(sed:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(npx next:*)",
+      "Bash(npx tsx:*)"
     ]
   }
 }

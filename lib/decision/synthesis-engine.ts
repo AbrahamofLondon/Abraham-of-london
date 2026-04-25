@@ -5,14 +5,19 @@
  * If yes → fail. If no → ship.
  *
  * Architecture:
- * 1. CaseObject → C3 Score → if ready → synthesis prompt → LLM → governed output
- * 2. Deterministic arbiter validates synthesis against classification
- * 3. If arbiter rejects → fall back to deterministic output
+ * 1. CaseObject → C3 Score → tier check
+ * 2. HARD_RECOVERY → recovery questions only, no synthesis
+ * 3. SOFT_RECOVERY → deterministic fallback only, no contradiction block
+ * 4. FULL_SYNTHESIS → LLM synthesis → arbiter tournament → governed output
+ * 5. Arbiter rejects → explicit mismatch message, NOT silent fallback
  */
 
 import type { CaseObject, ConditionClass } from "./case-object";
 import { classifyCondition, inferContradiction, inferAvoidance } from "./case-object";
 import { scoreC3, type C3Score } from "./c3-fidelity-scorer";
+import { runArbiterTournament, type ArbiterTournamentResult } from "./arbiter-tournament";
+import { SIGNALS, type SignalKey } from "@/lib/diagnostics/signals";
+import type { DeterministicOutput } from "./intelligence-spine";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GOVERNED SYNTHESIS CONTRACT
@@ -82,54 +87,66 @@ RULES:
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DETERMINISTIC ARBITER
+// DETERMINISTIC OUTPUT BUILDER
 // ─────────────────────────────────────────────────────────────────────────────
 
+const CONDITION_TO_SIGNAL: Record<ConditionClass, SignalKey> = {
+  authority: "AUTHORITY_LEAKAGE",
+  definition: "DEFINITION_FAILURE",
+  execution: "EXECUTION_AVOIDANCE",
+  instability: "LATENT_INSTABILITY",
+};
+
+/**
+ * Build deterministic output from case material.
+ * This is always computed, regardless of synthesis tier.
+ */
+export function buildDeterministicOutput(caseObj: CaseObject): DeterministicOutput {
+  const conditionClass = classifyCondition(caseObj);
+  const signalKey = CONDITION_TO_SIGNAL[conditionClass];
+  const signal = SIGNALS[signalKey];
+
+  const contradictionSet: string[] = [];
+  const inferred = inferContradiction(caseObj);
+  if (inferred) contradictionSet.push(inferred);
+  if (signal.contradiction) contradictionSet.push(signal.contradiction);
+
+  return {
+    conditionClass,
+    signal,
+    contradictionSet,
+    blockerClass: conditionClass,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DETERMINISTIC FALLBACK (still bespoke — quotes user words)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** @deprecated Use arbitrate() in old integrations — prefer runArbiterTournament() */
 export type ArbiterResult = {
   status: "APPROVED" | "REJECTED";
   reason?: string;
 };
 
-/**
- * Validates that synthesis output doesn't contradict deterministic classification.
- */
+/** @deprecated Use runArbiterTournament() instead */
 export function arbitrate(
   synthesis: Partial<GovernedSynthesis>,
   caseObj: CaseObject,
 ): ArbiterResult {
-  // Check: verdict must contain at least one quoted user phrase
-  const hasQuote = synthesis.verdict?.includes('"') || synthesis.verdict?.includes("'");
-  if (!hasQuote && synthesis.verdict && synthesis.verdict.length > 20) {
-    return { status: "REJECTED", reason: "Verdict does not reference user language. Synthesis must quote user words." };
-  }
-
-  // Check: concrete move must not be generic
-  const genericPhrases = ["improve communication", "align stakeholders", "have a conversation", "think about", "consider", "reflect on"];
-  const moveIsGeneric = genericPhrases.some((p) => synthesis.concreteMove?.toLowerCase().includes(p));
-  if (moveIsGeneric) {
-    return { status: "REJECTED", reason: "Concrete move is generic. Must be specific to user's situation." };
-  }
-
-  // Check: condition class from synthesis should broadly align with deterministic
-  const deterministicClass = classifyCondition(caseObj);
-  // We don't require exact match — synthesis may see nuance — but flag if wildly different
-  if (synthesis.conditionClass && synthesis.conditionClass !== deterministicClass) {
-    // Allow: synthesis found a more specific class. Don't allow: completely unrelated.
-    // For now, this is informational, not blocking.
-  }
-
-  return { status: "APPROVED" };
+  const deterministic = buildDeterministicOutput(caseObj);
+  const result = runArbiterTournament(synthesis, caseObj, deterministic);
+  return {
+    status: result.accepted ? "APPROVED" : "REJECTED",
+    reason: result.violations.map((v) => v.message).join("; ") || undefined,
+  };
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DETERMINISTIC FALLBACK
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Produces deterministic output when synthesis is unavailable or rejected.
  * Still references user words. Still bespoke. Just not LLM-synthesised.
  */
-export function deterministicFallback(caseObj: CaseObject): GovernedSynthesis {
+export function deterministicFallback(caseObj: CaseObject, opts?: { suppressContradiction?: boolean }): GovernedSynthesis {
   const conditionClass = classifyCondition(caseObj);
   const contradiction = inferContradiction(caseObj);
   const avoidance = inferAvoidance(caseObj);
@@ -169,7 +186,9 @@ export function deterministicFallback(caseObj: CaseObject): GovernedSynthesis {
 
   return {
     verdict: verdicts[conditionClass],
-    primaryContradiction: contradiction ?? "Insufficient input to identify a specific contradiction. Provide more detail about the blocker and what you would do under time pressure.",
+    primaryContradiction: opts?.suppressContradiction
+      ? "Insufficient confidence for contradiction analysis. Complete more detail for the system to identify structural contradictions."
+      : (contradiction ?? "Insufficient input to identify a specific contradiction. Provide more detail about the blocker and what you would do under time pressure."),
     avoidedDecision: avoidance ?? "The system cannot determine what is being avoided without both a stated blocker and a forced action.",
     whyPriorAttemptsFailed: caseObj.priorAttempt
       ? `You described prior attempts as: "${caseObj.priorAttempt}". These addressed the surface condition. The structural cause — the ${conditionClass} gap — was not addressed.`
@@ -188,14 +207,23 @@ export function deterministicFallback(caseObj: CaseObject): GovernedSynthesis {
 // MAIN SYNTHESIS FUNCTION
 // ─────────────────────────────────────────────────────────────────────────────
 
+export type SynthesisResult = {
+  synthesis: GovernedSynthesis;
+  source: "llm" | "deterministic" | "recovery";
+  recoveryQuestion?: string;
+  /** Arbiter result when LLM was attempted */
+  arbiterResult?: ArbiterTournamentResult;
+  /** Explicit mismatch message when arbiter rejects — SHOW THIS TO THE USER */
+  arbiterMismatchMessage?: string;
+};
+
 /**
  * Produce governed synthesis from a CaseObject.
  *
- * 1. Score C3 fidelity
- * 2. If PRECISION_RECOVERY → return recovery state
- * 3. If SYNTHESIS_READY → attempt LLM synthesis
- * 4. Arbiter validates → if rejected, fall back to deterministic
- * 5. Return governed output
+ * Tiered enforcement:
+ * - HARD_RECOVERY: recovery questions only, no synthesis attempt
+ * - SOFT_RECOVERY: deterministic only, no contradiction block, no LLM
+ * - FULL_SYNTHESIS: LLM → arbiter tournament → governed output
  *
  * The LLM call is provided as an async function parameter so the engine
  * is not coupled to any specific LLM provider.
@@ -203,20 +231,31 @@ export function deterministicFallback(caseObj: CaseObject): GovernedSynthesis {
 export async function synthesise(
   caseObj: CaseObject,
   llmCall?: (prompt: string) => Promise<string>,
-): Promise<{ synthesis: GovernedSynthesis; source: "llm" | "deterministic" | "recovery"; recoveryQuestion?: string }> {
+): Promise<SynthesisResult> {
   // 1. C3 fidelity check
   const c3 = scoreC3(caseObj);
 
-  // 2. Precision recovery
-  if (c3.mode === "PRECISION_RECOVERY") {
+  // 2. HARD_RECOVERY — demand specifics, no synthesis
+  if (c3.tier === "HARD_RECOVERY") {
     return {
-      synthesis: deterministicFallback(caseObj),
+      synthesis: deterministicFallback(caseObj, { suppressContradiction: true }),
       source: "recovery",
       recoveryQuestion: c3.recoveryQuestion,
     };
   }
 
-  // 3. Attempt LLM synthesis
+  // 3. SOFT_RECOVERY — deterministic only, suppress contradiction block
+  if (c3.tier === "SOFT_RECOVERY") {
+    return {
+      synthesis: deterministicFallback(caseObj, { suppressContradiction: true }),
+      source: "deterministic",
+      recoveryQuestion: c3.recoveryQuestion,
+    };
+  }
+
+  // 4. FULL_SYNTHESIS — attempt LLM with arbiter tournament
+  const deterministic = buildDeterministicOutput(caseObj);
+
   if (llmCall) {
     try {
       const prompt = buildSynthesisPrompt(caseObj);
@@ -234,27 +273,35 @@ export async function synthesise(
           whyPriorAttemptsFailed: String(parsed.whyPriorAttemptsFailed ?? ""),
           concreteMove: String(parsed.concreteMove ?? ""),
           defaultPathForecast: String(parsed.defaultPathForecast ?? ""),
-          signalStrength: (parsed.signalStrength as any) ?? "medium",
+          signalStrength: (parsed.signalStrength as GovernedSynthesis["signalStrength"]) ?? "medium",
           certaintyBoundary: String(parsed.certaintyBoundary ?? ""),
           quotedUserLanguage: [caseObj.decision, caseObj.blocker, caseObj.forcedAction].filter(Boolean) as string[],
           conditionClass: classifyCondition(caseObj),
           c3Score: c3,
         };
 
-        // 4. Arbiter validation
-        const arbiterResult = arbitrate(synthesis, caseObj);
-        if (arbiterResult.status === "APPROVED") {
-          return { synthesis, source: "llm" };
+        // 5. Arbiter tournament — hard validation
+        const arbiterResult = runArbiterTournament(synthesis, caseObj, deterministic);
+
+        if (arbiterResult.accepted) {
+          return { synthesis, source: "llm", arbiterResult };
         }
 
-        // Arbiter rejected — fall back
-        console.warn("[synthesis-engine] Arbiter rejected LLM output:", arbiterResult.reason);
+        // Arbiter rejected — DO NOT silently fallback
+        // Return deterministic but expose the mismatch
+        console.warn("[synthesis-engine] Arbiter tournament rejected LLM output:", arbiterResult.violations);
+        return {
+          synthesis: deterministicFallback(caseObj),
+          source: "deterministic",
+          arbiterResult,
+          arbiterMismatchMessage: arbiterResult.userMessage,
+        };
       }
     } catch (err) {
       console.error("[synthesis-engine] LLM synthesis failed:", err);
     }
   }
 
-  // 5. Deterministic fallback
+  // 6. No LLM available — deterministic fallback
   return { synthesis: deterministicFallback(caseObj), source: "deterministic" };
 }

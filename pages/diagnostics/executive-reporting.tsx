@@ -46,9 +46,9 @@ export default function ExecutiveReportingEntryPage() {
             </h1>
             <p className="mt-5 max-w-2xl font-serif text-lg leading-8 text-white/52">
               Every contradiction identified across your diagnostic stages converges here. The system
-              prices the annual cost of inaction, names the decision you are avoiding, and produces
-              a priority stack that cannot be ignored. This is not a report. It is a governed position
-              with visible math.
+              prices consequence direction from your stated inputs, names the decision being avoided,
+              and produces a governed priority stack. Financial exposure requires a supplied cost anchor.
+              This is not a report. It is a governed position derived from your evidence.
             </p>
           </div>
 
@@ -64,8 +64,8 @@ export default function ExecutiveReportingEntryPage() {
             <div className="border border-white/10 bg-white/[0.025] p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">What it produces</p>
               <p className="mt-3 text-sm leading-6 text-white/58">
-                A constitutional position statement, financial exposure estimate, governed priority stack,
-                failure mode identification, and directed next action. PDF briefing available for board distribution.
+                A constitutional position statement, exposure direction estimate, governed priority stack,
+                failure mode identification, and enforced next action. PDF briefing available for board distribution.
               </p>
             </div>
             <div className="border border-white/10 bg-white/[0.025] p-5">
@@ -81,7 +81,7 @@ export default function ExecutiveReportingEntryPage() {
             price={getProductAmountGbp("executive_reporting")}
             ctaHref="/diagnostics/executive-reporting/run"
             checkoutPriceCode="executive_reporting"
-            primaryCtaLabel="Begin Executive Reporting intake"
+            primaryCtaLabel="Price the consequence"
             secondaryHref="/diagnostics"
             secondaryLabel="Return to diagnostic ladder"
             eyebrow={`Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`}

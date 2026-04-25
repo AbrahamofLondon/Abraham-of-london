@@ -63,7 +63,6 @@ import type {
   AlignmentDomain,
   DualAxisAnswer,
   PurposeProfileResult,
-  DomainProfile,
   CoherenceBand,
 } from "@/lib/alignment/types";
 import { track } from "@/lib/analytics/track";
@@ -85,7 +84,7 @@ import EvidenceChainSurface from "@/components/diagnostics/results/EvidenceChain
 import ProductAdvantageBlocks from "@/components/diagnostics/results/ProductAdvantageBlocks";
 import { buildPurposeResult } from "@/lib/diagnostics/assessment-result-builders";
 import { detectSignal } from "@/lib/diagnostics/signal-detector";
-import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
+// useInstitutionalLayers removed — wired via spine guard when needed
 
 // Pattern-Breaker Contract imports
 import { PatternBreakerContract } from "@/components/alignment/PatternBreakerContract";
@@ -127,9 +126,6 @@ import type {
 import {
   createOrganization,
   joinOrganization,
-  getOrganization,
-  getOrganizationByInviteCode,
-  getOrganizations,
   refreshOrganizationAnalytics,
 } from "@/lib/alignment/organization-engine";
 
@@ -673,6 +669,12 @@ function LiveProfileSidebar({ profile, totalAnswered, totalQuestions }: {
         </div>
       )}
 
+      <div style={{ border: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(255,255,255,0.005)", padding: "1rem 1.25rem" }}>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.65, color: "rgba(255,255,255,0.25)", fontStyle: "italic" }}>
+          This is not a personality test. It scores how aligned your decisions, environment, and behaviour actually are with what you say matters — then forces one binding commitment.
+        </p>
+      </div>
+
       <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.005)", padding: "1rem 1.25rem" }}>
         <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.65rem" }}>
           How scoring works
@@ -900,8 +902,8 @@ function AuthorityResultSurface({
       }} />
 
       <FreeLayerBoundary
-        summary="This assessment identifies a likely decision behaviour pattern from your self-reported answers, shows where your stated values and revealed choices diverge, and gives one practical correction."
-        limitation="It does not test whether the same pattern is structural in your organisation, price the consequence of delay, or sequence enforcement. It is a self-reported signal, not a complete psychological profile."
+        summary="This is personal behavioural evidence. It identifies a likely decision behaviour pattern from your self-reported answers, shows where your stated values and revealed choices diverge, and gives one practical correction. It may strengthen a corporate decision case, but it does not replace organisational diagnosis."
+        limitation="It does not test whether the same pattern is structural in your organisation, price the consequence of delay, or sequence enforcement. It is a self-reported signal — not a full psychological profile and not organisational structural diagnosis."
         validityBasis="This result reflects your self-reported decision pattern from a single session. It identifies a likely pressure behaviour, not a confirmed organisational condition."
         strengthenWith="Repeat this assessment under a live decision scenario — when a real decision is on the table, not retrospectively. Then compare with the Constitutional Diagnostic to test whether the pattern extends into organisational structure."
       />
@@ -919,7 +921,27 @@ function AuthorityResultSurface({
           }}
           resultPercent={result.percent}
           coherenceBand={result.coherenceBand}
-          onComplete={() => setContractCompleted(true)}
+          onComplete={() => {
+            setContractCompleted(true);
+            // Wire contract-engine: load the signed contract for dashboard display
+            const subjectId = getOrCreateSubjectId();
+            const signed = getMostRecentContract(subjectId);
+            if (signed) {
+              // Initialize execution trace for progress tracking
+              const trace: ExecutionTrace = {
+                contractId: signed.id,
+                checkpoints: [{ scheduledAt: new Date().toISOString(), type: "in_app", status: "sent", deliveredAt: new Date().toISOString() }],
+                microActions: [],
+                currentProgress: 0,
+                predictedCompletion: signed.deadline,
+                lastCheckinAt: new Date().toISOString(),
+                nextCheckinAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+              };
+              saveExecutionTrace(trace);
+              setExecutionTrace(trace);
+              track("contract_execution_initialized", { contractId: signed.id, weakestDomain: signed.weakestDomain });
+            }
+          }}
           onSkip={() => setContractSkipped(true)}
         />
       )}
@@ -1041,6 +1063,7 @@ function AuthorityResultSurface({
                 key={pct}
                 onClick={() => {
                   const val = parseInt(pct);
+                  reportProgress(executionTrace.contractId, { status: val >= 100 ? "completed" : "in_progress", description: `Progress updated to ${pct}` });
                   updateProgress(executionTrace.contractId, val, `Progress updated to ${pct}`);
                   setExecutionTrace(getExecutionTrace(executionTrace.contractId));
                 }}
@@ -1059,6 +1082,43 @@ function AuthorityResultSurface({
                 {pct}
               </button>
             ))}
+          </div>
+
+          {/* Report blocker + Request extension */}
+          <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
+            <button
+              onClick={() => {
+                reportProgress(executionTrace.contractId, { status: "blocked", description: "User-reported blocker" });
+                track("contract_blocker_reported", { contractId: executionTrace.contractId });
+              }}
+              style={{
+                flex: 1, padding: "6px 8px", fontSize: "0.55rem",
+                fontFamily: "'JetBrains Mono', monospace",
+                backgroundColor: "rgba(252,165,165,0.05)", border: "1px solid rgba(252,165,165,0.20)",
+                color: "rgba(252,165,165,0.70)", cursor: "pointer", letterSpacing: "0.08em", textTransform: "uppercase" as const,
+              }}
+            >
+              <AlertTriangle style={{ width: "8px", height: "8px", display: "inline", marginRight: "4px", verticalAlign: "middle" }} />
+              Report blocker
+            </button>
+            <button
+              onClick={() => {
+                const extended = requestExtension(executionTrace.contractId, 7, "Need more time to complete commitment");
+                if (extended) {
+                  track("contract_extension_granted", { contractId: executionTrace.contractId });
+                  setExecutionTrace(getExecutionTrace(executionTrace.contractId));
+                }
+              }}
+              style={{
+                flex: 1, padding: "6px 8px", fontSize: "0.55rem",
+                fontFamily: "'JetBrains Mono', monospace",
+                backgroundColor: "transparent", border: `1px solid ${GOLD}20`,
+                color: `${GOLD}90`, cursor: "pointer", letterSpacing: "0.08em", textTransform: "uppercase" as const,
+              }}
+            >
+              <Clock style={{ width: "8px", height: "8px", display: "inline", marginRight: "4px", verticalAlign: "middle" }} />
+              Request extension
+            </button>
           </div>
         </div>
       )}
@@ -1191,8 +1251,39 @@ function AuthorityResultSurface({
             </button>
           </div>
           {behavioralConnections.length > 0 && (
-            <div style={{ marginTop: "0.75rem", fontSize: "0.6rem", color: "rgba(110,231,183,0.5)" }}>
-              {behavioralConnections.length} data source{behavioralConnections.length !== 1 ? "s" : ""} connected · auto-verification active
+            <div style={{ marginTop: "0.75rem" }}>
+              <div style={{ fontSize: "0.6rem", color: "rgba(110,231,183,0.5)", marginBottom: "0.5rem" }}>
+                {behavioralConnections.length} data source{behavioralConnections.length !== 1 ? "s" : ""} connected
+              </div>
+              {executionTrace && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const subjectId = getOrCreateSubjectId();
+                      const contract = getMostRecentContract(subjectId);
+                      if (contract) {
+                        const result = await verifyWithBehavioralData(executionTrace.contractId, subjectId, contract.userCommitment);
+                        track("behavioral_verification_completed", { confidence: result.confidence, status: result.status });
+                        if (result.status === "likely_completed" && result.confidence === "high") {
+                          updateProgress(executionTrace.contractId, 100, "Verified by behavioral data");
+                          setExecutionTrace(getExecutionTrace(executionTrace.contractId));
+                        }
+                      }
+                    } catch (err) {
+                      console.error("Behavioral verification failed:", err);
+                    }
+                  }}
+                  style={{
+                    width: "100%", padding: "8px 12px", fontSize: "0.6rem",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    backgroundColor: `${GOLD}08`, border: `1px solid ${GOLD}25`,
+                    color: `${GOLD}BB`, cursor: "pointer", letterSpacing: "0.1em", textTransform: "uppercase" as const,
+                  }}
+                >
+                  <CheckSquare style={{ width: "9px", height: "9px", display: "inline", marginRight: "5px", verticalAlign: "middle" }} />
+                  Verify commitment with behavioral data
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -1367,6 +1458,9 @@ function AuthorityResultSurface({
                 <TrendingUp style={{ width: "10px", height: "10px", display: "inline", marginRight: "6px" }} />
                 Open Pattern Observatory
               </button>
+              <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono', monospace", fontSize: "6px", letterSpacing: "0.15em", color: "rgba(255,255,255,0.15)", textTransform: "uppercase" }}>
+                Peer intelligence unlocks once enough anonymised contract traces exist. Premium pattern intelligence coming soon.
+              </p>
             </div>
           )}
         </div>

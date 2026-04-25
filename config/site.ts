@@ -123,7 +123,7 @@ export const siteConfig: SiteConfig = {
     {
       kind: "linkedin",
       label: "LinkedIn",
-      href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
+      href: "https://www.linkedin.com/company/abraham-of-london/",
       priority: 2,
     },
     {
@@ -206,7 +206,7 @@ export const siteConfig: SiteConfig = {
     ],
     social: [
       { kind: "x", label: "Twitter", href: "https://x.com/AbrahamAda48634" },
-      { kind: "linkedin", label: "LinkedIn", href: "https://linkedin.com/in/abraham-adaramola" },
+      { kind: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/company/abraham-of-london/" },
       { kind: "instagram", label: "Instagram", href: "https://instagram.com/abraham_of_london" },
     ],
   },
