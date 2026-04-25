@@ -215,11 +215,11 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
   executive_reporting: {
     code: "executive_reporting",
-    displayName: "Executive Reporting — Standard",
-    amount: 19500,
-    displayPrice: "\u00a3195",
+    displayName: "Executive Reporting",
+    amount: 29500,
+    displayPrice: "\u00a3295",
     stripeProductId: "prod_SQGrT5cFHJ3MFH",
-    stripePriceId: "price_1TOLggQFpelVFMXJKSSxZvKv",
+    stripePriceId: "price_1TP22XQFpelVFMXJ4IWRIaqb",
     entitlementSlug: "assessment.executive_reporting",
     tier: "one-time-executive-reporting",
     category: "reporting",

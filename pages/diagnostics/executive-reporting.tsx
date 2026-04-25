@@ -41,14 +41,16 @@ export default function ExecutiveReportingEntryPage() {
               Flagship · Executive Reporting
             </div>
             <h1 className="mt-4 font-serif text-4xl font-light leading-[0.98] tracking-[-0.04em] text-white md:text-6xl">
-              The consequence is now priced.
-              <span className="block text-white/35">Decision. Exposure. Priority.</span>
+              This is where the cost<br />becomes visible.
             </h1>
             <p className="mt-5 max-w-2xl font-serif text-lg leading-8 text-white/52">
-              Every contradiction identified across your diagnostic stages converges here. The system
-              prices consequence direction from your stated inputs, names the decision being avoided,
-              and produces a governed priority stack. Financial exposure requires a supplied cost anchor.
-              This is not a report. It is a governed position derived from your evidence.
+              You already know something is wrong. This shows what it is costing — and what
+              happens if you do nothing. The system prices consequence direction from your stated
+              inputs, names the decision being avoided, and produces a governed priority stack.
+              Financial exposure requires a supplied cost anchor.
+            </p>
+            <p className="mt-3 max-w-xl font-mono text-[10px] leading-6 tracking-wide text-white/25">
+              If this saves one wrong month, it has already paid for itself.
             </p>
           </div>
 

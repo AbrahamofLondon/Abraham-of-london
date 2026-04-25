@@ -1513,7 +1513,7 @@ export default function StrategyRoomPage({
                 color: "rgba(255,255,255,0.92)",
                 maxWidth: "36ch",
               }}>
-                The system has determined that intervention is required.
+                The analysis is over. Now you either act or drift.
               </h1>
 
               <p style={{
@@ -1525,8 +1525,8 @@ export default function StrategyRoomPage({
                 color: "rgba(255,255,255,0.40)",
                 maxWidth: "48ch",
               }}>
-                Strategy Room inherits diagnostic evidence, names the decision,
-                identifies the blocker, and sequences intervention.
+                This locks the decision, assigns ownership, and tracks whether it actually happens.
+                If you are not ready to act, do not enter.
               </p>
 
               <div className="mt-4 grid gap-px grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)", maxWidth: "36rem" }}>
