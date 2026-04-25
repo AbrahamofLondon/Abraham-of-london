@@ -30,7 +30,7 @@ const RED = "rgba(252,165,165,";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" };
 
-type Stage = "entry" | "entry_response" | "q1" | "q2" | "q3" | "q4" | "q5" | "q6" | "contradiction_interrupt" | "synthesising" | "recovery" | "result" | "feedback";
+type Stage = "entry" | "entry_response" | "q1" | "q2" | "q3" | "q4" | "q5" | "q6" | "pre_commitment" | "contradiction_interrupt" | "synthesising" | "recovery" | "result" | "feedback";
 
 const QUESTIONS: Array<{ id: string; question: string; helper: string }> = [
   { id: "decision", question: "What decision are you unable to make right now?", helper: "Name the decision. Not the topic." },
@@ -54,6 +54,7 @@ const FastDiagnosticPage: NextPage = () => {
   const [entryClassification, setEntryClassification] = React.useState("");
   const [contradictionText, setContradictionText] = React.useState<string | null>(null);
   const [feedbackGiven, setFeedbackGiven] = React.useState<"yes" | "partial" | "no" | null>(null);
+  const [committed, setCommitted] = React.useState(false);
   const startTime = React.useRef(0);
 
   React.useEffect(() => { track("fast_diagnostic_page_view"); }, []);
@@ -93,6 +94,12 @@ const FastDiagnosticPage: NextPage = () => {
       setCurrentQ((q) => q + 1);
       setStage(`q${currentQ + 2}` as Stage);
     } else {
+      // Pre-commitment gate before results
+      setStage("pre_commitment");
+    }
+  }
+
+  async function proceedAfterCommitment() {
       // Check for contradiction before synthesis
       const contradiction = inferContradiction(
         createCaseObject({
@@ -108,7 +115,6 @@ const FastDiagnosticPage: NextPage = () => {
         return;
       }
       await runSynthesis();
-    }
   }
 
   async function runSynthesis() {
@@ -245,6 +251,49 @@ const FastDiagnosticPage: NextPage = () => {
           </div>
         </main>
       </Layout>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PRE-COMMITMENT GATE — filters spectators before result
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  if (stage === "pre_commitment") {
+    return (
+      <Shell progress={6} hideProgress>
+        <div style={{ maxWidth: "460px", margin: "0 auto", textAlign: "center" }}>
+          <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
+            If the system identifies the real blocker, are you willing to act on it within 48 hours?
+          </p>
+          <div className="flex gap-3 mt-6 justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                setCommitted(true);
+                track("fast_precommit_yes");
+                void proceedAfterCommitment();
+              }}
+              style={{ padding: "14px 32px", border: `1px solid ${GOLD}60`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
+            >
+              Yes — show me
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCommitted(false);
+                track("fast_precommit_no");
+                void proceedAfterCommitment();
+              }}
+              style={{ padding: "14px 32px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.35)", ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
+            >
+              Not yet
+            </button>
+          </div>
+          <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.12)", marginTop: "1.5rem" }}>
+            Both options proceed. The system records your intent.
+          </p>
+        </div>
+      </Shell>
     );
   }
 
@@ -488,7 +537,7 @@ const FastDiagnosticPage: NextPage = () => {
               <Link href="/diagnostics/executive-reporting" className="group flex items-center justify-between mt-2" style={{ padding: "14px 18px", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div>
                   <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
-                    Price what this is really costing
+                    See the cost you are already paying
                   </span>
                   <p style={{ ...serif, fontSize: "0.75rem", color: "rgba(255,255,255,0.25)", marginTop: "0.15rem" }}>
                     Executive Reporting converts this into exposure and priority.
@@ -528,7 +577,7 @@ const FastDiagnosticPage: NextPage = () => {
                     <>
                       Then you already know this is real. Don&rsquo;t leave it unpriced.
                       <Link href="/diagnostics/executive-reporting" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}CC`, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                        Make the cost visible <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
+                        See what this is already costing <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
                       </Link>
                     </>
                   ) : feedbackGiven === "partial" ? "Noted. The Constitutional Diagnostic will sharpen this." : "Noted. A different framing may be needed — try the Constitutional Diagnostic."}

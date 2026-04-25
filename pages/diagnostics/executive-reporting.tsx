@@ -83,7 +83,7 @@ export default function ExecutiveReportingEntryPage() {
             price={getProductAmountGbp("executive_reporting")}
             ctaHref="/diagnostics/executive-reporting/run"
             checkoutPriceCode="executive_reporting"
-            primaryCtaLabel="Price the consequence"
+            primaryCtaLabel="See the cost you are already paying"
             secondaryHref="/diagnostics"
             secondaryLabel="Return to diagnostic ladder"
             eyebrow={`Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`}

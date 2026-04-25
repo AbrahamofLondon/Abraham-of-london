@@ -1564,6 +1564,15 @@ export default function StrategyRoomPage({
                 </div>
               </div>
 
+              {/* Disqualification + cost anchor */}
+              <div className="mt-6" style={{ maxWidth: "36rem" }}>
+                <div style={{ border: "1px solid rgba(252,165,165,0.15)", backgroundColor: "rgba(252,165,165,0.03)", padding: "1rem" }}>
+                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(252,165,165,0.60)", fontStyle: "italic" }}>
+                    If this decision is not already costing you something measurable — do not enter.
+                  </p>
+                </div>
+              </div>
+
               <div className="mt-6">
                 <StrategyRoomConversionBridge
                   price={getProductAmountGbp("strategy_room")}

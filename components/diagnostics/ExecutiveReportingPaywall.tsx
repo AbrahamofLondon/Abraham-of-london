@@ -23,7 +23,7 @@ type ExecutiveReportingPaywallProps = {
 export default function ExecutiveReportingPaywall({
   price = getProductAmountGbp("executive_reporting"),
   checkoutPriceCode = "executive_reporting",
-  primaryCtaLabel = "Make the cost visible",
+  primaryCtaLabel = "See the cost you are already paying",
 }: ExecutiveReportingPaywallProps) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -226,6 +226,13 @@ export default function ExecutiveReportingPaywall({
           </div>
           <div className="text-3xl font-semibold text-white">£{price}</div>
         </div>
+      </div>
+
+      {/* TRUTH FILTER */}
+      <div className="mb-6 border-l-2 border-white/[0.06] pl-4">
+        <p className="text-sm leading-7 text-white/40" style={{ fontStyle: "italic" }}>
+          Most people do not buy this. Not because it is expensive. Because they already know what it will say.
+        </p>
       </div>
 
       {/* EMAIL */}
