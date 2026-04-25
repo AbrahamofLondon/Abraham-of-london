@@ -1,65 +1,50 @@
 /**
- * Fast Diagnostic — 3-minute decision interrogation.
+ * Fast Diagnostic — Operational Decision Intelligence.
  *
- * Not a survey. Decision confrontation.
+ * 6 free-text questions about the user's SPECIFIC situation.
+ * Synthesis engine produces bespoke output from their words.
+ * Precision recovery if input is too vague.
  *
- * FLOW: ENTRY → Q1 → Q2 → Q3 → (CONTRADICTION INTERRUPT) → Q4 → Q5 → Q6 → RESULT
+ * Test: "Could this output have existed before this user arrived?"
+ * If yes → fail. If no → ship.
  */
 
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
-import { composeResult, type DiagnosticResult } from "@/lib/diagnostics/output-composer";
-import { selectScenario } from "@/lib/diagnostics/scenario-selector";
-import { evaluateBehaviour } from "@/lib/diagnostics/behaviour-map";
-import { computeCostOfDelay, type CostOfDelayResult } from "@/lib/diagnostics/cost-of-delay-engine";
-import type { ScenarioDefinition } from "@/lib/diagnostics/scenarios";
+import { createCaseObject, type CaseObject } from "@/lib/decision/case-object";
+import { scoreC3 } from "@/lib/decision/c3-fidelity-scorer";
+import { synthesise, type GovernedSynthesis } from "@/lib/decision/synthesis-engine";
+import { forecastDefaultPath } from "@/lib/decision/default-path-forecast";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
-type Stage = "entry" | "q1" | "q2" | "q3" | "interrupt" | "q4" | "q5" | "q6" | "result" | "scenario" | "final";
+type Stage = "entry" | "q1" | "q2" | "q3" | "q4" | "q5" | "q6" | "synthesising" | "recovery" | "result";
+
+const QUESTIONS: Array<{ id: string; question: string; placeholder: string }> = [
+  { id: "decision", question: "What decision are you currently unable to resolve?", placeholder: "Not the topic — the decision. One sentence if possible." },
+  { id: "priorAttempt", question: "What has already been tried, and what specifically went wrong?", placeholder: "If nothing has been tried, say so. If something failed, state what and why." },
+  { id: "costOfDelay", question: "What becomes more expensive each week this remains unresolved?", placeholder: "Name the specific cost — financial, structural, political, reputational." },
+  { id: "claimedOwner", question: "Who is supposed to own this decision — and do they know it?", placeholder: "Name the person or role. If no one owns it, say that." },
+  { id: "blocker", question: "What is the single thing preventing this from being decided?", placeholder: "Not symptoms. The thing preventing the decision from being made right now." },
+  { id: "forcedAction", question: "If you were forced to decide in the next 24 hours, what would you actually do?", placeholder: "Be honest. Not what you should do — what you would do." },
+];
 
 const FastDiagnosticPage: NextPage = () => {
   const [stage, setStage] = React.useState<Stage>("entry");
-  const [decisionText, setDecisionText] = React.useState("");
-  const [urgency, setUrgency] = React.useState(0);
-  const [ownership, setOwnership] = React.useState(0);
-  const [decisionState, setDecisionState] = React.useState(0);
-  const [clarity, setClarity] = React.useState(0);
-  const [accountability, setAccountability] = React.useState(0);
-  const [scenarioChoice, setScenarioChoice] = React.useState("");
+  const [answers, setAnswers] = React.useState<Record<string, string>>({});
+  const [currentQ, setCurrentQ] = React.useState(0);
+  const [synthesis, setSynthesis] = React.useState<GovernedSynthesis | null>(null);
+  const [synthesisSource, setSynthesisSource] = React.useState<"llm" | "deterministic" | "recovery">("deterministic");
+  const [recoveryQuestion, setRecoveryQuestion] = React.useState<string | null>(null);
   const startTime = React.useRef(0);
 
-  React.useEffect(() => {
-    track("fast_diagnostic_page_view");
-  }, []);
-
-  // Keyboard navigation
-  React.useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      const key = e.key;
-      if (["1", "2", "3", "4"].includes(key)) {
-        const val = Number(key);
-        if (stage === "q2") { setUrgency(val); setTimeout(() => advance("q2", val), 300); }
-        if (stage === "q3") { setOwnership(val); setTimeout(() => advance("q3", val), 300); }
-        if (stage === "q4") { setDecisionState(val); setTimeout(() => advance("q4", val), 300); }
-        if (stage === "q5") { setClarity(val); setTimeout(() => advance("q5", val), 300); }
-        if (stage === "q6") { setAccountability(val); setTimeout(() => advance("q6", val), 300); }
-      }
-      if (key === "Enter") {
-        if (stage === "entry") startDiagnostic();
-        if (stage === "q1" && decisionText.length >= 10) setStage("q2");
-        if (stage === "interrupt") setStage("q4");
-      }
-    }
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  });
+  React.useEffect(() => { track("fast_diagnostic_page_view"); }, []);
 
   function startDiagnostic() {
     startTime.current = Date.now();
@@ -67,96 +52,83 @@ const FastDiagnosticPage: NextPage = () => {
     setStage("q1");
   }
 
-  function advance(from: Stage, value?: number) {
-    if (from === "q2") {
-      setStage("q3");
-    } else if (from === "q3") {
-      // Check contradiction interrupt
-      const urg = urgency || 0;
-      const own = value ?? ownership;
-      if (urg >= 3 && own >= 3) {
-        setStage("interrupt");
-      } else {
-        setStage("q4");
-      }
-    } else if (from === "q4") {
-      setStage("q5");
-    } else if (from === "q5") {
-      setStage("q6");
-    } else if (from === "q6") {
+  function handleAnswer(value: string) {
+    const q = QUESTIONS[currentQ]!;
+    setAnswers((prev) => ({ ...prev, [q.id]: value }));
+  }
+
+  async function advance() {
+    if (currentQ < QUESTIONS.length - 1) {
+      setCurrentQ((q) => q + 1);
+      setStage(`q${currentQ + 2}` as Stage);
+    } else {
+      // All questions answered — synthesise
+      setStage("synthesising");
       const elapsed = Math.round((Date.now() - startTime.current) / 1000);
       track("fast_diagnostic_completed", { elapsed_seconds: elapsed });
+
+      const caseObj = createCaseObject({
+        id: `fast_${Date.now()}`,
+        decision: answers.decision ?? "",
+        priorAttempt: answers.priorAttempt,
+        costOfDelay: answers.costOfDelay,
+        claimedOwner: answers.claimedOwner,
+        blocker: answers.blocker,
+        forcedAction: answers.forcedAction,
+      });
+
+      // Attempt synthesis via API
+      try {
+        const res = await fetch("/api/interpret", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            stage: "fast_diagnostic",
+            canonicalResult: caseObj,
+            userInputs: answers,
+            synthesisMode: true,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.synthesis) {
+            const result = await synthesise(caseObj, async () => JSON.stringify(data.synthesis));
+            setSynthesis(result.synthesis);
+            setSynthesisSource(result.source);
+            if (result.source === "recovery" && result.recoveryQuestion) {
+              setRecoveryQuestion(result.recoveryQuestion);
+              setStage("recovery");
+              return;
+            }
+            setStage("result");
+            return;
+          }
+        }
+      } catch {
+        // API failed — fall through to local synthesis
+      }
+
+      // Local synthesis (deterministic fallback)
+      const result = await synthesise(caseObj);
+      setSynthesis(result.synthesis);
+      setSynthesisSource(result.source);
+      if (result.source === "recovery" && result.recoveryQuestion) {
+        setRecoveryQuestion(result.recoveryQuestion);
+        setStage("recovery");
+        return;
+      }
       setStage("result");
     }
   }
 
-  // ─── COMPOSED RESULT (deterministic, from signal dictionary) ───
-  const composedResult: DiagnosticResult | null = React.useMemo(() => {
-    if (stage !== "result" && stage !== "scenario" && stage !== "final") return null;
-    return composeResult({
-      urgency,
-      ownershipScore: ownership,
-      stateScore: decisionState,
-      clarityScore: clarity,
-      accountabilityScore: accountability,
-    });
-  }, [urgency, ownership, decisionState, clarity, accountability, stage]);
-
-  const activeScenario: ScenarioDefinition | null = React.useMemo(() => {
-    if (!composedResult) return null;
-    return selectScenario(composedResult.signal.key);
-  }, [composedResult]);
-
-  const delayResult: CostOfDelayResult | null = React.useMemo(() => {
-    if (stage !== "result" && stage !== "scenario" && stage !== "final") return null;
-    return computeCostOfDelay({
-      urgencyScore: urgency,
-      ownershipScore: ownership,
-      clarityScore: clarity,
-      accountabilityScore: accountability,
-      stateScore: decisionState,
-    });
-  }, [urgency, ownership, clarity, accountability, decisionState, stage]);
-
-  // All language now comes from the signal dictionary — no inline strings
-  const sig = composedResult?.signal;
-
-  const urgencyLabel = ["", "No immediate consequence", "Minor disruption", "Noticeable impact", "Material consequence"][urgency] ?? "";
-  const ownershipLabel = ["", "Clearly defined", "Likely known", "Unclear", "No one"][ownership] ?? "";
-  const stateLabel = ["", "Actively progressed", "Being discussed", "Deferred repeatedly", "Avoided"][decisionState] ?? "";
-  const clarityLabel = ["", "Fully defined", "Mostly clear", "Partially defined", "Unclear"][clarity] ?? "";
-  const accountabilityLabel = ["", "Explicitly defined", "Likely known", "Shared", "No one"][accountability] ?? "";
-
-  // ─── OPTION BUTTON ───
-  function OptionButton({ label, value, selected, onSelect }: { label: string; value: number; selected: boolean; onSelect: () => void }) {
-    return (
-      <button
-        type="button"
-        onClick={onSelect}
-        style={{
-          width: "100%",
-          textAlign: "left",
-          padding: "14px 18px",
-          border: `1px solid ${selected ? `${GOLD}60` : "rgba(255,255,255,0.08)"}`,
-          backgroundColor: selected ? `${GOLD}10` : "transparent",
-          color: selected ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.50)",
-          fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-          fontSize: "0.92rem",
-          lineHeight: 1.6,
-          cursor: "pointer",
-          transition: "all 150ms",
-        }}
-      >
-        <span style={{ ...mono, fontSize: "8px", color: `${GOLD}80`, marginRight: "0.75rem" }}>{value}</span>
-        {label}
-      </button>
-    );
-  }
+  const currentAnswer = answers[QUESTIONS[currentQ]?.id ?? ""] ?? "";
+  const canAdvance = currentAnswer.trim().length >= 10;
 
   // ─── ENTRY ───
   if (stage === "entry") {
     return (
-      <Layout title="Decision Check" description="3-minute decision interrogation.">
+      <Layout title="Decision Check" description="Operational decision intelligence. 3 minutes.">
         <Head><meta name="robots" content="noindex" /></Head>
         <main className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: "rgb(3,3,5)" }}>
           <div className="max-w-lg text-center">
@@ -164,314 +136,206 @@ const FastDiagnosticPage: NextPage = () => {
               When the decision cannot wait.
             </h1>
             <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.40)", marginTop: "1.25rem", maxWidth: "42ch", marginLeft: "auto", marginRight: "auto" }}>
-              This takes 3 minutes. It will identify the contradiction in how this decision is being handled, and show what happens if nothing changes.
+              6 questions about your specific decision. The system will identify the contradiction you haven&apos;t named and the move you haven&apos;t made.
             </p>
-            <button
-              type="button"
-              onClick={startDiagnostic}
-              style={{ marginTop: "2rem", padding: "14px 28px", border: `1px solid ${GOLD}60`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
-            >
+            <button type="button" onClick={startDiagnostic} style={{ marginTop: "2rem", padding: "14px 28px", border: `1px solid ${GOLD}60`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
               Start decision check <ArrowRight style={{ width: 11, height: 11, display: "inline", marginLeft: "0.5rem", verticalAlign: "middle" }} />
             </button>
+            <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.12)", marginTop: "1.5rem" }}>
+              All free text. About your situation. No multiple choice.
+            </p>
           </div>
         </main>
       </Layout>
     );
   }
 
-  // ─── Q1: DECISION ANCHOR ───
-  if (stage === "q1") {
+  // ─── SYNTHESISING ───
+  if (stage === "synthesising") {
     return (
-      <Shell progress={1}>
+      <Shell progress={6} hideProgress>
+        <div className="flex flex-col items-center justify-center py-16">
+          <Loader2 style={{ width: 24, height: 24, color: `${GOLD}80`, animation: "spin 1.5s linear infinite" }} />
+          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60`, marginTop: "1rem" }}>
+            Synthesising from your case material...
+          </p>
+        </div>
+      </Shell>
+    );
+  }
+
+  // ─── PRECISION RECOVERY ───
+  if (stage === "recovery" && recoveryQuestion) {
+    return (
+      <Shell progress={6} hideProgress>
+        <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}04`, padding: "1.5rem" }}>
+          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            Precision blocked
+          </span>
+          <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.70)", marginTop: "0.75rem", maxWidth: "48ch" }}>
+            {recoveryQuestion}
+          </p>
+          <textarea
+            value={currentAnswer}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, recovery: e.target.value }))}
+            placeholder="Be specific."
+            rows={3}
+            style={{ width: "100%", marginTop: "1rem", padding: "12px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.80)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.6, resize: "none", outline: "none" }}
+          />
+          <button type="button" onClick={() => setStage("result")} style={{ marginTop: "1rem", padding: "10px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+            Continue with current input
+          </button>
+        </div>
+      </Shell>
+    );
+  }
+
+  // ─── QUESTIONS (Q1-Q6) ───
+  if (stage.startsWith("q") && stage !== "q6" || stage === "q6") {
+    const q = QUESTIONS[currentQ]!;
+    return (
+      <Shell progress={currentQ + 1}>
         <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.80)" }}>
-          What decision are you currently delaying or unable to resolve?
+          {q.question}
         </p>
         <textarea
-          value={decisionText}
-          onChange={(e) => setDecisionText(e.target.value.slice(0, 200))}
-          placeholder="One sentence. Be specific."
-          rows={3}
+          value={currentAnswer}
+          onChange={(e) => handleAnswer(e.target.value)}
+          placeholder={q.placeholder}
+          rows={4}
           style={{ width: "100%", marginTop: "1.25rem", padding: "14px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.80)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.6, resize: "none", outline: "none" }}
           autoFocus
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && canAdvance) { e.preventDefault(); advance(); } }}
         />
-        <div className="flex items-center justify-between mt-2">
-          <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.15)" }}>{decisionText.length}/200</span>
-          <button
-            type="button"
-            onClick={() => { if (decisionText.length >= 10) setStage("q2"); }}
-            disabled={decisionText.length < 10}
-            style={{ padding: "10px 20px", border: `1px solid ${decisionText.length >= 10 ? `${GOLD}60` : "rgba(255,255,255,0.06)"}`, backgroundColor: decisionText.length >= 10 ? `${GOLD}10` : "transparent", color: decisionText.length >= 10 ? `${GOLD}CC` : "rgba(255,255,255,0.15)", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: decisionText.length >= 10 ? "pointer" : "default" }}
-          >
-            Next
-          </button>
-        </div>
-      </Shell>
-    );
-  }
-
-  // ─── Q2: URGENCY ───
-  if (stage === "q2") {
-    return (
-      <Shell progress={2}>
-        <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.80)" }}>
-          If this decision remains unresolved for 7 days, what happens?
-        </p>
-        <div className="mt-5 space-y-2">
-          {["No immediate consequence", "Minor disruption", "Noticeable impact", "Material consequence"].map((label, i) => (
-            <OptionButton key={i} label={label} value={i + 1} selected={urgency === i + 1} onSelect={() => { setUrgency(i + 1); setTimeout(() => advance("q2", i + 1), 300); }} />
-          ))}
-        </div>
-      </Shell>
-    );
-  }
-
-  // ─── Q3: OWNERSHIP ───
-  if (stage === "q3") {
-    return (
-      <Shell progress={3}>
-        <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.80)" }}>
-          Who can make this decision without further permission?
-        </p>
-        <div className="mt-5 space-y-2">
-          {["Clearly defined", "Likely known", "Unclear", "No one"].map((label, i) => (
-            <OptionButton key={i} label={label} value={i + 1} selected={ownership === i + 1} onSelect={() => { setOwnership(i + 1); setTimeout(() => advance("q3", i + 1), 300); }} />
-          ))}
-        </div>
-      </Shell>
-    );
-  }
-
-  // ─── CONTRADICTION INTERRUPT ───
-  if (stage === "interrupt") {
-    return (
-      <Shell progress={3} hideProgress>
-        <div style={{ border: "1px solid rgba(252,165,165,0.25)", backgroundColor: "rgba(252,165,165,0.04)", padding: "1.5rem" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.65)" }}>
-            Your answers conflict
+        <div className="flex items-center justify-between mt-3">
+          <span style={{ ...mono, fontSize: "7px", color: canAdvance ? "rgba(110,231,183,0.40)" : "rgba(255,255,255,0.12)" }}>
+            {canAdvance ? "Ready" : "More detail needed"}
           </span>
-          <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1rem", lineHeight: 1.75, color: "rgba(255,255,255,0.70)", marginTop: "0.75rem", maxWidth: "48ch" }}>
-            High urgency with unclear ownership means the decision is likely to be made by whoever acts first — not by design.
-          </p>
-          <button
-            type="button"
-            onClick={() => setStage("q4")}
-            style={{ marginTop: "1.25rem", padding: "10px 20px", border: `1px solid rgba(252,165,165,0.35)`, backgroundColor: "rgba(252,165,165,0.06)", color: "rgba(252,165,165,0.70)", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
-          >
-            Continue
+          <button type="button" onClick={advance} disabled={!canAdvance} style={{ padding: "10px 20px", border: `1px solid ${canAdvance ? `${GOLD}60` : "rgba(255,255,255,0.06)"}`, backgroundColor: canAdvance ? `${GOLD}10` : "transparent", color: canAdvance ? `${GOLD}CC` : "rgba(255,255,255,0.15)", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: canAdvance ? "pointer" : "default" }}>
+            {currentQ === QUESTIONS.length - 1 ? "Analyse" : "Next"}
           </button>
-        </div>
-      </Shell>
-    );
-  }
-
-  // ─── Q4: DECISION STATE ───
-  if (stage === "q4") {
-    return (
-      <Shell progress={4}>
-        <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.80)" }}>
-          What is actually happening with this decision right now?
-        </p>
-        <div className="mt-5 space-y-2">
-          {["Actively being progressed", "Being discussed", "Deferred repeatedly", "Avoided"].map((label, i) => (
-            <OptionButton key={i} label={label} value={i + 1} selected={decisionState === i + 1} onSelect={() => { setDecisionState(i + 1); setTimeout(() => advance("q4", i + 1), 300); }} />
-          ))}
-        </div>
-      </Shell>
-    );
-  }
-
-  // ─── Q5: CLARITY ───
-  if (stage === "q5") {
-    return (
-      <Shell progress={5}>
-        <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.80)" }}>
-          How clearly defined is the decision outcome?
-        </p>
-        <div className="mt-5 space-y-2">
-          {["Fully defined", "Mostly clear", "Partially defined", "Unclear"].map((label, i) => (
-            <OptionButton key={i} label={label} value={i + 1} selected={clarity === i + 1} onSelect={() => { setClarity(i + 1); setTimeout(() => advance("q5", i + 1), 300); }} />
-          ))}
-        </div>
-      </Shell>
-    );
-  }
-
-  // ─── Q6: ACCOUNTABILITY ───
-  if (stage === "q6") {
-    return (
-      <Shell progress={6}>
-        <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.80)" }}>
-          If this decision fails, who is accountable?
-        </p>
-        <div className="mt-5 space-y-2">
-          {["Explicitly defined", "Likely known", "Shared", "No one"].map((label, i) => (
-            <OptionButton key={i} label={label} value={i + 1} selected={accountability === i + 1} onSelect={() => { setAccountability(i + 1); setTimeout(() => advance("q6", i + 1), 300); }} />
-          ))}
         </div>
       </Shell>
     );
   }
 
   // ─── RESULT ───
-  const elapsed = startTime.current ? Math.round((Date.now() - startTime.current) / 1000) : 0;
+  if (stage === "result" && synthesis) {
+    const elapsed = startTime.current ? Math.round((Date.now() - startTime.current) / 1000) : 0;
+    const forecast = forecastDefaultPath(createCaseObject({ id: "temp", decision: answers.decision ?? "", priorAttempt: answers.priorAttempt, costOfDelay: answers.costOfDelay, claimedOwner: answers.claimedOwner, blocker: answers.blocker, forcedAction: answers.forcedAction }));
 
-  return (
-    <Layout title="Decision Check — Result" description="Decision signal identified.">
-      <Head><meta name="robots" content="noindex" /></Head>
-      <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
-        <div className="mx-auto max-w-xl">
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
-            Decision check · {elapsed}s
-          </span>
+    return (
+      <Layout title="Decision Check — Result" description="Your decision, analysed.">
+        <Head><meta name="robots" content="noindex" /></Head>
+        <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
+          <div className="mx-auto max-w-xl">
+            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+              Decision check · {elapsed}s · {synthesisSource}
+            </span>
 
-          {sig && (
-            <>
-              {/* 1. VERDICT */}
-              <div style={{ marginTop: "1.5rem" }}>
-                <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>Verdict</span>
-                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.15rem", lineHeight: 1.55, color: "rgba(255,255,255,0.88)", marginTop: "0.35rem", maxWidth: "48ch" }}>{sig.verdict}</p>
+            {/* 1. VERDICT */}
+            <div style={{ marginTop: "1.5rem" }}>
+              <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>Verdict</span>
+              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.15rem", lineHeight: 1.6, color: "rgba(255,255,255,0.88)", marginTop: "0.35rem", maxWidth: "48ch" }}>
+                {synthesis.verdict}
+              </p>
+            </div>
+
+            {/* 2. THE CONTRADICTION */}
+            <div style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.04)", padding: "1rem", marginTop: "1.25rem" }}>
+              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>The contradiction</span>
+              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.65)", marginTop: "0.2rem", maxWidth: "48ch" }}>
+                {synthesis.primaryContradiction}
+              </p>
+            </div>
+
+            {/* 3. WHAT YOU'RE AVOIDING */}
+            <div style={{ border: "1px solid rgba(253,186,116,0.15)", backgroundColor: "rgba(253,186,116,0.03)", padding: "1rem", marginTop: "1rem" }}>
+              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.50)" }}>What is being avoided</span>
+              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.2rem", maxWidth: "48ch" }}>
+                {synthesis.avoidedDecision}
+              </p>
+            </div>
+
+            {/* 4. WHY PRIOR ATTEMPTS FAILED */}
+            {synthesis.whyPriorAttemptsFailed && (
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", marginTop: "1rem" }}>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Why prior attempts failed</span>
+                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "0.2rem", maxWidth: "48ch" }}>
+                  {synthesis.whyPriorAttemptsFailed}
+                </p>
               </div>
+            )}
 
-              {/* 2. WHAT YOUR ANSWERS EXPOSED */}
-              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", marginTop: "1.25rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>What your answers exposed</span>
-                <div className="mt-2 space-y-1">
-                  {[
-                    { label: "Decision", value: decisionText },
-                    { label: "Urgency", value: urgencyLabel },
-                    { label: "Ownership", value: ownershipLabel },
-                    { label: "State", value: stateLabel },
-                    { label: "Clarity", value: clarityLabel },
-                    { label: "Accountability", value: accountabilityLabel },
-                  ].map((item) => (
-                    <div key={item.label} className="flex gap-3">
-                      <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", minWidth: "80px" }}>{item.label}</span>
-                      <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)" }}>{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* 5. THE MOVE */}
+            <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginTop: "1rem" }}>
+              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>Your move — within 72 hours</span>
+              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.78)", marginTop: "0.2rem", maxWidth: "48ch" }}>
+                {synthesis.concreteMove}
+              </p>
+            </div>
 
-              {/* 3. THE CONTRADICTION */}
-              <div style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.04)", padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>The contradiction</span>
-                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.65)", marginTop: "0.2rem", maxWidth: "48ch" }}>{sig.contradiction}</p>
-              </div>
-
-              {/* 4. THE MOVE */}
-              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>The move — non-optional</span>
-                <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.78)", marginTop: "0.2rem", maxWidth: "48ch" }}>{sig.move}</p>
-              </div>
-
-              {/* 5. IF IGNORED — 7/30/90 */}
-              <div style={{ border: "1px solid rgba(252,165,165,0.12)", padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)" }}>If ignored</span>
-                <div className="mt-2 space-y-2">
-                  {[
-                    { label: "7 days", text: sig.ignored7 },
-                    { label: "30 days", text: sig.ignored30 },
-                    { label: "90 days", text: sig.ignored90 },
-                  ].map((c) => (
-                    <div key={c.label} className="flex gap-3">
-                      <span style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.30)", minWidth: "50px" }}>{c.label}</span>
-                      <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>{c.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* COST OF DELAY */}
-              {delayResult && (
-                <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "1rem", marginTop: "1.25rem" }}>
-                  <div className="flex items-center justify-between">
-                    <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Cost of delay</span>
-                    <span style={{ ...mono, fontSize: "8px", color: delayResult.band === "CRITICAL" ? "rgba(252,165,165,0.65)" : delayResult.band === "HIGH" ? "rgba(253,186,116,0.60)" : delayResult.band === "MODERATE" ? `${GOLD}BB` : "rgba(255,255,255,0.30)", fontWeight: 700 }}>
-                      {delayResult.band}
-                    </span>
+            {/* 6. DEFAULT PATH — IF IGNORED */}
+            <div style={{ border: "1px solid rgba(252,165,165,0.12)", padding: "1rem", marginTop: "1rem" }}>
+              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)" }}>If ignored</span>
+              <div className="mt-2 space-y-2">
+                {[
+                  { label: "7 days", text: forecast.sevenDays },
+                  { label: "30 days", text: forecast.thirtyDays },
+                  { label: "90 days", text: forecast.ninetyDays },
+                ].map((c) => (
+                  <div key={c.label} className="flex gap-3">
+                    <span style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.30)", minWidth: "50px" }}>{c.label}</span>
+                    <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>{c.text}</span>
                   </div>
-                  <div className="mt-3 space-y-2">
-                    {(["7_DAYS", "30_DAYS", "90_DAYS"] as const).map((h) => (
-                      <div key={h} className="flex gap-3">
-                        <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.18)", minWidth: "50px" }}>{h.replace("_", " ")}</span>
-                        <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>{delayResult.horizon[h]}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {delayResult.estimatedFinancialExposure != null && (
-                    <div style={{ marginTop: "0.75rem", borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "0.5rem" }}>
-                      <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Estimated exposure</span>
-                      <span style={{ ...mono, fontSize: "11px", color: `${GOLD}CC`, marginLeft: "0.5rem" }}>£{delayResult.estimatedFinancialExposure.toLocaleString()}</span>
-                    </div>
-                  )}
-                  <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.12)", marginTop: "0.5rem" }}>{delayResult.disclosure}</p>
-                </div>
-              )}
+                ))}
+              </div>
+            </div>
 
-              {/* SCENARIO STRESS-TEST */}
-              {activeScenario && stage === "result" && (
-                <div style={{ border: "1px solid rgba(255,255,255,0.10)", padding: "1.25rem", marginTop: "1.5rem" }}>
-                  <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Under pressure</span>
-                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.70)", marginTop: "0.5rem", maxWidth: "48ch" }}>{activeScenario.prompt}</p>
-                  <div className="mt-4 space-y-2">
-                    {activeScenario.options.map((opt) => (
-                      <button key={opt.id} type="button" onClick={() => { setScenarioChoice(opt.behaviourTag); setStage("final"); }} style={{ width: "100%", textAlign: "left", padding: "12px 16px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgba(255,255,255,0.55)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.6, cursor: "pointer" }}>
-                        <span style={{ ...mono, fontSize: "8px", color: `${GOLD}80`, marginRight: "0.75rem" }}>{opt.id}</span>
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+            {/* 7. CERTAINTY BOUNDARY */}
+            <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.15)", marginTop: "1rem" }}>
+              {synthesis.certaintyBoundary}
+            </p>
 
-              {/* FINAL — after scenario */}
-              {stage === "final" && scenarioChoice && (
-                <div style={{ border: "1px solid rgba(253,186,116,0.18)", backgroundColor: "rgba(253,186,116,0.03)", padding: "1rem", marginTop: "1rem" }}>
-                  <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.50)" }}>Behaviour revealed</span>
-                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.70)", marginTop: "0.2rem", maxWidth: "48ch" }}>
-                    {evaluateBehaviour(sig.key, scenarioChoice).aligned ? evaluateBehaviour(sig.key, scenarioChoice).message : sig.behaviourReveal}
-                  </p>
-                </div>
-              )}
+            {/* 8. SIGNAL STRENGTH */}
+            <div className="flex items-center gap-2 mt-2">
+              <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: synthesis.signalStrength === "high" ? "rgba(110,231,183,0.60)" : synthesis.signalStrength === "medium" ? `${GOLD}BB` : "rgba(255,255,255,0.30)" }} />
+              <span style={{ ...mono, fontSize: "7px", color: synthesis.signalStrength === "high" ? "rgba(110,231,183,0.50)" : synthesis.signalStrength === "medium" ? `${GOLD}80` : "rgba(255,255,255,0.25)" }}>
+                Signal: {synthesis.signalStrength}
+              </span>
+            </div>
 
-              {/* 7. VALIDITY */}
-              <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.15)", marginTop: "1rem" }}>{sig.boundaryStatement}</p>
+            {/* 9. ESCALATION */}
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem", marginTop: "1.5rem" }}>
+              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.40)", maxWidth: "48ch" }}>
+                Escalate when this must be priced, defended, or enforced.
+              </p>
+              <Link href="/diagnostics/executive-reporting" className="inline-flex items-center gap-2 mt-4" style={{ padding: "12px 24px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+                Escalate decision <ArrowRight style={{ width: 10, height: 10 }} />
+              </Link>
+            </div>
+          </div>
+        </main>
+      </Layout>
+    );
+  }
 
-              {/* 8. ESCALATION — only after scenario is complete or if no scenario */}
-              {(stage === "final" || !activeScenario) && (
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem", marginTop: "1.5rem" }}>
-                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.40)", maxWidth: "48ch" }}>
-                    {sig.escalationLine}
-                  </p>
-                  <Link href="/diagnostics/executive-reporting" className="inline-flex items-center gap-2 mt-4" style={{ padding: "12px 24px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
-                    Escalate decision <ArrowRight style={{ width: 10, height: 10 }} />
-                  </Link>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </main>
-    </Layout>
-  );
+  return null;
 };
 
 // ─── SHELL ───
 function Shell({ children, progress, hideProgress }: { children: React.ReactNode; progress: number; hideProgress?: boolean }) {
+  const GOLD = "#C9A96E";
   return (
-    <Layout title="Decision Check" description="3-minute decision interrogation.">
+    <Layout title="Decision Check" description="Operational decision intelligence.">
       <Head><meta name="robots" content="noindex" /></Head>
       <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-xl">
           {!hideProgress && (
             <>
               <div className="flex items-center justify-between mb-4">
-                <span style={{ ...{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase" as const, color: `${GOLD}70` }}>
-                  Decision check
-                </span>
-                <span style={{ ...{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }, fontSize: "8px", color: "rgba(255,255,255,0.25)" }}>
-                  {progress} / 6
-                </span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase" as const, color: `${GOLD}70` }}>Decision check</span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: "rgba(255,255,255,0.25)" }}>{progress} / 6</span>
               </div>
               <div className="flex gap-1 mb-8">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
