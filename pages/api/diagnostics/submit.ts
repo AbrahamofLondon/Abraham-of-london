@@ -101,7 +101,8 @@ function generateDiagnosticRef(kind: string): string {
     .replace(/[-:]/g, "")
     .replace(/\.\d{3}Z$/, "Z");
 
-  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const { randomBytes } = require("crypto") as typeof import("crypto");
+  const rand = randomBytes(6).toString("hex").slice(0, 8).toUpperCase();
 
   return `DGN-${prefix || "GENERAL"}-${date}-${rand}`;
 }

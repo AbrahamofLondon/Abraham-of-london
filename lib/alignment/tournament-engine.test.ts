@@ -8,14 +8,16 @@ import type { PurposeProfileResult, DualAxisAnswer } from "./types";
 
 function makeDeterministicResult(overrides?: Partial<PurposeProfileResult>): PurposeProfileResult {
   return {
+    totalScore: 33,
+    maxScore: 60,
     percent: 55,
     coherenceBand: "Fractured" as PurposeProfileResult["coherenceBand"],
     weakestDomains: ["decision"],
-    patternId: "fractured_centre" as PurposeProfileResult["patternId"],
-    patternTitle: "Fractured centre",
-    primaryPattern: "Decisions are being made but not from a coherent centre.",
-    urgentStatement: "Decision integrity is the weakest domain.",
-    sharpestSignal: null,
+    strengths: [],
+    corrections: [],
+    narrative: "Decisions are being made but not from a coherent centre.",
+    nextActions: ["Name the decision you are avoiding."],
+    createdAt: new Date().toISOString(),
     domainProfiles: [
       { domain: "identity" as const, label: "Identity", resonance: 7, certainty: 6, weighted: 4.2, percent: 70 },
       { domain: "decision" as const, label: "Decision", resonance: 4, certainty: 3, weighted: 1.2, percent: 35 },
@@ -24,10 +26,7 @@ function makeDeterministicResult(overrides?: Partial<PurposeProfileResult>): Pur
       { domain: "emotional_order" as const, label: "Emotional Order", resonance: 5, certainty: 4, weighted: 2.0, percent: 50 },
       { domain: "legacy" as const, label: "Legacy", resonance: 6, certainty: 6, weighted: 3.6, percent: 65 },
     ],
-    firstAction: {
-      domain: "decision" as const,
-      instruction: "Name the decision you are avoiding.",
-    },
+    firstAction: "Name the decision you are avoiding.",
     ...overrides,
   };
 }

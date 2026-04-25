@@ -109,32 +109,43 @@ export async function verifyWithBehavioralData(
   };
 }
 
-// Connect to Google Calendar OAuth
+/**
+ * Connect to Google Calendar via OAuth.
+ *
+ * CURRENT STATUS: Returns a pending connection that signals "awaiting OAuth".
+ * The actual OAuth flow requires Google Cloud Console credentials + callback URL.
+ * When implemented, this will redirect to Google OAuth consent screen,
+ * receive the callback, and store the access token server-side.
+ *
+ * The UI should show: "Calendar connection requested. OAuth integration pending."
+ */
 export async function connectGoogleCalendar(): Promise<BehavioralDataSource | null> {
-  // In production: implement OAuth flow
-  // For demo: return mock connection
+  // TODO: Implement actual OAuth flow via /api/integrations/google/connect
+  // For now, create a pending connection that does not fake any signal data
   return {
     type: "calendar",
-    connectionId: `cal_${Date.now()}`,
+    connectionId: `cal_pending_${Date.now()}`,
     connectedAt: new Date().toISOString(),
     lastSyncAt: new Date().toISOString(),
-    status: "active",
-    signals: {
-      meetingCompletion: 0.65 // Mock data
-    }
+    status: "disconnected", // honest status — not "active" until OAuth completes
+    signals: {}, // no fabricated signals
   };
 }
 
-// Connect to Slack
+/**
+ * Connect to Slack via OAuth.
+ *
+ * CURRENT STATUS: Returns a pending connection. No mock data.
+ * Actual implementation requires Slack App OAuth flow.
+ */
 export async function connectSlack(): Promise<BehavioralDataSource | null> {
+  // TODO: Implement actual OAuth flow via /api/integrations/slack/connect
   return {
     type: "slack",
-    connectionId: `slack_${Date.now()}`,
+    connectionId: `slack_pending_${Date.now()}`,
     connectedAt: new Date().toISOString(),
     lastSyncAt: new Date().toISOString(),
-    status: "active",
-    signals: {
-      slackResponsiveness: 2.5 // hours avg response
-    }
+    status: "disconnected", // honest status
+    signals: {}, // no fabricated signals
   };
 }

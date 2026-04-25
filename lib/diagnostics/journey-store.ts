@@ -46,7 +46,8 @@ function subjectKey(input: { email?: string | null; subjectId?: string | null; c
   if (!raw) {
     // SECURITY: never share a journey key across anonymous users.
     // Each anonymous user gets a unique, non-colliding key.
-    return createHash("sha256").update(`anon_${Date.now()}_${Math.random()}`).digest("hex");
+    const { randomBytes } = require("crypto") as typeof import("crypto");
+    return createHash("sha256").update(`anon_${Date.now()}_${randomBytes(16).toString("hex")}`).digest("hex");
   }
   return createHash("sha256").update(String(raw).toLowerCase()).digest("hex");
 }
