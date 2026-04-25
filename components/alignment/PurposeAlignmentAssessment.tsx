@@ -1,23 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // components/alignment/PurposeAlignmentAssessment.tsx
-// Design: Institutional Monumentalism
-// Status: live parallel surface, not the canonical Stage 1 entry.
-// Canonical Stage 1 currently lives at /diagnostics/constitutional-diagnostic.
-// This page remains useful as a support/parallel assessment experience and
-// should not be mistaken for the primary diagnostic route during audit.
-// This assessment earns its place in the product ladder by delivering
-// a diagnostic reading that feels specific to this person's exact
-// score pattern — not a generic band label.
+// Design: Institutional Monumentalism with Pattern-Breaker Enforcement
+// Status: PRIMARY DIAGNOSTIC SURFACE with contract binding
 //
-// Key architectural changes from v1:
-// 1. Three-stage grouped flow with clear purpose per stage
-// 2. Result surface: pattern-specific reading derived from lowest-scoring
-//    statements, not just domain labels
-// 3. Certainty gap analysis: where resonance >> certainty = unexamined assumption
-//    where certainty >> resonance = acknowledged problem
-// 4. Statement-level specificity: the result names the actual statements
-//    that drove the diagnosis
-// 5. Escalation close routes to the correct next product based on result
+// Architecture:
+// - Deterministic scoring backbone
+// - Synthesis engine via derivePatternReading
+// - Pattern-Breaker Contract for enforcement
+// - Memory interrupt for returning users
+// - Demographic capture for peer intelligence
+// - Verification scheduling and breach tracking
+//
+// UPGRADES INTEGRATED (v2.0):
+// 1. Agentic Execution Bridge — execution-engine.ts
+// 2. Context Graph / Decision Trace — enhanced-types.ts
+// 3. Organizational Pattern Aggregation — organization-engine.ts
+// 4. Behavioral Data Integration — behavioral-integration.ts
+// 5. Tournament Architecture — tournament-engine.ts
+// 6. Real-Time Progress Dashboard — ContractDashboard (inline)
+// 7. Pattern Observatory — PatternObservatory.tsx
 
 "use client";
 
@@ -26,7 +27,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   ArrowLeft,
-  ChevronRight,
   Shield,
   Target,
   Activity,
@@ -35,6 +35,20 @@ import {
   AlertTriangle,
   CheckSquare,
   Lock,
+  TrendingUp,
+  Users,
+  Briefcase,
+  Calendar,
+  MessageSquare,
+  GitBranch,
+  BarChart3,
+  Crown,
+  Globe,
+  UserPlus,
+  Zap,
+  Clock,
+  RefreshCw,
+  ExternalLink,
 } from "lucide-react";
 
 import {
@@ -72,6 +86,73 @@ import ProductAdvantageBlocks from "@/components/diagnostics/results/ProductAdva
 import { buildPurposeResult } from "@/lib/diagnostics/assessment-result-builders";
 import { detectSignal } from "@/lib/diagnostics/signal-detector";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
+
+// Pattern-Breaker Contract imports
+import { PatternBreakerContract } from "@/components/alignment/PatternBreakerContract";
+import { PastContractInterrupt } from "@/components/alignment/PastContractInterrupt";
+import { getMostRecentContract, processDueVerifications } from "@/lib/alignment/contract-engine";
+import type { PatternBreakerContract as ContractType } from "@/lib/alignment/contract-types";
+
+// Demographic context component imports
+import { DemographicContextCapture } from "@/components/alignment/DemographicContextCapture";
+
+// ═════════════════════════════════════════════════════════════════════════════
+// UPGRADE 1: Agentic Execution Bridge
+// ═════════════════════════════════════════════════════════════════════════════
+import {
+  saveExecutionTrace,
+  getExecutionTrace,
+  getExecutionTraces,
+  updateProgress,
+  processDueCheckins,
+  reportProgress,
+  requestExtension,
+} from "@/lib/alignment/execution-engine";
+import type { ExecutionTrace, MicroCheckin } from "@/lib/alignment/enhanced-types";
+
+// ═════════════════════════════════════════════════════════════════════════════
+// UPGRADE 2: Context Graph / Decision Trace types
+// ═════════════════════════════════════════════════════════════════════════════
+import type {
+  DecisionTrace,
+  OrganizationContext,
+  BehavioralDataSource,
+  TournamentResult,
+  GlobalTrends,
+} from "@/lib/alignment/enhanced-types";
+
+// ═════════════════════════════════════════════════════════════════════════════
+// UPGRADE 3: Organizational Pattern Aggregation
+// ═════════════════════════════════════════════════════════════════════════════
+import {
+  createOrganization,
+  joinOrganization,
+  getOrganization,
+  getOrganizationByInviteCode,
+  getOrganizations,
+  refreshOrganizationAnalytics,
+} from "@/lib/alignment/organization-engine";
+
+// ═════════════════════════════════════════════════════════════════════════════
+// UPGRADE 4: Behavioral Data Integration
+// ═════════════════════════════════════════════════════════════════════════════
+import {
+  saveBehavioralConnection,
+  getBehavioralConnections,
+  verifyWithBehavioralData,
+  connectGoogleCalendar,
+  connectSlack,
+} from "@/lib/alignment/behavioral-integration";
+
+// ═════════════════════════════════════════════════════════════════════════════
+// UPGRADE 5: Tournament Architecture
+// ═════════════════════════════════════════════════════════════════════════════
+import { runTournament } from "@/lib/alignment/tournament-engine";
+
+// ═════════════════════════════════════════════════════════════════════════════
+// UPGRADE 7: Pattern Observatory
+// ═════════════════════════════════════════════════════════════════════════════
+import { PatternObservatory } from "@/components/alignment/PatternObservatory";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -138,7 +219,7 @@ const BAND_CONFIG: Record<CoherenceBand, {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PATTERN ANALYSIS ENGINE
+// PATTERN ANALYSIS ENGINE (Synthesis Layer)
 // The core of what makes this assessment worth the price.
 // Instead of generic band text, we read the specific pattern of scores
 // and produce a diagnosis tied to what the person actually answered.
@@ -151,7 +232,7 @@ type ScoredStatement = {
   resonance: number;
   certainty: number;
   weighted:  number;
-  gap:       number; // resonance - certainty: positive = confident low, negative = uncertain about something
+  gap:       number;
 };
 
 type PatternReading = {
@@ -161,6 +242,8 @@ type PatternReading = {
   uncertaintyNote: string | null;
   firstAction:     string;
   escalationNote:  string;
+  weakestDomain:   AlignmentDomain;
+  sharpestSignal?: { statement: string; resonance: number; certainty: number } | null;
 };
 
 function derivePatternReading(
@@ -185,6 +268,8 @@ function derivePatternReading(
         : null,
       firstAction: result.firstAction ?? result.reportNarrative.firstActionBlock,
       escalationNote: result.routingRecommendation?.reason ?? result.reportNarrative.nextStepBlock,
+      weakestDomain: result.weakestDomains[0] ?? "identity",
+      sharpestSignal: result.evidence?.sharpestWeakSignal,
     };
   }
 
@@ -207,29 +292,27 @@ function derivePatternReading(
   // Find the single lowest-weighted statement
   const lowest = [...scored].sort((a, b) => a.weighted - b.weighted)[0] ?? null;
 
-  // Find statements where certainty >> resonance (acknowledged problem: they know it's bad)
+  // Find statements where certainty >> resonance (acknowledged problem)
   const acknowledgedProblems = scored
     .filter(s => s.resonance < 5 && s.certainty >= 6)
     .sort((a, b) => a.resonance - b.resonance);
 
-  // Find statements where resonance >> certainty (unexamined assumption: low resonance but low certainty too)
+  // Find statements where resonance >> certainty (unexamined assumption)
   const unexaminedWeakness = scored
     .filter(s => s.resonance <= 5 && s.certainty <= 4)
     .sort((a, b) => a.weighted - b.weighted);
 
-  const weakestDomain = result.weakestDomains[0];
-  const secondWeakest  = result.weakestDomains[1];
+  const weakestDomain = result.weakestDomains[0] ?? "identity";
+  const secondWeakest  = result.weakestDomains[1] ?? "decision";
 
   // Pattern: where are both weakness domains?
   const bothDrifting  = result.domainProfiles.filter(d => d.percent < 40).length;
   const highVariance  = result.domainProfiles.some(d => d.percent >= 70) &&
                         result.domainProfiles.some(d => d.percent < 40);
 
-  // ── OPENING DIAGNOSIS — names the kind of problem, not just the band ──
   let primaryPattern = "";
   let patternTitle   = "";
 
-  // Find strongest statement for mirror-back
   const strongest = [...scored].sort((a, b) => b.weighted - a.weighted)[0] ?? null;
 
   const wkPct = result.domainProfiles.find(d => d.domain === weakestDomain)?.percent ?? 0;
@@ -269,24 +352,20 @@ function derivePatternReading(
     primaryPattern = `Your alignment reads as ${bandWord}. Misalignment is distributed across domains rather than concentrated in one. There is no single root cause, which makes correction harder. The work is sequential: stabilise Identity first, then Decision Integrity, then the operational domains.`;
   }
 
-  // ── TENSION NAMING — the central contradiction in the answers ──
   if (highVariance) {
     primaryPattern += ` The significant gap between your strongest and weakest domains reveals that your alignment is situational — performing well in some areas while operating from misalignment in others. That inconsistency is itself the tension.`;
   }
 
-  // ── MIRROR-BACK — reflect the user's actual answer pattern ──
   if (lowest && strongest && lowest.id !== strongest.id) {
     const mirrorBack = ` Your sharpest weak signal is "${lowest.statement}" (${lowest.weighted.toFixed(1)} weighted). Your strongest signal is "${strongest.statement}" (${strongest.weighted.toFixed(1)} weighted). The distance between those two points defines your current operating condition.`;
     primaryPattern += mirrorBack;
   }
 
-  // ── URGENT STATEMENT — the single sharpest pain point ──
   let urgentStatement: string | null = null;
   if (lowest && lowest.weighted < 3) {
     urgentStatement = `"${lowest.statement}" — you scored ${lowest.resonance}/10 resonance with ${lowest.certainty}/10 certainty. This is not a soft weakness. It is the point where your alignment is most visibly failing.`;
   }
 
-  // ── TENSION NOTE — acknowledged problems vs unexamined blind spots ──
   let uncertaintyNote: string | null = null;
   if (unexaminedWeakness.length > 0 && acknowledgedProblems.length === 0) {
     const q = unexaminedWeakness[0]!;
@@ -296,7 +375,6 @@ function derivePatternReading(
     uncertaintyNote = `You scored "${q.statement}" at ${q.resonance}/10 resonance with ${q.certainty}/10 certainty. You know this is failing. That clarity is an asset — acknowledged problems can be corrected. Unexamined ones compound.`;
   }
 
-  // First concrete action — domain-specific, not generic
   const actionMap: Record<AlignmentDomain, string> = {
     identity:        "Rewrite your current mandate in one sentence. Not what you want it to be — what it actually is, evidenced by how your last 30 days have been spent. Then identify one commitment that contradicts it.",
     decision:        "Retrieve the last five decisions of consequence you made in the past 60 days. For each one, note whether it was made from principle or from pressure. The pattern is the diagnosis.",
@@ -306,9 +384,8 @@ function derivePatternReading(
     legacy:          "Name the one structure — not a goal, a structure — that you are building which must outlast your current season. If you cannot name it, that is the diagnosis.",
   };
 
-  const firstAction = actionMap[weakestDomain ?? "identity"];
+  const firstAction = actionMap[weakestDomain];
 
-  // Escalation note based on band
   let escalationNote = "";
   if (result.coherenceBand === "FRAGMENTED" || result.coherenceBand === "DRIFTING") {
     escalationNote = "The Constitutional Diagnostic will surface whether this misalignment extends into the operating structure of the organisation — or whether it is contained at the individual level. Run it before taking strategic action.";
@@ -318,7 +395,16 @@ function derivePatternReading(
     escalationNote = "At sovereign alignment, the Team Assessment surfaces whether the people around you are operating at the same standard — or whether there is a gap between your clarity and the organisation's execution.";
   }
 
-  return { primaryPattern, patternTitle, urgentStatement, uncertaintyNote, firstAction, escalationNote };
+  return { 
+    primaryPattern, 
+    patternTitle, 
+    urgentStatement, 
+    uncertaintyNote, 
+    firstAction, 
+    escalationNote,
+    weakestDomain,
+    sharpestSignal: lowest ? { statement: lowest.statement, resonance: lowest.resonance, certainty: lowest.certainty } : null,
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -381,7 +467,6 @@ function DualAxisInput({
   const certainty = answer?.certainty ?? 5;
   const weighted  = Math.round(resonance * (certainty / 10));
 
-  // Weighted score colour
   const wColor = weighted >= 6 ? "rgba(110,231,183,0.75)"
                : weighted >= 4 ? `${GOLD}AA`
                : weighted >= 2 ? "rgba(253,186,116,0.80)"
@@ -393,7 +478,6 @@ function DualAxisInput({
       backgroundColor: "rgb(5 5 7)",
       padding: "1.5rem 1.75rem",
     }}>
-      {/* Statement */}
       <div className="flex items-start gap-3 mb-5">
         <Icon style={{ width: "14px", height: "14px", color: `${GOLD}70`, flexShrink: 0, marginTop: "4px" }} />
         <div className="flex-1">
@@ -412,7 +496,6 @@ function DualAxisInput({
             {statement}
           </p>
         </div>
-        {/* Weighted score indicator */}
         <div style={{
           flexShrink: 0, textAlign: "center", padding: "0.4rem 0.6rem",
           border: "1px solid rgba(255,255,255,0.07)",
@@ -434,9 +517,7 @@ function DualAxisInput({
         </div>
       </div>
 
-      {/* Two rails */}
       <div className="space-y-5 pl-5">
-        {/* Resonance */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <span style={{
@@ -466,7 +547,6 @@ function DualAxisInput({
           </div>
         </div>
 
-        {/* Certainty */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <span style={{
@@ -513,7 +593,6 @@ function LiveProfileSidebar({ profile, totalAnswered, totalQuestions }: {
 
   return (
     <div className="space-y-3">
-      {/* Progress */}
       <div style={{
         border: "1px solid rgba(255,255,255,0.06)",
         backgroundColor: "rgba(255,255,255,0.01)",
@@ -532,7 +611,6 @@ function LiveProfileSidebar({ profile, totalAnswered, totalQuestions }: {
         </div>
       </div>
 
-      {/* Live domain scores */}
       {profile ? (
         <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06` }}>
           <div style={{ padding: "0.75rem 1.25rem", borderBottom: `1px solid ${GOLD}10` }}>
@@ -595,7 +673,6 @@ function LiveProfileSidebar({ profile, totalAnswered, totalQuestions }: {
         </div>
       )}
 
-      {/* Scoring explanation */}
       <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.005)", padding: "1rem 1.25rem" }}>
         <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.65rem" }}>
           How scoring works
@@ -609,305 +686,86 @@ function LiveProfileSidebar({ profile, totalAnswered, totalQuestions }: {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESULT SURFACE
-// ─────────────────────────────────────────────────────────────────────────────
-
-function ResultSurface({
-  result,
-  answers,
-  onRestart,
-}: {
-  result:    PurposeProfileResult;
-  answers:   Record<string, DualAxisAnswer>;
-  onRestart: () => void;
-}) {
-  const pattern = derivePatternReading(answers, result);
-  const bc = BAND_CONFIG[result.coherenceBand];
-  const weakDomains = result.domainProfiles
-    .filter((domain) => domain.percent < 45)
-    .map((domain) => domain.domain);
-  const structuralSpilloverLikely =
-    result.routingRecommendation?.spilloverLikely ??
-    weakDomains.some((domain) =>
-      ["identity", "decision", "environment"].includes(domain),
-    );
-
-  // Determine escalation path
-  const escalationPath = {
-    href: result.routingRecommendation?.href ?? "/diagnostics/constitutional-diagnostic?origin=purpose_alignment",
-    label: result.routingRecommendation?.label ?? "Continue to Constitutional Diagnostic",
-    note: result.routingRecommendation?.reason ?? "Personal clarity becomes useful when it is tested against organisational structure.",
-  };
-
-  React.useEffect(() => {
-    track("purpose_alignment_bridge_viewed", {
-      band: result.coherenceBand,
-      percent: result.percent,
-      spillover_likely: structuralSpilloverLikely,
-    });
-  }, [result.coherenceBand, result.percent, structuralSpilloverLikely]);
-
-  function handleBridgeClick() {
-    try {
-      window.sessionStorage.setItem("aol_diagnostics_origin", "purpose_alignment");
-    } catch {
-      // Origin marker is measurement-only.
-    }
-    track("purpose_alignment_bridge_clicked", {
-      destination: "/diagnostics/constitutional-diagnostic",
-      band: result.coherenceBand,
-    });
-    track("purpose_alignment_to_constitutional_started", {
-      origin: "purpose_alignment",
-    });
-  }
-
-  return (
-    <div className="space-y-6">
-
-      {/* Score headline */}
-      <div style={{ border: `1px solid ${bc.border}`, backgroundColor: bc.bg, padding: "2rem" }}>
-        <Eyebrow>Purpose alignment result</Eyebrow>
-        <div className="flex items-end justify-between gap-4 mt-4">
-          <div>
-            <div style={{
-              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-              fontWeight: 300, fontSize: "clamp(3rem, 6vw, 5rem)", lineHeight: 1,
-              letterSpacing: "-0.04em", color: bc.text,
-            }}>
-              {result.percent}%
-            </div>
-            <div style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.36em", textTransform: "uppercase",
-              color: bc.text, opacity: 0.85, marginTop: "0.4rem",
-            }}>
-              {bc.label}
-            </div>
-          </div>
-          {/* Domain mini-grid */}
-          <div className="grid grid-cols-3 gap-2">
-            {result.domainProfiles.map(dp => {
-              const c = dp.percent >= 65 ? "rgba(110,231,183,0.70)"
-                      : dp.percent >= 40 ? `${GOLD}AA`
-                      : "rgba(252,165,165,0.70)";
-              return (
-                <div key={dp.domain} style={{ textAlign: "center" }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.2rem", lineHeight: 1, color: c }}>
-                    {dp.percent}
-                  </div>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginTop: "2px" }}>
-                    {dp.domain.replace("_", " ").split(" ")[0]}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <p style={{ marginTop: "1rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)", fontStyle: "italic" }}>
-          {bc.reading}
-        </p>
-      </div>
-
-      {/* PATTERN READING — the primary diagnostic value */}
-      <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT, overflow: "hidden" }}>
-        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}>
-          <Eyebrow>Pattern reading — {pattern.patternTitle}</Eyebrow>
-        </div>
-        <div style={{ padding: "1.5rem" }}>
-          <p style={{
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.78,
-            color: "rgba(255,255,255,0.70)",
-          }}>
-            {pattern.primaryPattern}
-          </p>
-
-          {pattern.urgentStatement && (
-            <div style={{ marginTop: "1.25rem", padding: "1rem 1.25rem", border: `1px solid ${bc.border}`, backgroundColor: bc.bg }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: bc.text, marginBottom: "0.55rem" }}>
-                Sharpest signal
-              </div>
-              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.65)", fontStyle: "italic" }}>
-                {pattern.urgentStatement}
-              </p>
-            </div>
-          )}
-
-          {pattern.uncertaintyNote && (
-            <div style={{ marginTop: "1rem", padding: "1rem 1.25rem", border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.55rem" }}>
-                Certainty note
-              </div>
-              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
-                {pattern.uncertaintyNote}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* FIRST CONCRETE ACTION */}
-      <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.5rem" }}>
-        <Eyebrow>First action — this week</Eyebrow>
-        <p style={{
-          marginTop: "0.85rem",
-          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-          fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72,
-          color: "rgba(255,255,255,0.72)",
-        }}>
-          {pattern.firstAction}
-        </p>
-        <p style={{
-          marginTop: "0.75rem",
-          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-          fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60,
-          color: "rgba(255,255,255,0.35)", fontStyle: "italic",
-        }}>
-          This is a structural action, not a motivational one. Do it once and record what you find — not to feel better, but to have accurate data.
-        </p>
-      </div>
-
-      {/* DOMAIN BREAKDOWN */}
-      <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgb(5 5 7)" }}>
-        <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-          <Eyebrow>Domain breakdown</Eyebrow>
-        </div>
-        <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          {result.domainProfiles
-            .sort((a, b) => a.percent - b.percent)
-            .map(dp => {
-              const Icon = DOMAIN_ICONS[dp.domain];
-              const pctColor = dp.percent >= 65 ? "rgba(110,231,183,0.75)"
-                             : dp.percent >= 40 ? `${GOLD}BB`
-                             : "rgba(252,165,165,0.75)";
-              const gapNote = dp.resonance > dp.certainty + 3
-                ? "High resonance, low certainty — examine the assumption."
-                : dp.certainty > dp.resonance + 3
-                  ? "Known weakness — clear on the problem, not yet on the solution."
-                  : null;
-              return (
-                <div key={dp.domain} style={{ padding: "1rem 1.5rem" }}>
-                  <div className="flex items-start gap-3">
-                    <Icon style={{ width: "14px", height: "14px", color: `${GOLD}70`, flexShrink: 0, marginTop: "3px" }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-3 mb-1.5">
-                        <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.75)" }}>
-                          {dp.label}
-                        </span>
-                        <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.5rem", lineHeight: 1, color: pctColor, flexShrink: 0 }}>
-                          {dp.percent}%
-                        </span>
-                      </div>
-                      <div style={{ height: "2px", backgroundColor: "rgba(255,255,255,0.06)", overflow: "hidden", marginBottom: gapNote ? "0.5rem" : 0 }}>
-                        <div style={{ height: "100%", width: `${Math.max(2, dp.percent)}%`, backgroundColor: pctColor, transition: "width 600ms ease" }} />
-                      </div>
-                      {gapNote && (
-                        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
-                          {gapNote}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-      </div>
-
-      {/* ESCALATION */}
-      <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
-        <Eyebrow>If this is affecting how you lead, the next question is structural</Eyebrow>
-        <p style={{
-          marginTop: "0.85rem",
-          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-          fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70,
-          color: "rgba(255,255,255,0.45)", fontStyle: "italic",
-          marginBottom: "1.25rem",
-        }}>
-          This assessment reads you personally. The Constitutional Diagnostic reads whether
-          that misalignment is now affecting the operating structure of your organisation.
-          {structuralSpilloverLikely
-            ? " Your identity, decision, or environment signal suggests possible organisational spillover."
-            : " Your next step is to separate personal strain from structural organisational strain."}
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <a href={escalationPath.href}
-            onClick={handleBridgeClick}
-            className="group inline-flex items-center gap-2.5 transition-all duration-300"
-            style={{
-              padding: "11px 22px",
-              border: `1px solid ${GOLD}35`,
-              backgroundColor: `${GOLD}0D`,
-              color: `${GOLD}BB`,
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
-            }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
-            onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
-          >
-            {escalationPath.label}
-            <ArrowRight style={{ width: "11px", height: "11px" }} />
-          </a>
-          <button
-            type="button"
-            onClick={onRestart}
-            style={{
-              padding: "11px 22px",
-              border: "1px solid rgba(255,255,255,0.07)",
-              backgroundColor: "transparent",
-              color: "rgba(255,255,255,0.28)",
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
-              cursor: "pointer",
-            }}
-            onMouseEnter={e => { const el = e.currentTarget; el.style.color = "rgba(255,255,255,0.50)"; }}
-            onMouseLeave={e => { const el = e.currentTarget; el.style.color = "rgba(255,255,255,0.28)"; }}
-          >
-            Reassess
-          </button>
-        </div>
-        <p style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.14)" }}>
-          {escalationPath.note}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// AUTHORITY RESULT SURFACE — 10-block architecture
-// Replaces generic score-first rendering with decision-grade output
+// AUTHORITY RESULT SURFACE — 10-block architecture with Contract Binding
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AuthorityResultSurface({
   result,
   answers,
   reflections,
+  demographicContext,
+  executionTrace,
+  setExecutionTrace,
+  tournamentResult,
+  behavioralConnections,
+  setBehavioralConnections,
+  organizationContext,
+  setOrganizationContext,
+  orgNameInput,
+  setOrgNameInput,
+  orgInviteCode,
+  setOrgInviteCode,
+  showPatternObservatory,
+  setShowPatternObservatory,
+  isPremium,
+  setIsPremium,
   onRestart,
 }: {
   result: PurposeProfileResult;
   answers: Record<string, DualAxisAnswer>;
   reflections: { avoidedDecision: string; lastSevenDays: string; dissenter: string };
+  demographicContext: { role: string; industry: string; teamSize: string; yearsInRole: string } | null;
+  executionTrace: ExecutionTrace | null;
+  setExecutionTrace: (trace: ExecutionTrace | null) => void;
+  tournamentResult: TournamentResult | null;
+  behavioralConnections: BehavioralDataSource[];
+  setBehavioralConnections: (connections: BehavioralDataSource[]) => void;
+  organizationContext: OrganizationContext | null;
+  setOrganizationContext: (ctx: OrganizationContext | null) => void;
+  orgNameInput: string;
+  setOrgNameInput: (val: string) => void;
+  orgInviteCode: string;
+  setOrgInviteCode: (val: string) => void;
+  showPatternObservatory: boolean;
+  setShowPatternObservatory: (val: boolean) => void;
+  isPremium: boolean;
+  setIsPremium: (val: boolean) => void;
   onRestart: () => void;
 }) {
-  const pattern = result.primaryPattern;
+  const pattern = derivePatternReading(answers, result);
   const narrative = result.reportNarrative;
   const evidence = result.evidence;
+  
+  // Contract state
+  const [showContract, setShowContract] = React.useState(false);
+  const [contractCompleted, setContractCompleted] = React.useState(false);
+  const [contractSkipped, setContractSkipped] = React.useState(false);
+  
+  // Memory interrupt state
+  const [hasCheckedMemory, setHasCheckedMemory] = React.useState(false);
+  const [pastContract, setPastContract] = React.useState<ContractType | null>(null);
+  
+  // Check for past contracts on mount
+  React.useEffect(() => {
+    const subjectId = getOrCreateSubjectId();
+    const recent = getMostRecentContract(subjectId);
+    setPastContract(recent);
+    setHasCheckedMemory(true);
+    
+    // Process any due verifications
+    processDueVerifications();
+  }, []);
 
-  // BLOCK 1 — Interruption line: challenge the user
   const interruptionLine = narrative?.conditionStatement
-    ?? pattern?.consequence
+    ?? pattern.primaryPattern.slice(0, 200)
     ?? (result.percent >= 70
       ? "Alignment is not the problem. The decision you are avoiding is."
       : result.percent >= 45
         ? "You are not misaligned. You are structurally undecided."
         : "This is not drift. This is a mandate that was never built.");
 
-  // BLOCK 3 — Contradiction evidence: score vs free-text vs behaviour
   const contradictionEvidence: Array<{ scoreLabel: string; scoreValue: string; textEvidence: string; contradictionType: string }> = [];
 
-  // Primary: weakest domain vs user's self-assessment
   if (evidence?.sharpestWeakSignal) {
     const ws = evidence.sharpestWeakSignal;
     contradictionEvidence.push({
@@ -918,7 +776,6 @@ function AuthorityResultSurface({
     });
   }
 
-  // Free-text vs scores: if user described avoiding a decision but scored decision integrity high
   const decisionDomain = result.domainProfiles.find((d) => d.domain === "decision");
   if (reflections.avoidedDecision && decisionDomain && decisionDomain.percent >= 50) {
     contradictionEvidence.push({
@@ -929,7 +786,6 @@ function AuthorityResultSurface({
     });
   }
 
-  // Contradictions from the engine
   if (result.contradictions) {
     for (const c of result.contradictions.slice(0, 2)) {
       contradictionEvidence.push({
@@ -941,37 +797,33 @@ function AuthorityResultSurface({
     }
   }
 
-  // BLOCK 5 — Repetition warning
   const trajectoryConsequences = [
-    pattern?.consequence ?? "The current pattern will persist unless directly addressed.",
+    pattern.primaryPattern.includes("consequence") ? pattern.primaryPattern.split("consequence")[1]?.slice(0, 150) : "The current pattern will persist unless directly addressed.",
     ...(result.corrections?.slice(0, 2) ?? []),
   ].filter(Boolean);
 
-  // BLOCK 7 — Decision extraction from reflections
-  const extractedDecision = reflections.avoidedDecision || pattern?.firstAction || "";
+  const extractedDecision = reflections.avoidedDecision || pattern.firstAction || "";
   const decisionObject = buildPurposeDecisionObject({
     result,
     context: { reflections },
   });
 
-  // BLOCK 8 — Action steps
   const actionSteps = [
-    { step: pattern?.firstAction ?? result.nextActions?.[0] ?? "Identify the decision you are avoiding", timeframe: "Today" },
-    ...(result.nextActions?.slice(1, 3) ?? []).map((a) => ({ step: a })),
+    { step: pattern.firstAction, timeframe: "Today" },
+    ...(result.nextActions?.slice(1, 3) ?? []).map((a) => ({ step: a, timeframe: "This week" })),
   ].filter((s) => s.step);
 
   const routing = result.routingRecommendation;
 
-  // Build canonical assessment decision result
   const canonicalResult = buildPurposeResult({
     percent: result.percent,
     coherenceBand: result.coherenceBand,
-    primaryPattern: pattern ? {
-      label: pattern.label,
-      consequence: pattern.consequence,
-      firstAction: pattern.firstAction,
-      reasons: pattern.reasons,
-      score: pattern.score,
+    primaryPattern: result.primaryPattern ? {
+      label: result.primaryPattern.label,
+      consequence: result.primaryPattern.consequence,
+      firstAction: result.primaryPattern.firstAction,
+      reasons: result.primaryPattern.reasons,
+      score: result.primaryPattern.score,
     } : null,
     domainProfiles: result.domainProfiles.map((d) => ({
       domain: d.domain,
@@ -990,24 +842,31 @@ function AuthorityResultSurface({
 
   return (
     <div className="space-y-4" style={{ maxWidth: "56rem" }}>
-      {/* CANONICAL EVIDENCE CHAIN — the definitive result */}
+      {/* MEMORY INTERRUPT - Show past contract if exists */}
+      {hasCheckedMemory && pastContract && pastContract.status !== "completed" && (
+        <PastContractInterrupt 
+          onAcknowledge={() => {
+            track("past_contract_breach_acknowledged", { status: pastContract.status });
+          }}
+          onProceed={() => {}}
+        />
+      )}
+
       <EvidenceChainSurface result={canonicalResult} />
 
-      {/* PRODUCT ADVANTAGE — scenario, cost-of-delay, behavioural divergence */}
       <ProductAdvantageBlocks
         signalKey={detectSignal({ urgency: result.percent < 50 ? 3 : 2, ownershipScore: result.percent < 40 ? 3 : 2, stateScore: result.percent < 45 ? 3 : 2, clarityScore: result.percent < 50 ? 3 : 2, accountabilityScore: result.percent < 45 ? 3 : 2 })}
         scores={{ urgency: result.percent < 50 ? 3 : 2, ownership: result.percent < 40 ? 3 : 2, clarity: result.percent < 50 ? 3 : 2, accountability: result.percent < 45 ? 3 : 2, state: result.percent < 45 ? 3 : 2 }}
         layer="full"
       />
 
-      {/* Separator */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", margin: "1rem 0" }} />
 
       <ResultInterruption line={interruptionLine} />
 
       <ResultCondition
-        name={pattern?.label ?? result.coherenceBand}
-        definition={narrative?.classificationExplanation ?? pattern?.reasons?.join(". ") ?? ""}
+        name={pattern.patternTitle}
+        definition={narrative?.classificationExplanation ?? pattern.primaryPattern.slice(0, 300)}
       />
 
       <ResultContradiction evidence={contradictionEvidence} />
@@ -1024,7 +883,7 @@ function AuthorityResultSurface({
 
       <ResultTrajectory
         timeHorizon="30–60 days"
-        consequences={trajectoryConsequences}
+        consequences={trajectoryConsequences as string[]}
         label="If repeated"
       />
 
@@ -1034,10 +893,8 @@ function AuthorityResultSurface({
           : result.percent < 65
           ? { optionA: "Commit to the direction you stated", optionB: "Re-evaluate before the next pressure point" }
           : { optionA: "Lock the current direction", optionB: "Test whether the organisation shares it" },
-        ifUnchanged: pattern?.consequence
-          ?? "This decision behaviour pattern will repeat under pressure, producing inconsistent execution and eroding trust in your own judgement.",
-        minimumViableMove: pattern?.firstAction
-          ?? "Write the decision you are avoiding in one sentence and name who is affected by the delay.",
+        ifUnchanged: pattern.primaryPattern.slice(0, 200),
+        minimumViableMove: pattern.firstAction,
         confidence: result.percent < 35 ? "strong" : result.percent < 60 ? "moderate" : "strong",
         scaleBreak: "At scale, personal decision avoidance becomes organisational drift. Teams compensate by creating informal authority structures that bypass the stated chain.",
       }} />
@@ -1048,6 +905,472 @@ function AuthorityResultSurface({
         validityBasis="This result reflects your self-reported decision pattern from a single session. It identifies a likely pressure behaviour, not a confirmed organisational condition."
         strengthenWith="Repeat this assessment under a live decision scenario — when a real decision is on the table, not retrospectively. Then compare with the Constitutional Diagnostic to test whether the pattern extends into organisational structure."
       />
+
+      {/* PATTERN-BREAKER CONTRACT - The Weapon */}
+      {!contractCompleted && !contractSkipped && showContract && (
+        <PatternBreakerContract
+          pattern={{
+            primaryPattern: pattern.primaryPattern,
+            patternTitle: pattern.patternTitle,
+            urgentStatement: pattern.urgentStatement,
+            firstAction: pattern.firstAction,
+            weakestDomain: pattern.weakestDomain as string,
+            sharpestSignal: pattern.sharpestSignal,
+          }}
+          resultPercent={result.percent}
+          coherenceBand={result.coherenceBand}
+          onComplete={() => setContractCompleted(true)}
+          onSkip={() => setContractSkipped(true)}
+        />
+      )}
+
+      {!contractCompleted && !contractSkipped && !showContract && (
+        <div style={{ marginTop: "1rem" }}>
+          <button
+            onClick={() => setShowContract(true)}
+            style={{
+              background: `${GOLD}15`,
+              border: `1px solid ${GOLD}50`,
+              padding: "14px 28px",
+              color: GOLD,
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "8px",
+              letterSpacing: "0.25em",
+              cursor: "pointer",
+              width: "100%",
+              textTransform: "uppercase",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={e => { 
+              const el = e.currentTarget; 
+              el.style.background = `${GOLD}25`;
+              el.style.borderColor = `${GOLD}80`;
+            }}
+            onMouseLeave={e => { 
+              const el = e.currentTarget; 
+              el.style.background = `${GOLD}15`;
+              el.style.borderColor = `${GOLD}50`;
+            }}
+          >
+            <Lock style={{ width: "10px", height: "10px", display: "inline", marginRight: "8px" }} />
+            Make this binding — sign the pattern-breaker contract →
+          </button>
+          <p style={{ 
+            marginTop: "0.75rem", 
+            fontFamily: "'JetBrains Mono', monospace", 
+            fontSize: "6px", 
+            letterSpacing: "0.15em",
+            color: "rgba(255,255,255,0.2)",
+            textAlign: "center",
+          }}>
+            Contracts are stored and verified. The system remembers.
+          </p>
+        </div>
+      )}
+
+      {contractCompleted && (
+        <div style={{ 
+          border: `1px solid ${GOLD}30`, 
+          backgroundColor: `${GOLD}08`,
+          padding: "1rem",
+          textAlign: "center",
+        }}>
+          <CheckSquare style={{ color: GOLD, width: "16px", height: "16px", display: "inline", marginRight: "8px" }} />
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.15em", color: GOLD }}>
+            Contract signed. Verification scheduled for {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}.
+          </span>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          UPGRADE 6: Real-Time Contract Dashboard (Execution Progress)
+          ═══════════════════════════════════════════════════════════════════════ */}
+      {contractCompleted && executionTrace && (
+        <div style={{ 
+          border: `1px solid ${GOLD}20`, 
+          backgroundColor: `${GOLD}04`,
+          padding: "1.25rem",
+        }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 style={{ width: "12px", height: "12px", color: GOLD }} />
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.25em", color: GOLD }}>
+                CONTRACT DASHBOARD
+              </span>
+            </div>
+            <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.3)" }}>
+              {executionTrace.currentProgress}% complete
+            </span>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.06)", marginBottom: "1rem", overflow: "hidden" }}>
+            <motion.div
+              animate={{ width: `${executionTrace.currentProgress}%` }}
+              transition={{ duration: 0.8 }}
+              style={{ height: "100%", backgroundColor: GOLD }}
+            />
+          </div>
+
+          {/* Checkpoints */}
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.75rem" }}>
+            {executionTrace.checkpoints.slice(-3).map((cp, i) => (
+              <div key={i} style={{
+                padding: "0.25rem 0.5rem",
+                backgroundColor: cp.status === "sent" ? `${GOLD}10` : "rgba(110,231,183,0.1)",
+                border: `1px solid ${cp.status === "sent" ? `${GOLD}20` : "rgba(110,231,183,0.2)"}`,
+                fontSize: "0.6rem",
+                color: cp.status === "sent" ? GOLD : "rgba(110,231,183,0.8)",
+              }}>
+                {cp.type.toUpperCase()} · {cp.status}
+              </div>
+            ))}
+          </div>
+
+          {/* Micro-actions */}
+          {executionTrace.microActions.length > 0 && (
+            <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.4)" }}>
+              {executionTrace.microActions.length} action{executionTrace.microActions.length !== 1 ? "s" : ""} recorded
+            </div>
+          )}
+
+          {/* Quick progress update */}
+          <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem" }}>
+            {["25%", "50%", "75%", "100%"].map(pct => (
+              <button
+                key={pct}
+                onClick={() => {
+                  const val = parseInt(pct);
+                  updateProgress(executionTrace.contractId, val, `Progress updated to ${pct}`);
+                  setExecutionTrace(getExecutionTrace(executionTrace.contractId));
+                }}
+                style={{
+                  flex: 1,
+                  padding: "6px 4px",
+                  fontSize: "0.6rem",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  backgroundColor: "transparent",
+                  border: `1px solid ${GOLD}20`,
+                  color: GOLD,
+                  cursor: "pointer",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                {pct}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          UPGRADE 5: Tournament Architecture Verdict
+          ═══════════════════════════════════════════════════════════════════════ */}
+      {tournamentResult && (
+        <div style={{
+          border: `1px solid ${tournamentResult.arbiterVerdict === "contradiction_detected" ? "rgba(252,165,165,0.3)" : `${GOLD}20`}`,
+          backgroundColor: tournamentResult.arbiterVerdict === "contradiction_detected" ? "rgba(252,165,165,0.04)" : `${GOLD}04`,
+          padding: "1.25rem",
+        }}>
+          <div className="flex items-center gap-2 mb-2">
+            <GitBranch style={{ width: "12px", height: "12px", color: GOLD }} />
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.25em", color: GOLD }}>
+              TOURNAMENT VERDICT
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+            <span style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "7px",
+              letterSpacing: "0.15em",
+              color: tournamentResult.arbiterVerdict === "deterministic_wins" ? "rgba(110,231,183,0.9)" :
+                     tournamentResult.arbiterVerdict === "contradiction_detected" ? "#fca5a5" : GOLD,
+              padding: "4px 8px",
+              border: `1px solid ${tournamentResult.arbiterVerdict === "deterministic_wins" ? "rgba(110,231,183,0.3)" :
+                        tournamentResult.arbiterVerdict === "contradiction_detected" ? "rgba(252,165,165,0.3)" : `${GOLD}30`}`,
+            }}>
+              {tournamentResult.arbiterVerdict.replace(/_/g, " ").toUpperCase()}
+            </span>
+            <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.4)" }}>
+              Confidence: {Math.round(tournamentResult.confidence * 100)}%
+            </span>
+          </div>
+          {tournamentResult.contradictions.length > 0 && (
+            <div style={{ marginTop: "0.5rem" }}>
+              {tournamentResult.contradictions.map((c, i) => (
+                <div key={i} style={{
+                  fontSize: "0.7rem",
+                  color: "rgba(252,165,165,0.7)",
+                  padding: "0.25rem 0",
+                  borderBottom: i < tournamentResult.contradictions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                }}>
+                  ⚠ {c}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          UPGRADE 4: Behavioral Data Connection UI
+          ═══════════════════════════════════════════════════════════════════════ */}
+      {contractCompleted && (
+        <div style={{ border: `1px solid ${GOLD}15`, padding: "1.25rem" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Zap style={{ width: "12px", height: "12px", color: GOLD }} />
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.25em", color: GOLD }}>
+              BEHAVIORAL DATA INTEGRATION
+            </span>
+          </div>
+          <p style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.35)", marginBottom: "0.75rem" }}>
+            Connect real data sources to verify your commitments automatically
+          </p>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <button
+              onClick={async () => {
+                const connection = await connectGoogleCalendar();
+                if (connection) {
+                  saveBehavioralConnection(connection);
+                  setBehavioralConnections(getBehavioralConnections());
+                  track("behavioral_calendar_connected", {});
+                }
+              }}
+              style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                padding: "8px 14px",
+                backgroundColor: behavioralConnections.some(c => c.type === "calendar") ? `${GOLD}15` : "transparent",
+                border: `1px solid ${behavioralConnections.some(c => c.type === "calendar") ? `${GOLD}40` : "rgba(255,255,255,0.12)"}`,
+                color: behavioralConnections.some(c => c.type === "calendar") ? GOLD : "rgba(255,255,255,0.5)",
+                cursor: "pointer",
+                fontSize: "0.65rem",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+            >
+              <Calendar style={{ width: "10px", height: "10px" }} />
+              {behavioralConnections.some(c => c.type === "calendar") ? "✓ Calendar" : "Calendar"}
+            </button>
+            <button
+              onClick={async () => {
+                const connection = await connectSlack();
+                if (connection) {
+                  saveBehavioralConnection(connection);
+                  setBehavioralConnections(getBehavioralConnections());
+                  track("behavioral_slack_connected", {});
+                }
+              }}
+              style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                padding: "8px 14px",
+                backgroundColor: behavioralConnections.some(c => c.type === "slack") ? `${GOLD}15` : "transparent",
+                border: `1px solid ${behavioralConnections.some(c => c.type === "slack") ? `${GOLD}40` : "rgba(255,255,255,0.12)"}`,
+                color: behavioralConnections.some(c => c.type === "slack") ? GOLD : "rgba(255,255,255,0.5)",
+                cursor: "pointer",
+                fontSize: "0.65rem",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+            >
+              <MessageSquare style={{ width: "10px", height: "10px" }} />
+              {behavioralConnections.some(c => c.type === "slack") ? "✓ Slack" : "Slack"}
+            </button>
+            <button
+              style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                padding: "8px 14px",
+                backgroundColor: "transparent",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.25)",
+                cursor: "not-allowed",
+                fontSize: "0.65rem",
+                fontFamily: "'JetBrains Mono', monospace",
+                opacity: 0.5,
+              }}
+            >
+              <ExternalLink style={{ width: "10px", height: "10px" }} />
+              Jira (soon)
+            </button>
+          </div>
+          {behavioralConnections.length > 0 && (
+            <div style={{ marginTop: "0.75rem", fontSize: "0.6rem", color: "rgba(110,231,183,0.5)" }}>
+              {behavioralConnections.length} data source{behavioralConnections.length !== 1 ? "s" : ""} connected · auto-verification active
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          UPGRADE 3: Organization Invite / Join UI
+          ═══════════════════════════════════════════════════════════════════════ */}
+      {contractCompleted && (
+        <div style={{ border: `1px solid ${GOLD}15`, padding: "1.25rem" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Users style={{ width: "12px", height: "12px", color: GOLD }} />
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.25em", color: GOLD }}>
+              ORGANIZATION INTELLIGENCE
+            </span>
+          </div>
+          {organizationContext ? (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                <Globe style={{ width: "10px", height: "10px", color: GOLD }} />
+                <span style={{ fontSize: "0.8rem", color: GOLD }}>{organizationContext.name}</span>
+              </div>
+              <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.5rem" }}>
+                {organizationContext.members.length} member{organizationContext.members.length !== 1 ? "s" : ""} · {organizationContext.activeContracts} active contract{organizationContext.activeContracts !== 1 ? "s" : ""}
+              </div>
+              <div style={{ display: "flex", gap: "0.5rem", fontSize: "0.6rem" }}>
+                <span style={{ color: organizationContext.avgBreachRate > 0.3 ? "#fca5a5" : "rgba(110,231,183,0.7)" }}>
+                  Breach rate: {Math.round(organizationContext.avgBreachRate * 100)}%
+                </span>
+                <span style={{ color: "rgba(255,255,255,0.3)" }}>
+                  Invite code: <span style={{ color: GOLD, letterSpacing: "0.15em" }}>{organizationContext.inviteCode}</span>
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  const refreshed = refreshOrganizationAnalytics(organizationContext.orgId);
+                  if (refreshed) setOrganizationContext(refreshed);
+                }}
+                style={{
+                  marginTop: "0.75rem",
+                  padding: "6px 14px",
+                  fontSize: "0.6rem",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  backgroundColor: "transparent",
+                  border: `1px solid ${GOLD}20`,
+                  color: GOLD,
+                  cursor: "pointer",
+                }}
+              >
+                <RefreshCw style={{ width: "8px", height: "8px", display: "inline", marginRight: "4px" }} />
+                Refresh analytics
+              </button>
+            </div>
+          ) : (
+            <div>
+              <p style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.35)", marginBottom: "0.75rem" }}>
+                Compare patterns across your team or organization
+              </p>
+              <div style={{ display: "flex", gap: "0.5rem", flexDirection: "column" }}>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <input
+                    value={orgNameInput}
+                    onChange={e => setOrgNameInput(e.target.value)}
+                    placeholder="Organization name"
+                    style={{
+                      flex: 1,
+                      padding: "8px 10px",
+                      fontSize: "0.7rem",
+                      backgroundColor: "transparent",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "rgba(255,255,255,0.6)",
+                      outline: "none",
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const subjectId = getOrCreateSubjectId();
+                      const org = createOrganization(orgNameInput || "My Team", subjectId);
+                      setOrganizationContext(org);
+                      track("organization_created", { name: org.name });
+                    }}
+                    style={{
+                      padding: "8px 14px",
+                      fontSize: "0.6rem",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      backgroundColor: `${GOLD}10`,
+                      border: `1px solid ${GOLD}30`,
+                      color: GOLD,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <UserPlus style={{ width: "10px", height: "10px", display: "inline", marginRight: "4px" }} />
+                    Create
+                  </button>
+                </div>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <input
+                    value={orgInviteCode}
+                    onChange={e => setOrgInviteCode(e.target.value.toUpperCase())}
+                    placeholder="Invite code"
+                    style={{
+                      flex: 1,
+                      padding: "8px 10px",
+                      fontSize: "0.7rem",
+                      backgroundColor: "transparent",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "rgba(255,255,255,0.6)",
+                      outline: "none",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      letterSpacing: "0.15em",
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const subjectId = getOrCreateSubjectId();
+                      const org = joinOrganization(orgInviteCode, subjectId);
+                      if (org) {
+                        setOrganizationContext(org);
+                        track("organization_joined", { orgId: org.orgId });
+                      }
+                    }}
+                    style={{
+                      padding: "8px 14px",
+                      fontSize: "0.6rem",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      backgroundColor: "transparent",
+                      border: `1px solid ${GOLD}30`,
+                      color: GOLD,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Join
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          UPGRADE 7: Pattern Observatory (Premium Gate)
+          ═══════════════════════════════════════════════════════════════════════ */}
+      {contractCompleted && (
+        <div>
+          {showPatternObservatory ? (
+            <PatternObservatory
+              organizationId={organizationContext?.orgId}
+              isPremium={isPremium}
+            />
+          ) : (
+            <div style={{ marginTop: "0.5rem" }}>
+              <button
+                onClick={() => setShowPatternObservatory(true)}
+                style={{
+                  width: "100%",
+                  padding: "10px 18px",
+                  backgroundColor: "transparent",
+                  border: `1px solid ${GOLD}25`,
+                  color: GOLD,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.2em",
+                  cursor: "pointer",
+                  textTransform: "uppercase",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${GOLD}08`; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}
+              >
+                <TrendingUp style={{ width: "10px", height: "10px", display: "inline", marginRight: "6px" }} />
+                Open Pattern Observatory
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <LadderProgressionGate
         severity={result.percent < 40 ? "critical" : result.percent < 55 ? "high" : "medium"}
@@ -1061,7 +1384,6 @@ function AuthorityResultSurface({
         deferNote="You can keep this result and act on the immediate correction first. Continue only when you need structural confirmation."
       />
 
-      {/* Institutional layers — render when prior data exists */}
       <LongitudinalIntelligence data={null} />
       <OutcomeVerification data={null} />
 
@@ -1077,7 +1399,6 @@ function AuthorityResultSurface({
         band={result.coherenceBand}
       />
 
-      {/* Restart */}
       <button
         type="button"
         onClick={onRestart}
@@ -1108,12 +1429,17 @@ type Props = {
 };
 
 export default function PurposeAlignmentAssessment({ onScored }: Props) {
-  const [stage,     setStage]     = React.useState(0);
-  const [answers,   setAnswers]   = React.useState<Record<string, DualAxisAnswer>>({});
-  const [result,    setResult]    = React.useState<PurposeProfileResult | null>(null);
-  const [status,    setStatus]    = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [stage, setStage] = React.useState(0);
+  const [answers, setAnswers] = React.useState<Record<string, DualAxisAnswer>>({});
+  const [result, setResult] = React.useState<PurposeProfileResult | null>(null);
+  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
 
-  // Diagnostic reflection gate — free-text fields that create bespoke specificity
+  // Demographic context (captured at start)
+  const [demographicCompleted, setDemographicCompleted] = React.useState(false);
+  const [demographicContext, setDemographicContext] = React.useState<{ role: string; industry: string; teamSize: string; yearsInRole: string } | null>(null);
+  const [showDemographicCapture, setShowDemographicCapture] = React.useState(true);
+
+  // Diagnostic reflection gate
   const [showReflection, setShowReflection] = React.useState(false);
   const [reflections, setReflections] = React.useState({
     avoidedDecision: "",
@@ -1122,16 +1448,45 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   });
   const [direction, setDirection] = React.useState(1);
 
-  const isResult       = stage === STAGE_DOMAINS.length;
+  // ═════════════════════════════════════════════════════════════════════════
+  // UPGRADE STATE: Execution Trace (Agentic Bridge)
+  // ═════════════════════════════════════════════════════════════════════════
+  const [executionTrace, setExecutionTrace] = React.useState<ExecutionTrace | null>(null);
+  const [showContractDashboard, setShowContractDashboard] = React.useState(false);
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // UPGRADE STATE: Organization Context (Team Features)
+  // ═════════════════════════════════════════════════════════════════════════
+  const [organizationContext, setOrganizationContext] = React.useState<OrganizationContext | null>(null);
+  const [showOrganizationUI, setShowOrganizationUI] = React.useState(false);
+  const [orgInviteCode, setOrgInviteCode] = React.useState("");
+  const [orgNameInput, setOrgNameInput] = React.useState("");
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // UPGRADE STATE: Behavioral Data Integration
+  // ═════════════════════════════════════════════════════════════════════════
+  const [behavioralConnections, setBehavioralConnections] = React.useState<BehavioralDataSource[]>([]);
+  const [showBehavioralConnect, setShowBehavioralConnect] = React.useState(false);
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // UPGRADE STATE: Tournament Architecture
+  // ═════════════════════════════════════════════════════════════════════════
+  const [tournamentResult, setTournamentResult] = React.useState<TournamentResult | null>(null);
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // UPGRADE STATE: Pattern Observatory (Premium)
+  // ═════════════════════════════════════════════════════════════════════════
+  const [showPatternObservatory, setShowPatternObservatory] = React.useState(false);
+  const [isPremium, setIsPremium] = React.useState(false);
+
+  const isResult = stage === STAGE_DOMAINS.length;
   const currentDomains = isResult ? [] : STAGE_DOMAINS[stage]!;
   const currentQuestions = PURPOSE_ALIGNMENT_QUESTIONS.filter(q => currentDomains.includes(q.domain));
 
-  const totalAnswered  = Object.keys(answers).length;
+  const totalAnswered = Object.keys(answers).length;
   const totalQuestions = PURPOSE_ALIGNMENT_QUESTIONS.length;
 
-  // All questions on this stage have been touched (any answer value is valid including default 5)
-  // We require the user to explicitly move the slider at least once
-  const stageAnswered  = currentQuestions.every(q => answers[q.id] !== undefined);
+  const stageAnswered = currentQuestions.every(q => answers[q.id] !== undefined);
 
   const liveProfile = React.useMemo(() => {
     if (totalAnswered === 0) return null;
@@ -1149,6 +1504,38 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
     }
   }, [totalAnswered, totalQuestions]);
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // UPGRADE: Initialize execution bridge — process due checkins on mount
+  // ═════════════════════════════════════════════════════════════════════════
+  React.useEffect(() => {
+    const dueCheckins = processDueCheckins();
+    if (dueCheckins.length > 0) {
+      track("execution_checkins_processed", { count: dueCheckins.length });
+    }
+  }, []);
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // UPGRADE: Load existing behavioral connections on mount
+  // ═════════════════════════════════════════════════════════════════════════
+  React.useEffect(() => {
+    const existing = getBehavioralConnections();
+    setBehavioralConnections(existing);
+  }, []);
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // UPGRADE: Load execution trace when result becomes available
+  // ═════════════════════════════════════════════════════════════════════════
+  React.useEffect(() => {
+    if (result) {
+      const subjectId = getOrCreateSubjectId();
+      const traces = getExecutionTraces();
+      const existingTrace = traces.find(t => t.contractId === subjectId);
+      if (existingTrace) {
+        setExecutionTrace(existingTrace);
+      }
+    }
+  }, [result]);
+
   function updateAnswer(qid: string, field: "resonance" | "certainty", value: number) {
     setAnswers(prev => ({
       ...prev,
@@ -1162,9 +1549,10 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
 
   function advance() {
     if (stage < STAGE_DOMAINS.length - 1) {
-      setDirection(1); setStage(s => s + 1);
+      setDirection(1); 
+      setStage(s => s + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (!showReflection) {
-      // Show diagnostic reflection gate before computing result
       setShowReflection(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
@@ -1173,7 +1561,10 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   }
 
   function retreat() {
-    if (stage > 0) { setDirection(-1); setStage(s => s - 1); }
+    if (stage > 0) { 
+      setDirection(-1); 
+      setStage(s => s - 1); 
+    }
   }
 
   async function handleComplete() {
@@ -1185,6 +1576,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
     setResult(scored);
     setDirection(1);
     setStage(STAGE_DOMAINS.length);
+    
     try {
       sessionStorage.setItem(
         "purpose-alignment-result",
@@ -1196,11 +1588,12 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
             lastSevenDays: reflections.lastSevenDays || null,
             dissenter: reflections.dissenter || null,
           },
+          demographicContext,
         }),
       );
       sessionStorage.setItem("aol_diagnostics_origin", "purpose_alignment");
     } catch {}
-    // Extract tension signals and merge into cross-stage thread
+    
     try {
       const tensions = extractPurposeTensions(scored, answers);
       if (tensions.length > 0) {
@@ -1208,35 +1601,128 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
       }
     } catch {}
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // UPGRADE 5: Run Tournament Architecture to validate result
+    // ═══════════════════════════════════════════════════════════════════════
+    try {
+      const generativeSuggestion = `Based on your answers, your alignment score is ${scored.percent}% in the ${scored.coherenceBand} band. Your weakest domain is ${scored.weakestDomains[0] || "unknown"}. The pattern suggests ${scored.coherenceBand === "FRAGMENTED" ? "urgent structural intervention is needed" : "targeted correction in the weakest domain will produce compounding effects"}.`;
+      
+      const tournament = runTournament(
+        scored,
+        generativeSuggestion,
+        answers,
+        reflections,
+        { role: demographicContext?.role || "unknown", industry: demographicContext?.industry || "unknown" }
+      );
+      setTournamentResult(tournament);
+      
+      track("tournament_completed", {
+        verdict: tournament.arbiterVerdict,
+        contradictions: tournament.contradictions.length,
+        confidence: tournament.confidence,
+      });
+    } catch (error) {
+      console.error("Tournament engine error:", error);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // UPGRADE 1: Create execution trace for future tracking
+    // ═══════════════════════════════════════════════════════════════════════
+    try {
+      const subjectId = getOrCreateSubjectId();
+      const now = new Date().toISOString();
+      const deadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      
+      const trace: ExecutionTrace = {
+        contractId: subjectId,
+        checkpoints: [{
+          scheduledAt: now,
+          type: "in_app",
+          status: "sent",
+          deliveredAt: now,
+        }],
+        microActions: [],
+        currentProgress: 0,
+        predictedCompletion: deadline,
+        lastCheckinAt: now,
+        nextCheckinAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      };
+      saveExecutionTrace(trace);
+      setExecutionTrace(trace);
+    } catch (error) {
+      console.error("Execution trace creation error:", error);
+    }
+
     track("purpose_alignment_completed", {
       band: scored.coherenceBand,
       percent: scored.percent,
       weakest_domain: scored.weakestDomains[0] || "unknown",
+      role: demographicContext?.role,
+      industry: demographicContext?.industry,
+      tournament_verdict: tournamentResult?.arbiterVerdict || "not_run",
     });
+    
     onScored?.(scored, answers);
+    
     try {
       await fetch("/api/purpose-alignment/assessments", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, result: scored, reflections }),
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers, result: scored, reflections, demographicContext }),
       });
       setStatus("success");
-    } catch { setStatus("error"); }
+    } catch { 
+      setStatus("error"); 
+    }
   }
 
   function handleRestart() {
-    setStage(0); setAnswers({}); setResult(null); setStatus("idle"); setDirection(1);
+    setStage(0);
+    setAnswers({});
+    setResult(null);
+    setStatus("idle");
+    setDirection(1);
+    setShowReflection(false);
+    setShowDemographicCapture(true);
+    setDemographicCompleted(false);
+    setDemographicContext(null);
+    setReflections({
+      avoidedDecision: "",
+      lastSevenDays: "",
+      dissenter: "",
+    });
+    // Reset all upgrade state
+    setExecutionTrace(null);
+    setShowContractDashboard(false);
+    setOrganizationContext(null);
+    setShowOrganizationUI(false);
+    setOrgInviteCode("");
+    setOrgNameInput("");
+    setShowBehavioralConnect(false);
+    setTournamentResult(null);
+    setShowPatternObservatory(false);
+  }
+
+  function handleDemographicComplete(data: { role: string; industry: string; teamSize: string; yearsInRole: string }) {
+    setDemographicContext(data);
+    setDemographicCompleted(true);
+    setShowDemographicCapture(false);
+    track("demographic_captured", { role: data.role, industry: data.industry });
+  }
+
+  // Show demographic capture first
+  if (showDemographicCapture) {
+    return <DemographicContextCapture onComplete={handleDemographicComplete} />;
   }
 
   return (
     <div style={{ position: "relative", minHeight: "600px" }}>
-      {/* Midway signal */}
       {!isResult && stage === Math.floor(STAGE_DOMAINS.length / 2) && (
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", color: "rgba(252,165,165,0.30)", fontStyle: "italic", marginBottom: "1rem" }}>
-          Most teams don&apos;t see this until it&apos;s already costing them.
+          Most people don&apos;t see this until it&apos;s already costing them.
         </p>
       )}
 
-      {/* Stage progress strip */}
       {!isResult && (
         <div style={{ marginBottom: "2rem" }}>
           <div className="flex items-center justify-between mb-2">
@@ -1260,8 +1746,6 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
       )}
 
       <div className={`grid gap-8 ${!isResult ? "lg:grid-cols-[1fr_280px]" : ""}`}>
-
-        {/* Main panel */}
         <div>
           <AnimatePresence mode="wait" custom={direction}>
             {showReflection && !isResult ? (
@@ -1358,7 +1842,6 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                 exit={{ opacity: 0, x: direction * -24 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
-                {/* Stage header */}
                 <div style={{ marginBottom: "1.75rem" }}>
                   <h2 style={{
                     fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
@@ -1379,7 +1862,6 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                   </p>
                 </div>
 
-                {/* Questions */}
                 <div className="space-y-4">
                   {currentQuestions.map(q => (
                     <DualAxisInput
@@ -1393,7 +1875,6 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                   ))}
                 </div>
 
-                {/* Navigation */}
                 <div className="flex items-center justify-between pt-6 mt-6"
                   style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
                 >
@@ -1434,8 +1915,6 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                         fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
                         cursor: stageAnswered ? "pointer" : "not-allowed",
                       }}
-                      onMouseEnter={e => { if (stageAnswered) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
-                      onMouseLeave={e => { if (stageAnswered) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                     >
                       {stage === STAGE_DOMAINS.length - 1 ? "Proceed to consequence" : "Continue to decision exposure"}
                       <ArrowRight style={{ width: "11px", height: "11px" }} />
@@ -1450,13 +1929,33 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.60 }}
               >
-                <AuthorityResultSurface result={result} answers={answers} reflections={reflections} onRestart={handleRestart} />
+                <AuthorityResultSurface 
+                  result={result} 
+                  answers={answers} 
+                  reflections={reflections}
+                  demographicContext={demographicContext}
+                  executionTrace={executionTrace}
+                  setExecutionTrace={setExecutionTrace}
+                  tournamentResult={tournamentResult}
+                  behavioralConnections={behavioralConnections}
+                  setBehavioralConnections={setBehavioralConnections}
+                  organizationContext={organizationContext}
+                  setOrganizationContext={setOrganizationContext}
+                  orgNameInput={orgNameInput}
+                  setOrgNameInput={setOrgNameInput}
+                  orgInviteCode={orgInviteCode}
+                  setOrgInviteCode={setOrgInviteCode}
+                  showPatternObservatory={showPatternObservatory}
+                  setShowPatternObservatory={setShowPatternObservatory}
+                  isPremium={isPremium}
+                  setIsPremium={setIsPremium}
+                  onRestart={handleRestart}
+                />
               </motion.div>
             ) : null}
           </AnimatePresence>
         </div>
 
-        {/* Sidebar — only during intake stages */}
         {!isResult && (
           <div className="hidden lg:block">
             <div style={{ position: "sticky", top: "6rem" }}>
