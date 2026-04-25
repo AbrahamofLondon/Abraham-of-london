@@ -25,7 +25,7 @@ type ParsedEnv = z.infer<typeof envSchema>;
 
 const fallbackEnv: ParsedEnv = {
   NODE_ENV: 'development' as const,
-  DATABASE_URL: 'file:./dev.db',
+  DATABASE_URL: '', // Must be set via env — no SQLite fallback
   JWT_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
   NEXTAUTH_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
   NEXT_PUBLIC_SITE_URL: 'https://www.abrahamoflondon.org',

@@ -2,5 +2,6 @@
 import { defineConfig } from '@prisma/migrate';
 
 export default defineConfig({
-  datasourceUrl: process.env.DATABASE_URL || 'file:./dev.db',
+  // PostgreSQL via Neon — no SQLite fallback
+  datasourceUrl: process.env.DATABASE_URL,
 });
