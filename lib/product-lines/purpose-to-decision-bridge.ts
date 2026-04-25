@@ -145,6 +145,36 @@ export type EscalationReason =
  *
  * This is a gate, not an automatic bridge.
  */
+/**
+ * Explain why an escalation decision was made (or not made).
+ * Returns a human-readable explanation for audit purposes.
+ */
+export function explainEscalationDecision(input: {
+  avoidedDecision?: string | null;
+  contractBreached?: boolean;
+  recurrenceCount?: number;
+  dissenterSignal?: string | null;
+  userExplicitChoice?: boolean;
+}): string {
+  const { shouldEscalate, reasons } = shouldEscalatePurposeToCorporate(input);
+
+  if (!shouldEscalate) {
+    return "Escalation not triggered. The personal pattern does not indicate organisational consequence. Evidence remains within the Purpose Alignment product line.";
+  }
+
+  const explanations: string[] = reasons.map((r) => {
+    switch (r) {
+      case "user_explicit_choice": return "User explicitly chose to bridge personal evidence to corporate analysis.";
+      case "avoided_decision_involves_organisation": return "The avoided decision references leadership, team, or organisational structure — indicating structural consequence.";
+      case "contract_breach_affects_others": return "A Pattern-Breaker Contract was breached — the non-action affects people beyond the individual.";
+      case "pattern_recurrence": return `The same pattern has recurred ${input.recurrenceCount ?? "3+"} times — indicating structural, not personal, cause.`;
+      case "dissenter_indicates_structural_consequence": return "The dissenter signal references team or organisational impact — this is not isolated.";
+    }
+  });
+
+  return `Escalation triggered (${reasons.length} reason${reasons.length > 1 ? "s" : ""}): ${explanations.join(" ")}`;
+}
+
 export function shouldEscalatePurposeToCorporate(input: {
   avoidedDecision?: string | null;
   contractBreached?: boolean;

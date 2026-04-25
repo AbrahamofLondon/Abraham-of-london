@@ -18,6 +18,8 @@ import type { CaseObject } from "@/lib/decision/case-object";
 
 export type ContradictionSeverity = "low" | "medium" | "high" | "critical";
 
+export type LeadTemperature = "cold" | "warm" | "hot" | "urgent";
+
 export type ConversionSignals = {
   /** Mismatch between blocker and forced action (0-1) */
   contradictionSeverityIndex: number;
@@ -34,6 +36,10 @@ export type ConversionSignals = {
   isHighValue: boolean;
   /** Reasons for high-value flag */
   highValueReasons: string[];
+  /** Lead temperature — cold/warm/hot/urgent */
+  leadTemperature: LeadTemperature;
+  /** Why this temperature was assigned */
+  temperatureReasons: string[];
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -159,6 +165,21 @@ export function computeConversionSignals(
   // Action gap: 1 = move identified but not taken, 0 = taken
   const actionGapScore = behaviour?.actionTaken ? 0 : spine.case.forcedAction ? 1 : 0.5;
 
+  // Lead temperature derivation
+  const tempReasons: string[] = [];
+  let tempScore = 0;
+
+  if (behaviour?.accuracyResponse === "yes") { tempScore += 3; tempReasons.push("Confirmed accuracy"); }
+  if (severity === "critical") { tempScore += 3; tempReasons.push("Critical contradiction severity"); }
+  else if (severity === "high") { tempScore += 2; tempReasons.push("High contradiction severity"); }
+  if (spine.c3.specificityScore >= 0.7) { tempScore += 2; tempReasons.push("High C3 specificity"); }
+  if (behaviour?.viewedStrategyRoom && !behaviour.enteredStrategyRoom) { tempScore += 2; tempReasons.push("Strategy Room intent without entry"); }
+  if (behaviour?.viewedExecutiveReporting && !behaviour.purchasedExecutiveReporting) { tempScore += 1; tempReasons.push("ER viewed without purchase"); }
+  if (actionGapScore > 0.5) { tempScore += 1; tempReasons.push("Action identified but not taken"); }
+
+  const leadTemperature: LeadTemperature =
+    tempScore >= 7 ? "urgent" : tempScore >= 5 ? "hot" : tempScore >= 3 ? "warm" : "cold";
+
   return {
     contradictionSeverityIndex: index,
     contradictionSeverity: severity,
@@ -168,5 +189,7 @@ export function computeConversionSignals(
     lastCompletedStage: spine.stage,
     isHighValue,
     highValueReasons: reasons,
+    leadTemperature,
+    temperatureReasons: tempReasons,
   };
 }

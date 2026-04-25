@@ -527,3 +527,35 @@ export function resolveProductCode(codeOrSlug: string): CatalogProduct | null {
     ?? getProductByEntitlementSlug(codeOrSlug)
     ?? null;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CATALOG INTEGRITY ASSERTIONS — call at build time or test time
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type CatalogIntegrityError = { code: string; message: string };
+
+/** Assert all active products have Stripe price IDs. */
+export function assertActiveProductsHavePriceIds(): CatalogIntegrityError[] {
+  return getActiveProducts()
+    .filter((p) => p.amount > 0 && !p.stripePriceId)
+    .map((p) => ({ code: p.code, message: `Active paid product "${p.code}" has no stripePriceId` }));
+}
+
+/** Assert no duplicate product codes exist. */
+export function assertNoDuplicateProductCodes(): CatalogIntegrityError[] {
+  const codes = getAllProducts().map((p) => p.code);
+  const seen = new Set<string>();
+  const dupes: CatalogIntegrityError[] = [];
+  for (const code of codes) {
+    if (seen.has(code)) dupes.push({ code, message: `Duplicate product code: "${code}"` });
+    seen.add(code);
+  }
+  return dupes;
+}
+
+/** Assert no active product has a dead checkout path (success path must exist). */
+export function assertNoDeadCheckoutProducts(): CatalogIntegrityError[] {
+  return getActiveProducts()
+    .filter((p) => p.amount > 0 && !p.successPath)
+    .map((p) => ({ code: p.code, message: `Active paid product "${p.code}" has no successPath` }));
+}

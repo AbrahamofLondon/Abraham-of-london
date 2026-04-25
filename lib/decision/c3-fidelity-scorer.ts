@@ -13,6 +13,14 @@
 import type { CaseObject } from "./case-object";
 import type { C3Tier, ConfidenceBand } from "./intelligence-spine";
 
+export type RecoveryClassification =
+  | "missing_decision"
+  | "missing_owner"
+  | "missing_consequence"
+  | "missing_blocker"
+  | "insufficient_detail"
+  | null;
+
 export type C3Score = {
   clarity: number;       // 0-1: is the decision itself clear?
   context: number;       // 0-1: is there enough surrounding information?
@@ -26,6 +34,14 @@ export type C3Score = {
   confidenceBand: ConfidenceBand;
   missing: Array<"clarity" | "context" | "consequence">;
   recoveryQuestion?: string;
+  /** Why each dimension scored as it did */
+  scoringExplanation: {
+    clarity: string;
+    context: string;
+    consequence: string;
+  };
+  /** Classified recovery need */
+  recoveryClassification: RecoveryClassification;
 };
 
 // Re-export for convenience
@@ -132,5 +148,31 @@ export function scoreC3(caseObj: CaseObject): C3Score {
     }
   }
 
-  return { clarity, context, consequence, specificityScore, mode, tier, confidenceBand, missing, recoveryQuestion };
+  // Scoring explanation — why each dimension scored as it did
+  const scoringExplanation = {
+    clarity: clarity < 0.2 ? "Decision text is too short or vague to identify a specific decision"
+      : clarity < 0.4 ? "Decision text lacks named actors, deadlines, or causal language"
+      : clarity < 0.7 ? "Decision text is moderately specific but missing some concrete anchors"
+      : "Decision text names specific people, deadlines, or costs with causal language",
+    context: filledContext === 0 ? "No surrounding context fields were completed"
+      : filledContext < 2 ? "Only partial context provided — blocker or owner missing"
+      : context < 0.5 ? "Context fields are filled but lack specificity"
+      : "Context is specific — owner, blocker, and prior attempts are articulated",
+    consequence: !caseObj.costOfDelay || caseObj.costOfDelay.trim().length < 5 ? "No cost-of-delay information provided"
+      : consequence < 0.3 ? "Cost described in vague terms without concrete anchors"
+      : consequence < 0.6 ? "Cost direction identified but not quantified"
+      : "Cost is specific with named financial, structural, or timeline impact",
+  };
+
+  // Recovery classification
+  let recoveryClassification: RecoveryClassification = null;
+  if (tier !== "FULL_SYNTHESIS") {
+    if (!caseObj.decision || caseObj.decision.trim().length < 10) recoveryClassification = "missing_decision";
+    else if (!caseObj.claimedOwner || caseObj.claimedOwner.trim().length < 3) recoveryClassification = "missing_owner";
+    else if (!caseObj.costOfDelay || caseObj.costOfDelay.trim().length < 5) recoveryClassification = "missing_consequence";
+    else if (!caseObj.blocker || caseObj.blocker.trim().length < 5) recoveryClassification = "missing_blocker";
+    else recoveryClassification = "insufficient_detail";
+  }
+
+  return { clarity, context, consequence, specificityScore, mode, tier, confidenceBand, missing, recoveryQuestion, scoringExplanation, recoveryClassification };
 }

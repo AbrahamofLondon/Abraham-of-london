@@ -95,6 +95,63 @@ export function inferAvoidance(caseObj: CaseObject): string | null {
   return `The decision you described as blocked is one you already know how to resolve (your forced answer proves this). What is being avoided is not the decision — it is the conversation, confrontation, or commitment that the decision requires.`;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// VALIDATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type CaseValidationError = { field: string; message: string };
+
+/** Validate case object. Returns errors or empty array. */
+export function validateCaseObject(caseObj: CaseObject): CaseValidationError[] {
+  const errors: CaseValidationError[] = [];
+  if (!caseObj.id) errors.push({ field: "id", message: "Missing case ID" });
+  if (!caseObj.decision || caseObj.decision.trim().length < 5) {
+    errors.push({ field: "decision", message: "Decision text is required (minimum 5 characters)" });
+  }
+  if (caseObj.specificityScore < 0 || caseObj.specificityScore > 1) {
+    errors.push({ field: "specificityScore", message: "Specificity score must be between 0 and 1" });
+  }
+  return errors;
+}
+
+/** Normalize case object — trim fields, clamp scores, preserve source lineage. */
+export function normalizeCaseObject(caseObj: CaseObject): CaseObject {
+  return {
+    ...caseObj,
+    decision: caseObj.decision?.trim() ?? "",
+    priorAttempt: caseObj.priorAttempt?.trim() || undefined,
+    costOfDelay: caseObj.costOfDelay?.trim() || undefined,
+    claimedOwner: caseObj.claimedOwner?.trim() || undefined,
+    blocker: caseObj.blocker?.trim() || undefined,
+    forcedAction: caseObj.forcedAction?.trim() || undefined,
+    specificityScore: Math.max(0, Math.min(1, caseObj.specificityScore)),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Redact sensitive excess text for safe storage.
+ * Keeps first 500 chars of each field, strips PII patterns.
+ */
+export function redactCaseObjectForStorage(caseObj: CaseObject): CaseObject {
+  const cap = (s: string | undefined, max = 500) => s ? s.slice(0, max) : undefined;
+  return {
+    ...caseObj,
+    decision: cap(caseObj.decision, 500) ?? "",
+    priorAttempt: cap(caseObj.priorAttempt),
+    costOfDelay: cap(caseObj.costOfDelay),
+    claimedOwner: cap(caseObj.claimedOwner, 200),
+    blocker: cap(caseObj.blocker),
+    forcedAction: cap(caseObj.forcedAction),
+    // Strip email patterns from all text fields for storage safety
+    email: caseObj.email, // email is intentional — keep
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CLASSIFICATION
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
  * Classify the condition from case material.
  */

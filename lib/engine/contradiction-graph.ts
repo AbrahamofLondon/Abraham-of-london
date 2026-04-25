@@ -307,3 +307,60 @@ export function extendGraphFromAssessment(
 
   return g;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VALIDATION — the graph refuses bad input
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type GraphValidationError = { element: string; message: string };
+
+/** Validate node before insertion. */
+export function validateNode(node: GraphNode): GraphValidationError[] {
+  const errors: GraphValidationError[] = [];
+  if (!node.id) errors.push({ element: "node.id", message: "Node has no ID" });
+  if (!node.kind) errors.push({ element: "node.kind", message: "Node has no kind" });
+  if (node.severity < 0 || node.severity > 10) {
+    errors.push({ element: "node.severity", message: `Severity ${node.severity} out of bounds (0-10)` });
+  }
+  if (node.confidence < 0 || node.confidence > 1) {
+    errors.push({ element: "node.confidence", message: `Confidence ${node.confidence} out of bounds (0-1)` });
+  }
+  if (!node.source) errors.push({ element: "node.source", message: "Node has no source stage" });
+  return errors;
+}
+
+/** Validate edge — ensures referenced nodes exist. */
+export function validateEdge(graph: ContradictionGraph, edge: GraphEdge): GraphValidationError[] {
+  const errors: GraphValidationError[] = [];
+  if (!edge.id) errors.push({ element: "edge.id", message: "Edge has no ID" });
+  if (!graph.nodes.some((n) => n.id === edge.fromId)) {
+    errors.push({ element: "edge.fromId", message: `Edge references missing node: ${edge.fromId}` });
+  }
+  if (!graph.nodes.some((n) => n.id === edge.toId)) {
+    errors.push({ element: "edge.toId", message: `Edge references missing node: ${edge.toId}` });
+  }
+  if (edge.weight < 0 || edge.weight > 1) {
+    errors.push({ element: "edge.weight", message: `Weight ${edge.weight} out of bounds (0-1)` });
+  }
+  return errors;
+}
+
+/** Export a human-readable audit summary of the graph. */
+export function exportGraphAuditSummary(graph: ContradictionGraph): string {
+  const health = computeGraphHealth(graph);
+  const conflicts = detectActiveConflicts(graph);
+  const lines: string[] = [
+    `Graph: ${graph.nodes.length} nodes, ${graph.edges.length} edges`,
+    `Active contradictions: ${health.activeContradictions}`,
+    `Resolved: ${health.resolvedContradictions}`,
+    `Density: ${(health.graphDensity * 100).toFixed(1)}%`,
+    `Staleness: ${health.staleness}%`,
+  ];
+  if (conflicts.length > 0) {
+    lines.push("", "Active conflicts:");
+    for (const c of conflicts.slice(0, 5)) {
+      lines.push(`  [severity=${c.combinedSeverity}] ${c.nodeA.label} ↔ ${c.nodeB.label}${c.blocksDecision ? " (BLOCKS)" : ""}`);
+    }
+  }
+  return lines.join("\n");
+}

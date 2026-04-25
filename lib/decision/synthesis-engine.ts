@@ -49,20 +49,47 @@ export type GovernedSynthesis = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// INPUT SANITISATION — prevent prompt injection
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MAX_FIELD_LENGTH = 800;
+
+function sanitiseForPrompt(text: string | undefined | null): string {
+  if (!text) return "Not provided";
+  let clean = text
+    .replace(/```/g, "")                    // strip code fences
+    .replace(/\bsystem\s*:/gi, "system -")  // strip system: directives
+    .replace(/\bassistant\s*:/gi, "")       // strip assistant: injections
+    .replace(/\bhuman\s*:/gi, "")           // strip human: injections
+    .replace(/\bignore\s+(?:all\s+)?(?:previous|above|prior)\b/gi, "") // strip override attempts
+    .replace(/<[^>]+>/g, "")               // strip HTML/XML tags
+    .trim();
+  if (clean.length > MAX_FIELD_LENGTH) clean = clean.slice(0, MAX_FIELD_LENGTH) + "...";
+  return clean || "Not provided";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SYNTHESIS PROMPT BUILDER
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function buildSynthesisPrompt(caseObj: CaseObject): string {
+  const d = sanitiseForPrompt(caseObj.decision);
+  const pa = sanitiseForPrompt(caseObj.priorAttempt);
+  const cd = sanitiseForPrompt(caseObj.costOfDelay);
+  const co = sanitiseForPrompt(caseObj.claimedOwner);
+  const b = sanitiseForPrompt(caseObj.blocker);
+  const fa = sanitiseForPrompt(caseObj.forcedAction);
+
   return `You are a decision intelligence system. You do not advise. You identify contradictions, name what is being avoided, and force clarity.
 
 Given these 6 responses from a decision-maker:
 
-1. DECISION: "${caseObj.decision}"
-2. PRIOR ATTEMPTS: "${caseObj.priorAttempt ?? "Not provided"}"
-3. COST OF DELAY: "${caseObj.costOfDelay ?? "Not provided"}"
-4. CLAIMED OWNER: "${caseObj.claimedOwner ?? "Not provided"}"
-5. BLOCKER: "${caseObj.blocker ?? "Not provided"}"
-6. FORCED 24-HOUR ACTION: "${caseObj.forcedAction ?? "Not provided"}"
+1. DECISION: "${d}"
+2. PRIOR ATTEMPTS: "${pa}"
+3. COST OF DELAY: "${cd}"
+4. CLAIMED OWNER: "${co}"
+5. BLOCKER: "${b}"
+6. FORCED 24-HOUR ACTION: "${fa}"
 
 Produce a JSON object with these exact fields:
 
@@ -261,8 +288,10 @@ export async function synthesise(
       const prompt = buildSynthesisPrompt(caseObj);
       const raw = await llmCall(prompt);
 
-      // Parse JSON from LLM response
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      // Parse JSON from LLM response (enforce max length)
+      const MAX_LLM_OUTPUT = 8000;
+      const bounded = raw.length > MAX_LLM_OUTPUT ? raw.slice(0, MAX_LLM_OUTPUT) : raw;
+      const jsonMatch = bounded.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
 

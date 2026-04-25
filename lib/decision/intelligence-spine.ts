@@ -255,3 +255,90 @@ function formatStageName(stage: SpineStage): string {
   };
   return names[stage];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VALIDATION — the spine refuses bad state
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type SpineValidationError = {
+  field: string;
+  message: string;
+  severity: "BLOCK" | "WARN";
+};
+
+const STAGE_ORDER: SpineStage[] = [
+  "fast_diagnostic", "constitutional", "team", "enterprise",
+  "executive_reporting", "strategy_room", "outcome_verification",
+];
+
+/**
+ * Validate spine integrity. Returns errors if the spine is in an invalid state.
+ * Empty array = valid.
+ */
+export function validateIntelligenceSpine(spine: IntelligenceSpine): SpineValidationError[] {
+  const errors: SpineValidationError[] = [];
+
+  // 1. Case must exist with a decision
+  if (!spine.case?.id) {
+    errors.push({ field: "case.id", message: "Spine has no case ID", severity: "BLOCK" });
+  }
+  if (!spine.case?.decision || spine.case.decision.trim().length < 5) {
+    errors.push({ field: "case.decision", message: "Spine case has no decision text", severity: "BLOCK" });
+  }
+
+  // 2. C3 must exist and be bounded
+  if (!spine.c3) {
+    errors.push({ field: "c3", message: "Spine has no C3 score", severity: "BLOCK" });
+  } else {
+    if (spine.c3.specificityScore < 0 || spine.c3.specificityScore > 1) {
+      errors.push({ field: "c3.specificityScore", message: `C3 score out of bounds: ${spine.c3.specificityScore}`, severity: "BLOCK" });
+    }
+    if (!spine.c3.tier) {
+      errors.push({ field: "c3.tier", message: "C3 tier missing", severity: "BLOCK" });
+    }
+  }
+
+  // 3. HARD_RECOVERY must not have synthesis
+  if (spine.c3?.tier === "HARD_RECOVERY" && spine.synthesis !== null) {
+    errors.push({ field: "synthesis", message: "Synthesis present at HARD_RECOVERY tier — this should not happen", severity: "WARN" });
+  }
+
+  // 4. History must be append-only (stages should not regress)
+  if (spine.history.length > 1) {
+    for (let i = 1; i < spine.history.length; i++) {
+      const prev = STAGE_ORDER.indexOf(spine.history[i - 1]!.stage);
+      const curr = STAGE_ORDER.indexOf(spine.history[i]!.stage);
+      if (curr < prev && curr !== -1 && prev !== -1) {
+        errors.push({
+          field: `history[${i}]`,
+          message: `Stage regressed from ${spine.history[i - 1]!.stage} to ${spine.history[i]!.stage}`,
+          severity: "WARN",
+        });
+      }
+    }
+  }
+
+  // 5. Deterministic output must exist
+  if (!spine.deterministic?.conditionClass) {
+    errors.push({ field: "deterministic.conditionClass", message: "No deterministic condition class", severity: "BLOCK" });
+  }
+
+  // 6. Timestamps must exist
+  if (!spine.createdAt) {
+    errors.push({ field: "createdAt", message: "Missing creation timestamp", severity: "BLOCK" });
+  }
+
+  return errors;
+}
+
+/**
+ * Assert spine is valid. Throws if BLOCK-level errors exist.
+ * Use at trust boundaries (API routes, DB persistence).
+ */
+export function assertValidSpine(spine: IntelligenceSpine): void {
+  const errors = validateIntelligenceSpine(spine);
+  const blockers = errors.filter((e) => e.severity === "BLOCK");
+  if (blockers.length > 0) {
+    throw new Error(`Invalid spine: ${blockers.map((e) => e.message).join("; ")}`);
+  }
+}

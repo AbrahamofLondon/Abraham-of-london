@@ -105,9 +105,49 @@ export function createPressureLoop(spine: IntelligenceSpine): PressureLoop | nul
 
   const now = new Date();
   const decision = spine.case.decision;
-  const forcedAction = spine.case.forcedAction ?? spine.synthesis?.concreteMove ?? "the action you identified";
+  const hasMove = !!(spine.case.forcedAction || spine.synthesis?.concreteMove);
+  const forcedAction = spine.case.forcedAction ?? spine.synthesis?.concreteMove ?? "";
   const costOfDelay = spine.case.costOfDelay ?? "";
   const conditionClass = spine.deterministic.conditionClass;
+
+  // If no move exists, do not claim "you said you would" — use recovery framing
+  if (!hasMove) {
+    return {
+      spineId: spine.id,
+      email: spine.email,
+      decision,
+      forcedAction: "",
+      costOfDelay,
+      conditionClass,
+      createdAt: now.toISOString(),
+      messages: [
+        {
+          stage: "48h",
+          subject: "The decision is still open.",
+          body: `48 hours ago, you described a decision:\n\n"${decision}"\n\nNo specific move was identified. The system cannot track action without a named move.\n\nReturn and name what you would do if forced to decide in 24 hours.`,
+          scheduledAt: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+          sent: false,
+          actionRecorded: false,
+        },
+        {
+          stage: "7d",
+          subject: "This decision is now 7 days older.",
+          body: `The decision you described is still unresolved:\n\n"${decision}"\n\n${costOfDelay ? `You said the cost is: "${costOfDelay}". That cost has now compounded for a week.` : "The cost of delay has not disappeared. It has compounded."}\n\nReturn when you are ready to name the move.`,
+          scheduledAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          sent: false,
+          actionRecorded: false,
+        },
+        {
+          stage: "14d",
+          subject: "The system has classified this as drift.",
+          body: `This decision has been unresolved for 14 days without a named action.\n\nThis is drift. The system cannot track what was never committed to.\n\nReturn and re-run the decision when you are ready to act.`,
+          scheduledAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          sent: false,
+          actionRecorded: false,
+        },
+      ],
+    };
+  }
 
   const msg48h = build48hMessage(decision, forcedAction);
   const msg7d = build7dMessage(forcedAction, costOfDelay);

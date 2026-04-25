@@ -8,7 +8,10 @@ const ORGS_STORAGE_KEY = "aol_organizations";
 
 // Create or join organization
 export function createOrganization(name: string, subjectId: string): OrganizationContext {
-  const orgId = `org_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  const bytes = typeof window !== "undefined" && window.crypto?.getRandomValues
+    ? (() => { const b = new Uint8Array(4); window.crypto.getRandomValues(b); return Array.from(b, (v) => v.toString(36)).join(""); })()
+    : Date.now().toString(36).slice(-6);
+  const orgId = `org_${Date.now()}_${bytes}`;
   
   const org: OrganizationContext = {
     orgId,
@@ -168,5 +171,11 @@ export function refreshOrganizationAnalytics(orgId: string): OrganizationContext
 }
 
 function generateInviteCode(): string {
-  return Math.random().toString(36).substring(2, 10).toUpperCase();
+  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
+    const bytes = new Uint8Array(6);
+    window.crypto.getRandomValues(bytes);
+    return Array.from(bytes, (b) => b.toString(36)).join("").slice(0, 8).toUpperCase();
+  }
+  // Server-side fallback
+  return `INV${Date.now().toString(36).toUpperCase().slice(-6)}`;
 }

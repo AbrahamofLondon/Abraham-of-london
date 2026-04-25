@@ -33,6 +33,15 @@ export type ArbiterTournamentResult = {
   forcedFallback: boolean;
   /** Message to show the user when arbiter rejects synthesis */
   userMessage?: string;
+  /** Audit metadata */
+  audit: {
+    checkedAt: string;
+    weakestDomain: string;
+    violationCount: number;
+    hardCount: number;
+    softCount: number;
+    deterministicAnchor: string;
+  };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -181,5 +190,13 @@ export function runArbiterTournament(
     violations,
     forcedFallback: !accepted,
     userMessage,
+    audit: {
+      checkedAt: new Date().toISOString(),
+      weakestDomain: deterministic.conditionClass,
+      violationCount: violations.length,
+      hardCount: hardViolations.length,
+      softCount: violations.length - hardViolations.length,
+      deterministicAnchor: `${deterministic.conditionClass}:${deterministic.contradictionSet.length}contradictions`,
+    },
   };
 }
