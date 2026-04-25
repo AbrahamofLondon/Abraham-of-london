@@ -66,6 +66,8 @@ import type {
   CoherenceBand,
 } from "@/lib/alignment/types";
 import { track } from "@/lib/analytics/track";
+import { derivePatternReading, type PatternReading, type ScoredStatement } from "@/lib/alignment/pattern-reading-engine";
+import { GOLD, BASE, LIFT, STAGE_DOMAINS, STAGE_LABELS, STAGE_INTROS, BAND_CONFIG } from "@/lib/alignment/assessment-theme";
 import ResultInterruption from "@/components/diagnostics/results/ResultInterruption";
 import ResultCondition from "@/components/diagnostics/results/ResultCondition";
 import ResultContradiction from "@/components/diagnostics/results/ResultContradiction";
@@ -154,31 +156,7 @@ import { PatternObservatory } from "@/components/alignment/PatternObservatory";
 // DESIGN TOKENS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const GOLD = "#C9A96E";
-const BASE = "rgb(6 6 9)";
-const LIFT = "rgb(10 14 20)";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// CONSTANTS
-// ─────────────────────────────────────────────────────────────────────────────
-
-const STAGE_DOMAINS: AlignmentDomain[][] = [
-  ["identity", "decision"],
-  ["environment", "behaviour"],
-  ["emotional_order", "legacy"],
-];
-
-const STAGE_LABELS = [
-  "Identity & Decision Integrity",
-  "Environment & Behaviour",
-  "Internal Order & Legacy",
-];
-
-const STAGE_INTROS = [
-  "These two domains reveal whether you are operating from a coherent mandate or from accumulated momentum. Answer for the reality of the past 90 days — not your aspirations.",
-  "Your environment and your daily behaviour either reinforce your direction or quietly erode it. This stage surfaces the gap between what you say you value and what you actually do.",
-  "Emotional order is the foundation beneath every strategic decision. Legacy orientation reveals whether you are building or just moving. Answer precisely.",
-];
+// Design tokens and constants imported from lib/alignment/assessment-theme.ts
 
 const DOMAIN_ICONS: Record<AlignmentDomain, React.ComponentType<{ style?: React.CSSProperties }>> = {
   identity:        Shield,
@@ -189,60 +167,12 @@ const DOMAIN_ICONS: Record<AlignmentDomain, React.ComponentType<{ style?: React.
   legacy:          Landmark,
 };
 
-const BAND_CONFIG: Record<CoherenceBand, {
-  border: string; bg: string; text: string; label: string; reading: string;
-}> = {
-  SOVEREIGN: {
-    border: "rgba(52,211,153,0.25)", bg: "rgba(52,211,153,0.06)", text: "rgba(110,231,183,0.90)",
-    label: "Sovereign",
-    reading: "Operating at sovereign alignment. Identity, decisions, and behaviour are coherent with stated direction.",
-  },
-  ALIGNED: {
-    border: `${GOLD}30`, bg: `${GOLD}08`, text: `${GOLD}CC`,
-    label: "Aligned",
-    reading: "Alignment is functional but not unconditional. Specific drift areas are compounding quietly.",
-  },
-  DRIFTING: {
-    border: "rgba(251,146,60,0.25)", bg: "rgba(251,146,60,0.06)", text: "rgba(253,186,116,0.90)",
-    label: "Drifting",
-    reading: "Meaningful gaps between stated purpose and operational reality. Drift is structural, not circumstantial.",
-  },
-  FRAGMENTED: {
-    border: "rgba(248,113,113,0.25)", bg: "rgba(248,113,113,0.06)", text: "rgba(252,165,165,0.90)",
-    label: "Fragmented",
-    reading: "Alignment has broken down across multiple domains. Strategic action without reconstruction will compound the problem.",
-  },
-};
+// BAND_CONFIG imported from lib/alignment/assessment-theme.ts
+// Pattern reading engine imported from lib/alignment/pattern-reading-engine.ts
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PATTERN ANALYSIS ENGINE (Synthesis Layer)
-// The core of what makes this assessment worth the price.
-// Instead of generic band text, we read the specific pattern of scores
-// and produce a diagnosis tied to what the person actually answered.
-// ─────────────────────────────────────────────────────────────────────────────
-
-type ScoredStatement = {
-  id:        string;
-  domain:    AlignmentDomain;
-  statement: string;
-  resonance: number;
-  certainty: number;
-  weighted:  number;
-  gap:       number;
-};
-
-type PatternReading = {
-  primaryPattern:  string;
-  patternTitle:    string;
-  urgentStatement: string | null;
-  uncertaintyNote: string | null;
-  firstAction:     string;
-  escalationNote:  string;
-  weakestDomain:   AlignmentDomain;
-  sharpestSignal?: { statement: string; resonance: number; certainty: number } | null;
-};
-
-function derivePatternReading(
+// derivePatternReading is now imported from lib/alignment/pattern-reading-engine.ts
+// This legacy inline version is kept only as a type-check reference and will be removed.
+function _legacyDerivePatternReading(
   answers: Record<string, DualAxisAnswer>,
   result: PurposeProfileResult,
 ): PatternReading {

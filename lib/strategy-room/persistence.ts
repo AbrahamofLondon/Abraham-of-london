@@ -1,6 +1,12 @@
+/**
+ * Strategy Room Persistence — PostgreSQL via Neon (serverless).
+ *
+ * All persistence uses raw SQL via @neondatabase/serverless.
+ * No SQLite fallback. DATABASE_URL must be PostgreSQL.
+ */
+
 import { neon } from "@neondatabase/serverless";
 import { randomUUID } from "crypto";
-import { prisma } from "@/lib/prisma.server";
 
 type NullableString = string | null;
 
@@ -41,30 +47,9 @@ type StrategyRoomConversionData = {
 };
 
 function getDatabaseUrl(): string {
-  return process.env.DATABASE_URL || "";
-}
-
-function isPostgresDatabaseUrl(): boolean {
-  const url = getDatabaseUrl();
-  return url.startsWith("postgres://") || url.startsWith("postgresql://");
-}
-
-export function getStrategyRoomPersistenceBranch():
-  | "sqlite_prisma"
-  | "postgres_neon"
-  | "missing_database_url"
-  | "unsupported_database_url" {
-  const url = getDatabaseUrl();
-  if (!url) {
-    return "missing_database_url";
-  }
-  if (url.startsWith("file:")) {
-    return "sqlite_prisma";
-  }
-  if (isPostgresDatabaseUrl()) {
-    return "postgres_neon";
-  }
-  return "unsupported_database_url";
+  const url = process.env.DATABASE_URL || "";
+  if (!url) throw new Error("DATABASE_URL is required for Strategy Room persistence.");
+  return url;
 }
 
 function makePersistenceId(prefix: string): string {
@@ -72,12 +57,7 @@ function makePersistenceId(prefix: string): string {
 }
 
 function getSql() {
-  const url = getDatabaseUrl();
-  if (!url) {
-    throw new Error("DATABASE_URL is required for Strategy Room persistence.");
-  }
-
-  return neon(url);
+  return neon(getDatabaseUrl());
 }
 
 async function ensurePostgresStrategyRoomTables(): Promise<void> {
@@ -141,227 +121,68 @@ async function ensurePostgresStrategyRoomTables(): Promise<void> {
   `;
 }
 
-export async function createStrategyRoomSession(
-  data: StrategyRoomSessionData
-): Promise<void> {
-  const branch = getStrategyRoomPersistenceBranch();
-
-  if (branch === "sqlite_prisma") {
-    await prisma.strategyRoomSession.create({ data });
-    return;
-  }
-
-  if (branch !== "postgres_neon") {
-    throw new Error(`Strategy Room persistence unsupported branch: ${branch}`);
-  }
-
+export async function createStrategyRoomSession(data: StrategyRoomSessionData): Promise<void> {
   await ensurePostgresStrategyRoomTables();
   const sql = getSql();
-
   await sql`
-    INSERT INTO "StrategyRoomSession" (
-      "id",
-      "sessionKey",
-      "status",
-      "source",
-      "intake",
-      "canonicalSnapshot",
-      "route",
-      "readinessTier",
-      "authorityType"
-    )
-    VALUES (
-      ${makePersistenceId("srs")},
-      ${data.sessionKey},
-      ${data.status},
-      ${data.source},
-      ${data.intake},
-      ${data.canonicalSnapshot},
-      ${data.route},
-      ${data.readinessTier},
-      ${data.authorityType}
-    );
+    INSERT INTO "StrategyRoomSession" ("id","sessionKey","status","source","intake","canonicalSnapshot","route","readinessTier","authorityType")
+    VALUES (${makePersistenceId("srs")},${data.sessionKey},${data.status},${data.source},${data.intake},${data.canonicalSnapshot},${data.route},${data.readinessTier},${data.authorityType});
   `;
 }
 
-export async function createStrategyRoomImpression(
-  data: StrategyRoomImpressionData
-): Promise<void> {
-  if (!isPostgresDatabaseUrl()) {
-    await prisma.strategyRoomRecommendationImpression.create({ data });
-    return;
-  }
-
+export async function createStrategyRoomImpression(data: StrategyRoomImpressionData): Promise<void> {
   await ensurePostgresStrategyRoomTables();
   const sql = getSql();
-
   await sql`
-    INSERT INTO "StrategyRoomRecommendationImpression" (
-      "id",
-      "sessionKey",
-      "recommendations",
-      "canonicalSnapshot"
-    )
-    VALUES (
-      ${makePersistenceId("sri")},
-      ${data.sessionKey},
-      ${data.recommendations},
-      ${data.canonicalSnapshot}
-    );
+    INSERT INTO "StrategyRoomRecommendationImpression" ("id","sessionKey","recommendations","canonicalSnapshot")
+    VALUES (${makePersistenceId("sri")},${data.sessionKey},${data.recommendations},${data.canonicalSnapshot});
   `;
 }
 
-export async function markStrategyRoomImpression(
-  sessionKey: string,
-  canonicalSnapshot: NullableString
-): Promise<void> {
-  if (!isPostgresDatabaseUrl()) {
-    await prisma.strategyRoomSession.updateMany({
-      where: { sessionKey },
-      data: {
-        canonicalSnapshot,
-        lastImpressionAt: new Date(),
-      },
-    });
-    return;
-  }
-
+export async function markStrategyRoomImpression(sessionKey: string, canonicalSnapshot: NullableString): Promise<void> {
   await ensurePostgresStrategyRoomTables();
   const sql = getSql();
-
   await sql`
     UPDATE "StrategyRoomSession"
-    SET
-      "canonicalSnapshot" = ${canonicalSnapshot},
-      "lastImpressionAt" = CURRENT_TIMESTAMP,
-      "updatedAt" = CURRENT_TIMESTAMP
+    SET "canonicalSnapshot" = ${canonicalSnapshot}, "lastImpressionAt" = CURRENT_TIMESTAMP, "updatedAt" = CURRENT_TIMESTAMP
     WHERE "sessionKey" = ${sessionKey};
   `;
 }
 
-export async function createStrategyRoomFollowup(
-  data: StrategyRoomFollowupData
-): Promise<void> {
-  if (!isPostgresDatabaseUrl()) {
-    await prisma.strategyRoomFollowup.create({ data });
-    return;
-  }
-
+export async function createStrategyRoomFollowup(data: StrategyRoomFollowupData): Promise<void> {
   await ensurePostgresStrategyRoomTables();
   const sql = getSql();
-
   await sql`
-    INSERT INTO "StrategyRoomFollowup" (
-      "id",
-      "sessionKey",
-      "routeAfter",
-      "readinessTierAfter",
-      "authorityTypeAfter",
-      "clarityDelta",
-      "authorityDelta",
-      "convertedAfterGuidance",
-      "metadata",
-      "canonicalSnapshot"
-    )
-    VALUES (
-      ${makePersistenceId("srf")},
-      ${data.sessionKey},
-      ${data.routeAfter},
-      ${data.readinessTierAfter},
-      ${data.authorityTypeAfter},
-      ${data.clarityDelta},
-      ${data.authorityDelta},
-      ${data.convertedAfterGuidance},
-      ${data.metadata},
-      ${data.canonicalSnapshot}
-    );
+    INSERT INTO "StrategyRoomFollowup" ("id","sessionKey","routeAfter","readinessTierAfter","authorityTypeAfter","clarityDelta","authorityDelta","convertedAfterGuidance","metadata","canonicalSnapshot")
+    VALUES (${makePersistenceId("srf")},${data.sessionKey},${data.routeAfter},${data.readinessTierAfter},${data.authorityTypeAfter},${data.clarityDelta},${data.authorityDelta},${data.convertedAfterGuidance},${data.metadata},${data.canonicalSnapshot});
   `;
 }
 
-export async function markStrategyRoomFollowup(
-  sessionKey: string,
-  canonicalSnapshot: NullableString
-): Promise<void> {
-  if (!isPostgresDatabaseUrl()) {
-    await prisma.strategyRoomSession.updateMany({
-      where: { sessionKey },
-      data: {
-        canonicalSnapshot,
-        lastFollowupAt: new Date(),
-      },
-    });
-    return;
-  }
-
+export async function markStrategyRoomFollowup(sessionKey: string, canonicalSnapshot: NullableString): Promise<void> {
   await ensurePostgresStrategyRoomTables();
   const sql = getSql();
-
   await sql`
     UPDATE "StrategyRoomSession"
-    SET
-      "canonicalSnapshot" = ${canonicalSnapshot},
-      "lastFollowupAt" = CURRENT_TIMESTAMP,
-      "updatedAt" = CURRENT_TIMESTAMP
+    SET "canonicalSnapshot" = ${canonicalSnapshot}, "lastFollowupAt" = CURRENT_TIMESTAMP, "updatedAt" = CURRENT_TIMESTAMP
     WHERE "sessionKey" = ${sessionKey};
   `;
 }
 
-export async function createStrategyRoomConversion(
-  data: StrategyRoomConversionData
-): Promise<void> {
-  if (!isPostgresDatabaseUrl()) {
-    await prisma.strategyRoomConversion.create({ data });
-    return;
-  }
-
+export async function createStrategyRoomConversion(data: StrategyRoomConversionData): Promise<void> {
   await ensurePostgresStrategyRoomTables();
   const sql = getSql();
-
   await sql`
-    INSERT INTO "StrategyRoomConversion" (
-      "id",
-      "sessionKey",
-      "conversionType",
-      "metadata",
-      "canonicalSnapshot"
-    )
-    VALUES (
-      ${makePersistenceId("src")},
-      ${data.sessionKey},
-      ${data.conversionType},
-      ${data.metadata},
-      ${data.canonicalSnapshot}
-    );
+    INSERT INTO "StrategyRoomConversion" ("id","sessionKey","conversionType","metadata","canonicalSnapshot")
+    VALUES (${makePersistenceId("src")},${data.sessionKey},${data.conversionType},${data.metadata},${data.canonicalSnapshot});
   `;
 }
 
-export async function markStrategyRoomConversion(
-  sessionKey: string,
-  conversionType: string,
-  canonicalSnapshot: NullableString
-): Promise<void> {
-  if (!isPostgresDatabaseUrl()) {
-    await prisma.strategyRoomSession.updateMany({
-      where: { sessionKey },
-      data: {
-        canonicalSnapshot,
-        lastConversionAt: new Date(),
-        lastConversionType: conversionType,
-      },
-    });
-    return;
-  }
-
+export async function markStrategyRoomConversion(sessionKey: string, conversionType: string, canonicalSnapshot: NullableString): Promise<void> {
   await ensurePostgresStrategyRoomTables();
   const sql = getSql();
-
   await sql`
     UPDATE "StrategyRoomSession"
-    SET
-      "canonicalSnapshot" = ${canonicalSnapshot},
-      "lastConversionAt" = CURRENT_TIMESTAMP,
-      "lastConversionType" = ${conversionType},
-      "updatedAt" = CURRENT_TIMESTAMP
+    SET "canonicalSnapshot" = ${canonicalSnapshot}, "lastConversionAt" = CURRENT_TIMESTAMP, "lastConversionType" = ${conversionType}, "updatedAt" = CURRENT_TIMESTAMP
     WHERE "sessionKey" = ${sessionKey};
   `;
 }
