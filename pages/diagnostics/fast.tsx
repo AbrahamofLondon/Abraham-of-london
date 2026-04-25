@@ -23,6 +23,7 @@ import { synthesise, buildDeterministicOutput, type GovernedSynthesis, type Synt
 import { forecastDefaultPath, controlShiftSummary } from "@/lib/decision/default-path-forecast";
 import { createSpine, type IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { saveSpineToSession, persistSpineToDB } from "@/lib/decision/spine-persistence";
+import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
 
 const GOLD = "#C9A96E";
 const RED = "rgba(252,165,165,";
@@ -139,6 +140,9 @@ const FastDiagnosticPage: NextPage = () => {
       setSpine(newSpine);
       saveSpineToSession(newSpine);
       void persistSpineToDB(newSpine);
+
+      // Schedule behavioural pressure loop (48h / 7d / 14d follow-up)
+      registerPressureLoopFromSpine(newSpine);
       setSynthesis(result.synthesis);
       setSynthesisSource(result.source);
       if (result.arbiterMismatchMessage) setArbiterMessage(result.arbiterMismatchMessage);

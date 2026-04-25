@@ -59,6 +59,7 @@ import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
 import { getInheritedContext } from "@/lib/decision/spine-guard";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { generateAdaptiveQuestions, type AdaptiveQuestion } from "@/lib/decision/adaptive-question-engine";
+import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -752,6 +753,9 @@ export default function TeamAssessmentPage() {
     });
     setSubmitResult(res);
     trackStageComplete("team", "diagnostic", "/diagnostics/enterprise-assessment");
+
+    // Register pressure loop for follow-up
+    registerPressureLoopFromSpine(spine);
 
     // Write team findings back into the constitutional thread
     mergeTeamFindingsIntoThread({

@@ -55,6 +55,7 @@ import ProductAdvantageBlocks from "@/components/diagnostics/results/ProductAdva
 import { buildConstitutionalResult } from "@/lib/diagnostics/assessment-result-builders";
 import { detectSignal } from "@/lib/diagnostics/signal-detector";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
+import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
 
 function readinessNumeric(tier: string): number {
   const map: Record<string, number> = { FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 };
@@ -624,6 +625,8 @@ export default function ConstitutionalDiagnosticSuite() {
           },
         };
         saveConstitutionalThread(enrichedThread);
+        // Register pressure loop for follow-up
+        registerPressureLoopFromSpine();
       }
       // Extract and merge tension signals into cross-stage thread
       if (decision && scores) {

@@ -66,6 +66,7 @@ import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
 import { getInheritedContext } from "@/lib/decision/spine-guard";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { generateAdaptiveQuestions, type AdaptiveQuestion } from "@/lib/decision/adaptive-question-engine";
+import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -783,6 +784,9 @@ export default function EnterpriseAssessmentPage() {
       .map(b => ({ id: b.id, title: b.title, pct: sections.find(s => s.id === b.id)?.pct ?? 0 }))
       .filter(b => b.pct < 50)
       .map(b => b.title);
+
+    // Register pressure loop for follow-up
+    registerPressureLoopFromSpine(entSpine);
 
     mergeEnterpriseFindingsIntoThread({
       completedAt: new Date().toISOString(),
