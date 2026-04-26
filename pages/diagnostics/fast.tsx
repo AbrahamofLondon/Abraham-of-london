@@ -24,6 +24,8 @@ import { forecastDefaultPath, controlShiftSummary } from "@/lib/decision/default
 import { createSpine, type IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { saveSpineToSession, persistSpineToDB } from "@/lib/decision/spine-persistence";
 import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
+import DeterminismProof from "@/components/Intelligence/DeterminismProof";
+import DecisionTracePanel from "@/components/Intelligence/DecisionTracePanel";
 
 const GOLD = "#C9A96E";
 const RED = "rgba(252,165,165,";
@@ -575,6 +577,12 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
                 <ArrowRight style={{ width: 12, height: 12, color: "rgba(255,255,255,0.25)", flexShrink: 0, marginLeft: "1rem" }} />
               </Link>
+            </div>
+
+            {/* ═══ DETERMINISM PROOF + DECISION TRACE ═══ */}
+            <div className="mt-6 space-y-2">
+              <DeterminismProof spine={spine} compact />
+              <DecisionTracePanel spine={spine} />
             </div>
 
             {/* ═══ MICRO-CONVERSION FEEDBACK ═══ */}

@@ -122,22 +122,73 @@ async function getPrismaClient() {
 }
 
 export async function GET(req: NextRequest) {
-  // STUB: db.marketData not in schema (C10 debt).
-  // ExecutiveReportService.generateMarketAnalysisReport requires db.marketData
-  // which does not exist in the current Prisma schema. Returning honest 503
-  // until the market data ingestion pipeline is configured.
-  return NextResponse.json(
-    {
-      error: "Market intelligence pipeline launching soon",
-      code:  "MARKET_INTELLIGENCE_COMING_SOON",
-      message:
-        "Executive reporting is available via the assessment ladder. Market data integration is in active development.",
-    },
-    { status: 503 }
-  );
+  // Deterministic executive report from spine + domain scores + contradiction signals.
+  // No market data required. No hallucinated numbers.
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
 
-  // ── The handler below is preserved intact for when C10 is resolved. ────────
-  /* eslint-disable no-unreachable */
+  try {
+    const { loadSpineFromJourney } = await import("@/lib/decision/spine-persistence");
+    const { prisma } = await import("@/lib/prisma");
+    const spine = await loadSpineFromJourney(session.user.email, prisma as any);
+
+    if (!spine) {
+      return NextResponse.json({
+        error: "No decision spine found",
+        message: "Complete the diagnostic ladder to generate an executive report. Start at /diagnostics/fast.",
+      }, { status: 404 });
+    }
+
+    const cost = spine.economics?.estimatedMonthlyCost ?? 0;
+    const condition = spine.deterministic?.conditionClass ?? "unknown";
+    const contradiction = spine.synthesis?.primaryContradiction ?? spine.deterministic?.contradictionSet?.[0] ?? null;
+    const move = spine.synthesis?.concreteMove ?? null;
+    const forecast = spine.forecast;
+
+    return NextResponse.json({
+      protocol: PROTOCOL_VERSION,
+      node: NODE,
+      apiVersion: API_VERSION,
+      generatedAt: new Date().toISOString(),
+      deterministic: true,
+      report: {
+        conditionClass: condition,
+        positionStatement: spine.synthesis?.verdict ?? `${condition} condition detected. Structural analysis required.`,
+        contradiction,
+        costExposure: cost > 0 ? {
+          monthly: cost,
+          quarterly: cost * 3,
+          annual: cost * 12,
+          basis: "respondent-stated",
+        } : null,
+        decisionOwner: spine.case?.claimedOwner ?? null,
+        falseAuthority: spine.flags?.falseAuthority ?? false,
+        requiredAction: move,
+        defaultPath: forecast ? {
+          sevenDays: forecast.sevenDays,
+          thirtyDays: forecast.thirtyDays,
+          ninetyDays: forecast.ninetyDays,
+          optionDecayRate: forecast.optionDecayRate,
+          controlShiftProbability: forecast.controlShiftProbability,
+        } : null,
+        confidenceBand: spine.c3?.confidenceBand ?? "low",
+        integrityScore: spine.integrityScore ?? 1,
+        pressureIndex: spine.pressureIndex ?? 0,
+        stagesCompleted: spine.history?.map((h: any) => h.stage) ?? [],
+        certaintyBoundary: spine.synthesis?.certaintyBoundary ?? "Based on respondent-stated data from a single assessment session.",
+      },
+    }, { status: 200 });
+  } catch (error) {
+    console.error("[executive-report] Error:", error);
+    return NextResponse.json({ error: "Failed to generate report" }, { status: 500 });
+  }
+}
+
+// ── Legacy market data handler preserved for future C10 resolution ──────────
+/* eslint-disable @typescript-eslint/no-unused-vars */
+async function _legacyMarketDataHandler(req: NextRequest) {
   const startTime = Date.now();
 
   try {
