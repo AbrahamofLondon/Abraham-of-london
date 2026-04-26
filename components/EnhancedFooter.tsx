@@ -299,7 +299,7 @@ export default function EnhancedFooter(): React.ReactElement {
     { label: "Contact", href: "/contact" },
   ],
   "Trust & Proof": [
-    { label: "Founder", href: "/founders" },
+    { label: "Founder", href: "/about/founder" },
     { label: "Verification", href: "/verification" },
     { label: "Trust", href: "/trust" },
     { label: "Foundations", href: "/foundations" },
