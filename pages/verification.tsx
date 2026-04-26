@@ -33,8 +33,8 @@ const VerificationPage: NextPage = () => (
             <div className="mt-3 space-y-1 text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
               <p>Abraham of London — United Kingdom</p>
               <p>Alomarada Ltd — UK registered company</p>
-              <a href="https://find-and-update.company-information.service.gov.uk/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1" style={{ color: `${GOLD}90`, fontSize: "0.82rem" }}>
-                Companies House record <ExternalLink style={{ width: 9, height: 9 }} />
+              <a href="https://find-and-update.company-information.service.gov.uk/company/11549053/officers" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1" style={{ color: `${GOLD}90`, fontSize: "0.82rem" }}>
+                Companies House — Alomarada Ltd <ExternalLink style={{ width: 9, height: 9 }} />
               </a>
             </div>
           </section>
@@ -96,7 +96,17 @@ const VerificationPage: NextPage = () => (
           </div>
         </div>
 
-        <p className="mt-10" style={{ ...mono, fontSize: "6px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.10)" }}>
+        {/* Cross-links */}
+        <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Next verification steps</span>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href="/evidence" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>See applied evidence</Link>
+            <Link href="/trust" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Trust boundaries</Link>
+            <Link href="/foundations" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Intellectual foundations</Link>
+          </div>
+        </div>
+
+        <p className="mt-8" style={{ ...mono, fontSize: "6px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.10)" }}>
           Developed by Abraham Adaramola · Founder, Abraham of London
         </p>
       </div>

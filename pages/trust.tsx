@@ -83,8 +83,19 @@ const TrustPage: NextPage = () => (
           </section>
         </div>
 
+        {/* Cross-links: validate before you enter */}
+        <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Validate before you enter</span>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href="/verification" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Verify credentials</Link>
+            <Link href="/foundations" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Intellectual foundations</Link>
+            <Link href="/evidence" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Applied evidence</Link>
+            <Link href="/playbooks" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Public playbooks</Link>
+          </div>
+        </div>
+
         {/* CTA */}
-        <div className="mt-8">
+        <div className="mt-6">
           <Link href="/diagnostics/fast" className="inline-flex items-center gap-3" style={{ padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
             Start with the stuck decision <ArrowRight style={{ width: 11, height: 11 }} />
           </Link>

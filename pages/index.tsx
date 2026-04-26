@@ -3174,6 +3174,21 @@ const HomePage: NextPage<HomePageProps> = ({
         latestReport={latestReport}
       />
 
+      {/* 7.5. Trust strip */}
+      <div className="mx-auto max-w-[1100px] px-6 py-10 lg:px-12">
+        <div style={{ border: "1px solid rgba(255,255,255,0.04)", padding: "1.25rem" }}>
+          <p className="text-center" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.75rem" }}>
+            Before you enter the system
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/verification" className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)", padding: "4px 12px", border: "1px solid rgba(255,255,255,0.06)" }}>Verify the founder</Link>
+            <Link href="/trust" className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)", padding: "4px 12px", border: "1px solid rgba(255,255,255,0.06)" }}>Read trust boundaries</Link>
+            <Link href="/evidence" className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)", padding: "4px 12px", border: "1px solid rgba(255,255,255,0.06)" }}>See applied evidence</Link>
+            <Link href="/foundations" className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)", padding: "4px 12px", border: "1px solid rgba(255,255,255,0.06)" }}>Review foundations</Link>
+          </div>
+        </div>
+      </div>
+
       {/* 8. Final action */}
       <HomeFinalCta intelligenceHref={intelligenceHref} />
     </Layout>

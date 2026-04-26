@@ -1962,6 +1962,27 @@ model UserPreference {
   @@map("user_preferences")
 }
 
+model UserIntegration {
+  id           String    @id @default(cuid())
+  userId       String
+  provider     String    // "google" | "slack" | "jira" | "linear" | "github" | "notion"
+  accessToken  String    // encrypted at rest via lib/integrations/encryption.ts
+  refreshToken String?   // encrypted at rest
+  tokenExpiry  DateTime
+  scopes       String    @default("")
+  status       String    @default("active") // "active" | "expired" | "revoked"
+  lastSyncAt   DateTime?
+  metadata     String?   @default("{}")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider])
+  @@index([status])
+  @@map("user_integrations")
+}
+
 model StrategyInquiry {
   id        String             @id @default(cuid())
   name      String
@@ -3114,3 +3135,32 @@ model CalibrationEvent {
   @@index([applied])
   @@map("calibration_events")
 }
+
+model PatternBreakerContract {
+  id                    String   @id @default(cuid())
+  source                String
+  sourceId              String?
+  ownerName             String?
+  ownerEmail            String?
+  commitment            String
+  avoidedPattern        String?
+  consequenceOfInaction String?
+  canonSignals          Json?
+  canonDefinitions      Json?
+  dueAt                 DateTime
+  checkpoints           Json?
+  status                String   @default("active")
+  verificationStatus    String   @default("pending")
+  breachCount           Int      @default(0)
+  escalationLevel       String   @default("none")
+  metadata              Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([ownerEmail])
+  @@index([source])
+  @@index([status])
+  @@index([dueAt])
+  @@map("pattern_breaker_contracts")
+}
+

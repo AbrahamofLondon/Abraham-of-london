@@ -298,6 +298,14 @@ export default function EnhancedFooter(): React.ReactElement {
     { label: "Gatherings", href: "/events" },
     { label: "Contact", href: "/contact" },
   ],
+  "Trust & Proof": [
+    { label: "Founder", href: "/founders" },
+    { label: "Verification", href: "/verification" },
+    { label: "Trust", href: "/trust" },
+    { label: "Foundations", href: "/foundations" },
+    { label: "Evidence", href: "/evidence" },
+    { label: "Playbooks", href: "/playbooks" },
+  ],
   Governance: [
     { label: "About", href: "/about" },
     { label: "Method", href: "/method" },

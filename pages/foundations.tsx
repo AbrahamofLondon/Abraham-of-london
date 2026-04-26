@@ -5,6 +5,7 @@
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import Layout from "@/components/Layout";
 
 const GOLD = "#C9A96E";
@@ -61,6 +62,17 @@ const FoundationsPage: NextPage = () => (
         <p className="mt-8 text-sm" style={{ color: "rgba(255,255,255,0.25)", lineHeight: 1.7, fontStyle: "italic" }}>
           The Canon builds on these traditions but does not replicate them. Its originality lies in structured synthesis and application to modern decision authority challenges.
         </p>
+
+        {/* Cross-links: from foundations to application */}
+        <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>From foundations to application</span>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href="/evidence" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Applied evidence</Link>
+            <Link href="/playbooks" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Public playbooks</Link>
+            <Link href="/verification" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Verify credentials</Link>
+            <Link href="/canon/glossary" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: `1px solid ${GOLD}12`, color: `${GOLD}60` }}>Canon glossary</Link>
+          </div>
+        </div>
 
         <p className="mt-8" style={{ ...mono, fontSize: "6px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.10)" }}>
           Developed by Abraham Adaramola · Founder, Abraham of London

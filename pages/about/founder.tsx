@@ -109,10 +109,24 @@ const FounderPage: NextPage = () => (
             <a href="https://www.linkedin.com/company/abraham-of-london/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs" style={{ color: `${GOLD}AA` }}>
               LinkedIn <ExternalLink style={{ width: 10, height: 10 }} />
             </a>
-            <a href="https://find-and-update.company-information.service.gov.uk/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs" style={{ color: `${GOLD}AA` }}>
-              Companies House <ExternalLink style={{ width: 10, height: 10 }} />
+            <a href="https://find-and-update.company-information.service.gov.uk/company/11549053/officers" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs" style={{ color: `${GOLD}AA` }}>
+              Companies House — Alomarada Ltd <ExternalLink style={{ width: 10, height: 10 }} />
             </a>
           </div>
+        </div>
+
+        {/* Cross-links to trust surfaces */}
+        <div className="mt-6 flex flex-wrap gap-3">
+          {[
+            { label: "Verify credentials", href: "/verification" },
+            { label: "Trust boundaries", href: "/trust" },
+            { label: "Applied evidence", href: "/evidence" },
+            { label: "Intellectual foundations", href: "/foundations" },
+          ].map((link) => (
+            <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>
+              {link.label}
+            </Link>
+          ))}
         </div>
 
         {/* Positioning */}
