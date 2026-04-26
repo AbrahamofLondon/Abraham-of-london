@@ -118,6 +118,19 @@ export default function EvidencePage() {
               }}>
                 These are not opinions. These are structured readings of conditions that required decisions.
               </p>
+
+              <div style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", padding: "4px 10px", border: "1px solid rgba(201,169,110,0.15)" }}>
+                  5 outcome-verified cases
+                </div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  14–60 day enforcement windows
+                </div>
+              </div>
+
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.15)", marginTop: "0.75rem", maxWidth: "50ch" }}>
+                All cases anonymised due to commercial confidentiality. Outcome metrics preserved and auditable at system level.
+              </p>
             </div>
           </div>
         </section>
