@@ -1,186 +1,187 @@
-/* lib/server/auth/tokenStore.redis.ts - FINAL SSOT ALIGNED */
-// Type-only import keeps the Redis class name available for annotations
-// without pulling @upstash/redis/nodejs.mjs into the static module graph
-// at build time. The main entry of @upstash/redis evaluates
-// `process.version` at import time which crashes the Edge runtime the
-// moment webpack traces any static import of this file into an edge
-// chunk — even if the file is only used from Node routes in practice.
+/* lib/server/auth/tokenStore.redis.ts - REDIS PRIMARY + POSTGRES FALLBACK */
+// Redis remains the fast-path. Postgres is the authoritative fallback.
+// Redis failure never breaks auth. System becomes resilient without changing behaviour.
 //
-// The client is lazy-initialised via a singleton getter that uses a
-// dynamic import(). Webpack treats the dynamic import as a code-split
-// point and does not bundle @upstash/redis into chunks that never
-// actually call getRedis().
+// Type-only import keeps the Redis class name available for annotations
+// without pulling @upstash/redis/nodejs.mjs into the static module graph.
 import type { Redis } from '@upstash/redis';
 import { type AccessTier, normalizeUserTier } from "@/lib/access/tier-policy";
 
-let _redis: Redis | null = null;
+// ─────────────────────────────────────────────────────────────────────────────
+// SAFE REDIS SINGLETON — never throws unhandled
+// ─────────────────────────────────────────────────────────────────────────────
 
-async function getRedis(): Promise<Redis> {
-  if (!_redis) {
+let _redis: Redis | null = null;
+let _redisAttempted = false;
+
+async function getRedis(): Promise<Redis | null> {
+  if (_redis) return _redis;
+  if (_redisAttempted) return null;
+
+  _redisAttempted = true;
+  try {
     const mod = await import('@upstash/redis');
     _redis = mod.Redis.fromEnv();
-  }
-  return _redis;
-}
-
-/**
- * FIXED: Added verifySession to satisfy lib/inner-circle/access.server.ts
- * Bridges raw Redis data into the authentication clearance logic.
- */
-export async function verifySession(token: string): Promise<{
-  ok: boolean;
-  valid: boolean;
-  tier: AccessTier;
-  reason?: string;
-  expiresAt?: string;
-}> {
-  try {
-    const redis = await getRedis();
-    const [tier, userData] = await Promise.all([
-      redis.get<string>(`session:${token}:tier`),
-      redis.get<any>(`session:${token}:user`),
-    ]);
-
-    if (!tier) {
-      return {
-        ok: true,
-        valid: false,
-        tier: "public",
-        reason: "SESSION_NOT_FOUND"
-      };
-    }
-
-    return {
-      ok: true,
-      valid: true,
-      tier: normalizeUserTier(tier),
-      expiresAt: userData?.expiresAt || new Date(Date.now() + 86400000).toISOString()
-    };
-  } catch (error) {
-    console.error("[tokenStore] verifySession critical failure:", error);
-    return {
-      ok: false,
-      valid: false,
-      tier: "public",
-      reason: "INTERNAL_REDIS_ERROR"
-    };
-  }
-}
-
-/**
- * Checks the session tier stored in Redis.
- */
-export async function getSessionTier(token: string): Promise<AccessTier | null> {
-  try {
-    const redis = await getRedis();
-    const tier = await redis.get<string>(`session:${token}:tier`);
-    if (!tier) return null;
-    return normalizeUserTier(tier);
-  } catch (error) {
-    console.error("[tokenStore] Error getting session tier:", error);
+    return _redis;
+  } catch {
     return null;
   }
 }
 
-/**
- * Stores session tier in Redis
- */
-export async function setSessionTier(
-  token: string,
-  tier: string | AccessTier,
-  expirySeconds: number = 7 * 24 * 60 * 60 // 7 days default
-): Promise<void> {
-  try {
-    const redis = await getRedis();
-    const normalized = normalizeUserTier(tier);
-    await redis.setex(`session:${token}:tier`, expirySeconds, normalized);
+// ─────────────────────────────────────────────────────────────────────────────
+// POSTGRES FALLBACK — lazy import to avoid circular deps
+// ─────────────────────────────────────────────────────────────────────────────
 
-    await redis.setex(`session:${token}:metadata`, expirySeconds, {
-      storedAt: new Date().toISOString(),
-      originalTier: tier,
-      normalizedTier: normalized,
-    });
-  } catch (error) {
-    console.error("[tokenStore] Error setting session tier:", error);
-  }
-}
-
-/**
- * Removes the session from the cache.
- */
-export async function revokeSession(token: string): Promise<void> {
-  try {
-    const redis = await getRedis();
-    await redis.del(`session:${token}:tier`);
-    await redis.del(`session:${token}:metadata`);
-    await redis.del(`session:${token}:user`);
-  } catch (error) {
-    console.error("[tokenStore] Error revoking session:", error);
-  }
-}
-
-/**
- * Helper to create a session with proper tier
- */
-export async function createSession(
-  token: string,
-  userData: {
-    tier: string | AccessTier;
-    userId?: string;
-    email?: string;
-  },
-  expirySeconds: number = 7 * 24 * 60 * 60
-): Promise<void> {
-  const normalizedTier = normalizeUserTier(userData.tier);
-  const redis = await getRedis();
-
-  await Promise.all([
-    setSessionTier(token, normalizedTier, expirySeconds),
-    redis.setex(`session:${token}:user`, expirySeconds, {
-      userId: userData.userId,
-      email: userData.email,
-      tier: normalizedTier,
-      createdAt: new Date().toISOString(),
-    }),
-  ]);
-}
-
-/**
- * Get user data from session
- */
-export async function getSessionUser(token: string): Promise<{
-  userId?: string;
-  email?: string;
-  tier?: AccessTier;
+async function pgVerifySession(token: string): Promise<{
+  ok: boolean; valid: boolean; tier: AccessTier; memberId?: string | null; reason?: string; expiresAt?: string;
 } | null> {
   try {
-    const redis = await getRedis();
-    const [tier, userData] = await Promise.all([
-      redis.get<string>(`session:${token}:tier`),
-      redis.get<Record<string, any>>(`session:${token}:user`),
-    ]);
-
-    if (!tier && !userData) return null;
-
-    return {
-      tier: tier ? normalizeUserTier(tier) : undefined,
-      userId: userData?.userId,
-      email: userData?.email,
-    };
-  } catch (error) {
-    console.error("[tokenStore] Error getting session user:", error);
-    return null;
-  }
+    const pg = await import("./tokenStore.postgres");
+    const result = await pg.verifySession(token);
+    if (!result.ok) return null;
+    if (!result.valid) return { ok: true, valid: false, tier: "public", reason: result.reason };
+    return { ok: true, valid: true, tier: normalizeUserTier(result.tier), memberId: result.memberId ?? null, expiresAt: result.expiresAt };
+  } catch { return null; }
 }
 
-// Maintenance Exports
+async function pgGetSessionTier(token: string): Promise<AccessTier | null> {
+  try {
+    const pg = await import("./tokenStore.postgres");
+    const tier = await pg.getSessionTier(token);
+    return tier ? normalizeUserTier(tier) : null;
+  } catch { return null; }
+}
+
+async function pgGetSessionUser(token: string): Promise<{ userId?: string; email?: string; tier?: AccessTier } | null> {
+  try {
+    const pg = await import("./tokenStore.postgres");
+    const ctx = await pg.getSessionContext(token);
+    if (!ctx.ok || !ctx.valid) return null;
+    return { userId: ctx.memberId ?? undefined, email: ctx.email ?? undefined, tier: ctx.tier ? normalizeUserTier(ctx.tier) : undefined };
+  } catch { return null; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VERIFY SESSION — Redis primary, Postgres fallback
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function verifySession(token: string): Promise<{
+  ok: boolean; valid: boolean; tier: AccessTier; reason?: string; expiresAt?: string;
+}> {
+  // 1. Try Redis
+  const redis = await getRedis();
+  if (redis) {
+    try {
+      const [tier, userData] = await Promise.all([
+        redis.get<string>(`session:${token}:tier`),
+        redis.get<any>(`session:${token}:user`),
+      ]);
+      if (tier) {
+        return { ok: true, valid: true, tier: normalizeUserTier(tier), expiresAt: userData?.expiresAt || new Date(Date.now() + 86400000).toISOString() };
+      }
+      // Redis reachable but no session — try Postgres (session may not be cached)
+    } catch {
+      console.warn("[AUTH_FALLBACK] Redis error during verifySession, falling back to Postgres");
+    }
+  } else {
+    console.warn("[AUTH_FALLBACK] Redis unavailable, using Postgres");
+  }
+
+  // 2. Fallback to Postgres
+  const pgResult = await pgVerifySession(token);
+  if (pgResult) return pgResult;
+
+  // 3. No session
+  return { ok: true, valid: false, tier: "public", reason: "SESSION_NOT_FOUND" };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET SESSION TIER — Redis primary, Postgres fallback
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function getSessionTier(token: string): Promise<AccessTier | null> {
+  const redis = await getRedis();
+  if (redis) {
+    try {
+      const tier = await redis.get<string>(`session:${token}:tier`);
+      if (tier) return normalizeUserTier(tier);
+    } catch { /* fall through */ }
+  }
+  return pgGetSessionTier(token);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SET SESSION TIER — Redis only (write-through cache)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function setSessionTier(token: string, tier: string | AccessTier, expirySeconds: number = 7 * 24 * 60 * 60): Promise<void> {
+  const redis = await getRedis();
+  if (!redis) return;
+  try {
+    const normalized = normalizeUserTier(tier);
+    await redis.setex(`session:${token}:tier`, expirySeconds, normalized);
+    await redis.setex(`session:${token}:metadata`, expirySeconds, { storedAt: new Date().toISOString(), originalTier: tier, normalizedTier: normalized });
+  } catch { /* write failure non-critical */ }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REVOKE SESSION — Redis cache invalidation only
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function revokeSession(token: string): Promise<void> {
+  const redis = await getRedis();
+  if (!redis) return;
+  try { await redis.del(`session:${token}:tier`); await redis.del(`session:${token}:metadata`); await redis.del(`session:${token}:user`); } catch { /* non-critical */ }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CREATE SESSION — Redis cache (Postgres is authoritative via NextAuth)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function createSession(token: string, userData: { tier: string | AccessTier; userId?: string; email?: string }, expirySeconds: number = 7 * 24 * 60 * 60): Promise<void> {
+  const normalizedTier = normalizeUserTier(userData.tier);
+  const redis = await getRedis();
+  if (!redis) return;
+  try {
+    await Promise.all([
+      setSessionTier(token, normalizedTier, expirySeconds),
+      redis.setex(`session:${token}:user`, expirySeconds, { userId: userData.userId, email: userData.email, tier: normalizedTier, createdAt: new Date().toISOString() }),
+    ]);
+  } catch { /* write failure non-critical */ }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET SESSION USER — Redis primary, Postgres fallback
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function getSessionUser(token: string): Promise<{ userId?: string; email?: string; tier?: AccessTier } | null> {
+  const redis = await getRedis();
+  if (redis) {
+    try {
+      const [tier, userData] = await Promise.all([
+        redis.get<string>(`session:${token}:tier`),
+        redis.get<Record<string, any>>(`session:${token}:user`),
+      ]);
+      if (tier || userData) {
+        return { tier: tier ? normalizeUserTier(tier) : undefined, userId: userData?.userId, email: userData?.email };
+      }
+    } catch { /* fall through */ }
+  }
+  return pgGetSessionUser(token);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAINTENANCE — Redis only (best-effort)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export async function revokeKey(keyHash: string, reason: string): Promise<void> {
   const redis = await getRedis();
-  await redis.set(`revoked_key:${keyHash}`, { revokedAt: new Date().toISOString(), reason });
+  if (!redis) return;
+  try { await redis.set(`revoked_key:${keyHash}`, { revokedAt: new Date().toISOString(), reason }); } catch { /* non-critical */ }
 }
 
 export async function isKeyRevoked(keyHash: string): Promise<boolean> {
   const redis = await getRedis();
-  const revoked = await redis.get(`revoked_key:${keyHash}`);
-  return !!revoked;
+  if (!redis) return false;
+  try { const revoked = await redis.get(`revoked_key:${keyHash}`); return !!revoked; } catch { return false; }
 }
