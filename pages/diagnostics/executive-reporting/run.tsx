@@ -1866,9 +1866,26 @@ export default function ExecutiveReportingRunPage({
   );
   const [thread, setThread] = React.useState<ConstitutionalThread | null>(null);
   const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(null);
+  const [upstreamContext, setUpstreamContext] = React.useState<{ instrumentResultId?: string; marketContextId?: string }>({});
 
   React.useEffect(() => {
     trackStageStart("executive");
+
+    // Detect upstream context from decision instruments or market intelligence
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const instrumentId = params.get("instrumentResultId");
+      const marketId = params.get("marketContextId");
+      if (instrumentId) {
+        track("er_instrument_context_detected", { instrumentResultId: instrumentId });
+        setUpstreamContext((prev) => ({ ...prev, instrumentResultId: instrumentId }));
+      }
+      if (marketId) {
+        track("er_market_context_detected", { marketContextId: marketId });
+        setUpstreamContext((prev) => ({ ...prev, marketContextId: marketId }));
+      }
+    }
+
     if (attribution?.source) {
       track("enterprise_attribution_captured", {
         source: attribution.source,

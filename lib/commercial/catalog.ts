@@ -197,7 +197,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Global Market Intelligence Report \u2014 Q1 2026",
     amount: 5900,
     displayPrice: "\u00a359",
-    stripeProductId: null,
+    stripeProductId: null, // Stripe resolves via priceId — productId for metadata only
     stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
     entitlementSlug: "global-market-intelligence-report-q1-2026",
     tier: "premium-report",

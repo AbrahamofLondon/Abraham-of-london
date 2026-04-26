@@ -60,8 +60,16 @@ function StrategyRoomGate() {
   const [directive, setDirective] = React.useState<{
     level: string; reason: string; requiredAction?: string; recommendedPath?: string; summary?: string;
   } | null>(null);
+  const [upstreamInstrument, setUpstreamInstrument] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    // Detect upstream instrument or market context
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const instrumentId = params.get("instrumentResultId");
+      if (instrumentId) setUpstreamInstrument(instrumentId);
+    }
+
     try {
       const raw = sessionStorage.getItem("aol:tension-thread");
       if (!raw) return;

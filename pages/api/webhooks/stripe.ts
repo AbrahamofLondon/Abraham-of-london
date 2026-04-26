@@ -162,6 +162,21 @@ export default async function handler(
           });
           return res.status(500).json({ error: "Entitlement sync failed" });
         }
+
+        // Send purchase confirmation email for decision instruments
+        const instrumentSlugs = ["decision-exposure-instrument", "mandate-clarity-framework", "intervention-path-selector", "operator-decision-pack"];
+        if (userEmail && instrumentSlugs.includes(paidSlug)) {
+          try {
+            const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+            await fetch(`${baseUrl}/api/decision-instruments/send-purchase-email`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: userEmail, slug: paidSlug }),
+            });
+          } catch (emailErr) {
+            console.error("[STRIPE_WEBHOOK] Purchase email failed (non-blocking):", emailErr);
+          }
+        }
       }
     }
 
