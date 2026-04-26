@@ -480,7 +480,14 @@ function DeliveryState({
   );
 }
 
-function InstrumentEnvironment({
+/**
+ * @deprecated LEGACY — no longer rendered for entitled customers.
+ * Entitled customers see "Run interactive instrument" CTA → /run.
+ * This component is retained only as PDF worksheet fallback reference.
+ * The old evidence POST has been removed.
+ * All instrument persistence now uses /api/decision-instruments/results.
+ */
+function _LegacyInstrumentEnvironment({
   instrument,
   onComplete,
 }: {
@@ -502,21 +509,20 @@ function InstrumentEnvironment({
     trackAssetComplete(instrument.slug, instrument.transition.state);
     onComplete?.();
 
-    // Persist instrument completion as evidence node in the decision graph
-    // This feeds forward into downstream diagnostics (ER, SR, longitudinal)
-    fetch("/api/diagnostics/evidence", {
+    // Persist via instrument results API
+    fetch("/api/decision-instruments/results", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        type: instrument.transition.state === "HIGH_SEVERITY" ? "CONTRADICTION" : "ACTION",
-        severity: instrument.transition.state === "HIGH_SEVERITY" ? 85 : 55,
-        confidence: 85,
-        source: "instrument",
-        decisionId: `${instrument.slug}:${instrument.transition.state}`,
-        summary: `${instrument.title} completed. Transition state: ${instrument.transition.state}. Checklist items: ${instrument.guidedChecklist.length}. Outcome: ${instrument.outcomePromise.join("; ")}.`,
-        payload: { instrument: instrument.slug, transitionState: instrument.transition.state },
+        instrumentSlug: instrument.slug,
+        version: "legacy-checklist",
+        result: {
+          transitionState: instrument.transition.state,
+          checklistItems: instrument.guidedChecklist.length,
+          completedAt: new Date().toISOString(),
+        },
       }),
-    }).catch(() => {});
+    }).catch((err) => { console.error("[instrument-legacy] Result persist failed:", err); });
   }
 
   const transition = instrument.transition;

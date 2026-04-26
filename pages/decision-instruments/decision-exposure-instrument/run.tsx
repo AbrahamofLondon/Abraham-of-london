@@ -17,7 +17,7 @@ const DecisionExposureRun: NextPage = () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ instrumentSlug: "decision-exposure-instrument", version: r.version, scores: r.dimensionScores, result: r }),
-    }).catch(() => {});
+    }).catch((err) => { console.error("[instrument] Result persist failed:", err); });
   }
 
   return (

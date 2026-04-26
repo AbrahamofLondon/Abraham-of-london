@@ -11,7 +11,7 @@ const InterventionPathRun: NextPage = () => {
 
   async function handleComplete(r: InterventionResult) {
     setResult(r);
-    await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "intervention-path-selector", version: r.version, result: r }) }).catch(() => {});
+    await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "intervention-path-selector", version: r.version, result: r }) }).catch((err) => { console.error("[instrument] Result persist failed:", err); });
   }
 
   return (

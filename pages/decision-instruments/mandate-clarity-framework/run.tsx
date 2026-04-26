@@ -11,7 +11,7 @@ const MandateClarityRun: NextPage = () => {
 
   async function handleComplete(r: MandateResult) {
     setResult(r);
-    await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "mandate-clarity-framework", version: r.version, scores: r.blockScores, result: r }) }).catch(() => {});
+    await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "mandate-clarity-framework", version: r.version, scores: r.blockScores, result: r }) }).catch((err) => { console.error("[instrument] Result persist failed:", err); });
   }
 
   return (

@@ -31,7 +31,7 @@ const OperatorPackRun: NextPage = () => {
     await fetch("/api/decision-instruments/results", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ instrumentSlug: "operator-decision-pack", version: "1.0", result: { exposure, mandate, intervention: r, generatedAt: new Date().toISOString() } }),
-    }).catch(() => {});
+    }).catch((err) => { console.error("[instrument] Result persist failed:", err); });
   }
 
   const complete = stage === "dossier";
