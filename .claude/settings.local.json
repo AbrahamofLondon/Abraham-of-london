@@ -29,7 +29,31 @@
       "Bash(sed:*)",
       "Bash(pnpm build:*)",
       "Bash(npx next:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx prisma:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://www.abrahamoflondon.org/diagnostics/executive-reporting)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -L https://www.abrahamoflondon.org/diagnostics/executive-reporting)",
+      "Bash(node -e ':*)",
+      "Bash(sed -i 's|/assets/downloads/decision-exposure-instrument\\\\.pdf|/api/downloads/instrument-pdf?slug=decision-exposure-instrument|g' pages/decision-instruments/decision-exposure-instrument/run.tsx pages/decision-instruments/decision-exposure-instrument/start.tsx 'pages/decision-instruments/[slug].tsx')",
+      "Bash(sed -i 's|/assets/downloads/mandate-clarity-framework\\\\.pdf|/api/downloads/instrument-pdf?slug=mandate-clarity-framework|g' pages/decision-instruments/mandate-clarity-framework/run.tsx pages/decision-instruments/mandate-clarity-framework/start.tsx 'pages/decision-instruments/[slug].tsx')",
+      "Bash(sed -i 's|/assets/downloads/intervention-path-selector\\\\.pdf|/api/downloads/instrument-pdf?slug=intervention-path-selector|g' pages/decision-instruments/intervention-path-selector/run.tsx pages/decision-instruments/intervention-path-selector/start.tsx 'pages/decision-instruments/[slug].tsx')",
+      "Bash(sed -i 's|/assets/downloads/operator-decision-pack\\\\.pdf|/api/downloads/instrument-pdf?slug=operator-decision-pack|g' pages/decision-instruments/operator-decision-pack/start.tsx)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -L https://www.abrahamoflondon.org/diagnostics/executive-reporting/run)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://www.abrahamoflondon.org/api/analytics/executive-report)",
+      "Bash(find pages/ -name \"*.tsx\" -exec grep -l \"coming soon\\\\|placeholder\\\\|TODO\\\\|stub\\\\|empty\\\\|under construction\" {} \\\\;)",
+      "Bash(find pages/ -name \"*.tsx\" -exec grep -l \"coming soon\\\\|Coming Soon\\\\|COMING SOON\" {} \\\\;)",
+      "Bash(mv content/resources/decision-authority-matrix.mdx content/resources/strategic-frameworks/decision-authority-matrix.mdx)",
+      "Bash(mv content/toolkits/board-governance/board-governance.mdx content/toolkits/board-governance.mdx)",
+      "Bash(mv content/toolkits/board-governance/institutional-diagnostics.mdx content/toolkits/institutional-diagnostics.mdx)",
+      "Bash(node scripts/mdx-illegal-jsx-gate.mjs)",
+      "Bash(wc -l content/toolkits/*.mdx)",
+      "Bash(wc -l content/resources/strategic-frameworks/*.mdx)",
+      "Bash(find content/toolkits content/resources/strategic-frameworks -name \"*.mdx\" -exec sed -i 's/\\\\r$//' {} \\\\;)",
+      "Bash(find content/toolkits -name \"*.mdx\" -exec sed -i 's/\\\\r$//' {} \\\\;)"
     ]
   }
 }
