@@ -70,6 +70,7 @@ type InstrumentData = {
     cta: string;
     href: string;
   };
+  pdfHref?: string;
 };
 
 const INSTRUMENT_DATA: Record<string, InstrumentData> = {
@@ -133,6 +134,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`,
       href: "/diagnostics/executive-reporting",
     },
+    pdfHref: "/assets/downloads/decision-exposure-instrument.pdf",
   },
   "mandate-clarity-framework": {
     slug: "mandate-clarity-framework",
@@ -194,6 +196,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`,
       href: "/diagnostics/executive-reporting",
     },
+    pdfHref: "/assets/downloads/mandate-clarity-framework.pdf",
   },
   "intervention-path-selector": {
     slug: "intervention-path-selector",
@@ -255,6 +258,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Strategy Room · ${getProductDisplayPrice("strategy_room")}`,
       href: "/strategy-room",
     },
+    pdfHref: "/assets/downloads/intervention-path-selector.pdf",
   },
 };
 
@@ -865,7 +869,32 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
           <GoldRule />
 
           {hasAccess ? (
-            <InstrumentEnvironment instrument={instrument} onComplete={() => setFirstUseComplete(true)} />
+            <div className="py-8" style={{ maxWidth: "60ch" }}>
+              <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}06`, padding: "1.25rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.75rem" }}>
+                  Instrument unlocked
+                </div>
+                <Link
+                  href={`/decision-instruments/${instrument.slug}/run`}
+                  className="flex items-center justify-between w-full"
+                  style={{ padding: "14px 18px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase" }}
+                >
+                  Run interactive instrument
+                  <ArrowRight style={{ width: 11, height: 11 }} />
+                </Link>
+                {instrument.pdfHref && (
+                  <a
+                    href={instrument.pdfHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 mt-2"
+                    style={{ padding: "8px 18px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase" }}
+                  >
+                    Download PDF worksheet
+                  </a>
+                )}
+              </div>
+            </div>
           ) : (
             <div className="py-8" style={{ maxWidth: "65ch" }}>
               <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgb(5 6 8)", padding: "1.25rem" }}>
