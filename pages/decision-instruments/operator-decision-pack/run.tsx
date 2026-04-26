@@ -24,20 +24,27 @@ const OperatorPackRun: NextPage = () => {
 
   function handleExposure(r: ExposureResult) { setExposure(r); setStage("mandate"); }
   function handleMandate(r: MandateResult) { setMandate(r); setStage("intervention"); }
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
+
   async function handleIntervention(r: InterventionResult) {
     setIntervention(r);
     setStage("dossier");
     track("instrument_completed", { instrumentSlug: "operator-decision-pack" });
-    await fetch("/api/decision-instruments/results", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ instrumentSlug: "operator-decision-pack", version: "1.0", result: { exposure, mandate, intervention: r, generatedAt: new Date().toISOString() } }),
-    }).catch((err) => { console.error("[instrument] Result persist failed:", err); });
+    try {
+      const res = await fetch("/api/decision-instruments/results", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instrumentSlug: "operator-decision-pack", version: "1.0", result: { exposure, mandate, intervention: r, generatedAt: new Date().toISOString() } }),
+      });
+      const data = await res.json();
+      if (data.journeyKey) setResultKey(data.journeyKey);
+    } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
   const complete = stage === "dossier";
+  const nextHref = resultKey ? `/strategy-room?instrumentResultId=${encodeURIComponent(resultKey)}` : "/strategy-room";
 
   return (
-    <InstrumentShell title="Operator Decision Pack" slug="operator-decision-pack" completed={complete} nextStepLabel="Enter Strategy Room" nextStepHref="/strategy-room">
+    <InstrumentShell title="Operator Decision Pack" slug="operator-decision-pack" completed={complete} nextStepLabel="Enter Strategy Room" nextStepHref={nextHref}>
       {/* Progress */}
       <div className="flex gap-1 mb-6">
         {(["exposure", "mandate", "intervention", "dossier"] as Stage[]).map((s, i) => (

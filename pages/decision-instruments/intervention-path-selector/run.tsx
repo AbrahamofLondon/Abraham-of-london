@@ -7,15 +7,23 @@ import type { InterventionResult } from "@/lib/instruments/intervention-path/eng
 
 const InterventionPathRun: NextPage = () => {
   const [result, setResult] = React.useState<InterventionResult | null>(null);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "intervention-path-selector" }); }, []);
 
   async function handleComplete(r: InterventionResult) {
     setResult(r);
-    await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "intervention-path-selector", version: r.version, result: r }) }).catch((err) => { console.error("[instrument] Result persist failed:", err); });
+    try {
+      const res = await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "intervention-path-selector", version: r.version, result: r }) });
+      const data = await res.json();
+      if (data.journeyKey) setResultKey(data.journeyKey);
+    } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
+  const nextDest = result?.recommendedPath === "ESCALATE" ? "/strategy-room" : "/diagnostics/executive-reporting";
+  const nextHref = resultKey ? `${nextDest}?instrumentResultId=${encodeURIComponent(resultKey)}` : nextDest;
+
   return (
-    <InstrumentShell title="Intervention Path Selector" slug="intervention-path-selector" completed={!!result} pdfHref="/assets/downloads/intervention-path-selector.pdf" nextStepLabel={result?.recommendedPath === "ESCALATE" ? "Enter Strategy Room" : "See the cost you are already paying"} nextStepHref={result?.recommendedPath === "ESCALATE" ? "/strategy-room" : "/diagnostics/executive-reporting"}>
+    <InstrumentShell title="Intervention Path Selector" slug="intervention-path-selector" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=intervention-path-selector" nextStepLabel={result?.recommendedPath === "ESCALATE" ? "Enter Strategy Room" : "See the cost you are already paying"} nextStepHref={nextHref}>
       {!result ? <InterventionPathRunner onComplete={handleComplete} /> : (
         <div className="space-y-4">
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: result.executionBlocked ? "rgba(252,165,165,0.70)" : "#C9A96ECC" }}>

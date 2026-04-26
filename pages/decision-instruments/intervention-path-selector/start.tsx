@@ -24,7 +24,7 @@ const StartPage: NextPage = () => (
           <Link href="/decision-instruments/intervention-path-selector/run" className="flex items-center justify-center gap-3 w-full" style={{ padding: "14px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
             Start interactive instrument <ArrowRight style={{ width: 11, height: 11 }} />
           </Link>
-          <a href="/assets/downloads/intervention-path-selector.pdf" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full" style={{ padding: "10px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.30)", ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+          <a href="/api/downloads/instrument-pdf?slug=intervention-path-selector" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full" style={{ padding: "10px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.30)", ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
             <Download style={{ width: 10, height: 10 }} /> Download PDF worksheet
           </a>
         </div>

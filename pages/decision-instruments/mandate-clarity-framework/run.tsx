@@ -7,15 +7,22 @@ import type { MandateResult } from "@/lib/instruments/mandate-clarity/engine";
 
 const MandateClarityRun: NextPage = () => {
   const [result, setResult] = React.useState<MandateResult | null>(null);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "mandate-clarity-framework" }); }, []);
 
   async function handleComplete(r: MandateResult) {
     setResult(r);
-    await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "mandate-clarity-framework", version: r.version, scores: r.blockScores, result: r }) }).catch((err) => { console.error("[instrument] Result persist failed:", err); });
+    try {
+      const res = await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "mandate-clarity-framework", version: r.version, scores: r.blockScores, result: r }) });
+      const data = await res.json();
+      if (data.journeyKey) setResultKey(data.journeyKey);
+    } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
+  const nextHref = resultKey ? `/diagnostics/constitutional-diagnostic?instrumentResultId=${encodeURIComponent(resultKey)}` : "/diagnostics/constitutional-diagnostic";
+
   return (
-    <InstrumentShell title="Mandate Clarity Framework" slug="mandate-clarity-framework" completed={!!result} pdfHref="/assets/downloads/mandate-clarity-framework.pdf" nextStepLabel="Test the organisational structure" nextStepHref="/diagnostics/constitutional-diagnostic">
+    <InstrumentShell title="Mandate Clarity Framework" slug="mandate-clarity-framework" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=mandate-clarity-framework" nextStepLabel="Test the organisational structure" nextStepHref={nextHref}>
       {!result ? <MandateClarityRunner onComplete={handleComplete} /> : (
         <div className="space-y-4">
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: result.authorityType === "DIRECT" ? "rgba(110,231,183,0.70)" : "#C9A96ECC" }}>

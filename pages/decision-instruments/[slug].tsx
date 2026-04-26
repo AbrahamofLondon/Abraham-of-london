@@ -134,7 +134,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`,
       href: "/diagnostics/executive-reporting",
     },
-    pdfHref: "/assets/downloads/decision-exposure-instrument.pdf",
+    pdfHref: "/api/downloads/instrument-pdf?slug=decision-exposure-instrument",
   },
   "mandate-clarity-framework": {
     slug: "mandate-clarity-framework",
@@ -196,7 +196,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`,
       href: "/diagnostics/executive-reporting",
     },
-    pdfHref: "/assets/downloads/mandate-clarity-framework.pdf",
+    pdfHref: "/api/downloads/instrument-pdf?slug=mandate-clarity-framework",
   },
   "intervention-path-selector": {
     slug: "intervention-path-selector",
@@ -258,7 +258,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Strategy Room · ${getProductDisplayPrice("strategy_room")}`,
       href: "/strategy-room",
     },
-    pdfHref: "/assets/downloads/intervention-path-selector.pdf",
+    pdfHref: "/api/downloads/instrument-pdf?slug=intervention-path-selector",
   },
 };
 

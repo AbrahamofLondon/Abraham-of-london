@@ -7,27 +7,36 @@ import type { ExposureResult } from "@/lib/instruments/decision-exposure/engine"
 
 const DecisionExposureRun: NextPage = () => {
   const [result, setResult] = React.useState<ExposureResult | null>(null);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
 
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "decision-exposure-instrument" }); }, []);
 
   async function handleComplete(r: ExposureResult) {
     setResult(r);
     track("instrument_result_saved", { instrumentSlug: "decision-exposure-instrument", scoreBand: r.exposureBand });
-    await fetch("/api/decision-instruments/results", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ instrumentSlug: "decision-exposure-instrument", version: r.version, scores: r.dimensionScores, result: r }),
-    }).catch((err) => { console.error("[instrument] Result persist failed:", err); });
+    try {
+      const res = await fetch("/api/decision-instruments/results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instrumentSlug: "decision-exposure-instrument", version: r.version, scores: r.dimensionScores, result: r }),
+      });
+      const data = await res.json();
+      if (data.journeyKey) setResultKey(data.journeyKey);
+    } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
+
+  const nextHref = resultKey
+    ? `/diagnostics/executive-reporting?instrumentResultId=${encodeURIComponent(resultKey)}`
+    : "/diagnostics/executive-reporting";
 
   return (
     <InstrumentShell
       title="Decision Exposure Instrument"
       slug="decision-exposure-instrument"
       completed={!!result}
-      pdfHref="/assets/downloads/decision-exposure-instrument.pdf"
+      pdfHref="/api/downloads/instrument-pdf?slug=decision-exposure-instrument"
       nextStepLabel="See the cost you are already paying"
-      nextStepHref="/diagnostics/executive-reporting"
+      nextStepHref={nextHref}
     >
       {!result ? (
         <DecisionExposureRunner onComplete={handleComplete} />
