@@ -53,8 +53,15 @@ const FoundationsPage: NextPage = () => (
             The following are original frameworks developed by Abraham of London, derived from the traditions above but applied as structured decision systems:
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {["Alignment Index", "Decision Instruments", "Intelligence Spine", "Constitutional Diagnostic", "Strategy Room", "Evidence Ledger"].map((fw) => (
-              <div key={fw} style={{ padding: "6px 10px", border: `1px solid ${GOLD}12`, fontSize: "0.82rem", color: `${GOLD}AA` }}>{fw}</div>
+            {[
+              { label: "Alignment Index", href: "/diagnostics/purpose-alignment" },
+              { label: "Decision Instruments", href: "/decision-instruments" },
+              { label: "Intelligence Spine", href: "/diagnostics" },
+              { label: "Constitutional Diagnostic", href: "/diagnostics/constitutional-diagnostic" },
+              { label: "Strategy Room", href: "/strategy-room" },
+              { label: "Evidence Ledger", href: "/evidence" },
+            ].map((fw) => (
+              <Link key={fw.label} href={fw.href} style={{ display: "block", padding: "6px 10px", border: `1px solid ${GOLD}12`, fontSize: "0.82rem", color: `${GOLD}AA` }}>{fw.label}</Link>
             ))}
           </div>
         </div>
