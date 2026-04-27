@@ -149,12 +149,12 @@ const MethodPage: NextPage = () => (
         {/* ── CTA ── */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-4">
-            <Link href="/diagnostics/purpose-alignment" className="group inline-flex items-center gap-2 transition-all duration-200"
+            <Link href="/diagnostics/fast" className="group inline-flex items-center gap-2 transition-all duration-200"
               style={{ padding: "10px 20px", border: `1px solid ${AMBER}42`, color: AMBER, ...mono, fontSize: "8.5px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
               Run the diagnostic <ArrowRight style={{ width: 11, height: 11 }} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
-              Organisational decision? Start here
+            <Link href="/diagnostics/purpose-alignment" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+              Personal assessment &middot; Free
             </Link>
           </div>
 
