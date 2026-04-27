@@ -31,7 +31,7 @@ check("Footer: /trust", footer.includes("/trust"));
 check("Footer: /foundations", footer.includes("/foundations"));
 check("Footer: /evidence", footer.includes("/evidence"));
 check("Footer: /playbooks", footer.includes("/playbooks"));
-check("Footer: /founders", footer.includes("/founders"));
+check("Footer: /about/founder", footer.includes("/about/founder"));
 
 // About page links
 const about = read("pages/about.tsx");
