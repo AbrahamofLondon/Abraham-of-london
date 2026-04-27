@@ -383,7 +383,7 @@ const EducationResearchPage: NextPage = () => {
                 { label: "Canon", desc: "7 foundational codes governing decision authority, governance, and institutional integrity.", href: "/canon" },
                 { label: "Glossary", desc: "40 precisely defined terms. Research-grade definitions for decision, authority, drift, contradiction.", href: "/canon/glossary" },
                 { label: "Foundations", desc: "Intellectual and methodological basis. Theological, philosophical, and governance roots.", href: "/foundations" },
-                { label: "Toolkits", desc: "7 structured toolkits for decision exposure, mandate clarity, institutional drift, and governance.", href: "/resources/toolkits" },
+                { label: "Toolkits", desc: "7 structured toolkits for decision exposure, mandate clarity, institutional drift, and governance.", href: "/toolkits" },
                 { label: "Strategic Frameworks", desc: "7 frameworks for board governance, authority mapping, execution integrity, and intervention.", href: "/resources/strategic-frameworks" },
                 { label: "Editorials", desc: "Long-form analysis and applied thinking. Peer-reviewable. Citable.", href: "/editorials" },
               ].map(item => (
