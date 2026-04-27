@@ -56,6 +56,11 @@ import { buildConstitutionalResult } from "@/lib/diagnostics/assessment-result-b
 import { detectSignal } from "@/lib/diagnostics/signal-detector";
 import { inferTrajectory } from "@/lib/diagnostics/prognosis";
 import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
+import CaseActiveBanner from "@/components/diagnostics/unified/CaseActiveBanner";
+import ConsequenceTimelineBlock from "@/components/diagnostics/unified/ConsequenceTimeline";
+import LimitationsBlock from "@/components/diagnostics/unified/LimitationsBlock";
+import FeedbackLoopBlock from "@/components/diagnostics/unified/FeedbackLoop";
+import { generateConsequenceTimeline } from "@/lib/diagnostics/consequence-timeline";
 
 function readinessNumeric(tier: string): number {
   const map: Record<string, number> = { FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 };
@@ -1463,6 +1468,18 @@ export default function ConstitutionalDiagnosticSuite() {
                       </div>
                     );
                   })()}
+
+                  {/* ═══ UNIFIED CONVERSION SURFACE ═══ */}
+                  <CaseActiveBanner caseReference={`const_${scores.coherence}_${scores.authority}`} assessmentType="constitutional" />
+
+                  {(() => {
+                    const tl = generateConsequenceTimeline({ assessmentType: "constitutional", score: scores.coherence, weakestDomain: scores.authorityType === "UNCLEAR" ? "authority" : "governance" });
+                    return <ConsequenceTimelineBlock sevenDays={tl.sevenDays} thirtyDays={tl.thirtyDays} ninetyDays={tl.ninetyDays} controlShiftSummary={tl.controlShiftSummary} />;
+                  })()}
+
+                  <LimitationsBlock assessmentType="constitutional" />
+
+                  <FeedbackLoopBlock assessmentType="constitutional" />
                 </div>
 
                 {/* Right — scoring log */}
