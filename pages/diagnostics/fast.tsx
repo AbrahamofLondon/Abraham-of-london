@@ -200,15 +200,15 @@ const FastDiagnosticPage: NextPage = () => {
         <main className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: "rgb(3,3,5)" }}>
           <div className="max-w-lg w-full">
             <h1 style={{ ...serif, fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", fontWeight: 400, color: "rgba(255,255,255,0.90)", lineHeight: 1.2, textAlign: "center" }}>
-              The decision is not stuck.<br />
-              <span style={{ color: `${GOLD}CC` }}>Something is being avoided.</span>
+              You're not dealing with a strategy problem.<br />
+              <span style={{ color: `${GOLD}CC` }}>You're dealing with a decision that hasn't actually been taken.</span>
             </h1>
             <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.38)", marginTop: "1rem", textAlign: "center", maxWidth: "40ch", marginLeft: "auto", marginRight: "auto" }}>
-              Describe the decision. The system will expose the real blocker and force the next move — using your own words.
+              6 questions. No prep. If it's wrong, ignore it. If it's right, you'll know immediately.
             </p>
             <div style={{ marginTop: "2rem" }}>
               <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "0.5rem" }}>
-                In one sentence: what decision is currently stuck?
+                What decision are you unable to make right now?
               </label>
               <textarea
                 value={entryDecision}

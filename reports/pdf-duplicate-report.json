@@ -1,20 +1,45 @@
 {
-  "generatedAt": "2026-04-21T14:59:01.915Z",
+  "generatedAt": "2026-04-27T13:31:45.397Z",
   "totals": {
-    "duplicateFilenameGroups": 308,
-    "identicalDuplicateGroups": 212,
-    "divergentDuplicateGroups": 96,
-    "generatedVsStaticConflictGroups": 0
+    "duplicateFilenameGroups": 420,
+    "identicalDuplicateGroups": 208,
+    "divergentDuplicateGroups": 19,
+    "generatedVsStaticConflictGroups": 193
   },
   "byClassification": {
-    "divergent_duplicate": 96,
-    "identical_duplicate": 212
+    "generated_vs_static_conflict": 193,
+    "divergent_duplicate": 19,
+    "identical_duplicate": 208
   },
   "byRecommendedAction": {
-    "manual_resolution_required": 96,
-    "safe_redirect_candidate": 212
+    "manual_resolution_required": 212,
+    "safe_redirect_candidate": 208
   },
   "groups": [
+    {
+      "groupId": "filename:abraham-vault-pack.pdf",
+      "filename": "abraham-vault-pack.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/abraham-vault-pack.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/abraham-vault-pack.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 15011,
+          "sha256": "78c9285b51e0e76be525494205ed2bad78d09d8404179e3fc80d910a4b648215"
+        },
+        {
+          "publicUrl": "/assets/downloads/content-downloads/abraham-vault-pack.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 101315,
+          "sha256": "d32cfe1bc6d1ef6f9a70c51399f49300d9394882f60b57edd750a1f2b2ad4acc"
+        }
+      ]
+    },
     {
       "groupId": "filename:audit-of-ease.pdf",
       "filename": "audit-of-ease.pdf",
@@ -36,6 +61,54 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 79983,
           "sha256": "7d0d79cf3426b3b8c4ee249bfb262e8c99eea3f077f14d62ccd0c77822cf19e4"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:board-decision-log-template.pdf",
+      "filename": "board-decision-log-template.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/board-decision-log-template.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/board-decision-log-template.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 14973,
+          "sha256": "0c674ad1114efeffad65cda24c1459d336c450305e77c8510b44b4e3c36c8e5f"
+        },
+        {
+          "publicUrl": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 97947,
+          "sha256": "8d294f913872585d03299af62a706b3682d72817ad1ba2687ebfbc97a4592ad9"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:board-investor-onepager.pdf",
+      "filename": "board-investor-onepager.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/board-investor-onepager.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/board-investor-onepager.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 14914,
+          "sha256": "a449030de3eb0b27203a964762c609e4413f8ab5c97429e28852a7bca15d4988"
+        },
+        {
+          "publicUrl": "/assets/downloads/content-downloads/board-investor-onepager.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 87081,
+          "sha256": "8320f1147dd86dceb3415372aa1553f406ff2d8cb15c47951e339fa276d124fd"
         }
       ]
     },
@@ -328,12 +401,36 @@
       ]
     },
     {
+      "groupId": "filename:brotherhood-covenant.pdf",
+      "filename": "brotherhood-covenant.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/brotherhood-covenant.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/brotherhood-covenant.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 19624,
+          "sha256": "23feb92c675e335733cde7e9d25a9cde235e0fec2cdf51ed6d24c07c8dccd0a6"
+        },
+        {
+          "publicUrl": "/assets/downloads/content-downloads/brotherhood-covenant.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 142751,
+          "sha256": "bc775fa2bc42e118fc1ae855030018da4864607a9156667fc21061be0be7b9f0"
+        }
+      ]
+    },
+    {
       "groupId": "filename:brotherhood-leader-guide.pdf",
       "filename": "brotherhood-leader-guide.pdf",
-      "classification": "identical_duplicate",
-      "recommendedAction": "safe_redirect_candidate",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/brotherhood-leader-guide.pdf",
-      "uniqueHashCount": 1,
+      "uniqueHashCount": 2,
       "files": [
         {
           "publicUrl": "/assets/downloads/brotherhood-leader-guide.pdf",
@@ -341,6 +438,13 @@
           "canonicalityStatus": "candidate_canonical",
           "fileSizeBytes": 21546,
           "sha256": "9ca089911051f41d0044eaf8cf4a47f039ffa5d90d81987cdd97f2f99eee16ed"
+        },
+        {
+          "publicUrl": "/assets/downloads/lib-pdf/brotherhood-leader-guide.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 264122,
+          "sha256": "6b68263e71f0c1db2752c15d521674d77767f9dfb3b2c87741032d2052c531fa"
         },
         {
           "publicUrl": "/resources/brotherhood-leader-guide.pdf",
@@ -354,10 +458,10 @@
     {
       "groupId": "filename:brotherhood-starter-kit.pdf",
       "filename": "brotherhood-starter-kit.pdf",
-      "classification": "identical_duplicate",
-      "recommendedAction": "safe_redirect_candidate",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/brotherhood-starter-kit.pdf",
-      "uniqueHashCount": 1,
+      "uniqueHashCount": 2,
       "files": [
         {
           "publicUrl": "/assets/downloads/brotherhood-starter-kit.pdf",
@@ -365,6 +469,13 @@
           "canonicalityStatus": "candidate_canonical",
           "fileSizeBytes": 19485,
           "sha256": "c7c8c2dde08d6feb0eae2da873af86654dc48759cd025d3c989e1ef2d52cf99c"
+        },
+        {
+          "publicUrl": "/assets/downloads/lib-pdf/brotherhood-starter-kit.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 353980,
+          "sha256": "a33a1356cf1332dda6a1330877b3cae9764bf581095e84e22647bf294984b21d"
         },
         {
           "publicUrl": "/resources/brotherhood-starter-kit.pdf",
@@ -396,6 +507,30 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 19114,
           "sha256": "c05427caee3c3b4afa25c1aadb6f6d9f55a8fc6fe7947ca9c7e27f69f90e7e53"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:busy-is-not-the-same-as-anchored.pdf",
+      "filename": "busy-is-not-the-same-as-anchored.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/busy-is-not-the-same-as-anchored.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/busy-is-not-the-same-as-anchored.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 92972,
+          "sha256": "5b4985b485c923baef77046ed75a0dbd61a936380bfa8ae62c7f4a7b4d139efe"
+        },
+        {
+          "publicUrl": "/assets/downloads/content-downloads/busy-is-not-the-same-as-anchored.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93181,
+          "sha256": "9ffd54aaa60dfeb66f15dd338bbd8d5b28cdb264774a4b7f0419600536293f25"
         }
       ]
     },
@@ -564,6 +699,54 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 93707,
           "sha256": "eb8ce5ec3d43fe2929f628a8b7b4398b47bac1a68c42af76bae5129545698a09"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:canon-volume-iv-diagnostic-toolkit.pdf",
+      "filename": "canon-volume-iv-diagnostic-toolkit.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 29961,
+          "sha256": "0ef6055b0876bc3889a37656d13de7a77f5dde7e3b976bbd435646b8a481daae"
+        },
+        {
+          "publicUrl": "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 163335,
+          "sha256": "c838dd46dd8136d77ec086dc97ac6f4945363ea7fe1ebd27d6295705040f2ef1"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "filename": "canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 21923,
+          "sha256": "75ccfbdc08c3ec48a752fb845442fc2a89c3571b1afa9ef5a8434405cfe35483"
+        },
+        {
+          "publicUrl": "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 141965,
+          "sha256": "451ee98f60ed065fc6aeac6e24e63e53807d467b2ee2412a6ae996bd9f32a062"
         }
       ]
     },
@@ -2440,6 +2623,30 @@
       ]
     },
     {
+      "groupId": "filename:communication-script-bpf.pdf",
+      "filename": "communication-script-bpf.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/communication-script-bpf.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/communication-script-bpf.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 20740,
+          "sha256": "8926e0afb6696cb6ba4a5dfca8c2e1b8fbdcf22d995ad9a10c5ec11d0f6808c8"
+        },
+        {
+          "publicUrl": "/assets/downloads/content-downloads/communication-script-bpf.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 145580,
+          "sha256": "8ff99682ee7860d63d61a1812feeade444cd1a0a8316163865ddad4d33ca6d42"
+        }
+      ]
+    },
+    {
       "groupId": "filename:conviction-vs-coercion.pdf",
       "filename": "conviction-vs-coercion.pdf",
       "classification": "divergent_duplicate",
@@ -2488,6 +2695,78 @@
       ]
     },
     {
+      "groupId": "filename:decision-log-template.pdf",
+      "filename": "decision-log-template.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/decision-log-template.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/decision-log-template.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 89561,
+          "sha256": "5018038b4360e9ef4fd3ea1d9c4b9cbbecc95f748cc8fcda5450a09125d6635b"
+        },
+        {
+          "publicUrl": "/assets/downloads/decision-log-template.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 14233,
+          "sha256": "f934be9fd44449e091d8bac35cb363dfd87e68a1eb99dd43d20686a5001c2ed8"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:decision-matrix-scorecard-fillable.pdf",
+      "filename": "decision-matrix-scorecard-fillable.pdf",
+      "classification": "identical_duplicate",
+      "recommendedAction": "safe_redirect_candidate",
+      "recommendedCanonicalPath": "/assets/downloads/decision-matrix-scorecard-fillable.pdf",
+      "uniqueHashCount": 1,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/decision-matrix-scorecard-fillable.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 36611,
+          "sha256": "013d0f55b7f7e62b2ede9d7fcde7491182f16192dd707f3d995b4b20a2779622"
+        },
+        {
+          "publicUrl": "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 36611,
+          "sha256": "013d0f55b7f7e62b2ede9d7fcde7491182f16192dd707f3d995b4b20a2779622"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:decision-matrix-scorecard.pdf",
+      "filename": "decision-matrix-scorecard.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/decision-matrix-scorecard.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 99737,
+          "sha256": "477a1a028c20bffa5f6b9267b15cd37da9b2521da212f760e874d04f9759760d"
+        },
+        {
+          "publicUrl": "/assets/downloads/decision-matrix-scorecard.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 15147,
+          "sha256": "6c7166154460d93109b11c858cbe4d70916a95d95d5323f3ebd9017fa762f911"
+        }
+      ]
+    },
+    {
       "groupId": "filename:destiny-mapping-worksheet.pdf",
       "filename": "destiny-mapping-worksheet.pdf",
       "classification": "identical_duplicate",
@@ -2512,13 +2791,44 @@
       ]
     },
     {
+      "groupId": "filename:download-legacy-architecture-canvas.pdf",
+      "filename": "download-legacy-architecture-canvas.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/download-legacy-architecture-canvas.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 144151,
+          "sha256": "d57474687dfe8ca9b72008fbd4d6a1f9b30c4bd73f77e92e446f4f88a524c071"
+        },
+        {
+          "publicUrl": "/assets/downloads/download-legacy-architecture-canvas.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 143960,
+          "sha256": "23b91123ad8b94633be22a9d89ff9eacf6f3d17602448cc18ca87328ea7399c6"
+        }
+      ]
+    },
+    {
       "groupId": "filename:entrepreneur-operating-pack.pdf",
       "filename": "entrepreneur-operating-pack.pdf",
-      "classification": "identical_duplicate",
-      "recommendedAction": "safe_redirect_candidate",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/entrepreneur-operating-pack.pdf",
-      "uniqueHashCount": 1,
+      "uniqueHashCount": 2,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 106507,
+          "sha256": "594958c1b29539a85e25c1c9f33814e05a982cffa9237d60b8f7c3b5e50fb8ff"
+        },
         {
           "publicUrl": "/assets/downloads/entrepreneur-operating-pack.pdf",
           "folderClass": "canonical_download",
@@ -2532,6 +2842,30 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 15791,
           "sha256": "bcca5c9fa6eabcd586dd814338dbdb8cd6759a71af61e5a7ad10420d106ac21d"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:entrepreneur-survival-checklist.pdf",
+      "filename": "entrepreneur-survival-checklist.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/entrepreneur-survival-checklist.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 139943,
+          "sha256": "eb27e5661b08c5cc78928a76c1e5a1290d72f8070c74bae8d11d6bc1cf08fb44"
+        },
+        {
+          "publicUrl": "/assets/downloads/entrepreneur-survival-checklist.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 20742,
+          "sha256": "0b6b8a76d9bdee260edf592ff4d381f034623497335f94e0c41b62c2ca6b7bbc"
         }
       ]
     },
@@ -2563,6 +2897,54 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 18865,
           "sha256": "9171cbdcdd5656d2ecc7d7d1f40dc47263e5a3e39491209f386d853e155e1527"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:family-altar-liturgy.pdf",
+      "filename": "family-altar-liturgy.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/family-altar-liturgy.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/family-altar-liturgy.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 133660,
+          "sha256": "77c07597aa5233ab4353d1ea579f20c594bcc39e40a903ea083a77130dc74a3a"
+        },
+        {
+          "publicUrl": "/assets/downloads/family-altar-liturgy.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 19941,
+          "sha256": "75376cd9c7d3e9f68982c70b64366ae0a20cc0e29e87ebebad05b74aa82270ab"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:family-court-practical-pack.pdf",
+      "filename": "family-court-practical-pack.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/family-court-practical-pack.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/family-court-practical-pack.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 206560,
+          "sha256": "51a483fcb31d634d06fc785822263f09d6e1efb0b2f510e8cf3e2661f3190410"
+        },
+        {
+          "publicUrl": "/assets/downloads/family-court-practical-pack.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 53093,
+          "sha256": "023bf5a2b617fcf8a1fde7270ce53c728c94586b2f87aaf22b6c16114504e18a"
         }
       ]
     },
@@ -2663,6 +3045,30 @@
       ]
     },
     {
+      "groupId": "filename:fathering-without-fear.pdf",
+      "filename": "fathering-without-fear.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/fathering-without-fear.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fathering-without-fear.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 133155,
+          "sha256": "ab4ac6ae643c90ebd40d1eaddd8df9228d358ec061af4c6b030aade614b081aa"
+        },
+        {
+          "publicUrl": "/assets/downloads/fathering-without-fear.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 132995,
+          "sha256": "58b5ee816fe6971698adaa5725e9d2d7445ce6f3be404dd61f47f751eeff18a2"
+        }
+      ]
+    },
+    {
       "groupId": "filename:founders-salon.pdf",
       "filename": "founders-salon.pdf",
       "classification": "identical_duplicate",
@@ -2689,11 +3095,18 @@
     {
       "groupId": "filename:fr-001.pdf",
       "filename": "fr-001.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-001.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-001.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92472,
+          "sha256": "a04d4b20e76019020c627dd73cede928327b45a36bb2c3096b7c04eacac81078"
+        },
         {
           "publicUrl": "/assets/downloads/fr-001.pdf",
           "folderClass": "canonical_download",
@@ -2713,11 +3126,18 @@
     {
       "groupId": "filename:fr-004.pdf",
       "filename": "fr-004.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-004.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-004.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92754,
+          "sha256": "74b4e626dd40316c0da9a02c4ae6c5ded56b4b8aab36681b0731fa675c8d96d5"
+        },
         {
           "publicUrl": "/assets/downloads/fr-004.pdf",
           "folderClass": "canonical_download",
@@ -2737,11 +3157,18 @@
     {
       "groupId": "filename:fr-007.pdf",
       "filename": "fr-007.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-007.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-007.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92779,
+          "sha256": "3ed7d3a1297e7e4d94304a8146f412436f980a0e5fab27b855e62e826ec65383"
+        },
         {
           "publicUrl": "/assets/downloads/fr-007.pdf",
           "folderClass": "canonical_download",
@@ -2761,11 +3188,18 @@
     {
       "groupId": "filename:fr-010.pdf",
       "filename": "fr-010.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-010.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-010.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92692,
+          "sha256": "0f514af7ece6f2e9607aa15ec5630b4c33ed9841e9033c67fcaf604c1d291d88"
+        },
         {
           "publicUrl": "/assets/downloads/fr-010.pdf",
           "folderClass": "canonical_download",
@@ -2785,11 +3219,18 @@
     {
       "groupId": "filename:fr-013.pdf",
       "filename": "fr-013.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-013.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-013.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93641,
+          "sha256": "17cee8626b423f4170d88cccda1c98019faa2370d984c873059cc4fed7f32e38"
+        },
         {
           "publicUrl": "/assets/downloads/fr-013.pdf",
           "folderClass": "canonical_download",
@@ -2809,11 +3250,18 @@
     {
       "groupId": "filename:fr-016.pdf",
       "filename": "fr-016.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-016.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-016.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93162,
+          "sha256": "0a716aaf56524a63b84de3d60d2bd15bc7f149df7a4a0b488c63809da5f710e7"
+        },
         {
           "publicUrl": "/assets/downloads/fr-016.pdf",
           "folderClass": "canonical_download",
@@ -2833,11 +3281,18 @@
     {
       "groupId": "filename:fr-019.pdf",
       "filename": "fr-019.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-019.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-019.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93567,
+          "sha256": "e035b36bb2da4d057cb19bdc1fbff24d7e1a2dd457d5f5d07cd08d6db53009a3"
+        },
         {
           "publicUrl": "/assets/downloads/fr-019.pdf",
           "folderClass": "canonical_download",
@@ -2857,11 +3312,18 @@
     {
       "groupId": "filename:fr-022.pdf",
       "filename": "fr-022.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-022.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-022.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92574,
+          "sha256": "36b9d1a8aa8a71cc06787fae9b2bb5bd547a71fa557b344779ef9e99731549ea"
+        },
         {
           "publicUrl": "/assets/downloads/fr-022.pdf",
           "folderClass": "canonical_download",
@@ -2881,11 +3343,18 @@
     {
       "groupId": "filename:fr-025.pdf",
       "filename": "fr-025.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-025.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-025.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93726,
+          "sha256": "b12739a5e2d35785e33065b171d4ab954b6a6a3d24144accabcfae8a2c8f9cfc"
+        },
         {
           "publicUrl": "/assets/downloads/fr-025.pdf",
           "folderClass": "canonical_download",
@@ -2905,11 +3374,18 @@
     {
       "groupId": "filename:fr-028.pdf",
       "filename": "fr-028.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-028.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-028.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93911,
+          "sha256": "11331da7439e1e6caf99d87ef944ef48ed5bdc965ba170157bef9f00d79a8098"
+        },
         {
           "publicUrl": "/assets/downloads/fr-028.pdf",
           "folderClass": "canonical_download",
@@ -2929,11 +3405,18 @@
     {
       "groupId": "filename:fr-031.pdf",
       "filename": "fr-031.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-031.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-031.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93644,
+          "sha256": "40b399960b3702fa35d2c8fa079e3372f9bca2c7890fa1792ea70f0aad37eafd"
+        },
         {
           "publicUrl": "/assets/downloads/fr-031.pdf",
           "folderClass": "canonical_download",
@@ -2953,11 +3436,18 @@
     {
       "groupId": "filename:fr-034.pdf",
       "filename": "fr-034.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-034.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-034.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93896,
+          "sha256": "adfd294c3d9678bdb76c70eabbbef29eb6c146e1e754449773b6bcb149064bce"
+        },
         {
           "publicUrl": "/assets/downloads/fr-034.pdf",
           "folderClass": "canonical_download",
@@ -2977,11 +3467,18 @@
     {
       "groupId": "filename:fr-037.pdf",
       "filename": "fr-037.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-037.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-037.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93957,
+          "sha256": "0804fba32e5bd70715ec51de7a643efd63983d182a1ab1d25c5d76de45576e77"
+        },
         {
           "publicUrl": "/assets/downloads/fr-037.pdf",
           "folderClass": "canonical_download",
@@ -3001,11 +3498,18 @@
     {
       "groupId": "filename:fr-040.pdf",
       "filename": "fr-040.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-040.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-040.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92979,
+          "sha256": "d8f5691ce3b77954084c8fb97793f2a7e13d9c34d9e61ca4c7f771fd568b5bbc"
+        },
         {
           "publicUrl": "/assets/downloads/fr-040.pdf",
           "folderClass": "canonical_download",
@@ -3025,11 +3529,18 @@
     {
       "groupId": "filename:fr-043.pdf",
       "filename": "fr-043.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-043.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-043.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93899,
+          "sha256": "80e9e693b16c648397149d77425104fa60fd024217fc5f986252958306285a2e"
+        },
         {
           "publicUrl": "/assets/downloads/fr-043.pdf",
           "folderClass": "canonical_download",
@@ -3049,11 +3560,18 @@
     {
       "groupId": "filename:fr-046.pdf",
       "filename": "fr-046.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-046.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-046.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93422,
+          "sha256": "89ca36e4cac3de3d2e20dc5657f4d9cc23dbc81cdaf2001b05b2584f6834ec48"
+        },
         {
           "publicUrl": "/assets/downloads/fr-046.pdf",
           "folderClass": "canonical_download",
@@ -3073,11 +3591,18 @@
     {
       "groupId": "filename:fr-049.pdf",
       "filename": "fr-049.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-049.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-049.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93857,
+          "sha256": "59f692056f9a71724c33791176a4a54dc576b7bc87c43a1aea24f05f2969ebff"
+        },
         {
           "publicUrl": "/assets/downloads/fr-049.pdf",
           "folderClass": "canonical_download",
@@ -3097,11 +3622,18 @@
     {
       "groupId": "filename:fr-052.pdf",
       "filename": "fr-052.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-052.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-052.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93725,
+          "sha256": "b02975b8d19aa923d13744b91b10b0c713c0fa529b1399638e93741c2f22df5e"
+        },
         {
           "publicUrl": "/assets/downloads/fr-052.pdf",
           "folderClass": "canonical_download",
@@ -3121,11 +3653,18 @@
     {
       "groupId": "filename:fr-055.pdf",
       "filename": "fr-055.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-055.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-055.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93452,
+          "sha256": "1d9aa997e0716e637d55cc618f55b91378d6a077434dc03e442c064b716891c9"
+        },
         {
           "publicUrl": "/assets/downloads/fr-055.pdf",
           "folderClass": "canonical_download",
@@ -3145,11 +3684,18 @@
     {
       "groupId": "filename:fr-058.pdf",
       "filename": "fr-058.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-058.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-058.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 94818,
+          "sha256": "745d646518e2915f991db83f537eff14b0a54014c4d0f7c1569bf675cf81db25"
+        },
         {
           "publicUrl": "/assets/downloads/fr-058.pdf",
           "folderClass": "canonical_download",
@@ -3169,11 +3715,18 @@
     {
       "groupId": "filename:fr-061.pdf",
       "filename": "fr-061.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-061.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-061.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93165,
+          "sha256": "aea75464c8cc0f028f5b208e1c877650365f9d9d487c576dc8d19ad77f2fbebc"
+        },
         {
           "publicUrl": "/assets/downloads/fr-061.pdf",
           "folderClass": "canonical_download",
@@ -3193,11 +3746,18 @@
     {
       "groupId": "filename:fr-064.pdf",
       "filename": "fr-064.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-064.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-064.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93419,
+          "sha256": "123ad09dd3fcc22c8cd5f5d900f61b9d3a0a34fc3e18275a45891fe0eaa60705"
+        },
         {
           "publicUrl": "/assets/downloads/fr-064.pdf",
           "folderClass": "canonical_download",
@@ -3217,11 +3777,18 @@
     {
       "groupId": "filename:fr-067.pdf",
       "filename": "fr-067.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-067.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-067.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93406,
+          "sha256": "451a21ce9f21bf099e873c22fa2bf711c149f9a0e1d3519241570de534297b2e"
+        },
         {
           "publicUrl": "/assets/downloads/fr-067.pdf",
           "folderClass": "canonical_download",
@@ -3241,11 +3808,18 @@
     {
       "groupId": "filename:fr-070.pdf",
       "filename": "fr-070.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-070.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-070.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93005,
+          "sha256": "07b2889303bb584a3973940a0a544f516a135533f72bea04a35509011127220a"
+        },
         {
           "publicUrl": "/assets/downloads/fr-070.pdf",
           "folderClass": "canonical_download",
@@ -3265,11 +3839,18 @@
     {
       "groupId": "filename:fr-073.pdf",
       "filename": "fr-073.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/fr-073.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/fr-073.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93959,
+          "sha256": "8d1daf9c3f9a5498ec9d02beb2bae0beac2b3dc9f46f5446fdd63f5e16e924e4"
+        },
         {
           "publicUrl": "/assets/downloads/fr-073.pdf",
           "folderClass": "canonical_download",
@@ -3283,6 +3864,30 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 13942,
           "sha256": "0d2f107f4d6cbf5b213c7e985de929ab07a262ccddd4224feb336efe7156faa1"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:freedom-begins-where-ego-ends.pdf",
+      "filename": "freedom-begins-where-ego-ends.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/freedom-begins-where-ego-ends.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/freedom-begins-where-ego-ends.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92625,
+          "sha256": "51b3c8c1c8f029b0b0bf54ef113d4c54f713d73ae58218c09246536d119cde22"
+        },
+        {
+          "publicUrl": "/assets/downloads/freedom-begins-where-ego-ends.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 92444,
+          "sha256": "ec4871acd87b1baa28488442cbaf10c71ae1e8581a01543e802c8cc6e2352f72"
         }
       ]
     },
@@ -3320,11 +3925,18 @@
     {
       "groupId": "filename:frontier-resilience-01.pdf",
       "filename": "frontier-resilience-01.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/frontier-resilience-01.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 100798,
+          "sha256": "a4c55a07cc804d2672dab333883bd944dfc56de7e22ff87a006d6d52d6addaea"
+        },
         {
           "publicUrl": "/assets/downloads/frontier-resilience-01.pdf",
           "folderClass": "canonical_download",
@@ -4016,11 +4628,18 @@
     {
       "groupId": "filename:ia-003.pdf",
       "filename": "ia-003.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-003.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-003.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92494,
+          "sha256": "f647bd18ec8afb87f1605f8c9f88602c6c4f0012d942a0e3b214e3e3ca3658dd"
+        },
         {
           "publicUrl": "/assets/downloads/ia-003.pdf",
           "folderClass": "canonical_download",
@@ -4040,11 +4659,18 @@
     {
       "groupId": "filename:ia-006.pdf",
       "filename": "ia-006.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-006.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-006.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92035,
+          "sha256": "900d15c0ae10e0066054bda6f0a883337dbc0469b3c6c316cb7c62f27bb793c7"
+        },
         {
           "publicUrl": "/assets/downloads/ia-006.pdf",
           "folderClass": "canonical_download",
@@ -4064,11 +4690,18 @@
     {
       "groupId": "filename:ia-009.pdf",
       "filename": "ia-009.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-009.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-009.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92420,
+          "sha256": "ddecb529dc0bfc5066088406ad70bf2c5e2b629d782b4247ac6da2f605c54865"
+        },
         {
           "publicUrl": "/assets/downloads/ia-009.pdf",
           "folderClass": "canonical_download",
@@ -4088,11 +4721,18 @@
     {
       "groupId": "filename:ia-012.pdf",
       "filename": "ia-012.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-012.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-012.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 91821,
+          "sha256": "fec0cfbe0d46ba7f1c3050cf1644ec8615556dba45d6684a95d0742ebf0ad59d"
+        },
         {
           "publicUrl": "/assets/downloads/ia-012.pdf",
           "folderClass": "canonical_download",
@@ -4112,11 +4752,18 @@
     {
       "groupId": "filename:ia-015.pdf",
       "filename": "ia-015.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-015.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-015.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92700,
+          "sha256": "0cbfa64ed56f20779e02f9da73b1bb6ad99f3750eabc95fc8f12bcf0b7fe42a3"
+        },
         {
           "publicUrl": "/assets/downloads/ia-015.pdf",
           "folderClass": "canonical_download",
@@ -4136,11 +4783,18 @@
     {
       "groupId": "filename:ia-018.pdf",
       "filename": "ia-018.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-018.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-018.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92907,
+          "sha256": "2b0cf6c5ba7aa48e7d2ca5b3eedc9297697c6f8346dea7e93ed9f8882116c36c"
+        },
         {
           "publicUrl": "/assets/downloads/ia-018.pdf",
           "folderClass": "canonical_download",
@@ -4160,11 +4814,18 @@
     {
       "groupId": "filename:ia-021.pdf",
       "filename": "ia-021.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-021.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-021.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 91822,
+          "sha256": "ffdae05fcb9d32d7c4c0573d6b3433d06ab09cfbfe8b989b0f30af36f1c8bda8"
+        },
         {
           "publicUrl": "/assets/downloads/ia-021.pdf",
           "folderClass": "canonical_download",
@@ -4184,11 +4845,18 @@
     {
       "groupId": "filename:ia-024.pdf",
       "filename": "ia-024.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-024.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-024.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92122,
+          "sha256": "8ad1dbf08c9b406399ef6d089e95e2300430ad021a66b01501000da6b5d77eca"
+        },
         {
           "publicUrl": "/assets/downloads/ia-024.pdf",
           "folderClass": "canonical_download",
@@ -4208,11 +4876,18 @@
     {
       "groupId": "filename:ia-027.pdf",
       "filename": "ia-027.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-027.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-027.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92152,
+          "sha256": "bd2e8e0bc0280b5a3960da714bc3daf774856c1799eaceb44977a1a00f6033bc"
+        },
         {
           "publicUrl": "/assets/downloads/ia-027.pdf",
           "folderClass": "canonical_download",
@@ -4232,11 +4907,18 @@
     {
       "groupId": "filename:ia-030.pdf",
       "filename": "ia-030.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-030.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-030.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92720,
+          "sha256": "ad0778e781f2aaf68d787b54be286a90682870fcc8ddbbf798ec5f7654d27d26"
+        },
         {
           "publicUrl": "/assets/downloads/ia-030.pdf",
           "folderClass": "canonical_download",
@@ -4256,11 +4938,18 @@
     {
       "groupId": "filename:ia-033.pdf",
       "filename": "ia-033.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-033.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-033.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92502,
+          "sha256": "e5a5590d41ddaef27aa9e838b65b7ce09c0ca1e4141dce3a659066ef496f3186"
+        },
         {
           "publicUrl": "/assets/downloads/ia-033.pdf",
           "folderClass": "canonical_download",
@@ -4280,11 +4969,18 @@
     {
       "groupId": "filename:ia-036.pdf",
       "filename": "ia-036.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-036.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-036.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93173,
+          "sha256": "12903cafedf2a893514dfe1e1455312d9764df8a4dd8ca42dc629a67c15d835d"
+        },
         {
           "publicUrl": "/assets/downloads/ia-036.pdf",
           "folderClass": "canonical_download",
@@ -4304,11 +5000,18 @@
     {
       "groupId": "filename:ia-039.pdf",
       "filename": "ia-039.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-039.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-039.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93594,
+          "sha256": "b395722eaaf11cc8a1bf4b3b0efee04c9c38f8da7ece8e620a46e89a2935412f"
+        },
         {
           "publicUrl": "/assets/downloads/ia-039.pdf",
           "folderClass": "canonical_download",
@@ -4328,11 +5031,18 @@
     {
       "groupId": "filename:ia-042.pdf",
       "filename": "ia-042.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-042.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-042.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92122,
+          "sha256": "df76ea3ee213edb554a141ff8ea8aed7862bfd7b576ed0f219e30490792f0bd9"
+        },
         {
           "publicUrl": "/assets/downloads/ia-042.pdf",
           "folderClass": "canonical_download",
@@ -4352,11 +5062,18 @@
     {
       "groupId": "filename:ia-045.pdf",
       "filename": "ia-045.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-045.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-045.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92959,
+          "sha256": "8eb92ea11a7755a83af952cfcc50aec2306dc23c3bdf8c7a1509d337039f320d"
+        },
         {
           "publicUrl": "/assets/downloads/ia-045.pdf",
           "folderClass": "canonical_download",
@@ -4376,11 +5093,18 @@
     {
       "groupId": "filename:ia-048.pdf",
       "filename": "ia-048.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-048.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-048.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93177,
+          "sha256": "8b845b77924c1af539ff6db650b42a264b4c61ce35eb252b9b9316b92397733f"
+        },
         {
           "publicUrl": "/assets/downloads/ia-048.pdf",
           "folderClass": "canonical_download",
@@ -4400,11 +5124,18 @@
     {
       "groupId": "filename:ia-051.pdf",
       "filename": "ia-051.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-051.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-051.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92704,
+          "sha256": "5df1cd7058c275f1af604a39207cc87d6698508d9460476a3a9d7a7f7ea02238"
+        },
         {
           "publicUrl": "/assets/downloads/ia-051.pdf",
           "folderClass": "canonical_download",
@@ -4424,11 +5155,18 @@
     {
       "groupId": "filename:ia-054.pdf",
       "filename": "ia-054.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-054.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-054.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92959,
+          "sha256": "9031987c5e1052230f318ea83574502859a49c2814f41166b96d7c392c0432dd"
+        },
         {
           "publicUrl": "/assets/downloads/ia-054.pdf",
           "folderClass": "canonical_download",
@@ -4448,11 +5186,18 @@
     {
       "groupId": "filename:ia-057.pdf",
       "filename": "ia-057.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-057.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-057.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92972,
+          "sha256": "bed928ee1b30c45dab70afb2eb579d4179769734eb852b1484318e40965dacbd"
+        },
         {
           "publicUrl": "/assets/downloads/ia-057.pdf",
           "folderClass": "canonical_download",
@@ -4472,11 +5217,18 @@
     {
       "groupId": "filename:ia-060.pdf",
       "filename": "ia-060.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-060.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-060.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92256,
+          "sha256": "4fabe5d9696753560d6555550043ea8a883897437466557416dc11d7f8bd1378"
+        },
         {
           "publicUrl": "/assets/downloads/ia-060.pdf",
           "folderClass": "canonical_download",
@@ -4496,11 +5248,18 @@
     {
       "groupId": "filename:ia-063.pdf",
       "filename": "ia-063.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-063.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-063.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93174,
+          "sha256": "d0e2e2de34ea04ea0c4c8ad3484d1fff3485be35bcaf7991c109873e56fb759d"
+        },
         {
           "publicUrl": "/assets/downloads/ia-063.pdf",
           "folderClass": "canonical_download",
@@ -4520,11 +5279,18 @@
     {
       "groupId": "filename:ia-066.pdf",
       "filename": "ia-066.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-066.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-066.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92046,
+          "sha256": "a9b9866ec0eab571a8fcdb7cfb5215ab581428e6991175bfe2b62ba1d24fa5a6"
+        },
         {
           "publicUrl": "/assets/downloads/ia-066.pdf",
           "folderClass": "canonical_download",
@@ -4544,11 +5310,18 @@
     {
       "groupId": "filename:ia-069.pdf",
       "filename": "ia-069.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-069.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-069.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93031,
+          "sha256": "d901e6b2c2d1402c4829574ad040af2f56444dfaa4d762bb70dfc4f304cb14f4"
+        },
         {
           "publicUrl": "/assets/downloads/ia-069.pdf",
           "folderClass": "canonical_download",
@@ -4568,11 +5341,18 @@
     {
       "groupId": "filename:ia-072.pdf",
       "filename": "ia-072.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-072.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-072.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92149,
+          "sha256": "593ac7635ed67e1ad9d67f335bd026e8a944716bae6cc0dc5a944170dac1d519"
+        },
         {
           "publicUrl": "/assets/downloads/ia-072.pdf",
           "folderClass": "canonical_download",
@@ -4592,11 +5372,18 @@
     {
       "groupId": "filename:ia-075.pdf",
       "filename": "ia-075.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/ia-075.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ia-075.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92968,
+          "sha256": "67fccaec5d9f9772153cb47e45f6ca65c08d4647e19980cc70366043312f93ef"
+        },
         {
           "publicUrl": "/assets/downloads/ia-075.pdf",
           "folderClass": "canonical_download",
@@ -5317,6 +6104,30 @@
       ]
     },
     {
+      "groupId": "filename:institutional-sovereignty.pdf",
+      "filename": "institutional-sovereignty.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/institutional-sovereignty.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/institutional-sovereignty.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95816,
+          "sha256": "742fb72f092fc4722e0253a9187e289bc198d0ab7f8aa59957db497a867c445b"
+        },
+        {
+          "publicUrl": "/assets/downloads/institutional-sovereignty.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95615,
+          "sha256": "386472e06504e154f8acaf33f07b29773ea3316f269fb5d8b6acb0f0dc153e40"
+        }
+      ]
+    },
+    {
       "groupId": "filename:integrity.pdf",
       "filename": "integrity.pdf",
       "classification": "identical_duplicate",
@@ -5341,13 +6152,44 @@
       ]
     },
     {
+      "groupId": "filename:leaders-cue-card-two-up.pdf",
+      "filename": "leaders-cue-card-two-up.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/leaders-cue-card-two-up.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 72177,
+          "sha256": "73c345a173f3698a59973d72c915b9b06f17e01f89f3746af83dae7555a2c5cc"
+        },
+        {
+          "publicUrl": "/assets/downloads/leaders-cue-card-two-up.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 15427,
+          "sha256": "76a924853ddde86f0eadc900009824562f9e6d9cf984c4061bafb4cfb4d8bd12"
+        }
+      ]
+    },
+    {
       "groupId": "filename:leadership-playbook.pdf",
       "filename": "leadership-playbook.pdf",
-      "classification": "identical_duplicate",
-      "recommendedAction": "safe_redirect_candidate",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/leadership-playbook.pdf",
-      "uniqueHashCount": 1,
+      "uniqueHashCount": 2,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/leadership-playbook.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96666,
+          "sha256": "f44d2aaa1009d849d6fad88f476cfbecc71e85bedba42845f878b47307d9ba3c"
+        },
         {
           "publicUrl": "/assets/downloads/leadership-playbook.pdf",
           "folderClass": "canonical_download",
@@ -5437,6 +6279,54 @@
       ]
     },
     {
+      "groupId": "filename:legacy-canvas-fillable.pdf",
+      "filename": "legacy-canvas-fillable.pdf",
+      "classification": "identical_duplicate",
+      "recommendedAction": "safe_redirect_candidate",
+      "recommendedCanonicalPath": "/assets/downloads/legacy-canvas-fillable.pdf",
+      "uniqueHashCount": 1,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/legacy-canvas-fillable.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 10765,
+          "sha256": "a5be4d7706d60ac0a9b38fd26aea44542d877fd0e37a9fa9a95e51850efc4009"
+        },
+        {
+          "publicUrl": "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 10765,
+          "sha256": "a5be4d7706d60ac0a9b38fd26aea44542d877fd0e37a9fa9a95e51850efc4009"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:legacy-canvas.pdf",
+      "filename": "legacy-canvas.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/legacy-canvas.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/legacy-canvas.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 137372,
+          "sha256": "fa23a2a72ae11617cbe4f1f4d84a5eeb73de21dd91b9440c82390442b725e711"
+        },
+        {
+          "publicUrl": "/assets/downloads/legacy-canvas.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 19737,
+          "sha256": "b8c9dd26b9a6b5695af7dd6c0bc769ab9f51c6413a303baa8a22dc75916cd852"
+        }
+      ]
+    },
+    {
       "groupId": "filename:legacy.pdf",
       "filename": "legacy.pdf",
       "classification": "identical_duplicate",
@@ -5461,13 +6351,44 @@
       ]
     },
     {
+      "groupId": "filename:life-alignment-assessment.pdf",
+      "filename": "life-alignment-assessment.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/life-alignment-assessment.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 132199,
+          "sha256": "83a28d5e04bdc319f59e97f81ee87e1b8b76ddbe5f0a8587aa26a8a85010ad98"
+        },
+        {
+          "publicUrl": "/assets/downloads/life-alignment-assessment.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 132013,
+          "sha256": "e3edce108749ad99172e3383c95e651f2c11ea848a8e0d9b78a9550b36539f85"
+        }
+      ]
+    },
+    {
       "groupId": "filename:mentorship-starter-kit.pdf",
       "filename": "mentorship-starter-kit.pdf",
-      "classification": "identical_duplicate",
-      "recommendedAction": "safe_redirect_candidate",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/mentorship-starter-kit.pdf",
-      "uniqueHashCount": 1,
+      "uniqueHashCount": 2,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 108679,
+          "sha256": "ac4c2a82706925e841c3d41a9c60b26ff00c57d8fefed05a8b6e3669508ca1cf"
+        },
         {
           "publicUrl": "/assets/downloads/mentorship-starter-kit.pdf",
           "folderClass": "canonical_download",
@@ -5505,6 +6426,126 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 36259,
           "sha256": "646b7adab1b2ce97534953116ead8e006a31c3fa867cf6025b4f7ec709c3c4f8"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:operating-cadence-pack.pdf",
+      "filename": "operating-cadence-pack.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/operating-cadence-pack.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98513,
+          "sha256": "0a44c36e829129026e4cb69f3aa4323a4dad9e73bd7d077333e1aa0eb9d43393"
+        },
+        {
+          "publicUrl": "/assets/downloads/operating-cadence-pack.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 14500,
+          "sha256": "917a11969811bc6b97bf0a8674a4273940ef84f36c4fa6a711eba29fe28ddd35"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:pleasure-is-loud-purpose-is-quiet.pdf",
+      "filename": "pleasure-is-loud-purpose-is-quiet.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/pleasure-is-loud-purpose-is-quiet.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/pleasure-is-loud-purpose-is-quiet.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 91715,
+          "sha256": "4e295dd3dd4680cccfbd91c0337540f761e018cd8ee4291563812f8e2e0c37b6"
+        },
+        {
+          "publicUrl": "/assets/downloads/pleasure-is-loud-purpose-is-quiet.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 91494,
+          "sha256": "f2915b0d3a2a8d67c97211b80c7e0abb563e5331f7eec7ccf251e13c0d128ef1"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:principles-for-my-son-cue-card.pdf",
+      "filename": "principles-for-my-son-cue-card.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/principles-for-my-son-cue-card.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 69093,
+          "sha256": "c8073ebd6c0c2c57d5080478e955e4b66100e54eedd9e92ca2bdfe61ad2c304c"
+        },
+        {
+          "publicUrl": "/assets/downloads/principles-for-my-son-cue-card.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 15635,
+          "sha256": "1bd028185f23c502bcfd4be336de888e24ce8f834788629b4fb54c197a63118f"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:principles-for-my-son.pdf",
+      "filename": "principles-for-my-son.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/principles-for-my-son.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/principles-for-my-son.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 144628,
+          "sha256": "3484e6a2b5636266a48750a56c9f4e4389036cc3f45ef3bdd903cd7cc80eeca4"
+        },
+        {
+          "publicUrl": "/assets/downloads/principles-for-my-son.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 23742,
+          "sha256": "a364001f3936febaccaadb8d5a0f21c4aaf79bc206c760fe32ccd3f1ce1263d1"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:principles-of-surrender-framework.pdf",
+      "filename": "principles-of-surrender-framework.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/principles-of-surrender-framework.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/principles-of-surrender-framework.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 186565,
+          "sha256": "11efbed5a6850ad02a10895795ca48a28bcf8ceb286ce52283e410d9df57e7f0"
+        },
+        {
+          "publicUrl": "/assets/downloads/principles-of-surrender-framework.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 186420,
+          "sha256": "c052c781c3e5a221899dc92e0ffebd2558e0740f80072f1ec1a97eb8b51e8736"
         }
       ]
     },
@@ -5553,6 +6594,54 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 22702,
           "sha256": "6389fac48c9ccb512cd56441862ec82220206bd6582b31b319a28d0869f3561c"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:purpose-pyramid-worksheet-fillable.pdf",
+      "filename": "purpose-pyramid-worksheet-fillable.pdf",
+      "classification": "identical_duplicate",
+      "recommendedAction": "safe_redirect_candidate",
+      "recommendedCanonicalPath": "/assets/downloads/purpose-pyramid-worksheet-fillable.pdf",
+      "uniqueHashCount": 1,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 20245,
+          "sha256": "59d411bd246fcfe81ca5c6f49692b4e0358689f0d23989220a816956adef187f"
+        },
+        {
+          "publicUrl": "/assets/downloads/purpose-pyramid-worksheet-fillable.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 20245,
+          "sha256": "59d411bd246fcfe81ca5c6f49692b4e0358689f0d23989220a816956adef187f"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:purpose-pyramid-worksheet.pdf",
+      "filename": "purpose-pyramid-worksheet.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/purpose-pyramid-worksheet.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 154038,
+          "sha256": "3eb2fb46e7f1bee36d864a3d597be15e9ff51958a5caa76f6cdeb697969cdc3b"
+        },
+        {
+          "publicUrl": "/assets/downloads/purpose-pyramid-worksheet.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 19992,
+          "sha256": "912522ac9b653197aff9f69680ba35f9c195c0858ae3e596b8505dae695ca209"
         }
       ]
     },
@@ -5629,13 +6718,44 @@
       ]
     },
     {
-      "groupId": "filename:si-002.pdf",
-      "filename": "si-002.pdf",
-      "classification": "divergent_duplicate",
+      "groupId": "filename:scripture-track-john14.pdf",
+      "filename": "scripture-track-john14.pdf",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
-      "recommendedCanonicalPath": "/assets/downloads/si-002.pdf",
+      "recommendedCanonicalPath": "/assets/downloads/scripture-track-john14.pdf",
       "uniqueHashCount": 2,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/scripture-track-john14.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 140860,
+          "sha256": "12b685a1fd86b0954e67f6d65328387a68350c869adba1cfe74ec25fc985aafc"
+        },
+        {
+          "publicUrl": "/assets/downloads/scripture-track-john14.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 25482,
+          "sha256": "08641d95ad3990626672d3f4a764612dd072de74dc7c3fd91d718d72c61fdc83"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:si-002.pdf",
+      "filename": "si-002.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/si-002.pdf",
+      "uniqueHashCount": 3,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-002.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 91931,
+          "sha256": "ece5b75c412aaa0cf613434803eb345ecc7158e42721dceecfb4af5979bf9c98"
+        },
         {
           "publicUrl": "/assets/downloads/si-002.pdf",
           "folderClass": "canonical_download",
@@ -5655,11 +6775,18 @@
     {
       "groupId": "filename:si-005.pdf",
       "filename": "si-005.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-005.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-005.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92796,
+          "sha256": "76de4a8576190350b6f31f672e889041a1e3cd610fc4d5b64354980d50d6f437"
+        },
         {
           "publicUrl": "/assets/downloads/si-005.pdf",
           "folderClass": "canonical_download",
@@ -5679,11 +6806,18 @@
     {
       "groupId": "filename:si-008.pdf",
       "filename": "si-008.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-008.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-008.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92992,
+          "sha256": "b41dd072be6151281d631bd62df057da6a8e40621c443682387f04431d564739"
+        },
         {
           "publicUrl": "/assets/downloads/si-008.pdf",
           "folderClass": "canonical_download",
@@ -5703,11 +6837,18 @@
     {
       "groupId": "filename:si-011.pdf",
       "filename": "si-011.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-011.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-011.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 91859,
+          "sha256": "70356fe0b675335c9327f0c92e2a0ef590e63f116bb063366233cd80c80b5084"
+        },
         {
           "publicUrl": "/assets/downloads/si-011.pdf",
           "folderClass": "canonical_download",
@@ -5727,11 +6868,18 @@
     {
       "groupId": "filename:si-014.pdf",
       "filename": "si-014.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-014.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-014.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92309,
+          "sha256": "19d5551fb04b7d530962425220534e9b0eaf70c51aa594166163d8afc92eab8b"
+        },
         {
           "publicUrl": "/assets/downloads/si-014.pdf",
           "folderClass": "canonical_download",
@@ -5751,11 +6899,18 @@
     {
       "groupId": "filename:si-017.pdf",
       "filename": "si-017.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-017.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-017.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92327,
+          "sha256": "df058acd6b24475476df90e4c5f39adae91e69218b59a4667155a94b8f92edb5"
+        },
         {
           "publicUrl": "/assets/downloads/si-017.pdf",
           "folderClass": "canonical_download",
@@ -5775,11 +6930,18 @@
     {
       "groupId": "filename:si-020.pdf",
       "filename": "si-020.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-020.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-020.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92161,
+          "sha256": "a1498f942fbb7aa0f4d67ba8312a54ec3ce2027cc7ffabae784e3fe7c4aed776"
+        },
         {
           "publicUrl": "/assets/downloads/si-020.pdf",
           "folderClass": "canonical_download",
@@ -5799,11 +6961,18 @@
     {
       "groupId": "filename:si-023.pdf",
       "filename": "si-023.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-023.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-023.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93082,
+          "sha256": "ce11a4eaa8a11bbcdc61e06e3c10d35ad7498916473d6f9d98cd683f43059a98"
+        },
         {
           "publicUrl": "/assets/downloads/si-023.pdf",
           "folderClass": "canonical_download",
@@ -5823,11 +6992,18 @@
     {
       "groupId": "filename:si-026.pdf",
       "filename": "si-026.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-026.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-026.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92623,
+          "sha256": "81e77f023f1f2cd8bce8472b1b4d1c98bf318dabaa9e2d2dbc0f791282fb269c"
+        },
         {
           "publicUrl": "/assets/downloads/si-026.pdf",
           "folderClass": "canonical_download",
@@ -5847,11 +7023,18 @@
     {
       "groupId": "filename:si-029.pdf",
       "filename": "si-029.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-029.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-029.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93047,
+          "sha256": "630df60125404e352d84f87f037462f9638c2d9ca649c7cfc8b8f6c3274489e0"
+        },
         {
           "publicUrl": "/assets/downloads/si-029.pdf",
           "folderClass": "canonical_download",
@@ -5871,11 +7054,18 @@
     {
       "groupId": "filename:si-032.pdf",
       "filename": "si-032.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-032.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-032.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93082,
+          "sha256": "0f74b2a27ae753ee03d6216d637d180467bbe9195ec2bece6e7bb7cd8d4cadba"
+        },
         {
           "publicUrl": "/assets/downloads/si-032.pdf",
           "folderClass": "canonical_download",
@@ -5895,11 +7085,18 @@
     {
       "groupId": "filename:si-035.pdf",
       "filename": "si-035.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-035.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-035.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93881,
+          "sha256": "42de29f0cafa13dd047734b9277df4288c6a8defca39f7833ec821437ba568c9"
+        },
         {
           "publicUrl": "/assets/downloads/si-035.pdf",
           "folderClass": "canonical_download",
@@ -5919,11 +7116,18 @@
     {
       "groupId": "filename:si-038.pdf",
       "filename": "si-038.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-038.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-038.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 94144,
+          "sha256": "421720d3df5bdb80bd8085523a1cd0c97a6ee0d0bf2a9ab20a3e72ea73fe21f2"
+        },
         {
           "publicUrl": "/assets/downloads/si-038.pdf",
           "folderClass": "canonical_download",
@@ -5943,11 +7147,18 @@
     {
       "groupId": "filename:si-041.pdf",
       "filename": "si-041.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-041.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-041.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92312,
+          "sha256": "ea85d99a5f2a7c109c760e4f7d2b768bc185b85d4ecec6677c1eae3c4c6f98bf"
+        },
         {
           "publicUrl": "/assets/downloads/si-041.pdf",
           "folderClass": "canonical_download",
@@ -5967,11 +7178,18 @@
     {
       "groupId": "filename:si-044.pdf",
       "filename": "si-044.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-044.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-044.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92120,
+          "sha256": "6b0948f2007b59f287a16af07ecd75f74e041916a29ed9f544b1e4ff8f2a712f"
+        },
         {
           "publicUrl": "/assets/downloads/si-044.pdf",
           "folderClass": "canonical_download",
@@ -5991,11 +7209,18 @@
     {
       "groupId": "filename:si-047.pdf",
       "filename": "si-047.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-047.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-047.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92607,
+          "sha256": "70b3e32d399cd0549ad3fa46d7b140febdcb27f32a788a00291e556489bf94d9"
+        },
         {
           "publicUrl": "/assets/downloads/si-047.pdf",
           "folderClass": "canonical_download",
@@ -6015,11 +7240,18 @@
     {
       "groupId": "filename:si-050.pdf",
       "filename": "si-050.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-050.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-050.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93029,
+          "sha256": "8b4be47305c597f0300cd1c74ebd4cfd3f42aea64a46e3c2714c64b7dcc00fb6"
+        },
         {
           "publicUrl": "/assets/downloads/si-050.pdf",
           "folderClass": "canonical_download",
@@ -6039,11 +7271,18 @@
     {
       "groupId": "filename:si-053.pdf",
       "filename": "si-053.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-053.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-053.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93884,
+          "sha256": "b3a9d73add437f2962ac13c12256aa2939067b7335e0a9340c420bcdfa159dc5"
+        },
         {
           "publicUrl": "/assets/downloads/si-053.pdf",
           "folderClass": "canonical_download",
@@ -6063,11 +7302,18 @@
     {
       "groupId": "filename:si-056.pdf",
       "filename": "si-056.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-056.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-056.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93461,
+          "sha256": "5bc9ebb8a2fe5a523ff61f5790fce138ad2aa2c9b05301bd9a61e9290f6772be"
+        },
         {
           "publicUrl": "/assets/downloads/si-056.pdf",
           "folderClass": "canonical_download",
@@ -6087,11 +7333,18 @@
     {
       "groupId": "filename:si-059.pdf",
       "filename": "si-059.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-059.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-059.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93889,
+          "sha256": "cd5e6f6b5c094a1bf4d7e0e9ee1ca8ea55ee69de87d3164d3763112a70a921f7"
+        },
         {
           "publicUrl": "/assets/downloads/si-059.pdf",
           "folderClass": "canonical_download",
@@ -6111,11 +7364,18 @@
     {
       "groupId": "filename:si-062.pdf",
       "filename": "si-062.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-062.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-062.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92622,
+          "sha256": "b9ec9e5966e21a7591481be2990fe45583394f889d35bf8f43ccf8b91eadaadf"
+        },
         {
           "publicUrl": "/assets/downloads/si-062.pdf",
           "folderClass": "canonical_download",
@@ -6135,11 +7395,18 @@
     {
       "groupId": "filename:si-065.pdf",
       "filename": "si-065.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-065.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-065.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93462,
+          "sha256": "ef0c70b8801d8dd51de14241ba71523f3754f0cf2200c306a9e8abbc249c635c"
+        },
         {
           "publicUrl": "/assets/downloads/si-065.pdf",
           "folderClass": "canonical_download",
@@ -6159,11 +7426,18 @@
     {
       "groupId": "filename:si-068.pdf",
       "filename": "si-068.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-068.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-068.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 93649,
+          "sha256": "86515ce64f7389e5f6a4e5d76812680501111f896913c811d665eb450dbe13c1"
+        },
         {
           "publicUrl": "/assets/downloads/si-068.pdf",
           "folderClass": "canonical_download",
@@ -6183,11 +7457,18 @@
     {
       "groupId": "filename:si-071.pdf",
       "filename": "si-071.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-071.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-071.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92331,
+          "sha256": "b4f786d8196d6b8d9ae3d0a551a6aeb3b4b130e143e815516dd2ecb65258c86e"
+        },
         {
           "publicUrl": "/assets/downloads/si-071.pdf",
           "folderClass": "canonical_download",
@@ -6207,11 +7488,18 @@
     {
       "groupId": "filename:si-074.pdf",
       "filename": "si-074.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/si-074.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/si-074.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92604,
+          "sha256": "38f0a86a41e905338941e4c3bb98335bb493e6b04735943821f5de93919d8091"
+        },
         {
           "publicUrl": "/assets/downloads/si-074.pdf",
           "folderClass": "canonical_download",
@@ -6853,6 +8141,30 @@
       ]
     },
     {
+      "groupId": "filename:sovereignty-001.pdf",
+      "filename": "sovereignty-001.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/sovereignty-001.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/sovereignty-001.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 65823,
+          "sha256": "9e33789edeb78bcb8b27d81cf6fcab18b93b54337362e239dfebcd0ab7ed80b8"
+        },
+        {
+          "publicUrl": "/assets/downloads/sovereignty-001.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 65620,
+          "sha256": "a6951f89968b44be1fdb133b32c29e8ec0c08aae3743150053bc7343f8358af3"
+        }
+      ]
+    },
+    {
       "groupId": "filename:sovereignty.pdf",
       "filename": "sovereignty.pdf",
       "classification": "identical_duplicate",
@@ -6879,11 +8191,18 @@
     {
       "groupId": "filename:standards-brief.pdf",
       "filename": "standards-brief.pdf",
-      "classification": "identical_duplicate",
-      "recommendedAction": "safe_redirect_candidate",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/standards-brief.pdf",
-      "uniqueHashCount": 1,
+      "uniqueHashCount": 2,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/standards-brief.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 72332,
+          "sha256": "2d9cbc192030821980554336388a820d034d6eb35f77b472e52fb4e245daabd9"
+        },
         {
           "publicUrl": "/assets/downloads/standards-brief.pdf",
           "folderClass": "canonical_download",
@@ -6934,11 +8253,18 @@
     {
       "groupId": "filename:strategic-autonomy-002.pdf",
       "filename": "strategic-autonomy-002.pdf",
-      "classification": "divergent_duplicate",
+      "classification": "generated_vs_static_conflict",
       "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/strategic-autonomy-002.pdf",
-      "uniqueHashCount": 2,
+      "uniqueHashCount": 3,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/strategic-autonomy-002.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 66882,
+          "sha256": "735f8bdce9e17242a46531a638fac17d57a712794dc2ddaeb0603b041db1d7c6"
+        },
         {
           "publicUrl": "/assets/downloads/strategic-autonomy-002.pdf",
           "folderClass": "canonical_download",
@@ -7417,6 +8743,126 @@
       ]
     },
     {
+      "groupId": "filename:the-builders-catechism-founders-illuminated-edition.pdf",
+      "filename": "the-builders-catechism-founders-illuminated-edition.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/the-builders-catechism-founders-illuminated-edition.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 167159,
+          "sha256": "e6cd67165edb8dda12f6a4d63c4daab6d632dc99c296bfcf173621de700b7fb6"
+        },
+        {
+          "publicUrl": "/assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 38546,
+          "sha256": "4ccde7692dc12d5c49eeb2559a89d3cd3e187ab988ddf5cc71ff562f6a889e29"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:the-builders-catechism.pdf",
+      "filename": "the-builders-catechism.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/the-builders-catechism.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/the-builders-catechism.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 179778,
+          "sha256": "f1aba08acc8f98cbd53799905cfd84bdc5c75732c6c790d267dd15344cf59758"
+        },
+        {
+          "publicUrl": "/assets/downloads/the-builders-catechism.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 179619,
+          "sha256": "9f1da54eccc1ebbdc8e6dbab76a728c863151607af653afa87f3e2b1c720afe0"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:the-cost-of-refusing-formation.pdf",
+      "filename": "the-cost-of-refusing-formation.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/the-cost-of-refusing-formation.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/the-cost-of-refusing-formation.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 89028,
+          "sha256": "7c4e622f2847ea7946559a4fd090975828cb239ac0e6aa9f2391a7d466943c32"
+        },
+        {
+          "publicUrl": "/assets/downloads/the-cost-of-refusing-formation.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 88836,
+          "sha256": "454681ca5803389aabcd712c864a52f8807efd34a61e58b372068d86c27f8860"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:this-is-not-a-comfort-platform.pdf",
+      "filename": "this-is-not-a-comfort-platform.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/this-is-not-a-comfort-platform.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/this-is-not-a-comfort-platform.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 88080,
+          "sha256": "4c370df353d2158031d0572aa6fc58e3ab83de9fbc57396f743e6f4ccc3247c4"
+        },
+        {
+          "publicUrl": "/assets/downloads/this-is-not-a-comfort-platform.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 87883,
+          "sha256": "03a03614b882d0463517aa3592f235d0f5bed9a03f25ebe4e72ec207cb626c52"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:ultimate-purpose-of-man-editorial.pdf",
+      "filename": "ultimate-purpose-of-man-editorial.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/ultimate-purpose-of-man-editorial.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 162491,
+          "sha256": "fa872d4b2df3dc6d73fa480d55c4b99e09559705a8ce166f4a912609dcc412eb"
+        },
+        {
+          "publicUrl": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 2474708,
+          "sha256": "fe39fc4f6cf6e4a7672db4ab9656a5bd6a5d01f9ddefa99e6a6be0a0083e8301"
+        }
+      ]
+    },
+    {
       "groupId": "filename:v4.pdf",
       "filename": "v4.pdf",
       "classification": "identical_duplicate",
@@ -7491,11 +8937,18 @@
     {
       "groupId": "filename:weekly-operating-rhythm.pdf",
       "filename": "weekly-operating-rhythm.pdf",
-      "classification": "identical_duplicate",
-      "recommendedAction": "safe_redirect_candidate",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
       "recommendedCanonicalPath": "/assets/downloads/weekly-operating-rhythm.pdf",
-      "uniqueHashCount": 1,
+      "uniqueHashCount": 2,
       "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 87874,
+          "sha256": "06cc088af3127ab8d35c1f1a688d67d7e89e7626ccfaff822f7484cde537b9dc"
+        },
         {
           "publicUrl": "/assets/downloads/weekly-operating-rhythm.pdf",
           "folderClass": "canonical_download",
@@ -7509,6 +8962,1830 @@
           "canonicalityStatus": "specialty_route_asset",
           "fileSizeBytes": 15103,
           "sha256": "6ecb3e51a27cd135fecb1992e59d84a6e8d5983bd4c028ea0befd3dd39397954"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-a-single-yes-changes-everything.pdf",
+      "filename": "when-a-single-yes-changes-everything.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-a-single-yes-changes-everything.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-a-single-yes-changes-everything.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96922,
+          "sha256": "21e047ff107aef4b6a20db6d6c1a375c343552d3c499c57ac38f55b4fcd3c62b"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-a-single-yes-changes-everything.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96716,
+          "sha256": "4a124de2779885519def6263a4730913f7b7cf725285e8cb29ee174439b02050"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-all-you-can-do-is-breathe.pdf",
+      "filename": "when-all-you-can-do-is-breathe.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-all-you-can-do-is-breathe.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-all-you-can-do-is-breathe.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 97013,
+          "sha256": "3356190e3cc4004c634a7affe7cd511f7bd92363217178d71eca3b776670ddbb"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-all-you-can-do-is-breathe.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96803,
+          "sha256": "8b66c61c0c6e6b947869d0354997d1e0253fa07ad221ba7548c2109c28f92dc8"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-avoidance-becomes-your-personality.pdf",
+      "filename": "when-avoidance-becomes-your-personality.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-avoidance-becomes-your-personality.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-avoidance-becomes-your-personality.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 112085,
+          "sha256": "be66cf51ff0065240f926c6ee1e82f4ded41db3b4294e0430a9732cab1499ee0"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-avoidance-becomes-your-personality.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 111882,
+          "sha256": "b08de7275c8676ed31cdee3269fa85840654079827f18d41927c8bd594a8fdf8"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-busyness-becomes-your-brand.pdf",
+      "filename": "when-busyness-becomes-your-brand.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-busyness-becomes-your-brand.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-busyness-becomes-your-brand.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95804,
+          "sha256": "0a770dc7e8fa943fc96026e12d292db30380f5abb824f991151812293f55bb1f"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-busyness-becomes-your-brand.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95594,
+          "sha256": "fa6456a132863c64c0f1d4d4eac761d567aea7ca8697833ff1d91832296a778e"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-comfort-becomes-your-cage.pdf",
+      "filename": "when-comfort-becomes-your-cage.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-comfort-becomes-your-cage.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-comfort-becomes-your-cage.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 106263,
+          "sha256": "413ac09516e7242c50560a1b589e883b4fc37d93ee649568f796ac2289bb41c4"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-comfort-becomes-your-cage.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 106090,
+          "sha256": "62c6830f1f227afe382d31e977c210e646aceb7db60fe74bf31859dd1ae39293"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-conflict-feels-like-betrayal.pdf",
+      "filename": "when-conflict-feels-like-betrayal.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-conflict-feels-like-betrayal.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-conflict-feels-like-betrayal.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 99372,
+          "sha256": "71501a6badb4527080e53103cc582bce66f0576947f738990be1e9d0ffd0f4cc"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-conflict-feels-like-betrayal.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99198,
+          "sha256": "17d8cc2ff81b6c6020b95f27a9af7747fd0b98f61879c3687b496f20f65d592b"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-doctrine-feels-safer-than-god.pdf",
+      "filename": "when-doctrine-feels-safer-than-god.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-doctrine-feels-safer-than-god.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-doctrine-feels-safer-than-god.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 100200,
+          "sha256": "f6dd7c8d81fa4ed5f53ea9d59b4feae91289a3386a7fdaf3ff3b06836fea1610"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-doctrine-feels-safer-than-god.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99988,
+          "sha256": "8c600661aa3d1da2aeff3f864d2052284319fc3ff4e56add7de256781077c19f"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-every-promotion-feels-hollow.pdf",
+      "filename": "when-every-promotion-feels-hollow.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-every-promotion-feels-hollow.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-every-promotion-feels-hollow.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 92155,
+          "sha256": "bd3be4d453e1d77d5e0cf9423a69c9e90fa5b76565ad8c71dcfe50deb6126441"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-every-promotion-feels-hollow.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 91932,
+          "sha256": "07354320b29f1e9b4e61046596383455395a3c213f22cb196aeca8dc7d86ac33"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-grace-finds-you-in-the-mess.pdf",
+      "filename": "when-grace-finds-you-in-the-mess.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-grace-finds-you-in-the-mess.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-grace-finds-you-in-the-mess.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95451,
+          "sha256": "ff2f7631eefd477ff45fbcd2a8606f62e62141ecd75dc174fe0c37eae5db240b"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-grace-finds-you-in-the-mess.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95260,
+          "sha256": "099e4d71874f45aac3e565e20b03bf47fc4b3dab244ba453976f74ca85d0243f"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-hope-feels-reckless.pdf",
+      "filename": "when-hope-feels-reckless.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-hope-feels-reckless.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-hope-feels-reckless.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 97922,
+          "sha256": "2af84dbe5bcc9b81bc4384dcfdf948aad746567c6bd92652069a6f6be4c0a579"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-hope-feels-reckless.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 97713,
+          "sha256": "4d1e470b260443c169ad7cdeb5deb8d93041a381267a9385ce13477d6efaffd8"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-kindness-feels-like-rebellion.pdf",
+      "filename": "when-kindness-feels-like-rebellion.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-kindness-feels-like-rebellion.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-kindness-feels-like-rebellion.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 94193,
+          "sha256": "1fc493fc3d956cf320fc1c29aed456d9271a31add473c499227f3ff09ede12f7"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-kindness-feels-like-rebellion.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 93987,
+          "sha256": "5a3a619e4007d23ccaa5459dddd502f3a7583a0a37e13508f46da11e8731f7f0"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-later-became-never.pdf",
+      "filename": "when-later-became-never.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-later-became-never.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-later-became-never.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 100178,
+          "sha256": "332086d4c1ecad56bfb02508e970fceb5860aa21112ddb55dc5c563f5e1b5497"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-later-became-never.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99981,
+          "sha256": "714f79e2f797bab5f06cc26675b8bcf829212894b09d721d2e8fd671168c9786"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-numbness-feels-safer-than-joy.pdf",
+      "filename": "when-numbness-feels-safer-than-joy.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-numbness-feels-safer-than-joy.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-numbness-feels-safer-than-joy.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 99825,
+          "sha256": "aa764cc0e01b352334d7206dd1491431d335974530ba8715ddb3e7915e2a9f34"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-numbness-feels-safer-than-joy.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99635,
+          "sha256": "3909f17f7168b438a3d811492431fc36c3839ca6a9f05f1884ded5ea53d58ab4"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-productivity-becomes-punishment.pdf",
+      "filename": "when-productivity-becomes-punishment.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-productivity-becomes-punishment.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-productivity-becomes-punishment.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 99998,
+          "sha256": "7179aa741a5b994d95c07b4e04bfdfc03bba7c3ef4b72ecc049d3842f351361b"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-productivity-becomes-punishment.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99795,
+          "sha256": "5a7e208bea227bcabe75956d486da35682af6bdf27603deef73460f82193bd65"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-rest-starts-to-feel-dangerous.pdf",
+      "filename": "when-rest-starts-to-feel-dangerous.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-rest-starts-to-feel-dangerous.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-rest-starts-to-feel-dangerous.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 94576,
+          "sha256": "309c05f648738c2afde794400335fd010ad3d5154a679cf50312584831c97670"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-rest-starts-to-feel-dangerous.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 94349,
+          "sha256": "6225d762d61838d99c8bd4a4d85d1bab37f6a943e9fafed7d7de92545eadff3b"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-argue-with-god-in-your-head.pdf",
+      "filename": "when-you-argue-with-god-in-your-head.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-argue-with-god-in-your-head.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-argue-with-god-in-your-head.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 101596,
+          "sha256": "529ee6f588c5389d96d67a34cb76bbcda8a1f3d22bd6b85c3e67918693ad2ae6"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-argue-with-god-in-your-head.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 101392,
+          "sha256": "05055235e92d831529e3a3ee7ca99fa95e3f1b958738778fe1ac799ece7b6663"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-cant-stop-overthinking.pdf",
+      "filename": "when-you-cant-stop-overthinking.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-cant-stop-overthinking.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-cant-stop-overthinking.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96460,
+          "sha256": "26e5a6455f5a9bb5e6f7b58bdeffab68a030cc9d31fea38b9a1d031584133903"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-cant-stop-overthinking.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96260,
+          "sha256": "5729e8e112f4270e8cdf362f6ea12adf4fcc978f1ba49a38786aa882ce3c336e"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+      "filename": "when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 101826,
+          "sha256": "998cb6a8521e3fe1cb41f4be1ce971437fe6ca34ec4c51bbfed2646266923e63"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 101625,
+          "sha256": "5f5b53603d4f40f03d93dd75289437d7a775e6835a81c97bc48a0673922ff2bd"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-dont-know-what-you-want-anymore.pdf",
+      "filename": "when-you-dont-know-what-you-want-anymore.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-dont-know-what-you-want-anymore.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-dont-know-what-you-want-anymore.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 108547,
+          "sha256": "b3f486d4161d91e0c0789dea7d693147da552ac8bfcde20c8fffa849cc13ff66"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-dont-know-what-you-want-anymore.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 108360,
+          "sha256": "d1b5a11066490c0015d0a19a5f29f79f4ee6b5bf68d11dcf96637840ef5efa08"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-dont-trust-your-own-decisions.pdf",
+      "filename": "when-you-dont-trust-your-own-decisions.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-dont-trust-your-own-decisions.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-dont-trust-your-own-decisions.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98966,
+          "sha256": "e7a2ab55ee2e214636777131c329bfb5bdd575cb3429075a12cbb3afa7a202e8"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-dont-trust-your-own-decisions.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 98784,
+          "sha256": "3c6d519987bd02987893670bc56c07d5d2afc9d55c4f5dc420df04e0e0495c44"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-fear-being-wrong-about-god.pdf",
+      "filename": "when-you-fear-being-wrong-about-god.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-fear-being-wrong-about-god.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-fear-being-wrong-about-god.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98159,
+          "sha256": "39a7baae345b79393598bcd023c082e2829ac18f8e147c9c730ee95af51c8d78"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-fear-being-wrong-about-god.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 97953,
+          "sha256": "26bb433b3dc2db6ec82a1b2b91cd264b9131c85d4bc4a27d5fefd04118490994"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-fear-success-more-than-failure.pdf",
+      "filename": "when-you-fear-success-more-than-failure.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-fear-success-more-than-failure.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-fear-success-more-than-failure.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 101232,
+          "sha256": "78a05f639acc099d49c2c55ffec0d0c4d152c93e4009131b448de21da8dc96ad"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-fear-success-more-than-failure.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 101041,
+          "sha256": "8067655813eff0b65fc857f4743a17db92dacc1e47df54735ebed38aa3545cd3"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-feel-like-god-is-delaying-you.pdf",
+      "filename": "when-you-feel-like-god-is-delaying-you.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-feel-like-god-is-delaying-you.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-feel-like-god-is-delaying-you.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 100674,
+          "sha256": "1de6a41a625712acbed14139fbae8cb68b9892f934dfe892d4e1ca34a4653af9"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-feel-like-god-is-delaying-you.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 100499,
+          "sha256": "3861b06ed76cf8cd8e408d977bb1cbd89dd00fa4db869133586c782d37a169e9"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-feel-too-busy-to-care.pdf",
+      "filename": "when-you-feel-too-busy-to-care.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-feel-too-busy-to-care.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-feel-too-busy-to-care.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98194,
+          "sha256": "4b2eea4f470e16855e5ae3a8559afae71869db161bb01b9215fd2a2878ec672e"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-feel-too-busy-to-care.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 98012,
+          "sha256": "7eb311f2284010d664a6d5dce8d68934c34c2e6eda6397f55717abe55c3379bb"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-finally-let-yourself-cry.pdf",
+      "filename": "when-you-finally-let-yourself-cry.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-finally-let-yourself-cry.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-finally-let-yourself-cry.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95846,
+          "sha256": "369f6c7105c7bf567dd1f0015faf6ad68f9b34b18c669c4e5936513d0298d0a0"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-finally-let-yourself-cry.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95654,
+          "sha256": "5ee634b15895d2b0037f75075b247b3b137fe4919edf346a272fe7f850282944"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-give-more-than-you-get.pdf",
+      "filename": "when-you-give-more-than-you-get.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-give-more-than-you-get.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-give-more-than-you-get.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 115039,
+          "sha256": "490d83c4abe2f5eac0da574ce2ba8fd4fd15701fe2b0b13202faec2712a9036b"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-give-more-than-you-get.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 114850,
+          "sha256": "d3da07aefad62d50b9a664afa0447298076def1ec7b6af39d0290dc74a694bf8"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-keep-blaming-your-childhood.pdf",
+      "filename": "when-you-keep-blaming-your-childhood.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-keep-blaming-your-childhood.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-keep-blaming-your-childhood.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95551,
+          "sha256": "e19e165da3fc45d7ec9c397bbfc8505d67abb1f8265bf701a46138e73df438dd"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-keep-blaming-your-childhood.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95369,
+          "sha256": "533bd7f3410e0d45b013b2f21f84c88d261581403c64ac060a03cee351d098af"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-keep-choosing-people-who-cant-choose-you.pdf",
+      "filename": "when-you-keep-choosing-people-who-cant-choose-you.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 101003,
+          "sha256": "67baa8a9dcb7df16adcdf45c29fe96c8d05596de08ab56067289d378791c5c07"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 100819,
+          "sha256": "8b35b739940acb4bdfb89a99807c526f2de5fed07a18d01ba668f3f74a1bc704"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-keep-confusing-niceness-with-goodness.pdf",
+      "filename": "when-you-keep-confusing-niceness-with-goodness.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96766,
+          "sha256": "1c8b3c4b68a0226281336f75f1d31d26fb8477e429f679e9c8029e052fd6ab30"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96563,
+          "sha256": "4cd8165dcb50a5f9e575480dfba728b4baf2c9ab603e900405c1380ba569873d"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-miss-who-you-used-to-be.pdf",
+      "filename": "when-you-miss-who-you-used-to-be.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-miss-who-you-used-to-be.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-miss-who-you-used-to-be.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 106425,
+          "sha256": "d4d261c3b1fb7c2197cdcbd3a9845ec7c39fdf3df8f76ea5509a4b2db1deab58"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-miss-who-you-used-to-be.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 106218,
+          "sha256": "60ba93b20e8df765107277f452a479c17fcbfc2c41bdc67fbb5067917247fff7"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-mistake-familiarity-for-loyalty.pdf",
+      "filename": "when-you-mistake-familiarity-for-loyalty.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-mistake-familiarity-for-loyalty.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-mistake-familiarity-for-loyalty.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 112060,
+          "sha256": "9d7cfc7c6a4081ec974c0c2be4dd996da112700ca1105c8b7e4d3d30d5a3088b"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-mistake-familiarity-for-loyalty.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 111893,
+          "sha256": "5dfc1c18d3bffb1825d4f82f1dec0559a9bdb937fbd6e357dea53dad1bd32508"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-need-god-to-interrupt-you.pdf",
+      "filename": "when-you-need-god-to-interrupt-you.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-need-god-to-interrupt-you.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-need-god-to-interrupt-you.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98851,
+          "sha256": "1bde1903598d7f87977dffe2cb81e7fb10e90987d4ca1ea687bdf2518cd7fe3f"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-need-god-to-interrupt-you.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 98662,
+          "sha256": "9957516bdd23adeb97a3ebf84eabc2b99681b1b04b2b13e0182b74e2bb7db876"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-no-longer-recognise-your-own-voice.pdf",
+      "filename": "when-you-no-longer-recognise-your-own-voice.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-no-longer-recognise-your-own-voice.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-no-longer-recognise-your-own-voice.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 99771,
+          "sha256": "7c25720ae69297ad1a14f0220fb6cec7160511ec4e5d20d64d02eb0f048554e7"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-no-longer-recognise-your-own-voice.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99579,
+          "sha256": "55cf850f40bca6276dd2edc8b05e2e09807ef30fe1614badb2edae5d1f7d2ee4"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-outgrow-your-circle.pdf",
+      "filename": "when-you-outgrow-your-circle.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-outgrow-your-circle.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-outgrow-your-circle.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 97844,
+          "sha256": "b071e7e82dfd615dbe5f12bb9e605c4818ea14e75643d2b3ff99e748502c07d9"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-outgrow-your-circle.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 97638,
+          "sha256": "b48831d90e6411742c43c4ab46adc5228dfee33de7a8c0d0627f9458fef5cb33"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-realise-prayer-is-war.pdf",
+      "filename": "when-you-realise-prayer-is-war.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-realise-prayer-is-war.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-realise-prayer-is-war.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98443,
+          "sha256": "3cdf25174d32225baf8e0add479b9a2d48259df0956dc57a6b0afed6a232d41e"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-realise-prayer-is-war.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 98235,
+          "sha256": "660b100dcd082bb7ab02baf5f72de3c8df468571fd4abc45ef8058c2c8ba3352"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-realise-you-were-the-problem.pdf",
+      "filename": "when-you-realise-you-were-the-problem.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-realise-you-were-the-problem.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-realise-you-were-the-problem.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96908,
+          "sha256": "09fdb6968206b7eadd10ac53d83ab48153a118a69a94dd55a756c9ff72aececc"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-realise-you-were-the-problem.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96700,
+          "sha256": "80493409d5e9c5094099e874e1a9846ca242a507ca9f9ea9aa3dba558f1f3bb5"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-realise-youre-not-behind.pdf",
+      "filename": "when-you-realise-youre-not-behind.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-realise-youre-not-behind.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-realise-youre-not-behind.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 100247,
+          "sha256": "3e9c39e75880da2d67411f6d7ca7d04f8460d56203fd639e56f013a6e28fe09f"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-realise-youre-not-behind.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 100070,
+          "sha256": "83b1563767befa852d3ce117385655416d7bc4189dfb62e1053c1d665be40442"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-stop-waiting-for-permission.pdf",
+      "filename": "when-you-stop-waiting-for-permission.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-stop-waiting-for-permission.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-stop-waiting-for-permission.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 99561,
+          "sha256": "fa58d8dec1aae4ec40413bb2dfff78dbbd44114e69f49776a843045190f50e38"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-stop-waiting-for-permission.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99353,
+          "sha256": "45b8b4d83ce855ddb9f562fb5f255a41c3b1158b9df4fa7feca224887c246b5c"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-you-want-to-quit-but-cant.pdf",
+      "filename": "when-you-want-to-quit-but-cant.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-you-want-to-quit-but-cant.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-you-want-to-quit-but-cant.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 100401,
+          "sha256": "99994549933c969dc061cad87824507fe2dc1b763a7ef9f07ffa27d89ae765ef"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-you-want-to-quit-but-cant.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 100218,
+          "sha256": "259158350c555bac9e635be0b8097c61ef76a7f9dce3f8a86c8eb2b358e99ca3"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-calendar-is-full-but-your-life-is-empty.pdf",
+      "filename": "when-your-calendar-is-full-but-your-life-is-empty.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 111094,
+          "sha256": "df81d8927ad79e1b64969893a6d7c6b87bc7123220ae0e6d66203c0ef1b500db"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 110904,
+          "sha256": "0a2217881dceb13455cbb344e69b96d5d092ffacbfdafb65519b8808bdd7fa5b"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-calling-stops-being-cute.pdf",
+      "filename": "when-your-calling-stops-being-cute.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-calling-stops-being-cute.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-calling-stops-being-cute.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95543,
+          "sha256": "858c912526a12817ef107dc3ac80751a1b1954ac0dacf1201ef68b052dc87a7a"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-calling-stops-being-cute.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95344,
+          "sha256": "36b67f2ed4349abc9005a8d2c5935535438bdf8914a731bae35828968aab447e"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-character-is-leaking.pdf",
+      "filename": "when-your-character-is-leaking.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-character-is-leaking.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-character-is-leaking.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 99557,
+          "sha256": "7512f583c285e03fba7da53b762d610a0abca7f96f690d8e775339abc36b4967"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-character-is-leaking.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99350,
+          "sha256": "7b4088b1d68f31a9672cc21ecab225eb8a1681917710fc99114431a74811beb5"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-confidence-feels-manufactured.pdf",
+      "filename": "when-your-confidence-feels-manufactured.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-confidence-feels-manufactured.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-confidence-feels-manufactured.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 111459,
+          "sha256": "992b61898af969b0489879e07361d40c6459cf8def1ce0dcf23e3234b2a2f852"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-confidence-feels-manufactured.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 111240,
+          "sha256": "9f8b59a640cc0273693bf256555d1f223b9d9bc2b6066c0c1c3eebec4a1efbd3"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-convictions-feel-like-costumes.pdf",
+      "filename": "when-your-convictions-feel-like-costumes.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-convictions-feel-like-costumes.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-convictions-feel-like-costumes.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 109413,
+          "sha256": "28cd3d352c67e0a583cec62f60f587cd7f4b16d72b2f045a4a821a88b59e0012"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-convictions-feel-like-costumes.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 109222,
+          "sha256": "3f0732e459193d81d7d7fbb7fb6a3585296c2f4f9fa7c37f7d315d689e277fb7"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-dreams-feel-too-heavy.pdf",
+      "filename": "when-your-dreams-feel-too-heavy.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-dreams-feel-too-heavy.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-dreams-feel-too-heavy.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 100533,
+          "sha256": "75fd140b2c08d99747fd6f508ce6fb0df79a8e278702e962a43318e46989b366"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-dreams-feel-too-heavy.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 100322,
+          "sha256": "05bc33d45ee6cc75316d25300221f0a646d4bd91eacfbc23c13feb7b5703cd0d"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-excuses-become-your-identity.pdf",
+      "filename": "when-your-excuses-become-your-identity.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-excuses-become-your-identity.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-excuses-become-your-identity.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 120145,
+          "sha256": "08c646ae4fe67890d0b245b2fbe519424e6353c9db9370586e6db79db2029cea"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-excuses-become-your-identity.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 119950,
+          "sha256": "0e4ee4c67c2bbc728fb724517deee2aaa110b6c1f9c3ea3102578bcd8892ee0f"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-faith-feels-numb.pdf",
+      "filename": "when-your-faith-feels-numb.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-faith-feels-numb.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-faith-feels-numb.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96490,
+          "sha256": "0e149ad266b93d65e8b56da5ad24d81a9ad006177467374b142bf6ad431f8b33"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-faith-feels-numb.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96287,
+          "sha256": "58613547fd072bae3db1b487eb807ce6dd2e7b44b245ba48e872cfed96b9db5d"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-hustle-has-no-soul.pdf",
+      "filename": "when-your-hustle-has-no-soul.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-hustle-has-no-soul.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-hustle-has-no-soul.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95280,
+          "sha256": "945ae7e52cde53e23de71aec387daa320fb73eb5170f6bbe15255ec96b09f675"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-hustle-has-no-soul.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95093,
+          "sha256": "7be3467e1c8f2344d6ad4fb02fbd602bdae957866474d838846f566f37dd2a1b"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-legacy-terrifies-you.pdf",
+      "filename": "when-your-legacy-terrifies-you.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-legacy-terrifies-you.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-legacy-terrifies-you.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96945,
+          "sha256": "428af8c60787201cc0f336a07b0099854d0bc91b049e546047320ffa687c4694"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-legacy-terrifies-you.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96740,
+          "sha256": "4850790e5c539fba60a9adb840daeba6111e3b7ffe3bb07e68c67834d72ff9b8"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-silence-says-too-much.pdf",
+      "filename": "when-your-silence-says-too-much.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-silence-says-too-much.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-silence-says-too-much.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98828,
+          "sha256": "3c8f04027a3291e8c56bf1551c8cc293786695885814578988b1f12fa250d0e6"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-silence-says-too-much.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 98635,
+          "sha256": "50339b2f4eea0a8e007c9db21b80f6bb18d8e5b28c72802dced6a42013be227f"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-standards-keep-you-lonely.pdf",
+      "filename": "when-your-standards-keep-you-lonely.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-standards-keep-you-lonely.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-standards-keep-you-lonely.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 101390,
+          "sha256": "b75deea472f3496a0990693f8de1c997eff9717b7c8e54a62fab358d534b7933"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-standards-keep-you-lonely.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 101191,
+          "sha256": "a4852852dbbec72f80dbbaa5c5dd1b0b8f11e389f960053f40737abc2dfabc1e"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-vision-outgrows-your-environment.pdf",
+      "filename": "when-your-vision-outgrows-your-environment.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-vision-outgrows-your-environment.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-vision-outgrows-your-environment.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 97294,
+          "sha256": "19d935ef35e1718e12a1b15005a9bc01c5777a418667ae11cd1048599afc5541"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-vision-outgrows-your-environment.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 97104,
+          "sha256": "db573c1b6d6c977255f1d78b8b0eb4dfe815705fc210774219dd11164d44f482"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-your-work-becomes-your-hiding-place.pdf",
+      "filename": "when-your-work-becomes-your-hiding-place.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-your-work-becomes-your-hiding-place.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-your-work-becomes-your-hiding-place.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 97298,
+          "sha256": "69c9b2417f25bf010c13ac76f2da5748ae527be985888cc10275ac135b61467c"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-your-work-becomes-your-hiding-place.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 97131,
+          "sha256": "1cfb533aeb1d50cefb150b34a375ebf2aae51aaf9987796e2e3966056162f28b"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-addicted-to-distraction.pdf",
+      "filename": "when-youre-addicted-to-distraction.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-addicted-to-distraction.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-addicted-to-distraction.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96483,
+          "sha256": "92933289d84def032ed2ae7114d34de33c18ebb13b1f2c9f7fddd06167ecd4be"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-addicted-to-distraction.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96269,
+          "sha256": "75908e3b9ec13ab48402df745e8bb6fd30029b2fe9c3cf22dc0b1c477d3fc4b7"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-afraid-of-your-own-potential.pdf",
+      "filename": "when-youre-afraid-of-your-own-potential.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-afraid-of-your-own-potential.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-afraid-of-your-own-potential.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 102817,
+          "sha256": "bf6a3246e026653f68ac97787a9e15ca075d2e41c0f6771ba02f44cd8fc43027"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-afraid-of-your-own-potential.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 102633,
+          "sha256": "84b2e0b09b5862a7ec1bfadd83a518987a44f80cd55e188478dd7a66946cf955"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-afraid-to-be-radical.pdf",
+      "filename": "when-youre-afraid-to-be-radical.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-afraid-to-be-radical.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-afraid-to-be-radical.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96161,
+          "sha256": "5c449a1a8381ec3ca2216951a4effdb430b427f0e472af3fb5cf598122d91cee"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-afraid-to-be-radical.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95940,
+          "sha256": "03a2c2347a9a57a5da848b09dda3921fff1d7618612515843f21ecf098306e14"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-always-the-strong-one.pdf",
+      "filename": "when-youre-always-the-strong-one.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-always-the-strong-one.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-always-the-strong-one.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98790,
+          "sha256": "806492d80e54a51692670a285971f5d202f7e138dad431414af55896609da9d2"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-always-the-strong-one.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 98579,
+          "sha256": "5fba20ea2683ebe2bce4bf09f8a9a2686f95a7e623f4edaef792db96599043b5"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-attracted-to-potential-not-reality.pdf",
+      "filename": "when-youre-attracted-to-potential-not-reality.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-attracted-to-potential-not-reality.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-attracted-to-potential-not-reality.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 103630,
+          "sha256": "39b9abcb15d148b7e7f146ef4340e3eea41d72836dd80d533736d6211538a1bb"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-attracted-to-potential-not-reality.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 103447,
+          "sha256": "baefdd0cf209cd3d1af6578b9f1e80cbf77b6cb4745ef98dc5223e246701c1fc"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-building-someone-elses-legacy.pdf",
+      "filename": "when-youre-building-someone-elses-legacy.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-building-someone-elses-legacy.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-building-someone-elses-legacy.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 110479,
+          "sha256": "2b11878895cb6d476c80e845315dd92aaad9b9a07ad2231527f9f3b8601e5a0c"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-building-someone-elses-legacy.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 110288,
+          "sha256": "cc1cabdef90d27087829314e63e6215f0b404ba90a192915cb9a570068899af9"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-done-fixing-adults.pdf",
+      "filename": "when-youre-done-fixing-adults.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-done-fixing-adults.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-done-fixing-adults.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95505,
+          "sha256": "2050a93ae178874c05def0c2d06bfc70f9b3f78ba59b47bcab979fd2a480d0b2"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-done-fixing-adults.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95316,
+          "sha256": "fec86214bca5cab60ea0d55538ebe20ad6255c7207b599c385049617eddc92c2"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-exhausted-but-still-available.pdf",
+      "filename": "when-youre-exhausted-but-still-available.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-exhausted-but-still-available.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-exhausted-but-still-available.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 110177,
+          "sha256": "077ce2469572f0f75cd8ca0e8200bd876f788a5f3dc26762a25624431127f3f4"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-exhausted-but-still-available.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 109979,
+          "sha256": "1e3aafb2044fd63927bbef6680e5d0898bcb98c5712cbf91be8639440558b131"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-keeping-faith-out-of-habit.pdf",
+      "filename": "when-youre-keeping-faith-out-of-habit.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-keeping-faith-out-of-habit.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-keeping-faith-out-of-habit.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96827,
+          "sha256": "dbf980f883af51da6da3c03b7c719d777e8fb53e72b0832cd8fbbd6fb1b8c0cb"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-keeping-faith-out-of-habit.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96634,
+          "sha256": "d3e7c1e11d5eaa8ae46c2cbd28197f6bc0c2738f765bb9f6ad676051e06121ff"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-living-for-weekends.pdf",
+      "filename": "when-youre-living-for-weekends.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-living-for-weekends.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-living-for-weekends.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 94225,
+          "sha256": "51b313ac4b7bf648f9cb6e23a83b023c3c5c691e13e116a031b5e5cb030eefdd"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-living-for-weekends.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 94042,
+          "sha256": "3b4c937ab412551f1081e3b309b212396acb789bac3c6542014c648b62b3c19d"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-loved-without-earning-it.pdf",
+      "filename": "when-youre-loved-without-earning-it.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-loved-without-earning-it.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-loved-without-earning-it.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 91518,
+          "sha256": "18700b4392492a337cb7138a2bc90a70c978ebbd5310d51e6ef894dc4eec24ea"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-loved-without-earning-it.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 91322,
+          "sha256": "0476ede6baca2ad9cc2bc764ab2b823be1d1cfb88d7ec79733044390ec697a27"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-measuring-everything-but-meaning.pdf",
+      "filename": "when-youre-measuring-everything-but-meaning.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-measuring-everything-but-meaning.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-measuring-everything-but-meaning.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 102567,
+          "sha256": "70be5e96edca6a5cbdce9c6a8ec66b3bcfeb59ce68e59df6ea28f741ca96915a"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-measuring-everything-but-meaning.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 102376,
+          "sha256": "909888b0e4f283b242e88595a2a61c1592cc5ac46907acc920bed7b8c6f36176"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-not-lazy-youre-undisciplined.pdf",
+      "filename": "when-youre-not-lazy-youre-undisciplined.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-not-lazy-youre-undisciplined.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-not-lazy-youre-undisciplined.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 100065,
+          "sha256": "5c58dd35ed9b8af3876df63ba6e1943fd415853868544ad0bc82f95bb0dbb393"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-not-lazy-youre-undisciplined.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 99857,
+          "sha256": "922fd152f767afe678fe2f34a963b9e979eb83d5ea4b1ab91d8767a5434d9a67"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-preparing-for-rooms-you-havent-entered.pdf",
+      "filename": "when-youre-preparing-for-rooms-you-havent-entered.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96629,
+          "sha256": "d9c64c1a6c9e33f8c9828d5f26fb3a16fead4f32ab355cce191fedd03227352f"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 96445,
+          "sha256": "a35870204664b48c63497cdc42e87d552de80b0c2ecfb95e6e31fc4065d9c36c"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-productive-but-not-present.pdf",
+      "filename": "when-youre-productive-but-not-present.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-productive-but-not-present.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-productive-but-not-present.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 104956,
+          "sha256": "d9903a78ca697d2d484a2711b426e9495cb8f337bd9d3f1aa7d3ae92b9423902"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-productive-but-not-present.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 104767,
+          "sha256": "a2bae77c702a122eca4eb6909534630b919802e3acf7d504c86d138ff0b77617"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-scared-to-start-over.pdf",
+      "filename": "when-youre-scared-to-start-over.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-scared-to-start-over.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-scared-to-start-over.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96026,
+          "sha256": "e6194559eea093aef478fc15cf2ddb40eeae12cdea301672bdf18c3841758e06"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-scared-to-start-over.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95823,
+          "sha256": "99cb27a82744bf52882fe7c3665f060bc08853fe46ca6fdda3e78e77e7119f72"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-the-only-one-doing-the-work.pdf",
+      "filename": "when-youre-the-only-one-doing-the-work.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-the-only-one-doing-the-work.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-the-only-one-doing-the-work.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 96116,
+          "sha256": "02ef5242b736f905a75cecb0e2c930bb54cb1d81c4bae55f22079a38318cb97f"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-the-only-one-doing-the-work.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 95931,
+          "sha256": "aa1c5d77fd6d07b2156d777b59ecd9886ab87d3ac20a94aaee17c4ab2816dc1b"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-tired-of-being-the-bigger-person.pdf",
+      "filename": "when-youre-tired-of-being-the-bigger-person.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-tired-of-being-the-bigger-person.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-tired-of-being-the-bigger-person.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 121625,
+          "sha256": "58fa21ed96ca5a03477c0ccb5cb582ebc49371fec8a1e36d8acdc5fc60d65496"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-tired-of-being-the-bigger-person.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 121432,
+          "sha256": "5e1cad176d9cb6afd5e6b1ad5003d144b7d3ac7c4036de31e3d3b6b9b8196cb3"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-tired-of-starting-over.pdf",
+      "filename": "when-youre-tired-of-starting-over.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-tired-of-starting-over.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-tired-of-starting-over.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 97881,
+          "sha256": "e9595f99930d3ee5efa927b84698f1bd71ff62834ad0bfdc37231c75d7e96bec"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-tired-of-starting-over.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 97690,
+          "sha256": "ba8d18e3aa0a72caa4bc3dae3b0061ca5aff688f994f5f926b409e28a254db3d"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youre-winning-at-work-but-losing-yourself.pdf",
+      "filename": "when-youre-winning-at-work-but-losing-yourself.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 98844,
+          "sha256": "c194cf42b014577f30150eaac001eb33bbd9e9656858f227a837731864736385"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 98643,
+          "sha256": "398fb0519b7595d7bae726a11a3c03408048eaec848744e97727fc34e4888c6e"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youve-become-chronically-online.pdf",
+      "filename": "when-youve-become-chronically-online.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youve-become-chronically-online.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youve-become-chronically-online.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 95163,
+          "sha256": "60cce3351a5d962c85dd564fd3cb01afb6f29c6c8e9a0ca671876f2bc6541b88"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youve-become-chronically-online.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 94964,
+          "sha256": "d1141dce43e68c8c275601e5dca38dbd56f7c6071efbd20f46774ab94acc9f84"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:when-youve-worshipped-the-wrong-metrics.pdf",
+      "filename": "when-youve-worshipped-the-wrong-metrics.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/when-youve-worshipped-the-wrong-metrics.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/when-youve-worshipped-the-wrong-metrics.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 103939,
+          "sha256": "6e05b78398c6b49688b1bfa3f4054fa2c0b6d6bec35b3b5d7ff9cb089c9bc328"
+        },
+        {
+          "publicUrl": "/assets/downloads/when-youve-worshipped-the-wrong-metrics.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 103743,
+          "sha256": "3e568d1af2a4a1bfa0a10c9c08dba91d978359521a820a16dff1e32f9ec59bef"
+        }
+      ]
+    },
+    {
+      "groupId": "filename:you-were-built-to-carry-weight.pdf",
+      "filename": "you-were-built-to-carry-weight.pdf",
+      "classification": "generated_vs_static_conflict",
+      "recommendedAction": "manual_resolution_required",
+      "recommendedCanonicalPath": "/assets/downloads/you-were-built-to-carry-weight.pdf",
+      "uniqueHashCount": 2,
+      "files": [
+        {
+          "publicUrl": "/assets/downloads/content-downloads/you-were-built-to-carry-weight.pdf",
+          "folderClass": "generated_download",
+          "canonicalityStatus": "generated",
+          "fileSizeBytes": 94659,
+          "sha256": "11c113234c27e8c8f5713513b5bf5240e68ee98c829892b579a31dd88b54eaa0"
+        },
+        {
+          "publicUrl": "/assets/downloads/you-were-built-to-carry-weight.pdf",
+          "folderClass": "canonical_download",
+          "canonicalityStatus": "candidate_canonical",
+          "fileSizeBytes": 94454,
+          "sha256": "4daadaf201c8e76b3183937ef7e5ed5c75f2ddfb02f525440fb5888851de7bf4"
         }
       ]
     }

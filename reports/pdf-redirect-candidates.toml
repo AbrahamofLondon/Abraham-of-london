@@ -105,50 +105,8 @@
   force = true
 
 [[redirects]]
-  from = "/prints/entrepreneur-operating-pack.pdf"
-  to = "/assets/downloads/entrepreneur-operating-pack.pdf"
-  status = 301
-  force = true
-
-[[redirects]]
   from = "/prints/fatherhood-standards-card.pdf"
   to = "/assets/downloads/fatherhood-standards-card.pdf"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/prints/leadership-playbook.pdf"
-  to = "/assets/downloads/leadership-playbook.pdf"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/prints/mentorship-starter-kit.pdf"
-  to = "/assets/downloads/mentorship-starter-kit.pdf"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/prints/standards-brief.pdf"
-  to = "/assets/downloads/standards-brief.pdf"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/prints/weekly-operating-rhythm.pdf"
-  to = "/assets/downloads/weekly-operating-rhythm.pdf"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/resources/brotherhood-leader-guide.pdf"
-  to = "/assets/downloads/brotherhood-leader-guide.pdf"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/resources/brotherhood-starter-kit.pdf"
-  to = "/assets/downloads/brotherhood-starter-kit.pdf"
   status = 301
   force = true
 

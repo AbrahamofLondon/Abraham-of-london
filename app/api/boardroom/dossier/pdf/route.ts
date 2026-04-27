@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
     const documentElement = BoardroomDossierDocument({ dossier, organisationName: org.name });
     const pdfBuffer = await renderToBuffer(documentElement as ReactElement<DocumentProps>);
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as unknown as BodyInit, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

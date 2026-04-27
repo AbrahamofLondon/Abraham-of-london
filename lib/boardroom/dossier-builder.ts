@@ -100,7 +100,7 @@ export async function buildBoardroomDossier(
     const journeysWithCollisions = await prisma.diagnosticJourney.findMany({
       where: {
         id: { in: journeyIds },
-        mergedTensionThread: { not: null },
+        NOT: { mergedTensionThread: { equals: undefined } },
       },
       select: { mergedTensionThread: true },
     });

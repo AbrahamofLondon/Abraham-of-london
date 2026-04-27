@@ -1,7 +1,33 @@
 {
-  "generatedAt": "2026-04-21T15:41:49.440Z",
+  "generatedAt": "2026-04-27T13:31:59.566Z",
   "totals": {
-    "failures": 0
+    "failures": 5
   },
-  "findings": []
+  "findings": [
+    {
+      "rule": "checkout_grants_entitlement",
+      "severity": "fail",
+      "message": "app/api/checkout/route.ts must include grantEntitlement."
+    },
+    {
+      "rule": "canonical_binary_exists",
+      "severity": "fail",
+      "message": "global-market-intelligence-board-deck-q1-2026 is missing physical canonical binary /assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf."
+    },
+    {
+      "rule": "canonical_binary_exists",
+      "severity": "fail",
+      "message": "global-market-intelligence-report-q1-2026 is missing physical canonical binary /assets/downloads/global-market-intelligence-report-q1-2026.pdf."
+    },
+    {
+      "rule": "active_pdf_outside_canonical_path",
+      "severity": "fail",
+      "message": "198 active non-strategic PDFs remain outside /assets/downloads/{slug}.pdf."
+    },
+    {
+      "rule": "generated_reports_committed",
+      "severity": "fail",
+      "message": "Generated PDF reports changed unexpectedly: reports/pdf-canonical-decisions.json, reports/pdf-asset-registry.json, reports/pdf-duplicate-report.json."
+    }
+  ]
 }

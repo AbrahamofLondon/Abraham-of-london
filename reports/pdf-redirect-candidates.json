@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-21T14:59:09.620Z",
+  "generatedAt": "2026-04-27T13:31:51.129Z",
   "candidates": [
     {
       "from": "/lexicon/brotherhood.pdf",
@@ -138,68 +138,12 @@
       "sha256": "bf10ba2b4393667230783a216282b4454d3515fc265d39714e940cb26f3705f3"
     },
     {
-      "from": "/prints/entrepreneur-operating-pack.pdf",
-      "to": "/assets/downloads/entrepreneur-operating-pack.pdf",
-      "status": 301,
-      "reason": "byte_identical_legacy_alias",
-      "filename": "entrepreneur-operating-pack.pdf",
-      "sha256": "bcca5c9fa6eabcd586dd814338dbdb8cd6759a71af61e5a7ad10420d106ac21d"
-    },
-    {
       "from": "/prints/fatherhood-standards-card.pdf",
       "to": "/assets/downloads/fatherhood-standards-card.pdf",
       "status": 301,
       "reason": "byte_identical_legacy_alias",
       "filename": "fatherhood-standards-card.pdf",
       "sha256": "ea07d9e68992c758bb0404abbc89ece308bd35b975a1c30b132b3955d653d2d1"
-    },
-    {
-      "from": "/prints/leadership-playbook.pdf",
-      "to": "/assets/downloads/leadership-playbook.pdf",
-      "status": 301,
-      "reason": "byte_identical_legacy_alias",
-      "filename": "leadership-playbook.pdf",
-      "sha256": "52ca242095f2b2a5302ec5aaaa6c4d30d90d03cec581254a3c9a9ae4577c9869"
-    },
-    {
-      "from": "/prints/mentorship-starter-kit.pdf",
-      "to": "/assets/downloads/mentorship-starter-kit.pdf",
-      "status": 301,
-      "reason": "byte_identical_legacy_alias",
-      "filename": "mentorship-starter-kit.pdf",
-      "sha256": "5718328da6ef82d06e79413bceb69e5f211aa09125876f7cf8d8fd28b9203b7e"
-    },
-    {
-      "from": "/prints/standards-brief.pdf",
-      "to": "/assets/downloads/standards-brief.pdf",
-      "status": 301,
-      "reason": "byte_identical_legacy_alias",
-      "filename": "standards-brief.pdf",
-      "sha256": "fc62a7cc36689a24725bd067f39cb51ea197ecc75f3c440e91b1f3bc9e76574c"
-    },
-    {
-      "from": "/prints/weekly-operating-rhythm.pdf",
-      "to": "/assets/downloads/weekly-operating-rhythm.pdf",
-      "status": 301,
-      "reason": "byte_identical_legacy_alias",
-      "filename": "weekly-operating-rhythm.pdf",
-      "sha256": "6ecb3e51a27cd135fecb1992e59d84a6e8d5983bd4c028ea0befd3dd39397954"
-    },
-    {
-      "from": "/resources/brotherhood-leader-guide.pdf",
-      "to": "/assets/downloads/brotherhood-leader-guide.pdf",
-      "status": 301,
-      "reason": "byte_identical_legacy_alias",
-      "filename": "brotherhood-leader-guide.pdf",
-      "sha256": "9ca089911051f41d0044eaf8cf4a47f039ffa5d90d81987cdd97f2f99eee16ed"
-    },
-    {
-      "from": "/resources/brotherhood-starter-kit.pdf",
-      "to": "/assets/downloads/brotherhood-starter-kit.pdf",
-      "status": 301,
-      "reason": "byte_identical_legacy_alias",
-      "filename": "brotherhood-starter-kit.pdf",
-      "sha256": "c7c8c2dde08d6feb0eae2da873af86654dc48759cd025d3c989e1ef2d52cf99c"
     },
     {
       "from": "/resources/canon-campaign.pdf",

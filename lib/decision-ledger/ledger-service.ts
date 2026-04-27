@@ -68,14 +68,14 @@ export async function recordLedgerEntry(
       summary: entry.decision,
       confidence: Math.max(0, Math.min(1, entry.scoreImpact / 100)),
       severity: entry.scoreImpact > 5 ? "high" : entry.scoreImpact > 0 ? "medium" : "low",
-      payload: {
+      payload: JSON.parse(JSON.stringify({
         source: entry.source,
         sourceId: entry.sourceId,
         signals: entry.signals,
         commitment: entry.commitment,
         outcome: entry.outcome,
         scoreImpact: entry.scoreImpact,
-      },
+      })),
     },
   });
 
@@ -224,11 +224,17 @@ export async function getLedgerHistory(
   }
 
   // 3. Outcome verification records (via journeys linked to email)
+  // Find journeys for this email, then find outcomes linked to those journeys
+  const userJourneys = await prisma.diagnosticJourney.findMany({
+    where: { email },
+    select: { id: true },
+  });
+  const userJourneyIds = userJourneys.map((j: { id: string }) => j.id);
   const outcomes = await prisma.outcomeVerificationRecord.findMany({
     where: {
       OR: [
-        { baselineJourney: { email } },
-        { followUpJourney: { email } },
+        { baselineJourneyId: { in: userJourneyIds } },
+        { followUpJourneyId: { in: userJourneyIds } },
       ],
     },
     orderBy: { createdAt: "desc" },
@@ -236,6 +242,9 @@ export async function getLedgerHistory(
   });
 
   for (const o of outcomes) {
+    const payload = typeof o.payload === "object" && o.payload !== null
+      ? o.payload as Record<string, unknown>
+      : {};
     entries.push({
       id: o.id,
       source: "outcome",
@@ -243,14 +252,14 @@ export async function getLedgerHistory(
       decision: `Outcome verification: ${o.outcomeClassification}`,
       signals: {
         magnitudeOfChange: o.magnitudeOfChange,
-        interventionEffectivenessScore: o.interventionEffectivenessScore,
-        confidenceCap: o.confidenceCap,
+        effectivenessScore: o.effectivenessScore,
+        confidenceCap: payload.confidenceCap ?? null,
       },
       commitment: null,
       outcome: {
         classification: o.outcomeClassification,
         magnitude: o.magnitudeOfChange,
-        effectiveness: o.interventionEffectivenessScore,
+        effectiveness: o.effectivenessScore,
       },
       scoreImpact:
         o.outcomeClassification === "resolved"

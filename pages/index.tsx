@@ -633,19 +633,31 @@ function HeroSection({
               style={{ backgroundColor: "var(--ds-accent)", opacity: 0.42 }}
             />
 
-            {/* Hero message with commanding phrasing */}
+            {/* Hero message — reframe, don't describe */}
             <motion.p
-              className="mt-14 max-w-[42ch] text-[15px] font-normal leading-[1.85] ds-text"
+              className="mt-14 max-w-[48ch] text-[15px] font-normal leading-[1.85] ds-text"
               style={{ fontSize: "clamp(1rem, 1.7vw, 1.25rem)", opacity: 0.92 }}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 0.92, y: 0 }}
               transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              Identify structural contradictions. Price the consequence.<br />
-              Escalate only when evidence justifies it.
+              You're not dealing with a strategy problem.<br />
+              You're dealing with a decision that hasn't actually been taken.
             </motion.p>
 
-            {/* CTA hierarchy with strengthened primary dominance */}
+            {/* Subtitle — low commitment, permission to discard */}
+            <motion.p
+              className="mt-6 max-w-[42ch] text-[12px] font-normal leading-[1.7] ds-text-muted"
+              style={{ opacity: 0.65 }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 0.65, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            >
+              6 questions. No prep. If it's wrong, ignore it.<br />
+              If it's right, you'll know immediately.
+            </motion.p>
+
+            {/* CTA — single primary action, low commitment */}
             <motion.div 
               className="mt-14 flex flex-wrap gap-4"
               initial={{ opacity: 0, y: 12 }}
@@ -653,7 +665,7 @@ function HeroSection({
               transition={{ duration: 0.6, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               <Link
-                href="/diagnostics"
+                href="/diagnostics/fast"
                 className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition-all duration-300 hover:scale-[1.02]"
                 style={{
                   minWidth: "180px",
@@ -675,59 +687,8 @@ function HeroSection({
                 }}
               >
                 <ScrollText className="h-3.5 w-3.5" />
-                Begin Assessment
+                Run the diagnostic
                 <ArrowRight className="h-3.5 w-3.5 opacity-70 transition-transform duration-300 group-hover:translate-x-0.5" />
-              </Link>
-
-              <Link
-                href="/diagnostics/executive-reporting"
-                className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition-all duration-300"
-                style={{
-                  minWidth: "180px",
-                  borderColor: "var(--ds-border)",
-                  color: "var(--ds-text-muted)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = "var(--ds-border-strong)";
-                  e.currentTarget.style.backgroundColor = "var(--ds-panel)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = "var(--ds-border)";
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-              >
-                <ScrollText className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.8 }} />
-                Executive Reporting
-                <ArrowRight className="h-3.5 w-3.5 opacity-50 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:opacity-75" />
-              </Link>
-
-              <Link
-                href="/strategy-room"
-                className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition-all duration-300"
-                style={{
-                  minWidth: "180px",
-                  borderColor: "var(--ds-border)",
-                  color: "var(--ds-text-subtle)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = "var(--ds-border-strong)";
-                  e.currentTarget.style.backgroundColor = "var(--ds-panel)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = "var(--ds-border)";
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-              >
-                <Crown className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.7 }} />
-                Strategy Room
               </Link>
             </motion.div>
           </motion.div>

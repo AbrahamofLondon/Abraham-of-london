@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-21T14:59:05.797Z",
+  "generatedAt": "2026-04-27T13:31:48.386Z",
   "totals": {
-    "assetGroups": 434,
-    "resolved": 434,
+    "assetGroups": 428,
+    "resolved": 428,
     "unresolved": 0,
-    "canonical": 222,
-    "alias": 212,
+    "canonical": 220,
+    "alias": 208,
     "duplicate": 0,
     "conflict": 0
   },
@@ -14,12 +14,15 @@
       "slug": "abraham-vault-pack",
       "canonicalPath": "/assets/downloads/abraham-vault-pack.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/abraham-vault-pack.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/abraham-vault-pack.pdf.",
       "sourcePaths": [
-        "/assets/downloads/abraham-vault-pack.pdf"
+        "/assets/downloads/abraham-vault-pack.pdf",
+        "/assets/downloads/content-downloads/abraham-vault-pack.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/abraham-vault-pack.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -43,12 +46,15 @@
       "slug": "board-decision-log-template",
       "canonicalPath": "/assets/downloads/board-decision-log-template.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/board-decision-log-template.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/board-decision-log-template.pdf.",
       "sourcePaths": [
-        "/assets/downloads/board-decision-log-template.pdf"
+        "/assets/downloads/board-decision-log-template.pdf",
+        "/assets/downloads/content-downloads/board-decision-log-template.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/board-decision-log-template.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -56,12 +62,15 @@
       "slug": "board-investor-onepager",
       "canonicalPath": "/assets/downloads/board-investor-onepager.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/board-investor-onepager.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/board-investor-onepager.pdf.",
       "sourcePaths": [
-        "/assets/downloads/board-investor-onepager.pdf"
+        "/assets/downloads/board-investor-onepager.pdf",
+        "/assets/downloads/content-downloads/board-investor-onepager.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/board-investor-onepager.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -277,12 +286,15 @@
       "slug": "brotherhood-covenant",
       "canonicalPath": "/assets/downloads/brotherhood-covenant.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/brotherhood-covenant.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/brotherhood-covenant.pdf.",
       "sourcePaths": [
-        "/assets/downloads/brotherhood-covenant.pdf"
+        "/assets/downloads/brotherhood-covenant.pdf",
+        "/assets/downloads/content-downloads/brotherhood-covenant.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/brotherhood-covenant.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -302,14 +314,16 @@
     {
       "slug": "brotherhood-leader-guide",
       "canonicalPath": "/assets/downloads/brotherhood-leader-guide.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/brotherhood-leader-guide.pdf.",
+      "decision": "canonical",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/brotherhood-leader-guide.pdf.",
       "sourcePaths": [
         "/assets/downloads/brotherhood-leader-guide.pdf",
+        "/assets/downloads/lib-pdf/brotherhood-leader-guide.pdf",
         "/resources/brotherhood-leader-guide.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/lib-pdf/brotherhood-leader-guide.pdf",
         "/resources/brotherhood-leader-guide.pdf"
       ],
       "materialisationRequired": false,
@@ -318,14 +332,16 @@
     {
       "slug": "brotherhood-starter-kit",
       "canonicalPath": "/assets/downloads/brotherhood-starter-kit.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/brotherhood-starter-kit.pdf.",
+      "decision": "canonical",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/brotherhood-starter-kit.pdf.",
       "sourcePaths": [
         "/assets/downloads/brotherhood-starter-kit.pdf",
+        "/assets/downloads/lib-pdf/brotherhood-starter-kit.pdf",
         "/resources/brotherhood-starter-kit.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/lib-pdf/brotherhood-starter-kit.pdf",
         "/resources/brotherhood-starter-kit.pdf"
       ],
       "materialisationRequired": false,
@@ -335,12 +351,15 @@
       "slug": "busy-is-not-the-same-as-anchored",
       "canonicalPath": "/assets/downloads/busy-is-not-the-same-as-anchored.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/busy-is-not-the-same-as-anchored.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/busy-is-not-the-same-as-anchored.pdf.",
       "sourcePaths": [
-        "/assets/downloads/busy-is-not-the-same-as-anchored.pdf"
+        "/assets/downloads/busy-is-not-the-same-as-anchored.pdf",
+        "/assets/downloads/content-downloads/busy-is-not-the-same-as-anchored.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/busy-is-not-the-same-as-anchored.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -460,12 +479,15 @@
       "slug": "canon-volume-iv-diagnostic-toolkit",
       "canonicalPath": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf.",
       "sourcePaths": [
-        "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf"
+        "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+        "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -473,12 +495,15 @@
       "slug": "canon-volume-v-governance-diagnostic-toolkit",
       "canonicalPath": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf.",
       "sourcePaths": [
-        "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf"
+        "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+        "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -1734,12 +1759,15 @@
       "slug": "communication-script-bpf",
       "canonicalPath": "/assets/downloads/communication-script-bpf.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/communication-script-bpf.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/communication-script-bpf.pdf.",
       "sourcePaths": [
-        "/assets/downloads/communication-script-bpf.pdf"
+        "/assets/downloads/communication-script-bpf.pdf",
+        "/assets/downloads/content-downloads/communication-script-bpf.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/communication-script-bpf.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -1779,12 +1807,15 @@
       "slug": "decision-log-template",
       "canonicalPath": "/assets/downloads/decision-log-template.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/decision-log-template.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/decision-log-template.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/decision-log-template.pdf",
         "/assets/downloads/decision-log-template.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/decision-log-template.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -1792,25 +1823,31 @@
       "slug": "decision-matrix-scorecard",
       "canonicalPath": "/assets/downloads/decision-matrix-scorecard.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/decision-matrix-scorecard.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/decision-matrix-scorecard.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf",
         "/assets/downloads/decision-matrix-scorecard.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
     {
       "slug": "decision-matrix-scorecard-fillable",
       "canonicalPath": "/assets/downloads/decision-matrix-scorecard-fillable.pdf",
-      "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/decision-matrix-scorecard-fillable.pdf.",
+      "decision": "alias",
+      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/decision-matrix-scorecard-fillable.pdf.",
       "sourcePaths": [
-        "/assets/downloads/decision-matrix-scorecard-fillable.pdf"
+        "/assets/downloads/decision-matrix-scorecard-fillable.pdf",
+        "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -1834,26 +1871,31 @@
       "slug": "download-legacy-architecture-canvas",
       "canonicalPath": "/assets/downloads/download-legacy-architecture-canvas.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/download-legacy-architecture-canvas.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/download-legacy-architecture-canvas.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
         "/assets/downloads/download-legacy-architecture-canvas.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
     {
       "slug": "entrepreneur-operating-pack",
       "canonicalPath": "/assets/downloads/entrepreneur-operating-pack.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/entrepreneur-operating-pack.pdf.",
+      "decision": "canonical",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/entrepreneur-operating-pack.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
         "/assets/downloads/entrepreneur-operating-pack.pdf",
         "/prints/entrepreneur-operating-pack.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
         "/prints/entrepreneur-operating-pack.pdf"
       ],
       "materialisationRequired": false,
@@ -1863,12 +1905,15 @@
       "slug": "entrepreneur-survival-checklist",
       "canonicalPath": "/assets/downloads/entrepreneur-survival-checklist.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/entrepreneur-survival-checklist.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/entrepreneur-survival-checklist.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf",
         "/assets/downloads/entrepreneur-survival-checklist.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -1910,12 +1955,15 @@
       "slug": "family-altar-liturgy",
       "canonicalPath": "/assets/downloads/family-altar-liturgy.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/family-altar-liturgy.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/family-altar-liturgy.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/family-altar-liturgy.pdf",
         "/assets/downloads/family-altar-liturgy.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/family-altar-liturgy.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -1923,12 +1971,15 @@
       "slug": "family-court-practical-pack",
       "canonicalPath": "/assets/downloads/family-court-practical-pack.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/family-court-practical-pack.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/family-court-practical-pack.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/family-court-practical-pack.pdf",
         "/assets/downloads/family-court-practical-pack.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/family-court-practical-pack.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -1984,12 +2035,15 @@
       "slug": "fathering-without-fear",
       "canonicalPath": "/assets/downloads/fathering-without-fear.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/fathering-without-fear.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fathering-without-fear.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fathering-without-fear.pdf",
         "/assets/downloads/fathering-without-fear.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/fathering-without-fear.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -2013,13 +2067,15 @@
       "slug": "fr-001",
       "canonicalPath": "/assets/downloads/fr-001.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-001.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-001.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-001.pdf",
         "/assets/downloads/fr-001.pdf",
         "/vault/briefs/fr-001.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-001.pdf",
         "/vault/briefs/fr-001.pdf"
       ],
       "materialisationRequired": false,
@@ -2029,13 +2085,15 @@
       "slug": "fr-004",
       "canonicalPath": "/assets/downloads/fr-004.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-004.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-004.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-004.pdf",
         "/assets/downloads/fr-004.pdf",
         "/vault/briefs/fr-004.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-004.pdf",
         "/vault/briefs/fr-004.pdf"
       ],
       "materialisationRequired": false,
@@ -2045,13 +2103,15 @@
       "slug": "fr-007",
       "canonicalPath": "/assets/downloads/fr-007.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-007.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-007.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-007.pdf",
         "/assets/downloads/fr-007.pdf",
         "/vault/briefs/fr-007.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-007.pdf",
         "/vault/briefs/fr-007.pdf"
       ],
       "materialisationRequired": false,
@@ -2061,13 +2121,15 @@
       "slug": "fr-010",
       "canonicalPath": "/assets/downloads/fr-010.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-010.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-010.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-010.pdf",
         "/assets/downloads/fr-010.pdf",
         "/vault/briefs/fr-010.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-010.pdf",
         "/vault/briefs/fr-010.pdf"
       ],
       "materialisationRequired": false,
@@ -2077,13 +2139,15 @@
       "slug": "fr-013",
       "canonicalPath": "/assets/downloads/fr-013.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-013.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-013.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-013.pdf",
         "/assets/downloads/fr-013.pdf",
         "/vault/briefs/fr-013.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-013.pdf",
         "/vault/briefs/fr-013.pdf"
       ],
       "materialisationRequired": false,
@@ -2093,13 +2157,15 @@
       "slug": "fr-016",
       "canonicalPath": "/assets/downloads/fr-016.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-016.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-016.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-016.pdf",
         "/assets/downloads/fr-016.pdf",
         "/vault/briefs/fr-016.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-016.pdf",
         "/vault/briefs/fr-016.pdf"
       ],
       "materialisationRequired": false,
@@ -2109,13 +2175,15 @@
       "slug": "fr-019",
       "canonicalPath": "/assets/downloads/fr-019.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-019.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-019.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-019.pdf",
         "/assets/downloads/fr-019.pdf",
         "/vault/briefs/fr-019.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-019.pdf",
         "/vault/briefs/fr-019.pdf"
       ],
       "materialisationRequired": false,
@@ -2125,13 +2193,15 @@
       "slug": "fr-022",
       "canonicalPath": "/assets/downloads/fr-022.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-022.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-022.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-022.pdf",
         "/assets/downloads/fr-022.pdf",
         "/vault/briefs/fr-022.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-022.pdf",
         "/vault/briefs/fr-022.pdf"
       ],
       "materialisationRequired": false,
@@ -2141,13 +2211,15 @@
       "slug": "fr-025",
       "canonicalPath": "/assets/downloads/fr-025.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-025.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-025.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-025.pdf",
         "/assets/downloads/fr-025.pdf",
         "/vault/briefs/fr-025.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-025.pdf",
         "/vault/briefs/fr-025.pdf"
       ],
       "materialisationRequired": false,
@@ -2157,13 +2229,15 @@
       "slug": "fr-028",
       "canonicalPath": "/assets/downloads/fr-028.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-028.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-028.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-028.pdf",
         "/assets/downloads/fr-028.pdf",
         "/vault/briefs/fr-028.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-028.pdf",
         "/vault/briefs/fr-028.pdf"
       ],
       "materialisationRequired": false,
@@ -2173,13 +2247,15 @@
       "slug": "fr-031",
       "canonicalPath": "/assets/downloads/fr-031.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-031.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-031.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-031.pdf",
         "/assets/downloads/fr-031.pdf",
         "/vault/briefs/fr-031.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-031.pdf",
         "/vault/briefs/fr-031.pdf"
       ],
       "materialisationRequired": false,
@@ -2189,13 +2265,15 @@
       "slug": "fr-034",
       "canonicalPath": "/assets/downloads/fr-034.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-034.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-034.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-034.pdf",
         "/assets/downloads/fr-034.pdf",
         "/vault/briefs/fr-034.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-034.pdf",
         "/vault/briefs/fr-034.pdf"
       ],
       "materialisationRequired": false,
@@ -2205,13 +2283,15 @@
       "slug": "fr-037",
       "canonicalPath": "/assets/downloads/fr-037.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-037.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-037.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-037.pdf",
         "/assets/downloads/fr-037.pdf",
         "/vault/briefs/fr-037.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-037.pdf",
         "/vault/briefs/fr-037.pdf"
       ],
       "materialisationRequired": false,
@@ -2221,13 +2301,15 @@
       "slug": "fr-040",
       "canonicalPath": "/assets/downloads/fr-040.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-040.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-040.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-040.pdf",
         "/assets/downloads/fr-040.pdf",
         "/vault/briefs/fr-040.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-040.pdf",
         "/vault/briefs/fr-040.pdf"
       ],
       "materialisationRequired": false,
@@ -2237,13 +2319,15 @@
       "slug": "fr-043",
       "canonicalPath": "/assets/downloads/fr-043.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-043.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-043.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-043.pdf",
         "/assets/downloads/fr-043.pdf",
         "/vault/briefs/fr-043.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-043.pdf",
         "/vault/briefs/fr-043.pdf"
       ],
       "materialisationRequired": false,
@@ -2253,13 +2337,15 @@
       "slug": "fr-046",
       "canonicalPath": "/assets/downloads/fr-046.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-046.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-046.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-046.pdf",
         "/assets/downloads/fr-046.pdf",
         "/vault/briefs/fr-046.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-046.pdf",
         "/vault/briefs/fr-046.pdf"
       ],
       "materialisationRequired": false,
@@ -2269,13 +2355,15 @@
       "slug": "fr-049",
       "canonicalPath": "/assets/downloads/fr-049.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-049.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-049.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-049.pdf",
         "/assets/downloads/fr-049.pdf",
         "/vault/briefs/fr-049.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-049.pdf",
         "/vault/briefs/fr-049.pdf"
       ],
       "materialisationRequired": false,
@@ -2285,13 +2373,15 @@
       "slug": "fr-052",
       "canonicalPath": "/assets/downloads/fr-052.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-052.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-052.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-052.pdf",
         "/assets/downloads/fr-052.pdf",
         "/vault/briefs/fr-052.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-052.pdf",
         "/vault/briefs/fr-052.pdf"
       ],
       "materialisationRequired": false,
@@ -2301,13 +2391,15 @@
       "slug": "fr-055",
       "canonicalPath": "/assets/downloads/fr-055.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-055.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-055.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-055.pdf",
         "/assets/downloads/fr-055.pdf",
         "/vault/briefs/fr-055.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-055.pdf",
         "/vault/briefs/fr-055.pdf"
       ],
       "materialisationRequired": false,
@@ -2317,13 +2409,15 @@
       "slug": "fr-058",
       "canonicalPath": "/assets/downloads/fr-058.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-058.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-058.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-058.pdf",
         "/assets/downloads/fr-058.pdf",
         "/vault/briefs/fr-058.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-058.pdf",
         "/vault/briefs/fr-058.pdf"
       ],
       "materialisationRequired": false,
@@ -2333,13 +2427,15 @@
       "slug": "fr-061",
       "canonicalPath": "/assets/downloads/fr-061.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-061.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-061.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-061.pdf",
         "/assets/downloads/fr-061.pdf",
         "/vault/briefs/fr-061.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-061.pdf",
         "/vault/briefs/fr-061.pdf"
       ],
       "materialisationRequired": false,
@@ -2349,13 +2445,15 @@
       "slug": "fr-064",
       "canonicalPath": "/assets/downloads/fr-064.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-064.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-064.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-064.pdf",
         "/assets/downloads/fr-064.pdf",
         "/vault/briefs/fr-064.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-064.pdf",
         "/vault/briefs/fr-064.pdf"
       ],
       "materialisationRequired": false,
@@ -2365,13 +2463,15 @@
       "slug": "fr-067",
       "canonicalPath": "/assets/downloads/fr-067.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-067.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-067.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-067.pdf",
         "/assets/downloads/fr-067.pdf",
         "/vault/briefs/fr-067.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-067.pdf",
         "/vault/briefs/fr-067.pdf"
       ],
       "materialisationRequired": false,
@@ -2381,13 +2481,15 @@
       "slug": "fr-070",
       "canonicalPath": "/assets/downloads/fr-070.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-070.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-070.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-070.pdf",
         "/assets/downloads/fr-070.pdf",
         "/vault/briefs/fr-070.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-070.pdf",
         "/vault/briefs/fr-070.pdf"
       ],
       "materialisationRequired": false,
@@ -2397,13 +2499,15 @@
       "slug": "fr-073",
       "canonicalPath": "/assets/downloads/fr-073.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/fr-073.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/fr-073.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/fr-073.pdf",
         "/assets/downloads/fr-073.pdf",
         "/vault/briefs/fr-073.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/fr-073.pdf",
         "/vault/briefs/fr-073.pdf"
       ],
       "materialisationRequired": false,
@@ -2413,12 +2517,15 @@
       "slug": "freedom-begins-where-ego-ends",
       "canonicalPath": "/assets/downloads/freedom-begins-where-ego-ends.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/freedom-begins-where-ego-ends.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/freedom-begins-where-ego-ends.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/freedom-begins-where-ego-ends.pdf",
         "/assets/downloads/freedom-begins-where-ego-ends.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/freedom-begins-where-ego-ends.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -2444,13 +2551,15 @@
       "slug": "frontier-resilience-01",
       "canonicalPath": "/assets/downloads/frontier-resilience-01.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-01.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/frontier-resilience-01.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
         "/assets/downloads/frontier-resilience-01.pdf",
         "/vault/briefs/frontier-resilience-01.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
         "/vault/briefs/frontier-resilience-01.pdf"
       ],
       "materialisationRequired": false,
@@ -2876,26 +2985,26 @@
       "slug": "global-market-intelligence-board-deck-q1-2026",
       "canonicalPath": "/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf.",
+      "reason": "Only one file exists for this slug. Canonical endpoint /assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf must be materialised from /assets/downloads/content-downloads/global-market-intelligence-board-deck-q1-2026.pdf; physical canonical binary is not represented in this candidate group.",
       "sourcePaths": [
-        "/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf"
+        "/assets/downloads/content-downloads/global-market-intelligence-board-deck-q1-2026.pdf"
       ],
       "resolved": true,
       "aliasPaths": [],
-      "materialisationRequired": false,
+      "materialisationRequired": true,
       "confidence": "high"
     },
     {
       "slug": "global-market-intelligence-report-q1-2026",
       "canonicalPath": "/assets/downloads/global-market-intelligence-report-q1-2026.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/global-market-intelligence-report-q1-2026.pdf.",
+      "reason": "Only one file exists for this slug. Canonical endpoint /assets/downloads/global-market-intelligence-report-q1-2026.pdf must be materialised from /assets/downloads/content-downloads/global-market-intelligence-report-q1-2026.pdf; physical canonical binary is not represented in this candidate group.",
       "sourcePaths": [
-        "/assets/downloads/global-market-intelligence-report-q1-2026.pdf"
+        "/assets/downloads/content-downloads/global-market-intelligence-report-q1-2026.pdf"
       ],
       "resolved": true,
       "aliasPaths": [],
-      "materialisationRequired": false,
+      "materialisationRequired": true,
       "confidence": "high"
     },
     {
@@ -2934,13 +3043,15 @@
       "slug": "ia-003",
       "canonicalPath": "/assets/downloads/ia-003.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-003.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-003.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-003.pdf",
         "/assets/downloads/ia-003.pdf",
         "/vault/briefs/ia-003.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-003.pdf",
         "/vault/briefs/ia-003.pdf"
       ],
       "materialisationRequired": false,
@@ -2950,13 +3061,15 @@
       "slug": "ia-006",
       "canonicalPath": "/assets/downloads/ia-006.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-006.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-006.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-006.pdf",
         "/assets/downloads/ia-006.pdf",
         "/vault/briefs/ia-006.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-006.pdf",
         "/vault/briefs/ia-006.pdf"
       ],
       "materialisationRequired": false,
@@ -2966,13 +3079,15 @@
       "slug": "ia-009",
       "canonicalPath": "/assets/downloads/ia-009.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-009.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-009.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-009.pdf",
         "/assets/downloads/ia-009.pdf",
         "/vault/briefs/ia-009.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-009.pdf",
         "/vault/briefs/ia-009.pdf"
       ],
       "materialisationRequired": false,
@@ -2982,13 +3097,15 @@
       "slug": "ia-012",
       "canonicalPath": "/assets/downloads/ia-012.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-012.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-012.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-012.pdf",
         "/assets/downloads/ia-012.pdf",
         "/vault/briefs/ia-012.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-012.pdf",
         "/vault/briefs/ia-012.pdf"
       ],
       "materialisationRequired": false,
@@ -2998,13 +3115,15 @@
       "slug": "ia-015",
       "canonicalPath": "/assets/downloads/ia-015.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-015.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-015.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-015.pdf",
         "/assets/downloads/ia-015.pdf",
         "/vault/briefs/ia-015.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-015.pdf",
         "/vault/briefs/ia-015.pdf"
       ],
       "materialisationRequired": false,
@@ -3014,13 +3133,15 @@
       "slug": "ia-018",
       "canonicalPath": "/assets/downloads/ia-018.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-018.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-018.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-018.pdf",
         "/assets/downloads/ia-018.pdf",
         "/vault/briefs/ia-018.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-018.pdf",
         "/vault/briefs/ia-018.pdf"
       ],
       "materialisationRequired": false,
@@ -3030,13 +3151,15 @@
       "slug": "ia-021",
       "canonicalPath": "/assets/downloads/ia-021.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-021.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-021.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-021.pdf",
         "/assets/downloads/ia-021.pdf",
         "/vault/briefs/ia-021.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-021.pdf",
         "/vault/briefs/ia-021.pdf"
       ],
       "materialisationRequired": false,
@@ -3046,13 +3169,15 @@
       "slug": "ia-024",
       "canonicalPath": "/assets/downloads/ia-024.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-024.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-024.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-024.pdf",
         "/assets/downloads/ia-024.pdf",
         "/vault/briefs/ia-024.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-024.pdf",
         "/vault/briefs/ia-024.pdf"
       ],
       "materialisationRequired": false,
@@ -3062,13 +3187,15 @@
       "slug": "ia-027",
       "canonicalPath": "/assets/downloads/ia-027.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-027.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-027.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-027.pdf",
         "/assets/downloads/ia-027.pdf",
         "/vault/briefs/ia-027.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-027.pdf",
         "/vault/briefs/ia-027.pdf"
       ],
       "materialisationRequired": false,
@@ -3078,13 +3205,15 @@
       "slug": "ia-030",
       "canonicalPath": "/assets/downloads/ia-030.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-030.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-030.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-030.pdf",
         "/assets/downloads/ia-030.pdf",
         "/vault/briefs/ia-030.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-030.pdf",
         "/vault/briefs/ia-030.pdf"
       ],
       "materialisationRequired": false,
@@ -3094,13 +3223,15 @@
       "slug": "ia-033",
       "canonicalPath": "/assets/downloads/ia-033.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-033.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-033.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-033.pdf",
         "/assets/downloads/ia-033.pdf",
         "/vault/briefs/ia-033.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-033.pdf",
         "/vault/briefs/ia-033.pdf"
       ],
       "materialisationRequired": false,
@@ -3110,13 +3241,15 @@
       "slug": "ia-036",
       "canonicalPath": "/assets/downloads/ia-036.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-036.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-036.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-036.pdf",
         "/assets/downloads/ia-036.pdf",
         "/vault/briefs/ia-036.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-036.pdf",
         "/vault/briefs/ia-036.pdf"
       ],
       "materialisationRequired": false,
@@ -3126,13 +3259,15 @@
       "slug": "ia-039",
       "canonicalPath": "/assets/downloads/ia-039.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-039.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-039.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-039.pdf",
         "/assets/downloads/ia-039.pdf",
         "/vault/briefs/ia-039.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-039.pdf",
         "/vault/briefs/ia-039.pdf"
       ],
       "materialisationRequired": false,
@@ -3142,13 +3277,15 @@
       "slug": "ia-042",
       "canonicalPath": "/assets/downloads/ia-042.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-042.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-042.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-042.pdf",
         "/assets/downloads/ia-042.pdf",
         "/vault/briefs/ia-042.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-042.pdf",
         "/vault/briefs/ia-042.pdf"
       ],
       "materialisationRequired": false,
@@ -3158,13 +3295,15 @@
       "slug": "ia-045",
       "canonicalPath": "/assets/downloads/ia-045.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-045.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-045.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-045.pdf",
         "/assets/downloads/ia-045.pdf",
         "/vault/briefs/ia-045.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-045.pdf",
         "/vault/briefs/ia-045.pdf"
       ],
       "materialisationRequired": false,
@@ -3174,13 +3313,15 @@
       "slug": "ia-048",
       "canonicalPath": "/assets/downloads/ia-048.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-048.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-048.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-048.pdf",
         "/assets/downloads/ia-048.pdf",
         "/vault/briefs/ia-048.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-048.pdf",
         "/vault/briefs/ia-048.pdf"
       ],
       "materialisationRequired": false,
@@ -3190,13 +3331,15 @@
       "slug": "ia-051",
       "canonicalPath": "/assets/downloads/ia-051.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-051.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-051.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-051.pdf",
         "/assets/downloads/ia-051.pdf",
         "/vault/briefs/ia-051.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-051.pdf",
         "/vault/briefs/ia-051.pdf"
       ],
       "materialisationRequired": false,
@@ -3206,13 +3349,15 @@
       "slug": "ia-054",
       "canonicalPath": "/assets/downloads/ia-054.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-054.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-054.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-054.pdf",
         "/assets/downloads/ia-054.pdf",
         "/vault/briefs/ia-054.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-054.pdf",
         "/vault/briefs/ia-054.pdf"
       ],
       "materialisationRequired": false,
@@ -3222,13 +3367,15 @@
       "slug": "ia-057",
       "canonicalPath": "/assets/downloads/ia-057.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-057.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-057.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-057.pdf",
         "/assets/downloads/ia-057.pdf",
         "/vault/briefs/ia-057.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-057.pdf",
         "/vault/briefs/ia-057.pdf"
       ],
       "materialisationRequired": false,
@@ -3238,13 +3385,15 @@
       "slug": "ia-060",
       "canonicalPath": "/assets/downloads/ia-060.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-060.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-060.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-060.pdf",
         "/assets/downloads/ia-060.pdf",
         "/vault/briefs/ia-060.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-060.pdf",
         "/vault/briefs/ia-060.pdf"
       ],
       "materialisationRequired": false,
@@ -3254,13 +3403,15 @@
       "slug": "ia-063",
       "canonicalPath": "/assets/downloads/ia-063.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-063.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-063.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-063.pdf",
         "/assets/downloads/ia-063.pdf",
         "/vault/briefs/ia-063.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-063.pdf",
         "/vault/briefs/ia-063.pdf"
       ],
       "materialisationRequired": false,
@@ -3270,13 +3421,15 @@
       "slug": "ia-066",
       "canonicalPath": "/assets/downloads/ia-066.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-066.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-066.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-066.pdf",
         "/assets/downloads/ia-066.pdf",
         "/vault/briefs/ia-066.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-066.pdf",
         "/vault/briefs/ia-066.pdf"
       ],
       "materialisationRequired": false,
@@ -3286,13 +3439,15 @@
       "slug": "ia-069",
       "canonicalPath": "/assets/downloads/ia-069.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-069.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-069.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-069.pdf",
         "/assets/downloads/ia-069.pdf",
         "/vault/briefs/ia-069.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-069.pdf",
         "/vault/briefs/ia-069.pdf"
       ],
       "materialisationRequired": false,
@@ -3302,13 +3457,15 @@
       "slug": "ia-072",
       "canonicalPath": "/assets/downloads/ia-072.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-072.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-072.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-072.pdf",
         "/assets/downloads/ia-072.pdf",
         "/vault/briefs/ia-072.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-072.pdf",
         "/vault/briefs/ia-072.pdf"
       ],
       "materialisationRequired": false,
@@ -3318,13 +3475,15 @@
       "slug": "ia-075",
       "canonicalPath": "/assets/downloads/ia-075.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/ia-075.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ia-075.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ia-075.pdf",
         "/assets/downloads/ia-075.pdf",
         "/vault/briefs/ia-075.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/ia-075.pdf",
         "/vault/briefs/ia-075.pdf"
       ],
       "materialisationRequired": false,
@@ -3813,12 +3972,15 @@
       "slug": "institutional-sovereignty",
       "canonicalPath": "/assets/downloads/institutional-sovereignty.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-sovereignty.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/institutional-sovereignty.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/institutional-sovereignty.pdf",
         "/assets/downloads/institutional-sovereignty.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/institutional-sovereignty.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -3842,12 +4004,15 @@
       "slug": "leaders-cue-card-two-up",
       "canonicalPath": "/assets/downloads/leaders-cue-card-two-up.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/leaders-cue-card-two-up.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/leaders-cue-card-two-up.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf",
         "/assets/downloads/leaders-cue-card-two-up.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -3870,14 +4035,16 @@
     {
       "slug": "leadership-playbook",
       "canonicalPath": "/assets/downloads/leadership-playbook.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/leadership-playbook.pdf.",
+      "decision": "canonical",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/leadership-playbook.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/leadership-playbook.pdf",
         "/assets/downloads/leadership-playbook.pdf",
         "/prints/leadership-playbook.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/leadership-playbook.pdf",
         "/prints/leadership-playbook.pdf"
       ],
       "materialisationRequired": false,
@@ -3948,25 +4115,31 @@
       "slug": "legacy-canvas",
       "canonicalPath": "/assets/downloads/legacy-canvas.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/legacy-canvas.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/legacy-canvas.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/legacy-canvas.pdf",
         "/assets/downloads/legacy-canvas.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/legacy-canvas.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
     {
       "slug": "legacy-canvas-fillable",
       "canonicalPath": "/assets/downloads/legacy-canvas-fillable.pdf",
-      "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/legacy-canvas-fillable.pdf.",
+      "decision": "alias",
+      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/legacy-canvas-fillable.pdf.",
       "sourcePaths": [
-        "/assets/downloads/legacy-canvas-fillable.pdf"
+        "/assets/downloads/legacy-canvas-fillable.pdf",
+        "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -3974,26 +4147,31 @@
       "slug": "life-alignment-assessment",
       "canonicalPath": "/assets/downloads/life-alignment-assessment.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/life-alignment-assessment.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/life-alignment-assessment.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
         "/assets/downloads/life-alignment-assessment.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/life-alignment-assessment.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
     {
       "slug": "mentorship-starter-kit",
       "canonicalPath": "/assets/downloads/mentorship-starter-kit.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/mentorship-starter-kit.pdf.",
+      "decision": "canonical",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/mentorship-starter-kit.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
         "/assets/downloads/mentorship-starter-kit.pdf",
         "/prints/mentorship-starter-kit.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
         "/prints/mentorship-starter-kit.pdf"
       ],
       "materialisationRequired": false,
@@ -4019,12 +4197,15 @@
       "slug": "operating-cadence-pack",
       "canonicalPath": "/assets/downloads/operating-cadence-pack.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/operating-cadence-pack.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/operating-cadence-pack.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
         "/assets/downloads/operating-cadence-pack.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/operating-cadence-pack.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -4032,12 +4213,15 @@
       "slug": "pleasure-is-loud-purpose-is-quiet",
       "canonicalPath": "/assets/downloads/pleasure-is-loud-purpose-is-quiet.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/pleasure-is-loud-purpose-is-quiet.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/pleasure-is-loud-purpose-is-quiet.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/pleasure-is-loud-purpose-is-quiet.pdf",
         "/assets/downloads/pleasure-is-loud-purpose-is-quiet.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/pleasure-is-loud-purpose-is-quiet.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -4045,12 +4229,15 @@
       "slug": "principles-for-my-son",
       "canonicalPath": "/assets/downloads/principles-for-my-son.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/principles-for-my-son.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/principles-for-my-son.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/principles-for-my-son.pdf",
         "/assets/downloads/principles-for-my-son.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/principles-for-my-son.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -4058,12 +4245,15 @@
       "slug": "principles-for-my-son-cue-card",
       "canonicalPath": "/assets/downloads/principles-for-my-son-cue-card.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/principles-for-my-son-cue-card.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/principles-for-my-son-cue-card.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf",
         "/assets/downloads/principles-for-my-son-cue-card.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -4084,12 +4274,15 @@
       "slug": "principles-of-surrender-framework",
       "canonicalPath": "/assets/downloads/principles-of-surrender-framework.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/principles-of-surrender-framework.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/principles-of-surrender-framework.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/principles-of-surrender-framework.pdf",
         "/assets/downloads/principles-of-surrender-framework.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/principles-of-surrender-framework.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -4145,25 +4338,31 @@
       "slug": "purpose-pyramid-worksheet",
       "canonicalPath": "/assets/downloads/purpose-pyramid-worksheet.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/purpose-pyramid-worksheet.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/purpose-pyramid-worksheet.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf",
         "/assets/downloads/purpose-pyramid-worksheet.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
     {
       "slug": "purpose-pyramid-worksheet-fillable",
       "canonicalPath": "/assets/downloads/purpose-pyramid-worksheet-fillable.pdf",
-      "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/purpose-pyramid-worksheet-fillable.pdf.",
+      "decision": "alias",
+      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/purpose-pyramid-worksheet-fillable.pdf.",
       "sourcePaths": [
+        "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
         "/assets/downloads/purpose-pyramid-worksheet-fillable.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -4216,12 +4415,15 @@
       "slug": "scripture-track-john14",
       "canonicalPath": "/assets/downloads/scripture-track-john14.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/scripture-track-john14.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/scripture-track-john14.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/scripture-track-john14.pdf",
         "/assets/downloads/scripture-track-john14.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/scripture-track-john14.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -4229,13 +4431,15 @@
       "slug": "si-002",
       "canonicalPath": "/assets/downloads/si-002.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-002.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-002.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-002.pdf",
         "/assets/downloads/si-002.pdf",
         "/vault/briefs/si-002.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-002.pdf",
         "/vault/briefs/si-002.pdf"
       ],
       "materialisationRequired": false,
@@ -4245,13 +4449,15 @@
       "slug": "si-005",
       "canonicalPath": "/assets/downloads/si-005.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-005.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-005.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-005.pdf",
         "/assets/downloads/si-005.pdf",
         "/vault/briefs/si-005.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-005.pdf",
         "/vault/briefs/si-005.pdf"
       ],
       "materialisationRequired": false,
@@ -4261,13 +4467,15 @@
       "slug": "si-008",
       "canonicalPath": "/assets/downloads/si-008.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-008.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-008.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-008.pdf",
         "/assets/downloads/si-008.pdf",
         "/vault/briefs/si-008.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-008.pdf",
         "/vault/briefs/si-008.pdf"
       ],
       "materialisationRequired": false,
@@ -4277,13 +4485,15 @@
       "slug": "si-011",
       "canonicalPath": "/assets/downloads/si-011.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-011.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-011.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-011.pdf",
         "/assets/downloads/si-011.pdf",
         "/vault/briefs/si-011.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-011.pdf",
         "/vault/briefs/si-011.pdf"
       ],
       "materialisationRequired": false,
@@ -4293,13 +4503,15 @@
       "slug": "si-014",
       "canonicalPath": "/assets/downloads/si-014.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-014.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-014.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-014.pdf",
         "/assets/downloads/si-014.pdf",
         "/vault/briefs/si-014.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-014.pdf",
         "/vault/briefs/si-014.pdf"
       ],
       "materialisationRequired": false,
@@ -4309,13 +4521,15 @@
       "slug": "si-017",
       "canonicalPath": "/assets/downloads/si-017.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-017.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-017.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-017.pdf",
         "/assets/downloads/si-017.pdf",
         "/vault/briefs/si-017.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-017.pdf",
         "/vault/briefs/si-017.pdf"
       ],
       "materialisationRequired": false,
@@ -4325,13 +4539,15 @@
       "slug": "si-020",
       "canonicalPath": "/assets/downloads/si-020.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-020.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-020.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-020.pdf",
         "/assets/downloads/si-020.pdf",
         "/vault/briefs/si-020.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-020.pdf",
         "/vault/briefs/si-020.pdf"
       ],
       "materialisationRequired": false,
@@ -4341,13 +4557,15 @@
       "slug": "si-023",
       "canonicalPath": "/assets/downloads/si-023.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-023.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-023.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-023.pdf",
         "/assets/downloads/si-023.pdf",
         "/vault/briefs/si-023.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-023.pdf",
         "/vault/briefs/si-023.pdf"
       ],
       "materialisationRequired": false,
@@ -4357,13 +4575,15 @@
       "slug": "si-026",
       "canonicalPath": "/assets/downloads/si-026.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-026.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-026.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-026.pdf",
         "/assets/downloads/si-026.pdf",
         "/vault/briefs/si-026.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-026.pdf",
         "/vault/briefs/si-026.pdf"
       ],
       "materialisationRequired": false,
@@ -4373,13 +4593,15 @@
       "slug": "si-029",
       "canonicalPath": "/assets/downloads/si-029.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-029.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-029.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-029.pdf",
         "/assets/downloads/si-029.pdf",
         "/vault/briefs/si-029.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-029.pdf",
         "/vault/briefs/si-029.pdf"
       ],
       "materialisationRequired": false,
@@ -4389,13 +4611,15 @@
       "slug": "si-032",
       "canonicalPath": "/assets/downloads/si-032.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-032.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-032.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-032.pdf",
         "/assets/downloads/si-032.pdf",
         "/vault/briefs/si-032.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-032.pdf",
         "/vault/briefs/si-032.pdf"
       ],
       "materialisationRequired": false,
@@ -4405,13 +4629,15 @@
       "slug": "si-035",
       "canonicalPath": "/assets/downloads/si-035.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-035.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-035.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-035.pdf",
         "/assets/downloads/si-035.pdf",
         "/vault/briefs/si-035.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-035.pdf",
         "/vault/briefs/si-035.pdf"
       ],
       "materialisationRequired": false,
@@ -4421,13 +4647,15 @@
       "slug": "si-038",
       "canonicalPath": "/assets/downloads/si-038.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-038.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-038.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-038.pdf",
         "/assets/downloads/si-038.pdf",
         "/vault/briefs/si-038.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-038.pdf",
         "/vault/briefs/si-038.pdf"
       ],
       "materialisationRequired": false,
@@ -4437,13 +4665,15 @@
       "slug": "si-041",
       "canonicalPath": "/assets/downloads/si-041.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-041.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-041.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-041.pdf",
         "/assets/downloads/si-041.pdf",
         "/vault/briefs/si-041.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-041.pdf",
         "/vault/briefs/si-041.pdf"
       ],
       "materialisationRequired": false,
@@ -4453,13 +4683,15 @@
       "slug": "si-044",
       "canonicalPath": "/assets/downloads/si-044.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-044.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-044.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-044.pdf",
         "/assets/downloads/si-044.pdf",
         "/vault/briefs/si-044.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-044.pdf",
         "/vault/briefs/si-044.pdf"
       ],
       "materialisationRequired": false,
@@ -4469,13 +4701,15 @@
       "slug": "si-047",
       "canonicalPath": "/assets/downloads/si-047.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-047.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-047.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-047.pdf",
         "/assets/downloads/si-047.pdf",
         "/vault/briefs/si-047.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-047.pdf",
         "/vault/briefs/si-047.pdf"
       ],
       "materialisationRequired": false,
@@ -4485,13 +4719,15 @@
       "slug": "si-050",
       "canonicalPath": "/assets/downloads/si-050.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-050.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-050.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-050.pdf",
         "/assets/downloads/si-050.pdf",
         "/vault/briefs/si-050.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-050.pdf",
         "/vault/briefs/si-050.pdf"
       ],
       "materialisationRequired": false,
@@ -4501,13 +4737,15 @@
       "slug": "si-053",
       "canonicalPath": "/assets/downloads/si-053.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-053.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-053.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-053.pdf",
         "/assets/downloads/si-053.pdf",
         "/vault/briefs/si-053.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-053.pdf",
         "/vault/briefs/si-053.pdf"
       ],
       "materialisationRequired": false,
@@ -4517,13 +4755,15 @@
       "slug": "si-056",
       "canonicalPath": "/assets/downloads/si-056.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-056.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-056.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-056.pdf",
         "/assets/downloads/si-056.pdf",
         "/vault/briefs/si-056.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-056.pdf",
         "/vault/briefs/si-056.pdf"
       ],
       "materialisationRequired": false,
@@ -4533,13 +4773,15 @@
       "slug": "si-059",
       "canonicalPath": "/assets/downloads/si-059.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-059.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-059.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-059.pdf",
         "/assets/downloads/si-059.pdf",
         "/vault/briefs/si-059.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-059.pdf",
         "/vault/briefs/si-059.pdf"
       ],
       "materialisationRequired": false,
@@ -4549,13 +4791,15 @@
       "slug": "si-062",
       "canonicalPath": "/assets/downloads/si-062.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-062.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-062.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-062.pdf",
         "/assets/downloads/si-062.pdf",
         "/vault/briefs/si-062.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-062.pdf",
         "/vault/briefs/si-062.pdf"
       ],
       "materialisationRequired": false,
@@ -4565,13 +4809,15 @@
       "slug": "si-065",
       "canonicalPath": "/assets/downloads/si-065.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-065.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-065.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-065.pdf",
         "/assets/downloads/si-065.pdf",
         "/vault/briefs/si-065.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-065.pdf",
         "/vault/briefs/si-065.pdf"
       ],
       "materialisationRequired": false,
@@ -4581,13 +4827,15 @@
       "slug": "si-068",
       "canonicalPath": "/assets/downloads/si-068.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-068.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-068.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-068.pdf",
         "/assets/downloads/si-068.pdf",
         "/vault/briefs/si-068.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-068.pdf",
         "/vault/briefs/si-068.pdf"
       ],
       "materialisationRequired": false,
@@ -4597,13 +4845,15 @@
       "slug": "si-071",
       "canonicalPath": "/assets/downloads/si-071.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-071.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-071.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-071.pdf",
         "/assets/downloads/si-071.pdf",
         "/vault/briefs/si-071.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-071.pdf",
         "/vault/briefs/si-071.pdf"
       ],
       "materialisationRequired": false,
@@ -4613,13 +4863,15 @@
       "slug": "si-074",
       "canonicalPath": "/assets/downloads/si-074.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/si-074.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/si-074.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/si-074.pdf",
         "/assets/downloads/si-074.pdf",
         "/vault/briefs/si-074.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/si-074.pdf",
         "/vault/briefs/si-074.pdf"
       ],
       "materialisationRequired": false,
@@ -5061,26 +5313,31 @@
       "slug": "sovereignty-001",
       "canonicalPath": "/assets/downloads/sovereignty-001.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereignty-001.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/sovereignty-001.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/sovereignty-001.pdf",
         "/assets/downloads/sovereignty-001.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/sovereignty-001.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
     {
       "slug": "standards-brief",
       "canonicalPath": "/assets/downloads/standards-brief.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/standards-brief.pdf.",
+      "decision": "canonical",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/standards-brief.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/standards-brief.pdf",
         "/assets/downloads/standards-brief.pdf",
         "/prints/standards-brief.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/standards-brief.pdf",
         "/prints/standards-brief.pdf"
       ],
       "materialisationRequired": false,
@@ -5124,14 +5381,16 @@
       "slug": "strategic-autonomy-002",
       "canonicalPath": "/assets/downloads/strategic-autonomy-002.pdf",
       "decision": "canonical",
-      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/strategic-autonomy-002.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/strategic-autonomy-002.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/strategic-autonomy-002.pdf",
         "/assets/downloads/strategic-autonomy-002.pdf",
         "/vault/general/strategic-autonomy-002.pdf",
         "/vault/intelligence/strategic-autonomy-002.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/strategic-autonomy-002.pdf",
         "/vault/general/strategic-autonomy-002.pdf",
         "/vault/intelligence/strategic-autonomy-002.pdf"
       ],
@@ -5402,12 +5661,15 @@
       "slug": "the-builders-catechism",
       "canonicalPath": "/assets/downloads/the-builders-catechism.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/the-builders-catechism.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/the-builders-catechism.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/the-builders-catechism.pdf",
         "/assets/downloads/the-builders-catechism.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/the-builders-catechism.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5415,12 +5677,15 @@
       "slug": "the-builders-catechism-founders-illuminated-edition",
       "canonicalPath": "/assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/the-builders-catechism-founders-illuminated-edition.pdf",
         "/assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/the-builders-catechism-founders-illuminated-edition.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5441,12 +5706,15 @@
       "slug": "the-cost-of-refusing-formation",
       "canonicalPath": "/assets/downloads/the-cost-of-refusing-formation.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/the-cost-of-refusing-formation.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/the-cost-of-refusing-formation.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/the-cost-of-refusing-formation.pdf",
         "/assets/downloads/the-cost-of-refusing-formation.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/the-cost-of-refusing-formation.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5454,12 +5722,15 @@
       "slug": "this-is-not-a-comfort-platform",
       "canonicalPath": "/assets/downloads/this-is-not-a-comfort-platform.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/this-is-not-a-comfort-platform.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/this-is-not-a-comfort-platform.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/this-is-not-a-comfort-platform.pdf",
         "/assets/downloads/this-is-not-a-comfort-platform.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/this-is-not-a-comfort-platform.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5467,12 +5738,15 @@
       "slug": "ultimate-purpose-of-man-editorial",
       "canonicalPath": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/ultimate-purpose-of-man-editorial.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/ultimate-purpose-of-man-editorial.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/ultimate-purpose-of-man-editorial.pdf",
         "/assets/downloads/ultimate-purpose-of-man-editorial.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/ultimate-purpose-of-man-editorial.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5527,14 +5801,16 @@
     {
       "slug": "weekly-operating-rhythm",
       "canonicalPath": "/assets/downloads/weekly-operating-rhythm.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/weekly-operating-rhythm.pdf.",
+      "decision": "canonical",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/weekly-operating-rhythm.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
         "/assets/downloads/weekly-operating-rhythm.pdf",
         "/prints/weekly-operating-rhythm.pdf"
       ],
       "resolved": true,
       "aliasPaths": [
+        "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
         "/prints/weekly-operating-rhythm.pdf"
       ],
       "materialisationRequired": false,
@@ -5544,12 +5820,15 @@
       "slug": "when-a-single-yes-changes-everything",
       "canonicalPath": "/assets/downloads/when-a-single-yes-changes-everything.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-a-single-yes-changes-everything.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-a-single-yes-changes-everything.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-a-single-yes-changes-everything.pdf",
         "/assets/downloads/when-a-single-yes-changes-everything.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-a-single-yes-changes-everything.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5557,12 +5836,15 @@
       "slug": "when-all-you-can-do-is-breathe",
       "canonicalPath": "/assets/downloads/when-all-you-can-do-is-breathe.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-all-you-can-do-is-breathe.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-all-you-can-do-is-breathe.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-all-you-can-do-is-breathe.pdf",
         "/assets/downloads/when-all-you-can-do-is-breathe.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-all-you-can-do-is-breathe.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5570,12 +5852,15 @@
       "slug": "when-avoidance-becomes-your-personality",
       "canonicalPath": "/assets/downloads/when-avoidance-becomes-your-personality.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-avoidance-becomes-your-personality.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-avoidance-becomes-your-personality.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-avoidance-becomes-your-personality.pdf",
         "/assets/downloads/when-avoidance-becomes-your-personality.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-avoidance-becomes-your-personality.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5583,12 +5868,15 @@
       "slug": "when-busyness-becomes-your-brand",
       "canonicalPath": "/assets/downloads/when-busyness-becomes-your-brand.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-busyness-becomes-your-brand.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-busyness-becomes-your-brand.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-busyness-becomes-your-brand.pdf",
         "/assets/downloads/when-busyness-becomes-your-brand.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-busyness-becomes-your-brand.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5596,12 +5884,15 @@
       "slug": "when-comfort-becomes-your-cage",
       "canonicalPath": "/assets/downloads/when-comfort-becomes-your-cage.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-comfort-becomes-your-cage.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-comfort-becomes-your-cage.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-comfort-becomes-your-cage.pdf",
         "/assets/downloads/when-comfort-becomes-your-cage.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-comfort-becomes-your-cage.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5609,12 +5900,15 @@
       "slug": "when-conflict-feels-like-betrayal",
       "canonicalPath": "/assets/downloads/when-conflict-feels-like-betrayal.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-conflict-feels-like-betrayal.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-conflict-feels-like-betrayal.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-conflict-feels-like-betrayal.pdf",
         "/assets/downloads/when-conflict-feels-like-betrayal.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-conflict-feels-like-betrayal.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5622,12 +5916,15 @@
       "slug": "when-doctrine-feels-safer-than-god",
       "canonicalPath": "/assets/downloads/when-doctrine-feels-safer-than-god.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-doctrine-feels-safer-than-god.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-doctrine-feels-safer-than-god.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-doctrine-feels-safer-than-god.pdf",
         "/assets/downloads/when-doctrine-feels-safer-than-god.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-doctrine-feels-safer-than-god.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5635,12 +5932,15 @@
       "slug": "when-every-promotion-feels-hollow",
       "canonicalPath": "/assets/downloads/when-every-promotion-feels-hollow.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-every-promotion-feels-hollow.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-every-promotion-feels-hollow.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-every-promotion-feels-hollow.pdf",
         "/assets/downloads/when-every-promotion-feels-hollow.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-every-promotion-feels-hollow.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5648,12 +5948,15 @@
       "slug": "when-grace-finds-you-in-the-mess",
       "canonicalPath": "/assets/downloads/when-grace-finds-you-in-the-mess.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-grace-finds-you-in-the-mess.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-grace-finds-you-in-the-mess.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-grace-finds-you-in-the-mess.pdf",
         "/assets/downloads/when-grace-finds-you-in-the-mess.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-grace-finds-you-in-the-mess.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5661,12 +5964,15 @@
       "slug": "when-hope-feels-reckless",
       "canonicalPath": "/assets/downloads/when-hope-feels-reckless.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-hope-feels-reckless.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-hope-feels-reckless.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-hope-feels-reckless.pdf",
         "/assets/downloads/when-hope-feels-reckless.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-hope-feels-reckless.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5674,12 +5980,15 @@
       "slug": "when-kindness-feels-like-rebellion",
       "canonicalPath": "/assets/downloads/when-kindness-feels-like-rebellion.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-kindness-feels-like-rebellion.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-kindness-feels-like-rebellion.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-kindness-feels-like-rebellion.pdf",
         "/assets/downloads/when-kindness-feels-like-rebellion.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-kindness-feels-like-rebellion.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5687,12 +5996,15 @@
       "slug": "when-later-became-never",
       "canonicalPath": "/assets/downloads/when-later-became-never.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-later-became-never.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-later-became-never.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-later-became-never.pdf",
         "/assets/downloads/when-later-became-never.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-later-became-never.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5700,12 +6012,15 @@
       "slug": "when-numbness-feels-safer-than-joy",
       "canonicalPath": "/assets/downloads/when-numbness-feels-safer-than-joy.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-numbness-feels-safer-than-joy.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-numbness-feels-safer-than-joy.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-numbness-feels-safer-than-joy.pdf",
         "/assets/downloads/when-numbness-feels-safer-than-joy.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-numbness-feels-safer-than-joy.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5713,12 +6028,15 @@
       "slug": "when-productivity-becomes-punishment",
       "canonicalPath": "/assets/downloads/when-productivity-becomes-punishment.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-productivity-becomes-punishment.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-productivity-becomes-punishment.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-productivity-becomes-punishment.pdf",
         "/assets/downloads/when-productivity-becomes-punishment.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-productivity-becomes-punishment.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5726,12 +6044,15 @@
       "slug": "when-rest-starts-to-feel-dangerous",
       "canonicalPath": "/assets/downloads/when-rest-starts-to-feel-dangerous.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-rest-starts-to-feel-dangerous.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-rest-starts-to-feel-dangerous.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-rest-starts-to-feel-dangerous.pdf",
         "/assets/downloads/when-rest-starts-to-feel-dangerous.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-rest-starts-to-feel-dangerous.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5739,12 +6060,15 @@
       "slug": "when-you-argue-with-god-in-your-head",
       "canonicalPath": "/assets/downloads/when-you-argue-with-god-in-your-head.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-argue-with-god-in-your-head.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-argue-with-god-in-your-head.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-argue-with-god-in-your-head.pdf",
         "/assets/downloads/when-you-argue-with-god-in-your-head.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-argue-with-god-in-your-head.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5752,12 +6076,15 @@
       "slug": "when-you-cant-stop-overthinking",
       "canonicalPath": "/assets/downloads/when-you-cant-stop-overthinking.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-cant-stop-overthinking.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-cant-stop-overthinking.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-cant-stop-overthinking.pdf",
         "/assets/downloads/when-you-cant-stop-overthinking.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-cant-stop-overthinking.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5765,12 +6092,15 @@
       "slug": "when-you-cant-tell-if-youre-growing-or-drifting",
       "canonicalPath": "/assets/downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
         "/assets/downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5778,12 +6108,15 @@
       "slug": "when-you-dont-know-what-you-want-anymore",
       "canonicalPath": "/assets/downloads/when-you-dont-know-what-you-want-anymore.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-dont-know-what-you-want-anymore.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-dont-know-what-you-want-anymore.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-dont-know-what-you-want-anymore.pdf",
         "/assets/downloads/when-you-dont-know-what-you-want-anymore.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-dont-know-what-you-want-anymore.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5791,12 +6124,15 @@
       "slug": "when-you-dont-trust-your-own-decisions",
       "canonicalPath": "/assets/downloads/when-you-dont-trust-your-own-decisions.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-dont-trust-your-own-decisions.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-dont-trust-your-own-decisions.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-dont-trust-your-own-decisions.pdf",
         "/assets/downloads/when-you-dont-trust-your-own-decisions.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-dont-trust-your-own-decisions.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5804,12 +6140,15 @@
       "slug": "when-you-fear-being-wrong-about-god",
       "canonicalPath": "/assets/downloads/when-you-fear-being-wrong-about-god.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-fear-being-wrong-about-god.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-fear-being-wrong-about-god.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-fear-being-wrong-about-god.pdf",
         "/assets/downloads/when-you-fear-being-wrong-about-god.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-fear-being-wrong-about-god.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5817,12 +6156,15 @@
       "slug": "when-you-fear-success-more-than-failure",
       "canonicalPath": "/assets/downloads/when-you-fear-success-more-than-failure.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-fear-success-more-than-failure.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-fear-success-more-than-failure.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-fear-success-more-than-failure.pdf",
         "/assets/downloads/when-you-fear-success-more-than-failure.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-fear-success-more-than-failure.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5830,12 +6172,15 @@
       "slug": "when-you-feel-like-god-is-delaying-you",
       "canonicalPath": "/assets/downloads/when-you-feel-like-god-is-delaying-you.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-feel-like-god-is-delaying-you.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-feel-like-god-is-delaying-you.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-feel-like-god-is-delaying-you.pdf",
         "/assets/downloads/when-you-feel-like-god-is-delaying-you.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-feel-like-god-is-delaying-you.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5843,12 +6188,15 @@
       "slug": "when-you-feel-too-busy-to-care",
       "canonicalPath": "/assets/downloads/when-you-feel-too-busy-to-care.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-feel-too-busy-to-care.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-feel-too-busy-to-care.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-feel-too-busy-to-care.pdf",
         "/assets/downloads/when-you-feel-too-busy-to-care.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-feel-too-busy-to-care.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5856,12 +6204,15 @@
       "slug": "when-you-finally-let-yourself-cry",
       "canonicalPath": "/assets/downloads/when-you-finally-let-yourself-cry.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-finally-let-yourself-cry.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-finally-let-yourself-cry.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-finally-let-yourself-cry.pdf",
         "/assets/downloads/when-you-finally-let-yourself-cry.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-finally-let-yourself-cry.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5869,12 +6220,15 @@
       "slug": "when-you-give-more-than-you-get",
       "canonicalPath": "/assets/downloads/when-you-give-more-than-you-get.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-give-more-than-you-get.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-give-more-than-you-get.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-give-more-than-you-get.pdf",
         "/assets/downloads/when-you-give-more-than-you-get.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-give-more-than-you-get.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5882,12 +6236,15 @@
       "slug": "when-you-keep-blaming-your-childhood",
       "canonicalPath": "/assets/downloads/when-you-keep-blaming-your-childhood.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-keep-blaming-your-childhood.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-keep-blaming-your-childhood.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-keep-blaming-your-childhood.pdf",
         "/assets/downloads/when-you-keep-blaming-your-childhood.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-keep-blaming-your-childhood.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5895,12 +6252,15 @@
       "slug": "when-you-keep-choosing-people-who-cant-choose-you",
       "canonicalPath": "/assets/downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
         "/assets/downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5908,12 +6268,15 @@
       "slug": "when-you-keep-confusing-niceness-with-goodness",
       "canonicalPath": "/assets/downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-keep-confusing-niceness-with-goodness.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-keep-confusing-niceness-with-goodness.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
         "/assets/downloads/when-you-keep-confusing-niceness-with-goodness.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-keep-confusing-niceness-with-goodness.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5921,12 +6284,15 @@
       "slug": "when-you-miss-who-you-used-to-be",
       "canonicalPath": "/assets/downloads/when-you-miss-who-you-used-to-be.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-miss-who-you-used-to-be.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-miss-who-you-used-to-be.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-miss-who-you-used-to-be.pdf",
         "/assets/downloads/when-you-miss-who-you-used-to-be.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-miss-who-you-used-to-be.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5934,12 +6300,15 @@
       "slug": "when-you-mistake-familiarity-for-loyalty",
       "canonicalPath": "/assets/downloads/when-you-mistake-familiarity-for-loyalty.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-mistake-familiarity-for-loyalty.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-mistake-familiarity-for-loyalty.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-mistake-familiarity-for-loyalty.pdf",
         "/assets/downloads/when-you-mistake-familiarity-for-loyalty.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-mistake-familiarity-for-loyalty.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5947,12 +6316,15 @@
       "slug": "when-you-need-god-to-interrupt-you",
       "canonicalPath": "/assets/downloads/when-you-need-god-to-interrupt-you.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-need-god-to-interrupt-you.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-need-god-to-interrupt-you.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-need-god-to-interrupt-you.pdf",
         "/assets/downloads/when-you-need-god-to-interrupt-you.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-need-god-to-interrupt-you.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5960,12 +6332,15 @@
       "slug": "when-you-no-longer-recognise-your-own-voice",
       "canonicalPath": "/assets/downloads/when-you-no-longer-recognise-your-own-voice.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-no-longer-recognise-your-own-voice.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-no-longer-recognise-your-own-voice.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-no-longer-recognise-your-own-voice.pdf",
         "/assets/downloads/when-you-no-longer-recognise-your-own-voice.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-no-longer-recognise-your-own-voice.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5973,12 +6348,15 @@
       "slug": "when-you-outgrow-your-circle",
       "canonicalPath": "/assets/downloads/when-you-outgrow-your-circle.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-outgrow-your-circle.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-outgrow-your-circle.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-outgrow-your-circle.pdf",
         "/assets/downloads/when-you-outgrow-your-circle.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-outgrow-your-circle.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5986,12 +6364,15 @@
       "slug": "when-you-realise-prayer-is-war",
       "canonicalPath": "/assets/downloads/when-you-realise-prayer-is-war.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-realise-prayer-is-war.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-realise-prayer-is-war.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-realise-prayer-is-war.pdf",
         "/assets/downloads/when-you-realise-prayer-is-war.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-realise-prayer-is-war.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -5999,12 +6380,15 @@
       "slug": "when-you-realise-you-were-the-problem",
       "canonicalPath": "/assets/downloads/when-you-realise-you-were-the-problem.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-realise-you-were-the-problem.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-realise-you-were-the-problem.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-realise-you-were-the-problem.pdf",
         "/assets/downloads/when-you-realise-you-were-the-problem.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-realise-you-were-the-problem.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6012,12 +6396,15 @@
       "slug": "when-you-realise-youre-not-behind",
       "canonicalPath": "/assets/downloads/when-you-realise-youre-not-behind.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-realise-youre-not-behind.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-realise-youre-not-behind.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-realise-youre-not-behind.pdf",
         "/assets/downloads/when-you-realise-youre-not-behind.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-realise-youre-not-behind.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6025,12 +6412,15 @@
       "slug": "when-you-stop-waiting-for-permission",
       "canonicalPath": "/assets/downloads/when-you-stop-waiting-for-permission.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-stop-waiting-for-permission.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-stop-waiting-for-permission.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-stop-waiting-for-permission.pdf",
         "/assets/downloads/when-you-stop-waiting-for-permission.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-stop-waiting-for-permission.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6038,12 +6428,15 @@
       "slug": "when-you-want-to-quit-but-cant",
       "canonicalPath": "/assets/downloads/when-you-want-to-quit-but-cant.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-you-want-to-quit-but-cant.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-you-want-to-quit-but-cant.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-you-want-to-quit-but-cant.pdf",
         "/assets/downloads/when-you-want-to-quit-but-cant.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-you-want-to-quit-but-cant.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6051,12 +6444,15 @@
       "slug": "when-your-calendar-is-full-but-your-life-is-empty",
       "canonicalPath": "/assets/downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
         "/assets/downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6064,12 +6460,15 @@
       "slug": "when-your-calling-stops-being-cute",
       "canonicalPath": "/assets/downloads/when-your-calling-stops-being-cute.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-calling-stops-being-cute.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-calling-stops-being-cute.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-calling-stops-being-cute.pdf",
         "/assets/downloads/when-your-calling-stops-being-cute.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-calling-stops-being-cute.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6077,12 +6476,15 @@
       "slug": "when-your-character-is-leaking",
       "canonicalPath": "/assets/downloads/when-your-character-is-leaking.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-character-is-leaking.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-character-is-leaking.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-character-is-leaking.pdf",
         "/assets/downloads/when-your-character-is-leaking.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-character-is-leaking.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6090,12 +6492,15 @@
       "slug": "when-your-confidence-feels-manufactured",
       "canonicalPath": "/assets/downloads/when-your-confidence-feels-manufactured.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-confidence-feels-manufactured.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-confidence-feels-manufactured.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-confidence-feels-manufactured.pdf",
         "/assets/downloads/when-your-confidence-feels-manufactured.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-confidence-feels-manufactured.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6103,12 +6508,15 @@
       "slug": "when-your-convictions-feel-like-costumes",
       "canonicalPath": "/assets/downloads/when-your-convictions-feel-like-costumes.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-convictions-feel-like-costumes.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-convictions-feel-like-costumes.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-convictions-feel-like-costumes.pdf",
         "/assets/downloads/when-your-convictions-feel-like-costumes.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-convictions-feel-like-costumes.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6116,12 +6524,15 @@
       "slug": "when-your-dreams-feel-too-heavy",
       "canonicalPath": "/assets/downloads/when-your-dreams-feel-too-heavy.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-dreams-feel-too-heavy.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-dreams-feel-too-heavy.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-dreams-feel-too-heavy.pdf",
         "/assets/downloads/when-your-dreams-feel-too-heavy.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-dreams-feel-too-heavy.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6129,12 +6540,15 @@
       "slug": "when-your-excuses-become-your-identity",
       "canonicalPath": "/assets/downloads/when-your-excuses-become-your-identity.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-excuses-become-your-identity.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-excuses-become-your-identity.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-excuses-become-your-identity.pdf",
         "/assets/downloads/when-your-excuses-become-your-identity.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-excuses-become-your-identity.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6142,12 +6556,15 @@
       "slug": "when-your-faith-feels-numb",
       "canonicalPath": "/assets/downloads/when-your-faith-feels-numb.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-faith-feels-numb.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-faith-feels-numb.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-faith-feels-numb.pdf",
         "/assets/downloads/when-your-faith-feels-numb.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-faith-feels-numb.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6155,12 +6572,15 @@
       "slug": "when-your-hustle-has-no-soul",
       "canonicalPath": "/assets/downloads/when-your-hustle-has-no-soul.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-hustle-has-no-soul.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-hustle-has-no-soul.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-hustle-has-no-soul.pdf",
         "/assets/downloads/when-your-hustle-has-no-soul.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-hustle-has-no-soul.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6168,12 +6588,15 @@
       "slug": "when-your-legacy-terrifies-you",
       "canonicalPath": "/assets/downloads/when-your-legacy-terrifies-you.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-legacy-terrifies-you.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-legacy-terrifies-you.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-legacy-terrifies-you.pdf",
         "/assets/downloads/when-your-legacy-terrifies-you.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-legacy-terrifies-you.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6181,12 +6604,15 @@
       "slug": "when-your-silence-says-too-much",
       "canonicalPath": "/assets/downloads/when-your-silence-says-too-much.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-silence-says-too-much.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-silence-says-too-much.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-silence-says-too-much.pdf",
         "/assets/downloads/when-your-silence-says-too-much.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-silence-says-too-much.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6194,12 +6620,15 @@
       "slug": "when-your-standards-keep-you-lonely",
       "canonicalPath": "/assets/downloads/when-your-standards-keep-you-lonely.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-standards-keep-you-lonely.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-standards-keep-you-lonely.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-standards-keep-you-lonely.pdf",
         "/assets/downloads/when-your-standards-keep-you-lonely.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-standards-keep-you-lonely.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6207,12 +6636,15 @@
       "slug": "when-your-vision-outgrows-your-environment",
       "canonicalPath": "/assets/downloads/when-your-vision-outgrows-your-environment.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-vision-outgrows-your-environment.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-vision-outgrows-your-environment.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-vision-outgrows-your-environment.pdf",
         "/assets/downloads/when-your-vision-outgrows-your-environment.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-vision-outgrows-your-environment.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6220,12 +6652,15 @@
       "slug": "when-your-work-becomes-your-hiding-place",
       "canonicalPath": "/assets/downloads/when-your-work-becomes-your-hiding-place.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-your-work-becomes-your-hiding-place.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-your-work-becomes-your-hiding-place.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-your-work-becomes-your-hiding-place.pdf",
         "/assets/downloads/when-your-work-becomes-your-hiding-place.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-your-work-becomes-your-hiding-place.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6233,12 +6668,15 @@
       "slug": "when-youre-addicted-to-distraction",
       "canonicalPath": "/assets/downloads/when-youre-addicted-to-distraction.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-addicted-to-distraction.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-addicted-to-distraction.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-addicted-to-distraction.pdf",
         "/assets/downloads/when-youre-addicted-to-distraction.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-addicted-to-distraction.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6246,12 +6684,15 @@
       "slug": "when-youre-afraid-of-your-own-potential",
       "canonicalPath": "/assets/downloads/when-youre-afraid-of-your-own-potential.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-afraid-of-your-own-potential.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-afraid-of-your-own-potential.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-afraid-of-your-own-potential.pdf",
         "/assets/downloads/when-youre-afraid-of-your-own-potential.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-afraid-of-your-own-potential.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6259,12 +6700,15 @@
       "slug": "when-youre-afraid-to-be-radical",
       "canonicalPath": "/assets/downloads/when-youre-afraid-to-be-radical.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-afraid-to-be-radical.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-afraid-to-be-radical.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-afraid-to-be-radical.pdf",
         "/assets/downloads/when-youre-afraid-to-be-radical.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-afraid-to-be-radical.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6272,12 +6716,15 @@
       "slug": "when-youre-always-the-strong-one",
       "canonicalPath": "/assets/downloads/when-youre-always-the-strong-one.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-always-the-strong-one.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-always-the-strong-one.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-always-the-strong-one.pdf",
         "/assets/downloads/when-youre-always-the-strong-one.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-always-the-strong-one.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6285,12 +6732,15 @@
       "slug": "when-youre-attracted-to-potential-not-reality",
       "canonicalPath": "/assets/downloads/when-youre-attracted-to-potential-not-reality.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-attracted-to-potential-not-reality.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-attracted-to-potential-not-reality.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-attracted-to-potential-not-reality.pdf",
         "/assets/downloads/when-youre-attracted-to-potential-not-reality.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-attracted-to-potential-not-reality.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6298,12 +6748,15 @@
       "slug": "when-youre-building-someone-elses-legacy",
       "canonicalPath": "/assets/downloads/when-youre-building-someone-elses-legacy.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-building-someone-elses-legacy.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-building-someone-elses-legacy.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-building-someone-elses-legacy.pdf",
         "/assets/downloads/when-youre-building-someone-elses-legacy.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-building-someone-elses-legacy.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6311,12 +6764,15 @@
       "slug": "when-youre-done-fixing-adults",
       "canonicalPath": "/assets/downloads/when-youre-done-fixing-adults.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-done-fixing-adults.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-done-fixing-adults.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-done-fixing-adults.pdf",
         "/assets/downloads/when-youre-done-fixing-adults.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-done-fixing-adults.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6324,12 +6780,15 @@
       "slug": "when-youre-exhausted-but-still-available",
       "canonicalPath": "/assets/downloads/when-youre-exhausted-but-still-available.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-exhausted-but-still-available.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-exhausted-but-still-available.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-exhausted-but-still-available.pdf",
         "/assets/downloads/when-youre-exhausted-but-still-available.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-exhausted-but-still-available.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6337,12 +6796,15 @@
       "slug": "when-youre-keeping-faith-out-of-habit",
       "canonicalPath": "/assets/downloads/when-youre-keeping-faith-out-of-habit.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-keeping-faith-out-of-habit.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-keeping-faith-out-of-habit.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-keeping-faith-out-of-habit.pdf",
         "/assets/downloads/when-youre-keeping-faith-out-of-habit.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-keeping-faith-out-of-habit.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6350,12 +6812,15 @@
       "slug": "when-youre-living-for-weekends",
       "canonicalPath": "/assets/downloads/when-youre-living-for-weekends.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-living-for-weekends.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-living-for-weekends.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-living-for-weekends.pdf",
         "/assets/downloads/when-youre-living-for-weekends.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-living-for-weekends.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6363,12 +6828,15 @@
       "slug": "when-youre-loved-without-earning-it",
       "canonicalPath": "/assets/downloads/when-youre-loved-without-earning-it.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-loved-without-earning-it.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-loved-without-earning-it.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-loved-without-earning-it.pdf",
         "/assets/downloads/when-youre-loved-without-earning-it.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-loved-without-earning-it.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6376,12 +6844,15 @@
       "slug": "when-youre-measuring-everything-but-meaning",
       "canonicalPath": "/assets/downloads/when-youre-measuring-everything-but-meaning.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-measuring-everything-but-meaning.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-measuring-everything-but-meaning.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-measuring-everything-but-meaning.pdf",
         "/assets/downloads/when-youre-measuring-everything-but-meaning.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-measuring-everything-but-meaning.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6389,12 +6860,15 @@
       "slug": "when-youre-not-lazy-youre-undisciplined",
       "canonicalPath": "/assets/downloads/when-youre-not-lazy-youre-undisciplined.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-not-lazy-youre-undisciplined.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-not-lazy-youre-undisciplined.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-not-lazy-youre-undisciplined.pdf",
         "/assets/downloads/when-youre-not-lazy-youre-undisciplined.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-not-lazy-youre-undisciplined.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6402,12 +6876,15 @@
       "slug": "when-youre-preparing-for-rooms-you-havent-entered",
       "canonicalPath": "/assets/downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
         "/assets/downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6415,12 +6892,15 @@
       "slug": "when-youre-productive-but-not-present",
       "canonicalPath": "/assets/downloads/when-youre-productive-but-not-present.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-productive-but-not-present.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-productive-but-not-present.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-productive-but-not-present.pdf",
         "/assets/downloads/when-youre-productive-but-not-present.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-productive-but-not-present.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6428,12 +6908,15 @@
       "slug": "when-youre-scared-to-start-over",
       "canonicalPath": "/assets/downloads/when-youre-scared-to-start-over.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-scared-to-start-over.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-scared-to-start-over.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-scared-to-start-over.pdf",
         "/assets/downloads/when-youre-scared-to-start-over.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-scared-to-start-over.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6441,12 +6924,15 @@
       "slug": "when-youre-the-only-one-doing-the-work",
       "canonicalPath": "/assets/downloads/when-youre-the-only-one-doing-the-work.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-the-only-one-doing-the-work.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-the-only-one-doing-the-work.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-the-only-one-doing-the-work.pdf",
         "/assets/downloads/when-youre-the-only-one-doing-the-work.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-the-only-one-doing-the-work.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6454,12 +6940,15 @@
       "slug": "when-youre-tired-of-being-the-bigger-person",
       "canonicalPath": "/assets/downloads/when-youre-tired-of-being-the-bigger-person.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-tired-of-being-the-bigger-person.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-tired-of-being-the-bigger-person.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-tired-of-being-the-bigger-person.pdf",
         "/assets/downloads/when-youre-tired-of-being-the-bigger-person.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-tired-of-being-the-bigger-person.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6467,12 +6956,15 @@
       "slug": "when-youre-tired-of-starting-over",
       "canonicalPath": "/assets/downloads/when-youre-tired-of-starting-over.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-tired-of-starting-over.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-tired-of-starting-over.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-tired-of-starting-over.pdf",
         "/assets/downloads/when-youre-tired-of-starting-over.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-tired-of-starting-over.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6480,12 +6972,15 @@
       "slug": "when-youre-winning-at-work-but-losing-yourself",
       "canonicalPath": "/assets/downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youre-winning-at-work-but-losing-yourself.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youre-winning-at-work-but-losing-yourself.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
         "/assets/downloads/when-youre-winning-at-work-but-losing-yourself.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youre-winning-at-work-but-losing-yourself.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6493,12 +6988,15 @@
       "slug": "when-youve-become-chronically-online",
       "canonicalPath": "/assets/downloads/when-youve-become-chronically-online.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youve-become-chronically-online.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youve-become-chronically-online.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youve-become-chronically-online.pdf",
         "/assets/downloads/when-youve-become-chronically-online.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youve-become-chronically-online.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6506,12 +7004,15 @@
       "slug": "when-youve-worshipped-the-wrong-metrics",
       "canonicalPath": "/assets/downloads/when-youve-worshipped-the-wrong-metrics.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/when-youve-worshipped-the-wrong-metrics.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/when-youve-worshipped-the-wrong-metrics.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/when-youve-worshipped-the-wrong-metrics.pdf",
         "/assets/downloads/when-youve-worshipped-the-wrong-metrics.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/when-youve-worshipped-the-wrong-metrics.pdf"
+      ],
       "materialisationRequired": false,
       "confidence": "high"
     },
@@ -6519,90 +7020,15 @@
       "slug": "you-were-built-to-carry-weight",
       "canonicalPath": "/assets/downloads/you-were-built-to-carry-weight.pdf",
       "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/you-were-built-to-carry-weight.pdf.",
+      "reason": "Static source wins by policy because generated source is not both newer and explicitly authoritative. Canonical endpoint already exists at /assets/downloads/you-were-built-to-carry-weight.pdf.",
       "sourcePaths": [
+        "/assets/downloads/content-downloads/you-were-built-to-carry-weight.pdf",
         "/assets/downloads/you-were-built-to-carry-weight.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": false,
-      "confidence": "high"
-    },
-    {
-      "slug": "decision-exposure-instrument",
-      "canonicalPath": "/assets/downloads/decision-exposure-instrument.pdf",
-      "decision": "canonical",
-      "reason": "Premium decision instrument. Canonical endpoint.",
-      "sourcePaths": [
-        "/assets/downloads/decision-exposure-instrument.pdf"
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/you-were-built-to-carry-weight.pdf"
       ],
-      "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": false,
-      "confidence": "high"
-    },
-    {
-      "slug": "mandate-clarity-framework",
-      "canonicalPath": "/assets/downloads/mandate-clarity-framework.pdf",
-      "decision": "canonical",
-      "reason": "Premium decision framework. Canonical endpoint.",
-      "sourcePaths": [
-        "/assets/downloads/mandate-clarity-framework.pdf"
-      ],
-      "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": false,
-      "confidence": "high"
-    },
-    {
-      "slug": "intervention-path-selector",
-      "canonicalPath": "/assets/downloads/intervention-path-selector.pdf",
-      "decision": "canonical",
-      "reason": "Premium decision toolkit. Canonical endpoint.",
-      "sourcePaths": [
-        "/assets/downloads/intervention-path-selector.pdf"
-      ],
-      "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": false,
-      "confidence": "high"
-    },
-    {
-      "slug": "case-dossier-tariff-shock",
-      "canonicalPath": "/private_storage/premium-content/case-dossiers/case-dossier-tariff-shock.pdf",
-      "decision": "canonical",
-      "reason": "Case evidence dossier. Controlled delivery.",
-      "sourcePaths": [
-        "/private_storage/premium-content/case-dossiers/case-dossier-tariff-shock.pdf"
-      ],
-      "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": false,
-      "confidence": "high"
-    },
-    {
-      "slug": "case-dossier-team-alignment-illusion",
-      "canonicalPath": "/private_storage/premium-content/case-dossiers/case-dossier-team-alignment-illusion.pdf",
-      "decision": "canonical",
-      "reason": "Case evidence dossier. Controlled delivery.",
-      "sourcePaths": [
-        "/private_storage/premium-content/case-dossiers/case-dossier-team-alignment-illusion.pdf"
-      ],
-      "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": false,
-      "confidence": "high"
-    },
-    {
-      "slug": "case-dossier-escalation-denied",
-      "canonicalPath": "/private_storage/premium-content/case-dossiers/case-dossier-escalation-denied.pdf",
-      "decision": "canonical",
-      "reason": "Case evidence dossier. Controlled delivery.",
-      "sourcePaths": [
-        "/private_storage/premium-content/case-dossiers/case-dossier-escalation-denied.pdf"
-      ],
-      "resolved": true,
-      "aliasPaths": [],
       "materialisationRequired": false,
       "confidence": "high"
     }
