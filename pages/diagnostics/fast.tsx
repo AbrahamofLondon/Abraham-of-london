@@ -57,10 +57,21 @@ const FastDiagnosticPage: NextPage = () => {
   const [contradictionText, setContradictionText] = React.useState<string | null>(null);
   const [feedbackGiven, setFeedbackGiven] = React.useState<"yes" | "partial" | "no" | null>(null);
   const [committed, setCommitted] = React.useState(false);
+  const [costFirst, setCostFirst] = React.useState(false);
   const [feedbackReason, setFeedbackReason] = React.useState("");
   const startTime = React.useRef(0);
+  const [hasActiveCase, setHasActiveCase] = React.useState(false);
 
-  React.useEffect(() => { track("fast_diagnostic_page_view"); }, []);
+  React.useEffect(() => {
+    track("fast_diagnostic_page_view");
+    try {
+      const existing = sessionStorage.getItem("aol_intelligence_spine_v1");
+      if (existing) {
+        const parsed = JSON.parse(existing);
+        if (parsed?.id && parsed?.synthesis?.verdict) setHasActiveCase(true);
+      }
+    } catch {}
+  }, []);
 
   // ─── ENTRY INTERRUPT — single-field strike ───
   function handleEntrySubmit() {
@@ -199,8 +210,18 @@ const FastDiagnosticPage: NextPage = () => {
         <Head><meta name="robots" content="noindex" /></Head>
         <main className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: "rgb(3,3,5)" }}>
           <div className="max-w-lg w-full">
+            {hasActiveCase && (
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "0.75rem", marginBottom: "1.5rem", textAlign: "center" }}>
+                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70` }}>
+                  You have an active case
+                </span>
+                <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.35)", marginTop: "0.25rem" }}>
+                  A previous diagnostic result is still in session. Running again will create a new case.
+                </p>
+              </div>
+            )}
             <h1 style={{ ...serif, fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", fontWeight: 400, color: "rgba(255,255,255,0.90)", lineHeight: 1.2, textAlign: "center" }}>
-              You're not dealing with a strategy problem.<br />
+              You&#39;re not dealing with a strategy problem.<br />
               <span style={{ color: `${GOLD}CC` }}>You're dealing with a decision that hasn't actually been taken.</span>
             </h1>
             <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.38)", marginTop: "1rem", textAlign: "center", maxWidth: "40ch", marginLeft: "auto", marginRight: "auto" }}>
@@ -295,6 +316,18 @@ const FastDiagnosticPage: NextPage = () => {
               style={{ padding: "14px 32px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.35)", ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
             >
               Not yet
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCommitted(false);
+                setCostFirst(true);
+                track("fast_precommit_cost_first");
+                void proceedAfterCommitment();
+              }}
+              style={{ padding: "14px 32px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.25)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
+            >
+              I need to see the cost first
             </button>
           </div>
           <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.12)", marginTop: "1.5rem" }}>
@@ -426,15 +459,44 @@ const FastDiagnosticPage: NextPage = () => {
   if (stage === "result" && synthesis && spine) {
     const elapsed = startTime.current ? Math.round((Date.now() - startTime.current) / 1000) : 0;
     const forecast = spine.forecast;
+    const condition = spine.deterministic.conditionClass;
+
+    // Condition-based directive routing
+    const directiveCta = condition === "execution"
+      ? { label: "Enforce the decision", href: "/strategy-room", desc: "Strategy Room locks the decision and tracks whether it holds." }
+      : condition === "instability" || costFirst
+        ? { label: "Price the consequence", href: "/diagnostics/executive-reporting", desc: "Executive Reporting converts this into exposure, priority, and enforced next action." }
+        : { label: "Test the structure", href: "/diagnostics/constitutional-diagnostic", desc: "Constitutional Diagnostic tests whether this is embedded in how your organisation actually works." };
+
+    const secondaryLinks = [
+      condition !== "execution" ? { label: "Enforce the decision", href: "/strategy-room" } : null,
+      !costFirst && condition !== "instability" ? { label: "See the cost instead", href: "/diagnostics/executive-reporting" } : null,
+      condition === "execution" || condition === "instability" ? { label: "Test the structure", href: "/diagnostics/constitutional-diagnostic" } : null,
+    ].filter(Boolean) as Array<{ label: string; href: string }>;
 
     return (
       <Layout title="Decision Check — Result" description="Your decision, analysed.">
         <Head><meta name="robots" content="noindex" /></Head>
         <main className="min-h-screen px-6 py-16" style={{ backgroundColor: "rgb(3,3,5)" }}>
           <div className="mx-auto max-w-xl">
+
+            {/* ═══ CASE LIVE BANNER ═══ */}
+            <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginBottom: "1.5rem" }}>
+              <div className="flex items-center justify-between">
+                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>Your case is now active</span>
+                <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>{spine.id.slice(0, 16)}</span>
+              </div>
+              <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", marginTop: "0.4rem" }}>
+                The system has preserved your inputs.{committed ? " You committed to act within 48 hours. If nothing happens, this case will follow up." : ""} Your next step should match the condition detected below.
+              </p>
+              <button type="button" onClick={() => { try { navigator.clipboard.writeText(window.location.href); } catch {} }} style={{ marginTop: "0.5rem", ...mono, fontSize: "6px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", cursor: "pointer", background: "none", border: "none", padding: 0 }}>
+                Save this case locally
+              </button>
+            </div>
+
             {/* Header */}
             <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
-              {elapsed}s · {spine.deterministic.conditionClass} · {spine.c3.confidenceBand} confidence
+              {elapsed}s · {condition} · {spine.c3.confidenceBand} confidence
             </span>
             <h2 style={{ ...serif, fontSize: "1.3rem", fontWeight: 500, color: "rgba(255,255,255,0.85)", marginTop: "1rem", lineHeight: 1.3 }}>
               This is what is actually happening.
@@ -533,50 +595,59 @@ const FastDiagnosticPage: NextPage = () => {
               </span>
             </div>
 
-            {/* ═══ CONVERSION SECTION ═══ */}
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem", marginTop: "1.5rem" }}>
-              <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.6, color: "rgba(255,255,255,0.50)", fontWeight: 500 }}>
-                This is a surface read. The structural problem may be deeper.
+            {/* ═══ WHAT THIS CANNOT TELL YOU ═══ */}
+            <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", marginTop: "1.25rem" }}>
+              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>What this diagnostic cannot tell you</span>
+              <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(255,255,255,0.38)", marginTop: "0.3rem" }}>
+                This surface read identifies the condition and contradiction. It cannot determine:
+              </p>
+              <ul style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.7, color: "rgba(255,255,255,0.30)", marginTop: "0.3rem", paddingLeft: "1rem" }}>
+                <li>whether this is isolated or structural</li>
+                <li>what the delay is costing monthly</li>
+                <li>whether your team sees the same problem</li>
+                <li>whether this needs enforcement or restructuring</li>
+              </ul>
+              <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.35)", marginTop: "0.4rem", fontWeight: 500 }}>
+                That requires the next valid test.
+              </p>
+            </div>
+
+            {/* ═══ PATTERN CONTEXT ═══ */}
+            <div style={{ padding: "0.75rem 0", marginTop: "0.5rem" }}>
+              <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", lineHeight: 1.7 }}>
+                Pattern context: this condition appears in cases where the stated decision is not the real blockage. The blockage is usually authority, consequence, ownership, or enforcement — not information.
+              </p>
+            </div>
+
+            {/* ═══ DIRECTIVE CTA (condition-based, not menu) ═══ */}
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem", marginTop: "0.75rem" }}>
+              <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.5rem" }}>
+                System directive — based on {condition} classification
               </p>
 
-              {/* CTA 1 — Structural escalation */}
-              <Link href="/diagnostics/constitutional-diagnostic" className="group flex items-center justify-between mt-4" style={{ padding: "14px 18px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}08` }}>
+              {/* PRIMARY — one directive */}
+              <Link href={directiveCta.href} className="group flex items-center justify-between" style={{ padding: "14px 18px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08` }}>
                 <div>
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}CC` }}>
-                    Test the structure behind this decision
+                  <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}CC` }}>
+                    {directiveCta.label}
                   </span>
                   <p style={{ ...serif, fontSize: "0.75rem", color: "rgba(255,255,255,0.30)", marginTop: "0.15rem" }}>
-                    Run the Constitutional Diagnostic to see if this is embedded in how your organisation actually works.
+                    {directiveCta.desc}
                   </p>
                 </div>
                 <ArrowRight style={{ width: 12, height: 12, color: `${GOLD}80`, flexShrink: 0, marginLeft: "1rem" }} />
               </Link>
 
-              {/* CTA 2 — Consequence */}
-              <Link href="/diagnostics/executive-reporting" className="group flex items-center justify-between mt-2" style={{ padding: "14px 18px", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div>
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
-                    See the cost you are already paying
-                  </span>
-                  <p style={{ ...serif, fontSize: "0.75rem", color: "rgba(255,255,255,0.25)", marginTop: "0.15rem" }}>
-                    Executive Reporting converts this into exposure and priority.
-                  </p>
+              {/* SECONDARY — text links only */}
+              {secondaryLinks.length > 0 && (
+                <div className="flex flex-wrap gap-3 mt-3">
+                  {secondaryLinks.map((link) => (
+                    <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                      {link.label} →
+                    </Link>
+                  ))}
                 </div>
-                <ArrowRight style={{ width: 12, height: 12, color: "rgba(255,255,255,0.25)", flexShrink: 0, marginLeft: "1rem" }} />
-              </Link>
-
-              {/* CTA 3 — Execution */}
-              <Link href="/strategy-room" className="group flex items-center justify-between mt-2" style={{ padding: "14px 18px", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div>
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
-                    Enforce the decision
-                  </span>
-                  <p style={{ ...serif, fontSize: "0.75rem", color: "rgba(255,255,255,0.25)", marginTop: "0.15rem" }}>
-                    Strategy Room turns this into action and tracks whether it holds.
-                  </p>
-                </div>
-                <ArrowRight style={{ width: 12, height: 12, color: "rgba(255,255,255,0.25)", flexShrink: 0, marginLeft: "1rem" }} />
-              </Link>
+              )}
             </div>
 
             {/* ═══ DETERMINISM PROOF + DECISION TRACE ═══ */}
@@ -617,7 +688,14 @@ const FastDiagnosticPage: NextPage = () => {
                         See what this is already costing <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
                       </Link>
                     </>
-                  ) : feedbackGiven === "partial" ? "Noted. The Constitutional Diagnostic will sharpen this." : (
+                  ) : feedbackGiven === "partial" ? (
+                    <>
+                      Noted. The surface read is partial. The Constitutional Diagnostic tests whether the condition is structural.
+                      <Link href="/diagnostics/constitutional-diagnostic" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}AA`, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                        Sharpen the diagnosis <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
+                      </Link>
+                    </>
+                  ) : (
                     <span>
                       Where is it wrong?
                       <textarea
@@ -628,12 +706,21 @@ const FastDiagnosticPage: NextPage = () => {
                         style={{ display: "block", width: "100%", marginTop: "0.5rem", padding: "8px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.70)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.5, resize: "none", outline: "none" }}
                       />
                       {feedbackReason.trim().length > 10 && (
-                        <button type="button" onClick={() => {
-                          track("fast_feedback_reason", { reason: feedbackReason.slice(0, 200) });
-                          if (spine) { spine.accuracyFeedback = { response: "no", reason: feedbackReason, capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
-                        }} style={{ marginTop: "0.4rem", padding: "6px 14px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}>
-                          Submit correction
-                        </button>
+                        <>
+                          <button type="button" onClick={() => {
+                            track("fast_feedback_reason", { reason: feedbackReason.slice(0, 200) });
+                            if (spine) { spine.accuracyFeedback = { response: "no", reason: feedbackReason, capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
+                            setFeedbackGiven("no");
+                          }} style={{ marginTop: "0.4rem", padding: "6px 14px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}>
+                            Submit correction
+                          </button>
+                          <p style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "rgba(255,255,255,0.20)" }}>
+                            Correction recorded. The system treats this as a case correction, not a failed interaction. Your next best route is to test the structure more deeply.
+                          </p>
+                          <Link href="/diagnostics/constitutional-diagnostic" style={{ display: "inline-block", marginTop: "0.3rem", color: `${GOLD}AA`, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+                            Run Constitutional Diagnostic →
+                          </Link>
+                        </>
                       )}
                     </span>
                   )}

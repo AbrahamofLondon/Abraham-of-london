@@ -92,7 +92,9 @@ export function inferAvoidance(caseObj: CaseObject): string | null {
   if (!caseObj.forcedAction || !caseObj.blocker) return null;
 
   // The avoided thing is whatever the forced action implies they COULD do but haven't
-  return `The decision you described as blocked is one you already know how to resolve (your forced answer proves this). What is being avoided is not the decision — it is the conversation, confrontation, or commitment that the decision requires.`;
+  const forcedShort = caseObj.forcedAction.length > 80 ? caseObj.forcedAction.slice(0, 80) + "..." : caseObj.forcedAction;
+  const blockerShort = caseObj.blocker.length > 80 ? caseObj.blocker.slice(0, 80) + "..." : caseObj.blocker;
+  return `You named "${blockerShort}" as the blocker. But when forced to act, you chose: "${forcedShort}". That mismatch is the evidence. The decision you described as blocked is one you already know how to resolve. What is being avoided is not the decision — it is the conversation, confrontation, or commitment that the decision requires.`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

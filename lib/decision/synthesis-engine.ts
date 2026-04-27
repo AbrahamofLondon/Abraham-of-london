@@ -218,7 +218,7 @@ export function deterministicFallback(caseObj: CaseObject, opts?: { suppressCont
       : (contradiction ?? "Insufficient input to identify a specific contradiction. Provide more detail about the blocker and what you would do under time pressure."),
     avoidedDecision: avoidance ?? "The system cannot determine what is being avoided without both a stated blocker and a forced action.",
     whyPriorAttemptsFailed: caseObj.priorAttempt
-      ? `You described prior attempts as: "${caseObj.priorAttempt}". These addressed the surface condition. The structural cause — the ${conditionClass} gap — was not addressed.`
+      ? `You tried: "${caseObj.priorAttempt.length > 120 ? caseObj.priorAttempt.slice(0, 120) + "..." : caseObj.priorAttempt}". That addressed the visible symptom — not the structural condition. The ${conditionClass} gap was not touched by that approach.${caseObj.blocker ? ` The blocker you named — "${caseObj.blocker.length > 80 ? caseObj.blocker.slice(0, 80) + "..." : caseObj.blocker}" — persisted because it is structural, not operational.` : ""}`
       : "No prior attempts described. If this decision is genuinely new, the structural condition is the first thing to test.",
     concreteMove: moves[conditionClass],
     defaultPathForecast: forecasts[conditionClass],
