@@ -1,5 +1,1574 @@
 {
-  "generatedAt": "2026-04-21T18:31:18.711Z",
-  "totalDuplicateIds": 0,
-  "duplicates": []
+  "generatedAt": "2026-04-27T10:05:08.515Z",
+  "totalDuplicateIds": 196,
+  "duplicates": [
+    {
+      "id": "abraham-vault-pack",
+      "chosen": "/assets/downloads/content-downloads/abraham-vault-pack.pdf",
+      "dropped": [
+        "/assets/downloads/abraham-vault-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(99KB) > mtime"
+    },
+    {
+      "id": "board-decision-log-template",
+      "chosen": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
+      "dropped": [
+        "/assets/downloads/board-decision-log-template.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "board-investor-onepager",
+      "chosen": "/assets/downloads/content-downloads/board-investor-onepager.pdf",
+      "dropped": [
+        "/assets/downloads/board-investor-onepager.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(85KB) > mtime"
+    },
+    {
+      "id": "brotherhood-covenant",
+      "chosen": "/assets/downloads/content-downloads/brotherhood-covenant.pdf",
+      "dropped": [
+        "/assets/downloads/brotherhood-covenant.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(139KB) > mtime"
+    },
+    {
+      "id": "brotherhood-leader-guide",
+      "chosen": "/assets/downloads/lib-pdf/brotherhood-leader-guide.pdf",
+      "dropped": [
+        "/assets/downloads/brotherhood-leader-guide.pdf"
+      ],
+      "reason": "bucket(lib-pdf) > type(.pdf) > size(258KB) > mtime"
+    },
+    {
+      "id": "brotherhood-starter-kit",
+      "chosen": "/assets/downloads/lib-pdf/brotherhood-starter-kit.pdf",
+      "dropped": [
+        "/assets/downloads/brotherhood-starter-kit.pdf"
+      ],
+      "reason": "bucket(lib-pdf) > type(.pdf) > size(346KB) > mtime"
+    },
+    {
+      "id": "busy-is-not-the-same-as-anchored",
+      "chosen": "/assets/downloads/content-downloads/busy-is-not-the-same-as-anchored.pdf",
+      "dropped": [
+        "/assets/downloads/busy-is-not-the-same-as-anchored.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "canon-volume-iv-diagnostic-toolkit",
+      "chosen": "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "dropped": [
+        "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(160KB) > mtime"
+    },
+    {
+      "id": "canon-volume-v-governance-diagnostic-toolkit",
+      "chosen": "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "dropped": [
+        "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(139KB) > mtime"
+    },
+    {
+      "id": "communication-script-bpf",
+      "chosen": "/assets/downloads/content-downloads/communication-script-bpf.pdf",
+      "dropped": [
+        "/assets/downloads/communication-script-bpf.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(142KB) > mtime"
+    },
+    {
+      "id": "decision-log-template",
+      "chosen": "/assets/downloads/content-downloads/decision-log-template.pdf",
+      "dropped": [
+        "/assets/downloads/decision-log-template.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(87KB) > mtime"
+    },
+    {
+      "id": "decision-matrix-scorecard-fillable",
+      "chosen": "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf",
+      "dropped": [
+        "/assets/downloads/decision-matrix-scorecard-fillable.pdf"
+      ],
+      "reason": "bucket(lib-pdf) > type(.pdf) > size(36KB) > mtime"
+    },
+    {
+      "id": "decision-matrix-scorecard",
+      "chosen": "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf",
+      "dropped": [
+        "/assets/downloads/decision-matrix-scorecard.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "download-legacy-architecture-canvas",
+      "chosen": "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
+      "dropped": [
+        "/assets/downloads/download-legacy-architecture-canvas.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(141KB) > mtime"
+    },
+    {
+      "id": "entrepreneur-operating-pack",
+      "chosen": "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
+      "dropped": [
+        "/assets/downloads/entrepreneur-operating-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(104KB) > mtime"
+    },
+    {
+      "id": "entrepreneur-survival-checklist",
+      "chosen": "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf",
+      "dropped": [
+        "/assets/downloads/entrepreneur-survival-checklist.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(137KB) > mtime"
+    },
+    {
+      "id": "family-altar-liturgy",
+      "chosen": "/assets/downloads/content-downloads/family-altar-liturgy.pdf",
+      "dropped": [
+        "/assets/downloads/family-altar-liturgy.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(131KB) > mtime"
+    },
+    {
+      "id": "family-court-practical-pack",
+      "chosen": "/assets/downloads/content-downloads/family-court-practical-pack.pdf",
+      "dropped": [
+        "/assets/downloads/family-court-practical-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(202KB) > mtime"
+    },
+    {
+      "id": "fathering-without-fear",
+      "chosen": "/assets/downloads/content-downloads/fathering-without-fear.pdf",
+      "dropped": [
+        "/assets/downloads/fathering-without-fear.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(130KB) > mtime"
+    },
+    {
+      "id": "fr-001",
+      "chosen": "/assets/downloads/content-downloads/fr-001.pdf",
+      "dropped": [
+        "/assets/downloads/fr-001.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "fr-004",
+      "chosen": "/assets/downloads/content-downloads/fr-004.pdf",
+      "dropped": [
+        "/assets/downloads/fr-004.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-007",
+      "chosen": "/assets/downloads/content-downloads/fr-007.pdf",
+      "dropped": [
+        "/assets/downloads/fr-007.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-010",
+      "chosen": "/assets/downloads/content-downloads/fr-010.pdf",
+      "dropped": [
+        "/assets/downloads/fr-010.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-013",
+      "chosen": "/assets/downloads/content-downloads/fr-013.pdf",
+      "dropped": [
+        "/assets/downloads/fr-013.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-016",
+      "chosen": "/assets/downloads/content-downloads/fr-016.pdf",
+      "dropped": [
+        "/assets/downloads/fr-016.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-019",
+      "chosen": "/assets/downloads/content-downloads/fr-019.pdf",
+      "dropped": [
+        "/assets/downloads/fr-019.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-022",
+      "chosen": "/assets/downloads/content-downloads/fr-022.pdf",
+      "dropped": [
+        "/assets/downloads/fr-022.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "fr-025",
+      "chosen": "/assets/downloads/content-downloads/fr-025.pdf",
+      "dropped": [
+        "/assets/downloads/fr-025.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-028",
+      "chosen": "/assets/downloads/content-downloads/fr-028.pdf",
+      "dropped": [
+        "/assets/downloads/fr-028.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-031",
+      "chosen": "/assets/downloads/content-downloads/fr-031.pdf",
+      "dropped": [
+        "/assets/downloads/fr-031.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-034",
+      "chosen": "/assets/downloads/content-downloads/fr-034.pdf",
+      "dropped": [
+        "/assets/downloads/fr-034.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-037",
+      "chosen": "/assets/downloads/content-downloads/fr-037.pdf",
+      "dropped": [
+        "/assets/downloads/fr-037.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-040",
+      "chosen": "/assets/downloads/content-downloads/fr-040.pdf",
+      "dropped": [
+        "/assets/downloads/fr-040.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-043",
+      "chosen": "/assets/downloads/content-downloads/fr-043.pdf",
+      "dropped": [
+        "/assets/downloads/fr-043.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-046",
+      "chosen": "/assets/downloads/content-downloads/fr-046.pdf",
+      "dropped": [
+        "/assets/downloads/fr-046.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-049",
+      "chosen": "/assets/downloads/content-downloads/fr-049.pdf",
+      "dropped": [
+        "/assets/downloads/fr-049.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-052",
+      "chosen": "/assets/downloads/content-downloads/fr-052.pdf",
+      "dropped": [
+        "/assets/downloads/fr-052.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "fr-055",
+      "chosen": "/assets/downloads/content-downloads/fr-055.pdf",
+      "dropped": [
+        "/assets/downloads/fr-055.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-058",
+      "chosen": "/assets/downloads/content-downloads/fr-058.pdf",
+      "dropped": [
+        "/assets/downloads/fr-058.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(93KB) > mtime"
+    },
+    {
+      "id": "fr-061",
+      "chosen": "/assets/downloads/content-downloads/fr-061.pdf",
+      "dropped": [
+        "/assets/downloads/fr-061.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-064",
+      "chosen": "/assets/downloads/content-downloads/fr-064.pdf",
+      "dropped": [
+        "/assets/downloads/fr-064.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-067",
+      "chosen": "/assets/downloads/content-downloads/fr-067.pdf",
+      "dropped": [
+        "/assets/downloads/fr-067.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-070",
+      "chosen": "/assets/downloads/content-downloads/fr-070.pdf",
+      "dropped": [
+        "/assets/downloads/fr-070.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "fr-073",
+      "chosen": "/assets/downloads/content-downloads/fr-073.pdf",
+      "dropped": [
+        "/assets/downloads/fr-073.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "freedom-begins-where-ego-ends",
+      "chosen": "/assets/downloads/content-downloads/freedom-begins-where-ego-ends.pdf",
+      "dropped": [
+        "/assets/downloads/freedom-begins-where-ego-ends.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "frontier-resilience-01",
+      "chosen": "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
+      "dropped": [
+        "/assets/downloads/frontier-resilience-01.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "ia-003",
+      "chosen": "/assets/downloads/content-downloads/ia-003.pdf",
+      "dropped": [
+        "/assets/downloads/ia-003.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-006",
+      "chosen": "/assets/downloads/content-downloads/ia-006.pdf",
+      "dropped": [
+        "/assets/downloads/ia-006.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-009",
+      "chosen": "/assets/downloads/content-downloads/ia-009.pdf",
+      "dropped": [
+        "/assets/downloads/ia-009.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-012",
+      "chosen": "/assets/downloads/content-downloads/ia-012.pdf",
+      "dropped": [
+        "/assets/downloads/ia-012.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-015",
+      "chosen": "/assets/downloads/content-downloads/ia-015.pdf",
+      "dropped": [
+        "/assets/downloads/ia-015.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-018",
+      "chosen": "/assets/downloads/content-downloads/ia-018.pdf",
+      "dropped": [
+        "/assets/downloads/ia-018.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-021",
+      "chosen": "/assets/downloads/content-downloads/ia-021.pdf",
+      "dropped": [
+        "/assets/downloads/ia-021.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-024",
+      "chosen": "/assets/downloads/content-downloads/ia-024.pdf",
+      "dropped": [
+        "/assets/downloads/ia-024.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-027",
+      "chosen": "/assets/downloads/content-downloads/ia-027.pdf",
+      "dropped": [
+        "/assets/downloads/ia-027.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-030",
+      "chosen": "/assets/downloads/content-downloads/ia-030.pdf",
+      "dropped": [
+        "/assets/downloads/ia-030.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-033",
+      "chosen": "/assets/downloads/content-downloads/ia-033.pdf",
+      "dropped": [
+        "/assets/downloads/ia-033.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-036",
+      "chosen": "/assets/downloads/content-downloads/ia-036.pdf",
+      "dropped": [
+        "/assets/downloads/ia-036.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-039",
+      "chosen": "/assets/downloads/content-downloads/ia-039.pdf",
+      "dropped": [
+        "/assets/downloads/ia-039.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-042",
+      "chosen": "/assets/downloads/content-downloads/ia-042.pdf",
+      "dropped": [
+        "/assets/downloads/ia-042.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-045",
+      "chosen": "/assets/downloads/content-downloads/ia-045.pdf",
+      "dropped": [
+        "/assets/downloads/ia-045.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-048",
+      "chosen": "/assets/downloads/content-downloads/ia-048.pdf",
+      "dropped": [
+        "/assets/downloads/ia-048.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-051",
+      "chosen": "/assets/downloads/content-downloads/ia-051.pdf",
+      "dropped": [
+        "/assets/downloads/ia-051.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-054",
+      "chosen": "/assets/downloads/content-downloads/ia-054.pdf",
+      "dropped": [
+        "/assets/downloads/ia-054.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-057",
+      "chosen": "/assets/downloads/content-downloads/ia-057.pdf",
+      "dropped": [
+        "/assets/downloads/ia-057.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-060",
+      "chosen": "/assets/downloads/content-downloads/ia-060.pdf",
+      "dropped": [
+        "/assets/downloads/ia-060.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-063",
+      "chosen": "/assets/downloads/content-downloads/ia-063.pdf",
+      "dropped": [
+        "/assets/downloads/ia-063.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-066",
+      "chosen": "/assets/downloads/content-downloads/ia-066.pdf",
+      "dropped": [
+        "/assets/downloads/ia-066.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-069",
+      "chosen": "/assets/downloads/content-downloads/ia-069.pdf",
+      "dropped": [
+        "/assets/downloads/ia-069.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "ia-072",
+      "chosen": "/assets/downloads/content-downloads/ia-072.pdf",
+      "dropped": [
+        "/assets/downloads/ia-072.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "ia-075",
+      "chosen": "/assets/downloads/content-downloads/ia-075.pdf",
+      "dropped": [
+        "/assets/downloads/ia-075.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "institutional-sovereignty",
+      "chosen": "/assets/downloads/content-downloads/institutional-sovereignty.pdf",
+      "dropped": [
+        "/assets/downloads/institutional-sovereignty.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "leaders-cue-card-two-up",
+      "chosen": "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf",
+      "dropped": [
+        "/assets/downloads/leaders-cue-card-two-up.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(70KB) > mtime"
+    },
+    {
+      "id": "leadership-playbook",
+      "chosen": "/assets/downloads/content-downloads/leadership-playbook.pdf",
+      "dropped": [
+        "/assets/downloads/leadership-playbook.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "legacy-canvas-fillable",
+      "chosen": "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf",
+      "dropped": [
+        "/assets/downloads/legacy-canvas-fillable.pdf"
+      ],
+      "reason": "bucket(lib-pdf) > type(.pdf) > size(11KB) > mtime"
+    },
+    {
+      "id": "legacy-canvas",
+      "chosen": "/assets/downloads/content-downloads/legacy-canvas.pdf",
+      "dropped": [
+        "/assets/downloads/legacy-canvas.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(134KB) > mtime"
+    },
+    {
+      "id": "life-alignment-assessment",
+      "chosen": "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
+      "dropped": [
+        "/assets/downloads/life-alignment-assessment.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(129KB) > mtime"
+    },
+    {
+      "id": "mentorship-starter-kit",
+      "chosen": "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
+      "dropped": [
+        "/assets/downloads/mentorship-starter-kit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(106KB) > mtime"
+    },
+    {
+      "id": "operating-cadence-pack",
+      "chosen": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
+      "dropped": [
+        "/assets/downloads/operating-cadence-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "pleasure-is-loud-purpose-is-quiet",
+      "chosen": "/assets/downloads/content-downloads/pleasure-is-loud-purpose-is-quiet.pdf",
+      "dropped": [
+        "/assets/downloads/pleasure-is-loud-purpose-is-quiet.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "principles-for-my-son-cue-card",
+      "chosen": "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf",
+      "dropped": [
+        "/assets/downloads/principles-for-my-son-cue-card.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(67KB) > mtime"
+    },
+    {
+      "id": "principles-for-my-son",
+      "chosen": "/assets/downloads/content-downloads/principles-for-my-son.pdf",
+      "dropped": [
+        "/assets/downloads/principles-for-my-son.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(141KB) > mtime"
+    },
+    {
+      "id": "principles-of-surrender-framework",
+      "chosen": "/assets/downloads/content-downloads/principles-of-surrender-framework.pdf",
+      "dropped": [
+        "/assets/downloads/principles-of-surrender-framework.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(182KB) > mtime"
+    },
+    {
+      "id": "purpose-pyramid-worksheet-fillable",
+      "chosen": "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
+      "dropped": [
+        "/assets/downloads/purpose-pyramid-worksheet-fillable.pdf"
+      ],
+      "reason": "bucket(lib-pdf) > type(.pdf) > size(20KB) > mtime"
+    },
+    {
+      "id": "purpose-pyramid-worksheet",
+      "chosen": "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf",
+      "dropped": [
+        "/assets/downloads/purpose-pyramid-worksheet.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(150KB) > mtime"
+    },
+    {
+      "id": "scripture-track-john14",
+      "chosen": "/assets/downloads/content-downloads/scripture-track-john14.pdf",
+      "dropped": [
+        "/assets/downloads/scripture-track-john14.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(138KB) > mtime"
+    },
+    {
+      "id": "si-002",
+      "chosen": "/assets/downloads/content-downloads/si-002.pdf",
+      "dropped": [
+        "/assets/downloads/si-002.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-005",
+      "chosen": "/assets/downloads/content-downloads/si-005.pdf",
+      "dropped": [
+        "/assets/downloads/si-005.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-008",
+      "chosen": "/assets/downloads/content-downloads/si-008.pdf",
+      "dropped": [
+        "/assets/downloads/si-008.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-011",
+      "chosen": "/assets/downloads/content-downloads/si-011.pdf",
+      "dropped": [
+        "/assets/downloads/si-011.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-014",
+      "chosen": "/assets/downloads/content-downloads/si-014.pdf",
+      "dropped": [
+        "/assets/downloads/si-014.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-017",
+      "chosen": "/assets/downloads/content-downloads/si-017.pdf",
+      "dropped": [
+        "/assets/downloads/si-017.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-020",
+      "chosen": "/assets/downloads/content-downloads/si-020.pdf",
+      "dropped": [
+        "/assets/downloads/si-020.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-023",
+      "chosen": "/assets/downloads/content-downloads/si-023.pdf",
+      "dropped": [
+        "/assets/downloads/si-023.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-026",
+      "chosen": "/assets/downloads/content-downloads/si-026.pdf",
+      "dropped": [
+        "/assets/downloads/si-026.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-029",
+      "chosen": "/assets/downloads/content-downloads/si-029.pdf",
+      "dropped": [
+        "/assets/downloads/si-029.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-032",
+      "chosen": "/assets/downloads/content-downloads/si-032.pdf",
+      "dropped": [
+        "/assets/downloads/si-032.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-035",
+      "chosen": "/assets/downloads/content-downloads/si-035.pdf",
+      "dropped": [
+        "/assets/downloads/si-035.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "si-038",
+      "chosen": "/assets/downloads/content-downloads/si-038.pdf",
+      "dropped": [
+        "/assets/downloads/si-038.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "si-041",
+      "chosen": "/assets/downloads/content-downloads/si-041.pdf",
+      "dropped": [
+        "/assets/downloads/si-041.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-044",
+      "chosen": "/assets/downloads/content-downloads/si-044.pdf",
+      "dropped": [
+        "/assets/downloads/si-044.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-047",
+      "chosen": "/assets/downloads/content-downloads/si-047.pdf",
+      "dropped": [
+        "/assets/downloads/si-047.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-050",
+      "chosen": "/assets/downloads/content-downloads/si-050.pdf",
+      "dropped": [
+        "/assets/downloads/si-050.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-053",
+      "chosen": "/assets/downloads/content-downloads/si-053.pdf",
+      "dropped": [
+        "/assets/downloads/si-053.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "si-056",
+      "chosen": "/assets/downloads/content-downloads/si-056.pdf",
+      "dropped": [
+        "/assets/downloads/si-056.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-059",
+      "chosen": "/assets/downloads/content-downloads/si-059.pdf",
+      "dropped": [
+        "/assets/downloads/si-059.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "si-062",
+      "chosen": "/assets/downloads/content-downloads/si-062.pdf",
+      "dropped": [
+        "/assets/downloads/si-062.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-065",
+      "chosen": "/assets/downloads/content-downloads/si-065.pdf",
+      "dropped": [
+        "/assets/downloads/si-065.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-068",
+      "chosen": "/assets/downloads/content-downloads/si-068.pdf",
+      "dropped": [
+        "/assets/downloads/si-068.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(91KB) > mtime"
+    },
+    {
+      "id": "si-071",
+      "chosen": "/assets/downloads/content-downloads/si-071.pdf",
+      "dropped": [
+        "/assets/downloads/si-071.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "si-074",
+      "chosen": "/assets/downloads/content-downloads/si-074.pdf",
+      "dropped": [
+        "/assets/downloads/si-074.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "sovereignty-001",
+      "chosen": "/assets/downloads/content-downloads/sovereignty-001.pdf",
+      "dropped": [
+        "/assets/downloads/sovereignty-001.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(64KB) > mtime"
+    },
+    {
+      "id": "standards-brief",
+      "chosen": "/assets/downloads/content-downloads/standards-brief.pdf",
+      "dropped": [
+        "/assets/downloads/standards-brief.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(71KB) > mtime"
+    },
+    {
+      "id": "strategic-autonomy-002",
+      "chosen": "/assets/downloads/content-downloads/strategic-autonomy-002.pdf",
+      "dropped": [
+        "/assets/downloads/strategic-autonomy-002.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(65KB) > mtime"
+    },
+    {
+      "id": "the-builders-catechism-founders-illuminated-edition",
+      "chosen": "/assets/downloads/content-downloads/the-builders-catechism-founders-illuminated-edition.pdf",
+      "dropped": [
+        "/assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(163KB) > mtime"
+    },
+    {
+      "id": "the-builders-catechism",
+      "chosen": "/assets/downloads/content-downloads/the-builders-catechism.pdf",
+      "dropped": [
+        "/assets/downloads/the-builders-catechism.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(176KB) > mtime"
+    },
+    {
+      "id": "the-cost-of-refusing-formation",
+      "chosen": "/assets/downloads/content-downloads/the-cost-of-refusing-formation.pdf",
+      "dropped": [
+        "/assets/downloads/the-cost-of-refusing-formation.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(87KB) > mtime"
+    },
+    {
+      "id": "this-is-not-a-comfort-platform",
+      "chosen": "/assets/downloads/content-downloads/this-is-not-a-comfort-platform.pdf",
+      "dropped": [
+        "/assets/downloads/this-is-not-a-comfort-platform.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(86KB) > mtime"
+    },
+    {
+      "id": "ultimate-purpose-of-man-editorial",
+      "chosen": "/assets/downloads/content-downloads/ultimate-purpose-of-man-editorial.pdf",
+      "dropped": [
+        "/assets/downloads/ultimate-purpose-of-man-editorial.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(159KB) > mtime"
+    },
+    {
+      "id": "weekly-operating-rhythm",
+      "chosen": "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
+      "dropped": [
+        "/assets/downloads/weekly-operating-rhythm.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(86KB) > mtime"
+    },
+    {
+      "id": "when-a-single-yes-changes-everything",
+      "chosen": "/assets/downloads/content-downloads/when-a-single-yes-changes-everything.pdf",
+      "dropped": [
+        "/assets/downloads/when-a-single-yes-changes-everything.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "when-all-you-can-do-is-breathe",
+      "chosen": "/assets/downloads/content-downloads/when-all-you-can-do-is-breathe.pdf",
+      "dropped": [
+        "/assets/downloads/when-all-you-can-do-is-breathe.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "when-avoidance-becomes-your-personality",
+      "chosen": "/assets/downloads/content-downloads/when-avoidance-becomes-your-personality.pdf",
+      "dropped": [
+        "/assets/downloads/when-avoidance-becomes-your-personality.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(109KB) > mtime"
+    },
+    {
+      "id": "when-busyness-becomes-your-brand",
+      "chosen": "/assets/downloads/content-downloads/when-busyness-becomes-your-brand.pdf",
+      "dropped": [
+        "/assets/downloads/when-busyness-becomes-your-brand.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-comfort-becomes-your-cage",
+      "chosen": "/assets/downloads/content-downloads/when-comfort-becomes-your-cage.pdf",
+      "dropped": [
+        "/assets/downloads/when-comfort-becomes-your-cage.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(104KB) > mtime"
+    },
+    {
+      "id": "when-conflict-feels-like-betrayal",
+      "chosen": "/assets/downloads/content-downloads/when-conflict-feels-like-betrayal.pdf",
+      "dropped": [
+        "/assets/downloads/when-conflict-feels-like-betrayal.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-doctrine-feels-safer-than-god",
+      "chosen": "/assets/downloads/content-downloads/when-doctrine-feels-safer-than-god.pdf",
+      "dropped": [
+        "/assets/downloads/when-doctrine-feels-safer-than-god.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "when-every-promotion-feels-hollow",
+      "chosen": "/assets/downloads/content-downloads/when-every-promotion-feels-hollow.pdf",
+      "dropped": [
+        "/assets/downloads/when-every-promotion-feels-hollow.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(90KB) > mtime"
+    },
+    {
+      "id": "when-grace-finds-you-in-the-mess",
+      "chosen": "/assets/downloads/content-downloads/when-grace-finds-you-in-the-mess.pdf",
+      "dropped": [
+        "/assets/downloads/when-grace-finds-you-in-the-mess.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(93KB) > mtime"
+    },
+    {
+      "id": "when-hope-feels-reckless",
+      "chosen": "/assets/downloads/content-downloads/when-hope-feels-reckless.pdf",
+      "dropped": [
+        "/assets/downloads/when-hope-feels-reckless.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "when-kindness-feels-like-rebellion",
+      "chosen": "/assets/downloads/content-downloads/when-kindness-feels-like-rebellion.pdf",
+      "dropped": [
+        "/assets/downloads/when-kindness-feels-like-rebellion.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "when-later-became-never",
+      "chosen": "/assets/downloads/content-downloads/when-later-became-never.pdf",
+      "dropped": [
+        "/assets/downloads/when-later-became-never.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "when-numbness-feels-safer-than-joy",
+      "chosen": "/assets/downloads/content-downloads/when-numbness-feels-safer-than-joy.pdf",
+      "dropped": [
+        "/assets/downloads/when-numbness-feels-safer-than-joy.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-productivity-becomes-punishment",
+      "chosen": "/assets/downloads/content-downloads/when-productivity-becomes-punishment.pdf",
+      "dropped": [
+        "/assets/downloads/when-productivity-becomes-punishment.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "when-rest-starts-to-feel-dangerous",
+      "chosen": "/assets/downloads/content-downloads/when-rest-starts-to-feel-dangerous.pdf",
+      "dropped": [
+        "/assets/downloads/when-rest-starts-to-feel-dangerous.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "when-you-argue-with-god-in-your-head",
+      "chosen": "/assets/downloads/content-downloads/when-you-argue-with-god-in-your-head.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-argue-with-god-in-your-head.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(99KB) > mtime"
+    },
+    {
+      "id": "when-you-cant-stop-overthinking",
+      "chosen": "/assets/downloads/content-downloads/when-you-cant-stop-overthinking.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-cant-stop-overthinking.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-you-cant-tell-if-youre-growing-or-drifting",
+      "chosen": "/assets/downloads/content-downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-cant-tell-if-youre-growing-or-drifting.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(99KB) > mtime"
+    },
+    {
+      "id": "when-you-dont-know-what-you-want-anymore",
+      "chosen": "/assets/downloads/content-downloads/when-you-dont-know-what-you-want-anymore.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-dont-know-what-you-want-anymore.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(106KB) > mtime"
+    },
+    {
+      "id": "when-you-dont-trust-your-own-decisions",
+      "chosen": "/assets/downloads/content-downloads/when-you-dont-trust-your-own-decisions.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-dont-trust-your-own-decisions.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-you-fear-being-wrong-about-god",
+      "chosen": "/assets/downloads/content-downloads/when-you-fear-being-wrong-about-god.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-fear-being-wrong-about-god.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "when-you-fear-success-more-than-failure",
+      "chosen": "/assets/downloads/content-downloads/when-you-fear-success-more-than-failure.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-fear-success-more-than-failure.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(99KB) > mtime"
+    },
+    {
+      "id": "when-you-feel-like-god-is-delaying-you",
+      "chosen": "/assets/downloads/content-downloads/when-you-feel-like-god-is-delaying-you.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-feel-like-god-is-delaying-you.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "when-you-feel-too-busy-to-care",
+      "chosen": "/assets/downloads/content-downloads/when-you-feel-too-busy-to-care.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-feel-too-busy-to-care.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "when-you-finally-let-yourself-cry",
+      "chosen": "/assets/downloads/content-downloads/when-you-finally-let-yourself-cry.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-finally-let-yourself-cry.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-you-give-more-than-you-get",
+      "chosen": "/assets/downloads/content-downloads/when-you-give-more-than-you-get.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-give-more-than-you-get.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(112KB) > mtime"
+    },
+    {
+      "id": "when-you-keep-blaming-your-childhood",
+      "chosen": "/assets/downloads/content-downloads/when-you-keep-blaming-your-childhood.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-keep-blaming-your-childhood.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(93KB) > mtime"
+    },
+    {
+      "id": "when-you-keep-choosing-people-who-cant-choose-you",
+      "chosen": "/assets/downloads/content-downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-keep-choosing-people-who-cant-choose-you.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(99KB) > mtime"
+    },
+    {
+      "id": "when-you-keep-confusing-niceness-with-goodness",
+      "chosen": "/assets/downloads/content-downloads/when-you-keep-confusing-niceness-with-goodness.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-keep-confusing-niceness-with-goodness.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-you-miss-who-you-used-to-be",
+      "chosen": "/assets/downloads/content-downloads/when-you-miss-who-you-used-to-be.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-miss-who-you-used-to-be.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(104KB) > mtime"
+    },
+    {
+      "id": "when-you-mistake-familiarity-for-loyalty",
+      "chosen": "/assets/downloads/content-downloads/when-you-mistake-familiarity-for-loyalty.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-mistake-familiarity-for-loyalty.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(109KB) > mtime"
+    },
+    {
+      "id": "when-you-need-god-to-interrupt-you",
+      "chosen": "/assets/downloads/content-downloads/when-you-need-god-to-interrupt-you.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-need-god-to-interrupt-you.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-you-no-longer-recognise-your-own-voice",
+      "chosen": "/assets/downloads/content-downloads/when-you-no-longer-recognise-your-own-voice.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-no-longer-recognise-your-own-voice.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-you-outgrow-your-circle",
+      "chosen": "/assets/downloads/content-downloads/when-you-outgrow-your-circle.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-outgrow-your-circle.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "when-you-realise-prayer-is-war",
+      "chosen": "/assets/downloads/content-downloads/when-you-realise-prayer-is-war.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-realise-prayer-is-war.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "when-you-realise-you-were-the-problem",
+      "chosen": "/assets/downloads/content-downloads/when-you-realise-you-were-the-problem.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-realise-you-were-the-problem.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "when-you-realise-youre-not-behind",
+      "chosen": "/assets/downloads/content-downloads/when-you-realise-youre-not-behind.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-realise-youre-not-behind.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "when-you-stop-waiting-for-permission",
+      "chosen": "/assets/downloads/content-downloads/when-you-stop-waiting-for-permission.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-stop-waiting-for-permission.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-you-want-to-quit-but-cant",
+      "chosen": "/assets/downloads/content-downloads/when-you-want-to-quit-but-cant.pdf",
+      "dropped": [
+        "/assets/downloads/when-you-want-to-quit-but-cant.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "when-your-calendar-is-full-but-your-life-is-empty",
+      "chosen": "/assets/downloads/content-downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-calendar-is-full-but-your-life-is-empty.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(108KB) > mtime"
+    },
+    {
+      "id": "when-your-calling-stops-being-cute",
+      "chosen": "/assets/downloads/content-downloads/when-your-calling-stops-being-cute.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-calling-stops-being-cute.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(93KB) > mtime"
+    },
+    {
+      "id": "when-your-character-is-leaking",
+      "chosen": "/assets/downloads/content-downloads/when-your-character-is-leaking.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-character-is-leaking.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-your-confidence-feels-manufactured",
+      "chosen": "/assets/downloads/content-downloads/when-your-confidence-feels-manufactured.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-confidence-feels-manufactured.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(109KB) > mtime"
+    },
+    {
+      "id": "when-your-convictions-feel-like-costumes",
+      "chosen": "/assets/downloads/content-downloads/when-your-convictions-feel-like-costumes.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-convictions-feel-like-costumes.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(107KB) > mtime"
+    },
+    {
+      "id": "when-your-dreams-feel-too-heavy",
+      "chosen": "/assets/downloads/content-downloads/when-your-dreams-feel-too-heavy.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-dreams-feel-too-heavy.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "when-your-excuses-become-your-identity",
+      "chosen": "/assets/downloads/content-downloads/when-your-excuses-become-your-identity.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-excuses-become-your-identity.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(117KB) > mtime"
+    },
+    {
+      "id": "when-your-faith-feels-numb",
+      "chosen": "/assets/downloads/content-downloads/when-your-faith-feels-numb.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-faith-feels-numb.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-your-hustle-has-no-soul",
+      "chosen": "/assets/downloads/content-downloads/when-your-hustle-has-no-soul.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-hustle-has-no-soul.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(93KB) > mtime"
+    },
+    {
+      "id": "when-your-legacy-terrifies-you",
+      "chosen": "/assets/downloads/content-downloads/when-your-legacy-terrifies-you.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-legacy-terrifies-you.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "when-your-silence-says-too-much",
+      "chosen": "/assets/downloads/content-downloads/when-your-silence-says-too-much.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-silence-says-too-much.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-your-standards-keep-you-lonely",
+      "chosen": "/assets/downloads/content-downloads/when-your-standards-keep-you-lonely.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-standards-keep-you-lonely.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(99KB) > mtime"
+    },
+    {
+      "id": "when-your-vision-outgrows-your-environment",
+      "chosen": "/assets/downloads/content-downloads/when-your-vision-outgrows-your-environment.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-vision-outgrows-your-environment.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "when-your-work-becomes-your-hiding-place",
+      "chosen": "/assets/downloads/content-downloads/when-your-work-becomes-your-hiding-place.pdf",
+      "dropped": [
+        "/assets/downloads/when-your-work-becomes-your-hiding-place.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "when-youre-addicted-to-distraction",
+      "chosen": "/assets/downloads/content-downloads/when-youre-addicted-to-distraction.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-addicted-to-distraction.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-youre-afraid-of-your-own-potential",
+      "chosen": "/assets/downloads/content-downloads/when-youre-afraid-of-your-own-potential.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-afraid-of-your-own-potential.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(100KB) > mtime"
+    },
+    {
+      "id": "when-youre-afraid-to-be-radical",
+      "chosen": "/assets/downloads/content-downloads/when-youre-afraid-to-be-radical.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-afraid-to-be-radical.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-youre-always-the-strong-one",
+      "chosen": "/assets/downloads/content-downloads/when-youre-always-the-strong-one.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-always-the-strong-one.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "when-youre-attracted-to-potential-not-reality",
+      "chosen": "/assets/downloads/content-downloads/when-youre-attracted-to-potential-not-reality.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-attracted-to-potential-not-reality.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(101KB) > mtime"
+    },
+    {
+      "id": "when-youre-building-someone-elses-legacy",
+      "chosen": "/assets/downloads/content-downloads/when-youre-building-someone-elses-legacy.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-building-someone-elses-legacy.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(108KB) > mtime"
+    },
+    {
+      "id": "when-youre-done-fixing-adults",
+      "chosen": "/assets/downloads/content-downloads/when-youre-done-fixing-adults.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-done-fixing-adults.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(93KB) > mtime"
+    },
+    {
+      "id": "when-youre-exhausted-but-still-available",
+      "chosen": "/assets/downloads/content-downloads/when-youre-exhausted-but-still-available.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-exhausted-but-still-available.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(108KB) > mtime"
+    },
+    {
+      "id": "when-youre-keeping-faith-out-of-habit",
+      "chosen": "/assets/downloads/content-downloads/when-youre-keeping-faith-out-of-habit.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-keeping-faith-out-of-habit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "when-youre-living-for-weekends",
+      "chosen": "/assets/downloads/content-downloads/when-youre-living-for-weekends.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-living-for-weekends.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    },
+    {
+      "id": "when-youre-loved-without-earning-it",
+      "chosen": "/assets/downloads/content-downloads/when-youre-loved-without-earning-it.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-loved-without-earning-it.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(89KB) > mtime"
+    },
+    {
+      "id": "when-youre-measuring-everything-but-meaning",
+      "chosen": "/assets/downloads/content-downloads/when-youre-measuring-everything-but-meaning.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-measuring-everything-but-meaning.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(100KB) > mtime"
+    },
+    {
+      "id": "when-youre-not-lazy-youre-undisciplined",
+      "chosen": "/assets/downloads/content-downloads/when-youre-not-lazy-youre-undisciplined.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-not-lazy-youre-undisciplined.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "when-youre-preparing-for-rooms-you-havent-entered",
+      "chosen": "/assets/downloads/content-downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-preparing-for-rooms-you-havent-entered.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-youre-productive-but-not-present",
+      "chosen": "/assets/downloads/content-downloads/when-youre-productive-but-not-present.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-productive-but-not-present.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(102KB) > mtime"
+    },
+    {
+      "id": "when-youre-scared-to-start-over",
+      "chosen": "/assets/downloads/content-downloads/when-youre-scared-to-start-over.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-scared-to-start-over.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-youre-the-only-one-doing-the-work",
+      "chosen": "/assets/downloads/content-downloads/when-youre-the-only-one-doing-the-work.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-the-only-one-doing-the-work.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "when-youre-tired-of-being-the-bigger-person",
+      "chosen": "/assets/downloads/content-downloads/when-youre-tired-of-being-the-bigger-person.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-tired-of-being-the-bigger-person.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(119KB) > mtime"
+    },
+    {
+      "id": "when-youre-tired-of-starting-over",
+      "chosen": "/assets/downloads/content-downloads/when-youre-tired-of-starting-over.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-tired-of-starting-over.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "when-youre-winning-at-work-but-losing-yourself",
+      "chosen": "/assets/downloads/content-downloads/when-youre-winning-at-work-but-losing-yourself.pdf",
+      "dropped": [
+        "/assets/downloads/when-youre-winning-at-work-but-losing-yourself.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(97KB) > mtime"
+    },
+    {
+      "id": "when-youve-become-chronically-online",
+      "chosen": "/assets/downloads/content-downloads/when-youve-become-chronically-online.pdf",
+      "dropped": [
+        "/assets/downloads/when-youve-become-chronically-online.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(93KB) > mtime"
+    },
+    {
+      "id": "when-youve-worshipped-the-wrong-metrics",
+      "chosen": "/assets/downloads/content-downloads/when-youve-worshipped-the-wrong-metrics.pdf",
+      "dropped": [
+        "/assets/downloads/when-youve-worshipped-the-wrong-metrics.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(102KB) > mtime"
+    },
+    {
+      "id": "you-were-built-to-carry-weight",
+      "chosen": "/assets/downloads/content-downloads/you-were-built-to-carry-weight.pdf",
+      "dropped": [
+        "/assets/downloads/you-were-built-to-carry-weight.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(92KB) > mtime"
+    }
+  ]
 }

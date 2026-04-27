@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-04-21T14:58:53.524Z",
+  "generatedAt": "2026-04-27T10:01:34.825Z",
   "canonicalBinaryTarget": "/assets/downloads/{slug}.pdf",
   "totals": {
-    "pdfs": 751,
+    "pdfs": 749,
     "duplicateFilenameGroups": 308,
     "duplicateAssets": 631
   },
   "byFolderClass": {
-    "canonical_download": 428,
+    "canonical_download": 426,
     "lexicon_pdf": 17,
     "print_pdf": 6,
     "resource_pdf": 99,
@@ -15,7 +15,7 @@
     "vault_pdf": 105
   },
   "byCanonicalityStatus": {
-    "candidate_canonical": 428,
+    "candidate_canonical": 426,
     "specialty_route_asset": 323
   },
   "assets": [
@@ -2020,28 +2020,6 @@
       "sha256": "6bc9881b015538f52dc9a53b8185f88808dbe5ea4f65978b349a04a4d4123770",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": "filename:getting-started.pdf"
-    },
-    {
-      "relativePath": "public/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf",
-      "publicUrl": "/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf",
-      "filename": "global-market-intelligence-board-deck-q1-2026.pdf",
-      "slugCandidate": "global-market-intelligence-board-deck-q1-2026",
-      "folderClass": "canonical_download",
-      "fileSizeBytes": 113423,
-      "sha256": "6803d9a1f85157f93ac810c913c9a125674e1ea8924a548cf31f95052c57199b",
-      "canonicalityStatus": "candidate_canonical",
-      "duplicateGroupId": null
-    },
-    {
-      "relativePath": "public/assets/downloads/global-market-intelligence-report-q1-2026.pdf",
-      "publicUrl": "/assets/downloads/global-market-intelligence-report-q1-2026.pdf",
-      "filename": "global-market-intelligence-report-q1-2026.pdf",
-      "slugCandidate": "global-market-intelligence-report-q1-2026",
-      "folderClass": "canonical_download",
-      "fileSizeBytes": 121654,
-      "sha256": "3ccf949387ba208dc03b475702d861bf0ee148d878c8c27789aeae343c2a5f69",
-      "canonicalityStatus": "candidate_canonical",
-      "duplicateGroupId": null
     },
     {
       "relativePath": "public/assets/downloads/governance-diagnostic-toolkit.pdf",
