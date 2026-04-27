@@ -10,6 +10,7 @@ import {
 } from "@/lib/commercial/catalog";
 import { resolveProductIdentity } from "@/lib/commercial/product-identity";
 import { hubspotSync } from "@/lib/hubspot/sync";
+import { checkDoNotSellGate } from "@/lib/commercial/do-not-sell-gate";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeKey
@@ -57,6 +58,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // ── Resolve product from catalog SSOT with guardrails ──
   if (!email) {
     return res.status(400).json({ ok: false, reason: "EMAIL_REQUIRED" });
+  }
+
+  // ── Do-Not-Sell gate: block if diagnostic prerequisites not met ──
+  const gate = await checkDoNotSellGate(String(email).trim().toLowerCase(), code);
+  if (!gate.allowed) {
+    return res.status(403).json({ ok: false, reason: gate.reason, message: gate.message });
   }
 
   const eligibility = checkCheckoutEligibility(code);

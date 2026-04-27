@@ -95,6 +95,10 @@
   path = "/api/cleanup-download-tokens"
   schedule = "0 2 * * *"
 
+[[schedule]]
+  path = "/api/cron/escalation"
+  schedule = "0 */6 * * *"
+
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
