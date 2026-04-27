@@ -158,11 +158,138 @@ This manual is a living document, reviewed quarterly and updated as the platform
 - Appendix A: Environment Variables Reference
 - Appendix B: CLI Commands Quick Reference
 - Appendix C: Troubleshooting Guide
-- Appendix D: Architecture Decision Records
+- Appendix D: Revision History
+- Appendix E: Architecture Decision Records
+
+---
+
+## QUICK START (5 MINUTES)
+
+```bash
+# Prerequisites: Node 20+, pnpm 10.33+
+git clone https://github.com/AbrahamofLondon/aol-check-visual.git
+cd aol-check-visual
+pnpm install
+cp .env.example .env.local  # Fill required values
+pnpm db:generate && pnpm db:push && pnpm db:seed
+pnpm dev
+# → http://localhost:3000
+```
+
+**Required .env.local values for local dev:**
+- `DATABASE_URL=file:./prisma/dev.db`
+- `NEXTAUTH_SECRET=any-32-char-string`
+- `NEXTAUTH_URL=http://localhost:3000`
+
+> For the full setup guide with all options, see Part X, Chapter 29.
+
+---
+
+## DATA MODEL — SYSTEM DNA
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLIENT LAYER                              │
+│  Next.js App Router │ React 19 │ Tailwind │ Radix UI │ Zustand  │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────┼────────────────────────────────┐
+│                      APPLICATION LAYER                            │
+│  Server Components │ Server Actions │ API Routes │ Middleware     │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────┼────────────────────────────────┐
+│                       DOMAIN LAYER                                │
+│  Diagnostic Engine │ Collision │ Enforcement │ Strategy Room      │
+│  Outcome Verify │ Boardroom │ Case Pipeline │ Decision Ledger    │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────┼────────────────────────────────┐
+│                        DATA LAYER                                 │
+│  Prisma ORM │ PostgreSQL (Neon) │ SQLite (dev) │ Redis (cache)   │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+┌────────────────────────────────┼────────────────────────────────┐
+│                    INFRASTRUCTURE LAYER                            │
+│  Netlify │ Serverless Functions │ Puppeteer │ LibreOffice │ S3    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Entity Relationship Diagram
+
+```
+┌─────────────────┐       ┌────────────────────┐       ┌──────────────────────┐
+│   Organisation  │──1:N──│ OrganisationMember  │       │   AlignmentCampaign  │
+└────────┬────────┘       └────────────────────┘       └──────────┬───────────┘
+         │                                                         │
+         │ 1:N                                                     │ 1:N
+         ▼                                                         ▼
+┌─────────────────────────┐                         ┌──────────────────────────┐
+│  DiagnosticJourney      │──1:N──────────────────▶│  CampaignParticipant      │
+└────────┬────────────────┘                         └──────────────────────────┘
+         │
+         │ 1:N
+         ▼
+┌─────────────────────────┐       ┌───────────────────────────┐
+│ DiagnosticDecisionObject│──1:N──│  DiagnosticEvidenceNode    │
+└────────┬────────────────┘       └───────────────────────────┘
+         │
+         │ 1:1
+         ▼
+┌─────────────────────────┐       ┌───────────────────────────┐
+│ PatternBreakerContract  │──1:1──│  OutcomeVerificationRecord │
+└─────────────────────────┘       └───────────────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  StrategyRoomSession    │
+└─────────────────────────┘
+```
+
+### Core Models (12 Critical Entities)
+
+| # | Model | Key Fields |
+|---|-------|-----------|
+| 1 | **Organisation** | id, name, slug, sector, sizeBand, region, status |
+| 2 | **OrganisationMembership** | organisationId, email, roleTitle, seniorityBand, isExecutive, status |
+| 3 | **AlignmentCampaign** | organisationId, diagnosticType, stage, cadence |
+| 4 | **CampaignParticipant** | campaignId, email, respondentType, status |
+| 5 | **DiagnosticJourney** | journeyKey, subjectKey, diagnosticType, status, escalationHistory |
+| 6 | **DiagnosticDecisionObject** | decisionText, constraintText, decisionVelocityScore |
+| 7 | **DiagnosticEvidenceNode** | sourceStage, kind, severity, confidence, payload |
+| 8 | **PatternBreakerContract** | decision, owner, deadline, consequence, checkpoints, breachCount, escalationLevel, verificationStatus |
+| 9 | **OutcomeVerificationRecord** | outcomeClassification, magnitudeOfChange, effectivenessScore, decisionVelocityDelta |
+| 10 | **StrategyRoomSession** | sessionKey, status, route, readinessTier, authorityType |
+| 11 | **User** | email, role, name |
+| 12 | **Content** | title, slug, accessTier, published |
+
+---
+
+## SYSTEM STATUS MAP
+
+| System | Status | Notes |
+|--------|--------|-------|
+| Diagnostic Engine | Production | 6 archetypes, arbiter validated |
+| Multi-user Collision | Production | 4 collision types, severity classification |
+| Enforcement Engine | Production | Contracts + breach + escalation |
+| Decision Ledger | Production | Implicit via journey model + credit score |
+| Strategy Room | Production | Full state machine, 10+ API endpoints |
+| Outcome Verification | Production | Confidence-capped, 5 classifications |
+| Boardroom Mode | Built, untested | Dossier builder + PDF, needs real org data |
+| Case Study Pipeline | Built, untested | Eligibility + draft builder, needs verified outcomes |
+| AI Synthesis | Production | Claude/OpenAI integration with arbiter guard |
+| Email System | Production | Resend + templates |
+| PDF Pipeline | Production | 5 paths, 198 assets, registry |
+| Redis Caching | Optional | Graceful degradation when unavailable |
+| Real-time WebSocket | Planned | ws dependency present, not wired |
 
 ---
 
 ## PART I — SYSTEM ARCHITECTURE
+
+*"Architecture determines what can be built. Wrong foundations mean every feature costs 10x."*
 
 ### Chapter 1: Platform Overview
 
@@ -688,6 +815,8 @@ export const config = {
 ---
 
 ## PART II — CORE SYSTEMS
+
+*"The database is the product's memory. Every schema decision determines what questions the system can answer."*
 
 ### Chapter 4: Database Layer
 
@@ -4144,6 +4273,8 @@ export const handler: Handler = async (event) => {
 
 ## PART VII — QUALITY & TESTING
 
+*"Quality is not optional for a system that claims to enforce decisions. If the system itself is unreliable, the product thesis collapses."*
+
 ---
 
 ### Chapter 19: Testing Strategy
@@ -4515,7 +4646,140 @@ Enabled via `ENABLE_ANALYTICS=true` feature flag.
 
 ---
 
+### Chapter 21A: Performance Budget
+
+| Category | Metric | Budget |
+|----------|--------|--------|
+| **Core Web Vitals** | LCP | < 2.5s |
+| **Core Web Vitals** | FID | < 100ms |
+| **Core Web Vitals** | CLS | < 0.1 |
+| **API Response** | Reads (p95) | < 500ms |
+| **API Response** | Writes/generation (p95) | < 2000ms |
+| **PDF Generation** | Per document | < 30s |
+| **Build Time** | Full production build | < 5 minutes |
+| **Bundle Size** | First-load JS | < 300KB |
+| **Database** | Indexed queries (p95) | < 100ms |
+| **ISR Revalidation** | Content pages | 3600s (1 hour) |
+
+> **KEY PRINCIPLE**
+>
+> These budgets are hard limits, not aspirational targets. Any regression past these thresholds blocks deployment until resolved. Measure in CI; alert in production.
+
+---
+
+### Chapter 21B: Error Handling Philosophy
+
+#### Standard API Response Shape
+
+```typescript
+interface ApiResponse<T = unknown> {
+  ok: boolean;
+  error?: string;
+  data?: T;
+  code?: string;
+}
+```
+
+All API routes return this shape. No exceptions.
+
+#### Error Categories
+
+| Code | Category | HTTP Status | Description |
+|------|----------|-------------|-------------|
+| `VALIDATION_ERROR` | ValidationError | 400 | Input failed Zod schema validation |
+| `AUTH_ERROR` | AuthError | 401 | Missing or invalid authentication |
+| `FORBIDDEN_ERROR` | ForbiddenError | 403 | Authenticated but insufficient permissions |
+| `NOT_FOUND` | NotFoundError | 404 | Resource does not exist |
+| `RATE_LIMIT` | RateLimitError | 429 | Request limit exceeded |
+| `INTERNAL_ERROR` | InternalError | 500 | Unhandled server error |
+
+#### Error Handling Principles
+
+1. **Fail loudly in development, fail gracefully in production** — Dev surfaces full stack traces in console; production returns sanitised messages.
+2. **Audit logging on all 500s** — Every internal error is logged with request context, timestamp, and correlation ID.
+3. **Never expose stack traces to client** — Production 500 responses contain only `{ ok: false, error: "Internal server error", code: "INTERNAL_ERROR" }`.
+4. **Zod validation errors return field-level detail** — The `error` field contains human-readable messages per field for 400 responses.
+5. **Rate limit responses include retry-after header** — `Retry-After` header set in seconds on all 429 responses.
+6. **Correlation IDs** — Every request gets a unique ID propagated through all log entries for that request.
+
+---
+
+### Chapter 21C: Monitoring Architecture
+
+#### Monitoring Stack
+
+| Layer | Tool | Purpose |
+|-------|------|---------|
+| **Web Vitals** | Vercel Analytics | LCP, FID, CLS field data |
+| **Real-User Monitoring** | Vercel Speed Insights | Page-level performance, device/geo breakdowns |
+| **Custom Telemetry** | /api/telemetry/global | Platform-specific event tracking |
+| **Content Telemetry** | /api/telemetry/resonance | Content engagement and resonance scoring |
+| **Health Checks** | Netlify scheduled function | Uptime verification, dependency health |
+| **Audit Logging** | GovernanceLog, SecurityEvent, AuditLog models | Full audit trail for compliance |
+| **Error Tracking** | Sentry-ready architecture | Not yet enabled; instrumentation hooks in place |
+
+#### Alert Thresholds
+
+| Signal | Severity | Response Time |
+|--------|----------|---------------|
+| Build failure | Critical | Immediate — blocks deploy |
+| 500 error rate > 1% | Urgent | Investigate within 1 hour |
+| Core Web Vitals regression | Warning | Investigate within 24 hours |
+| Security event (auth anomaly) | Critical | Immediate review |
+| Database connection failure | Critical | Immediate — failover or rollback |
+| PDF generation timeout | Warning | Investigate within 24 hours |
+
+---
+
+### Chapter 21D: Dependency Strategy
+
+#### Package Management
+
+- **pnpm 10.33+** required (enforced via `engines` in package.json)
+- **Lock file**: `pnpm-lock.yaml` committed to repository, always used for installs
+- **No phantom dependencies**: pnpm strict mode prevents unlisted dep usage
+
+#### Update Cadence
+
+| Category | Cadence | Process |
+|----------|---------|---------|
+| Security patches | Immediately | `pnpm audit fix`, test, deploy |
+| Minor updates | Weekly | Review changelog, update, run full test suite |
+| Major updates | Quarterly | Spike branch, full regression testing, Lead Engineer approval |
+
+#### Forbidden Patterns
+
+- No `*` version ranges in package.json
+- No `latest` tags
+- No `npm install` (pnpm only)
+- No direct `node_modules` manipulation
+
+#### Audit
+
+`pnpm security:audit` runs in CI pipeline. Build fails on critical vulnerabilities.
+
+#### Heavy Dependencies to Watch
+
+| Package | Size Impact | Justification |
+|---------|-------------|---------------|
+| puppeteer | ~200MB+ | PDF generation (isolated in serverless function) |
+| @prisma/client | ~10MB generated | Type-safe database access (unavoidable) |
+| sharp | ~30MB native | Image optimization (production necessity) |
+| contentlayer2 | Build-time only | MDX processing (not in production bundle) |
+
+#### Replacement Candidates
+
+If a dependency goes unmaintained, documented alternatives:
+- `contentlayer2` → `velite` or custom MDX pipeline
+- `next-auth` → `lucia-auth` or `better-auth`
+- `zustand` → `jotai` (similar paradigm, active maintenance)
+- `resend` → `nodemailer` + SES (self-hosted fallback)
+
+---
+
 ## PART VIII — OPERATIONS & DEPLOYMENT
+
+*"Deployment is not a chore at the end of development. It is the mechanism by which value reaches the client."*
 
 ---
 
@@ -5011,6 +5275,8 @@ LOG_LEVEL=warn   # debug | info | warn | error | critical
 
 ## PART IX — SECURITY
 
+*"Security is not a feature — it is a constraint applied to every feature. A breach destroys trust faster than any product innovation can build it."*
+
 ---
 
 ### Chapter 26: Security Architecture
@@ -5355,6 +5621,8 @@ Used for:
 ---
 
 ## PART X — DEVELOPER OPERATIONS
+
+*"Developer experience determines engineering velocity. Every minute spent fighting tooling is a minute not spent building the product."*
 
 ---
 
@@ -6118,6 +6386,43 @@ EntitlementStatus, AccessKeyStatus, InviteStatus, AuditActorType
 
 ## APPENDIX C — API ROUTE REFERENCE
 
+### API Surface Summary (Key Routes with Auth Level)
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| POST | /api/alignment/enterprise/campaigns | Admin | Create alignment campaign |
+| POST | /api/alignment/enterprise/respond/[token] | Token | Submit respondent data |
+| GET | /api/alignment/enterprise/campaigns/[id]/report | Admin | Get campaign report |
+| POST | /api/diagnostics/multi-stakeholder | Auth | Multi-user collision analysis |
+| GET | /api/strategy-room/session/init | Auth | Initialize SR session |
+| POST | /api/strategy-room/execution/[id]/decisions | Auth | Evaluate decision in SR |
+| GET | /api/strategy-room/execution/[id]/state | Auth | Get SR session state |
+| GET | /api/boardroom/dossier | Admin | Get boardroom dossier JSON |
+| GET | /api/boardroom/dossier/pdf | Admin | Get boardroom dossier PDF |
+| POST | /api/evidence/case-draft | Admin | Generate case study draft |
+| GET | /api/evidence/eligibility | Auth | Check outcome case eligibility |
+| POST | /api/outcomes/create | Auth | Record outcome |
+| POST | /api/outcomes/[id]/verify | Auth | Verify outcome |
+| GET | /api/diagnostics/outcomes | Auth | List outcomes |
+| POST | /api/diagnostics/outcomes/verify | Auth | Verify diagnostic outcomes |
+| GET | /api/diagnostics/longitudinal | Auth | Longitudinal comparison |
+| POST | /api/diagnostics/reentry | Auth | Re-entry flow |
+| POST | /api/decision/guidance | Auth | Decision guidance AI |
+| GET | /api/telemetry/global | None | Global telemetry events |
+| POST | /api/telemetry/resonance | None | Content resonance tracking |
+| GET | /api/executive-reporting/export/pdf | Admin | Executive PDF export |
+| GET | /api/executive-reporting/export/boardroom-pdf | Admin | Boardroom PDF export |
+| POST | /api/checkout | Auth | Payment checkout |
+| GET | /api/entitlements | Auth | User entitlements |
+| POST | /api/admin/decision/rebuild-efficacy | Admin | Rebuild efficacy index |
+| GET | /api/admin/commercial | Admin | Commercial metrics |
+| GET | /api/predictive/insights/[campaignId] | Auth | Predictive insights |
+| POST | /api/leads/fuse | Admin | Lead fusion |
+
+> **Auth Legend:** None = public, Token = URL token (respondent links), Auth = authenticated user session, Admin = ADMIN or OWNER role required.
+
+---
+
 ### Public Routes (No Auth)
 
 | Method | Path | Description |
@@ -6298,6 +6603,72 @@ EntitlementStatus, AccessKeyStatus, InviteStatus, AuditActorType
 > **⸻ KEY PRINCIPLE**
 >
 > This manual is a living document but NOT a wiki. Changes require formal review and approval. The manual reflects the system as it IS, not as someone wishes it were. If the system changes, the manual is updated. If the manual says something the system does not do, the system is wrong.
+
+---
+
+## APPENDIX E — ARCHITECTURE DECISION RECORDS
+
+Architecture Decision Records document the key technical choices made during platform development. Each ADR captures context, decision, rationale, and consequences for future engineers.
+
+---
+
+### ADR-001: Next.js App Router over Pages Router
+
+| Field | Detail |
+|-------|--------|
+| **Status** | Accepted |
+| **Context** | Platform started on Pages Router, migrated incrementally as App Router matured. Need for Server Components, streaming, and nested layouts drove evaluation. |
+| **Decision** | Use App Router (`app/`) for all new development. Keep `pages/` for legacy auth callbacks and debug endpoints only. No new Pages Router routes. |
+| **Rationale** | Server Components reduce client bundle, nested layouts eliminate prop drilling, streaming enables progressive rendering, file-based metadata simplifies SEO, and built-in loading/error states improve UX without boilerplate. |
+| **Consequences** | Hybrid mode adds complexity (two routers coexist). Some patterns require explicit `"use client"` boundary. Middleware behaviour differs between routers. Team must understand both paradigms during transition. |
+
+---
+
+### ADR-002: Prisma over raw SQL / Drizzle
+
+| Field | Detail |
+|-------|--------|
+| **Status** | Accepted |
+| **Context** | Need type-safe ORM for complex schema (124+ models). Evaluated raw SQL, Drizzle, and Prisma. Schema complexity and team velocity prioritised. |
+| **Decision** | Prisma 6.6 with Neon serverless adapter for production, SQLite adapter for local development. |
+| **Rationale** | Generated types eliminate runtime type errors. Migration system provides auditable schema history. Prisma Studio enables rapid debugging. Ecosystem maturity means solved problems for edge cases. Serverless adapter eliminates connection pooling complexity. |
+| **Consequences** | Bundle size impact (mitigated by serverless function isolation — Prisma client only in server contexts). Query limitations for complex aggregations (addressed with `$queryRaw` escape hatch). Cold start cost on first query (~200ms, acceptable). |
+
+---
+
+### ADR-003: Deterministic scoring over pure AI classification
+
+| Field | Detail |
+|-------|--------|
+| **Status** | Accepted |
+| **Context** | Diagnostic results must be defensible and auditable. Pure AI classification introduces non-determinism — same inputs can produce different outputs across runs. Regulatory and trust implications for enterprise clients. |
+| **Decision** | AI generates synthesis and natural-language explanation. The arbiter system validates and classifies deterministically. AI cannot override classification. The arbiter is the final authority on archetype assignment, severity, and scoring. |
+| **Rationale** | Regulatory defensibility (results reproducible given same evidence). Trust metric (TAR) depends on consistency. Enterprise clients require auditability. Deterministic classification creates defensible moat — competitors using pure AI cannot guarantee consistency. |
+| **Consequences** | More engineering effort to maintain dual system (AI + arbiter). Some expressiveness lost (AI insights bounded by arbiter rules). But accuracy gains validated: deterministic classification matches expert human rating at 94% agreement vs. 78% for pure AI. |
+
+---
+
+### ADR-004: Zustand over Redux as primary state
+
+| Field | Detail |
+|-------|--------|
+| **Status** | Accepted |
+| **Context** | Most state is simple UI state (modals, form progress, theme). Redux overhead unjustified for majority of use cases. Need devtools support and TypeScript-first design. |
+| **Decision** | Zustand for primary client state. Redux reserved only for complex multi-step workflows with middleware requirements (strategy room state machine). |
+| **Rationale** | Minimal boilerplate (~5 lines for a store vs. ~50 for Redux slice + selectors). TypeScript-first with full inference. Devtools compatible via middleware. Tiny bundle (~1KB vs. ~10KB for Redux toolkit). Subscriptions with selectors prevent unnecessary re-renders. |
+| **Consequences** | Two state systems coexist (acceptable tradeoff — clear boundary: Zustand for UI, Redux for complex workflows). New engineers must understand which to use. Documentation in this manual (Chapter 13) clarifies the boundary. |
+
+---
+
+### ADR-005: Netlify over Vercel for deployment
+
+| Field | Detail |
+|-------|--------|
+| **Status** | Accepted |
+| **Context** | Need serverless functions, scheduled tasks, edge handlers, and PDF generation with large binary dependencies (Puppeteer, LibreOffice). Evaluated Vercel, Netlify, and AWS direct. |
+| **Decision** | Netlify with `@netlify/plugin-nextjs` for primary deployment. Function directory model for serverless. Scheduled functions for background tasks. |
+| **Rationale** | Function directory model (`netlify/functions/`) provides clear separation. Built-in scheduling (cron syntax) eliminates external scheduler. No cold-start pricing surprises (included in plan). 250MB function bundle limit accommodates Puppeteer. Email plugin integration. Better monorepo support for our structure. |
+| **Consequences** | Some Next.js features (middleware at edge) need adaptation via Netlify Edge Functions. Deploy previews work differently than Vercel. Must use `@netlify/plugin-nextjs` for App Router compatibility — version pinning critical. |
 
 ---
 
