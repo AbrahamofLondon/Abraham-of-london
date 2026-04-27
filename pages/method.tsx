@@ -132,15 +132,39 @@ const MethodPage: NextPage = () => (
 
         <Rule />
 
+        {/* ── EVIDENCE ── */}
+        <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>Does it work?</p>
+          <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
+            Observed outcomes, accuracy metrics, and anonymised case evidence are published. Every diagnostic output includes a determinism proof and full decision trace — the user can verify exactly how the system reached its conclusion.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <Link href="/evidence" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>See applied evidence</Link>
+            <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Run the diagnostic to see the proof</Link>
+          </div>
+        </div>
+
+        <Rule />
+
         {/* ── CTA ── */}
-        <div className="flex flex-wrap items-center gap-4">
-          <Link href="/diagnostics/constitutional-diagnostic" className="inline-flex items-center gap-2 transition-all duration-200"
-            style={{ padding: "10px 20px", border: `1px solid ${AMBER}42`, color: AMBER, ...mono, fontSize: "8.5px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
-            Enter the system <ArrowRight style={{ width: 11, height: 11 }} />
-          </Link>
-          <Link href="/diagnostics/executive-reporting" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
-            Executive Reporting &middot; {getProductDisplayPrice("executive_reporting")}
-          </Link>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/diagnostics/fast" className="group inline-flex items-center gap-2 transition-all duration-200"
+              style={{ padding: "10px 20px", border: `1px solid ${AMBER}42`, color: AMBER, ...mono, fontSize: "8.5px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+              Run the diagnostic <ArrowRight style={{ width: 11, height: 11 }} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link href="/diagnostics/executive-reporting" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+              Executive Reporting &middot; {getProductDisplayPrice("executive_reporting")}
+            </Link>
+          </div>
+
+          {/* Trust routing */}
+          <div className="flex flex-wrap gap-3">
+            <Link href="/verification" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Verify the founder</Link>
+            <Link href="/trust" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Trust boundaries</Link>
+            <Link href="/foundations" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Foundations</Link>
+            <Link href="/about/founder" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Founder</Link>
+          </div>
         </div>
       </div>
     </main>
