@@ -53,7 +53,9 @@
       "Bash(wc -l content/toolkits/*.mdx)",
       "Bash(wc -l content/resources/strategic-frameworks/*.mdx)",
       "Bash(find content/toolkits content/resources/strategic-frameworks -name \"*.mdx\" -exec sed -i 's/\\\\r$//' {} \\\\;)",
-      "Bash(find content/toolkits -name \"*.mdx\" -exec sed -i 's/\\\\r$//' {} \\\\;)"
+      "Bash(find content/toolkits -name \"*.mdx\" -exec sed -i 's/\\\\r$//' {} \\\\;)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://www.abrahamoflondon.org/founders\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://www.abrahamoflondon.org/about/founder\")"
     ]
   }
 }
