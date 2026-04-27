@@ -67,6 +67,12 @@ import { getInheritedContext } from "@/lib/decision/spine-guard";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { generateAdaptiveQuestions, type AdaptiveQuestion } from "@/lib/decision/adaptive-question-engine";
 import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
+import CaseActiveBanner from "@/components/diagnostics/unified/CaseActiveBanner";
+import ConsequenceTimelineBlock from "@/components/diagnostics/unified/ConsequenceTimeline";
+import LimitationsBlock from "@/components/diagnostics/unified/LimitationsBlock";
+import DirectiveCTA from "@/components/diagnostics/unified/DirectiveCTA";
+import FeedbackLoopBlock from "@/components/diagnostics/unified/FeedbackLoop";
+import { generateConsequenceTimeline } from "@/lib/diagnostics/consequence-timeline";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -525,30 +531,12 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             strengthenWith="Compare leadership, execution, and governance respondents independently using the multi-stakeholder campaign."
           />
 
-          {/* Escalation */}
-          <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
-            <Eyebrow>Earned next move</Eyebrow>
-            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.decisionObject.consequence}</p>
-            <p style={{ marginBottom: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-              Next: Executive Reporting translates condition into consequence, exposure, and ordered decisions.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href={routeConfig.href} className="inline-flex items-center gap-2.5 transition-all duration-300"
-                style={{ padding: "11px 22px", border: `1px solid ${routeConfig.border}`, backgroundColor: routeConfig.bg, color: routeConfig.text, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.80"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
-              >
-                {routeConfig.label} <ArrowRight style={{ width: "11px", height: "11px" }} />
-              </Link>
-              <button type="button" onClick={onRevise}
-                style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "transparent", color: "rgba(255,255,255,0.28)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", cursor: "pointer" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.50)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.28)"; }}
-              >
-                Revise answers
-              </button>
-            </div>
-          </div>
+          {/* ── Unified Conversion Surface ── */}
+          <CaseActiveBanner caseReference={`ENT-${Date.now().toString(36).toUpperCase()}`} committed assessmentType="enterprise" />
+          <ConsequenceTimelineBlock {...generateConsequenceTimeline({ assessmentType: "enterprise", score: totalPct, weakestDomain: reading.dominantFailure ?? sections.sort((a, b) => a.pct - b.pct)[0]?.title })} />
+          <LimitationsBlock assessmentType="enterprise" />
+          <DirectiveCTA assessmentType="enterprise" route={reading.route} score={totalPct} />
+          <FeedbackLoopBlock assessmentType="enterprise" />
 
           {/* Save */}
           <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.008)", padding: "1.25rem" }}>

@@ -51,6 +51,9 @@ import {
   setCommercialAccessCookie,
   verifyCheckoutSessionForProduct,
 } from "@/lib/server/billing/commercial-access";
+import CaseActiveBanner from "@/components/diagnostics/unified/CaseActiveBanner";
+import FeedbackLoopBlock from "@/components/diagnostics/unified/FeedbackLoop";
+import LimitationsBlock from "@/components/diagnostics/unified/LimitationsBlock";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION AUTHORITY GATE
@@ -1596,6 +1599,13 @@ export default function StrategyRoomPage({
               <div className="mt-3" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
                 Structured intake. Governed sequencing. No open-ended engagement.
               </div>
+
+              <div className="mt-8" style={{ maxWidth: "36rem" }}>
+                <LimitationsBlock assessmentType="enterprise" customLimitations={["This environment forces the decision. It cannot make the decision for you.", "It tracks whether action is taken. It does not guarantee the action is correct.", "Execution verification requires honest reporting. The system detects avoidance but cannot prevent it."]} />
+                <div className="mt-4">
+                  <FeedbackLoopBlock assessmentType="strategy" />
+                </div>
+              </div>
             </div>
           </div>
         </main>
@@ -1940,6 +1950,10 @@ export default function StrategyRoomPage({
         {/* ── STATE 3: EXECUTION CHAMBER ─────────────────────────────────── */}
         {!isSubmitting && canonical && (
           <>
+            <div className="mx-auto max-w-7xl px-6 lg:px-12 pt-4">
+              <CaseActiveBanner caseReference={executionSessionId ?? `SR-${Date.now().toString(36).toUpperCase()}`} committed assessmentType="strategy" />
+            </div>
+
             <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
 
             <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>

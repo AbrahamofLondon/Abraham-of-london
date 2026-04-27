@@ -60,6 +60,12 @@ import { getInheritedContext } from "@/lib/decision/spine-guard";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { generateAdaptiveQuestions, type AdaptiveQuestion } from "@/lib/decision/adaptive-question-engine";
 import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
+import CaseActiveBanner from "@/components/diagnostics/unified/CaseActiveBanner";
+import ConsequenceTimelineBlock from "@/components/diagnostics/unified/ConsequenceTimeline";
+import LimitationsBlock from "@/components/diagnostics/unified/LimitationsBlock";
+import DirectiveCTA from "@/components/diagnostics/unified/DirectiveCTA";
+import FeedbackLoopBlock from "@/components/diagnostics/unified/FeedbackLoop";
+import { generateConsequenceTimeline } from "@/lib/diagnostics/consequence-timeline";
 import ThresholdProximityLine, {
   thresholdProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
@@ -498,24 +504,12 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             strengthenWith="Collect 3-5 direct team responses. The gap between what you estimated and what the team reports is itself diagnostic."
           />
 
-          {/* Escalation */}
-          <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
-            <Eyebrow>Earned next move</Eyebrow>
-            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>{reading.decisionObject.consequence}</p>
-            <p style={{ marginBottom: "1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-              Next: Enterprise Assessment stress-tests governance, execution, and recent decision quality.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/diagnostics/enterprise-assessment"
-                className="inline-flex items-center gap-2.5 transition-all duration-300"
-                style={{ padding: "11px 22px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase" }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
-              >
-                Enterprise Assessment <ArrowRight style={{ width: "11px", height: "11px" }} />
-              </Link>
-            </div>
-          </div>
+          {/* ── Unified Conversion Surface ── */}
+          <CaseActiveBanner caseReference={`TEAM-${Date.now().toString(36).toUpperCase()}`} committed assessmentType="team" />
+          <ConsequenceTimelineBlock {...generateConsequenceTimeline({ assessmentType: "team", score: overallReality, weakestDomain: [...gaps].sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap))[0]?.label })} />
+          <LimitationsBlock assessmentType="team" />
+          <DirectiveCTA assessmentType="team" score={overallReality} />
+          <FeedbackLoopBlock assessmentType="team" />
 
           {/* Submit */}
           <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.008)", padding: "1.25rem" }}>

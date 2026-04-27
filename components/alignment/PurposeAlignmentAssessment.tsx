@@ -68,6 +68,12 @@ import type {
 import { track } from "@/lib/analytics/track";
 import { derivePatternReading, type PatternReading, type ScoredStatement } from "@/lib/alignment/pattern-reading-engine";
 import { GOLD, BASE, LIFT, STAGE_DOMAINS, STAGE_LABELS, STAGE_INTROS, BAND_CONFIG } from "@/lib/alignment/assessment-theme";
+import CaseActiveBanner from "@/components/diagnostics/unified/CaseActiveBanner";
+import ConsequenceTimelineBlock from "@/components/diagnostics/unified/ConsequenceTimeline";
+import LimitationsBlock from "@/components/diagnostics/unified/LimitationsBlock";
+import DirectiveCTA from "@/components/diagnostics/unified/DirectiveCTA";
+import FeedbackLoopBlock from "@/components/diagnostics/unified/FeedbackLoop";
+import { generateConsequenceTimeline } from "@/lib/diagnostics/consequence-timeline";
 import ResultInterruption from "@/components/diagnostics/results/ResultInterruption";
 import ResultCondition from "@/components/diagnostics/results/ResultCondition";
 import ResultContradiction from "@/components/diagnostics/results/ResultContradiction";
@@ -1422,6 +1428,20 @@ function AuthorityResultSurface({
         percent={result.percent}
         band={result.coherenceBand}
       />
+
+      {/* ═══ UNIFIED CONVERSION SURFACE ═══ */}
+      <CaseActiveBanner caseReference={`pa_${result.percent}_${result.weakestDomains[0] ?? "unknown"}`} assessmentType="purpose alignment" />
+
+      {(() => {
+        const tl = generateConsequenceTimeline({ assessmentType: "purpose", score: result.percent, weakestDomain: result.weakestDomains[0] });
+        return <ConsequenceTimelineBlock sevenDays={tl.sevenDays} thirtyDays={tl.thirtyDays} ninetyDays={tl.ninetyDays} />;
+      })()}
+
+      <LimitationsBlock assessmentType="purpose" />
+
+      <DirectiveCTA assessmentType="purpose" score={result.percent} />
+
+      <FeedbackLoopBlock assessmentType="purpose" />
 
       <button
         type="button"

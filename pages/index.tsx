@@ -1779,7 +1779,7 @@ function EscalationClose() {
                   textTransform: "uppercase",
                 }}
               >
-                Begin Assessment
+                Run the diagnostic
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
 
@@ -1880,13 +1880,15 @@ function HomeHero({ intelligenceHref: _intelligenceHref }: { intelligenceHref: s
             letterSpacing: "-0.02em",
           }}
         >
-          Most decisions don&rsquo;t stall.
+          You&rsquo;re not dealing with a strategy problem.
           <br />
-          <span className="ds-text-muted">They are misdiagnosed.</span>
+          <span className="ds-text-muted">You&rsquo;re dealing with a decision that hasn&rsquo;t actually been taken.</span>
         </h1>
 
           <p className="mt-4 max-w-[48ch] mx-auto text-[15px] leading-[1.85] ds-text-muted">
-            Describe the decision. The system will expose the real blocker, show what you are avoiding, and force the next move — using your own words.
+            6 questions. No prep. If it's wrong, ignore it.
+            <br />
+            If it's right, you'll know immediately.
           </p>
 
           {/* Proof strip */}
@@ -1897,6 +1899,11 @@ function HomeHero({ intelligenceHref: _intelligenceHref }: { intelligenceHref: s
             <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
             <span>Uses your inputs against your framing</span>
           </div>
+
+          {/* System description */}
+          <p className="mt-5 mx-auto max-w-[52ch] text-[12.5px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.38)" }}>
+            The system identifies the contradiction, prices the consequence, and directs the next valid move.
+          </p>
 
           {/* Primary CTA */}
           <div className="mt-6 flex flex-col items-center gap-3">
@@ -1912,13 +1919,18 @@ function HomeHero({ intelligenceHref: _intelligenceHref }: { intelligenceHref: s
               }}
               onClick={() => trackHeroClick("primary")}
             >
-              Describe the decision
+              Run the diagnostic
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
-            <a href="#how-it-works" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
-              See how it works
+            <a href="#proof-layer" onClick={() => trackHeroClick("secondary")} style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+              See what the system returns
             </a>
           </div>
+
+          {/* Trust line */}
+          <p className="mt-4 mx-auto max-w-[52ch] text-center text-[11px] leading-[1.7]" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.06em", color: "rgba(255,255,255,0.18)" }}>
+            Deterministic checks. No generic AI advice. No sale if the case is not ready.
+          </p>
         </div>
         {/* end text-center hero block, begin full-width content */}
 
@@ -1987,47 +1999,17 @@ function HomeHero({ intelligenceHref: _intelligenceHref }: { intelligenceHref: s
           ))}
         </div>
 
-        {/* Hard positioning */}
-        <div className="mx-auto mt-14 max-w-[440px] text-center">
-          <p className="font-['Cormorant_Garamond',Georgia,serif] font-light text-[22px] leading-[1.4]" style={{ color: "rgba(255,255,255,0.55)" }}>
-            We do not generate insights.<br />We close the execution gap.
-          </p>
-        </div>
-
-        {/* Dual-entry cards — Product lines */}
-        <div className="mx-auto mt-10 grid max-w-[600px] gap-3 sm:grid-cols-2">
-          <Link
-            href="/diagnostics/purpose-alignment"
-            className="group border border-white/[0.08] bg-white/[0.02] p-5 transition-all hover:border-white/[0.15]"
-          >
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)", fontWeight: 600 }}>
-              Personal product
-            </div>
-            <p className="mt-2 text-[13px] leading-[1.7] ds-text-muted">
-              Your decisions feel misaligned? Purpose Alignment scores the gap and binds one corrective action.
+        {/* Escalation preview — subtle */}
+        <div className="mx-auto mt-8 max-w-[500px]">
+          <div className="border border-white/[0.06] p-4">
+            <p className="text-[12px] leading-[1.7] ds-text-muted" style={{ fontStyle: "italic" }}>
+              If you commit and do nothing, the system will follow up.
             </p>
-            <div className="mt-3 inline-flex items-center gap-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
-              Take the assessment <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-            </div>
-          </Link>
-          <Link
-            href="/diagnostics/fast"
-            className="group border border-[#C9A96E]/20 bg-[#C9A96E]/[0.04] p-5 transition-all hover:border-[#C9A96E]/35"
-          >
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#C9A96ECC", fontWeight: 600 }}>
-              Organisational product
-            </div>
-            <p className="mt-2 text-[13px] leading-[1.7] ds-text-muted">
-              A decision is stuck in the business? The system exposes the contradiction and forces the move.
-            </p>
-            <div className="mt-3 inline-flex items-center gap-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#C9A96EAA" }}>
-              Start with the stuck decision <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-            </div>
-          </Link>
+          </div>
         </div>
 
         {/* Reassurance line */}
-        <p className="mt-3 text-center text-[12px] leading-[1.8] ds-text-muted">
+        <p className="mt-6 text-center text-[12px] leading-[1.8] ds-text-muted">
           You will know within minutes whether this is accurate. If it isn&rsquo;t, stop there.
         </p>
     </Section>
@@ -2107,7 +2089,7 @@ function HowItWorksLadder() {
     {
       label: "Evidence: Team + Enterprise",
       href: "/diagnostics",
-      cta: "Begin assessments",
+      cta: "Run the diagnostic",
       effort: "10-25 minutes · Free",
       explanation: [
         "Team perception gap analysis.",
@@ -2216,6 +2198,13 @@ function HowItWorksLadder() {
           </Panel>
         ))}
       </div>
+
+      {/* Do-not-sell — restrained */}
+      <div className="mt-6 mx-auto max-w-2xl text-center">
+        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+          If the diagnostic does not justify escalation, the system will not force a paid next step.
+        </p>
+      </div>
     </Section>
   );
 }
@@ -2299,6 +2288,82 @@ function WhoThisIsFor() {
               </p>
             </div>
           </Panel>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function ConsequenceEscalation() {
+  return (
+    <Section id="consequence" variant="void" compact>
+      <div className="mx-auto max-w-[680px]">
+        <div style={{ border: "1px solid rgba(252,165,165,0.15)", backgroundColor: "rgba(252,165,165,0.03)", padding: "2rem" }}>
+          <h2
+            className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[1.1]"
+            style={{ fontSize: "clamp(1.4rem, 3vw, 1.9rem)", color: "rgba(255,255,255,0.85)" }}
+          >
+            If this describes your situation, the cost is already moving.
+          </h2>
+          <div className="mt-5 space-y-3">
+            {[
+              "Delay does not wait for clarity.",
+              "Authority gaps do not stay neutral.",
+              "Execution drift compounds quietly until it becomes culture.",
+            ].map((line) => (
+              <p key={line} className="text-[14px] leading-[1.85]" style={{ color: "rgba(255,255,255,0.50)" }}>
+                {line}
+              </p>
+            ))}
+          </div>
+          <div className="mt-6">
+            <Link
+              href="/diagnostics/fast"
+              className="group inline-flex items-center gap-2 border px-5 py-3 transition-all duration-200"
+              style={{
+                borderColor: "rgba(252,165,165,0.25)",
+                backgroundColor: "rgba(252,165,165,0.06)",
+                color: "rgba(252,165,165,0.70)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+              }}
+            >
+              Run the diagnostic before the condition hardens
+              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function ProductClarity() {
+  return (
+    <Section id="product-clarity" variant="void" compact>
+      <div className="mx-auto max-w-[680px]">
+        <SectionHeader
+          eyebrow="What happens after the diagnostic"
+          title="Four steps. No ambiguity."
+          align="center"
+        />
+        <div className="mt-8 grid gap-px" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
+          {[
+            { step: "01", name: "Run 6 questions", desc: "Free. Under 2 minutes. No preparation required." },
+            { step: "02", name: "Receive condition, contradiction, consequence, and next move", desc: "Specific to your inputs. Not a template." },
+            { step: "03", name: "If justified, escalate to Executive Reporting or Strategy Room", desc: "The system routes you. You do not choose from a menu." },
+            { step: "04", name: "If not justified, stop", desc: "The system will not force a paid next step." },
+          ].map((item) => (
+            <div key={item.step} className="flex gap-4 p-5" style={{ backgroundColor: "var(--ds-background)" }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.06em", color: "var(--ds-accent)", opacity: 0.5, minWidth: "20px" }}>{item.step}</span>
+              <div>
+                <p className="text-[14px] leading-[1.6] ds-text" style={{ fontWeight: 500 }}>{item.name}</p>
+                <p className="mt-1 text-[12.5px] leading-[1.7] ds-text-muted">{item.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </Section>
@@ -2568,7 +2633,7 @@ function ProofLayer() {
               marginBottom: "1rem",
             }}
           >
-            Illustrative output based on anonymised diagnostic patterns
+            Example diagnostic output
           </div>
           <div
             style={{
@@ -2606,6 +2671,9 @@ function ProofLayer() {
               </p>
             </div>
           </div>
+          <p className="mt-2 text-[11px] leading-[1.7]" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.06em", color: "rgba(255,255,255,0.18)" }}>
+            Illustrative format. Your result is generated from your own inputs.
+          </p>
         </div>
 
         {/* B: Observed outcomes — what happened when used */}
@@ -2979,7 +3047,7 @@ function HomeDecisionSection() {
   );
 }
 
-function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
+function HomeFinalCta({ intelligenceHref: _intelligenceHref }: { intelligenceHref: string }) {
   return (
     <Section id="final-cta" variant="surface">
       <Panel surface="lift" gold>
@@ -2992,10 +3060,10 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
               If not, come back when one is.
             </p>
 
-            <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <div className="mt-10 flex flex-col items-center gap-4">
               <Link
                 href="/diagnostics/fast"
-                className="inline-flex items-center gap-3 border px-7 py-4 transition"
+                className="group inline-flex items-center gap-3 border px-7 py-4 transition-all duration-200 hover:-translate-y-0.5"
                 style={{
                   borderColor: "var(--ds-accent-soft)",
                   backgroundColor: "var(--ds-accent-soft)",
@@ -3006,54 +3074,21 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
                   textTransform: "uppercase",
                 }}
               >
-                Describe the decision
+                Run the diagnostic
                 <span className="text-[8px] opacity-70">Free · 2 min</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link
-                href="/diagnostics/executive-reporting"
-                className="inline-flex items-center gap-3 border px-7 py-4 transition"
-                style={{
-                  borderColor: "var(--ds-accent-soft)",
-                  backgroundColor: "var(--ds-accent-soft)",
-                  color: "var(--ds-accent)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Executive Reporting
-                <span className="text-[8px] opacity-70">{PRICE_EXECUTIVE_REPORTING}</span>
-              </Link>
-              <Link
-                href={intelligenceHref}
-                className="inline-flex items-center gap-3 border px-7 py-4 transition"
-                style={{
-                  borderColor: "var(--ds-border)",
-                  backgroundColor: "var(--ds-panel)",
-                  color: "var(--ds-text-muted)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Run the system
-              </Link>
-              <Link
-                href="/strategy-room"
-                className="inline-flex items-center gap-3 border px-7 py-4 transition"
-                style={{
-                  borderColor: "var(--ds-border)",
-                  color: "var(--ds-text-muted)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                }}
-              >
-                View Strategy Room criteria
-              </Link>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Link href="/evidence" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  See evidence
+                </Link>
+                <Link href="/verification" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  Verify the founder
+                </Link>
+                <Link href="/diagnostics/executive-reporting" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  View Executive Reporting
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -3096,46 +3131,31 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta property="og:image" content="/assets/images/social/og-image.jpg" />
       </Head>
 
-      {/* 1. Recognition */}
+      {/* 1. Recognition — unified hero */}
       <HomeHero intelligenceHref={intelligenceHref} />
 
-      {/* 2. Evidence — proof layer */}
+      {/* 2. Proof — what the system returns + example output */}
       <ProofLayer />
+
+      {/* 3. Consequence escalation — emotional pressure after proof */}
+      <ConsequenceEscalation />
+
+      {/* 4. Evidence — observed in practice */}
       <HomeEvidenceSection />
 
-      {/* 3. Decision — instruments */}
-      <HomeDecisionLayer />
-
-      {/* 4. Diagnostics — the ladder */}
-      <WhatThisPlatformIs />
+      {/* 5. Product ladder — Diagnostic → ER → Strategy Room */}
       <HowItWorksLadder />
 
-      {/* Flow reinforcement */}
-      <div className="mx-auto max-w-[1100px] px-6 py-3 lg:px-12">
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
-        <p className="mt-3 text-center" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.78rem", color: "rgba(255,255,255,0.18)" }}>
-          The system advances when the condition requires it.
-        </p>
-      </div>
+      {/* 5b. Product clarity — what happens after the diagnostic */}
+      <ProductClarity />
 
-      {/* 5. Reporting — Executive Reporting */}
+      {/* 6. Flagship — ER + Strategy Room */}
       <HomeDecisionSection />
 
-      {/* 6. Audience gate */}
+      {/* 7. Who this is for / not for */}
       <WhoThisIsFor />
 
-      {/* — mode change: conversion system → content library — */}
-      <Bridge text="supporting body of work" />
-
-      {/* 7. The governed library */}
-      <ContentLibrarySection
-        featuredBlogPosts={featuredBlogPosts}
-        featuredShorts={featuredShorts}
-        featuredPlaybooks={featuredPlaybooks}
-        latestReport={latestReport}
-      />
-
-      {/* 7.5. Trust strip */}
+      {/* 8. Trust strip — visible before final CTA */}
       <div className="mx-auto max-w-[1100px] px-6 py-10 lg:px-12">
         <div style={{ border: "1px solid rgba(255,255,255,0.04)", padding: "1.25rem" }}>
           <p className="text-center" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.75rem" }}>
@@ -3150,7 +3170,7 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </div>
 
-      {/* 8. Final action */}
+      {/* 9. Final action */}
       <HomeFinalCta intelligenceHref={intelligenceHref} />
     </Layout>
   );

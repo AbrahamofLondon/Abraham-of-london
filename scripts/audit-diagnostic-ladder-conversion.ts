@@ -48,13 +48,44 @@ check("Fast: no fake statistics", !/\b\d{2}%\b.*similar cases/i.test(fast));
 // Constitutional Diagnostic
 console.log("\n─── Constitutional Diagnostic ───\n");
 const constitutional = read("components/assessments/ConstitutionalDiagnosticSuite.tsx");
-const constitutionalPage = read("pages/diagnostics/constitutional-diagnostic.tsx");
-check("Constitutional: has post-result conversion surface", constitutional.includes("CaseActiveBanner") || constitutional.includes("DirectiveCTA") || constitutional.includes("LimitationsBlock") || constitutional.includes("UnifiedResultSurface") || constitutionalPage.includes("UnifiedResultSurface"));
+check("Constitutional: CaseActiveBanner", constitutional.includes("CaseActiveBanner"));
+check("Constitutional: ConsequenceTimeline", constitutional.includes("ConsequenceTimeline"));
+check("Constitutional: LimitationsBlock", constitutional.includes("LimitationsBlock"));
+check("Constitutional: FeedbackLoop", constitutional.includes("FeedbackLoop"));
 
 // Purpose Alignment
 console.log("\n─── Purpose Alignment ───\n");
 const purpose = read("components/alignment/PurposeAlignmentAssessment.tsx");
-check("Purpose: has feedback/contract mechanism", purpose.includes("PatternBreakerContract") || purpose.includes("FeedbackLoop"));
+check("Purpose: CaseActiveBanner", purpose.includes("CaseActiveBanner"));
+check("Purpose: ConsequenceTimeline", purpose.includes("ConsequenceTimeline"));
+check("Purpose: LimitationsBlock", purpose.includes("LimitationsBlock"));
+check("Purpose: DirectiveCTA", purpose.includes("DirectiveCTA"));
+check("Purpose: FeedbackLoop", purpose.includes("FeedbackLoop"));
+
+// Team Assessment
+console.log("\n─── Team Assessment ───\n");
+const team = read("pages/diagnostics/team-assessment.tsx");
+check("Team: CaseActiveBanner", team.includes("CaseActiveBanner"));
+check("Team: ConsequenceTimeline", team.includes("ConsequenceTimelineBlock"));
+check("Team: LimitationsBlock", team.includes("LimitationsBlock"));
+check("Team: DirectiveCTA", team.includes("DirectiveCTA"));
+check("Team: FeedbackLoop", team.includes("FeedbackLoopBlock"));
+
+// Enterprise Assessment
+console.log("\n─── Enterprise Assessment ───\n");
+const enterprise = read("pages/diagnostics/enterprise-assessment.tsx");
+check("Enterprise: CaseActiveBanner", enterprise.includes("CaseActiveBanner"));
+check("Enterprise: ConsequenceTimeline", enterprise.includes("ConsequenceTimelineBlock"));
+check("Enterprise: LimitationsBlock", enterprise.includes("LimitationsBlock"));
+check("Enterprise: DirectiveCTA", enterprise.includes("DirectiveCTA"));
+check("Enterprise: FeedbackLoop", enterprise.includes("FeedbackLoopBlock"));
+
+// Strategy Room
+console.log("\n─── Strategy Room ───\n");
+const strategyRoom = read("pages/strategy-room/index.tsx");
+check("Strategy Room: CaseActiveBanner", strategyRoom.includes("CaseActiveBanner"));
+check("Strategy Room: LimitationsBlock", strategyRoom.includes("LimitationsBlock"));
+check("Strategy Room: FeedbackLoop", strategyRoom.includes("FeedbackLoopBlock"));
 
 // Shared conversion components have condition-based routing
 console.log("\n─── Routing Logic ───\n");
