@@ -2,12 +2,31 @@
 
 import * as React from "react";
 import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/imports";
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
+const GOLD = "#C9A96E";
+
+const ENQUIRY_TYPES = [
+  { value: "", label: "Select enquiry type" },
+  { value: "institutional", label: "Institutional mandate" },
+  { value: "private", label: "Private / confidential advisory" },
+  { value: "education", label: "Education or research" },
+  { value: "media", label: "Media enquiry" },
+  { value: "partnership", label: "Partnership or collaboration" },
+  { value: "strategic-advisory", label: "Strategic advisory" },
+  { value: "other", label: "Other" },
+];
+
 const ContactFormContent = () => {
+  const router = useRouter();
+  const typeParam = (router.query.type as string) ?? "";
+  const defaultType = ENQUIRY_TYPES.some(t => t.value === typeParam) ? typeParam : "";
+
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -103,13 +122,12 @@ const ContactFormContent = () => {
           <select
             name="enquiryType"
             required
+            defaultValue={defaultType}
             className="w-full border border-white/12 bg-[rgb(3,3,5)] px-4 py-3 text-sm text-white focus:outline-none focus:border-white/24"
           >
-            <option value="">Select Enquiry Nature</option>
-            <option value="strategic-advisory">Strategic Advisory</option>
-            <option value="intelligence-briefing">Intelligence Briefing</option>
-            <option value="invitation-request">Invitation Request</option>
-            <option value="other">Other</option>
+            {ENQUIRY_TYPES.map(t => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
           </select>
         </div>
 
@@ -153,12 +171,25 @@ const ContactFormContent = () => {
         </p>
       )}
 
-      <p className="mt-8 font-mono text-[7.5px] uppercase tracking-[0.16em] text-white/28">
-        Serious inquiries only. Principals, executives, and family offices.
-      </p>
-      <p className="mt-3 font-mono text-[7.5px] uppercase tracking-[0.16em] text-white/24">
-        Response within 48 hours.
-      </p>
+      {/* What happens next */}
+      <div className="mt-10" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
+        <div className="font-mono text-[7px] uppercase tracking-[0.28em] text-white/25" style={{ marginBottom: "0.85rem" }}>
+          What happens next
+        </div>
+        <ol className="space-y-2 text-[13px] leading-[1.7] text-white/40" style={{ listStyleType: "decimal", paddingLeft: "1.25rem" }}>
+          <li>Your enquiry is reviewed within 48 hours.</li>
+          <li>Unsuitable or speculative requests are declined with a clear reason.</li>
+          <li>Serious mandates receive a direct response with proposed boundaries.</li>
+          <li>Confidential details should not be submitted in this form. The first conversation establishes scope.</li>
+        </ol>
+      </div>
+
+      {/* Verification links */}
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link href="/verification" className="font-mono text-[7px] uppercase tracking-[0.12em] text-white/25" style={{ padding: "5px 10px", border: "1px solid rgba(255,255,255,0.06)" }}>Verify the founder</Link>
+        <Link href="/about/founder" className="font-mono text-[7px] uppercase tracking-[0.12em] text-white/25" style={{ padding: "5px 10px", border: "1px solid rgba(255,255,255,0.06)" }}>About the founder</Link>
+        <Link href="/trust" className="font-mono text-[7px] uppercase tracking-[0.12em] text-white/25" style={{ padding: "5px 10px", border: "1px solid rgba(255,255,255,0.06)" }}>Trust boundaries</Link>
+      </div>
     </div>
   );
 };

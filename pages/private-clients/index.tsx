@@ -1,18 +1,20 @@
+/**
+ * /private-clients — Private mandate surface.
+ * Confidentiality-first. Trust mechanism. Self-serve diagnostic path.
+ * Design: Institutional Monumentalism — aligned with platform design system.
+ */
+
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import {
-  Lock,
-  ArrowRight,
-  ShieldCheck,
-  Briefcase,
-  Users,
-  Eye,
-  KeyRound,
-} from "lucide-react";
-
+import { ArrowRight, Lock, ShieldCheck, Eye, KeyRound } from "lucide-react";
 import Layout from "@/components/Layout";
+
+const GOLD = "#C9A96E";
+const BASE = "rgb(3 3 5)";
+const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif" };
 
 const PrivateClientsPage: NextPage = () => {
   return (
@@ -21,156 +23,142 @@ const PrivateClientsPage: NextPage = () => {
       description="Confidential strategic advisory for principals, founders, and select private mandates where discretion and judgment matter."
       canonicalUrl="/private-clients"
       fullWidth
+      headerTransparent
     >
       <Head>
         <meta property="og:title" content="Private Clients | Abraham of London" />
-        <meta
-          property="og:description"
-          content="Quiet advisory. Serious discretion. Bespoke strategic support for principals and founders."
-        />
+        <meta property="og:description" content="Quiet advisory. Serious discretion. Bespoke strategic support for principals and founders." />
       </Head>
 
-      <section className="relative overflow-hidden border-b border-white/10 bg-black text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_30%,rgba(245,158,11,0.04),transparent_60%)]" />
+      <div style={{ backgroundColor: BASE, color: "white" }}>
 
-        <div className="relative mx-auto max-w-7xl px-6 py-28 lg:px-12">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 backdrop-blur-sm">
-              <Lock className="h-4 w-4 text-amber-400" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/70">
-                Private • Confidential • Select access
+        {/* ── HERO ──────────────────────────────────────────────────────── */}
+        <section className="relative" style={{ background: `radial-gradient(circle at 30% 20%, ${GOLD}08, transparent 45%), ${BASE}` }}>
+          <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${GOLD}30, transparent)` }} />
+          <div className="mx-auto max-w-5xl px-6 pb-16 pt-28 lg:px-12 lg:pt-36">
+            <div className="inline-flex items-center gap-2" style={{ padding: "6px 14px", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06` }}>
+              <Lock style={{ width: 12, height: 12, color: `${GOLD}80` }} />
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
+                Private · Confidential · Select access
               </span>
             </div>
 
-            <h1 className="mt-8 font-serif text-5xl leading-[0.95] tracking-tight text-white md:text-7xl">
+            <h1 className="mt-8" style={{ ...serif, fontWeight: 300, fontSize: "clamp(2.4rem, 6vw, 4.2rem)", lineHeight: 0.96, color: "rgba(255,255,255,0.92)" }}>
               Quiet advisory.
               <br />
-              <span className="text-amber-400/90">Serious discretion.</span>
+              <span style={{ color: `${GOLD}CC` }}>Serious discretion.</span>
             </h1>
 
-            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/70">
-              Bespoke strategic support for principals, founders, and select
-              private mandates where confidentiality and judgment matter more than volume.
+            <p className="mt-6 max-w-2xl" style={{ ...serif, fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.8, color: "rgba(255,255,255,0.48)" }}>
+              Bespoke strategic support for principals, founders, and select private mandates where confidentiality and judgment matter more than volume.
             </p>
 
-            <div className="mt-10 flex flex-wrap items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Eye className="h-3 w-3 text-amber-400/60" />
-                <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/40">
-                  Strict confidence
-                </span>
+            <div className="mt-8 flex flex-wrap items-center gap-6">
+              {[
+                { icon: Eye, label: "Strict confidence" },
+                { icon: KeyRound, label: "Select access" },
+                { icon: ShieldCheck, label: "Deliberate scope" },
+              ].map((item, i) => (
+                <React.Fragment key={item.label}>
+                  {i > 0 && <div className="h-3 w-px" style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />}
+                  <div className="flex items-center gap-2">
+                    <item.icon style={{ width: 12, height: 12, color: `${GOLD}60` }} />
+                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>{item.label}</span>
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CONFIDENTIALITY STATEMENT ─────────────────────────────────── */}
+        <section style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
+            <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}04`, padding: "2rem" }}>
+              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1rem" }}>
+                Confidentiality commitment
               </div>
-
-              <div className="h-3 w-px bg-white/10" />
-
-              <div className="flex items-center gap-2">
-                <KeyRound className="h-3 w-3 text-amber-400/60" />
-                <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/40">
-                  Select access
-                </span>
-              </div>
-
-              <div className="h-3 w-px bg-white/10" />
-
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-3 w-3 text-amber-400/60" />
-                <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/40">
-                  Deliberate scope
-                </span>
+              <div className="space-y-3" style={{ ...serif, fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.45)" }}>
+                <p>No client is named publicly. No engagement is referenced without explicit written permission. No case material is used in marketing, evidence surfaces, or public writing without anonymisation and consent.</p>
+                <p>Confidential details should not be submitted in the initial contact form. The first conversation establishes boundaries before any sensitive information is exchanged.</p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="bg-[#070707] text-white">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12">
-          <div className="mb-12 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-400/70">
-                Areas of engagement
-              </span>
-              <h2 className="mt-3 font-serif text-3xl text-white md:text-4xl">
-                Built for trust, not scale
-              </h2>
-            </div>
-            <p className="max-w-md text-sm leading-relaxed text-white/50">
-              Deliberately limited access. Each engagement is treated as a serious
-              advisory relationship, not a volume service.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: ShieldCheck,
-                title: "Confidential strategy",
-                text: "Private strategic counsel for sensitive decisions and high-consequence environments, handled with discretion and clear boundaries.",
-                tag: "01",
-              },
-              {
-                icon: Briefcase,
-                title: "Principal advisory",
-                text: "Focused support for leadership judgment, positioning, and long-range strategic thinking with direct access and direct accountability.",
-                tag: "02",
-              },
-              {
-                icon: Users,
-                title: "Select engagements",
-                text: "Deliberately limited capacity. Not built for volume. Built for quality, continuity, and trust over time.",
-                tag: "03",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="group relative rounded-[28px] border border-white/10 bg-white/[0.03] p-8 transition-all duration-500 hover:border-amber-500/30 hover:bg-white/[0.05]"
-              >
-                <div className="flex items-start justify-between">
-                  <item.icon className="h-5 w-5 text-amber-400 transition-transform group-hover:scale-110" />
-                  <span className="font-mono text-[8px] text-white/20">{item.tag}</span>
-                </div>
-
-                <h2 className="mt-6 font-serif text-2xl text-white transition-colors group-hover:text-amber-50">
-                  {item.title}
-                </h2>
-
-                <p className="mt-4 text-sm leading-relaxed text-white/60 transition-colors group-hover:text-white/70">
-                  {item.text}
+        {/* ── PROOF / DELIVERY / BOUNDARY ──────────────────────────────── */}
+        <section style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-14 lg:px-12">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Proof</div>
+                <p style={{ ...serif, fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+                  Decision authority methodology observed across anonymised cases. Evidence method: anonymised, modelled, and verified where stated.
                 </p>
-
-                <div className="absolute bottom-8 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <Link href="/evidence" className="mt-3 inline-flex items-center gap-1.5" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                  See evidence <ArrowRight style={{ width: 9, height: 9 }} />
+                </Link>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden border-t border-white/10 bg-black text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(245,158,11,0.03),transparent_60%)]" />
-
-        <div className="relative mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-6 py-16 lg:flex-row lg:items-center lg:px-12">
-          <div className="max-w-xl">
-            <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-amber-400/80">
-              Confidential inquiry
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Delivery</div>
+                <p style={{ ...serif, fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+                  Private strategic counsel, decision architecture, and governance design. Diagnostic evidence + Executive Reporting + Strategy Room as warranted.
+                </p>
+              </div>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Boundary</div>
+                <p style={{ ...serif, fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+                  Deliberately limited capacity. Not built for volume. Engagements are accepted on the basis of seriousness, not revenue. Unsuitable requests are declined.
+                </p>
+              </div>
             </div>
-            <h3 className="mt-3 font-serif text-3xl text-white">
-              Request a private conversation
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-white/50">
-              For principals and their representatives. Initial contact is handled
-              discreetly and with clear boundaries from the outset.
-            </p>
           </div>
+        </section>
 
-          <Link
-            href="/contact"
-            className="group inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/[0.04] px-7 py-3.5 text-[10px] font-mono uppercase tracking-[0.28em] text-white/85 backdrop-blur-sm transition-all hover:border-amber-500/50 hover:bg-amber-500/10 hover:text-white"
-          >
-            <span>Request conversation</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-      </section>
+        {/* ── SELF-SERVE PATH ──────────────────────────────────────────── */}
+        <section style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-14 lg:px-12">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06`, padding: "1.75rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>Before you enquire</div>
+                <p style={{ ...serif, fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.45)" }}>
+                  Run the diagnostic first. It takes under 2 minutes and produces a specific reading. If the condition justifies private engagement, the system will indicate it.
+                </p>
+                <Link href="/diagnostics/fast" className="mt-4 inline-flex items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                  Run the diagnostic <ArrowRight style={{ width: 11, height: 11 }} />
+                </Link>
+              </div>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.75rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Request confidential conversation</div>
+                <p style={{ ...serif, fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.45)" }}>
+                  For principals and their representatives. Initial contact is handled discreetly with clear boundaries from the outset.
+                </p>
+                <Link href="/contact?type=private" className="mt-4 inline-flex items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
+                  Contact <ArrowRight style={{ width: 11, height: 11 }} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── TRUST ROUTING ────────────────────────────────────────────── */}
+        <section style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-10 lg:px-12">
+            <div className="flex flex-wrap justify-center gap-3">
+              {[
+                { label: "Verify the founder", href: "/verification" },
+                { label: "Trust boundaries", href: "/trust" },
+                { label: "Evidence", href: "/evidence" },
+                { label: "Foundations", href: "/foundations" },
+              ].map(link => (
+                <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
     </Layout>
   );
 };

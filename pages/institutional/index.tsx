@@ -545,8 +545,37 @@ const InstitutionalPage: NextPage = () => {
           </div>
         </section>
 
-        {/* ── MANDATE CLOSE ─────────────────────────────────────────────── */}
+        {/* ── PROOF / DELIVERY / BOUNDARY ────────────────────────────── */}
         <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Proof</div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+                  Observed in anonymised decision cases across governance pressure, decision exposure, and board accountability environments.
+                </p>
+                <Link href="/evidence" className="mt-3 inline-flex items-center gap-1.5" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                  See evidence <ArrowRight style={{ width: 9, height: 9 }} />
+                </Link>
+              </div>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Delivery</div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+                  Diagnostic evidence, Executive Reporting, and Strategy Room. Board-grade output derived from structured inputs — not open-ended engagement.
+                </p>
+              </div>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Boundary</div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+                  Evidence method: anonymised and modelled. No client naming. No speculative claims. Verified outcomes where stated.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── MANDATE CLOSE ─────────────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
             <motion.div
               variants={fadeUp}
@@ -583,7 +612,7 @@ const InstitutionalPage: NextPage = () => {
                   conversations are handled discreetly and with clear boundaries.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/contact"
+                  <Link href="/contact?type=institutional"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
                     style={{
                       padding: "11px 22px",
@@ -598,9 +627,9 @@ const InstitutionalPage: NextPage = () => {
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
                   >
-                    Discuss a mandate <ArrowRight style={{ width: "11px", height: "11px" }} />
+                    Discuss an institutional mandate <ArrowRight style={{ width: "11px", height: "11px" }} />
                   </Link>
-                  <Link href="/diagnostics"
+                  <Link href="/diagnostics/fast"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
                     style={{
                       padding: "11px 22px",
@@ -614,7 +643,7 @@ const InstitutionalPage: NextPage = () => {
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.55)"; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.30)"; }}
                   >
-                    Enter diagnostics
+                    Run the diagnostic first
                   </Link>
                 </div>
               </div>

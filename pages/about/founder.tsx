@@ -7,7 +7,8 @@ import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import Layout from "@/components/Layout";
 
 const GOLD = "#C9A96E";
@@ -87,8 +88,15 @@ const FounderPage: NextPage = () => {
             </p>
           </section>
 
+          {/* Founder portrait */}
+          <section className="mx-auto mt-12 flex justify-center">
+            <div style={{ width: 120, height: 120, border: `1px solid ${GOLD}30`, overflow: "hidden" }}>
+              <Image src="/assets/images/profile-portrait.webp" alt="Abraham Adaramola" width={120} height={120} className="object-cover" style={{ filter: "grayscale(0.3)" }} />
+            </div>
+          </section>
+
           {/* Cinematic positioning */}
-          <section className="mx-auto mt-16 max-w-2xl">
+          <section className="mx-auto mt-12 max-w-2xl">
             <p
               style={{
                 ...serif,
@@ -279,6 +287,19 @@ const FounderPage: NextPage = () => {
                 information is rarely the missing piece. Enforced decision authority is.
               </p>
             </div>
+          </section>
+
+          {/* Why this matters personally */}
+          <section className="mx-auto mt-14 max-w-2xl" style={{ borderLeft: `1px solid ${GOLD}25`, paddingLeft: "1.25rem" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}55` }}>
+              Why this exists
+            </p>
+            <p className="mt-4" style={{ ...serif, fontWeight: 300, fontSize: "1.15rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+              I watched capable people defer decisions they already understood, in environments where delay carried measurable cost. The problem was never intelligence. It was always enforcement — the absence of a system that identifies the contradiction, names the avoided decision, and tracks whether action was taken.
+            </p>
+            <p className="mt-3" style={{ fontSize: "0.92rem", lineHeight: 1.85, color: "rgba(255,255,255,0.38)" }}>
+              Abraham of London exists because I could not find that system anywhere. So I built it.
+            </p>
           </section>
 
           {/* Published proof */}
@@ -479,21 +500,32 @@ const FounderPage: NextPage = () => {
 
           {/* Final CTA */}
           <section className="mx-auto mt-16 max-w-xl text-center">
-            <Link
-              href="/diagnostics"
-              style={{
-                ...mono,
-                display: "inline-flex",
-                fontSize: "8px",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "rgb(3,3,5)",
-                backgroundColor: GOLD,
-                padding: "0.85rem 1.15rem",
-              }}
-            >
-              Enter the system
-            </Link>
+            <div className="flex flex-col items-center gap-3">
+              <Link
+                href="/diagnostics/fast"
+                className="group inline-flex items-center gap-2"
+                style={{
+                  ...mono,
+                  fontSize: "8px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "rgb(3,3,5)",
+                  backgroundColor: GOLD,
+                  padding: "0.85rem 1.15rem",
+                }}
+              >
+                Run the diagnostic
+                <ArrowRight style={{ width: 11, height: 11 }} className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Link href="/verification" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                  Verify credentials
+                </Link>
+                <Link href="/contact" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                  Contact
+                </Link>
+              </div>
+            </div>
           </section>
 
           <footer className="mx-auto mt-16 max-w-3xl border-t border-white/5 pt-6 text-center">

@@ -373,6 +373,44 @@ const MediaPage: NextPage = () => {
           </div>
         </section>
 
+        {/* ── TOPICS + EDITORIAL STANDARD ─────────────────────────────── */}
+        <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
+            <div className="grid gap-8 lg:grid-cols-2">
+              <div>
+                <Eyebrow>Topics Abraham can address</Eyebrow>
+                <ul className="mt-5 space-y-2">
+                  {[
+                    "Decision authority and institutional governance",
+                    "Executive leadership under structural pressure",
+                    "Organisational drift, misalignment, and execution failure",
+                    "Public-private infrastructure and governance architecture",
+                    "AI, determinism, and the limits of automated decision-making",
+                    "Faith, purpose, and the architecture of human flourishing",
+                  ].map(t => (
+                    <li key={t} className="flex items-start gap-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
+                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full" style={{ backgroundColor: `${GOLD}60` }} />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <Eyebrow>Editorial standard</Eyebrow>
+                <div className="mt-5 space-y-4" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+                  <p>No sensationalism. No speculative positioning. No commentary outside areas of direct expertise or published evidence.</p>
+                  <p>Every public statement is governed by the same standard as the diagnostic system: specific, evidence-grounded, and retractable if wrong.</p>
+                </div>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link href="/editorials" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>Review public writing</Link>
+                  <Link href="/evidence" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>See evidence</Link>
+                  <Link href="/foundations" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Foundations</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── MANDATE CLOSE ─────────────────────────────────────────────── */}
         <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
@@ -382,68 +420,29 @@ const MediaPage: NextPage = () => {
               whileInView="show"
               viewport={{ once: true, margin: "-60px" }}
             >
-              <div style={{
-                border: `1px solid ${GOLD}18`,
-                backgroundColor: `${GOLD}06`,
-                padding: "2rem 2.5rem",
-              }}>
-                <div style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.40em",
-                  textTransform: "uppercase",
-                  color: `${GOLD}90`,
-                  marginBottom: "1rem",
-                }}>
+              <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06`, padding: "2rem 2.5rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "1rem" }}>
                   Media engagement
                 </div>
-                <p style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "1.02rem",
-                  lineHeight: 1.72,
-                  color: "rgba(255,255,255,0.42)",
-                  fontStyle: "italic",
-                  maxWidth: "48ch",
-                  marginBottom: "1.5rem",
-                }}>
-                  For interview requests, speaking engagements, or editorial
-                  contributions. All media enquiries are reviewed and responded
-                  to with a clear position.
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.72, color: "rgba(255,255,255,0.42)", fontStyle: "italic", maxWidth: "48ch", marginBottom: "1.5rem" }}>
+                  For interview requests, speaking engagements, or editorial contributions. All media enquiries are reviewed and responded to with a clear position.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/contact"
+                  <Link href="/contact?type=media"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
-                    style={{
-                      padding: "11px 22px",
-                      border: `1px solid ${GOLD}35`,
-                      backgroundColor: `${GOLD}0D`,
-                      color: `${GOLD}BB`,
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px",
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                    }}
+                    style={{ padding: "11px 22px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
                   >
-                    Request conversation <ArrowRight style={{ width: "11px", height: "11px" }} />
+                    Submit a media enquiry <ArrowRight style={{ width: "11px", height: "11px" }} />
                   </Link>
                   <Link href="/editorials"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
-                    style={{
-                      padding: "11px 22px",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      color: "rgba(255,255,255,0.30)",
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px",
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                    }}
+                    style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.55)"; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.30)"; }}
                   >
-                    Read editorials
+                    Review public writing
                   </Link>
                 </div>
               </div>

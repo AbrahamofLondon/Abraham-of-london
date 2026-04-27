@@ -374,6 +374,31 @@ const EducationResearchPage: NextPage = () => {
           </div>
         </section>
 
+        {/* ── AVAILABLE RESOURCES ──────────────────────────────────────── */}
+        <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
+            <Eyebrow>Available for education and research use</Eyebrow>
+            <div className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                { label: "Canon", desc: "7 foundational codes governing decision authority, governance, and institutional integrity.", href: "/canon" },
+                { label: "Glossary", desc: "40 precisely defined terms. Research-grade definitions for decision, authority, drift, contradiction.", href: "/canon/glossary" },
+                { label: "Foundations", desc: "Intellectual and methodological basis. Theological, philosophical, and governance roots.", href: "/foundations" },
+                { label: "Toolkits", desc: "7 structured toolkits for decision exposure, mandate clarity, institutional drift, and governance.", href: "/resources/toolkits" },
+                { label: "Strategic Frameworks", desc: "7 frameworks for board governance, authority mapping, execution integrity, and intervention.", href: "/resources/strategic-frameworks" },
+                { label: "Editorials", desc: "Long-form analysis and applied thinking. Peer-reviewable. Citable.", href: "/editorials" },
+              ].map(item => (
+                <Link key={item.label} href={item.href} className="group block" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90` }}>{item.label}</div>
+                  <p className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)" }}>{item.desc}</p>
+                </Link>
+              ))}
+            </div>
+            <p className="mt-6" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+              Publication and research boundary: all outputs are deterministic, citable, and available for academic or institutional review. No proprietary lock-in on foundational thinking.
+            </p>
+          </div>
+        </section>
+
         {/* ── MANDATE CLOSE ─────────────────────────────────────────────── */}
         <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
@@ -413,38 +438,21 @@ const EducationResearchPage: NextPage = () => {
                   with clear boundaries and no obligation.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/contact"
+                  <Link href="/contact?type=education"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
-                    style={{
-                      padding: "11px 22px",
-                      border: `1px solid ${GOLD}35`,
-                      backgroundColor: `${GOLD}0D`,
-                      color: `${GOLD}BB`,
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px",
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                    }}
+                    style={{ padding: "11px 22px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
                   >
-                    Discuss mandate <ArrowRight style={{ width: "11px", height: "11px" }} />
+                    Discuss education or research use <ArrowRight style={{ width: "11px", height: "11px" }} />
                   </Link>
-                  <Link href="/canon"
+                  <Link href="/foundations"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
-                    style={{
-                      padding: "11px 22px",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      color: "rgba(255,255,255,0.30)",
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px",
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                    }}
+                    style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.55)"; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.30)"; }}
                   >
-                    Enter the canon
+                    Review foundations
                   </Link>
                 </div>
               </div>
