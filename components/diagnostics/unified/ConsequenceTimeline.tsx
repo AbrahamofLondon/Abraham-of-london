@@ -8,15 +8,22 @@ const RED = "rgba(252,165,165,";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
 export type ConsequenceTimelineProps = {
+  alreadyIncurred?: string;
   sevenDays: string;
   thirtyDays: string;
   ninetyDays: string;
   controlShiftSummary?: string;
 };
 
-export default function ConsequenceTimeline({ sevenDays, thirtyDays, ninetyDays, controlShiftSummary }: ConsequenceTimelineProps) {
+export default function ConsequenceTimeline({ alreadyIncurred, sevenDays, thirtyDays, ninetyDays, controlShiftSummary }: ConsequenceTimelineProps) {
   return (
     <div style={{ border: `1px solid ${RED}0.12)`, padding: "1rem", marginTop: "1rem" }}>
+      {alreadyIncurred && (
+        <div style={{ marginBottom: "0.75rem", paddingBottom: "0.65rem", borderBottom: `1px solid ${RED}0.08)` }}>
+          <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.55)` }}>Already incurred</span>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", lineHeight: 1.6, color: `${RED}0.60)`, marginTop: "0.25rem" }}>{alreadyIncurred}</p>
+        </div>
+      )}
       <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.40)` }}>If nothing changes</span>
       <div className="mt-2 space-y-2">
         {[

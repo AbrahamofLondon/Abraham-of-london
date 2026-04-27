@@ -14,6 +14,7 @@ import type { CaseObject, ConditionClass } from "./case-object";
 import { classifyCondition } from "./case-object";
 
 export type DefaultPathForecast = {
+  alreadyIncurred?: string;
   sevenDays: string;
   thirtyDays: string;
   ninetyDays: string;
@@ -125,6 +126,9 @@ export function forecastDefaultPath(caseObj: CaseObject): DefaultPathForecast {
   // Personalised narrative forecasts by condition
   const forecasts: Record<ConditionClass, DefaultPathForecast> = {
     authority: {
+      alreadyIncurred: hasOwner
+        ? `Delayed decision ownership — ${caseObj.claimedOwner} holds nominal authority while informal decisions accumulate.`
+        : "Unresolved authority dependency — no one named as owner while the decision drifts.",
       sevenDays: hasOwner
         ? `${caseObj.claimedOwner} remains the nominal owner but is not yet exercising authority. Informal decisions begin filling the gap.`
         : "No owner has been named. Informal authority is already filling the vacuum.",
@@ -139,6 +143,7 @@ export function forecastDefaultPath(caseObj: CaseObject): DefaultPathForecast {
       structuralRiskShift,
     },
     definition: {
+      alreadyIncurred: "Accumulated definition drift — stakeholders already executing against different interpretations of this decision.",
       sevenDays: "The undefined decision continues to consume meeting time. Stakeholders discuss it without converging because the outcome was never agreed.",
       thirtyDays: "Different stakeholders are now executing against different interpretations. Rework is compounding. Each attempt to 'align' produces temporary agreement that collapses under execution pressure.",
       ninetyDays: "The undefined decision has become a structural dependency failure. Downstream work built on assumption, not agreement, begins failing visibly.",
@@ -148,6 +153,9 @@ export function forecastDefaultPath(caseObj: CaseObject): DefaultPathForecast {
       structuralRiskShift,
     },
     execution: {
+      alreadyIncurred: caseObj.forcedAction
+        ? `Repeated execution drift — you already identified the action ("${caseObj.forcedAction.length > 60 ? caseObj.forcedAction.slice(0, 60) + "..." : caseObj.forcedAction}") but it remains untaken.`
+        : "Repeated execution drift — the decision is understood but being avoided.",
       sevenDays: caseObj.forcedAction
         ? `The action you described — "${caseObj.forcedAction}" — remains untaken. The window for voluntary action is still open but narrowing.`
         : "The decision remains deferred. The window for voluntary action is still open but narrowing.",
@@ -159,6 +167,7 @@ export function forecastDefaultPath(caseObj: CaseObject): DefaultPathForecast {
       structuralRiskShift,
     },
     instability: {
+      alreadyIncurred: "Untested assumptions already embedded — operating on clarity that has never survived real pressure.",
       sevenDays: "The untested condition holds. No visible failure, but no proof of resilience either.",
       thirtyDays: "The first real pressure event will determine whether this was genuine clarity or comfortable assumption. If assumption, recovery starts from behind.",
       ninetyDays: "The untested condition has embedded itself as normal operating state. When it fails — and it will — the failure is structural, not incremental.",

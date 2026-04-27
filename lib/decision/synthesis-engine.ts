@@ -169,9 +169,23 @@ export function arbitrate(
   };
 }
 
+/** Simple deterministic hash for variant rotation — same input always produces same variant */
+function variantIndex(text: string, variants: number): number {
+  let h = 0;
+  for (let i = 0; i < text.length; i++) {
+    h = ((h << 5) - h + text.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h) % variants;
+}
+
+function pickVariant<T>(decision: string, variants: T[]): T {
+  return variants[variantIndex(decision, variants.length)]!;
+}
+
 /**
  * Produces deterministic output when synthesis is unavailable or rejected.
  * Still references user words. Still bespoke. Just not LLM-synthesised.
+ * Controlled phrasing variation prevents template detection on repeat use.
  */
 export function deterministicFallback(caseObj: CaseObject, opts?: { suppressContradiction?: boolean }): GovernedSynthesis {
   const conditionClass = classifyCondition(caseObj);
@@ -180,12 +194,36 @@ export function deterministicFallback(caseObj: CaseObject, opts?: { suppressCont
   const c3 = scoreC3(caseObj);
 
   const decisionQuote = caseObj.decision.length > 80 ? caseObj.decision.slice(0, 80) + "..." : caseObj.decision;
+  const d = caseObj.decision; // short alias for variant selection
+
+  const verdictVariants: Record<ConditionClass, string[]> = {
+    authority: [
+      `The decision you described — "${decisionQuote}" — is stalled at the authority level. The person who should decide either doesn't know they should, or is waiting for permission that was never required.`,
+      `"${decisionQuote}" — this decision is blocked by an authority gap. Someone is either waiting for permission that does not exist, or assuming someone else will move first.`,
+      `The core problem with "${decisionQuote}" is not complexity — it is authority. The decision has an owner on paper but not in practice.`,
+    ],
+    definition: [
+      `The decision you described — "${decisionQuote}" — is not yet defined clearly enough to be acted on. People are discussing it without agreeing on what the outcome actually is.`,
+      `"${decisionQuote}" — this decision is being discussed but has never been defined. There is no shared agreement on what the outcome actually looks like.`,
+      `The reason "${decisionQuote}" keeps stalling is definitional: the people involved are not solving the same problem. They have not agreed on what resolution means.`,
+    ],
+    execution: [
+      `The decision you described — "${decisionQuote}" — is understood but is being avoided. The blocker you named is not preventing the decision — it is the reason you haven't had to make it yet.`,
+      `"${decisionQuote}" — the decision is clear but untaken. The stated blocker is not what prevents action — it is what justifies continued avoidance.`,
+      `Everyone involved in "${decisionQuote}" already knows what should happen. The problem is not information — it is the unwillingness to act on what is already known.`,
+    ],
+    instability: [
+      `The decision you described — "${decisionQuote}" — is not stable. It has not been tested under pressure. What looks like clarity now is assumption that will collapse when urgency arrives.`,
+      `"${decisionQuote}" — this decision appears resolved but has never been stress-tested. The current position is assumption, not conclusion.`,
+      `The stability of "${decisionQuote}" is untested. Under real pressure, the current framing will not hold. The question is whether you discover that on your terms or someone else's.`,
+    ],
+  };
 
   const verdicts: Record<ConditionClass, string> = {
-    authority: `The decision you described — "${decisionQuote}" — is stalled at the authority level. The person who should decide either doesn't know they should, or is waiting for permission that was never required.`,
-    definition: `The decision you described — "${decisionQuote}" — is not yet defined clearly enough to be acted on. People are discussing it without agreeing on what the outcome actually is.`,
-    execution: `The decision you described — "${decisionQuote}" — is understood but is being avoided. The blocker you named is not preventing the decision — it is the reason you haven't had to make it yet.`,
-    instability: `The decision you described — "${decisionQuote}" — is not stable. It has not been tested under pressure. What looks like clarity now is assumption that will collapse when urgency arrives.`,
+    authority: pickVariant(d, verdictVariants.authority),
+    definition: pickVariant(d, verdictVariants.definition),
+    execution: pickVariant(d, verdictVariants.execution),
+    instability: pickVariant(d, verdictVariants.instability),
   };
 
   const moves: Record<ConditionClass, string> = {
@@ -199,11 +237,34 @@ export function deterministicFallback(caseObj: CaseObject, opts?: { suppressCont
     instability: "Force this decision through one real constraint within 72 hours: a stakeholder deadline, a budget limit, or a team commitment. Observe what breaks.",
   };
 
+  const forecastVariants: Record<ConditionClass, string[]> = {
+    authority: [
+      "In 30 days, the authority vacuum will have been filled informally. Someone will have started making decisions without mandate. Reclaiming authority after that requires confrontation, not clarification.",
+      "Within a month, someone without formal authority will have started deciding by default. Once those decisions take hold, reversing them costs more than the original decision ever would have.",
+      "Thirty days from now, the authority question will have answered itself — not through governance, but through whoever stepped into the vacuum. That precedent is harder to undo than the original problem.",
+    ],
+    definition: [
+      "In 30 days, different stakeholders will be executing against different interpretations of this decision. Rework cost will have begun compounding. Alignment conversations will feel harder because positions have hardened.",
+      "Within a month, the undefined decision will have spawned multiple incompatible execution paths. Converging them later costs more than defining the outcome now.",
+      "Thirty days from now, the ambiguity will have hardened into competing facts. Each side will believe their interpretation was agreed. The rework will be political, not just operational.",
+    ],
+    execution: [
+      "In 30 days, the decision will be forced by external conditions rather than internal authority. The organisation will respond reactively, with fewer options and higher cost.",
+      "Within a month, the window for voluntary action will have closed. The decision will still happen — but on someone else's terms, at higher cost, with fewer options.",
+      "Thirty days of continued avoidance will transfer the decision from you to circumstance. When it finally happens, it will happen worse.",
+    ],
+    instability: [
+      "In 30 days, the first real pressure will reveal whether this was clarity or assumption. If it was assumption, recovery starts from behind.",
+      "Within a month, the untested assumption will meet its first real constraint. If the assumption was wrong, the cost of discovery is significantly higher than the cost of testing now.",
+      "Thirty days from now, the stability you see today will either be confirmed or exposed. If exposed, you will be recovering rather than acting.",
+    ],
+  };
+
   const forecasts: Record<ConditionClass, string> = {
-    authority: "In 30 days, the authority vacuum will have been filled informally. Someone will have started making decisions without mandate. Reclaiming authority after that requires confrontation, not clarification.",
-    definition: "In 30 days, different stakeholders will be executing against different interpretations of this decision. Rework cost will have begun compounding. Alignment conversations will feel harder because positions have hardened.",
-    execution: "In 30 days, the decision will be forced by external conditions rather than internal authority. The organisation will respond reactively, with fewer options and higher cost.",
-    instability: "In 30 days, the first real pressure will reveal whether this was clarity or assumption. If it was assumption, recovery starts from behind.",
+    authority: pickVariant(d, forecastVariants.authority),
+    definition: pickVariant(d, forecastVariants.definition),
+    execution: pickVariant(d, forecastVariants.execution),
+    instability: pickVariant(d, forecastVariants.instability),
   };
 
   const quotedLanguage: string[] = [];

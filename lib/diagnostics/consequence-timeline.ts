@@ -4,6 +4,7 @@
  */
 
 export type TimelineOutput = {
+  alreadyIncurred?: string;
   sevenDays: string;
   thirtyDays: string;
   ninetyDays: string;
@@ -23,6 +24,9 @@ export function generateConsequenceTimeline(input: {
   if (assessmentType === "purpose") {
     const domain = weakestDomain ?? "alignment";
     return {
+      alreadyIncurred: severe
+        ? `Repeated misalignment in ${domain} — decisions already made against stated purpose.`
+        : `Accumulated ${domain} drift — daily decisions already diverging from priorities.`,
       sevenDays: severe
         ? `The ${domain} misalignment continues to produce decisions that contradict stated purpose. No visible failure yet — but the pattern is compounding.`
         : `The ${domain} gap persists. Daily decisions continue to drift from stated priorities without correction.`,
@@ -37,6 +41,9 @@ export function generateConsequenceTimeline(input: {
 
   if (assessmentType === "constitutional") {
     return {
+      alreadyIncurred: severe
+        ? "Structural governance erosion — informal authority already displacing formal decision rights."
+        : "Unresolved constitutional strain — energy already absorbed by internal friction rather than execution.",
       sevenDays: severe
         ? "The structural condition persists. Internal friction absorbs energy that should produce execution."
         : "The constitutional reading holds. The condition is stable but untested under new pressure.",
@@ -54,6 +61,9 @@ export function generateConsequenceTimeline(input: {
 
   if (assessmentType === "team") {
     return {
+      alreadyIncurred: severe
+        ? "Leadership-team perception gap already active — execution diverging from intent before this assessment."
+        : "Accumulated perception drift — team and leadership already operating on different assumptions.",
       sevenDays: "The perception gap between leadership and team remains invisible to both sides. Execution continues to diverge from intent.",
       thirtyDays: severe
         ? "The gap has produced visible misalignment. Team members are executing against different interpretations. Rework is compounding."
@@ -66,6 +76,9 @@ export function generateConsequenceTimeline(input: {
 
   // Enterprise
   return {
+    alreadyIncurred: severe
+      ? "Institutional governance at capacity — structural risk already compounding before this assessment."
+      : "Unpriced institutional condition — operational strain already absorbed as normal.",
     sevenDays: route === "EXECUTIVE_REPORTING"
       ? "The institutional condition is active. Governance mechanisms are absorbing pressure but capacity is finite."
       : "The institutional signal is present but not yet acute. The condition is evolving.",

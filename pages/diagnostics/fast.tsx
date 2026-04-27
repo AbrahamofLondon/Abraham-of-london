@@ -22,7 +22,7 @@ import { scoreC3 } from "@/lib/decision/c3-fidelity-scorer";
 import { synthesise, buildDeterministicOutput, type GovernedSynthesis, type SynthesisResult } from "@/lib/decision/synthesis-engine";
 import { forecastDefaultPath, controlShiftSummary } from "@/lib/decision/default-path-forecast";
 import { createSpine, type IntelligenceSpine } from "@/lib/decision/intelligence-spine";
-import { saveSpineToSession, persistSpineToDB } from "@/lib/decision/spine-persistence";
+import { saveSpineToSession, persistSpineToDB, loadSpineFromSession } from "@/lib/decision/spine-persistence";
 import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
 import DeterminismProof from "@/components/Intelligence/DeterminismProof";
 import DecisionTracePanel from "@/components/Intelligence/DecisionTracePanel";
@@ -65,10 +65,20 @@ const FastDiagnosticPage: NextPage = () => {
   React.useEffect(() => {
     track("fast_diagnostic_page_view");
     try {
-      const existing = sessionStorage.getItem("aol_intelligence_spine_v1");
-      if (existing) {
-        const parsed = JSON.parse(existing);
-        if (parsed?.id && parsed?.synthesis?.verdict) setHasActiveCase(true);
+      const existing = loadSpineFromSession();
+      if (existing?.id && existing?.synthesis?.verdict && existing?.stage === "fast_diagnostic") {
+        // Full rehydration — restore prior result so "case is active" is experientially true
+        setSpine(existing);
+        setSynthesis(existing.synthesis);
+        setSynthesisSource(existing.kernelOutput ? "llm" : "deterministic");
+        setCommitted(!!existing.preCommitment?.willing48h);
+        if (existing.deterministic?.contradictionSet?.[0]) {
+          setContradictionText(existing.deterministic.contradictionSet[0]);
+        }
+        setHasActiveCase(true);
+        setStage("result");
+      } else if (existing?.id && existing?.synthesis?.verdict) {
+        setHasActiveCase(true);
       }
     } catch {}
   }, []);
@@ -569,6 +579,12 @@ const FastDiagnosticPage: NextPage = () => {
 
             {/* 6. DEFAULT PATH — pressure engine */}
             <div style={{ border: `1px solid ${RED}0.12)`, padding: "1rem", marginTop: "1rem" }}>
+              {forecast.alreadyIncurred && (
+                <div style={{ marginBottom: "0.75rem", paddingBottom: "0.65rem", borderBottom: `1px solid ${RED}0.08)` }}>
+                  <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.55)` }}>Already incurred</span>
+                  <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: `${RED}0.60)`, marginTop: "0.25rem" }}>{forecast.alreadyIncurred}</p>
+                </div>
+              )}
               <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.40)` }}>If nothing changes</span>
               <div className="mt-2 space-y-2">
                 {[
