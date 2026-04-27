@@ -24,6 +24,10 @@ const nextSteps = [
   { label: "Trust boundaries", href: "/trust" },
   { label: "Intellectual foundations", href: "/foundations" },
   { label: "Public playbooks", href: "/playbooks" },
+  { label: "Terms of service", href: "/terms-of-service" },
+  { label: "Privacy policy", href: "/privacy" },
+  { label: "Cookie policy", href: "/cookie-policy" },
+  { label: "Security", href: "/security" },
 ];
 
 const VerificationPage: NextPage = () => {
@@ -79,7 +83,7 @@ const VerificationPage: NextPage = () => {
 
               <div className="mt-3 space-y-1 text-sm" style={{ color: "rgba(255,255,255,0.46)" }}>
                 <p>Abraham of London — United Kingdom platform and operating identity.</p>
-                <p>Alomarada Ltd — UK registered company.</p>
+                <p>Alomarada Ltd — UK registered company. Company number: 11549053. UTR: 3124426287.</p>
 
                 <a
                   href="https://find-and-update.company-information.service.gov.uk/company/11549053/officers"
@@ -133,7 +137,6 @@ const VerificationPage: NextPage = () => {
                 <li>CMI Level 7 Diploma in Consulting Management.</li>
                 <li>MBA — University of East Anglia, Norwich Business School.</li>
                 <li>BSc — Microbiology, University of Lagos.</li>
-                <li>AWS Business Professional — in progress.</li>
               </ul>
             </section>
 

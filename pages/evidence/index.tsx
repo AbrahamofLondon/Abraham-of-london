@@ -239,13 +239,22 @@ export default function EvidencePage() {
           </div>
         </section>
 
-        {/* ── BACK ────────────────────────────────────────────────────────── */}
+        {/* ── TRUST ROUTING ─────────────────────────────────────────────── */}
         <section>
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
-            <div className="py-8">
-              <Link href="/" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
-                Back to home
-              </Link>
+            <div className="py-10" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Link href="/verification" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Verify</Link>
+                <Link href="/trust" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Trust boundaries</Link>
+                <Link href="/foundations" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Foundations</Link>
+                <Link href="/terms-of-service" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Terms</Link>
+                <Link href="/privacy" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Privacy</Link>
+              </div>
+              <div className="mt-6 text-center">
+                <Link href="/diagnostics/fast" className="inline-flex items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: GOLD, padding: "0.75rem 1rem", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}06` }}>
+                  Run the diagnostic <ArrowRight style={{ width: 10, height: 10 }} />
+                </Link>
+              </div>
             </div>
           </div>
         </section>

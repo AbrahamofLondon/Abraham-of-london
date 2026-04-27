@@ -26,6 +26,8 @@ const proofLinks = [
   { label: "Evidence", href: "/evidence" },
   { label: "Trust", href: "/trust" },
   { label: "Foundations", href: "/foundations" },
+  { label: "Terms", href: "/terms-of-service" },
+  { label: "Privacy", href: "/privacy" },
 ];
 
 const FounderPage: NextPage = () => {
