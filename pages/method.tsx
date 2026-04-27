@@ -128,6 +128,22 @@ const MethodPage: NextPage = () => (
               <p key={line} style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.45)" }}>{line}</p>
             ))}
           </div>
+
+          {/* Illustrative output example */}
+          <div className="mt-6" style={{ border: "1px solid rgba(255,215,0,0.15)", backgroundColor: "rgba(0,0,0,0.45)", padding: "1.25rem" }}>
+            <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.65rem" }}>Illustrative output — anonymised</p>
+            <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.3, color: "rgba(255,255,255,0.80)" }}>Execution coherence collapsing under governance drift</p>
+            <div className="mt-2 flex flex-wrap gap-3">
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(252,165,165,0.65)" }}>Trajectory: DETERIORATING</span>
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>Exposure: £420,000 / 6 months</span>
+            </div>
+            <p className="mt-2" style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+              Stabilise governance cadence within 30 days. Three concurrent owners producing conflicting mandates.
+            </p>
+            <p className="mt-2" style={{ ...mono, fontSize: "6px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.15)" }}>
+              Illustrative format. Your result is generated from your own inputs.
+            </p>
+          </div>
         </div>
 
         <Rule />
@@ -136,7 +152,7 @@ const MethodPage: NextPage = () => (
         <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
           <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>Does it work?</p>
           <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
-            Observed outcomes, accuracy metrics, and anonymised case evidence are published. Every diagnostic output includes a determinism proof and full decision trace — the user can verify exactly how the system reached its conclusion.
+            Observed outcomes, accuracy metrics, and anonymised case evidence are published. Every diagnostic output includes a <Link href="/#proof-layer" style={{ color: `${GOLD}AA`, borderBottom: `1px solid ${GOLD}30` }}>determinism proof and full decision trace</Link> — the user can verify exactly how the system reached its conclusion.
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
             <Link href="/evidence" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>See applied evidence</Link>
