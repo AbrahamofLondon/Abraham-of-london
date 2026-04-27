@@ -2945,7 +2945,22 @@ const HomePage: NextPage<HomePageProps> = ({
       {/* 7. Who this is for / not for */}
       <WhoThisIsFor />
 
-      {/* 8. Trust strip — visible before final CTA */}
+      {/* 8. Engagement lanes strip */}
+      <div className="mx-auto max-w-[1100px] px-6 py-6 lg:px-12">
+        <div style={{ border: "1px solid rgba(255,255,255,0.04)", padding: "1rem" }}>
+          <p className="text-center" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.65rem" }}>
+            Not here to run a diagnostic?
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/institutional" className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)", padding: "4px 12px", border: "1px solid rgba(255,255,255,0.06)" }}>Institutional</Link>
+            <Link href="/private-clients" className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)", padding: "4px 12px", border: "1px solid rgba(255,255,255,0.06)" }}>Private clients</Link>
+            <Link href="/education-research" className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)", padding: "4px 12px", border: "1px solid rgba(255,255,255,0.06)" }}>Education & research</Link>
+            <Link href="/media" className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)", padding: "4px 12px", border: "1px solid rgba(255,255,255,0.06)" }}>Media</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* 9. Trust strip — visible before final CTA */}
       <div className="mx-auto max-w-[1100px] px-6 py-10 lg:px-12">
         <div style={{ border: "1px solid rgba(255,255,255,0.04)", padding: "1.25rem" }}>
           <p className="text-center" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.75rem" }}>

@@ -152,6 +152,11 @@ function StrategyRoomGate() {
               {directive.level === "block" ? "Return to diagnostics" : "Address this first"}
               <ArrowRight style={{ width: "11px", height: "11px" }} />
             </Link>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link href="/institutional" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Institutional mandate</Link>
+              <Link href="/private-clients" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Private advisory</Link>
+              <Link href="/contact" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Contact</Link>
+            </div>
           </div>
         )}
       </div>
