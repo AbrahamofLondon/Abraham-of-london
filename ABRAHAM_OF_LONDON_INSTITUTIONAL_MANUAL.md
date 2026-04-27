@@ -33,7 +33,7 @@ This is a 100-year document. The language of business will change. The tools wil
 
 ### Sequential Reading
 
-For first-time readers, this manual should be read sequentially from Part I through Part IX plus Appendices. The logic of the system builds cumulatively — later chapters assume mastery of earlier principles.
+For first-time readers, this manual should be read sequentially from Part I through Part X plus Appendices. The logic of the system builds cumulatively — later chapters assume mastery of earlier principles.
 
 ### Role-Based Reading Paths
 
@@ -42,7 +42,7 @@ For first-time readers, this manual should be read sequentially from Part I thro
 | **Founder** | Parts I–III + Part VIII (Capital and Investor Relations) |
 | **Operator** | Parts IV–VI (Sales Doctrine, Call Flow, Evidence System) |
 | **Investor Relations** | Part VIII (Capital Narrative, Investor Memo, Fundraising) |
-| **New Hire** | Part I (Identity), Part IV (Sales Doctrine), Part IX (Operational Discipline) |
+| **New Hire** | Part I (Identity), Part IV (Sales Doctrine), Part IX (Operational Discipline), Part X (Governance & Compliance) |
 
 ### Binding Authority
 
@@ -84,7 +84,7 @@ For first-time readers, this manual should be read sequentially from Part I thro
   - 5.3 The Stakeholder-Ambiguity Pricing Model
   - 5.4 Enterprise Pricing Tiers
   - 5.5 The Strategy Room Reframe
-- Chapter 6: The Conversion Pathway (£0 to £10,000)
+- Chapter 6: The Conversion Pathway (£0 to £10,000+/month Retainer)
   - 6.1 The Stage Map
   - 6.2 The Moment That Matters
   - 6.3 The Executive Reporting Close
@@ -120,7 +120,7 @@ For first-time readers, this manual should be read sequentially from Part I thro
   - 10.5 The Transition from Transaction to Retainer
 
 ### Part IV — Sales Doctrine
-*Fundamental sales principles, objection destruction, and psychological pattern recognition.*
+*Fundamental sales principles, objection resolution, and psychological pattern recognition.*
 
 - Chapter 11: Fundamental Sales Principles
   - 11.1 The Core Rule
@@ -128,7 +128,7 @@ For first-time readers, this manual should be read sequentially from Part I thro
   - 11.3 The Structural Sales Advantage
   - 11.4 What Kills Deals
   - 11.5 What Wins Deals
-- Chapter 12: The Five Objections and Their Destruction
+- Chapter 12: The Five Objections and Their Resolution
   - 12.1 "This is expensive"
   - 12.2 "I need to think about it"
   - 12.3 "Not the right time"
@@ -149,7 +149,7 @@ For first-time readers, this manual should be read sequentially from Part I thro
 
 - Chapter 14: Call Architecture and Rules
 - Chapter 15: Stage-by-Stage Call Execution
-- Chapter 16: The Enterprise Pitch (£10k–£50k/month)
+- Chapter 16: The Enterprise Pitch (£10,000–£50,000/month)
 
 ### Part VI — The Evidence and Content System
 *Enterprise case construction, case amplification, and distribution standards.*
@@ -179,6 +179,26 @@ For first-time readers, this manual should be read sequentially from Part I thro
 - Chapter 27: The First Ten Accounts
 - Chapter 28: What Not To Do
 - Chapter 29: What a "Yes" Looks Like
+
+### Part X — Governance & Compliance
+*Operational governance, quality assurance, data protection, and termination protocols.*
+
+- Chapter 30: Onboarding Protocol
+  - 30.1 New Operator Onboarding (21-Day Sequence)
+  - 30.2 Performance Gate for Graduation
+- Chapter 31: Quality Assurance
+  - 31.1 Call Review Protocol
+  - 31.2 Performance Metrics
+  - 31.3 Correction Protocol
+- Chapter 32: Escalation Matrix
+- Chapter 33: Data Protection & Confidentiality
+  - 33.1 Classification of Client Data
+  - 33.2 Rules
+  - 33.3 Breach Protocol
+- Chapter 34: Engagement Termination
+  - 34.1 When an Engagement Ends
+  - 34.2 Client-Initiated Termination
+  - 34.3 System-Initiated Termination
 
 ### Appendices
 
@@ -492,7 +512,7 @@ This framing establishes it as a structural action, not a conversation. It is pr
 
 ---
 
-## Chapter 6: The Conversion Pathway (£0 to £10,000)
+## Chapter 6: The Conversion Pathway (£0 to £10,000+/month Retainer)
 
 ### 6.1 The Stage Map
 
@@ -570,7 +590,7 @@ This is not urgency. It is not persuasion. It is binary reality: act or continue
 
 ### 6.5 Strategy Room Call Structure
 
-If the buyer requests a call before committing to Strategy Room, the call follows a strict twenty-minute structure with no deviation:
+If the buyer requests a call before committing to Strategy Room, the call follows a strict 20-minute structure with no deviation:
 
 ```
 MINUTES 0–3: CONFIRMATION
@@ -600,7 +620,7 @@ MINUTES 15–20: CLOSE
 > - Never say "Let me know"
 > - Never offer a follow-up call
 > - Never provide additional information unless specifically requested
-> - Never exceed twenty minutes
+> - Never exceed 20 minutes
 
 ### 6.6 Price Defence
 
@@ -630,7 +650,7 @@ The retainer close shows pattern recurrence:
 
 The trigger conditions for introducing the retainer conversation (see Chapter 10 for full retainer conversion framework):
 
-- Two or more decisions flagged within fourteen to thirty days
+- Two or more decisions flagged within 14–30 days
 - Repeated breach patterns (commitments made and not kept)
 - Cross-team contradictions surfacing independently
 
@@ -804,6 +824,18 @@ The specific collision patterns that emerge:
 
 Each of these patterns is a confirmed contradiction that demands resolution. And resolution requires a governed intervention — not another meeting, not another strategy offsite, not another alignment workshop.
 
+#### 9.4.1 Cost Divergence
+
+Leadership estimates the cost of a delayed decision at £5,000/month. The team estimates £25,000/month. The gap reveals who is feeling the pain versus who is insulated from it. Leadership's lower figure reflects their distance from operational consequence — they see the decision as a strategic matter. The team's higher figure reflects lived reality — they experience the daily friction, rework, and opportunity cost. The true cost is almost always closer to the team's estimate.
+
+#### 9.4.2 Blocker Contradictions
+
+Leadership says "we need more data." The team says "we need a decision." The real blocker is neither — it is that no one has authority to force resolution. "More data" is avoidance language. "Need a decision" is frustration language. The structural reality beneath both is that the decision-making mechanism is absent. No individual possesses the combination of authority, information, and willingness to force the issue closed.
+
+#### 9.4.3 Authority Gaps
+
+The stated owner says "I'm responsible." But when asked "can you approve the budget, remove the blocker, or change the timeline?" they say no. Responsibility without authority is structural paralysis. The organisation has assigned accountability to someone who lacks the power to act on it. This is the most common form of false ownership — and it persists because it allows leadership to believe the decision is "being handled" while ensuring it can never actually be resolved.
+
 ### 9.5 Strategy Room Introduction
 
 At the point of confirmed multi-user collision, the Strategy Room is introduced not as a product but as a necessity:
@@ -828,7 +860,7 @@ But the retainer is never proposed. It is never suggested. It is never offered a
 
 The retainer conversation is initiated when — and only when — one or more of the following conditions are confirmed:
 
-1. **Two or more decisions flagged within fourteen to thirty days** — Demonstrating that decision avoidance is not episodic but chronic
+1. **Two or more decisions flagged within 14–30 days** — Demonstrating that decision avoidance is not episodic but chronic
 2. **Repeated breach patterns** — The organisation commits to actions and fails to execute them, indicating structural enforcement failure
 3. **Cross-team contradictions** — Multiple teams or levels within the organisation surface conflicting realities about the same decisions
 
@@ -1008,7 +1040,7 @@ This advantage transforms the sales interaction from a negotiation (where the se
 
 ---
 
-## Chapter 12: The Five Objections and Their Destruction
+## Chapter 12: The Five Objections and Their Resolution
 
 Every objection a buyer raises, regardless of how it is worded, collapses into one of five categories. Everything else is noise — surface variation on these five structural resistances. Mastery of this chapter means that no objection ever produces uncertainty or improvisation.
 
@@ -1309,7 +1341,7 @@ Characteristics: vague problem statement, low or unquantified cost, no urgency, 
 
 ## Chapter 15: Stage-by-Stage Call Execution
 
-This chapter provides the exact language, branch logic, and decision criteria for each stage of the call flow. Deviation from this script is not permitted during the first one hundred calls. After one hundred executions, minor calibration is acceptable only where data supports the modification.
+This chapter provides the exact language, branch logic, and decision criteria for each stage of the call flow. Deviation from this script is not permitted during the first 100 calls. After 100 executions, minor calibration is acceptable only where data supports the modification.
 
 ### Call Flow Decision Tree
 
@@ -1525,7 +1557,7 @@ Price is delivered without justification, without breakdown, without comparison 
 
 > **⸻ SCRIPT**
 > 
-> "This sits between £10k and £25k per month depending on scope. Relative to £[X], that's not the decision."
+> "This starts at £5,000 per month and scales with scope. Relative to £[X], that's not the decision."
 
 Then silence. Absolute silence. Do not elaborate. Do not offer payment plans. Do not ask if it "works for them." The price is the price. The prospect's own cost figure has already established that the price is rational. Silence forces them to confront this logic without escape routes.
 
@@ -1556,9 +1588,32 @@ The operator exits the call immediately under the following conditions:
 
 Clean. Professional. No door closed permanently, but no time wasted in the present.
 
+### 15.10 Recovery Protocol — When the Prospect Goes Off-Script
+
+Real conversations do not follow linear branch logic. The prospect may:
+
+- Ask an unrelated question mid-flow
+- Tell a long story about a previous consultant
+- Challenge the system itself rather than answering
+- Become emotional
+
+**Recovery principle:** Return to the last verified checkpoint.
+
+**Protocol:**
+
+1. Acknowledge briefly (one sentence maximum)
+2. State: "Let me bring this back to the decision."
+3. Re-ask the last unanswered question from the flow
+
+**If the prospect resists returning to structure:**
+
+> "I understand. But I need to know one thing before we continue: [repeat the checkpoint question]."
+
+**If they continue to derail after two recovery attempts:** Exit. They are not ready for a structured engagement.
+
 ---
 
-## Chapter 16: The Enterprise Pitch (£10k–£50k/month)
+## Chapter 16: The Enterprise Pitch (£10,000–£50,000/month)
 
 The enterprise pitch is not a presentation. It is not a demonstration. It is a controlled conversation that corners a decision-maker into either acting or consciously accepting loss. It operates at board level, where the stakes justify premium engagement and where decision paralysis carries the highest cost.
 
@@ -1647,7 +1702,7 @@ The one-decision entry removes the risk objection before it arises. It also esta
 
 > **⸻ SCRIPT**
 > 
-> "This sits between £10k and £25k per month depending on scope. Which, relative to £[monthly cost], is not the decision."
+> "This sits between £10,000 and £50,000 per month depending on scope. Which, relative to £[monthly cost], is not the decision."
 
 Do not explain further. Do not justify. Do not break down components. Do not compare to alternatives. Silence does the work. The prospect's own number has already validated the price. Any additional words from the operator would weaken this position.
 
@@ -1710,13 +1765,13 @@ Exit immediately if:
 
 If a prospect insists on slides — and only if they insist — provide a maximum of five slides with lethal structure:
 
-| Slide | Content |
-|-------|---------|
-| 1 | "Decisions fail because contradictions are ignored." |
-| 2 | "This system identifies, prices, and enforces." |
-| 3 | Example decision → cost → outcome (one case, no embellishment). |
-| 4 | Engagement model — one decision, then expansion. |
-| 5 | Price versus cost of delay. |
+| Slide | Content | Exact Language |
+|-------|---------|----------------|
+| 1 | The problem | "Every organisation has decisions that remain open. Not because the answer is unknown — because someone is choosing not to act. That avoidance costs money every month." |
+| 2 | The system | "We built a system that identifies the real decision, prices the cost of delay, assigns a single owner, enforces action within 48 hours, and verifies the outcome." |
+| 3 | Proof | Authority failure: £80,000 in pipeline delay accumulated over 60 days. Ownership assigned through forced escalation. Decision taken in 36 hours. |
+| 4 | Entry model | "One decision. One outcome. If it works, we expand. If it doesn't, you stop. No long-term commitment required to begin." |
+| 5 | The close | "Your decision is costing £[X]/month. This engagement is £[Y]/month. The question is not the price — it's whether you want to keep paying for the problem." |
 
 > **⚠ PROHIBITION**
 > 
@@ -2125,6 +2180,8 @@ The Detection layer captures and validates the initial decision signal. The Case
 > 
 > "What is the real decision, and what is actually preventing it?"
 
+**Why this matters:** Without accurate detection, every subsequent enforcement action is built on a false premise.
+
 ---
 
 #### Layer 2: ENFORCEMENT
@@ -2141,6 +2198,8 @@ The Enforcement layer converts diagnosis into action. The Intelligence Spine mai
 > **⸻ CORE QUESTION**
 > 
 > "Is the user acting on what they now know?"
+
+**Why this matters:** Detection without enforcement is consulting. Enforcement is what transforms diagnosis into outcome.
 
 ---
 
@@ -2159,6 +2218,8 @@ The Anti-Manipulation layer protects the system from users who attempt to game i
 > 
 > "Is this user telling the truth — to us and to themselves?"
 
+**Why this matters:** A system that can be gamed ceases to produce real outcomes — and its authority collapses the moment manipulation succeeds.
+
 ---
 
 #### Layer 4: SELF-GOVERNANCE
@@ -2174,6 +2235,8 @@ The Self-Governance layer prevents the system itself from degrading. North Star 
 > **⸻ CORE QUESTION**
 > 
 > "Is the system still performing at the standard required to maintain authority?"
+
+**Why this matters:** A system that cannot correct itself will eventually harm the clients it serves.
 
 ---
 
@@ -2192,6 +2255,8 @@ The Economic Pressure layer ensures that every interaction is grounded in financ
 > 
 > "Is there enough economic consequence to justify intervention?"
 
+**Why this matters:** Without economic grounding, the system devolves into opinion. Cost is the only universal language that forces action across all organisational levels.
+
 ---
 
 #### Layer 6: EVIDENCE PERMANENCE
@@ -2208,6 +2273,8 @@ The Evidence Permanence layer creates an unalterable record of decisions, action
 > 
 > "What does the historical record say about this decision-maker and this organisation?"
 
+**Why this matters:** Without permanent evidence, every engagement starts from zero. The ledger transforms accumulated experience into compounding institutional intelligence.
+
 ---
 
 #### Layer 7: SOCIAL PROOF
@@ -2223,6 +2290,8 @@ The Social Proof layer delivers evidence of system effectiveness tailored to eac
 > **⸻ CORE QUESTION**
 > 
 > "What evidence exists that this system works for someone like me?"
+
+**Why this matters:** Authority without evidence is a claim. Evidence without relevance is noise. Personalised proof converts scepticism into action.
 
 ---
 
@@ -2241,6 +2310,8 @@ Boardroom Mode operates at the highest tier of organisational engagement. The Bo
 > 
 > "Can this be deployed at the highest level of organisational governance?"
 
+**Why this matters:** Board-level deployment is where maximum organisational impact occurs. Without this capability, the system remains a tactical tool rather than strategic infrastructure.
+
 ---
 
 #### Layer 9: MULTI-ACTOR TRUTH
@@ -2257,6 +2328,8 @@ The Multi-Actor Truth layer handles the complexity that emerges when multiple in
 > **⸻ CORE QUESTION**
 > 
 > "What happens when multiple people tell different versions of the same story?"
+
+**Why this matters:** Single-user diagnosis can only reveal individual perception. Multi-actor truth reveals structural reality — the gap between what is believed and what is actually happening.
 
 ---
 
@@ -2275,6 +2348,8 @@ The Inbound Filtering layer ensures that commercial capacity is allocated to the
 > 
 > "Which prospects deserve attention, and in what order?"
 
+**Why this matters:** Capacity is finite. Without intelligent filtering, operator time is consumed by low-quality interactions that will never convert — starving qualified prospects of the attention they require.
+
 ---
 
 #### Layer 11: ESCALATION ENGINE
@@ -2287,11 +2362,13 @@ The Inbound Filtering layer ensures that commercial capacity is allocated to the
 | 5d Pattern | Pattern named |
 | 7d Fork | Act now or accept consequence explicitly |
 
-The Escalation Engine manages the time-based pressure sequence that follows commitment. At twenty-four hours, reality is restated. At forty-eight hours, breach is recorded. At seventy-two hours, pressure is applied. At five days, the pattern is named. At seven days, the fork is forced — act now or accept the consequence explicitly.
+The Escalation Engine manages the time-based pressure sequence that follows commitment. At 24 hours, reality is restated. At 48 hours, breach is recorded. At 72 hours, pressure is applied. At 5 days, the pattern is named. At 7 days, the fork is forced — act now or accept the consequence explicitly.
 
 > **⸻ CORE QUESTION**
 > 
 > "What happens when someone commits and then fails to act?"
+
+**Why this matters:** Without time-based escalation, commitments decay into suggestions. The escalation engine is what makes this an enforcement system rather than a tracking system.
 
 ---
 
@@ -2309,6 +2386,8 @@ The Retargeting layer maintains visibility with prospects who have demonstrated 
 > 
 > "How do we stay visible to qualified prospects who are not yet ready?"
 
+**Why this matters:** Timing is not always controlled by the system. Prospects who are qualified but not yet ready represent future revenue — maintaining presence without pursuit ensures they return when the cost becomes unbearable.
+
 ---
 
 #### Layer 13: ENTERPRISE
@@ -2325,6 +2404,8 @@ The Enterprise layer provides the infrastructure for full organisational deploym
 > **⸻ CORE QUESTION**
 > 
 > "How does this operate when deployed across an entire organisation?"
+
+**Why this matters:** Single-decision interventions prove the methodology. Enterprise deployment proves the business model. Without this layer, the system cannot scale beyond individual engagements into institutional infrastructure.
 
 ---
 
@@ -2470,7 +2551,10 @@ Four structural moats protect the system from replication:
 |------|---------|-------|----------|
 | Transactional | Executive Reporting | £295 | Prices the problem, generates qualified pipeline |
 | Enforcement | Strategy Room | £750–£1,250 | Resolves specific decisions, proves capability |
-| Enterprise | Retainers | £10k–£50k/month | Ongoing decision governance at organisational level |
+| Enterprise — Core | Retainer | £5,000/month | 1–2 decisions under governance |
+| Enterprise — Operational | Retainer | £10,000/month | Multi-team oversight |
+| Enterprise — Institutional | Retainer | £25,000/month | Organisation-level governance |
+| Enterprise — Bespoke | Retainer | £10,000–£50,000/month | Board-level, scope-dependent |
 | Expansion | Decision portfolios, org deployment, board integration | Variable | Increases contract value as scope expands within accounts |
 
 #### 22.8 Unit Economics
@@ -2570,7 +2654,7 @@ Abraham of London introduces Decision Authority Infrastructure — a system that
 1. **Contradiction detection** — what you say versus what your actions reveal
 2. **Decision identification** — the real decision being avoided
 3. **Economic framing** — cost of delay quantified by the user
-4. **Action enforcement** — one required move within forty-eight hours
+4. **Action enforcement** — one required move within 48 hours
 5. **Outcome verification** — did the action happen, and did it work
 
 #### Product Architecture — Six Layers
@@ -2609,9 +2693,12 @@ Revenue is aligned with economic consequence, not usage.
 |---------|-------|----------|
 | Executive Reporting | £295 | Prices the problem |
 | Strategy Room | £750–£1,250 | Enforces the decision |
-| Enterprise | £10,000–£50,000/month | Board-level integration + multi-decision enforcement |
+| Enterprise — Core | £5,000/month | 1–2 decisions under governance |
+| Enterprise — Operational | £10,000/month | Multi-team oversight |
+| Enterprise — Institutional | £25,000/month | Organisation-level governance |
+| Enterprise — Bespoke | £10,000–£50,000/month | Board-level integration, scope-dependent |
 
-**Pricing logic:** If a decision is costing £5,000–£50,000 per month, then £295–£1,250 is negligible, and £10,000–£25,000 per month is rational relative to the alternative of continued loss.
+**Pricing logic:** If a decision is costing £5,000–£50,000 per month, then £295–£1,250 is negligible, and £5,000–£25,000 per month is rational relative to the alternative of continued loss.
 
 #### GTM Strategy
 
@@ -2732,7 +2819,7 @@ Then:
 
 #### 24.7 Business Model
 
-> "Current model is simple: £295 prices the problem. £750–£1,250 enforces the decision. £10k–£50k per month runs this at board level."
+> "Current model is simple: £295 prices the problem. £750–£1,250 enforces the decision. £5,000–£50,000 per month runs this as permanent infrastructure — from single-decision governance to full organisational deployment."
 
 Then:
 
@@ -2772,7 +2859,7 @@ Do not over-explain the ask. Do not present terms unprompted. Signal availabilit
 
 #### 24.12 Post-Call Follow-Up Protocol
 
-Send within two to six hours of the call:
+Send within 2–6 hours of the call:
 
 1. The Investor Memo (complete document)
 2. A short note:
@@ -2780,6 +2867,17 @@ Send within two to six hours of the call:
 > "Thanks for the conversation. The core thesis is simple: most companies don't lack insight — they lack decision execution. We've built a system that closes that gap by identifying, pricing, and enforcing decisions. Attaching the memo for context. Let me know where you want to go deeper."
 
 No additional materials. No deck. No financial model unless specifically requested. The memo is sufficient. Restraint signals confidence.
+
+**Timing protocol:**
+
+- Within 2 hours: Send memo + short note (as described above)
+- Day 3 (if no response): One follow-up. "Wanted to confirm you received the memo. Happy to go deeper on any section."
+- Day 7 (if still no response): Close the loop. "Assume timing isn't right. This will be here when it is."
+- Never send a third follow-up. Never chase. Scarcity is communicated through restraint.
+
+**If they respond with questions:** Answer concisely. Do not re-pitch. Address the specific question and end with: "Want to schedule a second conversation to go deeper?"
+
+**If they respond with "not now":** "Understood. When this becomes urgent, you know where to find us." Then stop.
 
 ---
 
@@ -3063,27 +3161,23 @@ Critical for early momentum. Former CEOs, operators, and individuals who have li
 
 Consulting firms, enterprise SaaS operators, and transformation leaders. Engage selectively and only where strategic alignment does not compromise operational control.
 
-#### 26.6 Target Investor List
+#### 26.6 Target Investor Profiles
 
 **UK/Europe — Top Tier (Lead Potential):**
 
-- LocalGlobe
-- Episode 1 Ventures
-- Point Nine Capital
-- Seedcamp
-- Crane Venture Partners
+- Early-stage funds with B2B infrastructure thesis
+- Pre-seed/Seed funds comfortable with category creation
+- Firms that have backed workflow automation or enterprise tooling
 
-**UK/Europe — Strong Fit (Operator and Systems Thinking):**
+**UK/Europe — Strong Fit:**
 
-- Kindred Capital
-- Connect Ventures
-- Firstminute Capital
+- Operator-led funds with portfolio companies in transformation
+- Funds with partners who have operating experience (not just financial)
 
-**Global (Selective — Only If Strategic):**
+**Global (Selective):**
 
-- Andreessen Horowitz (warm introduction required)
-- Founders Fund (fits thesis if framed as infrastructure)
-- Bessemer Venture Partners
+- Only via warm introduction
+- Thesis alignment required (not just category interest)
 
 **Angels/Operators (High Priority):**
 
@@ -3093,13 +3187,13 @@ Target profiles: former SaaS founders with £50M+ exits, operators from McKinsey
 
 **Phase 1 — Warm Introductions Only**
 
-Ten to twenty high-quality introductions. No cold outreach. No mass emails. Each introduction carries a specific message:
+10–20 high-quality introductions. No cold outreach. No mass emails. Each introduction carries a specific message:
 
 > "We're building infrastructure for decision execution. Not SaaS, not consulting. Worth a conversation if you've seen how decisions actually break."
 
 **Phase 2 — Controlled Batch**
 
-Five to eight investors per batch. Run conversations. Refine narrative based on response patterns. Move to next batch with improved positioning.
+5–8 investors per batch. Run conversations. Refine narrative based on response patterns. Move to next batch with improved positioning.
 
 **Phase 3 — Signal Amplification**
 
@@ -3262,6 +3356,140 @@ Because the wrong clients — the ones who leave early, who push back on the met
 Every wrong client who departs is a gift. They have self-selected out of a system that was never designed for them. Their departure strengthens the portfolio, protects the positioning, and preserves capacity for the right client — the one who arrives uncomfortable, stays uncomfortable, and produces extraordinary outcomes precisely because they were never allowed to become comfortable.
 
 > **KEY PRINCIPLE:** The system is designed to repel the wrong client with the same force it attracts the right one. Attrition is not failure — it is filtration.
+
+---
+
+---
+
+# PART X — GOVERNANCE & COMPLIANCE
+
+*Operational governance, quality assurance, data protection, and the protocols that ensure institutional integrity as the organisation scales.*
+
+---
+
+### Chapter 30: Onboarding Protocol
+
+#### 30.1 New Operator Onboarding (21-Day Sequence)
+
+**Week 1 — Immersion:**
+
+- Day 1–2: Read Parts I–IV of this manual. No shortcuts.
+- Day 3: Shadow two live calls (observe only, no speaking)
+- Day 4–5: Role-play all five objections with a senior operator until response time < 3 seconds
+
+**Week 2 — Supervised Practice:**
+
+- Day 6–8: Run three calls with senior operator on mute (real prospects, real stakes)
+- Day 9–10: Debrief each call against the script. Identify deviations. Correct.
+
+**Week 3 — Solo with Review:**
+
+- Day 11–15: Five solo calls. All recorded. All reviewed within 24 hours.
+- Day 16–21: Full autonomy if performance metrics are met. If not, extend Week 2.
+
+#### 30.2 Performance Gate for Graduation
+
+- Script adherence ≥ 90%
+- Qualification accuracy (correctly identifies Type 1/2/3 calls) ≥ 80%
+- Zero prohibited language usage
+
+---
+
+### Chapter 31: Quality Assurance
+
+#### 31.1 Call Review Protocol
+
+- Every operator's calls are recorded
+- Minimum 2 calls reviewed per week per operator (random selection)
+- Review checklist: script adherence, pattern recognition, objection handling, exit discipline, tone control
+
+#### 31.2 Performance Metrics
+
+| Metric | Definition | Target |
+|--------|-----------|--------|
+| Conversion rate | Qualified calls → paid engagement | Tracked per operator |
+| Qualification accuracy | Calls correctly classified as Type 1/2/3 | ≥ 80% |
+| Average call duration | Qualified: 15–20 minutes; Disqualified: < 5 minutes | Within range |
+| Script adherence score | Measured by reviewer (0–100%) | ≥ 90% |
+| Prohibited language incidents | Count of violations per review period | Zero |
+
+#### 31.3 Correction Protocol
+
+- **First deviation:** Verbal debrief + script drill
+- **Pattern deviation (3+ in 14 days):** Supervised practice restart
+- **Philosophical deviation** (softening the system, adding "value" language, chasing): Formal review with founder
+
+---
+
+### Chapter 32: Escalation Matrix
+
+| Situation | Escalation Path | Timeline |
+|-----------|----------------|----------|
+| Prospect threatens legal action | Founder immediately | Same hour |
+| Prospect is a public figure / media risk | Founder before any response | Same day |
+| Operator encounters a scenario not in this manual | Senior operator, then founder if unresolved | 24 hours |
+| Client disputes diagnostic accuracy with evidence | Technical review → founder decision | 48 hours |
+| Breach pattern detected but client denies | Document, escalate to founder | 48 hours |
+| Two clients are direct competitors | Founder approval required before both engagements proceed | Before second engagement begins |
+| Operator has personal relationship with prospect | Disclose to founder. Reassign if conflict exists. | Before first interaction |
+
+---
+
+### Chapter 33: Data Protection & Confidentiality
+
+#### 33.1 Classification of Client Data
+
+| Tier | Classification | Handling |
+|------|---------------|----------|
+| Tier 1 | Restricted | Diagnostic responses, cost figures, decision details — encrypted at rest, never shared externally |
+| Tier 2 | Confidential | Organisation name, industry, engagement details — shared internally on need-to-know basis only |
+| Tier 3 | Anonymised | Pattern data, aggregate statistics — may be used in cases and content (no identification possible) |
+
+#### 33.2 Rules
+
+- No client data is stored on personal devices
+- No client names appear in external content (cases use anonymised structure only)
+- All diagnostic data is encrypted in transit and at rest
+- Client data is retained for 24 months post-engagement, then deleted unless retention is agreed in writing
+- If a client requests data deletion, it is completed within 14 days
+
+#### 33.3 Breach Protocol
+
+If client data is exposed or compromised:
+
+1. Contain immediately (revoke access, isolate system)
+2. Notify founder within 1 hour
+3. Notify affected client within 24 hours
+4. Document incident in full
+5. Implement corrective action within 7 days
+
+---
+
+### Chapter 34: Engagement Termination
+
+#### 34.1 When an Engagement Ends
+
+1. Final report delivered (decisions resolved, breaches logged, outcomes measured)
+2. Client data archived (encrypted, 24-month retention)
+3. Exit interview offered (not required — "What did we miss?")
+4. No further contact for 90 days (cooling period)
+5. After 90 days: One check-in permitted. "Has the pattern returned?"
+
+#### 34.2 Client-Initiated Termination
+
+- Accepted without objection. No retention attempts. No discount offers.
+- Response: "Understood. The system is here when it's needed."
+- Data archived per retention policy
+
+#### 34.3 System-Initiated Termination (Rare)
+
+**Grounds:**
+
+- Client consistently refuses to act (breach pattern with no correction)
+- Client attempts to manipulate the system (integrity score below threshold)
+- Client requests the system soften its methodology
+
+**Response:** "This engagement is no longer producing outcomes. We're closing it."
 
 ---
 
