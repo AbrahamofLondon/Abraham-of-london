@@ -9,7 +9,7 @@ import {
   getHCDRiskColor,
   SAMPLE_HCD_METRICS,
   type HCDMetrics,
-} from "./hcd-engine";
+} from "./hcd-engine-calculations";
 
 describe("HCD ENGINE: HUMAN CAPITAL DELTA AUDIT", () => {
   describe("core calculation integrity", () => {

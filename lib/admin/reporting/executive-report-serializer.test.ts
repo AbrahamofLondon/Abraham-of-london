@@ -1,5 +1,8 @@
 // @ts-nocheck
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
 import {
   serializeExecutiveReportToJson,
   serializeExecutiveReportToPdfPayload,
@@ -109,57 +112,64 @@ const mockReport = {
 
 describe("serializeExecutiveReportToJson", () => {
   it("returns canonical JSON payload", () => {
-    const result = serializeExecutiveReportToJson(mockReport as any);
+    const result = serializeExecutiveReportToJson({ report: mockReport });
 
     expect(result).toBeTruthy();
-    expect(result.meta).toBeTruthy();
-    expect(result.meta.version).toBe("2.0.0");
-    expect(result.meta.state).toBe("MISALIGNED");
+    expect(result.ok).toBe(true);
+    expect(result.canonical).toBeTruthy();
+    expect(result.canonical.schemaVersion).toBe("canonical-report-v2");
 
-    expect(result.narrative).toEqual(mockReport.narrative);
-    expect(result.ogr).toEqual(mockReport.ogr);
-    expect(result.financialExposure).toEqual(mockReport.financialExposure);
-    expect(result.priorityStack).toEqual(mockReport.priorityStack);
-    expect(result.failureModes).toEqual(mockReport.failureModes);
+    // orgState defaults to DRIFTING when no constitution is provided
+    expect(result.canonical.sections.executiveSummary.state).toBe("DRIFTING");
+
+    // Narrative fields are picked from report.narrative
+    expect(result.canonical.sections.executiveSummary.headline).toBe(mockReport.narrative.headline);
+    expect(result.canonical.sections.executiveSummary.summary).toBe(mockReport.narrative.summary);
+    expect(result.canonical.sections.executiveSummary.mandate).toBe(mockReport.narrative.mandate);
+
+    // Financial exposure
+    expect(result.canonical.sections.financialExposure.replacementCost).toBe(245000);
+    expect(result.canonical.sections.financialExposure.executionLoss).toBe(26500);
+    expect(result.canonical.sections.financialExposure.totalExposure).toBe(271500);
+
+    // Priority stack and failure modes
+    expect(result.canonical.sections.priorityStack.items).toEqual(mockReport.priorityStack);
+    expect(result.canonical.sections.failureModes.items).toEqual(mockReport.failureModes);
   });
 
   it("maps resonance telemetry into stable JSON shape", () => {
-    const result = serializeExecutiveReportToJson(mockReport as any);
+    const result = serializeExecutiveReportToJson({ report: mockReport });
 
-    expect(result.resonance.averageDissonance).toBe(26.5);
-    expect(result.resonance.isDisordered).toBe(false);
-    expect(Array.isArray(result.resonance.domains)).toBe(true);
-    expect(result.resonance.domains).toHaveLength(3);
+    const analysis = result.canonical.sections.strategicDomainAnalysis;
+    expect(analysis.averageDissonance).toBe(26.5);
+    expect(Array.isArray(analysis.domains)).toBe(true);
+    expect(analysis.domains).toHaveLength(3);
 
-    expect(result.resonance.domains[0]).toEqual({
-      label: "OPERATIONAL_CLARITY",
-      intent: 88,
-      reality: 45,
-      dissonance: 43,
-      coverage: "HIGH",
-      responseCount: 6,
+    expect(analysis.domains[0]).toEqual({
+      label: "STRATEGIC_INTENT",
+      intent: 95,
+      reality: 72,
+      dissonance: 23,
     });
   });
 
-  it("maps HCD aggregate into stable JSON shape", () => {
-    const result = serializeExecutiveReportToJson(mockReport as any);
+  it("maps integrity snapshot from report", () => {
+    const result = serializeExecutiveReportToJson({ report: mockReport });
 
-    expect(result.hcd).toEqual({
-      overallBurnoutIndex: 63,
-      riskScore: "HIGH",
-      totalReplacementCost: 245000,
-      averageUtilization: 87,
-      criticalDomains: ["LEADERSHIP_EXHAUSTION"],
-      elevatedDomains: ["ENGINEERING_VELOCITY"],
+    expect(result.canonical.sections.integritySnapshot).toEqual({
+      sovereignCertainty: 80.55,
+      burnoutIndex: 63,
+      averageDissonance: 26.5,
+      authorized: false,
     });
   });
 
   it("adds generated timestamp metadata", () => {
     const before = Date.now();
-    const result = serializeExecutiveReportToJson(mockReport as any);
+    const result = serializeExecutiveReportToJson({ report: mockReport });
     const after = Date.now();
 
-    const generated = Date.parse(result.meta.generatedAt);
+    const generated = Date.parse(result.canonical.generatedAt);
 
     expect(Number.isFinite(generated)).toBe(true);
     expect(generated).toBeGreaterThanOrEqual(before - 1000);
@@ -167,11 +177,11 @@ describe("serializeExecutiveReportToJson", () => {
   });
 
   it("preserves order of priority stack and failure modes", () => {
-    const result = serializeExecutiveReportToJson(mockReport as any);
+    const result = serializeExecutiveReportToJson({ report: mockReport });
 
-    expect(result.priorityStack[0]).toBe("Suspend execution — alignment not verified");
-    expect(result.priorityStack[1]).toBe("Correct OPERATIONAL_CLARITY (dissonance: 43%)");
-    expect(result.failureModes[2]).toBe("Leadership Signal Erosion");
+    expect(result.canonical.sections.priorityStack.items[0]).toBe("Suspend execution — alignment not verified");
+    expect(result.canonical.sections.priorityStack.items[1]).toBe("Correct OPERATIONAL_CLARITY (dissonance: 43%)");
+    expect(result.canonical.sections.failureModes.items[2]).toBe("Leadership Signal Erosion");
   });
 
   it("serializes empty arrays without crashing", () => {
@@ -198,24 +208,25 @@ describe("serializeExecutiveReportToJson", () => {
       failureModes: [],
     };
 
-    const result = serializeExecutiveReportToJson(emptyReport as any);
+    const result = serializeExecutiveReportToJson({ report: emptyReport });
 
-    expect(result.resonance.domains).toEqual([]);
-    expect(result.hcd.criticalDomains).toEqual([]);
-    expect(result.hcd.elevatedDomains).toEqual([]);
-    expect(result.priorityStack).toEqual([]);
-    expect(result.failureModes).toEqual([]);
+    expect(result.canonical.sections.strategicDomainAnalysis.domains).toEqual([]);
+    expect(result.canonical.sections.priorityStack.items).toEqual([]);
+    expect(result.canonical.sections.failureModes.items).toEqual([]);
   });
 });
 
 describe("serializeExecutiveReportToPdfPayload", () => {
   it("returns canonical PDF payload", () => {
-    const result = serializeExecutiveReportToPdfPayload(mockReport as any);
+    const result = serializeExecutiveReportToPdfPayload({ report: mockReport });
 
     expect(result).toBeTruthy();
-    expect(result.title).toBe("Executive Diagnostic Report");
-    expect(result.subtitle).toBe("Institutional Diagnostics Engine");
-    expect(result.state).toBe("MISALIGNED");
+    // Default title is "Executive Intelligence Brief"
+    expect(result.title).toBe("Executive Intelligence Brief");
+    // Default subtitle is ""
+    expect(typeof result.subtitle).toBe("string");
+    // State derived from constitution.orgState, which defaults to "DRIFTING" without constitution input
+    expect(result.state).toBe("DRIFTING");
 
     expect(result.headline).toBe(mockReport.narrative.headline);
     expect(result.summary).toBe(mockReport.narrative.summary);
@@ -223,7 +234,7 @@ describe("serializeExecutiveReportToPdfPayload", () => {
   });
 
   it("maps integrity block correctly", () => {
-    const result = serializeExecutiveReportToPdfPayload(mockReport as any);
+    const result = serializeExecutiveReportToPdfPayload({ report: mockReport });
 
     expect(result.integrity).toEqual({
       sovereignCertainty: 80.55,
@@ -233,8 +244,8 @@ describe("serializeExecutiveReportToPdfPayload", () => {
     });
   });
 
-  it("formats exposure values as currency strings", () => {
-    const result = serializeExecutiveReportToPdfPayload(mockReport as any);
+  it("formats exposure values as strings", () => {
+    const result = serializeExecutiveReportToPdfPayload({ report: mockReport });
 
     expect(typeof result.exposure.replacementCost).toBe("string");
     expect(typeof result.exposure.executionLoss).toBe("string");
@@ -246,29 +257,29 @@ describe("serializeExecutiveReportToPdfPayload", () => {
   });
 
   it("maps priorities and failure modes directly", () => {
-    const result = serializeExecutiveReportToPdfPayload(mockReport as any);
+    const result = serializeExecutiveReportToPdfPayload({ report: mockReport });
 
     expect(result.priorities).toEqual(mockReport.priorityStack);
     expect(result.failureModes).toEqual(mockReport.failureModes);
   });
 
   it("maps domains into PDF-friendly table rows", () => {
-    const result = serializeExecutiveReportToPdfPayload(mockReport as any);
+    const result = serializeExecutiveReportToPdfPayload({ report: mockReport });
 
     expect(Array.isArray(result.domains)).toBe(true);
     expect(result.domains).toHaveLength(3);
 
     expect(result.domains[1]).toEqual({
-      label: "LEADERSHIP_TRUST",
-      intent: 92,
-      reality: 58,
-      dissonance: 34,
+      label: "OPERATIONAL_CLARITY",
+      intent: 88,
+      reality: 45,
+      dissonance: 43,
     });
   });
 
   it("adds generated timestamp to PDF payload", () => {
     const before = Date.now();
-    const result = serializeExecutiveReportToPdfPayload(mockReport as any);
+    const result = serializeExecutiveReportToPdfPayload({ report: mockReport });
     const after = Date.now();
 
     const generated = Date.parse(result.generatedAt);
@@ -289,7 +300,10 @@ describe("serializeExecutiveReportToPdfPayload", () => {
       },
     };
 
-    const result = serializeExecutiveReportToPdfPayload(authorizedReport as any);
+    const result = serializeExecutiveReportToPdfPayload({
+      report: authorizedReport,
+      constitution: { orgState: "ORDERED" },
+    });
 
     expect(result.state).toBe("ORDERED");
     expect(result.integrity.authorized).toBe(true);
@@ -313,7 +327,7 @@ describe("serializeExecutiveReportToPdfPayload", () => {
       },
     };
 
-    const result = serializeExecutiveReportToPdfPayload(report as any);
+    const result = serializeExecutiveReportToPdfPayload({ report });
 
     expect(result.domains).toEqual([]);
   });

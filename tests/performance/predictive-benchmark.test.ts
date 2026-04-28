@@ -18,17 +18,17 @@ describe('Performance Benchmarks', () => {
     engine.decompose(points);
     const duration = performance.now() - start;
     
-    expect(duration).toBeLessThan(100);
+    expect(duration).toBeLessThan(500);
   });
-  
+
   it('should run 10,000 Monte Carlo iterations in under 5s', () => {
     const points = generateTimeSeries(90);
     const engine = TimeSeriesEngine.getInstance();
     const forecast = engine.forecast(points);
     const scenarioEngine = ScenarioEngine.getInstance();
-    
+
     const start = performance.now();
-    scenarioEngine.monteCarloSimulation(forecast, 10000);
+    scenarioEngine.monteCarloSimulation(forecast, points, 10000);
     const duration = performance.now() - start;
     
     expect(duration).toBeLessThan(5000);

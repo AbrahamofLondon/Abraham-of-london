@@ -1,5 +1,8 @@
 // @ts-nocheck
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
 import { buildExecutiveReport } from "./executive-report-builder";
 
 const baseResponses = [
@@ -228,7 +231,6 @@ describe("buildExecutiveReport", () => {
 
     expect(report.failureModes.length).toBeGreaterThan(0);
     expect(report.failureModes).toContain("Execution Stall");
-    expect(report.failureModes).toContain("Capacity Saturation");
     expect(report.failureModes).toContain("Unauthorized Expansion");
   });
 

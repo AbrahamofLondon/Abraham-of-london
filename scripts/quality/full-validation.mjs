@@ -39,7 +39,7 @@ run("TypeScript", "npx tsc --noEmit --pretty false");
 run("PDF audit", "npm run pdf:audit");
 run("MDX integrity", "node scripts/mdx-integrity-check.mjs");
 run("MDX gate", "node scripts/mdx-illegal-jsx-gate.mjs");
-run("Unit tests", "npx vitest run --reporter=verbose", { allowFail: true });
+run("Unit tests", "npx vitest run --reporter=verbose");
 run("Build", "npx next build");
 
 console.log("\n========================================");
