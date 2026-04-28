@@ -1,17 +1,3 @@
-// server-only guard removed — Pages Router incompatible
-
-/* lib/server/rate-limit-unified.ts — EDGE-SAFE (FULL REPLACEMENT) */
-// Fixes: "@upstash/redis.mjs uses process.version" Edge failure.
-// Memory rate limiter (Edge-safe). Backward compatible API surface.
-
-export type Bucket = { count: number; resetAt: number };
-
-// In-memory buckets (per runtime instance)
-// Note: In serverless, memory is ephemeral per request/instance,
-// but this satisfies Edge requirements and provides basic protection.
-const mem = new Map<string, Bucket>();
-
-/** Backward compatible config shape used across middleware + API wrappers */
 export type RateLimitConfig = {
   limit: number;
   windowMs: number;
@@ -28,10 +14,6 @@ export type RateLimitKey =
   | "CONTACT"
   | "DOWNLOAD";
 
-/**
- * Canonical configs.
- * NOTE: keys and names match existing call sites in the repository.
- */
 export const RATE_LIMIT_CONFIGS: Record<RateLimitKey, RateLimitConfig> = {
   PUBLIC: { limit: 120, windowMs: 60_000, keyPrefix: "pub" },
   AUTH: { limit: 60, windowMs: 60_000, keyPrefix: "auth" },
@@ -43,7 +25,6 @@ export const RATE_LIMIT_CONFIGS: Record<RateLimitKey, RateLimitConfig> = {
   DOWNLOAD: { limit: 20, windowMs: 3_600_000, keyPrefix: "download" },
 };
 
-// Alias preserved for backward compatibility
 export const LIMITS = RATE_LIMIT_CONFIGS;
 
 export type RateLimitResult = {
@@ -54,126 +35,73 @@ export type RateLimitResult = {
   resetAt: number;
   retryAfterMs: number;
   windowMs: number;
-  source: "memory";
+  source: "redis" | "postgres" | "unavailable";
 };
 
-/* -------------------------------------------------------------------------- */
-/* CORE LOGIC                                                                 */
-/* -------------------------------------------------------------------------- */
+import {
+  clearPersistentRateLimit,
+  consumePersistentRateLimit,
+  getPersistentRateLimitStats,
+} from "@/lib/server/security/persistent-rate-limit";
 
 function keyFor(config: RateLimitConfig, id: string): string {
   const safeId = String(id || "anon");
   return `${config.keyPrefix}:${safeId}`;
 }
 
-function computeResult(params: {
-  allowed: boolean;
-  remaining: number;
-  limit: number;
-  resetAt: number;
-  retryAfterMs: number;
-  windowMs: number;
-}): RateLimitResult {
+function normalizeResult(
+  raw: Awaited<ReturnType<typeof consumePersistentRateLimit>>,
+  windowMs: number,
+): RateLimitResult {
   return {
-    allowed: params.allowed,
-    remaining: params.remaining,
-    limit: params.limit,
-    resetAt: params.resetAt,
-    resetTime: params.resetAt, // legacy compatibility
-    retryAfterMs: params.retryAfterMs,
-    windowMs: params.windowMs,
-    source: "memory",
+    allowed: raw.allowed,
+    remaining: raw.remaining,
+    limit: raw.limit,
+    resetAt: raw.resetAt,
+    resetTime: raw.resetAt,
+    retryAfterMs: raw.retryAfterMs,
+    windowMs,
+    source: raw.source,
   };
 }
 
-/**
- * Canonical primitive limiter. Handles bucket expiration and incrementing.
- */
-function rateLimitByConfig(id: string, config: RateLimitConfig): RateLimitResult {
-  const now = Date.now();
-  const k = keyFor(config, id);
-
-  const existing = mem.get(k);
-  
-  // Create or reset bucket if expired
-  if (!existing || existing.resetAt <= now) {
-    const resetAt = now + config.windowMs;
-    mem.set(k, { count: 1, resetAt });
-    return computeResult({
-      allowed: true,
-      remaining: Math.max(0, config.limit - 1),
-      limit: config.limit,
-      resetAt,
-      retryAfterMs: 0,
-      windowMs: config.windowMs,
-    });
-  }
-
-  // Check if limit exceeded
-  if (existing.count >= config.limit) {
-    return computeResult({
-      allowed: false,
-      remaining: 0,
-      limit: config.limit,
-      resetAt: existing.resetAt,
-      retryAfterMs: Math.max(0, existing.resetAt - now),
-      windowMs: config.windowMs,
-    });
-  }
-
-  // Increment existing bucket
-  existing.count += 1;
-  mem.set(k, existing);
-
-  return computeResult({
-    allowed: true,
-    remaining: Math.max(0, config.limit - existing.count),
-    limit: config.limit,
-    resetAt: existing.resetAt,
-    retryAfterMs: 0,
-    windowMs: config.windowMs,
-  });
-}
-
-/* -------------------------------------------------------------------------- */
-/* PUBLIC API                                                                 */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Modern check style: rateLimitCheck({ key: 'ADMIN', id: ip })
- */
-export function rateLimitCheck(params: { key: RateLimitKey; id: string }): RateLimitResult {
+export function rateLimitCheck(params: {
+  key: RateLimitKey;
+  id: string;
+}): Promise<RateLimitResult> {
   const cfg = RATE_LIMIT_CONFIGS[params.key];
-  return rateLimitByConfig(params.id, cfg);
+  return rateLimit(params.id, cfg);
 }
 
-/**
- * Legacy style used across the repo: await rateLimit(ip, CONFIG)
- */
-export async function rateLimit(id: string, config: RateLimitConfig): Promise<RateLimitResult> {
-  return rateLimitByConfig(id, config);
+export async function rateLimit(
+  id: string,
+  config: RateLimitConfig,
+): Promise<RateLimitResult> {
+  const raw = await consumePersistentRateLimit({
+    key: keyFor(config, id),
+    limit: config.limit,
+    windowMs: config.windowMs,
+    failClosed: true,
+  });
+
+  return normalizeResult(raw, config.windowMs);
 }
 
-/**
- * Simple boolean check for quick filtering
- */
-export async function isRateLimited(params: { key: RateLimitKey; id: string }): Promise<boolean> {
-  const r = rateLimitCheck(params);
-  return !r.allowed;
+export async function isRateLimited(params: {
+  key: RateLimitKey;
+  id: string;
+}): Promise<boolean> {
+  const result = await rateLimitCheck(params);
+  return !result.allowed;
 }
 
-/**
- * Isomorphic IP resolver for Edge and Node environments
- */
 export function getClientIp(req: any): string {
-  // Edge / NextRequest (Middleware)
   if (req?.headers?.get) {
     const forwarded = req.headers.get("x-forwarded-for");
     if (forwarded) return forwarded.split(",")[0].trim();
     return req.headers.get("x-real-ip") ?? "127.0.0.1";
   }
 
-  // Node / NextApiRequest (Pages API)
   const fwd = req?.headers?.["x-forwarded-for"];
   const ip =
     (Array.isArray(fwd) ? fwd[0] : typeof fwd === "string" ? fwd.split(",")[0] : undefined) ??
@@ -183,9 +111,6 @@ export function getClientIp(req: any): string {
   return String(ip || "127.0.0.1");
 }
 
-/**
- * Generates standard rate limit headers for HTTP responses
- */
 export function createRateLimitHeaders(result: {
   limit: number;
   remaining: number;
@@ -193,27 +118,34 @@ export function createRateLimitHeaders(result: {
   resetAt?: number;
   retryAfterMs: number;
 }) {
-  const reset = typeof result.resetTime === "number" ? result.resetTime : Number(result.resetAt || Date.now());
+  const reset =
+    typeof result.resetTime === "number"
+      ? result.resetTime
+      : Number(result.resetAt || Date.now());
+
   return {
     "X-RateLimit-Limit": String(result.limit),
     "X-RateLimit-Remaining": String(result.remaining),
     "X-RateLimit-Reset": String(Math.ceil(reset / 1000)),
-    "Retry-After": result.retryAfterMs > 0 ? String(Math.ceil(result.retryAfterMs / 1000)) : "0",
+    "Retry-After": result.retryAfterMs > 0
+      ? String(Math.ceil(result.retryAfterMs / 1000))
+      : "0",
   };
 }
 
-/* -------------------------------------------------------------------------- */
-/* WRAPPERS                                                                   */
-/* -------------------------------------------------------------------------- */
-
-export function withApiRateLimit(handler: any, options: { key: RateLimitKey; id?: string }) {
+export function withApiRateLimit(handler: any, options: {
+  key: RateLimitKey;
+  id?: string;
+}) {
   return async (req: any, res: any) => {
     const id = options.id || getClientIp(req);
     const cfg = RATE_LIMIT_CONFIGS[options.key];
     const result = await rateLimit(id, cfg);
 
     const headers = createRateLimitHeaders(result);
-    for (const [k, v] of Object.entries(headers)) res.setHeader(k, v);
+    for (const [headerKey, value] of Object.entries(headers)) {
+      res.setHeader(headerKey, value);
+    }
 
     if (!result.allowed) {
       return res.status(429).json({
@@ -240,26 +172,16 @@ export function withEdgeRateLimit(handler: any, cfg: RateLimitConfig) {
   };
 }
 
-/* -------------------------------------------------------------------------- */
-/* STATS & MAINTENANCE                                                        */
-/* -------------------------------------------------------------------------- */
-
-export function getRateLimiterStats() {
-  return {
-    totalKeys: mem.size,
-    keys: Array.from(mem.entries()).map(([key, bucket]) => ({
-      key,
-      count: bucket.count,
-      resetAt: bucket.resetAt,
-      resetIn: Math.max(0, bucket.resetAt - Date.now()),
-    })),
-  };
+export async function getRateLimiterStats() {
+  return getPersistentRateLimitStats();
 }
 
-export async function resetRateLimit(params: { key: RateLimitKey; id: string }): Promise<boolean> {
+export async function resetRateLimit(params: {
+  key: RateLimitKey;
+  id: string;
+}): Promise<boolean> {
   const cfg = RATE_LIMIT_CONFIGS[params.key];
-  const k = keyFor(cfg, params.id);
-  return mem.delete(k);
+  return clearPersistentRateLimit(keyFor(cfg, params.id));
 }
 
 export const unblock = resetRateLimit;
@@ -278,4 +200,3 @@ export default {
   resetRateLimit,
   unblock,
 };
-

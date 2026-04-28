@@ -7,7 +7,7 @@
 
 import { getToken } from "next-auth/jwt";
 import type { NextApiRequest } from "next";
-import { type Tier, normalizeTier, maxTier, hasAccess as tierHasAccess } from "./tiers";
+import { type Tier, normalizeTier, hasAccess as tierHasAccess } from "./tiers";
 
 /* -------------------------------------------------------------------------- */
 /*  TYPES                                                                      */
@@ -81,8 +81,11 @@ export async function resolveIdentity(
       result.accessSessionId = session.sessionId;
       result.sessionExpiresAt = session.expiresAt;
 
-      const accessTier = normalizeTier(session.tier);
-      result.tier = maxTier(result.tier, accessTier);
+      // Access cookie identifies session presence but does NOT independently
+      // upgrade tier. Tier authority comes from NextAuth JWT or Prisma member
+      // record only. The access cookie tier is informational for logging.
+      // result.tier remains as set by NextAuth (step 1) or will be set by
+      // Prisma member lookup (step 3).
 
       // Prefer the member record from the access session
       if (session.memberId) {
@@ -111,10 +114,9 @@ export async function resolveIdentity(
         result.tier = "public";
       }
 
-      // Merge tier from member record if higher
-      const memberTier = normalizeTier(member.tier);
+      // Single authoritative source: Prisma member record
       if (result.lifecycle === "active") {
-        result.tier = maxTier(result.tier, memberTier);
+        result.tier = normalizeTier(member.tier);
       }
     }
   }
@@ -157,12 +159,12 @@ export function resolveIdentityEdge(
     result.flags = Array.isArray(aol.flags) ? aol.flags.map(String) : [];
     result.lifecycle = "active"; // trust JWT claim at edge
   } else if (hasAccessCookie) {
+    // Access cookie provides session presence indicator only.
+    // At edge without JWT, we grant minimum authenticated access.
+    // The server-side resolveIdentity() does the real Prisma check.
     result.authenticated = true;
     result.sessionSource = "access_cookie";
-    // At edge we can't look up the session, so we trust that if the
-    // cookie exists the user is at least inner_circle. The server will
-    // do the real check.
-    result.tier = "inner_circle";
+    result.tier = "member"; // minimum — server upgrades via Prisma if valid
     result.lifecycle = "active";
   }
 
