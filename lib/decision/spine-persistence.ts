@@ -14,20 +14,73 @@ import type { IntelligenceSpine } from "./intelligence-spine";
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SPINE_SESSION_KEY = "aol_intelligence_spine_v1";
+const SPINE_SESSION_KEY = "aol_intelligence_spine_v2";
+const SPINE_KEY_HANDLE = "aol_spine_key";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SESSION TIER (client-side)
+// CLIENT-SIDE ENCRYPTION (AES-256-GCM via Web Crypto API)
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function getOrCreateSessionKey(): Promise<CryptoKey> {
+  if (typeof window === "undefined" || !window.crypto?.subtle) {
+    throw new Error("Web Crypto not available");
+  }
+
+  // Check for existing key in this session
+  const existingRaw = window.sessionStorage.getItem(SPINE_KEY_HANDLE);
+  if (existingRaw) {
+    const keyData = Uint8Array.from(atob(existingRaw), (c) => c.charCodeAt(0));
+    return crypto.subtle.importKey("raw", keyData, "AES-GCM", true, ["encrypt", "decrypt"]);
+  }
+
+  // Generate new per-session key
+  const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+  const exported = await crypto.subtle.exportKey("raw", key);
+  const b64 = btoa(String.fromCharCode(...new Uint8Array(exported)));
+  window.sessionStorage.setItem(SPINE_KEY_HANDLE, b64);
+  return key;
+}
+
+async function encryptSpine(spine: IntelligenceSpine): Promise<string> {
+  const key = await getOrCreateSessionKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(JSON.stringify(spine));
+  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+  const payload = { iv: btoa(String.fromCharCode(...iv)), ct: btoa(String.fromCharCode(...new Uint8Array(ciphertext))) };
+  return JSON.stringify(payload);
+}
+
+async function decryptSpine(encrypted: string): Promise<IntelligenceSpine | null> {
+  try {
+    const key = await getOrCreateSessionKey();
+    const { iv: ivB64, ct: ctB64 } = JSON.parse(encrypted) as { iv: string; ct: string };
+    const iv = Uint8Array.from(atob(ivB64), (c) => c.charCodeAt(0));
+    const ct = Uint8Array.from(atob(ctB64), (c) => c.charCodeAt(0));
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+    return JSON.parse(new TextDecoder().decode(decrypted)) as IntelligenceSpine;
+  } catch {
+    return null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SESSION TIER (client-side, encrypted)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Save spine to sessionStorage.
+ * Save spine to sessionStorage (AES-256-GCM encrypted).
  * Also writes backward-compatible ConstitutionalThread for unmigrated pages.
  */
 export function saveSpineToSession(spine: IntelligenceSpine): void {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.setItem(SPINE_SESSION_KEY, JSON.stringify(spine));
+    // Async encryption — fire and forget for UI responsiveness
+    void encryptSpine(spine).then((encrypted) => {
+      window.sessionStorage.setItem(SPINE_SESSION_KEY, encrypted);
+    }).catch(() => {
+      // Fallback: store without encryption if Web Crypto unavailable
+      window.sessionStorage.setItem(SPINE_SESSION_KEY, JSON.stringify({ _plain: true, ...spine }));
+    });
     writeBackwardCompatThread(spine);
   } catch {
     // sessionStorage unavailable or quota exceeded
@@ -35,16 +88,46 @@ export function saveSpineToSession(spine: IntelligenceSpine): void {
 }
 
 /**
- * Load spine from sessionStorage.
+ * Load spine from sessionStorage (decrypts AES-256-GCM).
+ * Synchronous wrapper returns null; use loadSpineFromSessionAsync for full support.
  */
 export function loadSpineFromSession(): IntelligenceSpine | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.sessionStorage.getItem(SPINE_SESSION_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as IntelligenceSpine;
-    if (!parsed || typeof parsed !== "object" || !parsed.id) return null;
-    return parsed;
+    // Check for unencrypted fallback
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed._plain) {
+      const { _plain: _, ...spine } = parsed;
+      if (!spine.id) return null;
+      return spine as IntelligenceSpine;
+    }
+    // Encrypted data — cannot decrypt synchronously, return null
+    // Use loadSpineFromSessionAsync() instead
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Load spine from sessionStorage with async decryption.
+ */
+export async function loadSpineFromSessionAsync(): Promise<IntelligenceSpine | null> {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(SPINE_SESSION_KEY);
+    if (!raw) return null;
+    // Check for unencrypted fallback
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed._plain) {
+        const { _plain: _, ...spine } = parsed;
+        return (spine as IntelligenceSpine).id ? spine as IntelligenceSpine : null;
+      }
+    } catch { /* not plain JSON — try decrypt */ }
+    return await decryptSpine(raw);
   } catch {
     return null;
   }
@@ -57,6 +140,7 @@ export function clearSpineFromSession(): void {
   if (typeof window === "undefined") return;
   try {
     window.sessionStorage.removeItem(SPINE_SESSION_KEY);
+    window.sessionStorage.removeItem(SPINE_KEY_HANDLE);
   } catch {
     // ignore
   }

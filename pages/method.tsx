@@ -84,8 +84,8 @@ const MethodPage: NextPage = () => (
         {/* ── 4. THREE AUTHORITY PANELS (replaces 5-column grid) ── */}
         <div className="grid gap-3 md:grid-cols-3">
           {[
-            { n: "01", title: "Detects contradiction", desc: "Every statement is measured on two axes: resonance and certainty. High resonance with low certainty is where you claim alignment you haven't earned. The system names 12 structural patterns from these signals.", color: "rgba(252,165,165,0.55)" },
-            { n: "02", title: "Prices consequence", desc: "Contradictions are connected to time horizons and costs. The system calculates annual exposure with visible math — inputs, formula, output. No black box. The user can verify the number.", color: `${GOLD}80` },
+            { n: "01", title: "Detects contradiction", desc: "Each input is evaluated across independent proprietary dimensions to assess structural coherence and decision integrity. The system classifies named structural patterns from these signals — not categories, named conditions.", color: "rgba(252,165,165,0.55)" },
+            { n: "02", title: "Prices consequence", desc: "Detected contradictions are connected to time horizons and costs using the user's own stated inputs. The system derives exposure from what you provide — it does not fabricate data it does not have.", color: `${GOLD}80` },
             { n: "03", title: "Forces action", desc: "The output is a named decision, a sequenced priority stack, and a first move with a deadline. Patterns that persist across stages escalate. The system remembers what you have not resolved.", color: `${AMBER}80` },
           ].map((p) => (
             <div key={p.n} style={{ border: `1px solid ${p.color}25`, backgroundColor: `${p.color}06`, padding: "1.25rem" }}>
@@ -99,11 +99,11 @@ const MethodPage: NextPage = () => (
         {/* Secondary mechanism detail (collapsed, not primary) */}
         <div className="mt-6 grid gap-2 md:grid-cols-5">
           {[
-            { label: "Dual-axis scoring", detail: "Resonance + certainty per statement" },
-            { label: "12 pattern taxonomy", detail: "Named structural conditions" },
+            { label: "Multi-dimensional scoring", detail: "Proprietary evaluation per statement" },
+            { label: "Structural pattern engine", detail: "Named conditions, not categories" },
             { label: "Cross-stage memory", detail: "Patterns that persist escalate" },
             { label: "Evidence graph", detail: "Typed nodes across the journey" },
-            { label: "Consequence modelling", detail: "Time-bound financial exposure" },
+            { label: "Consequence modelling", detail: "Time-bound exposure derived from inputs" },
           ].map((m) => (
             <div key={m.label} style={{ border: "1px solid rgba(255,255,255,0.04)", padding: "0.65rem" }}>
               <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{m.label}</span>

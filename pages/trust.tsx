@@ -76,7 +76,7 @@ const TrustPage: NextPage = () => (
             <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
               <li>Every decision is deterministic — auditable, traceable, reproducible</li>
               <li>No fabricated data — all outputs derived from your stated inputs</li>
-              <li>No hidden AI — synthesis is governed by a deterministic arbiter</li>
+              <li>No hidden AI — output is governed by proprietary validation before it reaches you</li>
               <li>Founder-led — built from 15+ years of real-world execution experience</li>
               <li>Academically grounded — draws from recognised intellectual traditions</li>
             </ul>

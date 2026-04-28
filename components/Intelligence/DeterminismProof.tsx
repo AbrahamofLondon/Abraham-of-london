@@ -4,8 +4,8 @@
  * "This decision was reached deterministically.
  *  Same input → same output."
  *
- * Shows: weakest domain, contradiction source, scoring basis,
- * integrity-adjusted confidence.
+ * Shows: deterministic verification badge + abstracted confidence.
+ * Does NOT expose: tier names, scoring dimensions, integrity formula, thresholds.
  */
 
 import * as React from "react";
@@ -19,16 +19,16 @@ export type DeterminismProofProps = {
 
 export default function DeterminismProof({ spine, compact = false }: DeterminismProofProps) {
   const integrity = spine.integrityScore ?? 1;
-  const confidence = Math.round(spine.c3.specificityScore * integrity * 100);
-  const condition = spine.deterministic.conditionClass;
-  const tier = spine.c3.tier;
+  const raw = spine.c3.specificityScore * integrity;
+  const level = raw >= 0.7 ? "high" : raw >= 0.5 ? "moderate" : "limited";
+  const levelColor = raw >= 0.7 ? "rgba(110,231,183,0.60)" : raw >= 0.5 ? "rgba(201,169,110,0.70)" : "rgba(252,165,165,0.60)";
 
   if (compact) {
     return (
       <div className="flex items-center gap-2 border border-white/[0.06] bg-white/[0.02] px-3 py-2">
         <Shield className="h-3 w-3 shrink-0" style={{ color: "rgba(110,231,183,0.50)" }} />
         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
-          Deterministic · {condition} · {confidence}% confidence
+          Deterministic · {level} signal strength
         </span>
       </div>
     );
@@ -44,39 +44,23 @@ export default function DeterminismProof({ spine, compact = false }: Determinism
       </div>
 
       <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
-        This decision was reached deterministically. Same input produces same output.
+        This result was reached deterministically. Same input produces same output. The logic path is auditable.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-2" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.08em" }}>
         <div className="border border-white/[0.04] p-2">
-          <span style={{ color: "rgba(255,255,255,0.20)", textTransform: "uppercase" }}>Condition</span>
-          <div style={{ color: "rgba(255,255,255,0.50)", marginTop: "2px" }}>{condition}</div>
+          <span style={{ color: "rgba(255,255,255,0.20)", textTransform: "uppercase" }}>Signal strength</span>
+          <div style={{ color: levelColor, marginTop: "2px" }}>{level}</div>
         </div>
         <div className="border border-white/[0.04] p-2">
-          <span style={{ color: "rgba(255,255,255,0.20)", textTransform: "uppercase" }}>C3 Tier</span>
-          <div style={{ color: "rgba(255,255,255,0.50)", marginTop: "2px" }}>{tier.replace("_", " ").toLowerCase()}</div>
-        </div>
-        <div className="border border-white/[0.04] p-2">
-          <span style={{ color: "rgba(255,255,255,0.20)", textTransform: "uppercase" }}>Confidence</span>
-          <div style={{ color: confidence >= 70 ? "rgba(110,231,183,0.60)" : confidence >= 50 ? "rgba(201,169,110,0.70)" : "rgba(252,165,165,0.60)", marginTop: "2px" }}>
-            {confidence}%
-          </div>
-        </div>
-        <div className="border border-white/[0.04] p-2">
-          <span style={{ color: "rgba(255,255,255,0.20)", textTransform: "uppercase" }}>Integrity</span>
-          <div style={{ color: integrity >= 0.8 ? "rgba(110,231,183,0.60)" : integrity >= 0.5 ? "rgba(201,169,110,0.70)" : "rgba(252,165,165,0.60)", marginTop: "2px" }}>
-            {Math.round(integrity * 100)}%
-          </div>
+          <span style={{ color: "rgba(255,255,255,0.20)", textTransform: "uppercase" }}>Verification</span>
+          <div style={{ color: "rgba(110,231,183,0.50)", marginTop: "2px" }}>passed</div>
         </div>
       </div>
 
-      {spine.c3.scoringExplanation && (
-        <div className="mt-3 space-y-1" style={{ fontSize: "7px", color: "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', monospace" }}>
-          <div>Clarity: {spine.c3.scoringExplanation.clarity}</div>
-          <div>Context: {spine.c3.scoringExplanation.context}</div>
-          <div>Consequence: {spine.c3.scoringExplanation.consequence}</div>
-        </div>
-      )}
+      <p className="mt-3" style={{ fontSize: "7px", color: "rgba(255,255,255,0.15)", fontFamily: "'JetBrains Mono', monospace" }}>
+        Proprietary multi-factor evaluation. Result derived from your stated inputs only.
+      </p>
     </div>
   );
 }

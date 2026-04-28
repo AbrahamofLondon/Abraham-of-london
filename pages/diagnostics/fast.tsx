@@ -22,7 +22,7 @@ import { scoreC3 } from "@/lib/decision/c3-fidelity-scorer";
 import { synthesise, buildDeterministicOutput, type GovernedSynthesis, type SynthesisResult } from "@/lib/decision/synthesis-engine";
 import { forecastDefaultPath, controlShiftSummary } from "@/lib/decision/default-path-forecast";
 import { createSpine, type IntelligenceSpine } from "@/lib/decision/intelligence-spine";
-import { saveSpineToSession, persistSpineToDB, loadSpineFromSession } from "@/lib/decision/spine-persistence";
+import { saveSpineToSession, persistSpineToDB, loadSpineFromSession, loadSpineFromSessionAsync } from "@/lib/decision/spine-persistence";
 import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
 import DeterminismProof from "@/components/Intelligence/DeterminismProof";
 import DecisionTracePanel from "@/components/Intelligence/DecisionTracePanel";
@@ -64,10 +64,15 @@ const FastDiagnosticPage: NextPage = () => {
 
   React.useEffect(() => {
     track("fast_diagnostic_page_view");
-    try {
-      const existing = loadSpineFromSession();
-      if (existing?.id && existing?.synthesis?.verdict && existing?.stage === "fast_diagnostic") {
-        // Full rehydration — restore prior result so "case is active" is experientially true
+    // Attempt async decrypted load first, fall back to sync plaintext
+    void loadSpineFromSessionAsync().then((existing) => {
+      if (!existing) {
+        // Try sync fallback for plaintext/legacy data
+        const sync = loadSpineFromSession();
+        if (sync?.id && sync?.synthesis?.verdict) setHasActiveCase(true);
+        return;
+      }
+      if (existing.id && existing.synthesis?.verdict && existing.stage === "fast_diagnostic") {
         setSpine(existing);
         setSynthesis(existing.synthesis);
         setSynthesisSource(existing.kernelOutput ? "llm" : "deterministic");
@@ -77,10 +82,10 @@ const FastDiagnosticPage: NextPage = () => {
         }
         setHasActiveCase(true);
         setStage("result");
-      } else if (existing?.id && existing?.synthesis?.verdict) {
+      } else if (existing.id && existing.synthesis?.verdict) {
         setHasActiveCase(true);
       }
-    } catch {}
+    }).catch(() => { /* ignore decryption failures */ });
   }, []);
 
   // ─── ENTRY INTERRUPT — single-field strike ───
@@ -506,7 +511,7 @@ const FastDiagnosticPage: NextPage = () => {
 
             {/* Header */}
             <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
-              {elapsed}s · {condition} · {spine.c3.confidenceBand} confidence
+              {elapsed}s · {condition} · system evaluated
             </span>
             <h2 style={{ ...serif, fontSize: "1.3rem", fontWeight: 500, color: "rgba(255,255,255,0.85)", marginTop: "1rem", lineHeight: 1.3 }}>
               This is what is actually happening.
@@ -605,9 +610,9 @@ const FastDiagnosticPage: NextPage = () => {
 
             {/* 7. CERTAINTY BOUNDARY */}
             <div style={{ marginTop: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: spine.c3.confidenceBand === "high" ? "rgba(110,231,183,0.60)" : spine.c3.confidenceBand === "medium" ? `${GOLD}BB` : "rgba(255,255,255,0.30)" }} />
+              <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: spine.c3.specificityScore >= 0.7 ? "rgba(110,231,183,0.60)" : spine.c3.specificityScore >= 0.5 ? `${GOLD}BB` : "rgba(255,255,255,0.30)" }} />
               <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.20)" }}>
-                Confidence: {spine.c3.confidenceBand} · {synthesis.certaintyBoundary}
+                {synthesis.certaintyBoundary}
               </span>
             </div>
 

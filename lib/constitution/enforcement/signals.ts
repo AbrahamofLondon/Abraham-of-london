@@ -40,7 +40,7 @@ export function detectDrift(domainScores: number[]): EnforcementSignal | null {
     severity: variance > 45 ? "CRITICAL" : variance > 35 ? "HIGH" : "MEDIUM",
     score: variance,
     source: "diagnostics",
-    evidence: [`Domain variance: ${variance}pts (max ${Math.max(...domainScores)}, min ${Math.min(...domainScores)})`],
+    evidence: ["Domain variance exceeds enforceable threshold — structural drift detected"],
     canonDefinition: "Drift (Def 12): Incremental deviation from mission leading to decay",
   };
 }
@@ -53,7 +53,7 @@ export function detectAuthorityVacuum(authorityClarity: number): EnforcementSign
     severity: authorityClarity < 25 ? "CRITICAL" : "HIGH",
     score: authorityClarity,
     source: "mandate",
-    evidence: [`Authority clarity: ${authorityClarity}/100 — below enforceable threshold`],
+    evidence: ["Authority clarity below enforceable threshold — governance vacuum detected"],
     canonDefinition: "Sovereignty (Def 27): The highest authority within a defined domain",
   };
 }
@@ -66,7 +66,7 @@ export function detectRiskExposure(exposureScore: number): EnforcementSignal | n
     severity: exposureScore > 75 ? "CRITICAL" : "HIGH",
     score: exposureScore,
     source: "exposure",
-    evidence: [`Exposure score: ${exposureScore}/100`],
+    evidence: ["Exposure exceeds risk threshold — institutional exposure detected"],
     canonDefinition: "Risk (Def 25): Misalignment quantified under uncertainty",
   };
 }
@@ -79,7 +79,7 @@ export function detectPressureOverload(pressure: number, coherence: number): Enf
     severity: pressure > 85 ? "CRITICAL" : "HIGH",
     score: pressure,
     source: "intake",
-    evidence: [`Pressure: ${pressure}, coherence: ${coherence} — overload condition`],
+    evidence: ["Pressure exceeds structural coherence capacity — overload condition"],
     canonDefinition: "Pressure (Def 22): Forces that reveal structural integrity or weakness",
   };
 }
@@ -93,7 +93,7 @@ export function detectMisalignment(resonance: number, certainty: number): Enforc
     severity: gap > 6 ? "HIGH" : "MEDIUM",
     score: gap * 10,
     source: "purpose",
-    evidence: [`Resonance ${resonance}/10, certainty ${certainty}/10 — false alignment`],
+    evidence: ["Structural coherence gap detected — false alignment condition"],
     canonDefinition: "Alignment (Def 1): Structural harmony between identity, purpose, values, behaviour",
   };
 }

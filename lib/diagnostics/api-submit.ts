@@ -67,9 +67,6 @@ export async function handleDiagnosticSubmit(
       ok: true,
       diagnosticId: record.id,
       diagnosticRef: record.reference,
-      score: record.score,
-      severity: record.severity,
-      verdict: record.verdict,
       reportReady: true,
     });
   } catch (error) {

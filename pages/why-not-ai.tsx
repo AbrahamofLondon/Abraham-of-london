@@ -42,11 +42,11 @@ const WhyNotAI: NextPage = () => {
           <div className="mt-8 space-y-4">
             {[
               { ai: "Non-deterministic — same question, different answer", us: "Deterministic — same input, identical output. Provably." },
-              { ai: "No authority model — cannot identify who decides", us: "Authority classification — names the owner, detects false authority" },
-              { ai: "No enforcement — suggests but cannot require action", us: "Enforcement layer — breach tracking, escalation, Strategy Room lock" },
-              { ai: "No trust decay — treats every interaction as new", us: "Institutional memory — integrity scoring, recurrence detection, pattern tracking" },
-              { ai: "No auditability — outputs cannot be traced to logic", us: "Full traceability — inputs, signals, routing, rejections, all visible" },
-              { ai: "No economic anchoring — cannot price consequences", us: "Cost modelling — delay cost, option decay, control shift probability" },
+              { ai: "No authority model — cannot identify who decides", us: "Authority classification — names the real owner, detects false authority" },
+              { ai: "No enforcement — suggests but cannot require action", us: "Enforcement layer — tracks commitment, escalates non-action" },
+              { ai: "No trust decay — treats every interaction as new", us: "Institutional memory — the system remembers what you have not resolved" },
+              { ai: "No auditability — outputs cannot be traced to logic", us: "Full traceability — every conclusion is auditable against your inputs" },
+              { ai: "No economic anchoring — cannot price consequences", us: "Proprietary cost modelling — derives exposure from your stated data" },
             ].map((row, i) => (
               <div key={i} className="grid gap-3 sm:grid-cols-2">
                 <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem" }}>
