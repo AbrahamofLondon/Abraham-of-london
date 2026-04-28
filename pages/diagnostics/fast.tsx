@@ -294,24 +294,37 @@ const FastDiagnosticPage: NextPage = () => {
                 />
               ) : null}
 
+              {/* Executive Decision Authority Block */}
+              <ExecutiveDecisionAuthorityBlock authorityIndex={result.authorityIndex} costOfInaction={result.costOfInaction} executionFailure={result.executionFailure} />
+
+              {/* If Ignored */}
+              <div style={{ border: `1px solid ${RED}0.15)`, backgroundColor: `${RED}0.03)`, padding: "1rem 1.25rem" }}>
+                <div style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.45)` }}>If this is ignored</div>
+                <p style={{ marginTop: "0.4rem", ...serif, fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>
+                  {result.costOfInaction?.exposureBand === "critical"
+                    ? "This condition is already compounding. Delay does not pause the cost — it transfers control to whoever acts first. The decision you are avoiding will be made without you."
+                    : result.costOfInaction?.exposureBand === "high"
+                    ? "The window for voluntary action is narrowing. If this decision is not taken within the next cycle, the options available will be fewer and more expensive."
+                    : "The condition is present but manageable. If it persists without correction, it will embed as the normal operating state — and correction cost will increase significantly."}
+                </p>
+              </div>
+
               {result.arbiterMessage ? (
-                <Section title="Continuity note" body={result.arbiterMessage} />
+                <Section title="System integrity note" body={result.arbiterMessage} />
               ) : null}
 
-              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  onClick={resetDiagnostic}
-                  style={{ padding: "12px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.60)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
-                >
+              {/* Determinism proof */}
+              <div className="flex items-center gap-2 border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Deterministic · {result.signalStrength} signal strength</span>
+              </div>
+
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <Link href="/diagnostics/executive-reporting" style={{ padding: "12px 18px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                  Price the consequence <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
+                </Link>
+                <button type="button" onClick={resetDiagnostic} style={{ padding: "12px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
                   Start again
                 </button>
-                <a
-                  href="/diagnostics/executive-reporting"
-                  style={{ padding: "12px 18px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-                >
-                  Open executive reporting
-                </a>
               </div>
             </div>
           )}
