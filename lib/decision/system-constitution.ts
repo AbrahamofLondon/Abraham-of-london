@@ -1,3 +1,7 @@
+// NOTE: Do NOT use import "server-only" here — this module exports types
+// consumed by Pages Router components (strategy-room, enterprise-assessment).
+// Scoring functions in this file should be migrated to server-only API routes.
+
 export type CanonRoute = "REJECT" | "DIAGNOSTIC" | "STRATEGY";
 export type CanonOrgState = "ORDERED" | "DRIFTING" | "MISALIGNED" | "DISORDERED";
 export type CanonReadinessTier =

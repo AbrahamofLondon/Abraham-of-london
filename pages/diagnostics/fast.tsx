@@ -1,795 +1,301 @@
-/**
- * Fast Diagnostic — Decision Pressure Design.
- *
- * Not a form. Not a quiz. Not a lead magnet.
- * A controlled demonstration that exposes one real decision failure
- * in under 2 minutes.
- *
- * Entry interrupt → 6 high-pressure questions → C3 gate (visible) →
- * contradiction interrupt (overlay) → result surface → conversion CTAs →
- * micro-conversion feedback.
- */
-
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-import { ArrowRight, AlertTriangle, Loader2, CheckCircle2, XCircle, MinusCircle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
-import { createCaseObject, classifyCondition, inferContradiction } from "@/lib/decision/case-object";
-import { scoreC3 } from "@/lib/decision/c3-fidelity-scorer";
-import { synthesise, buildDeterministicOutput, type GovernedSynthesis, type SynthesisResult } from "@/lib/decision/synthesis-engine";
-import { forecastDefaultPath, controlShiftSummary } from "@/lib/decision/default-path-forecast";
-import { createSpine, type IntelligenceSpine } from "@/lib/decision/intelligence-spine";
-import { saveSpineToSession, persistSpineToDB, loadSpineFromSession, loadSpineFromSessionAsync } from "@/lib/decision/spine-persistence";
-import { registerPressureLoopFromSpine } from "@/lib/follow-up/register-loop-client";
-import DeterminismProof from "@/components/Intelligence/DeterminismProof";
-import DecisionTracePanel from "@/components/Intelligence/DecisionTracePanel";
+import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
 
 const GOLD = "#C9A96E";
-const RED = "rgba(252,165,165,";
-const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
-const serif: React.CSSProperties = { fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" };
-
-type Stage = "entry" | "entry_response" | "q1" | "q2" | "q3" | "q4" | "q5" | "q6" | "pre_commitment" | "contradiction_interrupt" | "synthesising" | "recovery" | "result" | "feedback";
 
 const QUESTIONS: Array<{ id: string; question: string; helper: string }> = [
-  { id: "decision", question: "What decision are you unable to make right now?", helper: "Name the decision. Not the topic." },
-  { id: "priorAttempt", question: "What have you already tried — and why did it fail?", helper: "If it worked, the decision would not still be open." },
-  { id: "costOfDelay", question: "What becomes more expensive every week this stays unresolved?", helper: "If nothing is becoming expensive, this is not a real decision." },
-  { id: "claimedOwner", question: "Who actually decides this? Do they know they own it?", helper: "Name the person or role. If no one owns it, say that." },
-  { id: "blocker", question: "What is stopping this from being decided?", helper: "Not symptoms. The blocker." },
-  { id: "forcedAction", question: "If you had to decide in 24 hours — what would you do?", helper: "No hedging. State the move." },
+  { id: "decision", question: "What decision are you unable to make right now?", helper: "Name the decision directly." },
+  { id: "priorAttempt", question: "What have you already tried?", helper: "Briefly describe the previous move." },
+  { id: "costOfDelay", question: "What becomes more expensive if this stays unresolved?", helper: "Name the cost in practical terms." },
+  { id: "claimedOwner", question: "Who should own the decision?", helper: "Name the person or role." },
+  { id: "blocker", question: "What is the live blocker?", helper: "Describe the actual point of delay." },
+  { id: "forcedAction", question: "If you had to move within 24 hours, what would you do?", helper: "State the move plainly." },
 ];
 
+type ViewStage = "questions" | "commitment" | "loading" | "recovery" | "result";
+
 const FastDiagnosticPage: NextPage = () => {
-  const [stage, setStage] = React.useState<Stage>("entry");
   const [answers, setAnswers] = React.useState<Record<string, string>>({});
-  const [currentQ, setCurrentQ] = React.useState(0);
-  const [synthesis, setSynthesis] = React.useState<GovernedSynthesis | null>(null);
-  const [synthesisSource, setSynthesisSource] = React.useState<"llm" | "deterministic" | "recovery">("deterministic");
-  const [recoveryQuestion, setRecoveryQuestion] = React.useState<string | null>(null);
-  const [spine, setSpine] = React.useState<IntelligenceSpine | null>(null);
-  const [arbiterMessage, setArbiterMessage] = React.useState<string | null>(null);
-  const [entryDecision, setEntryDecision] = React.useState("");
-  const [entryClassification, setEntryClassification] = React.useState("");
-  const [contradictionText, setContradictionText] = React.useState<string | null>(null);
-  const [feedbackGiven, setFeedbackGiven] = React.useState<"yes" | "partial" | "no" | null>(null);
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [stage, setStage] = React.useState<ViewStage>("questions");
   const [committed, setCommitted] = React.useState(false);
-  const [costFirst, setCostFirst] = React.useState(false);
-  const [feedbackReason, setFeedbackReason] = React.useState("");
-  const startTime = React.useRef(0);
-  const [hasActiveCase, setHasActiveCase] = React.useState(false);
+  const [result, setResult] = React.useState<FastDiagnosticResult | null>(null);
+  const [error, setError] = React.useState("");
+  const startedAt = React.useRef<number>(Date.now());
 
   React.useEffect(() => {
     track("fast_diagnostic_page_view");
-    // Attempt async decrypted load first, fall back to sync plaintext
-    void loadSpineFromSessionAsync().then((existing) => {
-      if (!existing) {
-        // Try sync fallback for plaintext/legacy data
-        const sync = loadSpineFromSession();
-        if (sync?.id && sync?.synthesis?.verdict) setHasActiveCase(true);
-        return;
-      }
-      if (existing.id && existing.synthesis?.verdict && existing.stage === "fast_diagnostic") {
-        setSpine(existing);
-        setSynthesis(existing.synthesis);
-        setSynthesisSource(existing.kernelOutput ? "llm" : "deterministic");
-        setCommitted(!!existing.preCommitment?.willing48h);
-        if (existing.deterministic?.contradictionSet?.[0]) {
-          setContradictionText(existing.deterministic.contradictionSet[0]);
-        }
-        setHasActiveCase(true);
+    try {
+      const raw = sessionStorage.getItem("aol_fast_result");
+      if (!raw) return;
+      const stored = JSON.parse(raw) as FastDiagnosticResult;
+      if (stored?.caseRef) {
+        setResult(stored);
         setStage("result");
-      } else if (existing.id && existing.synthesis?.verdict) {
-        setHasActiveCase(true);
       }
-    }).catch(() => { /* ignore decryption failures */ });
+    } catch {
+      // ignore
+    }
   }, []);
 
-  // ─── ENTRY INTERRUPT — single-field strike ───
-  function handleEntrySubmit() {
-    if (entryDecision.trim().length < 10) return;
-    startTime.current = Date.now();
-    track("fast_diagnostic_started", { entry_length: entryDecision.length });
+  const currentQuestion = QUESTIONS[currentIndex]!;
+  const currentValue = answers[currentQuestion.id] ?? "";
+  const canAdvance = currentValue.trim().length >= 8;
 
-    // Classify immediately
-    const tempCase = createCaseObject({ id: "temp", decision: entryDecision });
-    const condition = classifyCondition(tempCase);
-    const labels: Record<string, string> = {
-      authority: "an authority problem — who decides is unclear",
-      definition: "a definition problem — what is being decided is unclear",
-      execution: "an execution problem — the decision is known but avoided",
-      instability: "an instability condition — untested under real pressure",
-    };
-    setEntryClassification(labels[condition] ?? "a decision condition");
-    setAnswers((prev) => ({ ...prev, decision: entryDecision }));
-    setStage("entry_response");
+  function updateAnswer(value: string) {
+    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: value }));
   }
 
-  function advanceFromEntry() {
-    setCurrentQ(1); // Skip Q1 — already answered in entry
-    setStage("q2");
+  function nextQuestion() {
+    if (!canAdvance) return;
+    if (currentIndex < QUESTIONS.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      return;
+    }
+    setStage("commitment");
   }
 
-  function handleAnswer(value: string) {
-    const q = QUESTIONS[currentQ]!;
-    setAnswers((prev) => ({ ...prev, [q.id]: value }));
+  function previousQuestion() {
+    if (currentIndex === 0) return;
+    setCurrentIndex((prev) => prev - 1);
   }
 
-  async function advance() {
-    if (currentQ < QUESTIONS.length - 1) {
-      setCurrentQ((q) => q + 1);
-      setStage(`q${currentQ + 2}` as Stage);
-    } else {
-      // Pre-commitment gate before results
-      setStage("pre_commitment");
+  async function submitFastDiagnostic(commitment: boolean) {
+    setCommitted(commitment);
+    setStage("loading");
+    setError("");
+
+    try {
+      const response = await fetch("/api/diagnostics/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers, committed: commitment }),
+      });
+      const json = (await response.json()) as FastDiagnosticResult | { ok?: false; error?: string };
+
+      if (!response.ok || "caseRef" in json === false) {
+        throw new Error("error" in json && json.error ? json.error : "Unable to complete analysis.");
+      }
+
+      const publicResult = json as FastDiagnosticResult;
+      setResult(publicResult);
+      try {
+        sessionStorage.setItem("aol_fast_result", JSON.stringify(publicResult));
+      } catch {
+        // ignore
+      }
+
+      track("fast_diagnostic_completed", {
+        committed: commitment,
+        elapsed_seconds: Math.round((Date.now() - startedAt.current) / 1000),
+      });
+
+      if (publicResult.recoveryQuestion) {
+        setStage("recovery");
+        return;
+      }
+
+      setStage("result");
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : "Unable to complete analysis.");
+      setStage("questions");
     }
   }
 
-  async function proceedAfterCommitment() {
-      // Check for contradiction before synthesis
-      const contradiction = inferContradiction(
-        createCaseObject({
-          id: "temp",
-          decision: answers.decision ?? "",
-          blocker: answers.blocker,
-          forcedAction: answers.forcedAction,
-        }),
-      );
-      if (contradiction && answers.blocker && answers.forcedAction) {
-        setContradictionText(contradiction);
-        setStage("contradiction_interrupt");
-        return;
-      }
-      await runSynthesis();
-  }
-
-  async function runSynthesis() {
-    setStage("synthesising");
-    const elapsed = Math.round((Date.now() - startTime.current) / 1000);
-    track("fast_diagnostic_completed", { elapsed_seconds: elapsed });
-
-    const caseObj = createCaseObject({
-      id: `fast_${Date.now()}`,
-      decision: answers.decision ?? "",
-      priorAttempt: answers.priorAttempt,
-      costOfDelay: answers.costOfDelay,
-      claimedOwner: answers.claimedOwner,
-      blocker: answers.blocker,
-      forcedAction: answers.forcedAction,
-    });
-
-    const buildAndPersistSpine = (result: SynthesisResult) => {
-      const c3 = scoreC3(caseObj);
-      const deterministic = buildDeterministicOutput(caseObj);
-      const forecast = forecastDefaultPath(caseObj);
-      const newSpine = createSpine({
-        caseObj,
-        c3: { ...c3, tier: c3.tier, confidenceBand: c3.confidenceBand },
-        deterministic,
-        synthesis: result.synthesis,
-        forecast,
-      });
-      // Record pre-commitment intent on spine
-      newSpine.preCommitment = {
-        willing48h: committed,
-        capturedAt: new Date().toISOString(),
-      };
-      setSpine(newSpine);
-      saveSpineToSession(newSpine);
-      void persistSpineToDB(newSpine);
-
-      // Schedule behavioural pressure loop (48h / 7d / 14d follow-up)
-      registerPressureLoopFromSpine(newSpine);
-      setSynthesis(result.synthesis);
-      setSynthesisSource(result.source);
-      if (result.arbiterMismatchMessage) setArbiterMessage(result.arbiterMismatchMessage);
-    };
-
+  function resetDiagnostic() {
+    setAnswers({});
+    setCurrentIndex(0);
+    setStage("questions");
+    setCommitted(false);
+    setResult(null);
+    setError("");
+    startedAt.current = Date.now();
     try {
-      const res = await fetch("/api/interpret", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage: "fast_diagnostic", canonicalResult: caseObj, userInputs: answers, synthesisMode: true }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.synthesis) {
-          const result = await synthesise(caseObj, async () => JSON.stringify(data.synthesis));
-          buildAndPersistSpine(result);
-          if (result.source === "recovery" && result.recoveryQuestion) { setRecoveryQuestion(result.recoveryQuestion); setStage("recovery"); return; }
-          setStage("result");
-          return;
-        }
-      }
-    } catch { /* fall through */ }
-
-    const result = await synthesise(caseObj);
-    buildAndPersistSpine(result);
-    if (result.source === "recovery" && result.recoveryQuestion) { setRecoveryQuestion(result.recoveryQuestion); setStage("recovery"); return; }
-    setStage("result");
+      sessionStorage.removeItem("aol_fast_result");
+    } catch {
+      // ignore
+    }
   }
 
-  const currentAnswer = answers[QUESTIONS[currentQ]?.id ?? ""] ?? "";
-  const canAdvance = currentAnswer.trim().length >= 10;
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ENTRY INTERRUPT — single field, immediate classification
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  if (stage === "entry") {
-    return (
-      <Layout title="Decision Check" description="Expose the real blocker in under 2 minutes.">
-        <Head><meta name="robots" content="noindex" /></Head>
-        <main className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: "rgb(3,3,5)" }}>
-          <div className="max-w-lg w-full">
-            {hasActiveCase && (
-              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "0.75rem", marginBottom: "1.5rem", textAlign: "center" }}>
-                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70` }}>
-                  You have an active case
-                </span>
-                <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.35)", marginTop: "0.25rem" }}>
-                  A previous diagnostic result is still in session. Running again will create a new case.
-                </p>
-              </div>
-            )}
-            <h1 style={{ ...serif, fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", fontWeight: 400, color: "rgba(255,255,255,0.90)", lineHeight: 1.2, textAlign: "center" }}>
-              You&#39;re not dealing with a strategy problem.<br />
-              <span style={{ color: `${GOLD}CC` }}>You're dealing with a decision that hasn't actually been taken.</span>
+  return (
+    <Layout title="Decision Check" description="A governed fast diagnostic for live decision exposure.">
+      <Head>
+        <meta name="robots" content="noindex" />
+      </Head>
+      <main className="min-h-screen px-6 py-16" style={{ backgroundColor: "rgb(3,3,5)" }}>
+        <div className="mx-auto max-w-3xl">
+          <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1rem 1.25rem", marginBottom: "1.5rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}80` }}>
+              Fast Diagnostic
+            </div>
+            <h1 style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "2rem", lineHeight: 1.2, color: "rgba(255,255,255,0.92)", marginTop: "0.5rem" }}>
+              Governed analysis for one live decision
             </h1>
-            <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.38)", marginTop: "1rem", textAlign: "center", maxWidth: "40ch", marginLeft: "auto", marginRight: "auto" }}>
-              6 questions. No prep. If it's wrong, ignore it. If it's right, you'll know immediately.
+            <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "0.5rem" }}>
+              The public surface shows only the reading, the directive, and the next move.
             </p>
-            <div style={{ marginTop: "2rem" }}>
-              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "0.5rem" }}>
-                What decision are you unable to make right now?
-              </label>
+          </div>
+
+          {stage === "questions" && (
+            <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                Question {currentIndex + 1} of {QUESTIONS.length}
+              </div>
+              <h2 style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.25rem", lineHeight: 1.5, color: "rgba(255,255,255,0.88)", marginTop: "0.75rem" }}>
+                {currentQuestion.question}
+              </h2>
+              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.42)", marginTop: "0.35rem" }}>
+                {currentQuestion.helper}
+              </p>
               <textarea
-                value={entryDecision}
-                onChange={(e) => setEntryDecision(e.target.value)}
-                placeholder="e.g. Whether to replace the VP who is underperforming but is protected by the CEO"
-                rows={2}
-                style={{ width: "100%", padding: "14px", border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.85)", ...serif, fontSize: "0.95rem", lineHeight: 1.6, resize: "none", outline: "none" }}
-                autoFocus
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && entryDecision.trim().length >= 10) { e.preventDefault(); handleEntrySubmit(); } }}
+                value={currentValue}
+                onChange={(e) => updateAnswer(e.target.value)}
+                rows={4}
+                style={{ width: "100%", marginTop: "1rem", padding: "14px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(0,0,0,0.28)", color: "rgba(255,255,255,0.85)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.6, resize: "vertical", outline: "none" }}
               />
+              {error ? (
+                <p style={{ marginTop: "0.75rem", color: "rgba(252,165,165,0.82)", fontSize: "0.88rem" }}>{error}</p>
+              ) : null}
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  onClick={previousQuestion}
+                  disabled={currentIndex === 0}
+                  style={{ padding: "12px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: currentIndex === 0 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.60)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: currentIndex === 0 ? "default" : "pointer" }}
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={nextQuestion}
+                  disabled={!canAdvance}
+                  style={{ padding: "12px 18px", border: `1px solid ${canAdvance ? `${GOLD}50` : "rgba(255,255,255,0.10)"}`, backgroundColor: canAdvance ? `${GOLD}12` : "transparent", color: canAdvance ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: canAdvance ? "pointer" : "default" }}
+                >
+                  {currentIndex === QUESTIONS.length - 1 ? "Continue" : "Next"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {stage === "commitment" && (
+            <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem", textAlign: "center" }}>
+              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.78)" }}>
+                If the review identifies the blocker clearly, are you willing to act on it within 48 hours?
+              </p>
+              <div style={{ display: "flex", justifyContent: "center", gap: "0.75rem", marginTop: "1rem", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={() => void submitFastDiagnostic(true)}
+                  style={{ padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
+                >
+                  Yes, continue
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void submitFastDiagnostic(false)}
+                  style={{ padding: "12px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.60)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
+                >
+                  Continue without commitment
+                </button>
+              </div>
+            </div>
+          )}
+
+          {stage === "loading" && (
+            <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem", textAlign: "center", color: "rgba(255,255,255,0.70)" }}>
+              Preparing governed analysis...
+            </div>
+          )}
+
+          {stage === "recovery" && result && (
+            <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                More detail required
+              </div>
+              <p style={{ marginTop: "0.6rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.74)" }}>
+                {result.recoveryQuestion}
+              </p>
               <button
                 type="button"
-                onClick={handleEntrySubmit}
-                disabled={entryDecision.trim().length < 10}
-                style={{ marginTop: "0.75rem", width: "100%", padding: "14px", border: `1px solid ${entryDecision.trim().length >= 10 ? `${GOLD}60` : "rgba(255,255,255,0.06)"}`, backgroundColor: entryDecision.trim().length >= 10 ? `${GOLD}10` : "transparent", color: entryDecision.trim().length >= 10 ? `${GOLD}CC` : "rgba(255,255,255,0.12)", ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: entryDecision.trim().length >= 10 ? "pointer" : "default" }}
+                onClick={resetDiagnostic}
+                style={{ marginTop: "1rem", padding: "12px 18px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
               >
-                Start with the decision <ArrowRight style={{ width: 11, height: 11, display: "inline", marginLeft: "0.5rem", verticalAlign: "middle" }} />
+                Restart with more detail
               </button>
             </div>
-            <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.10)", marginTop: "1.5rem", textAlign: "center" }}>
-              If nothing important is currently stuck, this will not be useful.
-            </p>
-          </div>
-        </main>
-      </Layout>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ENTRY RESPONSE — immediate classification, then auto-advance
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  if (stage === "entry_response") {
-    return (
-      <Layout title="Decision Check" description="Decision classified.">
-        <Head><meta name="robots" content="noindex" /></Head>
-        <main className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: "rgb(3,3,5)" }}>
-          <div className="max-w-lg text-center">
-            <p style={{ ...serif, fontSize: "1.05rem", lineHeight: 1.7, color: "rgba(255,255,255,0.70)" }}>
-              You described {entryClassification}.
-            </p>
-            <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.35)", marginTop: "0.5rem" }}>
-              The system will now test whether this is an authority, definition, execution, or instability problem.
-            </p>
-            <button type="button" onClick={advanceFromEntry} style={{ marginTop: "1.5rem", padding: "14px 28px", border: `1px solid ${GOLD}60`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
-              Continue <ArrowRight style={{ width: 11, height: 11, display: "inline", marginLeft: "0.5rem", verticalAlign: "middle" }} />
-            </button>
-          </div>
-        </main>
-      </Layout>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PRE-COMMITMENT GATE — filters spectators before result
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  if (stage === "pre_commitment") {
-    return (
-      <Shell progress={6} hideProgress>
-        <div style={{ maxWidth: "460px", margin: "0 auto", textAlign: "center" }}>
-          <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
-            If the system identifies the real blocker, are you willing to act on it within 48 hours?
-          </p>
-          <div className="flex gap-3 mt-6 justify-center">
-            <button
-              type="button"
-              onClick={() => {
-                setCommitted(true);
-                track("fast_precommit_yes");
-                void proceedAfterCommitment();
-              }}
-              style={{ padding: "14px 32px", border: `1px solid ${GOLD}60`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
-            >
-              Yes — show me
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setCommitted(false);
-                track("fast_precommit_no");
-                void proceedAfterCommitment();
-              }}
-              style={{ padding: "14px 32px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.35)", ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
-            >
-              Not yet
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setCommitted(false);
-                setCostFirst(true);
-                track("fast_precommit_cost_first");
-                void proceedAfterCommitment();
-              }}
-              style={{ padding: "14px 32px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.25)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
-            >
-              I need to see the cost first
-            </button>
-          </div>
-          <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.12)", marginTop: "1.5rem" }}>
-            Both options proceed. The system records your intent.
-          </p>
-        </div>
-      </Shell>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CONTRADICTION INTERRUPT — overlay before synthesis
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  if (stage === "contradiction_interrupt" && contradictionText) {
-    // Extract blocker and forced action for display
-    const blockerShort = (answers.blocker ?? "").slice(0, 80);
-    const forcedShort = (answers.forcedAction ?? "").slice(0, 80);
-    return (
-      <Shell progress={6} hideProgress>
-        <div style={{ border: `1px solid ${RED}0.30)`, backgroundColor: `${RED}0.04)`, padding: "1.75rem" }}>
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle style={{ width: 14, height: 14, color: `${RED}0.70)` }} />
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${RED}0.60)` }}>
-              Contradiction detected
-            </span>
-          </div>
-          <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.75)", marginTop: "0.5rem" }}>
-            You said the blocker is: <span style={{ color: `${RED}0.80)` }}>&ldquo;{blockerShort}&rdquo;</span>
-          </p>
-          <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.75)", marginTop: "0.5rem" }}>
-            But your forced answer bypasses it: <span style={{ color: `${GOLD}CC` }}>&ldquo;{forcedShort}&rdquo;</span>
-          </p>
-          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)", marginTop: "1rem", fontWeight: 500 }}>
-            That means the blocker is not preventing the decision. It is justifying the avoidance.
-          </p>
-          <button type="button" onClick={() => void runSynthesis()} style={{ marginTop: "1.5rem", padding: "12px 24px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
-            Continue <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: "0.5rem", verticalAlign: "middle" }} />
-          </button>
-        </div>
-      </Shell>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // SYNTHESISING
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  if (stage === "synthesising") {
-    return (
-      <Shell progress={6} hideProgress>
-        <div className="flex flex-col items-center justify-center py-16">
-          <Loader2 style={{ width: 20, height: 20, color: `${GOLD}60`, animation: "spin 1.2s linear infinite" }} />
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}50`, marginTop: "0.75rem" }}>
-            Analysing your case material
-          </p>
-        </div>
-      </Shell>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PRECISION RECOVERY — visible C3 gate
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  if (stage === "recovery" && recoveryQuestion) {
-    return (
-      <Shell progress={6} hideProgress>
-        <div style={{ border: `1px solid ${RED}0.25)`, backgroundColor: `${RED}0.04)`, padding: "1.5rem" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${RED}0.55)` }}>
-            Too vague to diagnose
-          </span>
-          <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.70)", marginTop: "0.75rem", maxWidth: "48ch" }}>
-            {recoveryQuestion}
-          </p>
-          <textarea
-            value={answers.recovery ?? ""}
-            onChange={(e) => setAnswers((prev) => ({ ...prev, recovery: e.target.value }))}
-            placeholder="Be specific. Name the person, the deadline, or the cost."
-            rows={3}
-            style={{ width: "100%", marginTop: "1rem", padding: "12px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.80)", ...serif, fontSize: "0.92rem", lineHeight: 1.6, resize: "none", outline: "none" }}
-          />
-          <button type="button" onClick={() => setStage("result")} style={{ marginTop: "1rem", padding: "10px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
-            Continue with current input
-          </button>
-        </div>
-      </Shell>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // QUESTIONS (Q2-Q6) — Q1 handled by entry interrupt
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  if (stage.startsWith("q")) {
-    const q = QUESTIONS[currentQ]!;
-    return (
-      <Shell progress={currentQ + 1}>
-        <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.5, color: "rgba(255,255,255,0.85)", fontWeight: 500 }}>
-          {q.question}
-        </p>
-        <p style={{ ...serif, fontSize: "0.78rem", color: "rgba(255,255,255,0.28)", marginTop: "0.35rem" }}>
-          {q.helper}
-        </p>
-        <textarea
-          value={currentAnswer}
-          onChange={(e) => handleAnswer(e.target.value)}
-          rows={3}
-          style={{ width: "100%", marginTop: "1rem", padding: "14px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.80)", ...serif, fontSize: "0.95rem", lineHeight: 1.6, resize: "none", outline: "none" }}
-          autoFocus
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && canAdvance) { e.preventDefault(); advance(); } }}
-        />
-        <div className="flex items-center justify-between mt-3">
-          <span style={{ ...mono, fontSize: "7px", color: canAdvance ? "rgba(110,231,183,0.40)" : "rgba(255,255,255,0.10)" }}>
-            {canAdvance ? "Ready" : "More detail needed"}
-          </span>
-          <button type="button" onClick={advance} disabled={!canAdvance} style={{ padding: "10px 20px", border: `1px solid ${canAdvance ? `${GOLD}60` : "rgba(255,255,255,0.06)"}`, backgroundColor: canAdvance ? `${GOLD}10` : "transparent", color: canAdvance ? `${GOLD}CC` : "rgba(255,255,255,0.12)", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: canAdvance ? "pointer" : "default" }}>
-            {currentQ === QUESTIONS.length - 1 ? "Analyse" : "Next"}
-          </button>
-        </div>
-      </Shell>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RESULT SURFACE — demo format, not report
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  if (stage === "result" && synthesis && spine) {
-    const elapsed = startTime.current ? Math.round((Date.now() - startTime.current) / 1000) : 0;
-    const forecast = spine.forecast;
-    const condition = spine.deterministic.conditionClass;
-
-    // Condition-based directive routing
-    const directiveCta = condition === "execution"
-      ? { label: "Enforce the decision", href: "/strategy-room", desc: "Strategy Room locks the decision and tracks whether it holds." }
-      : condition === "instability" || costFirst
-        ? { label: "Price the consequence", href: "/diagnostics/executive-reporting", desc: "Executive Reporting converts this into exposure, priority, and enforced next action." }
-        : { label: "Test the structure", href: "/diagnostics/constitutional-diagnostic", desc: "Constitutional Diagnostic tests whether this is embedded in how your organisation actually works." };
-
-    const secondaryLinks = [
-      condition !== "execution" ? { label: "Enforce the decision", href: "/strategy-room" } : null,
-      !costFirst && condition !== "instability" ? { label: "See the cost instead", href: "/diagnostics/executive-reporting" } : null,
-      condition === "execution" || condition === "instability" ? { label: "Test the structure", href: "/diagnostics/constitutional-diagnostic" } : null,
-    ].filter(Boolean) as Array<{ label: string; href: string }>;
-
-    return (
-      <Layout title="Decision Check — Result" description="Your decision, analysed.">
-        <Head><meta name="robots" content="noindex" /></Head>
-        <main className="min-h-screen px-6 py-16" style={{ backgroundColor: "rgb(3,3,5)" }}>
-          <div className="mx-auto max-w-xl">
-
-            {/* ═══ CASE LIVE BANNER ═══ */}
-            <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginBottom: "1.5rem" }}>
-              <div className="flex items-center justify-between">
-                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>Your case is now active</span>
-                <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>{spine.id.slice(0, 16)}</span>
-              </div>
-              <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", marginTop: "0.4rem" }}>
-                The system has preserved your inputs.{committed ? " You committed to act within 48 hours. If nothing happens, this case will follow up." : ""} Your next step should match the condition detected below.
-              </p>
-              <button type="button" onClick={() => { try { navigator.clipboard.writeText(window.location.href); } catch {} }} style={{ marginTop: "0.5rem", ...mono, fontSize: "6px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", cursor: "pointer", background: "none", border: "none", padding: 0 }}>
-                Save this case locally
-              </button>
-            </div>
-
-            {/* Header */}
-            <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
-              {elapsed}s · {condition} · system evaluated
-            </span>
-            <h2 style={{ ...serif, fontSize: "1.3rem", fontWeight: 500, color: "rgba(255,255,255,0.85)", marginTop: "1rem", lineHeight: 1.3 }}>
-              This is what is actually happening.
-            </h2>
-
-            {/* Arbiter mismatch warning */}
-            {arbiterMessage && (
-              <div style={{ border: "1px solid rgba(255,165,0,0.3)", backgroundColor: "rgba(255,165,0,0.05)", padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,165,0,0.55)" }}>System integrity check</span>
-                <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(255,165,0,0.70)", marginTop: "0.2rem" }}>{arbiterMessage}</p>
-              </div>
-            )}
-
-            {/* 1. VERDICT */}
-            <div style={{ marginTop: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>Verdict</span>
-              <p style={{ ...serif, fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(255,255,255,0.85)", marginTop: "0.3rem" }}>
-                {synthesis.verdict}
-              </p>
-            </div>
-
-            {/* 2. PRIMARY CONTRADICTION */}
-            {synthesis.primaryContradiction && spine.c3.confidenceBand !== "low" && (
-              <div style={{ border: `1px solid ${RED}0.20)`, backgroundColor: `${RED}0.04)`, padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.50)` }}>The contradiction</span>
-                <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.65)", marginTop: "0.2rem" }}>
-                  {synthesis.primaryContradiction}
-                </p>
-              </div>
-            )}
-
-            {/* 3. WHAT YOU ARE AVOIDING */}
-            {synthesis.avoidedDecision && (
-              <div style={{ border: "1px solid rgba(253,186,116,0.15)", backgroundColor: "rgba(253,186,116,0.03)", padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.50)" }}>What you are avoiding</span>
-                <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.2rem", fontWeight: 500 }}>
-                  {synthesis.avoidedDecision}
-                </p>
-              </div>
-            )}
-
-            {/* 4. WHY PRIOR ATTEMPTS FAILED */}
-            {synthesis.whyPriorAttemptsFailed && (
-              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", marginTop: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Why prior attempts failed</span>
-                <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", marginTop: "0.2rem" }}>
-                  {synthesis.whyPriorAttemptsFailed}
-                </p>
-              </div>
-            )}
-
-            {/* 5. YOUR MOVE — gated by pre-commitment */}
-            <div style={{ border: `1px solid ${committed ? `${GOLD}25` : "rgba(255,255,255,0.06)"}`, backgroundColor: committed ? `${GOLD}06` : "rgba(255,255,255,0.02)", padding: "1rem", marginTop: "1rem" }}>
-              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: committed ? `${GOLD}65` : "rgba(255,255,255,0.25)" }}>Your move — within 48 hours</span>
-              {committed ? (
-                <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.80)", marginTop: "0.2rem", fontWeight: 500 }}>
-                  {synthesis.concreteMove}
-                </p>
-              ) : (
-                <div style={{ marginTop: "0.3rem" }}>
-                  <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
-                    You chose not to act within 48 hours. The system will not prescribe a full move.
-                  </p>
-                  <button type="button" onClick={() => { setCommitted(true); track("fast_precommit_upgrade"); }} style={{ marginTop: "0.5rem", padding: "8px 16px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}BB`, ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
-                    Switch to 48h commitment — unlock move
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* 6. DEFAULT PATH — pressure engine */}
-            <div style={{ border: `1px solid ${RED}0.12)`, padding: "1rem", marginTop: "1rem" }}>
-              {forecast.alreadyIncurred && (
-                <div style={{ marginBottom: "0.75rem", paddingBottom: "0.65rem", borderBottom: `1px solid ${RED}0.08)` }}>
-                  <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.55)` }}>Already incurred</span>
-                  <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: `${RED}0.60)`, marginTop: "0.25rem" }}>{forecast.alreadyIncurred}</p>
-                </div>
-              )}
-              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.40)` }}>If nothing changes</span>
-              <div className="mt-2 space-y-2">
-                {[
-                  { label: "7 days", text: forecast.sevenDays },
-                  { label: "30 days", text: forecast.thirtyDays },
-                  { label: "90 days", text: forecast.ninetyDays },
-                ].map((c) => (
-                  <div key={c.label} className="flex gap-3">
-                    <span style={{ ...mono, fontSize: "7px", color: `${RED}0.30)`, minWidth: "50px" }}>{c.label}</span>
-                    <span style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>{c.text}</span>
-                  </div>
-                ))}
-              </div>
-              <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)", marginTop: "0.75rem" }}>
-                {controlShiftSummary(forecast)}
-              </p>
-            </div>
-
-            {/* 7. CERTAINTY BOUNDARY */}
-            <div style={{ marginTop: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: spine.c3.specificityScore >= 0.7 ? "rgba(110,231,183,0.60)" : spine.c3.specificityScore >= 0.5 ? `${GOLD}BB` : "rgba(255,255,255,0.30)" }} />
-              <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.20)" }}>
-                {synthesis.certaintyBoundary}
-              </span>
-            </div>
-
-            {/* ═══ WHAT THIS CANNOT TELL YOU ═══ */}
-            <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", marginTop: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>What this diagnostic cannot tell you</span>
-              <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(255,255,255,0.38)", marginTop: "0.3rem" }}>
-                This surface read identifies the condition and contradiction. It cannot determine:
-              </p>
-              <ul style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.7, color: "rgba(255,255,255,0.30)", marginTop: "0.3rem", paddingLeft: "1rem" }}>
-                <li>whether this is isolated or structural</li>
-                <li>what the delay is costing monthly</li>
-                <li>whether your team sees the same problem</li>
-                <li>whether this needs enforcement or restructuring</li>
-              </ul>
-              <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.35)", marginTop: "0.4rem", fontWeight: 500 }}>
-                That requires the next valid test.
-              </p>
-            </div>
-
-            {/* ═══ PATTERN CONTEXT ═══ */}
-            <div style={{ padding: "0.75rem 0", marginTop: "0.5rem" }}>
-              <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", lineHeight: 1.7 }}>
-                Pattern context: this condition appears in cases where the stated decision is not the real blockage. The blockage is usually authority, consequence, ownership, or enforcement — not information.
-              </p>
-            </div>
-
-            {/* ═══ DIRECTIVE CTA (condition-based, not menu) ═══ */}
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem", marginTop: "0.75rem" }}>
-              <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.5rem" }}>
-                System directive — based on {condition} classification
-              </p>
-
-              {/* PRIMARY — one directive */}
-              <Link href={directiveCta.href} className="group flex items-center justify-between" style={{ padding: "14px 18px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08` }}>
-                <div>
-                  <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}CC` }}>
-                    {directiveCta.label}
-                  </span>
-                  <p style={{ ...serif, fontSize: "0.75rem", color: "rgba(255,255,255,0.30)", marginTop: "0.15rem" }}>
-                    {directiveCta.desc}
-                  </p>
-                </div>
-                <ArrowRight style={{ width: 12, height: 12, color: `${GOLD}80`, flexShrink: 0, marginLeft: "1rem" }} />
-              </Link>
-
-              {/* SECONDARY — text links only */}
-              {secondaryLinks.length > 0 && (
-                <div className="flex flex-wrap gap-3 mt-3">
-                  {secondaryLinks.map((link) => (
-                    <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
-                      {link.label} →
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* ═══ DETERMINISM PROOF + DECISION TRACE ═══ */}
-            <div className="mt-6 space-y-2">
-              <DeterminismProof spine={spine} compact />
-              <DecisionTracePanel spine={spine} />
-            </div>
-
-            {/* ═══ MICRO-CONVERSION FEEDBACK ═══ */}
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.25rem", marginTop: "1.5rem" }}>
-              {!feedbackGiven ? (
-                <>
-                  <p style={{ ...serif, fontSize: "0.88rem", color: "rgba(255,255,255,0.45)" }}>Was this accurate?</p>
-                  <div className="flex gap-2 mt-2">
-                    <FeedbackButton icon={<CheckCircle2 style={{ width: 12, height: 12 }} />} label="Yes — exactly it" color="rgba(110,231,183," onClick={() => {
-                      setFeedbackGiven("yes");
-                      track("fast_feedback", { value: "yes" });
-                      if (spine) { spine.accuracyFeedback = { response: "yes", capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
-                    }} />
-                    <FeedbackButton icon={<MinusCircle style={{ width: 12, height: 12 }} />} label="Partially" color="rgba(253,186,116," onClick={() => {
-                      setFeedbackGiven("partial");
-                      track("fast_feedback", { value: "partial" });
-                      if (spine) { spine.accuracyFeedback = { response: "partial", capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
-                    }} />
-                    <FeedbackButton icon={<XCircle style={{ width: 12, height: 12 }} />} label="No — missed" color={RED} onClick={() => {
-                      setFeedbackGiven("no");
-                      track("fast_feedback", { value: "no" });
-                      if (spine) { spine.accuracyFeedback = { response: "no", capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
-                    }} />
-                  </div>
-                </>
-              ) : (
-                <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", letterSpacing: "0.15em" }}>
-                  {feedbackGiven === "yes" ? (
-                    <>
-                      Then you already know this is real. Don&rsquo;t leave it unpriced.
-                      <Link href="/diagnostics/executive-reporting" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}CC`, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                        See what this is already costing <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
-                      </Link>
-                    </>
-                  ) : feedbackGiven === "partial" ? (
-                    <>
-                      Noted. The surface read is partial. The Constitutional Diagnostic tests whether the condition is structural.
-                      <Link href="/diagnostics/constitutional-diagnostic" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}AA`, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                        Sharpen the diagnosis <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
-                      </Link>
-                    </>
-                  ) : (
-                    <span>
-                      Where is it wrong?
-                      <textarea
-                        value={feedbackReason}
-                        onChange={(e) => setFeedbackReason(e.target.value)}
-                        placeholder="What did the system get wrong about your decision?"
-                        rows={2}
-                        style={{ display: "block", width: "100%", marginTop: "0.5rem", padding: "8px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.70)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.5, resize: "none", outline: "none" }}
-                      />
-                      {feedbackReason.trim().length > 10 && (
-                        <>
-                          <button type="button" onClick={() => {
-                            track("fast_feedback_reason", { reason: feedbackReason.slice(0, 200) });
-                            if (spine) { spine.accuracyFeedback = { response: "no", reason: feedbackReason, capturedAt: new Date().toISOString() }; saveSpineToSession(spine); void persistSpineToDB(spine); }
-                            setFeedbackGiven("no");
-                          }} style={{ marginTop: "0.4rem", padding: "6px 14px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}>
-                            Submit correction
-                          </button>
-                          <p style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "rgba(255,255,255,0.20)" }}>
-                            Correction recorded. The system treats this as a case correction, not a failed interaction. Your next best route is to test the structure more deeply.
-                          </p>
-                          <Link href="/diagnostics/constitutional-diagnostic" style={{ display: "inline-block", marginTop: "0.3rem", color: `${GOLD}AA`, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
-                            Run Constitutional Diagnostic →
-                          </Link>
-                        </>
-                      )}
-                    </span>
-                  )}
-                </p>
-              )}
-            </div>
-          </div>
-        </main>
-      </Layout>
-    );
-  }
-
-  return null;
-};
-
-// ─── SUB-COMPONENTS ───
-
-function Shell({ children, progress, hideProgress }: { children: React.ReactNode; progress: number; hideProgress?: boolean }) {
-  return (
-    <Layout title="Decision Check" description="Operational decision intelligence.">
-      <Head><meta name="robots" content="noindex" /></Head>
-      <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
-        <div className="mx-auto max-w-xl">
-          {!hideProgress && (
-            <>
-              <div className="flex items-center justify-between mb-4">
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase" as const, color: "#C9A96E70" }}>Decision check</span>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: "rgba(255,255,255,0.25)" }}>{progress} / 6</span>
-              </div>
-              <div className="flex gap-1 mb-8">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} style={{ flex: 1, height: "2px", backgroundColor: i <= progress ? "#C9A96E80" : "rgba(255,255,255,0.06)" }} />
-                ))}
-              </div>
-            </>
           )}
-          {children}
+
+          {stage === "result" && result && (
+            <div style={{ display: "grid", gap: "1rem" }}>
+              <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1.25rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                  State
+                </div>
+                <div style={{ marginTop: "0.45rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.5rem", color: "rgba(255,255,255,0.92)" }}>
+                  {result.conditionLabel}
+                </div>
+                <p style={{ marginTop: "0.5rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.58)" }}>
+                  Governed analysis complete.
+                </p>
+              </div>
+
+              {result.synthesis ? (
+                <>
+                  <Section title="Summary" body={result.synthesis.verdict} />
+                  <Section title="Directive" body={result.synthesis.concreteMove} />
+                  <Section title="Required action" body={result.synthesis.avoidedDecision} />
+                  <Section title="Recommended next step" body={result.synthesis.whyPriorAttemptsFailed} />
+                </>
+              ) : null}
+
+              {result.forecast ? (
+                <Section
+                  title="Escalation status"
+                  body={result.forecast.controlShiftSummary}
+                />
+              ) : null}
+
+              {result.arbiterMessage ? (
+                <Section title="Continuity note" body={result.arbiterMessage} />
+              ) : null}
+
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={resetDiagnostic}
+                  style={{ padding: "12px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.60)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
+                >
+                  Start again
+                </button>
+                <a
+                  href="/diagnostics/executive-reporting"
+                  style={{ padding: "12px 18px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+                >
+                  Open executive reporting
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </Layout>
   );
-}
+};
 
-function FeedbackButton({ icon, label, color, onClick }: { icon: React.ReactNode; label: string; color: string; onClick: () => void }) {
+function Section({ title, body }: { title: string; body: string }) {
   return (
-    <button type="button" onClick={onClick} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", padding: "8px 6px", border: `1px solid ${color}0.20)`, backgroundColor: `${color}0.04)`, color: `${color}0.60)`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.1em", cursor: "pointer" }}>
-      {icon} {label}
-    </button>
+    <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem 1.25rem" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+        {title}
+      </div>
+      <p style={{ marginTop: "0.45rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
+        {body}
+      </p>
+    </div>
   );
 }
 
