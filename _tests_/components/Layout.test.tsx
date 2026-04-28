@@ -1,4 +1,5 @@
-import { render, screen } from '...';
+// @vitest-environment jsdom
+import { render, screen } from '@testing-library/react';
 import Layout from "@/components/Layout";
 
 describe("Layout", () => {

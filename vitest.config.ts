@@ -6,7 +6,14 @@ export default defineConfig({
     // Standard institutional environment
     environment: 'node',
     globals: true,
-    
+
+    // Exclude Playwright e2e tests and build output duplicates
+    exclude: [
+      'tests/e2e/**',
+      '.next/**',
+      'node_modules/**',
+    ],
+
     // Path Aliasing for clean imports
     alias: {
       '@': path.resolve(__dirname, './'),

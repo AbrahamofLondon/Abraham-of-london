@@ -1,6 +1,13 @@
 // tests/performance/predictive-benchmark.test.ts
-import { TimeSeriesEngine } from '@/lib/predictive/engines/time-series-engine';
+import { TimeSeriesEngine, type TimeSeriesPoint } from '@/lib/predictive/engines/time-series-engine';
 import { ScenarioEngine } from '@/lib/predictive/engines/scenario-engine';
+
+function generateTimeSeries(count: number): TimeSeriesPoint[] {
+  return Array.from({ length: count }, (_, i) => ({
+    timestamp: new Date(2024, 0, i + 1),
+    value: 50 + Math.sin(i / 7) * 10 + i * 0.1 + (Math.random() - 0.5) * 5,
+  }));
+}
 
 describe('Performance Benchmarks', () => {
   it('should decompose 1000 points in under 100ms', () => {
