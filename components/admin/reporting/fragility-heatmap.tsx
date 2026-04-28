@@ -32,13 +32,13 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-function toNumber(value: unknown, fallback = 0): number {
+function toNumber(value: unknown, defaultValue = 0): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
     const parsed = Number(value);
     if (Number.isFinite(parsed)) return parsed;
   }
-  return fallback;
+  return defaultValue;
 }
 
 function parseVarianceScores(varianceScoresJson: string): number[] {
@@ -117,7 +117,7 @@ export function FragilityHeatmap({ teams }: FragilityHeatmapProps) {
           typeof (fragility as any)?.description === "string" &&
           (fragility as any).description.trim()
             ? (fragility as any).description.trim()
-            : "Fragility signal unavailable.",
+            : "Fragility indicator unavailable.",
       };
     });
   }, [teams]);

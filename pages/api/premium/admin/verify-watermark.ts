@@ -70,7 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 
-  const rateLimit = limitIp(req, "verify-watermark", RATE_LIMIT_CONFIG);
+  const rateLimit = await limitIp(req, "verify-watermark", RATE_LIMIT_CONFIG);
   setRateLimitHeaders(res, rateLimit);
 
   if (!rateLimit.allowed) {

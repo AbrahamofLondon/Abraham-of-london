@@ -247,7 +247,7 @@ export default async function handler(
 
   // Rate limit: 30 submissions per 10 minutes per IP
   const ip = getClientIp(req);
-  const rl = rateLimitCheck({ key: "INNER_CIRCLE_UNLOCK", id: `diag:${ip}` });
+  const rl = await rateLimitCheck({ key: "INNER_CIRCLE_UNLOCK", id: `diag:${ip}` });
   const rlHeaders = createRateLimitHeaders(rl);
   for (const [k, v] of Object.entries(rlHeaders)) res.setHeader(k, v);
 

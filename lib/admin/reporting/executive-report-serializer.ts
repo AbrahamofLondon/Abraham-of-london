@@ -411,3 +411,4 @@ export function serializeExecutiveReportToPdfPayload(input: SerializeInput) {
 }
 
 export type ReturnTypeSerializeExecutiveReportToPdfPayload = ReturnType<typeof serializeExecutiveReportToPdfPayload>;
+import "server-only";

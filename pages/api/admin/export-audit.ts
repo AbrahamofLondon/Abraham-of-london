@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
 import prisma from "@/lib/prisma";
 import { jsonErr } from "@/lib/server/http";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 type AuditRow = {
   createdAt: Date;
@@ -42,28 +43,9 @@ type AuditExportResponse =
       message?: string;
     };
 
-type RateLimitBucket = {
-  count: number;
-  resetAt: number;
-};
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __aolAdminAuditExportRateLimit:
-    | Map<string, RateLimitBucket>
-    | undefined;
-}
-
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 const RATE_LIMIT_MAX = 10;
 const MAX_RANGE_DAYS = 31;
-
-function getRateLimitStore(): Map<string, RateLimitBucket> {
-  if (!global.__aolAdminAuditExportRateLimit) {
-    global.__aolAdminAuditExportRateLimit = new Map<string, RateLimitBucket>();
-  }
-  return global.__aolAdminAuditExportRateLimit;
-}
 
 function getClientIp(req: NextApiRequest): string {
   const xf = req.headers["x-forwarded-for"];
@@ -75,33 +57,6 @@ function getClientIp(req: NextApiRequest): string {
       : req.socket?.remoteAddress || "0.0.0.0";
 
   return String(raw).split(",")[0]?.trim() || "0.0.0.0";
-}
-
-function applyRateLimit(
-  key: string
-): { ok: true; remaining: number; resetAt: number } | { ok: false; resetAt: number } {
-  const store = getRateLimitStore();
-  const now = Date.now();
-  const current = store.get(key);
-
-  if (!current || now >= current.resetAt) {
-    const resetAt = now + RATE_LIMIT_WINDOW_MS;
-    store.set(key, { count: 1, resetAt });
-    return { ok: true, remaining: RATE_LIMIT_MAX - 1, resetAt };
-  }
-
-  if (current.count >= RATE_LIMIT_MAX) {
-    return { ok: false, resetAt: current.resetAt };
-  }
-
-  current.count += 1;
-  store.set(key, current);
-
-  return {
-    ok: true,
-    remaining: Math.max(0, RATE_LIMIT_MAX - current.count),
-    resetAt: current.resetAt,
-  };
 }
 
 function normalizeDateInput(value: string | string[] | undefined): Date | null {
@@ -157,12 +112,17 @@ export default async function handler(
   }
 
   const rateKey = `${String(session.user.email).toLowerCase()}|${getClientIp(req)}`;
-  const rl = applyRateLimit(rateKey);
+  const rl = await consumePersistentRateLimit({
+    key: `admin-export-audit:${rateKey}`,
+    limit: RATE_LIMIT_MAX,
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    failClosed: true,
+  });
 
-  if (!rl.ok) {
+  if (!rl.allowed) {
     res.setHeader(
       "Retry-After",
-      String(Math.ceil((rl.resetAt - Date.now()) / 1000))
+      String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
     );
     return jsonErr(
       res,

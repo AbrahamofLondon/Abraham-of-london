@@ -41,7 +41,7 @@ export function CampaignActions({
 
   const handleGenerateReport = async () => {
     if (disabled) {
-      toast.error("Discretionary Guard: Anonymity threshold not yet reached.");
+      toast.error("Discretionary Guard: anonymity review point not yet reached.");
       return;
     }
     

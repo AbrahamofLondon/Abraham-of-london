@@ -2,11 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { readConstitutionalThread } from "@/lib/diagnostics/session-thread";
-import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
-import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { track } from "@/lib/analytics/track";
 import { getProductAmountGbp } from "@/lib/commercial/catalog";
-import { checkEconomicSanity, shouldBlockERPurchase } from "@/lib/follow-up/lie-detection";
 
 type ExecutiveReportingPaywallProps = {
   price?: number;
@@ -32,8 +29,7 @@ export default function ExecutiveReportingPaywall({
   const [checkoutCancelled, setCheckoutCancelled] = useState(false);
   const [committed, setCommitted] = useState(false);
   const paywallMountTime = useRef(Date.now());
-  const [spine, setSpine] = useState<IntelligenceSpine | null>(null);
-  const [currentSignal, setCurrentSignal] = useState<string[]>([
+  const [currentCondition, setCurrentCondition] = useState<string[]>([
     "Structural strain has been detected",
     "Interpretation is now required to determine consequence",
     "This stage translates condition into decision impact",
@@ -42,10 +38,8 @@ export default function ExecutiveReportingPaywall({
   const [estimatedMonthlyCost, setEstimatedMonthlyCost] = useState<string>("");
 
   // Case-linked data from spine
-  const costOfDelay = spine?.case.costOfDelay ?? null;
-  const hasCostText = costOfDelay && costOfDelay.trim().length > 5;
-  const conditionClass = spine?.deterministic.conditionClass ?? null;
-  const forcedAction = spine?.synthesis?.concreteMove ?? spine?.case.forcedAction ?? null;
+  const [costOfDelay, setCostOfDelay] = useState<string | null>(null);
+  const hasCostText = Boolean(costOfDelay && costOfDelay.trim().length > 5);
   const parsedCost = parseInt(estimatedMonthlyCost.replace(/[^0-9]/g, ""), 10);
   const hasCostNumber = Number.isFinite(parsedCost) && parsedCost > 0;
 
@@ -55,10 +49,17 @@ export default function ExecutiveReportingPaywall({
     const storedEmail = window.sessionStorage.getItem("aol_exec_checkout_email") || "";
     const params = new URLSearchParams(window.location.search);
     const thread = readConstitutionalThread();
-    const loadedSpine = loadSpineFromSession();
 
     if (storedEmail) setEmail(storedEmail);
-    if (loadedSpine) setSpine(loadedSpine);
+    try {
+      const raw = window.sessionStorage.getItem("aol_fast_result");
+      if (raw) {
+        const fastResult = JSON.parse(raw) as { forecast?: { alreadyIncurred?: string } | null };
+        setCostOfDelay(fastResult?.forecast?.alreadyIncurred ?? null);
+      }
+    } catch {
+      setCostOfDelay(null);
+    }
 
     if (params.get("checkout") === "cancelled") {
       setCheckoutCancelled(true);
@@ -66,7 +67,7 @@ export default function ExecutiveReportingPaywall({
     }
     if (thread) {
       const weakestDomain = Object.entries(thread.domainScores).sort((a, b) => a[1] - b[1])[0];
-      setCurrentSignal([
+      setCurrentCondition([
         thread.failureModes[0] || `${weakestDomain?.[0] || "Constitutional"} strain remains active`,
         thread.teamFindings
           ? `${thread.teamFindings.patternTitle} has already been confirmed`
@@ -77,7 +78,7 @@ export default function ExecutiveReportingPaywall({
     track("executive_reporting_paywall_viewed", {
       checkout_cancelled: params.get("checkout") === "cancelled",
       has_thread: Boolean(thread),
-      has_spine: Boolean(loadedSpine),
+      has_session_context: Boolean(costOfDelay),
     });
     const startedAt = Date.now();
     const handleUnload = () => {
@@ -94,11 +95,6 @@ export default function ExecutiveReportingPaywall({
     setMessage("Preparing decision session...");
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem("aol_exec_checkout_email", email);
-    }
-    // Persist economic anchor on spine
-    if (spine && hasCostNumber) {
-      spine.economics = { ...spine.economics, estimatedMonthlyCost: parsedCost };
-      try { const { saveSpineToSession: save } = require("@/lib/decision/spine-persistence"); save(spine); } catch {}
     }
 
     track("executive_reporting_checkout_clicked", {
@@ -143,11 +139,11 @@ export default function ExecutiveReportingPaywall({
         </div>
       )}
 
-      {/* SIGNAL SUMMARY */}
+      {/* CONDITION SUMMARY */}
       <div className="mb-6 border border-white/10 bg-white/[0.035] p-5 sm:p-6">
-        <div className="mb-3 font-medium text-white" style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}>Your current signal</div>
+        <div className="mb-3 font-medium text-white" style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}>Your current condition</div>
         <ul className="space-y-2 text-sm leading-6 text-white/72">
-          {currentSignal.slice(0, 3).map((item) => (
+          {currentCondition.slice(0, 3).map((item) => (
             <li key={item}>• {item}</li>
           ))}
         </ul>
@@ -165,21 +161,6 @@ export default function ExecutiveReportingPaywall({
             </p>
             <p className="mt-3 text-sm leading-6 text-white/45">
               If that is even partially accurate, this is already more expensive than £{price}.
-            </p>
-          </>
-        ) : conditionClass ? (
-          <>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.50)" }}>
-              You said this is affecting:
-            </p>
-            <p className="mt-2 text-sm leading-6 text-white/60">
-              {conditionClass === "authority" && "Authority, decision ownership, and who actually decides."}
-              {conditionClass === "definition" && "Decision clarity, alignment, and shared understanding."}
-              {conditionClass === "execution" && "Execution speed, accountability, and follow-through."}
-              {conditionClass === "instability" && "Structural stability — untested under real pressure."}
-            </p>
-            <p className="mt-3 text-sm leading-6 text-white/40">
-              That is not neutral. It compounds.
             </p>
           </>
         ) : (
@@ -252,20 +233,13 @@ export default function ExecutiveReportingPaywall({
             If this number is trivial, do not buy this.
           </p>
         )}
-        {hasCostNumber && spine && (() => {
-          const sanity = checkEconomicSanity({
-            estimatedMonthlyCost: parsedCost,
-            conditionClass: spine.deterministic.conditionClass,
-            contradictionSeverity: spine.c3.confidenceBand === "high" ? "critical" : spine.c3.confidenceBand === "medium" ? "medium" : "low",
-            claimedOwner: spine.case.claimedOwner,
-            blocker: spine.case.blocker,
-          });
-          return sanity.suspicious ? (
-            <div className="mt-3 border border-amber-500/20 bg-amber-500/[0.04] p-3">
-              <p className="text-xs leading-5 text-amber-200/70">{sanity.reason}</p>
-            </div>
-          ) : null;
-        })()}
+        {hasCostNumber && parsedCost < price && (
+          <div className="mt-3 border border-amber-500/20 bg-amber-500/[0.04] p-3">
+            <p className="text-xs leading-5 text-amber-200/70">
+              If the monthly cost is lower than the review itself, do not proceed unless the issue has governance or board-level consequence.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* PRICE — single anchor, no tiers */}
@@ -330,24 +304,18 @@ export default function ExecutiveReportingPaywall({
       ) : (
         /* CTA — only visible after commitment */
         <div>
-          {spine && shouldBlockERPurchase(spine) ? (
-            <div className="border border-white/10 bg-white/[0.02] p-4">
-              <p className="text-sm text-white/50">{shouldBlockERPurchase(spine)}</p>
-            </div>
-          ) : (
-            <>
-              <p className="mb-2 text-sm text-white/45">
-                You are about to make the cost of this decision visible. Once seen, it cannot be unseen.
-              </p>
-              <button
-                onClick={handleCheckout}
-                disabled={loading}
-                className="min-h-[44px] w-full bg-white py-3 font-medium text-black disabled:opacity-60"
-              >
-                {loading ? "Preparing decision session..." : primaryCtaLabel}
-              </button>
-            </>
-          )}
+          <>
+            <p className="mb-2 text-sm text-white/45">
+              You are about to make the cost of this decision visible. Once seen, it cannot be unseen.
+            </p>
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="min-h-[44px] w-full bg-white py-3 font-medium text-black disabled:opacity-60"
+            >
+              {loading ? "Preparing decision session..." : primaryCtaLabel}
+            </button>
+          </>
         </div>
       )}
 

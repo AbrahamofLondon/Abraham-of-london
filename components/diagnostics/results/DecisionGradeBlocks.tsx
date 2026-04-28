@@ -19,16 +19,16 @@ export type DecisionGradeProps = {
   ifUnchanged: string;
   /** One action. No fluff. */
   minimumViableMove: string;
-  /** How strong the signal is */
+  /** How strong the reading is */
   confidence: ConfidenceLevel;
-  /** Where this breaks at scale — connects small signal to big consequence */
+  /** Where this breaks at scale — connects small pattern to big consequence */
   scaleBreak?: string;
 };
 
 const CONFIDENCE_CONFIG: Record<ConfidenceLevel, { label: string; color: string }> = {
   strong: { label: "Consistent response pattern — likely real", color: "rgba(110,231,183,0.60)" },
-  moderate: { label: "Directional signal — pattern emerging, not yet confirmed", color: `${GOLD}BB` },
-  weak: { label: "Early signal — needs validation from additional evidence", color: "rgba(255,255,255,0.35)" },
+  moderate: { label: "Directional pattern — emerging, not yet confirmed", color: `${GOLD}BB` },
+  weak: { label: "Early pattern — needs validation from additional evidence", color: "rgba(255,255,255,0.35)" },
 };
 
 export default function DecisionGradeBlocks({ data }: { data: DecisionGradeProps }) {
@@ -39,7 +39,7 @@ export default function DecisionGradeBlocks({ data }: { data: DecisionGradeProps
       {/* Decision declaration */}
       <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
         <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>
-          Based on this signal, the likely decision in front of you is
+          Based on this reading, the likely decision in front of you is
         </span>
         <div className="mt-2 flex items-center gap-3">
           <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
@@ -84,7 +84,7 @@ export default function DecisionGradeBlocks({ data }: { data: DecisionGradeProps
         </div>
       )}
 
-      {/* Confidence signal */}
+      {/* Confidence indicator */}
       <div className="flex items-center gap-2" style={{ padding: "0.5rem 0" }}>
         <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: conf.color }} />
         <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: conf.color }}>

@@ -1,4 +1,5 @@
 // lib/auth/password.ts — SSOT password helpers
+import argon2 from "argon2";
 import bcrypt from "bcryptjs";
 
 function safeStr(value: unknown): string {
@@ -17,6 +18,10 @@ export async function verifyPassword(
   }
 
   try {
+    if (hash.startsWith("$argon2")) {
+      return await argon2.verify(hash, plain);
+    }
+
     return await bcrypt.compare(plain, hash);
   } catch {
     return false;

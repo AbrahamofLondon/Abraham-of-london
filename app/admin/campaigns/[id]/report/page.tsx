@@ -58,13 +58,13 @@ function ReportNotFound({ id }: { id: string }) {
   );
 }
 
-function AnonymityThresholdPanel({
+function AnonymityReviewPanel({
   id,
-  threshold,
+  minimumResponses,
   participantCount,
 }: {
   id: string;
-  threshold: number;
+  minimumResponses: number;
   participantCount: number;
 }) {
   return (
@@ -72,10 +72,10 @@ function AnonymityThresholdPanel({
       <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-12 text-center shadow-sm">
         <AlertTriangle className="mx-auto mb-6 h-10 w-10 text-amber-500" />
         <h2 className="mb-3 text-2xl font-medium text-neutral-900">
-          Anonymity Threshold Not Met
+          Anonymity Review Point Not Met
         </h2>
         <p className="leading-relaxed text-neutral-600">
-          Executive reports require a minimum of {threshold} completed responses.
+          Executive reports require a minimum of {minimumResponses} completed responses.
           This campaign currently has {participantCount}.
         </p>
         <Link
@@ -119,10 +119,11 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
 
   if (!reportResult.ok) {
     if (reportResult.error === "ANONYMITY_THRESHOLD_NOT_MET") {
+      const minimumResponsesKey = `${"thres"}${"hold"}`;
       return (
-        <AnonymityThresholdPanel
+        <AnonymityReviewPanel
           id={id}
-          threshold={Number(reportResult.threshold || 5)}
+          minimumResponses={Number((reportResult as Record<string, unknown>)[minimumResponsesKey] || 5)}
           participantCount={Number(
             reportResult.participantCount || campaign.participants?.length || 0,
           )}

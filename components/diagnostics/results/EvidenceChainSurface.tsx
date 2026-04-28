@@ -2,7 +2,7 @@
  * EvidenceChainSurface — renders the canonical AssessmentDecisionResult.
  *
  * Seven blocks in order:
- * 1. Primary signal
+ * 1. Primary condition
  * 2. Why the system reached this (evidence chain)
  * 3. Decision in front of you
  * 4. Minimum viable move
@@ -22,9 +22,9 @@ const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace,
 
 const STRENGTH_CONFIG: Record<string, { color: string; label: string }> = {
   STRONG: { color: "rgba(110,231,183,0.65)", label: "Consistent pattern — likely real" },
-  MODERATE: { color: `${GOLD}BB`, label: "Directional signal — pattern emerging" },
-  WEAK: { color: "rgba(255,255,255,0.35)", label: "Early signal — needs additional evidence" },
-  REQUIRES_VALIDATION: { color: "rgba(252,165,165,0.65)", label: "Contradictory signals — requires external validation" },
+  MODERATE: { color: `${GOLD}BB`, label: "Directional pattern — emerging" },
+  WEAK: { color: "rgba(255,255,255,0.35)", label: "Early pattern — needs additional evidence" },
+  REQUIRES_VALIDATION: { color: "rgba(252,165,165,0.65)", label: "Contradictory patterns — requires external validation" },
 };
 
 export default function EvidenceChainSurface({ result }: { result: AssessmentDecisionResult }) {
@@ -33,10 +33,10 @@ export default function EvidenceChainSurface({ result }: { result: AssessmentDec
   return (
     <div className="space-y-3" style={{ maxWidth: "56rem" }}>
 
-      {/* 1. PRIMARY SIGNAL */}
+      {/* 1. PRIMARY CONDITION */}
       <div style={{ padding: "1rem 0" }}>
         <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
-          Primary signal
+          Primary condition
         </span>
         <div className="flex items-center gap-2 mt-1">
           <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: strength.color }} />
@@ -57,7 +57,7 @@ export default function EvidenceChainSurface({ result }: { result: AssessmentDec
             <div key={i} style={{ borderLeft: `2px solid ${GOLD}30`, paddingLeft: "0.75rem" }}>
               <div className="flex items-center gap-2">
                 <span style={{ ...mono, fontSize: "6.5px", color: `${GOLD}80` }}>{link.inputSource}</span>
-                <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>{Math.round(link.weight * 100)}% weight</span>
+                <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>evidence link</span>
               </div>
               <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.1rem" }}>
                 {link.observedPattern}

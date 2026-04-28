@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 export const runtime = "nodejs";
 
@@ -17,16 +18,33 @@ type AuthorityLevel =
   | "SOVEREIGN";
 
 function normalizeKey(value: unknown): string {
-  return String(value ?? "").trim().toUpperCase();
+  return String(value ?? "").trim();
 }
 
-function getConfiguredKeys(): string[] {
+function sha256Hex(value: string): string {
+  return crypto.createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function constantTimeHexEquals(leftHex: string, rightHex: string): boolean {
+  const left = Buffer.from(leftHex, "hex");
+  const right = Buffer.from(rightHex, "hex");
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+function getConfiguredKeyHashes(): string[] {
   return [
-    process.env.OGR_SOVEREIGN_KEY || "",
-    ...(process.env.SOVEREIGN_KEYS || "").split(","),
-    process.env.SOVEREIGN_ACCESS_KEY || "",
+    process.env.OGR_SOVEREIGN_KEY_HASH || "",
+    ...(process.env.SOVEREIGN_KEY_HASHES || "").split(","),
+    process.env.SOVEREIGN_ACCESS_KEY_HASH || "",
+    process.env.OGR_SOVEREIGN_KEY ? sha256Hex(process.env.OGR_SOVEREIGN_KEY) : "",
+    ...(process.env.SOVEREIGN_KEYS || "")
+      .split(",")
+      .map((key) => key.trim())
+      .filter(Boolean)
+      .map((key) => sha256Hex(key)),
+    process.env.SOVEREIGN_ACCESS_KEY ? sha256Hex(process.env.SOVEREIGN_ACCESS_KEY) : "",
   ]
-    .map((key) => normalizeKey(key))
+    .map((key) => String(key || "").trim().toLowerCase())
     .filter(Boolean);
 }
 
@@ -70,14 +88,33 @@ function cookieBase() {
 }
 
 export async function POST(request: Request) {
+  // Rate limit: strict — 10 requests per 60s per IP
+  const clientIp = String(
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown"
+  );
+  const rl = await consumePersistentRateLimit({
+    key: `sovereign-auth:${clientIp}`,
+    limit: 10,
+    windowMs: 60_000,
+    failClosed: true,
+  });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { ok: false, error: "RATE_LIMIT_EXCEEDED" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } }
+    );
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
     const providedKey = normalizeKey((body as { key?: unknown })?.key);
 
-    const configuredKeys = getConfiguredKeys();
+    const configuredKeyHashes = getConfiguredKeyHashes();
     const sessionSecret = String(process.env.OGR_SESSION_SECRET || "").trim();
 
-    if (!configuredKeys.length) {
+    if (!configuredKeyHashes.length) {
       return NextResponse.json(
         { ok: false, error: "SOVEREIGN_KEY_NOT_CONFIGURED" },
         { status: 500 },
@@ -91,7 +128,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!providedKey || !configuredKeys.includes(providedKey)) {
+    const providedKeyHash = providedKey ? sha256Hex(providedKey) : "";
+    const authorized = configuredKeyHashes.some((candidateHash) =>
+      constantTimeHexEquals(candidateHash, providedKeyHash),
+    );
+
+    if (!providedKey || !authorized) {
       return NextResponse.json(
         { ok: false, error: "UNAUTHORIZED_ACCESS_BLOCK" },
         { status: 403 },

@@ -12,8 +12,8 @@ type EnterpriseAdvisoryCTAProps = {
 };
 
 export function EnterpriseAdvisoryCTA({
-  title = "This diagnostic sits at the threshold of private chamber work",
-  description = "When the signal is strong enough to warrant intervention, the next move is advisory, not another reading.",
+  title = "This diagnostic sits at the governed boundary of private chamber work",
+  description = "When the condition is strong enough to warrant intervention, the next move is advisory, not another reading.",
   intent = "enterprise-alignment-diagnostic",
   showEscalationNote = true,
 }: EnterpriseAdvisoryCTAProps) {
@@ -31,7 +31,7 @@ export function EnterpriseAdvisoryCTA({
             <Crown className="h-5 w-5 text-amber-400" />
           </div>
           <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber-400/70">
-            Advisory threshold
+            Advisory boundary
           </span>
         </div>
 
@@ -47,7 +47,7 @@ export function EnterpriseAdvisoryCTA({
             <p className="text-sm text-white/50">
               <span className="font-semibold text-white/70">Escalation note:</span>{" "}
               If the enterprise diagnostic surfaces leadership gap, high team variance,
-              or rising fragility signal, delay becomes a strategic error.
+              or rising fragility pattern, delay becomes a strategic error.
             </p>
           </div>
         )}

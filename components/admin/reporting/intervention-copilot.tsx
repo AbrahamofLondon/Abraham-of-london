@@ -82,7 +82,7 @@ export type InterventionCopilotProps = {
   constitutionalDecision?: ConstitutionalDecisionLite | null;
   constitutionalAuthority?: ConstitutionalAuthorityLite | null;
   participantCount?: number;
-  threshold?: number;
+  minimumResponses?: number;
   onCopyScript?: (domain: string, script: string) => void;
   onRequestDetail?: (domain: string) => void;
   onCreateIntervention?: (
@@ -159,8 +159,8 @@ function canAct(
   return levels[current || "OBSERVER"] >= levels[required];
 }
 
-function thresholdValid(participantCount: number, threshold: number) {
-  return participantCount >= threshold;
+function participationReady(participantCount: number, minimumResponses: number) {
+  return participantCount >= minimumResponses;
 }
 
 export default function InterventionCopilot({
@@ -169,14 +169,14 @@ export default function InterventionCopilot({
   constitutionalDecision,
   constitutionalAuthority,
   participantCount = 0,
-  threshold = 5,
+  minimumResponses = 5,
   onCopyScript,
   onRequestDetail,
   onCreateIntervention,
 }: InterventionCopilotProps) {
   const [workingDomain, setWorkingDomain] = React.useState<string | null>(null);
 
-  const validThreshold = thresholdValid(participantCount, threshold);
+  const participationReadyForAction = participationReady(participantCount, minimumResponses);
 
   const sorted = React.useMemo(() => {
     const order = {
@@ -228,7 +228,7 @@ export default function InterventionCopilot({
     );
 
     if (!allowed) return;
-    if (item.signatureRequired && !validThreshold) return;
+    if (item.signatureRequired && !participationReadyForAction) return;
 
     setWorkingDomain(item.domain);
 
@@ -252,7 +252,7 @@ export default function InterventionCopilot({
             No intervention intelligence available
           </h3>
           <p className="mt-3 text-sm text-white/52">
-            Complete the diagnostic stages first so the system has enough signal to
+            Complete the diagnostic stages first so the system has enough evidence to
             produce intervention-grade outputs.
           </p>
         </div>
@@ -271,7 +271,7 @@ export default function InterventionCopilot({
             </div>
 
             <h2 className="mt-3 font-serif text-2xl text-white/95 md:text-3xl">
-              Prescriptive actions ranked by constitutional weight
+              Prescriptive actions ranked by constitutional priority
             </h2>
 
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/58">
@@ -297,12 +297,12 @@ export default function InterventionCopilot({
             <span
               className={cn(
                 "rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.16em]",
-                validThreshold
+                participationReadyForAction
                   ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-300"
                   : "border-red-400/20 bg-red-500/10 text-red-300",
               )}
             >
-              Threshold {participantCount}/{threshold}
+              Review Point {participantCount}/{minimumResponses}
             </span>
           </div>
         </div>
@@ -341,7 +341,7 @@ export default function InterventionCopilot({
             constitutionalAuthority?.authorityLevel,
             item.constitutionalImpact.authorityLevelRequired,
           );
-          const blockedByThreshold = item.signatureRequired && !validThreshold;
+          const blockedByThreshold = item.signatureRequired && !participationReadyForAction;
           const busy = workingDomain === item.domain;
 
           return (
@@ -517,7 +517,7 @@ export default function InterventionCopilot({
 
                       {blockedByThreshold ? (
                         <span className="rounded-full border border-red-400/20 bg-red-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.14em] text-red-300">
-                          Quorum threshold not met
+                          Participation review point not met
                         </span>
                       ) : null}
                     </div>

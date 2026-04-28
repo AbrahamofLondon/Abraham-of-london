@@ -50,7 +50,7 @@ export default function SystemMemoryBlock({ currentStage, thread: threadProp }: 
     }
   }, [threadProp]);
 
-  // Only show if there are prior stages with signals
+  // Only show if there are prior stages with findings
   if (!thread || thread.tensions.length === 0) return null;
 
   const priorStages = [...new Set(thread.tensions.map((t) => t.source))].filter(
@@ -104,7 +104,7 @@ export default function SystemMemoryBlock({ currentStage, thread: threadProp }: 
           }}
         >
           Escalation: {thread.escalationLevel.replace(/_/g, " ")}
-          {highSeverityCount > 0 && ` · ${highSeverityCount} high-severity signal${highSeverityCount > 1 ? "s" : ""}`}
+          {highSeverityCount > 0 && ` · ${highSeverityCount} high-severity finding${highSeverityCount > 1 ? "s" : ""}`}
         </div>
       )}
 

@@ -78,7 +78,7 @@ export default function SignalRegistryTable({ items }: Props) {
   return (
     <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/40 backdrop-blur-md">
       <div className="border-b border-white/10 px-6 py-5">
-        <h2 className="font-serif text-2xl text-white">Decision Signal Registry</h2>
+        <h2 className="font-serif text-2xl text-white">Decision Indicator Registry</h2>
         <p className="mt-1 text-xs font-mono uppercase tracking-[0.16em] text-white/45">
           Unified drift, resonance, and governance health surface
         </p>

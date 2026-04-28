@@ -1,6 +1,13 @@
 // lib/auth/mfa.ts — DB-OPTIONAL + REDIS MANAGER COMPAT + SAFE FALLBACK + STRICT TS
-
-import { randomInt, randomBytes, createHash } from "crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createHmac,
+  randomBytes,
+  randomInt,
+  timingSafeEqual,
+} from "crypto";
 // @ts-ignore - hi-base32 doesn't ship types
 import { encode as encodeBase32 } from "hi-base32";
 import { authenticator } from "@otplib/preset-default";
@@ -103,7 +110,7 @@ type ChallengeStore = {
 // ==================== IN-MEMORY STORE ====================
 class MfaChallengeStore implements ChallengeStore {
   private static instance: MfaChallengeStore;
-  private challenges = new Map<string, any>();
+  private challenges: Map<string, any> = new Map();
 
   private constructor() {}
 
@@ -157,6 +164,9 @@ async function getRedisMfaStore(): Promise<ChallengeStore> {
       typeof client.set !== "function" ||
       typeof client.del !== "function"
     ) {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("[MFA] Redis challenge store is required in production");
+      }
       console.warn("[MFA] Redis client not available. Using in-memory store.");
       return MfaChallengeStore.getInstance();
     }
@@ -171,6 +181,9 @@ async function getRedisMfaStore(): Promise<ChallengeStore> {
           );
           await client.set(key, payload, "EX", ttlSeconds);
         } catch (error) {
+          if (process.env.NODE_ENV === "production") {
+            throw new Error("[MFA] Redis challenge persistence failed");
+          }
           console.error("[MFA] Redis set failed — falling back to memory:", error);
           await MfaChallengeStore.getInstance().set(key, value, ttlMs);
         }
@@ -183,6 +196,9 @@ async function getRedisMfaStore(): Promise<ChallengeStore> {
           const parsed = JSON.parse(raw);
           return reviveMaybeChallenge(parsed);
         } catch (error) {
+          if (process.env.NODE_ENV === "production") {
+            throw new Error("[MFA] Redis challenge read failed");
+          }
           console.error("[MFA] Redis get failed — falling back to memory:", error);
           return MfaChallengeStore.getInstance().get(key);
         }
@@ -192,6 +208,9 @@ async function getRedisMfaStore(): Promise<ChallengeStore> {
         try {
           await client.del(key);
         } catch (error) {
+          if (process.env.NODE_ENV === "production") {
+            throw new Error("[MFA] Redis challenge delete failed");
+          }
           console.error("[MFA] Redis delete failed — falling back to memory:", error);
           await MfaChallengeStore.getInstance().delete(key);
         }
@@ -202,9 +221,96 @@ async function getRedisMfaStore(): Promise<ChallengeStore> {
       },
     };
   } catch (error) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("[MFA] Redis challenge store unavailable in production");
+    }
     console.warn("[MFA] Redis module import failed — using in-memory store:", error);
     return MfaChallengeStore.getInstance();
   }
+}
+
+function getMfaEncryptionKey(): Buffer {
+  const secret = String(process.env.MFA_ENCRYPTION_KEY || "").trim();
+  if (!secret) {
+    throw new Error("[MFA] Missing MFA_ENCRYPTION_KEY");
+  }
+  return createHash("sha256").update(secret, "utf8").digest();
+}
+
+function encryptSecret(secret: string): string {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", getMfaEncryptionKey(), iv);
+  const ciphertext = Buffer.concat([
+    cipher.update(secret, "utf8"),
+    cipher.final(),
+  ]);
+  const tag = cipher.getAuthTag();
+  return `enc:${iv.toString("base64url")}:${tag.toString("base64url")}:${ciphertext.toString("base64url")}`;
+}
+
+function decryptSecret(value: string): string {
+  if (!value.startsWith("enc:")) {
+    return value;
+  }
+
+  const [, ivB64, tagB64, ciphertextB64] = value.split(":");
+  if (!ivB64 || !tagB64 || !ciphertextB64) {
+    throw new Error("[MFA] Invalid encrypted secret payload");
+  }
+
+  const decipher = createDecipheriv(
+    "aes-256-gcm",
+    getMfaEncryptionKey(),
+    Buffer.from(ivB64, "base64url"),
+  );
+  decipher.setAuthTag(Buffer.from(tagB64, "base64url"));
+
+  const plaintext = Buffer.concat([
+    decipher.update(Buffer.from(ciphertextB64, "base64url")),
+    decipher.final(),
+  ]);
+  return plaintext.toString("utf8");
+}
+
+function getBackupCodePepper(): string {
+  const pepper = String(
+    process.env.MFA_BACKUP_CODE_PEPPER || process.env.MFA_ENCRYPTION_KEY || "",
+  ).trim();
+  if (!pepper) {
+    throw new Error("[MFA] Missing MFA_BACKUP_CODE_PEPPER or MFA_ENCRYPTION_KEY");
+  }
+  return pepper;
+}
+
+function normalizeBackupCode(value: string): string {
+  return String(value || "").replace(/-/g, "").trim().toUpperCase();
+}
+
+function hashBackupCode(code: string): string {
+  return createHmac("sha256", getBackupCodePepper())
+    .update(normalizeBackupCode(code), "utf8")
+    .digest("hex");
+}
+
+function isHashedBackupCode(value: string): boolean {
+  return /^[a-f0-9]{64}$/i.test(String(value || "").trim());
+}
+
+function compareBackupCode(candidate: string, stored: string): boolean {
+  const candidateHash = hashBackupCode(candidate);
+  const storedHash = isHashedBackupCode(stored)
+    ? String(stored).trim().toLowerCase()
+    : hashBackupCode(stored);
+
+  const left = Buffer.from(candidateHash, "hex");
+  const right = Buffer.from(storedHash, "hex");
+  return left.length === right.length && timingSafeEqual(left, right);
+}
+
+function timingSafeEqualString(left: string, right: string): boolean {
+  const a = Buffer.from(String(left || "").trim());
+  const b = Buffer.from(String(right || "").trim());
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 // ==================== DATE REVIVAL HELPERS ====================
@@ -247,7 +353,19 @@ async function getUserTotpSecret(userId: string): Promise<string | null> {
           where: { userId },
           select: { totpSecret: true },
         });
-        if (row?.totpSecret) return String(row.totpSecret);
+        if (row?.totpSecret) {
+          const storedSecret = String(row.totpSecret);
+          const decryptedSecret = decryptSecret(storedSecret);
+
+          if (!storedSecret.startsWith("enc:") && typeof model.update === "function") {
+            await model.update({
+              where: { userId },
+              data: { totpSecret: encryptSecret(decryptedSecret) },
+            }).catch(() => undefined);
+          }
+
+          return decryptedSecret;
+        }
       }
     }
   } catch {
@@ -258,7 +376,19 @@ async function getUserTotpSecret(userId: string): Promise<string | null> {
   try {
     const store = await getRedisMfaStore();
     const v = await store.get(`mfa:totp:${userId}`);
-    return v?.totpSecret ? String(v.totpSecret) : null;
+    if (v?.totpSecret) {
+      const storedSecret = String(v.totpSecret);
+      const decryptedSecret = decryptSecret(storedSecret);
+      if (!storedSecret.startsWith("enc:")) {
+        await store.set(
+          `mfa:totp:${userId}`,
+          { totpSecret: encryptSecret(decryptedSecret) },
+          30 * 24 * 60 * 60 * 1000,
+        );
+      }
+      return decryptedSecret;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -278,7 +408,9 @@ async function getBackupCodes(userId: string): Promise<string[] | null> {
           where: { userId },
           select: { backupCodes: true },
         });
-        if (row?.backupCodes && Array.isArray(row.backupCodes)) return row.backupCodes.map(String);
+        if (row?.backupCodes && Array.isArray(row.backupCodes)) {
+          return row.backupCodes.map(String);
+        }
       }
     }
   } catch {
@@ -297,6 +429,10 @@ async function getBackupCodes(userId: string): Promise<string[] | null> {
 }
 
 async function saveBackupCodes(userId: string, backupCodes: string[]): Promise<void> {
+  const hashedBackupCodes = backupCodes.map((code) =>
+    isHashedBackupCode(code) ? String(code).trim().toLowerCase() : hashBackupCode(code),
+  );
+
   // Try DB update first (if model exists)
   try {
     const { prisma } = await import("@/lib/prisma");
@@ -308,7 +444,7 @@ async function saveBackupCodes(userId: string, backupCodes: string[]): Promise<v
       if (model && typeof model.update === "function") {
         await model.update({
           where: { userId },
-          data: { backupCodes },
+          data: { backupCodes: hashedBackupCodes },
         });
         return;
       }
@@ -319,7 +455,7 @@ async function saveBackupCodes(userId: string, backupCodes: string[]): Promise<v
 
   // Fallback: Redis/memory
   const store = await getRedisMfaStore();
-  await store.set(`mfa:backup:${userId}`, { backupCodes }, 30 * 24 * 60 * 60 * 1000);
+  await store.set(`mfa:backup:${userId}`, { backupCodes: hashedBackupCodes }, 30 * 24 * 60 * 60 * 1000);
 }
 
 // ==================== TOTP ====================
@@ -469,7 +605,7 @@ export async function verifyMfaChallenge(
 
     case "sms":
     case "email":
-      isValid = (challenge.code || "").toUpperCase() === code.toUpperCase();
+      isValid = timingSafeEqualString(String(challenge.code || ""), String(code || ""));
       break;
 
     case "backup-code":
@@ -603,14 +739,14 @@ async function sendVerificationCode(method: "sms" | "email", userId: string, cod
 }
 
 async function verifyBackupCode(userId: string, code: string): Promise<boolean> {
-  const normalizedCode = String(code || "").replace(/-/g, "").toUpperCase();
+  const normalizedCode = normalizeBackupCode(code);
   if (!normalizedCode) return false;
 
   const backupCodes = await getBackupCodes(userId);
   if (!backupCodes || !Array.isArray(backupCodes) || backupCodes.length === 0) return false;
 
   const idx = backupCodes.findIndex(
-    (bc) => String(bc).replace(/-/g, "").toUpperCase() === normalizedCode
+    (bc) => compareBackupCode(normalizedCode, String(bc))
   );
   if (idx === -1) return false;
 

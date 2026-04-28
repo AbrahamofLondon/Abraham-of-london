@@ -299,7 +299,7 @@ export default async function handler(
     RATE_LIMIT_CONFIGS.newsletter ?? RATE_LIMIT_CONFIGS.subscribe;
 
   const rlKey = getRateLimitKey(req, "newsletter");
-  const rateLimitResult = rateLimit(rlKey, newsletterRateConfig);
+  const rateLimitResult = await rateLimit(rlKey, newsletterRateConfig);
 
   const rateLimitHeaders = createRateLimitHeaders(rateLimitResult);
   Object.entries(rateLimitHeaders).forEach(([key, value]) => {

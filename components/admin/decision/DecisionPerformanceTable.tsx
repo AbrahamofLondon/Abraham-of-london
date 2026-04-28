@@ -21,7 +21,7 @@ function formatPercent(value: number, digits = 1): string {
   return `${(value * 100).toFixed(digits)}%`;
 }
 
-function formatWeight(value: number): string {
+function formatLift(value: number): string {
   return value.toFixed(2);
 }
 
@@ -73,7 +73,7 @@ export function DecisionPerformanceTable({
                   CVR
                 </th>
                 <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
-                  Weight
+                  Lift
                 </th>
                 <th className="px-6 py-3 text-right text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
                   Last Interaction
@@ -134,7 +134,7 @@ export function DecisionPerformanceTable({
                           : "bg-neutral-100 text-neutral-700"
                       }`}
                     >
-                      {formatWeight(row.adaptiveWeight)}
+                      {formatLift(row.adaptiveWeight)}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right text-neutral-500">

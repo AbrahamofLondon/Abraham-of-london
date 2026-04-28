@@ -4,27 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { toggleInteraction, type InteractionAction } from "@/lib/db/interactions";
-
-// ---------------------------------------------------------------------------
-// Minimal server-side throttle (UX + abuse-dampener). Not a security boundary.
-// Real security is auth + DB constraints + infra rate limits.
-// ---------------------------------------------------------------------------
-type Bucket = { count: number; resetAt: number };
-const mem = new Map<string, Bucket>();
-
-function rateLimit(key: string, limit: number, windowMs: number) {
-  const now = Date.now();
-  const cur = mem.get(key);
-  if (!cur || now >= cur.resetAt) {
-    mem.set(key, { count: 1, resetAt: now + windowMs });
-    return { ok: true, remaining: limit - 1, resetAt: now + windowMs, limit };
-  }
-  if (cur.count >= limit) {
-    return { ok: false, remaining: 0, resetAt: cur.resetAt, limit };
-  }
-  cur.count += 1;
-  return { ok: true, remaining: Math.max(0, limit - cur.count), resetAt: cur.resetAt, limit };
-}
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 function jsonError(message: string, status: number, extra?: Record<string, unknown>) {
   return NextResponse.json({ ok: false, error: message, ...extra }, { status });
@@ -57,8 +37,13 @@ export async function POST(req: NextRequest) {
     if (!action) return jsonError("Invalid action.", 400);
 
     // Soft throttle: per user + action + slug (prevents hammering)
-    const rl = rateLimit(`ic:${email}:${action}:${slug}`, 20, 60_000);
-    if (!rl.ok) {
+    const rl = await consumePersistentRateLimit({
+      key: `interactions:${email}:${action}:${slug}`,
+      limit: 20,
+      windowMs: 60_000,
+      failClosed: true,
+    });
+    if (!rl.allowed) {
       const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
       return NextResponse.json(
         { ok: false, error: "Too many requests.", retryAfter },

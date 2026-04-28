@@ -40,7 +40,7 @@ type CanonicalContext = {
   clarityScore: number;
   authorityScore: number;
   governanceScore: number;
-  severityScore: number;
+  severityIndex?: number;
   revenueScore: number;
 };
 

@@ -167,7 +167,7 @@ export function OGRInteractiveView({ data }: OGRInteractiveViewProps) {
           <div className="mb-5 flex items-center gap-2">
             <Activity className="h-4 w-4 text-[#8A6A2F]" />
             <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-neutral-800">
-              Organisational Signal
+              Organisational Indicator
             </h3>
           </div>
 

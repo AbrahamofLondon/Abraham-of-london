@@ -207,3 +207,4 @@ export function buildContextualBreakdown(context: CanonicalPerformanceContext) {
     revenueScore: context.revenueScore,
   };
 }
+import "server-only";

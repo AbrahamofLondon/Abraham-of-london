@@ -1,0 +1,91 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+
+const HOSTILE_PATH_PATTERNS = [
+  /^\/(?:\.env|\.git|\.svn|\.hg)(?:\/|$)/i,
+  /^\/(?:wp-admin|wp-login\.php|xmlrpc\.php)(?:\/|$)/i,
+  /^\/(?:phpmyadmin|pma|mysql)(?:\/|$)/i,
+  /^\/(?:server-status|cgi-bin)(?:\/|$)/i,
+];
+
+const BLOCKED_UA_PATTERNS = [
+  /sqlmap/i,
+  /nikto/i,
+  /dirbuster/i,
+  /gobuster/i,
+  /ffuf/i,
+  /masscan/i,
+  /nmap/i,
+];
+
+const MAX_PROTECTED_BODY_BYTES = 1_000_000;
+
+function isProtectedPath(pathname: string): boolean {
+  return (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/inner-circle") ||
+    pathname.startsWith("/sovereign") ||
+    pathname.startsWith("/api/admin") ||
+    pathname.startsWith("/api/inner-circle") ||
+    pathname.startsWith("/api/auth/sovereign")
+  );
+}
+
+function hasSessionCookie(req: NextRequest): boolean {
+  return Boolean(
+    req.cookies.get("next-auth.session-token")?.value ||
+      req.cookies.get("__Secure-next-auth.session-token")?.value ||
+      req.cookies.get("aol_access")?.value ||
+      req.cookies.get("ogr_sovereign_session")?.value,
+  );
+}
+
+function unauthorizedResponse(req: NextRequest): NextResponse {
+  if (req.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
+  }
+
+  const loginUrl = new URL("/auth/signin", req.url);
+  loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
+  return NextResponse.redirect(loginUrl);
+}
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  const userAgent = req.headers.get("user-agent") || "";
+
+  if (HOSTILE_PATH_PATTERNS.some((pattern) => pattern.test(pathname))) {
+    return NextResponse.json({ ok: false, error: "NOT_FOUND" }, { status: 404 });
+  }
+
+  if (BLOCKED_UA_PATTERNS.some((pattern) => pattern.test(userAgent))) {
+    return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+  }
+
+  if (isProtectedPath(pathname)) {
+    const contentLength = Number(req.headers.get("content-length") || 0);
+    if (contentLength > MAX_PROTECTED_BODY_BYTES) {
+      return NextResponse.json(
+        { ok: false, error: "REQUEST_TOO_LARGE" },
+        { status: 413 },
+      );
+    }
+
+    const token = await getToken({
+      req,
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: process.env.NODE_ENV === "production",
+    }).catch(() => null);
+
+    if (!token && !hasSessionCookie(req)) {
+      return unauthorizedResponse(req);
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};

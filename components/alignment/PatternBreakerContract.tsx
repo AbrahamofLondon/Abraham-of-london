@@ -167,7 +167,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
               }}>
                 The system has identified that your primary weakness is in <strong style={{ color: GOLD }}>{pattern.weakestDomain}</strong>.
                 {pattern.urgentStatement && (
-                  <span> Your sharpest signal: <em style={{ color: "rgba(252,165,165,0.8)" }}>"{pattern.urgentStatement.split('—')[0]}"</em></span>
+                  <span> Your sharpest pattern: <em style={{ color: "rgba(252,165,165,0.8)" }}>"{pattern.urgentStatement.split('—')[0]}"</em></span>
                 )}
               </p>
               

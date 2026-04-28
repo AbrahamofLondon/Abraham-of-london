@@ -169,7 +169,6 @@ function getSessionId(req: NextApiRequest): string | null {
     cookies.aol_session_id,
     cookies["next-auth.session-token"],
     cookies["__Secure-next-auth.session-token"],
-    req.headers["x-session-id"],
   ];
 
   for (const candidate of candidates) {

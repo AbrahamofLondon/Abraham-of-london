@@ -1,5 +1,5 @@
 /**
- * CompetitivePosition — visual signal of where the organisation stands.
+ * CompetitivePosition — visual indicator of where the organisation stands.
  *
  * States: BEHIND | AT_RISK | STABLE | ADVANCING | LEADING
  * This is a live indicator, not analytics.

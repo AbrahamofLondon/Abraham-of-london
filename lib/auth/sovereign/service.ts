@@ -1,6 +1,7 @@
 // lib/auth/sovereign/service.ts
 import crypto from 'crypto';
 import { SovereignSession, SovereignValidationResult, SovereignAuthConfig } from './types';
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 const DEFAULT_CONFIG: SovereignAuthConfig = {
   sessionDuration: 60 * 60 * 1000, // 1 hour
@@ -8,9 +9,6 @@ const DEFAULT_CONFIG: SovereignAuthConfig = {
   lockoutDuration: 5 * 60 * 1000, // 5 minutes
   requireSecureCookie: process.env.NODE_ENV === 'production'
 };
-
-// In-memory rate limiting (replace with Redis in production)
-const attemptStore = new Map<string, { count: number; lockedUntil: number }>();
 
 export class SovereignAuthService {
   private static instance: SovereignAuthService;
@@ -32,18 +30,32 @@ export class SovereignAuthService {
    */
   validateAccessKey(key: string): boolean {
     if (!key || typeof key !== 'string') return false;
-    
-    const validKey = process.env.SOVEREIGN_ACCESS_KEY;
-    if (!validKey) {
+
+    const configuredHashes = [
+      process.env.SOVEREIGN_ACCESS_KEY_HASH,
+      process.env.OGR_SOVEREIGN_KEY_HASH,
+      process.env.SOVEREIGN_ACCESS_KEY
+        ? crypto.createHash("sha256").update(process.env.SOVEREIGN_ACCESS_KEY, "utf8").digest("hex")
+        : "",
+    ]
+      .map((value) => String(value || "").trim().toLowerCase())
+      .filter(Boolean);
+
+    if (!configuredHashes.length) {
       console.error('[SovereignAuth] SOVEREIGN_ACCESS_KEY not configured');
       return false;
     }
-    
-    // Constant-time comparison to prevent timing attacks
-    return crypto.timingSafeEqual(
-      Buffer.from(key.toUpperCase()),
-      Buffer.from(validKey.toUpperCase())
-    );
+
+    const providedHash = crypto
+      .createHash("sha256")
+      .update(String(key).trim(), "utf8")
+      .digest("hex");
+
+    return configuredHashes.some((candidateHash) => {
+      const left = Buffer.from(candidateHash, "hex");
+      const right = Buffer.from(providedHash, "hex");
+      return left.length === right.length && crypto.timingSafeEqual(left, right);
+    });
   }
 
   /**
@@ -94,57 +106,24 @@ export class SovereignAuthService {
   /**
    * Rate limiting for authentication attempts
    */
-  checkRateLimit(identifier: string): { allowed: boolean; retryAfterMs?: number } {
-    const record = attemptStore.get(identifier);
-    const now = Date.now();
-    
-    // Check if locked
-    if (record && record.lockedUntil > now) {
-      return {
-        allowed: false,
-        retryAfterMs: record.lockedUntil - now
-      };
-    }
-    
-    // Reset if lock expired
-    if (record && record.lockedUntil <= now) {
-      attemptStore.delete(identifier);
-      return { allowed: true };
-    }
-    
-    return { allowed: true };
+  async checkRateLimit(identifier: string): Promise<{ allowed: boolean; retryAfterMs?: number }> {
+    const result = await consumePersistentRateLimit({
+      key: `sovereign-auth:${identifier}`,
+      limit: this.config.maxAttempts,
+      windowMs: this.config.lockoutDuration,
+      failClosed: true,
+    });
+
+    return result.allowed
+      ? { allowed: true }
+      : { allowed: false, retryAfterMs: result.retryAfterMs };
   }
 
   /**
    * Record authentication attempt
    */
-  recordAttempt(identifier: string, success: boolean): void {
-    if (success) {
-      attemptStore.delete(identifier);
-      return;
-    }
-    
-    const now = Date.now();
-    const record = attemptStore.get(identifier);
-    
-    if (!record) {
-      attemptStore.set(identifier, { count: 1, lockedUntil: 0 });
-      return;
-    }
-    
-    const newCount = record.count + 1;
-    
-    if (newCount >= this.config.maxAttempts) {
-      attemptStore.set(identifier, {
-        count: newCount,
-        lockedUntil: now + this.config.lockoutDuration
-      });
-    } else {
-      attemptStore.set(identifier, {
-        count: newCount,
-        lockedUntil: 0
-      });
-    }
+  async recordAttempt(_identifier: string, _success: boolean): Promise<void> {
+    return;
   }
 
   /**

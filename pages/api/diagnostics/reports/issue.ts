@@ -36,7 +36,7 @@ export default async function handler(
   }
 
   const ip = getClientIp(req);
-  const rl = consumeRateLimit({
+  const rl = await consumeRateLimit({
     key: `report-issue:${ip}`,
     limit: 20,
     windowMs: 60_000,

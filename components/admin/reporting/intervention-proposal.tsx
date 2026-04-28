@@ -59,13 +59,13 @@ function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-function n(value: unknown, fallback = 0): number {
+function n(value: unknown, defaultValue = 0): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
     const parsed = Number(value);
     if (Number.isFinite(parsed)) return parsed;
   }
-  return fallback;
+  return defaultValue;
 }
 
 function topIssue(metrics: InterventionMetric[], lens: TelemetryLens): InterventionMetric | null {

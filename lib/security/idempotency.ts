@@ -1,6 +1,6 @@
 /* lib/security/idempotency.ts */
 
-const store = new Map<string, number>();
+const store: Map<string, number> = new Map();
 
 export function isDuplicate(key: string, ttlMs = 5 * 60 * 1000): boolean {
   const now = Date.now();

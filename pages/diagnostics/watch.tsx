@@ -60,8 +60,8 @@ export default function DiagnosticWatchPage({ vm }: Props) {
               Conditions under observation
             </h2>
             <p className="mt-3 text-sm leading-6 text-white/45">
-              The diagnostic system has identified the following structural signals. They are being
-              tracked — not dismissed — but they do not yet meet the threshold for executive intervention.
+              The diagnostic system has identified the following structural conditions. They are being
+              tracked, not dismissed, but they do not yet justify executive intervention.
             </p>
             <ul className="mt-5 space-y-3">
               {vm.watchedConditions.map((condition) => (

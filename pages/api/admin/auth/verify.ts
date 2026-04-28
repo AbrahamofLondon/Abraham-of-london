@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma.server";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 /**
  * GET /api/admin/auth/verify?token=...&email=...&returnTo=...
@@ -10,6 +11,23 @@ import { serialize } from "cookie";
  * Redirects to the returnTo path on success, or to /admin/login on failure.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Rate limit: medium — 20 requests per 60s per IP
+  const clientIp = String(
+    req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() ||
+    req.socket?.remoteAddress ||
+    "unknown"
+  );
+  const rl = await consumePersistentRateLimit({
+    key: `admin-verify:${clientIp}`,
+    limit: 20,
+    windowMs: 60_000,
+    failClosed: true,
+  });
+  if (!rl.allowed) {
+    res.setHeader("Retry-After", String(Math.ceil(rl.retryAfterMs / 1000)));
+    return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
+  }
+
   const { token, email, returnTo } = req.query;
   const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
   const tokenStr = typeof token === "string" ? token : "";

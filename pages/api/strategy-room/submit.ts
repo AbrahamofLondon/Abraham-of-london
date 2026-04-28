@@ -40,7 +40,7 @@ export default async function handler(
 
   // Rate limit parity with canonical /api/strategy-room/enrol
   const ip = getClientIp(req);
-  const rl = rateLimitCheck({ key: "API_STRICT", id: `sr:${ip}` });
+  const rl = await rateLimitCheck({ key: "API_STRICT", id: `sr:${ip}` });
   const rlHeaders = createRateLimitHeaders(rl);
   for (const [k, v] of Object.entries(rlHeaders)) res.setHeader(k, v);
 

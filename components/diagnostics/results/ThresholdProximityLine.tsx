@@ -1,27 +1,27 @@
 const GOLD = "#C9A96E";
 
-export function thresholdProximityText({
+export function boundaryProximityText({
   label,
   value,
-  thresholdLabel,
-  threshold,
+  boundaryLabel,
+  boundary,
   higherIsBetter = true,
 }: {
   label: string;
   value: number;
-  thresholdLabel: string;
-  threshold: number;
+  boundaryLabel: string;
+  boundary: number;
   higherIsBetter?: boolean;
 }): string {
   const current = Math.round(value);
-  const target = Math.round(threshold);
+  const target = Math.round(boundary);
   const delta = higherIsBetter ? current - target : target - current;
   const distance = Math.abs(delta);
   const relation = delta >= 0 ? "above" : "below";
-  return `${label} at ${current}${label.toLowerCase().includes("gap") ? " pts" : "%"} — ${distance} point${distance === 1 ? "" : "s"} ${relation} ${thresholdLabel} threshold`;
+  return `${label} at ${current}${label.toLowerCase().includes("gap") ? " pts" : "%"} — ${distance} point${distance === 1 ? "" : "s"} ${relation} the ${boundaryLabel} review point`;
 }
 
-export default function ThresholdProximityLine({
+export default function BoundaryProximityLine({
   text,
 }: {
   text: string;

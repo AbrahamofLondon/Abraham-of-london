@@ -16,6 +16,7 @@ import {
 } from "@/lib/premium/download-token";
 import { generateForensicPayload } from "@/lib/intelligence/forensic-mapping";
 import type { AccessTier } from "@/lib/access/tier-policy";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 /**
  * Font registration is performed lazily on first request (see GET handler)
@@ -136,6 +137,20 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
 
   const ip = getClientIp(req);
   const userAgent = req.headers.get("user-agent") || "unknown";
+
+  // Rate limit: medium — 20 requests per 60s per IP
+  const rl = await consumePersistentRateLimit({
+    key: `download:${ip}`,
+    limit: 20,
+    windowMs: 60_000,
+    failClosed: true,
+  });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "RATE_LIMIT_EXCEEDED" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } }
+    );
+  }
 
   const session = await getServerSession(authOptions);
   const sessionUser = session?.user as SessionUserShape | undefined;

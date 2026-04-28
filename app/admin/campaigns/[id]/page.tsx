@@ -104,9 +104,9 @@ function toDateOrNull(value: string | Date | null | undefined): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function toNonEmptyString(value: unknown, fallback: string): string {
+function toNonEmptyString(value: unknown, defaultValue: string): string {
   if (typeof value === "string" && value.trim()) return value.trim();
-  return fallback;
+  return defaultValue;
 }
 
 // ============================================================================
@@ -350,7 +350,7 @@ export default async function CampaignManagementPage({ params }: PageProps) {
                 <p className="text-[8px] text-amber-400/80 flex items-center gap-2">
                   <Lock className="w-3 h-3" />
                   Executive snapshot requires {5 - completedCount} more responses
-                  for anonymity threshold
+                  to reach the anonymity review point
                 </p>
               </div>
             )}
@@ -399,7 +399,7 @@ export default async function CampaignManagementPage({ params }: PageProps) {
                       : "text-amber-600 animate-pulse"
                   }`}
                 >
-                  {isSafeToReport ? "Live Tracking" : "Threshold Pending"}
+                  {isSafeToReport ? "Live Tracking" : "Review Point Pending"}
                 </span>
               </div>
 
@@ -439,7 +439,7 @@ export default async function CampaignManagementPage({ params }: PageProps) {
 
             {!isSafeToReport && (
               <p className="mt-6 text-[9px] text-neutral-500 italic leading-relaxed uppercase tracking-tighter">
-                Executive Snapshots are locked until the anonymity threshold
+                Executive Snapshots are locked until the anonymity review point
                 (n=5) is achieved.
               </p>
             )}

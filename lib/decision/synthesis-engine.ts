@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Synthesis Engine — produces bespoke output from the user's specific case.
  *

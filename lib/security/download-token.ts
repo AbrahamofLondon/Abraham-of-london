@@ -1,7 +1,19 @@
 // lib/security/download-token.ts
 import crypto from "crypto";
 
-const SECRET = process.env.DOWNLOAD_SECRET || process.env.JWT_SECRET || "dev-secret";
+function getDownloadTokenSecret(): string {
+  const secret =
+    process.env.DOWNLOAD_SECRET?.trim() ||
+    process.env.DOWNLOAD_TOKEN_SECRET?.trim();
+
+  if (!secret) {
+    throw new Error(
+      "[DOWNLOAD_TOKEN] Missing DOWNLOAD_SECRET or DOWNLOAD_TOKEN_SECRET",
+    );
+  }
+
+  return secret;
+}
 
 /**
  * Base64url encode (RFC 4648 §5)
@@ -38,7 +50,10 @@ export function createDownloadToken(payload: DownloadTokenPayload): string {
   const body = { id: String(payload.id || "").trim(), exp };
 
   const bodyStr = JSON.stringify(body);
-  const sig = crypto.createHmac("sha256", SECRET).update(bodyStr).digest();
+  const sig = crypto
+    .createHmac("sha256", getDownloadTokenSecret())
+    .update(bodyStr)
+    .digest();
 
   return `${b64urlEncode(bodyStr)}.${b64urlEncode(sig)}`;
 }
@@ -51,7 +66,10 @@ export function verifyDownloadToken(token: string): VerifyResult {
     const bodyStr = b64urlDecodeToBuffer(bodyB64).toString("utf8");
     const sig = b64urlDecodeToBuffer(sigB64);
 
-    const expected = crypto.createHmac("sha256", SECRET).update(bodyStr).digest();
+    const expected = crypto
+      .createHmac("sha256", getDownloadTokenSecret())
+      .update(bodyStr)
+      .digest();
 
     // timingSafeEqual requires equal length
     if (sig.length !== expected.length) return { ok: false, reason: "signature" };

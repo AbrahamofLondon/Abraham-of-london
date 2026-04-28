@@ -355,3 +355,4 @@ export function buildCanonicalReportContract(
     sections,
   };
 }
+import "server-only";

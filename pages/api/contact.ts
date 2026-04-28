@@ -87,7 +87,7 @@ async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const ip = getClientIp(req);
-  const rl = rateLimit(`contact:${ip}`, RATE_LIMIT_CONFIGS.contact);
+  const rl = await rateLimit(`contact:${ip}`, RATE_LIMIT_CONFIGS.contact);
 
   Object.entries(createRateLimitHeaders(rl)).forEach(([k, v]) =>
     res.setHeader(k, v),

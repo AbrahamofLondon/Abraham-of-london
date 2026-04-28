@@ -169,7 +169,7 @@ export function InterventionModal({
                 />
                 <InterventionStep
                   title="Decision Logic Reset"
-                  description="Standardize approval thresholds for non-consensus expenditures."
+                  description="Standardize approval review points for non-consensus expenditures."
                 />
                 <InterventionStep
                   title="Sovereign Reporting"

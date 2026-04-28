@@ -375,7 +375,7 @@ export default function BriefingPDFTemplate({
       <section className="border-b border-neutral-200 py-6">
         <SectionTitle
           eyebrow="Strategic domain analysis"
-          title="Signal translated into structure"
+              title="Indicator translated into structure"
           subtitle="Intent, reality and dissonance across the dominant operating domains."
         />
         <div className="mt-4">

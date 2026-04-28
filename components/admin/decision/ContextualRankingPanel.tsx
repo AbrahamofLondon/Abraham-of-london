@@ -85,7 +85,7 @@ export function ContextualRankingPanel({
                 <div className="grid min-w-[360px] grid-cols-2 gap-3 xl:grid-cols-4">
                   <div className="rounded-2xl border border-neutral-200 p-3">
                     <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-neutral-400">
-                      Context Weight
+                      Context Lift
                     </div>
                     <div className="mt-2 text-sm font-mono text-neutral-800">
                       {row.contextualWeight.toFixed(2)}

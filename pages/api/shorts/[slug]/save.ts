@@ -40,7 +40,7 @@ export default async function handler(
   }
 
   const key = getRateLimitKey(req, "shorts_save");
-  const rl = rateLimit(key, RATE_LIMIT_CONFIGS.shortsSave);
+  const rl = await rateLimit(key, RATE_LIMIT_CONFIGS.shortsSave);
 
   const headers = createRateLimitHeaders(rl);
   for (const [k, v] of Object.entries(headers)) {

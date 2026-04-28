@@ -121,7 +121,7 @@ export function ParticipantTable({ participants }: { participants: Participant[]
 /**
  * STATUS BADGE HELPER
  * Standardizes visual representation of node progression.
- * Uses 'as const' to ensure the compiler recognizes 'invited' as a valid fallback key.
+ * Uses 'as const' to ensure the compiler recognizes 'invited' as a valid default key.
  */
 function StatusBadge({ status }: { status: string }) {
   const configs = {
@@ -143,7 +143,7 @@ function StatusBadge({ status }: { status: string }) {
   } as const;
 
   // 1. Cast status to keyof configs or null
-  // 2. Fallback to 'invited' configuration if status is unknown or missing
+  // 2. Default to 'invited' configuration if status is unknown or missing
   const config = configs[status as keyof typeof configs] ?? configs.invited;
   const Icon = config.icon;
 

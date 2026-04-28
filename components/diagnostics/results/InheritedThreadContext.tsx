@@ -99,7 +99,7 @@ export default function InheritedThreadContext({
               marginBottom: "0.65rem",
             }}
           >
-            Accumulated journey signal
+            Accumulated journey context
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
             {journeyLines.map((line, i) => (

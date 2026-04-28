@@ -41,7 +41,7 @@ export async function withInnerCircleRateLimit(
   const key = getInnerCircleKey(req, options.keyPrefix || "ic");
   
   // checkRateLimit expects (key, config) format
-  const result = checkRateLimit(key, { limit, windowSeconds, windowMs });
+  const result = await checkRateLimit(key, { limit, windowSeconds, windowMs });
   
   return {
     allowed: result.ok,

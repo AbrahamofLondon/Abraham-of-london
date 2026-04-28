@@ -39,7 +39,7 @@ export default async function handler(
   const ip = getClientIp(req);
   const userAgent = safeString(req.headers["user-agent"] || "");
 
-  const rl = consumeRateLimit({
+  const rl = await consumeRateLimit({
     key: `report-download:${ip}`,
     limit: 30,
     windowMs: 60_000,

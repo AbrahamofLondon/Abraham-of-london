@@ -45,7 +45,7 @@ export default function EventPriceManager() {
       const data = await response.json();
       setPrices(data);
       
-      // Track which prices are overridden (non-fallback)
+      // Track which prices are overridden from the baseline schedule
       const overrideMap: Record<string, PriceOverride> = {};
       data.forEach((event: EventPrice) => {
         // You'll need to track overrides from your API
@@ -118,8 +118,8 @@ export default function EventPriceManager() {
     }
   };
 
-  const handleResetToFallback = async (eventId: string) => {
-    if (!confirm('Reset all prices to fallback values? This cannot be undone.')) {
+  const handleResetToBaseline = async (eventId: string) => {
+    if (!confirm('Reset all prices to baseline values? This cannot be undone.')) {
       return;
     }
 
@@ -135,7 +135,7 @@ export default function EventPriceManager() {
         throw new Error('Failed to reset prices');
       }
 
-      setSuccess('Prices reset to fallback values');
+      setSuccess('Prices reset to baseline values');
       await fetchPrices();
       
       setTimeout(() => setSuccess(null), 3000);
@@ -309,7 +309,7 @@ export default function EventPriceManager() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleResetToFallback(event.eventId)}
+                        onClick={() => handleResetToBaseline(event.eventId)}
                         className="text-xs text-neutral-600 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-500"
                       >
                         Reset

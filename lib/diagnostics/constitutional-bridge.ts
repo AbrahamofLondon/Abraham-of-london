@@ -16,7 +16,7 @@
 import type {
   ConstitutionalDiagnosticBundle,
   ConstitutionalMicroReport,
-} from "@/lib/constitution/constitutional-diagnostic-derivation";
+} from "@/lib/diagnostics/constitutional-diagnostic-derivation";
 import type { ConstitutionalDecision } from "@/lib/constitution/rules";
 
 export type BridgeNextStage =

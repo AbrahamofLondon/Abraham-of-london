@@ -48,8 +48,8 @@ import {
 
 import Layout from "@/components/Layout";
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
-import ThresholdProximityLine, {
-  thresholdProximityText,
+import BoundaryProximityLine, {
+  boundaryProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
 import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
@@ -190,7 +190,6 @@ type ExecutiveReportViewModel = {
     clarityScore: number;
     authorityScore: number;
     governanceScore: number;
-    severityScore: number;
     escalationLevel?: number;
     revenueScore: number;
     dominantDomains: string[];
@@ -262,7 +261,6 @@ type CanonicalReport = {
       clarityScore?: number;
       authorityScore?: number;
       governanceScore?: number;
-      severityScore?: number;
       escalationLevel?: number;
       revenueScore?: number;
       dominantDomains?: string[];
@@ -483,16 +481,16 @@ function readLadderUpstreamContext(): LadderUpstreamContext | null {
   return null;
 }
 
-function safeString(value: unknown, fallback = ""): string {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+function safeString(value: unknown, defaultValue = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : defaultValue;
 }
 
-function safeNumber(value: unknown, fallback = 0): number {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+function safeNumber(value: unknown, defaultValue = 0): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : defaultValue;
 }
 
-function safeBoolean(value: unknown, fallback = false): boolean {
-  return typeof value === "boolean" ? value : fallback;
+function safeBoolean(value: unknown, defaultValue = false): boolean {
+  return typeof value === "boolean" ? value : defaultValue;
 }
 
 function safeStringArray(value: unknown): string[] {
@@ -706,7 +704,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
           Benchmark position · Cohort comparison
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
-          This report includes benchmark positioning against an anonymised cohort of comparable organisations. Cohort sample meets the minimum threshold for governed comparison.
+          This report includes benchmark positioning against an anonymised cohort of comparable organisations. Cohort sample meets the minimum standard for governed comparison.
         </p>
       </div>,
     );
@@ -735,7 +733,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
   const sentimentConfidence = typeof sentimentBlock?.confidence === "number" ? sentimentBlock.confidence : null;
 
   if (claims["team-wide sentiment"]?.allowed && respondentDerived) {
-    // Tier 3: Full team-wide sentiment — threshold met
+    // Tier 3: Full team-wide sentiment — participation standard met
     blocks.push(
       <div key="sentiment" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
         <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
@@ -747,14 +745,14 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
       </div>,
     );
   } else if (sentimentMode === "multi_respondent" || (respondentDerived && !claims["team-wide sentiment"]?.allowed)) {
-    // Tier 2: Directional team signal — respondents exist but below threshold
+    // Tier 2: Directional team reading — respondents exist but participation remains limited
     blocks.push(
       <div key="sentiment-directional" style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
         <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.75rem" }}>
           Directional team signal{sentimentConfidence !== null ? ` · ${sentimentConfidence}% confidence` : ""}
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.48)" }}>
-          Team evidence includes respondent data but has not yet reached the threshold for full team-wide sentiment. The signal is directional — it indicates tendency but cannot be presented as comprehensive team reality. Additional respondents would strengthen this section.
+          Team evidence includes respondent data but has not yet reached the participation standard for full team-wide sentiment. The reading is directional — it indicates tendency but cannot be presented as comprehensive team reality. Additional respondents would strengthen this section.
         </p>
       </div>,
     );

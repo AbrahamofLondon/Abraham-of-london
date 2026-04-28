@@ -1,5 +1,5 @@
 /**
- * CaseActiveBanner — persistence signal for all assessment results.
+ * CaseActiveBanner — persistence state for all assessment results.
  * Shows case reference, save time, commitment status, follow-up.
  */
 

@@ -12,7 +12,7 @@ const GLOBAL_DATA = {
   band: 'FRAGMENTED' as const,
   percentScore: 68,
   fragilitySignal: 'VOLATILE',
-  rawScoreDistribution: [85, 40, 92, 55, 78, 30, 88, 62, 95, 45],
+  rawReadingDistribution: [85, 40, 92, 55, 78, 30, 88, 62, 95, 45],
   domainScoresJson: [
     { domain: 'Strategic Alignment', percentScore: 72 },
     { domain: 'Operational Velocity', percentScore: 58 },
@@ -28,7 +28,7 @@ const TEAM_SNAPSHOTS = [
     respondentCount: 14,
     band: 'ALIGNED' as const,
     percentScore: 88,
-    rawScoreDistribution: [90, 85, 92, 88, 87, 89, 91],
+    rawReadingDistribution: [90, 85, 92, 88, 87, 89, 91],
     domainScoresJson: [
       { domain: 'Strategic Alignment', percentScore: 92 },
       { domain: 'Operational Velocity', percentScore: 85 },
@@ -48,7 +48,7 @@ const TEAM_SNAPSHOTS = [
     respondentCount: 22,
     band: 'DISORDERED' as const,
     percentScore: 42,
-    rawScoreDistribution: [10, 80, 15, 90, 20, 75, 12],
+    rawReadingDistribution: [10, 80, 15, 90, 20, 75, 12],
     domainScoresJson: [
       { domain: 'Strategic Alignment', percentScore: 45 },
       { domain: 'Operational Velocity', percentScore: 38 },
@@ -135,7 +135,7 @@ export default function ExecutiveSnapshotPage() {
             </div>
             <p className="text-[12px] leading-relaxed text-neutral-500 italic mb-6">
               "The current delta in Marketing Core suggests a structural collapse in operational intent. 
-              The 'Fractured' signal indicates that the team is moving in opposing directions, 
+              The 'Fractured' condition indicates that the team is moving in opposing directions, 
               rendering traditional top-down directives ineffective."
             </p>
             <div className="pt-6 border-t border-neutral-100 flex items-center gap-3">

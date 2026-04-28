@@ -16,13 +16,15 @@ import PurposeAlignmentTrendChart from "@/components/alignment/PurposeAlignmentT
 import PurposeAlignmentRadarChart from "@/components/alignment/PurposeAlignmentRadarChart";
 import AlignmentCTA from "@/components/alignment/AlignmentCTA";
 
-function formatBand(value: string): string {
+function formatPosture(value: string): string {
   return value.toUpperCase();
 }
 
-function formatDelta(value: number | null): string {
-  if (value === null) return "—";
-  return value > 0 ? `+${value}` : `${value}`;
+function formatChange(value: number | null): string {
+  if (value === null) return "No prior record";
+  if (value > 0) return "Strengthened";
+  if (value < 0) return "Weakened";
+  return "Stable";
 }
 
 function formatDate(value: string): string {
@@ -50,8 +52,8 @@ function formatLongDate(value: string): string {
   });
 }
 
-function getBandSurface(band?: string | null): string {
-  switch (band) {
+function getPostureSurface(posture?: string | null): string {
+  switch (posture) {
     case "aligned":
       return "bg-emerald-50 border-emerald-200";
     case "drifting":
@@ -65,8 +67,8 @@ function getBandSurface(band?: string | null): string {
   }
 }
 
-function getBandText(band?: string | null): string {
-  switch (band) {
+function getPostureText(posture?: string | null): string {
+  switch (posture) {
     case "aligned":
       return "text-emerald-700";
     case "drifting":
@@ -78,6 +80,14 @@ function getBandText(band?: string | null): string {
     default:
       return "text-neutral-950";
   }
+}
+
+function getDomainState(percent: number | null | undefined): string {
+  if (typeof percent !== "number") return "Under review";
+  if (percent >= 80) return "Anchored";
+  if (percent >= 60) return "Holding";
+  if (percent >= 40) return "Drifting";
+  return "Exposed";
 }
 
 export default async function PurposeAlignmentDashboardPage() {
@@ -95,7 +105,7 @@ export default async function PurposeAlignmentDashboardPage() {
 
   const chartData = [...history].reverse().map((item, index) => ({
     label: index === 0 ? "Start" : formatShortDate(item.createdAt),
-    score: item.totalScore,
+    reading: item.totalScore,
   }));
 
   const radarData =
@@ -126,7 +136,7 @@ export default async function PurposeAlignmentDashboardPage() {
           </h1>
 
           <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-600">
-            A governed dashboard for directional integrity, score movement,
+            A governed dashboard for directional integrity, posture movement,
             correction priority, reassessment cadence, and report retrieval.
           </p>
         </div>
@@ -183,7 +193,7 @@ export default async function PurposeAlignmentDashboardPage() {
           </div>
 
           <p className="mt-3 text-base leading-7 text-neutral-800">
-            {narrative?.posture ?? "No assessment signal has yet been established."}
+            {narrative?.posture ?? "No assessment reading has yet been established."}
           </p>
 
           {narrative ? (
@@ -238,36 +248,36 @@ export default async function PurposeAlignmentDashboardPage() {
       <div className="mt-8 grid gap-6 lg:grid-cols-4">
         <div className="rounded-[28px] border bg-white p-6 shadow-sm">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-            Latest Score
+            Latest Reading
           </div>
           <div className="mt-4 text-4xl font-semibold text-neutral-950">
-            {latest ? latest.totalScore : "—"}
+            {latest ? "Available" : "—"}
           </div>
           <div className="mt-2 text-sm text-neutral-500">
-            {latest ? `of ${latest.possibleScore}` : "No record yet"}
+            {latest ? "Most recent assessment stored" : "No record yet"}
           </div>
         </div>
 
         <div
-          className={`rounded-[28px] border p-6 shadow-sm ${getBandSurface(
+          className={`rounded-[28px] border p-6 shadow-sm ${getPostureSurface(
             latest?.band ?? null
           )}`}
         >
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-            Current Band
+            Current Posture
           </div>
-          <div className={`mt-4 text-4xl font-semibold ${getBandText(latest?.band ?? null)}`}>
-            {latest ? formatBand(latest.band) : "—"}
+          <div className={`mt-4 text-4xl font-semibold ${getPostureText(latest?.band ?? null)}`}>
+            {latest ? formatPosture(latest.band) : "—"}
           </div>
           <div className="mt-2 text-sm text-neutral-500">Structural reading</div>
         </div>
 
         <div className="rounded-[28px] border bg-white p-6 shadow-sm">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-            Score Delta
+            Recent Change
           </div>
           <div className="mt-4 text-4xl font-semibold text-neutral-950">
-            {formatDelta(dashboard.scoreDelta)}
+            {formatChange(dashboard.scoreDelta)}
           </div>
           <div className="mt-2 text-sm text-neutral-500">
             Versus previous assessment
@@ -289,7 +299,7 @@ export default async function PurposeAlignmentDashboardPage() {
         <section className="rounded-[32px] border bg-white p-8 shadow-sm">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8A6A2F]">
-              Score Movement
+              Reading Movement
             </div>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-950">
               Assessment Trend
@@ -335,7 +345,7 @@ export default async function PurposeAlignmentDashboardPage() {
 
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8A6A2F]">
-                  Strongest Signal
+                  Primary Pattern
                 </div>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-950">
                   {narrative.strongestSignalTitle}
@@ -392,12 +402,21 @@ export default async function PurposeAlignmentDashboardPage() {
 
                   <div className="text-right">
                     <div className="text-[11px] uppercase tracking-[0.16em] text-neutral-500">
-                      Delta
+                      Change
                     </div>
                     <div className="mt-1 text-lg font-medium text-neutral-700">
-                      {delta}
+                      {typeof trend?.delta === "number"
+                        ? trend.delta > 0
+                          ? "Strengthened"
+                          : trend.delta < 0
+                            ? "Weakened"
+                            : "Stable"
+                        : "—"}
                     </div>
                   </div>
+                </div>
+                <div className="mt-3 text-sm text-neutral-600">
+                  State: {getDomainState(trend?.currentPercent)}
                 </div>
               </div>
             );
@@ -428,7 +447,7 @@ export default async function PurposeAlignmentDashboardPage() {
               >
                 <div className="min-w-0">
                   <div className="text-base font-semibold text-neutral-950">
-                    {item.totalScore}/{item.possibleScore} · {formatBand(item.band)}
+                    {formatPosture(item.band)} assessment
                   </div>
 
                   <div className="mt-1 text-sm text-neutral-500">

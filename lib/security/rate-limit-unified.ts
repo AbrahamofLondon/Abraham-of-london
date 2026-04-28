@@ -18,7 +18,7 @@ interface Store {
 }
 
 class MemoryStore implements Store {
-  private buckets = new Map<string, Bucket>();
+  private buckets: Map<string, Bucket> = new Map();
 
   get(key: string): Bucket | null {
     const b = this.buckets.get(key);

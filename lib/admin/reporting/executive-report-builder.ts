@@ -266,3 +266,4 @@ export function buildExecutiveReport(
     failureModes,
   };
 }
+import "server-only";

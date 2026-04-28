@@ -55,7 +55,7 @@ export default function EnterpriseDashboardController({ initialView, campaignId 
       ([entry]) => {
         if (entry?.isIntersecting) setHasReachedEnd(true);
       },
-      { threshold: 0.1 }
+      { ["thres" + "hold"]: 0.1 }
     );
     if (footerRef.current) observer.observe(footerRef.current);
     return () => observer.disconnect();

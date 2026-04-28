@@ -44,13 +44,27 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   };
 
   const checkedCount = Object.values(checked).filter(Boolean).length;
+  const publicState = result
+    ? result.percent >= 70
+      ? "ORDERED"
+      : result.percent >= 45
+        ? "DRIFTING"
+        : result.percent >= 30
+          ? "MISALIGNED"
+          : "DISORDERED"
+    : null;
+  const publicSummary = result
+    ? result.weakestDomains.length > 0
+      ? `Governed analysis complete. The strongest immediate pressure appears around ${result.weakestDomains[0]}.`
+      : "Governed analysis complete. A directional correction is required."
+    : null;
 
   return (
     <div className="grid gap-8">
       <div className="rounded-2xl border p-6 shadow-sm bg-white">
         <h1 className="text-3xl font-semibold">Purpose Alignment Checklist</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Score directional integrity across identity, decisions, environment, behaviour,
+          Review directional integrity across identity, decisions, environment, behaviour,
           emotional order, and legacy.
         </p>
         <p className="mt-4 text-sm text-neutral-500">
@@ -86,7 +100,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
             onClick={handleScore}
             className="rounded-xl border px-4 py-2 text-sm font-medium shadow-sm hover:bg-neutral-50"
           >
-            Score alignment
+            Generate analysis
           </button>
         </div>
 
@@ -97,12 +111,12 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
         <div className="rounded-2xl border p-6 shadow-sm bg-white">
           <h2 className="text-xl font-semibold">Assessment Result</h2>
           <p className="mt-2 text-sm text-neutral-600">
-            Score: {result.totalScore}/{result.maxScore} ({result.percent}%)
+            State: {publicState}
           </p>
-          <p className="mt-1 text-sm text-neutral-600">Band: {result.coherenceBand}</p>
+          <p className="mt-1 text-sm text-neutral-600">{publicSummary}</p>
 
           <div className="mt-4">
-            <h3 className="font-medium">Corrections</h3>
+            <h3 className="font-medium">Recommended Actions</h3>
             <ul className="mt-2 list-disc pl-5 text-sm text-neutral-700">
               {result.corrections.map((item) => (
                 <li key={item}>{item}</li>

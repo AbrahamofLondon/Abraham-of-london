@@ -1,22 +1,28 @@
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
 import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
+import ExecutiveDecisionAuthorityBlock from "@/components/diagnostics/results/ExecutiveDecisionAuthorityBlock";
 
 const GOLD = "#C9A96E";
+const RED = "rgba(252,165,165,";
+const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
 const QUESTIONS: Array<{ id: string; question: string; helper: string }> = [
   { id: "decision", question: "What decision are you unable to make right now?", helper: "Name the decision directly." },
+  { id: "claimedOwner", question: "Who owns the decision to resolve this?", helper: "Clearly defined owner / Shared across multiple people / Unclear / No one explicitly owns it" },
   { id: "priorAttempt", question: "What have you already tried?", helper: "Briefly describe the previous move." },
   { id: "costOfDelay", question: "What becomes more expensive if this stays unresolved?", helper: "Name the cost in practical terms." },
-  { id: "claimedOwner", question: "Who should own the decision?", helper: "Name the person or role." },
   { id: "blocker", question: "What is the live blocker?", helper: "Describe the actual point of delay." },
   { id: "forcedAction", question: "If you had to move within 24 hours, what would you do?", helper: "State the move plainly." },
 ];
 
-type ViewStage = "questions" | "commitment" | "loading" | "recovery" | "result";
+type ViewStage = "questions" | "signal" | "commitment" | "loading" | "recovery" | "result";
 
 const FastDiagnosticPage: NextPage = () => {
   const [answers, setAnswers] = React.useState<Record<string, string>>({});
@@ -52,11 +58,17 @@ const FastDiagnosticPage: NextPage = () => {
 
   function nextQuestion() {
     if (!canAdvance) return;
+    // After Q2 (claimedOwner), show signal screen instead of Q3
+    if (currentIndex === 1) {
+      setStage("signal");
+      return;
+    }
     if (currentIndex < QUESTIONS.length - 1) {
       setCurrentIndex((prev) => prev + 1);
       return;
     }
-    setStage("commitment");
+    // After last question, submit to API
+    void submitFastDiagnostic();
   }
 
   function previousQuestion() {
@@ -64,8 +76,7 @@ const FastDiagnosticPage: NextPage = () => {
     setCurrentIndex((prev) => prev - 1);
   }
 
-  async function submitFastDiagnostic(commitment: boolean) {
-    setCommitted(commitment);
+  async function submitFastDiagnostic() {
     setStage("loading");
     setError("");
 
@@ -73,7 +84,7 @@ const FastDiagnosticPage: NextPage = () => {
       const response = await fetch("/api/diagnostics/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, committed: commitment }),
+        body: JSON.stringify({ answers, committed }),
       });
       const json = (await response.json()) as FastDiagnosticResult | { ok?: false; error?: string };
 
@@ -90,7 +101,7 @@ const FastDiagnosticPage: NextPage = () => {
       }
 
       track("fast_diagnostic_completed", {
-        committed: commitment,
+        committed,
         elapsed_seconds: Math.round((Date.now() - startedAt.current) / 1000),
       });
 
@@ -175,11 +186,32 @@ const FastDiagnosticPage: NextPage = () => {
                   disabled={!canAdvance}
                   style={{ padding: "12px 18px", border: `1px solid ${canAdvance ? `${GOLD}50` : "rgba(255,255,255,0.10)"}`, backgroundColor: canAdvance ? `${GOLD}12` : "transparent", color: canAdvance ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: canAdvance ? "pointer" : "default" }}
                 >
-                  {currentIndex === QUESTIONS.length - 1 ? "Continue" : "Next"}
+                  {currentIndex === QUESTIONS.length - 1 ? "Run Analysis" : "Next"}
                 </button>
               </div>
             </div>
           )}
+
+          {stage === "signal" && (() => {
+            const ownership = answers.claimedOwner ?? "";
+            const isGap = ownership.includes("Unclear") || ownership.includes("No one") || ownership.includes("not sure") || ownership.length < 5;
+            const isDelegated = ownership.includes("someone") || ownership.includes("Someone");
+            const signalLabel = isGap ? "Authority gap detected" : isDelegated ? "Delegation dependency" : "Ownership claimed";
+            const signalBody = isGap
+              ? "The decision you described has no clear owner. Until ownership is named, the condition will compound regardless of effort applied."
+              : isDelegated
+              ? "You have identified the decision but cannot make it yourself. The system will test whether the stated owner has genuine authority or is absorbing the role without mandate."
+              : "You claim authority over this decision. The system will test whether that authority is real — or whether something structural is preventing you from exercising it.";
+            return (
+              <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.5rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Initial signal</div>
+                <p style={{ ...serif, fontSize: "1.15rem", lineHeight: 1.5, color: "rgba(255,255,255,0.82)", marginTop: "0.6rem" }}>{signalLabel}</p>
+                <p style={{ fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "0.5rem" }}>{signalBody}</p>
+                <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.75rem" }}>The remaining questions will expose whether this condition is structural.</p>
+                <button type="button" onClick={() => setStage("commitment")} style={{ marginTop: "1rem", padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>Continue</button>
+              </div>
+            );
+          })()}
 
           {stage === "commitment" && (
             <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem", textAlign: "center" }}>
@@ -189,14 +221,14 @@ const FastDiagnosticPage: NextPage = () => {
               <div style={{ display: "flex", justifyContent: "center", gap: "0.75rem", marginTop: "1rem", flexWrap: "wrap" }}>
                 <button
                   type="button"
-                  onClick={() => void submitFastDiagnostic(true)}
+                  onClick={() => { setCommitted(true); setCurrentIndex(2); setStage("questions"); }}
                   style={{ padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
                 >
                   Yes, continue
                 </button>
                 <button
                   type="button"
-                  onClick={() => void submitFastDiagnostic(false)}
+                  onClick={() => { setCommitted(false); setCurrentIndex(2); setStage("questions"); }}
                   style={{ padding: "12px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.60)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
                 >
                   Continue without commitment
@@ -233,14 +265,17 @@ const FastDiagnosticPage: NextPage = () => {
             <div style={{ display: "grid", gap: "1rem" }}>
               <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1.25rem" }}>
                 <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
-                  State
+                  Diagnosis
                 </div>
-                <div style={{ marginTop: "0.45rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.5rem", color: "rgba(255,255,255,0.92)" }}>
-                  {result.conditionLabel}
+                <div style={{ marginTop: "0.45rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.25rem", lineHeight: 1.4, color: "rgba(255,255,255,0.92)" }}>
+                  This is not an execution problem.
                 </div>
-                <p style={{ marginTop: "0.5rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.58)" }}>
-                  Governed analysis complete.
-                </p>
+                <div style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.25rem", lineHeight: 1.4, color: "rgba(255,255,255,0.92)", marginTop: "0.15rem" }}>
+                  It is a decision structure problem.
+                </div>
+                <div style={{ marginTop: "0.6rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.9rem", lineHeight: 1.6, color: `${GOLD}CC` }}>
+                  Current condition: {result.conditionLabel}
+                </div>
               </div>
 
               {result.synthesis ? (

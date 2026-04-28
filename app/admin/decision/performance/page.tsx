@@ -107,7 +107,7 @@ export default async function DecisionPerformancePage() {
             subtext="Attributed conversion events."
           />
           <StatCard
-            label="Average Adaptive Weight"
+            label="Average Adaptive Lift"
             value={summary.averageAdaptiveWeight.toFixed(2)}
             subtext="Mean live performance multiplier across assets."
           />
@@ -117,7 +117,7 @@ export default async function DecisionPerformancePage() {
           <DecisionPerformanceTable
             title="Top Assets by Click-Through Rate"
             rows={data.topByCtr}
-            emptyMessage="No high-signal CTR data yet."
+            emptyMessage="No high-attention CTR data yet."
           />
 
           <DecisionPerformanceTable
@@ -127,9 +127,9 @@ export default async function DecisionPerformancePage() {
           />
 
           <DecisionPerformanceTable
-            title="Top Assets by Adaptive Weight"
+            title="Top Assets by Adaptive Lift"
             rows={data.topByWeight}
-            emptyMessage="No adaptive weighting data yet."
+            emptyMessage="No adaptive lift data yet."
           />
 
           <DecisionPerformanceTable

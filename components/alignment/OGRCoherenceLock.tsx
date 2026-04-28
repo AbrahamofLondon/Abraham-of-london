@@ -31,7 +31,7 @@ export default function OGRCoherenceLock({ organisationName = "The Institution" 
   return (
     <div className="mx-auto max-w-5xl bg-white border border-[#D4C5A8]/30 shadow-2xl my-24 overflow-hidden relative">
       
-      {/* 1. Status Bar: The "Live" Verification Signal */}
+      {/* 1. Status Bar: The live verification indicator */}
       <div className="bg-[#2C2416] px-12 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className={`w-2 h-2 rounded-full ${metrics.isLocked ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-[#8A6A2F] animate-pulse'}`} />
@@ -117,7 +117,7 @@ export default function OGRCoherenceLock({ organisationName = "The Institution" 
               <h5 className="font-mono text-[10px] uppercase tracking-widest text-[#2C2416]">Validation Proof</h5>
             </div>
             <p className="font-sans text-[10px] text-neutral-500 leading-relaxed">
-              Institutional resonance has been verified against the 75 core intelligence briefs. The variance in {organisationName}'s primary domains is now below the 15% Dissonance Threshold.
+              Institutional resonance has been verified against the 75 core intelligence briefs. The variance in {organisationName}'s primary domains is now below the 15% dissonance review point.
             </p>
           </div>
           <div className="flex justify-end items-end space-y-1 text-right">

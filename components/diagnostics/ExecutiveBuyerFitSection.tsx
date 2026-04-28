@@ -12,7 +12,7 @@ const LIFT = "rgb(10 14 20)";
 type BuyerCard = {
   title: string;
   body: string;
-  signal: string;
+  indicator: string;
   icon: React.ComponentType<{ style?: React.CSSProperties; className?: string }>;
 };
 
@@ -20,19 +20,19 @@ const BUYERS: BuyerCard[] = [
   {
     title: "Founder-led businesses",
     body: "Best for firms moving into complexity faster than internal clarity can support.",
-    signal: "Growth pressure",
+    indicator: "Growth pressure",
     icon: Crown,
   },
   {
     title: "Leadership teams",
     body: "Useful where trust, coordination, and execution fit are no longer clean.",
-    signal: "Operational drag",
+    indicator: "Operational drag",
     icon: Users,
   },
   {
     title: "Boards & senior operators",
     body: "Useful when the matter needs disciplined interpretation before formal intervention.",
-    signal: "Governance exposure",
+    indicator: "Governance exposure",
     icon: ShieldCheck,
   },
 ];
@@ -205,7 +205,7 @@ export default function ExecutiveBuyerFitSection() {
                     flexShrink: 0,
                   }}
                 >
-                  {item.signal}
+                  {item.indicator}
                 </span>
               </div>
 

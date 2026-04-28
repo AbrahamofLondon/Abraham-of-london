@@ -27,7 +27,7 @@ type RateLimitResult = {
 
 // Note: In a multi-node edge environment (Vercel), this Map resets per-isolate.
 // For strict global enforcement, connect this to Upstash/Redis.
-const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+const rateLimitStore: Map<string, { count: number; resetAt: number }> = new Map();
 
 const PUBLIC_PREFIXES = [
   "/api/auth",

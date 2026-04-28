@@ -78,7 +78,7 @@ const SESSION_CONFIG = {
 // ==================== SESSION STORAGE ====================
 class InMemStore {
   private static instance: InMemStore;
-  private sessions = new Map<string, SessionData>();
+  private sessions: Map<string, SessionData> = new Map();
   
   private constructor() {}
   

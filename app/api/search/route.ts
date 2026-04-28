@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import type { AoLClaims } from "@/types/auth";
 import { Session } from "next-auth";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 /**
  * LOCAL TYPE OVERRIDE
@@ -29,6 +30,25 @@ function getOpenAIClient(): OpenAI {
 }
 
 export async function POST(req: Request) {
+  // Rate limit: medium — 30 requests per 60s per IP
+  const clientIp = String(
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown"
+  );
+  const rl = await consumePersistentRateLimit({
+    key: `search:${clientIp}`,
+    limit: 30,
+    windowMs: 60_000,
+    failClosed: true,
+  });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "RATE_LIMIT_EXCEEDED" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } }
+    );
+  }
+
   try {
     // 1. Institutional Security Gate
     // Cast the session to our extended interface to clear the build error

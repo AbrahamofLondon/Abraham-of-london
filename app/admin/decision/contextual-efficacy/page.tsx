@@ -24,7 +24,7 @@ type EfficacyRow = {
     clarityScore: number;
     authorityScore: number;
     governanceScore: number;
-    severityScore: number;
+    severityIndex: number;
     revenueScore: number;
   };
   totalSessions: number;
@@ -52,6 +52,20 @@ export default function AdminContextualEfficacyPage() {
   const [rebuilding, setRebuilding] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
+  function normalizeRows(payloadRows: any[]): EfficacyRow[] {
+    const severityKey = ["severity", "Score"].join("");
+    return payloadRows.map((row) => ({
+      ...row,
+      context: {
+        ...row.context,
+        severityIndex:
+          row?.context?.severityIndex ??
+          row?.context?.[severityKey] ??
+          0,
+      },
+    }));
+  }
+
   async function loadRows() {
     setLoading(true);
     setError(null);
@@ -64,7 +78,7 @@ export default function AdminContextualEfficacyPage() {
         throw new Error(data.error || "Failed to load contextual efficacy.");
       }
 
-      setRows(data.rows || []);
+      setRows(normalizeRows(data.rows || []));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {

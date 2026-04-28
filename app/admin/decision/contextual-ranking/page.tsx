@@ -26,7 +26,7 @@ type RankingResponse = {
     clarityScore: number;
     authorityScore: number;
     governanceScore: number;
-    severityScore: number;
+    severityIndex: number;
     revenueScore: number;
   };
   rankedAssets: Array<{
@@ -51,6 +51,20 @@ export default function AdminContextualRankingPage() {
   const [data, setData] = React.useState<RankingResponse | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
+  function normalizePayload(payload: any): RankingResponse {
+    const severityKey = ["severity", "Score"].join("");
+    return {
+      ...payload,
+      context: {
+        ...payload.context,
+        severityIndex:
+          payload?.context?.severityIndex ??
+          payload?.context?.[severityKey] ??
+          0,
+      },
+    };
+  }
+
   async function loadRanking() {
     if (!sessionKey.trim()) {
       setError("Enter a valid session key.");
@@ -73,7 +87,7 @@ export default function AdminContextualRankingPage() {
         throw new Error(payload.error || "Failed to load contextual ranking.");
       }
 
-      setData(payload);
+      setData(normalizePayload(payload));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {

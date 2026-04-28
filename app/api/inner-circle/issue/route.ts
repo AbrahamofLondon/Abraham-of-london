@@ -3,7 +3,8 @@ import {
   createOrUpdateMemberAndIssueKey, 
   type CreateOrUpdateMemberArgs 
 } from '@/lib/innerCircleMembership';
-import { getClientIp, rateLimitForRequestIp } from '@/lib/inner-circle/server-utils';
+import { getClientIp } from '@/lib/inner-circle/server-utils';
+import { consumePersistentRateLimit } from '@/lib/server/security/persistent-rate-limit';
 
 /**
  * INSTITUTIONAL ONBOARDING GATEWAY
@@ -11,8 +12,22 @@ import { getClientIp, rateLimitForRequestIp } from '@/lib/inner-circle/server-ut
  * Securely issues new access keys to verified email identities.
  */
 export async function POST(req: NextRequest) {
+  // Rate limit: medium — 20 requests per 60s per IP
+  const ip = getClientIp(req);
+  const rl = await consumePersistentRateLimit({
+    key: `inner-circle-issue:${ip}`,
+    limit: 20,
+    windowMs: 60_000,
+    failClosed: true,
+  });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "RATE_LIMIT_EXCEEDED" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } }
+    );
+  }
+
   try {
-    const ip = getClientIp(req);
     const body = await req.json();
     const { email, name, context = "registration" } = body;
 

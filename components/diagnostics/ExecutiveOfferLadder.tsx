@@ -23,7 +23,7 @@ const DEFAULT_OFFERS: Offer[] = [
     body:
       "The first disciplined layer for leaders who need clarity before escalation.",
     bullets: [
-      "Signal reading and structural interpretation",
+      "Pattern reading and structural interpretation",
       "Useful before advisory is justified",
       "Best when drift is visible but diagnosis is still weak",
     ],

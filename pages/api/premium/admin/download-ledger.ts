@@ -111,7 +111,7 @@ export default async function handler(
     });
   }
 
-  const rateLimit = limitIp(req, "download-ledger", RATE_LIMIT_CONFIG);
+  const rateLimit = await limitIp(req, "download-ledger", RATE_LIMIT_CONFIG);
   setRateLimitHeaders(res, rateLimit);
 
   if (!rateLimit.allowed) {

@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma.server";
 import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
 import { getUserAccess } from "@/lib/access/get-user-access";
+import { verifyPassword } from "@/lib/auth/password";
 
 function bootstrapRoleForEmail(email: string) {
   if (email === "info@abrahamoflondon.org") return "OWNER" as const;
@@ -72,13 +73,24 @@ function buildProviders() {
           const email = credentials?.email?.trim().toLowerCase();
           const password = credentials?.password ?? "";
           const expectedEmail = adminUserEmail.trim().toLowerCase();
-          const expectedPassword = adminUserPassword;
+          const configuredPasswordHash = adminUserPassword;
 
-          if (!email || !password || !expectedEmail || !expectedPassword) {
+          if (!email || !password || !expectedEmail || !configuredPasswordHash) {
             return null;
           }
 
-          if (email !== expectedEmail || password !== expectedPassword) {
+          const isHashedPassword =
+            configuredPasswordHash.startsWith("$2") ||
+            configuredPasswordHash.startsWith("$argon2");
+
+          if (!isHashedPassword) {
+            console.error("[AUTH_PROVIDER_CONFIG] Bootstrap admin password must be stored as a hash");
+            return null;
+          }
+
+          const passwordOk = await verifyPassword(password, configuredPasswordHash);
+
+          if (email !== expectedEmail || !passwordOk) {
             return null;
           }
 

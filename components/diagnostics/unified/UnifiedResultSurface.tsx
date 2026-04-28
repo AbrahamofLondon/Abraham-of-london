@@ -15,14 +15,12 @@ import LimitationsBlock from "./LimitationsBlock";
 import ConsequenceTimeline from "./ConsequenceTimeline";
 import DirectiveCTA from "./DirectiveCTA";
 import FeedbackLoop from "./FeedbackLoop";
-import DeterminismProof from "@/components/Intelligence/DeterminismProof";
-import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 
 export type UnifiedResultSurfaceProps = {
   /** Assessment type */
   assessmentType: "purpose" | "constitutional" | "team" | "enterprise" | "fast";
 
-  /** Case reference for persistence signal */
+  /** Case reference for persistence state */
   caseReference: string;
 
   /** Whether user committed to action */
@@ -48,9 +46,6 @@ export type UnifiedResultSurfaceProps = {
   /** Custom limitations override */
   customLimitations?: string[];
 
-  /** Spine for determinism proof (optional) */
-  spine?: IntelligenceSpine | null;
-
   /** Feedback callback */
   onFeedback?: (response: "yes" | "partial" | "no", reason?: string) => void;
 };
@@ -66,7 +61,6 @@ export default function UnifiedResultSurface({
   score,
   costFirst,
   customLimitations,
-  spine,
   onFeedback,
 }: UnifiedResultSurfaceProps) {
   return (
@@ -106,14 +100,7 @@ export default function UnifiedResultSurface({
         costFirst={costFirst}
       />
 
-      {/* 6. Determinism Proof (if spine available) */}
-      {spine && (
-        <div className="mt-6">
-          <DeterminismProof spine={spine} compact />
-        </div>
-      )}
-
-      {/* 7. Feedback Loop */}
+      {/* 6. Feedback Loop */}
       <FeedbackLoop
         assessmentType={assessmentType}
         onFeedback={onFeedback}

@@ -28,10 +28,10 @@ type Props = {
   className?: string;
 };
 
-function safeString(value: unknown, fallback = "—"): string {
+function safeString(value: unknown, defaultValue = "—"): string {
   if (typeof value === "string" && value.trim()) return value.trim();
   if (typeof value === "number" && Number.isFinite(value)) return String(value);
-  return fallback;
+  return defaultValue;
 }
 
 function toDateLabel(value: unknown): string {

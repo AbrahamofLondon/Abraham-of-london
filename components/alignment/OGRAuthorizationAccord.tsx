@@ -61,7 +61,7 @@ export default function OGRAuthorizationAccord({ organisationName, representativ
               Article III: Expected Outcome
             </h3>
             <p className="font-serif text-sm leading-relaxed text-[#5C4E36]">
-              Success is defined as the stabilization of institutional geometries. The target threshold for post-calibration resonance is a 95% strategic fidelity rate across all primary operating vectors.
+              Success is defined as the stabilization of institutional geometries. The governed review point for post-calibration resonance is a 95% strategic fidelity rate across all primary operating vectors.
             </p>
           </section>
         </div>

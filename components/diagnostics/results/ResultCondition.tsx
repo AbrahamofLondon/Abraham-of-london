@@ -16,7 +16,7 @@ export default function ResultCondition({ name, definition }: { name: string; de
         color: `${GOLD}70`,
         marginBottom: "0.35rem",
       }}>
-        Primary signal
+        Primary condition
       </div>
       <h2 style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",

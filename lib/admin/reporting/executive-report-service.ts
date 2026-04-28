@@ -540,3 +540,4 @@ export async function buildExecutiveReportFromCampaign(
 }
 
 export const generateExecutiveReportForCampaign = buildExecutiveReportFromCampaign;
+import "server-only";

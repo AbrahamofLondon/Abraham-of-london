@@ -73,8 +73,8 @@ import LimitationsBlock from "@/components/diagnostics/unified/LimitationsBlock"
 import DirectiveCTA from "@/components/diagnostics/unified/DirectiveCTA";
 import FeedbackLoopBlock from "@/components/diagnostics/unified/FeedbackLoop";
 import { generateConsequenceTimeline } from "@/lib/diagnostics/consequence-timeline";
-import ThresholdProximityLine, {
-  thresholdProximityText,
+import BoundaryProximityLine, {
+  boundaryProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -212,63 +212,63 @@ function deriveReading(
 
   if (band === "ESCALATE" || (govLeaderWeak && execRiskWeak)) {
     patternTitle   = "Distributed constitutional strain";
-    primaryReading = `All four domains are below threshold at once. That means the institution is not carrying a local defect but a distributed constitutional strain across leadership, governance, execution, and risk posture. The threshold from operational difficulty into structural danger has already been crossed. The next move is governed executive interpretation before any direct intervention is attempted.`;
+    primaryReading = `All four domains are below the governed boundary at once. That means the institution is not carrying a local defect but a distributed constitutional strain across leadership, governance, execution, and risk posture. The institution has already moved from operational difficulty into structural danger. The next move is governed executive interpretation before any direct intervention is attempted.`;
     firstAction    = "Pause discretionary strategic initiatives. Convene the executive decision-making group around one question only: what are the three decisions that must not be made until consequence has been priced and priority has been governed?";
     escalationNote = "Executive Reporting should come before any mandate or chamber work. Entering Strategy Room without that ordering would compound disorder rather than reduce it.";
     route = "EXECUTIVE_REPORTING";
 
   } else if (govLeaderWeak) {
     patternTitle   = "Authority and governance out of order";
-    primaryReading = `Leadership coherence (${leadership}%) and governance reliability (${governance}%) are both below threshold. Authority is therefore not sufficiently ordered, and the structures meant to contain it are no longer load-bearing. The institution may still be moving, but it is moving without a stable governing frame. The threshold for safe escalation is closed until the authority architecture is made intelligible again.`;
+    primaryReading = `Leadership coherence (${leadership}%) and governance reliability (${governance}%) are both below the governed boundary. Authority is therefore not sufficiently ordered, and the structures meant to contain it are no longer load-bearing. The institution may still be moving, but it is moving without a stable governing frame. The review point for safe escalation remains closed until the authority architecture is made intelligible again.`;
     firstAction    = "Map the last five significant institutional decisions: who decided, on what authority, with what governance process. If this exercise reveals ambiguity in more than two, the governance architecture requires formal reconstruction before strategic escalation.";
     escalationNote = "Executive Reporting is needed to determine whether this is executive incoherence, governance failure, or both. That distinction determines the correction path.";
     route = "EXECUTIVE_REPORTING";
 
   } else if (execRiskWeak) {
     patternTitle   = "Execution drift under rising pressure";
-    primaryReading = `Execution variance (${execution}%) and risk posture (${risk}%) are both below threshold. The system is therefore carrying pressure that is no longer being translated into ordered action, which is how structural risk hardens quietly. The threshold has moved beyond routine operating variance and into compounding strain. The next move is executive interpretation before pressure fully displaces judgment.`;
+    primaryReading = `Execution variance (${execution}%) and risk posture (${risk}%) are both below the governed boundary. The system is therefore carrying pressure that is no longer being translated into ordered action, which is how structural risk hardens quietly. The institution has moved beyond routine operating variance and into compounding strain. The next move is executive interpretation before pressure fully displaces judgment.`;
     firstAction    = "Produce a single-page operational reality map: where are the three highest-variance execution points in the institution right now, what is the specific consequence of inaction in each, and who holds decision authority to correct them? If this document cannot be produced in 48 hours, that is itself a governance finding.";
     escalationNote = "Executive Reporting will turn this strain into a governed priority stack. Without that ordering, execution correction is likely to be aimed at the wrong level.";
     route = "EXECUTIVE_REPORTING";
 
   } else if (leaderWeak) {
     patternTitle   = "Leadership signal no longer coherent";
-    primaryReading = `Leadership coherence is at ${leadership}%, below the level at which the executive layer can reliably carry common judgment. Governance and execution may still appear functional, but they are now leaning on inertia instead of ordered signal. The threshold problem is therefore upstream, not downstream. The next move is to read the leadership condition directly before wider intervention is chosen.`;
+    primaryReading = `Leadership coherence is at ${leadership}%, below the level at which the executive layer can reliably carry common judgment. Governance and execution may still appear functional, but they are now leaning on inertia instead of ordered evidence. The review point issue is therefore upstream, not downstream. The next move is to read the leadership condition directly before wider intervention is chosen.`;
     firstAction    = "Identify the three most important beliefs the leadership group holds about the institution's current condition. Test whether those beliefs are shared. The gap between individual leadership beliefs is the governance problem.";
     escalationNote = "Leadership incoherence at this level warrants Executive Reporting first. A governed reading of the executive layer is more useful than premature intervention.";
     route = totalPct >= 60 ? "WATCH" : "EXECUTIVE_REPORTING";
 
   } else if (govWeak) {
     patternTitle   = "Governance no longer carrying order";
-    primaryReading = `Governance reliability is at ${governance}%. Decision rights, escalation lanes, and accountability structures are no longer carrying enough order for the system to move cleanly. That means friction is now constitutional, not merely procedural. The threshold for safe escalation depends on restoring governance as a load-bearing structure. The next move is to make the governance map explicit before choosing intervention.`;
+    primaryReading = `Governance reliability is at ${governance}%. Decision rights, escalation lanes, and accountability structures are no longer carrying enough order for the system to move cleanly. That means friction is now constitutional, not merely procedural. The review point for safe escalation depends on restoring governance as a load-bearing structure. The next move is to make the governance map explicit before choosing intervention.`;
     firstAction    = "Map decision rights explicitly. For the top ten classes of institutional decision, document who has authority, who must be consulted, and who must be informed. Circulate this document to all executives and track the areas of disagreement — those disagreements are the governance problem made visible.";
     escalationNote = "Executive Reporting will establish whether governance requires reconstruction or a more limited correction. That distinction should be made before any chamber escalation.";
     route = totalPct >= 65 ? "WATCH" : "EXECUTIVE_REPORTING";
 
   } else if (execWeak) {
     patternTitle   = "Operating layer drifting from intent";
-    primaryReading = `Execution variance is at ${execution}% while leadership and governance remain comparatively stronger. The institution still has some ordering at the top, but that order is not reaching the operating layer in a stable form. This is motion without sufficient coherence. The threshold has not yet moved into full disorder, but the strain is real. The next move is to tighten translation between priority and execution before drift compounds.`;
+    primaryReading = `Execution variance is at ${execution}% while leadership and governance remain comparatively stronger. The institution still has some ordering at the top, but that order is not reaching the operating layer in a stable form. This is motion without sufficient coherence. The institution has not yet moved into full disorder, but the strain is real. The next move is to tighten translation between priority and execution before drift compounds.`;
     firstAction    = "Identify the highest-variance operating unit. Run a structured rapid diagnostic there — not a full assessment, a focused reading of three things: what do they believe the current priorities are, what do they believe success looks like this quarter, and what is stopping them from operating at full capacity. The answers will locate the translation failure.";
     escalationNote = "This can still be corrected without heavy escalation if the strain is contained. Executive Reporting is warranted if the same pattern appears across units or begins to alter risk posture.";
     route = "WATCH";
 
   } else if (riskWeak) {
     patternTitle   = "Risk posture no longer stable";
-    primaryReading = `Risk posture is at ${risk}%, which means the system is losing room to correct cleanly. Trust is weakening, delay is increasing consequence, and pressure is beginning to displace deliberate judgment. The threshold is not yet collapse, but the window for ordered correction is narrowing. The next move is to define consequence precisely before the institution is forced into reaction.`;
+    primaryReading = `Risk posture is at ${risk}%, which means the system is losing room to correct cleanly. Trust is weakening, delay is increasing consequence, and pressure is beginning to displace deliberate judgment. Collapse has not arrived, but the window for ordered correction is narrowing. The next move is to define consequence precisely before the institution is forced into reaction.`;
     firstAction    = "Define the specific cost of inaction in the next 90 days: what becomes harder, more expensive, or politically impossible if nothing changes? Document this as a concrete consequence list, not as abstract risk language. That document is the basis for any board-level escalation.";
     escalationNote = "Executive Reporting provides the governed interpretation needed to act before pressure takes over sequencing. Without that, the institution is likely to move reactively.";
     route = totalPct >= 70 ? "WATCH" : "EXECUTIVE_REPORTING";
 
   } else if (band === "STABLE") {
     patternTitle   = "Institutional posture remains ordered";
-    primaryReading = `All four domains are above threshold: leadership coherence (${leadership}%), governance reliability (${governance}%), execution consistency (${execution}%), and risk posture (${risk}%). Based on this single-respondent reading, the institution appears to carry enough order for judgment, execution, and correction to remain aligned. The threshold is on the ordered side of strain. The next move is not emergency escalation, but testing whether this posture holds under real pressure.`;
+    primaryReading = `All four domains are above the governed boundary: leadership coherence (${leadership}%), governance reliability (${governance}%), execution consistency (${execution}%), and risk posture (${risk}%). Based on this single-respondent reading, the institution appears to carry enough order for judgment, execution, and correction to remain aligned. The posture remains on the ordered side of strain. The next move is not emergency escalation, but testing whether this posture holds under real pressure.`;
     firstAction    = "The most productive use of this reading is stress-testing: identify the three conditions under which this institutional coherence would be most likely to degrade, and verify whether governance, execution, and leadership are resilient to each.";
     escalationNote = "A stable institutional reading supports proactive Executive Reporting if leadership wants a governed planning brief rather than crisis correction.";
     route = "WATCH";
 
   } else {
     patternTitle   = "Watch condition under moderate strain";
-    primaryReading = `The enterprise reading sits in the WATCH band (${totalPct}%). No single domain has fully failed, but the institution is carrying enough friction, pressure, or coherence strain to warrant disciplined attention. The danger is normalization: low-grade disorder becomes mistaken for normal operating reality. The threshold for heavy escalation is not crossed yet. The next move is to name the highest-strain point and govern it before it spreads.`;
+    primaryReading = `The enterprise reading sits in the WATCH posture (${totalPct}%). No single domain has fully failed, but the institution is carrying enough friction, pressure, or coherence strain to warrant disciplined attention. The danger is normalization: low-grade disorder becomes mistaken for normal operating reality. The case for heavy escalation is not established yet. The next move is to name the highest-strain point and govern it before it spreads.`;
     firstAction    = "Identify the institutional area where the friction is highest and the cost of continuing to absorb it is most visible. That is the diagnostic priority. The reading does not require immediate escalation, but it does require a named owner for the correction.";
     escalationNote = "A WATCH condition justifies continued monitoring and readiness for Executive Reporting. If this reading degrades on reassessment, escalation should follow quickly.";
     route = "WATCH";
@@ -413,12 +413,12 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <div style={{ marginTop: "0.6rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: bc.text, opacity: 0.90 }}>
               {reading.band} — {totalPct}% overall
             </div>
-            <ThresholdProximityLine
-              text={thresholdProximityText({
+            <BoundaryProximityLine
+              text={boundaryProximityText({
                 label: "Decision clarity",
                 value: reading.decisionSignal.clarityScore,
-                thresholdLabel: "EXECUTIVE REPORTING",
-                threshold: 55,
+                boundaryLabel: "EXECUTIVE REPORTING",
+                boundary: 55,
               })}
             />
           </div>
@@ -630,7 +630,7 @@ export default function EnterpriseAssessmentPage() {
       setEntSpine(loaded);
       _setSpineCtx(getInheritedContext(loaded));
       const qs = generateAdaptiveQuestions({
-        conditionClass: loaded.deterministic.conditionClass,
+        conditionClass: "definition",
         contradiction: loaded.synthesis?.primaryContradiction ?? null,
         c3Gaps: loaded.c3.missing,
         memorySignals: [],
@@ -1045,7 +1045,7 @@ export default function EnterpriseAssessmentPage() {
                             Structural evidence — from your specific decision
                           </span>
                           <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
-                            The system identified a {entSpine?.deterministic.conditionClass ?? "decision"} condition. These questions test whether the condition is institutional.
+                            These questions test whether the current decision pattern is institutional rather than local.
                           </p>
                           <div className="mt-4 space-y-4">
                             {adaptiveQuestions.map((q) => (

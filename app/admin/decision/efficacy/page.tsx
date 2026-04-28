@@ -155,14 +155,14 @@ export default async function DecisionEfficacyPage() {
             accent
           />
           <StatCard
-            label="Avg Contextual Weight"
+            label="Avg Contextual Lift"
             value={contextualSummary.avgContextualWeight.toFixed(2)}
             subtext="Mean contextual lift"
           />
           <StatCard
             label="Avg Confidence"
             value={`${(contextualSummary.avgConfidenceScore * 100).toFixed(0)}%`}
-            subtext="Average confidence in contextual weighting"
+            subtext="Average confidence in contextual ranking"
           />
         </div>
 
@@ -175,7 +175,7 @@ export default async function DecisionEfficacyPage() {
           <StatCard
             label="Average Decision Usefulness"
             value={summary.avgDecisionUsefulness?.toFixed(2) ?? "0.00"}
-            subtext="Usefulness weighted toward judgment improvement"
+            subtext="Usefulness oriented toward judgment improvement"
           />
         </div>
 

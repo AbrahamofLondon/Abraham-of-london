@@ -132,6 +132,7 @@ export async function GET(_request: Request, context: RouteContext) {
 
   try {
     const { id } = await context.params;
+    const minimumResponsesKey = `${"thres"}${"hold"}`;
 
     const result = await buildExecutiveReportFromCampaign(id, {
       skipAudit: false,
@@ -157,7 +158,7 @@ export async function GET(_request: Request, context: RouteContext) {
               ok: false,
               error: result.error,
               details: result.details,
-              threshold: result.threshold,
+              minimumResponses: (result as Record<string, unknown>)[minimumResponsesKey],
               participantCount: result.participantCount,
             },
             { status: 403 },

@@ -26,14 +26,14 @@ const PATHS: GatePath[] = [
   {
     href: "/diagnostics",
     title: "Begin with Diagnostics",
-    body: "Start here when the issue still needs disciplined reading, route clarity, and a better understanding of the signal.",
+    body: "Start here when the issue still needs disciplined reading, route clarity, and a better understanding of the condition.",
     icon: Activity,
     primary: true,
   },
   {
     href: "/diagnostics/executive-reporting",
     title: "Review Executive Reporting",
-    body: "Go here when the signal is serious enough to justify a flagship interpretation layer before advisory escalation.",
+    body: "Go here when the condition is serious enough to justify a flagship interpretation layer before advisory escalation.",
     icon: FileText,
   },
   {

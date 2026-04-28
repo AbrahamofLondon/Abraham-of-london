@@ -1,8 +1,7 @@
 /* lib/inner-circle/access.server.ts — Standardized Redis Access (SSOT) */
 
 import tiers, { type AccessTier } from "@/lib/access/tiers";
-// ✅ FIXED: Changed from .postgres to .redis to ensure session consistency
-import { verifySession } from "@/lib/server/auth/tokenStore.redis";
+import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 
 export type InnerCircleAccessReason =
   | "no_request"

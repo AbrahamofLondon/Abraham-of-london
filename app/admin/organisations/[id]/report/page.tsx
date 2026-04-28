@@ -400,7 +400,7 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                 <div className="space-y-4 text-sm leading-7 text-neutral-700">
                   <p>
                     This report consolidates enterprise posture across campaign activity,
-                    participation quality, structural signals, and intervention readiness.
+                    participation quality, structural indicators, and intervention readiness.
                   </p>
                   <p>
                     The present snapshot indicates{" "}
@@ -425,7 +425,7 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                 </div>
               </SectionCard>
 
-              <SectionCard title="Strategic Signal" icon={Activity}>
+              <SectionCard title="Strategic Indicator" icon={Activity}>
                 <div className="space-y-4">
                   <div>
                     <div className="mb-2 flex items-center justify-between">
@@ -521,7 +521,7 @@ export default async function OrganisationReportPage({ params }: PageProps) {
             </div>
 
             <div className="mt-8 grid gap-8 xl:grid-cols-[1fr_1fr]">
-              <SectionCard title="Domain Signals" icon={Globe}>
+              <SectionCard title="Domain Indicators" icon={Globe}>
                 {domains.length ? (
                   <div className="space-y-3">
                     {domains.slice(0, 8).map((domain: any, idx: number) => (
@@ -542,7 +542,7 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                   </div>
                 ) : (
                   <p className="text-sm text-neutral-500">
-                    No domain-level signal map was available in the current enterprise snapshot.
+                    No domain-level indicator map was available in the current enterprise snapshot.
                   </p>
                 )}
               </SectionCard>

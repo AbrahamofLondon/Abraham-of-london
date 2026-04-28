@@ -15,6 +15,7 @@ import {
   readConstitutionalHandoff,
   type ConstitutionalHandoffStage,
 } from "@/lib/diagnostics/constitutional-handoff";
+import type { ConstitutionalBridgeBundle } from "@/lib/diagnostics/constitutional-bridge";
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -25,15 +26,15 @@ function stageMeta(stage: ConstitutionalHandoffStage) {
     case "team-assessment":
       return {
         icon: Users,
-        title: "Inherited constitutional signal available",
-        body: "This stage has received authority, coherence, pressure, friction, posture, and readiness signal from the initial constitutional intake.",
+        title: "Inherited constitutional context available",
+        body: "This stage has received authority, coherence, pressure, friction, posture, and readiness context from the initial constitutional intake.",
         href: "/diagnostics",
         cta: "Back to intake",
       };
     case "strategy-room":
       return {
         icon: Crown,
-        title: "Escalation signal has been carried forward",
+        title: "Escalation context has been carried forward",
         body: "This room can use the initial constitutional reading instead of forcing a blind restart.",
         href: "/consulting/strategy-room",
         cta: "Remain in Strategy Room",
@@ -43,7 +44,7 @@ function stageMeta(stage: ConstitutionalHandoffStage) {
       return {
         icon: FileText,
         title: "Executive Reporting has inherited the first reading",
-        body: "This page can now use the constitutional intake as pre-read signal instead of treating the user like they never spoke.",
+        body: "This page can now use the constitutional intake as pre-read context instead of treating the user like they never spoke.",
         href: "/diagnostics/executive-reporting",
         cta: "Continue",
       };
@@ -56,20 +57,34 @@ export default function InheritedSignalBanner({
   stage: ConstitutionalHandoffStage;
 }) {
   const [ready, setReady] = React.useState(false);
-  const [payload, setPayload] = React.useState<ReturnType<typeof readConstitutionalHandoff>>(null);
+  const [bridge, setBridge] = React.useState<ConstitutionalBridgeBundle | null>(null);
 
   React.useEffect(() => {
-    setPayload(readConstitutionalHandoff(stage));
-    setReady(true);
+    const payload = readConstitutionalHandoff(stage);
+    if (!payload?.token) {
+      setReady(true);
+      return;
+    }
+
+    void fetch(
+      `/api/diagnostics/constitutional-handoff/${stage}?token=${encodeURIComponent(payload.token)}`,
+    )
+      .then((response) => (response.ok ? response.json() : null))
+      .then((json) => {
+        if (json?.ok && json.bridge) {
+          setBridge(json.bridge as ConstitutionalBridgeBundle);
+        }
+      })
+      .finally(() => setReady(true));
   }, [stage]);
 
-  if (!ready || !payload) return null;
+  if (!ready || !bridge) return null;
 
   const meta = stageMeta(stage);
   const Icon = meta.icon;
-  const executive = payload.bridge.executiveReporting;
-  const team = payload.bridge.teamAssessment;
-  const route = payload.bridge.strategyRoom.escalationFit.route;
+  const executive = bridge.executiveReporting;
+  const team = bridge.teamAssessment;
+  const route = bridge.strategyRoom.escalationFit.route;
 
   return (
     <div className="mb-8 rounded-[28px] border border-emerald-400/18 bg-emerald-500/8 p-6">
@@ -78,7 +93,7 @@ export default function InheritedSignalBanner({
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-200">
-              Inherited Signal
+              Inherited Context
             </span>
           </div>
 
@@ -121,7 +136,7 @@ export default function InheritedSignalBanner({
                 Team hypothesis
               </div>
               <div className="mt-2 text-sm leading-6 text-white/78">
-                {team.hypotheses[0] || "Inherited signal available for team-level verification."}
+                {team.hypotheses[0] || "Inherited context available for team-level verification."}
               </div>
             </div>
           </div>

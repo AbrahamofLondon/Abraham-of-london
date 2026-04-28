@@ -3,6 +3,7 @@ import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
 import { sendEmail } from "@/lib/email/core/sendEmail";
 import { EmailLinks } from "@/lib/email/links";
 import { prisma } from "@/lib/prisma.server";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 import crypto from "crypto";
 
 /**
@@ -18,6 +19,23 @@ import crypto from "crypto";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
+  }
+
+  // Rate limit: strict — 5 requests per 60s per IP
+  const clientIp = String(
+    req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() ||
+    req.socket?.remoteAddress ||
+    "unknown"
+  );
+  const rl = await consumePersistentRateLimit({
+    key: `admin-send-link:${clientIp}`,
+    limit: 5,
+    windowMs: 60_000,
+    failClosed: true,
+  });
+  if (!rl.allowed) {
+    res.setHeader("Retry-After", String(Math.ceil(rl.retryAfterMs / 1000)));
+    return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
   }
 
   const { email, returnTo } = req.body ?? {};

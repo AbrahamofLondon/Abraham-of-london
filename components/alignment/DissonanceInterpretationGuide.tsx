@@ -3,11 +3,11 @@
 import React from "react";
 
 export default function DissonanceInterpretationGuide() {
-  const thresholds = [
-    { range: "0 – 450", state: "Structural Coherence", action: "Protocol Maintenance" },
-    { range: "451 – 900", state: "Elastic Drift", action: "Targeted Alignment" },
-    { range: "901 – 1500", state: "Systemic Dissonance", action: "Forensic Audit" },
-    { range: "1501+", state: "Acute Fragility", action: "Institutional Reset" },
+  const reviewStates = [
+    { state: "Structural Coherence", action: "Protocol Maintenance" },
+    { state: "Elastic Drift", action: "Targeted Alignment" },
+    { state: "Systemic Dissonance", action: "Forensic Audit" },
+    { state: "Acute Fragility", action: "Institutional Reset" },
   ];
 
   return (
@@ -63,20 +63,18 @@ export default function DissonanceInterpretationGuide() {
           </p>
         </div>
 
-        {/* Threshold Table */}
+        {/* Review Table */}
         <div className="mb-12 bg-[#F9F6EF] p-8 border border-[#E8E0D4]">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-[#E8E0D4] text-left font-mono text-[10px] uppercase tracking-widest text-[#6B5A3E]">
-                <th className="pb-4">Metric</th>
                 <th className="pb-4">State</th>
                 <th className="pb-4 text-right">Protocol</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E8E0D4]">
-              {thresholds.map((row) => (
-                <tr key={row.range} className="font-serif text-sm">
-                  <td className="py-4 font-mono font-bold">{row.range}</td>
+              {reviewStates.map((row) => (
+                <tr key={row.state} className="font-serif text-sm">
                   <td className="py-4 text-[#5C4E36]">{row.state}</td>
                   <td className="py-4 text-right font-mono text-[10px] text-[#8A6A2F] uppercase">{row.action}</td>
                 </tr>

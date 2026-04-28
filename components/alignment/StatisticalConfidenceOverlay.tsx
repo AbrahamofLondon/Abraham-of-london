@@ -16,7 +16,7 @@ interface ConfidenceStatus {
   color: string;
   glow: string;
   surface: string;
-  threshold: "high" | "medium" | "low";
+  tier: "high" | "medium" | "low";
 }
 
 const CONFIDENCE_CONFIG: { high: ConfidenceStatus; medium: ConfidenceStatus; low: ConfidenceStatus } = {
@@ -26,23 +26,23 @@ const CONFIDENCE_CONFIG: { high: ConfidenceStatus; medium: ConfidenceStatus; low
     color: "#C9A96A",
     glow: "0 0 18px rgba(201,169,106,0.22)",
     surface: "border-[#C9A96A]/20 bg-[#C9A96A]/[0.05]",
-    threshold: "high",
+    tier: "high",
   },
   medium: {
-    label: "Indicative Signal",
+    label: "Indicative Reading",
     description: "Directionally useful. Strong enough for disciplined inquiry, but not yet maximal confidence.",
     color: "#D6B77A",
     glow: "none",
     surface: "border-amber-500/20 bg-amber-500/[0.05]",
-    threshold: "medium",
+    tier: "medium",
   },
   low: {
     label: "Low Sample Reliability",
-    description: "Insufficient signal density for decisive structural conclusions. Treat as preliminary only.",
+    description: "Insufficient evidence density for decisive structural conclusions. Treat as preliminary only.",
     color: "#F59E0B",
     glow: "none",
     surface: "border-orange-500/20 bg-orange-500/[0.05]",
-    threshold: "low",
+    tier: "low",
   },
 };
 
@@ -185,7 +185,7 @@ export function StatisticalConfidenceOverlay({
             {isHighConfidence 
               ? "Confidence sufficient for strategic deployment and board-level interpretation."
               : isMediumConfidence
-              ? "Use for directional signal; complement with qualitative validation before escalation."
+              ? "Use for directional reading; complement with qualitative validation before escalation."
               : "Collect additional data points before drawing structural conclusions."}
           </p>
         </div>

@@ -113,7 +113,7 @@ export function DrillDownMatrix({ globalData, teamSnapshots }: DrillDownMatrixPr
                 <h5 className="text-[9px] font-mono uppercase tracking-wider text-neutral-500">Insufficient Data</h5>
               </div>
               <p className="text-[10px] text-neutral-500 leading-relaxed mb-4">
-                Sample size (N={integrity.nodeCount}) does not meet minimum threshold for board reporting.
+                Sample size (N={integrity.nodeCount}) does not meet the minimum review point for board reporting.
               </p>
               <button 
                 onClick={() => setActiveView('global')}

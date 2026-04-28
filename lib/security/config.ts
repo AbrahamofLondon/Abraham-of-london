@@ -36,9 +36,13 @@ class SecurityConfiguration {
   }
   
   private loadConfig(): SecurityConfig {
+    const jwtSecret = process.env.INNER_CIRCLE_JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("[SecurityConfig] Missing INNER_CIRCLE_JWT_SECRET");
+    }
     return {
       jwt: {
-        secret: process.env.INNER_CIRCLE_JWT_SECRET || 'fallback-secret-change-in-production',
+        secret: jwtSecret,
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
         algorithm: process.env.JWT_ALGORITHM || 'HS256',
       },
@@ -64,10 +68,6 @@ class SecurityConfiguration {
   
   validate(): boolean {
     const errors: string[] = [];
-    
-    if (!this.config.jwt.secret || this.config.jwt.secret === 'fallback-secret-change-in-production') {
-      errors.push('JWT secret is not properly configured');
-    }
     
     if (this.config.api.allowedOrigins.length === 0) {
       errors.push('No allowed origins configured');

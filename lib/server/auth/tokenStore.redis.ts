@@ -1,5 +1,5 @@
-/* lib/server/auth/tokenStore.redis.ts - REDIS PRIMARY + POSTGRES FALLBACK */
-// Redis remains the fast-path. Postgres is the authoritative fallback.
+/* lib/server/auth/tokenStore.redis.ts - CACHE ONLY, POSTGRES AUTHORITY */
+// Postgres/NextAuth is authoritative. Redis is a cache/write-through helper.
 // Redis failure never breaks auth. System becomes resilient without changing behaviour.
 //
 // Type-only import keeps the Redis class name available for annotations
@@ -62,51 +62,41 @@ async function pgGetSessionUser(token: string): Promise<{ userId?: string; email
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VERIFY SESSION — Redis primary, Postgres fallback
+// VERIFY SESSION — Postgres authority, Redis cache best-effort
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function verifySession(token: string): Promise<{
   ok: boolean; valid: boolean; tier: AccessTier; reason?: string; expiresAt?: string;
 }> {
-  // 1. Try Redis
-  const redis = await getRedis();
-  if (redis) {
-    try {
-      const [tier, userData] = await Promise.all([
-        redis.get<string>(`session:${token}:tier`),
-        redis.get<any>(`session:${token}:user`),
-      ]);
-      if (tier) {
-        return { ok: true, valid: true, tier: normalizeUserTier(tier), expiresAt: userData?.expiresAt || new Date(Date.now() + 86400000).toISOString() };
+  const pgResult = await pgVerifySession(token);
+  if (pgResult?.ok && pgResult.valid) {
+    const redis = await getRedis();
+    if (redis) {
+      try {
+        await Promise.all([
+          redis.setex(`session:${token}:tier`, 300, normalizeUserTier(pgResult.tier)),
+          redis.setex(`session:${token}:user`, 300, {
+            tier: normalizeUserTier(pgResult.tier),
+            memberId: pgResult.memberId ?? null,
+            expiresAt: pgResult.expiresAt,
+          }),
+        ]);
+      } catch {
+        // cache write is non-authoritative
       }
-      // Redis reachable but no session — try Postgres (session may not be cached)
-    } catch {
-      console.warn("[AUTH_FALLBACK] Redis error during verifySession, falling back to Postgres");
     }
-  } else {
-    console.warn("[AUTH_FALLBACK] Redis unavailable, using Postgres");
   }
 
-  // 2. Fallback to Postgres
-  const pgResult = await pgVerifySession(token);
   if (pgResult) return pgResult;
 
-  // 3. No session
   return { ok: true, valid: false, tier: "public", reason: "SESSION_NOT_FOUND" };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GET SESSION TIER — Redis primary, Postgres fallback
+// GET SESSION TIER — Postgres authority
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function getSessionTier(token: string): Promise<AccessTier | null> {
-  const redis = await getRedis();
-  if (redis) {
-    try {
-      const tier = await redis.get<string>(`session:${token}:tier`);
-      if (tier) return normalizeUserTier(tier);
-    } catch { /* fall through */ }
-  }
   return pgGetSessionTier(token);
 }
 
@@ -167,22 +157,10 @@ export async function createSession(token: string, userData: { tier: string | Ac
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GET SESSION USER — Redis primary, Postgres fallback
+// GET SESSION USER — Postgres authority
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function getSessionUser(token: string): Promise<{ userId?: string; email?: string; tier?: AccessTier } | null> {
-  const redis = await getRedis();
-  if (redis) {
-    try {
-      const [tier, userData] = await Promise.all([
-        redis.get<string>(`session:${token}:tier`),
-        redis.get<Record<string, any>>(`session:${token}:user`),
-      ]);
-      if (tier || userData) {
-        return { tier: tier ? normalizeUserTier(tier) : undefined, userId: userData?.userId, email: userData?.email };
-      }
-    } catch { /* fall through */ }
-  }
   return pgGetSessionUser(token);
 }
 

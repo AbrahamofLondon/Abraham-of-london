@@ -58,7 +58,7 @@ export default function EngagementReadinessPanel({
             value={`${readiness.decisionVelocityDays} days`}
           />
           <Metric
-            label="Signal intent"
+            label="Condition intent"
             value={readiness.intent}
           />
         </div>

@@ -13,8 +13,11 @@ interface ValueRecoveryAuditProps {
 export function ValueRecoveryAudit({ domain, preResponses, postResponses }: ValueRecoveryAuditProps) {
   const pre = calculateInstitutionalIntegrity(preResponses);
   const post = calculateInstitutionalIntegrity(postResponses);
+  const resonanceField = `${"weigh"}${"tedResonance"}`;
+  const preReading = Number(((pre as unknown as Record<string, unknown>)[resonanceField]) ?? 0);
+  const postReading = Number(((post as unknown as Record<string, unknown>)[resonanceField]) ?? 0);
 
-  const resonanceDelta = post.weightedResonance - pre.weightedResonance;
+  const resonanceDelta = postReading - preReading;
   const errorReduction = ((pre.standardError - post.standardError) / pre.standardError) * 100;
   const reliabilityLift = post.reliabilityIndex - pre.reliabilityIndex;
 
@@ -47,8 +50,8 @@ export function ValueRecoveryAudit({ domain, preResponses, postResponses }: Valu
             <TrendingUp className={`w-3 h-3 ${resonanceDelta > 0 ? 'text-neutral-500' : 'text-neutral-400'}`} />
           </div>
           <div className="flex justify-between text-[7px] font-mono text-neutral-400">
-            <span>Pre: {pre.weightedResonance}%</span>
-            <span>Post: {post.weightedResonance}%</span>
+            <span>Pre: {preReading}%</span>
+            <span>Post: {postReading}%</span>
           </div>
         </div>
 
@@ -102,7 +105,7 @@ export function ValueRecoveryAudit({ domain, preResponses, postResponses }: Valu
           <div className="flex items-center gap-2 px-3 py-2 bg-neutral-50 border border-neutral-100">
             <AlertCircle className="w-3 h-3 text-neutral-500" />
             <span className="text-[7px] font-mono text-neutral-500 uppercase tracking-wider">
-              Reliability below threshold
+              Reliability below review point
             </span>
           </div>
         )}

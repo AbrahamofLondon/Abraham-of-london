@@ -75,8 +75,8 @@ export default function ExecutiveReportSamplePreview() {
                   Structural Misalignment Identified
                 </h3>
                 <p className="mt-5 text-sm leading-relaxed text-white/54">
-                  Execution remains active, but certainty has fallen below sovereign
-                  threshold and leadership pressure is compounding drag across the
+                  Execution remains active, but certainty has fallen below the sovereign
+                  review point and leadership pressure is compounding drag across the
                   weakest operational domains.
                 </p>
               </div>

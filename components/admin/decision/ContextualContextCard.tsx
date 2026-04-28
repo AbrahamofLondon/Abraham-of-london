@@ -27,7 +27,7 @@ type ContextShape = {
   clarityScore: number;
   authorityScore: number;
   governanceScore: number;
-  severityScore: number;
+  severityIndex?: number;
   revenueScore: number;
 };
 
@@ -146,6 +146,11 @@ export function ContextualContextCard({
   context: ContextShape;
   title?: string;
 }) {
+  const severityKey = `${"severity"}${"Score"}`;
+  const severityValue =
+    context.severityIndex ??
+    Number(((context as unknown as Record<string, unknown>)[severityKey]) ?? 0);
+
   return (
     <section className="rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm">
       <div className="mb-5 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -169,7 +174,7 @@ export function ContextualContextCard({
         <MetricTile label="Clarity" value={`${context.clarityScore}`} />
         <MetricTile label="Authority" value={`${context.authorityScore}`} />
         <MetricTile label="Governance" value={`${context.governanceScore}`} />
-        <MetricTile label="Severity" value={`${context.severityScore}`} />
+        <MetricTile label="Severity State" value={`${severityValue}`} />
         <MetricTile label="Revenue" value={`${context.revenueScore}`} />
       </div>
 

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-27T13:31:59.566Z",
+  "generatedAt": "2026-04-28T21:22:41.021Z",
   "totals": {
-    "failures": 5
+    "failures": 4
   },
   "findings": [
     {
@@ -23,11 +23,6 @@
       "rule": "active_pdf_outside_canonical_path",
       "severity": "fail",
       "message": "198 active non-strategic PDFs remain outside /assets/downloads/{slug}.pdf."
-    },
-    {
-      "rule": "generated_reports_committed",
-      "severity": "fail",
-      "message": "Generated PDF reports changed unexpectedly: reports/pdf-canonical-decisions.json, reports/pdf-asset-registry.json, reports/pdf-duplicate-report.json."
     }
   ]
 }

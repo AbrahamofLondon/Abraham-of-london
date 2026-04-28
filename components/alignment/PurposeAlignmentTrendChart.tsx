@@ -17,7 +17,7 @@ type AssessmentRoute = "STRATEGY" | "DIAGNOSTIC" | "REJECT";
 
 type AssessmentPoint = {
   label: string;
-  score: number;
+  reading: number;
   route?: AssessmentRoute;
   confidence?: number;
 };
@@ -54,7 +54,7 @@ function normalizeData(data: AssessmentPoint[]): AssessmentPoint[] {
   if (!Array.isArray(data)) return [];
   return data.map((item, index) => ({
     label: String(item?.label || `Point ${index + 1}`),
-    score: normalizeScore(item?.score),
+    reading: normalizeScore(item?.reading),
     route:
       item?.route === "STRATEGY" ||
       item?.route === "DIAGNOSTIC" ||
@@ -77,7 +77,7 @@ function CustomTooltip({ active, payload }: TooltipProps) {
         {point.label}
       </div>
 
-      <div className="mt-2 text-xl font-light text-white">{point.score}%</div>
+      <div className="mt-2 text-xl font-light text-white">{point.reading}%</div>
 
       {point.route ? (
         <div className="mt-1 flex items-center gap-1.5">
@@ -96,7 +96,7 @@ function CustomTooltip({ active, payload }: TooltipProps) {
               ? "Strategy qualified"
               : point.route === "DIAGNOSTIC"
                 ? "Diagnostic route"
-                : "Below threshold"}
+                : "Under review"}
           </span>
         </div>
       ) : null}
@@ -128,7 +128,7 @@ export default function ConstitutionalTrendChart({
 
   const lastPoint = safeData[safeData.length - 1]!;
   const previousPoint = safeData.length > 1 ? safeData[safeData.length - 2] ?? null : null;
-  const trend = previousPoint ? lastPoint.score - previousPoint.score : 0;
+  const trend = previousPoint ? lastPoint.reading - previousPoint.reading : 0;
 
   const TrendIcon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
   const trendColor =
@@ -145,14 +145,14 @@ export default function ConstitutionalTrendChart({
         <div>
           <h3 className="font-serif text-lg text-white">Constitutional Trace</h3>
           <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/30">
-            Longitudinal alignment variance
+            Longitudinal alignment movement
           </p>
         </div>
 
         {typeof currentScore === "number" ? (
           <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-right">
             <div className="font-mono text-[8px] uppercase tracking-[0.16em] text-white/30">
-              Current Score
+              Current Reading
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-light text-white">
@@ -201,7 +201,7 @@ export default function ConstitutionalTrendChart({
             <Tooltip content={<CustomTooltip />} />
             <Line
               type="monotone"
-              dataKey="score"
+              dataKey="reading"
               stroke="#c9a96a"
               strokeWidth={2.5}
               dot={{

@@ -1,10 +1,6 @@
-// lib/security/rateLimit.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { anonymizeIp, getClientIp } from "@/lib/server/ip";
-
-type Bucket = { count: number; resetAt: number };
-
-const buckets = new Map<string, Bucket>();
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 export type LimitConfig = {
   windowMs: number;
@@ -27,54 +23,35 @@ export type ConsumeRateLimitResult = {
   key: string;
 };
 
-function now() {
-  return Date.now();
+function buildResult(result: Awaited<ReturnType<typeof consumePersistentRateLimit>>): LimitResult {
+  return {
+    allowed: result.allowed,
+    remaining: result.remaining,
+    resetAt: result.resetAt,
+    limit: result.limit,
+    key: result.key,
+  };
 }
 
-function getOrInitBucket(key: string, windowMs: number): Bucket {
-  const t = now();
-  const existing = buckets.get(key);
-
-  if (!existing || t > existing.resetAt) {
-    const fresh = { count: 0, resetAt: t + windowMs };
-    buckets.set(key, fresh);
-    return fresh;
-  }
-
-  return existing;
-}
-
-/**
- * IP-based limiter (privacy-safe via anonymization)
- * - Use per-route prefix to avoid cross-route interference
- */
-export function limitIp(
+export async function limitIp(
   req: NextApiRequest,
   prefix: string,
   config: LimitConfig,
-): LimitResult {
+): Promise<LimitResult> {
   const ip = getClientIp(req);
   const anon = anonymizeIp(ip);
   const key = `${prefix}:${anon}`;
 
-  const bucket = getOrInitBucket(key, config.windowMs);
-  bucket.count += 1;
-
-  const allowed = bucket.count <= config.max;
-  const remaining = Math.max(0, config.max - bucket.count);
-
-  return {
-    allowed,
-    remaining,
-    resetAt: bucket.resetAt,
-    limit: config.max,
+  const result = await consumePersistentRateLimit({
     key,
-  };
+    limit: config.max,
+    windowMs: config.windowMs,
+    failClosed: true,
+  });
+
+  return buildResult(result);
 }
 
-/**
- * Optional helper to expose standard-ish rate limit headers
- */
 export function setRateLimitHeaders(
   res: NextApiResponse,
   result: LimitResult | ConsumeRateLimitResult,
@@ -84,58 +61,46 @@ export function setRateLimitHeaders(
   res.setHeader("X-RateLimit-Reset", String(Math.ceil(result.resetAt / 1000)));
 }
 
-/**
- * Email-based limiter (prevents resend abuse by identity)
- * - Use normalized email in key
- */
-export function limitEmail(
+export async function limitEmail(
   email: string,
   prefix: string,
   config: LimitConfig,
-): LimitResult {
+): Promise<LimitResult> {
   const normalized = (email || "").trim().toLowerCase();
   const key = `${prefix}:email:${normalized || "unknown"}`;
 
-  const bucket = getOrInitBucket(key, config.windowMs);
-  bucket.count += 1;
-
-  const allowed = bucket.count <= config.max;
-  const remaining = Math.max(0, config.max - bucket.count);
-
-  return {
-    allowed,
-    remaining,
-    resetAt: bucket.resetAt,
-    limit: config.max,
+  const result = await consumePersistentRateLimit({
     key,
-  };
+    limit: config.max,
+    windowMs: config.windowMs,
+    failClosed: true,
+  });
+
+  return buildResult(result);
 }
 
-/* -----------------------------------------------------------------------------
-   Compatibility layer for newer diagnostics routes
------------------------------------------------------------------------------ */
-
-export function consumeRateLimit(args: {
+export async function consumeRateLimit(args: {
   key: string;
   limit: number;
   windowMs: number;
-}): ConsumeRateLimitResult {
+}): Promise<ConsumeRateLimitResult> {
   const key = String(args.key || "").trim();
   const limit = Math.max(1, Number(args.limit || 1));
   const windowMs = Math.max(1000, Number(args.windowMs || 60_000));
 
-  const bucket = getOrInitBucket(key, windowMs);
-  bucket.count += 1;
-
-  const ok = bucket.count <= limit;
-  const remaining = Math.max(0, limit - bucket.count);
+  const result = await consumePersistentRateLimit({
+    key,
+    limit,
+    windowMs,
+    failClosed: true,
+  });
 
   return {
-    ok,
-    remaining,
-    resetAt: bucket.resetAt,
-    limit,
-    key,
+    ok: result.allowed,
+    remaining: result.remaining,
+    resetAt: result.resetAt,
+    limit: result.limit,
+    key: result.key,
   };
 }
 

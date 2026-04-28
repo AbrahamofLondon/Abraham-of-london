@@ -2,21 +2,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
 import { prisma } from "@/lib/db";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 type ErrorResponse = {
   ok: false;
   error: string;
 };
-
-type RateLimitBucket = {
-  count: number;
-  resetAt: number;
-};
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __aolVipExportRateLimit: Map<string, RateLimitBucket> | undefined;
-}
 
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 const RATE_LIMIT_MAX = 10;
@@ -26,13 +17,6 @@ function getDb() {
     throw new Error("Database client unavailable");
   }
   return prisma;
-}
-
-function getRateLimitStore(): Map<string, RateLimitBucket> {
-  if (!global.__aolVipExportRateLimit) {
-    global.__aolVipExportRateLimit = new Map<string, RateLimitBucket>();
-  }
-  return global.__aolVipExportRateLimit;
 }
 
 function getClientIp(req: NextApiRequest): string {
@@ -45,33 +29,6 @@ function getClientIp(req: NextApiRequest): string {
       : req.socket?.remoteAddress || "0.0.0.0";
 
   return String(raw).split(",")[0]?.trim() || "0.0.0.0";
-}
-
-function applyRateLimit(
-  key: string
-): { ok: true; remaining: number; resetAt: number } | { ok: false; resetAt: number } {
-  const store = getRateLimitStore();
-  const now = Date.now();
-  const current = store.get(key);
-
-  if (!current || now >= current.resetAt) {
-    const resetAt = now + RATE_LIMIT_WINDOW_MS;
-    store.set(key, { count: 1, resetAt });
-    return { ok: true, remaining: RATE_LIMIT_MAX - 1, resetAt };
-  }
-
-  if (current.count >= RATE_LIMIT_MAX) {
-    return { ok: false, resetAt: current.resetAt };
-  }
-
-  current.count += 1;
-  store.set(key, current);
-
-  return {
-    ok: true,
-    remaining: Math.max(0, RATE_LIMIT_MAX - current.count),
-    resetAt: current.resetAt,
-  };
 }
 
 function csvEscape(value: unknown): string {
@@ -98,12 +55,17 @@ export default async function handler(
   }
 
   const rateKey = `${String(session.user.email).toLowerCase()}|${getClientIp(req)}`;
-  const rl = applyRateLimit(rateKey);
+  const rl = await consumePersistentRateLimit({
+    key: `admin-export-vips:${rateKey}`,
+    limit: RATE_LIMIT_MAX,
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    failClosed: true,
+  });
 
-  if (!rl.ok) {
+  if (!rl.allowed) {
     res.setHeader(
       "Retry-After",
-      String(Math.ceil((rl.resetAt - Date.now()) / 1000))
+      String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
     );
     return res.status(429).json({
       ok: false,

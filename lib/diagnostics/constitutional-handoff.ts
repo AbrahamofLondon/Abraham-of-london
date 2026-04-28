@@ -1,11 +1,16 @@
 /* ============================================================================
    FILE: lib/diagnostics/constitutional-handoff.ts
    PURPOSE:
-   - Carry inherited constitutional signal into downstream pages
-   - Session-scoped, browser-only, safe for navigation handoff
+   - Carry only opaque constitutional handoff references into downstream pages
+   - Prevent the browser from storing the real inherited bridge payload
 ============================================================================ */
 
-import type { ConstitutionalBridgeBundle } from "@/lib/diagnostics/constitutional-bridge";
+import {
+  clearAllSecureStateReferences,
+  clearSecureStateReference,
+  readSecureStateReference,
+  writeSecureStateReference,
+} from "@/lib/security/secure-client-state";
 
 export type ConstitutionalHandoffStage =
   | "team-assessment"
@@ -13,17 +18,8 @@ export type ConstitutionalHandoffStage =
   | "strategy-room";
 
 export type ConstitutionalHandoffPayload = {
-  source: "constitutional-intake";
-  reportId: string | null;
-  createdAt: string;
-  bridge: ConstitutionalBridgeBundle;
+  token: string;
 };
-
-const STORAGE_PREFIX = "aol_constitutional_handoff_v1";
-
-function getStorageKey(stage: ConstitutionalHandoffStage): string {
-  return `${STORAGE_PREFIX}:${stage}`;
-}
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
@@ -34,54 +30,29 @@ export function writeConstitutionalHandoff(
   payload: ConstitutionalHandoffPayload,
 ): void {
   if (!isBrowser()) return;
-
-  try {
-    window.sessionStorage.setItem(getStorageKey(stage), JSON.stringify(payload));
-  } catch {
-    // ignore storage failure
-  }
+  writeSecureStateReference(stage, payload.token);
 }
 
 export function readConstitutionalHandoff(
   stage: ConstitutionalHandoffStage,
 ): ConstitutionalHandoffPayload | null {
   if (!isBrowser()) return null;
-
-  try {
-    const raw = window.sessionStorage.getItem(getStorageKey(stage));
-    if (!raw) return null;
-    return JSON.parse(raw) as ConstitutionalHandoffPayload;
-  } catch {
-    return null;
-  }
+  const token = readSecureStateReference(stage);
+  return token ? { token } : null;
 }
 
 export function clearConstitutionalHandoff(
   stage: ConstitutionalHandoffStage,
 ): void {
   if (!isBrowser()) return;
-
-  try {
-    window.sessionStorage.removeItem(getStorageKey(stage));
-  } catch {
-    // ignore
-  }
+  clearSecureStateReference(stage);
 }
 
 export function clearAllConstitutionalHandoffs(): void {
   if (!isBrowser()) return;
-
-  try {
-    const stages: ConstitutionalHandoffStage[] = [
-      "team-assessment",
-      "executive-reporting",
-      "strategy-room",
-    ];
-
-    for (const stage of stages) {
-      window.sessionStorage.removeItem(getStorageKey(stage));
-    }
-  } catch {
-    // ignore
-  }
+  clearAllSecureStateReferences([
+    "team-assessment",
+    "executive-reporting",
+    "strategy-room",
+  ]);
 }

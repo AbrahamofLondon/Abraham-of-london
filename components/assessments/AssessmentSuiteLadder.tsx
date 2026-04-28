@@ -129,7 +129,7 @@ export default function AssessmentSuiteLadder() {
       <div className="flex items-center justify-center gap-4 mt-8">
         <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent)" }} />
         <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
-          Each layer hands signal to the next without rework
+          Each layer carries context to the next without rework
         </span>
         <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent)" }} />
       </div>

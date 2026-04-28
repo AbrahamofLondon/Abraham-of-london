@@ -179,7 +179,7 @@ class SecurityConfiguration {
       ...this.config,
       jwt: {
         ...this.config.jwt,
-        secret: env.INNER_CIRCLE_JWT_SECRET || env.JWT_SECRET || "fallback-secret-change-in-production",
+        secret: env.INNER_CIRCLE_JWT_SECRET || env.JWT_SECRET || (() => { throw new Error("[Security] Missing INNER_CIRCLE_JWT_SECRET or JWT_SECRET"); })(),
         expiresIn: env.JWT_EXPIRES_IN || this.config.jwt.expiresIn,
         algorithm: env.JWT_ALGORITHM || this.config.jwt.algorithm,
         issuer: env.JWT_ISSUER || this.config.jwt.issuer,
@@ -230,10 +230,11 @@ class SecurityConfiguration {
     const errors: string[] = [];
     const config = this.getConfig();
 
-    if (!config.jwt.secret || config.jwt.secret === "fallback-secret-change-in-production") {
+    if (!config.jwt.secret) {
       errors.push("JWT_SECRET must be set in production");
+    } else if (config.jwt.secret.length < 32) {
+      errors.push("JWT_SECRET should be at least 32 characters");
     }
-    if (config.jwt.secret.length < 32) errors.push("JWT_SECRET should be at least 32 characters");
 
     if (!config.api.allowedOrigins.length) errors.push("At least one ALLOWED_ORIGIN must be configured");
     if (config.api.rateLimit.maxRequests <= 0) errors.push("RATE_LIMIT_MAX_REQUESTS must be positive");
@@ -523,7 +524,7 @@ export type LimitResult = {
 };
 
 export class RateLimiter {
-  private buckets = new Map<string, Bucket>();
+  private buckets: Map<string, Bucket> = new Map();
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {

@@ -16,7 +16,7 @@ const CASES = [
       "Exposed hidden execution bottlenecks. Reduced friction before expansion phase.",
   },
   {
-    title: "Founder-led organisation nearing burnout threshold",
+    title: "Founder-led organisation nearing burnout limit",
     outcome:
       "Detected systemic overload patterns. Intervention prevented leadership breakdown.",
   },

@@ -20,7 +20,7 @@ export default function EnterpriseIntelligenceDashboard({ view }: Props) {
   return (
     <div className="flex flex-col gap-10 w-full max-w-7xl mx-auto py-12 px-6">
       
-      {/* 1. INSTITUTIONAL HEADER & CONFIDENCE SIGNAL */}
+      {/* 1. INSTITUTIONAL HEADER & CONFIDENCE INDICATOR */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border-b border-brand-charcoal/30 pb-10">
         <div className="lg:col-span-7 flex flex-col gap-2">
           <div className="flex items-center gap-2">
@@ -59,7 +59,10 @@ export default function EnterpriseIntelligenceDashboard({ view }: Props) {
         {/* Temporal Trajectory (Trend) */}
         <div className="lg:col-span-7 h-[460px]">
           <PurposeAlignmentTrendChart
-            data={trendSeries}
+            data={trendSeries.map((item) => ({
+              ...item,
+              reading: item.score,
+            }))}
           />
         </div>
 

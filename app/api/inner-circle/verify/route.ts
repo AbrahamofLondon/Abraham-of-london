@@ -8,9 +8,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyInnerCircleKey } from "@/lib/inner-circle/exports.server";
-
-type Bucket = { count: number; resetAt: number };
-const BUCKETS = new Map<string, Bucket>();
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 function getIp(req: NextRequest) {
   const xf = req.headers.get("x-forwarded-for");
@@ -18,28 +16,18 @@ function getIp(req: NextRequest) {
   return req.headers.get("x-real-ip") || "unknown";
 }
 
-function rateLimit(req: NextRequest, limit = 30, windowMs = 60_000) {
+async function rateLimit(req: NextRequest, limit = 30, windowMs = 60_000) {
   const ip = getIp(req);
-  const now = Date.now();
-  const key = `verify:${ip}`;
-  const b = BUCKETS.get(key);
-
-  if (!b || b.resetAt <= now) {
-    BUCKETS.set(key, { count: 1, resetAt: now + windowMs });
-    return { allowed: true, remaining: limit - 1, limit, resetAt: now + windowMs };
-  }
-
-  if (b.count >= limit) {
-    return { allowed: false, remaining: 0, limit, resetAt: b.resetAt };
-  }
-
-  b.count += 1;
-  BUCKETS.set(key, b);
-  return { allowed: true, remaining: Math.max(0, limit - b.count), limit, resetAt: b.resetAt };
+  return consumePersistentRateLimit({
+    key: `inner-circle-verify:${ip}`,
+    limit,
+    windowMs,
+    failClosed: true,
+  });
 }
 
 export async function POST(req: NextRequest) {
-  const rl = rateLimit(req);
+  const rl = await rateLimit(req);
   if (!rl.allowed) {
     return NextResponse.json(
       {

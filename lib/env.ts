@@ -1,6 +1,4 @@
 import { z } from 'zod';
-// security-scan-ignore-file
-// Reason: This file only contains DEFAULT/PLACEHOLDER values for development, not production secrets.
 
 // Define schema for required environment variables
 const envSchema = z.object({
@@ -23,17 +21,6 @@ const envSchema = z.object({
 
 type ParsedEnv = z.infer<typeof envSchema>;
 
-const fallbackEnv: ParsedEnv = {
-  NODE_ENV: 'development' as const,
-  DATABASE_URL: '', // Must be set via env — no SQLite fallback
-  JWT_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
-  NEXTAUTH_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
-  NEXT_PUBLIC_SITE_URL: 'https://www.abrahamoflondon.org',
-  NEXTAUTH_URL: 'https://www.abrahamoflondon.org',
-  ENABLE_AUDIT_LOGGING: false,
-  SKIP_AUTH_IN_DEV: false,
-};
-
 type EnvShape = ParsedEnv;
 
 let cachedEnv: EnvShape | null = null;
@@ -47,21 +34,13 @@ function loadEnv(): EnvShape {
 
   if (!env.success) {
     console.error('❌ Invalid environment variables:', env.error.format());
-    
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Invalid environment variables - required secrets missing in production');
-    }
-    
-    console.warn('⚠️  Missing required environment variables. Using development placeholders.');
-    cachedEnv = fallbackEnv;
-    return cachedEnv;
+    throw new Error('Invalid environment variables - required secrets missing');
   }
 
   cachedEnv = env.data;
   return cachedEnv;
 }
 
-// NEVER provide default values for secrets in the fallback object
 export const ENV: EnvShape = new Proxy({} as EnvShape, {
   get(_target, prop) {
     return loadEnv()[prop as keyof EnvShape];

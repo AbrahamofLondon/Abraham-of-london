@@ -54,8 +54,8 @@ export default async function DecisionGovernancePage() {
             Recommendation Governance
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-600">
-            This surface governs recommendation quality, confidence thresholds,
-            suppression rules, and drift alerts. It exists to prevent the engine
+            This surface governs recommendation quality, confidence review points,
+            suppression rules, and drift alerts. It exists to prevent the analysis layer
             from becoming noisy, unstable, or overly concentrated around a few assets.
           </p>
         </div>

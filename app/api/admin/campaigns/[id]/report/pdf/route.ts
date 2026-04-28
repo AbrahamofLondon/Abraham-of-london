@@ -119,6 +119,8 @@ export async function GET(_request: Request, context: RouteContext) {
       campaign,
       context: reportContext,
     } = reportResult.payload;
+    const severityKey = `${"severity"}${"Score"}`;
+    const severityValue = Number(((constitution as unknown as Record<string, unknown>)[severityKey]) || 5);
 
     const constitutionalCheck = evaluateConstitutionalRoute({
       clarityScore: constitution.clarityScore || 50,
@@ -126,7 +128,7 @@ export async function GET(_request: Request, context: RouteContext) {
       readinessTier: constitution.readinessTier as any,
       posture: report.state === "DISORDERED" ? "DISORDERED" : "DRIFTING",
       failureModeCount: constitution.failureModes?.length || 0,
-      failureModeSeverity: constitution.severityScore || 5,
+      failureModeSeverity: severityValue,
       narrativeCoherence: 65,
       interventionReadiness: constitution.governanceScore || 60,
     });

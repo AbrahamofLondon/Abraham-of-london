@@ -28,7 +28,7 @@ import {
   type DiagnosticAnswers,
   type DiagnosticAnswerValue,
   type LikertValue,
-} from "@/lib/constitution/constitutional-diagnostic-derivation";
+} from "@/lib/diagnostics/constitutional-diagnostic-derivation";
 import {
   writeConstitutionalHandoff,
   clearAllConstitutionalHandoffs,
@@ -38,6 +38,7 @@ import type { ConstitutionalBridgeBundle } from "@/lib/diagnostics/constitutiona
 type ApiSuccess = {
   ok: true;
   reportId: string;
+  stateToken: string;
   bundle: {
     report: {
       authorityScore: number;
@@ -88,9 +89,6 @@ type ApiFailure = {
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 type EvaluationPhase = "idle" | "reading" | "parsing" | "weighing" | "complete";
-
-const STORAGE_KEY = "aol-constitutional-diagnostic-v3";
-const AUTO_SAVE_DELAY_MS = 700;
 
 const RESONANCE_LABELS = [
   "Completely false",
@@ -144,13 +142,13 @@ function getPhaseLabel(phase: EvaluationPhase) {
     case "reading":
       return "Reading structural pattern";
     case "parsing":
-      return "Parsing constitutional signal";
+      return "Parsing constitutional reading";
     case "weighing":
       return "Deriving report and route";
     case "complete":
       return "Assessment complete";
     default:
-      return "Awaiting sufficient signal";
+      return "Awaiting sufficient detail";
   }
 }
 
@@ -164,7 +162,7 @@ function toneClass(tone: "neutral" | "amber" | "emerald") {
   return "border-white/10 bg-white/5";
 }
 
-function SignalTile({
+function StatusTile({
   title,
   value,
   tone = "neutral",
@@ -231,12 +229,14 @@ function RatingRail({
 export default function ConstitutionalDiagnostic() {
   const [answers, setAnswers] = React.useState<DiagnosticAnswers>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
-  const [savingDraft, setSavingDraft] = React.useState(false);
   const [phase, setPhase] = React.useState<EvaluationPhase>("idle");
   const [submitState, setSubmitState] = React.useState<SubmitState>("idle");
   const [errorMessage, setErrorMessage] = React.useState("");
   const [reportData, setReportData] = React.useState<ApiSuccess | null>(null);
   const [showResults, setShowResults] = React.useState(false);
+  const startedAtRef = React.useRef<string>(new Date().toISOString());
+  const questionStartedAtRef = React.useRef<number>(Date.now());
+  const timingRef = React.useRef<Record<string, number>>({});
 
   const questions = DEFAULT_DIAGNOSTIC_QUESTIONS;
   const answeredCount = Object.keys(answers).length;
@@ -247,44 +247,15 @@ export default function ConstitutionalDiagnostic() {
   const currentAnswer = answers[currentQuestion.id] ?? makeDefaultAnswer();
 
   React.useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as {
-        answers?: DiagnosticAnswers;
-        currentQuestionIndex?: number;
-      };
+    questionStartedAtRef.current = Date.now();
+  }, [currentQuestionIndex]);
 
-      if (parsed.answers) setAnswers(parsed.answers);
-      if (typeof parsed.currentQuestionIndex === "number") {
-        setCurrentQuestionIndex(parsed.currentQuestionIndex);
-      }
-    } catch {
-      // ignore malformed draft
-    }
-  }, []);
-
-  React.useEffect(() => {
-    if (!answeredCount) return;
-
-    const timer = window.setTimeout(() => {
-      try {
-        window.localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify({
-            answers,
-            currentQuestionIndex,
-          }),
-        );
-        setSavingDraft(true);
-        window.setTimeout(() => setSavingDraft(false), 450);
-      } catch {
-        // ignore storage failures
-      }
-    }, AUTO_SAVE_DELAY_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [answers, currentQuestionIndex, answeredCount]);
+  const captureQuestionTiming = () => {
+    const elapsed = Date.now() - questionStartedAtRef.current;
+    timingRef.current[currentQuestion.id] =
+      (timingRef.current[currentQuestion.id] ?? 0) + elapsed;
+    questionStartedAtRef.current = Date.now();
+  };
 
   const setResonance = (value: LikertValue) => {
     setAnswers((prev) => ({
@@ -307,6 +278,8 @@ export default function ConstitutionalDiagnostic() {
   };
 
   const goNext = () => {
+    captureQuestionTiming();
+
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       return;
@@ -319,6 +292,7 @@ export default function ConstitutionalDiagnostic() {
 
   const goPrevious = () => {
     if (currentQuestionIndex > 0) {
+      captureQuestionTiming();
       setCurrentQuestionIndex((prev) => prev - 1);
     }
   };
@@ -327,16 +301,17 @@ export default function ConstitutionalDiagnostic() {
     const ok = window.confirm("Clear all answers and restart the constitutional intake?");
     if (!ok) return;
 
-    window.localStorage.removeItem(STORAGE_KEY);
     clearAllConstitutionalHandoffs();
     setAnswers({});
     setCurrentQuestionIndex(0);
-    setSavingDraft(false);
     setPhase("idle");
     setSubmitState("idle");
     setErrorMessage("");
     setReportData(null);
     setShowResults(false);
+    startedAtRef.current = new Date().toISOString();
+    questionStartedAtRef.current = Date.now();
+    timingRef.current = {};
   };
 
   async function submitAssessment() {
@@ -360,6 +335,11 @@ export default function ConstitutionalDiagnostic() {
         body: JSON.stringify({
           source: "constitutional_diagnostic_public",
           answers,
+          telemetry: {
+            startedAt: startedAtRef.current,
+            submittedAt: new Date().toISOString(),
+            questionTimingsMs: timingRef.current,
+          },
         }),
       });
 
@@ -370,24 +350,15 @@ export default function ConstitutionalDiagnostic() {
       }
 
       writeConstitutionalHandoff("team-assessment", {
-        source: "constitutional-intake",
-        reportId: json.reportId,
-        createdAt: new Date().toISOString(),
-        bridge: json.bridge,
+        token: json.stateToken,
       });
 
       writeConstitutionalHandoff("executive-reporting", {
-        source: "constitutional-intake",
-        reportId: json.reportId,
-        createdAt: new Date().toISOString(),
-        bridge: json.bridge,
+        token: json.stateToken,
       });
 
       writeConstitutionalHandoff("strategy-room", {
-        source: "constitutional-intake",
-        reportId: json.reportId,
-        createdAt: new Date().toISOString(),
-        bridge: json.bridge,
+        token: json.stateToken,
       });
 
       setReportData(json);
@@ -395,11 +366,7 @@ export default function ConstitutionalDiagnostic() {
       setPhase("complete");
       setShowResults(true);
 
-      try {
-        window.localStorage.removeItem(STORAGE_KEY);
-      } catch {
-        // ignore
-      }
+      timingRef.current = {};
     } catch (error) {
       setSubmitState("error");
       setPhase("idle");
@@ -432,7 +399,7 @@ export default function ConstitutionalDiagnostic() {
 
             <p className="mx-auto mt-4 max-w-3xl text-white/52">
               Not a vague vibe check. A persisted constitutional micro-report with
-              route, posture, readiness, findings, risks, and inherited downstream signal.
+              state, posture, readiness, findings, risks, and inherited downstream context.
             </p>
           </div>
 
@@ -480,11 +447,11 @@ export default function ConstitutionalDiagnostic() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-5">
-            <SignalTile title="Authority" value={`${report.authorityScore}%`} tone={report.authorityScore >= 70 ? "emerald" : report.authorityScore >= 45 ? "amber" : "neutral"} />
-            <SignalTile title="Coherence" value={`${report.coherenceScore}%`} tone={report.coherenceScore >= 70 ? "emerald" : report.coherenceScore >= 45 ? "amber" : "neutral"} />
-            <SignalTile title="Pressure" value={`${report.pressureScore}%`} tone={report.pressureScore >= 70 ? "amber" : "neutral"} />
-            <SignalTile title="Friction" value={`${report.frictionScore}%`} tone={report.frictionScore >= 70 ? "amber" : "neutral"} />
-            <SignalTile title="Trust" value={`${report.trustScore}%`} tone={report.trustScore >= 70 ? "emerald" : report.trustScore >= 45 ? "amber" : "neutral"} />
+            <StatusTile title="State" value={routeSummary.route} tone={routeSummary.tone} />
+            <StatusTile title="Posture" value={report.posture} tone={routeSummary.tone} />
+            <StatusTile title="Readiness" value={report.readinessTier} tone={routeSummary.tone} />
+            <StatusTile title="Authority" value={report.authorityType} tone={routeSummary.tone} />
+            <StatusTile title="Escalation" value={decision.escalationAllowed ? "Available" : "Contained"} tone={decision.escalationAllowed ? "amber" : "neutral"} />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
@@ -532,7 +499,7 @@ export default function ConstitutionalDiagnostic() {
               <div className="flex items-center gap-2">
                 <LayoutGrid className="h-4 w-4 text-amber-400/70" />
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
-                  Inherited next-stage signal
+                  Inherited next-stage context
                 </span>
               </div>
 
@@ -650,15 +617,15 @@ export default function ConstitutionalDiagnostic() {
 
             <p className="mt-4 max-w-2xl text-white/52">
               This gate produces a real micro-report: posture, readiness, authority,
-              friction, risks, interventions, route, and inherited signal for the next layers.
+              risks, interventions, state, and inherited context for the next layers.
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <SignalTile title="Progress" value={`${progress}%`} tone="amber" />
-            <SignalTile title="Answered" value={`${answeredCount}/${questions.length}`} />
-            <SignalTile title="Current Domain" value={currentQuestion.domain} />
-            <SignalTile title="Draft Status" value={savingDraft ? "Saving" : "Saved"} tone={savingDraft ? "amber" : "emerald"} />
+            <StatusTile title="Progress" value={`${progress}%`} tone="amber" />
+            <StatusTile title="Answered" value={`${answeredCount}/${questions.length}`} />
+            <StatusTile title="Current Domain" value={currentQuestion.domain} />
+            <StatusTile title="State" value="Ephemeral" tone="emerald" />
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-sm">
@@ -792,7 +759,7 @@ export default function ConstitutionalDiagnostic() {
               <div className="flex items-start gap-3">
                 <Crown className="mt-0.5 h-4 w-4 text-emerald-400/75" />
                 <span>
-                  <strong className="text-white/80">Strategy Room</strong> is for signals with clear authority, meaningful consequence, and sufficient readiness.
+                  <strong className="text-white/80">Strategy Room</strong> is for cases with clear authority, meaningful consequence, and sufficient readiness.
                 </span>
               </div>
 
@@ -822,7 +789,7 @@ export default function ConstitutionalDiagnostic() {
               </div>
 
               <p className="mt-3 text-sm leading-relaxed text-white/54">
-                The intake is complete. Generate the constitutional report and carry the inherited signal into the next layers.
+                The intake is complete. Generate the constitutional report and carry the inherited context into the next layers.
               </p>
 
               <button

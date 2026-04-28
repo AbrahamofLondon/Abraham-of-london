@@ -361,7 +361,7 @@ export default async function OrganisationDashboardPage({
                 </h2>
                 <p className="mt-1 text-sm text-neutral-600">
                   Live organisational posture, campaign health, response patterning,
-                  and intervention signal.
+                  and intervention indicator.
                 </p>
               </div>
             </div>

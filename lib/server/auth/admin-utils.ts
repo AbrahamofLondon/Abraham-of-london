@@ -2,6 +2,7 @@
 import "server-only";
 
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { authenticator } from "@otplib/preset-default";
 
@@ -48,6 +49,37 @@ function getAdminJwtSecret(): string {
   const secret = process.env.ADMIN_JWT_SECRET || process.env.NEXTAUTH_SECRET;
   if (!secret) throw new Error("Missing ADMIN_JWT_SECRET (or NEXTAUTH_SECRET fallback).");
   return secret;
+}
+
+function decryptStoredTotpSecret(value: string): string {
+  if (!value.startsWith("enc:")) {
+    return value;
+  }
+
+  const secret = String(process.env.MFA_ENCRYPTION_KEY || "").trim();
+  if (!secret) {
+    throw new Error("Missing MFA_ENCRYPTION_KEY");
+  }
+
+  const [, ivB64, tagB64, ciphertextB64] = value.split(":");
+  if (!ivB64 || !tagB64 || !ciphertextB64) {
+    throw new Error("Invalid encrypted TOTP secret");
+  }
+
+  const key = crypto.createHash("sha256").update(secret, "utf8").digest();
+  const decipher = crypto.createDecipheriv(
+    "aes-256-gcm",
+    key,
+    Buffer.from(ivB64, "base64url"),
+  );
+  decipher.setAuthTag(Buffer.from(tagB64, "base64url"));
+
+  const plaintext = Buffer.concat([
+    decipher.update(Buffer.from(ciphertextB64, "base64url")),
+    decipher.final(),
+  ]);
+
+  return plaintext.toString("utf8");
 }
 
 async function audit(event: string, meta: Record<string, unknown>) {
@@ -199,7 +231,10 @@ export async function verifyAdminTotp(input: { userId: string; code: string }): 
   }
 
   // TOTP verify (default otplib window is okay; if you want drift tolerance, set authenticator.options.window)
-  const ok = authenticator.verify({ token: code, secret: setup.totpSecret });
+  const ok = authenticator.verify({
+    token: code,
+    secret: decryptStoredTotpSecret(setup.totpSecret),
+  });
 
   await audit(ok ? "admin_mfa_totp_verified" : "admin_mfa_totp_failed", { userId });
 

@@ -74,13 +74,14 @@ async function decryptSpine(encrypted: string): Promise<IntelligenceSpine | null
 export function saveSpineToSession(spine: IntelligenceSpine): void {
   if (typeof window === "undefined") return;
   try {
-    // Async encryption — fire and forget for UI responsiveness
-    void encryptSpine(spine).then((encrypted) => {
-      window.sessionStorage.setItem(SPINE_SESSION_KEY, encrypted);
-    }).catch(() => {
-      // Fallback: store without encryption if Web Crypto unavailable
-      window.sessionStorage.setItem(SPINE_SESSION_KEY, JSON.stringify({ _plain: true, ...spine }));
-    });
+    // Encryption failure now results in no session-tier spine write.
+    void encryptSpine(spine)
+      .then((encrypted) => {
+        window.sessionStorage.setItem(SPINE_SESSION_KEY, encrypted);
+      })
+      .catch(() => {
+        window.sessionStorage.removeItem(SPINE_SESSION_KEY);
+      });
     writeBackwardCompatThread(spine);
   } catch {
     // sessionStorage unavailable or quota exceeded
@@ -96,15 +97,7 @@ export function loadSpineFromSession(): IntelligenceSpine | null {
   try {
     const raw = window.sessionStorage.getItem(SPINE_SESSION_KEY);
     if (!raw) return null;
-    // Check for unencrypted fallback
-    const parsed = JSON.parse(raw);
-    if (parsed && parsed._plain) {
-      const { _plain: _, ...spine } = parsed;
-      if (!spine.id) return null;
-      return spine as IntelligenceSpine;
-    }
-    // Encrypted data — cannot decrypt synchronously, return null
-    // Use loadSpineFromSessionAsync() instead
+    // Encrypted data cannot be decrypted synchronously.
     return null;
   } catch {
     return null;
@@ -119,14 +112,6 @@ export async function loadSpineFromSessionAsync(): Promise<IntelligenceSpine | n
   try {
     const raw = window.sessionStorage.getItem(SPINE_SESSION_KEY);
     if (!raw) return null;
-    // Check for unencrypted fallback
-    try {
-      const parsed = JSON.parse(raw);
-      if (parsed && parsed._plain) {
-        const { _plain: _, ...spine } = parsed;
-        return (spine as IntelligenceSpine).id ? spine as IntelligenceSpine : null;
-      }
-    } catch { /* not plain JSON — try decrypt */ }
     return await decryptSpine(raw);
   } catch {
     return null;
@@ -197,8 +182,8 @@ export async function persistSpineToJourney(
     diagnosticJourney: {
       upsert: (args: {
         where: { journeyKey: string };
-        create: Record<string, unknown>;
-        update: Record<string, unknown>;
+        create: unknown;
+        update: unknown;
       }) => Promise<unknown>;
     };
   },

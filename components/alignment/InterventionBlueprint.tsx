@@ -39,7 +39,7 @@ export default function InterventionBlueprint({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
         <div className="space-y-4 border-l border-[#8A6A2F]/20 pl-6">
           <h4 className="font-mono text-[10px] uppercase tracking-widest text-[#8A6A2F]">
-            The Current Signal
+            The Current Condition
           </h4>
           <p className="font-sans text-xs leading-relaxed text-[#5C4E36]">
             With a Dissonance Area of <span className="font-bold text-[#2C2416]">{dissonanceArea}</span>, the organization is currently navigating high-velocity change. While resilient, there is measurable "drag" within the <span className="italic capitalize">{primaryDomain}</span> domain.
