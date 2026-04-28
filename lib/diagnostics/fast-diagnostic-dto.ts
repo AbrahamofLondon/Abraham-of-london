@@ -51,4 +51,39 @@ export type FastDiagnosticResult = {
   arbiterMessage: string | null;
   /** Encrypted state token for session continuity */
   stateToken: string;
+
+  // ── ELEVATION LAYER (v1) ──────────────────────────────────────────────
+
+  /** Cost of inaction — qualitative exposure + horizon projections */
+  costOfInaction?: {
+    exposureBand: "low" | "moderate" | "high" | "critical" | "undisclosed";
+    horizon30: string;
+    horizon60: string;
+    horizon90: string;
+    executiveWarning: string;
+  };
+
+  /** Why execution of the directive will stall */
+  executionFailure?: {
+    likelyFailureMode: string;
+    whyExecutionWillStall: string;
+    requiredCorrection: string;
+  };
+
+  /** Decision authority interpretive index */
+  authorityIndex?: {
+    band: "strong" | "strained" | "weak" | "critical";
+    label: string;
+    boardMeaning: string;
+    nextGovernanceMove: string;
+  };
+
+  /** Cross-session decision memory trend (when history exists) */
+  memoryTrend?: {
+    totalDecisions: number;
+    dominantState: string;
+    repeatedConditions: string[];
+    escalationTrend: "stable" | "rising" | "falling" | "insufficient_data";
+    executiveSummary: string;
+  };
 };

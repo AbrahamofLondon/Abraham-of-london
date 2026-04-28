@@ -3183,3 +3183,31 @@ model RateLimitBucket {
   @@map("rate_limit_buckets")
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DECISION MEMORY — public-safe summaries only, no internal scoring data
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DecisionMemory {
+  id              String   @id @default(cuid())
+  userId          String?
+  organisationId  String?
+  sessionId       String?
+  source          String
+  state           String
+  headline        String
+  summary         String
+  directive       String
+  recommendations Json
+  publicSignals   Json?
+  escalationLabel String?
+  escalationLevel String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organisationId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("decision_memories")
+}
+

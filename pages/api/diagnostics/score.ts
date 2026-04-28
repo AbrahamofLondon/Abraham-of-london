@@ -19,6 +19,10 @@ import { createSpine } from "@/lib/decision/intelligence-spine";
 import { persistSpineToJourney } from "@/lib/decision/spine-persistence";
 import { prisma } from "@/lib/prisma";
 import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
+import { computeCostOfInaction } from "@/lib/server/decision/cost-of-inaction.server";
+import { assessExecutionFailure } from "@/lib/server/decision/execution-failure.server";
+import { computeAuthorityIndex } from "@/lib/server/decision/authority-index.server";
+import { createDecisionMemory, listDecisionMemoryByUser, summariseDecisionMemoryTrend } from "@/lib/server/decision-memory/memory-service.server";
 
 const requestSchema = z.object({
   answers: z.record(z.string()),
@@ -141,6 +145,63 @@ export default async function handler(
       arbiterMessage: synthesisResult.arbiterMismatchMessage ?? null,
       stateToken: spine.id,
     };
+
+    // 9. ELEVATION LAYER — public-safe consequence outputs
+    const stateMap: Record<string, "ORDERED" | "DRIFTING" | "MISALIGNED" | "DISORDERED"> = {
+      authority: "MISALIGNED",
+      definition: "DRIFTING",
+      execution: "DRIFTING",
+      instability: "DISORDERED",
+    };
+    const publicState = stateMap[condition] ?? "DRIFTING";
+    const publicConditions = synth ? [condition, synth.verdict.slice(0, 50)] : [condition];
+
+    result.costOfInaction = computeCostOfInaction({
+      state: publicState,
+      estimatedExposureGBP: caseObj.costOfDelay ? parseFloat(caseObj.costOfDelay.replace(/[^0-9.]/g, "")) || null : null,
+      decisionWindow: caseObj.costOfDelay ?? null,
+    });
+
+    result.executionFailure = assessExecutionFailure({
+      state: publicState,
+      publicConditions,
+      directive: synth?.concreteMove ?? "No directive produced",
+    });
+
+    // Authority index + memory trend (best-effort, don't block response)
+    try {
+      const priorRecords = spine.email
+        ? await listDecisionMemoryByUser(spine.email)
+        : [];
+      const trend = priorRecords.length > 0
+        ? summariseDecisionMemoryTrend(priorRecords)
+        : undefined;
+
+      result.authorityIndex = computeAuthorityIndex({
+        state: publicState,
+        escalationRequired: publicState === "DISORDERED" || publicState === "MISALIGNED",
+        repeatedConditions: trend?.repeatedConditions,
+        escalationTrend: trend?.escalationTrend,
+      });
+
+      if (trend) result.memoryTrend = trend;
+
+      // Persist this decision to memory
+      await createDecisionMemory({
+        userId: spine.email ?? spine.userId ?? undefined,
+        sessionId: spine.id,
+        source: "fast_diagnostic",
+        state: publicState,
+        headline: synth?.verdict?.slice(0, 120) ?? `${condition} condition detected`,
+        summary: synth?.primaryContradiction?.slice(0, 250) ?? "Insufficient input for contradiction analysis",
+        directive: synth?.concreteMove?.slice(0, 250) ?? "Complete the diagnostic for a specific directive",
+        recommendations: synth ? [synth.concreteMove] : [],
+        escalationLabel: result.costOfInaction?.exposureBand === "critical" ? "Immediate intervention" : undefined,
+        escalationLevel: result.costOfInaction?.exposureBand ?? undefined,
+      });
+    } catch {
+      // Non-fatal: elevation enrichment failed, core result is still valid
+    }
 
     return res.status(200).json(result);
   } catch (error) {
