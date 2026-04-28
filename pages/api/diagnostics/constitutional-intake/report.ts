@@ -2,24 +2,26 @@
    FILE: pages/api/diagnostics/constitutional-intake/report.ts
    PURPOSE:
    - Accept constitutional intake answers
-   - Derive micro-report + constitutional decision + downstream bridge
-   - Persist everything in ConstitutionalIntakeReport
+   - Run the fragmented constitutional engine
+   - Persist internal output while returning a minimized client payload
 ============================================================================ */
 
 import type { NextApiRequest, NextApiResponse } from "next";
+import { z } from "zod";
+
 import { prisma } from "@/lib/prisma";
-import {
-  deriveConstitutionalDiagnosticBundle,
-  type DiagnosticAnswers,
-} from "@/lib/constitution/constitutional-diagnostic-derivation";
-import { buildConstitutionalBridgeBundle } from "@/lib/diagnostics/constitutional-bridge";
+import { type DiagnosticAnswers } from "@/lib/diagnostics/constitutional-diagnostic-derivation";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
+import { runConstitutionalOrchestration } from "@/lib/engine/orchestrator";
+import { assessReplicationRisk } from "@/lib/security/replication-detection";
+import { createEncryptedStateToken } from "@/lib/security/secure-client-state";
+import { toPublicResult, type PublicConstitutionalResult } from "@/lib/diagnostics/public-constitutional-result";
 
 type ApiSuccess = {
   ok: true;
   reportId: string;
-  bundle: ReturnType<typeof deriveConstitutionalDiagnosticBundle>;
-  bridge: ReturnType<typeof buildConstitutionalBridgeBundle>;
+  stateToken: string;
+  result: PublicConstitutionalResult;
 };
 
 type ApiFailure = {
@@ -28,14 +30,32 @@ type ApiFailure = {
   details?: unknown;
 };
 
+const requestSchema = z
+  .object({
+    source: z.string().trim().min(1).max(120).optional(),
+    sessionKey: z.string().trim().min(1).max(160).optional(),
+    respondentKey: z.string().trim().min(1).max(160).optional(),
+    operatorKey: z.string().trim().min(1).max(160).optional(),
+    email: z.string().trim().email().max(320).optional(),
+    organisation: z.string().trim().max(240).optional(),
+    campaignId: z.string().trim().max(160).optional(),
+    answers: z.record(z.any()),
+    telemetry: z
+      .object({
+        startedAt: z.string().datetime().optional(),
+        submittedAt: z.string().datetime().optional(),
+        clientSessionId: z.string().trim().max(160).optional(),
+        questionTimingsMs: z.record(z.number().int().min(0).max(300000)).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
-}
-
-function asString(value: unknown, fallback = ""): string {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
 function isLikertValue(value: unknown): value is 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 {
@@ -86,9 +106,18 @@ export default async function handler(
   }
 
   try {
-    const body = asRecord(req.body);
+    const parsed = requestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        ok: false,
+        error: "INVALID_REQUEST",
+        details: parsed.error.flatten(),
+      });
+    }
+
+    const body = parsed.data;
     const answers = parseAnswers(body.answers);
-    const campaignId = asString(body.campaignId) || null;
+    const campaignId = body.campaignId ?? null;
 
     if (Object.keys(answers).length < 4) {
       return res.status(400).json({
@@ -98,43 +127,78 @@ export default async function handler(
       });
     }
 
+    const clientIp = getClientIp(req) || null;
+    const userAgent =
+      typeof req.headers["user-agent"] === "string" ? req.headers["user-agent"] : null;
+
     const operatorKey =
-      asString(body.operatorKey) ||
-      asString(body.respondentKey) ||
-      asString(body.sessionKey) ||
+      body.operatorKey ||
+      body.respondentKey ||
+      body.sessionKey ||
       "constitutional_diagnostic_public";
 
-    const bundle = deriveConstitutionalDiagnosticBundle(answers, {
+    const replication = assessReplicationRisk({
+      ip: clientIp,
+      sessionKey: body.sessionKey ?? null,
       operatorKey,
-      operatorOverrideRequested: false,
+      userAgent,
+      answeredCount: Object.keys(answers).length,
     });
 
-    const bridge = buildConstitutionalBridgeBundle(bundle);
+    if (replication.throttleSuggested) {
+      return res.status(429).json({
+        ok: false,
+        error: "REQUEST_THROTTLED",
+      });
+    }
+
+    const result = runConstitutionalOrchestration({
+      answers,
+      context: {
+        sessionContext: [
+          body.sessionKey,
+          operatorKey,
+          clientIp,
+          userAgent,
+        ]
+          .filter(Boolean)
+          .join(":"),
+        operatorKey,
+        source: body.source ?? "constitutional_diagnostic_public",
+        ipAddress: clientIp,
+        userAgent,
+        responseDetail: replication.responseDetail,
+      },
+      telemetry: {
+        ...body.telemetry,
+        submittedAt: new Date().toISOString(),
+      },
+    });
 
     const created = await prisma.constitutionalIntakeReport.create({
       data: {
-        source: asString(body.source, "constitutional_diagnostic_public"),
-        sessionKey: asString(body.sessionKey) || null,
-        respondentKey: asString(body.respondentKey) || null,
-        email: asString(body.email).toLowerCase() || null,
-        organisation: asString(body.organisation) || null,
-        ipAddress: getClientIp(req) || null,
-        userAgent: asString(req.headers["user-agent"]) || null,
+        source: body.source ?? "constitutional_diagnostic_public",
+        sessionKey: body.sessionKey ?? null,
+        respondentKey: body.respondentKey ?? null,
+        email: body.email?.toLowerCase() ?? null,
+        organisation: body.organisation ?? null,
+        ipAddress: clientIp,
+        userAgent,
 
         answersJson: JSON.stringify(answers),
-        reportJson: JSON.stringify(bundle.report),
-        constitutionalInputJson: JSON.stringify(bundle.constitutionalInput),
-        decisionJson: JSON.stringify(bundle.decision),
-        routeSummaryJson: JSON.stringify(bundle.routeSummary),
-        bridgeJson: JSON.stringify(bridge),
+        reportJson: JSON.stringify(result.bundle.report),
+        constitutionalInputJson: JSON.stringify(result.bundle.constitutionalInput),
+        decisionJson: JSON.stringify(result.internal.decision),
+        routeSummaryJson: JSON.stringify(result.bundle.routeSummary),
+        bridgeJson: JSON.stringify(result.bridge),
 
-        route: bundle.decision.route,
-        confidence: bundle.decision.confidence,
-        posture: bundle.report.posture,
-        readinessTier: bundle.report.readinessTier,
-        authorityType: bundle.report.authorityType,
-        seriousnessScore: bundle.report.seriousnessScore,
-        completionPercent: bundle.report.completionPercent,
+        route: result.bundle.decision.route,
+        confidence: result.bundle.decision.confidence,
+        posture: result.bundle.report.posture,
+        readinessTier: result.bundle.report.readinessTier,
+        authorityType: result.bundle.report.authorityType,
+        seriousnessScore: result.bundle.report.seriousnessScore,
+        completionPercent: result.bundle.report.completionPercent,
         ...(campaignId
           ? {
               campaign: {
@@ -151,39 +215,42 @@ export default async function handler(
     });
 
     await persistDiagnosticStage({
-      email: asString(body.email).toLowerCase() || null,
+      email: body.email?.toLowerCase() ?? null,
       campaignId,
-      organisation: asString(body.organisation) || null,
+      organisation: body.organisation ?? null,
       stage: "constitutional",
       payload: {
-        report: bundle.report,
-        decision: bundle.decision,
-        bridge,
+        report: result.bundle.report,
+        decision: result.bundle.decision,
+        bridge: result.bridge,
       },
-      tensions: Array.isArray((bundle.decision as any)?.disqualifiersTriggered)
-        ? (bundle.decision as any).disqualifiersTriggered
-        : [],
-      routeDecision: bundle.decision,
+      tensions: result.bundle.decision.disqualifiersTriggered,
+      routeDecision: result.bundle.decision,
       snapshot: {
         timestamp: new Date().toISOString(),
         stage: "constitutional",
         coreMetrics: {
-          confidence: Number((bundle.decision as any)?.confidence || 0),
-          seriousnessScore: Number((bundle.report as any)?.seriousnessScore || 0),
+          confidence: Number(result.bundle.decision.confidence || 0),
+          seriousnessScore: Number(result.bundle.report.seriousnessScore || 0),
         },
-        tensions: Array.isArray((bundle.decision as any)?.disqualifiersTriggered)
-          ? (bundle.decision as any).disqualifiersTriggered
-          : [],
-        escalationLevel: (bundle.decision as any)?.route === "STRATEGY" ? 3 : 1,
-        directive: (bundle.decision as any)?.route || null,
+        tensions: result.bundle.decision.disqualifiersTriggered,
+        escalationLevel: result.bundle.decision.route === "STRATEGY" ? 3 : 1,
+        directive: result.bundle.decision.route || null,
       },
+    });
+
+    const stateToken = createEncryptedStateToken({
+      kind: "constitutional_handoff",
+      reportId: created.id,
+      issuedAt: new Date().toISOString(),
+      version: 1,
     });
 
     return res.status(200).json({
       ok: true,
       reportId: created.id,
-      bundle,
-      bridge,
+      stateToken,
+      result: toPublicResult(result.bundle.report),
     });
   } catch (error) {
     console.error("[CONSTITUTIONAL_INTAKE_REPORT_API_ERROR]", error);
