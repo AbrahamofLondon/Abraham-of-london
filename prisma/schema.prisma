@@ -3211,3 +3211,73 @@ model DecisionMemory {
   @@map("decision_memories")
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// IP ABUSE WATCHDOG — behavioural abuse detection and evidence persistence
+// ─────────────────────────────────────────────────────────────────────────────
+
+model AbuseEvent {
+  id            String   @id @default(cuid())
+  identityKey   String
+  ipAddress     String?
+  sessionId     String?
+  route         String
+  ruleTriggered String
+  severity      Int      @default(0)
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  @@index([identityKey])
+  @@index([ipAddress])
+  @@index([createdAt])
+  @@index([ruleTriggered])
+  @@map("abuse_events")
+}
+
+model AbuseFingerprint {
+  id              String   @id @default(cuid())
+  identityKey     String   @unique
+  ipAddresses     Json
+  sessionIds      Json
+  requestCount    Int      @default(0)
+  distinctInputs  Int      @default(0)
+  variationScore  Float    @default(0)
+  lastSeenAt      DateTime
+  firstSeenAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([identityKey])
+  @@index([variationScore])
+  @@map("abuse_fingerprints")
+}
+
+model AbuseDecision {
+  id            String   @id @default(cuid())
+  identityKey   String
+  level         Int      @default(0)
+  action        String
+  reason        String
+  expiresAt     DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([identityKey])
+  @@index([level])
+  @@index([expiresAt])
+  @@map("abuse_decisions")
+}
+
+model BlockedIdentity {
+  id            String   @id @default(cuid())
+  identityKey   String   @unique
+  ipAddress     String?
+  reason        String
+  permanent     Boolean  @default(false)
+  evidenceCount Int      @default(0)
+  blockedAt     DateTime @default(now())
+  expiresAt     DateTime?
+
+  @@index([identityKey])
+  @@index([expiresAt])
+  @@map("blocked_identities")
+}
+

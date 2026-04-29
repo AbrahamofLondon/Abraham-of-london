@@ -23,11 +23,17 @@ import { computeCostOfInaction } from "@/lib/server/decision/cost-of-inaction.se
 import { assessExecutionFailure } from "@/lib/server/decision/execution-failure.server";
 import { computeAuthorityIndex } from "@/lib/server/decision/authority-index.server";
 import { createDecisionMemory, listDecisionMemoryByUser, summariseDecisionMemoryTrend } from "@/lib/server/decision-memory/memory-service.server";
+import { evaluateRequest, degradeResult, quickHash } from "@/lib/server/security/ip-abuse-watchdog.server";
 
 const requestSchema = z.object({
   answers: z.record(z.string()),
   committed: z.boolean(),
 }).strict();
+
+function getIp(req: NextApiRequest): string {
+  const xf = req.headers["x-forwarded-for"];
+  return (Array.isArray(xf) ? xf[0] : xf)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "0.0.0.0";
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -47,6 +53,38 @@ export default async function handler(
 
   if (!answers.decision || answers.decision.trim().length < 10) {
     return res.status(400).json({ ok: false, error: "Decision text too short" });
+  }
+
+  // ── IP ABUSE WATCHDOG ──────────────────────────────────────────────────
+  let abuseVerdict;
+  try {
+    abuseVerdict = await evaluateRequest({
+      ipAddress: getIp(req),
+      sessionId: req.headers["x-session-id"] as string | undefined,
+      route: "/api/diagnostics/score",
+      inputHash: quickHash(answers.decision ?? ""),
+      answerSetHash: quickHash(Object.values(answers).join("|")),
+      submissionTimeMs: typeof req.body._elapsed === "number" ? req.body._elapsed : undefined,
+      userAgent: req.headers["user-agent"] ?? undefined,
+    });
+  } catch {
+    // Watchdog failure — allow request (rate limiting is a separate layer)
+    abuseVerdict = { level: 0 as const, action: "allow" as const, internalReason: "Watchdog unavailable" };
+  }
+
+  // Block
+  if (abuseVerdict.action === "block_temp" || abuseVerdict.action === "block_perm") {
+    return res.status(429).json({ ok: false, error: abuseVerdict.publicMessage ?? "Please try again later." });
+  }
+
+  // Verify (require friction — for now, just add delay)
+  if (abuseVerdict.action === "verify") {
+    await new Promise((r) => setTimeout(r, 3000));
+  }
+
+  // Slow (silent delay)
+  if (abuseVerdict.action === "slow") {
+    await new Promise((r) => setTimeout(r, 1500));
   }
 
   try {
@@ -203,7 +241,12 @@ export default async function handler(
       // Non-fatal: elevation enrichment failed, core result is still valid
     }
 
-    return res.status(200).json(result);
+    // Apply degradation if watchdog flagged this request
+    const finalResult = abuseVerdict.action === "degrade"
+      ? degradeResult(result) as FastDiagnosticResult
+      : result;
+
+    return res.status(200).json(finalResult);
   } catch (error) {
     console.error("[FAST_DIAGNOSTIC_SCORE_ERROR]", error);
     return res.status(500).json({ ok: false, error: "Scoring failed" });
