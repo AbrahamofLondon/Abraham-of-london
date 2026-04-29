@@ -1,5 +1,5 @@
 /* pages/diagnostics/purpose-alignment.tsx
-   Purpose Alignment Assessment — the personal diagnostic entry point.
+   Purpose Alignment Analysis — the personal diagnostic entry point.
    Positioned as the free public instrument that proves the platform's
    intelligence before the institutional ladder begins. */
 
@@ -29,8 +29,8 @@ export default function PurposeAlignmentPage() {
 
   return (
     <Layout
-      title="Purpose Alignment Assessment | Abraham of London"
-      description="A free personal diagnostic that reads your alignment across six structural domains. 8 minutes. No account required. Specific to your exact score pattern."
+      title="Purpose Alignment Analysis | Abraham of London"
+      description="A free personal analysis that reads your alignment across six structural domains. 8 minutes. No account required. Specific to your exact condition."
       canonicalUrl="/diagnostics/purpose-alignment"
       fullWidth
       headerTransparent
@@ -130,7 +130,7 @@ export default function PurposeAlignmentPage() {
           <PurposeAlignmentAssessment />
         </section>
 
-        {/* Post-assessment context */}
+        {/* Post-analysis context */}
         <section className="border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="mx-auto max-w-6xl px-6 lg:px-12 py-16">
             <div className="max-w-2xl">

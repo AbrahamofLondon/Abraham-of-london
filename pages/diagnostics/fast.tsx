@@ -121,9 +121,10 @@ const FastDiagnosticPage: NextPage = () => {
     setCurrentIndex((prev) => prev - 1);
   }
 
-  async function submitFastDiagnostic() {
+  async function submitFastDiagnostic(commitmentOverride?: boolean) {
     setStage("loading");
     setError("");
+    const commitmentValue = commitmentOverride ?? committed;
 
     try {
       const response = await fetch("/api/diagnostics/score", {
@@ -131,7 +132,7 @@ const FastDiagnosticPage: NextPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           answers,
-          committed,
+          committed: commitmentValue,
           elapsedMs: Date.now() - startedAt.current,
         }),
       });
@@ -150,7 +151,7 @@ const FastDiagnosticPage: NextPage = () => {
       }
 
       track("fast_diagnostic_completed", {
-        committed,
+        committed: commitmentValue,
         elapsed_seconds: Math.round((Date.now() - startedAt.current) / 1000),
       });
 
@@ -318,7 +319,7 @@ const FastDiagnosticPage: NextPage = () => {
               <div style={{ display: "flex", justifyContent: "center", gap: "0.75rem", marginTop: "1rem", flexWrap: "wrap" }}>
                 <button
                   type="button"
-                  onClick={() => { setCommitted(true); void submitFastDiagnostic(); }}
+                  onClick={() => { setCommitted(true); void submitFastDiagnostic(true); }}
                   style={{ padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
                 >
                   Yes — Continue
