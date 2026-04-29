@@ -39,11 +39,17 @@ export type AssessmentDecisionResult = {
   /** The binary decision this result surfaces */
   decisionInFrontOfYou: string;
 
+  /** Why this condition is not isolated */
+  patternRecognition: string;
+
   /** One action. Observable. Doable in 24-72 hours. Tied to the signal. */
   minimumViableMove: string;
 
   /** What happens if nothing changes — one sentence, not dramatic */
   ifUnchanged: string;
+
+  /** How this condition should be framed by senior decision-makers */
+  boardPerspective: string;
 
   /** What this result is based on and what it cannot claim */
   validityBoundary: string;

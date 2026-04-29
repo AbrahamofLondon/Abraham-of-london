@@ -135,6 +135,32 @@ export default function EvidencePage() {
           </div>
         </section>
 
+        {/* ── 1B. PROOF STANDARD ─────────────────────────────────────────── */}
+        <section>
+          <div className="mx-auto max-w-6xl px-6 lg:px-12">
+            <div
+              className="grid gap-px md:grid-cols-4 border-y"
+              style={{ borderColor: "rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.04)" }}
+            >
+              {[
+                { title: "What is published", body: "Anonymised cases that preserve condition, decision, consequence, and observed movement." },
+                { title: "What is not published", body: "Identity, raw source records, internal routing logic, and private operating mechanics." },
+                { title: "What does not qualify", body: "Self-declared success without sufficient corroboration or review." },
+                { title: "What this proves", body: "That the system can identify a live condition, direct action, and verify whether movement occurred." },
+              ].map((item) => (
+                <div key={item.title} style={{ backgroundColor: VOID, padding: "1rem" }}>
+                  <div style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+                    {item.title}
+                  </div>
+                  <p style={{ ...serif, marginTop: "0.45rem", fontSize: "0.84rem", lineHeight: 1.5, color: "rgba(255,255,255,0.44)" }}>
+                    {item.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ── 2. DEFINITION STRIP ─────────────────────────────────────────── */}
         <section>
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
@@ -232,6 +258,9 @@ export default function EvidencePage() {
         <section>
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="py-6" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.5rem" }}>
+                Public proof is designed to be sufficient for due diligence without disclosing the private operating model.
+              </p>
               <p style={{ ...serif, fontSize: "0.88rem", color: "rgba(252,165,165,0.45)", fontStyle: "italic" }}>
                 This requires intervention, not analysis.
               </p>

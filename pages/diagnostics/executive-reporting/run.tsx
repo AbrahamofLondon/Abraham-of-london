@@ -1548,7 +1548,7 @@ function ExecutiveReportingIntake({
               Derived from your specific evidence
             </div>
             <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
-              Deterministic logic — no generic output
+              Governed analysis — no generic output
             </div>
             <div style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.85rem" }}>
               This is not advisory. This is decision enforcement.

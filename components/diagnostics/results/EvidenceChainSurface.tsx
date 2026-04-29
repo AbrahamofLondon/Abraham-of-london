@@ -1,14 +1,16 @@
 /**
  * EvidenceChainSurface — renders the canonical AssessmentDecisionResult.
  *
- * Seven blocks in order:
- * 1. Primary condition
- * 2. Why the system reached this (evidence chain)
- * 3. Decision in front of you
- * 4. Minimum viable move
- * 5. If unchanged
- * 6. Validity boundary
- * 7. What would strengthen this result
+ * Public result structure:
+ * 1. Opening condition
+ * 2. Why this is happening
+ * 3. Pattern recognition
+ * 4. Decision in front of you
+ * 5. Required move
+ * 6. Cost of inaction
+ * 7. Board-level view
+ * 8. Basis and boundary
+ * 9. What would strengthen this analysis
  *
  * No sales CTA before all seven blocks.
  * No UI computes meaning — this renders only the contract.
@@ -33,10 +35,10 @@ export default function EvidenceChainSurface({ result }: { result: AssessmentDec
   return (
     <div className="space-y-3" style={{ maxWidth: "56rem" }}>
 
-      {/* 1. PRIMARY CONDITION */}
+      {/* 1. OPENING CONDITION */}
       <div style={{ padding: "1rem 0" }}>
         <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
-          Primary condition
+          Current condition
         </span>
         <div className="flex items-center gap-2 mt-1">
           <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: strength.color }} />
@@ -47,10 +49,10 @@ export default function EvidenceChainSurface({ result }: { result: AssessmentDec
         </p>
       </div>
 
-      {/* 2. WHY THE SYSTEM REACHED THIS */}
+      {/* 2. WHY THIS IS HAPPENING */}
       <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem" }}>
         <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
-          Evidence chain
+          Why this is happening
         </span>
         <div className="mt-2 space-y-2">
           {result.evidenceChain.map((link, i) => (
@@ -84,7 +86,17 @@ export default function EvidenceChainSurface({ result }: { result: AssessmentDec
         </div>
       )}
 
-      {/* 3. DECISION IN FRONT OF YOU */}
+      {/* 3. PATTERN RECOGNITION */}
+      <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}03`, padding: "0.9rem 1rem" }}>
+        <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}68` }}>
+          Pattern recognition
+        </span>
+        <p style={{ marginTop: "0.25rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.9rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)", maxWidth: "62ch" }}>
+          {result.patternRecognition}
+        </p>
+      </div>
+
+      {/* 4. DECISION IN FRONT OF YOU */}
       <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
         <span style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70` }}>
           The decision this surfaces
@@ -94,39 +106,51 @@ export default function EvidenceChainSurface({ result }: { result: AssessmentDec
         </p>
       </div>
 
-      {/* 4. MINIMUM VIABLE MOVE */}
+      {/* 5. REQUIRED MOVE */}
       <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}03`, padding: "0.85rem" }}>
         <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
-          One move — within 72 hours
+          Required move
         </span>
         <p style={{ marginTop: "0.2rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.75, color: "rgba(255,255,255,0.75)", maxWidth: "62ch" }}>
           {result.minimumViableMove}
         </p>
       </div>
 
-      {/* 5. IF UNCHANGED */}
+      {/* 6. COST OF INACTION */}
       <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem" }}>
         <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)" }}>
-          If unchanged
+          Cost of inaction
         </span>
         <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "0.15rem", maxWidth: "62ch" }}>
           {result.ifUnchanged}
         </p>
       </div>
 
-      {/* SCALE IMPLICATION */}
-      {result.scaleImplication && (
+      {/* 7. BOARD-LEVEL VIEW */}
+      {result.boardPerspective && (
         <div style={{ border: "1px solid rgba(255,255,255,0.05)", padding: "0.65rem" }}>
           <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.40)" }}>
-            At scale
+            Board-level view
           </span>
           <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(253,186,116,0.50)", marginTop: "0.1rem", maxWidth: "62ch" }}>
+            {result.boardPerspective}
+          </p>
+        </div>
+      )}
+
+      {/* 8. SCALE IMPLICATION */}
+      {result.scaleImplication && (
+        <div style={{ border: "1px solid rgba(255,255,255,0.05)", padding: "0.65rem" }}>
+          <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(253,186,116,0.30)" }}>
+            At scale
+          </span>
+          <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(253,186,116,0.44)", marginTop: "0.1rem", maxWidth: "62ch" }}>
             {result.scaleImplication}
           </p>
         </div>
       )}
 
-      {/* 6. VALIDITY BOUNDARY */}
+      {/* 9. VALIDITY BOUNDARY */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.75rem" }}>
         <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
           Basis and boundary
@@ -136,11 +160,11 @@ export default function EvidenceChainSurface({ result }: { result: AssessmentDec
         </p>
       </div>
 
-      {/* 7. WHAT WOULD STRENGTHEN THIS */}
+      {/* 10. WHAT WOULD STRENGTHEN THIS */}
       {result.whatWouldStrengthenThis.length > 0 && (
         <div>
           <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(110,231,183,0.40)" }}>
-            To strengthen this result
+            To strengthen this analysis
           </span>
           {result.whatWouldStrengthenThis.map((s, i) => (
             <p key={i} style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", marginTop: "0.1rem", maxWidth: "62ch" }}>

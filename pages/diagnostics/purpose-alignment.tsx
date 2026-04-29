@@ -37,8 +37,8 @@ export default function PurposeAlignmentPage() {
     >
       <Head>
         <meta name="robots" content="index,follow" />
-        <meta property="og:title" content="Purpose Alignment Assessment | Abraham of London" />
-        <meta property="og:description" content="A free personal diagnostic that reads your alignment across six structural domains. Specific to your exact pattern — not a generic band label." />
+        <meta property="og:title" content="Purpose Alignment Analysis | Abraham of London" />
+        <meta property="og:description" content="A free personal analysis that reads where your direction is holding and where it is structurally drifting." />
       </Head>
 
       <div style={{ backgroundColor: VOID, minHeight: "100vh", color: "white" }}>
@@ -62,7 +62,7 @@ export default function PurposeAlignmentPage() {
                   fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
                   color: `${GOLD}BB`,
                 }}>
-                  Personal Diagnostic · Free · 8 minutes
+                  Personal Analysis · Free · 8 minutes
                 </span>
               </div>
 
@@ -82,7 +82,7 @@ export default function PurposeAlignmentPage() {
                 fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.65,
                 color: "rgba(255,255,255,0.48)", maxWidth: "52ch",
               }}>
-                This is not a personality test. It scores how aligned your decisions, environment, and behaviour actually are with what you say matters — then forces one binding action. Your result is specific to your exact pattern.
+                This is not a personality test. It reads whether your decisions, environment, and behaviour are structurally carrying what you say matters — then names the move required to restore order.
               </p>
 
               <div style={{
@@ -118,8 +118,7 @@ export default function PurposeAlignmentPage() {
                     color: "rgba(255,255,255,0.46)",
                   }}
                 >
-                  This is a parallel personal diagnostic surface. The institutional ladder still
-                  begins with the Constitutional Diagnostic.
+                  This is a personal decision surface. The institutional ladder begins with the Constitutional Diagnostic.
                 </p>
               </div>
             </div>
@@ -150,7 +149,7 @@ export default function PurposeAlignmentPage() {
                 fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72,
                 color: "rgba(255,255,255,0.45)",
               }}>
-                This assessment reads you personally. The Constitutional Diagnostic reads your organisation structurally. Together they form a continuous system — personal alignment informing institutional diagnosis.
+                This analysis reads you personally. The Constitutional Diagnostic reads your organisation structurally. Together they form one decision system: personal direction informing institutional order.
               </p>
               <Link
                 href="/diagnostics/constitutional-diagnostic"

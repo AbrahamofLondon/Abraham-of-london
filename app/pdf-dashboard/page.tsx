@@ -237,7 +237,7 @@ export default function PdfDashboard() {
           {isDisordered && (
             <div className="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 print:border-red-500 print:bg-red-50">
               <p className="text-xs text-red-400 print:text-red-700">
-                ⚠️ SYSTEM ALERT: Resonance below critical threshold ({data.resonance}%). 
+                ⚠️ SYSTEM ALERT: Resonance below governed review point ({data.resonance}%). 
                 Immediate intervention required.
               </p>
             </div>

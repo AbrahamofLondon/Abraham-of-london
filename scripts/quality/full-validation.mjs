@@ -10,10 +10,10 @@ const PASS = "\x1b[32mPASS\x1b[0m";
 const FAIL = "\x1b[31mFAIL\x1b[0m";
 const results = [];
 
-function run(label, cmd, { allowFail = false } = {}) {
+function run(label, cmd, { allowFail = false, timeout = 300_000 } = {}) {
   process.stdout.write(`  ${label}... `);
   try {
-    execSync(cmd, { stdio: "pipe", timeout: 300_000 });
+    execSync(cmd, { stdio: "pipe", timeout });
     console.log(PASS);
     results.push({ label, status: "PASS" });
     return true;
@@ -37,10 +37,11 @@ run("Prisma validate", "npx prisma validate");
 run("Prisma generate", "npx prisma generate");
 run("TypeScript", "npx tsc --noEmit --pretty false");
 run("PDF audit", "npm run pdf:audit");
+run("PDF enforce", "npm run pdf:enforce");
 run("MDX integrity", "node scripts/mdx-integrity-check.mjs");
 run("MDX gate", "node scripts/mdx-illegal-jsx-gate.mjs");
 run("Unit tests", "npx vitest run --reporter=verbose");
-run("Build", "npx next build");
+run("Build", "pnpm build", { timeout: 900_000 });
 
 console.log("\n========================================");
 console.log("  RESULTS");

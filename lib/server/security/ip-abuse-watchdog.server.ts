@@ -247,6 +247,17 @@ export function degradeResult<T extends Record<string, unknown>>(result: T): T {
   delete degraded.authorityIndex;
   delete degraded.memoryTrend;
 
+  if (degraded.patternEvidence && typeof degraded.patternEvidence === "object") {
+    degraded.patternEvidence = {
+      recognitionLine: "This condition aligns with a recurring decision failure profile.",
+      observations: [
+        "Observed similar cases often delayed action longer than they expected.",
+        "Delay typically made recovery harder in the next operating cycle.",
+        "A later intervention was often required to restore movement.",
+      ],
+    } as unknown;
+  }
+
   return degraded as T;
 }
 

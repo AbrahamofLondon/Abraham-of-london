@@ -54,7 +54,7 @@ const TrustPage: NextPage = () => (
               <li>It will price the cost of delay using your own stated inputs</li>
               <li>It will prescribe one concrete action — not a menu of options</li>
               <li>It will track whether you act and escalate if you do not</li>
-              <li>Every output is deterministic — same input produces same output</li>
+              <li>Every output is governed — the result is held to a consistent review standard</li>
             </ul>
           </section>
 
@@ -64,7 +64,7 @@ const TrustPage: NextPage = () => (
             <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
               <li>Comfortable language — the system names problems directly</li>
               <li>Multiple options — one move, not a decision menu</li>
-              <li>AI-generated advice — the core is deterministic, not generative</li>
+              <li>Generic assistant output — the result you receive has governed review before release</li>
               <li>Guaranteed outcomes — the system identifies and enforces, it does not predict</li>
               <li>Privacy from your own data — the system uses your inputs against your framing</li>
             </ul>
@@ -74,11 +74,21 @@ const TrustPage: NextPage = () => (
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
             <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>How Trust Is Built Here</span>
             <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
-              <li>Every decision is deterministic — auditable, traceable, reproducible</li>
+              <li>Every decision is reviewable — auditable, traceable, and accountable</li>
               <li>No fabricated data — all outputs derived from your stated inputs</li>
               <li>No hidden AI — output is governed by proprietary validation before it reaches you</li>
               <li>Founder-led — built from 15+ years of real-world execution experience</li>
               <li>Academically grounded — draws from recognised intellectual traditions</li>
+            </ul>
+          </section>
+
+          <section style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
+            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Proof Boundary</span>
+            <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
+              <li>Public proof is designed to be sufficient for scrutiny, not sufficient to reconstruct the system.</li>
+              <li>You will see condition, consequence, and verified movement where appropriate.</li>
+              <li>You will not see private source records, client identity, or proprietary operating mechanics.</li>
+              <li>Where deeper substantiation is required, it moves through the appropriate confidential route.</li>
             </ul>
           </section>
         </div>

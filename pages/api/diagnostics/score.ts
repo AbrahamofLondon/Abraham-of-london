@@ -22,6 +22,7 @@ import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto
 import { computeCostOfInaction } from "@/lib/server/decision/cost-of-inaction.server";
 import { assessExecutionFailure } from "@/lib/server/decision/execution-failure.server";
 import { computeAuthorityIndex } from "@/lib/server/decision/authority-index.server";
+import { applyPublicTone, buildPublicPatternEvidence } from "@/lib/server/decision/public-pattern-proof.server";
 import { createDecisionMemory, listDecisionMemoryByUser, summariseDecisionMemoryTrend } from "@/lib/server/decision-memory/memory-service.server";
 import { quickHash } from "@/lib/server/security/ip-abuse-watchdog.server";
 import { runShield, degradeResult } from "@/lib/server/security/adaptive-response.server";
@@ -29,6 +30,7 @@ import { runShield, degradeResult } from "@/lib/server/security/adaptive-respons
 const requestSchema = z.object({
   answers: z.record(z.string()),
   committed: z.boolean(),
+  elapsedMs: z.number().positive().max(30 * 60 * 1000).optional(),
 }).strict();
 
 function getIp(req: NextApiRequest): string {
@@ -50,7 +52,7 @@ export default async function handler(
     return res.status(400).json({ ok: false, error: "INVALID_REQUEST" });
   }
 
-  const { answers, committed } = parsed.data;
+  const { answers, committed, elapsedMs } = parsed.data;
 
   if (!answers.decision || answers.decision.trim().length < 10) {
     return res.status(400).json({ ok: false, error: "Decision text too short" });
@@ -70,7 +72,7 @@ export default async function handler(
       query: (req.query ?? {}) as Record<string, unknown>,
       inputHash: quickHash(answers.decision ?? ""),
       answerSetHash: quickHash(Object.values(answers).join("|")),
-      elapsedMs: typeof req.body._elapsed === "number" ? req.body._elapsed : undefined,
+      elapsedMs,
     });
   } catch {
     shieldVerdict = { allowed: true, action: "allow" as const, delayMs: 0, degradeResponse: false, internalSummary: "Shield unavailable" };
@@ -86,23 +88,30 @@ export default async function handler(
 
   try {
     // 1. Build case object
+    const priorAttempt = answers.urgency ? `Urgency: ${answers.urgency}` : undefined;
+    const costOfDelay = answers.consequence
+      ? `${answers.consequence}${answers.urgency ? ` (Urgency: ${answers.urgency})` : ""}`
+      : undefined;
+    const forcedAction = committed
+      ? "Prepared to act on the identified root constraint within 48 hours."
+      : undefined;
     const caseObj = createCaseObject({
       id: `fast_${Date.now()}`,
       decision: answers.decision ?? "",
-      priorAttempt: answers.priorAttempt,
-      costOfDelay: answers.costOfDelay,
+      priorAttempt,
+      costOfDelay,
       claimedOwner: answers.claimedOwner,
       blocker: answers.blocker,
-      forcedAction: answers.forcedAction,
+      forcedAction,
     });
 
     // 2. Check for contradiction (pre-synthesis)
-    const contradiction = (answers.blocker && answers.forcedAction)
+    const contradiction = (answers.blocker && forcedAction)
       ? inferContradiction(createCaseObject({
           id: "pre_check",
           decision: answers.decision ?? "",
           blocker: answers.blocker,
-          forcedAction: answers.forcedAction,
+          forcedAction,
         }))
       : null;
 
@@ -203,6 +212,11 @@ export default async function handler(
       directive: synth?.concreteMove ?? "No directive produced",
     });
 
+    result.patternEvidence = buildPublicPatternEvidence(
+      condition,
+      result.costOfInaction?.exposureBand,
+    );
+
     // Authority index + memory trend (best-effort, don't block response)
     try {
       const priorRecords = spine.email
@@ -239,9 +253,19 @@ export default async function handler(
     }
 
     // Apply degradation if shield flagged this request
+    const confidentButMisread =
+      typeof answers.claimedOwner === "string" &&
+      /clearly defined owner|final|i own|i decide|i am responsible/i.test(answers.claimedOwner) &&
+      (condition === "authority" || condition === "definition");
+
+    const tonedResult = applyPublicTone(result, {
+      hesitationMs: elapsedMs,
+      confidentButMisread,
+    });
+
     const finalResult = shieldVerdict.degradeResponse
-      ? degradeResult(result) as FastDiagnosticResult
-      : result;
+      ? degradeResult(tonedResult) as FastDiagnosticResult
+      : tonedResult;
 
     return res.status(200).json(finalResult);
   } catch (error) {

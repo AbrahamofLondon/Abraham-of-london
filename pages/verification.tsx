@@ -152,6 +152,19 @@ const VerificationPage: NextPage = () => {
               </p>
             </section>
 
+            <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+                Evidence Standard
+              </span>
+
+              <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.44)", lineHeight: 1.75 }}>
+                <li>Public proof is anonymised, human-reviewed, and published only when the underlying outcome is strong enough to defend.</li>
+                <li>Self-reported claims alone are not treated as public proof.</li>
+                <li>Public case material preserves condition, decision, consequence, and verified movement while removing identity and source records.</li>
+                <li>Deeper source documentation remains private and can be handled only inside the appropriate commercial or confidential route.</li>
+              </ul>
+            </section>
+
             <section className="grid gap-4 sm:grid-cols-2">
               <div style={{ border: `1px solid ${GOLD}14`, padding: "1rem" }}>
                 <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}55` }}>
@@ -162,7 +175,7 @@ const VerificationPage: NextPage = () => {
                   <li>Decision enforcement infrastructure.</li>
                   <li>Governance and authority frameworks.</li>
                   <li>Execution systems and diagnostic instruments.</li>
-                  <li>Deterministic analysis with auditable outputs.</li>
+                  <li>Governed analysis with auditable outputs.</li>
                 </ul>
               </div>
 

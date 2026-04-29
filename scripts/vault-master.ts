@@ -45,12 +45,17 @@ import { registerPdfFonts } from "../lib/pdf/register-fonts";
 
 const prisma = new PrismaClient();
 
-function requireVaultDatabaseUrl(): string {
+function getVaultDatabaseUrl(): string | null {
   const value = process.env.DATABASE_URL?.trim();
   if (!value) {
-    throw new Error(
-      '[VAULT_MASTER] DATABASE_URL missing. Set it in .env.local before running vault sync.'
-    );
+    return null;
+  }
+
+  if (
+    !value.startsWith("postgresql://") &&
+    !value.startsWith("postgres://")
+  ) {
+    return null;
   }
 
   return value;
@@ -106,7 +111,7 @@ async function registerFontsForCli(): Promise<void> {
 
 async function vaultMaster(): Promise<void> {
   const startTime = Date.now();
-  requireVaultDatabaseUrl();
+  const vaultDatabaseUrl = getVaultDatabaseUrl();
   const stats: VaultStats = {
     success: 0,
     cached: 0,
@@ -156,53 +161,59 @@ async function vaultMaster(): Promise<void> {
     const activeKeys = filteredBriefs.map((b) => b.slugSafe);
 
     // 📡 2. DATABASE SYNCHRONIZATION
-    console.log(
-      `📡 [VAULT_MASTER]: Syncing ${filteredBriefs.length} metadata records...`
-    );
+    if (vaultDatabaseUrl) {
+      console.log(
+        `📡 [VAULT_MASTER]: Syncing ${filteredBriefs.length} metadata records...`
+      );
 
-    for (const brief of filteredBriefs) {
-      try {
-        const version = String(brief.version || "1.0.0");
+      for (const brief of filteredBriefs) {
+        try {
+          const version = String(brief.version || "1.0.0");
 
-        await prisma.contentMetadata.upsert({
-          where: { slug: brief.slugSafe },
-          update: {
-            title: brief.titleSafe,
-            contentType: mapToSchemaType(brief.category),
-            classification:
-              brief.accessTierSafe === "public"
-                ? AccessTier.PUBLIC
-                : AccessTier.RESTRICTED,
-            summary: brief.excerptSafe || "",
-            metadata: JSON.stringify({
-              status: brief.statusSafe,
+          await prisma.contentMetadata.upsert({
+            where: { slug: brief.slugSafe },
+            update: {
+              title: brief.titleSafe,
+              contentType: mapToSchemaType(brief.category),
+              classification:
+                brief.accessTierSafe === "public"
+                  ? AccessTier.PUBLIC
+                  : AccessTier.RESTRICTED,
+              summary: brief.excerptSafe || "",
+              metadata: JSON.stringify({
+                status: brief.statusSafe,
+                version,
+              }),
+              updatedAt: new Date(),
+            },
+            create: {
+              slug: brief.slugSafe,
+              title: brief.titleSafe,
+              contentType: mapToSchemaType(brief.category),
+              classification:
+                brief.accessTierSafe === "public"
+                  ? AccessTier.PUBLIC
+                  : AccessTier.RESTRICTED,
+              summary: brief.excerptSafe || "",
+              metadata: JSON.stringify({
+                status: brief.statusSafe,
+              }),
               version,
-            }),
-            updatedAt: new Date(),
-          },
-          create: {
-            slug: brief.slugSafe,
-            title: brief.titleSafe,
-            contentType: mapToSchemaType(brief.category),
-            classification:
-              brief.accessTierSafe === "public"
-                ? AccessTier.PUBLIC
-                : AccessTier.RESTRICTED,
-            summary: brief.excerptSafe || "",
-            metadata: JSON.stringify({
-              status: brief.statusSafe,
-            }),
-            version,
-          },
-        });
+            },
+          });
 
-        stats.dbSynced++;
-      } catch (dbErr: any) {
-        console.error(
-          `❌ DB_SYNC_ERROR [${brief.slugSafe}]: ${dbErr?.message || String(dbErr)}`
-        );
-        stats.failed++;
+          stats.dbSynced++;
+        } catch (dbErr: any) {
+          console.error(
+            `❌ DB_SYNC_ERROR [${brief.slugSafe}]: ${dbErr?.message || String(dbErr)}`
+          );
+          stats.failed++;
+        }
       }
+    } else {
+      console.log(
+        "📡 [VAULT_MASTER]: Skipping metadata DB sync because DATABASE_URL is not a PostgreSQL connection string."
+      );
     }
 
     // 🖨️ 3. PDF GENERATION (Selective + Robust)
@@ -262,7 +273,7 @@ async function vaultMaster(): Promise<void> {
     );
     process.exit(1);
   } finally {
-    await prisma.$disconnect();
+    await prisma.$disconnect().catch(() => undefined);
   }
 }
 

@@ -113,7 +113,7 @@ const OperatorPackRun: NextPage = () => {
           </div>
 
           <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.10)", textAlign: "center" }}>
-            Deterministic · Operator Decision Dossier · v1.0
+            Governed · Operator Decision Dossier · v1.0
           </p>
         </div>
       )}

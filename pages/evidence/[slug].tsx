@@ -434,6 +434,17 @@ export default function EvidenceDetailPage({ asset }: PageProps) {
             </div>
           </div>
 
+          <div className="pb-5" style={{ maxWidth: "56rem" }}>
+            <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem 1rem" }}>
+              <div style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.35rem" }}>
+                Public Proof Boundary
+              </div>
+              <p style={{ ...serif, fontSize: "0.86rem", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
+                This dossier is intended to prove the condition, the decision frame, the consequence of delay, and the movement that followed. It is not intended to expose private source records, internal scoring, or proprietary operating logic.
+              </p>
+            </div>
+          </div>
+
           <Rule />
 
           {/* 2. CONDITION SNAPSHOT */}
@@ -585,6 +596,15 @@ export default function EvidenceDetailPage({ asset }: PageProps) {
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)"; }}
               >Download full dossier <ArrowRight style={{ width: 9, height: 9 }} /></a>
             </div>
+          </div>
+
+          <div className="pb-5" style={{ maxWidth: "48rem" }}>
+            <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+              Need deeper substantiation?
+            </p>
+            <p style={{ ...serif, marginTop: "0.35rem", fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.34)" }}>
+              Public dossiers are designed for proof-facing review. Source-level substantiation, supporting records, and live application remain private and move only through the appropriate confidential route.
+            </p>
           </div>
 
           {/* BACK */}

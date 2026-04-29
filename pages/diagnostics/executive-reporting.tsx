@@ -183,7 +183,7 @@ export default function ExecutiveReportingEntryPage() {
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
             <span>One-time report — no subscription</span>
             <span>Derived from your specific evidence</span>
-            <span>Deterministic logic — no generic output</span>
+            <span>Governed analysis — no generic output</span>
           </div>
 
           <div className="mt-4 border border-white/10 bg-white/[0.02] p-5">

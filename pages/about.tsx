@@ -89,6 +89,24 @@ const AboutPage: NextPage = () => {
               </div>
             </div>
 
+            <div className="mt-10 pt-8" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <h2 className="font-serif text-xl font-light text-white/80">Evidence Standard</h2>
+              <div className="mt-4 space-y-3 text-sm leading-7 text-white/46">
+                <p>
+                  Public proof on this platform is designed to show condition, decision relevance,
+                  consequence, and observed movement without exposing client identity or private operating logic.
+                </p>
+                <p>
+                  Self-declared success on its own is not treated as sufficient public proof.
+                  Published evidence is anonymised, bounded, and intended to withstand serious review.
+                </p>
+                <p>
+                  Source-level records, supporting documentation, and deeper substantiation remain private
+                  and move only through the appropriate confidential route.
+                </p>
+              </div>
+            </div>
+
             <div className="mt-10">
               <Link href="/diagnostics/fast" className="inline-flex items-center gap-3" style={{ padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
                 Start with the stuck decision <ArrowRight style={{ width: 11, height: 11 }} />

@@ -1719,7 +1719,7 @@ function HomeHero({ intelligenceHref: _intelligenceHref }: { intelligenceHref: s
 
           {/* Trust line */}
           <p className="mt-4 mx-auto max-w-[52ch] text-center text-[11px] leading-[1.7]" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.06em", color: "rgba(255,255,255,0.18)" }}>
-            Deterministic checks. No generic AI advice. No sale if the case is not ready.
+            Governed review. No generic assistant output. No sale if the case is not ready.
           </p>
         </div>
         {/* end text-center hero block, begin full-width content */}
@@ -2516,7 +2516,7 @@ function ProofLayer() {
                 Method
               </div>
               <p className="max-w-[60ch] text-[13.5px] leading-[1.85] ds-text-muted">
-                The system captures signal, classifies condition, and enforces interpretation.
+                The system captures evidence, identifies operating condition, and enforces interpretation.
               </p>
             </div>
             <div className="mt-4">
@@ -2779,7 +2779,7 @@ function HomeDecisionSection() {
               ]}
             />
             <div className="mt-5 space-y-1.5">
-              {[`One-time · ${PRICE_EXECUTIVE_REPORTING} · No subscription`, "Derived from your specific evidence", "Deterministic logic — no generic output"].map((line) => (
+              {[`One-time · ${PRICE_EXECUTIVE_REPORTING} · No subscription`, "Derived from your specific evidence", "Governed analysis — no generic output"].map((line) => (
                 <p key={line} className="text-[12px] leading-[1.7] ds-text-muted">{line}</p>
               ))}
             </div>

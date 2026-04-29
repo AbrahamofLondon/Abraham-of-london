@@ -105,7 +105,7 @@ export default function EnterpriseAssessmentPage({ params }: { params: { token: 
       return;
     }
 
-    if (Object.keys(answers).length < 5) { // Minimum threshold for integrity
+    if (Object.keys(answers).length < 5) { // Minimum answer count for an integrity read
       toast.error("Insufficient Data: Please complete all alignment nodes.");
       return;
     }

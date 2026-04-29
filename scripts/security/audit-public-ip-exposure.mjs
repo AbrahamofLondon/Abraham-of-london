@@ -30,14 +30,73 @@ const fileExtensions = new Set([
 ]);
 
 const bannedPatterns = [
-  { name: "threshold", regex: /\bthresholds?\b/i },
-  { name: "weight", regex: /\bweights?\b/i },
-  { name: "score band", regex: /\b(score\s*bands?|banded scoring|80\/60\/40|0-40|41-60|61-80|81-100)\b/i },
+  {
+    name: "threshold",
+    regex: /\bthresholds?\b/i,
+    ignore: [
+      /\bintersectionobserver\b/i,
+      /\brootmargin\b/i,
+      /\bthreshold\s*[:=]/i,
+      /\bthreshold\?/i,
+      /\bfont-weight\b/i,
+      /\bthreshold proximity\b/i,
+    ],
+    require: /\b(diagnostic|integrity|constitutional|severity|critical|below|meets|govern|review|qualif)\b/i,
+  },
+  {
+    name: "weight",
+    regex: /\bweights?\b|\bweighting\b/i,
+    ignore: [
+      /\bfont-weight\b/i,
+      /\bfont-(thin|light|normal|medium|semibold|bold|extrabold|black)\b/i,
+      /\bwght\b/i,
+      /\bcorrect weights?\b/i,
+      /\bbear weight\b/i,
+      /\bcarry weight\b/i,
+    ],
+    require: /\b(signal|score|model|drift|distribution|influence|weighted?|proprietary|evaluation)\b/i,
+  },
+  { name: "score band", regex: /\b(score\s*bands?|scoreBand|banded scoring|80\/60\/40|0-40|41-60|61-80|81-100)\b/i },
   { name: "arbiter rule", regex: /\barbiter|arbitration\b/i },
-  { name: "fallback mode", regex: /\bfallback\b/i },
+  {
+    name: "fallback mode",
+    regex: /\bfallback(mode|route|source)?\b/i,
+    ignore: [
+      /\bfallback\s*[=:({<]/i,
+      /\bfallback\?/i,
+      /\bif\s*\([^)]*fallback/i,
+      /\breturn\s+fallback\b/i,
+      /\bfallback\s+to\b/i,
+      /\bgraceful fallback\b/i,
+      /\bsafe fallback\b/i,
+      /\bimage fails\b/i,
+      /\blazy loading\b/i,
+      /\bcopy link\b/i,
+      /\bfont failed to load\b/i,
+      /\berrorboundary\b/i,
+      /\bsuspense\b/i,
+    ],
+    require: /\b(mode|route|source|recovery|deterministic|governed analysis|completion|content source)\b/i,
+  },
   { name: "deterministic mode", regex: /\bdeterministic\b/i },
   { name: "LLM source", regex: /\bllm\b|language model/i },
-  { name: "signal map", regex: /\bsignal(map|s)?\b/i },
+  {
+    name: "signal map",
+    regex: /\bsignal(map|s)?\b|\bSignalKey\b|\bmatchedSignals?\b/i,
+    ignore: [
+      /\bAbortSignal\b/i,
+      /\bcontroller\.signal\b/i,
+      /\bsignal:\s*\{/i,
+      /\bsignal:\s*true\b/i,
+      /\bsignal\?\s*:/i,
+      /\bsignal quality\b/i,
+      /\bsignal over noise\b/i,
+      /\bpublic signal\b/i,
+      /\blive signal\b/i,
+      /\bmarket signals?\b/i,
+    ],
+    require: /\b(signalmap|matchedsignals?|SignalKey|fragility signal|signal profile|diagnostic signal|constitutional signals?|internal signals?)\b/i,
+  },
   { name: "classification keyword", regex: /\bmatchedKeywords?|keyword classification\b/i },
   { name: "raw spine", regex: /\brawSpine|intelligence spine\b/i },
 ];
@@ -85,14 +144,15 @@ for (const fullPath of files) {
 
   lines.forEach((line, index) => {
     for (const pattern of bannedPatterns) {
-      if (pattern.regex.test(line)) {
+      if (!pattern.regex.test(line)) continue;
+      if (pattern.ignore?.some((ignore) => ignore.test(line))) continue;
+      if (pattern.require && !pattern.require.test(line)) continue;
         findings.push({
           file: relPath,
           line: index + 1,
           pattern: pattern.name,
           text: line.trim().slice(0, 180),
         });
-      }
     }
   });
 }

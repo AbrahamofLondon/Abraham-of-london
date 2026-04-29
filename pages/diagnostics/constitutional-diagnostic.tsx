@@ -186,7 +186,7 @@ export default function ConstitutionalDiagnosticPage() {
                     Ten questions. Two axes. One constitutional route. Tests
                     whether the decision problem is structural — reads posture,
                     authority, readiness, and failure mode density, then routes
-                    the signal forward. No login. No inflation. Deterministic output.
+                    the assessment forward. No login. No inflation. Governed output.
                   </p>
 
                   <div className="flex flex-wrap gap-3 mt-8">

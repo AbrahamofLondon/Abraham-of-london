@@ -17,7 +17,7 @@ const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace,
 
 const WhyNotAI: NextPage = () => {
   return (
-    <Layout title="Why Not AI | Abraham of London" description="Why decision authority cannot be delegated to language models.">
+    <Layout title="Why Not AI | Abraham of London" description="Why decision authority should not be delegated to generic assistants.">
       <Head><meta name="robots" content="index,follow" /></Head>
       <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-xl">
@@ -35,13 +35,13 @@ const WhyNotAI: NextPage = () => {
           </h1>
 
           <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", lineHeight: 1.8, color: "rgba(255,255,255,0.40)", marginTop: "1.5rem", maxWidth: "48ch" }}>
-            Language models are powerful. They are also non-deterministic, non-accountable, and structurally incapable of decision authority.
+            Generic assistants are useful for drafting and exploration. They are not built to carry accountable decision authority under pressure.
           </p>
 
           {/* Comparison */}
           <div className="mt-8 space-y-4">
             {[
-              { ai: "Non-deterministic — same question, different answer", us: "Deterministic — same input, identical output. Provably." },
+              { ai: "Answer-oriented — useful for exploration, weak under accountability", us: "Governed analysis — built for accountable review and decision pressure" },
               { ai: "No authority model — cannot identify who decides", us: "Authority classification — names the real owner, detects false authority" },
               { ai: "No enforcement — suggests but cannot require action", us: "Enforcement layer — tracks commitment, escalates non-action" },
               { ai: "No trust decay — treats every interaction as new", us: "Institutional memory — the system remembers what you have not resolved" },

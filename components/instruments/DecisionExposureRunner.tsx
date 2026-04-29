@@ -75,14 +75,14 @@ export default function DecisionExposureRunner({ costAnchor, onComplete }: { cos
       {/* Complete */}
       <button
         type="button"
-        onClick={() => { track("instrument_completed", { instrumentSlug: "decision-exposure-instrument", scoreBand: result.exposureBand }); onComplete(result); }}
+        onClick={() => { track("instrument_completed", { instrumentSlug: "decision-exposure-instrument", decisionState: result.exposureBand }); onComplete(result); }}
         style={{ width: "100%", padding: "14px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
       >
         Save result
       </button>
 
       <p style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.10)", textAlign: "center" }}>
-        Deterministic · Same input → same output · v{result.version}
+        Governed result · Version {result.version}
       </p>
     </div>
   );

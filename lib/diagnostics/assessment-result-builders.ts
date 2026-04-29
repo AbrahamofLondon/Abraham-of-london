@@ -66,8 +66,10 @@ export function buildPurposeResult(input: {
   return {
     assessmentType: "PURPOSE",
     primarySignal: primaryPattern
-      ? `${primaryPattern.label}: ${primaryPattern.consequence}`
-      : `Decision behaviour pattern at ${percent}% alignment. ${percent < 50 ? "Pressure is producing inconsistent decision ownership." : "Direction is present but may not be structurally anchored."}`,
+      ? `${primaryPattern.label}. ${primaryPattern.consequence}`
+      : percent < 50
+        ? "Personal direction is under structural drift. Pressure is producing inconsistent decision ownership."
+        : "Direction is visible, but it is not yet fully anchored in behaviour and environment.",
     signalStrength: strength,
     evidenceChain: evidence,
     internalContradictions: [
@@ -75,10 +77,16 @@ export function buildPurposeResult(input: {
       ...(contradictions ?? []).map((c) => c.evidence),
     ],
     decisionInFrontOfYou,
+    patternRecognition: percent < 45
+      ? "This is not isolated. This pattern appears repeatedly when stated values are clearer than the decisions required to defend them."
+      : "This is not isolated. This pattern appears when personal direction is understood conceptually but not yet enforced under pressure.",
     minimumViableMove: reflections.avoidedDecision
       ? `Write "${reflections.avoidedDecision.slice(0, 60)}" as a one-sentence decision statement. Name the person affected if it remains unresolved for seven days. Share it with one person who can hold you accountable.`
       : primaryPattern?.firstAction ?? "Identify the decision you are currently avoiding and write it in one sentence. Name who is affected by the delay.",
     ifUnchanged: primaryPattern?.consequence ?? "This decision behaviour pattern will repeat under pressure, producing delayed ownership and inconsistent execution.",
+    boardPerspective: percent < 45
+      ? "From a senior governance perspective, this is a direction and accountability issue, not a temporary motivation issue."
+      : "From a senior governance perspective, this is a reinforcement issue: direction exists, but it is not yet consistently carrying action.",
     validityBoundary: "This result is based on your submitted answers from a single session. It is strongest when compared against live decision records or repeated under active pressure. It identifies a likely pattern, not a confirmed condition.",
     whatWouldStrengthenThis: [
       "Repeat this assessment when a real decision is actively on the table — not retrospectively.",
@@ -134,7 +142,11 @@ export function buildConstitutionalResult(input: {
 
   return {
     assessmentType: "CONSTITUTIONAL",
-    primarySignal: `Authority signal: ${scores.authorityType.toLowerCase()} authority with ${scores.posture.toLowerCase()} posture. ${failureModes.length > 0 ? `${failureModes.length} governance pressure point${failureModes.length > 1 ? "s" : ""} active.` : "No acute governance pressure points detected."}`,
+    primarySignal: scores.authorityType === "UNCLEAR"
+      ? "Decision authority is fragmented. Ownership is implied rather than assigned."
+      : scores.governance < 50
+        ? "Decision governance is not carrying enough order. Authority exists, but it is not reliably holding."
+        : `Authority is ${scores.authorityType.toLowerCase()} with a ${scores.posture.toLowerCase()} posture. The structural pressure is governance discipline, not simple effort.`,
     signalStrength: strength,
     evidenceChain: evidence,
     internalContradictions: [
@@ -142,12 +154,18 @@ export function buildConstitutionalResult(input: {
       ...(reflections.shadowAuthority ? [`Shadow authority reported: "${reflections.shadowAuthority}". This suggests formal authority structure is being bypassed.`] : []),
     ],
     decisionInFrontOfYou,
+    patternRecognition: scores.authorityType === "UNCLEAR"
+      ? "This is not isolated. This pattern appears repeatedly in organisations where ownership is assumed socially but not assigned structurally."
+      : "This is not isolated. This pattern appears when formal governance exists, but operating decisions are still being routed through informal authority.",
     minimumViableMove: scores.authorityType === "UNCLEAR"
       ? "Name the one person authorised to make the most contested current decision. Document what they can decide without further permission. Communicate this to the three people who need to hear it."
       : "Identify the single constitutional boundary that is currently being crossed most often. Enforce it once in the next decision cycle and observe what resistance surfaces.",
     ifUnchanged: scores.governance < 50
       ? "Authority leakage at this level typically produces parallel decision routes within 30 days. Decisions get made by whoever acts first, not by who should decide."
       : "The structural condition will persist as background friction. Execution quality degrades incrementally rather than failing visibly — until accumulated cost surfaces under pressure.",
+    boardPerspective: route === "STRATEGY"
+      ? "From a board perspective, this signals a governance exposure that may require structured intervention rather than local correction."
+      : "From a board perspective, this signals a decision-governance weakness, not a temporary execution issue.",
     validityBoundary: "This result is based on 10 self-reported responses from a single session. It identifies a likely authority signal and governance pressure point. It is strongest when validated against actual decision records and compared with assessments from other respondents.",
     whatWouldStrengthenThis: [
       "Validate the authority finding against actual decision records — who decided the last three contested decisions?",
@@ -200,7 +218,7 @@ export function buildTeamResult(input: {
 
   return {
     assessmentType: "TEAM",
-    primarySignal: `${respondentBasis} ${condition.label}. ${varianceIndex > 40 ? "High variance suggests instructions are being interpreted differently across teams." : trustGap > 30 ? "Trust gap suggests leadership perception and team experience have diverged." : "Team dynamics show emerging pressure that may compound under stress."}`,
+    primarySignal: `${respondentBasis} ${condition.label}. ${varianceIndex > 40 ? "Instructions are being interpreted differently across teams." : trustGap > 30 ? "Leadership perception and team experience have diverged." : "Team dynamics show a pressure pattern that will compound under strain."}`,
     signalStrength: strength,
     evidenceChain: evidence,
     internalContradictions: [
@@ -212,12 +230,20 @@ export function buildTeamResult(input: {
       : trustGap > 30
       ? "Whether to rebuild execution trust through visible follow-through, or accept the trust deficit as normal friction."
       : "Whether to maintain current team structure, or restructure communication ownership before the next pressure cycle.",
+    patternRecognition: varianceIndex > 40
+      ? "This is not isolated. This pattern appears when leadership believes direction is clear but the operating layer is working from a different map."
+      : trustGap > 30
+        ? "This is not isolated. This pattern appears when information still flows upward, but trust no longer carries enough weight to correct the system."
+        : "This is not isolated. This pattern appears when teams still look functional on the surface but coherence is beginning to thin under pressure.",
     minimumViableMove: varianceIndex > 40
       ? "Ask three team members to restate the current top priority, who owns it, the deadline, and the main blocker — without prompting or preparation. Compare their answers. The gap is the problem."
       : "Name the single decision where leadership and team are most likely to disagree on urgency. Resolve that one before issuing the next directive.",
     ifUnchanged: varianceIndex > 40
       ? "Teams operating with this variance level will compensate by ignoring directives they disagree with. Instructions fail silently rather than visibly."
       : "The gap between leadership perception and team experience will widen under pressure. Each decision cycle reinforces the divergence.",
+    boardPerspective: varianceIndex > 40 || trustGap > 30
+      ? "From a board perspective, this signals an execution-governance risk: leadership intent is no longer translating cleanly into operating behaviour."
+      : "From a board perspective, this is an early coherence warning rather than a fully escalated governance failure.",
     validityBoundary: isMultiSource
       ? `This result is based on ${respondentCount} respondents. Signal strength increases with additional respondents and repeat measurement.`
       : "This result reflects one person's view of the team, not the team itself. It is a perception signal, not measured team evidence. It is strongest when compared against direct team responses.",
@@ -277,7 +303,11 @@ export function buildEnterpriseResult(input: {
 
   return {
     assessmentType: "ENTERPRISE",
-    primarySignal: `Operating pressure signal: ${posture.toLowerCase()} posture (composite ${composite}%). ${heatDomains.length > 0 ? `Active stress concentrated in ${heatDomains.join(", ")}.` : "No single heat domain dominant."} ${weakestDomain ? `Weakest domain: ${weakestDomain.domain} (${weakestDomain.score}%).` : ""}`,
+    primarySignal: posture === "DISORDERED"
+      ? "This is not a local execution issue. The operating structure is under distributed strain."
+      : posture === "CONTESTED"
+        ? "Authority and governance are out of order. The enterprise is carrying conflict through structure, not just through workload."
+        : `The enterprise is showing a ${posture.toLowerCase()} posture. The live pressure is concentrated in ${heatDomains[0] ?? "the weakest operating domain"}.`,
     signalStrength: strength,
     evidenceChain: evidence,
     internalContradictions: consistency.contradictions.map((c) => c.note),
@@ -288,12 +318,20 @@ export function buildEnterpriseResult(input: {
       : heatDomains.length > 0
       ? `Whether to concentrate governance on ${heatDomains[0]} (the dominant pressure point), or spread attention across all domains equally.`
       : "Whether to lock the current governance cadence, or restructure operational authority proactively.",
+    patternRecognition: posture === "DISORDERED"
+      ? "This is not isolated. This pattern appears when multiple operating domains adapt to unresolved governance weakness instead of correcting it."
+      : posture === "CONTESTED"
+        ? "This is not isolated. This pattern appears when authority remains disputed long enough for execution to build workarounds around the dispute."
+        : "This is not isolated. This pattern appears when the enterprise is still functional, but one domain is carrying more structural load than it should.",
     minimumViableMove: heatDomains.length > 0
       ? `Name the single decision in ${heatDomains[0]} that has been deferred longest. Assign one accountable owner and set a seven-day deadline. Report the outcome.`
       : "Identify which governance boundary is being crossed most often and enforce it once before the next operating cycle.",
     ifUnchanged: posture === "DISORDERED" || posture === "CONTESTED"
       ? "At this posture, decisions are already being made by whoever acts first rather than by who should decide. Each cycle deepens the informal authority structure."
       : "Institutional drag at this level compounds quietly. Execution becomes progressively slower without a single visible failure — until the accumulated cost surfaces under pressure.",
+    boardPerspective: posture === "DISORDERED" || posture === "CONTESTED"
+      ? "From a board perspective, this is a decision-governance exposure. Delay shifts the cost from operational friction to structural impairment."
+      : "From a board perspective, this is a governed watch condition: the enterprise is still moving, but one pressure line is beginning to accumulate consequence.",
     validityBoundary: "This result identifies organisational pressure signals from a single intake. One respondent's domain scores cannot prove enterprise-wide condition. It is strongest when compared against assessments from multiple respondents across leadership, execution, and governance roles.",
     whatWouldStrengthenThis: [
       "Have leadership, execution, and governance respondents complete this independently. Compare where they diverge.",

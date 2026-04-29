@@ -81,7 +81,7 @@ export default function MandateClarityRunner({ onComplete }: { onComplete: (resu
         <p style={{ fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>{result.recommendation}</p>
       </div>
 
-      <button type="button" onClick={() => { track("instrument_completed", { instrumentSlug: "mandate-clarity-framework", scoreBand: result.decisionRiskLevel }); onComplete(result); }}
+      <button type="button" onClick={() => { track("instrument_completed", { instrumentSlug: "mandate-clarity-framework", decisionState: result.decisionRiskLevel }); onComplete(result); }}
         style={{ width: "100%", padding: "14px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
         Save result
       </button>

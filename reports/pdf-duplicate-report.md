@@ -1,12 +1,12 @@
 # PDF Duplicate Report
 
-Generated: 2026-04-29T12:11:39.512Z
+Generated: 2026-04-29T14:08:14.611Z
 
 ## Summary
 
-- Duplicate filename groups: 420
-- Identical duplicate groups: 208
-- Divergent duplicate groups: 19
+- Duplicate filename groups: 422
+- Identical duplicate groups: 134
+- Divergent duplicate groups: 95
 - Generated/static conflict groups: 193
 
 ## Manual Review Groups
@@ -94,6 +94,15 @@ Generated: 2026-04-29T12:11:39.512Z
   - /assets/downloads/canon-builders-rule-of-life.pdf (33794 bytes)
   - /vault/briefs/canon-builders-rule-of-life.pdf (18706 bytes)
 
+### canon-system-constitution.pdf
+
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/canon-system-constitution.pdf
+
+  - /assets/downloads/canon-system-constitution.pdf (95892 bytes)
+  - /resources/canon-system-constitution.pdf (93707 bytes)
+
 ### canon-volume-iv-diagnostic-toolkit.pdf
 
 - Classification: generated_vs_static_conflict
@@ -179,10 +188,10 @@ Generated: 2026-04-29T12:11:39.512Z
 ### extremism-shield.pdf
 
 - Classification: divergent_duplicate
-- Unique hashes: 2
+- Unique hashes: 3
 - Recommended canonical path: /assets/downloads/extremism-shield.pdf
 
-  - /assets/downloads/extremism-shield.pdf (19588 bytes)
+  - /assets/downloads/extremism-shield.pdf (47977 bytes)
   - /vault/briefs/extremism-shield.pdf (19588 bytes)
   - /vault/general/extremism-shield.pdf (18865 bytes)
 
@@ -488,256 +497,223 @@ Generated: 2026-04-29T12:11:39.512Z
 - Unique hashes: 3
 - Recommended canonical path: /assets/downloads/frontier-resilience-01.pdf
 
-  - /assets/downloads/content-downloads/frontier-resilience-01.pdf (100798 bytes)
+  - /assets/downloads/content-downloads/frontier-resilience-01.pdf (76840 bytes)
   - /assets/downloads/frontier-resilience-01.pdf (75731 bytes)
   - /vault/briefs/frontier-resilience-01.pdf (16088 bytes)
 
-### governance-diagnostic-toolkit.pdf
+### frontier-resilience-beyond-survival-mode.pdf
 
 - Classification: divergent_duplicate
 - Unique hashes: 2
-- Recommended canonical path: /assets/downloads/governance-diagnostic-toolkit.pdf
+- Recommended canonical path: /assets/downloads/frontier-resilience-beyond-survival-mode.pdf
 
-  - /assets/downloads/governance-diagnostic-toolkit.pdf (81278 bytes)
-  - /vault/briefs/governance-diagnostic-toolkit.pdf (15781 bytes)
+  - /assets/downloads/frontier-resilience-beyond-survival-mode.pdf (48562 bytes)
+  - /resources/frontier-resilience-beyond-survival-mode.pdf (47746 bytes)
 
-### ia-003.pdf
+### frontier-resilience-crisis-loops-and-lost-judgment.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-003.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf
 
-  - /assets/downloads/content-downloads/ia-003.pdf (92494 bytes)
-  - /assets/downloads/ia-003.pdf (30594 bytes)
-  - /vault/briefs/ia-003.pdf (13929 bytes)
+  - /assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf (49252 bytes)
+  - /resources/frontier-resilience-crisis-loops-and-lost-judgment.pdf (49035 bytes)
 
-### ia-006.pdf
+### frontier-resilience-decision-latency-as-hidden-risk.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-006.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf
 
-  - /assets/downloads/content-downloads/ia-006.pdf (92035 bytes)
-  - /assets/downloads/ia-006.pdf (30563 bytes)
-  - /vault/briefs/ia-006.pdf (13938 bytes)
+  - /assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf (49484 bytes)
+  - /resources/frontier-resilience-decision-latency-as-hidden-risk.pdf (49508 bytes)
 
-### ia-009.pdf
+### frontier-resilience-drift-in-the-second-line.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-009.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-drift-in-the-second-line.pdf
 
-  - /assets/downloads/content-downloads/ia-009.pdf (92420 bytes)
-  - /assets/downloads/ia-009.pdf (30619 bytes)
-  - /vault/briefs/ia-009.pdf (13972 bytes)
+  - /assets/downloads/frontier-resilience-drift-in-the-second-line.pdf (48418 bytes)
+  - /resources/frontier-resilience-drift-in-the-second-line.pdf (47722 bytes)
 
-### ia-012.pdf
+### frontier-resilience-drift-inside-the-winning-season.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-012.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf
 
-  - /assets/downloads/content-downloads/ia-012.pdf (91821 bytes)
-  - /assets/downloads/ia-012.pdf (30483 bytes)
-  - /vault/briefs/ia-012.pdf (13908 bytes)
+  - /assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf (49166 bytes)
+  - /resources/frontier-resilience-drift-inside-the-winning-season.pdf (48828 bytes)
 
-### ia-015.pdf
+### frontier-resilience-fatigue-at-the-top.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-015.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-fatigue-at-the-top.pdf
 
-  - /assets/downloads/content-downloads/ia-015.pdf (92700 bytes)
-  - /assets/downloads/ia-015.pdf (30592 bytes)
-  - /vault/briefs/ia-015.pdf (14040 bytes)
+  - /assets/downloads/frontier-resilience-fatigue-at-the-top.pdf (48801 bytes)
+  - /resources/frontier-resilience-fatigue-at-the-top.pdf (47950 bytes)
 
-### ia-018.pdf
+### frontier-resilience-founder-endurance-is-not-a-plan.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-018.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf
 
-  - /assets/downloads/content-downloads/ia-018.pdf (92907 bytes)
-  - /assets/downloads/ia-018.pdf (30678 bytes)
-  - /vault/briefs/ia-018.pdf (14051 bytes)
+  - /assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf (48624 bytes)
+  - /resources/frontier-resilience-founder-endurance-is-not-a-plan.pdf (48576 bytes)
 
-### ia-021.pdf
+### frontier-resilience-fragility-of-unowned-decisions.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-021.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf
 
-  - /assets/downloads/content-downloads/ia-021.pdf (91822 bytes)
-  - /assets/downloads/ia-021.pdf (30468 bytes)
-  - /vault/briefs/ia-021.pdf (13989 bytes)
+  - /assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf (50035 bytes)
+  - /resources/frontier-resilience-fragility-of-unowned-decisions.pdf (49797 bytes)
 
-### ia-024.pdf
+### frontier-resilience-holding-standard-when-cash-tightens.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-024.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf
 
-  - /assets/downloads/content-downloads/ia-024.pdf (92122 bytes)
-  - /assets/downloads/ia-024.pdf (30685 bytes)
-  - /vault/briefs/ia-024.pdf (13977 bytes)
+  - /assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf (49268 bytes)
+  - /resources/frontier-resilience-holding-standard-when-cash-tightens.pdf (48741 bytes)
 
-### ia-027.pdf
+### frontier-resilience-institutions-that-cannot-say-no.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-027.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf
 
-  - /assets/downloads/content-downloads/ia-027.pdf (92152 bytes)
-  - /assets/downloads/ia-027.pdf (30530 bytes)
-  - /vault/briefs/ia-027.pdf (14012 bytes)
+  - /assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf (48486 bytes)
+  - /resources/frontier-resilience-institutions-that-cannot-say-no.pdf (48468 bytes)
 
-### ia-030.pdf
+### frontier-resilience-operating-cadence-under-strain.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-030.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf
 
-  - /assets/downloads/content-downloads/ia-030.pdf (92720 bytes)
-  - /assets/downloads/ia-030.pdf (30657 bytes)
-  - /vault/briefs/ia-030.pdf (13985 bytes)
+  - /assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf (48776 bytes)
+  - /resources/frontier-resilience-operating-cadence-under-strain.pdf (48276 bytes)
 
-### ia-033.pdf
+### frontier-resilience-pressure-tests-for-key-person-risk.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-033.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf
 
-  - /assets/downloads/content-downloads/ia-033.pdf (92502 bytes)
-  - /assets/downloads/ia-033.pdf (30612 bytes)
-  - /vault/briefs/ia-033.pdf (13953 bytes)
+  - /assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf (49736 bytes)
+  - /resources/frontier-resilience-pressure-tests-for-key-person-risk.pdf (48556 bytes)
 
-### ia-036.pdf
+### frontier-resilience-resilience-before-expansion.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-036.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-resilience-before-expansion.pdf
 
-  - /assets/downloads/content-downloads/ia-036.pdf (93173 bytes)
-  - /assets/downloads/ia-036.pdf (30987 bytes)
-  - /vault/briefs/ia-036.pdf (14027 bytes)
+  - /assets/downloads/frontier-resilience-resilience-before-expansion.pdf (48278 bytes)
+  - /resources/frontier-resilience-resilience-before-expansion.pdf (47599 bytes)
 
-### ia-039.pdf
+### frontier-resilience-restoring-command-after-confusion.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-039.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf
 
-  - /assets/downloads/content-downloads/ia-039.pdf (93594 bytes)
-  - /assets/downloads/ia-039.pdf (30987 bytes)
-  - /vault/briefs/ia-039.pdf (13936 bytes)
+  - /assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf (49063 bytes)
+  - /resources/frontier-resilience-restoring-command-after-confusion.pdf (48647 bytes)
 
-### ia-042.pdf
+### frontier-resilience-stress-reveals-the-real-culture.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-042.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf
 
-  - /assets/downloads/content-downloads/ia-042.pdf (92122 bytes)
-  - /assets/downloads/ia-042.pdf (30603 bytes)
-  - /vault/briefs/ia-042.pdf (14000 bytes)
+  - /assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf (49045 bytes)
+  - /resources/frontier-resilience-stress-reveals-the-real-culture.pdf (48397 bytes)
 
-### ia-045.pdf
+### frontier-resilience-surviving-bad-information.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-045.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-surviving-bad-information.pdf
 
-  - /assets/downloads/content-downloads/ia-045.pdf (92959 bytes)
-  - /assets/downloads/ia-045.pdf (30804 bytes)
-  - /vault/briefs/ia-045.pdf (14023 bytes)
+  - /assets/downloads/frontier-resilience-surviving-bad-information.pdf (48984 bytes)
+  - /resources/frontier-resilience-surviving-bad-information.pdf (48362 bytes)
 
-### ia-048.pdf
+### frontier-resilience-the-cost-of-living-in-escalation.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-048.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf
 
-  - /assets/downloads/content-downloads/ia-048.pdf (93177 bytes)
-  - /assets/downloads/ia-048.pdf (30836 bytes)
-  - /vault/briefs/ia-048.pdf (14024 bytes)
+  - /assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf (48966 bytes)
+  - /resources/frontier-resilience-the-cost-of-living-in-escalation.pdf (48663 bytes)
 
-### ia-051.pdf
+### frontier-resilience-the-discipline-of-bounded-adaptation.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-051.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf
 
-  - /assets/downloads/content-downloads/ia-051.pdf (92704 bytes)
-  - /assets/downloads/ia-051.pdf (30629 bytes)
-  - /vault/briefs/ia-051.pdf (14047 bytes)
+  - /assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf (49418 bytes)
+  - /resources/frontier-resilience-the-discipline-of-bounded-adaptation.pdf (48578 bytes)
 
-### ia-054.pdf
+### frontier-resilience-the-false-order-of-busy-teams.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-054.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf
 
-  - /assets/downloads/content-downloads/ia-054.pdf (92959 bytes)
-  - /assets/downloads/ia-054.pdf (30802 bytes)
-  - /vault/briefs/ia-054.pdf (14002 bytes)
+  - /assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf (49275 bytes)
+  - /resources/frontier-resilience-the-false-order-of-busy-teams.pdf (48419 bytes)
 
-### ia-057.pdf
+### frontier-resilience-the-fragility-of-heroic-leadership.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-057.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf
 
-  - /assets/downloads/content-downloads/ia-057.pdf (92972 bytes)
-  - /assets/downloads/ia-057.pdf (30717 bytes)
-  - /vault/briefs/ia-057.pdf (14005 bytes)
+  - /assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf (49109 bytes)
+  - /resources/frontier-resilience-the-fragility-of-heroic-leadership.pdf (48421 bytes)
 
-### ia-060.pdf
+### frontier-resilience-the-tax-of-constant-reaction.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-060.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf
 
-  - /assets/downloads/content-downloads/ia-060.pdf (92256 bytes)
-  - /assets/downloads/ia-060.pdf (30639 bytes)
-  - /vault/briefs/ia-060.pdf (14046 bytes)
+  - /assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf (49331 bytes)
+  - /resources/frontier-resilience-the-tax-of-constant-reaction.pdf (48724 bytes)
 
-### ia-063.pdf
+### frontier-resilience-when-clarity-has-no-owner.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-063.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf
 
-  - /assets/downloads/content-downloads/ia-063.pdf (93174 bytes)
-  - /assets/downloads/ia-063.pdf (30953 bytes)
-  - /vault/briefs/ia-063.pdf (13991 bytes)
+  - /assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf (49205 bytes)
+  - /resources/frontier-resilience-when-clarity-has-no-owner.pdf (48108 bytes)
 
-### ia-066.pdf
+### frontier-resilience-when-growth-hides-breakdown.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-066.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf
 
-  - /assets/downloads/content-downloads/ia-066.pdf (92046 bytes)
-  - /assets/downloads/ia-066.pdf (30661 bytes)
-  - /vault/briefs/ia-066.pdf (14055 bytes)
+  - /assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf (50099 bytes)
+  - /resources/frontier-resilience-when-growth-hides-breakdown.pdf (49393 bytes)
 
-### ia-069.pdf
+### frontier-resilience-when-recovery-needs-governance.pdf
 
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-069.pdf
+- Classification: divergent_duplicate
+- Unique hashes: 2
+- Recommended canonical path: /assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf
 
-  - /assets/downloads/content-downloads/ia-069.pdf (93031 bytes)
-  - /assets/downloads/ia-069.pdf (30977 bytes)
-  - /vault/briefs/ia-069.pdf (13961 bytes)
-
-### ia-072.pdf
-
-- Classification: generated_vs_static_conflict
-- Unique hashes: 3
-- Recommended canonical path: /assets/downloads/ia-072.pdf
-
-  - /assets/downloads/content-downloads/ia-072.pdf (92149 bytes)
-  - /assets/downloads/ia-072.pdf (30645 bytes)
-  - /vault/briefs/ia-072.pdf (13989 bytes)
+  - /assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf (49092 bytes)
+  - /resources/frontier-resilience-when-recovery-needs-governance.pdf (48778 bytes)
 

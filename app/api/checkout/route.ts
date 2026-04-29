@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { getPdfAssetIdentityBySlug } from "@/lib/assets/pdf-identity";
 import { resolveAssetPricing } from "@/lib/commercial/pricing-engine";
+import { grantEntitlement } from "@/lib/commercial/entitlements";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 import type { UserContext } from "@/lib/assets/pdf-access";
@@ -107,6 +108,10 @@ export async function POST(req: NextRequest) {
   });
 
   if (!verified.ok || !verified.entitlement?.granted) {
+    if (userId) {
+      await grantEntitlement(userId, asset.slug, "purchase-repair").catch(() => undefined);
+    }
+
     return NextResponse.json(
       {
         ok: false,
@@ -116,6 +121,10 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 },
     );
+  }
+
+  if (userId) {
+    await grantEntitlement(userId, asset.slug, "purchase").catch(() => undefined);
   }
 
   return NextResponse.json({

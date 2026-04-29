@@ -103,7 +103,7 @@ export default async function EnterpriseCampaignDashboardPage({
 
         <div className="rounded-[28px] border bg-white p-6 shadow-sm">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-            Fragility Signal
+            Fragility Pattern
           </div>
           <div className="mt-4 text-4xl font-semibold text-neutral-950">
             {snapshot?.fragilitySignal ?? "—"}

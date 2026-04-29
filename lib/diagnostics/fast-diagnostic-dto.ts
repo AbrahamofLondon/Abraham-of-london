@@ -10,6 +10,7 @@
 export type FastDiagnosticRequest = {
   answers: Record<string, string>;
   committed: boolean;
+  elapsedMs?: number;
 };
 
 export type FastDiagnosticResult = {
@@ -85,5 +86,11 @@ export type FastDiagnosticResult = {
     repeatedConditions: string[];
     escalationTrend: "stable" | "rising" | "falling" | "insufficient_data";
     executiveSummary: string;
+  };
+
+  /** Public-safe recurring pattern authority */
+  patternEvidence?: {
+    recognitionLine: string;
+    observations: string[];
   };
 };

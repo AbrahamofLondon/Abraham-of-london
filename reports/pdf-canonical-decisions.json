@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-29T12:11:41.124Z",
+  "generatedAt": "2026-04-29T14:08:16.351Z",
   "totals": {
     "assetGroups": 428,
     "resolved": 428,
     "unresolved": 0,
-    "canonical": 220,
-    "alias": 208,
+    "canonical": 294,
+    "alias": 134,
     "duplicate": 0,
     "conflict": 0
   },
@@ -462,8 +462,8 @@
     {
       "slug": "canon-system-constitution",
       "canonicalPath": "/assets/downloads/canon-system-constitution.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/canon-system-constitution.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/canon-system-constitution.pdf.",
       "sourcePaths": [
         "/assets/downloads/canon-system-constitution.pdf",
         "/resources/canon-system-constitution.pdf"
@@ -2568,8 +2568,8 @@
     {
       "slug": "frontier-resilience-beyond-survival-mode",
       "canonicalPath": "/assets/downloads/frontier-resilience-beyond-survival-mode.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-beyond-survival-mode.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-beyond-survival-mode.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-beyond-survival-mode.pdf",
         "/resources/frontier-resilience-beyond-survival-mode.pdf"
@@ -2584,8 +2584,8 @@
     {
       "slug": "frontier-resilience-crisis-loops-and-lost-judgment",
       "canonicalPath": "/assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf",
         "/resources/frontier-resilience-crisis-loops-and-lost-judgment.pdf"
@@ -2600,8 +2600,8 @@
     {
       "slug": "frontier-resilience-decision-latency-as-hidden-risk",
       "canonicalPath": "/assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf",
         "/resources/frontier-resilience-decision-latency-as-hidden-risk.pdf"
@@ -2616,8 +2616,8 @@
     {
       "slug": "frontier-resilience-drift-in-the-second-line",
       "canonicalPath": "/assets/downloads/frontier-resilience-drift-in-the-second-line.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-drift-in-the-second-line.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-drift-in-the-second-line.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-drift-in-the-second-line.pdf",
         "/resources/frontier-resilience-drift-in-the-second-line.pdf"
@@ -2632,8 +2632,8 @@
     {
       "slug": "frontier-resilience-drift-inside-the-winning-season",
       "canonicalPath": "/assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf",
         "/resources/frontier-resilience-drift-inside-the-winning-season.pdf"
@@ -2648,8 +2648,8 @@
     {
       "slug": "frontier-resilience-fatigue-at-the-top",
       "canonicalPath": "/assets/downloads/frontier-resilience-fatigue-at-the-top.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-fatigue-at-the-top.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-fatigue-at-the-top.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-fatigue-at-the-top.pdf",
         "/resources/frontier-resilience-fatigue-at-the-top.pdf"
@@ -2664,8 +2664,8 @@
     {
       "slug": "frontier-resilience-founder-endurance-is-not-a-plan",
       "canonicalPath": "/assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf",
         "/resources/frontier-resilience-founder-endurance-is-not-a-plan.pdf"
@@ -2680,8 +2680,8 @@
     {
       "slug": "frontier-resilience-fragility-of-unowned-decisions",
       "canonicalPath": "/assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf",
         "/resources/frontier-resilience-fragility-of-unowned-decisions.pdf"
@@ -2696,8 +2696,8 @@
     {
       "slug": "frontier-resilience-holding-standard-when-cash-tightens",
       "canonicalPath": "/assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf",
         "/resources/frontier-resilience-holding-standard-when-cash-tightens.pdf"
@@ -2712,8 +2712,8 @@
     {
       "slug": "frontier-resilience-institutions-that-cannot-say-no",
       "canonicalPath": "/assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf",
         "/resources/frontier-resilience-institutions-that-cannot-say-no.pdf"
@@ -2728,8 +2728,8 @@
     {
       "slug": "frontier-resilience-operating-cadence-under-strain",
       "canonicalPath": "/assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf",
         "/resources/frontier-resilience-operating-cadence-under-strain.pdf"
@@ -2744,8 +2744,8 @@
     {
       "slug": "frontier-resilience-pressure-tests-for-key-person-risk",
       "canonicalPath": "/assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf",
         "/resources/frontier-resilience-pressure-tests-for-key-person-risk.pdf"
@@ -2760,8 +2760,8 @@
     {
       "slug": "frontier-resilience-resilience-before-expansion",
       "canonicalPath": "/assets/downloads/frontier-resilience-resilience-before-expansion.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-resilience-before-expansion.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-resilience-before-expansion.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-resilience-before-expansion.pdf",
         "/resources/frontier-resilience-resilience-before-expansion.pdf"
@@ -2776,8 +2776,8 @@
     {
       "slug": "frontier-resilience-restoring-command-after-confusion",
       "canonicalPath": "/assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf",
         "/resources/frontier-resilience-restoring-command-after-confusion.pdf"
@@ -2792,8 +2792,8 @@
     {
       "slug": "frontier-resilience-stress-reveals-the-real-culture",
       "canonicalPath": "/assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf",
         "/resources/frontier-resilience-stress-reveals-the-real-culture.pdf"
@@ -2808,8 +2808,8 @@
     {
       "slug": "frontier-resilience-surviving-bad-information",
       "canonicalPath": "/assets/downloads/frontier-resilience-surviving-bad-information.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-surviving-bad-information.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-surviving-bad-information.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-surviving-bad-information.pdf",
         "/resources/frontier-resilience-surviving-bad-information.pdf"
@@ -2824,8 +2824,8 @@
     {
       "slug": "frontier-resilience-the-cost-of-living-in-escalation",
       "canonicalPath": "/assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf",
         "/resources/frontier-resilience-the-cost-of-living-in-escalation.pdf"
@@ -2840,8 +2840,8 @@
     {
       "slug": "frontier-resilience-the-discipline-of-bounded-adaptation",
       "canonicalPath": "/assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf",
         "/resources/frontier-resilience-the-discipline-of-bounded-adaptation.pdf"
@@ -2856,8 +2856,8 @@
     {
       "slug": "frontier-resilience-the-false-order-of-busy-teams",
       "canonicalPath": "/assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf",
         "/resources/frontier-resilience-the-false-order-of-busy-teams.pdf"
@@ -2872,8 +2872,8 @@
     {
       "slug": "frontier-resilience-the-fragility-of-heroic-leadership",
       "canonicalPath": "/assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf",
         "/resources/frontier-resilience-the-fragility-of-heroic-leadership.pdf"
@@ -2888,8 +2888,8 @@
     {
       "slug": "frontier-resilience-the-tax-of-constant-reaction",
       "canonicalPath": "/assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf",
         "/resources/frontier-resilience-the-tax-of-constant-reaction.pdf"
@@ -2904,8 +2904,8 @@
     {
       "slug": "frontier-resilience-when-clarity-has-no-owner",
       "canonicalPath": "/assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf",
         "/resources/frontier-resilience-when-clarity-has-no-owner.pdf"
@@ -2920,8 +2920,8 @@
     {
       "slug": "frontier-resilience-when-growth-hides-breakdown",
       "canonicalPath": "/assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf",
         "/resources/frontier-resilience-when-growth-hides-breakdown.pdf"
@@ -2936,8 +2936,8 @@
     {
       "slug": "frontier-resilience-when-recovery-needs-governance",
       "canonicalPath": "/assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf",
         "/resources/frontier-resilience-when-recovery-needs-governance.pdf"
@@ -2952,8 +2952,8 @@
     {
       "slug": "frontier-resilience-when-urgency-corrupts-sequencing",
       "canonicalPath": "/assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf.",
       "sourcePaths": [
         "/assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf",
         "/resources/frontier-resilience-when-urgency-corrupts-sequencing.pdf"
@@ -2984,27 +2984,33 @@
     {
       "slug": "global-market-intelligence-board-deck-q1-2026",
       "canonicalPath": "/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf",
-      "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint /assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf must be materialised from /assets/downloads/content-downloads/global-market-intelligence-board-deck-q1-2026.pdf; physical canonical binary is not represented in this candidate group.",
+      "decision": "alias",
+      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf.",
       "sourcePaths": [
-        "/assets/downloads/content-downloads/global-market-intelligence-board-deck-q1-2026.pdf"
+        "/assets/downloads/content-downloads/global-market-intelligence-board-deck-q1-2026.pdf",
+        "/assets/downloads/global-market-intelligence-board-deck-q1-2026.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": true,
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/global-market-intelligence-board-deck-q1-2026.pdf"
+      ],
+      "materialisationRequired": false,
       "confidence": "high"
     },
     {
       "slug": "global-market-intelligence-report-q1-2026",
       "canonicalPath": "/assets/downloads/global-market-intelligence-report-q1-2026.pdf",
-      "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint /assets/downloads/global-market-intelligence-report-q1-2026.pdf must be materialised from /assets/downloads/content-downloads/global-market-intelligence-report-q1-2026.pdf; physical canonical binary is not represented in this candidate group.",
+      "decision": "alias",
+      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/global-market-intelligence-report-q1-2026.pdf.",
       "sourcePaths": [
-        "/assets/downloads/content-downloads/global-market-intelligence-report-q1-2026.pdf"
+        "/assets/downloads/content-downloads/global-market-intelligence-report-q1-2026.pdf",
+        "/assets/downloads/global-market-intelligence-report-q1-2026.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": true,
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/global-market-intelligence-report-q1-2026.pdf"
+      ],
+      "materialisationRequired": false,
       "confidence": "high"
     },
     {
@@ -3508,8 +3514,8 @@
     {
       "slug": "institutional-alpha-false-confidence-from-aggregated-metrics",
       "canonicalPath": "/assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf",
         "/resources/institutional-alpha-false-confidence-from-aggregated-metrics.pdf"
@@ -3524,8 +3530,8 @@
     {
       "slug": "institutional-alpha-intelligence-after-the-founder-myth",
       "canonicalPath": "/assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf",
         "/resources/institutional-alpha-intelligence-after-the-founder-myth.pdf"
@@ -3540,8 +3546,8 @@
     {
       "slug": "institutional-alpha-intelligence-debt-in-scaling-firms",
       "canonicalPath": "/assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf",
         "/resources/institutional-alpha-intelligence-debt-in-scaling-firms.pdf"
@@ -3556,8 +3562,8 @@
     {
       "slug": "institutional-alpha-intelligence-drift-after-rapid-expansion",
       "canonicalPath": "/assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf",
         "/resources/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf"
@@ -3572,8 +3578,8 @@
     {
       "slug": "institutional-alpha-overinterpreting-motion-as-momentum",
       "canonicalPath": "/assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf",
         "/resources/institutional-alpha-overinterpreting-motion-as-momentum.pdf"
@@ -3588,8 +3594,8 @@
     {
       "slug": "institutional-alpha-pattern-recognition-without-operating-truth",
       "canonicalPath": "/assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf",
         "/resources/institutional-alpha-pattern-recognition-without-operating-truth.pdf"
@@ -3604,8 +3610,8 @@
     {
       "slug": "institutional-alpha-reporting-systems-that-reward-optimism",
       "canonicalPath": "/assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf",
         "/resources/institutional-alpha-reporting-systems-that-reward-optimism.pdf"
@@ -3620,8 +3626,8 @@
     {
       "slug": "institutional-alpha-signal-decay-in-reporting-chains",
       "canonicalPath": "/assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf",
         "/resources/institutional-alpha-signal-decay-in-reporting-chains.pdf"
@@ -3636,8 +3642,8 @@
     {
       "slug": "institutional-alpha-the-blindness-of-clean-narratives",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf",
         "/resources/institutional-alpha-the-blindness-of-clean-narratives.pdf"
@@ -3652,8 +3658,8 @@
     {
       "slug": "institutional-alpha-the-breakdown-of-field-intelligence",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf",
         "/resources/institutional-alpha-the-breakdown-of-field-intelligence.pdf"
@@ -3668,8 +3674,8 @@
     {
       "slug": "institutional-alpha-the-comfort-of-lagging-indicators",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf",
         "/resources/institutional-alpha-the-comfort-of-lagging-indicators.pdf"
@@ -3684,8 +3690,8 @@
     {
       "slug": "institutional-alpha-the-danger-of-unaudited-assumptions",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf",
         "/resources/institutional-alpha-the-danger-of-unaudited-assumptions.pdf"
@@ -3700,8 +3706,8 @@
     {
       "slug": "institutional-alpha-the-difference-between-insight-and-surveillance",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf",
         "/resources/institutional-alpha-the-difference-between-insight-and-surveillance.pdf"
@@ -3716,8 +3722,8 @@
     {
       "slug": "institutional-alpha-the-discipline-of-decision-grade-intelligence",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf",
         "/resources/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf"
@@ -3732,8 +3738,8 @@
     {
       "slug": "institutional-alpha-the-hidden-cost-of-flattering-data",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf",
         "/resources/institutional-alpha-the-hidden-cost-of-flattering-data.pdf"
@@ -3748,8 +3754,8 @@
     {
       "slug": "institutional-alpha-the-institutional-price-of-guesswork",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf",
         "/resources/institutional-alpha-the-institutional-price-of-guesswork.pdf"
@@ -3764,8 +3770,8 @@
     {
       "slug": "institutional-alpha-the-politics-of-suppressed-bad-news",
       "canonicalPath": "/assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
         "/resources/institutional-alpha-the-politics-of-suppressed-bad-news.pdf"
@@ -3780,8 +3786,8 @@
     {
       "slug": "institutional-alpha-weak-signals-before-reputational-fracture",
       "canonicalPath": "/assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf",
         "/resources/institutional-alpha-weak-signals-before-reputational-fracture.pdf"
@@ -3796,8 +3802,8 @@
     {
       "slug": "institutional-alpha-when-analysts-inherit-a-broken-mandate",
       "canonicalPath": "/assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf",
         "/resources/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf"
@@ -3812,8 +3818,8 @@
     {
       "slug": "institutional-alpha-when-dashboards-outpace-judgment",
       "canonicalPath": "/assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf",
         "/resources/institutional-alpha-when-dashboards-outpace-judgment.pdf"
@@ -3828,8 +3834,8 @@
     {
       "slug": "institutional-alpha-when-risk-travels-faster-than-reporting",
       "canonicalPath": "/assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
         "/resources/institutional-alpha-when-risk-travels-faster-than-reporting.pdf"
@@ -3844,8 +3850,8 @@
     {
       "slug": "institutional-alpha-when-scenario-planning-becomes-theatre",
       "canonicalPath": "/assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf",
         "/resources/institutional-alpha-when-scenario-planning-becomes-theatre.pdf"
@@ -3860,8 +3866,8 @@
     {
       "slug": "institutional-alpha-when-the-board-sees-a-different-company",
       "canonicalPath": "/assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf",
         "/resources/institutional-alpha-when-the-board-sees-a-different-company.pdf"
@@ -3876,8 +3882,8 @@
     {
       "slug": "institutional-alpha-why-executive-summaries-mislead",
       "canonicalPath": "/assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf",
         "/resources/institutional-alpha-why-executive-summaries-mislead.pdf"
@@ -3892,8 +3898,8 @@
     {
       "slug": "institutional-alpha-why-leaders-stop-hearing-reality",
       "canonicalPath": "/assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf.",
       "sourcePaths": [
         "/assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf",
         "/resources/institutional-alpha-why-leaders-stop-hearing-reality.pdf"
@@ -4896,8 +4902,8 @@
     {
       "slug": "sovereign-intelligence-alignment-without-sovereignty",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf",
         "/resources/sovereign-intelligence-alignment-without-sovereignty.pdf"
@@ -4912,8 +4918,8 @@
     {
       "slug": "sovereign-intelligence-control-without-ownership",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-control-without-ownership.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-control-without-ownership.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-control-without-ownership.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-control-without-ownership.pdf",
         "/resources/sovereign-intelligence-control-without-ownership.pdf"
@@ -4928,8 +4934,8 @@
     {
       "slug": "sovereign-intelligence-dependence-disguised-as-partnership",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf",
         "/resources/sovereign-intelligence-dependence-disguised-as-partnership.pdf"
@@ -4944,8 +4950,8 @@
     {
       "slug": "sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf",
         "/resources/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf"
@@ -4960,8 +4966,8 @@
     {
       "slug": "sovereign-intelligence-identity-drift-in-institutions-under-external-pressure",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf",
         "/resources/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf"
@@ -4976,8 +4982,8 @@
     {
       "slug": "sovereign-intelligence-internal-empires-and-the-loss-of-common-rule",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf",
         "/resources/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf"
@@ -4992,8 +4998,8 @@
     {
       "slug": "sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf",
         "/resources/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf"
@@ -5008,8 +5014,8 @@
     {
       "slug": "sovereign-intelligence-sovereignty-at-the-edge-of-regulation",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf",
         "/resources/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf"
@@ -5024,8 +5030,8 @@
     {
       "slug": "sovereign-intelligence-strategic-ambition-without-sovereign-capacity",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf",
         "/resources/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf"
@@ -5040,8 +5046,8 @@
     {
       "slug": "sovereign-intelligence-strategic-exposure-without-red-lines",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf",
         "/resources/sovereign-intelligence-strategic-exposure-without-red-lines.pdf"
@@ -5056,8 +5062,8 @@
     {
       "slug": "sovereign-intelligence-the-cost-of-borrowed-legitimacy",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf",
         "/resources/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf"
@@ -5072,8 +5078,8 @@
     {
       "slug": "sovereign-intelligence-the-discipline-of-institutional-self-government",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf",
         "/resources/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf"
@@ -5088,8 +5094,8 @@
     {
       "slug": "sovereign-intelligence-the-false-safety-of-strategic-silence",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf",
         "/resources/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf"
@@ -5104,8 +5110,8 @@
     {
       "slug": "sovereign-intelligence-the-geography-of-hidden-influence",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf",
         "/resources/sovereign-intelligence-the-geography-of-hidden-influence.pdf"
@@ -5120,8 +5126,8 @@
     {
       "slug": "sovereign-intelligence-the-governance-cost-of-permanent-exception",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf",
         "/resources/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf"
@@ -5136,8 +5142,8 @@
     {
       "slug": "sovereign-intelligence-the-illusion-of-neutral-platforms",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf",
         "/resources/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf"
@@ -5152,8 +5158,8 @@
     {
       "slug": "sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf",
         "/resources/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf"
@@ -5168,8 +5174,8 @@
     {
       "slug": "sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf",
         "/resources/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf"
@@ -5184,8 +5190,8 @@
     {
       "slug": "sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf",
         "/resources/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf"
@@ -5200,8 +5206,8 @@
     {
       "slug": "sovereign-intelligence-the-tax-of-strategic-appeasement",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf",
         "/resources/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf"
@@ -5216,8 +5222,8 @@
     {
       "slug": "sovereign-intelligence-the-vulnerability-of-narrative-capture",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf",
         "/resources/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf"
@@ -5232,8 +5238,8 @@
     {
       "slug": "sovereign-intelligence-the-weakness-of-outsourced-judgment",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf",
         "/resources/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf"
@@ -5248,8 +5254,8 @@
     {
       "slug": "sovereign-intelligence-when-institutions-become-too-easy-to-pressure",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf",
         "/resources/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf"
@@ -5264,8 +5270,8 @@
     {
       "slug": "sovereign-intelligence-when-optionality-quietly-dies",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf",
         "/resources/sovereign-intelligence-when-optionality-quietly-dies.pdf"
@@ -5280,8 +5286,8 @@
     {
       "slug": "sovereign-intelligence-why-power-concentrates-around-the-decisive",
       "canonicalPath": "/assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf",
-      "decision": "alias",
-      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf.",
+      "decision": "canonical",
+      "reason": "Single explicitly authoritative source wins over non-authoritative variants. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf.",
       "sourcePaths": [
         "/assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf",
         "/resources/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf"

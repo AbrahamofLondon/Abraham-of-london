@@ -343,6 +343,12 @@ const FounderPage: NextPage = () => {
               protecting commercial confidentiality. Cases are anonymised or modelled where required.
             </p>
 
+            <p className="mt-4 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
+              Public evidence is intended to demonstrate that the system can identify a live condition,
+              frame the decision properly, and verify movement afterward. It is not intended to expose
+              private source records, identity, or proprietary operating mechanics.
+            </p>
+
             <Link
               href="/evidence"
               className="mt-5 inline-flex"
@@ -455,6 +461,11 @@ const FounderPage: NextPage = () => {
                 Companies House <ExternalLink style={{ width: 10, height: 10 }} />
               </a>
             </div>
+
+            <p className="mt-5 max-w-2xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.40)" }}>
+              Verification here is deliberately layered: legal presence, founder grounding, public evidence,
+              and bounded proof standards. Deeper substantiation exists, but it remains inside the correct confidential path.
+            </p>
           </section>
 
           {/* Operating boundary */}

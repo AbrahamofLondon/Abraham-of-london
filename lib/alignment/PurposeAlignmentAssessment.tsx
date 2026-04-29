@@ -58,17 +58,28 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
       ? `Governed analysis complete. The strongest immediate pressure appears around ${result.weakestDomains[0]}.`
       : "Governed analysis complete. A directional correction is required."
     : null;
+  const patternRecognition = result
+    ? result.weakestDomains.length > 0
+      ? `This pattern is not isolated. It appears when ${result.weakestDomains[0]} is carrying more structural strain than the rest of the system can absorb.`
+      : "This pattern is not isolated. It appears when direction is stated clearly but not yet reinforced through consistent behaviour."
+    : null;
+  const boardView = result
+    ? publicState === "DISORDERED" || publicState === "MISALIGNED"
+      ? "From a board perspective, this signals a breakdown in directional governance rather than a temporary motivation issue."
+      : "From a board perspective, this is a watch condition: direction exists, but it is not yet carrying enough reinforcement under pressure."
+    : null;
+  const requiredMove = result?.corrections[0] ?? "Name one direction-defining move and commit to it inside the next 72 hours.";
 
   return (
     <div className="grid gap-8">
       <div className="rounded-2xl border p-6 shadow-sm bg-white">
-        <h1 className="text-3xl font-semibold">Purpose Alignment Checklist</h1>
+        <div className="text-xs uppercase tracking-[0.24em] text-neutral-500">Input → Signal → Precision → Verdict</div>
+        <h1 className="mt-3 text-3xl font-semibold">Where is your direction breaking down?</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Review directional integrity across identity, decisions, environment, behaviour,
-          emotional order, and legacy.
+          Work through the live conditions shaping your direction across identity, decisions, environment, behaviour, emotional order, and legacy.
         </p>
         <p className="mt-4 text-sm text-neutral-500">
-          Checked: {checkedCount} / {PURPOSE_ALIGNMENT_QUESTIONS.length}
+          Precision step: {checkedCount} / {PURPOSE_ALIGNMENT_QUESTIONS.length} conditions marked
         </p>
       </div>
 
@@ -100,23 +111,27 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
             onClick={handleScore}
             className="rounded-xl border px-4 py-2 text-sm font-medium shadow-sm hover:bg-neutral-50"
           >
-            Generate analysis
+            Continue to verdict
           </button>
         </div>
 
-        {saving && <p className="mt-3 text-sm text-neutral-500">Saving assessment…</p>}
+        {saving && <p className="mt-3 text-sm text-neutral-500">Saving analysis…</p>}
       </div>
 
       {result && (
         <div className="rounded-2xl border p-6 shadow-sm bg-white">
-          <h2 className="text-xl font-semibold">Assessment Result</h2>
-          <p className="mt-2 text-sm text-neutral-600">
-            State: {publicState}
+          <div className="text-xs uppercase tracking-[0.24em] text-neutral-500">Verdict</div>
+          <h2 className="mt-3 text-xl font-semibold">This is not a motivation problem. It is a direction structure problem.</h2>
+          <p className="mt-3 text-sm text-neutral-700">Current condition: {publicSummary}</p>
+          <p className="mt-3 text-sm text-neutral-700">{patternRecognition}</p>
+          <p className="mt-3 text-sm text-neutral-700">
+            If unchanged, this condition will continue to distort decisions until drift becomes your normal operating state.
           </p>
-          <p className="mt-1 text-sm text-neutral-600">{publicSummary}</p>
+          <p className="mt-3 text-sm text-neutral-700">{boardView}</p>
+          <p className="mt-3 text-sm font-medium text-neutral-900">Required move: {requiredMove}</p>
 
           <div className="mt-4">
-            <h3 className="font-medium">Recommended Actions</h3>
+            <h3 className="font-medium">Recommended next steps</h3>
             <ul className="mt-2 list-disc pl-5 text-sm text-neutral-700">
               {result.corrections.map((item) => (
                 <li key={item}>{item}</li>
