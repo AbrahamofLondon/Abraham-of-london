@@ -1,9 +1,55 @@
 # ABRAHAM OF LONDON — INSTITUTIONAL MANUAL
 
-**Version:** 2.0
+**Version:** 2.1
 **Date:** April 2026
 **Classification:** Internal — Institutional
 **Status:** Governing Document
+
+---
+
+## Document Control
+
+| Field | Detail |
+|-------|--------|
+| **Classification** | Internal — Restricted Distribution |
+| **Version** | 2.1 |
+| **Effective Date** | April 2026 |
+| **Review Cycle** | Annual |
+| **Custodian** | Office of the Founder |
+| **Next Review** | April 2027 |
+
+---
+
+## PREAMBLE
+
+This document constitutes the definitive operational doctrine of Abraham of London. It is not a guide, a suggestion, or a set of recommendations. It is the standard by which the organisation acquires, converts, serves, and retains clients. Every operator, partner, and future leader of this institution is bound by the principles, structures, and protocols contained herein.
+
+Abraham of London exists to solve a problem that persists across every industry, every geography, and every era of commerce: the failure of organisations to execute the decisions they already know must be made. This manual codifies the system that eliminates that failure — not through advice, not through analytics, and not through persuasion, but through structured confrontation with reality and enforced action under pressure.
+
+This is a 100-year document. The language of business will change. The tools will evolve. The markets will transform. But the fundamental truth that organisations fail because decisions are avoided — not because information is lacking — will remain constant. This manual is built on that permanence. It should be read, internalised, and applied without deviation.
+
+---
+
+## HOW TO USE THIS MANUAL
+
+### Sequential Reading
+
+For first-time readers, this manual should be read sequentially from Part I through Part XIV plus Appendices. The logic of the system builds cumulatively — later chapters assume mastery of earlier principles.
+
+### Role-Based Reading Paths
+
+| Role | Required Reading |
+|------|-----------------|
+| **Founder** | Parts I-III + Part X (Capital and Investor Relations) |
+| **Operator** | Parts IV-IX (Sales Doctrine, Call Flow, Evidence System) |
+| **Investor Relations** | Part X (Capital Narrative, Investor Memo, Fundraising) |
+| **New Hire** | Part I (Identity), Part V (Sales Doctrine), Part XII (Operational Discipline), Part XIII (Governance & Compliance) |
+
+### Binding Authority
+
+> **PROHIBITION**
+> 
+> This manual is binding doctrine, not optional reading. No operator, partner, or representative of Abraham of London may deviate from the principles, scripts, pricing, or protocols contained herein without written authorisation from the Founder. Claiming ignorance of a section does not exempt compliance.
 
 ---
 
@@ -31,35 +77,63 @@
   - [Chapter 17: Cost of Inaction Engine](#chapter-17-cost-of-inaction-engine)
   - [Chapter 18: Execution Failure Layer](#chapter-18-execution-failure-layer)
   - [Chapter 19: Decision Memory v1](#chapter-19-decision-memory-v1)
-- [PART IV — SALES & POSITIONING](#part-iv--sales--positioning)
-  - [Chapter 20: Sales Doctrine](#chapter-20-sales-doctrine)
-  - [Chapter 21: Enterprise Case System](#chapter-21-enterprise-case-system)
-- [PART V — CONTENT & DISTRIBUTION](#part-v--content--distribution)
-  - [Chapter 22: Content Amplification](#chapter-22-content-amplification)
-  - [Chapter 23: Engagement Lane Architecture](#chapter-23-engagement-lane-architecture)
-- [PART VI — SYSTEM ARCHITECTURE](#part-vi--system-architecture)
-  - [Chapter 24: The 13-Layer Technical Architecture](#chapter-24-the-13-layer-technical-architecture)
-  - [Chapter 25: Delivery Model & Operating Cadence](#chapter-25-delivery-model--operating-cadence)
-- [PART VII — CAPITAL & INVESTOR RELATIONS](#part-vii--capital--investor-relations)
-  - [Chapter 26: Capital Narrative](#chapter-26-capital-narrative)
-  - [Chapter 27: Investor Memo](#chapter-27-investor-memo)
-  - [Chapter 28: Investor Call Script](#chapter-28-investor-call-script)
-  - [Chapter 29: Objection Handling — Investor Warbook](#chapter-29-objection-handling--investor-warbook)
-  - [Chapter 30: Fundraising Strategy](#chapter-30-fundraising-strategy)
-- [PART VIII — OPERATIONAL DISCIPLINE & GOVERNANCE](#part-viii--operational-discipline--governance)
-  - [Chapter 31: The First Ten Accounts](#chapter-31-the-first-ten-accounts)
-  - [Chapter 32: What Not To Do](#chapter-32-what-not-to-do)
-  - [Chapter 33: Quality Assurance & Compliance](#chapter-33-quality-assurance--compliance)
-  - [Chapter 34: Engagement Termination](#chapter-34-engagement-termination)
-- [PART IX — IP PROTECTION & COMPETITIVE DEFENSE](#part-ix--ip-protection--competitive-defense)
-  - [Chapter 35: Disclosure Principle](#chapter-35-disclosure-principle)
-  - [Chapter 36: Public vs Proprietary Layers](#chapter-36-public-vs-proprietary-layers)
+- [PART IV — REVENUE ARCHITECTURE & CONVERSION](#part-iv--revenue-architecture--conversion)
+  - [Chapter 20: The Product Ladder](#chapter-20-the-product-ladder)
+  - [Chapter 21: Pricing Doctrine](#chapter-21-pricing-doctrine)
+  - [Chapter 22: The Conversion Pathway](#chapter-22-the-conversion-pathway)
+- [PART V — SALES DOCTRINE](#part-v--sales-doctrine)
+  - [Chapter 23: Sales Positioning](#chapter-23-sales-positioning)
+  - [Chapter 24: Fundamental Sales Principles](#chapter-24-fundamental-sales-principles)
+  - [Chapter 25: The Five Objections and Their Resolution](#chapter-25-the-five-objections-and-their-resolution)
+  - [Chapter 26: Psychological Pattern Recognition](#chapter-26-psychological-pattern-recognition)
+- [PART VI — ENTERPRISE LAND STRATEGY](#part-vi--enterprise-land-strategy)
+  - [Chapter 27: Entry Methodology](#chapter-27-entry-methodology)
+  - [Chapter 28: The Land Mechanism](#chapter-28-the-land-mechanism)
+  - [Chapter 29: Expansion and Multi-User Collision](#chapter-29-expansion-and-multi-user-collision)
+  - [Chapter 30: Retainer Conversion](#chapter-30-retainer-conversion)
+- [PART VII — THE CALL FLOW SYSTEM](#part-vii--the-call-flow-system)
+  - [Chapter 31: Call Architecture and Rules](#chapter-31-call-architecture-and-rules)
+  - [Chapter 32: Stage-by-Stage Call Execution](#chapter-32-stage-by-stage-call-execution)
+  - [Chapter 33: The Enterprise Pitch](#chapter-33-the-enterprise-pitch)
+- [PART VIII — EVIDENCE & CONTENT SYSTEM](#part-viii--evidence--content-system)
+  - [Chapter 34: Enterprise Case System](#chapter-34-enterprise-case-system)
+  - [Chapter 35: Case Amplification System](#chapter-35-case-amplification-system)
+  - [Chapter 36: Content and Distribution Standards](#chapter-36-content-and-distribution-standards)
+  - [Chapter 37: Engagement Lane Architecture](#chapter-37-engagement-lane-architecture)
+- [PART IX — SYSTEM ARCHITECTURE](#part-ix--system-architecture)
+  - [Chapter 38: The 13-Layer Technical Architecture](#chapter-38-the-13-layer-technical-architecture)
+  - [Chapter 39: Delivery Model & Operating Cadence](#chapter-39-delivery-model--operating-cadence)
+- [PART X — CAPITAL & INVESTOR RELATIONS](#part-x--capital--investor-relations)
+  - [Chapter 40: Capital Narrative](#chapter-40-capital-narrative)
+  - [Chapter 41: Investor Memo](#chapter-41-investor-memo)
+  - [Chapter 42: Investor Call Script](#chapter-42-investor-call-script)
+  - [Chapter 43: Objection Handling — Investor Warbook](#chapter-43-objection-handling--investor-warbook)
+  - [Chapter 44: Fundraising Strategy](#chapter-44-fundraising-strategy)
+- [PART XI — OPERATIONAL DISCIPLINE](#part-xi--operational-discipline)
+  - [Chapter 45: The First Ten Accounts](#chapter-45-the-first-ten-accounts)
+  - [Chapter 46: What Not To Do](#chapter-46-what-not-to-do)
+  - [Chapter 47: What a "Yes" Looks Like](#chapter-47-what-a-yes-looks-like)
+- [PART XII — GOVERNANCE & COMPLIANCE](#part-xii--governance--compliance)
+  - [Chapter 48: Onboarding Protocol](#chapter-48-onboarding-protocol)
+  - [Chapter 49: Quality Assurance](#chapter-49-quality-assurance)
+  - [Chapter 50: Escalation Matrix](#chapter-50-escalation-matrix)
+  - [Chapter 51: Data Protection & Confidentiality](#chapter-51-data-protection--confidentiality)
+  - [Chapter 52: Engagement Termination](#chapter-52-engagement-termination)
+- [PART XIII — IP PROTECTION & COMPETITIVE DEFENSE](#part-xiii--ip-protection--competitive-defense)
+  - [Chapter 53: Disclosure Principle](#chapter-53-disclosure-principle)
+  - [Chapter 54: Public vs Proprietary Layers](#chapter-54-public-vs-proprietary-layers)
 - [APPENDICES](#appendices)
-  - [Appendix A: Pricing Matrix](#appendix-a-pricing-matrix)
-  - [Appendix B: Severity Taxonomy](#appendix-b-severity-taxonomy)
-  - [Appendix C: Condition Class Taxonomy](#appendix-c-condition-class-taxonomy)
-  - [Appendix D: 13 Contradiction Archetype Registry](#appendix-d-13-contradiction-archetype-registry)
-  - [Appendix E: Quality Gate Checklist](#appendix-e-quality-gate-checklist)
+  - [Appendix A: Product Catalog](#appendix-a-product-catalog)
+  - [Appendix B: Pricing Matrix](#appendix-b-pricing-matrix)
+  - [Appendix C: Severity Taxonomy](#appendix-c-severity-taxonomy)
+  - [Appendix D: Condition Class Taxonomy](#appendix-d-condition-class-taxonomy)
+  - [Appendix E: 13 Contradiction Archetype Registry](#appendix-e-13-contradiction-archetype-registry)
+  - [Appendix F: Quality Gate Checklist](#appendix-f-quality-gate-checklist)
+  - [Appendix G: System Metrics Glossary](#appendix-g-system-metrics-glossary)
+  - [Appendix H: Quick Reference Card](#appendix-h-quick-reference-card)
+  - [Appendix I: Operator Self-Diagnostic](#appendix-i-operator-self-diagnostic)
+  - [Appendix J: Revision History and Amendment Procedure](#appendix-j-revision-history-and-amendment-procedure)
+  - [Appendix K: Index / Term Reference](#appendix-k-index--term-reference)
 
 ---
 
@@ -117,13 +191,21 @@ The product philosophy of Abraham of London is governed by four principles:
 
 **Precision over comfort.** The system would rather say nothing than say something inaccurate. The Arbiter Tournament runs five mandatory validation rules against every synthesis output. If any hard rule fails, the synthesis is rejected and the user sees the mismatch — not a quietly degraded result. The system does not bluff intelligence. If the C3 score is below threshold, the system enters HARD_RECOVERY or SOFT_RECOVERY mode rather than fabricating depth from shallow input. This precision comes at a cost: some users will feel the system is too harsh. Those users are not the target market.
 
+**The Discomfort Principle.** The product works when it makes people uncomfortable enough to act. Comfort is the enemy of decision execution. A comfortable person does not change. A comfortable organisation does not confront its contradictions. A comfortable leader does not take the decision they have been avoiding for months. The system is designed to remove comfort systematically. It surfaces contradictions the user did not want to see. It prices costs the user did not want to quantify. It assigns ownership the user did not want to accept. It enforces deadlines the user did not want to face. This does not mean the system is aggressive. It means the system is accurate. Accuracy, when applied to avoided decisions, feels aggressive to the person avoiding them. That feeling is the mechanism working.
+
+**The Permanence Principle.** These principles do not change with market conditions, technology shifts, or organisational scale. They are permanent because the problem they address is permanent. Human beings will always prefer to avoid uncomfortable decisions. Organisations will always generate contradictions between stated intent and actual behaviour. Cost will always compound during delay. The tools will change. The interfaces will evolve. The pricing will adjust. But the fundamental architecture — surface the contradiction, price the delay, assign the owner, enforce the action, verify the outcome — is permanent doctrine.
+
 ---
 
 ## Chapter 4: Operating Principle
 
 Authority derives from accuracy, not permission.
 
-This is the operating principle of the institution. It means that the system does not ask for the client's approval before delivering a diagnosis. It does not soften findings to maintain the relationship. It does not adjust its output based on what the client wants to hear. The system derives its authority from one thing: being right.
+This is the operating principle of the institution. The system optimises for **decision completion under pressure**. Not better decisions. Not more informed decisions. Not more collaborative decisions. Completed decisions. The distinction is critical. "Better decisions" is a consulting promise — unmeasurable, unfalsifiable, and ultimately empty. Decision completion is binary: either the decision was taken and executed, or it was not.
+
+**The Governance Principle.** The system governs the interaction. The user does not. This is the most counter-intuitive principle in the entire architecture, and it is the most important. Every other product in the market defers to the user. It asks what they want. It presents options. It lets them navigate at their own pace. Abraham of London does the opposite. The system decides what question comes next. The system determines what truth is presented. The system controls the pace, the pressure, and the exit conditions. The user's role is to answer honestly and then act. This is not arrogance. It is engineering. A medical diagnostic does not ask the patient what tests they would prefer. The system has a methodology. The methodology works when followed. It fails when overridden by user preference.
+
+**The Operating Principle Applied.** It means that the system does not ask for the client's approval before delivering a diagnosis. It does not soften findings to maintain the relationship. It does not adjust its output based on what the client wants to hear. The system derives its authority from one thing: being right.
 
 If the system identifies a contradiction between what the client says and what the client does, and that contradiction is accurate, the system has earned the authority to press on it. If the system predicts that inaction will produce a specific structural consequence within 90 days, and that prediction is accurate, the system has earned the authority to escalate.
 
@@ -241,7 +323,7 @@ The system currently implements **4 core condition classes** with variant expres
 3. **Execution** — the decision has been made but is not being executed. The blocker is not informational but structural — resources, politics, or avoidance. Variant: partial execution creates the appearance of progress while the core issue remains unresolved.
 4. **Instability** — the conditions around the decision are shifting faster than the organisation can adapt. The decision may be correct today and obsolete next week. Variant: the organisation is making stable decisions in an unstable environment, or unstable decisions in a stable one.
 
-**TARGET — not yet implemented:** The system targets a taxonomy of **13 specific contradiction archetypes** distributed across these 4 condition classes. The 13-archetype registry is documented in Appendix D. The current implementation uses the 4 condition classes with the `detectContradictions` function performing rule-based contradiction detection (urgency without timeline, growth without commercial signals, strategic claims without depth, transformation without execution approach). The 13-archetype taxonomy represents the target state where each condition class contains 3-4 named archetypes with specific detection signatures, scoring weights, and prescribed interventions.
+**TARGET — not yet implemented:** The system targets a taxonomy of **13 specific contradiction archetypes** distributed across these 4 condition classes. The 13-archetype registry is documented in Appendix E. The current implementation uses the 4 condition classes with the `detectContradictions` function performing rule-based contradiction detection (urgency without timeline, growth without commercial signals, strategic claims without depth, transformation without execution approach). The 13-archetype taxonomy represents the target state where each condition class contains 3-4 named archetypes with specific detection signatures, scoring weights, and prescribed interventions.
 
 The contradiction model operates deterministically. Contradictions are derived from the user's own answers, not from statistical inference or sentiment analysis. The CaseObject stores the `contradiction` field (the primary contradiction identified), and the DeterministicOutput on the Intelligence Spine contains a `contradictionSet` — an array of all detected contradictions. The Arbiter Tournament validates that any LLM synthesis references these deterministic contradictions rather than inventing its own.
 
@@ -284,7 +366,17 @@ The Strategy Room is gated. Not every user qualifies. The Decision Directive sys
 
 Session initialisation, follow-up sequences, and conversion tracking are managed through dedicated API routes. The Strategy Room persists enforcement data through Prisma models including session state, execution milestones, and breach records (database migrations: `20260420_add_strategy_room_tables`, `20260423_add_strategy_room_enforcement_persistence`).
 
-The Strategy Room is where the system's thesis is most visible: force the decision, name the owner, track the execution, escalate the breach. It is not a workshop. It is an enforcement mechanism with a 48-hour clock.
+> **PROHIBITION**
+> 
+> The Strategy Room is never to be described or sold as "a session." That framing reduces it to a time-based service and invites comparison with coaching, consulting, or therapy.
+
+The Strategy Room is to be described exclusively as:
+
+> **SCRIPT**
+> 
+> "A governed intervention on a live decision."
+
+This framing establishes it as a structural action, not a conversation. It is priced accordingly — not by the hour, but by the complexity of what must be resolved.
 
 ---
 
@@ -472,24 +564,260 @@ Decision Memory v1 is the foundation of the Enterprise layer's portfolio view. B
 
 ---
 
-# PART IV — SALES & POSITIONING
+# PART IV — REVENUE ARCHITECTURE & CONVERSION
 
 ---
 
-## Chapter 20: Sales Doctrine
+## Chapter 20: The Product Ladder
+
+### 20.1 Architecture Overview
+
+The product ladder is not a menu. It is a structured escalation system. Each stage exists to increase three variables simultaneously: **truth clarity**, **pressure**, and **commitment**. A user who enters at the bottom and moves through the system experiences progressively greater exposure to the real decision they are avoiding, progressively greater economic pressure to act, and progressively greater personal commitment to resolution.
+
+The ladder operates from £0 to enterprise retainer:
+
+```
+Content -> Fast Diagnostic -> Executive Reporting -> Strategy Room -> Retainer
+  £0           £0                  £295              £750-£1,250      £5k+/month
+```
+
+No stage can be skipped without degrading conversion quality. No stage can be modified to be "more comfortable" without destroying the mechanism that produces action.
+
+### 20.2 Stage Definitions
+
+**Stage 1: Content (£0)** — Content is not marketing. It is controlled provocation. Every piece of content published by Abraham of London must do one of three things: expose a contradiction, quantify a cost, or force a decision. Content that educates, entertains, or inspires without creating pressure is wasted.
+
+**Stage 2: Fast Diagnostic (£0)** — The Fast Diagnostic is a six-question instrument that identifies the real decision being avoided. It is free because its purpose is not revenue generation — its purpose is signal detection.
+
+**Stage 3: Executive Reporting (£295)** — Executive Reporting is the first commercial transaction. It forces the user to put an explicit number on the consequence they already feel. The user is not buying information. They are buying the inability to pretend the cost is not real.
+
+**Stage 4: Strategy Room (£750-£1,250)** — The Strategy Room is a governed intervention on a live decision. The pricing reflects the number of stakeholders and the degree of ambiguity — not the amount of time spent. £750: Low-risk decision, single stakeholder, limited ambiguity. £1,250: Active decision, multiple stakeholders, high ambiguity. £5,000+: Organisational-level intervention requiring structural change.
+
+**Stage 5: Retainer (£5,000+/month)** — The retainer is not ongoing support. It is a permanent Decision Authority Layer installed within the organisation. It monitors decisions, enforces follow-through, flags contradictions early, and escalates when required.
+
+### 20.3 The Complete Product Catalog
+
+The organisation maintains eighteen canonical products across seven commercial layers:
+
+#### A. Decision Layer (Instruments)
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Decision Exposure Instrument | £29 | LIVE |
+| Mandate Clarity Framework | £49 | LIVE |
+| Intervention Path Selector | £79 | LIVE |
+| Operator Decision Pack (bundle of above three) | £129 | LIVE |
+
+#### B. Evidence Layer
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Case Dossier — Tariff Shock | Free | LIVE |
+| Case Dossier — Team Alignment | Free | LIVE |
+| Case Dossier — Escalation Denied | Free | LIVE |
+
+#### C. Intelligence Layer
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Global Market Intelligence Report — Q1 2026 | £59 | LIVE |
+
+#### D. Reporting Layer
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Executive Reporting | £295 | LIVE |
+| Executive Reporting — Advanced | £295 | LIVE |
+| Diagnostic Report — Basic | £250 | RETIRED |
+| Diagnostic Report — Pro | £750 | RETIRED |
+
+#### E. Execution Layer
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Strategy Room — Entry | £750 | LIVE |
+| Strategy Room — Active / Multi-Decision | £1,250 | LIVE |
+
+#### F. Membership Layer
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Inner Circle | £30/month | INACTIVE |
+
+#### G. Enterprise Retainer Layer
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Decision Authority Retainer — Core | Contracted monthly | INACTIVE (awaiting first contract) |
+| Decision Authority Retainer — Operational | Contracted monthly | INACTIVE (awaiting first contract) |
+| Decision Authority Retainer — Institutional | Contracted monthly | INACTIVE (awaiting first contract) |
+
+### 20.4 Product Ladder Integrity Rule
+
+> **PROHIBITION**
+> 
+> Every product in the catalog must satisfy a single criterion: it must increase pressure toward decision execution. Products that provide comfort, reduce urgency, or allow the user to delay without consequence are structurally incompatible with the system and must be retired or redesigned.
+
+---
+
+## Chapter 21: Pricing Doctrine
+
+### 21.1 The Fundamental Pricing Principle
+
+> **KEY PRINCIPLE**
+> 
+> Price against cost, not features.
+
+This single sentence governs all pricing decisions within Abraham of London. The question is never "what is this product worth based on its features, its time investment, or its market comparables?" The question is always "what is the decision this product addresses currently costing the buyer, and is our price trivial relative to that cost?"
+
+### 21.2 The Non-Negotiation Principle
+
+> **PROHIBITION**
+> 
+> Never justify price. Never negotiate. Never discount.
+
+The correct response to any price hesitation is a single principle, delivered without elaboration:
+
+> **SCRIPT**
+> 
+> "If this isn't already costing more than this, don't do it. If it is, then the price isn't the decision."
+
+### 21.3 The Stakeholder-Ambiguity Pricing Model
+
+Price increases with the number of stakeholders and the degree of ambiguity — not with the amount of time spent. This model reflects the actual difficulty of decision enforcement. Time is irrelevant. What matters is how many people must be aligned, how many contradictions must be surfaced, and how much structural resistance must be overcome.
+
+### 21.4 Enterprise Pricing Tiers
+
+Enterprise engagements operate on monthly retainer structures:
+
+| Tier | Monthly Price | Scope |
+|------|---------------|-------|
+| **Core** | £5,000/month | One to two active decisions under governance. Single decision owner. Clear scope. |
+| **Operational** | £10,000/month | Multi-team oversight. Multiple active decisions. Cross-functional contradiction detection. |
+| **Institutional** | £25,000/month | Organisation-level governance. Full decision portfolio management. Board-level reporting. |
+| **Bespoke** | £10,000-£50,000/month | Scope determined by organisational complexity and decision volume. |
+
+---
+
+## Chapter 22: The Conversion Pathway
+
+### 22.1 The Stage Map
+
+The conversion pathway is a structured escalation from £0 to £10,000+/month retainer. It is not a funnel in the conventional marketing sense. It optimises for one thing: moving a serious operator from initial signal to paid resolution as rapidly as their decision pressure allows.
+
+```
++----------+    +-----------------+    +---------------------+    +------------------+    +--------------+
+| Content  | -> | Fast Diagnostic | -> | Executive Reporting | -> |  Strategy Room   | -> |   Retainer   |
+|    £0    |    |       £0        |    |        £295         |    |   £750-£1,250    |    |  £5k+/month  |
++----------+    +-----------------+    +---------------------+    +------------------+    +--------------+
+```
+
+Each stage must increase truth clarity, increase pressure, and increase commitment. Any stage that reduces any of these three variables is a failure point.
+
+### 22.2 The Moment That Matters
+
+The close happens at a single, identifiable moment:
+
+> The user completes the Fast Diagnostic and confirms three conditions:
+> - **Accuracy = YES** — the diagnostic identified the real problem
+> - **Cost >= £5,000** — the monthly cost of inaction is material
+> - **Intent = YES** — they are willing to act
+
+When all three conditions are met simultaneously, that is not a lead. That is **entry clearance**. The immediate move:
+
+> **SCRIPT**
+> 
+> "If that's accurate, then you already know this isn't small. The question is whether it's just you — or structural. That's what the next step confirms."
+
+### 22.3 The Executive Reporting Close
+
+Executive Reporting is the first monetary commitment. The conversion frame:
+
+> **SCRIPT**
+> 
+> "You've already described the problem. This is where we make the cost explicit and remove any ambiguity. If the number is trivial, don't buy it. If it isn't, you already know why this matters."
+
+> **PROHIBITION**
+> 
+> Key rules for this stage:
+> - No external pressure applied
+> - No discount offered under any circumstances
+> - No justification of the price
+> - No follow-up if the buyer hesitates
+
+### 22.4 Post-Executive Reporting: The Strategy Room Transition
+
+The transition message:
+
+> **SCRIPT**
+> 
+> "You now have the contradiction, the cost, and the decision. What you don't have is execution. That's the only reason to continue. We can run a controlled session to remove ambiguity, establish ownership, and force the decision into action. Or you can let this continue. Up to you."
+
+### 22.5 Strategy Room Call Structure
+
+If the buyer requests a call before committing to Strategy Room, the call follows a strict 20-minute structure:
+
+```
+MINUTES 0-3: CONFIRMATION
++-- Confirm the decision that has been identified
++-- Confirm the cost that has been quantified
++-- Establish that both are still accurate and current
+
+MINUTES 3-10: DIAGNOSIS
++-- Identify the real blocker preventing execution
++-- Identify the actual decision owner (may differ from stated owner)
++-- Identify any hidden dependencies or structural constraints
+
+MINUTES 10-15: DECLARATION
++-- State: "This will not resolve without intervention."
++-- Allow silence. Do not elaborate. Do not soften.
+
+MINUTES 15-20: CLOSE
++-- Present the binary: "We can fix this now in a structured session.
+|   Or you can revisit this in 30 days with a higher cost. Which do you want?"
++-- Stop talking. Wait for the answer.
+```
+
+> **PROHIBITION**
+> 
+> Rules for the call: Never say "What do you think?" Never say "Let me know." Never offer a follow-up call. Never provide additional information unless specifically requested. Never exceed 20 minutes.
+
+### 22.6 Price Defence
+
+When a buyer hesitates at any price point:
+
+> **SCRIPT**
+> 
+> "If this isn't already costing more than this, don't do it. If it is, then the price isn't the decision."
+
+Do not justify the price. Do not explain what is included. Do not compare to alternatives. Do not offer payment plans. Do not negotiate.
+
+### 22.7 Retainer Close
+
+The retainer close shows pattern recurrence:
+
+> **SCRIPT**
+> 
+> "This isn't a one-off. You have a pattern of decision drift. We can keep fixing these one by one. Or we put a layer in place that stops them recurring. That's what the retainer does. It governs decisions, execution, and follow-through. Not advice. Enforcement."
+
+Trigger conditions for introducing the retainer conversation:
+- Two or more decisions flagged within 14-30 days
+- Repeated breach patterns (commitments made and not kept)
+- Cross-team contradictions surfacing independently
+
+If none of these conditions are present, the retainer is not introduced. The system does not upsell. It responds to demonstrated pattern.
+
+---
+
+# PART V — SALES DOCTRINE
+
+---
+
+## Chapter 23: Sales Positioning
 
 The sales doctrine of Abraham of London follows a single principle: authority before features.
 
 The sales conversation does not begin with what the product does. It begins with a question the prospect cannot answer confidently. "How long has this decision been unresolved?" "Who owns it?" "What has it cost you so far?" If the prospect can answer these questions clearly and without hesitation, they do not need the system. If they cannot — and they almost never can — the system has already demonstrated its value before any feature has been described.
-
-**Pricing Structure:**
-
-- **Fast Diagnostic** — Free. Entry point. Under 2 minutes. Server-side scoring only.
-- **Purpose Alignment Assessment** — Free. Personal diagnostic. Establishes mandate clarity.
-- **Constitutional Assessment** — Included in engagement pathways. Structural diagnostic.
-- **Executive Reporting** — **£295**. The first paid product. Delivers a formatted executive report with contradiction analysis, economic framing, and governance recommendations.
-- **Strategy Room** — **£750-£1,250**. The enforcement product. 48-hour action-forcing session with locked decision, named owner, sequenced moves, and execution tracking. Pricing varies by complexity and organisational scale.
-- **Retainers** — **£5,000-£50,000/month**. Ongoing decision authority infrastructure. Includes recurring diagnostics, multi-stakeholder deployment, longitudinal tracking, boardroom mode access, and portfolio-level decision intelligence. Retainer contracts are managed through the enterprise retainer system (`20260423_add_enterprise_retainer_contracts` migration).
 
 **Sales Process:**
 
@@ -503,81 +831,1058 @@ The Do-Not-Sell flag exists for prospects who should not proceed. If the system 
 
 ---
 
-## Chapter 21: Enterprise Case System
+## Chapter 24: Fundamental Sales Principles
 
-The Enterprise Case System produces evidence for institutional credibility without compromising client confidentiality. It operates on three principles:
+### 24.1 The Core Rule
 
-**Anonymised evidence only.** No client is named. No organisation is identified. Cases are described in terms of condition class, contradiction pattern, intervention deployed, and verified outcome. The anonymisation is structural, not cosmetic — the case descriptions are written such that they could apply to any organisation facing that condition class.
+> **KEY PRINCIPLE**
+> 
+> "You do not argue. You do not persuade. You do not convince. You restate reality and force a choice."
 
-**No client naming.** This is an absolute prohibition, not a preference. The system's credibility derives from accuracy, not from name-dropping. The statement "a FTSE 250 company in financial services" is never used because it narrows identification. The statement "an organisation experiencing authority-class contradiction with critical exposure" is used because it describes the condition without identifying the client.
+This is not a sales technique. It is the operational definition of how every commercial interaction within Abraham of London is conducted. The system does not sell in any conventional sense. It surfaces reality — the reality the buyer already knows but is choosing to avoid — and then forces a binary decision: act on that reality, or continue paying the cost of ignoring it.
 
-**Modelled outcomes.** Case studies present modelled outcomes based on the system's diagnostic framework, not claimed client results. The system can state: "In cases where authority-class contradiction is resolved through Strategy Room intervention, the observed pattern is decision resolution within 14 days and structural change verification within 90 days." This is a statement about the system's observed patterns, not a promise about any specific client's results.
+### 24.2 Response Structure
 
-The Enterprise Case System feeds the Social Proof Engine (`lib/proof/social-proof-engine.ts`) which maintains observed outcome metrics and accuracy statistics. These are used in Boardroom Mode dossiers, Executive Reports, and sales materials. The evidence is drawn from the Evidence Ledger and verified outcomes, ensuring that every proof statement can be traced back to an actual verified impact record.
+Every commercial response, regardless of context, follows a three-part structure:
+
+1. **Acknowledge** — Confirm that you heard what the buyer said. Do not dismiss. Do not argue.
+2. **Re-anchor** — Return the conversation to the only relevant fact: the cost of the avoided decision.
+3. **Force decision boundary** — Present the binary. Act or continue. Choose.
+
+This structure is invariant. It does not change based on the buyer's tone, their seniority, their industry, or their objection.
+
+### 24.3 The Structural Sales Advantage
+
+Abraham of London possesses something that most commercial operations do not: **proof of contradiction combined with behavioural data**.
+
+This is not a claim. It is a demonstrable fact derived from the buyer's own inputs:
+
+- "You said X. Your team said Y."
+- "You committed to act. You didn't."
+- "The cost is £12,000 per month. No action has been taken."
+
+These are not persuasion techniques. They are exposure. The buyer cannot argue with their own data. This advantage transforms the sales interaction from a negotiation into a confrontation with reality.
+
+### 24.4 What Kills Deals
+
+> **PROHIBITION**
+
+1. **Explaining too much** — Every additional word after the decision boundary is set weakens the position.
+2. **Softening tone** — "Perhaps we could..." and "If you'd like to..." and "One option might be..." are prohibited constructions.
+3. **Giving multiple options** — Options create the illusion of complexity where none exists.
+4. **Adding "value" language** — Words like "value," "benefit," "advantage," "ROI," and "investment" signal that the seller is justifying rather than stating.
+5. **Chasing after hesitation** — When a buyer hesitates and the seller follows up, the power dynamic inverts.
+
+### 24.5 What Wins Deals
+
+> **KEY PRINCIPLE**
+> 
+> Four elements — and only four — produce closed deals within this system.
+
+1. **Clarity** — The problem is stated with absolute precision. No ambiguity. No softening.
+2. **Constraint** — The number of available actions is reduced to the minimum. Ideally two: act or don't.
+3. **Inevitability** — The framing communicates that this problem will not resolve itself.
+4. **Controlled pressure** — Pressure that emerges naturally from the buyer's own acknowledged reality. Not artificial urgency.
 
 ---
 
-# PART V — CONTENT & DISTRIBUTION
+## Chapter 25: The Five Objections and Their Resolution
+
+Every objection a buyer raises, regardless of how it is worded, collapses into one of five categories. Mastery of this chapter means that no objection ever produces uncertainty or improvisation.
+
+#### OBJECTION 1: "This is expensive"
+
+**What they mean:** "I don't feel enough pressure yet."
+
+**Psychology:** The buyer has not fully internalised the cost of their avoided decision. The price of the solution feels real; the cost of the problem still feels abstract.
+
+> **RESPONSE**
+> 
+> "Then don't do it. If this isn't already costing more than this, it's not the right level. If it is, then the price isn't the decision."
+
+**Then:** Stop talking. Silence does the work.
+
+> **PROHIBITION**
+> 
+> Never justify the price. Never list features. Never compare to alternatives. Never offer a discount. Never say "it's an investment."
+
+#### OBJECTION 2: "I need to think about it"
+
+**What they mean:** "I want to delay the decision."
+
+**Psychology:** This mirrors the exact behaviour that brought the buyer to the system in the first place — decision avoidance. They are now avoiding the decision about whether to address their avoided decision.
+
+> **RESPONSE**
+> 
+> "That's the pattern we've just identified. You already have the problem, the cost, and the decision. What exactly are you thinking about?"
+
+**Then:** Wait. Force specificity. Most buyers cannot answer this question because there is nothing specific to think about.
+
+#### OBJECTION 3: "Not the right time"
+
+**What they mean:** "I don't want to act now."
+
+**Psychology:** The buyer believes future conditions will be more favourable. This belief is almost always false.
+
+> **RESPONSE**
+> 
+> "When does this become the right time? Because from what you've shown, it's already costing you monthly."
+
+**Then deliver the binary:**
+
+> **SCRIPT**
+> 
+> "So the real decision is: act now or pay for another month. Which one are you choosing?"
+
+#### OBJECTION 4: "We can handle this internally"
+
+**What they mean:** "We want control. We want to avoid external exposure."
+
+**Psychology:** This objection is ego-driven. The buyer does not want to acknowledge that their organisation requires external enforcement.
+
+> **RESPONSE**
+> 
+> "You probably can. The question is: why hasn't it been handled already?"
+
+**Then:**
+
+> **SCRIPT**
+> 
+> "Something in the structure is preventing that. That's what we remove."
+
+#### OBJECTION 5: "I'm not sure it's accurate"
+
+> **KEY PRINCIPLE**
+> 
+> This is the only valid objection. Every other objection is a form of avoidance.
+
+> **RESPONSE**
+> 
+> "Good. Where is it wrong?"
+
+**If their response is vague:**
+
+> **SCRIPT**
+> 
+> "That's not a disagreement. That's discomfort."
+
+**If their response is specific** — adjust or clarify. The system is not infallible.
+
+**In either case, close with:**
+
+> **SCRIPT**
+> 
+> "If it's even partially right, it still needs to be addressed. So the question remains the same."
 
 ---
 
-## Chapter 22: Content Amplification
+## Chapter 26: Psychological Pattern Recognition
 
-Content amplification operates on a 7-asset rotation model distributed primarily through LinkedIn, supported by the Abraham of London canon, glossary, toolkits, and frameworks.
+### 26.1 The Four Patterns
 
-**The 7-Asset Rotation:**
+Every buyer exhibits one of four behavioural patterns during commercial interaction. These patterns are not personality types — they are responses to pressure.
 
-1. **Doctrine posts** — statements of principle from the founding thesis. These establish institutional authority. They do not sell. They define the category.
-2. **Contradiction cases** — anonymised examples of specific contradiction patterns the system detects. These demonstrate diagnostic capability without revealing methodology.
-3. **Economic framing pieces** — content that reframes the cost of inaction. These shift the prospect's mental accounting from "cost of intervention" to "cost of doing nothing."
-4. **System capability posts** — descriptions of what the system does, focused on outputs not inputs. What the user sees, not how the system works.
-5. **Authority challenge posts** — posts that challenge conventional decision-making assumptions. These repel wrong clients and attract right ones.
-6. **Evidence posts** — anonymised outcome data from the system. Observed patterns, accuracy rates, resolution timelines.
-7. **Engagement invitations** — direct calls to action. Run the diagnostic. See what it finds. Free. Under two minutes.
+### 26.2 Pattern A: The Avoider
 
-**LinkedIn Campaign.** The primary distribution channel is LinkedIn with a 21-post market-dominant entry campaign. This campaign was designed to establish category authority in the first wave. Each post follows a specific structural template: opening contradiction, institutional framing, system capability reference, and call to action. The posts are sequenced to build from doctrine (establishing the problem) through capability (establishing the system) to invitation (driving engagement). All 21 posts have been rewritten for market-dominant entry positioning.
+**Signals:** Vague answers, repeated requests for time, topic-shifting when the conversation approaches the decision point, agreement in principle with no movement toward action.
 
-**Canon and Supporting Assets.** The Abraham of London canon (`lib/canon.ts`) provides the foundational vocabulary. The glossary defines key terms. Toolkits provide frameworks that demonstrate the system's thinking without revealing its machinery. All supporting assets are public by design — they establish authority. The proprietary elements are the scoring, classification, and synthesis engines that sit behind the public face.
+**What is happening:** The Avoider's primary mechanism is diffusion. They dissipate pressure by remaining non-specific.
+
+**The move: Increase pressure.**
+
+> **SCRIPT**
+> 
+> "You're describing a topic, not a decision."
+
+**Follow-up pressure:** "What specifically are you deciding? What specifically does it cost? When specifically will you act?"
+
+### 26.3 Pattern B: The Rationaliser
+
+**Signals:** Long explanations, intellectual justifications for inaction, reframing the problem as more complex, using phrases like "it's nuanced" or "there are multiple dimensions."
+
+**What is happening:** The Rationaliser's primary mechanism is complexity inflation.
+
+**The move: Collapse complexity.**
+
+> **SCRIPT**
+> 
+> "That doesn't change the fact that the decision hasn't been taken."
+
+**Follow-up pressure:** "You've identified twelve considerations. Which one is actually preventing you from deciding?"
+
+### 26.4 Pattern C: The Defender
+
+**Signals:** "We already tried that," "It's not that simple," "You don't understand our context," challenging the system's authority or methodology.
+
+**What is happening:** The Defender's primary mechanism is ego protection.
+
+**The move: Respect, then expose.**
+
+> **SCRIPT**
+> 
+> "Agreed. It's not simple. That's why it's still unresolved."
+
+**Follow-up pressure:** "What would need to change for this to resolve? And why hasn't that change happened?"
+
+### 26.5 Pattern D: The High Performer
+
+**Signals:** Quick recognition of the diagnosis, short direct responses, visible discomfort but no avoidance, questions focused on "how" rather than "whether."
+
+**What is happening:** The High Performer already knows. They are seeking the mechanism to execute.
+
+**The move: Accelerate.**
+
+> **SCRIPT**
+> 
+> "Then we don't need more discussion. We need execution."
+
+> **KEY PRINCIPLE**
+> 
+> The High Performer is the best client. They convert fastest, produce the strongest outcomes, and generate the most referrals.
+
+### 26.6 Conversation Control Rules
+
+**1. Shorten responses.** Every response should be shorter than the buyer's preceding statement. Brevity signals authority.
+
+**2. Remove options.** Never present three possibilities when one will suffice. Say "this is what happens next."
+
+**3. Force clarity.** Every statement must push toward specificity. Which decision, what cost, whose ownership, what deadline.
+
+### 26.7 Prohibited Language
+
+> **PROHIBITION**
+> 
+> Never say "What do you think?" — Never say "Let me know" — Never say "We can explore" — Never say "No pressure" — Never say "Take your time" — Never say "Happy to chat" — Never say "Just following up"
+
+### 26.8 Required Language
+
+The following constructions are the standard vocabulary of commercial interaction:
+
+- "This is the decision" — Establishes what must be resolved
+- "This is the consequence" — Establishes what happens if it is not resolved
+- "Choose" — Forces action
 
 ---
 
-## Chapter 23: Engagement Lane Architecture
+# PART VI — ENTERPRISE LAND STRATEGY
+
+---
+
+## Chapter 27: Entry Methodology
+
+### 27.1 The Governing Principle: Don't Sell, Trigger
+
+> **KEY PRINCIPLE**
+> 
+> Abraham of London does not pitch organisations. It does not send proposals. It does not request meetings. It lets one senior operator expose a contradiction.
+
+That contradiction — surfaced through the operator's own answers, priced by the operator's own estimate, and confirmed by the operator's own acknowledgment — becomes the entry point. The system did not sell anything. The system revealed something that was already true.
+
+### 27.2 Target Profile
+
+The target profile is non-negotiable. Engagement with individuals who do not match this profile is actively destructive to positioning, to conversion rate, and to institutional authority.
+
+**Valid targets:**
+- Founder / CEO / COO
+- Head of Strategy / Transformation
+- Division leader with direct P&L pressure
+
+> **PROHIBITION**
+> 
+> **Everyone else is noise.** No middle managers without decision authority. No HR directors seeking "culture tools." No consultants looking for "partnership opportunities." No investors doing "due diligence" on the category. No academics interested in the methodology.
+
+### 27.3 The Entry Message Framework
+
+The entry message follows a specific architecture: controlled provocation without pitch, without brand explanation, and without any request for the recipient's time.
+
+> **SCRIPT**
+> 
+> "You're not dealing with a strategy problem. You're dealing with a decision that hasn't actually been taken. Run this. 6 questions. No prep. If it's wrong, ignore it. If it's right, you'll know immediately."
+
+This message works because it reframes the recipient's situation, introduces the diagnostic as a test not a product, removes all obligation, and creates a self-selection mechanism.
+
+### 27.4 The Six-Question Diagnostic Trigger
+
+The Fast Diagnostic is the entry mechanism. Six questions. No preparation required. No time commitment beyond three minutes. No commercial obligation. But the output — when it lands — creates an immediate and undeniable recognition: the problem is real, the cost is measurable, and the decision is being avoided.
+
+---
+
+## Chapter 28: The Land Mechanism
+
+### 28.1 The Sequence
+
+1. A single user runs the Fast Diagnostic
+2. The diagnostic surfaces a contradiction between their stated position and their actual situation
+3. The user sees the cost of that contradiction — quantified in their own terms
+4. The user faces decision pressure — not from the system, but from their own acknowledged reality
+
+### 28.2 Signal Detection
+
+The system watches for three simultaneous confirmations:
+
+- **Accuracy = YES** — The user confirms the diagnostic identified the real problem
+- **Intent = YES** — The user states willingness to act
+- **Cost >= £5,000** — The monthly cost of inaction is material
+
+When all three conditions are met, the user is **entry clearance**. The response to entry clearance is immediate, direct, and structural.
+
+### 28.3 The Immediate Move
+
+Upon detecting entry clearance, the system pushes Executive Reporting with a single reframe:
+
+> **SCRIPT**
+> 
+> "This is already affecting more than one person. Confirm it."
+
+### 28.4 The Structural Shift
+
+The critical transition in the land mechanism is the shift from personal to structural:
+
+- **Before Executive Reporting:** "I have a decision I'm avoiding"
+- **After Executive Reporting:** "My organisation has a structural decision failure"
+
+This shift is what enables enterprise expansion.
+
+---
+
+## Chapter 29: Expansion and Multi-User Collision
+
+### 29.1 The Expansion Philosophy
+
+> **PROHIBITION**
+> 
+> The Strategy Room is never sold immediately after Executive Reporting.
+
+Expansion is triggered by introducing organisational contradiction — the gap between how the individual user perceives reality and how their team perceives it.
+
+### 29.2 The Trigger Message
+
+> **SCRIPT**
+> 
+> "If this is accurate for you, there is a high probability your team would answer differently. That difference is the real problem. Run this with 3-5 people involved in the decision."
+
+This message is not an upsell. It is an introduction of risk.
+
+### 29.3 Why This Works
+
+The expansion trigger works because it does not ask for money, does not propose a product, introduces risk of misalignment, creates curiosity, and triggers internal testing without requiring commercial commitment.
+
+### 29.4 Multi-User Collision
+
+When two to five users from the same organisation complete the diagnostic, the system surfaces:
+
+> **KEY PRINCIPLE**
+> 
+> "Leadership and team are not describing the same reality."
+
+The specific collision patterns that emerge:
+
+- Leadership scores decision clarity at one level; the team scores it significantly lower
+- The stated decision owner is not recognised as the owner by those who must execute
+- The cost estimate varies dramatically between levels of the organisation
+- The blocker identified by leadership differs fundamentally from the blocker identified by the team
+
+#### 29.4.1 Cost Divergence
+
+Leadership estimates the cost at £5,000/month. The team estimates £25,000/month. The gap reveals who is feeling the pain versus who is insulated from it. The true cost is almost always closer to the team's estimate.
+
+#### 29.4.2 Blocker Contradictions
+
+Leadership says "we need more data." The team says "we need a decision." The real blocker is neither — it is that no one has authority to force resolution. "More data" is avoidance language. "Need a decision" is frustration language.
+
+#### 29.4.3 Authority Gaps
+
+The stated owner says "I'm responsible." But when asked "can you approve the budget, remove the blocker, or change the timeline?" they say no. Responsibility without authority is structural paralysis.
+
+### 29.5 Strategy Room Introduction
+
+> **SCRIPT**
+> 
+> "You now have two conflicting versions of the same decision. This will not resolve itself. We can run a controlled session to establish the real decision owner, remove ambiguity, and force execution. Or you can let this continue. Your call."
+
+---
+
+## Chapter 30: Retainer Conversion
+
+### 30.1 The Retainer Game
+
+The retainer is the true commercial objective. Individual transactions are entry mechanisms. They prove the system works. But the retainer is never proposed. It is triggered by demonstrated pattern — and only by demonstrated pattern.
+
+### 30.2 Trigger Conditions
+
+1. **Two or more decisions flagged within 14-30 days** — Demonstrating that decision avoidance is chronic
+2. **Repeated breach patterns** — The organisation commits to actions and fails to execute them
+3. **Cross-team contradictions** — Multiple teams surface conflicting realities about the same decisions
+
+> **PROHIBITION**
+> 
+> If none of these conditions are present, the retainer is not mentioned. The system does not anticipate need. It responds to demonstrated reality.
+
+### 30.3 The Retainer Frame
+
+> **SCRIPT**
+> 
+> "This isn't a one-off decision problem. You have a recurring decision integrity issue. We can keep reacting to each one. Or we put a governance layer over it. That's what the retainer does."
+
+The retainer is described exclusively as a **Decision Authority Layer** that monitors active decisions, enforces follow-through on committed actions, flags contradictions early, and escalates when required. This is not advice. It is enforcement.
+
+### 30.4 Pricing Tiers
+
+| Tier | Monthly Price | Scope |
+|------|---------------|-------|
+| **Core** | £5,000/month | One to two active decisions under governance |
+| **Operational** | £10,000/month | Multi-team oversight, multiple active decisions |
+| **Institutional** | £25,000/month | Organisation-level governance, full decision portfolio |
+
+> **PROHIBITION**
+> 
+> There is no negotiation on price. There is no discount for longer commitments. There is no "introductory rate."
+
+### 30.5 The Transition from Transaction to Retainer
+
+1. First Strategy Room resolves a single decision successfully
+2. Second decision surfaces within days to weeks
+3. Pattern becomes undeniable: the organisation does not have a decision problem — it has a decision system problem
+4. Retainer is introduced as the structural solution to a structural issue
+
+> **KEY PRINCIPLE**
+> 
+> The key psychological shift: the client stops thinking of Abraham of London as a provider they call when a problem arises, and starts thinking of it as infrastructure they cannot operate without. That shift — from vendor to infrastructure — is the retainer close.
+
+---
+
+# PART VII — THE CALL FLOW SYSTEM
+
+---
+
+## Chapter 31: Call Architecture and Rules
+
+The call is not a conversation. It is not a discovery session. It is a deterministic mechanism that either qualifies a prospect into a paying engagement or removes them from the pipeline within minutes.
+
+> **KEY PRINCIPLE**
+> 
+> The call exists to filter and force, not to discuss and nurture.
+
+### 31.1 The Four Rules of Call Conduct
+
+**Rule One: You ask. They answer.** The operator controls the frame at all times. Questions flow in one direction.
+
+**Rule Two: You do not explain early.** Explanation is a defensive posture. The operator delivers no context, no background, no positioning statement until the prospect has demonstrated economic reality and decision authority.
+
+**Rule Three: You do not rescue vague thinking.** When a prospect cannot articulate their problem with specificity, the operator does not bridge this gap. The operator names the gap and exits.
+
+**Rule Four: You exit weak calls fast.** A call that fails to produce economic clarity within the first three minutes is a call that should end within four.
+
+### 31.2 The Flow Map
+
+```
+OPEN -> QUALIFY -> DIAGNOSE -> ANCHOR -> AUTHORITY -> OFFER -> PRICE -> CLOSE
+                \
+                 DISQUALIFY (early exit at any stage)
+```
+
+At every stage, branch logic determines whether the call advances or terminates.
+
+### 31.3 Call Classification Types
+
+**Type 1 — High-Quality Call.** Clear decision articulated, high monthly cost confirmed, authority present. Action: close or advance immediately.
+
+**Type 2 — Medium-Quality Call.** Cost is present and confirmed, but authority is unclear. Action: redirect. Either require the decision owner to join a subsequent call, or downgrade to Executive Reporting.
+
+**Type 3 — Low-Quality Call.** Vague problem statement, low or unquantified cost, no urgency. Action: exit fast.
+
+---
+
+## Chapter 32: Stage-by-Stage Call Execution
+
+This chapter provides the exact language, branch logic, and decision criteria for each stage of the call flow. Deviation from this script is not permitted during the first 100 calls.
+
+### Call Flow Decision Tree
+
+```
++-----------------------------------------------------------------+
+|                      CALL FLOW DECISION TREE                    |
++-----------------------------------------------------------------+
+|                                                                 |
+|  STAGE 1 -- OPEN (Frame Control)                                |
+|  +-- Clear answer (names decision + cost) ---------> QUALIFY    |
+|  +-- Vague/Abstract response                                   |
+|       +-- Force clarity ("That's a topic...") ----> QUALIFY     |
+|       +-- Still vague after redirect -------------> EXIT        |
+|                                                                 |
+|  STAGE 2 -- QUALIFY (Economic Reality)                          |
+|  +-- Gives a number --------------------------> DIAGNOSE       |
+|  +-- "Not sure" but gives magnitude -----------> DIAGNOSE       |
+|  +-- Refuses/avoids quantification ------------> EXIT           |
+|                                                                 |
+|  STAGE 3 -- DIAGNOSE (Pattern Extraction)                       |
+|  +-- Agreement with pattern -------------------> ANCHOR         |
+|  +-- Resistance ("more complex than that")                      |
+|       +-- Cannot explain why unresolved -------> ANCHOR         |
+|       +-- Provides valid reframe --------------> ADJUST+ANCHOR  |
+|                                                                 |
+|  STAGE 4 -- ECONOMIC ANCHOR (Control Point)                     |
+|  +-- Acknowledges projected cost --------------> AUTHORITY      |
+|  +-- Downplays cost                                             |
+|       +-- Reverses after challenge ------------> AUTHORITY      |
+|       +-- Maintains minimisation --------------> EXIT/DOWNGRADE |
+|                                                                 |
+|  STAGE 5 -- AUTHORITY CHECK                                     |
+|  +-- Is decision owner with verified authority -> OFFER         |
+|  +-- Is NOT decision owner                                      |
+|       +-- Escalation path exists (48hr) -------> HOLD+RESCHED   |
+|       +-- No escalation path ------------------> EXIT           |
+|                                                                 |
+|  STAGE 6 -- OFFER (Structure, Not Sales)                        |
+|  +-- Deliver function statement ---------------> PRICE          |
+|                                                                 |
+|  STAGE 7 -- PRICE (No Defence)                                  |
+|  +-- State price + silence --------------------> CLOSE          |
+|                                                                 |
+|  STAGE 8 -- CLOSE (Forced Fork)                                 |
+|  +-- Accepts ----------------------------------> ENGAGEMENT     |
+|  +-- Objection raised -------------------------> OBJECTION PROT |
+|  +-- No response / stalls ---------------------> EXIT           |
+|                                                                 |
++-----------------------------------------------------------------+
+```
+
+### 32.1 Stage 1 — OPEN (Frame Control)
+
+> **SCRIPT**
+> 
+> "I'm not going to present anything. I need one thing to decide if this is even relevant: What decision is currently costing you the most per month?"
+
+**Branch A — Clear Answer:** Advance to Stage 2.
+
+**Branch B — Vague Response:**
+
+> **SCRIPT**
+> 
+> "That's a topic. What's the actual decision that hasn't been made?"
+
+If still no specificity after redirection:
+
+> **SCRIPT**
+> 
+> "This isn't the right moment. When it becomes a decision with a measurable cost, this will make sense."
+
+### 32.2 Stage 2 — QUALIFY (Economic Reality)
+
+> **SCRIPT**
+> 
+> "Roughly, what is that costing per month?"
+
+**Branch A — Gives a Number:** Proceed to Stage 3.
+
+**Branch B — "Not Sure":**
+
+> **SCRIPT**
+> 
+> "Order of magnitude is fine. Are we talking hundreds, thousands, or tens of thousands?"
+
+**Branch C — Refuses:**
+
+> **SCRIPT**
+> 
+> "Then this isn't a decision yet. It's not something we can act on."
+
+### 32.3 Stage 3 — DIAGNOSE (Pattern Extraction)
+
+**The Four Questions:**
+
+1. "What's blocking the decision?"
+2. "Who owns it?"
+3. "What have you tried?"
+4. "Why hasn't it worked?"
+
+Then deliver the pattern:
+
+> **SCRIPT**
+> 
+> "This isn't an options problem. It's a contradiction between what's stated and what's happening. That's why it's still open."
+
+**Branch B — Resistance:**
+
+> **SCRIPT**
+> 
+> "Then explain why it's still unresolved."
+
+### 32.4 Stage 4 — ECONOMIC ANCHOR (Control Point)
+
+> **SCRIPT**
+> 
+> "You said this is costing roughly £[X] per month. That's £[X times 3] over the next 90 days if nothing changes. So the question isn't whether to act. It's whether to continue paying that."
+
+**Branch B — Downplay:**
+
+> **SCRIPT**
+> 
+> "If it's not material, we stop here. This only works when the cost matters."
+
+### 32.5 Stage 5 — AUTHORITY CHECK
+
+> **SCRIPT**
+> 
+> "Who actually has the authority to resolve this?"
+
+**If Mismatch Detected:**
+
+> **SCRIPT**
+> 
+> "That's why it's stuck. The person responsible isn't the person with control."
+
+> **PROHIBITION**
+> 
+> Do not build engagements on the foundation of proxy authority. They collapse during execution.
+
+### 32.6 Stage 6 — OFFER (Structure, Not Sales)
+
+> **SCRIPT**
+> 
+> "We don't advise on this. We take the decision, remove the contradiction, assign ownership, and enforce execution."
+
+Then:
+
+> **SCRIPT**
+> 
+> "We start with one decision. We take it to a verified outcome. If that works, we expand. If it doesn't, you stop."
+
+### 32.7 Stage 7 — PRICE (No Defence)
+
+> **SCRIPT**
+> 
+> "This starts at £5,000 per month and scales with scope. Relative to £[X], that's not the decision."
+
+Then silence. Do not elaborate.
+
+### 32.8 Stage 8 — CLOSE (Forced Fork)
+
+> **SCRIPT**
+> 
+> "So there are two positions. We fix this now. Or it continues costing you £[X] per month. Which direction do you want to go?"
+
+### 32.9 Exit Conditions
+
+Exit immediately when: no cost clarity after two attempts, no decision authority and no path to it, no urgency, or defensive behaviour.
+
+**Exit Line (Universal):**
+
+> **SCRIPT**
+> 
+> "This isn't the right moment. When it becomes a decision with a measurable cost, this will make sense."
+
+### 32.10 Recovery Protocol
+
+**Recovery principle:** Return to the last verified checkpoint.
+
+1. Acknowledge briefly (one sentence maximum)
+2. State: "Let me bring this back to the decision."
+3. Re-ask the last unanswered question from the flow
+
+If they continue to derail after two recovery attempts: Exit.
+
+---
+
+## Chapter 33: The Enterprise Pitch (£10,000-£50,000/month)
+
+The enterprise pitch is not a presentation. It is a controlled conversation that corners a decision-maker into either acting or consciously accepting loss.
+
+### 33.1 Opening — Disarm and Reframe
+
+> **SCRIPT**
+> 
+> "I'm not here to present a solution. I'm here to understand one thing: What decision is currently costing you the most per month?"
+
+### 33.2 Qualification — Push Until You Get a Number
+
+If the prospect responds with generalities:
+
+> **SCRIPT**
+> 
+> "Then you're not dealing with a decision yet. You're dealing with a topic. Those don't get solved."
+
+### 33.3 Structured Live Diagnosis
+
+**The Five Questions:**
+
+1. What decision is open?
+2. What's blocking it?
+3. Who owns it?
+4. What have you tried?
+5. Why hasn't it worked?
+
+> **SCRIPT**
+> 
+> "What you've described is not a lack of options. It's a contradiction between [stated position] and [actual behaviour]. That's why it's still open."
+
+### 33.4 Economic Anchor — The Turning Point
+
+> **SCRIPT**
+> 
+> "You said this is costing roughly £[X] per month. That's approximately £[X times 3] over the next 90 days if nothing changes. So the question isn't whether to act. It's whether to continue paying that."
+
+### 33.5 Authority Exposure
+
+> **SCRIPT**
+> 
+> "You're describing ownership as [claimed]. But the blocker shows it sits with [actual]. That's why it's stuck."
+
+### 33.6 The Offer — No Selling Language
+
+> **SCRIPT**
+> 
+> "What we do is very simple. We take that decision, remove the contradiction, assign ownership, and enforce execution. Not advise. Enforce."
+
+### 33.7 Engagement Structure
+
+> **SCRIPT**
+> 
+> "We start with one decision. We take it from where it is now to a verified outcome. If that works, we expand. If it doesn't, you stop."
+
+### 33.8 Price Delivery
+
+> **SCRIPT**
+> 
+> "This sits between £10,000 and £50,000 per month depending on scope. Which, relative to £[monthly cost], is not the decision."
+
+### 33.9 The Close — Force the Fork
+
+> **SCRIPT**
+> 
+> "So there are only two positions. We address this now. Or it continues costing you £[X] per month. Which direction do you want to go?"
+
+### 33.10 Objection Handling
+
+**"We need more time."** — "Time is already costing you £[X] per month. So the question is what changes during that time."
+
+**"We need more data."** — "More data won't resolve a structural contradiction. It just delays the same decision."
+
+**"Too expensive."** — "Compared to what? Because right now, you're already paying £[X] per month for the problem."
+
+**"We'll handle this internally."** — "You've already tried. What would be different this time?"
+
+### 33.11 When to Walk Away
+
+Exit immediately if: no cost clarity after two attempts, no decision authority and no escalation path, no urgency, or the prospect seeks to negotiate terms before acknowledging the problem.
+
+> **KEY PRINCIPLE**
+> 
+> Walking away is not failure. It is quality control.
+
+### 33.12 Optional Deck Structure
+
+If a prospect insists on slides — and only if they insist — provide a maximum of five slides:
+
+| Slide | Content | Exact Language |
+|-------|---------|----------------|
+| 1 | The problem | "Every organisation has decisions that remain open. Not because the answer is unknown — because someone is choosing not to act. That avoidance costs money every month." |
+| 2 | The system | "We built a system that identifies the real decision, prices the cost of delay, assigns a single owner, enforces action within 48 hours, and verifies the outcome." |
+| 3 | Proof | Authority failure: £80,000 in pipeline delay accumulated over 60 days. Ownership assigned through forced escalation. Decision taken in 36 hours. |
+| 4 | Entry model | "One decision. One outcome. If it works, we expand. If it doesn't, you stop. No long-term commitment required to begin." |
+| 5 | The close | "Your decision is costing £[X]/month. This engagement is £[Y]/month. The question is not the price — it's whether you want to keep paying for the problem." |
+
+> **PROHIBITION**
+> 
+> No twenty-slide narrative. No "about us" section. No team bios. No roadmap. Five slides. Each one a controlled detonation.
+
+---
+
+# PART VIII — EVIDENCE & CONTENT SYSTEM
+
+---
+
+## Chapter 34: Enterprise Case System
+
+Evidence is the currency of authority. The Enterprise Case System transforms real client interventions into institutional proof — not through praise, not through testimonials, but through the structured documentation of contradiction, action, and outcome.
+
+### 34.1 The Rules of Case Construction
+
+> **PROHIBITION**
+> 
+> These rules are absolute. Violation of any single rule renders a case unusable.
+
+**Rule One: No names, no logos.** Client identity is never revealed. The system operates under conditions of absolute discretion.
+
+**Rule Two: No praise language.** The words "happy," "satisfied," "pleased," "grateful," "impressed" and all synonyms are permanently banned from case documentation.
+
+**Rule Three: No "client was happy" framing.** The outcome is described in terms of what changed in measurable, structural, or economic terms.
+
+**Rule Four: Only contradiction, action, outcome.** Every case must demonstrate three things: what was broken, what was done, and what resulted.
+
+### 34.2 The Standard Structure
+
+Every case follows a six-element architecture:
+
+```
+Context -> Contradiction -> Cost -> Action -> Outcome -> Implication
+```
+
+- **Context** establishes the organisational situation without identifying details
+- **Contradiction** names the specific gap between stated reality and actual behaviour
+- **Cost** quantifies the economic consequence of the unresolved state
+- **Action** describes the precise intervention executed
+- **Outcome** states the measurable result
+- **Implication** extracts the universal principle
+
+### 34.3 Case Studies
+
+**CASE ONE — AUTHORITY FAILURE**
+*Purpose: Expose false ownership — the condition in which an organisation believes decision authority is clear but execution reveals it is not.*
+
+A leadership team believed decision ownership was clear. The CEO stated: "We've already aligned on this." The team, when asked independently, stated: "We're waiting for direction."
+
+**Contradiction:** Ownership existed in conversation but not in execution.
+
+**Cost:** Approximately £80,000 in pipeline delay accumulated over sixty days.
+
+**Action:** A single accountable owner was identified and assigned through forced escalation. A forty-eight-hour decision deadline was imposed.
+
+**Outcome:** Decision taken in thirty-six hours. Execution commenced within the same working week.
+
+**Implication:** Most delays are not strategic problems. They are ownership failures disguised as alignment. When everyone owns a decision, no one owns it.
+
+---
+
+**CASE TWO — DECISION AVOIDANCE**
+*Purpose: Expose avoidance patterns — the condition in which a decision is framed as complex when it is in fact avoided.*
+
+A founder described a "complex strategic decision" that required further analysis. The decision had been "in progress" for five weeks. During those five weeks, no new information had been gathered that was not available on day one.
+
+**Contradiction:** The stated position was "we're working through it carefully." The actual behaviour was "no one is willing to commit."
+
+**Cost:** Approximately £25,000 per month in stalled growth.
+
+**Action:** All options except two were removed: decide now, or deliberately and explicitly delay with a documented cost acceptance.
+
+**Outcome:** Decision made in twenty-four hours. Not because new information emerged. Because the option to avoid was removed.
+
+**Implication:** Most decisions are not hard. They are avoided. The system that forces binary choice at the earliest possible moment prevents the accumulation of artificial difficulty.
+
+---
+
+**CASE THREE — MISALIGNED REALITY (Multi-User Collision)**
+*Purpose: Demonstrate organisational contradiction — leadership's perception of clarity diverges materially from the team's lived experience.*
+
+Leadership scored decision clarity at eighty-two per cent. The team scored the same dimension at forty-one per cent.
+
+**Contradiction:** Leadership believed alignment existed. The team was compensating for ambiguity — filling gaps with assumptions, duplicating work.
+
+**Cost:** Execution drift across three teams. Approximately £120,000 in operational inefficiency over a single quarter.
+
+**Action:** The contradiction was surfaced directly — not as an opinion, but as measured data. Alignment was forced on three specific dimensions: decision owner, success criteria, and execution path.
+
+**Outcome:** Clarity increased immediately. Execution gaps reduced within two weeks.
+
+**Implication:** Alignment is not what leadership believes. It is what the system actually executes. The gap between leadership perception and operational reality is the most expensive invisible cost in any organisation.
+
+---
+
+## Chapter 35: Case Amplification System
+
+One case, properly constructed, contains sufficient informational density to generate seven distinct content assets.
+
+### 35.1 The 7-Asset Stack
+
+Every clean case is decomposed into seven assets:
+
+**1. PRIMARY CASE POST** — The anchor. The full case narrative in Context-Contradiction-Cost-Action-Outcome-Implication structure.
+
+**2. PATTERN EXTRACT** — A short, sharp statement that generalises the specific case into a universal principle. Maximum two to three sentences. *Example:* "If two people describe the same decision differently, there is no decision. Everything else is delay."
+
+**3. COST FRAGMENT** — The economic consequence extracted in isolation. *Example:* "£80k delay. No strategy issue. No market issue. Just unclear ownership."
+
+**4. OPERATOR MEMO** — Written in the tone of an internal briefing. Structured as Observation, Effect, Correction, Result. *Example:* "Observation: Decision ownership was assumed, not assigned. Effect: Execution stalled across functions. Correction: Single owner. Fixed deadline. Result: Decision velocity restored."
+
+**5. DIRECT CHALLENGE** — A statement designed to force self-reflection. *Example:* "What decision in your organisation is still 'in progress'? Be precise. If you can't name it clearly, it hasn't been taken."
+
+**6. DM HOOK** — A short outreach message tied directly to a case. *Example:* "Saw this recently: Leadership thought a decision was clear. The team was waiting. Same situation? If yes, run this."
+
+**7. CONVERSION BRIDGE** — Moves the reader from intellectual recognition to action. *Example:* "If this feels familiar, don't analyse it. Test it. It takes 3 minutes to see if it's actually happening."
+
+### 35.2 Distribution Sequence
+
+The seven assets deploy across a seven-day cadence:
+
+| Day | Asset | Function |
+|-----|-------|----------|
+| 1 | Primary Case Post | Establish the narrative |
+| 2 | Pattern Extract | Broaden reach |
+| 3 | Cost Fragment | Economic trigger |
+| 4 | Direct Challenge | Engagement generation |
+| 5 | Operator Memo | Enterprise credibility |
+| 6 | Pattern Extract (variation) | Sustained presence |
+| 7 | Rest, or begin the next case cycle | -- |
+
+### 35.3 Multiplier Effect
+
+- **3 cases** = 21+ assets = 3 weeks of consistent presence
+- **10 cases** = 70+ assets = niche dominance across all channels
+
+### 35.4 Content Operating Rules
+
+> **KEY PRINCIPLE**
+> 
+> Every published asset must satisfy ALL of the following constraints. No exceptions.
+
+- Under 120 words (most of the time). Brevity is authority. Verbosity is insecurity.
+- One idea only. A single post addresses a single concept. Never compound.
+- No explanation. The reader either recognises the pattern or they do not. Explanation weakens both the content and the positioning.
+- No storytelling fluff. No "imagine this scenario." No "have you ever." No narrative devices that soften the directness of the statement.
+
+### 35.5 Tone Control
+
+The voice across all assets follows three calibrations:
+
+- **Calm, not aggressive.** Authority does not shout. It states. The tone is that of a surgeon describing a procedure, not a prosecutor making a closing argument.
+- **Precise, not emotional.** Numbers, structures, patterns. Never feelings, aspirations, or motivational framing.
+- **Direct, not dramatic.** No exclamation marks. No rhetorical escalation. The content is powerful because of what it says, not how it says it.
+
+### 35.6 Signal Extraction
+
+| Asset Type | Signal Generated |
+|------------|-----------------|
+| Pattern Extract | Reach (views, impressions) |
+| Cost Fragment | Saves and shares (economic resonance) |
+| Direct Challenge | Comments and direct messages (engagement depth) |
+| Operator Memo | High-quality inbound (enterprise-level enquiry) |
+
+### 35.7 Scaling the System
+
+The mathematics of amplification are straightforward:
+
+- **3 cases** = 21+ assets = 3 weeks of consistent presence without a single piece of fabricated content
+- **10 cases** = 70+ assets = niche dominance across all channels
+
+At ten cases, the system has produced sufficient evidence density that any prospect entering the market encounters Abraham of London's decision evidence regardless of their entry point. This is not achieved through volume. It is achieved through systematic multiplication of real outcomes.
+
+### 35.8 Kill Rule
+
+> **KEY PRINCIPLE**
+> 
+> If a specific format fails to generate measurable signal across three consecutive deployments, it is dropped.
+
+Three attempts without signal is a definitive result. Retire the format or fundamentally restructure it.
+
+---
+
+## Chapter 36: Content and Distribution Standards
+
+### 36.1 Where to Deploy Cases
+
+**LinkedIn (Primary Channel)** — Two to three posts per week, rotating across asset types.
+
+**Sales Conversations** — Cases are deployed mid-conversation as pattern evidence: "We've seen this before..."
+
+**Website** — Cases appear with minimal editorial modification. No corporate softening.
+
+### 36.2 What to Track
+
+Three metrics determine whether the content system is performing:
+
+1. **Inbound messages after posts** — direct enquiries generated by published content
+2. **Diagnostic starts after case posts** — product entry correlated with content publishing
+3. **Conversion rate versus normal** — comparative performance of case-driven prospects
+
+> **KEY PRINCIPLE**
+> 
+> If content does not move these three numbers, it is not working regardless of vanity metrics.
+
+### 36.3 What Not to Do
+
+> **PROHIBITION**
+> 
+> - Do not exaggerate numbers. Every figure in a case must be defensible.
+> - Do not soften language.
+> - Do not add storytelling fluff.
+> - Do not make it emotional. Emotion signals vendor insecurity.
+
+---
+
+## Chapter 37: Engagement Lane Architecture
 
 The Engagement Lane Architecture organises the system's public surface into distinct pathways for different audience types. Each lane is a dedicated page with lane-specific content, messaging, and calls to action.
 
 **The 6 Lane Pages:**
 
-1. **Institutional** (`/institutional`) — for boards, governance systems, and institutional design work. Access tier: architect. This lane speaks to decision-makers responsible for organisational decision-making infrastructure. Messaging focuses on structural governance, board-level diagnostics, and multi-stakeholder deployment.
+1. **Institutional** (`/institutional`) — for boards, governance systems, and institutional design work. Access tier: architect. Messaging focuses on structural governance, board-level diagnostics, and multi-stakeholder deployment.
 
-2. **Private Clients** (`/private-clients`) — for private engagement pathways, retainers, and advisory streams. Access tier: client. This lane speaks to individuals or small leadership teams facing specific high-stakes decisions. Messaging focuses on personal diagnostic depth, Strategy Room access, and ongoing retainer relationships.
+2. **Private Clients** (`/private-clients`) — for private engagement pathways, retainers, and advisory streams. Access tier: client. Messaging focuses on personal diagnostic depth, Strategy Room access, and ongoing retainer relationships.
 
-3. **Education & Research** (`/education-research`) — for research notes, teaching editions, reading lists, and workshops. Access tier: public. This lane speaks to academics, students, and practitioners interested in decision authority as a field of study. Messaging focuses on intellectual contribution, research access, and workshop participation.
+3. **Education & Research** (`/education-research`) — for research notes, teaching editions, reading lists, and workshops. Access tier: public.
 
-4. **Media** (`/media`) — for public commentary, interviews, press assets, and high-signal briefs. Access tier: public. This lane speaks to journalists, podcasters, and media professionals. Messaging focuses on expert commentary availability, press asset access, and briefing requests.
+4. **Media** (`/media`) — for public commentary, interviews, press assets, and high-signal briefs. Access tier: public.
 
-5. **Consulting** — for firms and practitioners who want to integrate decision authority methodology into their own practice. Messaging focuses on licensing, methodology access, and integration support.
+5. **Consulting** — for firms and practitioners who want to integrate decision authority methodology into their own practice.
 
 6. **Contact** — the universal contact surface with lane-aware routing.
 
-**Lane-Aware Contact Form.** The contact form accepts a `?type` query parameter that pre-selects the engagement lane. A visitor arriving from the Institutional page has `?type=institutional` pre-filled, routing their inquiry to the appropriate handling path. This ensures inquiries are categorised before they arrive, reducing response friction and enabling lane-specific follow-up sequences.
+**Lane-Aware Contact Form.** The contact form accepts a `?type` query parameter that pre-selects the engagement lane. A visitor arriving from the Institutional page has `?type=institutional` pre-filled.
 
-**Homepage Strip.** The homepage includes a navigation strip: "Not here to run a diagnostic?" This strip directs visitors who are not seeking a diagnostic to the appropriate engagement lane — media inquiries, research access, institutional engagement, or private consultation. The strip prevents the diagnostic from being the only entry point and ensures that non-diagnostic visitors find their lane without friction.
+**Homepage Strip.** The homepage includes a navigation strip: "Not here to run a diagnostic?" This strip directs visitors to the appropriate engagement lane.
+
+**LinkedIn Campaign.** The primary distribution channel is LinkedIn with a 21-post market-dominant entry campaign. Each post follows a specific structural template: opening contradiction, institutional framing, system capability reference, and call to action.
+
+**Canon and Supporting Assets.** The Abraham of London canon (`lib/canon.ts`) provides the foundational vocabulary. The glossary defines key terms. Toolkits provide frameworks that demonstrate the system's thinking without revealing its machinery.
 
 ---
 
-# PART VI — SYSTEM ARCHITECTURE
+# PART IX — SYSTEM ARCHITECTURE
 
 ---
 
-## Chapter 24: The 13-Layer Technical Architecture
+## Chapter 38: The 13-Layer Technical Architecture
 
 The system is organised into 13 layers, each with a specific function. Layers are additive — higher layers depend on lower layers, but lower layers operate independently.
+
+### System Architecture Visual Map
+
+```
++-------------------------------------------------------------+
+|                    FOUNDER DASHBOARD                        |
+|  System Status | Revenue | Pipeline | Pressure | Actions    |
++----------------------------+--------------------------------+
+                             |
++----------------------------+--------------------------------+
+|                  GOVERNANCE LAYER                           |
+|  North Star (QER/DAR/TAR) | System Integrity Mode          |
+|  Integrity Scoring | Lie Detection | Kill Switches          |
++----------------------------+--------------------------------+
+                             |
++----------------------------+--------------------------------+
+|                  REVENUE SYSTEM                             |
+|  Cost Anchor | Dynamic Pricing | Do-Not-Sell | Time Decay   |
++----------------------------+--------------------------------+
+                             |
++----------------------------+--------------------------------+
+|                  PRODUCT LADDER                             |
+|  Signal Capture -> Diagnosis -> Economic Exposure ->        |
+|  Enforcement -> Verification                                |
++----------------------------+--------------------------------+
+                             |
++----------------------------+--------------------------------+
+|                  ENFORCEMENT ENGINE                         |
+|  Intelligence Spine | Pressure Loop | Breach Ladder |       |
+|  Pre-Commitment Gate | Escalation Timers                    |
++----------------------------+--------------------------------+
+                             |
++----------------------------+--------------------------------+
+|              PROOF + ENTERPRISE LAYERS                      |
+|  Evidence Ledger | Social Proof | Boardroom Mode |          |
+|  Multi-Actor Truth | Retargeting | Portfolio View           |
++-------------------------------------------------------------+
+```
 
 ---
 
 ### Layer 1: DETECTION
 
-The detection layer identifies the decision condition from user input.
+| Component | Function |
+|-----------|----------|
+| CaseObject | Atomic unit — structured decision representation |
+| C3 Fidelity | Measures completeness and consistency |
+| Synthesis Engine | Combines inputs into diagnostic pattern |
+| Arbiter Tournament | Resolves competing interpretations |
 
 **CaseObject.** Created by the Fast Diagnostic. Contains the decision in the user's own words, claimed ownership, prior attempts, cost of delay, blockers, and forced action scenarios. Typed in `lib/decision/case-object.ts`. Classified into one of four condition classes: authority, definition, execution, instability.
 
@@ -585,7 +1890,7 @@ The detection layer identifies the decision condition from user input.
 
 **Synthesis Engine with Server-Only Guard.** The GovernedSynthesis output is LLM-generated analysis that is only produced when the C3 tier reaches FULL_SYNTHESIS (>= 0.7). The synthesis engine is guarded by a server-only constraint — synthesis computation never occurs on the client. The `spine-guard.ts` enforces spine invariants.
 
-**Arbiter Tournament (5 rules).** Every synthesis output must pass five mandatory validation rules before reaching the user. Implemented in `lib/decision/arbiter-tournament.ts`:
+**Arbiter Tournament (5 rules).** Every synthesis output must pass five mandatory validation rules. Implemented in `lib/decision/arbiter-tournament.ts`:
 1. **Condition Integrity** — synthesis condition class must match deterministic class.
 2. **Contradiction Alignment** — synthesis must reference the deterministic contradiction set.
 3. **Move Validity** — recommended action must reference the user's specific blocker, not generic advice.
@@ -594,164 +1899,325 @@ The detection layer identifies the decision condition from user input.
 
 Hard violations reject the synthesis entirely. The user sees the mismatch. This is a market differentiator.
 
+> **CORE QUESTION:** "What is the real decision, and what is actually preventing it?"
+
+**Why this matters:** Without accurate detection, every subsequent enforcement action is built on a false premise.
+
 ---
 
 ### Layer 2: ENFORCEMENT
 
-The enforcement layer ensures decisions are acted upon.
+| Component | Function |
+|-----------|----------|
+| Intelligence Spine | Maintains continuity across all journey stages |
+| Pressure Loop | Increases tension over time — delay has consequence |
+| Breach Ladder | Defines escalating responses to dishonoured commitments |
+| Pre-Commitment Gate | Requires declared willingness before output delivery |
 
 **Intelligence Spine.** The single persistent contract across all stages. Typed in `lib/decision/intelligence-spine.ts`. Never resets. Accumulates intelligence across stages.
 
-**Pressure Loop (48h/7d/14d).** Time-based pressure escalation. The pressureIndex on the spine is monotonically increasing. Each missed checkpoint increases pressure. The pressure loop operates at three intervals: 48 hours (initial follow-up), 7 days (escalation), 14 days (final enforcement).
+**Pressure Loop (48h/7d/14d).** Time-based pressure escalation. The pressureIndex on the spine is monotonically increasing. Each missed checkpoint increases pressure.
 
-**Breach Ladder.** When committed actions are not taken, the breach is recorded on the spine (`execution.breach`, `execution.breachCount`). The Breach Ladder applies graduated consequences: first breach triggers re-engagement, second breach triggers escalation, repeated breaches trigger the Do-Not-Sell flag.
+**Breach Ladder.** When committed actions are not taken, the breach is recorded. Graduated consequences: first breach triggers re-engagement, second triggers escalation, repeated breaches trigger the Do-Not-Sell flag.
 
-**Pre-Commitment Gate.** Captured during the Fast Diagnostic. The user explicitly states whether they are willing to act within 48 hours. This is not a question about interest. It is a commitment that the system tracks.
+**Pre-Commitment Gate.** The user explicitly states whether they are willing to act within 48 hours. This is not a question about interest. It is a commitment that the system tracks.
+
+> **CORE QUESTION:** "Is the user acting on what they now know?"
+
+**Why this matters:** Detection without enforcement is consulting. Enforcement is what transforms diagnosis into outcome.
 
 ---
 
 ### Layer 3: ANTI-MANIPULATION
 
-The anti-manipulation layer protects the system's accuracy from gaming, flattery, and strategic misrepresentation.
+| Component | Function |
+|-----------|----------|
+| Integrity Score | Tracks consistency across inputs over time |
+| Lie Detection | Identifies patterns of dishonesty or self-deception |
+| False Authority | Exposes users claiming power they do not possess |
+| Economic Sanity | Validates cost figures against organisational context |
 
-**Integrity Score.** A 0-1 score on the spine (`integrityScore`). Below 0.5 indicates degraded integrity — the user's answers show patterns consistent with gaming or strategic misrepresentation. The score informs the system's confidence in its own output.
+**Integrity Score.** A 0-1 score on the spine (`integrityScore`). Below 0.5 indicates degraded integrity — the user's answers show patterns consistent with gaming or strategic misrepresentation.
 
-**False Authority Detection.** Flags discrepancies between claimed ownership and behavioural signals. When a user claims they own a decision but their answers reveal they cannot compel action, the `falseAuthority` flag is raised. Implemented through the CaseObject's comparison of `claimedOwner` against `actualOwnerCandidate`.
+**False Authority Detection.** Flags discrepancies between claimed ownership and behavioural signals. When a user claims they own a decision but their answers reveal they cannot compel action, the `falseAuthority` flag is raised.
 
-**Economic Sanity.** Detects implausible economic claims. If the stated cost of the decision is inconsistent with the described scope, the `economicSanitySuspicious` flag is raised. The system does not use implausible anchors for economic framing.
+**Economic Sanity.** Detects implausible economic claims. If the stated cost is inconsistent with the described scope, the `economicSanitySuspicious` flag is raised.
 
-**Phrasing Variation for Anti-Pattern-Detection.** The system varies the phrasing of diagnostic questions across sessions to prevent users from learning the "right" answers. Consistent patterns across varied phrasings increase confidence. Inconsistent patterns across consistent phrasings raise integrity concerns.
+**Phrasing Variation for Anti-Pattern-Detection.** The system varies the phrasing of diagnostic questions across sessions to prevent users from learning the "right" answers.
+
+> **CORE QUESTION:** "Is this user telling the truth — to us and to themselves?"
+
+**Why this matters:** A system that can be gamed ceases to produce real outcomes — and its authority collapses the moment manipulation succeeds.
 
 ---
 
 ### Layer 4: SELF-GOVERNANCE
 
-The self-governance layer ensures the system maintains its own standards.
+| Component | Function |
+|-----------|----------|
+| North Star Metrics | QER%, DAR%, TAR% — constant system health measurement |
+| System Kill Switch | Halts operations if metrics fall below threshold |
+| Self-Contradiction Audit | Monitors internal consistency of system outputs |
 
-**North Star Metrics.** The system tracks its own accuracy and impact metrics. These include: diagnostic accuracy (confirmed by user feedback), prediction accuracy (verified outcomes matching forecasts), resolution rate (proportion of diagnosed conditions that reach verified structural change), and authority metrics (proportion of engagements where the system's authority was confirmed by the client's actions).
+**North Star Metrics.** TAR% (trust accuracy rate), DAR% (decision action rate), QER% (quality economic rate). These provide constant measurement of system health.
 
-**Quality Gate (8-step validation).** Every output passes through an 8-step validation process before reaching the user. The steps are documented in Appendix E. This gate is automated and enforced at the build level. No output bypasses the gate.
+**System Kill Switch.** Halts commercial operations if accuracy, execution rates, or quality metrics fall below defined thresholds. The system shuts down sales if performance drops.
+
+**Self-Contradiction Audit.** Monitors whether the system's own outputs are internally consistent — ensuring it does not demand of users what it fails to deliver itself.
+
+**Quality Gate (8-step validation).** Every output passes through an 8-step validation process before reaching the user. Documented in Appendix F. This gate is automated and enforced at the build level.
+
+> **CORE QUESTION:** "Is the system still performing at the standard required to maintain authority?"
+
+**Why this matters:** A system that cannot correct itself will eventually harm the clients it serves.
 
 ---
 
 ### Layer 5: ECONOMIC PRESSURE
 
-The economic pressure layer converts diagnostic findings into financial consequence language.
+| Component | Function |
+|-----------|----------|
+| Cost Anchor | Ties every decision to a user-declared monetary consequence |
+| Dynamic Pricing | Adjusts engagement cost relative to stated decision value |
+| Do-Not-Sell | Blocks transactions when economic pressure is insufficient |
+| Time Decay | Makes accumulating cost visible over time |
 
 **Cost Anchor.** The user-provided financial anchor that grounds all economic projections. Without a cost anchor, the system produces qualitative exposure language only.
 
-**Cost of Inaction Engine.** Server-side only (`lib/server/decision/cost-of-inaction.server.ts`). Produces exposure bands and horizon narratives from state and financial input. See Chapter 17 for full documentation.
+**Cost of Inaction Engine.** Server-side only (`lib/server/decision/cost-of-inaction.server.ts`). Produces exposure bands and horizon narratives. See Chapter 17 for full documentation.
 
 **Do-Not-Sell.** A flag that terminates engagement when the system determines that selling to this client would degrade institutional credibility. Triggered by: trivial problems, absent authority, validation-seeking behaviour, or economic unsuitability.
 
-**Time Decay.** The mathematical model for option compression over time. Implemented through the DefaultPathForecast's `optionDecayRate` (options lost per month, 0-1) and `controlShiftProbability` (probability that decision control transfers away from stated owner, 0-1). Base decay rates vary by condition class: authority 0.3, execution 0.4, definition 0.2, instability 0.15.
+**Time Decay.** The mathematical model for option compression over time. Base decay rates vary by condition class: authority 0.3, execution 0.4, definition 0.2, instability 0.15.
+
+> **CORE QUESTION:** "Is there enough economic consequence to justify intervention?"
+
+**Why this matters:** Without economic grounding, the system devolves into opinion.
 
 ---
 
 ### Layer 6: EVIDENCE PERMANENCE
 
-The evidence permanence layer creates an immutable record of decisions, actions, and outcomes.
+| Component | Function |
+|-----------|----------|
+| Evidence Ledger | Records every diagnostic, commitment, breach, and resolution |
+| Decision Credit Score | Longitudinal view of decision-making reliability |
+| Contradiction Consistency | Tracks recurrence of same contradictions over time |
 
-**Evidence Ledger.** An append-only record implemented in `lib/constitution/evidence-ledger.ts`. Every stage appends. Nothing is overwritten. Each entry records: spine ID, stage, contradiction, action required, action taken, verified impact, pressure index, integrity score, condition class, and cost estimate. The ledger is built from the spine history and can only be appended to, never modified.
+**Evidence Ledger.** An append-only record implemented in `lib/constitution/evidence-ledger.ts`. Every stage appends. Nothing is overwritten. Each entry records: spine ID, stage, contradiction, action required, action taken, verified impact, pressure index, integrity score, condition class, and cost estimate.
 
-**Decision Credit Score.** A derived score based on the user's historical pattern of making commitments and following through. Users who consistently commit and execute build decision credit. Users who consistently commit and breach degrade their score. This score influences future system recommendations.
+**Decision Credit Score.** A derived score based on the user's historical pattern of making commitments and following through. Users who consistently commit and execute build decision credit. Users who consistently breach degrade their score.
 
 **Contradiction Convergence.** Cross-session analysis of contradiction patterns. When the same contradiction appears across multiple sessions or multiple stakeholders, it is flagged as convergent — indicating a structural condition rather than a situational one.
+
+> **CORE QUESTION:** "What does the historical record say about this decision-maker and this organisation?"
+
+**Why this matters:** Without permanent evidence, every engagement starts from zero. The ledger transforms accumulated experience into compounding institutional intelligence.
 
 ---
 
 ### Layer 7: SOCIAL PROOF
 
-The social proof layer provides evidence of the system's effectiveness.
+| Component | Function |
+|-----------|----------|
+| Cohort Metrics | Aggregate performance data for similar users |
+| Proof Statements | Specific outcome evidence |
+| Personalisation | Proof tailored by role, cost bracket, and condition |
 
 **Observed Outcomes.** Aggregated, anonymised data from the Outcome Verification loop. The system can report: "In X% of cases where condition Y was detected and intervention Z was applied, verified structural change occurred within N days."
 
-**Accuracy Metrics.** Aggregated accuracy feedback from users. The system tracks what proportion of users confirmed the diagnosis as accurate (yes), partially accurate (partial), or inaccurate (no).
+**Accuracy Metrics.** Aggregated accuracy feedback from users.
 
-**Anonymised Case Studies.** See Chapter 21. Evidence drawn from the Evidence Ledger and verified outcomes. No client naming. Modelled outcomes only.
+**Anonymised Case Studies.** See Chapter 34. Evidence drawn from the Evidence Ledger and verified outcomes.
+
+> **CORE QUESTION:** "What evidence exists that this system works for someone like me?"
+
+**Why this matters:** Authority without evidence is a claim. Evidence without relevance is noise. Personalised proof converts scepticism into action.
 
 ---
 
 ### Layer 8: BOARDROOM MODE
 
-The boardroom layer produces governance-grade decision documents.
+| Component | Function |
+|-----------|----------|
+| Board Dossier | Complete decision portfolio for board-level presentation |
+| Objection Handling | Pre-built responses to executive-level resistance |
+| Decision Path | Route from current state to resolved state |
+| Classification: RESTRICTED | Sensitive data handled with security controls |
 
-**Board Dossier.** A multi-section document generated from the Intelligence Spine. Sections use factual, confrontational, and quantified tones. Includes objection handling and decision path analysis. See Chapter 14.
+**Board Dossier.** A multi-section document generated from the Intelligence Spine. Sections use factual, confrontational, and quantified tones. See Chapter 14.
 
 **Multi-Stakeholder Collision Detection.** Identifies where multiple stakeholders' inputs diverge on the same decision. Surfaces authority gaps, cost divergence, and narrative inconsistencies across respondents.
+
+> **CORE QUESTION:** "Can this be deployed at the highest level of organisational governance?"
+
+**Why this matters:** Board-level deployment is where maximum organisational impact occurs.
 
 ---
 
 ### Layer 9: MULTI-ACTOR TRUTH
 
-The multi-actor truth layer extends collision detection to organisational-level analysis.
+| Component | Function |
+|-----------|----------|
+| Collision Detection | Identifies when users describe the same decision differently |
+| Authority Gaps | Surfaces mismatches between perceived and actual authority |
+| Cost Divergence | Flags when stakeholders assign different values to same problem |
+| Blocker Contradictions | Exposes incompatible explanations of unresolved decisions |
 
-**Collision Detection.** Implemented in `lib/constitution/multi-user-collision.ts`. When multiple users from the same organisation run diagnostics on related decisions, the system detects where their answers collide — where they disagree about ownership, urgency, cost, or blockers.
+**Collision Detection.** Implemented in `lib/constitution/multi-user-collision.ts`. When multiple users from the same organisation run diagnostics on related decisions, the system detects where their answers collide.
 
-**Authority Gaps.** Situations where no stakeholder claims ownership, or where multiple stakeholders claim ownership of the same decision. Both conditions are structural failures that the system surfaces.
+**Authority Gaps.** Situations where no stakeholder claims ownership, or where multiple stakeholders claim ownership of the same decision. Both conditions are structural failures.
 
-**Cost Divergence.** Situations where different stakeholders assign radically different economic values to the same decision. This divergence is itself a diagnostic signal — it indicates that the organisation has not agreed on what the decision is worth, which means they have not agreed on what it is.
+**Cost Divergence.** Situations where different stakeholders assign radically different economic values to the same decision. This divergence is itself a diagnostic signal.
+
+> **CORE QUESTION:** "What happens when multiple people tell different versions of the same story?"
+
+**Why this matters:** Single-user diagnosis can only reveal individual perception. Multi-actor truth reveals structural reality.
 
 ---
 
 ### Layer 10: INBOUND FILTERING
 
-The inbound filtering layer routes incoming engagement to the appropriate surface.
+| Component | Function |
+|-----------|----------|
+| Tier Routing | Assigns prospects to engagement levels by signal strength |
+| Strategy Room Gate | Prevents premium access without qualifying criteria |
+| Metric-Driven Adjustment | Modifies routing rules based on performance data |
+| Auto-Follow-Up | Maintains engagement with qualified unconverted prospects |
 
 **Tier Routing.** The access tier system (public, member, inner_circle, restricted, client, legacy, architect, owner, top_secret) determines which surfaces a user can access. Implemented through `lib/access/tier-policy.ts` and `lib/access/tier-map.ts`.
 
-**Strategy Room Gate.** The Decision Directive system evaluates whether a user's diagnostic state qualifies them for Strategy Room access. If structural failure is detected, access is blocked. If a mandate vacuum exists, access is restricted. See Chapter 11.
+**Strategy Room Gate.** The Decision Directive system evaluates whether a user's diagnostic state qualifies them for Strategy Room access.
 
-**Inbound Filter.** The contact form and engagement pathways use lane-aware routing (`?type` parameter) to direct inquiries to the appropriate handling path. See Chapter 23.
+**Inbound Filter.** The contact form and engagement pathways use lane-aware routing (`?type` parameter). See Chapter 37.
+
+> **CORE QUESTION:** "Which prospects deserve attention, and in what order?"
+
+**Why this matters:** Capacity is finite. Without intelligent filtering, operator time is consumed by low-quality interactions.
 
 ---
 
 ### Layer 11: ESCALATION ENGINE
 
-The escalation engine applies time-based pressure to unresolved decisions.
+| Component | Function |
+|-----------|----------|
+| 24h Reality | Reality restated |
+| 48h Breach | Breach recorded |
+| 72h Pressure | Pressure applied |
+| 5d Pattern | Pattern named |
+| 7d Fork | Act now or accept consequence explicitly |
 
-**Escalation Timeline: 24h, 48h, 72h, 5d, 7d.** The system applies escalating pressure at five intervals:
-- **24h** — initial follow-up. Confirms the decision is still active. Restates the diagnosed contradiction.
-- **48h** — commitment checkpoint. Evaluates whether the Pre-Commitment Gate promise has been honoured. If not, pressure increases.
-- **72h** — escalation warning. The system warns that the cost of inaction is now higher than it was at diagnosis.
-- **5d** — breach detection. If no action has been taken, the system records a breach and applies the Breach Ladder.
-- **7d** — final enforcement. The system delivers the 7-day consequence projection and either escalates to a higher surface or triggers the Do-Not-Sell flag.
+**Escalation Timeline: 24h, 48h, 72h, 5d, 7d.**
+- **24h** — initial follow-up. Restates the diagnosed contradiction.
+- **48h** — commitment checkpoint. Evaluates Pre-Commitment Gate promise.
+- **72h** — escalation warning. Cost of inaction is now higher than at diagnosis.
+- **5d** — breach detection. If no action has been taken, records breach and applies Breach Ladder.
+- **7d** — final enforcement. Delivers 7-day consequence projection and either escalates or triggers Do-Not-Sell.
 
-The auto-escalation sweep (`lib/constitution/escalation-engine.ts`) runs periodically, checking open interventions. Cases with seriousness above 75 and confidence above 0.6 are automatically escalated to the Strategy Room.
+Auto-escalation sweep (`lib/constitution/escalation-engine.ts`) runs periodically. Cases with seriousness above 75 and confidence above 0.6 are automatically escalated to the Strategy Room.
+
+> **CORE QUESTION:** "What happens when someone commits and then fails to act?"
+
+**Why this matters:** Without time-based escalation, commitments decay into suggestions.
 
 ---
 
 ### Layer 12: RETARGETING
 
-The retargeting layer re-engages users who have received a diagnosis but have not acted.
+| Component | Function |
+|-----------|----------|
+| Segment-Driven Creatives | Content tailored to prospect's decision condition |
+| Dynamic Personalisation | Messaging adjusted by interaction history |
+| Frequency Control | Prevents oversaturation while maintaining presence |
 
-**Pressure Loop.** A time-based re-engagement sequence that references the user's specific diagnostic findings. The loop does not send generic follow-ups. It restates the contradiction, updates the cost of inaction projection, and asks whether the condition has changed.
+**Pressure Loop.** A time-based re-engagement sequence that references the user's specific diagnostic findings. The loop restates the contradiction, updates the cost of inaction projection, and asks whether the condition has changed.
 
-**Follow-Up System.** Managed through `lib/follow-up/retargeting-segments.ts`. Segments users by diagnostic severity, engagement level, and response history. Follow-up content is personalised to the user's condition class and exposure band.
+**Follow-Up System.** Managed through `lib/follow-up/retargeting-segments.ts`. Segments users by diagnostic severity, engagement level, and response history.
+
+> **CORE QUESTION:** "How do we stay visible to qualified prospects who are not yet ready?"
+
+**Why this matters:** Timing is not always controlled by the system. Maintaining presence without pursuit ensures prospects return when the cost becomes unbearable.
 
 ---
 
 ### Layer 13: ENTERPRISE
 
-The enterprise layer provides portfolio-level decision intelligence.
+| Component | Function |
+|-----------|----------|
+| Portfolio View | All active decisions across an organisation in one interface |
+| Org Metrics | Decision velocity, breach rates, resolution patterns |
+| Red Flags | Systemic patterns indicating structural dysfunction |
+| DAaaS Structure | Commercial and operational framework for ongoing engagement |
 
 **Decision Memory.** See Chapter 19. Cross-session persistence of public-safe decision summaries.
 
 **Cross-Session Signal Aggregation.** The system aggregates signals across multiple sessions for the same user or organisation. This enables trend detection: is the organisation's decision-making capacity improving, stable, or degrading?
 
-**Portfolio View.** For enterprise retainer clients, the system provides a portfolio-level view of all active decisions, their condition classes, exposure bands, escalation states, and resolution status. This is the executive dashboard for decision authority infrastructure. Implemented through `lib/enterprise/enterprise-portfolio.ts`.
+**Portfolio View.** For enterprise retainer clients, the system provides a portfolio-level view of all active decisions, their condition classes, exposure bands, escalation states, and resolution status. Implemented through `lib/enterprise/enterprise-portfolio.ts`.
+
+> **CORE QUESTION:** "How does this operate when deployed across an entire organisation?"
+
+**Why this matters:** Single-decision interventions prove the methodology. Enterprise deployment proves the business model.
 
 ---
 
-## Chapter 25: Delivery Model & Operating Cadence
+## Chapter 39: Delivery Model & Operating Cadence
 
-**Technology Stack.** The system is built on Next.js with TypeScript. The database is PostgreSQL accessed through Prisma ORM. PDF generation is handled through a dedicated rendering pipeline. The system deploys on Netlify with serverless functions for API routes.
+### 39.1 What You Are Not
 
-**Deployment Cadence.** Changes are deployed through a CI/CD pipeline. Every deployment passes through the Quality Gate (Appendix E). No deployment bypasses the gate. The deployment model is continuous — there are no scheduled release windows.
+This is not consulting. Consulting provides recommendations and departs. This is not advisory. Advisory offers perspective without accountability. This is not the production of decks, reports, strategy documents, or transformation roadmaps.
 
-**Data Architecture.** The database schema is managed through Prisma migrations. As of April 2026, the migration history includes: access tier expansion, proof evidence, strategy room tables, team assessment campaigns, diagnostic evidence graph, purpose alignment canonical results, longitudinal/multi/outcome infrastructure, strategy room enforcement persistence, enterprise retainer contracts, AI adaptive decision authority, enterprise-capable foundation, PAL advantage fields, verification token, and calibration loop.
+If the engagement produces a document that sits in a shared drive unread, the engagement has failed. Documents are not outcomes. Actions are outcomes. Decisions are outcomes. Measurable changes in organisational behaviour are outcomes.
 
-**API Structure.** The API is organised by domain:
+### 39.2 What You Are
+
+The system performs four functions and no others:
+
+1. **Tracking decisions** — maintaining a complete, current record of what has been decided, what remains open, and what has been committed to
+2. **Enforcing commitments** — applying time-bound pressure to ensure that declared actions are executed within their stated timeframes
+3. **Escalating breaches** — recording and surfacing instances where commitments are not honoured, with escalating consequences
+4. **Reporting contradictions** — identifying and presenting instances where stated positions diverge from actual behaviour
+
+These four functions constitute the entirety of the delivery model. Everything else is scope creep.
+
+> **KEY PRINCIPLE:** The system does not advise. It tracks, enforces, escalates, and reports. Any expansion beyond these four functions represents mission drift.
+
+### 39.3 Weekly Cadence (Non-Negotiable)
+
+Every active engagement receives a weekly report containing five elements:
+
+| Element | Description |
+|---------|-------------|
+| Decisions opened | New decisions identified or entering the system |
+| Decisions delayed | Decisions that have exceeded their resolution timeframe |
+| Breaches | Commitments made and not honoured |
+| Ownership conflicts | Instances where decision authority is unclear or contested |
+| Required actions | Specific, named actions required of specific, named individuals |
+
+**Format:** Short. Brutal. Board-readable. No narrative. Comprehensible in under two minutes.
+
+### 39.4 Operating Cadence
+
+The system operates on two cadences:
+
+1. **Diagnostic cadence** — real-time. Diagnostics are processed immediately upon submission. Scoring is server-side. Results are returned synchronously.
+2. **Enforcement cadence** — time-based. Escalation, breach detection, and follow-up operate on the 24h/48h/72h/5d/7d timeline. The auto-escalation sweep runs periodically to detect cases requiring automatic Strategy Room escalation.
+
+### 39.5 Technology Stack
+
+The system is built on Next.js with TypeScript. The database is PostgreSQL accessed through Prisma ORM. PDF generation is handled through a dedicated rendering pipeline. The system deploys on Netlify with serverless functions for API routes.
+
+### 39.6 Data Architecture
+
+The database schema is managed through Prisma migrations. As of April 2026, the migration history includes: access tier expansion, proof evidence, strategy room tables, team assessment campaigns, diagnostic evidence graph, purpose alignment canonical results, longitudinal/multi/outcome infrastructure, strategy room enforcement persistence, enterprise retainer contracts, AI adaptive decision authority, enterprise-capable foundation, PAL advantage fields, verification token, and calibration loop.
+
+### 39.7 Deployment Cadence
+
+Changes are deployed through a CI/CD pipeline. Every deployment passes through the Quality Gate (Appendix F). No deployment bypasses the gate. The deployment model is continuous — there are no scheduled release windows.
+
+### 39.8 API Structure
+
+The API is organised by domain:
 - `/api/diagnostics/` — diagnostic submission, re-entry, outcome verification, longitudinal, multi-stakeholder
 - `/api/constitutional/` — constitutional assessment, audit, export, appeal
 - `/api/strategy-room/` — session management, execution tracking, conversion
@@ -761,151 +2227,621 @@ The enterprise layer provides portfolio-level decision intelligence.
 - `/api/admin/` — decision intelligence, commercial, campaign management, governance
 - `/api/sovereign/` — authenticated session management
 
-**Operating Cadence.** The system operates on two cadences:
-1. **Diagnostic cadence** — real-time. Diagnostics are processed immediately upon submission. Scoring is server-side. Results are returned synchronously.
-2. **Enforcement cadence** — time-based. Escalation, breach detection, and follow-up operate on the 24h/48h/72h/5d/7d timeline. The auto-escalation sweep runs periodically to detect cases requiring automatic Strategy Room escalation.
+### 39.9 The Founder Dashboard
+
+| Dimension | Function |
+|-----------|----------|
+| System Status | Operational health of all thirteen layers |
+| Revenue | Current run rate, pipeline value, conversion metrics |
+| Pipeline | Qualified prospects by tier, stage, and estimated value |
+| Pressure | Aggregate pressure index across all active engagements |
+| Actions | Required founder actions, prioritised by commercial impact |
+
+### 39.10 Governance Layer
+
+| Mechanism | Function |
+|-----------|----------|
+| North Star Metrics | QER%, DAR%, TAR% |
+| System Integrity Mode | Activated when any North Star metric falls below threshold |
+| Integrity Scoring | Continuous assessment of user honesty and system accuracy |
+| Kill Switches | Automatic suspension when performance degrades |
+
+> **KEY PRINCIPLE:** The governance layer has authority over revenue. If system integrity is compromised, commercial operations halt.
 
 ---
 
-# PART VII — CAPITAL & INVESTOR RELATIONS
+# PART X — CAPITAL & INVESTOR RELATIONS
 
 ---
 
-## Chapter 26: Capital Narrative
+## Chapter 40: Capital Narrative
+
+### 40.1 Category Positioning
 
 Abraham of London creates a new category: **Decision Authority Infrastructure (DAI)**.
 
 The capital narrative begins with a market observation: every organisation spends heavily on intelligence (consultants, analytics, data platforms) and on execution (project management, process automation, operational tools). But no one has built infrastructure for the gap between intelligence and execution — the decision itself.
 
-Decisions are the bottleneck. Not information. Not execution capability. The decision. And decisions fail for structural reasons: unclear authority, undefined scope, unpriced consequences, and absent enforcement. These are infrastructure problems, not information problems.
+### 40.2 The Problem Statement
 
-DAI addresses this gap by providing the structural layer that forces decisions to resolution. It is not consulting (which depends on client willingness), not analytics (which provides information without enforcement), and not project management (which assumes the decision has already been made). It is the infrastructure that ensures decisions get made, tracked, and verified.
+Organisations do not fail from a lack of data, strategy, talent, technology, or capital. They fail because **decisions are delayed, diluted, or never executed**. This creates decision drift — a condition in which time passes, cost accumulates, responsibility diffuses, and outcomes degrade.
 
-The market opportunity is defined by the size of the consulting and advisory market ($300B+ globally) and the observation that a significant proportion of advisory engagements fail to produce action — not because the advice was wrong, but because the decision architecture was inadequate. DAI captures value from this failure mode.
+### 40.3 Market Comparison
 
-The competitive advantage is structural: the system's intelligence accumulates across sessions (the Intelligence Spine never resets), its enforcement mechanisms create accountability that advisory cannot, and its verification loop measures actual impact rather than claiming it. The longer a client uses the system, the more accurate it becomes. The longer a competitor operates without these mechanisms, the further behind they fall.
+| Category | What It Does | What It Fails To Do |
+|----------|-------------|-------------------|
+| SaaS | Surfaces data | Does not enforce decisions |
+| Consulting | Provides recommendations | Does not verify execution |
+| Analytics | Measures outcomes | Does not address behaviour |
+| Coaching | Changes individuals | Does not address structure |
+| **DAI** | **Identifies, prices, assigns, enforces, verifies** | **--** |
 
----
+### 40.4 Core Insight
 
-## Chapter 27: Investor Memo
+Most systems optimise for insight, efficiency, or reporting. Abraham of London optimises for **decision completion under pressure**. This is not "better decisions." It is **fewer unresolved decisions.**
 
-**The Problem.** Organisations spend billions on consultants and analytics. Decisions still stall. The problem is not information — it is decision authority. No infrastructure exists to identify unresolved decisions, price their consequences, force resolution, and verify outcomes.
+### 40.5 Product Stack (Simplified for Capital)
 
-**The Solution.** Abraham of London is Decision Authority Infrastructure. The system identifies contradictions in decision-making through structured diagnostics, prices the cost of inaction through server-side economic engines, forces decisions through enforcement mechanisms (Pre-Commitment Gate, Strategy Room, Escalation Engine), and verifies outcomes through the Outcome Verification loop.
+| Layer | Function | Products |
+|-------|----------|----------|
+| Layer 1 — Signal Capture | Entry and qualification | Fast Diagnostic, Purpose Alignment |
+| Layer 2 — Structural Diagnosis | Root cause identification | Constitutional, Team, Enterprise Assessments |
+| Layer 3 — Economic Exposure | Cost quantification | Executive Reporting |
+| Layer 4 — Execution Enforcement | Action forcing | Strategy Room |
+| Layer 5 — Verification Loop | Outcome tracking | Outcome Check, Pressure System |
+| Supporting Engines | System infrastructure | Intelligence Spine, Governance Layer, Follow-up/Retargeting, Social Proof Engine |
 
-**The Product.** A tiered product system from free diagnostics (Fast Diagnostic, Purpose Alignment) through paid enforcement (Executive Reporting at £295, Strategy Room at £750-£1,250) to enterprise retainers (£5,000-£50,000/month). Each tier increases diagnostic depth, enforcement pressure, and accountability.
+### 40.6 Defensibility — Four Structural Moats
 
-**The Technology.** A 13-layer architecture with server-side scoring, deterministic classification, LLM synthesis with hard validation (5-rule Arbiter Tournament), persistent Intelligence Spine, cross-session Decision Memory, and append-only Evidence Ledger. All proprietary logic is server-only. The public surface demonstrates capability without revealing machinery.
+**1. Data Flywheel.** Every user generates decision patterns, cost signals, and behavioural outcomes. The system becomes more accurate over time.
 
-**The Traction.** The system is live with functional diagnostics, strategy room, executive reporting, enterprise campaigns, and boardroom mode. The 21-post LinkedIn campaign is deployed for market-dominant entry. The engagement lane architecture provides multi-audience reach.
+**2. Enforcement Layer.** Most competitors will stop at insight. The enforcement mechanism requires a fundamentally different product philosophy.
 
-**The Ask.** Seed capital to fund: first ten enterprise accounts, content amplification at scale, engineering depth for the 13-archetype taxonomy and NEGLIGIBLE/SYSTEMIC severity tiers, and sales infrastructure.
+**3. Economic Anchoring.** Every decision is tied to a self-declared cost figure, creating a pricing mechanism that competitors cannot replicate.
 
-**The Return.** Revenue model is tiered: free-to-paid conversion from diagnostics to Executive Reporting (£295), upsell to Strategy Room (£750-£1,250), land-and-expand to retainers (£5K-£50K/month). Retainer revenue is recurring and deepens with usage. The Intelligence Spine creates structural lock-in: switching costs increase as decision history accumulates.
+**4. Closed-Loop System.** Diagnosis feeds action. Action feeds outcome. Outcome feeds the next diagnosis. This compounding intelligence is the deepest moat.
 
----
+### 40.7 Monetisation Model
 
-## Chapter 28: Investor Call Script
+| Tier | Product | Price | Function |
+|------|---------|-------|----------|
+| Transactional | Executive Reporting | £295 | Prices the problem |
+| Enforcement | Strategy Room | £750-£1,250 | Resolves specific decisions |
+| Enterprise — Core | Retainer | £5,000/month | 1-2 decisions under governance |
+| Enterprise — Operational | Retainer | £10,000/month | Multi-team oversight |
+| Enterprise — Institutional | Retainer | £25,000/month | Organisation-level governance |
+| Enterprise — Bespoke | Retainer | £10,000-£50,000/month | Board-level, scope-dependent |
 
-**Opening (2 minutes).** "Every organisation you've invested in has had a decision that should have taken two weeks and took six months. Not because they lacked information. Because no one had the authority, the pressure, or the accountability to force it to conclusion. We've built infrastructure for that."
+### 40.8 Unit Economics
 
-**Problem Statement (3 minutes).** Describe the decision authority gap. Use anonymised examples from the system's case library. Quantify the cost of indecision using the economic framing model. Establish that this is a structural problem, not an information problem.
+Illustrative funnel:
 
-**Solution Overview (5 minutes).** Walk through the four operations: identify contradiction, price consequence, force decision, verify outcome. Demonstrate the Fast Diagnostic live — share screen, run a diagnostic, show the output. Let the system speak for itself. Do not explain the methodology. Show the result.
+```
+1,000 Fast Diagnostic users
+  +-> 10-15% proceed to Executive Reporting    = 100-150
+        +-> 5-8% proceed to Strategy Room       = 5-12
+              +-> 1-2% convert to retainers      = 1-3
+```
 
-**Product and Revenue (5 minutes).** Present the tiered model: free diagnostics as entry, Executive Reporting as first conversion, Strategy Room as enforcement product, retainers as recurring revenue. Show the pricing logic: price is always less than the cost of inaction the system has identified. The sale is not "buy this product." The sale is "you cannot afford not to resolve this decision."
+### 40.9 Market Size
 
-**Technology Moat (3 minutes).** Explain the Intelligence Spine — the fact that it never resets, that every session adds intelligence, that the system becomes more accurate with use. Explain the Arbiter Tournament — the fact that the system rejects its own output when it fails validation. These are not features. They are structural advantages that cannot be replicated by adding a feature to an existing product.
+**Target segment:** Mid-market companies (£5M-£200M revenue), founder-led or executive-driven.
 
-**Ask and Terms (2 minutes).** State the ask. Present terms. Close with: "We are not asking you to believe in our methodology. We are asking you to verify it. Run the diagnostic. If the findings are accurate, the investment thesis follows."
+**Entry point:** One unresolved decision costing £5,000 or more per month.
 
----
+**Expansion logic:** Every company has multiple such decisions. Entry on one creates visibility of others.
 
-## Chapter 29: Objection Handling — Investor Warbook
+### 40.10 Go-to-Market Phases
 
-The Investor Warbook contains 17 investor objections with structured responses.
+| Phase | Model | Activity |
+|-------|-------|----------|
+| Phase 1 | Founder-led sales | Direct outreach, diagnostic-led inbound, high-signal/low-volume |
+| Phase 2 | System-led qualification | Content engine, retargeting, pressure loops |
+| Phase 3 | Enterprise rollout | Boardroom Mode, decision portfolios, organisational deployment |
 
-1. **"This is just consulting with software."** No. Consulting depends on the consultant's continued involvement. This is infrastructure that operates independently. Consulting gives advice. This system enforces decisions.
+### 40.11 Risks and Mitigations
 
-2. **"The market is too small."** The global management consulting market is $300B+. We are not competing with it. We are capturing the value it fails to deliver — the decisions that were correctly diagnosed but never resolved.
+| Risk | Impact | Mitigation |
+|------|--------|-----------|
+| Misdiagnosis | Trust collapse | Arbiter Tournament, feedback loops, kill-switch |
+| Buyer Readiness | Low-quality leads | Do-Not-Sell mechanism, gating, pre-commitment requirements |
+| Organisational Resistance | Authority conflicts block execution | Boardroom Mode, stakeholder mapping, multi-actor truth detection |
 
-3. **"Why would anyone pay for this when they can hire McKinsey?"** McKinsey tells you what to do. We ensure it gets done. They are complementary, not competitive. McKinsey clients are our best prospects — they already have the diagnosis but lack the enforcement.
+### 40.12 Why Now
 
-4. **"The technology isn't defensible."** The Intelligence Spine's cross-session accumulation creates data moats. The Arbiter Tournament's validation logic is proprietary. The Evidence Ledger's longitudinal records cannot be replicated without time. Defensibility increases with usage.
+**Data abundance creates decision paralysis.** Organisations have more information than ever and less clarity on what to do with it.
 
-5. **"How do you acquire customers?"** Free diagnostic as entry point. Content amplification through LinkedIn. Lane-specific engagement architecture. The diagnostic is the sales tool — if it is accurate, the system sells itself.
+**AI acceleration creates faster consequences.** When execution cycles compress, the cost of delayed decisions compounds more rapidly.
 
-6. **"What's the churn risk?"** The Intelligence Spine creates switching costs. Decision history does not transfer. The longer a client uses the system, the more valuable the accumulated intelligence becomes.
+### 40.13 Vision
 
-7. **"Can this scale without human intervention?"** The diagnostic layer is fully automated. The enforcement layer is time-triggered. The Strategy Room requires human facilitation but the surrounding infrastructure (escalation, tracking, breach detection) is automated.
-
-8. **"Who is the competition?"** No one builds decision authority infrastructure. Consulting firms sell advice. Analytics platforms sell data. Project management tools track execution. No one tracks the decision itself. We are creating the category.
-
-9. **"What if the diagnosis is wrong?"** The system measures its own accuracy through the Outcome Verification loop. Wrong diagnoses are detected, recorded, and fed back into the system. Self-correction is built in, not bolted on.
-
-10. **"This sounds too aggressive for enterprise."** Enterprise does not need gentle. Enterprise needs accurate. The system's directness is its value proposition. Organisations do not change because someone asked nicely.
-
-11. **"What's the LTV:CAC?"** Free diagnostic means near-zero CAC for entry. Executive Reporting at £295 covers acquisition cost. Strategy Room at £750-£1,250 is profit. Retainers at £5K-£50K/month are high-LTV recurring revenue.
-
-12. **"How do you handle data privacy?"** All diagnostic data is processed server-side. Decision Memory stores public-safe summaries only. No internal scoring data is exposed. Client data is isolated by organisation.
-
-13. **"What's the team?"** The system was designed by a single institutional architect with full doctrinal control. This is an advantage at this stage — no design-by-committee, no diluted vision.
-
-14. **"Is the AI defensible?"** The AI (LLM synthesis) is the least important part of the system. The deterministic layer, the C3 scorer, the Arbiter Tournament, the Evidence Ledger — these are the defensible components. The AI is a synthesis layer that is validated, not trusted.
-
-15. **"What if someone copies the methodology?"** The methodology is public. The machinery is proprietary. Copying the framework is easy. Replicating the Intelligence Spine, the Evidence Ledger, the cross-session memory, and the Arbiter Tournament requires building the entire system. See Chapter 35: Disclosure Principle.
-
-16. **"Can you show me case studies?"** Anonymised evidence only. We do not name clients. We describe conditions, interventions, and verified outcomes. See Chapter 21.
-
-17. **"What's the exit path?"** Enterprise SaaS acquisition by governance, risk, or consulting platforms seeking to add decision enforcement to their portfolio. Alternatively, category leadership in Decision Authority Infrastructure as a standalone public company.
-
----
-
-## Chapter 30: Fundraising Strategy
-
-**Stage: Pre-Seed / Seed.** The system is functional. The products are live. The technology is built. The fundraise is for market entry and first accounts, not for product development.
-
-**Target Raise.** Sufficient to fund 18 months of operations: first ten enterprise accounts, one sales hire, content amplification, and engineering depth for target features (13-archetype taxonomy, NEGLIGIBLE/SYSTEMIC severity tiers).
-
-**Investor Profile.** Seeking investors who understand:
-- Category creation (not competing in an existing market)
-- Infrastructure businesses (not feature-based SaaS)
-- Founder-led vision (not consensus-driven product development)
-- Long-cycle enterprise sales (not immediate viral growth)
-
-**Fundraising Process:**
-
-1. **Warm introduction.** Every investor interaction begins with a warm introduction from someone who has experienced the system. Cold outreach is not used. The system's own doctrine applies: authority before features.
-
-2. **Diagnostic demonstration.** Every investor call includes a live diagnostic. The investor experiences the system's accuracy firsthand. This is not a demo. It is a proof.
-
-3. **Memo delivery.** The Investor Memo (Chapter 27) is delivered after the diagnostic, not before. The diagnostic creates the context for the memo. Without the diagnostic experience, the memo is just another pitch deck.
-
-4. **Term negotiation.** Terms are standard for the stage. The non-negotiable term is doctrinal control — the founding vision is not subject to board override during the category creation phase.
-
-5. **Close.** The close mirrors the system's own methodology: name the decision, name the owner, set the deadline, track the execution. The investor either acts or does not. The system does not chase.
+To become the **default operating layer for decision authority** inside organisations.
 
 ---
 
-# PART VIII — OPERATIONAL DISCIPLINE & GOVERNANCE
+## Chapter 41: Investor Memo
+
+### Executive Summary
+
+Abraham of London is building Decision Authority Infrastructure — a system that identifies, prices, and enforces critical decisions inside organisations. This is not a productivity tool or an advisory product. It is an execution enforcement layer.
+
+### The Problem — Decision Drift
+
+Across organisations of all sizes, there is a consistent failure pattern. Decisions remain open too long. Ownership is unclear. Execution breaks. No system verifies whether action actually occurred.
+
+### Why Existing Solutions Fail
+
+SaaS tools provide data visibility but no enforcement. Consulting provides clarity but no accountability. Analytics provides measurement but no ownership. Coaching provides behaviour change but disconnected from outcomes. All stop before: Was the decision made and executed?
+
+### The Solution — The DAI Lifecycle
+
+1. **Contradiction detection** — what you say versus what your actions reveal
+2. **Decision identification** — the real decision being avoided
+3. **Economic framing** — cost of delay quantified by the user
+4. **Action enforcement** — one required move within 48 hours
+5. **Outcome verification** — did the action happen, and did it work
+
+### Core Innovation — Six Key Mechanisms
+
+| Mechanism | Function |
+|-----------|----------|
+| Pre-Commitment Gate | Users must declare willingness to act before receiving most valuable outputs |
+| Economic Anchoring | Users input their own cost of delay — creates self-declared price reference |
+| Integrity Scoring | Detects manipulation and inconsistent inputs |
+| Breach Tracking | When users commit and fail to follow through, this is recorded and surfaced |
+| Pressure Index | Across all stages, pressure increases monotonically |
+| System Kill-Switch | If accuracy or execution rates drop below threshold, commercial operations halt automatically |
+
+### Business Model
+
+Revenue is aligned with economic consequence, not usage.
+
+| Product | Price | Function |
+|---------|-------|----------|
+| Executive Reporting | £295 | Prices the problem |
+| Strategy Room | £750-£1,250 | Enforces the decision |
+| Enterprise — Core | £5,000/month | 1-2 decisions under governance |
+| Enterprise — Operational | £10,000/month | Multi-team oversight |
+| Enterprise — Institutional | £25,000/month | Organisation-level governance |
+| Enterprise — Bespoke | £10,000-£50,000/month | Board-level integration |
+
+### GTM Strategy
+
+Phase 1: founder-led validation. Phase 2: system-led qualification via Fast Diagnostic. Phase 3: enterprise expansion through Boardroom Mode. The defining advantage: the product filters users before sales engage.
+
+### Defensibility — Four Pillars
+
+1. **Decision Data Layer** — behavioural signals, economic inputs, and execution outcomes compound over time
+2. **Enforcement Layer** — competitors will stop at insight; this system enforces action
+3. **Closed Feedback Loop** — every cycle improves accuracy
+4. **Governance System** — built-in thresholds prevent degradation
+
+### Use of Capital
+
+```
+Distribution Engine #################### 40%
+Product Hardening   ###############      30%
+Enterprise GTM      ##########           20%
+Operations/Buffer   #####                10%
+```
+
+| Priority | Allocation | Scope |
+|----------|-----------|-------|
+| Distribution Engine | 40% | Content, inbound, retargeting, funnel optimisation, audience development |
+| Product Hardening | 30% | Decision accuracy improvements, data infrastructure, enterprise-grade stability |
+| Enterprise GTM | 20% | Founder-led sales support, case study development, Boardroom Mode rollout |
+| Operations/Buffer | 10% | Administrative infrastructure, legal, compliance, contingency |
+
+### Traction Signals
+
+The system is optimised for signal quality, not volume. Early indicators demonstrate:
+- Strong engagement at contradiction points — users respond to accuracy, not features
+- User response to cost framing rather than product descriptions
+- Pre-commitment increasing conversion rates
+- Disqualification improving overall funnel quality
+- The product works when it makes people uncomfortable enough to act
+
+### Risks
+
+| Risk | Cause | Mitigation |
+|------|-------|-----------|
+| Misdiagnosis | Loss of trust if accuracy degrades | Deterministic + arbiter systems, continuous TAR measurement |
+| User avoidance | Low conversion if lead quality degrades | Pre-commitment requirements, disqualification mechanisms |
+| Organisational resistance | Execution blocked by internal politics | Stakeholder mapping, multi-actor truth detection |
+
+### Why This Wins
+
+This product does something most systems avoid. It forces reality into the conversation. It exposes contradictions. It attaches cost. It removes ambiguity. It demands action. That is uncomfortable — but it is valuable. Comfort does not create change. Precision pressure does.
+
+### Vision
+
+To become the default operating layer for decision authority inside organisations. Where every critical decision is visible, every delay is priced, every action is tracked, and every outcome is verified.
+
+### Closing Position
+
+Most products help people think better. This one ensures they decide and act. The system does not compete for attention. It demands action.
 
 ---
 
-## Chapter 31: The First Ten Accounts
+## Chapter 42: Investor Call Script
 
-The first ten accounts define the institution. They are not just customers. They are evidence. Every subsequent sale, every case study, every investor conversation, and every content piece will reference the patterns established by these ten accounts.
+### 42.1 Opening — 30 Seconds, Set Frame
+
+> "I'll keep this tight. This is not a SaaS pitch and not a consulting story. We're building infrastructure for something most companies don't control — decision execution."
+
+### 42.2 Context Alignment — 2 Minutes, Hook
+
+> "Let me test something quickly. In the companies you've seen — where do things actually break?"
+
+Let the investor answer. Then:
+
+> "What you just described isn't a strategy problem. It's unresolved decisions."
+
+### 42.3 Problem Reframe
+
+> "Every system in the market stops before the only thing that matters: Was the decision made — and did it happen?"
+
+> "That gap is what we built for."
+
+### 42.4 What We Built — 5 Points, 3 Minutes
+
+> "We built a system that does five things in sequence:
+>
+> 1. Identifies the real decision — not the stated one
+> 2. Forces the user to quantify the cost of delay
+> 3. Assigns responsibility
+> 4. Enforces one action within 48 hours
+> 5. Verifies whether it actually happened"
+
+> "It doesn't give advice. It forces movement."
+
+### 42.5 Demonstrate Control
+
+> "Most tools let the user stay comfortable. This system removes that option."
+
+> "If the user isn't willing to act — we restrict output. If the cost is trivial — we block purchase. If they contradict themselves — we call it out. If they don't act — we track the breach."
+
+> "The system governs the interaction."
+
+### 42.6 Economic Anchor
+
+> "If a decision is costing £10k a month, the real question isn't whether they want a report. It's whether they want to keep paying that cost."
+
+> "We price against that — not against features."
+
+### 42.7 Business Model
+
+> "Current model is simple: £295 prices the problem. £750-£1,250 enforces the decision. £5,000-£50,000 per month runs this as permanent infrastructure."
+
+> "The endgame is not transactions. It's embedded decision infrastructure."
+
+### 42.8 Traction
+
+> "We're early, but the signals are clear: Users engage at contradiction points. Conversion happens when cost becomes visible. Pre-commitment increases action rates. Disqualification improves funnel quality."
+
+### 42.9 Defensibility
+
+> "This compounds in three ways: Decision data — behaviour plus cost plus outcomes. Execution layer — others don't have it. Closed loop — diagnose, act, verify."
+
+### 42.10 Controlled Pause
+
+> "That's the system at a high level. Where do you want to go deeper?"
+
+### 42.11 Close and the Ask
+
+> "We're not trying to be another tool in the stack. We're building the layer that makes the rest of the stack actually work."
+
+> "We're raising to scale distribution and move into enterprise deployment. Happy to share numbers and structure if this aligns with how you think."
+
+### 42.12 Post-Call Follow-Up Protocol
+
+Send within 2-6 hours of the call:
+
+1. The Investor Memo (complete document)
+2. A short note:
+
+> "Thanks for the conversation. The core thesis is simple: most companies don't lack insight — they lack decision execution. We've built a system that closes that gap by identifying, pricing, and enforcing decisions. Attaching the memo for context. Let me know where you want to go deeper."
+
+**Timing protocol:**
+
+- Within 2 hours: Send memo + short note
+- Day 3 (if no response): "Wanted to confirm you received the memo. Happy to go deeper on any section."
+- Day 7 (if still no response): "Assume timing isn't right. This will be here when it is."
+- Never send a third follow-up. Never chase.
+
+---
+
+## Chapter 43: Objection Handling — Investor Warbook
+
+The Investor Warbook documents every significant objection an investor may raise. Every objection falls into one of three categories: misunderstanding (clarify), scepticism (reframe), or avoidance (confront).
+
+---
+
+#### OBJECTION 1: "This feels like consulting in disguise."
+
+**What they mean:** "This doesn't scale."
+
+> "Consulting gives recommendations. This enforces execution and verifies outcomes. Consultants leave. This stays in the system and tracks whether the decision actually happened."
+
+**If they push:** "If consulting solved this problem, it wouldn't still exist at this scale."
+
+---
+
+#### OBJECTION 2: "Why hasn't this been built before?"
+
+**What they mean:** "This might not be viable."
+
+> "Because it's uncomfortable. Most products optimise for adoption. This one forces users to confront what they're avoiding."
+
+---
+
+#### OBJECTION 3: "This feels too aggressive. Users won't like it."
+
+**What they mean:** "Will people actually use this?"
+
+> "People don't like it. That's why it works. They don't convert because it's pleasant. They convert because it's accurate."
+
+---
+
+#### OBJECTION 4: "What if your diagnosis is wrong?"
+
+**What they mean:** "Trust risk."
+
+> "Then the product fails. Completely."
+> 
+> *[Pause.]*
+> 
+> "That's why we track accuracy as a core metric and shut down conversion if it drops."
+
+---
+
+#### OBJECTION 5: "Is this just another AI wrapper?"
+
+**What they mean:** "No moat."
+
+> "AI generates language. We enforce decisions. The value isn't the output. It's what happens after the output."
+
+---
+
+#### OBJECTION 6: "Who is the real buyer?"
+
+**What they mean:** "Sales complexity."
+
+> "The person already feeling the cost. Usually a founder, CEO, or operator with direct accountability."
+
+---
+
+#### OBJECTION 7: "What's the market size?"
+
+**What they mean:** "Is this big enough?"
+
+> "Every organisation has unresolved decisions costing money. We start with one decision. We expand to the decision system."
+
+---
+
+#### OBJECTION 8: "What stops a user from ignoring the system?"
+
+**What they mean:** "Retention risk."
+
+> "Nothing stops them. That's the point. But we track that behaviour — and it becomes part of their next diagnosis. Avoidance doesn't disappear. It compounds."
+
+---
+
+#### OBJECTION 9: "Why would someone pay £295/£1,250 for this?"
+
+**What they mean:** "Pricing doubt."
+
+> "If a decision is costing £10k per month, £295 is irrelevant. We price against cost — not features."
+
+---
+
+#### OBJECTION 10: "What's your competition?"
+
+**What they mean:** "Where do you sit?"
+
+> "Indirect competition is everywhere. Direct competition doesn't exist. Everyone helps you think. No one ensures you act."
+
+---
+
+#### OBJECTION 11: "What if organisations resist this?"
+
+**What they mean:** "Adoption friction."
+
+> "They will. Which is why we don't start at the organisation. We start with one decision owner under pressure."
+
+---
+
+#### OBJECTION 12: "This sounds hard to scale."
+
+**What they mean:** "Is this venture-scale?"
+
+> "The system scales because the enforcement is built into the product. We don't scale people. We scale decision enforcement."
+
+---
+
+#### OBJECTION 13: "What's the exit?"
+
+**What they mean:** "Return profile."
+
+> "Either this becomes infrastructure inside organisations, or it becomes indispensable data on decision behaviour. Both are valuable outcomes."
+
+---
+
+#### OBJECTION 14: "What's your biggest weakness?"
+
+**What they mean:** "Let's see if you're honest."
+
+> "If the system becomes inaccurate, it collapses. That's why we built governance that shuts it down when accuracy drops."
+
+---
+
+#### OBJECTION 15: "I'm not sure this is a category."
+
+**What they mean:** "This is unclear."
+
+> "It isn't. Yet. Most categories are named after they work — not before."
+
+---
+
+#### OBJECTION 16: "This feels niche."
+
+**What they mean:** "Limited upside."
+
+> "A single unresolved decision can cost millions. This isn't niche. It's concentrated value."
+
+---
+
+#### OBJECTION 17: Hard Pushback Scenario
+
+> "Let me ask you directly — in your portfolio, how many companies are struggling because they lack insight... and how many because they aren't executing decisions?"
+
+> "That gap is what we're building for."
+
+---
+
+#### Red Flags — Walk Away Signals
+
+Do not pursue investors who:
+- Want you to "soften" the product
+- Don't believe execution is a real problem
+- Push toward generic SaaS positioning
+- Focus exclusively on UI or features
+
+#### Internal Post-Call Check
+
+After every investor call, three questions:
+
+1. Did I control the frame?
+2. Did I challenge their assumptions?
+3. Did they feel the problem?
+
+If the answer to any question is no, the call was a pitch — not a leadership exercise.
+
+---
+
+## Chapter 44: Fundraising Strategy
+
+### 44.1 Strategic Positioning
+
+Abraham of London is not raising for a SaaS tool. It is raising for Decision Authority Infrastructure — a new category.
+
+- Do NOT chase generic SaaS VCs
+- Do NOT optimise for volume of investor meetings
+- Do NOT dilute the narrative to fit existing categories
+
+### 44.2 Round Structure
+
+**Recommended:** Pre-Seed / Seed Hybrid
+
+| Parameter | Target |
+|-----------|--------|
+| Raise | £1.5M-£3M |
+| Target runway | 18-24 months |
+| Instrument | SAFE or priced round depending on leverage position |
+
+### 44.3 Capital Allocation
+
+| Priority | Allocation | Scope |
+|----------|-----------|-------|
+| Distribution Engine | 40% | Content, inbound, retargeting, funnel optimisation |
+| Product Hardening | 30% | Decision accuracy improvements, data infrastructure, governance refinement |
+| Enterprise GTM | 20% | Founder-led sales support, case study development, Boardroom Mode rollout |
+| Operations/Buffer | 10% | Administrative infrastructure, legal, compliance, contingency |
+
+### 44.4 Target Investor Profile
+
+The ideal investor possesses:
+- A track record backing B2B, infrastructure, or workflow systems
+- Understanding of enterprise buying behaviour and organisational dynamics
+- Comfort with non-obvious categories that create rather than enter markets
+- Preference for execution capability over narrative polish
+
+### 44.5 Investor Segments
+
+**Segment A — High-Conviction Early-Stage VCs (UK/EU):** Primary targets. Comfortable with category creation.
+
+**Segment B — Operators and Angels:** Former CEOs, operators, and individuals who have lived decision failure. They recognise the problem faster.
+
+**Segment C — Strategic Investors (Selective):** Consulting firms, enterprise SaaS operators. Engage selectively.
+
+### 44.6 Target Investor Profiles
+
+**UK/Europe — Top Tier:** Early-stage funds with B2B infrastructure thesis. Pre-seed/Seed funds comfortable with category creation.
+
+**UK/Europe — Strong Fit:** Operator-led funds with portfolio companies in transformation.
+
+**Global (Selective):** Only via warm introduction. Thesis alignment required.
+
+**Angels/Operators (High Priority):** Former SaaS founders with £50M+ exits, operators from McKinsey/BCG/Bain who left consulting, scaling technology company executives, former CEOs and COOs.
+
+### 44.7 Outreach Strategy
+
+**Phase 1 — Warm Introductions Only.** 10-20 high-quality introductions. No cold outreach.
+
+**Phase 2 — Controlled Batch.** 5-8 investors per batch. Refine narrative based on response patterns.
+
+**Phase 3 — Signal Amplification.** Share conversion metrics and enterprise interest. Let momentum create urgency.
+
+### 44.8 Meeting Strategy
+
+| Call | Purpose | Activities |
+|------|---------|-----------|
+| Call 1 | Frame and problem recognition | Establish category, test comprehension, assess alignment |
+| Call 2 | Product and economics deep dive | Demonstrate system logic, present unit economics |
+| Call 3 | Terms and conviction test | Discuss round structure, assess commitment, negotiate |
+
+### 44.9 Deal Control Rules
+
+- Never overshare pipeline information
+- Never rush to term sheets
+- Create controlled urgency through scarcity of access, not artificial deadlines
+- Use language that signals selectivity
+
+### 44.10 Signals You Are Winning
+
+- Investors ask operational questions
+- Investors reference their portfolio companies
+- Investors ask about enterprise rollout
+- Investors challenge assumptions constructively
+
+### 44.11 Signals to Walk Away
+
+- "Can you make it more SaaS-like?"
+- "This feels too harsh for users"
+- "Can you simplify it into a tool?"
+
+### 44.12 Timeline — 10-Week Plan
+
+```
+| WEEKS 1-2  | Finalise materials - Secure introductions - Prepare data room |
+| WEEKS 3-6  | First wave conversations - Refine narrative - Identify leads   |
+| WEEKS 7-10 | Drive term sheet - Close round - Execute documentation         |
+```
+
+### 44.13 Negotiation Position
+
+The company is selling:
+- A working system with demonstrated logic
+- A clear economic model with defined unit economics
+- A category gap that no competitor currently occupies
+
+---
+
+# PART XI — OPERATIONAL DISCIPLINE
+
+---
+
+## Chapter 45: The First Ten Accounts
+
+The first ten accounts define the institution. They are not just customers. They are evidence.
 
 **Selection Criteria.** The first ten accounts must satisfy all of the following:
 
-1. **Real decision at stake.** The organisation must have a genuine unresolved decision with material consequence. Test cases, pilots, and "let's see what it does" engagements are rejected.
-
-2. **Authority to act.** The primary contact must have the authority to force the decision to conclusion, or must have direct access to someone who does. Engagements with middle managers who need approval chains are deferred.
-
-3. **Willingness to verify.** The organisation must agree to participate in the Outcome Verification loop. This is non-negotiable. Without verification, the engagement produces no evidence.
-
-4. **Appropriate scale.** The decision must be significant enough to justify the system's intervention but not so complex that resolution within the system's timeframe is impossible.
-
-5. **Condition class diversity.** The ten accounts should span all four condition classes (authority, definition, execution, instability) to build evidence breadth.
+1. **Real decision at stake.** The organisation must have a genuine unresolved decision with material consequence.
+2. **Authority to act.** The primary contact must have the authority to force the decision to conclusion.
+3. **Willingness to verify.** The organisation must agree to participate in the Outcome Verification loop.
+4. **Appropriate scale.** The decision must be significant enough to justify the system's intervention.
+5. **Condition class diversity.** The ten accounts should span all four condition classes.
 
 **Engagement Protocol for First Ten:**
 
@@ -914,6 +2850,21 @@ The first ten accounts define the institution. They are not just customers. They
 - Capture Outcome Verification at 30, 60, and 90 days.
 - Record every interaction in the Evidence Ledger.
 - Produce anonymised case documentation for each account.
+
+**What to Track:**
+
+| Record | Purpose |
+|--------|---------|
+| Decision -> Action -> Impact chain | The full sequence from identified decision through enforced action to measured outcome |
+| Breach -> Escalation -> Correction | Every instance where commitment was made and not honoured, the escalation that followed |
+
+**Execution Rules:**
+
+**Do NOT improvise.** Every script, every flow, every escalation protocol exists for a reason.
+
+**Do NOT soften.** Softening the system softens the outcomes. Softened outcomes are worthless as evidence.
+
+**Do NOT over-explain.** Statement of reality. Force the choice. Record the result.
 
 **Success Metrics for First Ten:**
 - 80%+ diagnostic accuracy (confirmed by client feedback)
@@ -924,84 +2875,246 @@ The first ten accounts define the institution. They are not just customers. They
 
 ---
 
-## Chapter 32: What Not To Do
+## Chapter 46: What Not To Do
 
-The following 24 prohibitions govern all institutional behaviour. Violations are not corrected. They are treated as breaches of institutional discipline.
+The following prohibitions govern all institutional behaviour. Violations are treated as breaches of institutional discipline.
 
-1. Do not sell to organisations that lack decision authority.
-2. Do not soften diagnostic findings to maintain client comfort.
-3. Do not fabricate financial projections without user-provided anchors.
-4. Do not name clients in any external material, ever.
-5. Do not bypass the Arbiter Tournament for any reason.
-6. Do not deliver synthesis output that has failed hard validation.
-7. Do not reset the Intelligence Spine between stages.
-8. Do not decrease the pressureIndex under any circumstances.
-9. Do not offer discounts that undermine the pricing doctrine.
-10. Do not compete on warmth, accessibility, or ease of use.
-11. Do not describe the system as consulting, coaching, or advisory.
-12. Do not expose internal scoring thresholds or classification logic to clients.
-13. Do not deploy Boardroom Mode for non-board-level issues.
-14. Do not proceed with Strategy Room when the Decision Directive blocks it.
-15. Do not suppress the Do-Not-Sell flag for revenue purposes.
-16. Do not promise outcomes the system has not verified.
-17. Do not use client data for marketing without explicit authorisation.
-18. Do not skip the Quality Gate for any deployment.
-19. Do not add features that trade accuracy for user comfort.
-20. Do not accept investment that requires diluting doctrinal control.
-21. Do not publish content that reveals proprietary scoring or synthesis logic.
-22. Do not engage with media that requires simplifying the system to fit a headline.
-23. Do not hire salespeople who cannot explain the founding problem.
-24. Do not treat the first ten accounts as anything less than institutional evidence.
+| # | Prohibition | Rationale |
+|---|-------------|-----------|
+| 1 | Do not sell to organisations that lack decision authority | Engagement without authority collapses during execution |
+| 2 | Do not soften diagnostic findings to maintain client comfort | Accuracy is the source of authority |
+| 3 | Do not fabricate financial projections without user-provided anchors | Fabrication destroys credibility |
+| 4 | Do not name clients in any external material, ever | Absolute discretion is non-negotiable |
+| 5 | Do not bypass the Arbiter Tournament for any reason | Validation protects accuracy |
+| 6 | Do not deliver synthesis output that has failed hard validation | Failed synthesis is worse than no synthesis |
+| 7 | Do not reset the Intelligence Spine between stages | Spine continuity is a design invariant |
+| 8 | Do not decrease the pressureIndex under any circumstances | Pressure is monotonically increasing |
+| 9 | Do not offer discounts that undermine the pricing doctrine | Discounts signal the price was not real |
+| 10 | Do not compete on warmth, accessibility, or ease of use | The system competes on being right |
+| 11 | Do not describe the system as consulting, coaching, or advisory | Category positioning is non-negotiable |
+| 12 | Do not expose internal scoring thresholds or classification logic | Proprietary machinery stays server-side |
+| 13 | Do not deploy Boardroom Mode for non-board-level issues | Boardroom Mode has activation thresholds |
+| 14 | Do not proceed with Strategy Room when the Decision Directive blocks it | Gating exists for structural reasons |
+| 15 | Do not suppress the Do-Not-Sell flag for revenue purposes | Wrong clients degrade the system |
+| 16 | Do not promise outcomes the system has not verified | Only verified outcomes are stated |
+| 17 | Do not use client data for marketing without explicit authorisation | Data governance is absolute |
+| 18 | Do not skip the Quality Gate for any deployment | The gate protects accuracy |
+| 19 | Do not add features that trade accuracy for user comfort | Precision over comfort is doctrine |
+| 20 | Do not accept investment that requires diluting doctrinal control | Vision is not subject to committee |
+| 21 | Do not publish content that reveals proprietary scoring or synthesis logic | Public/proprietary boundary is enforced |
+| 22 | Do not engage with media that requires simplifying the system to fit a headline | Category integrity must be preserved |
+| 23 | Do not hire salespeople who cannot explain the founding problem | Alignment with doctrine is a hiring criterion |
+| 24 | Do not treat the first ten accounts as anything less than institutional evidence | First ten accounts are proof, not revenue |
+| 25 | Do not create enterprise features prematurely | Build when ten accounts require it |
+| 26 | Do not chase volume over signal | One qualified prospect outweighs one hundred unqualified |
+| 27 | Do not add storytelling fluff | Pattern. Cost. Action. Outcome. Nothing else. |
+| 28 | Do not give multiple options | Options create deliberation. Directives create movement. |
 
 ---
 
-## Chapter 33: Quality Assurance & Compliance
+## Chapter 47: What a "Yes" Looks Like
 
-**Quality Gate.** Every release passes through the 8-step Quality Gate documented in Appendix E. No exceptions. No manual overrides. The gate is automated and enforced at the build level.
+Success in this system does not sound like enthusiasm. It does not sound like excitement. It does not sound like effusive praise.
 
-**Diagnostic Quality.** Every diagnostic output is validated against the following standards:
+A real "yes" sounds like:
+
+> "Fine. Let's do it."
+
+> "Okay, this needs sorting."
+
+> "Let's move."
+
+That is real intent. Not energy. Not excitement. Resigned clarity. The prospect has confronted the reality, exhausted their objections, and arrived at the only rational conclusion.
+
+### 47.1 What You Will Experience
+
+You will lose people. You will create friction. You will receive pushback. Prospects will tell you the approach is too direct.
+
+Good.
+
+Because the wrong clients — the ones who leave early, who push back on the method, who want comfort rather than clarity — are clients who would have consumed time without producing outcomes, required constant reassurance, produced mediocre results, and diluted the positioning.
+
+> **KEY PRINCIPLE**
+> 
+> The system is designed to repel the wrong client with the same force it attracts the right one. Attrition is not failure — it is filtration.
+
+---
+
+# PART XII — GOVERNANCE & COMPLIANCE
+
+---
+
+## Chapter 48: Onboarding Protocol
+
+### 48.1 New Operator Onboarding (21-Day Sequence)
+
+**Week 1 — Immersion:**
+
+- Day 1-2: Read Parts I-V of this manual. No shortcuts.
+- Day 3: Shadow two live calls (observe only, no speaking)
+- Day 4-5: Role-play all five objections with a senior operator until response time < 3 seconds
+
+**Week 2 — Supervised Practice:**
+
+- Day 6-8: Run three calls with senior operator on mute (real prospects, real stakes)
+- Day 9-10: Debrief each call against the script. Identify deviations. Correct.
+
+**Week 3 — Solo with Review:**
+
+- Day 11-15: Five solo calls. All recorded. All reviewed within 24 hours.
+- Day 16-21: Full autonomy if performance metrics are met. If not, extend Week 2.
+
+### 48.2 Performance Gate for Graduation
+
+The following thresholds must be met before an operator is granted full autonomy:
+
+- Script adherence >= 90%
+- Qualification accuracy (correctly identifies Type 1/2/3 calls) >= 80%
+- Zero prohibited language usage across all reviewed calls
+- Demonstrated ability to exit weak calls within 5 minutes
+- Correct application of the three-part response structure (Acknowledge, Re-anchor, Force decision boundary) in all role-play scenarios
+
+If performance gate is not met by Day 21, the operator returns to Week 2 supervised practice until all criteria are satisfied. There is no time-based graduation — only performance-based graduation.
+
+---
+
+## Chapter 49: Quality Assurance
+
+### 49.1 Call Review Protocol
+
+- Every operator's calls are recorded
+- Minimum 2 calls reviewed per week per operator (random selection)
+- Review checklist: script adherence, pattern recognition, objection handling, exit discipline, tone control
+
+### 49.2 Performance Metrics
+
+| Metric | Definition | Target |
+|--------|-----------|--------|
+| Conversion rate | Qualified calls -> paid engagement | Tracked per operator |
+| Qualification accuracy | Calls correctly classified as Type 1/2/3 | >= 80% |
+| Average call duration | Qualified: 15-20 minutes; Disqualified: < 5 minutes | Within range |
+| Script adherence score | Measured by reviewer (0-100%) | >= 90% |
+| Prohibited language incidents | Count of violations per review period | Zero |
+
+### 49.3 Correction Protocol
+
+- **First deviation:** Verbal debrief + script drill
+- **Pattern deviation (3+ in 14 days):** Supervised practice restart
+- **Philosophical deviation** (softening the system, adding "value" language, chasing): Formal review with founder
+
+### 49.4 Diagnostic Quality
+
+Every diagnostic output is validated against the following standards:
 - CaseObject fields must be populated from actual user input, not defaults or inferences.
 - C3 scores must be computed server-side using the documented scoring function.
 - Deterministic output must include a valid condition class, signal, and contradiction set.
 - Synthesis (when produced) must pass the 5-rule Arbiter Tournament.
 - Economic projections must reference user-provided anchors or default to qualitative language.
+- No output reaches the client that has not passed the Quality Gate.
+- No synthesis is delivered that the Arbiter Tournament has not validated.
 
-**Data Integrity.** The Evidence Ledger is append-only. Historical entries are never modified. The spine's pressureIndex is monotonically increasing. The integrityScore is derived from behavioural signals, not manual assignment.
+### 49.5 Data Integrity
 
-**Compliance.** Client data is processed server-side and stored in PostgreSQL. Decision Memory stores public-safe summaries only — no internal scoring data is persisted in client-facing records. The system does not store raw diagnostic answers after scoring is complete. Access tiers control visibility at the application level.
+The Evidence Ledger is append-only. Historical entries are never modified. The spine's pressureIndex is monotonically increasing. The integrityScore is derived from behavioural signals, not manual assignment.
 
-**Audit Trail.** The audit system (`lib/audit/audit-logger.server.ts`) records significant system actions including diagnostic submissions, report generation, strategy room sessions, and escalation events. Audit logs are append-only and timestamped.
+### 49.6 Compliance
 
-**Monitoring.** The system includes observability infrastructure (`lib/constitution/observability-dashboard.ts`, `observability-store.ts`) for tracking system health, performance metrics, and operational anomalies.
+Client data is processed server-side and stored in PostgreSQL. Decision Memory stores public-safe summaries only — no internal scoring data is persisted in client-facing records. The system does not store raw diagnostic answers after scoring is complete. Access tiers control visibility at the application level.
+
+### 49.7 Audit Trail
+
+The audit system (`lib/audit/audit-logger.server.ts`) records significant system actions including diagnostic submissions, report generation, strategy room sessions, and escalation events. Audit logs are append-only and timestamped.
+
+### 49.8 Monitoring
+
+The system includes observability infrastructure (`lib/constitution/observability-dashboard.ts`, `observability-store.ts`) for tracking system health, performance metrics, and operational anomalies.
 
 ---
 
-## Chapter 34: Engagement Termination
+## Chapter 50: Escalation Matrix
 
-Engagements are terminated under three conditions:
+| Situation | Escalation Path | Timeline |
+|-----------|----------------|----------|
+| Prospect threatens legal action | Founder immediately | Same hour |
+| Prospect is a public figure / media risk | Founder before any response | Same day |
+| Operator encounters a scenario not in this manual | Senior operator, then founder if unresolved | 24 hours |
+| Client disputes diagnostic accuracy with evidence | Technical review -> founder decision | 48 hours |
+| Breach pattern detected but client denies | Document, escalate to founder | 48 hours |
+| Two clients are direct competitors | Founder approval required before both engagements proceed | Before second engagement begins |
+| Operator has personal relationship with prospect | Disclose to founder. Reassign if conflict exists. | Before first interaction |
 
-**Condition 1: Do-Not-Sell Triggered.** When the system detects that engagement would be unproductive — because the client lacks authority, the problem is trivial, or the client is seeking validation rather than resolution — the `doNotSellTriggered` flag is raised on the spine. Engagement is terminated. The client is informed that the system has determined this is not a productive engagement and no further services will be offered.
+---
 
-**Condition 2: Repeated Breach Without Action.** When the client repeatedly commits to action and repeatedly fails to execute, and the system has exhausted its escalation ladder, the engagement is terminated. The system cannot force action. It can only create the conditions under which action becomes the path of least resistance. When those conditions fail, the engagement has reached its structural limit.
+## Chapter 51: Data Protection & Confidentiality
 
-**Condition 3: Integrity Degradation.** When the integrityScore drops below 0.3, indicating persistent gaming, strategic misrepresentation, or deliberate manipulation of the diagnostic process, the engagement is terminated. The system's authority depends on accurate input. When input integrity is compromised, diagnostic accuracy is compromised, and the system's core value proposition is void.
+### 51.1 Classification of Client Data
+
+| Tier | Classification | Handling |
+|------|---------------|----------|
+| Tier 1 | Restricted | Diagnostic responses, cost figures, decision details — encrypted at rest, never shared externally |
+| Tier 2 | Confidential | Organisation name, industry, engagement details — shared internally on need-to-know basis only |
+| Tier 3 | Anonymised | Pattern data, aggregate statistics — may be used in cases and content (no identification possible) |
+
+### 51.2 Rules
+
+- No client data is stored on personal devices
+- No client names appear in external content
+- All diagnostic data is encrypted in transit and at rest
+- Client data is retained for 24 months post-engagement, then deleted unless retention is agreed in writing
+- If a client requests data deletion, it is completed within 14 days
+
+### 51.3 Breach Protocol
+
+If client data is exposed or compromised:
+
+1. Contain immediately (revoke access, isolate system)
+2. Notify founder within 1 hour
+3. Notify affected client within 24 hours
+4. Document incident in full
+5. Implement corrective action within 7 days
+
+---
+
+## Chapter 52: Engagement Termination
+
+### 52.1 When an Engagement Ends
+
+1. Final report delivered (decisions resolved, breaches logged, outcomes measured)
+2. Client data archived (encrypted, 24-month retention)
+3. Exit interview offered (not required — "What did we miss?")
+4. No further contact for 90 days (cooling period)
+5. After 90 days: One check-in permitted. "Has the pattern returned?"
+
+### 52.2 Client-Initiated Termination
+
+- Accepted without objection. No retention attempts. No discount offers.
+- Response: "Understood. The system is here when it's needed."
+- Data archived per retention policy.
+
+### 52.3 System-Initiated Termination
+
+**Condition 1: Do-Not-Sell Triggered.** The `doNotSellTriggered` flag is raised. Client is informed that the system has determined this is not a productive engagement.
+
+**Condition 2: Repeated Breach Without Action.** The system has exhausted its escalation ladder. The engagement has reached its structural limit.
+
+**Condition 3: Integrity Degradation.** When the integrityScore drops below 0.3, indicating persistent gaming or manipulation.
 
 **Termination Protocol:**
-1. The system generates a final diagnostic summary documenting the condition at termination.
-2. The summary is appended to the Evidence Ledger with a termination flag.
-3. The client receives a termination notice that includes the reason category but not the internal scoring that triggered it.
-4. All client data is retained in the system for institutional learning but is flagged as terminated.
-5. Re-engagement is possible after a minimum 90-day cooling period, subject to a fresh diagnostic that demonstrates changed conditions.
+1. Final diagnostic summary generated documenting the condition at termination.
+2. Summary appended to the Evidence Ledger with a termination flag.
+3. Client receives termination notice with reason category but not internal scoring.
+4. All client data retained for institutional learning but flagged as terminated.
+5. Re-engagement possible after a minimum 90-day cooling period, subject to fresh diagnostic.
 
-Termination is not punitive. It is structural. The system recognises the limits of its own intervention model and withdraws rather than degrading its output quality to maintain revenue.
-
----
-
-# PART IX — IP PROTECTION & COMPETITIVE DEFENSE
+Termination is not punitive. It is structural. The system recognises the limits of its own intervention model.
 
 ---
 
-## Chapter 35: Disclosure Principle
+# PART XIII — IP PROTECTION & COMPETITIVE DEFENSE
+
+---
+
+## Chapter 53: Disclosure Principle
 
 The disclosure principle governs what the system reveals publicly and what remains proprietary:
 
@@ -1009,7 +3122,7 @@ The disclosure principle governs what the system reveals publicly and what remai
 
 This principle operates at every layer of the system. The user receives a diagnostic result that includes a condition class, contradiction set, economic framing, and concrete move recommendation. This output is visible, understandable, and valuable. But the output does not reveal how the condition class was derived, how the contradiction was detected, how the economic framing was computed, or how the recommended move was validated.
 
-The disclosure principle is not security through obscurity. The system's foundational concepts — condition classes, contradiction detection, economic consequence, enforcement — are public. They are published in the canon, discussed in content, and described in the engagement lane pages. This public disclosure serves authority: it demonstrates that the institution has a coherent intellectual framework.
+The disclosure principle is not security through obscurity. The system's foundational concepts are public. This public disclosure serves authority.
 
 What remains proprietary is the machinery:
 - The C3 Fidelity Scorer's weighting and threshold logic
@@ -1026,34 +3139,28 @@ A competitor reading this manual will understand what the system does and why. T
 
 ---
 
-## Chapter 36: Public vs Proprietary Layers
-
-The system is divided into two layers with a clear boundary between them.
+## Chapter 54: Public vs Proprietary Layers
 
 **Public Layer — Authority Assets:**
 
-The following are public by design. They establish the institution's authority and market position:
+- **Canon** (`lib/canon.ts`): The foundational vocabulary and conceptual framework. Published openly.
+- **Glossary**: Definitions of key terms. Published on the website and in content.
+- **Foundations**: The founding problem, the institutional thesis, the four operations.
+- **Toolkits and Frameworks**: Structured thinking tools that demonstrate the system's approach.
 
-- **Canon** (`lib/canon.ts`): The foundational vocabulary and conceptual framework. Published openly. Anyone can read and reference the canon. This builds category awareness.
-- **Glossary**: Definitions of key terms (condition class, contradiction, decision authority, enforcement, etc.). Published on the website and in content.
-- **Foundations**: The founding problem, the institutional thesis, the four operations. Published in the LinkedIn campaign, the engagement lanes, and this manual's doctrinal chapters.
-- **Toolkits and Frameworks**: Structured thinking tools that demonstrate the system's approach. These help potential clients understand the framework without accessing the machinery.
-
-The public layer is generous. It gives away concepts freely. This is not leakage. It is strategy. When the system's concepts become the industry vocabulary — when people say "decision authority gap" and "condition class" — the institution that defined those terms owns the category.
+The public layer is generous. It gives away concepts freely. This is strategy. When the system's concepts become the industry vocabulary, the institution that defined those terms owns the category.
 
 **Proprietary Layer — Server-Only Machinery:**
 
-The following are server-only and never exposed to the client or the public:
+- **Scoring logic**: All scoring functions, weighting coefficients, and threshold boundaries.
+- **Classification logic**: The exact boundaries between condition classes, severity levels, and score bands.
+- **Synthesis governance**: The Arbiter Tournament rules and rejection logic.
+- **Economic computation**: The Cost of Inaction Engine and Default Path Forecast derivation logic.
+- **Integrity and pressure mechanics**: The integrityScore derivation, pressureIndex computation, and breach detection logic.
 
-- **Scoring logic**: All scoring functions, weighting coefficients, and threshold boundaries. The C3 Fidelity Scorer, the severity scoring function, the readiness classifier, and the posture classifier.
-- **Classification logic**: The exact boundaries between condition classes, severity levels, and score bands. The system reports the classification. It does not reveal where the boundary lies.
-- **Synthesis governance**: The Arbiter Tournament rules, the synthesis engine, and the rejection logic. The system reports that synthesis was accepted or rejected. It does not reveal why.
-- **Economic computation**: The Cost of Inaction Engine, the Cost of Delay Engine, and the Default Path Forecast derivation logic. The system reports exposure bands and horizon narratives. It does not reveal the computation.
-- **Integrity and pressure mechanics**: The integrityScore derivation, the pressureIndex computation, and the breach detection logic. The system applies these. It does not explain them.
+**Controlled Ambiguity.** All public documentation maintains controlled ambiguity about the proprietary layer. The user does not need to know how the engine works. They need to know that it works.
 
-**Controlled Ambiguity.** All public documentation maintains controlled ambiguity about the proprietary layer. The system describes what it does ("identifies contradictions," "prices consequences," "forces decisions") without describing how. This is not deception. It is discipline. The user does not need to know how the engine works. They need to know that it works. The proof is in the diagnostic output's accuracy, not in the code's documentation.
-
-The boundary between public and proprietary is enforced technically through the `server-only` import guard on sensitive modules and architecturally through the separation of client-facing API responses (which contain classifications and narratives) from internal scoring objects (which contain raw scores, weights, and thresholds).
+The boundary between public and proprietary is enforced technically through the `server-only` import guard on sensitive modules.
 
 ---
 
@@ -1061,7 +3168,32 @@ The boundary between public and proprietary is enforced technically through the 
 
 ---
 
-## Appendix A: Pricing Matrix
+## Appendix A: Product Catalog
+
+| # | Code | Name | Price | Status |
+|---|------|------|-------|--------|
+| 1 | decision_exposure_instrument | Decision Exposure Instrument | £29 | LIVE |
+| 2 | mandate_clarity_framework | Mandate Clarity Framework | £49 | LIVE |
+| 3 | intervention_path_selector | Intervention Path Selector | £79 | LIVE |
+| 4 | operator_decision_pack | Operator Decision Pack | £129 | LIVE |
+| 5 | case_dossier_tariff_shock | Case Dossier — Tariff Shock | Free | LIVE |
+| 6 | case_dossier_team_alignment | Case Dossier — Team Alignment | Free | LIVE |
+| 7 | case_dossier_escalation_denied | Case Dossier — Escalation Denied | Free | LIVE |
+| 8 | gmi_q1_2026 | Global Market Intelligence Report Q1 2026 | £59 | LIVE |
+| 9 | executive_reporting | Executive Reporting | £295 | LIVE |
+| 10 | executive_reporting_priority | Executive Reporting — Advanced | £295 | LIVE |
+| 11 | strategy_room | Strategy Room — Entry | £750 | LIVE |
+| 12 | strategy_room_extended | Strategy Room — Extended | £1,250 | LIVE |
+| 13 | diagnostic_report_basic | Diagnostic Report — Basic | £250 | RETIRED |
+| 14 | diagnostic_report_pro | Diagnostic Report — Pro | £750 | RETIRED |
+| 15 | inner_circle | Inner Circle | £30/month | INACTIVE |
+| 16 | retainer_core | Decision Authority Retainer — Core | Contracted | INACTIVE |
+| 17 | retainer_operational | Decision Authority Retainer — Operational | Contracted | INACTIVE |
+| 18 | retainer_institutional | Decision Authority Retainer — Institutional | Contracted | INACTIVE |
+
+---
+
+## Appendix B: Pricing Matrix
 
 | Product | Price | Type | Access |
 |---------|-------|------|--------|
@@ -1075,11 +3207,11 @@ The boundary between public and proprietary is enforced technically through the 
 | Enterprise Retainer (Tier 2) | £15,000/month | Multi-stakeholder + portfolio | Architect |
 | Enterprise Retainer (Tier 3) | £50,000/month | Full institutional deployment | Owner |
 
-All pricing is in GBP. Enterprise retainer pricing varies by organisational scale, number of active decisions tracked, and depth of multi-stakeholder deployment. The pricing principle is constant: the price is always less than the cost of inaction the system has identified.
+All pricing is in GBP. The pricing principle is constant: the price is always less than the cost of inaction the system has identified.
 
 ---
 
-## Appendix B: Severity Taxonomy
+## Appendix C: Severity Taxonomy
 
 The system currently implements a 4-tier severity taxonomy:
 
@@ -1099,37 +3231,31 @@ The DiagnosticSeverity type in the codebase defines four values: `"low"`, `"mode
 | **NEGLIGIBLE** | No material decision risk detected. Monitoring only. |
 | **SYSTEMIC** | Condition affects multiple interconnected decisions. Organisational-level intervention required. |
 
-The NEGLIGIBLE tier would sit above LOW, capturing cases where no intervention is warranted. The SYSTEMIC tier would sit above CRITICAL, capturing cases where the failure is not in a single decision but in the organisation's decision-making system itself. Both tiers require additional detection logic and scoring thresholds that have not yet been implemented.
-
 ---
 
-## Appendix C: Condition Class Taxonomy
-
-The system implements 4 condition classes, defined as the `ConditionClass` type in `lib/decision/case-object.ts`:
+## Appendix D: Condition Class Taxonomy
 
 | Condition Class | Definition | Base Decay Rate |
 |----------------|------------|-----------------|
-| **Authority** | The decision has no legitimate owner, or the stated owner lacks actual authority to compel action. | 0.30 |
-| **Definition** | The decision itself is not clearly defined. Stakeholders disagree on what the question is. | 0.20 |
-| **Execution** | The decision has been made but is not being executed. Structural blockers prevent action. | 0.40 |
+| **Authority** | The decision has no legitimate owner, or the stated owner lacks actual authority. | 0.30 |
+| **Definition** | The decision itself is not clearly defined. | 0.20 |
+| **Execution** | The decision has been made but is not being executed. | 0.40 |
 | **Instability** | The conditions around the decision are shifting faster than the organisation can adapt. | 0.15 |
 
-Base decay rates represent options lost per month (0-1 scale) and are defined in the DefaultPathForecast derivation logic. Actual decay rates are adjusted upward based on user-provided specificity in cost-of-delay input and the presence of forced action vs. blocker discrepancies.
-
-The condition class is the primary classification axis for every case. It determines the deterministic output, the default path forecast, the economic framing tone, and the recommended intervention pathway.
+Base decay rates represent options lost per month (0-1 scale). Actual decay rates are adjusted upward based on user-provided specificity.
 
 ---
 
-## Appendix D: 13 Contradiction Archetype Registry
+## Appendix E: 13 Contradiction Archetype Registry
 
-**STATUS: TARGET — not yet implemented.** The current system detects contradictions through rule-based pattern matching with 4 detection rules. The target is a taxonomy of 13 named archetypes distributed across the 4 condition classes.
+**STATUS: TARGET — not yet implemented.**
 
 ### Authority Class (4 archetypes)
 
-1. **The Phantom Owner** — someone is named as decision owner but has no mechanism to compel action. The title exists. The authority does not.
-2. **The Consensus Trap** — the organisation requires consensus before deciding, ensuring no individual can be held accountable for the decision.
+1. **The Phantom Owner** — someone is named as decision owner but has no mechanism to compel action.
+2. **The Consensus Trap** — the organisation requires consensus before deciding, ensuring no individual can be held accountable.
 3. **The Proxy Chain** — authority is delegated through so many layers that no one knows who actually decides.
-4. **The Veto Ghost** — someone who is not the named owner can block the decision without being visible in the authority structure.
+4. **The Veto Ghost** — someone who is not the named owner can block the decision without being visible.
 
 ### Definition Class (3 archetypes)
 
@@ -1139,41 +3265,250 @@ The condition class is the primary classification axis for every case. It determ
 
 ### Execution Class (3 archetypes)
 
-8. **The Pilot Purgatory** — the decision was "made" but implementation is perpetually in pilot, proof-of-concept, or phase one.
-9. **The Resource Mirage** — resources are nominally committed but practically unavailable, ensuring the decision cannot be executed.
+8. **The Pilot Purgatory** — the decision was "made" but implementation is perpetually in pilot or phase one.
+9. **The Resource Mirage** — resources are nominally committed but practically unavailable.
 10. **The Partial Execute** — enough action is taken to create the appearance of progress while the core issue remains unresolved.
 
 ### Instability Class (3 archetypes)
 
-11. **The Stable Decision in Unstable Ground** — the organisation has made a clear decision but the conditions it depends on are shifting, making the decision progressively less relevant.
-12. **The Adaptive Freeze** — the environment is changing but the organisation has frozen its decision-making, hoping stability will return.
-13. **The Reactive Loop** — the organisation is making rapid decisions in response to each change, but the decisions contradict each other because there is no stable reference point.
+11. **The Stable Decision in Unstable Ground** — the organisation has made a clear decision but the conditions it depends on are shifting.
+12. **The Adaptive Freeze** — the environment is changing but the organisation has frozen its decision-making.
+13. **The Reactive Loop** — the organisation is making rapid decisions in response to each change, but the decisions contradict each other.
 
-Each archetype, when implemented, will have: a detection signature (patterns in CaseObject fields that indicate its presence), a scoring weight (how much it contributes to severity), and a prescribed intervention (the specific system surface best suited to address it).
+Each archetype, when implemented, will have: a detection signature, a scoring weight, and a prescribed intervention.
 
 ---
 
-## Appendix E: Quality Gate Checklist
+## Appendix F: Quality Gate Checklist
 
-The 8-step Quality Gate is enforced on every deployment. No step is optional. No manual override exists.
+The 8-step Quality Gate is enforced on every deployment. No step is optional.
 
 | Step | Gate | Description | Fail Action |
 |------|------|-------------|-------------|
-| 1 | **Prisma** | Prisma schema validates. Migrations are clean. No drift between schema and database. | Block deployment. |
+| 1 | **Prisma** | Prisma schema validates. Migrations are clean. | Block deployment. |
 | 2 | **TypeScript** | Full TypeScript compilation with strict mode. Zero type errors. | Block deployment. |
-| 3 | **PDF** | PDF generation pipeline produces valid output for all registered templates. No rendering errors. | Block deployment. |
-| 4 | **MDX Integrity** | All MDX content files parse without errors. Frontmatter validates against schema. | Block deployment. |
-| 5 | **MDX Gate** | MDX content gate verifies that no content references undefined components, broken links, or missing assets. | Block deployment. |
-| 6 | **Unit Tests** | All unit tests pass. Test coverage thresholds are met. No skipped tests without documented justification. | Block deployment. |
-| 7 | **Build** | Full production build completes without warnings or errors. Bundle size is within acceptable limits. | Block deployment. |
-| 8 | **Integration** | End-to-end validation of critical paths: diagnostic submission, scoring, result rendering, PDF export, and API response contracts. | Block deployment. |
+| 3 | **PDF** | PDF generation pipeline produces valid output. | Block deployment. |
+| 4 | **MDX Integrity** | All MDX content files parse without errors. | Block deployment. |
+| 5 | **MDX Gate** | No undefined components, broken links, or missing assets. | Block deployment. |
+| 6 | **Unit Tests** | All unit tests pass. Coverage thresholds met. | Block deployment. |
+| 7 | **Build** | Full production build completes without warnings or errors. | Block deployment. |
+| 8 | **Integration** | End-to-end validation of critical paths. | Block deployment. |
 
-Every step produces a pass/fail result. Any fail blocks the deployment. The gate is not a suggestion. It is a structural enforcement mechanism that prevents degraded output from reaching production. The gate protects the institution's most important asset: accuracy.
+Every step produces a pass/fail result. Any fail blocks the deployment.
 
 ---
 
-*End of Manual.*
+## Appendix G: System Metrics Glossary
+
+| Metric | Full Name | Definition | Threshold Action |
+|--------|-----------|-----------|-----------------|
+| TAR% | Trust Accuracy Rate | Percentage of diagnostic outputs users confirm as accurate | If TAR drops below defined minimum -> suspend commercial operations |
+| DAR% | Decision Action Rate | Percentage of users who take measurable action within prescribed timeframe | High TAR + low DAR -> accurate diagnosis but insufficient pressure |
+| QER% | Quality Economic Rate | Percentage of economically qualified engagements converting to revenue | Low QER -> pricing or qualification mechanism failure |
+| Pressure Index | -- | Composite metric measuring cumulative pressure. Increases monotonically. | Flat Pressure Index -> escalation engine malfunction |
+| Integrity Score | -- | Per-user metric tracking consistency and honesty of inputs over time | Low Integrity Score -> Do-Not-Sell activation |
+| Breach Score | -- | Cumulative record of commitments made and not honoured | High Breach Score -> escalation intensity increase |
+
+---
+
+## Appendix H: Quick Reference Card
+
+*A single-page operational summary for immediate recall.*
+
+### The Five Investor Objections — One-Line Responses
+
+| Objection | Response |
+|-----------|----------|
+| "This feels like consulting." | "Consulting advises. This enforces and verifies." |
+| "Why hasn't this been built?" | "Because it's uncomfortable. That's why the gap exists." |
+| "Too aggressive for users." | "They don't convert because it's pleasant. They convert because it's accurate." |
+| "What if diagnosis is wrong?" | "The product fails. That's why we instrument accuracy and shut down if it drops." |
+| "Just another AI wrapper?" | "AI generates language. We enforce decisions. Value is what happens after the output." |
+
+### The Four Patterns — One-Line Moves
+
+| Pattern | Move |
+|---------|------|
+| Authority Failure | Assign singular ownership with fixed deadline |
+| Decision Avoidance | Remove all options except decide-now or delay-with-documented-cost |
+| Misaligned Reality | Surface the perception gap as measured data, then force alignment |
+| Scope Drift | Name the original decision, remove everything that is not it |
+
+### Prohibited Language
+
+| Never Say | Why |
+|-----------|-----|
+| "Value-add" | Vague — signals nothing precise |
+| "Unlock potential" | Aspirational — signals no mechanism |
+| "Empower" | Passive — signals no accountability |
+| "Transform" | Overused — signals marketing, not operations |
+| "Happy," "satisfied," "pleased" | Vendor insecurity — signals need for validation |
+| "Partnership" | False equivalence — this is a system, not a relationship |
+| "Just checking in" | Pursuit language — inverts power dynamic |
+| "No pressure" | Contradicts the entire methodology |
+
+### Required Language
+
+| Always Use | Why |
+|-----------|-----|
+| "The decision is..." | Forces specificity |
+| "The cost of delay is..." | Forces economic reality |
+| "The action required is..." | Forces singular accountability |
+| "The deadline is..." | Forces temporal constraint |
+| "The consequence of inaction is..." | Forces pressure |
+
+### Exit Conditions — When to Walk Away
+
+- Prospect asks for "more options" after diagnosis -> Exit
+- Prospect wants to "think about it" past 72 hours -> Escalate or exit
+- Prospect disputes their own stated cost figure -> Challenge integrity or exit
+- Prospect requests softer language or "warmer approach" -> Exit
+- Prospect refuses to name a single decision owner -> Exit
+
+---
+
+## Appendix I: Operator Self-Diagnostic
+
+*A checklist for operators to detect deviation from the system before it compounds.*
+
+Run this checklist weekly. Any "yes" answer requires immediate correction.
+
+| # | Question | If Yes -> |
+|---|----------|----------|
+| 1 | Are you explaining too much? | Stop. State the fact. Let it work. |
+| 2 | Are you offering options? | Remove all but one path. |
+| 3 | Are you chasing? | Stop all outreach. Wait for signal. |
+| 4 | Are you softening language to avoid discomfort? | Revert to standard scripts. |
+| 5 | Are you accommodating timeline extensions? | Reimpose the original deadline. |
+| 6 | Are you spending more time on unqualified prospects than qualified ones? | Activate Do-Not-Sell. Redirect capacity. |
+| 7 | Are you adding features nobody asked for? | Stop building. Return to the ten-account threshold. |
+| 8 | Are you using "value" language in any communication? | Rewrite immediately. |
+| 9 | Are you avoiding the economic question? | Lead with cost. |
+| 10 | Are you treating prospects as relationships rather than cases? | Recalibrate. This is a system. |
+| 11 | Are you producing documents instead of decisions? | Delete the document. Force the decision. |
+| 12 | Are you measuring vanity metrics over signal metrics? | Reset tracking to DAR%, TAR%, QER%. |
+| 13 | Are you improvising the system? | Stop. Return to this manual. |
+| 14 | Are you feeling the need to justify the approach? | The approach does not require justification. It requires execution. |
+
+> **KEY PRINCIPLE:** If you notice three or more "yes" answers in a single week, you are drifting into consulting mode. Reset immediately.
+
+---
+
+## Appendix J: Revision History and Amendment Procedure
+
+### J.1 Revision History
+
+| Version | Date | Author | Description |
+|---------|------|--------|-------------|
+| 1.0 | April 2026 | Founder | Initial institutional manual compiled |
+| 2.0 | April 2026 | Founder | Product Elevation Layer, IP Protection, 13 archetypes, 6-tier severity, engagement lanes, campaign infrastructure |
+| 2.1 | April 2026 | Founder | Full operational merge: sales doctrine, call flow, evidence system, investor relations detail, governance protocols |
+
+### J.2 Amendment Procedure
+
+All amendments follow a formal four-stage procedure:
+
+| Stage | Actor | Action |
+|-------|-------|--------|
+| 1. Proposal | Any operator or system custodian | Amendment proposed in writing with rationale |
+| 2. Review | Custodian | Reviews for consistency with existing doctrine |
+| 3. Ratification | Founder | Approves, modifies, or rejects — founder decision is final |
+| 4. Recording | Custodian | Records amendment in revision history with version increment |
+
+### J.3 Triggers for Revision
+
+| Trigger | Scope of Review |
+|---------|----------------|
+| New product launch | Appendix A, capital narrative product stack, pricing references |
+| Pricing change | All chapters referencing affected product, Appendix A, investor materials |
+| Structural shift in methodology | Affected chapters, system architecture, downstream cross-references |
+| New metric introduced | Appendix G, governance layer, capital narrative |
+| Investor round completion | Fundraising strategy, capital allocation figures |
+| System layer added or modified | Architecture chapter, visual map, cross-references |
+| Prohibition added or removed | What Not To Do, Quick Reference Card, Self-Diagnostic |
+| Significant market or competitive change | Capital narrative, investor memo |
+
+### J.4 Amendment Rules
+
+- No amendment is valid without founder ratification
+- No amendment may contradict founding principles without a full doctrinal review
+- Amendments take effect immediately upon recording
+- Superseded text is archived but not deleted from version control
+- Emergency amendments may bypass Stage 2 review with founder authorisation
+
+---
+
+## Appendix K: Index / Term Reference
+
+| Term | Chapter Reference |
+|------|-------------------|
+| Arbiter Tournament | Ch. 38 (Layer 1: Detection), Ch. 40 (Defensibility) |
+| Boardroom Mode | Ch. 14, Ch. 38 (Layer 8), Ch. 40 (Go-to-Market Phase 3) |
+| Breach Ladder | Ch. 38 (Layer 2: Enforcement), Ch. 45 (What to Track) |
+| Breach Score | Appendix G, Ch. 38 (Layer 6: Evidence Permanence) |
+| C3 Fidelity | Ch. 6, Ch. 38 (Layer 1: Detection) |
+| Capital Allocation | Ch. 41 (Use of Capital), Ch. 44 |
+| CaseObject | Ch. 6, Ch. 38 (Layer 1: Detection) |
+| Closed-Loop System | Ch. 40 (Defensibility), Ch. 41 (Defensibility) |
+| Collision Detection | Ch. 14, Ch. 29, Ch. 38 (Layer 9: Multi-Actor Truth) |
+| Cost Anchor | Ch. 10, Ch. 38 (Layer 5: Economic Pressure) |
+| DAaaS (Decision Authority as a Service) | Ch. 38 (Layer 13: Enterprise) |
+| DAI (Decision Authority Infrastructure) | Ch. 2, Ch. 40 (Category Positioning) |
+| DAR% (Decision Action Rate) | Appendix G, Ch. 39 (Governance Layer) |
+| Decision Credit Score | Ch. 38 (Layer 6: Evidence Permanence) |
+| Decision Drift | Ch. 40 (Problem Statement), Ch. 41 (The Problem) |
+| Decision Memory | Ch. 19, Ch. 38 (Layer 13: Enterprise) |
+| Do-Not-Sell | Ch. 4, Ch. 38 (Layer 5: Economic Pressure) |
+| Economic Anchoring | Ch. 10, Ch. 40 (Defensibility) |
+| Entry Clearance | Ch. 22, Ch. 28 (Signal Detection) |
+| Escalation Engine | Ch. 38 (Layer 11), Ch. 45 (What to Track) |
+| Evidence Ledger | Ch. 38 (Layer 6: Evidence Permanence) |
+| Executive Reporting | Ch. 20, Ch. 22, Appendix A |
+| False Authority Detection | Ch. 4, Ch. 38 (Layer 3: Anti-Manipulation) |
+| Fast Diagnostic | Ch. 6, Ch. 20, Ch. 27 |
+| Founder Dashboard | Ch. 39 |
+| Governance Layer | Ch. 39 (Governance Layer), Ch. 38 (Layer 4) |
+| Integrity Score | Ch. 38 (Layer 3: Anti-Manipulation), Appendix G |
+| Intelligence Spine | Ch. 15, Ch. 38 (Layer 2: Enforcement) |
+| Kill Switch (System) | Ch. 38 (Layer 4: Self-Governance) |
+| North Star Metrics | Ch. 38 (Layer 4: Self-Governance), Appendix G |
+| Pre-Commitment Gate | Ch. 6, Ch. 38 (Layer 2: Enforcement) |
+| Pressure Index | Appendix G, Ch. 38 (Layer 5: Economic Pressure) |
+| Pressure Loop | Ch. 38 (Layer 2: Enforcement) |
+| QER% (Quality Economic Rate) | Appendix G, Ch. 39 (Governance Layer) |
+| Retargeting | Ch. 38 (Layer 12) |
+| Social Proof | Ch. 38 (Layer 7) |
+| Strategy Room | Ch. 11, Ch. 20, Ch. 22, Appendix A |
+| Strategy Room Gate | Ch. 38 (Layer 10: Inbound Filtering) |
+| Synthesis Engine | Ch. 38 (Layer 1: Detection) |
+| TAR% (Trust Accuracy Rate) | Appendix G, Ch. 39 (Governance Layer) |
+| Tier Routing | Ch. 38 (Layer 10: Inbound Filtering) |
+| Time Decay | Ch. 38 (Layer 5: Economic Pressure) |
+
+---
+
+---
+
+## CLOSING DECLARATION
+
+This document constitutes the complete operational doctrine of Abraham of London — Decision Authority Infrastructure. It is not a plan. It is not a proposal. It is not a strategy deck awaiting approval. It is the binding operational reality of an organisation that has made a singular commitment: to identify, price, and enforce the decisions that other systems allow to drift, decay, and destroy value in silence.
+
+Every script, every flow, every metric, every prohibition contained in these pages exists because it has been designed against a specific failure mode observed in organisations that tolerate ambiguity. The system described here does not tolerate ambiguity. It does not accommodate it. It does not work around it. It eliminates it — through precision, through pressure, and through the relentless application of economic truth to structural contradiction.
+
+This manual carries the authority of institutional doctrine. It binds every operator, every system, and every commercial interaction conducted under the Abraham of London name. Deviation is not creativity. Deviation is corruption. The system works because it is consistent. It is consistent because it is governed. It is governed because this document exists and is enforced.
+
+**Abraham of London exists to make organisations confront and execute the decisions they are currently avoiding. That is the mission. That is the method. That is the standard against which all activity is measured — now and permanently.**
+
+---
+
+**Ratified by:** ___________________________
+
+**Date:** ___________________________
+
+**Position:** Founder & Custodian
+
+---
 
 *Abraham of London — Decision Authority Infrastructure*
-*Version 2.0 — April 2026*
+*Institutional Manual — Version 2.1 — April 2026*
 *Classification: Internal — Institutional*
