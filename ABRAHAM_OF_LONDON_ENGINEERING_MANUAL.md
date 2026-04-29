@@ -239,7 +239,7 @@ The platform is organized in five layers:
 | System | Status | Notes |
 |--------|--------|-------|
 | Diagnostic Engine | Production | Server-side scoring, arbiter validated |
-| Multi-user Collision | Production | 4 collision types, severity classification |
+| Multi-user Collision | Production | 13 contradiction archetypes, 6-tier severity |
 | Enforcement Engine | Production | Contracts + breach + escalation |
 | Decision Ledger | Production | Implicit via journey model + credit score |
 | Strategy Room | Production | Full state machine, 10+ API endpoints |
@@ -1562,12 +1562,14 @@ The scoring system in `lib/diagnostics/scoring.ts` uses 4 severity tiers:
 
 | Severity | Score Range |
 |---|---|
-| critical | < 40 |
-| high | 40 - 59 |
-| moderate | 60 - 79 |
-| low | >= 80 |
+| systemic | < 15 |
+| critical | 15 - 34 |
+| high | 35 - 54 |
+| moderate | 55 - 74 |
+| low | 75 - 89 |
+| negligible | >= 90 |
 
-**TARGET — not yet implemented:** The full severity model targets 6 tiers (NEGLIGIBLE, LOW, MODERATE, HIGH, CRITICAL, SYSTEMIC). NEGLIGIBLE and SYSTEMIC are not yet present in `scoring.ts`.
+**IMPLEMENTED:** The full 6-tier severity model is live in `scoring.ts`, `client.ts`, `store.ts`, and `types.ts`:
 
 ```typescript
 // Target severity levels — ordered by urgency
@@ -1598,7 +1600,7 @@ Currently implemented in `lib/diagnostics/contradictions.ts` — 3 core archetyp
 2. **CLARITY_VS_ACCOUNTABILITY** — defined decision + no accountability
 3. **URGENCY_VS_STATE** — urgent + repeatedly deferred
 
-**TARGET — not yet implemented:** The full model targets 13 contradiction archetypes. The current 3 serve as the core set with additional archetypes planned.
+**IMPLEMENTED:** The full 13-archetype model is live in `lib/diagnostics/signals.ts`. The `inferArchetypeSignal()` function in `lib/decision/synthesis-engine.ts` selects the specific variant from user input. Authority class: AUTHORITY_LEAKAGE, AUTHORITY_CONTEST, AUTHORITY_VACUUM, FALSE_AUTHORITY. Definition class: DEFINITION_FAILURE, DEFINITION_DRIFT, DEFINITION_CONFLICT. Execution class: EXECUTION_AVOIDANCE, EXECUTION_THEATRE, ESCALATION_AVOIDANCE. Instability class: LATENT_INSTABILITY, STRUCTURAL_FRAGILITY, GOVERNANCE_EROSION.
 
 ### Server-Side Scoring
 

@@ -302,9 +302,9 @@ The 9 domains assessed are:
 8. **Conflict Resolution** — whether disagreements are resolved or left to fester.
 9. **Temporal Discipline** — whether decisions are made within appropriate timeframes.
 
-Each domain is scored on a 1-5 scale per question. The assessment produces a total score, a percentage, a severity classification (low, moderate, high, critical), and a score band (stable, watch, fragile, escalate).
+Each domain is scored on a 1-5 scale per question. The assessment produces a total score, a percentage, a severity classification (negligible, low, moderate, high, critical, systemic), and a score band (stable, watch, fragile, escalate).
 
-The severity classification uses the following thresholds: 80+ is "low" severity (stable with minor correction points), 60-79 is "moderate" (recoverable but drift is present), 40-59 is "high" (material weakness detected), below 40 is "critical" (immediate correction required).
+The 6-tier severity taxonomy is documented in Appendix C.
 
 The Constitutional Assessment can be deployed as a team campaign, where multiple respondents answer independently and the system aggregates results. Cross-respondent analysis detects where different stakeholders see the same domain differently — a signal of structural misalignment that no individual respondent would surface alone.
 
@@ -316,14 +316,30 @@ Results feed into the Intelligence Spine. The assessment deepens the CaseObject 
 
 The contradiction model is the intellectual core of the system. Every stalled decision contains at least one contradiction — a structural mismatch between what the organisation says and what it does.
 
-The system currently implements **4 core condition classes** with variant expressions:
+The system implements **13 contradiction archetypes** across 4 condition classes. Each archetype has a specific detection signature, verdict, prescribed move, and 7/30/90-day consequence projection. The `inferArchetypeSignal()` function in the synthesis engine selects the specific variant from user input via keyword analysis of blocker, owner, and forced action.
 
-1. **Authority** — the decision has no legitimate owner, or the stated owner lacks actual authority. Variant: someone claims ownership but cannot compel action.
-2. **Definition** — the decision itself is not clearly defined. People are arguing about what to do before agreeing on what the question is. Variant: the decision has been reframed so many times that its original urgency has been diluted.
-3. **Execution** — the decision has been made but is not being executed. The blocker is not informational but structural — resources, politics, or avoidance. Variant: partial execution creates the appearance of progress while the core issue remains unresolved.
-4. **Instability** — the conditions around the decision are shifting faster than the organisation can adapt. The decision may be correct today and obsolete next week. Variant: the organisation is making stable decisions in an unstable environment, or unstable decisions in a stable one.
+**Authority class (4 archetypes):**
+1. **Authority Leakage** — no one owns the decision; under urgency it will be made by whoever acts first.
+2. **Authority Contest** — multiple parties claim decision authority; the contest itself has become the blocker.
+3. **Authority Vacuum** — no one claims or exercises authority; the vacuum is filled by inertia, not governance.
+4. **False Authority** — the stated owner holds the title but not the mandate; they convene but cannot close.
 
-**TARGET — not yet implemented:** The system targets a taxonomy of **13 specific contradiction archetypes** distributed across these 4 condition classes. The 13-archetype registry is documented in Appendix E. The current implementation uses the 4 condition classes with the `detectContradictions` function performing rule-based contradiction detection (urgency without timeline, growth without commercial signals, strategic claims without depth, transformation without execution approach). The 13-archetype taxonomy represents the target state where each condition class contains 3-4 named archetypes with specific detection signatures, scoring weights, and prescribed interventions.
+**Definition class (3 archetypes):**
+5. **Definition Failure** — the decision is undefined despite claimed ownership; the outcome has never been agreed.
+6. **Definition Drift** — the decision definition has changed without acknowledgement; scope shifted but no one named it.
+7. **Definition Conflict** — stakeholders hold incompatible definitions; they are solving different problems.
+
+**Execution class (3 archetypes):**
+8. **Execution Avoidance** — the decision is known but being avoided; avoidance is the current operating decision.
+9. **Execution Theatre** — activity substitutes for decision execution; meetings and updates create the appearance of progress.
+10. **Escalation Avoidance** — required escalation is being suppressed; the team manages around the constraint instead of surfacing it.
+
+**Instability class (3 archetypes):**
+11. **Latent Instability** — the decision is not stable; clarity that has not survived pressure is not clarity.
+12. **Structural Fragility** — the decision depends on a single point of failure; if that point fails, the structure collapses.
+13. **Governance Erosion** — formal governance is being bypassed by informal practice; decisions happen outside the mandated process.
+
+The full 13-archetype registry with verdicts, moves, and consequences is documented in Appendix E.
 
 The contradiction model operates deterministically. Contradictions are derived from the user's own answers, not from statistical inference or sentiment analysis. The CaseObject stores the `contradiction` field (the primary contradiction identified), and the DeterministicOutput on the Intelligence Spine contains a `contradictionSet` — an array of all detected contradictions. The Arbiter Tournament validates that any LLM synthesis references these deterministic contradictions rather than inventing its own.
 
@@ -1884,7 +1900,7 @@ The system is organised into 13 layers, each with a specific function. Layers ar
 | Synthesis Engine | Combines inputs into diagnostic pattern |
 | Arbiter Tournament | Resolves competing interpretations |
 
-**CaseObject.** Created by the Fast Diagnostic. Contains the decision in the user's own words, claimed ownership, prior attempts, cost of delay, blockers, and forced action scenarios. Typed in `lib/decision/case-object.ts`. Classified into one of four condition classes: authority, definition, execution, instability.
+**CaseObject.** Created by the Fast Diagnostic. Contains the decision in the user's own words, claimed ownership, prior attempts, cost of delay, blockers, and forced action scenarios. Typed in `lib/decision/case-object.ts`. Classified into one of 13 contradiction archetypes across 4 condition classes (authority, definition, execution, instability) by the `inferArchetypeSignal()` function.
 
 **C3 Fidelity Scorer.** Scores input on three dimensions: Clarity (is the decision itself clear?), Context (is there enough surrounding information?), and Consequence (is the cost/stakes articulated?). Each dimension scores 0-1. The composite specificity score determines the processing tier. Implemented in `lib/decision/c3-fidelity-scorer.ts`.
 
@@ -2841,7 +2857,7 @@ The first ten accounts define the institution. They are not just customers. They
 2. **Authority to act.** The primary contact must have the authority to force the decision to conclusion.
 3. **Willingness to verify.** The organisation must agree to participate in the Outcome Verification loop.
 4. **Appropriate scale.** The decision must be significant enough to justify the system's intervention.
-5. **Condition class diversity.** The ten accounts should span all four condition classes.
+5. **Archetype diversity.** The ten accounts should span as many of the 13 contradiction archetypes as possible across all four condition classes.
 
 **Engagement Protocol for First Ten:**
 
@@ -3213,23 +3229,18 @@ All pricing is in GBP. The pricing principle is constant: the price is always le
 
 ## Appendix C: Severity Taxonomy
 
-The system currently implements a 4-tier severity taxonomy:
+The system implements a 6-tier severity taxonomy:
 
 | Severity | Score Range | Verdict |
 |----------|------------|---------|
-| **LOW** | 80-100% | Stable with minor correction points |
-| **MODERATE** | 60-79% | Recoverable, but drift is present |
-| **HIGH** | 40-59% | Material weakness detected |
-| **CRITICAL** | 0-39% | Immediate correction required |
+| **NEGLIGIBLE** | 90-100% | No material condition detected. Maintain current governance rhythm. |
+| **LOW** | 75-89% | Stable with minor correction points |
+| **MODERATE** | 55-74% | Recoverable, but drift is present |
+| **HIGH** | 35-54% | Material weakness detected |
+| **CRITICAL** | 15-34% | Immediate correction required |
+| **SYSTEMIC** | 0-14% | Systemic failure — structural intervention required at the governance level |
 
-The DiagnosticSeverity type in the codebase defines four values: `"low"`, `"moderate"`, `"high"`, `"critical"`.
-
-**TARGET — not yet implemented:** The target taxonomy adds two additional tiers:
-
-| Severity | Description |
-|----------|-------------|
-| **NEGLIGIBLE** | No material decision risk detected. Monitoring only. |
-| **SYSTEMIC** | Condition affects multiple interconnected decisions. Organisational-level intervention required. |
+The `DiagnosticSeverity` type in the codebase defines all six values: `"negligible"`, `"low"`, `"moderate"`, `"high"`, `"critical"`, `"systemic"`. Scoring functions in `lib/diagnostics/scoring.ts` and `lib/diagnostics/client.ts` use the full 6-tier taxonomy.
 
 ---
 
@@ -3248,34 +3259,34 @@ Base decay rates represent options lost per month (0-1 scale). Actual decay rate
 
 ## Appendix E: 13 Contradiction Archetype Registry
 
-**STATUS: TARGET — not yet implemented.**
+**STATUS: IMPLEMENTED.** All 13 archetypes are live in `lib/diagnostics/signals.ts`. The `inferArchetypeSignal()` function in `lib/decision/synthesis-engine.ts` selects the specific variant from user input.
 
 ### Authority Class (4 archetypes)
 
-1. **The Phantom Owner** — someone is named as decision owner but has no mechanism to compel action.
-2. **The Consensus Trap** — the organisation requires consensus before deciding, ensuring no individual can be held accountable.
-3. **The Proxy Chain** — authority is delegated through so many layers that no one knows who actually decides.
-4. **The Veto Ghost** — someone who is not the named owner can block the decision without being visible.
+1. **AUTHORITY_LEAKAGE** — no one owns the decision; under urgency, it will be made by whoever acts first.
+2. **AUTHORITY_CONTEST** — multiple parties claim decision authority; the contest itself has become the blocker.
+3. **AUTHORITY_VACUUM** — no one claims or exercises authority; the vacuum is filled by inertia, not governance.
+4. **FALSE_AUTHORITY** — the stated owner holds the title but not the mandate; they convene but cannot close.
 
 ### Definition Class (3 archetypes)
 
-5. **The Moving Target** — the decision has been redefined so many times that its original urgency has been diluted.
-6. **The Scope Creep Mask** — what began as a specific decision has expanded to encompass everything, ensuring it encompasses nothing actionable.
-7. **The False Binary** — the decision is framed as two options when the real issue is that neither option addresses the actual problem.
+5. **DEFINITION_FAILURE** — the decision is undefined despite claimed ownership; the outcome has never been agreed.
+6. **DEFINITION_DRIFT** — the decision definition has changed without acknowledgement; scope shifted but no one named it.
+7. **DEFINITION_CONFLICT** — stakeholders hold incompatible definitions; they are solving different problems.
 
 ### Execution Class (3 archetypes)
 
-8. **The Pilot Purgatory** — the decision was "made" but implementation is perpetually in pilot or phase one.
-9. **The Resource Mirage** — resources are nominally committed but practically unavailable.
-10. **The Partial Execute** — enough action is taken to create the appearance of progress while the core issue remains unresolved.
+8. **EXECUTION_AVOIDANCE** — the decision is known but being avoided; avoidance is the current operating decision.
+9. **EXECUTION_THEATRE** — activity substitutes for decision execution; meetings and updates create the appearance of progress.
+10. **ESCALATION_AVOIDANCE** — required escalation is being suppressed; the team manages around the constraint.
 
 ### Instability Class (3 archetypes)
 
-11. **The Stable Decision in Unstable Ground** — the organisation has made a clear decision but the conditions it depends on are shifting.
-12. **The Adaptive Freeze** — the environment is changing but the organisation has frozen its decision-making.
-13. **The Reactive Loop** — the organisation is making rapid decisions in response to each change, but the decisions contradict each other.
+11. **LATENT_INSTABILITY** — the decision is not stable; clarity that has not survived pressure is not clarity.
+12. **STRUCTURAL_FRAGILITY** — the decision depends on a single point of failure; if that point fails, the structure collapses.
+13. **GOVERNANCE_EROSION** — formal governance is being bypassed by informal practice; decisions happen outside the mandated process.
 
-Each archetype, when implemented, will have: a detection signature, a scoring weight, and a prescribed intervention.
+Each archetype has: a detection signature (keyword analysis in `inferArchetypeSignal()`), a verdict, a contradiction statement, a prescribed move with deadline, 7/30/90-day consequence projections, a behaviour reveal, and an escalation line.
 
 ---
 
