@@ -52,7 +52,7 @@ export type DiagnosticIntent =
 
 export type DiagnosticAnswerValue = 1 | 2 | 3 | 4 | 5;
 
-export type DiagnosticSeverity = "low" | "moderate" | "high" | "critical";
+export type DiagnosticSeverity = "negligible" | "low" | "moderate" | "high" | "critical" | "systemic";
 
 export type DiagnosticScoreBand = "stable" | "watch" | "fragile" | "escalate";
 
@@ -333,10 +333,12 @@ export type DiagnosticReportIssueResponse =
 
 export function isDiagnosticSeverity(value: unknown): value is DiagnosticSeverity {
   return (
+    value === "negligible" ||
     value === "low" ||
     value === "moderate" ||
     value === "high" ||
-    value === "critical"
+    value === "critical" ||
+    value === "systemic"
   );
 }
 

@@ -3,7 +3,7 @@
 
 import { prisma } from "@/lib/prisma";
 
-export type DiagnosticSeverity = "low" | "moderate" | "high" | "critical";
+export type DiagnosticSeverity = "negligible" | "low" | "moderate" | "high" | "critical" | "systemic";
 
 export type DiagnosticRecord = {
   id: string;

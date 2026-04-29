@@ -36,10 +36,12 @@ export function computePct(score: number, maxScore: number): number {
 export function severityFromPct(pct: number): DiagnosticSeverity {
   const safePct = Math.max(0, Math.min(100, Math.round(pct)));
 
-  if (safePct >= 80) return "low";
-  if (safePct >= 60) return "moderate";
-  if (safePct >= 40) return "high";
-  return "critical";
+  if (safePct >= 90) return "negligible";
+  if (safePct >= 75) return "low";
+  if (safePct >= 55) return "moderate";
+  if (safePct >= 35) return "high";
+  if (safePct >= 15) return "critical";
+  return "systemic";
 }
 
 export function bandFromPct(pct: number): DiagnosticScoreBand {

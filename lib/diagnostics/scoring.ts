@@ -17,15 +17,19 @@ export function percentageScore(answers: Array<number | boolean | null | undefin
 }
 
 export function severityFromScore(score: number): DiagnosticSeverity {
-  if (score >= 80) return "low";
-  if (score >= 60) return "moderate";
-  if (score >= 40) return "high";
-  return "critical";
+  if (score >= 90) return "negligible";
+  if (score >= 75) return "low";
+  if (score >= 55) return "moderate";
+  if (score >= 35) return "high";
+  if (score >= 15) return "critical";
+  return "systemic";
 }
 
 export function verdictFromScore(score: number): string {
-  if (score >= 80) return "Stable with minor correction points";
-  if (score >= 60) return "Recoverable, but drift is present";
-  if (score >= 40) return "Material weakness detected";
-  return "Immediate correction required";
+  if (score >= 90) return "No material condition detected. Maintain current governance rhythm.";
+  if (score >= 75) return "Stable with minor correction points";
+  if (score >= 55) return "Recoverable, but drift is present";
+  if (score >= 35) return "Material weakness detected";
+  if (score >= 15) return "Immediate correction required";
+  return "Systemic failure — structural intervention required at the governance level";
 }

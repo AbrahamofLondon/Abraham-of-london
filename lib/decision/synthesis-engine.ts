@@ -127,12 +127,48 @@ const CONDITION_TO_SIGNAL: Record<ConditionClass, SignalKey> = {
 };
 
 /**
+ * Infer the specific contradiction archetype (1 of 13) from user input.
+ * Falls back to base condition signal if no variant matches.
+ */
+function inferArchetypeSignal(conditionClass: ConditionClass, caseObj: CaseObject): SignalKey {
+  const text = [caseObj.decision, caseObj.blocker, caseObj.claimedOwner, caseObj.forcedAction, caseObj.priorAttempt].join(" ").toLowerCase();
+
+  if (conditionClass === "authority") {
+    if (/nobody|no one|unclear|not sure|don.t know who/i.test(caseObj.claimedOwner ?? "")) return "AUTHORITY_VACUUM";
+    if (/multiple|both|two people|shared|co-own/i.test(text)) return "AUTHORITY_CONTEST";
+    if (/title|on paper|supposed to|should be|nominally/i.test(text)) return "FALSE_AUTHORITY";
+    return "AUTHORITY_LEAKAGE";
+  }
+
+  if (conditionClass === "definition") {
+    if (/changed|shifted|moved|different.*now|used to be/i.test(text)) return "DEFINITION_DRIFT";
+    if (/disagree|different interpretation|not the same|conflicting/i.test(text)) return "DEFINITION_CONFLICT";
+    return "DEFINITION_FAILURE";
+  }
+
+  if (conditionClass === "execution") {
+    if (/meeting|update|report|slide|deck|workshop|review/i.test(text) && /no.*decision|hasn.t.*moved|still.*discussing/i.test(text)) return "EXECUTION_THEATRE";
+    if (/escalat|raise|surface|senior|board|above/i.test(text) && /avoid|won.t|afraid|risky|politic/i.test(text)) return "ESCALATION_AVOIDANCE";
+    return "EXECUTION_AVOIDANCE";
+  }
+
+  if (conditionClass === "instability") {
+    if (/one person|single|depends on|only.*knows|if.*leaves/i.test(text)) return "STRUCTURAL_FRAGILITY";
+    if (/bypass|skip|informal|outside.*process|corridor|off.*record/i.test(text)) return "GOVERNANCE_EROSION";
+    return "LATENT_INSTABILITY";
+  }
+
+  return CONDITION_TO_SIGNAL[conditionClass];
+}
+
+/**
  * Build deterministic output from case material.
  * This is always computed, regardless of synthesis tier.
+ * Selects from 13 contradiction archetypes (4 core + 9 variants).
  */
 export function buildDeterministicOutput(caseObj: CaseObject): DeterministicOutput {
   const conditionClass = classifyCondition(caseObj);
-  const signalKey = CONDITION_TO_SIGNAL[conditionClass];
+  const signalKey = inferArchetypeSignal(conditionClass, caseObj);
   const signal = SIGNALS[signalKey];
 
   const contradictionSet: string[] = [];
