@@ -146,6 +146,19 @@
   status = 301
   force = true
 
+  [[schedule]]
+    path = "/api/cleanup-download-tokens"
+    schedule = "0 2 * * *"
+
+  [[schedule]]
+    path = "/api/cron/escalation"
+    schedule = "0 */6 * * *"
+
+  Missing:
+  [[schedule]]
+    path = "/api/cron/decision-state"
+    schedule = "0 */12 * * *"
+
 # PDF canonical alias redirects
 # Generated from duplicate report
 # Only byte-identical legacy direct-file aliases included

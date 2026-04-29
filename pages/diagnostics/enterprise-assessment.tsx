@@ -76,6 +76,8 @@ import { generateConsequenceTimeline } from "@/lib/diagnostics/consequence-timel
 import BoundaryProximityLine, {
   boundaryProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
+import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
+import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOKENS
@@ -522,6 +524,22 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.decisionObject.action}</p>
           </div>
 
+          {/* ── Anchor-driven escalation hook ─── */}
+          <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.5rem" }}>
+            <Eyebrow>Next unknown</Eyebrow>
+            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.82)" }}>
+              This is now a governance and exposure problem. It has financial consequences.
+            </p>
+            <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>
+              {reading.route === "EXECUTIVE_REPORTING"
+                ? `The institutional condition at ${totalPct}% has crossed from operational strain to structural risk. Executive Reporting translates this into priced consequence and governed intervention sequencing.`
+                : `The institutional reading at ${totalPct}% is under watch. Executive Reporting will determine whether the current condition has financial exposure that warrants intervention before pressure takes over sequencing.`}
+            </p>
+            <Link href="/diagnostics/executive-reporting" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "11px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}>
+              Escalate to Executive Reporting <ChevronRight style={{ width: 11, height: 11 }} />
+            </Link>
+          </div>
+
           <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
           <FreeLayerBoundary
@@ -620,7 +638,36 @@ export default function EnterpriseAssessmentPage() {
   const [adaptiveQuestions, setAdaptiveQuestions]         = React.useState<AdaptiveQuestion[]>([]);
   const [adaptiveAnswers, setAdaptiveAnswers]             = React.useState<Record<string, string>>({});
   const [showAdaptive, setShowAdaptive]                   = React.useState(false);
+  const [challenge, setChallenge] = React.useState<ChallengeResult | null>(null);
   const recentDecisionReady = identity.recentDecision.trim().length >= 80;
+
+  async function runEnterpriseChallenge(stage: string): Promise<ChallengeResult | null> {
+    setChallenge(null);
+    try {
+      const response = await fetch("/api/diagnostics/challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assessmentType: "enterprise",
+          stage,
+          answers: {
+            recentDecision: identity.recentDecision,
+            authority: identity.role,
+            consequence: identity.notes,
+          },
+        }),
+      });
+      if (!response.ok) return null;
+      const json = (await response.json()) as { ok: boolean } & ChallengeResult;
+      if (json.ok && json.severity !== "none") {
+        setChallenge(json);
+        return json;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
 
   React.useEffect(() => {
     trackStageStart("enterprise");
@@ -982,7 +1029,24 @@ export default function EnterpriseAssessmentPage() {
                     </div>
                   </div>
 
-                  <button type="button" onClick={() => recentDecisionReady && advance("instrument")} disabled={!recentDecisionReady} style={{ marginTop: "1.75rem", padding: "13px 28px", border: `1px solid ${recentDecisionReady ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: recentDecisionReady ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: recentDecisionReady ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: recentDecisionReady ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
+                  {/* Challenge card — after recent decision input */}
+                  {challenge && (
+                    <div style={{ marginTop: "1.25rem" }}>
+                      <DecisionChallengeCard
+                        challenge={challenge}
+                        onRevise={() => setChallenge(null)}
+                        onAccept={() => { setChallenge(null); advance("instrument"); }}
+                      />
+                    </div>
+                  )}
+
+                  <button type="button" onClick={async () => {
+                    if (!recentDecisionReady) return;
+                    const hit = await runEnterpriseChallenge("enterprise_problem");
+                    if (hit && !hit.canProceed) return;
+                    if (hit && hit.canProceed) return; // card shown
+                    advance("instrument");
+                  }} disabled={!recentDecisionReady} style={{ marginTop: "1.75rem", padding: "13px 28px", border: `1px solid ${recentDecisionReady ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: recentDecisionReady ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: recentDecisionReady ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: recentDecisionReady ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
                     onMouseEnter={e => { if (recentDecisionReady) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
                     onMouseLeave={e => { if (recentDecisionReady) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                   >

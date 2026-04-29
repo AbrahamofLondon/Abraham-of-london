@@ -93,4 +93,16 @@ export type FastDiagnosticResult = {
     recognitionLine: string;
     observations: string[];
   };
+
+  /** Anchor-bound 8-section narrative (when user input is sufficient) */
+  anchorNarrative?: {
+    opening: string;
+    condition: string;
+    whyItExists: string;
+    pattern: string;
+    costOfInaction: { thirtyDays: string; sixtyDays: string; ninetyDays: string };
+    perspective: string;
+    requiredMove: string;
+    cta: string;
+  };
 };

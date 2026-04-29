@@ -69,6 +69,8 @@ import { generateConsequenceTimeline } from "@/lib/diagnostics/consequence-timel
 import BoundaryProximityLine, {
   boundaryProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
+import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
+import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -495,6 +497,22 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.decisionObject.action}</p>
           </div>
 
+          {/* ── Anchor-driven escalation hook ─── */}
+          <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.5rem" }}>
+            <Eyebrow>Next unknown</Eyebrow>
+            <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.82)" }}>
+              This is not a team issue alone. The structure itself is allowing this to persist.
+            </p>
+            <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>
+              {reading.route === "ENTERPRISE"
+                ? `The ${reading.urgentDomain ?? "dominant"} gap is too distributed for local correction. The Enterprise Diagnostic tests whether this strain is embedded in the wider institutional structure.`
+                : `The perception gap in ${reading.urgentDomain ?? "the most stressed domain"} may be contained to this team — or it may be a symptom of how the institution operates. The Enterprise Diagnostic reveals which.`}
+            </p>
+            <Link href="/diagnostics/enterprise-assessment" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "11px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}>
+              Run Enterprise Diagnostic <ChevronRight style={{ width: 11, height: 11 }} />
+            </Link>
+          </div>
+
           <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
           <FreeLayerBoundary
@@ -592,6 +610,36 @@ export default function TeamAssessmentPage() {
     falseAssumption: "",
     showScoresReaction: "",
   });
+  const [challenge, setChallenge] = React.useState<ChallengeResult | null>(null);
+
+  async function runTeamChallenge(stage: string, extraAnswers?: Record<string, unknown>): Promise<ChallengeResult | null> {
+    setChallenge(null);
+    try {
+      const response = await fetch("/api/diagnostics/challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assessmentType: "team",
+          stage,
+          answers: {
+            ...extraAnswers,
+            falseAssumption: teamReflections.falseAssumption,
+            showScoresReaction: teamReflections.showScoresReaction,
+            teamName: identity.teamName,
+          },
+        }),
+      });
+      if (!response.ok) return null;
+      const json = (await response.json()) as { ok: boolean } & ChallengeResult;
+      if (json.ok && json.severity !== "none") {
+        setChallenge(json);
+        return json;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
 
   React.useEffect(() => {
     trackStageStart("team");
@@ -690,8 +738,21 @@ export default function TeamAssessmentPage() {
     [constitutionalThread, gaps, overallLeader, overallReality],
   );
 
-  function advance(to: Phase) { setDirection(1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to); }
-  function retreat(to: Phase) { setDirection(-1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to); }
+  async function advance(to: Phase) {
+    setChallenge(null);
+    // Challenge checkpoint: before entering result phase
+    if (to === "result" && realityComplete()) {
+      const hit = await runTeamChallenge("pre_result");
+      if (hit && !hit.canProceed) return;
+      if (hit && hit.canProceed) return; // card shown, user accepts to continue
+    }
+    setDirection(1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to);
+  }
+  function advanceForce(to: Phase) {
+    setChallenge(null);
+    setDirection(1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to);
+  }
+  function retreat(to: Phase) { setChallenge(null); setDirection(-1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to); }
 
   async function handleSubmit() {
     setIsSubmitting(true);
@@ -1055,6 +1116,17 @@ export default function TeamAssessmentPage() {
                     </div>
                   )}
 
+                  {/* Challenge card — displayed when pre_result challenge fires */}
+                  {challenge && (
+                    <div style={{ marginTop: "1.5rem" }}>
+                      <DecisionChallengeCard
+                        challenge={challenge}
+                        onRevise={() => setChallenge(null)}
+                        onAccept={() => { setChallenge(null); advanceForce("result"); }}
+                      />
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                     <button type="button" onClick={() => retreat("leader")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
                       <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
@@ -1064,7 +1136,7 @@ export default function TeamAssessmentPage() {
                       <button type="button" onClick={() => {
                         if (!realityComplete()) return;
                         if (adaptiveQuestions.length > 0 && !showAdaptive) { setShowAdaptive(true); return; }
-                        advance("result");
+                        void advance("result");
                       }} disabled={!realityComplete()} style={{ padding: "11px 24px", border: `1px solid ${realityComplete() ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: realityComplete() ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: realityComplete() ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: realityComplete() ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
                         onMouseEnter={e => { if (realityComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
                         onMouseLeave={e => { if (realityComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}

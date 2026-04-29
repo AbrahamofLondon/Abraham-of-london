@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import Head from "next/head";
 import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import ExecutiveReportingPaywall from "@/components/diagnostics/ExecutiveReportingPaywall";
@@ -22,63 +21,171 @@ export default function ExecutiveReportingEntryPage() {
   return (
     <Layout
       title="Executive Reporting | Abraham of London"
-      description="Governed executive reporting. The flagship brief that translates diagnostic evidence into financial exposure, institutional constraint, and a governed priority stack."
+      description="Governed executive reporting. Translates diagnostic evidence into financial exposure, institutional constraint, and a governed priority stack."
       canonicalUrl="/diagnostics/executive-reporting"
       fullWidth
       headerTransparent
     >
       <Head>
-        <meta
-          name="description"
-          content="Executive Reporting is the first consequence interpretation layer in the Abraham of London diagnostic ladder."
-        />
+        <meta name="description" content="Executive Reporting is the consequence interpretation layer in the Abraham of London diagnostic ladder." />
       </Head>
 
-      <main className="min-h-screen bg-[#050505] px-6 py-24 text-white lg:px-12">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 max-w-3xl">
-            <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-200/70">
-              Flagship · Executive Reporting
-            </div>
-            <h1 className="mt-4 font-serif text-4xl font-light leading-[0.98] tracking-[-0.04em] text-white md:text-6xl">
-              This is where the cost<br />becomes visible.
+      <main style={{ backgroundColor: "#0B0B0B", minHeight: "100vh", color: "#F5F5F5" }}>
+        <div style={{ maxWidth: "680px", margin: "0 auto", padding: "120px 24px 96px" }}>
+
+          {/* ═══ 1. HERO — VERDICT, NOT HEADLINE ═══ */}
+          <div style={{ paddingBottom: "80px" }}>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "clamp(32px, 5vw, 48px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "#F5F5F5" }}>
+              This is not an execution problem.
             </h1>
-            <p className="mt-5 max-w-2xl font-serif text-lg leading-8 text-white/52">
-              You already know something is wrong. This shows what it is costing — and what
-              happens if you do nothing. The system prices consequence direction from your stated
-              inputs, names the decision being avoided, and produces a governed priority stack.
-              Financial exposure requires a supplied cost anchor.
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "clamp(32px, 5vw, 48px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.35)", marginTop: "4px" }}>
+              It is a decision structure failure.
             </p>
-            <p className="mt-3 max-w-xl font-mono text-[10px] leading-6 tracking-wide text-white/25">
-              If this saves one wrong month, it has already paid for itself.
+            <p style={{ marginTop: "24px", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#888" }}>
+              Current condition: MISALIGNED
             </p>
           </div>
 
-          {/* What it uses / what it produces / who it is for */}
-          <div className="mb-8 grid gap-4 md:grid-cols-3">
-            <div className="border border-white/10 bg-white/[0.025] p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">What it consumes</p>
-              <p className="mt-3 text-sm leading-6 text-white/58">
-                Every contradiction from prior stages. Your stated decision, constraint, delay cost,
-                and prior attempts. The evidence graph accumulated across your diagnostic journey.
-              </p>
-            </div>
-            <div className="border border-white/10 bg-white/[0.025] p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">What it produces</p>
-              <p className="mt-3 text-sm leading-6 text-white/58">
-                A constitutional position statement, exposure direction estimate, governed priority stack,
-                failure mode identification, and enforced next action. PDF briefing available for board distribution.
-              </p>
-            </div>
-            <div className="border border-white/10 bg-white/[0.025] p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">Who it is for</p>
-              <p className="mt-3 text-sm leading-6 text-white/58">
-                Executives, board members, and institutional principals who need structured interpretation
-                before making consequential decisions. Not a general assessment — a governed brief for serious conditions.
-              </p>
-            </div>
+          {/* ═══ 2. PRECISION STRIKE ═══ */}
+          <div style={{ paddingBottom: "64px" }}>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777" }}>
+              You are attempting to:
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#EAEAEA", paddingLeft: "14px", marginTop: "8px" }}>
+              The decision your diagnostic evidence identified
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777", marginTop: "20px" }}>
+              While operating within:
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#EAEAEA", paddingLeft: "14px", marginTop: "8px" }}>
+              The constraint that has prevented resolution
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777", marginTop: "24px" }}>
+              This is why progress has stalled.
+            </p>
           </div>
 
+          {/* ═══ 3. WHY IT EXISTS ═══ */}
+          <div style={{ paddingBottom: "64px" }}>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)" }}>
+              The issue is not the absence of effort.
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)", marginTop: "16px" }}>
+              The structure governing the decision has not changed. Prior attempts have not altered the condition because they addressed symptoms, not the structural constraint.
+            </p>
+          </div>
+
+          {/* ═══ 4. PATTERN RECOGNITION ═══ */}
+          <div style={{ height: "1px", background: "#1A1A1A", margin: "48px 0" }} />
+          <div style={{ paddingBottom: "64px" }}>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)" }}>
+              This is not isolated.
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)", marginTop: "16px" }}>
+              This pattern appears when a decision requires authority, but execution continues under shared or unclear control.
+            </p>
+          </div>
+
+          {/* ═══ 5. CONTRADICTION — THE ONLY FRAMED SECTION ═══ */}
+          <div style={{ background: "#111", padding: "24px 28px", borderLeft: "2px solid #444", marginBottom: "64px" }}>
+            <p style={{ fontSize: "14px", lineHeight: 1.7, color: "#777" }}>
+              The diagnostic evidence shows:
+            </p>
+            <div style={{ marginTop: "16px" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#666", marginBottom: "4px" }}>Decision</p>
+              <p style={{ fontSize: "15px", lineHeight: 1.6, color: "#EAEAEA" }}>
+                The decision that must be made — identified from your diagnostic journey
+              </p>
+            </div>
+            <div style={{ marginTop: "20px" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#666", marginBottom: "4px" }}>Constraint</p>
+              <p style={{ fontSize: "15px", lineHeight: 1.6, color: "#EAEAEA" }}>
+                The competing structure that prevents resolution
+              </p>
+            </div>
+            <p style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "24px" }}>
+              These cannot coexist. One of them must give way.
+            </p>
+          </div>
+
+          {/* ═══ 6. COST OF INACTION ═══ */}
+          <div style={{ paddingBottom: "72px" }}>
+            <div style={{ marginBottom: "24px" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>30 days</p>
+              <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "6px" }}>
+                You will still be managing the same blocker. Workarounds will have replaced structure.
+              </p>
+            </div>
+            <div style={{ marginBottom: "24px" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>60 days</p>
+              <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "6px" }}>
+                The cost will shift from operational delay to structural inefficiency. Options that existed today are now constrained.
+              </p>
+            </div>
+            <div style={{ marginBottom: "32px" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>90 days</p>
+              <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "6px" }}>
+                The decision will no longer be optional. It will be forced under worse conditions.
+              </p>
+            </div>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.70)", marginTop: "32px" }}>
+              At this point, delay is no longer neutral.
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.70)", marginTop: "4px" }}>
+              It is a decision.
+            </p>
+          </div>
+
+          {/* ═══ 7. BOARD VIEW ═══ */}
+          <div style={{ maxWidth: "600px", paddingBottom: "72px", paddingLeft: "16px" }}>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.55)" }}>
+              From a board or investor perspective:
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.55)", marginTop: "16px" }}>
+              This does not appear as complexity.
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.70)", marginTop: "8px" }}>
+              It appears as a decision not yet taken.
+            </p>
+          </div>
+
+          {/* ═══ 8. REQUIRED MOVE ═══ */}
+          <div style={{ paddingBottom: "72px" }}>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.60)", marginBottom: "12px" }}>
+              Required:
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {["Assign a single accountable owner", "Remove the competing obligation", "Commit to a defined timeline"].map((item) => (
+                <li key={item} style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.60)", paddingLeft: "16px", marginBottom: "4px" }}>
+                  &bull; {item}
+                </li>
+              ))}
+            </ul>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.45)", marginTop: "16px" }}>
+              Until this happens, execution will continue to stall.
+            </p>
+          </div>
+
+          {/* ═══ 9. CONSEQUENCE SNAPSHOT ═══ */}
+          <div style={{ paddingBottom: "80px" }}>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)" }}>
+              You now have visibility.
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.45)", marginTop: "8px" }}>
+              What you do not yet have is resolution.
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.45)", marginTop: "16px" }}>
+              If nothing changes, you will continue to operate inside the same constraint, with increasing cost and decreasing control.
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.65)", marginTop: "24px" }}>
+              You are now at the point where clarity is no longer the issue.
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.65)", marginTop: "4px" }}>
+              Execution is.
+            </p>
+          </div>
+
+          {/* ═══ 10. EXECUTIVE REPORTING PAYWALL ═══ */}
           <ExecutiveReportingPaywall
             price={getProductAmountGbp("executive_reporting")}
             ctaHref="/diagnostics/executive-reporting/run"
@@ -90,89 +197,18 @@ export default function ExecutiveReportingEntryPage() {
             title="Where diagnostic evidence becomes a governed position."
             description="The diagnostic ladder accumulates structural evidence. Executive Reporting translates that evidence into consequence: financial exposure, institutional constraint, and the priority decisions that follow."
             sampleLines={[
-              {
-                label: "Position statement",
-                value: "Execution coherence collapsing under governance drift",
-              },
-              {
-                label: "Financial exposure",
-                value: "£420,000 estimated loss over 6 months",
-              },
-              {
-                label: "Priority stack",
-                value: "Re-establish authority clarity → collapse redundant reporting → stabilise execution cadence",
-              },
+              { label: "Position statement", value: "Execution coherence collapsing under governance drift" },
+              { label: "Financial exposure", value: "£420,000 estimated loss over 6 months" },
+              { label: "Priority stack", value: "Re-establish authority clarity → collapse redundant reporting → stabilise execution cadence" },
             ]}
           />
 
-          <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[28px] border border-white/10 bg-white/[0.025] p-6 md:p-8">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-200/70">
-                Anonymized sample report
-              </p>
-              <h2 className="mt-4 max-w-3xl font-serif text-3xl font-light leading-tight text-white md:text-4xl">
-                Execution coherence collapsing under governance drift
-              </h2>
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-black/25 p-5">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/42">
-                    Priority Stack
-                  </p>
-                  <ol className="mt-4 space-y-3 text-sm leading-6 text-white/72">
-                    <li>1. Re-establish authority clarity at decision layer</li>
-                    <li>2. Collapse redundant reporting structures</li>
-                    <li>3. Stabilise execution cadence</li>
-                  </ol>
-                </div>
-                <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-5">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/70">
-                    Financial Exposure
-                  </p>
-                  <div className="mt-4 font-serif text-3xl text-white">
-                    £420,000
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-white/60">
-                    Estimated loss over 6 months from delay, duplicated reporting load,
-                    and execution drag.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-6 md:p-8">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/42">
-                How evidence escalates
-              </p>
-              <div className="mt-5 space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/38">
-                    Diagnostic ladder (Stages 1–3)
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-white/62">
-                    Constitutional routing, team perception gaps, enterprise pressure mapping.
-                    Tension accumulates across stages. Evidence builds.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-200/70">
-                    Executive Reporting (Stage 4)
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-white/70">
-                    Interpretation layer. Takes accumulated evidence, adds executive intake,
-                    produces financial exposure, governed priority stack, and a position that
-                    can be acted on or escalated to Strategy Room.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
           {(checkoutCancelled || accessRequired) && (
-            <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-amber-200/75">
+            <div style={{ marginTop: "24px", padding: "20px", borderLeft: "2px solid #444", background: "#111" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#888" }}>
                 {checkoutCancelled ? "Session cancelled" : "Access required"}
               </p>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/58">
+              <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "8px" }}>
                 {checkoutCancelled
                   ? "No payment was taken. You can return to the free ladder or restart Executive Reporting when ready."
                   : "Executive Reporting is the consequence interpretation layer. Complete checkout to continue into the intake."}
@@ -180,42 +216,57 @@ export default function ExecutiveReportingEntryPage() {
             </div>
           )}
 
-          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-            <span>One-time report — no subscription</span>
-            <span>Derived from your specific evidence</span>
-            <span>Governed analysis — no generic output</span>
+          {/* ═══ 11. PAYMENT BLOCK ═══ */}
+          <div style={{ height: "1px", background: "#222", margin: "96px 0 48px" }} />
+
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.55)" }}>
+              At this point, there are only two paths:
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.70)", marginTop: "16px" }}>
+              1. Leave with clarity and return to delay
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.70)", marginTop: "4px" }}>
+              2. Remove the hesitation and force the decision through
+            </p>
           </div>
 
-          <div className="mt-4 border border-white/10 bg-white/[0.02] p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/38">
-              Commercial access
+          <div style={{ paddingBottom: "32px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#888" }}>
+              Decision Enforcement Session
             </p>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
-              {getProductDisplayPrice("executive_reporting")} one-time access. Payment is processed through Stripe and returns directly
-              to the Executive Reporting intake. Also available through Inner Circle access
-              without per-report cost.
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontSize: "32px", fontWeight: 300, color: "rgba(255,255,255,0.90)", marginTop: "8px" }}>
+              &pound;1,250
+            </p>
+            <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", marginTop: "8px" }}>
+              One decision. No drift. No ambiguity left unresolved.
             </p>
           </div>
+
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#888" }}>
+              Multi-Decision Intervention
+            </p>
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontSize: "32px", fontWeight: 300, color: "rgba(255,255,255,0.90)", marginTop: "8px" }}>
+              &pound;2,500+
+            </p>
+            <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", marginTop: "8px" }}>
+              For structurally linked decisions.
+            </p>
+          </div>
+
+          <a
+            href="/strategy-room"
+            style={{ display: "block", width: "100%", padding: "18px 0", textAlign: "center", backgroundColor: "#F5F5F5", color: "#0B0B0B", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", fontWeight: 500 }}
+          >
+            Enter Strategy Room
+          </a>
+
+          <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.35)", marginTop: "32px" }}>
+            If the cost of delay is already visible, this is the point where you stop paying it.
+          </p>
+
         </div>
-
-          {/* External Conditions */}
-          <section className="mt-10 mb-8">
-            <div className="border border-white/8 bg-white/[0.02] p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/28">
-                External conditions
-              </p>
-              <p className="mt-3 max-w-2xl font-serif text-sm leading-6 text-white/45">
-                Executive Reporting prices internal consequence. External market conditions affect the urgency and magnitude of that consequence.
-              </p>
-              <a
-                href="/artifacts/global-market-intelligence-report-q1-2026"
-                className="mt-3 inline-flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.22em] text-amber-200/70 transition-all hover:text-amber-200/90"
-              >
-                Global Market Intelligence &middot; {getProductDisplayPrice("gmi_q1_2026")}
-                <ArrowRight className="h-2.5 w-2.5" />
-              </a>
-            </div>
-          </section>
       </main>
     </Layout>
   );

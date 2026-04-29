@@ -26,6 +26,10 @@ import { applyPublicTone, buildPublicPatternEvidence } from "@/lib/server/decisi
 import { createDecisionMemory, listDecisionMemoryByUser, summariseDecisionMemoryTrend } from "@/lib/server/decision-memory/memory-service.server";
 import { quickHash } from "@/lib/server/security/ip-abuse-watchdog.server";
 import { runShield, degradeResult } from "@/lib/server/security/adaptive-response.server";
+import { extractAnchors } from "@/lib/server/decision/anchor-extractor.server";
+import { detectAnchorContradictions } from "@/lib/server/decision/contradiction-engine.server";
+import { composeAnchorNarrative } from "@/lib/server/decision/narrative-engine.server";
+import type { DecisionAnchors } from "@/lib/server/decision/anchor-types.server";
 
 const requestSchema = z.object({
   answers: z.record(z.string()),
@@ -250,6 +254,83 @@ export default async function handler(
       });
     } catch {
       // Non-fatal: elevation enrichment failed, core result is still valid
+    }
+
+    // 10. ANCHOR-BOUND NARRATIVE — user-specific, deterministic
+    try {
+      const ownerClarityMap: Record<string, DecisionAnchors["ownerClarity"]> = {
+        "You": "clear",
+        "Team": "contested",
+        "Shared": "contested",
+        "Unclear": "absent",
+      };
+
+      const fastAnchors = extractAnchors({
+        type: "constitutional",
+        input: {
+          scores: {
+            authority: condition === "authority" ? 30 : 60,
+            coherence: condition === "definition" ? 35 : 60,
+            trust: 50,
+            pressure: answers.urgency === "Critical" ? 85 : answers.urgency === "High" ? 70 : 50,
+            friction: condition === "execution" ? 70 : 40,
+            seriousness: c3.specificityScore * 100,
+            governance: 50,
+            narrative: 50,
+            interventionReadiness: committed ? 70 : 30,
+            severity: c3.specificityScore * 100,
+            failureModeCount: 0,
+            authorityType: ownerClarityMap[answers.claimedOwner ?? ""] === "clear" ? "DIRECT" as const : "UNCLEAR" as const,
+            posture: publicState === "DISORDERED" ? "DISORDERED" as const : publicState === "MISALIGNED" ? "MISALIGNED" as const : "ORDERED" as const,
+            readinessTier: committed ? "STABILIZING" as const : "EMERGING" as const,
+          },
+          decision: {
+            route: condition === "authority" || condition === "definition" ? "DIAGNOSTIC" as const : "STRATEGY" as const,
+            confidence: c3.specificityScore,
+            thresholds: { strategyThreshold: 0.7, diagnosticThreshold: 0.4 },
+            proximity: { toStrategy: c3.specificityScore, toDiagnostic: 1 - c3.specificityScore },
+            rationale: synth ? [synth.verdict] : ["Insufficient input for full rationale"],
+            recommendedInterventions: synth ? [synth.concreteMove] : [],
+            disqualifiersTriggered: [],
+            postureWeight: 1,
+            readinessWeight: 1,
+            escalationAllowed: true,
+          },
+          reflections: {
+            structuralProblem: answers.decision ?? null,
+            priorAttempts: null,
+            shadowAuthority: null,
+          },
+          intake: {
+            problemStatement: answers.decision ?? null,
+            currentConstraint: answers.blocker ?? null,
+            desiredOutcome: null,
+            decisionNeed: {
+              decisionQuestion: answers.decision ?? null,
+              whatHappensIfNothingChanges: answers.consequence ?? null,
+              whyNow: answers.urgency ?? null,
+            },
+            history: { priorAttemptOutcome: null, correctionHistory: null },
+            governance: { authorityScope: ownerClarityMap[answers.claimedOwner ?? ""] === "clear" ? "DIRECT" : "UNCLEAR" },
+          },
+        },
+      });
+
+      const anchorContradictions = detectAnchorContradictions(fastAnchors);
+      const anchorNarrative = composeAnchorNarrative(
+        fastAnchors,
+        anchorContradictions,
+        {
+          patternLabel: conditionLabels[condition] ?? condition,
+          firstAction: synth?.concreteMove ?? "Assign a single accountable decision owner.",
+          consequence: synth?.defaultPathForecast ?? "The condition will compound.",
+          perspectiveType: "personal",
+        },
+      );
+
+      result.anchorNarrative = anchorNarrative;
+    } catch {
+      // Non-fatal: anchor narrative enrichment failed, static result still valid
     }
 
     // Apply degradation if shield flagged this request

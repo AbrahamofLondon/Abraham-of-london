@@ -54,6 +54,7 @@ import {
 import CaseActiveBanner from "@/components/diagnostics/unified/CaseActiveBanner";
 import FeedbackLoopBlock from "@/components/diagnostics/unified/FeedbackLoop";
 import LimitationsBlock from "@/components/diagnostics/unified/LimitationsBlock";
+import ExecutionFlow from "@/components/strategy-room/ExecutionFlow";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION AUTHORITY GATE
@@ -1397,6 +1398,8 @@ export default function StrategyRoomPage({
   const [executionSessionId, setExecutionSessionId] = React.useState<string | null>(null);
   const [persistError, setPersistError] = React.useState<string | null>(null);
   const [executiveResult, setExecutiveResult] = React.useState<unknown>(null);
+  const [showExecutionFlow, setShowExecutionFlow] = React.useState(false);
+  const [executionFlowComplete, setExecutionFlowComplete] = React.useState(false);
 
   // Enforcement state — reactive system visibility
   const [enforcement, setEnforcement] = React.useState<{
@@ -1552,6 +1555,42 @@ export default function StrategyRoomPage({
                   </div>
                 ))}
               </div>
+
+              {/* ── ExecutionFlow qualification gate (pre-payment) ── */}
+              {!executionFlowComplete && (
+                <div className="mt-8" style={{ maxWidth: "36rem" }}>
+                  {!showExecutionFlow ? (
+                    <button
+                      type="button"
+                      onClick={() => { setShowExecutionFlow(true); track("strategy_room_execution_flow_started"); }}
+                      style={{
+                        padding: "14px 28px",
+                        border: `1px solid ${GOLD}50`,
+                        backgroundColor: `${GOLD}10`,
+                        color: `${GOLD}CC`,
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "9px",
+                        letterSpacing: "0.20em",
+                        textTransform: "uppercase",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Qualify for execution
+                    </button>
+                  ) : (
+                    <ExecutionFlow
+                      inheritedDecision={thread?.summary?.title ?? null}
+                      inheritedBlocker={thread?.summary?.narrative ?? null}
+                      inheritedConsequence={null}
+                      onComplete={() => {
+                        setExecutionFlowComplete(true);
+                        setShowExecutionFlow(false);
+                        track("strategy_room_execution_flow_completed");
+                      }}
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Decision-weight price framing */}
               <div className="mt-8 space-y-4" style={{ maxWidth: "36rem" }}>

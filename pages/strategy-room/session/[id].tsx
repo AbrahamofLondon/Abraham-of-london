@@ -13,6 +13,7 @@ import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } fr
 import Layout from "@/components/Layout";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { prisma } from "@/lib/prisma.server";
+import ReturnBriefInterruptionBar from "@/components/strategy-room/ReturnBriefInterruptionBar";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -159,6 +160,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
   const [newDecision, setNewDecision] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [localError, setLocalError] = React.useState("");
+  const [microFeedback, setMicroFeedback] = React.useState("");
 
   if (error || !session) {
     return (
@@ -190,6 +192,8 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
       if (!res.ok) throw new Error(data.error || "Failed to log decision");
       setSession((prev) => prev ? { ...prev, decisions: [...prev.decisions, data.decision] } : prev);
       setNewDecision("");
+      setMicroFeedback("Recorded.");
+      setTimeout(() => setMicroFeedback(""), 2000);
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : "Error logging decision");
     } finally {
@@ -245,6 +249,19 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
 
       <div style={{ backgroundColor: DEEP, minHeight: "100vh", color: "white" }}>
         <div style={{ maxWidth: "56rem", margin: "0 auto", padding: "1.5rem 1.25rem 3rem" }}>
+
+          {/* ── Session authority line ── */}
+          <div style={{ padding: "1rem 0 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.04)", marginBottom: "1rem" }}>
+            <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)" }}>
+              This session is now active. Your decision is in scope.
+            </p>
+            <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "0.25rem" }}>
+              Everything from this point forward is execution.
+            </p>
+          </div>
+
+          {/* ── Return brief interruption (if available) ── */}
+          <ReturnBriefInterruptionBar sessionId={session.id} />
 
           {/* ── 1. ENTRY STATE — immediate grounding ── */}
           <section style={{ paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
@@ -511,7 +528,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                     value={newDecision}
                     onChange={(e) => setNewDecision(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") logDecision(); }}
-                    placeholder="Record a decision..."
+                    placeholder="Record action taken"
                     style={{
                       flex: 1,
                       backgroundColor: "transparent",
@@ -540,9 +557,14 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                     }}
                   >
                     <Plus style={{ width: 10, height: 10 }} />
-                    Log
+                    Log decision
                   </button>
                 </div>
+                {microFeedback && (
+                  <div style={{ ...mono, fontSize: "7.5px", color: "rgba(110,231,183,0.55)", marginTop: "0.35rem" }}>
+                    {microFeedback}
+                  </div>
+                )}
                 {localError && (
                   <div style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.70)", marginTop: "0.35rem" }}>
                     {localError}

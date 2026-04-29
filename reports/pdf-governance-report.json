@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-29T14:14:45.282Z",
+  "generatedAt": "2026-04-29T20:10:25.952Z",
   "rules": {
     "noNewPdfOutsideCanonicalPath": {
       "canonicalPrefix": "public/assets/downloads/",

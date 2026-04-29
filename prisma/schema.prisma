@@ -3315,3 +3315,25 @@ model EvidenceVaultEntry {
   @@map("evidence_vault")
 }
 
+// ─── Decision State Orchestrator — contact suppression ledger ────────────────
+
+model DecisionContactLedger {
+  id        String   @id @default(cuid())
+  userId    String?
+  sessionId String?
+  journeyId String?
+  state     String
+  system    String
+  channel   String
+  severity  String
+  sentAt    DateTime @default(now())
+  metadata  Json?
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([journeyId])
+  @@index([state])
+  @@index([sentAt])
+  @@map("decision_contact_ledger")
+}
+

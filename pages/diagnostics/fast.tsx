@@ -8,69 +8,79 @@ import { track } from "@/lib/analytics/track";
 import { trackHesitation, trackScrollDepth } from "@/lib/analytics/hesitation";
 import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
 import ExecutiveDecisionAuthorityBlock from "@/components/diagnostics/results/ExecutiveDecisionAuthorityBlock";
+import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
+import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 
 const GOLD = "#C9A96E";
-const RED = "rgba(252,165,165,";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
-type Question =
-  | { id: "decision"; question: string; helper: string; type: "textarea"; placeholder: string }
-  | { id: "claimedOwner" | "blocker" | "urgency" | "consequence"; question: string; helper: string; type: "options"; options: string[] };
+type ViewStage = "hero" | "decision" | "authority" | "consequence" | "commitment" | "loading" | "recovery" | "result";
 
-const QUESTIONS: Question[] = [
+const STEPS: Array<{
+  id: string;
+  headline: string;
+  placeholder: string;
+  microcopy: string;
+  challengeStage: string;
+}> = [
   {
     id: "decision",
-    question: "Where is the decision breaking down?",
-    helper: "Most delays are not execution failures. They are structural.",
-    type: "textarea",
-    placeholder: "Describe the decision that is currently stuck…",
+    headline: "What decision has been sitting unresolved longer than it should?",
+    placeholder: "Describe the decision \u2014 not the outcome you want.",
+    microcopy: "If you can\u2019t name it clearly, that\u2019s already a signal.",
+    challengeStage: "decision_input",
   },
   {
     id: "claimedOwner",
-    question: "Who should own this decision?",
-    helper: "One owner is stronger than implied ownership.",
-    type: "options",
-    options: ["You", "Team", "Shared", "Unclear"],
-  },
-  {
-    id: "blocker",
-    question: "What is currently blocking it?",
-    helper: "Choose the condition that is carrying the most pressure.",
-    type: "options",
-    options: ["Lack of clarity", "Misalignment", "Risk", "No authority", "Other"],
-  },
-  {
-    id: "urgency",
-    question: "How urgent is this?",
-    helper: "Urgency affects consequence, not just pace.",
-    type: "options",
-    options: ["Low", "Medium", "High", "Critical"],
+    headline: "Who can actually make this decision binding?",
+    placeholder: "Name the person or role with final authority.",
+    microcopy: "\u201CEveryone\u201D is not an answer.",
+    challengeStage: "ownership",
   },
   {
     id: "consequence",
-    question: "What happens if nothing changes?",
-    helper: "Choose the closest live consequence.",
-    type: "options",
-    options: [
-      "Decision delay compounds and execution stalls",
-      "Workarounds replace structure",
-      "Risk increases and confidence drops",
-      "Authority gets bypassed",
-    ],
+    headline: "What becomes more expensive if this stays unresolved?",
+    placeholder: "Be specific \u2014 time, money, risk, or opportunity.",
+    microcopy: "If nothing changes, something worsens. Name it.",
+    challengeStage: "pre_result",
   },
 ];
 
-type ViewStage = "questions" | "signal" | "commitment" | "loading" | "recovery" | "result";
-
 const FastDiagnosticPage: NextPage = () => {
   const [answers, setAnswers] = React.useState<Record<string, string>>({});
-  const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [stage, setStage] = React.useState<ViewStage>("questions");
+  const [stepIndex, setStepIndex] = React.useState(0);
+  const [stage, setStage] = React.useState<ViewStage>("hero");
   const [committed, setCommitted] = React.useState(false);
   const [result, setResult] = React.useState<FastDiagnosticResult | null>(null);
   const [error, setError] = React.useState("");
   const startedAt = React.useRef<number>(Date.now());
+  const [challenge, setChallenge] = React.useState<ChallengeResult | null>(null);
+  const [challengeLoading, setChallengeLoading] = React.useState(false);
+  const [liveHint, setLiveHint] = React.useState("");
+
+  async function runChallenge(challengeStage: string): Promise<ChallengeResult | null> {
+    setChallengeLoading(true);
+    setChallenge(null);
+    try {
+      const response = await fetch("/api/diagnostics/challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assessmentType: "fast", stage: challengeStage, answers }),
+      });
+      if (!response.ok) return null;
+      const json = (await response.json()) as { ok: boolean } & ChallengeResult;
+      if (json.ok && json.severity !== "none") {
+        setChallenge(json);
+        return json;
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      setChallengeLoading(false);
+    }
+  }
 
   React.useEffect(() => {
     track("fast_diagnostic_page_view");
@@ -80,403 +90,387 @@ const FastDiagnosticPage: NextPage = () => {
       const raw = sessionStorage.getItem("aol_fast_result");
       if (!raw) return;
       const stored = JSON.parse(raw) as FastDiagnosticResult;
-      if (stored?.caseRef) {
-        setResult(stored);
-        setStage("result");
-      }
-    } catch {
-      // ignore
-    }
-    return () => {
-      cleanScroll();
-      cleanHesitation();
-    };
+      if (stored?.caseRef) { setResult(stored); setStage("result"); }
+    } catch { /* ignore */ }
+    return () => { cleanScroll(); cleanHesitation(); };
   }, []);
 
-  const currentQuestion = QUESTIONS[currentIndex]!;
-  const currentValue = answers[currentQuestion.id] ?? "";
-  const canAdvance = currentQuestion.type === "textarea"
-    ? currentValue.trim().length >= 12
-    : currentValue.trim().length > 0;
+  // Live hint logic — reacts while typing
+  const currentStep = STEPS[stepIndex];
+  const currentValue = currentStep ? (answers[currentStep.id] ?? "") : "";
+  const canAdvance = currentValue.trim().length >= 8;
+
+  React.useEffect(() => {
+    if (stage !== "decision" && stage !== "authority" && stage !== "consequence") { setLiveHint(""); return; }
+    const text = currentValue.trim();
+    if (text.length < 5) { setLiveHint(""); return; }
+
+    const timer = setTimeout(() => {
+      if (stepIndex === 0) {
+        // Decision input live hints
+        if (/^(grow|improve|fix|increase|be more|make things|sort out|deal with)/i.test(text)) {
+          setLiveHint("This does not yet read as a decision.");
+        } else if (/want to|hope to|would like/i.test(text)) {
+          setLiveHint("This sounds like an outcome, not a decision.");
+        } else if (text.length < 20) {
+          setLiveHint("This is broad \u2014 what specifically must be decided?");
+        } else {
+          setLiveHint("");
+        }
+      } else if (stepIndex === 1) {
+        // Authority live hints
+        if (/^(everyone|the team|shared|we all|committee|leadership|no one|unclear)/i.test(text)) {
+          setLiveHint("Shared ownership usually explains delay.");
+        } else if (text.length >= 3 && text.length < 15) {
+          setLiveHint("If this person says no, does the decision still happen?");
+        } else {
+          setLiveHint("");
+        }
+      } else if (stepIndex === 2) {
+        // Consequence live hints
+        if (/^(things will|it will be|problems|nothing|more of the same)/i.test(text)) {
+          setLiveHint("That consequence is too abstract.");
+        } else if (text.length < 25) {
+          setLiveHint("If this continues for 90 days, what actually breaks?");
+        } else {
+          setLiveHint("");
+        }
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [currentValue, stepIndex, stage]);
 
   function updateAnswer(value: string) {
-    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: value }));
+    if (!currentStep) return;
+    setAnswers((prev) => ({ ...prev, [currentStep.id]: value }));
   }
 
-  function nextQuestion() {
-    if (!canAdvance) return;
-    if (currentIndex === 0) {
-      setStage("signal");
-      return;
+  async function advanceStep() {
+    if (!canAdvance || !currentStep) return;
+
+    const hit = await runChallenge(currentStep.challengeStage);
+    if (hit && !hit.canProceed) return;
+    if (hit && hit.canProceed) return; // card shown, user accepts to continue
+
+    if (stepIndex < STEPS.length - 1) {
+      setStepIndex((prev) => prev + 1);
+      setStage(stepIndex === 0 ? "authority" : "consequence");
+    } else {
+      setStage("commitment");
     }
-    if (currentIndex < QUESTIONS.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      return;
-    }
-    setStage("commitment");
   }
 
-  function previousQuestion() {
-    if (currentIndex === 0) return;
-    setCurrentIndex((prev) => prev - 1);
+  function acceptChallenge() {
+    setChallenge(null);
+    if (stepIndex < STEPS.length - 1) {
+      setStepIndex((prev) => prev + 1);
+      setStage(stepIndex === 0 ? "authority" : "consequence");
+    } else {
+      setStage("commitment");
+    }
   }
 
   async function submitFastDiagnostic(commitmentOverride?: boolean) {
     setStage("loading");
     setError("");
     const commitmentValue = commitmentOverride ?? committed;
-
     try {
       const response = await fetch("/api/diagnostics/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          answers,
-          committed: commitmentValue,
-          elapsedMs: Date.now() - startedAt.current,
-        }),
+        body: JSON.stringify({ answers, committed: commitmentValue, elapsedMs: Date.now() - startedAt.current }),
       });
       const json = (await response.json()) as FastDiagnosticResult | { ok?: false; error?: string };
-
       if (!response.ok || "caseRef" in json === false) {
         throw new Error("error" in json && json.error ? json.error : "Unable to complete analysis.");
       }
-
       const publicResult = json as FastDiagnosticResult;
       setResult(publicResult);
-      try {
-        sessionStorage.setItem("aol_fast_result", JSON.stringify(publicResult));
-      } catch {
-        // ignore
-      }
-
-      track("fast_diagnostic_completed", {
-        committed: commitmentValue,
-        elapsed_seconds: Math.round((Date.now() - startedAt.current) / 1000),
-      });
-
-      if (publicResult.recoveryQuestion) {
-        setStage("recovery");
-        return;
-      }
-
+      try { sessionStorage.setItem("aol_fast_result", JSON.stringify(publicResult)); } catch { /* ignore */ }
+      track("fast_diagnostic_completed", { committed: commitmentValue, elapsed_seconds: Math.round((Date.now() - startedAt.current) / 1000) });
+      if (publicResult.recoveryQuestion) { setStage("recovery"); return; }
       setStage("result");
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Unable to complete analysis.");
-      setStage("questions");
+      setStage("decision");
     }
   }
 
   function resetDiagnostic() {
-    setAnswers({});
-    setCurrentIndex(0);
-    setStage("questions");
-    setCommitted(false);
-    setResult(null);
-    setError("");
+    setAnswers({}); setStepIndex(0); setStage("hero");
+    setCommitted(false); setResult(null); setError(""); setChallenge(null); setLiveHint("");
     startedAt.current = Date.now();
-    try {
-      sessionStorage.removeItem("aol_fast_result");
-    } catch {
-      // ignore
-    }
+    try { sessionStorage.removeItem("aol_fast_result"); } catch { /* ignore */ }
   }
 
-  const initialSignalPreview = (() => {
-    const decision = answers.decision?.trim() ?? "";
-    if (/approve|sign off|board|ceo|owner|authority|permission/i.test(decision)) {
-      return "Initial signal detected: decision ownership appears unstable.";
-    }
-    if (/delay|stuck|waiting|blocked|unclear/i.test(decision)) {
-      return "Initial signal detected: the structural constraint is likely sitting above execution.";
-    }
-    return "Initial signal detected: decision ownership appears unstable.";
-  })();
-
-  const boardView = result?.authorityIndex?.boardMeaning
-    ?? "From a board perspective: this signals a breakdown in decision governance, not a temporary execution issue.";
-
-  const requiredMove = result?.synthesis?.concreteMove
-    ?? "Assign a single accountable decision owner. Remove shared authority from the decision path. Set a clear execution window.";
-
-  const recommendedNextStep = result?.executionFailure?.requiredCorrection
-    ?? result?.synthesis?.whyPriorAttemptsFailed
-    ?? "Confirm the owner, the boundary, and the consequence before widening the response.";
+  const an = result?.anchorNarrative;
 
   return (
     <Layout title="Decision Check" description="A governed fast diagnostic for live decision exposure.">
-      <Head>
-        <meta name="robots" content="noindex" />
-      </Head>
-      <main className="min-h-screen px-6 py-16" style={{ backgroundColor: "rgb(3,3,5)" }}>
-        <div className="mx-auto max-w-3xl">
-          <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1rem 1.25rem", marginBottom: "1.5rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}80` }}>
-              Fast Diagnostic
-            </div>
-            <h1 style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "2rem", lineHeight: 1.2, color: "rgba(255,255,255,0.92)", marginTop: "0.5rem" }}>
-              Where is the decision breaking down?
+      <Head><meta name="robots" content="noindex" /></Head>
+      <main className="min-h-screen" style={{ backgroundColor: "rgb(3,3,5)" }}>
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* HERO — ABOVE THE FOLD                                             */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {stage === "hero" && (
+          <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+            <h1 style={{ ...serif, fontSize: "clamp(2rem, 5vw, 3.8rem)", lineHeight: 1.05, letterSpacing: "-0.03em", color: "rgba(255,255,255,0.94)", maxWidth: "18ch" }}>
+              You don&rsquo;t have an execution problem.
             </h1>
-            <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "0.5rem" }}>
-              Most delays are not execution failures. They are structural.
+            <p style={{ ...serif, fontSize: "clamp(1.6rem, 3.5vw, 2.8rem)", lineHeight: 1.1, color: "rgba(255,255,255,0.45)", marginTop: "0.5rem", maxWidth: "22ch" }}>
+              You have a decision structure problem.
+            </p>
+            <p style={{ marginTop: "2.5rem", maxWidth: "36ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.48)" }}>
+              Most decisions don&rsquo;t fail because they&rsquo;re wrong. They fail because no one actually owns them &mdash; or the structure can&rsquo;t carry them.
+            </p>
+            <p style={{ marginTop: "0.5rem", maxWidth: "36ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.48)" }}>
+              This will show you where yours is breaking. Takes 2 minutes.
+            </p>
+            <button
+              type="button"
+              onClick={() => { setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); }}
+              style={{ marginTop: "2.5rem", padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
+            >
+              Find the break
+            </button>
+            <p style={{ marginTop: "1.25rem", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+              No signup. No theory. You will either recognise it &mdash; or you won&rsquo;t.
             </p>
           </div>
+        )}
 
-          {stage === "questions" && (
-            <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
-                Step {currentIndex + 1} of {QUESTIONS.length}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* INTERROGATION SCREENS (Decision / Authority / Consequence)         */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {(stage === "decision" || stage === "authority" || stage === "consequence") && currentStep && (
+          <div className="flex flex-col items-center justify-center min-h-screen px-6">
+            <div style={{ width: "100%", maxWidth: "640px" }}>
+              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "2rem" }}>
+                Step {stepIndex + 1} of {STEPS.length}
               </div>
-              <h2 style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.25rem", lineHeight: 1.5, color: "rgba(255,255,255,0.88)", marginTop: "0.75rem" }}>
-                {currentQuestion.question}
+              <h2 style={{ ...serif, fontSize: "clamp(1.4rem, 3vw, 2rem)", lineHeight: 1.2, color: "rgba(255,255,255,0.92)", maxWidth: "28ch" }}>
+                {currentStep.headline}
               </h2>
-              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.42)", marginTop: "0.35rem" }}>
-                {currentQuestion.helper}
+              <textarea
+                value={currentValue}
+                onChange={(e) => updateAnswer(e.target.value)}
+                rows={4}
+                placeholder={currentStep.placeholder}
+                autoFocus
+                style={{ width: "100%", marginTop: "1.5rem", padding: "16px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.88)", fontSize: "1rem", lineHeight: 1.65, resize: "none", outline: "none" }}
+              />
+              <p style={{ marginTop: "0.6rem", fontSize: "0.85rem", color: "rgba(255,255,255,0.30)" }}>
+                {currentStep.microcopy}
               </p>
-              {currentQuestion.type === "textarea" ? (
-                <textarea
-                  value={currentValue}
-                  onChange={(e) => updateAnswer(e.target.value)}
-                  rows={4}
-                  placeholder={currentQuestion.placeholder}
-                  style={{ width: "100%", marginTop: "1rem", padding: "14px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(0,0,0,0.28)", color: "rgba(255,255,255,0.85)", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.6, resize: "vertical", outline: "none" }}
-                />
-              ) : (
-                <div style={{ display: "grid", gap: "0.75rem", marginTop: "1rem" }}>
-                  {currentQuestion.options.map((option) => {
-                    const selected = currentValue === option;
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => updateAnswer(option)}
-                        style={{
-                          padding: "14px 16px",
-                          textAlign: "left",
-                          border: `1px solid ${selected ? `${GOLD}44` : "rgba(255,255,255,0.08)"}`,
-                          backgroundColor: selected ? `${GOLD}10` : "rgba(255,255,255,0.01)",
-                          color: selected ? "rgba(255,255,255,0.90)" : "rgba(255,255,255,0.62)",
-                          fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-                          fontSize: "0.95rem",
-                          lineHeight: 1.5,
-                          cursor: "pointer",
-                        }}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
+
+              {/* Live hint — reacts while typing */}
+              {liveHint && (
+                <p style={{ marginTop: "0.75rem", fontSize: "0.88rem", color: `${GOLD}BB`, transition: "opacity 300ms" }}>
+                  {liveHint}
+                </p>
+              )}
+
+              {/* Challenge card */}
+              {challenge && (
+                <div style={{ marginTop: "1rem" }}>
+                  <DecisionChallengeCard
+                    challenge={challenge}
+                    onRevise={() => setChallenge(null)}
+                    onAccept={acceptChallenge}
+                  />
                 </div>
               )}
-              {error ? (
+
+              {challengeLoading && (
+                <p style={{ marginTop: "0.75rem", color: "rgba(255,255,255,0.35)", fontSize: "0.85rem" }}>Evaluating decision quality...</p>
+              )}
+
+              {error && (
                 <p style={{ marginTop: "0.75rem", color: "rgba(252,165,165,0.82)", fontSize: "0.88rem" }}>{error}</p>
-              ) : null}
-              <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", marginTop: "1rem" }}>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5rem" }}>
                 <button
                   type="button"
-                  onClick={previousQuestion}
-                  disabled={currentIndex === 0}
-                  style={{ padding: "12px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: currentIndex === 0 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.60)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: currentIndex === 0 ? "default" : "pointer" }}
-                >
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  onClick={nextQuestion}
+                  onClick={advanceStep}
                   disabled={!canAdvance}
-                  style={{ padding: "12px 18px", border: `1px solid ${canAdvance ? `${GOLD}50` : "rgba(255,255,255,0.10)"}`, backgroundColor: canAdvance ? `${GOLD}12` : "transparent", color: canAdvance ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: canAdvance ? "pointer" : "default" }}
+                  style={{ padding: "14px 28px", border: `1px solid ${canAdvance ? `${GOLD}50` : "rgba(255,255,255,0.08)"}`, backgroundColor: canAdvance ? `${GOLD}12` : "transparent", color: canAdvance ? `${GOLD}CC` : "rgba(255,255,255,0.15)", ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", cursor: canAdvance ? "pointer" : "default" }}
                 >
-                  {currentIndex === 0 ? "Continue" : currentIndex === QUESTIONS.length - 1 ? "Continue" : "Next"}
+                  Continue
                 </button>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {stage === "signal" && (
-            <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.5rem" }}>
-              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Initial signal</div>
-              <p style={{ ...serif, fontSize: "1.15rem", lineHeight: 1.5, color: "rgba(255,255,255,0.82)", marginTop: "0.6rem" }}>
-                Decision ownership appears unstable.
-              </p>
-              <p style={{ fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "0.5rem" }}>
-                {initialSignalPreview}
-              </p>
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* COMMITMENT SCREEN                                                  */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {stage === "commitment" && (
+          <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+            <h2 style={{ ...serif, fontSize: "clamp(1.3rem, 3vw, 1.8rem)", lineHeight: 1.3, color: "rgba(255,255,255,0.88)", maxWidth: "26ch" }}>
+              If this identifies the real blocker, will you act on it within 48 hours?
+            </h2>
+            <div style={{ display: "flex", gap: "1rem", marginTop: "2rem", flexWrap: "wrap", justifyContent: "center" }}>
               <button
                 type="button"
-                onClick={() => { setCurrentIndex(1); setStage("questions"); }}
-                style={{ marginTop: "1rem", padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
+                onClick={() => { setCommitted(true); void submitFastDiagnostic(true); }}
+                style={{ padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", cursor: "pointer" }}
               >
-                Continue analysis
+                Yes &mdash; if it&rsquo;s clear
               </button>
-            </div>
-          )}
-
-          {stage === "commitment" && (
-            <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem", textAlign: "center" }}>
-              <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.78)" }}>
-                If the analysis identifies the root constraint clearly, are you prepared to act on it within 48 hours?
-              </p>
-              <div style={{ display: "flex", justifyContent: "center", gap: "0.75rem", marginTop: "1rem", flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  onClick={() => { setCommitted(true); void submitFastDiagnostic(true); }}
-                  style={{ padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
-                >
-                  Yes — Continue
-                </button>
-                <Link
-                  href="/"
-                  style={{ padding: "12px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.60)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-                >
-                  No — Exit
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {stage === "loading" && (
-            <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem", textAlign: "center", color: "rgba(255,255,255,0.70)" }}>
-              Preparing governed analysis...
-            </div>
-          )}
-
-          {stage === "recovery" && result && (
-            <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
-                More detail required
-              </div>
-              <p style={{ marginTop: "0.6rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.74)" }}>
-                {result.recoveryQuestion}
-              </p>
               <button
                 type="button"
-                onClick={resetDiagnostic}
-                style={{ marginTop: "1rem", padding: "12px 18px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
+                onClick={() => { setCommitted(false); void submitFastDiagnostic(false); }}
+                style={{ padding: "14px 28px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", cursor: "pointer" }}
               >
-                Restart with more detail
+                No &mdash; I&rsquo;m not ready to act
               </button>
             </div>
-          )}
+            <p style={{ marginTop: "1.5rem", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+              This only works if the decision is real.
+            </p>
+          </div>
+        )}
 
-          {stage === "result" && result && (
-            <div style={{ display: "grid", gap: "1rem" }}>
-              <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1.25rem" }}>
-                <div style={{ marginTop: "0.45rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.25rem", lineHeight: 1.4, color: "rgba(255,255,255,0.92)" }}>
-                  This is not an execution problem.
-                </div>
-                <div style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.25rem", lineHeight: 1.4, color: "rgba(255,255,255,0.92)", marginTop: "0.15rem" }}>
-                  It is a decision structure failure.
-                </div>
-                <div style={{ marginTop: "0.6rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.9rem", lineHeight: 1.6, color: `${GOLD}CC` }}>
-                  Current condition: {result.condition === "authority"
-                    ? "Decision authority is fragmented."
-                    : result.condition === "definition"
-                      ? "The decision itself is not clearly defined."
-                      : result.condition === "execution"
-                        ? "The next move is known, but ownership is not carrying it."
-                        : "The decision is unstable under pressure."}
+        {/* Loading */}
+        {stage === "loading" && (
+          <div className="flex items-center justify-center min-h-screen px-6">
+            <p style={{ color: "rgba(255,255,255,0.50)", fontSize: "0.95rem" }}>Preparing governed analysis...</p>
+          </div>
+        )}
+
+        {/* Recovery */}
+        {stage === "recovery" && result && (
+          <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>More detail required</div>
+            <p style={{ marginTop: "1rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.74)", maxWidth: "40ch" }}>{result.recoveryQuestion}</p>
+            <button type="button" onClick={resetDiagnostic} style={{ marginTop: "1.5rem", padding: "14px 24px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", cursor: "pointer" }}>
+              Restart with more detail
+            </button>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* RESULT SCREEN — £10K FEEL                                          */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {stage === "result" && result && (
+          <div className="px-6 py-20">
+            <div className="mx-auto max-w-2xl" style={{ display: "grid", gap: "1.5rem" }}>
+
+              {/* OPENING */}
+              <div style={{ paddingBottom: "1.5rem", borderBottom: `1px solid ${GOLD}18` }}>
+                <p style={{ ...serif, fontSize: "clamp(1.3rem, 3vw, 1.8rem)", lineHeight: 1.25, color: "rgba(255,255,255,0.94)" }}>
+                  {an ? an.opening : "You are not stuck because this is complex. You are stuck because the decision structure is broken."}
+                </p>
+              </div>
+
+              {/* CONDITION */}
+              <ResultBlock label="Condition">
+                {an ? an.condition : "The decision exists, but it does not have clean authority. It cannot move in its current form."}
+              </ResultBlock>
+
+              {/* PERSONAL MIRROR LINE */}
+              <div style={{ padding: "1.25rem 0", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.5, color: "rgba(255,255,255,0.65)", fontStyle: "italic" }}>
+                  You already know this. You&rsquo;ve been circling it.
+                </p>
+              </div>
+
+              {/* WHY IT EXISTS */}
+              <ResultBlock label="Why it exists">
+                {an ? an.whyItExists : result.synthesis?.whyPriorAttemptsFailed ?? "The stated decision conflicts with the current ownership structure. As long as authority remains distributed, progress will continue to stall."}
+              </ResultBlock>
+
+              {/* PATTERN */}
+              <ResultBlock label="Pattern">
+                {an ? an.pattern : "This pattern appears when decisions are discussed, but not actually assigned. Agreement replaces ownership. Movement stops."}
+              </ResultBlock>
+
+              {/* COST OF INACTION */}
+              <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Cost of inaction</div>
+                <div style={{ marginTop: "0.75rem", display: "grid", gap: "0.65rem" }}>
+                  <CostLine label="30 days" text={an?.costOfInaction.thirtyDays ?? result.costOfInaction?.horizon30 ?? "Delay becomes normalised. Workarounds emerge."} />
+                  <CostLine label="60 days" text={an?.costOfInaction.sixtyDays ?? result.costOfInaction?.horizon60 ?? "Resources are spent without forward movement."} />
+                  <CostLine label="90 days" text={an?.costOfInaction.ninetyDays ?? result.costOfInaction?.horizon90 ?? "The cost of reversing direction exceeds the cost of deciding now."} />
                 </div>
               </div>
 
-              {result.synthesis ? (
-                <>
-                  <Section title="Core diagnosis" body={result.synthesis.primaryContradiction || result.synthesis.verdict} />
-                  <Section title="Why it exists" body={result.synthesis.whyPriorAttemptsFailed} />
-                </>
-              ) : null}
+              {/* BOARD / EXTERNAL VIEW */}
+              <ResultBlock label="External view">
+                {an?.perspective ?? "From the outside, this does not appear as complexity. It appears as hesitation. That is how it will be interpreted."}
+              </ResultBlock>
 
-              {result.patternEvidence ? (
-                <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem 1.25rem" }}>
-                  <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
-                    Pattern recognition
-                  </div>
-                  <p style={{ marginTop: "0.45rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
-                    {result.patternEvidence.recognitionLine}
-                  </p>
-                  <div style={{ marginTop: "0.8rem", ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
-                    From observed similar cases
-                  </div>
-                  <div style={{ marginTop: "0.45rem", display: "grid", gap: "0.45rem" }}>
-                    {result.patternEvidence.observations.map((line) => (
-                      <p key={line} style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.58)" }}>
-                        • {line}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              {result.costOfInaction ? (
-                <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem 1.25rem" }}>
-                  <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
-                    Cost of inaction
-                  </div>
-                  <div style={{ marginTop: "0.45rem", display: "grid", gap: "0.55rem" }}>
-                    <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.68, color: "rgba(255,255,255,0.72)" }}>
-                      30 days: {result.costOfInaction.horizon30}
-                    </p>
-                    <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.68, color: "rgba(255,255,255,0.72)" }}>
-                      60 days: {result.costOfInaction.horizon60}
-                    </p>
-                    <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.68, color: "rgba(255,255,255,0.72)" }}>
-                      90 days: {result.costOfInaction.horizon90}
-                    </p>
-                  </div>
-                </div>
-              ) : null}
-
-              <Section title="Board-level view" body={boardView} />
-              <Section title="Required move" body={requiredMove} />
-              <Section title="Recommended next step" body={recommendedNextStep} />
+              {/* REQUIRED MOVE */}
+              <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}06`, padding: "1.25rem 1.5rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>Required move</div>
+                <p style={{ marginTop: "0.6rem", ...serif, fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(255,255,255,0.85)" }}>
+                  {an?.requiredMove ?? "Assign one accountable owner. Remove competing authority. Force a decision window. Anything less will preserve the current outcome."}
+                </p>
+              </div>
 
               {/* Executive Decision Authority Block */}
               <ExecutiveDecisionAuthorityBlock authorityIndex={result.authorityIndex} costOfInaction={result.costOfInaction} executionFailure={result.executionFailure} />
 
-              <Section
-                title="Escalation status"
-                body={result.forecast?.controlShiftSummary ?? "Governed analysis complete."}
-              />
+              {result.arbiterMessage && <ResultBlock label="System integrity note">{result.arbiterMessage}</ResultBlock>}
 
-              <div style={{ border: `1px solid ${RED}0.15)`, backgroundColor: `${RED}0.03)`, padding: "1rem 1.25rem" }}>
-                <div style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${RED}0.45)` }}>Impact</div>
-                <p style={{ marginTop: "0.4rem", ...serif, fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>
-                  If this is not corrected, the cost will not remain operational. It will become structural.
+              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", padding: "0.5rem 0" }}>
+                Governed analysis · {result.signalStrength} reading strength
+              </div>
+
+              {/* ── ESCALATION: Fast → Purpose ─── */}
+              <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.25rem 1.5rem" }}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Next unknown</div>
+                <p style={{ marginTop: "0.5rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.82)" }}>
+                  This appears to be a decision structure issue. What is not yet clear is whether this is personal or systemic.
                 </p>
-              </div>
-
-              {result.arbiterMessage ? (
-                <Section title="System integrity note" body={result.arbiterMessage} />
-              ) : null}
-
-              <div className="flex items-center gap-2 border border-white/[0.06] bg-white/[0.02] px-3 py-2">
-                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Governed analysis · {result.signalStrength} reading strength</span>
-              </div>
-
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                <Link href="/diagnostics/executive-reporting" style={{ padding: "12px 18px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                  Run full executive analysis <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
+                <Link href="/purpose-alignment" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "0.85rem", padding: "12px 22px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                  Continue to Purpose Alignment <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
-                <button type="button" onClick={resetDiagnostic} style={{ padding: "12px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
-                  Start again
-                </button>
+              </div>
+
+              {/* CTA */}
+              <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginBottom: "1rem" }}>
+                  {an?.cta ?? "This is now structural, not situational."}
+                </p>
+                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                  <Link href="/diagnostics/executive-reporting" style={{ padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                    Move this into a controlled decision environment <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
+                  </Link>
+                  <button type="button" onClick={resetDiagnostic} style={{ padding: "12px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
+                    Start again
+                  </button>
+                </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </main>
     </Layout>
   );
 };
 
-function Section({ title, body }: { title: string; body: string }) {
+function ResultBlock({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem 1.25rem" }}>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
-        {title}
+    <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+        {label}
       </div>
-      <p style={{ marginTop: "0.45rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
-        {body}
+      <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>
+        {children}
       </p>
+    </div>
+  );
+}
+
+function CostLine({ label, text }: { label: string; text: string }) {
+  return (
+    <div>
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginRight: "0.75rem" }}>{label}:</span>
+      <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.68)" }}>{text}</span>
     </div>
   );
 }

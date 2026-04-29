@@ -12,6 +12,9 @@ import {
 import { getOrCreatePurposeAlignmentSessionKey } from "@/lib/alignment/session";
 import { buildPurposeAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
+import { extractPurposeAnchors } from "@/lib/server/decision/anchor-extractor.server";
+import { detectAnchorContradictions } from "@/lib/server/decision/contradiction-engine.server";
+import { composeAnchorNarrative } from "@/lib/server/decision/narrative-engine.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -120,11 +123,34 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // ── ANCHOR-BOUND NARRATIVE ──────────────────────────────────────────
+    let anchorNarrative = null;
+    try {
+      const anchors = extractPurposeAnchors({
+        result,
+        context: context ?? undefined,
+      });
+      const contradictions = detectAnchorContradictions(anchors);
+      anchorNarrative = composeAnchorNarrative(
+        anchors,
+        contradictions,
+        {
+          patternLabel: result.primaryPattern?.label ?? result.coherenceBand,
+          firstAction: result.firstAction ?? result.corrections[0] ?? "Name the avoided decision.",
+          consequence: result.primaryPattern?.consequence ?? "The pattern will continue.",
+          perspectiveType: "personal",
+        },
+      );
+    } catch {
+      // Non-fatal: anchor enrichment failed
+    }
+
     return NextResponse.json({
       ok: true,
       assessmentId,
       result,
       authorityPacket,
+      anchorNarrative,
       isPreview: true,
       nextSteps: {
         exploreStrategyRoom: "/strategy-room",

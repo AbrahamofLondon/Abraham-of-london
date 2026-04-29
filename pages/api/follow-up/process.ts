@@ -1,14 +1,15 @@
 /**
  * POST /api/follow-up/process
  *
- * Cron-callable endpoint that processes due pressure loop messages.
- * Reads all active loops from DB, checks for due messages, and sends via Resend.
+ * DEPRECATED: Independent pressure loop processing is now handled by the
+ * Decision State Orchestrator at /api/cron/decision-state.
  *
- * This is the retention engine. It makes decisions feel tracked.
+ * This endpoint is retained for backward compatibility but delegates to
+ * the orchestrator to prevent duplicate messaging. Direct cron scheduling
+ * of this endpoint should be replaced with /api/cron/decision-state.
  *
- * Netlify Scheduled Function or external cron hits:
- * POST /api/follow-up/process
- * Authorization: Bearer <CRON_SECRET>
+ * Previous behavior: reads active loops, sends due messages independently.
+ * Current behavior: calls orchestrator which enforces cooldown + state routing.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
