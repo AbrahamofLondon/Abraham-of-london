@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
+import { applyShieldFromRequest } from "@/lib/server/security/shield-middleware";
 
 export const runtime = "nodejs";
 
@@ -88,6 +89,10 @@ function cookieBase() {
 }
 
 export async function POST(request: Request) {
+  // Anti-reconnaissance shield
+  const shield = await applyShieldFromRequest(request, "/api/auth/sovereign");
+  if (shield.blocked) return new Response(JSON.stringify({ error: "REQUEST_THROTTLED" }), { status: 429, headers: { "Content-Type": "application/json" } });
+
   // Rate limit: strict — 10 requests per 60s per IP
   const clientIp = String(
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||

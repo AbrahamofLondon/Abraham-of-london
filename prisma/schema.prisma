@@ -3281,3 +3281,37 @@ model BlockedIdentity {
   @@map("blocked_identities")
 }
 
+model CanaryTripwire {
+  id            String   @id @default(cuid())
+  identityKey   String
+  ipAddress     String?
+  tripwireType  String
+  tripwireId    String
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  @@index([identityKey])
+  @@index([tripwireType])
+  @@index([createdAt])
+  @@map("canary_tripwires")
+}
+
+model EvidenceVaultEntry {
+  id            String   @id @default(cuid())
+  identityKey   String
+  eventType     String
+  severity      Int      @default(0)
+  snapshot      Json
+  ipAddress     String?
+  userAgent     String?
+  route         String?
+  immutable     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([identityKey])
+  @@index([eventType])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("evidence_vault")
+}
+

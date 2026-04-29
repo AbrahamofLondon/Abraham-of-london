@@ -23,7 +23,8 @@ import { computeCostOfInaction } from "@/lib/server/decision/cost-of-inaction.se
 import { assessExecutionFailure } from "@/lib/server/decision/execution-failure.server";
 import { computeAuthorityIndex } from "@/lib/server/decision/authority-index.server";
 import { createDecisionMemory, listDecisionMemoryByUser, summariseDecisionMemoryTrend } from "@/lib/server/decision-memory/memory-service.server";
-import { evaluateRequest, degradeResult, quickHash } from "@/lib/server/security/ip-abuse-watchdog.server";
+import { quickHash } from "@/lib/server/security/ip-abuse-watchdog.server";
+import { runShield, degradeResult } from "@/lib/server/security/adaptive-response.server";
 
 const requestSchema = z.object({
   answers: z.record(z.string()),
@@ -55,36 +56,32 @@ export default async function handler(
     return res.status(400).json({ ok: false, error: "Decision text too short" });
   }
 
-  // ── IP ABUSE WATCHDOG ──────────────────────────────────────────────────
-  let abuseVerdict;
+  // ── ANTI-RECONNAISSANCE SHIELD ──────────────────────────────────────────
+  let shieldVerdict;
   try {
-    abuseVerdict = await evaluateRequest({
+    shieldVerdict = await runShield({
       ipAddress: getIp(req),
       sessionId: req.headers["x-session-id"] as string | undefined,
       route: "/api/diagnostics/score",
+      method: "POST",
+      referer: req.headers.referer ?? undefined,
+      userAgent: req.headers["user-agent"] ?? undefined,
+      body: req.body as Record<string, unknown>,
+      query: (req.query ?? {}) as Record<string, unknown>,
       inputHash: quickHash(answers.decision ?? ""),
       answerSetHash: quickHash(Object.values(answers).join("|")),
-      submissionTimeMs: typeof req.body._elapsed === "number" ? req.body._elapsed : undefined,
-      userAgent: req.headers["user-agent"] ?? undefined,
+      elapsedMs: typeof req.body._elapsed === "number" ? req.body._elapsed : undefined,
     });
   } catch {
-    // Watchdog failure — allow request (rate limiting is a separate layer)
-    abuseVerdict = { level: 0 as const, action: "allow" as const, internalReason: "Watchdog unavailable" };
+    shieldVerdict = { allowed: true, action: "allow" as const, delayMs: 0, degradeResponse: false, internalSummary: "Shield unavailable" };
   }
 
-  // Block
-  if (abuseVerdict.action === "block_temp" || abuseVerdict.action === "block_perm") {
-    return res.status(429).json({ ok: false, error: abuseVerdict.publicMessage ?? "Please try again later." });
+  if (!shieldVerdict.allowed) {
+    return res.status(429).json({ ok: false, error: shieldVerdict.publicMessage ?? "Please try again later." });
   }
 
-  // Verify (require friction — for now, just add delay)
-  if (abuseVerdict.action === "verify") {
-    await new Promise((r) => setTimeout(r, 3000));
-  }
-
-  // Slow (silent delay)
-  if (abuseVerdict.action === "slow") {
-    await new Promise((r) => setTimeout(r, 1500));
+  if (shieldVerdict.delayMs > 0) {
+    await new Promise((r) => setTimeout(r, shieldVerdict.delayMs));
   }
 
   try {
@@ -241,8 +238,8 @@ export default async function handler(
       // Non-fatal: elevation enrichment failed, core result is still valid
     }
 
-    // Apply degradation if watchdog flagged this request
-    const finalResult = abuseVerdict.action === "degrade"
+    // Apply degradation if shield flagged this request
+    const finalResult = shieldVerdict.degradeResponse
       ? degradeResult(result) as FastDiagnosticResult
       : result;
 

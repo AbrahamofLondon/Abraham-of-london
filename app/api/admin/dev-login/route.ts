@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto, { timingSafeEqual } from "crypto";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
+import { applyShieldFromRequest } from "@/lib/server/security/shield-middleware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +18,10 @@ export async function POST(req: NextRequest) {
   if (process.env.NODE_ENV !== "development") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  // Anti-reconnaissance shield
+  const shield = await applyShieldFromRequest(req, "/api/admin/dev-login");
+  if (shield.blocked) return NextResponse.json({ error: "REQUEST_THROTTLED" }, { status: 429 });
 
   // Rate limit: strict — 5 requests per 60s per IP
   const clientIp = String(

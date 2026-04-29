@@ -5,6 +5,7 @@ import {
 } from '@/lib/innerCircleMembership';
 import { getClientIp } from '@/lib/inner-circle/server-utils';
 import { consumePersistentRateLimit } from '@/lib/server/security/persistent-rate-limit';
+import { applyShieldFromRequest } from '@/lib/server/security/shield-middleware';
 
 /**
  * INSTITUTIONAL ONBOARDING GATEWAY
@@ -12,6 +13,10 @@ import { consumePersistentRateLimit } from '@/lib/server/security/persistent-rat
  * Securely issues new access keys to verified email identities.
  */
 export async function POST(req: NextRequest) {
+  // Anti-reconnaissance shield
+  const shield = await applyShieldFromRequest(req, "/api/inner-circle/issue");
+  if (shield.blocked) return NextResponse.json({ error: "REQUEST_THROTTLED" }, { status: 429 });
+
   // Rate limit: medium — 20 requests per 60s per IP
   const ip = getClientIp(req);
   const rl = await consumePersistentRateLimit({

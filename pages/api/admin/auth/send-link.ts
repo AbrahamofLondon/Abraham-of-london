@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email/core/sendEmail";
 import { EmailLinks } from "@/lib/email/links";
 import { prisma } from "@/lib/prisma.server";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
+import { applyShield } from "@/lib/server/security/shield-middleware";
 import crypto from "crypto";
 
 /**
@@ -20,6 +21,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
   }
+
+  // Anti-reconnaissance shield
+  const shield = await applyShield(req, "/api/admin/auth/send-link");
+  if (shield.blocked) return res.status(429).json({ ok: false, error: "REQUEST_THROTTLED" });
+  if (shield.delayMs > 0) await new Promise((r) => setTimeout(r, shield.delayMs));
 
   // Rate limit: strict — 5 requests per 60s per IP
   const clientIp = String(

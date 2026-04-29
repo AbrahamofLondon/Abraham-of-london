@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyInnerCircleKey } from "@/lib/inner-circle/exports.server";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
+import { applyShieldFromRequest } from "@/lib/server/security/shield-middleware";
 
 function getIp(req: NextRequest) {
   const xf = req.headers.get("x-forwarded-for");
@@ -27,6 +28,10 @@ async function rateLimit(req: NextRequest, limit = 30, windowMs = 60_000) {
 }
 
 export async function POST(req: NextRequest) {
+  // Anti-reconnaissance shield
+  const shield = await applyShieldFromRequest(req, "/api/inner-circle/verify");
+  if (shield.blocked) return NextResponse.json({ error: "REQUEST_THROTTLED" }, { status: 429 });
+
   const rl = await rateLimit(req);
   if (!rl.allowed) {
     return NextResponse.json(
