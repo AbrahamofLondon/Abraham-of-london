@@ -1134,14 +1134,12 @@ export default function EnterpriseAssessmentPage() {
 
                   <div className="grid gap-4 mt-8 sm:grid-cols-2">
                     {[
-                      { label: "Respondent name", key: "name",         type: "text",  placeholder: "Full name" },
-                      { label: "Email",           key: "email",        type: "email", placeholder: "email@org.com" },
                       { label: "Role",            key: "role",         type: "text",  placeholder: "Board chair, CEO, Director…" },
                       { label: "Organisation",    key: "organisation", type: "text",  placeholder: "Company or institution" },
                     ].map(f => (
                       <div key={f.key}>
                         <label style={labelStyle}>{f.label}</label>
-                        <input type={f.type} value={identity[f.key as keyof typeof identity]} onChange={e => setIdentity(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} style={inputStyle}
+                        <input type={f.type} value={identity[f.key as keyof typeof identity]} onChange={e => setIdentity(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} style={{ ...inputStyle, minHeight: "44px", fontSize: "16px" }}
                           onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }}
                           onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
                         />
@@ -1149,7 +1147,7 @@ export default function EnterpriseAssessmentPage() {
                     ))}
                     <div className="sm:col-span-2">
                       <label style={labelStyle}>Most important decision in the last 90 days</label>
-                      <textarea value={identity.recentDecision} onChange={e => setIdentity(prev => ({ ...prev, recentDecision: e.target.value }))} rows={4} placeholder="Describe the most important decision made in the last 90 days. Include what was decided, who carried authority, what constraint shaped the decision, and what happened next." style={{ ...inputStyle, resize: "none", lineHeight: 1.75 }}
+                      <textarea value={identity.recentDecision} onChange={e => setIdentity(prev => ({ ...prev, recentDecision: e.target.value }))} rows={4} placeholder="Describe the most important decision made in the last 90 days. Include what was decided, who carried authority, what constraint shaped the decision, and what happened next." style={{ ...inputStyle, resize: "none", lineHeight: 1.75, minHeight: "44px", fontSize: "16px" }}
                         onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }}
                         onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
                       />
@@ -1157,13 +1155,32 @@ export default function EnterpriseAssessmentPage() {
                         {identity.recentDecision.trim().length}/40 minimum characters
                       </p>
                     </div>
-                  <div className="sm:col-span-2">
-                      <label style={labelStyle}>Initial observations (optional)</label>
-                      <textarea value={identity.notes} onChange={e => setIdentity(prev => ({ ...prev, notes: e.target.value }))} rows={3} placeholder="Where is institutional signal, governance reliability, or trust becoming unstable?" style={{ ...inputStyle, resize: "none", lineHeight: 1.75 }}
-                        onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }}
-                        onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
-                      />
-                    </div>
+                    <details className="sm:col-span-2" style={{ marginTop: "0.5rem" }}>
+                      <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                        Optional context
+                      </summary>
+                      <div className="grid gap-4 mt-4 sm:grid-cols-2">
+                        {[
+                          { label: "Respondent name", key: "name", type: "text", placeholder: "Full name" },
+                          { label: "Email", key: "email", type: "email", placeholder: "email@org.com" },
+                        ].map(f => (
+                          <div key={f.key}>
+                            <label style={labelStyle}>{f.label}</label>
+                            <input type={f.type} value={identity[f.key as keyof typeof identity]} onChange={e => setIdentity(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} style={{ ...inputStyle, minHeight: "44px", fontSize: "16px" }}
+                              onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }}
+                              onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
+                            />
+                          </div>
+                        ))}
+                        <div className="sm:col-span-2">
+                          <label style={labelStyle}>Initial observations (optional)</label>
+                          <textarea value={identity.notes} onChange={e => setIdentity(prev => ({ ...prev, notes: e.target.value }))} rows={3} placeholder="Where is institutional signal, governance reliability, or trust becoming unstable?" style={{ ...inputStyle, resize: "none", lineHeight: 1.75, minHeight: "44px", fontSize: "16px" }}
+                            onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }}
+                            onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
+                          />
+                        </div>
+                      </div>
+                    </details>
                   </div>
 
                   {showResume ? (

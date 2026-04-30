@@ -1273,11 +1273,11 @@ export default function TeamAssessmentPage() {
                     {realityDomains.map(d => <QuestionBlock key={d.id} domain={d} phase="reality" scores={realityScores} onScore={setRS} />)}
                   </div>
 
-                  {/* Adaptive free-text questions from spine */}
-                  {showAdaptive && adaptiveQuestions.length > 0 && (
+                  {/* Adaptive free-text questions — auto-surfaced when detected */}
+                  {adaptiveQuestions.length > 0 && (
                     <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: "rgb(10,14,20)", padding: "1.5rem", marginTop: "1.5rem" }}>
                       <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
-                        Structural evidence — from your specific decision
+                        We&rsquo;ve detected structural gaps. Add evidence (optional)
                       </span>
                       <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
                         These questions ground the team reading in your specific case.
@@ -1328,13 +1328,12 @@ export default function TeamAssessmentPage() {
                           return;
                         }
                         if (!realityComplete()) return;
-                        if (adaptiveQuestions.length > 0 && !showAdaptive) { setShowAdaptive(true); return; }
                         void advance("result");
-                      }} disabled={!realityGroupComplete(realityPage)} style={{ padding: "11px 24px", border: `1px solid ${realityGroupComplete(realityPage) ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: realityGroupComplete(realityPage) ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: realityGroupComplete(realityPage) ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: realityGroupComplete(realityPage) ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
+                      }} disabled={!realityGroupComplete(realityPage)} style={{ padding: "11px 24px", border: `1px solid ${realityGroupComplete(realityPage) ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: realityGroupComplete(realityPage) ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: realityGroupComplete(realityPage) ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: realityGroupComplete(realityPage) ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem", minHeight: "44px" }}
                         onMouseEnter={e => { if (realityGroupComplete(realityPage)) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
                         onMouseLeave={e => { if (realityGroupComplete(realityPage)) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                       >
-                        {realityPage === 0 ? "Continue to remaining domains" : showAdaptive ? "Generate gap analysis" : adaptiveQuestions.length > 0 ? "Add structural evidence" : "Generate gap analysis"} <ArrowRight style={{ width: "11px", height: "11px" }} />
+                        {realityPage === 0 ? "Continue to remaining domains" : "Generate gap analysis"} <ArrowRight style={{ width: "11px", height: "11px" }} />
                       </button>
                     </div>
                   </div>

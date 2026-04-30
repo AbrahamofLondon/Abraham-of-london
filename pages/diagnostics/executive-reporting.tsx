@@ -336,6 +336,11 @@ export default function ExecutiveReportingEntryPage() {
             </p>
           </details>
 
+          {/* ═══ EMAIL CAPTURE — ABOVE PAYWALL ═══ */}
+          <section style={{ marginBottom: "64px" }}>
+            <ResultEmailCapture source="executive_reporting_gate" />
+          </section>
+
           {/* ═══ 8. PAYWALL ═══ */}
           <section style={{ paddingBottom: "32px" }}>
             <p style={{ ...serif, fontSize: "20px", lineHeight: 1.6, color: "rgba(255,255,255,0.65)" }}>
@@ -414,11 +419,6 @@ export default function ExecutiveReportingEntryPage() {
                 </Link>
               </>
             )}
-          </section>
-
-          {/* ═══ 10. EMAIL CAPTURE ═══ */}
-          <section style={{ paddingBottom: "48px" }}>
-            <ResultEmailCapture source="executive_reporting_gate" />
           </section>
 
           {/* ═══ SOCIAL PROOF ═══ */}
