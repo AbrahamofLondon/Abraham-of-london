@@ -20,8 +20,15 @@ import {
   type DecisionStateResult,
 } from "./decision-state-engine.server";
 import { generateReturnBrief } from "@/lib/server/strategy-room/return-brief.server";
+import { isUnsubscribed } from "@/lib/server/privacy/identity-service.server";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
+
+export type OrchestrationDiagnostic = {
+  stage: string;
+  source: "strategy_room_sessions" | "pressure_loop_journeys" | "orchestrator";
+  message: string;
+};
 
 export type OrchestrationResult = {
   scanned: number;
@@ -29,7 +36,22 @@ export type OrchestrationResult = {
   skippedCooldown: number;
   skippedIdle: number;
   errors: number;
+  /** Diagnostic details — included in dry-run responses only */
+  diagnostics?: OrchestrationDiagnostic[];
 };
+
+// ─── Safe error extraction ───────────────────────────────────────────────────
+
+function safeErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    // In production, only return the message. In dev, include more context.
+    if (process.env.NODE_ENV === "production") {
+      return error.message.slice(0, 200);
+    }
+    return `${error.message}${error.cause ? ` (cause: ${String(error.cause)})` : ""}`.slice(0, 500);
+  }
+  return String(error).slice(0, 200);
+}
 
 // ─── Cooldown enforcement ────────────────────────────────────────────────────
 
@@ -143,6 +165,7 @@ ${briefUrl
     ? `<a href="${briefUrl}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:#F5F5F5;color:#0B0B0B;font-family:monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">View briefing</a>`
     : `<p style="font-size:14px;color:rgba(255,255,255,0.40);margin-top:16px;">Return to your session to take action.</p>`}
 <p style="margin-top:32px;font-family:monospace;font-size:9px;letter-spacing:0.06em;color:rgba(255,255,255,0.20);">Abraham of London · Decision Integrity System</p>
+<p style="margin-top:8px;font-family:monospace;font-size:8px;color:rgba(255,255,255,0.12);"><a href="${process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.abrahamoflondon.org"}/api/user/unsubscribe" style="color:rgba(255,255,255,0.15);text-decoration:underline;">Unsubscribe</a></p>
 </div></body></html>`;
 
   return { subject, html, text };
@@ -155,15 +178,29 @@ async function scanExecutionSessions(
   dryRun: boolean,
   limit: number,
 ): Promise<void> {
-  const sessions = await prisma.strategyRoomExecutionSession.findMany({
-    where: { status: { in: ["active", "monitoring"] } },
-    include: { decisions: true },
-    take: limit,
-  });
+  let sessions;
+  try {
+    sessions = await prisma.strategyRoomExecutionSession.findMany({
+      where: { status: { in: ["active", "monitoring"] } },
+      include: { decisions: true },
+      take: limit,
+    });
+  } catch (queryError) {
+    result.errors++;
+    result.diagnostics?.push({
+      stage: "query",
+      source: "strategy_room_sessions",
+      message: safeErrorMessage(queryError),
+    });
+    return;
+  }
 
   for (const session of sessions) {
     try {
       if (!session.email) continue;
+
+      // Privacy check: respect unsubscribe
+      if (await isUnsubscribed(session.email)) { result.skippedIdle++; continue; }
 
       let canonical: Record<string, unknown> = {};
       try { canonical = session.canonicalSnapshot ? JSON.parse(session.canonicalSnapshot) : {}; } catch { /* ignore */ }
@@ -231,9 +268,19 @@ async function scanExecutionSessions(
         await recordContact(stateInput, stateResult);
       } else {
         result.errors++;
+        result.diagnostics?.push({
+          stage: "send_email",
+          source: "strategy_room_sessions",
+          message: `Email send failed for session ${session.id}`,
+        });
       }
-    } catch {
+    } catch (sessionError) {
       result.errors++;
+      result.diagnostics?.push({
+        stage: "process_session",
+        source: "strategy_room_sessions",
+        message: safeErrorMessage(sessionError),
+      });
     }
   }
 }
@@ -245,14 +292,28 @@ async function scanPressureLoopJourneys(
   dryRun: boolean,
   limit: number,
 ): Promise<void> {
-  const journeys = await prisma.diagnosticJourney.findMany({
-    where: { diagnosticType: "pressure_loop", status: "active" },
-    take: limit,
-  });
+  let journeys;
+  try {
+    journeys = await prisma.diagnosticJourney.findMany({
+      where: { diagnosticType: "pressure_loop", status: "active" },
+      take: limit,
+    });
+  } catch (queryError) {
+    result.errors++;
+    result.diagnostics?.push({
+      stage: "query",
+      source: "pressure_loop_journeys",
+      message: safeErrorMessage(queryError),
+    });
+    return;
+  }
 
   for (const journey of journeys) {
     try {
       if (!journey.email) continue;
+
+      // Privacy check: respect unsubscribe
+      if (await isUnsubscribed(journey.email)) { result.skippedIdle++; continue; }
 
       let loop: Record<string, unknown> = {};
       try {
@@ -327,6 +388,7 @@ async function scanPressureLoopJourneys(
 <p style="font-size:15px;line-height:1.7;color:#C9A96E;margin-top:16px;"><strong>This decision is still open.</strong></p>
 <a href="${baseUrl}/diagnostics/fast" style="display:inline-block;margin-top:24px;padding:14px 28px;background:#F5F5F5;color:#0B0B0B;font-family:monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">Return to diagnostic</a>
 <p style="margin-top:32px;font-family:monospace;font-size:9px;letter-spacing:0.06em;color:rgba(255,255,255,0.20);">Abraham of London · Decision Integrity System</p>
+<p style="margin-top:8px;font-family:monospace;font-size:8px;color:rgba(255,255,255,0.12);"><a href="${process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.abrahamoflondon.org"}/api/user/unsubscribe" style="color:rgba(255,255,255,0.15);text-decoration:underline;">Unsubscribe</a></p>
 </div></body></html>`,
         text: `${dueMessage.body ?? stateResult.reason}\n\nThis decision is still open.\n\nReturn: ${baseUrl}/diagnostics/fast`,
         meta: { userId: journey.email, journeyId: journey.id, source: "decision_state_orchestrator" },
@@ -354,9 +416,19 @@ async function scanPressureLoopJourneys(
         await recordContact(stateInput, stateResult);
       } else {
         result.errors++;
+        result.diagnostics?.push({
+          stage: "send_email",
+          source: "pressure_loop_journeys",
+          message: `Email send failed for journey ${journey.id}`,
+        });
       }
-    } catch {
+    } catch (journeyError) {
       result.errors++;
+      result.diagnostics?.push({
+        stage: "process_journey",
+        source: "pressure_loop_journeys",
+        message: safeErrorMessage(journeyError),
+      });
     }
   }
 }
@@ -370,12 +442,14 @@ export async function runDecisionStateOrchestrator(options?: {
   const dryRun = options?.dryRun ?? false;
   const limit = options?.limit ?? 100;
 
+  const diagnostics: OrchestrationDiagnostic[] = [];
   const result: OrchestrationResult = {
     scanned: 0,
     triggered: 0,
     skippedCooldown: 0,
     skippedIdle: 0,
     errors: 0,
+    diagnostics,
   };
 
   try {
@@ -390,6 +464,16 @@ export async function runDecisionStateOrchestrator(options?: {
   } catch (error) {
     console.error("[decision-state-orchestrator]", error);
     result.errors++;
+    diagnostics.push({
+      stage: "orchestrator_main",
+      source: "orchestrator",
+      message: safeErrorMessage(error),
+    });
+  }
+
+  // Only include diagnostics in dry-run responses
+  if (!dryRun) {
+    delete result.diagnostics;
   }
 
   return result;

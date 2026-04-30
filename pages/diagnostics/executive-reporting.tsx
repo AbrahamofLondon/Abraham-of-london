@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -9,13 +9,55 @@ import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/ca
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 import { trackExecGateView } from "@/lib/analytics/journey-client";
 
+type UserEvidence = {
+  decision: string | null;
+  blocker: string | null;
+  consequence: string | null;
+  condition: string | null;
+  owner: string | null;
+};
+
+function loadUserEvidence(): UserEvidence {
+  const empty: UserEvidence = { decision: null, blocker: null, consequence: null, condition: null, owner: null };
+  try {
+    // Try fast diagnostic result first
+    const fast = sessionStorage.getItem("aol_fast_result");
+    if (fast) {
+      const parsed = JSON.parse(fast);
+      const answers = JSON.parse(localStorage.getItem("aol_fast_draft") ?? "{}").answers ?? {};
+      return {
+        decision: answers.decision || parsed?.synthesis?.avoidedDecision || null,
+        blocker: answers.claimedOwner === "Unclear" || answers.claimedOwner === "Shared" ? `ownership is ${(answers.claimedOwner ?? "unclear").toLowerCase()}` : null,
+        consequence: answers.consequence || parsed?.synthesis?.defaultPathForecast || null,
+        condition: parsed?.conditionLabel || parsed?.condition || null,
+        owner: answers.claimedOwner || null,
+      };
+    }
+    // Try enterprise result
+    const ent = sessionStorage.getItem("enterprise-assessment-result");
+    if (ent) {
+      const parsed = JSON.parse(ent);
+      return {
+        decision: parsed?.recentDecision || null,
+        blocker: parsed?.dominantFailure || null,
+        consequence: parsed?.primaryReading || null,
+        condition: parsed?.band || null,
+        owner: null,
+      };
+    }
+  } catch { /* ignore */ }
+  return empty;
+}
+
 export default function ExecutiveReportingEntryPage() {
   const router = useRouter();
   const checkoutCancelled = router.query.checkout === "cancelled";
   const accessRequired = router.query.access === "required";
+  const [evidence, setEvidence] = useState<UserEvidence>({ decision: null, blocker: null, consequence: null, condition: null, owner: null });
 
   useEffect(() => {
     trackExecGateView();
+    setEvidence(loadUserEvidence());
   }, []);
 
   return (
@@ -41,9 +83,11 @@ export default function ExecutiveReportingEntryPage() {
             <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "clamp(32px, 5vw, 48px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.35)", marginTop: "4px" }}>
               It is a decision structure failure.
             </p>
-            <p style={{ marginTop: "24px", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#888" }}>
-              Current condition: MISALIGNED
-            </p>
+            {evidence.condition && (
+              <p style={{ marginTop: "24px", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#888" }}>
+                Current condition: {evidence.condition}
+              </p>
+            )}
           </div>
 
           {/* ═══ 2. PRECISION STRIKE ═══ */}
@@ -52,13 +96,13 @@ export default function ExecutiveReportingEntryPage() {
               You are attempting to:
             </p>
             <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#EAEAEA", paddingLeft: "14px", marginTop: "8px" }}>
-              The decision your diagnostic evidence identified
+              {evidence.decision ? `"${evidence.decision}"` : "A decision identified through your diagnostic journey"}
             </p>
             <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777", marginTop: "20px" }}>
               While operating within:
             </p>
             <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#EAEAEA", paddingLeft: "14px", marginTop: "8px" }}>
-              The constraint that has prevented resolution
+              {evidence.blocker ? `"${evidence.blocker}"` : "A constraint that has prevented resolution"}
             </p>
             <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777", marginTop: "24px" }}>
               This is why progress has stalled.
@@ -94,13 +138,13 @@ export default function ExecutiveReportingEntryPage() {
             <div style={{ marginTop: "16px" }}>
               <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#666", marginBottom: "4px" }}>Decision</p>
               <p style={{ fontSize: "15px", lineHeight: 1.6, color: "#EAEAEA" }}>
-                The decision that must be made — identified from your diagnostic journey
+                {evidence.decision ? `"${evidence.decision}"` : "The decision that must be made — identified from your diagnostic journey"}
               </p>
             </div>
             <div style={{ marginTop: "20px" }}>
               <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#666", marginBottom: "4px" }}>Constraint</p>
               <p style={{ fontSize: "15px", lineHeight: 1.6, color: "#EAEAEA" }}>
-                The competing structure that prevents resolution
+                {evidence.blocker ? `"${evidence.blocker}"` : "The competing structure that prevents resolution"}
               </p>
             </div>
             <p style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "24px" }}>
@@ -113,7 +157,9 @@ export default function ExecutiveReportingEntryPage() {
             <div style={{ marginBottom: "24px" }}>
               <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>30 days</p>
               <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "6px" }}>
-                You will still be managing the same blocker. Workarounds will have replaced structure.
+                {evidence.blocker
+                  ? `You will still be managing ${evidence.blocker}. Workarounds will have replaced structure.`
+                  : "You will still be managing the same blocker. Workarounds will have replaced structure."}
               </p>
             </div>
             <div style={{ marginBottom: "24px" }}>

@@ -9,6 +9,7 @@ import { trackHesitation, trackScrollDepth } from "@/lib/analytics/hesitation";
 import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
 import ExecutiveDecisionAuthorityBlock from "@/components/diagnostics/results/ExecutiveDecisionAuthorityBlock";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
+import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 
 const GOLD = "#C9A96E";
@@ -58,6 +59,49 @@ const FastDiagnosticPage: NextPage = () => {
   const [challenge, setChallenge] = React.useState<ChallengeResult | null>(null);
   const [challengeLoading, setChallengeLoading] = React.useState(false);
   const [liveHint, setLiveHint] = React.useState("");
+  const [showResume, setShowResume] = React.useState(false);
+
+  // ── localStorage persistence ───────────────────────────────────────────
+  const STORAGE_KEY = "aol_fast_draft";
+
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as { answers: Record<string, string>; stepIndex: number };
+        if (saved.answers && Object.keys(saved.answers).length > 0) {
+          setShowResume(true);
+          // Pre-load but don't auto-resume — let user choose
+          window.__aolFastDraft = saved;
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  React.useEffect(() => {
+    if (stage === "hero" || stage === "result" || stage === "loading") return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, stepIndex }));
+      } catch { /* ignore */ }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [answers, stepIndex, stage]);
+
+  function resumeDraft() {
+    const saved = (window as unknown as { __aolFastDraft?: { answers: Record<string, string>; stepIndex: number } }).__aolFastDraft;
+    if (saved) {
+      setAnswers(saved.answers);
+      setStepIndex(saved.stepIndex);
+      setStage(saved.stepIndex === 0 ? "decision" : saved.stepIndex === 1 ? "authority" : "consequence");
+    }
+    setShowResume(false);
+  }
+
+  function startFresh() {
+    setShowResume(false);
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+  }
 
   async function runChallenge(challengeStage: string): Promise<ChallengeResult | null> {
     setChallengeLoading(true);
@@ -145,29 +189,33 @@ const FastDiagnosticPage: NextPage = () => {
     setAnswers((prev) => ({ ...prev, [currentStep.id]: value }));
   }
 
-  async function advanceStep() {
-    if (!canAdvance || !currentStep) return;
-
-    const hit = await runChallenge(currentStep.challengeStage);
-    if (hit && !hit.canProceed) return;
-    if (hit && hit.canProceed) return; // card shown, user accepts to continue
-
+  function moveToNextStep() {
+    setChallenge(null);
+    setLiveHint("");
     if (stepIndex < STEPS.length - 1) {
-      setStepIndex((prev) => prev + 1);
-      setStage(stepIndex === 0 ? "authority" : "consequence");
+      const nextIndex = stepIndex + 1;
+      setStepIndex(nextIndex);
+      setStage(nextIndex === 1 ? "authority" : "consequence");
     } else {
       setStage("commitment");
     }
   }
 
-  function acceptChallenge() {
-    setChallenge(null);
-    if (stepIndex < STEPS.length - 1) {
-      setStepIndex((prev) => prev + 1);
-      setStage(stepIndex === 0 ? "authority" : "consequence");
-    } else {
-      setStage("commitment");
+  async function advanceStep() {
+    if (!canAdvance || !currentStep) return;
+
+    const hit = await runChallenge(currentStep.challengeStage);
+
+    // No challenge — advance immediately
+    if (!hit) {
+      moveToNextStep();
+      return;
     }
+
+    // Challenge fired — card is now visible.
+    // If blocked (canProceed=false): user MUST revise. Do not advance.
+    // If can proceed (canProceed=true): user sees card, clicks Accept to advance.
+    // In both cases, we stop here. The card handles the next move.
   }
 
   async function submitFastDiagnostic(commitmentOverride?: boolean) {
@@ -201,6 +249,7 @@ const FastDiagnosticPage: NextPage = () => {
     setCommitted(false); setResult(null); setError(""); setChallenge(null); setLiveHint("");
     startedAt.current = Date.now();
     try { sessionStorage.removeItem("aol_fast_result"); } catch { /* ignore */ }
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }
 
   const an = result?.anchorNarrative;
@@ -227,13 +276,20 @@ const FastDiagnosticPage: NextPage = () => {
             <p style={{ marginTop: "0.5rem", maxWidth: "36ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.48)" }}>
               This will show you where yours is breaking. Takes 2 minutes.
             </p>
-            <button
-              type="button"
-              onClick={() => { setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); }}
-              style={{ marginTop: "2.5rem", padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}
-            >
-              Find the break
-            </button>
+            {showResume ? (
+              <div style={{ marginTop: "2.5rem", display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+                <button type="button" onClick={() => { resumeDraft(); startedAt.current = Date.now(); }} style={{ padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                  Continue your session
+                </button>
+                <button type="button" onClick={() => { startFresh(); setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); }} style={{ padding: "16px 36px", border: "1px solid rgba(255,255,255,0.15)", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                  Start fresh
+                </button>
+              </div>
+            ) : (
+              <button type="button" onClick={() => { setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); }} style={{ marginTop: "2.5rem", padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                Find the break
+              </button>
+            )}
             <p style={{ marginTop: "1.25rem", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
               No signup. No theory. You will either recognise it &mdash; or you won&rsquo;t.
             </p>
@@ -277,7 +333,7 @@ const FastDiagnosticPage: NextPage = () => {
                   <DecisionChallengeCard
                     challenge={challenge}
                     onRevise={() => setChallenge(null)}
-                    onAccept={acceptChallenge}
+                    onAccept={moveToNextStep}
                   />
                 </div>
               )}
@@ -432,6 +488,9 @@ const FastDiagnosticPage: NextPage = () => {
               </div>
 
               {/* CTA */}
+              {/* ── Email capture ─── */}
+              <ResultEmailCapture source="fast_diagnostic" resultRef={result.caseRef} />
+
               <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                 <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginBottom: "1rem" }}>
                   {an?.cta ?? "This is now structural, not situational."}

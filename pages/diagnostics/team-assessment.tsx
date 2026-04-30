@@ -641,6 +641,31 @@ export default function TeamAssessmentPage() {
     }
   }
 
+  // ── localStorage persistence ──────────────────────────────────────────────
+  const TEAM_STORAGE_KEY = "aol_team_draft";
+
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem(TEAM_STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved.identity) setIdentity(saved.identity);
+      if (saved.leaderScores) setLeaderScores(saved.leaderScores);
+      if (saved.realityScores) setRealityScores(saved.realityScores);
+      if (saved.teamReflections) setTeamReflections(saved.teamReflections);
+    } catch { /* ignore */ }
+  }, []);
+
+  React.useEffect(() => {
+    if (phase === "result") return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify({ identity, leaderScores, realityScores, teamReflections }));
+      } catch { /* ignore */ }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [identity, leaderScores, realityScores, teamReflections, phase]);
+
   React.useEffect(() => {
     trackStageStart("team");
     // Load spine for inherited context + adaptive questions
@@ -738,19 +763,20 @@ export default function TeamAssessmentPage() {
     [constitutionalThread, gaps, overallLeader, overallReality],
   );
 
-  async function advance(to: Phase) {
+  function doAdvance(to: Phase) {
     setChallenge(null);
-    // Challenge checkpoint: before entering result phase
-    if (to === "result" && realityComplete()) {
-      const hit = await runTeamChallenge("pre_result");
-      if (hit && !hit.canProceed) return;
-      if (hit && hit.canProceed) return; // card shown, user accepts to continue
-    }
     setDirection(1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to);
   }
-  function advanceForce(to: Phase) {
+
+  async function advance(to: Phase) {
     setChallenge(null);
-    setDirection(1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to);
+    if (to === "result" && realityComplete()) {
+      const hit = await runTeamChallenge("pre_result");
+      if (!hit) { doAdvance(to); return; }
+      // Challenge fired — card visible. Blocked: user revises. Can proceed: user clicks Accept.
+      return;
+    }
+    doAdvance(to);
   }
   function retreat(to: Phase) { setChallenge(null); setDirection(-1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to); }
 
@@ -1122,7 +1148,7 @@ export default function TeamAssessmentPage() {
                       <DecisionChallengeCard
                         challenge={challenge}
                         onRevise={() => setChallenge(null)}
-                        onAccept={() => { setChallenge(null); advanceForce("result"); }}
+                        onAccept={() => doAdvance("result")}
                       />
                     </div>
                   )}

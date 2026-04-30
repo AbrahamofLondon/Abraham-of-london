@@ -3337,3 +3337,54 @@ model DecisionContactLedger {
   @@map("decision_contact_ledger")
 }
 
+// ─── Privacy Architecture — Data Separation Layer ────────────────────────────
+
+/// Stores decision data WITHOUT any PII. Identified only by opaque sessionId.
+model DecisionSession {
+  id          String   @id @default(cuid())
+  sessionId   String   @unique
+  anchors     Json?
+  pattern     String?
+  trajectory  String?
+  source      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  link        SessionLink?
+
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("decision_session")
+}
+
+/// Stores user identity with encrypted email. No decision data here.
+model UserIdentity {
+  id             String   @id @default(cuid())
+  emailEncrypted String
+  emailHash      String   @unique
+  unsubscribed   Boolean  @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  links          SessionLink[]
+
+  @@index([emailHash])
+  @@map("user_identity")
+}
+
+/// Join table — the ONLY bridge between identity and decision data.
+model SessionLink {
+  id        String   @id @default(cuid())
+  sessionId String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+
+  session   DecisionSession @relation(fields: [sessionId], references: [sessionId])
+  user      UserIdentity    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([sessionId])
+  @@map("session_link")
+}
+

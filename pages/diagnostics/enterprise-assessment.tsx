@@ -669,6 +669,29 @@ export default function EnterpriseAssessmentPage() {
     }
   }
 
+  // ── localStorage persistence ──────────────────────────────────────────────
+  const ENT_STORAGE_KEY = "aol_enterprise_draft";
+
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem(ENT_STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved.identity) setIdentity(saved.identity);
+      if (saved.answers) setAnswers(saved.answers);
+    } catch { /* ignore */ }
+  }, []);
+
+  React.useEffect(() => {
+    if (phase === "result") return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(ENT_STORAGE_KEY, JSON.stringify({ identity, answers }));
+      } catch { /* ignore */ }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [identity, answers, phase]);
+
   React.useEffect(() => {
     trackStageStart("enterprise");
     // Load spine for inherited context + adaptive questions
@@ -1043,8 +1066,7 @@ export default function EnterpriseAssessmentPage() {
                   <button type="button" onClick={async () => {
                     if (!recentDecisionReady) return;
                     const hit = await runEnterpriseChallenge("enterprise_problem");
-                    if (hit && !hit.canProceed) return;
-                    if (hit && hit.canProceed) return; // card shown
+                    if (hit) return; // challenge card visible — user clicks Accept or Revise
                     advance("instrument");
                   }} disabled={!recentDecisionReady} style={{ marginTop: "1.75rem", padding: "13px 28px", border: `1px solid ${recentDecisionReady ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: recentDecisionReady ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: recentDecisionReady ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: recentDecisionReady ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
                     onMouseEnter={e => { if (recentDecisionReady) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
