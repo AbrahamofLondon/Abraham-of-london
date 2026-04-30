@@ -78,6 +78,15 @@ import BoundaryProximityLine, {
 } from "@/components/diagnostics/results/ThresholdProximityLine";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
+import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import DualAxisPromptCard from "@/components/diagnostics/DualAxisPromptCard";
+import type { DualAxisAnswer } from "@/lib/alignment/types";
+import {
+  clearVersionedAssessmentState,
+  loadVersionedAssessmentState,
+  saveVersionedAssessmentState,
+} from "@/lib/client/assessment-state";
+import { detectDualAxisIntegrityChallenge } from "@/lib/client/assessment-integrity";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOKENS
@@ -145,6 +154,23 @@ const SCORE_LABELS: Record<DiagnosticAnswerValue, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 type SectionScore = { id: string; title: string; pct: number };
+type EnterpriseAxisAnswers = Record<string, DualAxisAnswer>;
+type EnterpriseDraftSnapshot = {
+  phase: "identity" | "instrument";
+  identity: {
+    name: string;
+    email: string;
+    organisation: string;
+    role: string;
+    recentDecision: string;
+    notes: string;
+  };
+  answers: EnterpriseAxisAnswers;
+  instrumentPage: number;
+  startedAt: number;
+};
+const ENT_STORAGE_KEY = "aol-enterprise-assessment-state";
+const ENT_STORAGE_VERSION = "2026-04-standardized";
 
 type EnterpriseReading = {
   band:          string;
@@ -162,14 +188,31 @@ type EnterpriseReading = {
   decisionObject: import("@/lib/diagnostics/decision-engine").DecisionObject;
 };
 
-function sectionPct(answers: Record<string, DiagnosticAnswerValue>, blockId: string): number {
-  const vals: number[] = [0, 1, 2].map(i => answers[`${blockId}-${i}`] ?? 0).filter(v => v > 0);
+function sectionPct(answers: EnterpriseAxisAnswers, blockId: string): number {
+  const vals = [0, 1, 2]
+    .map((i) => answers[`${blockId}-${i}`])
+    .filter(isAnswered)
+    .map((answer) => toDiagnosticValue(answer));
   if (!vals.length) return 0;
   return Math.round((vals.reduce((s: number, v: number) => s + v, 0) / (vals.length * 5)) * 100);
 }
 
+function defaultAxisAnswer(): DualAxisAnswer {
+  return { resonance: 5, certainty: 5 };
+}
+
+function isAnswered(answer: DualAxisAnswer | undefined) {
+  return Boolean(answer) && !(answer!.resonance === 5 && answer!.certainty === 5);
+}
+
+function toDiagnosticValue(answer: DualAxisAnswer | undefined): DiagnosticAnswerValue {
+  if (!answer) return 3;
+  const mapped = Math.round(answer.resonance / 2);
+  return Math.min(5, Math.max(1, mapped === 0 ? 1 : mapped)) as DiagnosticAnswerValue;
+}
+
 function deriveReading(
-  answers: Record<string, DiagnosticAnswerValue>,
+  answers: EnterpriseAxisAnswers,
   totalPct: number,
   teamAlignmentPct: number | null,
   recentDecision: string,
@@ -437,6 +480,13 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             })}
           </div>
         </div>
+
+        <div className="mt-6">
+          <ResultEmailCapture
+            source="enterprise_assessment"
+            resultRef={submitResult && submitResult.ok ? submitResult.diagnosticRef : reading.patternTitle}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
@@ -523,6 +573,36 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <Eyebrow>Immediate governance action</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.decisionObject.action}</p>
           </div>
+
+          <details style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
+            <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+              How this was determined
+            </summary>
+            <div className="mt-5 space-y-5">
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>You indicated</div>
+                <ul className="mt-3 space-y-2">
+                  {sections.slice(0, 4).map((section) => (
+                    <li key={section.id} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
+                      {section.title}: {section.pct}% structural strength
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Contradiction mapping</div>
+                <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
+                  The reading compares enterprise coherence, governance, execution, and risk against the decision signal from your recent high-stakes decision. The conflict between those layers drives the route.
+                </p>
+              </div>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Pattern trigger explanation</div>
+                <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
+                  This combination produces {reading.patternTitle.toLowerCase()} because the weakest enterprise domain is {reading.dominantFailure ?? "the lowest-scoring structural block"}, while the recent decision signal resolves at {reading.decisionSignal.clarityScore}% clarity and {reading.decisionSignal.structuralRisk}% structural risk.
+                </p>
+              </div>
+            </div>
+          </details>
 
           {/* ── Anchor-driven escalation hook ─── */}
           <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.5rem" }}>
@@ -626,7 +706,7 @@ type PagePhase = "identity" | "instrument" | "result";
 
 export default function EnterpriseAssessmentPage() {
   const [phase,       setPhase]       = React.useState<PagePhase>("identity");
-  const [answers,     setAnswers]     = React.useState<Record<string, DiagnosticAnswerValue>>({});
+  const [answers,     setAnswers]     = React.useState<EnterpriseAxisAnswers>({});
   const [identity,    setIdentity]    = React.useState({ name: "", email: "", organisation: "", role: "", recentDecision: "", notes: "" });
   const [submitResult,setSubmitResult]= React.useState<DiagnosticSubmitResponse | null>(null);
   const [isSubmitting,setIsSubmitting]= React.useState(false);
@@ -639,6 +719,10 @@ export default function EnterpriseAssessmentPage() {
   const [adaptiveAnswers, setAdaptiveAnswers]             = React.useState<Record<string, string>>({});
   const [showAdaptive, setShowAdaptive]                   = React.useState(false);
   const [challenge, setChallenge] = React.useState<ChallengeResult | null>(null);
+  const [instrumentPage, setInstrumentPage] = React.useState(0);
+  const [showResume, setShowResume] = React.useState(false);
+  const [draftSnapshot, setDraftSnapshot] = React.useState<EnterpriseDraftSnapshot | null>(null);
+  const startedAtRef = React.useRef(Date.now());
   const recentDecisionReady = identity.recentDecision.trim().length >= 80;
 
   async function runEnterpriseChallenge(stage: string): Promise<ChallengeResult | null> {
@@ -669,28 +753,30 @@ export default function EnterpriseAssessmentPage() {
     }
   }
 
-  // ── localStorage persistence ──────────────────────────────────────────────
-  const ENT_STORAGE_KEY = "aol_enterprise_draft";
-
   React.useEffect(() => {
-    try {
-      const raw = localStorage.getItem(ENT_STORAGE_KEY);
-      if (!raw) return;
-      const saved = JSON.parse(raw);
-      if (saved.identity) setIdentity(saved.identity);
-      if (saved.answers) setAnswers(saved.answers);
-    } catch { /* ignore */ }
+    const saved = loadVersionedAssessmentState<EnterpriseDraftSnapshot>(
+      ENT_STORAGE_KEY,
+      ENT_STORAGE_VERSION,
+    );
+    if (!saved) return;
+    setDraftSnapshot(saved);
+    setShowResume(true);
   }, []);
 
   React.useEffect(() => {
     if (phase === "result") return;
     const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(ENT_STORAGE_KEY, JSON.stringify({ identity, answers }));
-      } catch { /* ignore */ }
+      saveVersionedAssessmentState(ENT_STORAGE_KEY, ENT_STORAGE_VERSION, {
+        phase,
+        identity,
+        answers,
+        instrumentPage,
+        startedAt: startedAtRef.current,
+        timestamp: new Date().toISOString(),
+      });
     }, 800);
     return () => clearTimeout(timer);
-  }, [identity, answers, phase]);
+  }, [identity, answers, phase, instrumentPage]);
 
   React.useEffect(() => {
     trackStageStart("enterprise");
@@ -730,15 +816,15 @@ export default function EnterpriseAssessmentPage() {
   }, []);
 
   const allPrompts = BLOCKS.flatMap(b => b.prompts.map((_, i) => `${b.id}-${i}`));
-  const answeredCount = allPrompts.filter(k => (answers[k] ?? 0) > 0).length;
+  const answeredCount = allPrompts.filter((k) => isAnswered(answers[k])).length;
   const complete = answeredCount === allPrompts.length;
 
   const answerList: DiagnosticAnswer[] = BLOCKS.flatMap(b =>
     b.prompts.map((prompt, i) => ({
       sectionId: b.id, questionId: `${b.id}-${i}`, prompt,
-      value: (answers[`${b.id}-${i}`] ?? 3) as DiagnosticAnswerValue,
+      value: toDiagnosticValue(answers[`${b.id}-${i}`]),
     }))
-  ).filter(a => (answers[a.questionId] ?? 0) > 0);
+  ).filter(a => isAnswered(answers[a.questionId]));
 
   const totalScore = answerList.reduce((s, a) => s + a.value, 0);
   const maxScore   = allPrompts.length * 5;
@@ -784,12 +870,36 @@ export default function EnterpriseAssessmentPage() {
         : [],
     [constitutionalThread, reading, sections],
   );
+  const visibleBlocks = BLOCKS.slice(instrumentPage * 2, instrumentPage * 2 + 2);
+  const instrumentGroupComplete = visibleBlocks.every((block) =>
+    [0, 1, 2].every((idx) => isAnswered(answers[`${block.id}-${idx}`])),
+  );
 
-  function setAnswer(key: string, value: DiagnosticAnswerValue) {
+  function resumeDraft() {
+    if (!draftSnapshot) return;
+    setPhase(draftSnapshot.phase);
+    setIdentity(draftSnapshot.identity);
+    setAnswers(draftSnapshot.answers);
+    setInstrumentPage(draftSnapshot.instrumentPage);
+    startedAtRef.current = draftSnapshot.startedAt;
+    setShowResume(false);
+  }
+
+  function discardDraft() {
+    clearVersionedAssessmentState(ENT_STORAGE_KEY);
+    setDraftSnapshot(null);
+    setShowResume(false);
+  }
+
+  function setAnswer(key: string, value: DualAxisAnswer) {
     setAnswers(prev => ({ ...prev, [key]: value }));
   }
 
-  function advance(to: PagePhase) { window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to); }
+  function advance(to: PagePhase) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (to === "instrument") setInstrumentPage(0);
+    setPhase(to);
+  }
 
   async function handleSubmit() {
     setIsSubmitting(true);
@@ -832,6 +942,7 @@ export default function EnterpriseAssessmentPage() {
       },
     });
     setSubmitResult(res);
+    clearVersionedAssessmentState(ENT_STORAGE_KEY);
 
     const nextHref = reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting";
     const outcome = reading?.route === "STRATEGY_ROOM" ? "strategy" as const : "diagnostic" as const;
@@ -1043,7 +1154,7 @@ export default function EnterpriseAssessmentPage() {
                         {identity.recentDecision.trim().length}/80 minimum characters
                       </p>
                     </div>
-                    <div className="sm:col-span-2">
+                  <div className="sm:col-span-2">
                       <label style={labelStyle}>Initial observations (optional)</label>
                       <textarea value={identity.notes} onChange={e => setIdentity(prev => ({ ...prev, notes: e.target.value }))} rows={3} placeholder="Where is institutional signal, governance reliability, or trust becoming unstable?" style={{ ...inputStyle, resize: "none", lineHeight: 1.75 }}
                         onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }}
@@ -1051,6 +1162,25 @@ export default function EnterpriseAssessmentPage() {
                       />
                     </div>
                   </div>
+
+                  {showResume ? (
+                    <div style={{ marginTop: "1.5rem", padding: "1.25rem", border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06` }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                        Resume your assessment?
+                      </div>
+                      <p style={{ marginTop: "0.6rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.46)" }}>
+                        A saved enterprise reading is available on this device.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <button type="button" onClick={resumeDraft} style={{ padding: "10px 18px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                          Resume
+                        </button>
+                        <button type="button" onClick={discardDraft} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.42)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                          Start fresh
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
 
                   {/* Challenge card — after recent decision input */}
                   {challenge && (
@@ -1092,8 +1222,8 @@ export default function EnterpriseAssessmentPage() {
                       </p>
 
                       <div className="space-y-4">
-                        {BLOCKS.map(block => {
-                          const blockAnswered = [0, 1, 2].filter(i => (answers[`${block.id}-${i}`] ?? 0) > 0).length;
+                        {visibleBlocks.map(block => {
+                          const blockAnswered = [0, 1, 2].filter(i => isAnswered(answers[`${block.id}-${i}`])).length;
                           return (
                             <div key={block.id} style={{ border: "1px solid rgba(255,255,255,0.062)", backgroundColor: "rgb(5 5 7)" }}>
                               <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -1106,15 +1236,16 @@ export default function EnterpriseAssessmentPage() {
                               <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
                                 {block.prompts.map((prompt, idx) => {
                                   const key = `${block.id}-${idx}`;
-                                  const val = (answers[key] ?? 0) as DiagnosticAnswerValue | 0;
+                                  const val = answers[key] ?? defaultAxisAnswer();
                                   return (
                                     <div key={key} style={{ padding: "1rem 1.5rem" }}>
-                                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.60, color: "rgba(255,255,255,0.65)", marginBottom: "0.25rem" }}>{prompt}</p>
-                                      <div className="flex justify-between">
-                                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Strongly no</span>
-                                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Strongly yes</span>
-                                      </div>
-                                      <ScoreSelector value={val} onChange={v => setAnswer(key, v)} />
+                                      <DualAxisPromptCard
+                                        domainLabel={block.domain}
+                                        statement={prompt}
+                                        value={val}
+                                        touched={isAnswered(answers[key])}
+                                        onChange={(next) => setAnswer(key, next)}
+                                      />
                                     </div>
                                   );
                                 })}
@@ -1152,22 +1283,52 @@ export default function EnterpriseAssessmentPage() {
                         </div>
                       )}
 
+                      {challenge && (
+                        <div style={{ marginTop: "1.5rem" }}>
+                          <DecisionChallengeCard
+                            challenge={challenge}
+                            onRevise={() => setChallenge(null)}
+                            onAccept={() => {
+                              setChallenge(null);
+                              if (instrumentPage === 0) {
+                                setInstrumentPage(1);
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                                return;
+                              }
+                              if (adaptiveQuestions.length > 0 && !showAdaptive) {
+                                setShowAdaptive(true);
+                                return;
+                              }
+                              advance("result");
+                            }}
+                          />
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                         <button type="button" onClick={() => advance("identity")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
                           <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
                         </button>
                         <div style={{ textAlign: "center" }}>
-                          {!complete && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 12 questions to generate the reading</p>}
+                          {!instrumentGroupComplete && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
                           <button type="button" onClick={() => {
+                            if (!instrumentGroupComplete) return;
+                            if (instrumentPage === 0) {
+                              const integrityHit = detectDualAxisIntegrityChallenge({ answers: Object.fromEntries(visibleBlocks.flatMap((block) => [0,1,2].map((idx) => [`${block.id}-${idx}`, answers[`${block.id}-${idx}`] ?? defaultAxisAnswer()]))) as Record<string, DualAxisAnswer>, minimumAnswers: 6, startedAt: startedAtRef.current, submittedAt: Date.now() });
+                              if (integrityHit) { setChallenge(integrityHit); return; }
+                              setInstrumentPage(1);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                              return;
+                            }
                             if (!complete) return;
                             if (adaptiveQuestions.length > 0 && !showAdaptive) { setShowAdaptive(true); return; }
                             advance("result");
-                          }} disabled={!complete}
-                            style={{ padding: "11px 24px", border: `1px solid ${complete ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: complete ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: complete ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: complete ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
-                            onMouseEnter={e => { if (complete) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
-                            onMouseLeave={e => { if (complete) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
+                          }} disabled={!instrumentGroupComplete}
+                            style={{ padding: "11px 24px", border: `1px solid ${instrumentGroupComplete ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: instrumentGroupComplete ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: instrumentGroupComplete ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: instrumentGroupComplete ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
+                            onMouseEnter={e => { if (instrumentGroupComplete) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
+                            onMouseLeave={e => { if (instrumentGroupComplete) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                           >
-                            {showAdaptive ? "Generate enterprise reading" : adaptiveQuestions.length > 0 ? "Add structural evidence" : "Generate enterprise reading"} <ArrowRight style={{ width: "11px", height: "11px" }} />
+                            {instrumentPage === 0 ? "Continue to remaining domains" : showAdaptive ? "Generate enterprise reading" : adaptiveQuestions.length > 0 ? "Add structural evidence" : "Generate enterprise reading"} <ArrowRight style={{ width: "11px", height: "11px" }} />
                           </button>
                         </div>
                       </div>

@@ -34,6 +34,15 @@ import {
   clearAllConstitutionalHandoffs,
 } from "@/lib/diagnostics/constitutional-handoff";
 import type { ConstitutionalBridgeBundle } from "@/lib/diagnostics/constitutional-bridge";
+import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
+import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import {
+  clearVersionedAssessmentState,
+  loadVersionedAssessmentState,
+  saveVersionedAssessmentState,
+} from "@/lib/client/assessment-state";
+import { detectDualAxisIntegrityChallenge } from "@/lib/client/assessment-integrity";
+import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 
 type ApiSuccess = {
   ok: true;
@@ -89,6 +98,11 @@ type ApiFailure = {
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 type EvaluationPhase = "idle" | "reading" | "parsing" | "weighing" | "complete";
+type DraftSnapshot = {
+  answers: DiagnosticAnswers;
+  currentQuestionIndex: number;
+  startedAt: string;
+};
 
 const RESONANCE_LABELS = [
   "Completely false",
@@ -116,6 +130,13 @@ const CERTAINTY_LABELS = [
   "High",
   "Very high",
   "Absolute",
+] as const;
+const STORAGE_KEY = "aol-constitutional-diagnostic-state";
+const STORAGE_VERSION = "2026-04-standardized";
+const LOADING_LINES = [
+  "Evaluating structural alignment…",
+  "Mapping contradictions…",
+  "Projecting consequences…",
 ] as const;
 
 function cn(...parts: Array<string | false | null | undefined>) {
@@ -234,6 +255,10 @@ export default function ConstitutionalDiagnostic() {
   const [errorMessage, setErrorMessage] = React.useState("");
   const [reportData, setReportData] = React.useState<ApiSuccess | null>(null);
   const [showResults, setShowResults] = React.useState(false);
+  const [challenge, setChallenge] = React.useState<ChallengeResult | null>(null);
+  const [showResume, setShowResume] = React.useState(false);
+  const [draftSnapshot, setDraftSnapshot] = React.useState<DraftSnapshot | null>(null);
+  const [loadingLineIndex, setLoadingLineIndex] = React.useState(0);
   const startedAtRef = React.useRef<string>(new Date().toISOString());
   const questionStartedAtRef = React.useRef<number>(Date.now());
   const timingRef = React.useRef<Record<string, number>>({});
@@ -245,6 +270,44 @@ export default function ConstitutionalDiagnostic() {
 
   const currentQuestion = questions[currentQuestionIndex]!;
   const currentAnswer = answers[currentQuestion.id] ?? makeDefaultAnswer();
+
+  React.useEffect(() => {
+    const stored = loadVersionedAssessmentState<DraftSnapshot>(
+      STORAGE_KEY,
+      STORAGE_VERSION,
+    );
+    if (!stored || Object.keys(stored.answers ?? {}).length === 0) return;
+    setDraftSnapshot(stored);
+    setShowResume(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (showResults) {
+      clearVersionedAssessmentState(STORAGE_KEY);
+      return;
+    }
+
+    if (Object.keys(answers).length === 0) return;
+
+    const timer = window.setTimeout(() => {
+      saveVersionedAssessmentState(STORAGE_KEY, STORAGE_VERSION, {
+        answers,
+        currentQuestionIndex,
+        startedAt: startedAtRef.current,
+        timestamp: new Date().toISOString(),
+      });
+    }, 500);
+
+    return () => window.clearTimeout(timer);
+  }, [answers, currentQuestionIndex, showResults]);
+
+  React.useEffect(() => {
+    if (submitState !== "submitting") return;
+    const timer = window.setInterval(() => {
+      setLoadingLineIndex((prev) => (prev + 1) % LOADING_LINES.length);
+    }, 1100);
+    return () => window.clearInterval(timer);
+  }, [submitState]);
 
   React.useEffect(() => {
     questionStartedAtRef.current = Date.now();
@@ -279,8 +342,25 @@ export default function ConstitutionalDiagnostic() {
 
   const goNext = () => {
     captureQuestionTiming();
+    setChallenge(null);
 
     if (currentQuestionIndex < questions.length - 1) {
+      const nextAnswers = {
+        ...answers,
+        [currentQuestion.id]: currentAnswer,
+      };
+      const localChallenge = detectDualAxisIntegrityChallenge({
+        answers: nextAnswers,
+        minimumAnswers: 5,
+        startedAt: Date.parse(startedAtRef.current),
+        submittedAt: Date.now(),
+      });
+
+      if (localChallenge) {
+        setChallenge(localChallenge);
+        return;
+      }
+
       setCurrentQuestionIndex((prev) => prev + 1);
       return;
     }
@@ -302,6 +382,7 @@ export default function ConstitutionalDiagnostic() {
     if (!ok) return;
 
     clearAllConstitutionalHandoffs();
+    clearVersionedAssessmentState(STORAGE_KEY);
     setAnswers({});
     setCurrentQuestionIndex(0);
     setPhase("idle");
@@ -312,6 +393,20 @@ export default function ConstitutionalDiagnostic() {
     startedAtRef.current = new Date().toISOString();
     questionStartedAtRef.current = Date.now();
     timingRef.current = {};
+  };
+
+  const resumeDraft = () => {
+    if (!draftSnapshot) return;
+    setAnswers(draftSnapshot.answers);
+    setCurrentQuestionIndex(draftSnapshot.currentQuestionIndex);
+    startedAtRef.current = draftSnapshot.startedAt;
+    setShowResume(false);
+  };
+
+  const discardDraft = () => {
+    clearVersionedAssessmentState(STORAGE_KEY);
+    setDraftSnapshot(null);
+    setShowResume(false);
   };
 
   async function submitAssessment() {
@@ -365,6 +460,7 @@ export default function ConstitutionalDiagnostic() {
       setSubmitState("success");
       setPhase("complete");
       setShowResults(true);
+      clearVersionedAssessmentState(STORAGE_KEY);
 
       timingRef.current = {};
     } catch (error) {
@@ -380,6 +476,19 @@ export default function ConstitutionalDiagnostic() {
   const decision = reportData?.bundle.decision ?? null;
   const routeSummary = reportData?.bundle.routeSummary ?? null;
   const bridge = reportData?.bridge ?? null;
+  const contradictionInputs = questions
+    .map((question) => ({
+      question,
+      answer: answers[question.id],
+    }))
+    .filter(
+      (entry): entry is { question: (typeof questions)[number]; answer: DiagnosticAnswerValue } =>
+        Boolean(entry.answer),
+    )
+    .filter(
+      ({ answer }) => Math.abs(answer.resonance - answer.certainty) >= 4 || answer.certainty <= 3,
+    )
+    .slice(0, 5);
 
   if (showResults && report && decision && routeSummary && bridge) {
     return (
@@ -443,6 +552,13 @@ export default function ConstitutionalDiagnostic() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
+            </div>
+
+            <div className="mt-6">
+              <ResultEmailCapture
+                source="constitutional_diagnostic"
+                resultRef={reportData!.reportId}
+              />
             </div>
           </div>
 
@@ -558,6 +674,56 @@ export default function ConstitutionalDiagnostic() {
             </div>
           </div>
 
+          <details className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <summary className="cursor-pointer text-sm font-medium text-white">
+              How this was determined
+            </summary>
+            <div className="mt-5 grid gap-5 text-sm leading-7 text-white/70">
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">
+                  You indicated
+                </div>
+                <ul className="mt-3 grid gap-2">
+                  {questions.slice(0, 5).map((question) => {
+                    const answer = answers[question.id];
+                    if (!answer) return null;
+                    return (
+                      <li key={question.id}>
+                        {question.text} → resonance {answer.resonance}/10, certainty {answer.certainty}/10
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
+              {contradictionInputs.length > 0 ? (
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">
+                    Contradiction mapping
+                  </div>
+                  <ul className="mt-3 grid gap-2">
+                    {contradictionInputs.map(({ question, answer }) => (
+                      <li key={question.id}>
+                        {question.text} → tension between resonance {answer.resonance}/10 and certainty {answer.certainty}/10
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">
+                  Pattern trigger explanation
+                </div>
+                <p className="mt-3">
+                  This combination produces {routeSummary.title.toLowerCase()} because the authority,
+                  coherence, friction, and pressure scores resolved into a {report.posture.toLowerCase()} posture with{" "}
+                  {report.readinessTier.toLowerCase().replaceAll("_", " ")} readiness.
+                </p>
+              </div>
+            </div>
+          </details>
+
           {decision.disqualifiersTriggered.length > 0 ? (
             <div className="rounded-2xl border border-white/10 bg-black/30 p-6">
               <div className="flex items-center gap-2 text-sm text-white/40">
@@ -644,6 +810,33 @@ export default function ConstitutionalDiagnostic() {
             </div>
           </div>
 
+          {showResume ? (
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-300/80">
+                Resume your assessment?
+              </div>
+              <p className="mt-2 text-sm leading-6 text-white/60">
+                A saved constitutional reading is available on this device.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={resumeDraft}
+                  className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-sm text-amber-200"
+                >
+                  Resume
+                </button>
+                <button
+                  type="button"
+                  onClick={discardDraft}
+                  className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white/60"
+                >
+                  Start fresh
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           <div className="rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-8">
             <div className="mb-6 flex items-center justify-between gap-4">
               <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/40">
@@ -676,6 +869,23 @@ export default function ConstitutionalDiagnostic() {
                 accent="emerald"
               />
             </div>
+
+            {challenge ? (
+              <div className="mt-6">
+                <DecisionChallengeCard
+                  challenge={challenge}
+                  onRevise={() => setChallenge(null)}
+                  onAccept={() => {
+                    setChallenge(null);
+                    if (currentQuestionIndex < questions.length - 1) {
+                      setCurrentQuestionIndex((prev) => prev + 1);
+                    } else if (isComplete) {
+                      void submitAssessment();
+                    }
+                  }}
+                />
+              </div>
+            ) : null}
 
             <div className="mt-8 flex justify-between gap-4">
               <button
@@ -813,6 +1023,20 @@ export default function ConstitutionalDiagnostic() {
           </div>
         </motion.aside>
       </div>
+
+      {submitState === "submitting" ? (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[28px] bg-[#0e0e10] p-8 text-white shadow-2xl">
+            <div className="text-[11px] uppercase tracking-[0.28em] text-[#c9a96e]">Resolution</div>
+            <p className="mt-4 font-serif text-3xl leading-tight">
+              {LOADING_LINES[loadingLineIndex]}
+            </p>
+            <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full w-1/2 animate-pulse rounded-full bg-[#c9a96e]" />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

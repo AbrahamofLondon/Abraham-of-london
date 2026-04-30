@@ -24,7 +24,10 @@ function loadUserEvidence(): UserEvidence {
     const fast = sessionStorage.getItem("aol_fast_result");
     if (fast) {
       const parsed = JSON.parse(fast);
-      const answers = JSON.parse(localStorage.getItem("aol_fast_draft") ?? "{}").answers ?? {};
+      const answers =
+        JSON.parse(localStorage.getItem("aol-fast-assessment-state") ?? "{}").data?.answers ??
+        JSON.parse(localStorage.getItem("aol_fast_draft") ?? "{}").answers ??
+        {};
       return {
         decision: answers.decision || parsed?.synthesis?.avoidedDecision || null,
         blocker: answers.claimedOwner === "Unclear" || answers.claimedOwner === "Shared" ? `ownership is ${(answers.claimedOwner ?? "unclear").toLowerCase()}` : null,
@@ -54,6 +57,11 @@ export default function ExecutiveReportingEntryPage() {
   const checkoutCancelled = router.query.checkout === "cancelled";
   const accessRequired = router.query.access === "required";
   const [evidence, setEvidence] = useState<UserEvidence>({ decision: null, blocker: null, consequence: null, condition: null, owner: null });
+  const ladderProgress = [
+    { key: "purpose-alignment-result", label: "Purpose" },
+    { key: "team-assessment-result", label: "Team" },
+    { key: "enterprise-assessment-result", label: "Enterprise" },
+  ];
 
   useEffect(() => {
     trackExecGateView();
@@ -106,6 +114,26 @@ export default function ExecutiveReportingEntryPage() {
             </p>
             <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777", marginTop: "24px" }}>
               This is why progress has stalled.
+            </p>
+          </div>
+
+          <div style={{ background: "#111", padding: "24px 28px", marginBottom: "64px", border: "1px solid #1c1c1c" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#666" }}>
+              Ladder progress
+            </p>
+            <div style={{ display: "grid", gap: "10px", marginTop: "16px" }}>
+              {ladderProgress.map((item) => {
+                const completed = typeof window !== "undefined" && Boolean(sessionStorage.getItem(item.key));
+                return (
+                  <div key={item.key} style={{ display: "flex", justifyContent: "space-between", gap: "12px", fontSize: "14px", lineHeight: 1.6, color: completed ? "#EAEAEA" : "#666" }}>
+                    <span>{item.label}</span>
+                    <span>{completed ? "Completed" : "Not completed"}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <p style={{ marginTop: "16px", fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)" }}>
+              The ladder has accumulated evidence. Executive Reporting is the layer that turns that evidence into consequence, sequencing, and a governed decision position.
             </p>
           </div>
 
@@ -228,6 +256,15 @@ export default function ExecutiveReportingEntryPage() {
             </p>
             <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.65)", marginTop: "4px" }}>
               Execution is.
+            </p>
+          </div>
+
+          <div style={{ background: "#111", padding: "24px 28px", borderLeft: "2px solid #444", marginBottom: "80px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#666" }}>
+              How this was determined
+            </p>
+            <p style={{ marginTop: "16px", fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.65)" }}>
+              The system combined the decision you surfaced, the constraint that has preserved it, and the consequence attached to delay. Executive Reporting exists because that evidence now points to a structural issue rather than a local execution miss.
             </p>
           </div>
 

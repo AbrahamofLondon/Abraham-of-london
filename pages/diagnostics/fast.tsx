@@ -11,12 +11,24 @@ import ExecutiveDecisionAuthorityBlock from "@/components/diagnostics/results/Ex
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
+import {
+  clearVersionedAssessmentState,
+  loadVersionedAssessmentState,
+  saveVersionedAssessmentState,
+} from "@/lib/client/assessment-state";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
 type ViewStage = "hero" | "decision" | "authority" | "consequence" | "commitment" | "loading" | "recovery" | "result";
+type FastDraftSnapshot = {
+  answers: Record<string, string>;
+  stepIndex: number;
+  startedAt: number;
+};
+const STORAGE_KEY = "aol-fast-assessment-state";
+const STORAGE_VERSION = "2026-04-standardized";
 
 const STEPS: Array<{
   id: string;
@@ -60,47 +72,45 @@ const FastDiagnosticPage: NextPage = () => {
   const [challengeLoading, setChallengeLoading] = React.useState(false);
   const [liveHint, setLiveHint] = React.useState("");
   const [showResume, setShowResume] = React.useState(false);
-
-  // ── localStorage persistence ───────────────────────────────────────────
-  const STORAGE_KEY = "aol_fast_draft";
+  const [draftSnapshot, setDraftSnapshot] = React.useState<FastDraftSnapshot | null>(null);
 
   React.useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const saved = JSON.parse(raw) as { answers: Record<string, string>; stepIndex: number };
-        if (saved.answers && Object.keys(saved.answers).length > 0) {
-          setShowResume(true);
-          // Pre-load but don't auto-resume — let user choose
-          window.__aolFastDraft = saved;
-        }
-      }
-    } catch { /* ignore */ }
+    const saved = loadVersionedAssessmentState<FastDraftSnapshot>(
+      STORAGE_KEY,
+      STORAGE_VERSION,
+    );
+    if (!saved || !saved.answers || Object.keys(saved.answers).length === 0) return;
+    setDraftSnapshot(saved);
+    setShowResume(true);
   }, []);
 
   React.useEffect(() => {
     if (stage === "hero" || stage === "result" || stage === "loading") return;
     const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, stepIndex }));
-      } catch { /* ignore */ }
+      saveVersionedAssessmentState(STORAGE_KEY, STORAGE_VERSION, {
+        answers,
+        stepIndex,
+        startedAt: startedAt.current,
+        timestamp: new Date().toISOString(),
+      });
     }, 500);
     return () => clearTimeout(timer);
   }, [answers, stepIndex, stage]);
 
   function resumeDraft() {
-    const saved = (window as unknown as { __aolFastDraft?: { answers: Record<string, string>; stepIndex: number } }).__aolFastDraft;
-    if (saved) {
-      setAnswers(saved.answers);
-      setStepIndex(saved.stepIndex);
-      setStage(saved.stepIndex === 0 ? "decision" : saved.stepIndex === 1 ? "authority" : "consequence");
+    if (draftSnapshot) {
+      setAnswers(draftSnapshot.answers);
+      setStepIndex(draftSnapshot.stepIndex);
+      setStage(draftSnapshot.stepIndex === 0 ? "decision" : draftSnapshot.stepIndex === 1 ? "authority" : "consequence");
+      startedAt.current = draftSnapshot.startedAt;
     }
     setShowResume(false);
   }
 
   function startFresh() {
     setShowResume(false);
-    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    clearVersionedAssessmentState(STORAGE_KEY);
+    setDraftSnapshot(null);
   }
 
   async function runChallenge(challengeStage: string): Promise<ChallengeResult | null> {
@@ -234,6 +244,7 @@ const FastDiagnosticPage: NextPage = () => {
       }
       const publicResult = json as FastDiagnosticResult;
       setResult(publicResult);
+      clearVersionedAssessmentState(STORAGE_KEY);
       try { sessionStorage.setItem("aol_fast_result", JSON.stringify(publicResult)); } catch { /* ignore */ }
       track("fast_diagnostic_completed", { committed: commitmentValue, elapsed_seconds: Math.round((Date.now() - startedAt.current) / 1000) });
       if (publicResult.recoveryQuestion) { setStage("recovery"); return; }
@@ -249,7 +260,7 @@ const FastDiagnosticPage: NextPage = () => {
     setCommitted(false); setResult(null); setError(""); setChallenge(null); setLiveHint("");
     startedAt.current = Date.now();
     try { sessionStorage.removeItem("aol_fast_result"); } catch { /* ignore */ }
-    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    clearVersionedAssessmentState(STORAGE_KEY);
   }
 
   const an = result?.anchorNarrative;
@@ -490,6 +501,20 @@ const FastDiagnosticPage: NextPage = () => {
               {/* CTA */}
               {/* ── Email capture ─── */}
               <ResultEmailCapture source="fast_diagnostic" resultRef={result.caseRef} />
+
+              <details style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
+                <summary style={{ cursor: "pointer", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
+                  How this was determined
+                </summary>
+                <div style={{ marginTop: "1rem", display: "grid", gap: "0.9rem" }}>
+                  <p style={{ ...serif, fontSize: "0.96rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
+                    You indicated: {answers.decision || "an unresolved decision"}, under authority held by {answers.claimedOwner || "an unclear owner"}, with consequence described as {answers.consequence || "increasing cost"}.
+                  </p>
+                  <p style={{ ...serif, fontSize: "0.96rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
+                    This combination typically produces decision drift because the structure carrying the decision is weaker than the urgency surrounding it.
+                  </p>
+                </div>
+              </details>
 
               <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                 <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginBottom: "1rem" }}>

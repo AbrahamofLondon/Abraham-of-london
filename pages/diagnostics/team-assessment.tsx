@@ -71,6 +71,15 @@ import BoundaryProximityLine, {
 } from "@/components/diagnostics/results/ThresholdProximityLine";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
+import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import DualAxisPromptCard from "@/components/diagnostics/DualAxisPromptCard";
+import type { DualAxisAnswer } from "@/lib/alignment/types";
+import {
+  clearVersionedAssessmentState,
+  loadVersionedAssessmentState,
+  saveVersionedAssessmentState,
+} from "@/lib/client/assessment-state";
+import { detectDualAxisIntegrityChallenge } from "@/lib/client/assessment-integrity";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -128,11 +137,27 @@ const DOMAINS: Domain[] = [
 ];
 
 type Phase = "identity" | "leader" | "reality" | "result";
-type ScoreMap = Record<string, DiagnosticAnswerValue>;
+type ScoreMap = Record<string, DualAxisAnswer>;
 type IdentityForm = {
   respondentName: string; respondentEmail: string; respondentRole: string;
   organisation: string; teamName: string; teamSize: string; notes: string;
 };
+type TeamDraftSnapshot = {
+  phase: "identity" | "leader" | "reality";
+  identity: IdentityForm;
+  leaderScores: ScoreMap;
+  realityScores: ScoreMap;
+  teamReflections: {
+    confidenceBaseline: number;
+    falseAssumption: string;
+    showScoresReaction: string;
+  };
+  leaderPage: number;
+  realityPage: number;
+  startedAt: number;
+};
+const TEAM_STORAGE_KEY = "aol-team-assessment-state";
+const TEAM_STORAGE_VERSION = "2026-04-standardized";
 
 type DomainGap = {
   domain: string; label: string;
@@ -151,9 +176,26 @@ function qKey(phase: "leader" | "reality", domainId: string, idx: number) {
   return `${phase}_${domainId}_${idx}`;
 }
 
+function defaultAxisAnswer(): DualAxisAnswer {
+  return { resonance: 5, certainty: 5 };
+}
+
+function isAnswered(answer: DualAxisAnswer | undefined) {
+  return Boolean(answer) && !(answer!.resonance === 5 && answer!.certainty === 5);
+}
+
+function toDiagnosticValue(answer: DualAxisAnswer | undefined): DiagnosticAnswerValue {
+  if (!answer) return 3;
+  const mapped = Math.round(answer.resonance / 2);
+  return Math.min(5, Math.max(1, mapped === 0 ? 1 : mapped)) as DiagnosticAnswerValue;
+}
+
 function domainPct(scores: ScoreMap, phase: "leader" | "reality", domainId: string): number {
-  const vals: number[] = [0, 1, 2].map(i => (scores[qKey(phase, domainId, i)] ?? 0) as number);
-  const answered = vals.filter(v => v > 0);
+  const vals = [0, 1, 2]
+    .map((i) => scores[qKey(phase, domainId, i)])
+    .filter(isAnswered)
+    .map((answer) => toDiagnosticValue(answer));
+  const answered = vals.filter((v) => v > 0);
   if (!answered.length) return 0;
   return Math.round((answered.reduce((s, v) => s + v, 0) / (answered.length * 5)) * 100);
 }
@@ -298,51 +340,13 @@ const labelStyle: React.CSSProperties = {
   color: "rgba(255,255,255,0.26)",
 };
 
-const SCORE_LABELS: Record<DiagnosticAnswerValue, string> = {
-  1: "Strongly disagree", 2: "Disagree", 3: "Mixed", 4: "Agree", 5: "Strongly agree",
-};
-
-function ScoreSelector({ value, onChange, accent = "gold" }: {
-  value: DiagnosticAnswerValue | 0;
-  onChange: (v: DiagnosticAnswerValue) => void;
-  accent?: "gold" | "slate";
-}) {
-  return (
-    <div className="flex gap-1.5 mt-3">
-      {([1, 2, 3, 4, 5] as DiagnosticAnswerValue[]).map(n => {
-        const isActive = value === n;
-        const ac = accent === "gold"
-          ? { border: `${GOLD}55`, bg: `${GOLD}12`, text: GOLD }
-          : { border: "rgba(148,163,184,0.40)", bg: "rgba(148,163,184,0.08)", text: "rgba(203,213,225,0.90)" };
-        return (
-          <button key={n} type="button" onClick={() => onChange(n)} title={SCORE_LABELS[n]}
-            style={{
-              flex: 1, minHeight: "44px", padding: "8px 4px", textAlign: "center",
-              border: `1px solid ${isActive ? ac.border : "rgba(255,255,255,0.07)"}`,
-              backgroundColor: isActive ? ac.bg : "rgba(255,255,255,0.01)",
-              color: isActive ? ac.text : "rgba(255,255,255,0.30)",
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "9px", fontWeight: isActive ? 600 : 400,
-              cursor: "pointer", transition: "all 200ms ease",
-            }}
-            onMouseEnter={e => { if (!isActive) { (e.currentTarget as HTMLButtonElement).style.borderColor = `${GOLD}28`; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.55)"; } }}
-            onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.07)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.30)"; } }}
-          >
-            {n}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 function QuestionBlock({ domain, phase, scores, onScore }: {
   domain: Domain; phase: "leader" | "reality"; scores: ScoreMap;
-  onScore: (key: string, value: DiagnosticAnswerValue) => void;
+  onScore: (key: string, value: DualAxisAnswer) => void;
 }) {
   const Icon = domain.icon;
   const prefix = phase === "leader" ? domain.leaderPrefix : domain.realityPrefix;
-  const answered = [0, 1, 2].filter(idx => (scores[qKey(phase, domain.id, idx)] ?? 0) > 0).length;
+  const answered = [0, 1, 2].filter((idx) => isAnswered(scores[qKey(phase, domain.id, idx)])).length;
   return (
     <div style={{ border: "1px solid rgba(255,255,255,0.062)", backgroundColor: "rgb(5 5 7)" }}>
       <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
@@ -355,17 +359,16 @@ function QuestionBlock({ domain, phase, scores, onScore }: {
       <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
         {domain.prompts.map((prompt, idx) => {
           const key = qKey(phase, domain.id, idx);
-          const val = (scores[key] ?? 0) as DiagnosticAnswerValue | 0;
+          const val = scores[key] ?? defaultAxisAnswer();
           return (
             <div key={key} style={{ padding: "1rem 1.5rem" }}>
-              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.60, color: "rgba(255,255,255,0.65)" }}>
-                <span style={{ color: "rgba(255,255,255,0.30)", marginRight: "0.35rem" }}>{prefix}</span>{prompt}
-              </p>
-              <div className="flex items-center justify-between mt-1 mb-1">
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Strongly disagree</span>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Strongly agree</span>
-              </div>
-              <ScoreSelector value={val} onChange={v => onScore(key, v)} accent={phase === "reality" ? "slate" : "gold"} />
+              <DualAxisPromptCard
+                domainLabel={domain.label}
+                statement={`${prefix} ${prompt}`}
+                value={val}
+                touched={isAnswered(scores[key])}
+                onChange={(next) => onScore(key, next)}
+              />
             </div>
           );
         })}
@@ -422,6 +425,13 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             </div>
             <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Overall gap</div>
           </div>
+        </div>
+
+        <div className="mt-6">
+          <ResultEmailCapture
+            source="team_assessment"
+            resultRef={submitResult && submitResult.ok ? submitResult.diagnosticRef : reading.title}
+          />
         </div>
       </div>
 
@@ -496,6 +506,36 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             <Eyebrow>Immediate direction</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.decisionObject.action}</p>
           </div>
+
+          <details style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
+            <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+              How this was determined
+            </summary>
+            <div className="mt-5 space-y-5">
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>You indicated</div>
+                <ul className="mt-3 space-y-2">
+                  {gaps.slice(0, 3).map((gap) => (
+                    <li key={gap.domain} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
+                      {gap.label}: leadership {gap.leaderPct}% vs estimated team reality {gap.realityPct}%
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Contradiction mapping</div>
+                <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
+                  The reading compares how leadership experiences the team against how leadership believes the team would describe itself. The gap, not the raw score alone, drives the diagnosis.
+                </p>
+              </div>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Pattern trigger explanation</div>
+                <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
+                  This combination produces {reading.title.toLowerCase()} because the largest divergence sits in {reading.urgentDomain ?? "the dominant domain"}, while overall leader perception and operating reality remain {gapAbs} points apart.
+                </p>
+              </div>
+            </div>
+          </details>
 
           {/* ── Anchor-driven escalation hook ─── */}
           <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.5rem" }}>
@@ -611,6 +651,11 @@ export default function TeamAssessmentPage() {
     showScoresReaction: "",
   });
   const [challenge, setChallenge] = React.useState<ChallengeResult | null>(null);
+  const [leaderPage, setLeaderPage] = React.useState(0);
+  const [realityPage, setRealityPage] = React.useState(0);
+  const [showResume, setShowResume] = React.useState(false);
+  const [draftSnapshot, setDraftSnapshot] = React.useState<TeamDraftSnapshot | null>(null);
+  const startedAtRef = React.useRef(Date.now());
 
   async function runTeamChallenge(stage: string, extraAnswers?: Record<string, unknown>): Promise<ChallengeResult | null> {
     setChallenge(null);
@@ -641,30 +686,33 @@ export default function TeamAssessmentPage() {
     }
   }
 
-  // ── localStorage persistence ──────────────────────────────────────────────
-  const TEAM_STORAGE_KEY = "aol_team_draft";
-
   React.useEffect(() => {
-    try {
-      const raw = localStorage.getItem(TEAM_STORAGE_KEY);
-      if (!raw) return;
-      const saved = JSON.parse(raw);
-      if (saved.identity) setIdentity(saved.identity);
-      if (saved.leaderScores) setLeaderScores(saved.leaderScores);
-      if (saved.realityScores) setRealityScores(saved.realityScores);
-      if (saved.teamReflections) setTeamReflections(saved.teamReflections);
-    } catch { /* ignore */ }
+    const saved = loadVersionedAssessmentState<TeamDraftSnapshot>(
+      TEAM_STORAGE_KEY,
+      TEAM_STORAGE_VERSION,
+    );
+    if (!saved) return;
+    setDraftSnapshot(saved);
+    setShowResume(true);
   }, []);
 
   React.useEffect(() => {
     if (phase === "result") return;
     const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify({ identity, leaderScores, realityScores, teamReflections }));
-      } catch { /* ignore */ }
+      saveVersionedAssessmentState(TEAM_STORAGE_KEY, TEAM_STORAGE_VERSION, {
+        phase,
+        identity,
+        leaderScores,
+        realityScores,
+        teamReflections,
+        leaderPage,
+        realityPage,
+        startedAt: startedAtRef.current,
+        timestamp: new Date().toISOString(),
+      });
     }, 800);
     return () => clearTimeout(timer);
-  }, [identity, leaderScores, realityScores, teamReflections, phase]);
+  }, [identity, leaderScores, realityScores, teamReflections, phase, leaderPage, realityPage]);
 
   React.useEffect(() => {
     trackStageStart("team");
@@ -703,15 +751,38 @@ export default function TeamAssessmentPage() {
     setConstitutionalThread(readConstitutionalThread());
   }, []);
 
-  function setLS(key: string, v: DiagnosticAnswerValue) { setLeaderScores(prev => ({ ...prev, [key]: v })); }
-  function setRS(key: string, v: DiagnosticAnswerValue) { setRealityScores(prev => ({ ...prev, [key]: v })); }
+  function resumeDraft() {
+    if (!draftSnapshot) return;
+    setPhase(draftSnapshot.phase);
+    setIdentity(draftSnapshot.identity);
+    setLeaderScores(draftSnapshot.leaderScores);
+    setRealityScores(draftSnapshot.realityScores);
+    setTeamReflections(draftSnapshot.teamReflections);
+    setLeaderPage(draftSnapshot.leaderPage);
+    setRealityPage(draftSnapshot.realityPage);
+    startedAtRef.current = draftSnapshot.startedAt;
+    setShowResume(false);
+  }
 
-  function leaderComplete() { return DOMAINS.every(d => [0, 1, 2].every(idx => (leaderScores[qKey("leader", d.id, idx)] ?? 0) > 0)); }
-  function realityComplete() { return DOMAINS.every(d => [0, 1, 2].every(idx => (realityScores[qKey("reality", d.id, idx)] ?? 0) > 0)); }
+  function discardDraft() {
+    clearVersionedAssessmentState(TEAM_STORAGE_KEY);
+    setDraftSnapshot(null);
+    setShowResume(false);
+  }
+
+  function setLS(key: string, v: DualAxisAnswer) { setLeaderScores(prev => ({ ...prev, [key]: v })); }
+  function setRS(key: string, v: DualAxisAnswer) { setRealityScores(prev => ({ ...prev, [key]: v })); }
+
+  function leaderComplete() { return DOMAINS.every(d => [0, 1, 2].every(idx => isAnswered(leaderScores[qKey("leader", d.id, idx)]))); }
+  function realityComplete() { return DOMAINS.every(d => [0, 1, 2].every(idx => isAnswered(realityScores[qKey("reality", d.id, idx)]))); }
+  function leaderGroupComplete(group: number) { return DOMAINS.slice(group * 2, group * 2 + 2).every(d => [0, 1, 2].every(idx => isAnswered(leaderScores[qKey("leader", d.id, idx)]))); }
+  function realityGroupComplete(group: number) { return DOMAINS.slice(group * 2, group * 2 + 2).every(d => [0, 1, 2].every(idx => isAnswered(realityScores[qKey("reality", d.id, idx)]))); }
 
   function ovPct(p: "leader" | "reality"): number {
     const scores = p === "leader" ? leaderScores : realityScores;
-    const all: number[] = DOMAINS.flatMap(d => [0, 1, 2].map(idx => (scores[qKey(p, d.id, idx)] ?? 0) as number));
+    const all = DOMAINS.flatMap((d) => [0, 1, 2].map((idx) => scores[qKey(p, d.id, idx)]))
+      .filter(isAnswered)
+      .map((answer) => toDiagnosticValue(answer));
     const ans = all.filter(v => v > 0);
     if (!ans.length) return 0;
     return Math.round((ans.reduce((s, v) => s + v, 0) / (ans.length * 5)) * 100);
@@ -762,15 +833,35 @@ export default function TeamAssessmentPage() {
       }),
     [constitutionalThread, gaps, overallLeader, overallReality],
   );
+  const leaderDomains = DOMAINS.slice(leaderPage * 2, leaderPage * 2 + 2);
+  const realityDomains = DOMAINS.slice(realityPage * 2, realityPage * 2 + 2);
 
   function doAdvance(to: Phase) {
     setChallenge(null);
-    setDirection(1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to);
+    setDirection(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setPhase(to);
   }
 
   async function advance(to: Phase) {
     setChallenge(null);
+    if (to === "leader") {
+      setLeaderPage(0);
+    }
+    if (to === "reality") {
+      setRealityPage(0);
+    }
     if (to === "result" && realityComplete()) {
+      const integrityHit = detectDualAxisIntegrityChallenge({
+        answers: realityScores,
+        minimumAnswers: 6,
+        startedAt: startedAtRef.current,
+        submittedAt: Date.now(),
+      });
+      if (integrityHit) {
+        setChallenge(integrityHit);
+        return;
+      }
       const hit = await runTeamChallenge("pre_result");
       if (!hit) { doAdvance(to); return; }
       // Challenge fired — card visible. Blocked: user revises. Can proceed: user clicks Accept.
@@ -785,8 +876,8 @@ export default function TeamAssessmentPage() {
     const criticalGaps = gaps.filter((gap) => gap.gapSeverity === "CRITICAL");
     const highGaps = gaps.filter((gap) => gap.gapSeverity === "HIGH");
     const answers: DiagnosticAnswer[] = [
-      ...DOMAINS.flatMap(d => [0, 1, 2].map(idx => ({ sectionId: d.id, questionId: qKey("leader", d.id, idx), prompt: `[Leader] ${d.leaderPrefix} ${d.prompts[idx]}`, value: (leaderScores[qKey("leader", d.id, idx)] ?? 3) as DiagnosticAnswerValue }))),
-      ...DOMAINS.flatMap(d => [0, 1, 2].map(idx => ({ sectionId: d.id, questionId: qKey("reality", d.id, idx), prompt: `[Reality] ${d.realityPrefix} ${d.prompts[idx]}`, value: (realityScores[qKey("reality", d.id, idx)] ?? 3) as DiagnosticAnswerValue }))),
+      ...DOMAINS.flatMap(d => [0, 1, 2].map(idx => ({ sectionId: d.id, questionId: qKey("leader", d.id, idx), prompt: `[Leader] ${d.leaderPrefix} ${d.prompts[idx]}`, value: toDiagnosticValue(leaderScores[qKey("leader", d.id, idx)]) }))),
+      ...DOMAINS.flatMap(d => [0, 1, 2].map(idx => ({ sectionId: d.id, questionId: qKey("reality", d.id, idx), prompt: `[Reality] ${d.realityPrefix} ${d.prompts[idx]}`, value: toDiagnosticValue(realityScores[qKey("reality", d.id, idx)]) }))),
     ];
     const totalScore = answers.reduce((s, a) => s + a.value, 0);
     const maxScore   = answers.length * 5;
@@ -833,6 +924,7 @@ export default function TeamAssessmentPage() {
       },
     });
     setSubmitResult(res);
+    clearVersionedAssessmentState(TEAM_STORAGE_KEY);
     trackStageComplete("team", "diagnostic", "/diagnostics/enterprise-assessment");
 
     // Register pressure loop for follow-up
@@ -1059,6 +1151,25 @@ export default function TeamAssessmentPage() {
                     </p>
                   </div>
 
+                  {showResume ? (
+                    <div style={{ marginTop: "1.5rem", padding: "1.25rem", border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06` }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                        Resume your assessment?
+                      </div>
+                      <p style={{ marginTop: "0.6rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.46)" }}>
+                        A saved team reading is available on this device.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <button type="button" onClick={resumeDraft} style={{ padding: "10px 18px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                          Resume
+                        </button>
+                        <button type="button" onClick={discardDraft} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.42)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                          Start fresh
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+
                   <button type="button" onClick={() => advance("leader")} style={{ marginTop: "1.75rem", padding: "13px 28px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
                     onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; }}
                     onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; }}
@@ -1077,20 +1188,48 @@ export default function TeamAssessmentPage() {
                   <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.70, color: "rgba(255,255,255,0.38)", fontStyle: "italic", maxWidth: "48ch" }}>Answer from your genuine current observation — not your aspirations. The honest read is the diagnostic instrument.</p>
 
                   <div className="space-y-4 mt-8">
-                    {DOMAINS.map(d => <QuestionBlock key={d.id} domain={d} phase="leader" scores={leaderScores} onScore={setLS} />)}
+                    {leaderDomains.map(d => <QuestionBlock key={d.id} domain={d} phase="leader" scores={leaderScores} onScore={setLS} />)}
                   </div>
+
+                  {challenge && (
+                    <div style={{ marginTop: "1.5rem" }}>
+                      <DecisionChallengeCard
+                        challenge={challenge}
+                        onRevise={() => setChallenge(null)}
+                        onAccept={() => {
+                          setChallenge(null);
+                          if (leaderPage === 0) {
+                            setLeaderPage(1);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                            return;
+                          }
+                          void advance("reality");
+                        }}
+                      />
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                     <button type="button" onClick={() => retreat("identity")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
                       <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
                     </button>
                     <div style={{ textAlign: "center" }}>
-                      {!leaderComplete() && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 12 questions to continue</p>}
-                      <button type="button" onClick={() => leaderComplete() && advance("reality")} disabled={!leaderComplete()} style={{ padding: "11px 24px", border: `1px solid ${leaderComplete() ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: leaderComplete() ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: leaderComplete() ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: leaderComplete() ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
-                        onMouseEnter={e => { if (leaderComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
-                        onMouseLeave={e => { if (leaderComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
+                      {!leaderGroupComplete(leaderPage) && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
+                      <button type="button" onClick={() => {
+                        if (!leaderGroupComplete(leaderPage)) return;
+                        if (leaderPage === 0) {
+                          const hit = detectDualAxisIntegrityChallenge({ answers: Object.fromEntries(leaderDomains.flatMap((d) => [0,1,2].map((idx) => [qKey("leader", d.id, idx), leaderScores[qKey("leader", d.id, idx)] ?? defaultAxisAnswer()]))) as Record<string, DualAxisAnswer>, minimumAnswers: 6, startedAt: startedAtRef.current, submittedAt: Date.now() });
+                          if (hit) { setChallenge(hit); return; }
+                          setLeaderPage(1);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                          return;
+                        }
+                        void advance("reality");
+                      }} disabled={!leaderGroupComplete(leaderPage)} style={{ padding: "11px 24px", border: `1px solid ${leaderGroupComplete(leaderPage) ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: leaderGroupComplete(leaderPage) ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: leaderGroupComplete(leaderPage) ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: leaderGroupComplete(leaderPage) ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
+                        onMouseEnter={e => { if (leaderGroupComplete(leaderPage)) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
+                        onMouseLeave={e => { if (leaderGroupComplete(leaderPage)) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                       >
-                        Continue the Assessment <ArrowRight style={{ width: "11px", height: "11px" }} />
+                        {leaderPage === 0 ? "Continue to remaining domains" : "Continue the Assessment"} <ArrowRight style={{ width: "11px", height: "11px" }} />
                       </button>
                     </div>
                   </div>
@@ -1111,7 +1250,7 @@ export default function TeamAssessmentPage() {
                   </div>
 
                   <div className="space-y-4 mt-8">
-                    {DOMAINS.map(d => <QuestionBlock key={d.id} domain={d} phase="reality" scores={realityScores} onScore={setRS} />)}
+                    {realityDomains.map(d => <QuestionBlock key={d.id} domain={d} phase="reality" scores={realityScores} onScore={setRS} />)}
                   </div>
 
                   {/* Adaptive free-text questions from spine */}
@@ -1158,16 +1297,24 @@ export default function TeamAssessmentPage() {
                       <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
                     </button>
                     <div style={{ textAlign: "center" }}>
-                      {!realityComplete() && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 12 questions to generate the gap analysis</p>}
+                      {!realityGroupComplete(realityPage) && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
                       <button type="button" onClick={() => {
+                        if (!realityGroupComplete(realityPage)) return;
+                        if (realityPage === 0) {
+                          const hit = detectDualAxisIntegrityChallenge({ answers: Object.fromEntries(realityDomains.flatMap((d) => [0,1,2].map((idx) => [qKey("reality", d.id, idx), realityScores[qKey("reality", d.id, idx)] ?? defaultAxisAnswer()]))) as Record<string, DualAxisAnswer>, minimumAnswers: 6, startedAt: startedAtRef.current, submittedAt: Date.now() });
+                          if (hit) { setChallenge(hit); return; }
+                          setRealityPage(1);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                          return;
+                        }
                         if (!realityComplete()) return;
                         if (adaptiveQuestions.length > 0 && !showAdaptive) { setShowAdaptive(true); return; }
                         void advance("result");
-                      }} disabled={!realityComplete()} style={{ padding: "11px 24px", border: `1px solid ${realityComplete() ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: realityComplete() ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: realityComplete() ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: realityComplete() ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
-                        onMouseEnter={e => { if (realityComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
-                        onMouseLeave={e => { if (realityComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
+                      }} disabled={!realityGroupComplete(realityPage)} style={{ padding: "11px 24px", border: `1px solid ${realityGroupComplete(realityPage) ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: realityGroupComplete(realityPage) ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: realityGroupComplete(realityPage) ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: realityGroupComplete(realityPage) ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
+                        onMouseEnter={e => { if (realityGroupComplete(realityPage)) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
+                        onMouseLeave={e => { if (realityGroupComplete(realityPage)) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                       >
-                        {showAdaptive ? "Generate gap analysis" : adaptiveQuestions.length > 0 ? "Add structural evidence" : "Generate gap analysis"} <ArrowRight style={{ width: "11px", height: "11px" }} />
+                        {realityPage === 0 ? "Continue to remaining domains" : showAdaptive ? "Generate gap analysis" : adaptiveQuestions.length > 0 ? "Add structural evidence" : "Generate gap analysis"} <ArrowRight style={{ width: "11px", height: "11px" }} />
                       </button>
                     </div>
                   </div>
