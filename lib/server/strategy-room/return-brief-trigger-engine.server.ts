@@ -168,6 +168,7 @@ function composeEmailHtml(
   trajectory: string,
   briefUrl: string,
 ): string {
+  const rootUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.abrahamoflondon.org";
   const trajectoryColor =
     trajectory === "DETERIORATING" ? "#FC9999"
     : trajectory === "FRAGILE" ? "#C9A96E"
@@ -188,6 +189,7 @@ function composeEmailHtml(
 <p style="font-size:15px;line-height:1.7;color:rgba(255,255,255,0.65);margin-top:16px;"><strong>This decision is still open.</strong></p>
 <a href="${briefUrl}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:#F5F5F5;color:#0B0B0B;font-family:monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">View briefing</a>
 <p style="margin-top:32px;font-family:monospace;font-size:9px;letter-spacing:0.06em;color:rgba(255,255,255,0.20);">Abraham of London · Decision Integrity System</p>
+<p style="margin-top:8px;font-family:monospace;font-size:8px;color:rgba(255,255,255,0.12);"><a href="${rootUrl}/api/user/unsubscribe" style="color:rgba(255,255,255,0.15);text-decoration:underline;">Unsubscribe</a></p>
 </div>
 </body>
 </html>`;
