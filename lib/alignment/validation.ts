@@ -9,6 +9,12 @@ const dualAxisAnswerSchema = z.object({
 export const purposeAlignmentInputSchema = z.object({
   answers: z.record(z.string(), dualAxisAnswerSchema),
   notes: z.string().trim().max(5000).optional().or(z.literal("")),
+  clientMeta: z
+    .object({
+      startedAt: z.string().datetime().optional().nullable(),
+      submittedAt: z.string().datetime().optional().nullable(),
+    })
+    .optional(),
   reflections: z
     .object({
       avoidedDecision: z.string().trim().max(1000).nullable().optional(),

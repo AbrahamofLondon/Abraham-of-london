@@ -15,6 +15,9 @@ import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 import { extractPurposeAnchors } from "@/lib/server/decision/anchor-extractor.server";
 import { detectAnchorContradictions } from "@/lib/server/decision/contradiction-engine.server";
 import { composeAnchorNarrative } from "@/lib/server/decision/narrative-engine.server";
+import { framePurposeSocialProof } from "@/lib/server/social-proof/aggregate-patterns.server";
+import { detectAssessmentIntegrity } from "@/lib/server/decision/challenge-engine.server";
+import type { PurposeProfileResult } from "@/lib/alignment/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,6 +42,40 @@ function internalError(message: string) {
     },
     { status: 500 },
   );
+}
+
+function roundToNearest(value: number, increment: number) {
+  return Math.round(value / increment) * increment;
+}
+
+function degradePurposeResultPrecision(result: PurposeProfileResult): PurposeProfileResult {
+  return {
+    ...result,
+    totalScore: roundToNearest(result.totalScore, 5),
+    percent: roundToNearest(result.percent, 10),
+    domainProfiles: result.domainProfiles.map((domain) => ({
+      ...domain,
+      resonance: roundToNearest(domain.resonance, 2),
+      certainty: roundToNearest(domain.certainty, 2),
+      weighted: roundToNearest(domain.weighted, 2),
+      percent: roundToNearest(domain.percent, 10),
+    })),
+    domainStates: result.domainStates?.map((state) => ({
+      ...state,
+      resonanceMean: roundToNearest(state.resonanceMean, 2),
+      certaintyMean: roundToNearest(state.certaintyMean, 2),
+      alignmentScore: roundToNearest(state.alignmentScore, 10),
+      confidenceGap: roundToNearest(state.confidenceGap, 2),
+    })),
+    secondaryPattern: null,
+    evidence: result.evidence
+      ? {
+          sharpestWeakSignal: result.evidence.sharpestWeakSignal,
+          strongestStabilisingSignal: null,
+          contradictionEvidence: result.evidence.contradictionEvidence.slice(0, 1),
+        }
+      : result.evidence,
+  };
 }
 
 export async function GET(req: NextRequest) {
@@ -79,10 +116,17 @@ export async function POST(req: NextRequest) {
       reflections: parsed.reflections ?? null,
     };
 
-    const result = scorePurposeProfile({
+    const integrity = detectAssessmentIntegrity({
+      answers: parsed.answers,
+      startedAt: parsed.clientMeta?.startedAt ?? null,
+      submittedAt: parsed.clientMeta?.submittedAt ?? null,
+    });
+
+    const rawResult = scorePurposeProfile({
       answers: parsed.answers,
       context,
     });
+    const result = integrity.shouldDegrade ? degradePurposeResultPrecision(rawResult) : rawResult;
 
     const assessmentId = await createPurposeAlignmentAssessment({
       sessionKey,
@@ -151,6 +195,7 @@ export async function POST(req: NextRequest) {
       result,
       authorityPacket,
       anchorNarrative,
+      socialProof: framePurposeSocialProof(result),
       isPreview: true,
       nextSteps: {
         exploreStrategyRoom: "/strategy-room",

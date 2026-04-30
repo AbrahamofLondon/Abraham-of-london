@@ -41,6 +41,11 @@ export type ChallengeInput = {
   answers: Record<string, unknown>;
 };
 
+export type AssessmentIntegritySignal = {
+  shouldDegrade: boolean;
+  reasons: Array<"identical_patterns" | "extreme_uniformity" | "unnatural_timing">;
+};
+
 // ─── Detection helpers ───────────────────────────────────────────────────────
 
 const VAGUE_PATTERNS = [
@@ -615,4 +620,55 @@ export function evaluateChallenge(
   }
 
   return result;
+}
+
+export function detectAssessmentIntegrity(params: {
+  answers: Record<string, { resonance: number; certainty: number }>;
+  startedAt?: string | null;
+  submittedAt?: string | null;
+}): AssessmentIntegritySignal {
+  const values = Object.values(params.answers);
+  const reasons: AssessmentIntegritySignal["reasons"] = [];
+
+  if (values.length === 0) {
+    return { shouldDegrade: false, reasons };
+  }
+
+  const identicalPairs = new Set(values.map((answer) => `${answer.resonance}:${answer.certainty}`));
+  if (identicalPairs.size <= 2) {
+    reasons.push("identical_patterns");
+  }
+
+  const resonanceSpread = Math.max(...values.map((answer) => answer.resonance)) -
+    Math.min(...values.map((answer) => answer.resonance));
+  const certaintySpread = Math.max(...values.map((answer) => answer.certainty)) -
+    Math.min(...values.map((answer) => answer.certainty));
+  const extremeCount = values.filter(
+    (answer) =>
+      (answer.resonance === 0 || answer.resonance === 10) &&
+      (answer.certainty === 0 || answer.certainty === 10),
+  ).length;
+
+  if ((resonanceSpread <= 1 && certaintySpread <= 1) || extremeCount >= Math.ceil(values.length * 0.7)) {
+    reasons.push("extreme_uniformity");
+  }
+
+  if (params.startedAt && params.submittedAt) {
+    const started = Date.parse(params.startedAt);
+    const submitted = Date.parse(params.submittedAt);
+
+    if (Number.isFinite(started) && Number.isFinite(submitted)) {
+      const elapsedMs = submitted - started;
+      const msPerResponse = elapsedMs / values.length;
+
+      if (elapsedMs > 0 && msPerResponse < 900) {
+        reasons.push("unnatural_timing");
+      }
+    }
+  }
+
+  return {
+    shouldDegrade: reasons.length >= 2,
+    reasons,
+  };
 }
