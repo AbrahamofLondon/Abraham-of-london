@@ -433,6 +433,9 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             resultRef={submitResult && submitResult.ok ? submitResult.diagnosticRef : reading.title}
           />
         </div>
+        <p style={{ marginTop: "1rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>
+          This pattern is commonly seen before structural correction. This reading can be tracked over time. Re-evaluate in 14 days to see whether the pattern improves or repeats.
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
@@ -1096,16 +1099,12 @@ export default function TeamAssessmentPage() {
 
                   <div className="grid gap-4 mt-8 sm:grid-cols-2">
                     {[
-                      { label: "Your name", key: "respondentName", type: "text", placeholder: "Full name" },
-                      { label: "Email", key: "respondentEmail", type: "email", placeholder: "email@org.com" },
-                      { label: "Your role", key: "respondentRole", type: "text", placeholder: "Founder, CEO, Director…" },
-                      { label: "Organisation", key: "organisation", type: "text", placeholder: "Company or institution" },
                       { label: "Team / unit name", key: "teamName", type: "text", placeholder: "Leadership team, ops, product…" },
-                      { label: "Approximate team size", key: "teamSize", type: "number", placeholder: "Number of members" },
+                      { label: "Your role", key: "respondentRole", type: "text", placeholder: "Founder, CEO, Director…" },
                     ].map(f => (
                       <div key={f.key}>
                         <label style={labelStyle}>{f.label}</label>
-                        <input type={f.type} value={identity[f.key as keyof IdentityForm]} onChange={e => setIdentity(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} style={inputStyle}
+                        <input type={f.type} value={identity[f.key as keyof IdentityForm]} onChange={e => setIdentity(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} style={{ ...inputStyle, minHeight: "44px", fontSize: "16px" }}
                           onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.035)"; }}
                           onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.025)"; }}
                         />
@@ -1113,11 +1112,32 @@ export default function TeamAssessmentPage() {
                     ))}
                     <div className="sm:col-span-2">
                       <label style={labelStyle}>Initial observations (optional)</label>
-                      <textarea value={identity.notes} onChange={e => setIdentity(prev => ({ ...prev, notes: e.target.value }))} rows={3} placeholder="Where are you seeing drift, friction, or execution weakness?" style={{ ...inputStyle, resize: "none", lineHeight: 1.75 }}
+                      <textarea value={identity.notes} onChange={e => setIdentity(prev => ({ ...prev, notes: e.target.value }))} rows={3} placeholder="Where are you seeing drift, friction, or execution weakness?" style={{ ...inputStyle, resize: "none", lineHeight: 1.75, minHeight: "44px", fontSize: "16px" }}
                         onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.035)"; }}
                         onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.025)"; }}
                       />
                     </div>
+                    <details className="sm:col-span-2" style={{ marginTop: "0.5rem" }}>
+                      <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                        Optional context
+                      </summary>
+                      <div className="grid gap-4 mt-4 sm:grid-cols-2">
+                        {[
+                          { label: "Your name", key: "respondentName", type: "text", placeholder: "Full name" },
+                          { label: "Email", key: "respondentEmail", type: "email", placeholder: "email@org.com" },
+                          { label: "Organisation", key: "organisation", type: "text", placeholder: "Company or institution" },
+                          { label: "Approximate team size", key: "teamSize", type: "number", placeholder: "Number of members" },
+                        ].map(f => (
+                          <div key={f.key}>
+                            <label style={labelStyle}>{f.label}</label>
+                            <input type={f.type} value={identity[f.key as keyof IdentityForm]} onChange={e => setIdentity(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} style={{ ...inputStyle, minHeight: "44px", fontSize: "16px" }}
+                              onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.035)"; }}
+                              onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.025)"; }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </details>
                   </div>
 
                   {/* Mode selection */}

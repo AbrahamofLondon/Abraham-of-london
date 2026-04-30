@@ -16,6 +16,7 @@ import {
   type AssessmentCurrentStep,
   type PurposeAssessmentSnapshot,
 } from "@/lib/client/assessment-state";
+import { detectDualAxisIntegrityChallenge } from "@/lib/client/assessment-integrity";
 
 type Props = {
   onScored?: (result: PurposeProfileResult, answers: Record<string, DualAxisAnswer>) => void;
@@ -141,10 +142,15 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   const [captureBusy, setCaptureBusy] = React.useState(false);
   const [captureEmail, setCaptureEmail] = React.useState("");
   const [captureMessage, setCaptureMessage] = React.useState("");
+  const [signalPage, setSignalPage] = React.useState(0);
   const [startedAt] = React.useState(() => new Date().toISOString());
+  const startedAtMs = React.useRef(Date.now());
   const pendingAdvanceRef = React.useRef<null | (() => void)>(null);
 
   React.useEffect(() => {
+    try {
+      if (sessionStorage.getItem("aol_purpose_fresh_session")) return;
+    } catch { /* ignore */ }
     const stored = loadAssessmentState();
     if (stored) setResumeState(stored);
   }, []);
@@ -209,6 +215,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   function discardResume() {
     clearAssessmentState();
     setResumeState(null);
+    try { sessionStorage.setItem("aol_purpose_fresh_session", "1"); } catch { /* ignore */ }
   }
 
   function dismissChallenge() {
@@ -506,70 +513,127 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
           </section>
         ) : null}
 
-        {phase === "signal" ? (
-          <section className={`grid gap-6 ${toneClassForStep(true)}`}>
-            <div className="rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">
-                    Signal capture
+        {phase === "signal" ? (() => {
+          const DOMAIN_GROUPS: AlignmentDomain[][] = [
+            ["identity", "decision"],
+            ["environment", "behaviour"],
+            ["emotional_order", "legacy"],
+          ];
+          const currentGroup = DOMAIN_GROUPS[signalPage] ?? DOMAIN_GROUPS[0]!;
+          const groupQuestions = PURPOSE_ALIGNMENT_QUESTIONS.filter((q) => currentGroup.includes(q.domain));
+          const groupTouched = groupQuestions.every((q) => touched[q.id]);
+          const isLastPage = signalPage === DOMAIN_GROUPS.length - 1;
+
+          return (
+            <section className={`grid gap-6 ${toneClassForStep(true)}`}>
+              <div className="rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">
+                      Signal {signalPage + 1} of {DOMAIN_GROUPS.length}
+                    </div>
+                    <h2 className="mt-3 font-serif text-3xl leading-tight text-neutral-950">
+                      Rate each statement for truth and certainty.
+                    </h2>
                   </div>
-                  <h2 className="mt-3 font-serif text-3xl leading-tight text-neutral-950">
-                    Rate each statement for truth and certainty.
-                  </h2>
+                  <div className="rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700">
+                    {touchedCount} / {PURPOSE_ALIGNMENT_QUESTIONS.length} conditions interrogated
+                  </div>
                 </div>
-                <div className="rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700">
-                  {touchedCount} / {PURPOSE_ALIGNMENT_QUESTIONS.length} conditions interrogated
-                </div>
-              </div>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600">
-                Low certainty softens the signal. High certainty hardens it. Wide gaps expose contradiction.
-              </p>
-            </div>
-
-            {(["identity", "decision", "environment", "behaviour", "emotional_order", "legacy"] as AlignmentDomain[]).map((domain) => (
-              <div key={domain} className="grid gap-4">
-                <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">
-                  {domainHeading(domain)}
-                </div>
-                {PURPOSE_ALIGNMENT_QUESTIONS.filter((question) => question.domain === domain).map((question) => (
-                  <DualAxisInput
-                    key={question.id}
-                    question={question}
-                    value={responses[question.id]!}
-                    touched={Boolean(touched[question.id])}
-                    onChange={(next) => updateResponse(question.id, next)}
-                  />
-                ))}
-              </div>
-            ))}
-
-            <div className="sticky bottom-3 z-20 rounded-[28px] border border-neutral-200 bg-white/95 p-4 shadow-lg backdrop-blur">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-neutral-700">
-                  Move only when every statement has been touched. Precision matters more than speed.
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600">
+                  Low certainty softens the signal. High certainty hardens it. Wide gaps expose contradiction.
                 </p>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPhase("context")}
-                    className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700"
-                  >
-                    Revise context
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleScore}
-                    disabled={!allSignalTouched || submitting}
-                    className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-30"
-                  >
-                    Continue to verdict
-                  </button>
+              </div>
+
+              {currentGroup.map((domain) => (
+                <div key={domain} className="grid gap-4">
+                  <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">
+                    {domainHeading(domain)}
+                  </div>
+                  {PURPOSE_ALIGNMENT_QUESTIONS.filter((question) => question.domain === domain).map((question) => (
+                    <DualAxisInput
+                      key={question.id}
+                      question={question}
+                      value={responses[question.id]!}
+                      touched={Boolean(touched[question.id])}
+                      onChange={(next) => updateResponse(question.id, next)}
+                    />
+                  ))}
+                </div>
+              ))}
+
+              <div className="sticky bottom-3 z-20 rounded-[28px] border border-neutral-200 bg-white/95 p-4 shadow-lg backdrop-blur">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-neutral-700">
+                    {isLastPage
+                      ? "Move only when every statement has been touched. Precision matters more than speed."
+                      : `${groupQuestions.length} statements in this group. Complete them to continue.`}
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        dismissChallenge();
+                        if (signalPage > 0) setSignalPage(signalPage - 1);
+                        else setPhase("context");
+                      }}
+                      className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700"
+                    >
+                      {signalPage > 0 ? "Previous" : "Revise context"}
+                    </button>
+                    {isLastPage ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const integrityHit = detectDualAxisIntegrityChallenge({
+                            answers: responses,
+                            startedAt: startedAtMs.current,
+                            submittedAt: Date.now(),
+                          });
+                          if (integrityHit) {
+                            setChallenge(integrityHit);
+                            queueAdvance(handleScore);
+                            return;
+                          }
+                          handleScore();
+                        }}
+                        disabled={!allSignalTouched || submitting}
+                        className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-30"
+                      >
+                        Continue to verdict
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (groupTouched) {
+                            const groupAnswers = Object.fromEntries(
+                              groupQuestions.map((q) => [q.id, responses[q.id]!]),
+                            );
+                            const integrityHit = detectDualAxisIntegrityChallenge({
+                              answers: groupAnswers,
+                              minimumAnswers: 4,
+                            });
+                            if (integrityHit) {
+                              setChallenge(integrityHit);
+                              queueAdvance(() => setSignalPage(signalPage + 1));
+                              return;
+                            }
+                            setSignalPage(signalPage + 1);
+                          }
+                        }}
+                        disabled={!groupTouched}
+                        className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-30"
+                      >
+                        Continue
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
-        ) : null}
+            </section>
+          );
+        })() : null}
 
         {phase === "result" && result ? (
           <section className={`grid gap-6 ${toneClassForStep(true)}`}>
@@ -589,6 +653,10 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                     {socialProof}
                   </p>
                 ) : null}
+
+                <div className="mt-8">
+                  <ResultEmailCapture source="purpose_alignment" resultRef={result.createdAt} />
+                </div>
 
                 {anchorNarrative ? (
                   <>
@@ -742,6 +810,10 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                     ) : null}
                   </div>
                 </section>
+
+                <p className="mt-8 text-sm leading-7 text-neutral-500" style={{ fontStyle: "italic" }}>
+                  This pattern is commonly seen before structural correction. This reading can be tracked over time. Re-evaluate in 14 days to see whether the pattern improves or repeats.
+                </p>
 
                 <section className="mt-10">
                   <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">Next pressure point</div>

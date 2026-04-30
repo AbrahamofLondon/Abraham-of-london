@@ -425,8 +425,12 @@ const FastDiagnosticPage: NextPage = () => {
 
         {/* Loading */}
         {stage === "loading" && (
-          <div className="flex items-center justify-center min-h-screen px-6">
-            <p style={{ color: "rgba(255,255,255,0.50)", fontSize: "0.95rem" }}>Preparing governed analysis...</p>
+          <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1.5rem" }}>Resolution</div>
+            <LoadingLine />
+            <div style={{ marginTop: "2rem", width: "200px", height: "3px", borderRadius: "2px", backgroundColor: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+              <div style={{ width: "50%", height: "100%", borderRadius: "2px", backgroundColor: GOLD, animation: "pulse 1.5s ease-in-out infinite" }} />
+            </div>
           </div>
         )}
 
@@ -537,6 +541,10 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               </details>
 
+              <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.30)", fontStyle: "italic", padding: "0.75rem 0" }}>
+                This pattern is commonly seen before structural correction. This reading can be tracked over time. Re-evaluate in 14 days to see whether the pattern improves or repeats.
+              </p>
+
               <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                 <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginBottom: "1rem" }}>
                   {an?.cta ?? "This is now structural, not situational."}
@@ -568,6 +576,25 @@ function ResultBlock({ label, children }: { label: string; children: React.React
         {children}
       </p>
     </div>
+  );
+}
+
+const LOADING_LINES = [
+  "Reading your decision pattern\u2026",
+  "Checking structural consistency\u2026",
+  "Preparing governed analysis\u2026",
+];
+
+function LoadingLine() {
+  const [index, setIndex] = React.useState(0);
+  React.useEffect(() => {
+    const timer = setInterval(() => setIndex((i) => (i + 1) % LOADING_LINES.length), 1400);
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.2rem, 3vw, 1.6rem)", lineHeight: 1.3, color: "rgba(255,255,255,0.70)", transition: "opacity 300ms" }}>
+      {LOADING_LINES[index]}
+    </p>
   );
 }
 

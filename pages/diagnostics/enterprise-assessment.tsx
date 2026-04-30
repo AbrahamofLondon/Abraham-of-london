@@ -487,6 +487,9 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             resultRef={submitResult && submitResult.ok ? submitResult.diagnosticRef : reading.patternTitle}
           />
         </div>
+        <p style={{ marginTop: "1rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>
+          This pattern is commonly seen before structural correction. This reading can be tracked over time. Re-evaluate in 14 days to see whether the pattern improves or repeats.
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
@@ -723,7 +726,7 @@ export default function EnterpriseAssessmentPage() {
   const [showResume, setShowResume] = React.useState(false);
   const [draftSnapshot, setDraftSnapshot] = React.useState<EnterpriseDraftSnapshot | null>(null);
   const startedAtRef = React.useRef(Date.now());
-  const recentDecisionReady = identity.recentDecision.trim().length >= 80;
+  const recentDecisionReady = identity.recentDecision.trim().length >= 40;
 
   async function runEnterpriseChallenge(stage: string): Promise<ChallengeResult | null> {
     setChallenge(null);
@@ -1151,7 +1154,7 @@ export default function EnterpriseAssessmentPage() {
                         onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
                       />
                       <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: recentDecisionReady ? "rgba(110,231,183,0.55)" : "rgba(255,255,255,0.22)" }}>
-                        {identity.recentDecision.trim().length}/80 minimum characters
+                        {identity.recentDecision.trim().length}/40 minimum characters
                       </p>
                     </div>
                   <div className="sm:col-span-2">

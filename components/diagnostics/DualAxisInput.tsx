@@ -73,7 +73,7 @@ export default function DualAxisInput({ question, value, touched, onChange }: Pr
                 certainty: value.certainty,
               })
             }
-            className="h-3 w-full cursor-pointer accent-neutral-900"
+            className="h-11 w-full cursor-pointer accent-neutral-900"
             aria-label={`${question.statement} resonance`}
           />
         </label>
@@ -95,7 +95,7 @@ export default function DualAxisInput({ question, value, touched, onChange }: Pr
                 certainty: Number(event.target.value),
               })
             }
-            className="h-3 w-full cursor-pointer accent-[#8a6a2f]"
+            className="h-11 w-full cursor-pointer accent-[#8a6a2f]"
             aria-label={`${question.statement} certainty`}
           />
         </label>

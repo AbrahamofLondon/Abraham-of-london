@@ -560,57 +560,64 @@ export default function ConstitutionalDiagnostic() {
                 resultRef={reportData!.reportId}
               />
             </div>
+
+            <p className="mt-6 text-sm leading-7 text-white/40" style={{ fontStyle: "italic" }}>
+              This pattern is commonly seen before structural correction. This reading can be tracked over time. Re-evaluate in 14 days to see whether the pattern improves or repeats.
+            </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-5">
-            <StatusTile title="State" value={routeSummary.route} tone={routeSummary.tone} />
-            <StatusTile title="Posture" value={report.posture} tone={routeSummary.tone} />
-            <StatusTile title="Readiness" value={report.readinessTier} tone={routeSummary.tone} />
-            <StatusTile title="Authority" value={report.authorityType} tone={routeSummary.tone} />
-            <StatusTile title="Escalation" value={decision.escalationAllowed ? "Available" : "Contained"} tone={decision.escalationAllowed ? "amber" : "neutral"} />
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-amber-400/70" />
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
-                  Executive reading
-                </span>
-              </div>
-
-              <p className="mt-4 text-sm leading-7 text-white/72">
-                {report.summary}
-              </p>
-
-              <div className="mt-5 space-y-3">
-                {report.keyFindings.map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm leading-7 text-white/68">
-                    <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              {decision.recommendedInterventions.length > 0 ? (
-                <div className="mt-6">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/38">
-                    Priority interventions
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {decision.recommendedInterventions.slice(0, 5).map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.14em] text-white/62"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
+          <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-amber-400/70" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
+                Executive reading
+              </span>
             </div>
 
+            <p className="mt-4 text-sm leading-7 text-white/72">
+              {report.summary}
+            </p>
+
+            <div className="mt-5 space-y-3">
+              {report.keyFindings.map((item) => (
+                <div key={item} className="flex items-start gap-3 text-sm leading-7 text-white/68">
+                  <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+
+            {decision.recommendedInterventions.length > 0 ? (
+              <div className="mt-6">
+                <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/38">
+                  Priority interventions
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {decision.recommendedInterventions.slice(0, 5).map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.14em] text-white/62"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          <details className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <summary className="cursor-pointer text-sm font-medium text-white">Advanced reading</summary>
+            <div className="mt-5 grid gap-4 md:grid-cols-5">
+              <StatusTile title="State" value={routeSummary.route} tone={routeSummary.tone} />
+              <StatusTile title="Posture" value={report.posture} tone={routeSummary.tone} />
+              <StatusTile title="Readiness" value={report.readinessTier} tone={routeSummary.tone} />
+              <StatusTile title="Authority" value={report.authorityType} tone={routeSummary.tone} />
+              <StatusTile title="Escalation" value={decision.escalationAllowed ? "Available" : "Contained"} tone={decision.escalationAllowed ? "amber" : "neutral"} />
+            </div>
+          </details>
+
+          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
               <div className="flex items-center gap-2">
                 <LayoutGrid className="h-4 w-4 text-amber-400/70" />

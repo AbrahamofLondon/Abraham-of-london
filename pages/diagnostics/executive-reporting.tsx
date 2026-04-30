@@ -11,9 +11,12 @@ import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/ca
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 import { trackExecGateView } from "@/lib/analytics/journey-client";
 
+/* ─── Design tokens ─────────────────────────────────────────────────────── */
+const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif" };
 
+/* ─── Types ──────────────────────────────────────────────────────────────── */
 type UserEvidence = {
   decision: string | null;
   blocker: string | null;
@@ -26,6 +29,7 @@ type UserEvidence = {
 
 type LadderItem = { key: string; label: string; completed: boolean };
 
+/* ─── Evidence loader ────────────────────────────────────────────────────── */
 function loadUserEvidence(): UserEvidence {
   const result: UserEvidence = {
     decision: null, blocker: null, consequence: null,
@@ -34,7 +38,6 @@ function loadUserEvidence(): UserEvidence {
   };
 
   try {
-    // Completed assessments
     const checks = [
       { key: "aol_fast_result", label: "fast" },
       { key: "purpose-alignment-result", label: "purpose" },
@@ -45,7 +48,6 @@ function loadUserEvidence(): UserEvidence {
       if (sessionStorage.getItem(c.key)) result.completedAssessments.push(c.label);
     }
 
-    // Fast diagnostic — primary evidence source
     const fast = sessionStorage.getItem("aol_fast_result");
     if (fast) {
       const parsed = JSON.parse(fast);
@@ -61,7 +63,6 @@ function loadUserEvidence(): UserEvidence {
       result.pattern = parsed?.anchorNarrative?.pattern || null;
     }
 
-    // Enterprise result — supplement or fallback
     const ent = sessionStorage.getItem("enterprise-assessment-result");
     if (ent) {
       const parsed = JSON.parse(ent);
@@ -71,7 +72,6 @@ function loadUserEvidence(): UserEvidence {
       if (!result.condition) result.condition = parsed?.band || null;
     }
 
-    // Purpose alignment — supplement
     const purpose = sessionStorage.getItem("purpose-alignment-result");
     if (purpose) {
       const parsed = JSON.parse(purpose);
@@ -79,7 +79,6 @@ function loadUserEvidence(): UserEvidence {
       if (!result.condition) result.condition = parsed?.conditionLabel || null;
     }
 
-    // Team assessment — supplement
     const team = sessionStorage.getItem("team-assessment-result");
     if (team) {
       const parsed = JSON.parse(team);
@@ -90,6 +89,12 @@ function loadUserEvidence(): UserEvidence {
   return result;
 }
 
+/* ─── Divider component ──────────────────────────────────────────────────── */
+function GoldDivider() {
+  return <div style={{ height: "1px", background: `linear-gradient(90deg, transparent 0%, ${GOLD}30 20%, ${GOLD}30 80%, transparent 100%)`, margin: "72px 0" }} />;
+}
+
+/* ─── Page ────────────────────────────────────────────────────────────────── */
 export default function ExecutiveReportingEntryPage() {
   const router = useRouter();
   const checkoutCancelled = router.query.checkout === "cancelled";
@@ -127,158 +132,175 @@ export default function ExecutiveReportingEntryPage() {
         <meta name="description" content="Executive Reporting is the consequence interpretation layer in the Abraham of London diagnostic ladder." />
       </Head>
 
-      <main style={{ backgroundColor: "#0B0B0B", minHeight: "100vh", color: "#F5F5F5" }}>
-        <div style={{ maxWidth: "680px", margin: "0 auto", padding: "120px 24px 96px" }}>
+      <main style={{ backgroundColor: "#050505", minHeight: "100vh", color: "#F5F5F5" }}>
+        <div style={{ maxWidth: "680px", margin: "0 auto", padding: "140px 24px 96px" }}>
 
           {/* ═══ 1. OPENING VERDICT ═══ */}
-          <div style={{ paddingBottom: "80px" }}>
-            <h1 style={{ ...serif, fontWeight: 500, fontSize: "clamp(32px, 5vw, 48px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "#F5F5F5" }}>
+          <section style={{ paddingBottom: "32px" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "28px" }}>
+              Executive Reporting
+            </p>
+            <h1 style={{ ...serif, fontWeight: 400, fontSize: "clamp(34px, 5.5vw, 52px)", lineHeight: 1.08, letterSpacing: "-0.025em", color: "#F5F5F5" }}>
               This is not an execution problem.
             </h1>
-            <p style={{ ...serif, fontWeight: 500, fontSize: "clamp(32px, 5vw, 48px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.35)", marginTop: "4px" }}>
+            <p style={{ ...serif, fontWeight: 400, fontSize: "clamp(34px, 5.5vw, 52px)", lineHeight: 1.08, letterSpacing: "-0.025em", color: `${GOLD}60`, marginTop: "6px" }}>
               It is a decision structure failure.
             </p>
-            <p style={{ marginTop: "24px", ...mono, fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#888" }}>
+            <p style={{ marginTop: "28px", ...mono, fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}90` }}>
               Current condition: {evidence.condition || "unresolved decision exposure"}
             </p>
-          </div>
+          </section>
 
-          {/* ═══ 2. PERSONALISED PRECISION STRIKE ═══ */}
-          <div style={{ paddingBottom: "64px" }}>
+          <GoldDivider />
+
+          {/* ═══ 2. PERSONALISED DECISION EXPOSURE ═══ */}
+          <section style={{ paddingBottom: "0" }}>
             {hasEvidence ? (
               <>
-                <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777" }}>
+                <p style={{ ...serif, fontSize: "17px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)" }}>
                   You are attempting to resolve:
                 </p>
-                <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#EAEAEA", paddingLeft: "14px", marginTop: "8px" }}>
-                  &ldquo;{evidence.decision}&rdquo;
-                </p>
+                <blockquote style={{ borderLeft: `2px solid ${GOLD}40`, paddingLeft: "20px", margin: "14px 0 0 0" }}>
+                  <p style={{ ...serif, fontSize: "19px", lineHeight: 1.6, color: "#EAEAEA", fontStyle: "italic" }}>
+                    &ldquo;{evidence.decision}&rdquo;
+                  </p>
+                </blockquote>
                 {evidence.blocker && (
                   <>
-                    <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777", marginTop: "20px" }}>
+                    <p style={{ ...serif, fontSize: "17px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "28px" }}>
                       While still operating within:
                     </p>
-                    <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#EAEAEA", paddingLeft: "14px", marginTop: "8px" }}>
-                      &ldquo;{evidence.blocker}&rdquo;
-                    </p>
+                    <blockquote style={{ borderLeft: `2px solid ${GOLD}40`, paddingLeft: "20px", margin: "14px 0 0 0" }}>
+                      <p style={{ ...serif, fontSize: "19px", lineHeight: 1.6, color: "#EAEAEA", fontStyle: "italic" }}>
+                        &ldquo;{evidence.blocker}&rdquo;
+                      </p>
+                    </blockquote>
                   </>
                 )}
-                <p style={{ fontSize: "15px", lineHeight: 1.75, color: "#777", marginTop: "24px" }}>
+                <p style={{ ...serif, fontSize: "17px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "32px" }}>
                   That is why progress has stalled.
                 </p>
               </>
             ) : (
-              <>
-                <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.60)" }}>
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "28px" }}>
+                <p style={{ ...serif, fontSize: "17px", lineHeight: 1.75, color: "rgba(255,255,255,0.60)" }}>
                   Your diagnostic evidence indicates a decision exposure, but the underlying decision has not been named clearly enough yet.
                 </p>
                 <Link
                   href="/diagnostics/fast"
-                  style={{ display: "inline-block", marginTop: "16px", padding: "12px 22px", border: "1px solid rgba(255,255,255,0.15)", backgroundColor: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.70)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+                  style={{ display: "inline-block", marginTop: "20px", padding: "14px 28px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", textDecoration: "none", minHeight: "44px" }}
                 >
                   Complete Fast Diagnostic first
                 </Link>
-              </>
+              </div>
             )}
-          </div>
+          </section>
+
+          <GoldDivider />
 
           {/* ═══ 3. CONSEQUENCE SNAPSHOT ═══ */}
-          <div style={{ paddingBottom: "72px" }}>
-            <div style={{ marginBottom: "24px" }}>
-              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>If nothing changes</p>
-            </div>
-            <div style={{ marginBottom: "24px" }}>
-              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>30 days</p>
-              <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "6px" }}>
-                {evidence.blocker
-                  ? `You will still be managing ${evidence.blocker}. Workarounds will have replaced structure.`
-                  : "The same constraint will still be active. Workarounds will have replaced structure."}
-              </p>
-            </div>
-            <div style={{ marginBottom: "24px" }}>
-              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>60 days</p>
-              <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "6px" }}>
-                {evidence.consequence
-                  ? `The cost shifts from operational delay to structural damage: ${evidence.consequence}`
-                  : "The cost will shift from operational delay to structural inefficiency. Options that existed today are now constrained."}
-              </p>
-            </div>
-            <div style={{ marginBottom: "32px" }}>
-              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555" }}>90 days</p>
-              <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.55)", marginTop: "6px" }}>
-                The decision will no longer be optional. It will be forced under worse conditions.
-              </p>
+          <section>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "32px" }}>
+              If nothing changes
+            </p>
+            <div style={{ display: "grid", gap: "28px" }}>
+              <div style={{ borderLeft: `2px solid ${GOLD}25`, paddingLeft: "20px" }}>
+                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}80` }}>30 days</p>
+                <p style={{ ...serif, fontSize: "16px", lineHeight: 1.75, color: "rgba(255,255,255,0.58)", marginTop: "8px" }}>
+                  {evidence.blocker
+                    ? `You will still be managing ${evidence.blocker}. Workarounds will have replaced structure.`
+                    : "The same constraint will still be active. Workarounds will have replaced structure."}
+                </p>
+              </div>
+              <div style={{ borderLeft: `2px solid ${GOLD}35`, paddingLeft: "20px" }}>
+                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}80` }}>60 days</p>
+                <p style={{ ...serif, fontSize: "16px", lineHeight: 1.75, color: "rgba(255,255,255,0.58)", marginTop: "8px" }}>
+                  {evidence.consequence
+                    ? `The cost shifts from operational delay to structural damage: ${evidence.consequence}`
+                    : "The cost will shift from operational delay to structural inefficiency. Options that existed today are now constrained."}
+                </p>
+              </div>
+              <div style={{ borderLeft: `2px solid ${GOLD}50`, paddingLeft: "20px" }}>
+                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}80` }}>90 days</p>
+                <p style={{ ...serif, fontSize: "16px", lineHeight: 1.75, color: "rgba(255,255,255,0.58)", marginTop: "8px" }}>
+                  The decision will no longer be optional. It will be forced under worse conditions.
+                </p>
+              </div>
             </div>
             {!hasEvidence && (
-              <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+              <p style={{ marginTop: "24px", ...serif, fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
                 The available evidence is not sufficient to price this fully yet.
               </p>
             )}
-          </div>
+          </section>
 
-          {/* ═══ 4. LADDER EVIDENCE ═══ */}
-          <div style={{ background: "#111", padding: "24px 28px", marginBottom: "64px", border: "1px solid #1c1c1c" }}>
-            <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#666" }}>
+          <GoldDivider />
+
+          {/* ═══ 4. EVIDENCE ACCUMULATED ═══ */}
+          <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: "rgba(255,255,255,0.015)", padding: "28px" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "20px" }}>
               Evidence accumulated
             </p>
-            <div style={{ display: "grid", gap: "10px", marginTop: "16px" }}>
+            <div style={{ display: "grid", gap: "12px" }}>
               {ladder.map((item) => (
-                <div key={item.key} style={{ display: "flex", justifyContent: "space-between", gap: "12px", fontSize: "14px", lineHeight: 1.6, color: item.completed ? "#EAEAEA" : "#666" }}>
-                  <span>{item.completed ? "✓" : "○"} {item.label}</span>
-                  <span>{item.completed ? "Completed" : "Not yet completed"}</span>
+                <div key={item.key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                  <span style={{ ...serif, fontSize: "15px", color: item.completed ? "#EAEAEA" : "rgba(255,255,255,0.30)" }}>
+                    {item.completed ? "✓" : "○"} {item.label}
+                  </span>
+                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: item.completed ? `${GOLD}90` : "rgba(255,255,255,0.20)" }}>
+                    {item.completed ? "Completed" : "Not yet completed"}
+                  </span>
                 </div>
               ))}
             </div>
-            <p style={{ marginTop: "16px", fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)" }}>
-              The ladder has accumulated evidence. Executive Reporting is the layer that turns that evidence into consequence, sequencing, and a governed decision position.
-            </p>
-          </div>
+          </section>
 
           {/* ═══ 5. WHAT EXECUTIVE REPORTING ADDS ═══ */}
-          <div style={{ paddingBottom: "64px" }}>
-            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)" }}>
+          <section style={{ padding: "64px 0" }}>
+            <p style={{ ...serif, fontSize: "17px", lineHeight: 1.8, color: "rgba(255,255,255,0.55)" }}>
               The free ladder identifies the structure of the problem.
             </p>
-            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)", marginTop: "16px" }}>
+            <p style={{ ...serif, fontSize: "17px", lineHeight: 1.8, color: "rgba(255,255,255,0.55)", marginTop: "16px" }}>
               Executive Reporting goes further:
             </p>
-            <ul style={{ listStyle: "none", padding: 0, margin: "16px 0 0 0" }}>
+            <ul style={{ listStyle: "none", padding: 0, margin: "20px 0 0 0" }}>
               {[
                 "prices the cost of delay",
                 "identifies the governance correction",
                 "sequences the first intervention",
                 "prepares a board-ready decision object",
               ].map((item) => (
-                <li key={item} style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.60)", paddingLeft: "16px", marginBottom: "4px" }}>
-                  &bull; {item}
+                <li key={item} style={{ ...serif, fontSize: "16px", lineHeight: 2.0, color: `${GOLD}BB`, paddingLeft: "20px", position: "relative" }}>
+                  <span style={{ position: "absolute", left: 0, color: `${GOLD}60` }}>&bull;</span>
+                  {item}
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
 
-          {/* ═══ 6. PERSONALISED PREVIEW BEFORE PAYWALL ═══ */}
+          {/* ═══ 6. PERSONALISED REPORT PREVIEW ═══ */}
           {hasEvidence && (
-            <div style={{ background: "#111", padding: "28px", borderLeft: "2px solid #444", marginBottom: "64px" }}>
-              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#666", marginBottom: "24px" }}>
-                Preview — from your evidence
+            <section style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "32px", marginBottom: "16px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "28px" }}>
+                Preview — from your diagnostic evidence
               </p>
 
-              <div style={{ marginBottom: "20px" }}>
-                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#555", marginBottom: "6px" }}>
+              <div style={{ marginBottom: "28px" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
                   1. Executive decision finding
                 </p>
-                <p style={{ fontSize: "15px", lineHeight: 1.7, color: "#EAEAEA" }}>
-                  {evidence.decision
-                    ? `The unresolved decision — "${evidence.decision}" — is not an execution delay. It is a structural failure to assign binding authority.`
-                    : "Decision finding pending full evidence."}
+                <p style={{ ...serif, fontSize: "16px", lineHeight: 1.7, color: "#EAEAEA" }}>
+                  The unresolved decision &mdash; &ldquo;{evidence.decision}&rdquo; &mdash; is not an execution delay. It is a structural failure to assign binding authority.
                 </p>
               </div>
 
-              <div style={{ marginBottom: "20px" }}>
-                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#555", marginBottom: "6px" }}>
+              <div style={{ height: "1px", background: `${GOLD}15`, margin: "0 0 28px 0" }} />
+
+              <div style={{ marginBottom: "28px" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
                   2. Structural contradiction
                 </p>
-                <p style={{ fontSize: "15px", lineHeight: 1.7, color: "#EAEAEA" }}>
+                <p style={{ ...serif, fontSize: "16px", lineHeight: 1.7, color: "#EAEAEA" }}>
                   {evidence.blocker
                     ? `The decision cannot resolve while ${evidence.blocker} remains the operating constraint. These two positions are incompatible.`
                     : evidence.pattern
@@ -287,33 +309,42 @@ export default function ExecutiveReportingEntryPage() {
                 </p>
               </div>
 
+              <div style={{ height: "1px", background: `${GOLD}15`, margin: "0 0 28px 0" }} />
+
               <div>
-                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#555", marginBottom: "6px" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
                   3. Cost of inaction
                 </p>
-                <p style={{ fontSize: "15px", lineHeight: 1.7, color: "#EAEAEA" }}>
+                <p style={{ ...serif, fontSize: "16px", lineHeight: 1.7, color: "#EAEAEA" }}>
                   {evidence.consequence
                     ? `If nothing changes: ${evidence.consequence}. The full financial and structural exposure is calculated in the report.`
                     : "Cost of inaction requires full Executive Reporting analysis to price accurately."}
                 </p>
               </div>
-            </div>
+            </section>
           )}
 
-          {/* ═══ 7. EMAIL CAPTURE ═══ */}
-          <div style={{ marginBottom: "64px" }}>
-            <ResultEmailCapture source="executive_reporting_gate" />
-          </div>
+          <GoldDivider />
+
+          {/* ═══ 7. HOW THIS WAS DETERMINED ═══ */}
+          <details style={{ border: `1px solid ${GOLD}15`, backgroundColor: "rgba(255,255,255,0.015)", padding: "24px 28px", marginBottom: "64px" }}>
+            <summary style={{ cursor: "pointer", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
+              How this was determined
+            </summary>
+            <p style={{ marginTop: "20px", ...serif, fontSize: "16px", lineHeight: 1.75, color: "rgba(255,255,255,0.60)" }}>
+              The system combined the decision you surfaced, the constraint that has preserved it, and the consequence attached to delay. Executive Reporting exists because that evidence now points to a structural issue rather than a local execution miss.
+            </p>
+          </details>
 
           {/* ═══ 8. PAYWALL ═══ */}
-          <div style={{ paddingBottom: "64px" }}>
-            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)" }}>
+          <section style={{ paddingBottom: "32px" }}>
+            <p style={{ ...serif, fontSize: "20px", lineHeight: 1.6, color: "rgba(255,255,255,0.65)" }}>
               You have seen the diagnosis.
             </p>
-            <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)", marginTop: "4px" }}>
+            <p style={{ ...serif, fontSize: "20px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
               You have not yet seen the full consequence.
             </p>
-          </div>
+          </section>
 
           <ExecutiveReportingPaywall
             price={getProductAmountGbp("executive_reporting")}
@@ -333,11 +364,11 @@ export default function ExecutiveReportingEntryPage() {
           />
 
           {(checkoutCancelled || accessRequired) && (
-            <div style={{ marginTop: "24px", padding: "20px", borderLeft: "2px solid #444", background: "#111" }}>
-              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#888" }}>
+            <div style={{ marginTop: "24px", padding: "24px", borderLeft: `2px solid ${GOLD}40`, background: "rgba(255,255,255,0.02)" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
                 {checkoutCancelled ? "Session cancelled" : "Access required"}
               </p>
-              <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "8px" }}>
+              <p style={{ ...serif, fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "10px" }}>
                 {checkoutCancelled
                   ? "No payment was taken. You can return to the free ladder or restart Executive Reporting when ready."
                   : "Executive Reporting is the consequence interpretation layer. Complete checkout to continue into the intake."}
@@ -345,44 +376,55 @@ export default function ExecutiveReportingEntryPage() {
             </div>
           )}
 
+          <GoldDivider />
+
           {/* ═══ 9. STRATEGY ROOM BRIDGE ═══ */}
-          <div style={{ height: "1px", background: "#222", margin: "96px 0 48px" }} />
+          <section style={{ paddingBottom: "48px" }}>
+            {hasStrategy ? (
+              <>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "16px" }}>
+                  Qualified for intervention
+                </p>
+                <p style={{ ...serif, fontSize: "18px", lineHeight: 1.7, color: "rgba(255,255,255,0.65)" }}>
+                  This now qualifies for controlled intervention.
+                </p>
+                <p style={{ ...serif, fontSize: "18px", lineHeight: 1.7, color: "rgba(255,255,255,0.75)", marginTop: "8px" }}>
+                  Move this into a Strategy Room session.
+                </p>
+                <a
+                  href="/strategy-room"
+                  style={{ display: "inline-block", marginTop: "24px", padding: "16px 32px", backgroundColor: `${GOLD}`, color: "#0B0B0B", ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none", fontWeight: 600, minHeight: "44px" }}
+                >
+                  Move into Strategy Room
+                </a>
+              </>
+            ) : (
+              <>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
+                  Strategy Room
+                </p>
+                <p style={{ ...serif, fontSize: "16px", lineHeight: 1.7, color: "rgba(255,255,255,0.40)" }}>
+                  More diagnostic evidence is required before Strategy Room access can be considered.
+                </p>
+                <Link
+                  href="/diagnostics"
+                  style={{ display: "inline-block", marginTop: "16px", padding: "14px 24px", border: `1px solid ${GOLD}25`, color: `${GOLD}80`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none", minHeight: "44px" }}
+                >
+                  Return to diagnostic ladder
+                </Link>
+              </>
+            )}
+          </section>
 
-          {hasStrategy ? (
-            <div style={{ paddingBottom: "48px" }}>
-              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)" }}>
-                This now qualifies for controlled intervention.
-              </p>
-              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.70)", marginTop: "12px" }}>
-                Move this into a Strategy Room session.
-              </p>
-              <a
-                href="/strategy-room"
-                style={{ display: "inline-block", marginTop: "20px", padding: "16px 28px", backgroundColor: "#F5F5F5", color: "#0B0B0B", ...mono, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", fontWeight: 500 }}
-              >
-                Move into Strategy Room
-              </a>
-            </div>
-          ) : (
-            <div style={{ paddingBottom: "48px" }}>
-              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.45)" }}>
-                More diagnostic evidence is required before Strategy Room access can be considered.
-              </p>
-              <Link
-                href="/diagnostics"
-                style={{ display: "inline-block", marginTop: "16px", padding: "12px 22px", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-              >
-                Return to diagnostic ladder
-              </Link>
-            </div>
-          )}
+          {/* ═══ 10. EMAIL CAPTURE ═══ */}
+          <section style={{ paddingBottom: "48px" }}>
+            <ResultEmailCapture source="executive_reporting_gate" />
+          </section>
 
-          <div style={{ background: "#111", padding: "24px 28px", borderLeft: "2px solid #444", marginBottom: "48px" }}>
-            <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#666" }}>
-              How this was determined
-            </p>
-            <p style={{ marginTop: "16px", fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.65)" }}>
-              The system combined the decision you surfaced, the constraint that has preserved it, and the consequence attached to delay. Executive Reporting exists because that evidence now points to a structural issue rather than a local execution miss.
+          {/* ═══ SOCIAL PROOF ═══ */}
+          <div style={{ borderTop: `1px solid ${GOLD}12`, paddingTop: "32px" }}>
+            <p style={{ ...serif, fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>
+              This pattern is commonly seen before structural correction. This reading can be tracked over time. Re-evaluate in 14 days to see whether the pattern improves or repeats.
             </p>
           </div>
 
