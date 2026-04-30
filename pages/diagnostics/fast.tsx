@@ -21,7 +21,7 @@ const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
-type ViewStage = "hero" | "decision" | "authority" | "consequence" | "commitment" | "loading" | "recovery" | "result";
+type ViewStage = "hero" | "decision" | "authority" | "consequence" | "commitment" | "commitment_declined" | "loading" | "recovery" | "result";
 type FastDraftSnapshot = {
   answers: Record<string, string>;
   stepIndex: number;
@@ -389,7 +389,10 @@ const FastDiagnosticPage: NextPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => { setCommitted(false); void submitFastDiagnostic(false); }}
+                onClick={() => {
+                  setCommitted(false);
+                  setStage("commitment_declined");
+                }}
                 style={{ padding: "14px 28px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", cursor: "pointer" }}
               >
                 No &mdash; I&rsquo;m not ready to act
@@ -398,6 +401,25 @@ const FastDiagnosticPage: NextPage = () => {
             <p style={{ marginTop: "1.5rem", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               This only works if the decision is real.
             </p>
+          </div>
+        )}
+
+        {/* Commitment declined — not yet a decision */}
+        {stage === "commitment_declined" && (
+          <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+            <p style={{ ...serif, fontSize: "clamp(1.3rem, 3vw, 1.8rem)", lineHeight: 1.3, color: "rgba(255,255,255,0.88)", maxWidth: "28ch" }}>
+              Then this is not yet a decision.
+            </p>
+            <p style={{ marginTop: "1rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.48)", maxWidth: "36ch" }}>
+              You can still view the analysis, but the system will treat this as unresolved.
+            </p>
+            <button
+              type="button"
+              onClick={() => void submitFastDiagnostic(false)}
+              style={{ marginTop: "2rem", padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", cursor: "pointer" }}
+            >
+              View analysis anyway
+            </button>
           </div>
         )}
 
@@ -444,6 +466,9 @@ const FastDiagnosticPage: NextPage = () => {
                   You already know this. You&rsquo;ve been circling it.
                 </p>
               </div>
+
+              {/* ── Email capture — above fold after verdict ─── */}
+              <ResultEmailCapture source="fast_diagnostic" resultRef={result.caseRef} />
 
               {/* WHY IT EXISTS */}
               <ResultBlock label="Why it exists">
@@ -497,10 +522,6 @@ const FastDiagnosticPage: NextPage = () => {
                   Continue to Purpose Alignment <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
               </div>
-
-              {/* CTA */}
-              {/* ── Email capture ─── */}
-              <ResultEmailCapture source="fast_diagnostic" resultRef={result.caseRef} />
 
               <details style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
                 <summary style={{ cursor: "pointer", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>

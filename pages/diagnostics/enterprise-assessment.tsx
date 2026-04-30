@@ -1216,6 +1216,9 @@ export default function EnterpriseAssessmentPage() {
                     {/* Questions */}
                     <div>
                       <Eyebrow>Enterprise instrument</Eyebrow>
+                      <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                        Block {instrumentPage * 2 + 1}–{Math.min(instrumentPage * 2 + 2, BLOCKS.length)} of {BLOCKS.length}
+                      </div>
                       <h2 style={{ marginTop: "1.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.6rem, 2.5vw, 2.2rem)", lineHeight: 1.0, letterSpacing: "-0.020em", color: "rgba(255,255,255,0.88)", marginBottom: "0.75rem" }}>Rate the institutional condition.</h2>
                       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.70, color: "rgba(255,255,255,0.38)", fontStyle: "italic", maxWidth: "48ch", marginBottom: "2rem" }}>
                         Answer for the actual current condition — not aspirations. 1 = Strongly no. 5 = Strongly yes.
