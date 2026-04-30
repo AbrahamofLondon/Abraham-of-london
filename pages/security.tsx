@@ -116,6 +116,11 @@ const SecurityPage: NextPage = () => {
                 links. Not every legacy surface has been migrated to that pattern yet.
               </p>
               <p className="text-sm font-light leading-relaxed text-zinc-300">
+                Payment processing is handled entirely by Stripe. We do not store card numbers,
+                CVVs, or full payment credentials on our servers. Stripe processes payments
+                under its own PCI-DSS-compliant security controls.
+              </p>
+              <p className="text-sm font-light leading-relaxed text-zinc-300">
                 We minimise internal access where practical, but authorised operators, service
                 providers, and technical staff may still need limited access to investigate service
                 issues, fulfil requests, or respond to abuse or legal obligations.

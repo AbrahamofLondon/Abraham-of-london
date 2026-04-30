@@ -24,6 +24,7 @@ export type ReturnBriefTrigger =
 
 export type ReturnBrief = {
   sessionId: string;
+  sessionKey: string;
   generatedAt: string;
   trigger: ReturnBriefTrigger;
 
@@ -114,10 +115,15 @@ export function evaluateTrigger(
 // ─── Brief generation ────────────────────────────────────────────────────────
 
 export async function generateReturnBrief(
-  executionSessionId: string,
+  executionSessionRef: string,
 ): Promise<ReturnBrief | null> {
-  const session = await prisma.strategyRoomExecutionSession.findUnique({
-    where: { id: executionSessionId },
+  const session = await prisma.strategyRoomExecutionSession.findFirst({
+    where: {
+      OR: [
+        { id: executionSessionRef },
+        { sessionKey: executionSessionRef },
+      ],
+    },
     include: { decisions: true },
   });
 
@@ -223,7 +229,8 @@ export async function generateReturnBrief(
   }
 
   return {
-    sessionId: executionSessionId,
+    sessionId: session.id,
+    sessionKey: session.sessionKey,
     generatedAt: new Date().toISOString(),
     trigger,
     opening,

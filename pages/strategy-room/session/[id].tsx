@@ -261,7 +261,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
           </div>
 
           {/* ── Return brief interruption (if available) ── */}
-          <ReturnBriefInterruptionBar sessionId={session.id} />
+          <ReturnBriefInterruptionBar sessionKey={session.sessionKey} />
 
           {/* ── 1. ENTRY STATE — immediate grounding ── */}
           <section style={{ paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
@@ -671,8 +671,13 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   }
 
   try {
-    const raw = await prisma.strategyRoomExecutionSession.findUnique({
-      where: { id },
+    const raw = await prisma.strategyRoomExecutionSession.findFirst({
+      where: {
+        OR: [
+          { id },
+          { sessionKey: id },
+        ],
+      },
       include: { decisions: { orderBy: { createdAt: "asc" } } },
     });
 

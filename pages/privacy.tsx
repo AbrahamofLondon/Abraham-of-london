@@ -157,8 +157,9 @@ const PrivacyPage: NextPage = () => {
               <p className="text-sm font-light leading-relaxed text-zinc-300">
                 Depending on the feature in use, this may include infrastructure, hosting, email,
                 and abuse-prevention providers. Current processors or third-party services may
-                include Resend for transactional email delivery, Google reCAPTCHA where enabled on
-                protected forms or flows, and Buttondown where subscription workflows are used.
+                include Resend for transactional email delivery, Stripe for payment processing
+                and access entitlement, Google reCAPTCHA where enabled on protected forms or
+                flows, and Buttondown where subscription workflows are used.
               </p>
               <p className="text-sm font-light leading-relaxed text-zinc-300">
                 Some of these providers may process data outside the United Kingdom. Where that
@@ -188,8 +189,9 @@ const PrivacyPage: NextPage = () => {
                 on it.
               </p>
               <p className="text-sm font-light leading-relaxed text-zinc-300">
-                Some flows also provide direct unsubscribe or deletion mechanisms. If you want to
-                exercise a right, contact{" "}
+                Some flows also provide direct unsubscribe or deletion mechanisms. You can
+                request full data deletion at any time — your decision records, identity data,
+                and session history will be removed. If you want to exercise a right, contact{" "}
                 <a
                   className="text-amber-500 underline underline-offset-4"
                   href={`mailto:${contactEmail}`}

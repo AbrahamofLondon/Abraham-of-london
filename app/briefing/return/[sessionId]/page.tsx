@@ -13,6 +13,7 @@ import Link from "next/link";
 
 type ReturnBriefData = {
   sessionId: string;
+  sessionKey: string;
   generatedAt: string;
   trigger: string;
   opening: string;
@@ -167,7 +168,7 @@ export default function ReturnBriefPage() {
 
         {/* ═══ CTA ═══ */}
         <Link
-          href={`/strategy-room/session/${brief.sessionId}`}
+          href={`/strategy-room/session/${brief.sessionKey}`}
           style={{ display: "block", width: "100%", padding: "18px 0", textAlign: "center", backgroundColor: "#F5F5F5", color: "#0B0B0B", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", fontWeight: 500 }}
         >
           Return to Strategy Room

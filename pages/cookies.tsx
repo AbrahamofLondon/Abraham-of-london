@@ -108,6 +108,11 @@ const CookiesPage: NextPage = () => {
               Those services may set or read their own cookies or browser identifiers according to
               their own policies.
             </p>
+            <p className="text-sm font-light leading-relaxed text-zinc-300">
+              Payment processing is handled through Stripe, which may set its own cookies during
+              checkout. Stripe&apos;s cookie and data practices are governed by Stripe&apos;s own
+              privacy policy.
+            </p>
           </section>
 
           <section className="space-y-4">

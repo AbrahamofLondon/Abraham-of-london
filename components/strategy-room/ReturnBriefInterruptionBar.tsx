@@ -17,12 +17,12 @@ type BriefStatus = {
   trigger?: string;
 };
 
-export default function ReturnBriefInterruptionBar({ sessionId }: { sessionId: string }) {
+export default function ReturnBriefInterruptionBar({ sessionKey }: { sessionKey: string }) {
   const [status, setStatus] = React.useState<BriefStatus | null>(null);
 
   React.useEffect(() => {
-    if (!sessionId) return;
-    fetch(`/api/strategy-room/briefing/return/${sessionId}`)
+    if (!sessionKey) return;
+    fetch(`/api/strategy-room/briefing/return/${sessionKey}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.ok && data.briefAvailable) {
@@ -34,7 +34,7 @@ export default function ReturnBriefInterruptionBar({ sessionId }: { sessionId: s
         }
       })
       .catch(() => {});
-  }, [sessionId]);
+  }, [sessionKey]);
 
   if (!status?.available) return null;
 
@@ -70,7 +70,7 @@ export default function ReturnBriefInterruptionBar({ sessionId }: { sessionId: s
           : "A new briefing has been generated based on your execution."}
       </p>
       <Link
-        href={`/briefing/return/${sessionId}`}
+        href={`/briefing/return/${sessionKey}`}
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
           fontSize: "8px",

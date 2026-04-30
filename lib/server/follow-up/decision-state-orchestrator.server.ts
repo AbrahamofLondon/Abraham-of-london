@@ -11,18 +11,22 @@ import "server-only";
  * It speaks because the decision state changed.
  */
 
-import { prisma } from "@/lib/prisma.server";
+import { siteConfig } from "@/config/site";
+import {
+  buildCriticalPatternEmail,
+  buildDecisionDriftEmail,
+  buildReturnBriefEmail,
+  type BuiltDecisionEmail,
+} from "@/lib/email/decision-email-builder";
 import { sendEmail } from "@/lib/email/core/sendEmail";
+import { prisma } from "@/lib/prisma.server";
+import { isUnsubscribed } from "@/lib/server/privacy/identity-service.server";
+import { generateReturnBrief } from "@/lib/server/strategy-room/return-brief.server";
 import {
   computeDecisionState,
-  STATE_MESSAGE_MAP,
   type DecisionStateInput,
   type DecisionStateResult,
 } from "./decision-state-engine.server";
-import { generateReturnBrief } from "@/lib/server/strategy-room/return-brief.server";
-import { isUnsubscribed } from "@/lib/server/privacy/identity-service.server";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 export type OrchestrationDiagnostic = {
   stage: string;
@@ -36,15 +40,22 @@ export type OrchestrationResult = {
   skippedCooldown: number;
   skippedIdle: number;
   errors: number;
-  /** Diagnostic details — included in dry-run responses only */
   diagnostics?: OrchestrationDiagnostic[];
 };
 
-// ─── Safe error extraction ───────────────────────────────────────────────────
+type ContactIdentity = {
+  userId?: string | null;
+  sessionId?: string | null;
+  journeyId?: string | null;
+};
+
+type ContactTone = {
+  emailClass: string;
+  toneKey: string;
+};
 
 function safeErrorMessage(error: unknown): string {
   if (error instanceof Error) {
-    // In production, only return the message. In dev, include more context.
     if (process.env.NODE_ENV === "production") {
       return error.message.slice(0, 200);
     }
@@ -53,17 +64,38 @@ function safeErrorMessage(error: unknown): string {
   return String(error).slice(0, 200);
 }
 
-// ─── Cooldown enforcement ────────────────────────────────────────────────────
+function hoursSince(date: Date): number {
+  return (Date.now() - date.getTime()) / (1000 * 60 * 60);
+}
 
-async function getLastContact(
-  userId: string | null | undefined,
-  sessionId: string | null | undefined,
-  journeyId: string | null | undefined,
-): Promise<{ sentAt: Date; severity: string } | null> {
+function getBaseUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_BASE_URL?.trim()
+    || process.env.NEXT_PUBLIC_SITE_URL?.trim()
+    || siteConfig.url
+    || "https://www.abrahamoflondon.org"
+  ).replace(/\/$/, "");
+}
+
+function getDeleteUrl(email?: string | null): string {
+  const contactEmail = siteConfig.contact.email || "info@abrahamoflondon.org";
+  const subject = encodeURIComponent("Delete my data");
+  const body = encodeURIComponent(email ? `Please remove data associated with ${email}.` : "Please remove my data.");
+  return `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+}
+
+function getUnsubscribeUrl(email?: string | null): string {
+  const contactEmail = siteConfig.contact.email || "info@abrahamoflondon.org";
+  const subject = encodeURIComponent("Unsubscribe");
+  const body = encodeURIComponent(email ? `Please unsubscribe ${email}.` : "Please unsubscribe me.");
+  return `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+}
+
+async function getLastContact(identity: ContactIdentity): Promise<{ sentAt: Date; severity: string } | null> {
   const where: Record<string, unknown>[] = [];
-  if (userId) where.push({ userId });
-  if (sessionId) where.push({ sessionId });
-  if (journeyId) where.push({ journeyId });
+  if (identity.userId) where.push({ userId: identity.userId });
+  if (identity.sessionId) where.push({ sessionId: identity.sessionId });
+  if (identity.journeyId) where.push({ journeyId: identity.journeyId });
 
   if (where.length === 0) return null;
 
@@ -75,8 +107,36 @@ async function getLastContact(
   return last ? { sentAt: last.sentAt, severity: last.severity } : null;
 }
 
-function hoursSince(date: Date): number {
-  return (Date.now() - date.getTime()) / (1000 * 60 * 60);
+async function hasRecentToneMatch(
+  identity: ContactIdentity,
+  tone: ContactTone,
+  windowHours: number,
+): Promise<boolean> {
+  const where: Record<string, unknown>[] = [];
+  if (identity.userId) where.push({ userId: identity.userId });
+  if (identity.sessionId) where.push({ sessionId: identity.sessionId });
+  if (identity.journeyId) where.push({ journeyId: identity.journeyId });
+
+  if (where.length === 0) return false;
+
+  const cutoff = new Date(Date.now() - windowHours * 60 * 60 * 1000);
+  const recent = await prisma.decisionContactLedger.findMany({
+    where: {
+      OR: where,
+      sentAt: { gte: cutoff },
+    },
+    orderBy: { sentAt: "desc" },
+    take: 12,
+    select: { metadata: true },
+  });
+
+  return recent.some((entry) => {
+    if (!entry.metadata || typeof entry.metadata !== "object" || Array.isArray(entry.metadata)) {
+      return false;
+    }
+    const meta = entry.metadata as Record<string, unknown>;
+    return meta.toneKey === tone.toneKey || meta.emailClass === tone.emailClass;
+  });
 }
 
 function shouldSuppressContact(
@@ -86,8 +146,6 @@ function shouldSuppressContact(
   if (!lastContact) return false;
 
   const hours = hoursSince(lastContact.sentAt);
-
-  // Critical severity can override cooldown
   if (stateResult.severity === "critical" && lastContact.severity !== "critical") {
     return false;
   }
@@ -95,11 +153,10 @@ function shouldSuppressContact(
   return hours < stateResult.minimumCooldownHours;
 }
 
-// ─── Record contact event ────────────────────────────────────────────────────
-
 async function recordContact(
   input: DecisionStateInput,
   stateResult: DecisionStateResult,
+  tone: ContactTone,
 ): Promise<void> {
   await prisma.decisionContactLedger.create({
     data: {
@@ -115,63 +172,109 @@ async function recordContact(
         trajectory: input.trajectory ?? null,
         contradictionCount: input.contradictionCount ?? 0,
         blockedDecisionCount: input.blockedDecisionCount ?? 0,
+        emailClass: tone.emailClass,
+        toneKey: tone.toneKey,
       },
     },
   });
 }
 
-// ─── Email composition ───────────────────────────────────────────────────────
-
-function composeEmail(
-  stateResult: DecisionStateResult,
-  briefUrl: string | null,
-): { subject: string; html: string; text: string } {
-  const messages =
-    stateResult.state !== "idle" && stateResult.state !== "executing"
-      ? STATE_MESSAGE_MAP[stateResult.state]
-      : null;
-
-  const subject = messages?.subject ?? "Decision update";
-  const opening = messages?.opening ?? stateResult.reason;
-
-  const cta = briefUrl
-    ? `View briefing: ${briefUrl}`
-    : "Return to your session to take action.";
-
-  const text = [
-    opening,
-    "",
-    stateResult.reason,
-    "",
-    "This decision is still open.",
-    "",
-    cta,
-  ].join("\n");
-
-  const trajectoryColor =
-    stateResult.severity === "critical" ? "#FC9999"
-    : stateResult.severity === "high" ? "#FC9999"
-    : stateResult.severity === "medium" ? "#C9A96E"
-    : "#999";
-
-  const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;padding:0;background-color:#0B0B0B;color:#F5F5F5;font-family:Georgia,serif;">
-<div style="max-width:520px;margin:0 auto;padding:48px 24px;">
-<p style="font-size:15px;line-height:1.75;color:rgba(255,255,255,0.70);">${opening}</p>
-<p style="font-size:14px;line-height:1.7;color:rgba(255,255,255,0.45);margin-top:12px;">${stateResult.reason}</p>
-<p style="font-size:15px;line-height:1.7;color:${trajectoryColor};margin-top:16px;"><strong>This decision is still open.</strong></p>
-${briefUrl
-    ? `<a href="${briefUrl}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:#F5F5F5;color:#0B0B0B;font-family:monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">View briefing</a>`
-    : `<p style="font-size:14px;color:rgba(255,255,255,0.40);margin-top:16px;">Return to your session to take action.</p>`}
-<p style="margin-top:32px;font-family:monospace;font-size:9px;letter-spacing:0.06em;color:rgba(255,255,255,0.20);">Abraham of London · Decision Integrity System</p>
-<p style="margin-top:8px;font-family:monospace;font-size:8px;color:rgba(255,255,255,0.12);"><a href="${process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.abrahamoflondon.org"}/api/user/unsubscribe" style="color:rgba(255,255,255,0.15);text-decoration:underline;">Unsubscribe</a></p>
-</div></body></html>`;
-
-  return { subject, html, text };
+function mapTrajectory(
+  trajectory: DecisionStateInput["trajectory"],
+): "executing" | "stalled" | "fragile" | "deteriorating" {
+  if (trajectory === "DETERIORATING") return "deteriorating";
+  if (trajectory === "FRAGILE") return "fragile";
+  if (trajectory === "ASCENDING") return "executing";
+  return "stalled";
 }
 
-// ─── Execution session scanner ───────────────────────────────────────────────
+async function buildStrategyRoomEmail(
+  session: {
+    email: string | null;
+    sessionKey: string;
+    conditionSummary: string | null;
+    coreProblem: string | null;
+    createdAt: Date;
+    decisions: Array<{ updatedAt: Date; status: string }>;
+  },
+  stateInput: DecisionStateInput,
+  stateResult: DecisionStateResult,
+): Promise<BuiltDecisionEmail | null> {
+  const baseUrl = getBaseUrl();
+  const secureLink = `${baseUrl}/briefing/return/${session.sessionKey}`;
+  const unsubscribeUrl = getUnsubscribeUrl(session.email);
+  const deleteUrl = getDeleteUrl(session.email);
+  const brief = await generateReturnBrief(session.sessionKey);
+
+  const decision = session.conditionSummary || "the open decision";
+  const pattern = stateResult.reason;
+  const lastActivityAt = session.decisions.length > 0
+    ? session.decisions.reduce((latest, item) => (item.updatedAt > latest ? item.updatedAt : latest), session.decisions[0]!.updatedAt)
+    : session.createdAt;
+
+  if (stateResult.state === "recurring_pattern") {
+    return buildCriticalPatternEmail({
+      decision,
+      pattern,
+      trajectory: mapTrajectory(stateInput.trajectory ?? null),
+      secureLink,
+      unsubscribeUrl,
+      deleteUrl,
+      contradictionSummary: brief?.challenge ?? brief?.trajectory.reason ?? pattern,
+      lastActivityAt,
+    });
+  }
+
+  if (stateResult.state === "fragile" || stateResult.state === "deteriorating") {
+    return buildReturnBriefEmail({
+      decision,
+      pattern,
+      trajectory: mapTrajectory(stateInput.trajectory ?? null),
+      secureLink,
+      unsubscribeUrl,
+      deleteUrl,
+      contradictionSummary: brief?.trajectory.reason ?? brief?.challenge ?? pattern,
+      lastActivityAt,
+    });
+  }
+
+  if (stateResult.state === "committed_no_action" || stateResult.state === "stalled") {
+    return buildDecisionDriftEmail({
+      decision,
+      pattern,
+      trajectory: mapTrajectory(stateInput.trajectory ?? null),
+      secureLink,
+      unsubscribeUrl,
+      deleteUrl,
+      contradictionSummary: brief?.trajectory.reason ?? pattern,
+      lastActivityAt,
+    });
+  }
+
+  return null;
+}
+
+function buildPressureLoopEmail(
+  journey: {
+    email: string | null;
+    journeyKey: string;
+    startedAt: Date;
+  },
+  stateInput: DecisionStateInput,
+  stateResult: DecisionStateResult,
+  pattern: string,
+): BuiltDecisionEmail {
+  const baseUrl = getBaseUrl();
+  return buildDecisionDriftEmail({
+    decision: "the open decision",
+    pattern,
+    trajectory: mapTrajectory(stateInput.trajectory ?? null),
+    secureLink: `${baseUrl}/diagnostics/fast?journeyKey=${encodeURIComponent(journey.journeyKey)}`,
+    unsubscribeUrl: getUnsubscribeUrl(journey.email),
+    deleteUrl: getDeleteUrl(journey.email),
+    lastActivityAt: journey.startedAt,
+  });
+}
 
 async function scanExecutionSessions(
   result: OrchestrationResult,
@@ -198,12 +301,17 @@ async function scanExecutionSessions(
   for (const session of sessions) {
     try {
       if (!session.email) continue;
-
-      // Privacy check: respect unsubscribe
-      if (await isUnsubscribed(session.email)) { result.skippedIdle++; continue; }
+      if (await isUnsubscribed(session.email)) {
+        result.skippedIdle++;
+        continue;
+      }
 
       let canonical: Record<string, unknown> = {};
-      try { canonical = session.canonicalSnapshot ? JSON.parse(session.canonicalSnapshot) : {}; } catch { /* ignore */ }
+      try {
+        canonical = session.canonicalSnapshot ? JSON.parse(session.canonicalSnapshot) : {};
+      } catch {
+        canonical = {};
+      }
       const execState = canonical.executionState as { trajectory?: string } | undefined;
 
       const stateInput: DecisionStateInput = {
@@ -211,8 +319,7 @@ async function scanExecutionSessions(
         sessionId: session.id,
         lastCommitmentAt: session.createdAt,
         lastActionAt: session.decisions.length > 0
-          ? session.decisions.reduce((latest, d) =>
-              d.updatedAt > latest ? d.updatedAt : latest, session.decisions[0]!.updatedAt)
+          ? session.decisions.reduce((latest, d) => (d.updatedAt > latest ? d.updatedAt : latest), session.decisions[0]!.updatedAt)
           : null,
         pendingDecisionCount: session.decisions.filter((d) => d.status === "pending").length,
         executedDecisionCount: session.decisions.filter((d) => d.status === "executed").length,
@@ -224,15 +331,29 @@ async function scanExecutionSessions(
       };
 
       const stateResult = computeDecisionState(stateInput);
-
       if (stateResult.allowedSystem === "none") {
         result.skippedIdle++;
         continue;
       }
 
-      // Cooldown check
-      const lastContact = await getLastContact(session.email, session.id, null);
+      const email = await buildStrategyRoomEmail(session, stateInput, stateResult);
+      if (!email) {
+        result.skippedIdle++;
+        continue;
+      }
+
+      const identity: ContactIdentity = {
+        userId: session.email,
+        sessionId: session.id,
+      };
+
+      const lastContact = await getLastContact(identity);
       if (shouldSuppressContact(lastContact, stateResult)) {
+        result.skippedCooldown++;
+        continue;
+      }
+
+      if (await hasRecentToneMatch(identity, email, stateResult.minimumCooldownHours)) {
         result.skippedCooldown++;
         continue;
       }
@@ -242,30 +363,22 @@ async function scanExecutionSessions(
         continue;
       }
 
-      // Generate brief URL if return_brief or retainer_gate
-      let briefUrl: string | null = null;
-      if (stateResult.allowedSystem === "return_brief" || stateResult.allowedSystem === "retainer_gate") {
-        const brief = await generateReturnBrief(session.id);
-        if (brief) {
-          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.abrahamoflondon.org";
-          briefUrl = `${baseUrl}/briefing/return/${session.id}`;
-        }
-      }
-
-      // Send email
-      const email = composeEmail(stateResult, briefUrl);
       const emailResult = await sendEmail({
         type: "SYSTEM",
         to: session.email,
         subject: email.subject,
         html: email.html,
         text: email.text,
-        meta: { userId: session.email, journeyId: session.sessionKey, source: "decision_state_orchestrator" },
+        meta: {
+          userId: session.email,
+          journeyId: session.sessionKey,
+          source: "decision_state_orchestrator",
+        },
       });
 
       if (emailResult.ok) {
         result.triggered++;
-        await recordContact(stateInput, stateResult);
+        await recordContact(stateInput, stateResult, email);
       } else {
         result.errors++;
         result.diagnostics?.push({
@@ -284,8 +397,6 @@ async function scanExecutionSessions(
     }
   }
 }
-
-// ─── Pressure loop scanner (free ladder journeys) ────────────────────────────
 
 async function scanPressureLoopJourneys(
   result: OrchestrationResult,
@@ -311,9 +422,10 @@ async function scanPressureLoopJourneys(
   for (const journey of journeys) {
     try {
       if (!journey.email) continue;
-
-      // Privacy check: respect unsubscribe
-      if (await isUnsubscribed(journey.email)) { result.skippedIdle++; continue; }
+      if (await isUnsubscribed(journey.email)) {
+        result.skippedIdle++;
+        continue;
+      }
 
       let loop: Record<string, unknown> = {};
       try {
@@ -322,18 +434,19 @@ async function scanPressureLoopJourneys(
               ? JSON.parse(journey.mergedTensionThread)
               : journey.mergedTensionThread) as Record<string, unknown>
           : {};
-      } catch { /* ignore */ }
+      } catch {
+        loop = {};
+      }
 
       const messages = (loop.messages ?? []) as Array<{
         sent?: boolean;
         actionRecorded?: boolean;
         scheduledAt?: string;
-        subject?: string;
         body?: string;
       }>;
 
       const dueMessage = messages.find(
-        (m) => !m.sent && !m.actionRecorded && m.scheduledAt && new Date(m.scheduledAt) <= new Date(),
+        (message) => !message.sent && !message.actionRecorded && message.scheduledAt && new Date(message.scheduledAt) <= new Date(),
       );
 
       if (!dueMessage) {
@@ -350,21 +463,35 @@ async function scanPressureLoopJourneys(
       };
 
       const stateResult = computeDecisionState(stateInput);
-
       if (stateResult.allowedSystem === "none") {
         result.skippedIdle++;
         continue;
       }
 
-      // Only allow pressure_loop system for free ladder
       if (stateResult.allowedSystem !== "pressure_loop" && stateResult.allowedSystem !== "escalation_engine") {
         result.skippedIdle++;
         continue;
       }
 
-      // Cooldown check
-      const lastContact = await getLastContact(journey.email, null, journey.id);
+      const email = buildPressureLoopEmail(
+        journey,
+        stateInput,
+        stateResult,
+        dueMessage.body ?? stateResult.reason,
+      );
+
+      const identity: ContactIdentity = {
+        userId: journey.email,
+        journeyId: journey.id,
+      };
+
+      const lastContact = await getLastContact(identity);
       if (shouldSuppressContact(lastContact, stateResult)) {
+        result.skippedCooldown++;
+        continue;
+      }
+
+      if (await hasRecentToneMatch(identity, email, stateResult.minimumCooldownHours)) {
         result.skippedCooldown++;
         continue;
       }
@@ -374,38 +501,29 @@ async function scanPressureLoopJourneys(
         continue;
       }
 
-      // Send the due message
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.abrahamoflondon.org";
       const emailResult = await sendEmail({
         type: "TRANSACTIONAL",
         to: journey.email,
-        subject: dueMessage.subject ?? STATE_MESSAGE_MAP.committed_no_action.subject,
-        html: `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;padding:0;background-color:#0B0B0B;color:#F5F5F5;font-family:Georgia,serif;">
-<div style="max-width:520px;margin:0 auto;padding:48px 24px;">
-<p style="font-size:15px;line-height:1.75;color:rgba(255,255,255,0.70);">${dueMessage.body ?? stateResult.reason}</p>
-<p style="font-size:15px;line-height:1.7;color:#C9A96E;margin-top:16px;"><strong>This decision is still open.</strong></p>
-<a href="${baseUrl}/diagnostics/fast" style="display:inline-block;margin-top:24px;padding:14px 28px;background:#F5F5F5;color:#0B0B0B;font-family:monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">Return to diagnostic</a>
-<p style="margin-top:32px;font-family:monospace;font-size:9px;letter-spacing:0.06em;color:rgba(255,255,255,0.20);">Abraham of London · Decision Integrity System</p>
-<p style="margin-top:8px;font-family:monospace;font-size:8px;color:rgba(255,255,255,0.12);"><a href="${process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.abrahamoflondon.org"}/api/user/unsubscribe" style="color:rgba(255,255,255,0.15);text-decoration:underline;">Unsubscribe</a></p>
-</div></body></html>`,
-        text: `${dueMessage.body ?? stateResult.reason}\n\nThis decision is still open.\n\nReturn: ${baseUrl}/diagnostics/fast`,
-        meta: { userId: journey.email, journeyId: journey.id, source: "decision_state_orchestrator" },
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+        meta: {
+          userId: journey.email,
+          journeyId: journey.journeyKey,
+          source: "decision_state_orchestrator",
+        },
       });
 
       if (emailResult.ok) {
         result.triggered++;
         dueMessage.sent = true;
 
-        // Update the journey with marked message
         await prisma.diagnosticJourney.update({
           where: { id: journey.id },
           data: { mergedTensionThread: JSON.parse(JSON.stringify(loop)) },
         });
 
-        // Check if all messages sent — mark journey completed
-        const allSent = messages.every((m) => m.sent || m.actionRecorded);
+        const allSent = messages.every((message) => message.sent || message.actionRecorded);
         if (allSent) {
           await prisma.diagnosticJourney.update({
             where: { id: journey.id },
@@ -413,7 +531,7 @@ async function scanPressureLoopJourneys(
           });
         }
 
-        await recordContact(stateInput, stateResult);
+        await recordContact(stateInput, stateResult, email);
       } else {
         result.errors++;
         result.diagnostics?.push({
@@ -433,8 +551,6 @@ async function scanPressureLoopJourneys(
   }
 }
 
-// ─── Main orchestrator ───────────────────────────────────────────────────────
-
 export async function runDecisionStateOrchestrator(options?: {
   dryRun?: boolean;
   limit?: number;
@@ -453,13 +569,8 @@ export async function runDecisionStateOrchestrator(options?: {
   };
 
   try {
-    // Scan paid Strategy Room sessions
     await scanExecutionSessions(result, dryRun, limit);
-
-    // Scan free ladder pressure loops
     await scanPressureLoopJourneys(result, dryRun, limit);
-
-    // Count total scanned
     result.scanned = result.triggered + result.skippedCooldown + result.skippedIdle + result.errors;
   } catch (error) {
     console.error("[decision-state-orchestrator]", error);
@@ -471,7 +582,6 @@ export async function runDecisionStateOrchestrator(options?: {
     });
   }
 
-  // Only include diagnostics in dry-run responses
   if (!dryRun) {
     delete result.diagnostics;
   }
