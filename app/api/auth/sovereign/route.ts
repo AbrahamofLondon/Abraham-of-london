@@ -2,14 +2,19 @@
 
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { z } from "zod";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 import { applyShieldFromRequest } from "@/lib/server/security/shield-middleware";
+import { noStoreJson, parseJsonBody, requireJsonContent, requireMethod } from "@/lib/server/security/app-route-guards";
 
 export const runtime = "nodejs";
 
 const PRIMARY_COOKIE_NAME = "ogr_sovereign_session";
 const COMPAT_COOKIE_NAME = "sovereign_session";
 const COOKIE_TTL_SECONDS = 60 * 60 * 8; // 8 hours
+const requestSchema = z.object({
+  key: z.string().trim().min(8).max(512),
+}).strict();
 
 type AuthorityLevel =
   | "OBSERVER"
@@ -82,13 +87,19 @@ function cookieBase() {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    sameSite: "strict" as const,
     path: "/",
     maxAge: COOKIE_TTL_SECONDS,
   };
 }
 
 export async function POST(request: Request) {
+  const methodCheck = requireMethod(request, ["POST"]);
+  if (!methodCheck.ok) return methodCheck.response;
+
+  const contentCheck = requireJsonContent(request);
+  if (!contentCheck.ok) return contentCheck.response;
+
   // Anti-reconnaissance shield
   const shield = await applyShieldFromRequest(request, "/api/auth/sovereign");
   if (shield.blocked) return new Response(JSON.stringify({ error: "REQUEST_THROTTLED" }), { status: 429, headers: { "Content-Type": "application/json" } });
@@ -113,21 +124,22 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json().catch(() => ({}));
-    const providedKey = normalizeKey((body as { key?: unknown })?.key);
+    const parsed = await parseJsonBody(request, requestSchema);
+    if (!parsed.ok) return parsed.response;
+    const providedKey = normalizeKey(parsed.data.key);
 
     const configuredKeyHashes = getConfiguredKeyHashes();
     const sessionSecret = String(process.env.OGR_SESSION_SECRET || "").trim();
 
     if (!configuredKeyHashes.length) {
-      return NextResponse.json(
+      return noStoreJson(
         { ok: false, error: "SOVEREIGN_KEY_NOT_CONFIGURED" },
         { status: 500 },
       );
     }
 
     if (!sessionSecret) {
-      return NextResponse.json(
+      return noStoreJson(
         { ok: false, error: "OGR_SESSION_SECRET_NOT_CONFIGURED" },
         { status: 500 },
       );
@@ -139,7 +151,7 @@ export async function POST(request: Request) {
     );
 
     if (!providedKey || !authorized) {
-      return NextResponse.json(
+      return noStoreJson(
         { ok: false, error: "UNAUTHORIZED_ACCESS_BLOCK" },
         { status: 403 },
       );
@@ -153,7 +165,7 @@ export async function POST(request: Request) {
       secret: sessionSecret,
     });
 
-    const response = NextResponse.json({ ok: true });
+    const response = noStoreJson({ ok: true });
 
     response.cookies.set({
       name: PRIMARY_COOKIE_NAME,
@@ -170,7 +182,7 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     console.error("[SOVEREIGN_AUTH_FAILURE]", error);
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, error: "AUTH_GATE_FAILURE" },
       { status: 500 },
     );
@@ -178,7 +190,7 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json(
+  return noStoreJson(
     {
       ok: false,
       error: "METHOD_NOT_ALLOWED",

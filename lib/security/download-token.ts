@@ -37,17 +37,26 @@ function b64urlDecodeToBuffer(b64url: string): Buffer {
 }
 
 export type DownloadTokenPayload = {
-  id: string;
+  purpose: "download";
+  subject: string;
+  iat: number;
+  exp: number;
   expSeconds?: number; // default 15 mins
 };
 
 export type VerifyResult =
-  | { ok: true; id: string; exp: number }
+  | { ok: true; subject: string; purpose: "download"; exp: number; iat: number }
   | { ok: false; reason: "format" | "signature" | "payload" | "expired" | "error" };
 
 export function createDownloadToken(payload: DownloadTokenPayload): string {
-  const exp = Math.floor(Date.now() / 1000) + (payload.expSeconds ?? 15 * 60);
-  const body = { id: String(payload.id || "").trim(), exp };
+  const issuedAt = Math.floor(Date.now() / 1000);
+  const exp = issuedAt + (payload.expSeconds ?? 15 * 60);
+  const body = {
+    purpose: "download",
+    subject: String(payload.subject || "").trim(),
+    iat: issuedAt,
+    exp,
+  };
 
   const bodyStr = JSON.stringify(body);
   const sig = crypto
@@ -75,14 +84,17 @@ export function verifyDownloadToken(token: string): VerifyResult {
     if (sig.length !== expected.length) return { ok: false, reason: "signature" };
     if (!crypto.timingSafeEqual(sig, expected)) return { ok: false, reason: "signature" };
 
-    const body = JSON.parse(bodyStr) as { id?: unknown; exp?: unknown };
-    const id = typeof body.id === "string" ? body.id.trim() : "";
+    const body = JSON.parse(bodyStr) as { purpose?: unknown; subject?: unknown; exp?: unknown; iat?: unknown };
+    const subject = typeof body.subject === "string" ? body.subject.trim() : "";
+    const iat = typeof body.iat === "number" ? body.iat : Number(body.iat);
     const exp = typeof body.exp === "number" ? body.exp : Number(body.exp);
 
-    if (!id || !Number.isFinite(exp)) return { ok: false, reason: "payload" };
+    if (body.purpose !== "download" || !subject || !Number.isFinite(exp) || !Number.isFinite(iat)) {
+      return { ok: false, reason: "payload" };
+    }
     if (exp < Math.floor(Date.now() / 1000)) return { ok: false, reason: "expired" };
 
-    return { ok: true, id, exp };
+    return { ok: true, subject, purpose: "download", exp, iat };
   } catch {
     return { ok: false, reason: "error" };
   }

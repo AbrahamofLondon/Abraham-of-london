@@ -21,6 +21,7 @@ import {
   assessReplicationRisk,
   type ReplicationTelemetry,
 } from "@/lib/security/replication-detection";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 type ApiSuccess = {
   ok: true;
@@ -41,9 +42,19 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiSuccess | ApiFailure>,
 ) {
+  if (String(process.env.SECURITY_LOCKDOWN_MODE || "").toLowerCase() === "true" ||
+      String(process.env.DISABLE_DIAGNOSTIC_SCORING || "").toLowerCase() === "true") {
+    return res.status(503).json({ ok: false, error: "DIAGNOSTIC_SCORING_DISABLED" });
+  }
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method not allowed" });
+  }
+
+  const contentType = String(req.headers["content-type"] || "");
+  if (!/application\/json/i.test(contentType)) {
+    return res.status(415).json({ ok: false, error: "Unsupported media type" });
   }
 
   const parsed = requestSchema.safeParse(req.body);
@@ -55,6 +66,21 @@ export default async function handler(
   }
 
   const { assessmentType, stage, answers } = parsed.data;
+  const rateLimit = await consumePersistentRateLimit({
+    key: [
+      "diagnostics-challenge",
+      String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "0.0.0.0"),
+      typeof answers["sessionKey"] === "string" ? answers["sessionKey"] : "",
+      assessmentType,
+      stage,
+    ].filter(Boolean).join(":"),
+    limit: 30,
+    windowMs: 15 * 60_000,
+    failClosed: true,
+  });
+  if (!rateLimit.allowed) {
+    return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
+  }
 
   // ─── Shield check ──────────────────────────────────────────────────────────
 

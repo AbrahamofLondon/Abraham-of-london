@@ -1,14 +1,27 @@
 /* pages/api/admin/security/appeal.ts — Clearance Request Handler */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/config";
+import { z } from "zod";
 import { auditLogger } from "@/lib/server/db/audit";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
+
+const bodySchema = z.object({
+  reason: z.string().trim().min(1).max(500),
+  attemptedPath: z.string().trim().max(240).optional(),
+  requiredTier: z.string().trim().max(64).optional(),
+}).strict();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
-  const session = await getServerSession(req, res, authOptions);
-  const { reason, attemptedPath, requiredTier } = req.body;
+  const session = await requireAdminServer(req, res, { routeKey: "admin-security-appeal" });
+  if (!session) return;
+
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, message: "INVALID_REQUEST" });
+  }
+
+  const { reason, attemptedPath, requiredTier } = parsed.data;
 
   try {
     // 1. Lockdown Integrity Check
@@ -29,9 +42,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ipAddress: req.headers["x-forwarded-for"]?.toString().split(",")[0] || req.socket.remoteAddress || "0.0.0.0",
       userAgent: req.headers["user-agent"] || null,
       metadata: {
-        reason: reason?.substring(0, 500),
+        reason,
         requiredTier,
-        userTier: (session as any)?.aol?.tier || "public",
+        userRole: session.user?.role || "USER",
         timestamp: new Date().toISOString(),
       },
     });

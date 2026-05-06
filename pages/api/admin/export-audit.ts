@@ -1,9 +1,8 @@
 /* pages/api/admin/export-audit.ts — INSTITUTIONAL AUDIT EXPORT (SCHEMA-ALIGNED) */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
 import prisma from "@/lib/prisma";
 import { jsonErr } from "@/lib/server/http";
-import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 type AuditRow = {
   createdAt: Date;
@@ -43,8 +42,6 @@ type AuditExportResponse =
       message?: string;
     };
 
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
-const RATE_LIMIT_MAX = 10;
 const MAX_RANGE_DAYS = 31;
 
 function getClientIp(req: NextApiRequest): string {
@@ -103,38 +100,14 @@ export default async function handler(
     return jsonErr(res, 405, "METHOD_NOT_ALLOWED", "Use GET for exports.");
   }
 
-  const session = await getSession({ req });
-  const adminEmail =
-    process.env.INITIAL_ADMIN_EMAIL || "admin@abrahamoflondon.com";
-
-  if (!session || session.user?.email !== adminEmail) {
-    return jsonErr(res, 403, "UNAUTHORIZED", "Administrative access required.");
-  }
-
-  const rateKey = `${String(session.user.email).toLowerCase()}|${getClientIp(req)}`;
-  const rl = await consumePersistentRateLimit({
-    key: `admin-export-audit:${rateKey}`,
-    limit: RATE_LIMIT_MAX,
-    windowMs: RATE_LIMIT_WINDOW_MS,
-    failClosed: true,
+  const session = await requireAdminServer(req, res, {
+    routeKey: "admin-export-audit",
+    rateLimit: {
+      limit: 10,
+      windowMs: 60 * 60 * 1000,
+    },
   });
-
-  if (!rl.allowed) {
-    res.setHeader(
-      "Retry-After",
-      String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
-    );
-    return jsonErr(
-      res,
-      429,
-      "RATE_LIMITED",
-      "Too many export attempts. Try again later."
-    );
-  }
-
-  res.setHeader("X-RateLimit-Limit", String(RATE_LIMIT_MAX));
-  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
-  res.setHeader("X-RateLimit-Reset", String(rl.resetAt));
+  if (!session) return;
 
   const sinceQuery = normalizeDateInput(req.query.since);
   const untilQuery = normalizeDateInput(req.query.until);
@@ -186,7 +159,7 @@ export default async function handler(
           start: startDate.toISOString(),
           end: endDate.toISOString(),
         },
-        exportedBy: String(session.user.email || adminEmail),
+        exportedBy: String(session.user?.email || ""),
         schema: "SystemAuditLog.metadata",
       },
       data: logs,

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { getPdfAssetIdentityBySlug } from "@/lib/assets/pdf-identity";
@@ -10,28 +11,53 @@ import { grantEntitlement } from "@/lib/commercial/entitlements";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 import type { UserContext } from "@/lib/assets/pdf-access";
+import {
+  enforceAppRouteRateLimit,
+  failClosedForFlag,
+  noStoreJson,
+  parseJsonBody,
+  requireJsonContent,
+  requireMethod,
+} from "@/lib/server/security/app-route-guards";
 
-type CheckoutPayload = {
-  slug?: string;
-  userId?: string;
-  email?: string;
-  simulateSuccess?: boolean;
-};
-
-async function parsePayload(req: NextRequest): Promise<CheckoutPayload> {
-  try {
-    return (await req.json()) as CheckoutPayload;
-  } catch {
-    return {};
-  }
-}
+const checkoutSchema = z.object({
+  slug: z.string().trim().min(1).max(160),
+  email: z.string().trim().email().max(320).optional(),
+  simulateSuccess: z.boolean().optional(),
+}).strict();
 
 export async function POST(req: NextRequest) {
-  const payload = await parsePayload(req);
-  const slug = String(payload.slug || "").replace(/\.pdf$/i, "");
+  const methodCheck = requireMethod(req, ["POST"]);
+  if (!methodCheck.ok) return methodCheck.response;
+
+  const contentCheck = requireJsonContent(req);
+  if (!contentCheck.ok) return contentCheck.response;
+
+  const lockdown = failClosedForFlag({
+    flag: "DISABLE_CHECKOUT",
+    action: "checkout_started",
+    route: "/api/checkout",
+    publicMessage: "CHECKOUT_TEMPORARILY_DISABLED",
+  });
+  if (!lockdown.ok) return lockdown.response;
+
+  const parsed = await parseJsonBody(req, checkoutSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
+  const slug = payload.slug.replace(/\.pdf$/i, "");
+
+  const rateLimit = await enforceAppRouteRateLimit({
+    request: req,
+    routeKey: "checkout",
+    limit: 12,
+    windowMs: 15 * 60_000,
+    email: payload.email || null,
+    failClosed: true,
+  });
+  if (!rateLimit.ok) return rateLimit.response;
 
   if (!slug) {
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, error: "slug is required" },
       { status: 400 },
     );
@@ -41,18 +67,18 @@ export async function POST(req: NextRequest) {
   try {
     asset = getPdfAssetIdentityBySlug(slug);
   } catch {
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, error: "PDF asset not found" },
       { status: 404 },
     );
   }
 
   const identity = await resolveIdentity(req);
-  const userId = identity.subjectId || payload.userId || null;
-  const email = identity.email || String(payload.email || "").trim().toLowerCase() || null;
+  const userId = identity.subjectId || null;
+  const email = identity.email || payload.email?.trim().toLowerCase() || null;
 
   if (!userId && !email) {
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, error: "Authenticated user or entitlement email required for checkout" },
       { status: 401 },
     );
@@ -60,7 +86,7 @@ export async function POST(req: NextRequest) {
 
   // Production: redirect to canonical checkout route
   if (process.env.NODE_ENV === "production") {
-    return NextResponse.json(
+    return noStoreJson(
       {
         ok: false,
         error: "Use canonical checkout",
@@ -88,7 +114,7 @@ export async function POST(req: NextRequest) {
   const paymentSucceeded = payload.simulateSuccess === true;
 
   if (!paymentSucceeded) {
-    return NextResponse.json(
+    return noStoreJson(
       {
         ok: false,
         slug: asset.slug,
@@ -112,7 +138,7 @@ export async function POST(req: NextRequest) {
       await grantEntitlement(userId, asset.slug, "purchase-repair").catch(() => undefined);
     }
 
-    return NextResponse.json(
+    return noStoreJson(
       {
         ok: false,
         slug: asset.slug,
@@ -127,7 +153,7 @@ export async function POST(req: NextRequest) {
     await grantEntitlement(userId, asset.slug, "purchase").catch(() => undefined);
   }
 
-  return NextResponse.json({
+  return noStoreJson({
     ok: true,
     slug: asset.slug,
     price: pricing.price,

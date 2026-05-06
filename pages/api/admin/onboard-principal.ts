@@ -5,14 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { InquiryStatus } from "@prisma/client";
 import { generatePrincipalKey } from "@/lib/auth/key-generator";
 import { sendOnboardingWelcome } from "@/lib/intelligence/notification-delegate";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
 
 import {
   normalizeUserTier,
   hasAccess,
   getTierLabel,
 } from "@/lib/access/tier-policy";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 type DbAccessTier =
   | "public"
@@ -92,7 +91,8 @@ export default async function handler(
     });
   }
 
-  const session = await getServerSession(req, res, authOptions);
+  const session = await requireAdminServer(req, res, { routeKey: "admin-onboard-principal" });
+  if (!session) return;
   const actor = getSessionActor(session);
 
   if (!hasAccess(actor.tier, "architect")) {

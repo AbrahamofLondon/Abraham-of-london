@@ -13,10 +13,8 @@
 // route consistent with the live pattern.
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-
-import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 type ApiResponse =
   | {
@@ -45,16 +43,8 @@ export default async function handler(
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
-  const session = await getServerSession(req, res, authOptions);
-  const isInternal = Boolean((session as any)?.aol?.isInternal);
-
-  if (!session || !isInternal) {
-    return res.status(403).json({
-      ok: false,
-      error: "Forbidden",
-      code: "ADMIN_REQUIRED",
-    });
-  }
+  const session = await requireAdminServer(req, res, { routeKey: "admin-members-list" });
+  if (!session) return;
 
   try {
     const rows = await prisma.innerCircleMember.findMany({

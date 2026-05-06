@@ -1,10 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { processJobBatch, registerJobHandler } from "@/lib/jobs/processor-v2";
 import { logger } from "@/lib/observability/logger";
 import { withCircuitBreaker } from "@/lib/resilience/circuit-breaker";
 import { prisma } from "@/lib/prisma";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 registerJobHandler("diagnostic.report.regenerate", async (payload) => {
   const artifact = await prisma.diagnosticArtifact.findUnique({
@@ -27,11 +26,13 @@ registerJobHandler("diagnostic.report.regenerate", async (payload) => {
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
-
-  if (!session) {
-    return res.status(401).json({ ok: false, reason: "UNAUTHORIZED" });
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
   }
+
+  const session = await requireAdminServer(req, res, { routeKey: "admin-jobs-process" });
+  if (!session) return;
 
   try {
     const result = await withCircuitBreaker("jobs.process", async () => {

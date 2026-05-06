@@ -1,8 +1,9 @@
 /* pages/api/assets/retrieve.ts — SECURE ASSET GATEKEEPER */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
+import { getServerSession } from "next-auth/next";
 import prisma from "@/lib/prisma"; // ✅ Unified import with other working routes
 import { auditLogger } from "@/lib/audit/audit-logger";
+import { authOptions } from "@/lib/auth/config";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -10,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // 1. Initial Identity Verification
-  const session = await getSession({ req });
+  const session = await getServerSession(req, res, authOptions);
   const { slug } = req.body;
 
   if (!session || !session.user) {

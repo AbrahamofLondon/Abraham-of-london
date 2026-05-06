@@ -16,6 +16,7 @@ import { runConstitutionalOrchestration } from "@/lib/engine/orchestrator";
 import { assessReplicationRisk } from "@/lib/security/replication-detection";
 import { createEncryptedStateToken } from "@/lib/security/secure-client-state";
 import { toPublicResult, type PublicConstitutionalResult } from "@/lib/diagnostics/public-constitutional-result";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
 type ApiSuccess = {
   ok: true;
@@ -97,6 +98,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiSuccess | ApiFailure>,
 ) {
+  if (String(process.env.SECURITY_LOCKDOWN_MODE || "").toLowerCase() === "true" ||
+      String(process.env.DISABLE_DIAGNOSTIC_SCORING || "").toLowerCase() === "true") {
+    return res.status(503).json({ ok: false, error: "DIAGNOSTIC_SCORING_DISABLED" });
+  }
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({
@@ -106,6 +112,11 @@ export default async function handler(
   }
 
   try {
+    const contentType = String(req.headers["content-type"] || "");
+    if (!/application\/json/i.test(contentType)) {
+      return res.status(415).json({ ok: false, error: "UNSUPPORTED_MEDIA_TYPE" });
+    }
+
     const parsed = requestSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
@@ -116,6 +127,21 @@ export default async function handler(
     }
 
     const body = parsed.data;
+    const rateLimit = await consumePersistentRateLimit({
+      key: [
+        "constitutional-intake-report",
+        getClientIp(req) || "0.0.0.0",
+        body.sessionKey ?? "",
+        body.email?.trim().toLowerCase() ?? "",
+      ].filter(Boolean).join(":"),
+      limit: 12,
+      windowMs: 30 * 60_000,
+      failClosed: true,
+    });
+    if (!rateLimit.allowed) {
+      return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
+    }
+
     const answers = parseAnswers(body.answers);
     const campaignId = body.campaignId ?? null;
 

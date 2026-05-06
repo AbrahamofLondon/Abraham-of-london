@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 // app/api/strategy-room/results/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
+import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
 
 export async function GET(req: Request) {
   try {
@@ -22,6 +23,16 @@ export async function GET(req: Request) {
     // 1. EXPLICIT DECISION SESSION LOOKUP
     // ============================================
     if (type === "session" || sessionKey) {
+      const access = await assertStrategyRoomAccess({
+        request: req,
+        sessionRef: sessionKey || id,
+        purpose: "strategy_room_access",
+        allowTokenPurposes: ["strategy_room_access", "return_brief"],
+      });
+      if (!access.ok) {
+        return NextResponse.json({ error: access.error }, { status: access.status });
+      }
+
       const session = await prisma.decisionRecommendationSession.findFirst({
         where: sessionKey
           ? { sessionKey }
@@ -73,33 +84,10 @@ export async function GET(req: Request) {
       });
     }
 
-    // ============================================
-    // 2. LEGACY STRATEGY INTAKE LOOKUP
-    // ============================================
-    const record = await prisma.strategyIntake.findUnique({
-      where: { id },
-    });
-
-    if (!record) {
-      return NextResponse.json(
-        { error: "Strategy intake not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      type: "intake",
-      id: record.id,
-      fullName: record.fullName,
-      organisation: record.organisation,
-      dependencyLevel: record.dependencyLevel,
-      volatility: record.volatility,
-      readinessScore: record.readinessScore,
-      payload: record.payload,
-      emailHash: record.emailHash,
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-    });
+    return NextResponse.json(
+      { error: "SESSION_ACCESS_REQUIRED" },
+      { status: 403 }
+    );
   } catch (error) {
     console.error("[STRATEGY_RESULTS_ERROR]", error);
 

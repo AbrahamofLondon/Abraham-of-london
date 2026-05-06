@@ -1,4 +1,5 @@
 const STORAGE_PREFIX = "aol_secure_state_ref_v1";
+const MAX_TOKEN_AGE_MS = 1000 * 60 * 60 * 24;
 
 type SecureStateTokenPayload = {
   kind: "constitutional_handoff";
@@ -16,11 +17,15 @@ function isBrowser(): boolean {
 }
 
 function getSecret(): string {
-  return (
-    process.env.SECURE_CLIENT_STATE_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    "development-secure-client-state-secret"
-  );
+  const secret = String(
+    process.env.SECURE_CLIENT_STATE_SECRET || process.env.NEXTAUTH_SECRET || "",
+  ).trim();
+
+  if (!secret) {
+    throw new Error("SECURE_CLIENT_STATE_SECRET or NEXTAUTH_SECRET is required");
+  }
+
+  return secret;
 }
 
 export function writeSecureStateReference(scope: string, token: string): void {
@@ -99,8 +104,18 @@ export function decryptEncryptedStateToken(
     if (
       parsed?.kind !== "constitutional_handoff" ||
       parsed?.version !== 1 ||
-      typeof parsed?.reportId !== "string"
+      typeof parsed?.reportId !== "string" ||
+      typeof parsed?.issuedAt !== "string"
     ) {
+      return null;
+    }
+
+    const issuedAt = new Date(parsed.issuedAt);
+    if (Number.isNaN(issuedAt.getTime())) {
+      return null;
+    }
+
+    if (Date.now() - issuedAt.getTime() > MAX_TOKEN_AGE_MS) {
       return null;
     }
 

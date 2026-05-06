@@ -12,12 +12,16 @@ const TAG_LENGTH = 16;
 
 /**
  * Derive a 32-byte key from the configured secret using HKDF.
- * Falls back to a SHA-256 hash if no secret is configured (dev only).
  */
 function deriveKey(): Buffer {
-  const secret = process.env.OAUTH_TOKEN_ENCRYPTION_KEY ||
-                 process.env.INNER_CIRCLE_JWT_SECRET ||
-                 "dev-fallback-key-change-in-production-32bytes";
+  const secret = String(
+    process.env.OAUTH_TOKEN_ENCRYPTION_KEY ||
+      process.env.INNER_CIRCLE_JWT_SECRET ||
+      "",
+  ).trim();
+  if (!secret) {
+    throw new Error("[ENCRYPTION] Missing OAUTH_TOKEN_ENCRYPTION_KEY or INNER_CIRCLE_JWT_SECRET");
+  }
   // Use HKDF to derive a proper 256-bit key from the secret
   const inputKey = crypto.createHash("sha256").update(secret).digest();
   return inputKey;

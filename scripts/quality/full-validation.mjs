@@ -41,6 +41,8 @@ run("PDF enforce", "npm run pdf:enforce");
 run("MDX integrity", "node scripts/mdx-integrity-check.mjs");
 run("MDX gate", "node scripts/mdx-illegal-jsx-gate.mjs");
 run("Unit tests", "npx vitest run --reporter=verbose");
+run("Client bundle audit", "node scripts/security/audit-client-bundle-secrets.mjs");
+run("Public IP audit", "node scripts/security/audit-public-ip-exposure.mjs");
 run("Build", "pnpm build", { timeout: 900_000 });
 
 console.log("\n========================================");

@@ -13,6 +13,8 @@ import {
   insufficientEvidenceContradiction,
 } from "@/lib/contracts/decision-surface";
 import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
+import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
+import { noStoreJson, requireMethod } from "@/lib/server/security/app-route-guards";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -24,7 +26,19 @@ type RouteContext = { params: Promise<{ id: string }> };
  */
 export async function GET(_req: NextRequest, ctx: RouteContext) {
   try {
+    const methodCheck = requireMethod(_req, ["GET"]);
+    if (!methodCheck.ok) return methodCheck.response;
+
     const { id } = await ctx.params;
+    const access = await assertStrategyRoomAccess({
+      request: _req,
+      sessionRef: id,
+      purpose: "strategy_room_access",
+      allowTokenPurposes: ["strategy_room_access", "return_brief"],
+    });
+    if (!access.ok) {
+      return noStoreJson({ error: access.error }, { status: access.status });
+    }
 
     const session = await prisma.strategyRoomExecutionSession.findUnique({
       where: { id },

@@ -6,51 +6,53 @@
 ============================================================================ */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { z } from "zod";
 import {
   listDeadLetters,
   markDeadLetterResolved,
   markDeadLetterDiscarded,
 } from "@/lib/server/jobs/dead-letter";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
-import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
+const querySchema = z.object({
+  status: z.string().trim().max(64).optional(),
+  queue: z.string().trim().max(128).optional(),
+  take: z.coerce.number().int().min(1).max(200).optional().default(100),
+}).strict();
 
-function isAdmin(session: any) {
-  const email = String(session?.user?.email || "").toLowerCase();
-  return BOOTSTRAP_ADMIN_EMAILS.has(email);
-}
+const bodySchema = z.object({
+  id: z.string().trim().min(1).max(128),
+  action: z.enum(["resolve", "discard"]),
+  note: z.string().trim().max(1000).optional(),
+}).strict();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
-
-  if (!session || !isAdmin(session)) {
-    return res.status(403).json({ ok: false, error: "FORBIDDEN" });
-  }
+  const session = await requireAdminServer(req, res, { routeKey: "admin-dead-letter-index" });
+  if (!session) return;
 
   if (req.method === "GET") {
-    const status =
-      typeof req.query.status === "string" ? req.query.status : undefined;
-    const queue =
-      typeof req.query.queue === "string" ? req.query.queue : undefined;
-    const take =
-      typeof req.query.take === "string" ? Number(req.query.take) : 100;
+    const parsed = querySchema.safeParse(req.query);
+    if (!parsed.success) {
+      return res.status(400).json({ ok: false, error: "INVALID_REQUEST" });
+    }
+
+    const { status, queue, take } = parsed.data;
 
     const items = await listDeadLetters({
       status: status as any,
       queue,
-      take: Number.isFinite(take) ? take : 100,
+      take,
     });
 
     return res.status(200).json({ ok: true, items });
   }
 
   if (req.method === "POST") {
-    const { id, action, note } = req.body || {};
-
-    if (!id || typeof id !== "string") {
-      return res.status(400).json({ ok: false, error: "ID_REQUIRED" });
+    const parsed = bodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ ok: false, error: "INVALID_REQUEST" });
     }
+    const { id, action, note } = parsed.data;
 
     if (action === "resolve") {
       const item = await markDeadLetterResolved(id, note);

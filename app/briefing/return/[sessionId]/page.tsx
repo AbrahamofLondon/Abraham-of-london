@@ -8,7 +8,7 @@
  */
 
 import * as React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 type ReturnBriefData = {
@@ -34,14 +34,17 @@ type ReturnBriefData = {
 
 export default function ReturnBriefPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const sessionId = params?.sessionId as string;
+  const accessToken = searchParams?.get("access") || "";
   const [brief, setBrief] = React.useState<ReturnBriefData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [noBrief, setNoBrief] = React.useState(false);
 
   React.useEffect(() => {
     if (!sessionId) return;
-    fetch(`/api/strategy-room/briefing/return/${sessionId}`)
+    const query = accessToken ? `?access=${encodeURIComponent(accessToken)}` : "";
+    fetch(`/api/strategy-room/briefing/return/${sessionId}${query}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.ok && data.briefAvailable) {
@@ -52,7 +55,7 @@ export default function ReturnBriefPage() {
       })
       .catch(() => setNoBrief(true))
       .finally(() => setLoading(false));
-  }, [sessionId]);
+  }, [accessToken, sessionId]);
 
   if (loading) {
     return (

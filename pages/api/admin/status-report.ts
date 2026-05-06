@@ -1,16 +1,16 @@
 /* pages/api/admin/status-report.ts — DYNAMIC REPORT GENERATOR */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
 import { prisma } from "@/lib/db";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession({ req });
-  const adminEmail = process.env.INITIAL_ADMIN_EMAIL || 'admin@abrahamoflondon.com';
-
-  // 1. Security Guard
-  if (!session || session.user?.email !== adminEmail) {
-    return res.status(403).json({ error: "Access Denied: Admin Clearance Required" });
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const session = await requireAdminServer(req, res, { routeKey: "admin-status-report" });
+  if (!session) return;
 
   // ✅ CRITICAL FIX: Ensure prisma is not null before proceeding
   if (!prisma) {

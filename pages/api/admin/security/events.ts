@@ -1,18 +1,29 @@
 /* pages/api/admin/security/events.ts — Log Query Engine */
 import type { NextApiRequest, NextApiResponse } from "next";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma.server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/config";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
+
+const querySchema = z.object({
+  status: z.string().trim().max(40).optional().default("pending"),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(10),
+}).strict();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
-  
-  // High Clearance Check
-  if (!session || (session as any).aol?.tier !== "admin" && (session as any).aol?.tier !== "root") {
-    return res.status(403).json({ error: "Institutional Clearance Required" });
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { status = "pending", limit = "10" } = req.query;
+  const session = await requireAdminServer(req, res, { routeKey: "admin-security-events" });
+  if (!session) return;
+
+  const parsedQuery = querySchema.safeParse(req.query);
+  if (!parsedQuery.success) {
+    return res.status(400).json({ error: "INVALID_REQUEST" });
+  }
+
+  const { status, limit } = parsedQuery.data;
 
   try {
     const events = await prisma.systemAuditLog.findMany({
@@ -21,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         category: "SECURITY"
       },
       orderBy: { createdAt: 'desc' },
-      take: parseInt(String(limit)),
+      take: limit,
     });
 
     return res.status(200).json({ events });

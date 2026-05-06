@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma.server";
 import { propagateDecisionChange } from "@/lib/strategy-room/execution-feedback";
 import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
@@ -13,8 +14,28 @@ import {
 } from "@/lib/execution/decision-state-engine";
 import { buildDecisionSurfacePayload } from "@/lib/contracts/decision-surface";
 import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
+import {
+  noStoreJson,
+  parseJsonBody,
+  requireJsonContent,
+  requireMethod,
+} from "@/lib/server/security/app-route-guards";
+import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
 
 type RouteContext = { params: Promise<{ id: string }> };
+const postSchema = z.object({
+  decision: z.string().trim().min(1).max(2000),
+  notes: z.string().trim().max(2000).optional().nullable(),
+  aiLeverageAction: z.string().trim().max(64).optional(),
+  decisionObjectId: z.string().trim().min(1).max(128).optional(),
+}).strict();
+
+const patchSchema = z.object({
+  decisionId: z.string().trim().min(1).max(128),
+  status: z.enum(["pending", "executed", "blocked"]).optional(),
+  notes: z.string().trim().max(2000).optional().nullable(),
+  aiLeverageAction: z.string().trim().max(64).optional(),
+}).strict();
 
 function parseJsonObject(value: string | null | undefined): Record<string, unknown> {
   if (!value) return {};
@@ -45,8 +66,25 @@ async function findInactiveRetainerForDecision(decisionObjectId: string) {
 
 export async function POST(req: NextRequest, ctx: RouteContext) {
   try {
+    const methodCheck = requireMethod(req, ["POST"]);
+    if (!methodCheck.ok) return methodCheck.response;
+
+    const contentCheck = requireJsonContent(req);
+    if (!contentCheck.ok) return contentCheck.response;
+
     const { id: sessionId } = await ctx.params;
-    const body = await req.json();
+    const access = await assertStrategyRoomAccess({
+      request: req,
+      sessionRef: sessionId,
+      purpose: "strategy_room_access",
+    });
+    if (!access.ok) {
+      return noStoreJson({ error: access.error }, { status: access.status });
+    }
+
+    const parsed = await parseJsonBody(req, postSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
     const { decision, notes } = body;
     const aiLeverageAction = typeof body?.aiLeverageAction === "string" ? body.aiLeverageAction.trim() : "";
     const decisionObjectId = typeof body?.decisionObjectId === "string" ? body.decisionObjectId.trim() : "";
@@ -281,8 +319,25 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
 
 export async function PATCH(req: NextRequest, ctx: RouteContext) {
   try {
+    const methodCheck = requireMethod(req, ["PATCH"]);
+    if (!methodCheck.ok) return methodCheck.response;
+
+    const contentCheck = requireJsonContent(req);
+    if (!contentCheck.ok) return contentCheck.response;
+
     const { id: sessionId } = await ctx.params;
-    const body = await req.json();
+    const access = await assertStrategyRoomAccess({
+      request: req,
+      sessionRef: sessionId,
+      purpose: "strategy_room_access",
+    });
+    if (!access.ok) {
+      return noStoreJson({ error: access.error }, { status: access.status });
+    }
+
+    const parsed = await parseJsonBody(req, patchSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
     const { decisionId, status, notes } = body;
 
     if (!decisionId) {

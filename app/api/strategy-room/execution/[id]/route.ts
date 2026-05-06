@@ -1,7 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma.server";
+import {
+  noStoreJson,
+  parseJsonBody,
+  requireJsonContent,
+  requireMethod,
+} from "@/lib/server/security/app-route-guards";
+import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
 
 type RouteContext = { params: Promise<{ id: string }> };
+const patchSchema = z.object({
+  status: z.string().trim().max(80).optional(),
+  coreProblem: z.string().trim().max(1200).optional().nullable(),
+  decisionQuestion: z.string().trim().max(1200).optional().nullable(),
+  constraints: z.unknown().optional(),
+  exposureLevel: z.string().trim().max(80).optional().nullable(),
+  interventionStack: z.unknown().optional(),
+  constraintMap: z.unknown().optional(),
+}).strict();
 
 /**
  * GET  — Fetch a single execution session with decisions
@@ -11,6 +28,15 @@ type RouteContext = { params: Promise<{ id: string }> };
 export async function GET(_req: NextRequest, ctx: RouteContext) {
   try {
     const { id } = await ctx.params;
+    const access = await assertStrategyRoomAccess({
+      request: _req,
+      sessionRef: id,
+      purpose: "strategy_room_access",
+      allowTokenPurposes: ["strategy_room_access", "return_brief"],
+    });
+    if (!access.ok) {
+      return noStoreJson({ error: access.error }, { status: access.status });
+    }
 
     const session = await prisma.strategyRoomExecutionSession.findUnique({
       where: { id },
@@ -50,8 +76,25 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
 
 export async function PATCH(req: NextRequest, ctx: RouteContext) {
   try {
+    const methodCheck = requireMethod(req, ["PATCH"]);
+    if (!methodCheck.ok) return methodCheck.response;
+
+    const contentCheck = requireJsonContent(req);
+    if (!contentCheck.ok) return contentCheck.response;
+
     const { id } = await ctx.params;
-    const body = await req.json();
+    const access = await assertStrategyRoomAccess({
+      request: req,
+      sessionRef: id,
+      purpose: "strategy_room_access",
+    });
+    if (!access.ok) {
+      return noStoreJson({ error: access.error }, { status: access.status });
+    }
+
+    const parsed = await parseJsonBody(req, patchSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
 
     const updateData: Record<string, unknown> = {};
 

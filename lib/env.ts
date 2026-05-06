@@ -17,6 +17,12 @@ const envSchema = z.object({
   // Feature flags
   ENABLE_AUDIT_LOGGING: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
   SKIP_AUTH_IN_DEV: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
+  DISABLE_EMAIL_SENDS: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
+  DISABLE_DIAGNOSTIC_SCORING: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
+  DISABLE_STRATEGY_ROOM_ENTRY: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
+  DISABLE_CHECKOUT: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
+  DISABLE_RETURN_BRIEFS: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
+  SECURITY_LOCKDOWN_MODE: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
 });
 
 type ParsedEnv = z.infer<typeof envSchema>;
@@ -93,6 +99,12 @@ export const Config = new Proxy({} as {
       features: {
         auditLogging: env.ENABLE_AUDIT_LOGGING,
         skipAuthInDev: env.SKIP_AUTH_IN_DEV,
+        disableEmailSends: env.DISABLE_EMAIL_SENDS,
+        disableDiagnosticScoring: env.DISABLE_DIAGNOSTIC_SCORING,
+        disableStrategyRoomEntry: env.DISABLE_STRATEGY_ROOM_ENTRY,
+        disableCheckout: env.DISABLE_CHECKOUT,
+        disableReturnBriefs: env.DISABLE_RETURN_BRIEFS,
+        securityLockdownMode: env.SECURITY_LOCKDOWN_MODE,
       },
     } as const;
 

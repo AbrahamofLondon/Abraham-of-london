@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T15:12:11.965Z",
+  "generatedAt": "2026-05-06T22:05:22.806Z",
   "count": 4,
   "items": [
     {
@@ -9,8 +9,8 @@
       "sourcePath": "C:\\aol-check-visual\\scripts\\pdf\\print-sources\\4d-surrender-framework-worksheet.print.md",
       "outputPath": "C:\\aol-check-visual\\public\\epubs\\4d-surrender-framework-worksheet.epub",
       "publicHref": "/epubs/4d-surrender-framework-worksheet.epub",
-      "sizeBytes": 5559,
-      "generatedAt": "2026-04-30T15:12:11.965Z"
+      "sizeBytes": 5563,
+      "generatedAt": "2026-05-06T22:05:22.806Z"
     },
     {
       "slug": "surrender-decision-matrix",
@@ -19,8 +19,8 @@
       "sourcePath": "C:\\aol-check-visual\\scripts\\pdf\\print-sources\\surrender-decision-matrix.print.md",
       "outputPath": "C:\\aol-check-visual\\public\\epubs\\surrender-decision-matrix.epub",
       "publicHref": "/epubs/surrender-decision-matrix.epub",
-      "sizeBytes": 5329,
-      "generatedAt": "2026-04-30T15:12:11.965Z"
+      "sizeBytes": 5328,
+      "generatedAt": "2026-05-06T22:05:22.806Z"
     },
     {
       "slug": "ultimate-purpose-of-man-editorial",
@@ -29,8 +29,8 @@
       "sourcePath": "C:\\aol-check-visual\\scripts\\pdf\\print-sources\\ultimate-purpose-of-man-editorial.print.md",
       "outputPath": "C:\\aol-check-visual\\public\\epubs\\ultimate-purpose-of-man-editorial.epub",
       "publicHref": "/epubs/ultimate-purpose-of-man-editorial.epub",
-      "sizeBytes": 15226,
-      "generatedAt": "2026-04-30T15:12:11.965Z"
+      "sizeBytes": 15227,
+      "generatedAt": "2026-05-06T22:05:22.806Z"
     },
     {
       "slug": "weekly-surrender-audit-template",
@@ -40,7 +40,7 @@
       "outputPath": "C:\\aol-check-visual\\public\\epubs\\weekly-surrender-audit-template.epub",
       "publicHref": "/epubs/weekly-surrender-audit-template.epub",
       "sizeBytes": 5069,
-      "generatedAt": "2026-04-30T15:12:11.965Z"
+      "generatedAt": "2026-05-06T22:05:22.806Z"
     }
   ]
 }

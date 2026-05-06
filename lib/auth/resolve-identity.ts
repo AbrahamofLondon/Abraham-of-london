@@ -159,13 +159,9 @@ export function resolveIdentityEdge(
     result.flags = Array.isArray(aol.flags) ? aol.flags.map(String) : [];
     result.lifecycle = "active"; // trust JWT claim at edge
   } else if (hasAccessCookie) {
-    // Access cookie provides session presence indicator only.
-    // At edge without JWT, we grant minimum authenticated access.
-    // The server-side resolveIdentity() does the real Prisma check.
-    result.authenticated = true;
+    // Cookie presence is only a routing hint at the edge. It does not
+    // establish an authenticated member state without cryptographic proof.
     result.sessionSource = "access_cookie";
-    result.tier = "member"; // minimum — server upgrades via Prisma if valid
-    result.lifecycle = "active";
   }
 
   result.innerCircleAccess =

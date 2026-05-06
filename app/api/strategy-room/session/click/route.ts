@@ -3,6 +3,8 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
+import { noStoreJson, requireJsonContent, requireMethod } from "@/lib/server/security/app-route-guards";
 
 type ClickInput = {
   sessionKey: string;
@@ -32,6 +34,12 @@ function safeNumber(value: unknown, fallback = 0): number {
 
 export async function POST(req: Request) {
   try {
+    const methodCheck = requireMethod(req, ["POST"]);
+    if (!methodCheck.ok) return methodCheck.response;
+
+    const contentCheck = requireJsonContent(req);
+    if (!contentCheck.ok) return contentCheck.response;
+
     const body = (await req.json()) as ClickInput;
 
     const sessionKey = safeString(body?.sessionKey);
@@ -56,17 +64,28 @@ export async function POST(req: Request) {
         : {};
 
     if (!sessionKey) {
-      return NextResponse.json(
+      return noStoreJson(
         { success: false, error: "sessionKey is required" },
         { status: 400 }
       );
     }
 
     if (!assetId) {
-      return NextResponse.json(
+      return noStoreJson(
         { success: false, error: "assetId is required" },
         { status: 400 }
       );
+    }
+
+    const access = await assertStrategyRoomAccess({
+      request: req,
+      sessionRef: sessionKey,
+      purpose: "strategy_room_access",
+      allowTokenPurposes: ["strategy_room_access", "return_brief"],
+      requireEntitlement: false,
+    });
+    if (!access.ok) {
+      return noStoreJson({ success: false, error: access.error }, { status: access.status });
     }
 
     const prisma =
@@ -84,7 +103,7 @@ export async function POST(req: Request) {
     });
 
     if (!session) {
-      return NextResponse.json(
+      return noStoreJson(
         { success: false, error: "decision session not found" },
         { status: 404 }
       );
@@ -105,7 +124,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({
+    return noStoreJson({
       success: true,
       clickId: click.id,
       sessionKey: session.sessionKey,
@@ -114,7 +133,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("[STRATEGY_ROOM_CLICK_ERROR]", error);
 
-    return NextResponse.json(
+    return noStoreJson(
       {
         success: false,
         error: "Failed to log recommendation click",

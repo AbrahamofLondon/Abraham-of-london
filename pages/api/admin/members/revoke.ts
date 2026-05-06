@@ -6,14 +6,18 @@
 // action where the admin UI only holds the member row, not the raw key.
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
+import { z } from "zod";
 
-import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 type ApiResponse =
   | { ok: true; memberId: string; revokedCount: number }
   | { ok: false; error: string; code?: string };
+
+const bodySchema = z.object({
+  memberId: z.string().trim().min(1).max(128),
+}).strict();
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,24 +28,15 @@ export default async function handler(
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
-  const session = await getServerSession(req, res, authOptions);
-  const isInternal = Boolean((session as any)?.aol?.isInternal);
+  const session = await requireAdminServer(req, res, { routeKey: "admin-members-revoke" });
+  if (!session) return;
 
-  if (!session || !isInternal) {
-    return res.status(403).json({
-      ok: false,
-      error: "Forbidden",
-      code: "ADMIN_REQUIRED",
-    });
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: "memberId required", code: "BAD_REQUEST" });
   }
 
-  const { memberId } = (req.body ?? {}) as { memberId?: string };
-
-  if (!memberId || typeof memberId !== "string") {
-    return res
-      .status(400)
-      .json({ ok: false, error: "memberId required", code: "BAD_REQUEST" });
-  }
+  const { memberId } = parsed.data;
 
   try {
     const result = await prisma.innerCircleKey.updateMany({

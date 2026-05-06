@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma.server";
 import { randomUUID } from "crypto";
 import { getDiagnosticJourney } from "@/lib/diagnostics/journey-store";
@@ -6,6 +7,29 @@ import {
   buildDecisionSurfacePayload,
   insufficientEvidenceContradiction,
 } from "@/lib/contracts/decision-surface";
+import {
+  enforceAppRouteRateLimit,
+  noStoreJson,
+  parseJsonBody,
+  requireJsonContent,
+  requireMethod,
+} from "@/lib/server/security/app-route-guards";
+import { assertStrategyRoomAccess, authorizeStrategyRoomEntry } from "@/lib/server/strategy-room/access.server";
+
+const postSchema = z.object({
+  strategyRoomSessionId: z.string().trim().max(128).optional().nullable(),
+  email: z.string().trim().email().max(320).optional().nullable(),
+  directive: z.string().trim().max(80).optional().nullable(),
+  escalationLevel: z.string().trim().max(80).optional().nullable(),
+  conditionSummary: z.string().trim().max(1200).optional().nullable(),
+  coreProblem: z.string().trim().max(1200).optional().nullable(),
+  decisionQuestion: z.string().trim().max(1200).optional().nullable(),
+  constraints: z.unknown().optional(),
+  exposureLevel: z.string().trim().max(80).optional().nullable(),
+  interventionStack: z.unknown().optional(),
+  constraintMap: z.unknown().optional(),
+  canonicalSnapshot: z.unknown().optional(),
+}).strict();
 
 /**
  * POST — Create a new Strategy Room execution session
@@ -14,7 +38,34 @@ import {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const methodCheck = requireMethod(req, ["POST"]);
+    if (!methodCheck.ok) return methodCheck.response;
+
+    const contentCheck = requireJsonContent(req);
+    if (!contentCheck.ok) return contentCheck.response;
+
+    const parsed = await parseJsonBody(req, postSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
+
+    const entryAuth = await authorizeStrategyRoomEntry({
+      request: req,
+      intakeEmail: body.email ?? null,
+    });
+    if (!entryAuth.ok) {
+      return noStoreJson({ error: entryAuth.error }, { status: entryAuth.status });
+    }
+
+    const rateLimit = await enforceAppRouteRateLimit({
+      request: req,
+      routeKey: "strategy-room-execution-create",
+      limit: 10,
+      windowMs: 15 * 60_000,
+      email: entryAuth.identityEmail,
+      failClosed: true,
+    });
+    if (!rateLimit.ok) return rateLimit.response;
+
     const {
       strategyRoomSessionId,
       email,
@@ -29,6 +80,19 @@ export async function POST(req: NextRequest) {
       constraintMap,
       canonicalSnapshot,
     } = body;
+
+    if (strategyRoomSessionId) {
+      const access = await assertStrategyRoomAccess({
+        request: req,
+        sessionRef: strategyRoomSessionId,
+        purpose: "strategy_room_access",
+        allowTokenPurposes: ["strategy_room_access", "return_brief"],
+      });
+      if (!access.ok) {
+        return noStoreJson({ error: access.error }, { status: access.status });
+      }
+    }
+
     const evidenceJourney = email
       ? await getDiagnosticJourney({ email })
       : null;
@@ -130,12 +194,23 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    const methodCheck = requireMethod(req, ["GET"]);
+    if (!methodCheck.ok) return methodCheck.response;
+
     const { searchParams } = new URL(req.url);
     const email = searchParams.get("email");
     const status = searchParams.get("status");
 
+    const entryAuth = await authorizeStrategyRoomEntry({
+      request: req,
+      intakeEmail: email,
+    });
+    if (!entryAuth.ok) {
+      return noStoreJson({ error: entryAuth.error }, { status: entryAuth.status });
+    }
+
     const where: Record<string, unknown> = {};
-    if (email) where.email = email;
+    where.email = entryAuth.identityEmail;
     if (status) where.status = status;
 
     const sessions = await prisma.strategyRoomExecutionSession.findMany({

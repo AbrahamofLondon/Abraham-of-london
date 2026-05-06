@@ -21,6 +21,7 @@ import {
 import { sendEmail } from "@/lib/email/core/sendEmail";
 import { prisma } from "@/lib/prisma.server";
 import { isUnsubscribed } from "@/lib/server/privacy/identity-service.server";
+import { createSignedActionToken } from "@/lib/server/security/signed-action-token";
 import { generateReturnBrief } from "@/lib/server/strategy-room/return-brief.server";
 import {
   computeDecisionState,
@@ -78,17 +79,13 @@ function getBaseUrl(): string {
 }
 
 function getDeleteUrl(email?: string | null): string {
-  const contactEmail = siteConfig.contact.email || "info@abrahamoflondon.org";
-  const subject = encodeURIComponent("Delete my data");
-  const body = encodeURIComponent(email ? `Please remove data associated with ${email}.` : "Please remove my data.");
-  return `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+  const baseUrl = getBaseUrl();
+  return email ? `${baseUrl}/privacy#delete-data` : `${baseUrl}/privacy`;
 }
 
 function getUnsubscribeUrl(email?: string | null): string {
-  const contactEmail = siteConfig.contact.email || "info@abrahamoflondon.org";
-  const subject = encodeURIComponent("Unsubscribe");
-  const body = encodeURIComponent(email ? `Please unsubscribe ${email}.` : "Please unsubscribe me.");
-  return `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+  const baseUrl = getBaseUrl();
+  return email ? `${baseUrl}/privacy#unsubscribe` : `${baseUrl}/privacy`;
 }
 
 async function getLastContact(identity: ContactIdentity): Promise<{ sentAt: Date; severity: string } | null> {
@@ -201,7 +198,12 @@ async function buildStrategyRoomEmail(
   stateResult: DecisionStateResult,
 ): Promise<BuiltDecisionEmail | null> {
   const baseUrl = getBaseUrl();
-  const secureLink = `${baseUrl}/briefing/return/${session.sessionKey}`;
+  const accessToken = createSignedActionToken({
+    purpose: "return_brief",
+    subject: session.sessionKey,
+    ttlSeconds: 60 * 60 * 24 * 14,
+  });
+  const secureLink = `${baseUrl}/briefing/return/${session.sessionKey}?access=${encodeURIComponent(accessToken)}`;
   const unsubscribeUrl = getUnsubscribeUrl(session.email);
   const deleteUrl = getDeleteUrl(session.email);
   const brief = await generateReturnBrief(session.sessionKey);

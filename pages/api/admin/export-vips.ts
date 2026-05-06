@@ -1,16 +1,12 @@
 /* pages/api/admin/export-vips.ts — CSV EXPORT ENGINE (HARDENED, NULL-SAFE) */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
 import { prisma } from "@/lib/db";
-import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 type ErrorResponse = {
   ok: false;
   error: string;
 };
-
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
-const RATE_LIMIT_MAX = 10;
 
 function getDb() {
   if (!prisma) {
@@ -46,36 +42,14 @@ export default async function handler(
     return res.status(405).json({ ok: false, error: "Method Not Allowed" });
   }
 
-  const session = await getSession({ req });
-  const adminEmail =
-    process.env.INITIAL_ADMIN_EMAIL || "admin@abrahamoflondon.com";
-
-  if (!session || session.user?.email !== adminEmail) {
-    return res.status(403).json({ ok: false, error: "Unauthorized" });
-  }
-
-  const rateKey = `${String(session.user.email).toLowerCase()}|${getClientIp(req)}`;
-  const rl = await consumePersistentRateLimit({
-    key: `admin-export-vips:${rateKey}`,
-    limit: RATE_LIMIT_MAX,
-    windowMs: RATE_LIMIT_WINDOW_MS,
-    failClosed: true,
+  const session = await requireAdminServer(req, res, {
+    routeKey: "admin-export-vips",
+    rateLimit: {
+      limit: 10,
+      windowMs: 60 * 60 * 1000,
+    },
   });
-
-  if (!rl.allowed) {
-    res.setHeader(
-      "Retry-After",
-      String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
-    );
-    return res.status(429).json({
-      ok: false,
-      error: "Too many export attempts. Try again later.",
-    });
-  }
-
-  res.setHeader("X-RateLimit-Limit", String(RATE_LIMIT_MAX));
-  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
-  res.setHeader("X-RateLimit-Reset", String(rl.resetAt));
+  if (!session) return;
 
   try {
     const db = getDb();

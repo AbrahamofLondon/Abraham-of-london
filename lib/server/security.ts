@@ -14,11 +14,9 @@ export interface SecurityThreat {
 
 export interface SecurityMetrics {
   totalRequests: number;
-  blockedRequests: number;
   suspiciousLogins: number;
   failedLogins: number;
   ipThreats: number;
-  rateLimitHits: number;
 }
 
 export interface SecurityStatus {
@@ -33,11 +31,9 @@ class SecurityMonitor {
   private threats: SecurityThreat[] = [];
   private metrics: SecurityMetrics = {
     totalRequests: 0,
-    blockedRequests: 0,
     suspiciousLogins: 0,
     failedLogins: 0,
     ipThreats: 0,
-    rateLimitHits: 0
   };
   private readonly maxThreats = 100;
   private lastMetricsReset = Date.now();
@@ -97,28 +93,10 @@ class SecurityMonitor {
   }> {
     this.metrics.totalRequests++;
 
-    // Basic rate limiting check
-    if (this.checkRateLimit(request.ip)) {
-      this.metrics.rateLimitHits++;
-      return {
-        allowed: false,
-        reason: 'Rate limit exceeded',
-        threatLevel: 'medium'
-      };
-    }
-
     return {
       allowed: true,
       threatLevel: 'none'
     };
-  }
-
-  private checkRateLimit(_ip: string): boolean { // Prefixed with underscore
-    // Simple rate limiting - in production, use Redis or a proper rate limiter
-    const rateLimit = parseInt(process.env.RATE_LIMIT_REQUESTS_PER_MINUTE || '60');
-    const _rateLimit = rateLimit; // Prefixed with underscore to indicate unused
-    // This is a simplified version
-    return false;
   }
 }
 

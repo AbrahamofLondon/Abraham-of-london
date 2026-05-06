@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 // app/api/strategy-room/session/init/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
@@ -8,6 +9,42 @@ import { createStrategyRoomSession } from "@/lib/strategy-room/persistence";
 import { randomUUID } from "crypto";
 import { enforceStrategyRoomAccess } from "@/lib/diagnostics/authority-enforcement";
 import { createDecisionOutcomeLink } from "@/lib/outcomes/outcome-model";
+import {
+  enforceAppRouteRateLimit,
+  failClosedForFlag,
+  noStoreJson,
+  parseJsonBody,
+  requireJsonContent,
+  requireMethod,
+  requireSameOrigin,
+} from "@/lib/server/security/app-route-guards";
+import { authorizeStrategyRoomEntry } from "@/lib/server/strategy-room/access.server";
+import { writeSecurityAudit } from "@/lib/security/audit-log";
+
+const intakeSchema = z.object({
+  fullName: z.string().trim().min(1).max(160),
+  email: z.string().trim().email().max(320).optional().nullable(),
+  organisation: z.string().trim().max(240).optional().nullable(),
+  sector: z.string().trim().max(160).optional().nullable(),
+  revenueBand: z.string().trim().max(80).optional().nullable(),
+  authorityRole: z.string().trim().max(160).optional().nullable(),
+  authorityScope: z.string().trim().max(160).optional().nullable(),
+  urgencyWindow: z.string().trim().max(80).optional().nullable(),
+  problemStatement: z.string().trim().max(4000).optional().nullable(),
+  symptoms: z.string().trim().max(4000).optional().nullable(),
+  desiredOutcome: z.string().trim().max(4000).optional().nullable(),
+  currentConstraint: z.string().trim().max(4000).optional().nullable(),
+  marketExposure: z.string().trim().max(80).optional().nullable(),
+  boardInvolved: z.string().trim().max(80).optional().nullable(),
+}).strict();
+
+const requestSchema = z.object({
+  intake: intakeSchema,
+  tensionThread: z.unknown().optional().nullable(),
+  accessToken: z.string().trim().max(2048).optional().nullable(),
+  handoffToken: z.string().trim().max(4096).optional().nullable(),
+  handoffReportId: z.string().trim().max(160).optional().nullable(),
+}).strict();
 
 function makeSessionKey(): string {
   return `sr_${randomUUID().replace(/-/g, "")}`;
@@ -88,20 +125,65 @@ function logStrategyRoomInitError(stage: string, error: unknown): void {
   });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const methodCheck = requireMethod(request, ["POST"]);
+  if (!methodCheck.ok) return methodCheck.response;
+
+  const contentCheck = requireJsonContent(request);
+  if (!contentCheck.ok) return contentCheck.response;
+
+  const sameOrigin = requireSameOrigin(request, "/api/strategy-room/session/init");
+  if (!sameOrigin.ok) return sameOrigin.response;
+
   let stage = "parse_request";
 
   try {
-    const body = await request.json();
-    const intake = body?.intake;
-    const tensionThread = body?.tensionThread ?? null; // Cross-stage tension memory (optional)
+    const lockdown = failClosedForFlag({
+      flag: "DISABLE_STRATEGY_ROOM_ENTRY",
+      action: "strategy_room_access_denied",
+      route: "/api/strategy-room/session/init",
+      publicMessage: "STRATEGY_ROOM_TEMPORARILY_DISABLED",
+    });
+    if (!lockdown.ok) return lockdown.response;
 
-    if (!intake || typeof intake !== "object") {
-      return NextResponse.json(
-        { success: false, error: "Invalid intake payload." },
-        { status: 400 }
-      );
+    const parsed = await parseJsonBody(request, requestSchema);
+    if (!parsed.ok) return parsed.response;
+    const {
+      intake,
+      tensionThread = null,
+      accessToken = null,
+      handoffToken = null,
+      handoffReportId = null,
+    } = parsed.data;
+
+    const authz = await authorizeStrategyRoomEntry({
+      request,
+      intakeEmail: intake.email ?? null,
+      entryToken: accessToken,
+      handoffToken,
+      handoffReportId,
+    });
+    if (!authz.ok) {
+      await writeSecurityAudit({
+        action: "strategy_room_access_denied",
+        severity: "warn",
+        status: "BLOCKED",
+        resourceId: "/api/strategy-room/session/init",
+        metadata: { reason: authz.error },
+      });
+      return noStoreJson({ success: false, error: authz.error }, { status: authz.status });
     }
+
+    const rateLimit = await enforceAppRouteRateLimit({
+      request,
+      routeKey: "strategy-room-init",
+      limit: 10,
+      windowMs: 15 * 60_000,
+      email: authz.identityEmail,
+      sessionId: authz.handoff?.reportId ?? authz.subjectId,
+      failClosed: true,
+    });
+    if (!rateLimit.ok) return rateLimit.response;
 
     // ── DECISION AUTHORITY ENFORCEMENT ──
     // Server-side hard gate: restrict/block directives prevent session creation.
@@ -111,6 +193,19 @@ export async function POST(request: Request) {
     const intakeEmail = typeof intake.email === "string" ? intake.email.trim().toLowerCase() : null;
     const enforcement = await enforceStrategyRoomAccess(intakeEmail, tensionThread);
     if (!enforcement.allowed) {
+      await writeSecurityAudit({
+        action: "strategy_room_access_denied",
+        severity: "warn",
+        status: "BLOCKED",
+        actorId: authz.subjectId,
+        actorEmail: authz.identityEmail,
+        resourceId: "/api/strategy-room/session/init",
+        metadata: {
+          reason: enforcement.reason,
+          directive: enforcement.directive?.level ?? null,
+          handoffReportId: authz.handoff?.reportId ?? null,
+        },
+      });
       return NextResponse.json(
         {
           success: false,
@@ -220,6 +315,21 @@ export async function POST(request: Request) {
       ...(tensionThread ? { tensionThread: toJsonString(tensionThread) } : {}),
     });
 
+    await writeSecurityAudit({
+      action: "strategy_room_session_created",
+      severity: "info",
+      status: "SUCCESS",
+      actorId: authz.subjectId,
+      actorEmail: authz.identityEmail,
+      resourceId: sessionKey,
+      metadata: {
+        route: assembled.constitution.route,
+        readinessTier: assembled.constitution.readinessTier,
+        authorityType: assembled.constitution.authorityType,
+        handoffReportId: authz.handoff?.reportId ?? null,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       sessionKey,
@@ -238,6 +348,16 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     logStrategyRoomInitError(stage, error);
+    await writeSecurityAudit({
+      action: "strategy_room_session_init_failed",
+      severity: "error",
+      status: "FAILURE",
+      resourceId: "/api/strategy-room/session/init",
+      metadata: {
+        stage,
+        error: error instanceof Error ? error.message.slice(0, 300) : "unknown",
+      },
+    });
     const diagnostic =
       stage === "persist_strategy_room_session"
         ? getSafePrismaDiagnostic(error)

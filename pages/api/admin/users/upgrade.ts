@@ -1,21 +1,29 @@
 /* pages/api/admin/users/upgrade.ts — Tier Elevation Engine */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/config";
+import { z } from "zod";
+import { AccessTier } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { auditLogger } from "@/lib/server/db/audit";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
+
+const bodySchema = z.object({
+  userId: z.string().trim().min(1).max(128),
+  newTier: z.nativeEnum(AccessTier),
+  requestId: z.string().trim().min(1).max(128),
+}).strict();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
-  const session = await getServerSession(req, res, authOptions);
-  
-  // Ensure only high-level Admins can perform upgrades
-  if ((session as any)?.aol?.tier !== "admin" && (session as any)?.aol?.tier !== "root") {
-    return res.status(403).json({ message: "Unauthorized: Insufficient Clearance" });
+  const session = await requireAdminServer(req, res, { routeKey: "admin-users-upgrade" });
+  if (!session) return;
+
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, message: "INVALID_REQUEST" });
   }
 
-  const { userId, newTier, requestId } = req.body;
+  const { userId, newTier, requestId } = parsed.data;
 
   try {
     const result = await prisma.$transaction([

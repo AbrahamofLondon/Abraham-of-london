@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 import React from "react";
 import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { generateExecutiveReportForCampaign } from "@/lib/admin/reporting/executive-report-service";
 import { evaluateConstitutionalRoute } from "@/lib/constitution/rules";
 import { requireAdminAppRoute } from "@/lib/access/require-admin-app";

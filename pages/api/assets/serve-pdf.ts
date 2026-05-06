@@ -1,13 +1,14 @@
 /* pages/api/assets/serve-pdf.ts — SECURE ASSET GATEWAY */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
+import { getServerSession } from "next-auth/next";
 import fs from "fs";
 import path from "path";
 import { pipeline } from "stream/promises"; // ✅ Better for handling stream closure
+import { authOptions } from "@/lib/auth/config";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // 1. Session Validation
-  const session = await getSession({ req });
+  const session = await getServerSession(req, res, authOptions);
   if (!session) {
     return res.status(401).json({ error: "Institutional clearance required." });
   }

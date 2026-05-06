@@ -6,8 +6,7 @@
 ============================================================================ */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { z } from "zod";
 import {
   getDeadLetterById,
   markDeadLetterReplayed,
@@ -15,30 +14,27 @@ import {
 import { issueDiagnosticReportFromRecord } from "@/lib/server/diagnostics/report-issuer";
 import { runDiagnosticsRetentionSweep } from "@/lib/server/diagnostics/retention";
 import { processPendingDiagnosticReports } from "@/lib/server/diagnostics/jobs";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
-import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
-
-function isAdmin(session: any) {
-  const email = String(session?.user?.email || "").toLowerCase();
-  return BOOTSTRAP_ADMIN_EMAILS.has(email);
-}
+const bodySchema = z.object({
+  id: z.string().trim().min(1).max(128),
+}).strict();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
-
-  if (!session || !isAdmin(session)) {
-    return res.status(403).json({ ok: false, error: "FORBIDDEN" });
-  }
-
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
   }
 
-  const { id } = req.body || {};
-  if (!id || typeof id !== "string") {
-    return res.status(400).json({ ok: false, error: "ID_REQUIRED" });
+  const session = await requireAdminServer(req, res, { routeKey: "admin-dead-letter-replay" });
+  if (!session) return;
+
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: "INVALID_REQUEST" });
   }
+
+  const { id } = parsed.data;
 
   const item = await getDeadLetterById(id);
   if (!item) {

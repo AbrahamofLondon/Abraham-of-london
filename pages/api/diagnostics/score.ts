@@ -26,6 +26,7 @@ import { applyPublicTone, buildPublicPatternEvidence } from "@/lib/server/decisi
 import { createDecisionMemory, listDecisionMemoryByUser, summariseDecisionMemoryTrend } from "@/lib/server/decision-memory/memory-service.server";
 import { quickHash } from "@/lib/server/security/ip-abuse-watchdog.server";
 import { runShield, degradeResult } from "@/lib/server/security/adaptive-response.server";
+import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 import { extractAnchors } from "@/lib/server/decision/anchor-extractor.server";
 import { detectAnchorContradictions } from "@/lib/server/decision/contradiction-engine.server";
 import { composeAnchorNarrative } from "@/lib/server/decision/narrative-engine.server";
@@ -46,9 +47,19 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<FastDiagnosticResult | { ok: false; error: string }>,
 ) {
+  if (String(process.env.SECURITY_LOCKDOWN_MODE || "").toLowerCase() === "true" ||
+      String(process.env.DISABLE_DIAGNOSTIC_SCORING || "").toLowerCase() === "true") {
+    return res.status(503).json({ ok: false, error: "DIAGNOSTIC_SCORING_DISABLED" });
+  }
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method not allowed" });
+  }
+
+  const contentType = String(req.headers["content-type"] || "");
+  if (!/application\/json/i.test(contentType)) {
+    return res.status(415).json({ ok: false, error: "UNSUPPORTED_MEDIA_TYPE" });
   }
 
   const parsed = requestSchema.safeParse(req.body);
@@ -57,6 +68,21 @@ export default async function handler(
   }
 
   const { answers, committed, elapsedMs } = parsed.data;
+  const identityKey = [
+    "diagnostics-score",
+    getIp(req),
+    req.headers["x-session-id"] ? String(req.headers["x-session-id"]) : "",
+    quickHash((answers.decision || "").trim().toLowerCase()),
+  ].filter(Boolean).join(":");
+  const rateLimit = await consumePersistentRateLimit({
+    key: identityKey,
+    limit: 20,
+    windowMs: 15 * 60_000,
+    failClosed: true,
+  });
+  if (!rateLimit.allowed) {
+    return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
+  }
 
   if (!answers.decision || answers.decision.trim().length < 10) {
     return res.status(400).json({ ok: false, error: "Decision text too short" });

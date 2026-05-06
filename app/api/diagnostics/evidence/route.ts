@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import type { SafeParseReturnType } from "zod";
 
+import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { prisma } from "@/lib/prisma";
 import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
@@ -12,6 +14,15 @@ import {
   formatZodError,
   instrumentEvidenceSchema,
 } from "@/lib/diagnostics/runtime-validation";
+import { writeSecurityAudit } from "@/lib/security/audit-log";
+import { verifySignedActionToken } from "@/lib/server/security/signed-action-token";
+import {
+  enforceAppRouteRateLimit,
+  getClientIp,
+  noStoreJson,
+  requireJsonContent,
+  requireMethod,
+} from "@/lib/server/security/app-route-guards";
 import type {
   CanonicalDecisionObject,
   DiagnosticEvidenceNodeInput,
@@ -20,6 +31,23 @@ import type {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const requestSchema = z.object({
+  stage: z.string().trim().max(80).optional(),
+  email: z.string().trim().email().max(320).optional().nullable(),
+  subjectId: z.string().trim().max(160).optional().nullable(),
+  sessionId: z.string().trim().max(160).optional().nullable(),
+  decisionObjectId: z.string().trim().max(128).optional().nullable(),
+  authorityInput: z.record(z.string(), z.unknown()).optional().nullable(),
+  evidenceNodes: z.array(z.unknown()).max(32).optional(),
+  decisionObject: z.unknown().optional(),
+  payload: z.record(z.string(), z.unknown()).optional().nullable(),
+  campaignId: z.string().trim().max(160).optional().nullable(),
+  organisation: z.string().trim().max(240).optional().nullable(),
+  routeDecision: z.unknown().optional().nullable(),
+  escalationEvent: z.unknown().optional().nullable(),
+  accessToken: z.string().trim().max(2048).optional().nullable(),
+}).strict();
 
 function s(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
@@ -38,6 +66,36 @@ async function ensureDecisionExists(decisionObjectId: string, email?: string | n
   if (email && decision.email && decision.email.toLowerCase() !== email.toLowerCase()) return false;
   if (subjectId && decision.sessionId && decision.sessionId !== subjectId) return false;
   return true;
+}
+
+async function getDecisionOwnership(decisionObjectId: string): Promise<{
+  id: string;
+  email: string | null;
+  sessionId: string | null;
+} | null> {
+  const decision = await prisma.diagnosticDecisionObject.findUnique({
+    where: { id: decisionObjectId },
+    select: { id: true, email: true, sessionId: true },
+  });
+
+  if (!decision) {
+    return null;
+  }
+
+  return {
+    id: decision.id,
+    email: decision.email ? decision.email.toLowerCase() : null,
+    sessionId: decision.sessionId ?? null,
+  };
+}
+
+function readAccessToken(request: Request, body: z.infer<typeof requestSchema>): string | null {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice("Bearer ".length).trim() || null;
+  }
+
+  return body.accessToken || null;
 }
 
 function decisionObjectFrom(value: unknown): CanonicalDecisionObject | null {
@@ -97,9 +155,86 @@ function instrumentNodeFrom(value: unknown): DiagnosticEvidenceNodeInput | null 
   };
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const methodCheck = requireMethod(request, ["POST"]);
+  if (!methodCheck.ok) return methodCheck.response;
+
+  const contentCheck = requireJsonContent(request);
+  if (!contentCheck.ok) return contentCheck.response;
+
   try {
-    const body = await request.json();
+    const body = requestSchema.parse(await request.json());
+    const identity = await resolveIdentity(request);
+    const token = readAccessToken(request, body);
+    const verifiedToken = token
+      ? verifySignedActionToken(token, "diagnostic_evidence")
+      : null;
+    const identityEmail = identity.email ? identity.email.trim().toLowerCase() : null;
+    const requestedEmail = s(body?.email).toLowerCase() || null;
+    const requestedSubjectId = s(body?.subjectId) || s(body?.sessionId) || null;
+    const explicitDecisionId = s(body?.decisionObjectId) || null;
+
+    if (!identityEmail && !verifiedToken?.ok) {
+      await writeSecurityAudit({
+        action: "auth_failure",
+        severity: "warn",
+        status: "BLOCKED",
+        ip: getClientIp(request),
+        resourceId: "/api/diagnostics/evidence",
+      });
+      return noStoreJson({ ok: false, error: "AUTHENTICATION_REQUIRED" }, { status: 401 });
+    }
+
+    if (!verifiedToken?.ok && requestedSubjectId && identity.subjectId !== requestedSubjectId) {
+      await writeSecurityAudit({
+        action: "forbidden_object_access",
+        severity: "warn",
+        status: "BLOCKED",
+        actorId: identity.subjectId,
+        actorEmail: identityEmail,
+        ip: getClientIp(request),
+        resourceId: explicitDecisionId || requestedSubjectId,
+      });
+      return noStoreJson({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+    }
+
+    if (identityEmail && requestedEmail && identityEmail !== requestedEmail) {
+      await writeSecurityAudit({
+        action: "forbidden_object_access",
+        severity: "warn",
+        status: "BLOCKED",
+        actorId: identity.subjectId,
+        actorEmail: identityEmail,
+        ip: getClientIp(request),
+        resourceId: explicitDecisionId || requestedEmail,
+      });
+      return noStoreJson({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+    }
+
+    if (identity.subjectId && requestedSubjectId && identity.subjectId !== requestedSubjectId) {
+      await writeSecurityAudit({
+        action: "forbidden_object_access",
+        severity: "warn",
+        status: "BLOCKED",
+        actorId: identity.subjectId,
+        actorEmail: identityEmail,
+        ip: getClientIp(request),
+        resourceId: explicitDecisionId || requestedSubjectId,
+      });
+      return noStoreJson({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+    }
+
+    const rateLimit = await enforceAppRouteRateLimit({
+      request,
+      routeKey: "diagnostic-evidence",
+      limit: 12,
+      windowMs: 15 * 60_000,
+      sessionId: requestedSubjectId,
+      email: requestedEmail || identityEmail,
+      failClosed: true,
+    });
+    if (!rateLimit.ok) return rateLimit.response;
+
     const instrumentNode = instrumentNodeFrom(body);
     const requestedStage = instrumentNode ? "instrument" : s(body?.stage);
     const stageParsed = evidenceSourceStageSchema.safeParse(requestedStage);
@@ -109,20 +244,54 @@ export async function POST(request: Request) {
     }
 
     const stage = stageParsed.data as EvidenceSourceStage;
-    const email = s(body?.email).toLowerCase() || null;
-    const subjectId = s(body?.subjectId) || s(body?.sessionId) || null;
-    const explicitDecisionId = instrumentNode
+    const email = requestedEmail || identityEmail || null;
+    const subjectId = requestedSubjectId || identity.subjectId || null;
+    const normalizedDecisionId = instrumentNode
       ? String(instrumentNode.payload?.decisionId || "")
-      : s(body?.decisionObjectId) || null;
+      : explicitDecisionId;
 
-    if (explicitDecisionId) {
-      const validDecision = await ensureDecisionExists(explicitDecisionId, email, subjectId);
+    if (normalizedDecisionId) {
+      const validDecision = await ensureDecisionExists(normalizedDecisionId, email, subjectId);
+      const decision = await getDecisionOwnership(normalizedDecisionId);
       if (!validDecision) {
-        return NextResponse.json(
-          { ok: false, error: "decisionObjectId failed ownership or existence validation" },
-          { status: 400 },
-        );
+        await writeSecurityAudit({
+          action: "forbidden_object_access",
+          severity: "warn",
+          status: "BLOCKED",
+          actorId: identity.subjectId,
+          actorEmail: identityEmail,
+          ip: getClientIp(request),
+          resourceId: normalizedDecisionId,
+        });
+        return noStoreJson({ ok: false, error: "FORBIDDEN" }, { status: 403 });
       }
+
+      if (
+        verifiedToken?.ok &&
+        decision &&
+        verifiedToken.payload.subject !== decision.id &&
+        verifiedToken.payload.subject !== decision.sessionId
+      ) {
+        await writeSecurityAudit({
+          action: "forbidden_object_access",
+          severity: "warn",
+          status: "BLOCKED",
+          ip: getClientIp(request),
+          resourceId: normalizedDecisionId,
+        });
+        return noStoreJson({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+      }
+    }
+
+    if (verifiedToken?.ok && requestedSubjectId && verifiedToken.payload.subject !== requestedSubjectId) {
+      await writeSecurityAudit({
+        action: "forbidden_object_access",
+        severity: "warn",
+        status: "BLOCKED",
+        ip: getClientIp(request),
+        resourceId: requestedSubjectId,
+      });
+      return noStoreJson({ ok: false, error: "FORBIDDEN" }, { status: 403 });
     }
 
     const authorityInput = isObject(body?.authorityInput) ? body.authorityInput : null;
@@ -182,7 +351,7 @@ export async function POST(request: Request) {
       payload: isObject(body?.payload)
         ? body.payload
         : instrumentNode
-          ? { stage, decisionId: explicitDecisionId, source: "instrument" }
+          ? { stage, decisionId: normalizedDecisionId, source: "instrument" }
           : { stage },
       tensions: nodes
         .filter((node: DiagnosticEvidenceNodeInput) => node.kind === "contradiction")
@@ -193,7 +362,22 @@ export async function POST(request: Request) {
       decisionObject,
     });
 
-    return NextResponse.json({
+    await writeSecurityAudit({
+      action: "diagnostic_evidence_persisted",
+      severity: "info",
+      status: "SUCCESS",
+      actorId: identity.subjectId,
+      actorEmail: identityEmail,
+      ip: getClientIp(request),
+      resourceId: normalizedDecisionId || stage,
+      metadata: {
+        stage,
+        evidenceNodeCount: nodes.length,
+        decisionObjectRecorded: Boolean(decisionObject),
+      },
+    });
+
+    return noStoreJson({
       ok: true,
       journeyKey: journey.journeyKey,
       evidenceNodeCount: nodes.length,
@@ -205,7 +389,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {
-      return NextResponse.json(
+      return noStoreJson(
         { ok: false, error: formatZodError(error as any) },
         { status: 400 },
       );

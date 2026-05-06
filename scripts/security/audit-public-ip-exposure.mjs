@@ -99,6 +99,12 @@ const bannedPatterns = [
   },
   { name: "classification keyword", regex: /\bmatchedKeywords?|keyword classification\b/i },
   { name: "raw spine", regex: /\brawSpine|intelligence spine\b/i },
+  { name: "decision anchors", regex: /\bDecisionAnchors?\b|\bAnchorContradiction\b/i },
+  { name: "integrity reasons", regex: /\bintegrity reasons?\b/i },
+  { name: "challenge rules", regex: /\bchallenge rules?\b/i },
+  { name: "anti gaming", regex: /\banti-gaming\b|\banti gaming\b/i },
+  { name: "token secrets", regex: /\b(CRON_SECRET|DOWNLOAD_SECRET|NEXTAUTH_SECRET|SOVEREIGN_KEYS?)\b/i },
+  { name: "pattern taxonomy", regex: /\bpattern taxonomy\b/i },
 ];
 
 function normalize(relPath) {

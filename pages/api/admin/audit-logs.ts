@@ -1,39 +1,19 @@
 /* pages/api/admin/audit-logs.ts — SECURE LOG RETRIEVAL */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { auditLogger } from "@/lib/audit/audit-logger";
-
-type LegacyUser = {
-  role?: string | null;
-};
-
-type LegacySession = {
-  aol?: {
-    tier?: string | null;
-  } | null;
-};
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getServerSession(req, res, authOptions);
-
-  const user = session?.user;
-  const legacyUser = user as LegacyUser | undefined;
-  const legacySession = session as LegacySession | null | undefined;
-
-  const isAdmin =
-    legacyUser?.role === "ADMIN" ||
-    legacyUser?.role === "owner" ||
-    legacySession?.aol?.tier === "owner";
-
-  if (!session || !user || !isAdmin) {
-    return res.status(403).json({
-      error: "Unauthorized. Admin Clearance Required.",
-    });
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const session = await requireAdminServer(req, res, { routeKey: "admin-audit-logs" });
+  if (!session) return;
 
   try {
     const logs = await auditLogger.query({ limit: 100 });

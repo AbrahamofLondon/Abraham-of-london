@@ -1,22 +1,19 @@
 /* pages/api/admin/pdf-analytics.ts — PDF Analytics Endpoint */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Check authentication (skip in development)
-  if (process.env.NODE_ENV !== "development") {
-    const session = await getServerSession(req, res, authOptions);
-    const adminEmail = process.env.INITIAL_ADMIN_EMAIL || "admin@abrahamoflondon.com";
-
-    if (!session || session.user?.email !== adminEmail) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const session = await requireAdminServer(req, res, { routeKey: "admin-pdf-analytics" });
+  if (!session) return;
 
   try {
     // Fetch actual data from database
@@ -68,20 +65,6 @@ export default async function handler(
   } catch (error) {
     console.error("[PDF Analytics] Error:", error);
     
-    // Return mock data for development
-    if (process.env.NODE_ENV === "development") {
-      return res.status(200).json({
-        totalDownloads: 1247,
-        uniqueUsers: 342,
-        topAsset: "Legacy Architecture Canvas",
-        recentActivity: [
-          { id: "1", title: "Strategic Frameworks", downloads: 42 },
-          { id: "2", title: "Governance Protocol", downloads: 38 },
-          { id: "3", title: "Risk Posture", downloads: 27 },
-        ],
-      });
-    }
-
     return res.status(500).json({ error: "Failed to fetch analytics" });
   }
 }

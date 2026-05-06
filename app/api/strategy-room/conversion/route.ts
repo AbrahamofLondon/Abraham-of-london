@@ -3,6 +3,8 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
+import { noStoreJson, requireJsonContent, requireMethod } from "@/lib/server/security/app-route-guards";
 
 type ConversionInput = {
   sessionKey: string;
@@ -30,23 +32,40 @@ function safeNumber(value: unknown, fallback = 0): number {
 
 export async function POST(req: Request) {
   try {
+    const methodCheck = requireMethod(req, ["POST"]);
+    if (!methodCheck.ok) return methodCheck.response;
+
+    const contentCheck = requireJsonContent(req);
+    if (!contentCheck.ok) return contentCheck.response;
+
     const body = (await req.json()) as ConversionInput;
 
     const sessionKey = safeString(body?.sessionKey);
     const conversionType = safeString(body?.conversionType);
 
     if (!sessionKey) {
-      return NextResponse.json(
+      return noStoreJson(
         { success: false, error: "sessionKey is required" },
         { status: 400 }
       );
     }
 
     if (!conversionType) {
-      return NextResponse.json(
+      return noStoreJson(
         { success: false, error: "conversionType is required" },
         { status: 400 }
       );
+    }
+
+    const access = await assertStrategyRoomAccess({
+      request: req,
+      sessionRef: sessionKey,
+      purpose: "strategy_room_access",
+      allowTokenPurposes: ["strategy_room_access", "return_brief"],
+      requireEntitlement: false,
+    });
+    if (!access.ok) {
+      return noStoreJson({ success: false, error: access.error }, { status: access.status });
     }
 
     const prisma =
@@ -66,7 +85,7 @@ export async function POST(req: Request) {
     });
 
     if (!session) {
-      return NextResponse.json(
+      return noStoreJson(
         { success: false, error: "decision session not found" },
         { status: 404 }
       );
@@ -122,7 +141,7 @@ export async function POST(req: Request) {
       return created;
     });
 
-    return NextResponse.json({
+    return noStoreJson({
       success: true,
       conversionId: conversion.id,
       sessionKey: session.sessionKey,
@@ -132,7 +151,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("[STRATEGY_ROOM_CONVERSION_ERROR]", error);
 
-    return NextResponse.json(
+    return noStoreJson(
       {
         success: false,
         error: "Failed to log conversion",

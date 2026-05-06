@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 // app/api/strategy-room/session/followup/route.ts
 
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
 import {
   createStrategyRoomFollowup,
@@ -14,6 +15,35 @@ import {
 } from "@/lib/outcomes/outcome-model";
 import { recordOutcomeSnapshot } from "@/lib/outcomes/evidence";
 import { randomUUID } from "crypto";
+import {
+  enforceAppRouteRateLimit,
+  failClosedForFlag,
+  noStoreJson,
+  parseJsonBody,
+  requireJsonContent,
+  requireMethod,
+  requireSameOrigin,
+} from "@/lib/server/security/app-route-guards";
+import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
+
+const followupSchema = z.object({
+  sessionKey: z.string().trim().min(12).max(128),
+  routeAfter: z.string().trim().max(80).optional(),
+  readinessTierAfter: z.string().trim().max(80).optional(),
+  authorityTypeAfter: z.string().trim().max(80).optional(),
+  clarityDelta: z.number().min(-100).max(100).optional(),
+  authorityDelta: z.number().min(-100).max(100).optional(),
+  convertedAfterGuidance: z.boolean().optional(),
+  decisionId: z.string().trim().max(128).optional(),
+  interventionStack: z.array(z.unknown()).max(32).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  canonicalSnapshot: z.unknown().optional(),
+  outcomeSnapshot: z.unknown().optional(),
+  baseline: z.unknown().optional(),
+  followUp: z.unknown().optional(),
+  organisation: z.string().trim().max(240).optional(),
+  timeToOutcomeDays: z.number().min(0).max(3650).optional(),
+}).strict();
 
 function toJsonString(value: unknown): string | null {
   if (value == null) {
@@ -76,23 +106,64 @@ function buildOutcomeSnapshotFromBody(
 }
 
 export async function POST(request: Request) {
+  const methodCheck = requireMethod(request, ["POST"]);
+  if (!methodCheck.ok) return methodCheck.response;
+
+  const contentCheck = requireJsonContent(request);
+  if (!contentCheck.ok) return contentCheck.response;
+
+  const sameOrigin = requireSameOrigin(request, "/api/strategy-room/session/followup");
+  if (!sameOrigin.ok) return sameOrigin.response;
+
   try {
-    const body = await request.json();
+    const lockdown = failClosedForFlag({
+      flag: "DISABLE_STRATEGY_ROOM_ENTRY",
+      action: "strategy_room_access_denied",
+      route: "/api/strategy-room/session/followup",
+      publicMessage: "STRATEGY_ROOM_TEMPORARILY_DISABLED",
+    });
+    if (!lockdown.ok) return lockdown.response;
+
+    const parsed = await parseJsonBody(request, followupSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
+    const rawBody = body as unknown as Record<string, unknown>;
+
+    const rateLimit = await enforceAppRouteRateLimit({
+      request,
+      routeKey: "strategy-room-followup",
+      limit: 15,
+      windowMs: 15 * 60_000,
+      sessionId: body.sessionKey,
+      failClosed: true,
+    });
+    if (!rateLimit.ok) return rateLimit.response;
 
     const sessionKey = String(body?.sessionKey || "").trim();
     if (!sessionKey) {
-      return NextResponse.json(
+      return noStoreJson(
         { ok: false, error: "sessionKey is required." },
         { status: 400 }
       );
     }
 
+    const access = await assertStrategyRoomAccess({
+      request,
+      sessionRef: sessionKey,
+      purpose: "strategy_room_access",
+      allowTokenPurposes: ["strategy_room_access", "return_brief"],
+      requireEntitlement: false,
+    });
+    if (!access.ok) {
+      return noStoreJson({ ok: false, error: access.error }, { status: access.status });
+    }
+
     const canonicalSnapshot = normalizeCanonicalSectionsSnapshot({
       envelope:
-        body?.canonicalSnapshot?.sections ? body.canonicalSnapshot : undefined,
+        asRecord(rawBody?.canonicalSnapshot)?.sections ? rawBody.canonicalSnapshot as any : undefined,
       sections:
-        body?.canonicalSnapshot?.constitutionalPosture
-          ? body.canonicalSnapshot
+        asRecord(rawBody?.canonicalSnapshot)?.constitutionalPosture
+          ? rawBody.canonicalSnapshot as any
           : undefined,
       source: "followup",
       sessionKey,
@@ -100,22 +171,22 @@ export async function POST(request: Request) {
 
     const persistedCanonicalSnapshot = toJsonString(canonicalSnapshot);
 
-    const outcomeSnapshot = buildOutcomeSnapshotFromBody(body, sessionKey);
+    const outcomeSnapshot = buildOutcomeSnapshotFromBody(rawBody, sessionKey);
     const recordedOutcome = outcomeSnapshot
       ? recordOutcomeSnapshot(outcomeSnapshot)
       : null;
     const decisionOutcomeLink = createDecisionOutcomeLink({
-      decisionId: String(body?.decisionId || sessionKey),
-      interventionStack: Array.isArray(body?.interventionStack)
-        ? body.interventionStack
-        : Array.isArray(body?.metadata?.interventionStack)
-          ? body.metadata.interventionStack
+      decisionId: String(rawBody?.decisionId || sessionKey),
+      interventionStack: Array.isArray(rawBody?.interventionStack)
+        ? rawBody.interventionStack
+        : Array.isArray(asRecord(rawBody?.metadata)?.interventionStack)
+          ? asRecord(rawBody?.metadata)?.interventionStack as unknown[]
           : [],
       outcomeSnapshotId: recordedOutcome?.id,
     });
 
     const metadata = {
-      ...asRecord(body?.metadata || {}),
+      ...asRecord(rawBody?.metadata || {}),
       decisionOutcomeLink,
       outcomeSnapshot: recordedOutcome,
       outcomeClassification: recordedOutcome?.outcomeClassification ?? null,
@@ -123,27 +194,25 @@ export async function POST(request: Request) {
 
     await createStrategyRoomFollowup({
       sessionKey,
-      routeAfter: String(body?.routeAfter || ""),
-      readinessTierAfter: String(body?.readinessTierAfter || ""),
-      authorityTypeAfter: String(body?.authorityTypeAfter || ""),
-      clarityDelta: Number(body?.clarityDelta || 0),
-      authorityDelta: Number(body?.authorityDelta || 0),
-      convertedAfterGuidance: Boolean(body?.convertedAfterGuidance),
+      routeAfter: String(rawBody?.routeAfter || ""),
+      readinessTierAfter: String(rawBody?.readinessTierAfter || ""),
+      authorityTypeAfter: String(rawBody?.authorityTypeAfter || ""),
+      clarityDelta: Number(rawBody?.clarityDelta || 0),
+      authorityDelta: Number(rawBody?.authorityDelta || 0),
+      convertedAfterGuidance: Boolean(rawBody?.convertedAfterGuidance),
       metadata: toJsonString(metadata),
       canonicalSnapshot: persistedCanonicalSnapshot,
     });
 
     await markStrategyRoomFollowup(sessionKey, persistedCanonicalSnapshot);
 
-    return NextResponse.json({
+    return noStoreJson({
       ok: true,
       decisionOutcomeLink,
       outcome: recordedOutcome,
     });
-  } catch (error) {
-    console.error("[STRATEGY_ROOM_FOLLOWUP_ERROR]", error);
-
-    return NextResponse.json(
+  } catch {
+    return noStoreJson(
       { ok: false, error: "Failed to capture follow-up event." },
       { status: 500 }
     );

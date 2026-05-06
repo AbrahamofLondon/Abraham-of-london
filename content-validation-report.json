@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-01-09T14:49:21.617Z",
+  "timestamp": "2026-05-06T22:36:33.417Z",
   "summary": {
-    "totalFiles": 154,
-    "validFiles": 154,
+    "totalFiles": 555,
+    "validFiles": 555,
     "invalidFiles": 0,
-    "warningFiles": 47,
-    "contentlayerDocs": 0
+    "warningFiles": 517,
+    "contentlayerDocs": 210
   },
   "fileDistribution": {
     "posts": 0,
@@ -17,356 +17,3807 @@
     "prints": 0,
     "resources": 0,
     "strategies": 0,
-    "other": 154
+    "other": 555
   },
   "contentlayerCounts": {
-    "posts": 0,
-    "downloads": 0,
-    "books": 0,
-    "canons": 0,
-    "shorts": 0,
-    "events": 0,
-    "prints": 0,
-    "resources": 0,
-    "strategies": 0
+    "posts": 25,
+    "downloads": 33,
+    "books": 5,
+    "canons": 15,
+    "shorts": 96,
+    "events": 2,
+    "prints": 6,
+    "resources": 26,
+    "strategies": 2
   },
   "invalidFiles": [],
   "warningFiles": [
     {
-      "path": "blog\\fathering-principles.mdx",
+      "path": "artifacts/global-market-intelligence-report-q1-2026.mdx",
       "warnings": [
-        "Possible broken internal link: /blog/reclaiming-the-narrative",
-        "Possible broken internal link: /blog/the-brotherhood-code",
-        "Possible broken internal link: /blog/leadership-begins-at-home",
-        "Possible broken internal link: /downloads/Fathers_in_Family_Court_Practical_Pack.pdf",
-        "Possible broken internal link: /downloads/Brotherhood_Starter_Kit.pdf",
-        "Possible broken internal link: /downloads/Brotherhood_Leader_Guide_4_Weeks.pdf",
-        "Possible broken internal link: /contact"
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "blog\\fathering-without-fear-teaser.mdx",
+      "path": "artifacts/global-market-outlook-q1-2026-public.mdx",
       "warnings": [
-        "Possible broken internal link: /contact",
-        "Possible broken internal link: /blog/fathering-without-fear"
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "blog\\post-when-the-system-breaks-you.mdx",
+      "path": "blog/fathering-principles.mdx",
       "warnings": [
-        "Slug \"when-the-system-breaks-you\" doesn't match filename \"post-when-the-system-breaks-you\""
+        "Possible broken internal link: /insights/reclaiming-the-narrative",
+        "Possible broken internal link: /insights/the-brotherhood-code",
+        "Possible broken internal link: /insights/leadership-begins-at-home",
+        "Possible broken internal link: /contact-us"
       ]
     },
     {
-      "path": "blog\\principles-for-my-son.mdx",
+      "path": "blog/fathering-without-fear-teaser.mdx",
       "warnings": [
-        "Possible broken internal link: /downloads/principles-for-my-son",
-        "Possible broken internal link: /downloads/principles-for-my-son-cue-card",
-        "Possible broken internal link: /contact"
+        "Possible broken internal link: /contact-us",
+        "Possible broken internal link: /insights/fathering-without-fear-teaser"
       ]
     },
     {
-      "path": "blog\\reclaiming-the-narrative.mdx",
+      "path": "blog/in-my-fathers-house.mdx",
       "warnings": [
-        "Slug \"reclaiming-the-narrative.mdx\" doesn't match filename \"reclaiming-the-narrative\"",
-        "Possible broken internal link: /downloads/fathers_in_the_family_court_practical_pack.pdf"
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father"
       ]
     },
     {
-      "path": "blog\\[slug].mdx",
+      "path": "blog/principles-for-my-son.mdx",
       "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Very little or no content after frontmatter",
+        "Possible broken internal link: /contact-us",
+        "Possible broken internal link: /vault/lexicon/legacy"
+      ]
+    },
+    {
+      "path": "blog/purpose-is-the-anchor.mdx",
+      "warnings": [
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose"
+      ]
+    },
+    {
+      "path": "blog/surrender-not-submission.mdx",
+      "warnings": [
+        "Possible broken internal link: /downloads/principles-of-surrender",
+        "Possible broken internal link: /downloads/purpose-alignment"
+      ]
+    },
+    {
+      "path": "blog/surrender-operational-framework.mdx",
+      "warnings": [
+        "Slug \"surrender-framework/surrender-operational-framework\" doesn't match filename \"surrender-operational-framework\""
+      ]
+    },
+    {
+      "path": "books/architecture-of-ascension.mdx",
+      "warnings": [
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty"
+      ]
+    },
+    {
+      "path": "books/fathering-without-fear.mdx",
+      "warnings": [
+        "Slug \"/books/fathering-without-fear\" doesn't match filename \"fathering-without-fear\""
+      ]
+    },
+    {
+      "path": "books/the-architecture-of-human-purpose.mdx",
+      "warnings": [
+        "Slug \"/books/the-architecture-of-human-purpose\" doesn't match filename \"the-architecture-of-human-purpose\""
+      ]
+    },
+    {
+      "path": "books/the-builders-catechism.mdx",
+      "warnings": [
+        "Slug \"/books/the-builders-catechism\" doesn't match filename \"the-builders-catechism\""
+      ]
+    },
+    {
+      "path": "books/the-fiction-adaptation.mdx",
+      "warnings": [
+        "Slug \"/books/the-fiction-adaptation\" doesn't match filename \"the-fiction-adaptation\""
+      ]
+    },
+    {
+      "path": "briefs/audit-of-ease.mdx",
+      "warnings": [
+        "Slug \"/briefs/audit-of-ease\" doesn't match filename \"audit-of-ease\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/canon-builders-rule-of-life.mdx",
+      "warnings": [
+        "Slug \"/briefs/canon-builders-rule-of-life\" doesn't match filename \"canon-builders-rule-of-life\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/canon-system-constitution.mdx",
+      "warnings": [
+        "Slug \"/briefs/canon-system-constitution\" doesn't match filename \"canon-system-constitution\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/conviction-vs-coercion.mdx",
+      "warnings": [
+        "Slug \"/briefs/conviction-vs-coercion\" doesn't match filename \"conviction-vs-coercion\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-01.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-01\" doesn't match filename \"frontier-resilience-01\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-beyond-survival-mode.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-beyond-survival-mode\" doesn't match filename \"frontier-resilience-beyond-survival-mode\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-crisis-loops-and-lost-judgment.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-crisis-loops-and-lost-judgment\" doesn't match filename \"frontier-resilience-crisis-loops-and-lost-judgment\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-decision-latency-as-hidden-risk.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-decision-latency-as-hidden-risk\" doesn't match filename \"frontier-resilience-decision-latency-as-hidden-risk\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-drift-in-the-second-line.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-drift-in-the-second-line\" doesn't match filename \"frontier-resilience-drift-in-the-second-line\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-drift-inside-the-winning-season.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-drift-inside-the-winning-season\" doesn't match filename \"frontier-resilience-drift-inside-the-winning-season\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-fatigue-at-the-top.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-fatigue-at-the-top\" doesn't match filename \"frontier-resilience-fatigue-at-the-top\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-founder-endurance-is-not-a-plan.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-founder-endurance-is-not-a-plan\" doesn't match filename \"frontier-resilience-founder-endurance-is-not-a-plan\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-fragility-of-unowned-decisions.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-fragility-of-unowned-decisions\" doesn't match filename \"frontier-resilience-fragility-of-unowned-decisions\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-holding-standard-when-cash-tightens.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-holding-standard-when-cash-tightens\" doesn't match filename \"frontier-resilience-holding-standard-when-cash-tightens\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-institutions-that-cannot-say-no.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-institutions-that-cannot-say-no\" doesn't match filename \"frontier-resilience-institutions-that-cannot-say-no\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-operating-cadence-under-strain.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-operating-cadence-under-strain\" doesn't match filename \"frontier-resilience-operating-cadence-under-strain\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-pressure-tests-for-key-person-risk.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-pressure-tests-for-key-person-risk\" doesn't match filename \"frontier-resilience-pressure-tests-for-key-person-risk\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-resilience-before-expansion.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-resilience-before-expansion\" doesn't match filename \"frontier-resilience-resilience-before-expansion\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-restoring-command-after-confusion.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-restoring-command-after-confusion\" doesn't match filename \"frontier-resilience-restoring-command-after-confusion\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-stress-reveals-the-real-culture.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-stress-reveals-the-real-culture\" doesn't match filename \"frontier-resilience-stress-reveals-the-real-culture\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-surviving-bad-information.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-surviving-bad-information\" doesn't match filename \"frontier-resilience-surviving-bad-information\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-the-cost-of-living-in-escalation.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-the-cost-of-living-in-escalation\" doesn't match filename \"frontier-resilience-the-cost-of-living-in-escalation\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-the-discipline-of-bounded-adaptation.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-the-discipline-of-bounded-adaptation\" doesn't match filename \"frontier-resilience-the-discipline-of-bounded-adaptation\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-the-false-order-of-busy-teams.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-the-false-order-of-busy-teams\" doesn't match filename \"frontier-resilience-the-false-order-of-busy-teams\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-the-fragility-of-heroic-leadership.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-the-fragility-of-heroic-leadership\" doesn't match filename \"frontier-resilience-the-fragility-of-heroic-leadership\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-the-tax-of-constant-reaction.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-the-tax-of-constant-reaction\" doesn't match filename \"frontier-resilience-the-tax-of-constant-reaction\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-when-clarity-has-no-owner.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-when-clarity-has-no-owner\" doesn't match filename \"frontier-resilience-when-clarity-has-no-owner\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-when-growth-hides-breakdown.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-when-growth-hides-breakdown\" doesn't match filename \"frontier-resilience-when-growth-hides-breakdown\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-when-recovery-needs-governance.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-when-recovery-needs-governance\" doesn't match filename \"frontier-resilience-when-recovery-needs-governance\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/frontier-resilience-when-urgency-corrupts-sequencing.mdx",
+      "warnings": [
+        "Slug \"/briefs/frontier-resilience-when-urgency-corrupts-sequencing\" doesn't match filename \"frontier-resilience-when-urgency-corrupts-sequencing\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/governance-diagnostic-toolkit.mdx",
+      "warnings": [
+        "Slug \"/briefs/governance-diagnostic-toolkit\" doesn't match filename \"governance-diagnostic-toolkit\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-false-confidence-from-aggregated-metrics.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-false-confidence-from-aggregated-metrics\" doesn't match filename \"institutional-alpha-false-confidence-from-aggregated-metrics\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/metrics",
+        "Possible broken internal link: /lexicon/risk"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-intelligence-after-the-founder-myth.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-intelligence-after-the-founder-myth\" doesn't match filename \"institutional-alpha-intelligence-after-the-founder-myth\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/stewardship",
+        "Possible broken internal link: /lexicon/maturity"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-intelligence-debt-in-scaling-firms.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-intelligence-debt-in-scaling-firms\" doesn't match filename \"institutional-alpha-intelligence-debt-in-scaling-firms\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/scale",
+        "Possible broken internal link: /lexicon/signal"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-intelligence-drift-after-rapid-expansion.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-intelligence-drift-after-rapid-expansion\" doesn't match filename \"institutional-alpha-intelligence-drift-after-rapid-expansion\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/scale",
+        "Possible broken internal link: /lexicon/drift"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-overinterpreting-motion-as-momentum.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-overinterpreting-motion-as-momentum\" doesn't match filename \"institutional-alpha-overinterpreting-motion-as-momentum\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/momentum",
+        "Possible broken internal link: /lexicon/execution"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-pattern-recognition-without-operating-truth.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-pattern-recognition-without-operating-truth\" doesn't match filename \"institutional-alpha-pattern-recognition-without-operating-truth\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /lexicon/signal",
+        "Possible broken internal link: /lexicon/discernment"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-reporting-systems-that-reward-optimism.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-reporting-systems-that-reward-optimism\" doesn't match filename \"institutional-alpha-reporting-systems-that-reward-optimism\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/incentive",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-signal-decay-in-reporting-chains.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-signal-decay-in-reporting-chains\" doesn't match filename \"institutional-alpha-signal-decay-in-reporting-chains\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/signal"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-blindness-of-clean-narratives.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-blindness-of-clean-narratives\" doesn't match filename \"institutional-alpha-the-blindness-of-clean-narratives\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/narrative",
+        "Possible broken internal link: /lexicon/discernment",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-breakdown-of-field-intelligence.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-breakdown-of-field-intelligence\" doesn't match filename \"institutional-alpha-the-breakdown-of-field-intelligence\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/field",
+        "Possible broken internal link: /lexicon/signal",
+        "Possible broken internal link: /lexicon/stewardship"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-comfort-of-lagging-indicators.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-comfort-of-lagging-indicators\" doesn't match filename \"institutional-alpha-the-comfort-of-lagging-indicators\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/risk",
+        "Possible broken internal link: /lexicon/signal",
+        "Possible broken internal link: /lexicon/discernment"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-danger-of-unaudited-assumptions.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-danger-of-unaudited-assumptions\" doesn't match filename \"institutional-alpha-the-danger-of-unaudited-assumptions\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/assumption",
+        "Possible broken internal link: /lexicon/prudence",
+        "Possible broken internal link: /lexicon/discernment"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-difference-between-insight-and-surveillance.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-difference-between-insight-and-surveillance\" doesn't match filename \"institutional-alpha-the-difference-between-insight-and-surveillance\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/insight",
+        "Possible broken internal link: /lexicon/trust",
+        "Possible broken internal link: /lexicon/stewardship"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-discipline-of-decision-grade-intelligence.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-discipline-of-decision-grade-intelligence\" doesn't match filename \"institutional-alpha-the-discipline-of-decision-grade-intelligence\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/discernment"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-hidden-cost-of-flattering-data.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-hidden-cost-of-flattering-data\" doesn't match filename \"institutional-alpha-the-hidden-cost-of-flattering-data\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/discernment"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-institutional-price-of-guesswork.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-institutional-price-of-guesswork\" doesn't match filename \"institutional-alpha-the-institutional-price-of-guesswork\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-the-politics-of-suppressed-bad-news.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-the-politics-of-suppressed-bad-news\" doesn't match filename \"institutional-alpha-the-politics-of-suppressed-bad-news\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/courage"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-weak-signals-before-reputational-fracture.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-weak-signals-before-reputational-fracture\" doesn't match filename \"institutional-alpha-weak-signals-before-reputational-fracture\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/reputation",
+        "Possible broken internal link: /lexicon/signal"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-when-analysts-inherit-a-broken-mandate.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-when-analysts-inherit-a-broken-mandate\" doesn't match filename \"institutional-alpha-when-analysts-inherit-a-broken-mandate\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/mandate",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-when-dashboards-outpace-judgment.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-when-dashboards-outpace-judgment\" doesn't match filename \"institutional-alpha-when-dashboards-outpace-judgment\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/judgment",
+        "Possible broken internal link: /lexicon/signal"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-when-risk-travels-faster-than-reporting.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-when-risk-travels-faster-than-reporting\" doesn't match filename \"institutional-alpha-when-risk-travels-faster-than-reporting\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/risk",
+        "Possible broken internal link: /lexicon/cadence"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-when-scenario-planning-becomes-theatre.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-when-scenario-planning-becomes-theatre\" doesn't match filename \"institutional-alpha-when-scenario-planning-becomes-theatre\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/preparedness",
+        "Possible broken internal link: /lexicon/prudence"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-when-the-board-sees-a-different-company.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-when-the-board-sees-a-different-company\" doesn't match filename \"institutional-alpha-when-the-board-sees-a-different-company\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/board",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-why-executive-summaries-mislead.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-why-executive-summaries-mislead\" doesn't match filename \"institutional-alpha-why-executive-summaries-mislead\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "briefs/institutional-alpha-why-leaders-stop-hearing-reality.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-alpha-why-leaders-stop-hearing-reality\" doesn't match filename \"institutional-alpha-why-leaders-stop-hearing-reality\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/humility",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "briefs/institutional-integrity-audit.mdx",
+      "warnings": [
+        "Slug \"/briefs/institutional-integrity-audit\" doesn't match filename \"institutional-integrity-audit\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-alignment-without-sovereignty.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-alignment-without-sovereignty\" doesn't match filename \"sovereign-intelligence-alignment-without-sovereignty\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/alignment",
+        "Possible broken internal link: /lexicon/authority"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-control-without-ownership.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-control-without-ownership\" doesn't match filename \"sovereign-intelligence-control-without-ownership\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/ownership",
+        "Possible broken internal link: /lexicon/authority"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-dependence-disguised-as-partnership.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-dependence-disguised-as-partnership\" doesn't match filename \"sovereign-intelligence-dependence-disguised-as-partnership\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/stewardship"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms\" doesn't match filename \"sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/capital",
+        "Possible broken internal link: /lexicon/stewardship"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure\" doesn't match filename \"sovereign-intelligence-identity-drift-in-institutions-under-external-pressure\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/boundary"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule\" doesn't match filename \"sovereign-intelligence-internal-empires-and-the-loss-of-common-rule\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/authority",
+        "Possible broken internal link: /lexicon/justice"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom\" doesn't match filename \"sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/value",
+        "Possible broken internal link: /lexicon/leverage"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-sovereignty-at-the-edge-of-regulation\" doesn't match filename \"sovereign-intelligence-sovereignty-at-the-edge-of-regulation\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/prudence"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-strategic-ambition-without-sovereign-capacity\" doesn't match filename \"sovereign-intelligence-strategic-ambition-without-sovereign-capacity\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/capacity",
+        "Possible broken internal link: /lexicon/prudence"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-strategic-exposure-without-red-lines.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-strategic-exposure-without-red-lines\" doesn't match filename \"sovereign-intelligence-strategic-exposure-without-red-lines\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/boundary",
+        "Possible broken internal link: /lexicon/courage"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-cost-of-borrowed-legitimacy.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-cost-of-borrowed-legitimacy\" doesn't match filename \"sovereign-intelligence-the-cost-of-borrowed-legitimacy\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/authority",
+        "Possible broken internal link: /lexicon/legitimacy"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-discipline-of-institutional-self-government.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-discipline-of-institutional-self-government\" doesn't match filename \"sovereign-intelligence-the-discipline-of-institutional-self-government\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/self-government",
+        "Possible broken internal link: /lexicon/stewardship"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-false-safety-of-strategic-silence.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-false-safety-of-strategic-silence\" doesn't match filename \"sovereign-intelligence-the-false-safety-of-strategic-silence\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /lexicon/courage",
+        "Possible broken internal link: /lexicon/authority"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-geography-of-hidden-influence.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-geography-of-hidden-influence\" doesn't match filename \"sovereign-intelligence-the-geography-of-hidden-influence\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/authority",
+        "Possible broken internal link: /lexicon/discernment"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-governance-cost-of-permanent-exception.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-governance-cost-of-permanent-exception\" doesn't match filename \"sovereign-intelligence-the-governance-cost-of-permanent-exception\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/rule",
+        "Possible broken internal link: /lexicon/justice"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-illusion-of-neutral-platforms.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-illusion-of-neutral-platforms\" doesn't match filename \"sovereign-intelligence-the-illusion-of-neutral-platforms\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/infrastructure",
+        "Possible broken internal link: /lexicon/power"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon\" doesn't match filename \"sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/time-horizon",
+        "Possible broken internal link: /lexicon/prudence"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths\" doesn't match filename \"sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/leverage",
+        "Possible broken internal link: /lexicon/optionality"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you\" doesn't match filename \"sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/courage",
+        "Possible broken internal link: /lexicon/boundary"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-tax-of-strategic-appeasement.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-tax-of-strategic-appeasement\" doesn't match filename \"sovereign-intelligence-the-tax-of-strategic-appeasement\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/courage",
+        "Possible broken internal link: /lexicon/boundary"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-vulnerability-of-narrative-capture.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-vulnerability-of-narrative-capture\" doesn't match filename \"sovereign-intelligence-the-vulnerability-of-narrative-capture\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/narrative",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-the-weakness-of-outsourced-judgment.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-the-weakness-of-outsourced-judgment\" doesn't match filename \"sovereign-intelligence-the-weakness-of-outsourced-judgment\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/judgment",
+        "Possible broken internal link: /lexicon/discernment",
+        "Possible broken internal link: /lexicon/authority"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-when-institutions-become-too-easy-to-pressure\" doesn't match filename \"sovereign-intelligence-when-institutions-become-too-easy-to-pressure\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/fortitude",
+        "Possible broken internal link: /lexicon/leverage"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-when-optionality-quietly-dies.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-when-optionality-quietly-dies\" doesn't match filename \"sovereign-intelligence-when-optionality-quietly-dies\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/optionality",
+        "Possible broken internal link: /lexicon/prudence"
+      ]
+    },
+    {
+      "path": "briefs/sovereign-intelligence-why-power-concentrates-around-the-decisive.mdx",
+      "warnings": [
+        "Slug \"/briefs/sovereign-intelligence-why-power-concentrates-around-the-decisive\" doesn't match filename \"sovereign-intelligence-why-power-concentrates-around-the-decisive\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/power",
+        "Possible broken internal link: /lexicon/authority",
+        "Possible broken internal link: /lexicon/justice"
+      ]
+    },
+    {
+      "path": "canon/builders-catechism.mdx",
+      "warnings": [
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/legacy"
+      ]
+    },
+    {
+      "path": "canon/canon-campaign.mdx",
+      "warnings": [
+        "Slug \"/canon/canon-campaign\" doesn't match filename \"canon-campaign\""
+      ]
+    },
+    {
+      "path": "canon/canon-introduction-letter.mdx",
+      "warnings": [
+        "Slug \"/canon/canon-introduction-letter\" doesn't match filename \"canon-introduction-letter\""
+      ]
+    },
+    {
+      "path": "canon/canon-master-index-preview.mdx",
+      "warnings": [
+        "Slug \"/canon/canon-master-index-preview\" doesn't match filename \"canon-master-index-preview\""
+      ]
+    },
+    {
+      "path": "canon/volume-i-foundations-of-purpose.mdx",
+      "warnings": [
+        "Slug \"/canon/volume-i-foundations-of-purpose\" doesn't match filename \"volume-i-foundations-of-purpose\""
+      ]
+    },
+    {
+      "path": "canon/volume-i-teaching-edition.mdx",
+      "warnings": [
+        "Slug \"/canon/volume-i-teaching-edition\" doesn't match filename \"volume-i-teaching-edition\""
+      ]
+    },
+    {
+      "path": "canon/volume-ii-governance-and-formation.mdx",
+      "warnings": [
+        "Slug \"/canon/volume-ii-governance-and-formation\" doesn't match filename \"volume-ii-governance-and-formation\""
+      ]
+    },
+    {
+      "path": "canon/volume-ii-teaching-edition.mdx",
+      "warnings": [
+        "Slug \"/canon/volume-ii-teaching-edition\" doesn't match filename \"volume-ii-teaching-edition\""
+      ]
+    },
+    {
+      "path": "canon/volume-iii-teaching-edition.mdx",
+      "warnings": [
+        "Slug \"/canon/volume-iii-teaching-edition\" doesn't match filename \"volume-iii-teaching-edition\""
+      ]
+    },
+    {
+      "path": "canon/volume-iv-teaching-edition.mdx",
+      "warnings": [
+        "Slug \"/canon/volume-iv-teaching-edition\" doesn't match filename \"volume-iv-teaching-edition\""
+      ]
+    },
+    {
+      "path": "canon/volume-x-filename.mdx",
+      "warnings": [
+        "Slug \"/canon/volume-x-filename\" doesn't match filename \"volume-x-filename\""
+      ]
+    },
+    {
+      "path": "canon/volume-x-the-arc-of-future-civilisation.mdx",
+      "warnings": [
+        "Slug \"/canon/volume-x-the-arc-of-future-civilisation\" doesn't match filename \"volume-x-the-arc-of-future-civilisation\""
+      ]
+    },
+    {
+      "path": "downloads/abraham-vault-pack.mdx",
+      "warnings": [
+        "Slug \"/downloads/abraham-vault-pack\" doesn't match filename \"abraham-vault-pack\""
+      ]
+    },
+    {
+      "path": "downloads/board-decision-log-template.mdx",
+      "warnings": [
+        "Slug \"/downloads/board-decision-log-template\" doesn't match filename \"board-decision-log-template\""
+      ]
+    },
+    {
+      "path": "downloads/board-investor-onepager.mdx",
+      "warnings": [
+        "Slug \"/downloads/board-investor-onepager\" doesn't match filename \"board-investor-onepager\""
+      ]
+    },
+    {
+      "path": "downloads/brotherhood-covenant.mdx",
+      "warnings": [
+        "Slug \"/downloads/brotherhood-covenant\" doesn't match filename \"brotherhood-covenant\""
+      ]
+    },
+    {
+      "path": "downloads/canon-volume-iv-diagnostic-toolkit.mdx",
+      "warnings": [
+        "Slug \"/downloads/canon-volume-iv-diagnostic-toolkit\" doesn't match filename \"canon-volume-iv-diagnostic-toolkit\""
+      ]
+    },
+    {
+      "path": "downloads/canon-volume-v-governance-diagnostic-toolkit.mdx",
+      "warnings": [
+        "Slug \"/downloads/canon-volume-v-governance-diagnostic-toolkit\" doesn't match filename \"canon-volume-v-governance-diagnostic-toolkit\"",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/legacy"
+      ]
+    },
+    {
+      "path": "downloads/communication-script-bpf.mdx",
+      "warnings": [
+        "Slug \"/downloads/communication-script-bpf\" doesn't match filename \"communication-script-bpf\""
+      ]
+    },
+    {
+      "path": "downloads/decision-log-template.mdx",
+      "warnings": [
+        "Slug \"/downloads/decision-log-template\" doesn't match filename \"decision-log-template\""
+      ]
+    },
+    {
+      "path": "downloads/decision-matrix-scorecard.mdx",
+      "warnings": [
+        "Slug \"/downloads/decision-matrix-scorecard\" doesn't match filename \"decision-matrix-scorecard\""
+      ]
+    },
+    {
+      "path": "downloads/download-legacy-architecture-canvas.mdx",
+      "warnings": [
+        "Slug \"/downloads/legacy-architecture-canvas\" doesn't match filename \"download-legacy-architecture-canvas\""
+      ]
+    },
+    {
+      "path": "downloads/entrepreneur-operating-pack.mdx",
+      "warnings": [
+        "Slug \"/downloads/entrepreneur-operating-pack\" doesn't match filename \"entrepreneur-operating-pack\""
+      ]
+    },
+    {
+      "path": "downloads/entrepreneur-survival-checklist.mdx",
+      "warnings": [
+        "Slug \"/downloads/entrepreneur-survival-checklist\" doesn't match filename \"entrepreneur-survival-checklist\""
+      ]
+    },
+    {
+      "path": "downloads/family-altar-liturgy.mdx",
+      "warnings": [
+        "Slug \"/downloads/family-altar-liturgy\" doesn't match filename \"family-altar-liturgy\""
+      ]
+    },
+    {
+      "path": "downloads/family-court-practical-pack.mdx",
+      "warnings": [
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/father"
+      ]
+    },
+    {
+      "path": "downloads/leaders-cue-card-two-up.mdx",
+      "warnings": [
+        "Slug \"/downloads/leaders-cue-card-two-up\" doesn't match filename \"leaders-cue-card-two-up\""
+      ]
+    },
+    {
+      "path": "downloads/leadership-playbook.mdx",
+      "warnings": [
+        "Slug \"/downloads/leadership-playbook\" doesn't match filename \"leadership-playbook\""
+      ]
+    },
+    {
+      "path": "downloads/legacy-canvas.mdx",
+      "warnings": [
+        "Slug \"/downloads/legacy-canvas\" doesn't match filename \"legacy-canvas\""
+      ]
+    },
+    {
+      "path": "downloads/life-alignment-assessment.mdx",
+      "warnings": [
+        "Slug \"/downloads/life-alignment-assessment\" doesn't match filename \"life-alignment-assessment\""
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-001.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-004.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-007.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-010.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-013.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-016.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-019.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-022.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-025.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-028.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-031.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-034.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-037.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-040.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-043.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-046.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-049.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-052.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-055.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-058.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-061.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-064.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-067.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-070.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/fr-073.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/frontier-resilience-01.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-003.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-006.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-009.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-012.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-015.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-018.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-021.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-024.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-027.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-030.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-033.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-036.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-039.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-042.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-045.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-048.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-051.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-054.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-057.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-060.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-063.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-066.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-069.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-072.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/ia-075.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-002.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-005.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-008.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-011.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-014.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-017.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-020.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-023.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-026.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-029.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-032.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-035.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-038.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-041.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-044.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-047.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-050.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-053.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-056.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-059.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-062.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-065.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-068.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-071.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-briefs/si-074.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-intel/sovereignty-001.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
         "Content is very short (less than 50 characters)"
       ]
     },
     {
-      "path": "books\\book-fathering-without-fear.mdx",
+      "path": "downloads/linked-intel/strategic-autonomy-002.mdx",
       "warnings": [
-        "Slug \"fathering-without-fear\" doesn't match filename \"book-fathering-without-fear\""
-      ]
-    },
-    {
-      "path": "books\\the-architecture-of-human-purpose.mdx",
-      "warnings": [
-        "Possible broken internal link: /subscribe"
-      ]
-    },
-    {
-      "path": "books\\[slug].mdx",
-      "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Very little or no content after frontmatter",
+        "File not found in Contentlayer generated data (may be excluded)",
         "Content is very short (less than 50 characters)"
       ]
     },
     {
-      "path": "canon\\[slug].mdx",
+      "path": "downloads/linked-shorts/busy-is-not-the-same-as-anchored.mdx",
       "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Very little or no content after frontmatter",
-        "Content is very short (less than 50 characters)"
+        "Slug \"/shorts/busy-is-not-the-same-as-anchored\" doesn't match filename \"busy-is-not-the-same-as-anchored\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\abraham-vault-pack.mdx",
+      "path": "downloads/linked-shorts/freedom-begins-where-ego-ends.mdx",
       "warnings": [
-        "Slug \"download-abraham-vault-pack\" doesn't match filename \"abraham-vault-pack\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/freedom-begins-where-ego-ends\" doesn't match filename \"freedom-begins-where-ego-ends\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\board-decision-log-template.mdx",
+      "path": "downloads/linked-shorts/institutional-sovereignty.mdx",
       "warnings": [
-        "Slug \"download-board-decision-log-template\" doesn't match filename \"board-decision-log-template\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/institutional-sovereignty\" doesn't match filename \"institutional-sovereignty\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\board-investor-onepager.mdx",
+      "path": "downloads/linked-shorts/pleasure-is-loud-purpose-is-quiet.mdx",
       "warnings": [
-        "Slug \"download-board-investor-onepager\" doesn't match filename \"board-investor-onepager\"",
-        "Legacy field \"downloadFile\": Use downloadUrl instead",
-        "Legacy field \"fileUrl\": Use downloadUrl instead",
-        "Legacy field \"pdfPath\": Use downloadUrl instead"
+        "Slug \"/shorts/pleasure-is-loud-purpose-is-quiet\" doesn't match filename \"pleasure-is-loud-purpose-is-quiet\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\brotherhood-covenant.mdx",
+      "path": "downloads/linked-shorts/the-cost-of-refusing-formation.mdx",
       "warnings": [
-        "Slug \"download-brotherhood-covenant\" doesn't match filename \"brotherhood-covenant\""
+        "Slug \"/shorts/the-cost-of-refusing-formation\" doesn't match filename \"the-cost-of-refusing-formation\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\canon-volume-iv-diagnostic-toolkit.mdx",
+      "path": "downloads/linked-shorts/this-is-not-a-comfort-platform.mdx",
       "warnings": [
-        "Slug \"download-canon-volume-iv-diagnostic-toolkit\" doesn't match filename \"canon-volume-iv-diagnostic-toolkit\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/this-is-not-a-comfort-platform\" doesn't match filename \"this-is-not-a-comfort-platform\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\canon-volume-v-governance-diagnostic-toolkit.mdx",
+      "path": "downloads/linked-shorts/when-a-single-yes-changes-everything.mdx",
       "warnings": [
-        "Slug \"download-canon-volume-v-governance-diagnostic-toolkit\" doesn't match filename \"canon-volume-v-governance-diagnostic-toolkit\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-a-single-yes-changes-everything\" doesn't match filename \"when-a-single-yes-changes-everything\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\communication-script-bpf.mdx",
+      "path": "downloads/linked-shorts/when-all-you-can-do-is-breathe.mdx",
       "warnings": [
-        "Slug \"download-communication-script-bpf\" doesn't match filename \"communication-script-bpf\""
+        "Slug \"/shorts/when-all-you-can-do-is-breathe\" doesn't match filename \"when-all-you-can-do-is-breathe\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\decision-log-template.mdx",
+      "path": "downloads/linked-shorts/when-avoidance-becomes-your-personality.mdx",
       "warnings": [
-        "Slug \"download-decision-log-template\" doesn't match filename \"decision-log-template\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-avoidance-becomes-your-personality\" doesn't match filename \"when-avoidance-becomes-your-personality\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\decision-matrix-scorecard.mdx",
+      "path": "downloads/linked-shorts/when-busyness-becomes-your-brand.mdx",
       "warnings": [
-        "Slug \"download-decision-matrix-scorecard\" doesn't match filename \"decision-matrix-scorecard\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-busyness-becomes-your-brand\" doesn't match filename \"when-busyness-becomes-your-brand\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\download-legacy-architecture-canvas.mdx",
+      "path": "downloads/linked-shorts/when-comfort-becomes-your-cage.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-comfort-becomes-your-cage\" doesn't match filename \"when-comfort-becomes-your-cage\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\entrepreneur-operating-pack.mdx",
+      "path": "downloads/linked-shorts/when-conflict-feels-like-betrayal.mdx",
       "warnings": [
-        "Slug \"download-entrepreneur-operating-pack\" doesn't match filename \"entrepreneur-operating-pack\""
+        "Slug \"/shorts/when-conflict-feels-like-betrayal\" doesn't match filename \"when-conflict-feels-like-betrayal\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\entrepreneur-survival-checklist.mdx",
+      "path": "downloads/linked-shorts/when-doctrine-feels-safer-than-god.mdx",
       "warnings": [
-        "Slug \"download-entrepreneur-survival-checklist\" doesn't match filename \"entrepreneur-survival-checklist\""
+        "Slug \"/shorts/when-doctrine-feels-safer-than-god\" doesn't match filename \"when-doctrine-feels-safer-than-god\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\family-altar-liturgy.mdx",
+      "path": "downloads/linked-shorts/when-every-promotion-feels-hollow.mdx",
       "warnings": [
-        "Slug \"download-family-altar-liturgy\" doesn't match filename \"family-altar-liturgy\""
+        "Slug \"/shorts/when-every-promotion-feels-hollow\" doesn't match filename \"when-every-promotion-feels-hollow\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\leaders-cue-card-two-up.mdx",
+      "path": "downloads/linked-shorts/when-grace-finds-you-in-the-mess.mdx",
       "warnings": [
-        "Slug \"download-leaders-cue-card-two-up\" doesn't match filename \"leaders-cue-card-two-up\""
+        "Slug \"/shorts/when-grace-finds-you-in-the-mess\" doesn't match filename \"when-grace-finds-you-in-the-mess\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\leadership-playbook.mdx",
+      "path": "downloads/linked-shorts/when-hope-feels-reckless.mdx",
       "warnings": [
-        "Slug \"download-leadership-playbook\" doesn't match filename \"leadership-playbook\""
+        "Slug \"/shorts/when-hope-feels-reckless\" doesn't match filename \"when-hope-feels-reckless\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\legacy-canvas.mdx",
+      "path": "downloads/linked-shorts/when-kindness-feels-like-rebellion.mdx",
       "warnings": [
-        "Slug \"download-legacy-architecture-canvas\" doesn't match filename \"legacy-canvas\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-kindness-feels-like-rebellion\" doesn't match filename \"when-kindness-feels-like-rebellion\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\mentorship-starter-kit.mdx",
+      "path": "downloads/linked-shorts/when-later-became-never.mdx",
       "warnings": [
-        "Slug \"download-mentorship-starter-kit\" doesn't match filename \"mentorship-starter-kit\"",
-        "Legacy field \"downloadFile\": Use downloadUrl instead",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-later-became-never\" doesn't match filename \"when-later-became-never\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\operating-cadence-pack.mdx",
+      "path": "downloads/linked-shorts/when-numbness-feels-safer-than-joy.mdx",
       "warnings": [
-        "Slug \"download-operating-cadence-pack\" doesn't match filename \"operating-cadence-pack\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-numbness-feels-safer-than-joy\" doesn't match filename \"when-numbness-feels-safer-than-joy\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\principles-for-my-son-cue-card.mdx",
+      "path": "downloads/linked-shorts/when-productivity-becomes-punishment.mdx",
       "warnings": [
-        "Slug \"download-principles-for-my-son-cue-card\" doesn't match filename \"principles-for-my-son-cue-card\""
+        "Slug \"/shorts/when-productivity-becomes-punishment\" doesn't match filename \"when-productivity-becomes-punishment\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\principles-for-my-son.mdx",
+      "path": "downloads/linked-shorts/when-rest-starts-to-feel-dangerous.mdx",
       "warnings": [
-        "Slug \"download-principles-for-my-son\" doesn't match filename \"principles-for-my-son\"",
-        "Legacy field \"downloadFile\": Use downloadUrl instead",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-rest-starts-to-feel-dangerous\" doesn't match filename \"when-rest-starts-to-feel-dangerous\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\purpose-pyramid-worksheet.mdx",
+      "path": "downloads/linked-shorts/when-you-argue-with-god-in-your-head.mdx",
       "warnings": [
-        "Slug \"download-purpose-pyramid-worksheet\" doesn't match filename \"purpose-pyramid-worksheet\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-you-argue-with-god-in-your-head\" doesn't match filename \"when-you-argue-with-god-in-your-head\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\scripture-track-john14.mdx",
+      "path": "downloads/linked-shorts/when-you-cant-stop-overthinking.mdx",
       "warnings": [
-        "Slug \"download-scripture-track-john14\" doesn't match filename \"scripture-track-john14\"",
-        "Legacy field \"downloadFile\": Use downloadUrl instead",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-you-cant-stop-overthinking\" doesn't match filename \"when-you-cant-stop-overthinking\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\standards-brief.mdx",
+      "path": "downloads/linked-shorts/when-you-cant-tell-if-youre-growing-or-drifting.mdx",
       "warnings": [
-        "Slug \"download-standards-brief\" doesn't match filename \"standards-brief\""
+        "Slug \"/shorts/when-you-cant-tell-if-youre-growing-or-drifting\" doesn't match filename \"when-you-cant-tell-if-youre-growing-or-drifting\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\ultimate-purpose-of-man-editorial.mdx",
+      "path": "downloads/linked-shorts/when-you-dont-know-what-you-want-anymore.mdx",
       "warnings": [
-        "Slug \"download-ultimate-purpose-of-man-editorial\" doesn't match filename \"ultimate-purpose-of-man-editorial\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-you-dont-know-what-you-want-anymore\" doesn't match filename \"when-you-dont-know-what-you-want-anymore\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\weekly-operating-rhythm.mdx",
+      "path": "downloads/linked-shorts/when-you-dont-trust-your-own-decisions.mdx",
       "warnings": [
-        "Slug \"download-weekly-operating-rhythm\" doesn't match filename \"weekly-operating-rhythm\""
+        "Slug \"/shorts/when-you-dont-trust-your-own-decisions\" doesn't match filename \"when-you-dont-trust-your-own-decisions\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "downloads\\[slug].mdx",
+      "path": "downloads/linked-shorts/when-you-fear-being-wrong-about-god.mdx",
       "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead",
-        "Very little or no content after frontmatter",
-        "Content is very short (less than 50 characters)"
+        "Slug \"/shorts/when-you-fear-being-wrong-about-god\" doesn't match filename \"when-you-fear-being-wrong-about-god\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "events\\[slug].mdx",
+      "path": "downloads/linked-shorts/when-you-fear-success-more-than-failure.mdx",
       "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Very little or no content after frontmatter",
-        "Content is very short (less than 50 characters)"
+        "Slug \"/shorts/when-you-fear-success-more-than-failure\" doesn't match filename \"when-you-fear-success-more-than-failure\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "prints\\[slug].mdx",
+      "path": "downloads/linked-shorts/when-you-feel-like-god-is-delaying-you.mdx",
       "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Legacy field \"fileUrl\": Use downloadUrl instead",
-        "Very little or no content after frontmatter",
-        "Content is very short (less than 50 characters)"
+        "Slug \"/shorts/when-you-feel-like-god-is-delaying-you\" doesn't match filename \"when-you-feel-like-god-is-delaying-you\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "resources\\canon-builders-rule-of-life.mdx",
+      "path": "downloads/linked-shorts/when-you-feel-too-busy-to-care.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-you-feel-too-busy-to-care\" doesn't match filename \"when-you-feel-too-busy-to-care\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "resources\\canon-campaign.mdx",
+      "path": "downloads/linked-shorts/when-you-finally-let-yourself-cry.mdx",
       "warnings": [
-        "Possible broken internal link: /canon/the-architecture-of-human-purpose",
-        "Possible broken internal link: /inner-circle"
+        "Slug \"/shorts/when-you-finally-let-yourself-cry\" doesn't match filename \"when-you-finally-let-yourself-cry\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "resources\\canon-council-table-agenda.mdx",
+      "path": "downloads/linked-shorts/when-you-give-more-than-you-get.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-you-give-more-than-you-get\" doesn't match filename \"when-you-give-more-than-you-get\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "resources\\canon-household-charter.mdx",
+      "path": "downloads/linked-shorts/when-you-keep-blaming-your-childhood.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-you-keep-blaming-your-childhood\" doesn't match filename \"when-you-keep-blaming-your-childhood\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "resources\\canon-reading-plan-year-one.mdx",
+      "path": "downloads/linked-shorts/when-you-keep-choosing-people-who-cant-choose-you.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-you-keep-choosing-people-who-cant-choose-you\" doesn't match filename \"when-you-keep-choosing-people-who-cant-choose-you\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "resources\\multi-generational-legacy-ledger.mdx",
+      "path": "downloads/linked-shorts/when-you-keep-confusing-niceness-with-goodness.mdx",
       "warnings": [
-        "Legacy field \"fileUrl\": Use downloadUrl instead"
+        "Slug \"/shorts/when-you-keep-confusing-niceness-with-goodness\" doesn't match filename \"when-you-keep-confusing-niceness-with-goodness\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "resources\\[slug].mdx",
+      "path": "downloads/linked-shorts/when-you-miss-who-you-used-to-be.mdx",
       "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Very little or no content after frontmatter",
-        "Content is very short (less than 50 characters)"
+        "Slug \"/shorts/when-you-miss-who-you-used-to-be\" doesn't match filename \"when-you-miss-who-you-used-to-be\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "shorts\\[slug].mdx",
+      "path": "downloads/linked-shorts/when-you-mistake-familiarity-for-loyalty.mdx",
       "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Very little or no content after frontmatter",
-        "Content is very short (less than 50 characters)"
+        "Slug \"/shorts/when-you-mistake-familiarity-for-loyalty\" doesn't match filename \"when-you-mistake-familiarity-for-loyalty\"",
+        "File not found in Contentlayer generated data (may be excluded)"
       ]
     },
     {
-      "path": "strategy\\[slug].mdx",
+      "path": "downloads/linked-shorts/when-you-need-god-to-interrupt-you.mdx",
       "warnings": [
-        "Slug \"replace\" doesn't match filename \"[slug]\"",
-        "Very little or no content after frontmatter",
-        "Content is very short (less than 50 characters)"
+        "Slug \"/shorts/when-you-need-god-to-interrupt-you\" doesn't match filename \"when-you-need-god-to-interrupt-you\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-you-no-longer-recognise-your-own-voice.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-no-longer-recognise-your-own-voice\" doesn't match filename \"when-you-no-longer-recognise-your-own-voice\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-you-outgrow-your-circle.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-outgrow-your-circle\" doesn't match filename \"when-you-outgrow-your-circle\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-you-realise-prayer-is-war.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-realise-prayer-is-war\" doesn't match filename \"when-you-realise-prayer-is-war\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-you-realise-you-were-the-problem.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-realise-you-were-the-problem\" doesn't match filename \"when-you-realise-you-were-the-problem\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-you-realise-youre-not-behind.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-realise-youre-not-behind\" doesn't match filename \"when-you-realise-youre-not-behind\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-you-stop-waiting-for-permission.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-stop-waiting-for-permission\" doesn't match filename \"when-you-stop-waiting-for-permission\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-you-want-to-quit-but-cant.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-want-to-quit-but-cant\" doesn't match filename \"when-you-want-to-quit-but-cant\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-calendar-is-full-but-your-life-is-empty.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-calendar-is-full-but-your-life-is-empty\" doesn't match filename \"when-your-calendar-is-full-but-your-life-is-empty\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-calling-stops-being-cute.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-calling-stops-being-cute\" doesn't match filename \"when-your-calling-stops-being-cute\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-character-is-leaking.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-character-is-leaking\" doesn't match filename \"when-your-character-is-leaking\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-confidence-feels-manufactured.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-confidence-feels-manufactured\" doesn't match filename \"when-your-confidence-feels-manufactured\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-convictions-feel-like-costumes.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-convictions-feel-like-costumes\" doesn't match filename \"when-your-convictions-feel-like-costumes\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-dreams-feel-too-heavy.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-dreams-feel-too-heavy\" doesn't match filename \"when-your-dreams-feel-too-heavy\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-excuses-become-your-identity.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-excuses-become-your-identity\" doesn't match filename \"when-your-excuses-become-your-identity\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-faith-feels-numb.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-faith-feels-numb\" doesn't match filename \"when-your-faith-feels-numb\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-hustle-has-no-soul.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-hustle-has-no-soul\" doesn't match filename \"when-your-hustle-has-no-soul\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-legacy-terrifies-you.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-legacy-terrifies-you\" doesn't match filename \"when-your-legacy-terrifies-you\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-silence-says-too-much.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-silence-says-too-much\" doesn't match filename \"when-your-silence-says-too-much\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-standards-keep-you-lonely.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-standards-keep-you-lonely\" doesn't match filename \"when-your-standards-keep-you-lonely\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-vision-outgrows-your-environment.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-vision-outgrows-your-environment\" doesn't match filename \"when-your-vision-outgrows-your-environment\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-your-work-becomes-your-hiding-place.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-work-becomes-your-hiding-place\" doesn't match filename \"when-your-work-becomes-your-hiding-place\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-addicted-to-distraction.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-addicted-to-distraction\" doesn't match filename \"when-youre-addicted-to-distraction\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-afraid-of-your-own-potential.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-afraid-of-your-own-potential\" doesn't match filename \"when-youre-afraid-of-your-own-potential\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-afraid-to-be-radical.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-afraid-to-be-radical\" doesn't match filename \"when-youre-afraid-to-be-radical\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-always-the-strong-one.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-always-the-strong-one\" doesn't match filename \"when-youre-always-the-strong-one\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-attracted-to-potential-not-reality.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-attracted-to-potential-not-reality\" doesn't match filename \"when-youre-attracted-to-potential-not-reality\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-building-someone-elses-legacy.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-building-someone-elses-legacy\" doesn't match filename \"when-youre-building-someone-elses-legacy\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-done-fixing-adults.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-done-fixing-adults\" doesn't match filename \"when-youre-done-fixing-adults\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-exhausted-but-still-available.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-exhausted-but-still-available\" doesn't match filename \"when-youre-exhausted-but-still-available\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-keeping-faith-out-of-habit.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-keeping-faith-out-of-habit\" doesn't match filename \"when-youre-keeping-faith-out-of-habit\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-living-for-weekends.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-living-for-weekends\" doesn't match filename \"when-youre-living-for-weekends\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-loved-without-earning-it.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-loved-without-earning-it\" doesn't match filename \"when-youre-loved-without-earning-it\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-measuring-everything-but-meaning.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-measuring-everything-but-meaning\" doesn't match filename \"when-youre-measuring-everything-but-meaning\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-not-lazy-youre-undisciplined.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-not-lazy-youre-undisciplined\" doesn't match filename \"when-youre-not-lazy-youre-undisciplined\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-preparing-for-rooms-you-havent-entered.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-preparing-for-rooms-you-havent-entered\" doesn't match filename \"when-youre-preparing-for-rooms-you-havent-entered\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-productive-but-not-present.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-productive-but-not-present\" doesn't match filename \"when-youre-productive-but-not-present\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-scared-to-start-over.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-scared-to-start-over\" doesn't match filename \"when-youre-scared-to-start-over\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-the-only-one-doing-the-work.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-the-only-one-doing-the-work\" doesn't match filename \"when-youre-the-only-one-doing-the-work\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-tired-of-being-the-bigger-person.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-tired-of-being-the-bigger-person\" doesn't match filename \"when-youre-tired-of-being-the-bigger-person\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-tired-of-starting-over.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-tired-of-starting-over\" doesn't match filename \"when-youre-tired-of-starting-over\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youre-winning-at-work-but-losing-yourself.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-winning-at-work-but-losing-yourself\" doesn't match filename \"when-youre-winning-at-work-but-losing-yourself\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youve-become-chronically-online.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youve-become-chronically-online\" doesn't match filename \"when-youve-become-chronically-online\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/when-youve-worshipped-the-wrong-metrics.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youve-worshipped-the-wrong-metrics\" doesn't match filename \"when-youve-worshipped-the-wrong-metrics\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/linked-shorts/you-were-built-to-carry-weight.mdx",
+      "warnings": [
+        "Slug \"/shorts/you-were-built-to-carry-weight\" doesn't match filename \"you-were-built-to-carry-weight\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "downloads/mentorship-starter-kit.mdx",
+      "warnings": [
+        "Slug \"/downloads/mentorship-starter-kit\" doesn't match filename \"mentorship-starter-kit\""
+      ]
+    },
+    {
+      "path": "downloads/operating-cadence-pack.mdx",
+      "warnings": [
+        "Slug \"/downloads/operating-cadence-pack\" doesn't match filename \"operating-cadence-pack\""
+      ]
+    },
+    {
+      "path": "downloads/principles-for-my-son-cue-card.mdx",
+      "warnings": [
+        "Slug \"/downloads/principles-for-my-son-cue-card\" doesn't match filename \"principles-for-my-son-cue-card\""
+      ]
+    },
+    {
+      "path": "downloads/principles-for-my-son.mdx",
+      "warnings": [
+        "Slug \"/downloads/principles-for-my-son\" doesn't match filename \"principles-for-my-son\""
+      ]
+    },
+    {
+      "path": "downloads/principles-of-surrender-framework.mdx",
+      "warnings": [
+        "Slug \"/downloads/principles-of-surrender\" doesn't match filename \"principles-of-surrender-framework\"",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender"
+      ]
+    },
+    {
+      "path": "downloads/purpose-pyramid-worksheet.mdx",
+      "warnings": [
+        "Slug \"/downloads/purpose-pyramid-worksheet\" doesn't match filename \"purpose-pyramid-worksheet\""
+      ]
+    },
+    {
+      "path": "downloads/scripture-track-john14.mdx",
+      "warnings": [
+        "Slug \"/downloads/scripture-track-john14\" doesn't match filename \"scripture-track-john14\""
+      ]
+    },
+    {
+      "path": "downloads/standards-brief.mdx",
+      "warnings": [
+        "Slug \"/downloads/standards-brief\" doesn't match filename \"standards-brief\""
+      ]
+    },
+    {
+      "path": "downloads/ultimate-purpose-of-man-editorial.mdx",
+      "warnings": [
+        "Slug \"/downloads/ultimate-purpose-of-man-editorial\" doesn't match filename \"ultimate-purpose-of-man-editorial\""
+      ]
+    },
+    {
+      "path": "downloads/weekly-operating-rhythm.mdx",
+      "warnings": [
+        "Slug \"/downloads/weekly-operating-rhythm\" doesn't match filename \"weekly-operating-rhythm\""
+      ]
+    },
+    {
+      "path": "evidence/escalation-denied-case.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "evidence/outcome-verified-authority-boundary.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "evidence/outcome-verified-decision-lag.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "evidence/outcome-verified-escalation-restraint.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "evidence/outcome-verified-hidden-divergence.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "evidence/outcome-verified-market-exposure.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "evidence/tariff-shock-growth-break.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "evidence/team-alignment-illusion.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-001.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-002.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /intelligence",
+        "Possible broken internal link: /canon/foundations"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-003.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-004.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-005.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/legacy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-006.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-007.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /canon/foundations",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /intelligence",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-008.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-009.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-010.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-011.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "intelligence/strategic-autonomy-012.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty"
+      ]
+    },
+    {
+      "path": "lexicon/brotherhood.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "lexicon/clarity.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity"
+      ]
+    },
+    {
+      "path": "lexicon/covenant.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "lexicon/family.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "lexicon/father.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /blog/post-when-the-system-breaks-you"
+      ]
+    },
+    {
+      "path": "lexicon/governance.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/responsibility",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/responsibility",
+        "Possible broken internal link: /vault/lexicon/responsibility",
+        "Possible broken internal link: /vault/lexicon/responsibility",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/purpose"
+      ]
+    },
+    {
+      "path": "lexicon/identity.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/identity",
+        "Possible broken internal link: /vault/lexicon/identity",
+        "Possible broken internal link: /vault/lexicon/identity",
+        "Possible broken internal link: /vault/lexicon/identity",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/identity",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender"
+      ]
+    },
+    {
+      "path": "lexicon/integrity.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity"
+      ]
+    },
+    {
+      "path": "lexicon/leadership.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership"
+      ]
+    },
+    {
+      "path": "lexicon/legacy.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/identity",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/legacy"
+      ]
+    },
+    {
+      "path": "lexicon/purpose.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/sovereignty"
+      ]
+    },
+    {
+      "path": "lexicon/responsibility.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/responsibility",
+        "Possible broken internal link: /vault/lexicon/responsibility",
+        "Possible broken internal link: /vault/lexicon/responsibility",
+        "Possible broken internal link: /vault/lexicon/responsibility",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose"
+      ]
+    },
+    {
+      "path": "lexicon/sisterhood.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance"
+      ]
+    },
+    {
+      "path": "lexicon/sovereignty.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/integrity"
+      ]
+    },
+    {
+      "path": "lexicon/strategic-autonomy.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "lexicon/strategy.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "lexicon/surrender.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /vault/lexicon/sovereignty"
+      ]
+    },
+    {
+      "path": "lexicon/_index.mdx",
+      "warnings": [
+        "Slug \"/lexicon\" doesn't match filename \"_index\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /lexicon/vision",
+        "Possible broken internal link: /lexicon/succession",
+        "Possible broken internal link: /lexicon/formation"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/01-most-delays-are-misdiagnosed-problems.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/02-waiting-on-approval-vs-avoiding-escalation.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/03-slow-decision-vs-blocked-decision.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/04-we-need-alignment-no-one-owns-the-decision.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/05-if-nothing-is-becoming-expensive-its-not-a-real-decision.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/06-execution-problem-vs-authority-problem.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/07-why-workshops-dont-fix-decision-problems.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/08-the-forced-24-hour-test.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/09-more-data-is-usually-avoidance.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/10-most-teams-optimise-before-deciding.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/11-who-actually-decides-vs-who-appears-to-decide.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/12-silent-blockers-inside-organisations.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/13-escalation-avoidance-patterns.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/14-shared-ownership-no-ownership.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/15-why-alignment-kills-speed.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/16-if-youve-tried-3-things-and-failed-its-structural.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/17-short-brutal-case-study.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/18-what-are-you-avoiding.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/19-your-team-knows-the-answer-theyre-not-saying-it.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/20-run-one-real-decision-through-this.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "outbound/linkedin/strategy-room-conversion-script.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "playbooks/century-firm-playbook.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "playbooks/decision-exposure-public.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "playbooks/execution-integrity-protocol.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "playbooks/execution-integrity-public.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "playbooks/intervention-path-public.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /decision-instruments/intervention-path-selector",
+        "Possible broken internal link: /decision-instruments/decision-exposure-instrument"
+      ]
+    },
+    {
+      "path": "playbooks/mandate-clarity-public.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "playbooks/the-alignment-audit-playbook.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "playbooks/the-drift-detection-framework.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "prints/entrepreneur-operating-pack.mdx",
+      "warnings": [
+        "Slug \"/prints/entrepreneur-operating-pack\" doesn't match filename \"entrepreneur-operating-pack\""
+      ]
+    },
+    {
+      "path": "prints/fatherhood-standards-card.mdx",
+      "warnings": [
+        "Slug \"/prints/fatherhood-standards-card\" doesn't match filename \"fatherhood-standards-card\""
+      ]
+    },
+    {
+      "path": "prints/leadership-playbook.mdx",
+      "warnings": [
+        "Slug \"/prints/leadership-playbook\" doesn't match filename \"leadership-playbook\""
+      ]
+    },
+    {
+      "path": "prints/mentorship-starter-kit.mdx",
+      "warnings": [
+        "Slug \"/prints/mentorship-starter-kit\" doesn't match filename \"mentorship-starter-kit\""
+      ]
+    },
+    {
+      "path": "prints/standards-brief.mdx",
+      "warnings": [
+        "Slug \"/prints/standards-brief\" doesn't match filename \"standards-brief\""
+      ]
+    },
+    {
+      "path": "prints/weekly-operating-rhythm.mdx",
+      "warnings": [
+        "Slug \"/prints/weekly-operating-rhythm\" doesn't match filename \"weekly-operating-rhythm\""
+      ]
+    },
+    {
+      "path": "resources/brotherhood-leader-guide.mdx",
+      "warnings": [
+        "Possible broken internal link: /vault/lexicon/leadership"
+      ]
+    },
+    {
+      "path": "resources/canon-campaign.mdx",
+      "warnings": [
+        "Slug \"/resources/canon-campaign\" doesn't match filename \"canon-campaign\""
+      ]
+    },
+    {
+      "path": "resources/canon-council-table-agenda.mdx",
+      "warnings": [
+        "Slug \"/resources/canon-council-table-agenda\" doesn't match filename \"canon-council-table-agenda\"",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /resources/alpha"
+      ]
+    },
+    {
+      "path": "resources/canon-household-charter-template.mdx",
+      "warnings": [
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/clarity",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/leadership",
+        "Possible broken internal link: /vault/lexicon/purpose",
+        "Possible broken internal link: /vault/lexicon/legacy"
+      ]
+    },
+    {
+      "path": "resources/canon-household-charter.mdx",
+      "warnings": [
+        "Slug \"/resources/canon-household-charter\" doesn't match filename \"canon-household-charter\"",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /downloads/canon-household-charter-template"
+      ]
+    },
+    {
+      "path": "resources/canon-reading-plan-year-one.mdx",
+      "warnings": [
+        "Slug \"/resources/canon-reading-plan-year-one\" doesn't match filename \"canon-reading-plan-year-one\""
+      ]
+    },
+    {
+      "path": "resources/destiny-mapping-worksheet.mdx",
+      "warnings": [
+        "Slug \"/resources/destiny-mapping-worksheet\" doesn't match filename \"destiny-mapping-worksheet\"",
+        "Possible broken internal link: /vault/lexicon/identity",
+        "Possible broken internal link: /resources/alpha"
+      ]
+    },
+    {
+      "path": "resources/fatherhood-impact-framework.md",
+      "warnings": [
+        "Slug \"/resources/fatherhood-impact-framework\" doesn't match filename \"fatherhood-impact-framework\"",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /resources/alpha"
+      ]
+    },
+    {
+      "path": "resources/getting-started.mdx",
+      "warnings": [
+        "Slug \"/resources/getting-started\" doesn't match filename \"getting-started\"",
+        "Possible broken internal link: /decision-instruments/decision-exposure-instrument"
+      ]
+    },
+    {
+      "path": "resources/institutional-health-scorecard.mdx",
+      "warnings": [
+        "Slug \"/resources/institutional-health-scorecard\" doesn't match filename \"institutional-health-scorecard\""
+      ]
+    },
+    {
+      "path": "resources/leadership-standards-blueprint.md",
+      "warnings": [
+        "Slug \"/resources/leadership-standards-blueprint\" doesn't match filename \"leadership-standards-blueprint\""
+      ]
+    },
+    {
+      "path": "resources/multi-generational-legacy-ledger.mdx",
+      "warnings": [
+        "Slug \"/resources/multi-generational-legacy-ledger\" doesn't match filename \"multi-generational-legacy-ledger\""
+      ]
+    },
+    {
+      "path": "resources/strategic-frameworks/execution-integrity-grid.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "resources/strategic-frameworks/index.mdx",
+      "warnings": [
+        "Slug \"resources/strategic-frameworks\" doesn't match filename \"index\""
+      ]
+    },
+    {
+      "path": "resources/strategic-frameworks/v4.mdx",
+      "warnings": [
+        "Slug \"resources/strategic-frameworks/v4\" doesn't match filename \"v4\""
+      ]
+    },
+    {
+      "path": "resources/surrender-framework/surrender-operational-framework.mdx",
+      "warnings": [
+        "Slug \"surrender-framework/surrender-operational-framework\" doesn't match filename \"surrender-operational-framework\""
+      ]
+    },
+    {
+      "path": "resources/vault-index.mdx",
+      "warnings": [
+        "Slug \"/resources/vault-index\" doesn't match filename \"vault-index\"",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/downloads/board-decision-log-template.xlsx",
+        "Possible broken internal link: /vault/downloads/operating-cadence-pack.pptx"
+      ]
+    },
+    {
+      "path": "resources/vault.mdx",
+      "warnings": [
+        "Slug \"/resources/vault\" doesn't match filename \"vault\"",
+        "Possible broken internal link: /vault/lexicon/governance"
+      ]
+    },
+    {
+      "path": "shorts/authority-is-the-missing-layer.mdx",
+      "warnings": [
+        "Slug \"/shorts/authority-is-the-missing-layer\" doesn't match filename \"authority-is-the-missing-layer\""
+      ]
+    },
+    {
+      "path": "shorts/avoidance-has-a-trail.mdx",
+      "warnings": [
+        "Slug \"/shorts/avoidance-has-a-trail\" doesn't match filename \"avoidance-has-a-trail\""
+      ]
+    },
+    {
+      "path": "shorts/busy-is-not-the-same-as-anchored.mdx",
+      "warnings": [
+        "Slug \"/shorts/busy-is-not-the-same-as-anchored\" doesn't match filename \"busy-is-not-the-same-as-anchored\""
+      ]
+    },
+    {
+      "path": "shorts/consensus-can-hide-drift.mdx",
+      "warnings": [
+        "Slug \"/shorts/consensus-can-hide-drift\" doesn't match filename \"consensus-can-hide-drift\""
+      ]
+    },
+    {
+      "path": "shorts/contradiction-is-not-noise.mdx",
+      "warnings": [
+        "Slug \"/shorts/contradiction-is-not-noise\" doesn't match filename \"contradiction-is-not-noise\""
+      ]
+    },
+    {
+      "path": "shorts/decision-latency-is-liability.mdx",
+      "warnings": [
+        "Slug \"/shorts/decision-latency-is-liability\" doesn't match filename \"decision-latency-is-liability\""
+      ]
+    },
+    {
+      "path": "shorts/decision-no-one-enforced.mdx",
+      "warnings": [
+        "Slug \"/shorts/decision-no-one-enforced\" doesn't match filename \"decision-no-one-enforced\""
+      ]
+    },
+    {
+      "path": "shorts/evidence-before-intervention.mdx",
+      "warnings": [
+        "Slug \"/shorts/evidence-before-intervention\" doesn't match filename \"evidence-before-intervention\""
+      ]
+    },
+    {
+      "path": "shorts/execution-begins-when-excuses-end.mdx",
+      "warnings": [
+        "Slug \"/shorts/execution-begins-when-excuses-end\" doesn't match filename \"execution-begins-when-excuses-end\""
+      ]
+    },
+    {
+      "path": "shorts/freedom-begins-where-ego-ends.mdx",
+      "warnings": [
+        "Slug \"/shorts/freedom-begins-where-ego-ends\" doesn't match filename \"freedom-begins-where-ego-ends\""
+      ]
+    },
+    {
+      "path": "shorts/hidden-divergence-costs-more.mdx",
+      "warnings": [
+        "Slug \"/shorts/hidden-divergence-costs-more\" doesn't match filename \"hidden-divergence-costs-more\""
+      ]
+    },
+    {
+      "path": "shorts/institutional-sovereignty.mdx",
+      "warnings": [
+        "Slug \"/shorts/institutional-sovereignty\" doesn't match filename \"institutional-sovereignty\""
+      ]
+    },
+    {
+      "path": "shorts/outcomes-verify-authority.mdx",
+      "warnings": [
+        "Slug \"/shorts/outcomes-verify-authority\" doesn't match filename \"outcomes-verify-authority\""
+      ]
+    },
+    {
+      "path": "shorts/pleasure-is-loud-purpose-is-quiet.mdx",
+      "warnings": [
+        "Slug \"/shorts/pleasure-is-loud-purpose-is-quiet\" doesn't match filename \"pleasure-is-loud-purpose-is-quiet\""
+      ]
+    },
+    {
+      "path": "shorts/strategy-fails-after-agreement.mdx",
+      "warnings": [
+        "Slug \"/shorts/strategy-fails-after-agreement\" doesn't match filename \"strategy-fails-after-agreement\""
+      ]
+    },
+    {
+      "path": "shorts/the-cost-is-not-static.mdx",
+      "warnings": [
+        "Slug \"/shorts/the-cost-is-not-static\" doesn't match filename \"the-cost-is-not-static\""
+      ]
+    },
+    {
+      "path": "shorts/the-cost-of-refusing-formation.mdx",
+      "warnings": [
+        "Slug \"/shorts/the-cost-of-refusing-formation\" doesn't match filename \"the-cost-of-refusing-formation\""
+      ]
+    },
+    {
+      "path": "shorts/the-market-does-not-wait-for-clarity.mdx",
+      "warnings": [
+        "Slug \"/shorts/the-market-does-not-wait-for-clarity\" doesn't match filename \"the-market-does-not-wait-for-clarity\""
+      ]
+    },
+    {
+      "path": "shorts/the-report-is-not-the-product.mdx",
+      "warnings": [
+        "Slug \"/shorts/the-report-is-not-the-product\" doesn't match filename \"the-report-is-not-the-product\""
+      ]
+    },
+    {
+      "path": "shorts/this-is-not-a-comfort-platform.mdx",
+      "warnings": [
+        "Slug \"/shorts/this-is-not-a-comfort-platform\" doesn't match filename \"this-is-not-a-comfort-platform\""
+      ]
+    },
+    {
+      "path": "shorts/when-a-single-yes-changes-everything.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-a-single-yes-changes-everything\" doesn't match filename \"when-a-single-yes-changes-everything\""
+      ]
+    },
+    {
+      "path": "shorts/when-all-you-can-do-is-breathe.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-all-you-can-do-is-breathe\" doesn't match filename \"when-all-you-can-do-is-breathe\""
+      ]
+    },
+    {
+      "path": "shorts/when-avoidance-becomes-your-personality.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-avoidance-becomes-your-personality\" doesn't match filename \"when-avoidance-becomes-your-personality\""
+      ]
+    },
+    {
+      "path": "shorts/when-busyness-becomes-your-brand.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-busyness-becomes-your-brand\" doesn't match filename \"when-busyness-becomes-your-brand\""
+      ]
+    },
+    {
+      "path": "shorts/when-comfort-becomes-your-cage.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-comfort-becomes-your-cage\" doesn't match filename \"when-comfort-becomes-your-cage\""
+      ]
+    },
+    {
+      "path": "shorts/when-conflict-feels-like-betrayal.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-conflict-feels-like-betrayal\" doesn't match filename \"when-conflict-feels-like-betrayal\""
+      ]
+    },
+    {
+      "path": "shorts/when-doctrine-feels-safer-than-god.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-doctrine-feels-safer-than-god\" doesn't match filename \"when-doctrine-feels-safer-than-god\""
+      ]
+    },
+    {
+      "path": "shorts/when-every-promotion-feels-hollow.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-every-promotion-feels-hollow\" doesn't match filename \"when-every-promotion-feels-hollow\""
+      ]
+    },
+    {
+      "path": "shorts/when-grace-finds-you-in-the-mess.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-grace-finds-you-in-the-mess\" doesn't match filename \"when-grace-finds-you-in-the-mess\""
+      ]
+    },
+    {
+      "path": "shorts/when-hope-feels-reckless.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-hope-feels-reckless\" doesn't match filename \"when-hope-feels-reckless\""
+      ]
+    },
+    {
+      "path": "shorts/when-kindness-feels-like-rebellion.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-kindness-feels-like-rebellion\" doesn't match filename \"when-kindness-feels-like-rebellion\""
+      ]
+    },
+    {
+      "path": "shorts/when-later-became-never.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-later-became-never\" doesn't match filename \"when-later-became-never\""
+      ]
+    },
+    {
+      "path": "shorts/when-numbness-feels-safer-than-joy.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-numbness-feels-safer-than-joy\" doesn't match filename \"when-numbness-feels-safer-than-joy\""
+      ]
+    },
+    {
+      "path": "shorts/when-productivity-becomes-punishment.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-productivity-becomes-punishment\" doesn't match filename \"when-productivity-becomes-punishment\""
+      ]
+    },
+    {
+      "path": "shorts/when-rest-starts-to-feel-dangerous.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-rest-starts-to-feel-dangerous\" doesn't match filename \"when-rest-starts-to-feel-dangerous\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-argue-with-god-in-your-head.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-argue-with-god-in-your-head\" doesn't match filename \"when-you-argue-with-god-in-your-head\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-cant-stop-overthinking.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-cant-stop-overthinking\" doesn't match filename \"when-you-cant-stop-overthinking\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-cant-tell-if-youre-growing-or-drifting.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-cant-tell-if-youre-growing-or-drifting\" doesn't match filename \"when-you-cant-tell-if-youre-growing-or-drifting\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-dont-know-what-you-want-anymore.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-dont-know-what-you-want-anymore\" doesn't match filename \"when-you-dont-know-what-you-want-anymore\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-dont-trust-your-own-decisions.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-dont-trust-your-own-decisions\" doesn't match filename \"when-you-dont-trust-your-own-decisions\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-fear-being-wrong-about-god.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-fear-being-wrong-about-god\" doesn't match filename \"when-you-fear-being-wrong-about-god\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-fear-success-more-than-failure.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-fear-success-more-than-failure\" doesn't match filename \"when-you-fear-success-more-than-failure\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-feel-like-god-is-delaying-you.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-feel-like-god-is-delaying-you\" doesn't match filename \"when-you-feel-like-god-is-delaying-you\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-feel-too-busy-to-care.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-feel-too-busy-to-care\" doesn't match filename \"when-you-feel-too-busy-to-care\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-finally-let-yourself-cry.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-finally-let-yourself-cry\" doesn't match filename \"when-you-finally-let-yourself-cry\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-give-more-than-you-get.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-give-more-than-you-get\" doesn't match filename \"when-you-give-more-than-you-get\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-keep-blaming-your-childhood.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-keep-blaming-your-childhood\" doesn't match filename \"when-you-keep-blaming-your-childhood\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-keep-choosing-people-who-cant-choose-you.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-keep-choosing-people-who-cant-choose-you\" doesn't match filename \"when-you-keep-choosing-people-who-cant-choose-you\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-keep-confusing-niceness-with-goodness.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-keep-confusing-niceness-with-goodness\" doesn't match filename \"when-you-keep-confusing-niceness-with-goodness\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-miss-who-you-used-to-be.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-miss-who-you-used-to-be\" doesn't match filename \"when-you-miss-who-you-used-to-be\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-mistake-familiarity-for-loyalty.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-mistake-familiarity-for-loyalty\" doesn't match filename \"when-you-mistake-familiarity-for-loyalty\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-need-god-to-interrupt-you.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-need-god-to-interrupt-you\" doesn't match filename \"when-you-need-god-to-interrupt-you\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-no-longer-recognise-your-own-voice.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-no-longer-recognise-your-own-voice\" doesn't match filename \"when-you-no-longer-recognise-your-own-voice\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-outgrow-your-circle.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-outgrow-your-circle\" doesn't match filename \"when-you-outgrow-your-circle\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-realise-prayer-is-war.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-realise-prayer-is-war\" doesn't match filename \"when-you-realise-prayer-is-war\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-realise-you-were-the-problem.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-realise-you-were-the-problem\" doesn't match filename \"when-you-realise-you-were-the-problem\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-realise-youre-not-behind.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-realise-youre-not-behind\" doesn't match filename \"when-you-realise-youre-not-behind\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-stop-waiting-for-permission.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-stop-waiting-for-permission\" doesn't match filename \"when-you-stop-waiting-for-permission\""
+      ]
+    },
+    {
+      "path": "shorts/when-you-want-to-quit-but-cant.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-you-want-to-quit-but-cant\" doesn't match filename \"when-you-want-to-quit-but-cant\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-calendar-is-full-but-your-life-is-empty.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-calendar-is-full-but-your-life-is-empty\" doesn't match filename \"when-your-calendar-is-full-but-your-life-is-empty\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-calling-stops-being-cute.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-calling-stops-being-cute\" doesn't match filename \"when-your-calling-stops-being-cute\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-character-is-leaking.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-character-is-leaking\" doesn't match filename \"when-your-character-is-leaking\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-confidence-feels-manufactured.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-confidence-feels-manufactured\" doesn't match filename \"when-your-confidence-feels-manufactured\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-convictions-feel-like-costumes.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-convictions-feel-like-costumes\" doesn't match filename \"when-your-convictions-feel-like-costumes\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-dreams-feel-too-heavy.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-dreams-feel-too-heavy\" doesn't match filename \"when-your-dreams-feel-too-heavy\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-excuses-become-your-identity.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-excuses-become-your-identity\" doesn't match filename \"when-your-excuses-become-your-identity\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-faith-feels-numb.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-faith-feels-numb\" doesn't match filename \"when-your-faith-feels-numb\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-hustle-has-no-soul.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-hustle-has-no-soul\" doesn't match filename \"when-your-hustle-has-no-soul\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-legacy-terrifies-you.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-legacy-terrifies-you\" doesn't match filename \"when-your-legacy-terrifies-you\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-silence-says-too-much.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-silence-says-too-much\" doesn't match filename \"when-your-silence-says-too-much\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-standards-keep-you-lonely.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-standards-keep-you-lonely\" doesn't match filename \"when-your-standards-keep-you-lonely\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-vision-outgrows-your-environment.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-vision-outgrows-your-environment\" doesn't match filename \"when-your-vision-outgrows-your-environment\""
+      ]
+    },
+    {
+      "path": "shorts/when-your-work-becomes-your-hiding-place.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-your-work-becomes-your-hiding-place\" doesn't match filename \"when-your-work-becomes-your-hiding-place\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-addicted-to-distraction.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-addicted-to-distraction\" doesn't match filename \"when-youre-addicted-to-distraction\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-afraid-of-your-own-potential.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-afraid-of-your-own-potential\" doesn't match filename \"when-youre-afraid-of-your-own-potential\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-afraid-to-be-radical.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-afraid-to-be-radical\" doesn't match filename \"when-youre-afraid-to-be-radical\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-always-the-strong-one.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-always-the-strong-one\" doesn't match filename \"when-youre-always-the-strong-one\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-attracted-to-potential-not-reality.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-attracted-to-potential-not-reality\" doesn't match filename \"when-youre-attracted-to-potential-not-reality\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-building-someone-elses-legacy.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-building-someone-elses-legacy\" doesn't match filename \"when-youre-building-someone-elses-legacy\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-done-fixing-adults.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-done-fixing-adults\" doesn't match filename \"when-youre-done-fixing-adults\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-exhausted-but-still-available.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-exhausted-but-still-available\" doesn't match filename \"when-youre-exhausted-but-still-available\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-keeping-faith-out-of-habit.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-keeping-faith-out-of-habit\" doesn't match filename \"when-youre-keeping-faith-out-of-habit\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-living-for-weekends.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-living-for-weekends\" doesn't match filename \"when-youre-living-for-weekends\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-loved-without-earning-it.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-loved-without-earning-it\" doesn't match filename \"when-youre-loved-without-earning-it\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-measuring-everything-but-meaning.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-measuring-everything-but-meaning\" doesn't match filename \"when-youre-measuring-everything-but-meaning\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-not-lazy-youre-undisciplined.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-not-lazy-youre-undisciplined\" doesn't match filename \"when-youre-not-lazy-youre-undisciplined\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-preparing-for-rooms-you-havent-entered.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-preparing-for-rooms-you-havent-entered\" doesn't match filename \"when-youre-preparing-for-rooms-you-havent-entered\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-productive-but-not-present.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-productive-but-not-present\" doesn't match filename \"when-youre-productive-but-not-present\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-scared-to-start-over.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-scared-to-start-over\" doesn't match filename \"when-youre-scared-to-start-over\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-the-only-one-doing-the-work.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-the-only-one-doing-the-work\" doesn't match filename \"when-youre-the-only-one-doing-the-work\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-tired-of-being-the-bigger-person.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-tired-of-being-the-bigger-person\" doesn't match filename \"when-youre-tired-of-being-the-bigger-person\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-tired-of-starting-over.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-tired-of-starting-over\" doesn't match filename \"when-youre-tired-of-starting-over\""
+      ]
+    },
+    {
+      "path": "shorts/when-youre-winning-at-work-but-losing-yourself.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youre-winning-at-work-but-losing-yourself\" doesn't match filename \"when-youre-winning-at-work-but-losing-yourself\""
+      ]
+    },
+    {
+      "path": "shorts/when-youve-become-chronically-online.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youve-become-chronically-online\" doesn't match filename \"when-youve-become-chronically-online\""
+      ]
+    },
+    {
+      "path": "shorts/when-youve-worshipped-the-wrong-metrics.mdx",
+      "warnings": [
+        "Slug \"/shorts/when-youve-worshipped-the-wrong-metrics\" doesn't match filename \"when-youve-worshipped-the-wrong-metrics\""
+      ]
+    },
+    {
+      "path": "shorts/you-were-built-to-carry-weight.mdx",
+      "warnings": [
+        "Slug \"/shorts/you-were-built-to-carry-weight\" doesn't match filename \"you-were-built-to-carry-weight\""
+      ]
+    },
+    {
+      "path": "strategy/extremism-shield.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "strategy/sample-strategy.mdx",
+      "warnings": [
+        "Slug \"/strategy/sample-strategy\" doesn't match filename \"sample-strategy\""
+      ]
+    },
+    {
+      "path": "toolkits/board-governance.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/crisis-leadership/crisis-leadership-command-protocol.mdx",
+      "warnings": [
+        "Slug \"crisis-leadership/command-protocol\" doesn't match filename \"crisis-leadership-command-protocol\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/crisis-leadership/crisis-leadership-stress-test.mdx",
+      "warnings": [
+        "Slug \"crisis-leadership/stress-test\" doesn't match filename \"crisis-leadership-stress-test\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/crisis-leadership.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/culture-shaping/culture-shaping-enforcement.mdx",
+      "warnings": [
+        "Slug \"culture-shaping/enforcement\" doesn't match filename \"culture-shaping-enforcement\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/culture-shaping/culture-shaping-foundations.mdx",
+      "warnings": [
+        "Slug \"culture-shaping/foundations\" doesn't match filename \"culture-shaping-foundations\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/culture-shaping.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/institutional-diagnostics/institutional-diagnostics-intervention-matrix.mdx",
+      "warnings": [
+        "Slug \"institutional-diagnostics/intervention-matrix\" doesn't match filename \"institutional-diagnostics-intervention-matrix\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/institutional-diagnostics/institutional-diagnostics-signal-registry.mdx",
+      "warnings": [
+        "Slug \"institutional-diagnostics/signal-registry\" doesn't match filename \"institutional-diagnostics-signal-registry\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/institutional-diagnostics.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/leadership-formation/leadership-formation-foundations.mdx",
+      "warnings": [
+        "Slug \"leadership-formation/foundations\" doesn't match filename \"leadership-formation-foundations\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/leadership-formation/leadership-formation-succession.mdx",
+      "warnings": [
+        "Slug \"leadership-formation/succession\" doesn't match filename \"leadership-formation-succession\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/leadership-formation.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/renewal-and-reform.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/renewal-reform/renewal-reform-phased-delivery.mdx",
+      "warnings": [
+        "Slug \"renewal-reform/phased-delivery\" doesn't match filename \"renewal-reform-phased-delivery\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/renewal-reform/renewal-reform-resistance-management.mdx",
+      "warnings": [
+        "Slug \"renewal-reform/resistance-management\" doesn't match filename \"renewal-reform-resistance-management\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/succession-engineering/succession-engineering-custodian-selection.mdx",
+      "warnings": [
+        "Slug \"succession-engineering/custodian-selection\" doesn't match filename \"succession-engineering-custodian-selection\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/succession-engineering/succession-engineering-leadership-dna.mdx",
+      "warnings": [
+        "Slug \"succession-engineering/leadership-dna\" doesn't match filename \"succession-engineering-leadership-dna\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "toolkits/succession-engineering.mdx",
+      "warnings": [
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-001-modern-household.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-001-modern-household\" doesn't match filename \"brief-001-modern-household\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-002-economic-fortress.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-002-economic-fortress\" doesn't match filename \"brief-002-economic-fortress\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-003-education-of-heirs.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-003-education-of-heirs\" doesn't match filename \"brief-003-education-of-heirs\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-004-parallel-estate.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-004-parallel-estate\" doesn't match filename \"brief-004-parallel-estate\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy",
+        "Possible broken internal link: /vault/lexicon/sovereignty"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-005-brotherhood-protocol.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-005-brotherhood-protocol\" doesn't match filename \"brief-005-brotherhood-protocol\"",
+        "File not found in Contentlayer generated data (may be excluded)"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-006-sisterhood-and-hearth.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-006-sisterhood-and-hearth\" doesn't match filename \"brief-006-sisterhood-and-hearth\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /vault/lexicon/governance",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /vault/lexicon/sovereignty"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-007-covenantal-oath.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-007-covenantal-oath\" doesn't match filename \"brief-007-covenantal-oath\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/integrity",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-008-ledger-of-legacy.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-008-ledger-of-legacy\" doesn't match filename \"brief-008-ledger-of-legacy\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /vault/lexicon/legacy",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /vault/lexicon/identity",
+        "Possible broken internal link: /vault/lexicon/legacy"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-009-sovereignty-of-time.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-009-sovereignty-of-time\" doesn't match filename \"brief-009-sovereignty-of-time\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/surrender",
+        "Possible broken internal link: /vault/lexicon/family",
+        "Possible broken internal link: /vault/lexicon/strategic-autonomy"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-010-geometry-of-inner-circle.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-010-geometry-of-inner-circle\" doesn't match filename \"brief-010-geometry-of-inner-circle\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/ledger",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-011-geography-of-estate.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-011-geography-of-estate\" doesn't match filename \"brief-011-geography-of-estate\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/sovereignty",
+        "Possible broken internal link: /vault/lexicon/father",
+        "Possible broken internal link: /vault/lexicon/sovereignty"
+      ]
+    },
+    {
+      "path": "vault/briefs/brief-012-aesthetics-of-order.mdx",
+      "warnings": [
+        "Slug \"/vault/briefs/brief-012-aesthetics-of-order\" doesn't match filename \"brief-012-aesthetics-of-order\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /lexicon/truth",
+        "Possible broken internal link: /lexicon/truth"
+      ]
+    },
+    {
+      "path": "vault/indices/rise-decay-index.mdx",
+      "warnings": [
+        "Slug \"/vault/indices/rise-decay-index\" doesn't match filename \"rise-decay-index\"",
+        "File not found in Contentlayer generated data (may be excluded)",
+        "Possible broken internal link: /vault/lexicon/family"
       ]
     }
   ],
   "recommendations": [
     "Consider fixing warnings to improve content quality",
-    "Organize 154 files in /content/other/ into proper categories"
+    "Organize 555 files in /content/other/ into proper categories"
   ]
 }

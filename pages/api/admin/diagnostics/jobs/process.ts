@@ -5,28 +5,17 @@
 ============================================================================ */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { processPendingDiagnosticReports } from "@/lib/server/diagnostics/jobs";
-
-import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
-
-function isAdmin(session: any) {
-  const email = String(session?.user?.email || "").toLowerCase();
-  return BOOTSTRAP_ADMIN_EMAILS.has(email);
-}
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
-
-  if (!session || !isAdmin(session)) {
-    return res.status(403).json({ ok: false, error: "FORBIDDEN" });
-  }
-
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
   }
+
+  const session = await requireAdminServer(req, res, { routeKey: "admin-diagnostics-jobs-process" });
+  if (!session) return;
 
   try {
     const result = await processPendingDiagnosticReports();

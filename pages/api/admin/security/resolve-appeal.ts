@@ -1,9 +1,9 @@
 /* pages/api/admin/security/resolve-appeal.ts — Institutional Tier Escalation */
 import type { NextApiRequest, NextApiResponse } from "next";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma.server";
 import { AccessTier } from "@prisma/client";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/config";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 /**
  * Runtime narrower: confirms a string is a member of the current Prisma
@@ -15,18 +15,23 @@ function isDbAccessTier(value: string): value is AccessTier {
   return (Object.values(AccessTier) as string[]).includes(value);
 }
 
+const bodySchema = z.object({
+  eventId: z.string().trim().min(1).max(128),
+  approved: z.boolean(),
+}).strict();
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const session = await getServerSession(req, res, authOptions);
-  
-  // 1. Verify Directorate Clearance
-  const adminTier = (session as any)?.aol?.tier;
-  if (adminTier !== "admin" && adminTier !== "root") {
-    return res.status(403).json({ error: "Insufficient clearance to modify tiers." });
+  const session = await requireAdminServer(req, res, { routeKey: "admin-security-resolve-appeal" });
+  if (!session) return;
+
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: "INVALID_REQUEST" });
   }
 
-  const { eventId, approved } = req.body;
+  const { eventId, approved } = parsed.data;
 
   try {
     // 2. Fetch the original request data
