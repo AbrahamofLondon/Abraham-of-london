@@ -9,9 +9,14 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { verifyInnerCircleKey } from "@/lib/inner-circle/exports.server";
-import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 import { applyShieldFromRequest } from "@/lib/server/security/shield-middleware";
-import { noStoreJson, parseJsonBody, requireJsonContent, requireMethod } from "@/lib/server/security/app-route-guards";
+import {
+  enforceAppRouteRateLimit,
+  noStoreJson,
+  parseJsonBody,
+  requireJsonContent,
+  requireMethod,
+} from "@/lib/server/security/app-route-guards";
 
 const verifySchema = z.object({
   key: z.string().trim().min(8).max(512).optional(),
@@ -19,22 +24,6 @@ const verifySchema = z.object({
 }).strict().refine((value) => Boolean(value.key || value.accessKey), {
   message: "Missing access key.",
 });
-
-function getIp(req: NextRequest) {
-  const xf = req.headers.get("x-forwarded-for");
-  if (xf) return xf.split(",")[0]?.trim() || "unknown";
-  return req.headers.get("x-real-ip") || "unknown";
-}
-
-async function rateLimit(req: NextRequest, limit = 30, windowMs = 60_000) {
-  const ip = getIp(req);
-  return consumePersistentRateLimit({
-    key: `inner-circle-verify:${ip}`,
-    limit,
-    windowMs,
-    failClosed: true,
-  });
-}
 
 export async function POST(req: NextRequest) {
   const methodCheck = requireMethod(req, ["POST"]);
@@ -47,17 +36,14 @@ export async function POST(req: NextRequest) {
   const shield = await applyShieldFromRequest(req, "/api/inner-circle/verify");
   if (shield.blocked) return NextResponse.json({ error: "REQUEST_THROTTLED" }, { status: 429 });
 
-  const rl = await rateLimit(req);
-  if (!rl.allowed) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "Rate limit exceeded. Try again shortly.",
-        rateLimit: rl,
-      },
-      { status: 429 }
-    );
-  }
+  const rateLimit = await enforceAppRouteRateLimit({
+    request: req,
+    routeKey: "inner-circle-verify",
+    limit: 30,
+    windowMs: 60_000,
+    failClosed: true,
+  });
+  if (!rateLimit.ok) return rateLimit.response;
 
   try {
     const parsed = await parseJsonBody(req, verifySchema);
@@ -70,7 +56,6 @@ export async function POST(req: NextRequest) {
       {
         ok: true,
         result,
-        rateLimit: rl,
       },
       { status: 200 }
     );
@@ -79,7 +64,6 @@ export async function POST(req: NextRequest) {
       {
         ok: false,
         error: e?.message || "Verification failed.",
-        rateLimit: rl,
       },
       { status: 500 }
     );

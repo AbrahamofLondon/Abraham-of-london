@@ -124,7 +124,7 @@ export async function proxy(req: NextRequest) {
   const isApi = pathname.startsWith("/api/");
   const isAdmin = pathname.startsWith("/admin") || pathname.startsWith("/api/vault") || pathname.startsWith("/api/admin");
   const isInner = pathname.startsWith("/inner-circle");
-  const requiresInstitutionalSession = isInner || pathname.startsWith("/api/premium") || pathname.startsWith("/api/dl/");
+  const requiresInstitutionalSession = isInner || pathname.startsWith("/api/premium");
 
   // 0. EMERGENCY BYPASS (Safety Net)
   const masterKey = process.env.INTERNAL_BYPASS_KEY;

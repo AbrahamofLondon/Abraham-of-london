@@ -7,7 +7,6 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import type { AccessTier } from "@/lib/access/tier-policy";
 import {
   normalizeUserTier,
   hasAccess,
@@ -17,36 +16,16 @@ import {
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import {
   createDownloadGrantToken,
-  getTokenForensics,
 } from "@/lib/downloads/security";
+import {
+  buildLegacyDownloadResolveOk,
+  type LegacyDownloadResolveFail,
+  type LegacyDownloadResolveOk,
+} from "@/lib/downloads/legacy-resolver";
 import {
   resolveDownloadAsset,
   type DownloadAssetContentType,
 } from "@/lib/downloads/asset-registry";
-
-type ResolveOk = {
-  ok: true;
-  slug: string;
-  title: string;
-  contentType: string;
-  requiredTier: AccessTier;
-  requiredTierLabel: string;
-  userTier?: string;
-  bodyCode?: string;
-  token: string | null;
-  tokenId: string | null;
-  watermarkId: string | null;
-  forensicFooter: string | null;
-  downloadUrl: string | null;
-};
-
-type ResolveFail = {
-  ok: false;
-  reason: string;
-  requiredTier?: AccessTier;
-  requiredTierLabel?: string;
-  userTier?: string;
-};
 
 type InnerCircleAccess = {
   hasAccess: boolean;
@@ -88,7 +67,7 @@ async function resolveLegacyAsset(slug: string) {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResolveOk | ResolveFail>,
+  res: NextApiResponse<LegacyDownloadResolveOk | LegacyDownloadResolveFail>,
 ) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -142,22 +121,9 @@ export default async function handler(
       return null;
     });
 
-    const forensics = getTokenForensics(issued?.metadata);
-
-    return res.status(200).json({
-      ok: true,
-      slug: asset.slug,
-      title: asset.title,
-      contentType: asset.contentType,
-      requiredTier,
-      requiredTierLabel,
-      bodyCode: asset.bodyCode || "",
-      token: issued?.token ?? null,
-      tokenId: issued?.tokenId ?? null,
-      watermarkId: forensics.watermarkId,
-      forensicFooter: forensics.expectedFooter,
-      downloadUrl: `/api/downloads/${encodeURIComponent(asset.slug)}`,
-    });
+    return res.status(200).json(
+      buildLegacyDownloadResolveOk({ asset, requiredTier, issued }),
+    );
   }
 
   const access = (await getInnerCircleAccess(req)) as InnerCircleAccess | null;
@@ -204,23 +170,9 @@ export default async function handler(
     return null;
   });
 
-  const forensics = getTokenForensics(issued?.metadata);
-
-  return res.status(200).json({
-    ok: true,
-    slug: asset.slug,
-    title: asset.title,
-    contentType: asset.contentType,
-    requiredTier,
-    requiredTierLabel,
-    userTier: getTierLabel(userTier),
-    bodyCode: asset.bodyCode || "",
-    token: issued?.token ?? null,
-    tokenId: issued?.tokenId ?? null,
-    watermarkId: forensics.watermarkId,
-    forensicFooter: forensics.expectedFooter,
-    downloadUrl: `/api/downloads/${encodeURIComponent(asset.slug)}`,
-  });
+  return res.status(200).json(
+    buildLegacyDownloadResolveOk({ asset, requiredTier, issued, userTier }),
+  );
 }
 
 export const config = {
