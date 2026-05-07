@@ -1204,9 +1204,13 @@ export async function proxy(req: NextRequest) {
     return response;
   }
 
-  /* INTERNAL BYPASS */
+  /* INTERNAL BYPASS — development only */
   const masterKey = process.env.INTERNAL_BYPASS_KEY;
-  if (masterKey && req.headers.get("X-Directorate-Bypass") === masterKey) {
+  if (
+    process.env.NODE_ENV === "development" &&
+    masterKey &&
+    req.headers.get("X-Directorate-Bypass") === masterKey
+  ) {
     const response = NextResponse.next();
     response.headers.set("X-Directorate-Bypass-Active", "true");
     setSecurityHeaders(response, req);

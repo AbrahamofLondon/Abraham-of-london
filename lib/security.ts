@@ -11,7 +11,11 @@ const ALGORITHM = 'aes-256-gcm';
 /** * Institutional Requirement: Ensure the key is exactly 32 bytes.
  * We use Buffer.alloc to guarantee length regardless of the env string.
  */
-const ENCRYPTION_KEY = Buffer.alloc(32, process.env.ENCRYPTION_KEY || 'default_institutional_key_32_chars'); 
+const rawEncryptionKey = String(process.env.ENCRYPTION_KEY || "").trim();
+if (!rawEncryptionKey) {
+  throw new Error("[security] ENCRYPTION_KEY is required");
+}
+const ENCRYPTION_KEY = Buffer.alloc(32, rawEncryptionKey);
 const IV_LENGTH = 16;
 
 /**

@@ -2,14 +2,10 @@
 import crypto from "crypto";
 
 function getDownloadTokenSecret(): string {
-  const secret =
-    process.env.DOWNLOAD_SECRET?.trim() ||
-    process.env.DOWNLOAD_TOKEN_SECRET?.trim();
+  const secret = process.env.DOWNLOAD_TOKEN_SECRET?.trim();
 
   if (!secret) {
-    throw new Error(
-      "[DOWNLOAD_TOKEN] Missing DOWNLOAD_SECRET or DOWNLOAD_TOKEN_SECRET",
-    );
+    throw new Error("[DOWNLOAD_TOKEN] Missing DOWNLOAD_TOKEN_SECRET");
   }
 
   return secret;

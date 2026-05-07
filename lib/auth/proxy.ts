@@ -128,7 +128,11 @@ export async function proxy(req: NextRequest) {
 
   // 0. EMERGENCY BYPASS (Safety Net)
   const masterKey = process.env.INTERNAL_BYPASS_KEY;
-  if (masterKey && req.headers.get("X-Directorate-Bypass") === masterKey) {
+  if (
+    process.env.NODE_ENV === "development" &&
+    masterKey &&
+    req.headers.get("X-Directorate-Bypass") === masterKey
+  ) {
     const response = NextResponse.next();
     response.headers.set("X-Directorate-Safety-Active", "true");
     return response;

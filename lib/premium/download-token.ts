@@ -65,14 +65,10 @@ export type CleanupResult = {
 };
 
 function getDownloadTokenSecret(): string {
-  const secret = String(
-    process.env.DOWNLOAD_TOKEN_SECRET || process.env.NEXTAUTH_SECRET || "",
-  ).trim();
+  const secret = String(process.env.DOWNLOAD_TOKEN_SECRET || "").trim();
 
   if (!secret) {
-    throw new Error(
-      "[DOWNLOAD_TOKEN] Missing DOWNLOAD_TOKEN_SECRET or NEXTAUTH_SECRET",
-    );
+    throw new Error("[DOWNLOAD_TOKEN] Missing DOWNLOAD_TOKEN_SECRET");
   }
 
   return secret;

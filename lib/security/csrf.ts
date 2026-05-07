@@ -37,13 +37,10 @@ function safeStr(value: unknown): string {
 }
 
 function getCsrfSecret(): string {
-  const secret =
-    process.env.CSRF_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    process.env.DOWNLOAD_TOKEN_SECRET;
+  const secret = process.env.CSRF_SECRET;
 
   if (!safeStr(secret)) {
-    throw new Error("[CSRF] Missing CSRF_SECRET or fallback secret");
+    throw new Error("[CSRF] Missing CSRF_SECRET");
   }
 
   return String(secret);

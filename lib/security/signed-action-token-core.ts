@@ -8,15 +8,10 @@ export type SignedActionPayload = {
 };
 
 function getActionTokenSecret(): string {
-  const secret = String(
-    process.env.ACTION_TOKEN_SECRET ||
-      process.env.DOWNLOAD_TOKEN_SECRET ||
-      process.env.NEXTAUTH_SECRET ||
-      "",
-  ).trim();
+  const secret = String(process.env.ACTION_TOKEN_SECRET || "").trim();
 
   if (!secret) {
-    throw new Error("[ACTION_TOKEN] Missing ACTION_TOKEN_SECRET or canonical signing secret");
+    throw new Error("[ACTION_TOKEN] Missing ACTION_TOKEN_SECRET");
   }
 
   return secret;

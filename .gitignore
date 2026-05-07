@@ -41,6 +41,7 @@ tsconfig.next.tsbuildinfo
 .env
 .env.*
 !.env.example
+!.env.schema
 !.env.local.example
 .envrc
 

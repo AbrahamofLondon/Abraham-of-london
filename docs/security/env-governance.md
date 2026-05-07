@@ -2,6 +2,12 @@
 
 > Generated: 2026-05-07 | Source: automated codebase scan of `process.env.*` usage
 
+Current incident policy:
+
+- `ACTION_TOKEN_SECRET`, `DOWNLOAD_TOKEN_SECRET`, `ADMIN_JWT_SECRET`, `SECURE_CLIENT_STATE_SECRET`, `CSRF_SECRET`, `DYNAMIC_THRESHOLD_SALT`, `OAUTH_TOKEN_ENCRYPTION_KEY`, and `INNER_CIRCLE_JWT_SECRET` must not fall back to any shared secret.
+- `RESEND_WEBHOOK_SECRET` must fail closed in production.
+- `INTERNAL_BYPASS_KEY` and `DEV_ADMIN_PASSWORD` are development-only controls and must not be treated as production-operable access paths.
+
 ---
 
 ## 1. Complete Environment Variable Registry
@@ -19,7 +25,7 @@
 | `CSRF_SECRET` | Yes | Yes | No | CSRF token signing |
 | `ACCESS_COOKIE_SECRET` | Yes | Yes | No | Cookie encryption |
 | `SESSION_COOKIE_PREFIX` | No | No | No | Default: aol |
-| `ADMIN_JWT_SECRET` | Yes | Yes | Fallback: `NEXTAUTH_SECRET` | Admin JWT signing. **Security concern: fallback chain.** |
+| `ADMIN_JWT_SECRET` | Yes | Yes | No | Admin JWT signing |
 | `ADMIN_API_KEY` | Yes | Yes | No | Admin API authentication |
 | `ADMIN_SECRET_TOKEN` | Yes | Yes | No | Admin token validation |
 | `ADMIN_SECRET` | Yes | Yes | No | Admin secret |
@@ -84,7 +90,7 @@
 |---|---|---|---|---|
 | `RESEND_API_KEY` | Yes | Yes | No | Resend email API key |
 | `RESEND_AUDIENCE_ID` | No | No | No | Resend audience |
-| `RESEND_WEBHOOK_SECRET` | No | Yes | No | Resend webhook signing |
+| `RESEND_WEBHOOK_SECRET` | Yes | Yes | No | Resend webhook signing |
 | `EMAIL_FROM` | Yes | No | No | Sender address |
 | `EMAIL_PROVIDER` | No | No | No | Email provider name |
 | `EMAIL_SERVER` | No | No | No | SMTP server |
@@ -118,7 +124,7 @@
 | `DENYLIST_PEPPER` | Yes | Yes | No | Denylist hashing pepper |
 | `NEW_INTERNAL_SALT` | No | Yes | No | Internal salt (new) |
 | `NTERNAL_SALT` | No | Yes | No | Typo? Should be INTERNAL_SALT |
-| `INTERNAL_BYPASS_KEY` | No | Yes | No | Emergency bypass key |
+| `INTERNAL_BYPASS_KEY` | No | Yes | No | Development-only internal bypass key |
 | `AUDIT_EDGE_SECRET` | Yes | Yes | No | Audit edge auth |
 | `SOVEREIGN_ACCESS_KEY` | Yes | Yes | No | Sovereign access auth |
 | `OGR_SESSION_SECRET` | Yes | Yes | No | OGR session signing |
@@ -131,9 +137,9 @@
 | `SOVEREIGN_KEY_HASHES` | No | No | No | Precomputed hashes |
 | `MFA_BACKUP_CODE_PEPPER` | No | Yes | Fallback: `MFA_ENCRYPTION_KEY` | MFA backup codes. **Fallback chain.** |
 | `MFA_ENCRYPTION_KEY` | No | Yes | No | MFA encryption |
-| `SECURE_CLIENT_STATE_SECRET` | No | Yes | Fallback: `NEXTAUTH_SECRET` | Client state signing. **Fallback chain.** |
-| `DYNAMIC_THRESHOLD_SALT` | No | Yes | No | Dynamic threshold |
-| `OAUTH_TOKEN_ENCRYPTION_KEY` | No | Yes | No | OAuth token AES encryption |
+| `SECURE_CLIENT_STATE_SECRET` | Yes | Yes | No | Client state signing |
+| `DYNAMIC_THRESHOLD_SALT` | Yes | Yes | No | Dynamic threshold |
+| `OAUTH_TOKEN_ENCRYPTION_KEY` | Yes | Yes | No | OAuth token AES encryption |
 | `RATE_LIMIT_MAX_REQUESTS` | No | No | No | Rate limit config |
 | `RATE_LIMIT_WINDOW_MS` | No | No | No | Rate limit window |
 | `SECURITY_LOCKDOWN_MODE` | No | No | No | System lockdown toggle |
@@ -175,13 +181,13 @@
 
 | Variable | Required in Prod | Secret | Has Fallback | Notes |
 |---|---|---|---|---|
-| `DOWNLOAD_TOKEN_SECRET` | Yes | Yes | Fallback: `NEXTAUTH_SECRET` | Download token signing. **Fallback chain.** |
+| `DOWNLOAD_TOKEN_SECRET` | Yes | Yes | No | Download token signing |
 | `ARTIFACT_ACCESS_SECRET` | Yes | Yes | No | Artifact access auth |
 | `DOWNLOAD_SECRET` | No | Yes | No | Download auth |
 | `DOWNLOAD_SIGNING_SECRET` | No | Yes | No | Download signing |
 | `ASSET_SECRET` | No | Yes | No | Asset auth |
 | `PREMIUM_ASSET_BACKEND` | No | No | No | local / s3 |
-| `ACTION_TOKEN_SECRET` | No | Yes | No | Action token signing |
+| `ACTION_TOKEN_SECRET` | Yes | Yes | No | Action token signing |
 
 ### AI / External APIs
 

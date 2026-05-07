@@ -46,8 +46,8 @@ type AdminJwtPayload = {
 const ADMIN_MIN_TIER: AccessTier = "architect";
 
 function getAdminJwtSecret(): string {
-  const secret = process.env.ADMIN_JWT_SECRET || process.env.NEXTAUTH_SECRET;
-  if (!secret) throw new Error("Missing ADMIN_JWT_SECRET (or NEXTAUTH_SECRET fallback).");
+  const secret = String(process.env.ADMIN_JWT_SECRET || "").trim();
+  if (!secret) throw new Error("Missing ADMIN_JWT_SECRET.");
   return secret;
 }
 

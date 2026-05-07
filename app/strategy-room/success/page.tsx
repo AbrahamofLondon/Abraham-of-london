@@ -156,16 +156,21 @@ function StrategySuccessContent() {
               </div>
               <div>
                 <span className="text-zinc-400 font-bold block uppercase text-xs">Export PDF</span>
-                <span className="text-zinc-600 text-[9px] uppercase">Coming_Soon.exe</span>
+                <span className="text-zinc-600 text-[9px] uppercase">Export scheduling in progress</span>
               </div>
             </div>
           </button>
         </div>
 
-        <div className="mt-12 text-center">
+        <div className="mt-12 text-center space-y-4">
           <Link href="/strategy-room" className="inline-flex items-center gap-2 text-zinc-600 hover:text-amber-500 text-[9px] uppercase tracking-widest transition-colors font-bold">
-            <RefreshCw size={10} /> Recalibrate_Assessment
+            <RefreshCw size={10} /> Return to Strategy Room
           </Link>
+          <div>
+            <Link href="/refund-policy" className="text-[10px] uppercase tracking-[0.28em] text-zinc-500 hover:text-zinc-300">
+              Review refund policy
+            </Link>
+          </div>
         </div>
       </motion.div>
     </div>

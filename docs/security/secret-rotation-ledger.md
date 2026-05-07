@@ -21,11 +21,11 @@
 
 | Secret | Purpose | Rotation Policy | Last Rotation | Blast Radius if Compromised |
 |---|---|---|---|---|
-| `NEXTAUTH_SECRET` | Signs all NextAuth session JWTs. Also used as fallback for `ADMIN_JWT_SECRET`, `DOWNLOAD_TOKEN_SECRET`, `SECURE_CLIENT_STATE_SECRET`. | Critical (90d) | Unknown | **Total auth compromise.** All user sessions invalidated. Admin JWT, download tokens, and client state all forged. Due to fallback chains, this is effectively a master signing key. |
+| `NEXTAUTH_SECRET` | Signs all NextAuth session JWTs. | Critical (90d) | Unknown | **Total auth compromise.** All user sessions invalidated. |
 | `JWT_SECRET` | Signs application-level JWTs (non-NextAuth). | Critical (90d) | Unknown | **Auth bypass.** Arbitrary JWT tokens can be forged. |
 | `ENCRYPTION_KEY` | AES encryption for sensitive data at rest. | Critical (90d) | Unknown | **Data exposure.** All encrypted fields in the database become readable. |
 | `INTERNAL_BYPASS_KEY` | Master key for `X-Directorate-Bypass` header. Bypasses ALL authentication. | Critical (90d) | Unknown | **Complete system compromise.** Attacker bypasses all auth, rate limiting, and access control across every route. |
-| `ADMIN_JWT_SECRET` | Signs admin JWT tokens. Falls back to `NEXTAUTH_SECRET`. | Critical (90d) | Unknown | **Admin impersonation.** Arbitrary admin tokens can be forged. |
+| `ADMIN_JWT_SECRET` | Signs admin JWT tokens. | Critical (90d) | Unknown | **Admin impersonation.** Arbitrary admin tokens can be forged. |
 | `ADMIN_API_KEY` | Authenticates admin API requests. | Critical (90d) | Unknown | **Admin API takeover.** Full admin API access. |
 | `ADMIN_SECRET_TOKEN` | Admin token validation. | Critical (90d) | Unknown | **Admin access.** Admin actions can be performed. |
 | `ADMIN_SECRET` | General admin secret. | Critical (90d) | Unknown | **Admin access.** Depends on usage context. |
@@ -63,7 +63,7 @@
 | `TEAM_ASSESSMENT_INVITE_SECRET` | Signs team assessment invites. | Standard (180d) | Unknown | **Invite forgery.** |
 | `DIAGNOSTIC_HMAC_SECRET` | HMAC signing for diagnostic data. | Standard (180d) | Unknown | **Data tampering.** Diagnostic results can be forged. |
 | `DIAGNOSTIC_WATERMARK_SECRET` | Watermarks diagnostic PDFs. | Standard (180d) | Unknown | **Watermark bypass.** Diagnostic PDFs created without tracking. |
-| `DOWNLOAD_TOKEN_SECRET` | Signs download tokens. Falls back to `NEXTAUTH_SECRET`. | Standard (180d) | Unknown | **Unauthorized downloads.** Premium content accessed freely. |
+| `DOWNLOAD_TOKEN_SECRET` | Signs download tokens. | Standard (180d) | Unknown | **Unauthorized downloads.** Premium content accessed freely. |
 | `ARTIFACT_ACCESS_SECRET` | Authenticates artifact access. | Standard (180d) | Unknown | **Artifact exposure.** Protected artifacts accessed. |
 | `OGR_SESSION_SECRET` | Signs OGR sessions. | Standard (180d) | Unknown | **OGR session forgery.** |
 | `OGR_SOVEREIGN_KEY` | OGR sovereign authentication. | Standard (180d) | Unknown | **Sovereign impersonation.** |
@@ -73,7 +73,7 @@
 | `HUBSPOT_ACCESS_TOKEN` | HubSpot access. Falls back to `CRM_API_KEY`. | Standard (180d) | Unknown | **CRM access.** |
 | `MFA_ENCRYPTION_KEY` | Encrypts MFA secrets. | Standard (180d) | Unknown | **MFA bypass.** TOTP secrets exposed. |
 | `MFA_BACKUP_CODE_PEPPER` | Peppers MFA backup codes. Falls back to `MFA_ENCRYPTION_KEY`. | Standard (180d) | Unknown | **MFA bypass.** Backup codes predictable. |
-| `SECURE_CLIENT_STATE_SECRET` | Signs client-side state. Falls back to `NEXTAUTH_SECRET`. | Standard (180d) | Unknown | **State tampering.** Client state forged. |
+| `SECURE_CLIENT_STATE_SECRET` | Signs client-side state. | Standard (180d) | Unknown | **State tampering.** Client state forged. |
 
 ### Tier 3 -- Annual (365-day rotation)
 

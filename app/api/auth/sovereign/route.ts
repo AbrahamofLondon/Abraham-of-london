@@ -10,7 +10,6 @@ import { noStoreJson, parseJsonBody, requireJsonContent, requireMethod } from "@
 export const runtime = "nodejs";
 
 const PRIMARY_COOKIE_NAME = "ogr_sovereign_session";
-const COMPAT_COOKIE_NAME = "sovereign_session";
 const COOKIE_TTL_SECONDS = 60 * 60 * 8; // 8 hours
 const requestSchema = z.object({
   key: z.string().trim().min(8).max(512),
@@ -64,23 +63,6 @@ function buildSignedSession(secret: string): string {
   const payload = `${issuedAt}:${nonce}`;
   const mac = signValue(payload, secret);
   return `${payload}.${mac}`;
-}
-
-function buildCompatAuthorityCookie(args: {
-  userId: string;
-  campaignId: string;
-  authorityLevel: AuthorityLevel;
-  secret: string;
-}): string {
-  const seed = `${args.userId}:${args.campaignId}:${args.authorityLevel}:${Date.now()}`;
-  const signature = signValue(seed, args.secret);
-
-  return [
-    args.userId,
-    args.campaignId,
-    args.authorityLevel,
-    signature,
-  ].join(":");
 }
 
 function cookieBase() {
@@ -158,24 +140,11 @@ export async function POST(request: Request) {
     }
 
     const primarySession = buildSignedSession(sessionSecret);
-    const compatAuthority = buildCompatAuthorityCookie({
-      userId: "sovereign-user",
-      campaignId: "system",
-      authorityLevel: "SOVEREIGN",
-      secret: sessionSecret,
-    });
-
     const response = noStoreJson({ ok: true });
 
     response.cookies.set({
       name: PRIMARY_COOKIE_NAME,
       value: primarySession,
-      ...cookieBase(),
-    });
-
-    response.cookies.set({
-      name: COMPAT_COOKIE_NAME,
-      value: compatAuthority,
       ...cookieBase(),
     });
 

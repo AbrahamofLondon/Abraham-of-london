@@ -54,6 +54,14 @@ function parseEnvFile(filePath) {
   return { entries, raw };
 }
 
+function isProductionLike(entries) {
+  const map = Object.fromEntries(entries.map((entry) => [entry.key, entry.value]));
+  return (
+    String(map.NODE_ENV || "").trim().toLowerCase() === "production" ||
+    String(map.NEXT_PUBLIC_APP_ENV || "").trim().toLowerCase() === "production"
+  );
+}
+
 function banner(title) {
   console.log(`\n${"═".repeat(60)}`);
   console.log(`  ${title}`);
@@ -97,6 +105,7 @@ const PLACEHOLDER_PATTERNS = [
 
 function checkPlaceholders(label, entries) {
   const issues = [];
+  const prodLike = isProductionLike(entries);
   for (const { key, value } of entries) {
     if (value === "") {
       issues.push(`${key} = (empty)`);
@@ -112,7 +121,7 @@ function checkPlaceholders(label, entries) {
   if (issues.length === 0) {
     record(`Placeholder values [${label}]`, PASS, "No placeholders detected.");
   } else {
-    record(`Placeholder values [${label}]`, FAIL, issues.join("\n      "));
+    record(`Placeholder values [${label}]`, prodLike ? FAIL : WARN, issues.join("\n      "));
   }
 }
 
@@ -154,6 +163,7 @@ function isSecretKey(key) {
 
 function checkWeakDefaults(label, entries) {
   const issues = [];
+  const prodLike = isProductionLike(entries);
   for (const { key, value } of entries) {
     if (!isSecretKey(key)) continue;
     const lower = value.toLowerCase();
@@ -171,7 +181,7 @@ function checkWeakDefaults(label, entries) {
   if (issues.length === 0) {
     record(`Weak defaults [${label}]`, PASS, "No weak secret values found.");
   } else {
-    record(`Weak defaults [${label}]`, WARN, issues.join("\n      "));
+    record(`Weak defaults [${label}]`, prodLike ? FAIL : WARN, issues.join("\n      "));
   }
 }
 
@@ -221,7 +231,7 @@ function checkFallbackChains() {
   } else {
     record(
       "Fallback chains",
-      WARN,
+      FAIL,
       `${secretChains.length} secret fallback chain(s) found:\n      ` +
         secretChains.map((l) => l.replace(ROOT + "/", "").replace(ROOT + "\\", "")).join("\n      ")
     );
@@ -244,6 +254,7 @@ const BYPASS_FLAGS = [
 
 function checkDevFlags(label, entries) {
   const found = [];
+  const prodLike = isProductionLike(entries);
   for (const { key, value } of entries) {
     // Catch any BYPASS_* or DISABLE_* pattern
     if (/^(BYPASS_|DISABLE_|SKIP_|PREMIUM_DEV_)/.test(key) || BYPASS_FLAGS.includes(key)) {
@@ -257,7 +268,7 @@ function checkDevFlags(label, entries) {
   } else {
     record(
       `Development bypass flags [${label}]`,
-      WARN,
+      prodLike ? FAIL : WARN,
       `Active bypass flags (must be disabled in production):\n      ` + found.join("\n      ")
     );
   }
@@ -267,19 +278,24 @@ function checkDevFlags(label, entries) {
 
 const PROD_REQUIRED = [
   "NEXTAUTH_SECRET",
+  "ACTION_TOKEN_SECRET",
   "DATABASE_URL",
   "STRIPE_SECRET_KEY",
   "STRIPE_WEBHOOK_SECRET",
+  "RESEND_WEBHOOK_SECRET",
   "CRON_SECRET",
   "DOWNLOAD_TOKEN_SECRET",
   "OGR_SESSION_SECRET",
   "RESEND_API_KEY",
   "ENCRYPTION_KEY",
+  "SECURE_CLIENT_STATE_SECRET",
   "CSRF_SECRET",
   "JWT_SECRET",
   "ADMIN_JWT_SECRET",
   "INNER_CIRCLE_JWT_SECRET",
   "INNER_CIRCLE_DB_URL",
+  "DYNAMIC_THRESHOLD_SALT",
+  "OAUTH_TOKEN_ENCRYPTION_KEY",
   "SYSTEM_INTEGRITY_SALT",
   "DIAGNOSTIC_HMAC_SECRET",
   "DIAGNOSTIC_WATERMARK_SECRET",
@@ -310,6 +326,63 @@ function checkProdRequired(label, entries) {
   }
 }
 
+function checkMalformedBooleanKeys(label, entries) {
+  const malformed = entries
+    .filter((entry) => /!$/.test(entry.line.split("=")[0]?.trim() || ""))
+    .map((entry) => entry.line);
+
+  if (malformed.length === 0) {
+    record(`Malformed boolean keys [${label}]`, PASS, "No malformed env keys found.");
+    return;
+  }
+
+  record(
+    `Malformed boolean keys [${label}]`,
+    FAIL,
+    malformed.join("\n      "),
+  );
+}
+
+function checkSharedSecrets(label, entries) {
+  const prodLike = isProductionLike(entries);
+  const domainKeys = [
+    "NEXTAUTH_SECRET",
+    "JWT_SECRET",
+    "DOWNLOAD_TOKEN_SECRET",
+    "ACTION_TOKEN_SECRET",
+    "ENCRYPTION_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "RESEND_WEBHOOK_SECRET",
+    "ADMIN_JWT_SECRET",
+    "INNER_CIRCLE_JWT_SECRET",
+    "SECURE_CLIENT_STATE_SECRET",
+  ];
+
+  const byValue = new Map();
+  for (const { key, value } of entries) {
+    if (!domainKeys.includes(key)) continue;
+    if (!value || /^CHANGE_ME$/i.test(value)) continue;
+    const list = byValue.get(value) || [];
+    list.push(key);
+    byValue.set(value, list);
+  }
+
+  const reused = [...byValue.values()]
+    .filter((keys) => keys.length > 1)
+    .map((keys) => keys.join(", "));
+
+  if (reused.length === 0) {
+    record(`Shared secret domains [${label}]`, PASS, "No secret reuse across protected domains.");
+    return;
+  }
+
+  record(
+    `Shared secret domains [${label}]`,
+    prodLike ? FAIL : WARN,
+    reused.join("\n      "),
+  );
+}
+
 // ─── Run all checks ────────────────────────────────────────────────────────
 
 banner("ENV INTEGRITY CHECK");
@@ -327,9 +400,11 @@ for (const envFile of [".env", ".env.local"]) {
   const { entries } = parseEnvFile(filePath);
 
   checkDuplicates(label, entries);
+  checkMalformedBooleanKeys(label, entries);
   checkPlaceholders(label, entries);
   checkWeakDefaults(label, entries);
   checkDevFlags(label, entries);
+  checkSharedSecrets(label, entries);
   checkProdRequired(label, entries);
 }
 

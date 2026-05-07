@@ -14,13 +14,9 @@ const TAG_LENGTH = 16;
  * Derive a 32-byte key from the configured secret using HKDF.
  */
 function deriveKey(): Buffer {
-  const secret = String(
-    process.env.OAUTH_TOKEN_ENCRYPTION_KEY ||
-      process.env.INNER_CIRCLE_JWT_SECRET ||
-      "",
-  ).trim();
+  const secret = String(process.env.OAUTH_TOKEN_ENCRYPTION_KEY || "").trim();
   if (!secret) {
-    throw new Error("[ENCRYPTION] Missing OAUTH_TOKEN_ENCRYPTION_KEY or INNER_CIRCLE_JWT_SECRET");
+    throw new Error("[ENCRYPTION] Missing OAUTH_TOKEN_ENCRYPTION_KEY");
   }
   // Use HKDF to derive a proper 256-bit key from the secret
   const inputKey = crypto.createHash("sha256").update(secret).digest();

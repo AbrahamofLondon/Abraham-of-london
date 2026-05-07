@@ -65,7 +65,7 @@ The application uses multiple cookie-based identity channels. Trust derivation v
 
 ### 2.2 Admin JWT
 - **Library:** `jsonwebtoken` (standard JWS)
-- **Secret:** `process.env.ADMIN_JWT_SECRET` (falls back to `NEXTAUTH_SECRET`)
+- **Secret:** `process.env.ADMIN_JWT_SECRET`
 - **Expiry:** 8 hours
 - **Payload:** `{ sub, username, role, permissions, typ: "admin" }`
 - **Issued by:** `issueAdminSessionToken()` in `lib/server/auth/admin-utils.ts:264`
@@ -126,7 +126,7 @@ The application uses multiple cookie-based identity channels. Trust derivation v
 ### 3.3 Sovereign Sessions
 - **Service:** `SovereignAuthService` (singleton) in `lib/auth/sovereign/service.ts`
 - **Validation:** `validateSovereignSession()` in `middleware/sovereign.ts:89`
-- **Source:** `sovereign_session` cookie
+- **Source:** `ogr_sovereign_session` cookie
 - **Dev bypass:** `BYPASS_SOVEREIGN=true` in development only (`process.env.NODE_ENV === 'development'`)
 - **Trust level:** SERVER-SIDE -- validated through constitutional authority framework
 
@@ -333,6 +333,6 @@ The application uses multiple cookie-based identity channels. Trust derivation v
 
 5. **Dev bypass** in sovereign middleware (`BYPASS_SOVEREIGN=true` in development) -- must be verified this cannot leak to production through misconfiguration.
 
-6. **ADMIN_JWT_SECRET fallback to NEXTAUTH_SECRET** -- if `ADMIN_JWT_SECRET` is not set, admin JWTs share the same signing key as user JWTs. A compromised NEXTAUTH_SECRET would grant admin access if the `typ` field is not validated everywhere.
+6. **Admin JWT secret separation** -- `ADMIN_JWT_SECRET` must remain independent from all user/session secrets.
 
 7. **CSRF protection is opt-in** (`requireSameOrigin` called per-route) rather than enforced globally via middleware. Routes that forget to call it are unprotected.

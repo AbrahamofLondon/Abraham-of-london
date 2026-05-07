@@ -17,12 +17,10 @@ function isBrowser(): boolean {
 }
 
 function getSecret(): string {
-  const secret = String(
-    process.env.SECURE_CLIENT_STATE_SECRET || process.env.NEXTAUTH_SECRET || "",
-  ).trim();
+  const secret = String(process.env.SECURE_CLIENT_STATE_SECRET || "").trim();
 
   if (!secret) {
-    throw new Error("SECURE_CLIENT_STATE_SECRET or NEXTAUTH_SECRET is required");
+    throw new Error("SECURE_CLIENT_STATE_SECRET is required");
   }
 
   return secret;

@@ -47,25 +47,22 @@ export const COMMERCIAL_PRODUCTS: Record<
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24;
 
 export function getCommercialCookieSecret(): string {
-  const dedicated =
+  const dedicated = String(
     process.env.COMMERCIAL_COOKIE_SECRET ||
-    process.env.COMMERCIAL_ACCESS_SECRET;
+    process.env.COMMERCIAL_ACCESS_SECRET ||
+    "",
+  ).trim();
 
-  if (dedicated?.trim()) return dedicated.trim();
+  if (dedicated) return dedicated;
 
   if (process.env.NODE_ENV === "production") {
     throw new Error("COMMERCIAL_COOKIE_SECRET is required in production.");
   }
 
-  const fallback =
-    process.env.NEXTAUTH_SECRET ||
-    process.env.STRIPE_WEBHOOK_SECRET ||
-    "aol-local-commercial-access";
-
   console.warn(
-    "[COMMERCIAL_COOKIE_SECRET_MISSING] Using development-only commercial cookie fallback.",
+    "[COMMERCIAL_COOKIE_SECRET_MISSING] Using development-only generated local fallback.",
   );
-  return fallback;
+  return "aol-local-commercial-access";
 }
 
 function sign(value: string): string {

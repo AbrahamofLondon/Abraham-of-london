@@ -47,7 +47,9 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 function verifyWebhookSignature(req: NextApiRequest): boolean {
-  if (!RESEND_WEBHOOK_SECRET) return true;
+  if (!RESEND_WEBHOOK_SECRET) {
+    return process.env.NODE_ENV !== "production";
+  }
 
   const signature = String(req.headers["resend-signature"] || "").trim();
   if (!signature) return false;
@@ -119,6 +121,10 @@ export default async function resendWebhookHandler(
   }
 
   try {
+    if (process.env.NODE_ENV === "production" && !RESEND_WEBHOOK_SECRET) {
+      return res.status(503).json({ ok: false, error: "Webhook secret not configured" });
+    }
+
     if (!verifyWebhookSignature(req)) {
       return res.status(401).json({ ok: false, error: "Invalid signature" });
     }

@@ -8,12 +8,14 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function getSecretSalt(): string {
-  return (
-    process.env.DYNAMIC_THRESHOLD_SALT ||
-    process.env.SECURE_CLIENT_STATE_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    "development-dynamic-threshold-salt"
-  );
+  const salt = String(process.env.DYNAMIC_THRESHOLD_SALT || "").trim();
+
+  if (salt) return salt;
+  if (process.env.NODE_ENV === "development") {
+    return "development-dynamic-threshold-salt";
+  }
+
+  throw new Error("[dynamic-threshold] Missing DYNAMIC_THRESHOLD_SALT");
 }
 
 function hashFraction(input: string): number {
