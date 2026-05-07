@@ -8,12 +8,8 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 
-import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
-import {
-  assertDiagnosticReportAccess,
-  canUnlockReport,
-} from "@/lib/server/diagnostics/report-engine";
-import { resolveDiagnosticReport } from "@/lib/server/diagnostics/report-resolver";
+// Server-only modules (report-engine → signed-action-token uses "server-only" guard)
+// are dynamically imported inside getServerSideProps to prevent client bundle inclusion.
 
 type Props = {
   item: any | null;
@@ -194,9 +190,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   const [
     { readAccessCookie },
     { getSessionContext, tierAtLeast },
+    { getDiagnosticRecordByRef },
+    { assertDiagnosticReportAccess, canUnlockReport },
+    { resolveDiagnosticReport },
   ] = await Promise.all([
     import("@/lib/server/auth/cookies"),
     import("@/lib/server/auth/tokenStore.postgres"),
+    import("@/lib/server/diagnostics/store"),
+    import("@/lib/server/diagnostics/report-engine"),
+    import("@/lib/server/diagnostics/report-resolver"),
   ]);
 
   try {
