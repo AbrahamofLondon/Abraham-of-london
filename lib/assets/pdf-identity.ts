@@ -339,7 +339,12 @@ function fileExists(publicPath: string): boolean {
   try {
     const fs = require("fs") as typeof import("fs");
     const path = require("path") as typeof import("path");
-    return fs.existsSync(path.join(process.cwd(), "public", publicPath.replace(/^\/+/, "")));
+    const relativePath = publicPath.replace(/^\/+/, "");
+    const privateRoot = path.join(process.cwd(), "private_storage", "premium-content");
+    if (relativePath.startsWith("assets/downloads/") || relativePath.startsWith("_archive/")) {
+      return fs.existsSync(path.join(privateRoot, relativePath));
+    }
+    return fs.existsSync(path.join(process.cwd(), "public", relativePath));
   } catch {
     return false;
   }

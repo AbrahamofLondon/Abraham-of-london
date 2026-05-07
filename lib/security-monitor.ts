@@ -68,7 +68,12 @@ interface SecurityEvent {
     | "path_traversal"
     | "suspicious_headers"
     | "rapid_requests"
-    | "brute_force";
+    | "brute_force"
+    | "token_replay_attempt"
+    | "auth_failure_burst"
+    | "rate_limit_abuse"
+    | "invalid_payload_burst"
+    | "cross_session_attempt";
   ip: string;
   endpoint: string;
   details: string;

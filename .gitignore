@@ -79,6 +79,7 @@ _backups/
 *.dump
 *.sql.dump
 *.backup
+*.backup-*
 *.bak
 *.swp
 *.swo
@@ -133,6 +134,7 @@ temp/
 *.launcher
 *.local
 *.orig
+*.codex-backup
 .history/
 
 # ------------------------------

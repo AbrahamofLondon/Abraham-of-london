@@ -13,7 +13,7 @@ export const runtimeConfig = {
   },
 
   pdf: {
-    publicDir: "public/assets/downloads",
+    publicDir: "private_storage/premium-content/assets/downloads",
   },
 } as const;
 

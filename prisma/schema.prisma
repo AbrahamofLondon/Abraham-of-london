@@ -3388,3 +3388,14 @@ model SessionLink {
   @@map("session_link")
 }
 
+// ============================================================================
+// WEBHOOK IDEMPOTENCY
+// ============================================================================
+
+model ProcessedWebhookEvent {
+  id        String   @id // Stripe event ID — guarantees exactly-once processing
+  createdAt DateTime @default(now())
+
+  @@map("processed_webhook_events")
+}
+

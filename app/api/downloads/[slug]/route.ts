@@ -48,6 +48,30 @@ async function buildUserContext(
   };
 }
 
+function resolvePrivatePdfPath(relativePath: string): { absolutePath: string; allowedRoot: string } {
+  const cwd = process.cwd();
+  const normalized = relativePath.replace(/^\/+/, "");
+
+  if (normalized.startsWith("assets/downloads/")) {
+    return {
+      absolutePath: path.resolve(cwd, "private_storage", "premium-content", normalized),
+      allowedRoot: path.resolve(cwd, "private_storage", "premium-content", "assets", "downloads"),
+    };
+  }
+
+  if (normalized.startsWith("_archive/")) {
+    return {
+      absolutePath: path.resolve(cwd, "private_storage", "premium-content", normalized),
+      allowedRoot: path.resolve(cwd, "private_storage", "premium-content", "_archive"),
+    };
+  }
+
+  return {
+    absolutePath: path.resolve(cwd, "private_storage", "premium-content", normalized),
+    allowedRoot: path.resolve(cwd, "private_storage", "premium-content"),
+  };
+}
+
 function jsonBlocked(
   asset: PdfAssetIdentityResolved,
   delivery: ReturnType<typeof resolvePdfDelivery>,
@@ -89,24 +113,22 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
   }
 
   const relativePath = asset.canonicalPath.replace(/^\/+/, "");
-  const cwd = process.cwd();
-
-  // Resolve file path based on asset type:
-  // 1. Paid instruments → private/assets/paid-instruments/
-  // 2. Case dossiers → private_storage/premium-content/case-dossiers/
-  // 3. Everything else → public/
   let absolutePath: string;
   let allowedRoot: string;
 
   if (asset.access === "paid") {
-    absolutePath = path.resolve(cwd, "private", "assets", "paid-instruments", `${asset.slug}.pdf`);
-    allowedRoot = path.resolve(cwd, "private");
-  } else if (relativePath.startsWith("private_storage/") || asset.slug.startsWith("case-dossier-")) {
-    absolutePath = path.resolve(cwd, relativePath);
-    allowedRoot = path.resolve(cwd, "private_storage");
+    absolutePath = path.resolve(
+      process.cwd(),
+      "private",
+      "assets",
+      "paid-instruments",
+      `${asset.slug}.pdf`,
+    );
+    allowedRoot = path.resolve(process.cwd(), "private");
   } else {
-    absolutePath = path.resolve(cwd, "public", relativePath);
-    allowedRoot = path.resolve(cwd, "public");
+    const resolved = resolvePrivatePdfPath(relativePath);
+    absolutePath = resolved.absolutePath;
+    allowedRoot = resolved.allowedRoot;
   }
 
   if (!absolutePath.startsWith(allowedRoot + path.sep)) {

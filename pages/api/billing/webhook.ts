@@ -82,6 +82,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+  // ── Idempotency hard lock ──────────────────────────────────────────────────
+  // Stripe may retry webhooks. The find-or-update entitlement pattern handles
+  // duplicate grants, but this table prevents the entire handler from
+  // re-executing under concurrency or retries. If the event ID exists, we
+  // return 200 immediately — Stripe treats this as acknowledged.
+  try {
+    const existing = await prisma.processedWebhookEvent.findUnique({
+      where: { id: event.id },
+      select: { id: true },
+    });
+    if (existing) {
+      return res.json({ received: true, replay: true });
+    }
+    // Insert BEFORE processing — if we crash mid-processing, Stripe retries
+    // and we re-process. If we insert AFTER, concurrent calls can race past
+    // the check. Insert-before + unique constraint = exactly-once semantics.
+    await prisma.processedWebhookEvent.create({ data: { id: event.id } });
+  } catch (idempotencyError: any) {
+    // Unique constraint violation = another instance is already processing
+    if (idempotencyError?.code === "P2002") {
+      return res.json({ received: true, replay: true });
+    }
+    // Non-idempotency DB errors should not block webhook processing —
+    // fall through and let the entitlement authority's own idempotency handle it
+    console.warn("[BILLING_WEBHOOK] Idempotency check failed, proceeding", idempotencyError);
+  }
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const email = String(session.metadata?.email || session.customer_details?.email || "").toLowerCase();

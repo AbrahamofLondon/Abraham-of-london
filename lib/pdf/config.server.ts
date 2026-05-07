@@ -38,7 +38,7 @@ class PDFConfiguration {
   private loadConfig(): PDFGenerationConfig {
     return {
       apiKey: process.env.PDF_GENERATION_API_KEY || 'default-key-change-in-production',
-      outputDir: process.env.PDF_OUTPUT_DIR || './public/assets/downloads',
+      outputDir: process.env.PDF_OUTPUT_DIR || './private_storage/premium-content/assets/downloads',
       tempDir: process.env.PDF_TEMP_DIR || './tmp/pdf',
       defaultOptions: {
         format: (process.env.PDF_DEFAULT_FORMAT as 'A4') || 'A4',
@@ -89,4 +89,3 @@ class PDFConfiguration {
 }
 
 export default PDFConfiguration;
-

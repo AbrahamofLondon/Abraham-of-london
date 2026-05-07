@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
-export type PremiumAssetBackend = "local-private" | "local-public";
+export type PremiumAssetBackend = "local-private";
 
 export type PremiumAssetRecord = {
   id: string;
@@ -22,13 +22,6 @@ const PRIVATE_PREMIUM_ROOT = path.join(
   process.cwd(),
   "private_storage",
   "premium-content",
-);
-
-const PUBLIC_DOWNLOADS_ROOT = path.join(
-  process.cwd(),
-  "public",
-  "assets",
-  "downloads",
 );
 
 function safeBasename(input: string): string {
@@ -100,13 +93,6 @@ function resolvePrivateAssetPath(relativePath: string): string {
   return absolute;
 }
 
-function resolvePublicAssetPath(relativePath: string): string {
-  const safeRelative = ensureSafeRelativePath(relativePath);
-  const absolute = path.join(PUBLIC_DOWNLOADS_ROOT, safeRelative);
-  assertWithinRoot(PUBLIC_DOWNLOADS_ROOT, absolute);
-  return absolute;
-}
-
 function statIfFile(absolutePath: string): fs.Stats | null {
   try {
     const stat = fs.statSync(absolutePath);
@@ -128,10 +114,8 @@ function computeFileSha256Sync(absolutePath: string): string {
  *
  * Priority:
  * 1. private_storage/premium-content/<relativePath>
- * 2. public/assets/downloads/<relativePath>
  *
- * This lets you publish richer flagship artifacts like PPTX now,
- * without forcing an immediate storage migration.
+ * Public asset fallback was removed during the launch-blocking hardening pass.
  */
 function resolveAssetCandidate(relativePath: string): {
   absolutePath: string;
@@ -149,17 +133,6 @@ function resolveAssetCandidate(relativePath: string): {
       backend: "local-private",
       exists: true,
       stat: privateStat,
-    };
-  }
-
-  const publicPath = resolvePublicAssetPath(safeRelative);
-  const publicStat = statIfFile(publicPath);
-  if (publicStat) {
-    return {
-      absolutePath: publicPath,
-      backend: "local-public",
-      exists: true,
-      stat: publicStat,
     };
   }
 
@@ -238,10 +211,8 @@ export function premiumAssetExists(relativePath: string): boolean {
 
 export function getPremiumAssetRoots(): {
   privateRoot: string;
-  publicDownloadsRoot: string;
 } {
   return {
     privateRoot: PRIVATE_PREMIUM_ROOT,
-    publicDownloadsRoot: PUBLIC_DOWNLOADS_ROOT,
   };
 }
