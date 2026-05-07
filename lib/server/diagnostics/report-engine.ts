@@ -3,7 +3,7 @@
 /* lib/server/diagnostics/report-engine.ts */
 
 import type { StoredDiagnosticRecord } from "@/lib/server/diagnostics/store";
-import { verifySignedActionToken } from "@/lib/server/security/signed-action-token";
+import { verifySignedActionToken } from "@/lib/security/signed-action-token-core";
 
 export type ReportPriority = "low" | "medium" | "high" | "critical";
 
