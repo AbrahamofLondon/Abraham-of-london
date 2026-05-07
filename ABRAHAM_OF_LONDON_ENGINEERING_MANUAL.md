@@ -1,7 +1,7 @@
 # Abraham of London — Engineering Manual
 
-**Version:** 2.0  
-**Date:** April 2026  
+**Version:** 3.0  
+**Date:** May 2026  
 **Classification:** Internal — Engineering  
 **Repository:** `aol-check-visual`
 
@@ -12,8 +12,8 @@
 | Field | Detail |
 |-------|--------|
 | **Classification** | Internal — Engineering |
-| **Version** | 2.0 |
-| **Effective Date** | April 2026 |
+| **Version** | 3.0 |
+| **Effective Date** | May 2026 |
 | **Review Cycle** | Quarterly |
 | **Custodian** | Lead Engineer |
 | **Next Review** | July 2026 |
@@ -117,6 +117,7 @@ This manual is a living document, reviewed quarterly and updated as the platform
 - Chapter 30: Security Architecture
 - Chapter 31: Authentication Security
 - Chapter 32: Data Protection
+- Chapter 32A: ZTHVF Security Validation Framework
 
 ### Part X — Canonical Contract Reference
 - Chapter 33: Intelligence Spine Contract
@@ -724,51 +725,52 @@ export async function submitAssessment(formData: FormData) {
 4. Use `revalidatePath()` or `revalidateTag()` after mutations
 5. Throw errors for invalid states — the framework handles error UI
 
-### Middleware
+### Proxy (Institutional Perimeter)
 
-The middleware (`middleware.ts`) runs at the Edge on every request before it reaches the route handler. It handles:
+The system uses `proxy.ts` at the project root as its **Institutional Perimeter (V5.1)**. This replaces the standard Next.js `middleware.ts` pattern. It exports a `proxy()` function and a `config.matcher` that intercepts all requests except static assets.
 
-1. **Authentication enforcement** — Redirects unauthenticated users from protected routes
-2. **Rate limiting** — Applies rate limits per IP/session
-3. **Redirects** — Legacy URL redirects and canonical URL enforcement
-4. **Headers** — Security headers (CSP, HSTS, X-Frame-Options)
+**Execution order:**
+
+| Step | Check | Action on Failure |
+|------|-------|-------------------|
+| 0 | PDF download guard | Redirects `/assets/downloads/*.pdf` → `/api/downloads/{slug}` (307) |
+| 1 | Dev bypass | `BYPASS_SOVEREIGN=true` in development only |
+| 2 | Internal bypass | `X-Directorate-Bypass` header matches `INTERNAL_BYPASS_KEY` |
+| 3 | Canonical host redirect | Non-canonical hostname → 308 to `www.abrahamoflondon.org` |
+| 4 | Global lockdown | Checks `/api/system/lock-status` — non-admin users get 503 |
+| 5 | Public path bypass | Matches `PUBLIC_PREFIXES` — passes through with security headers |
+| 6 | Rate limiting | Per-IP + pathname, tiered by route type. 429 on limit exceeded |
+| 7 | Constitutional authority | For constitutional paths — requires sovereign session + authority level |
+| 8 | Admin IP restriction | `ADMIN_ALLOWED_IPS` check for admin paths |
+| 9 | Session & role validation | NextAuth JWT + access cookie. Admin requires role hierarchy |
+| 10 | Auth tier enforcement | Edge-safe tier: Tier 0 (public) → Tier 3 (architect) |
+| 11 | Security headers | CSP, HSTS, COOP, CORP, X-Frame-Options, Permissions-Policy |
+
+**Auth tier classification:**
+
+| Tier | Level | Route Prefixes |
+|------|-------|----------------|
+| Tier 3 | architect (admin) | `/inner-circle/admin`, `/api/admin`, `/directorate` |
+| Tier 2 | inner_circle | `/inner-circle`, `/private`, `/vault`, `/board` |
+| Tier 1 | member | `/consulting`, `/strategy` |
+| Tier 0 | public | All `PUBLIC_PREFIXES` |
 
 ```typescript
-// middleware.ts
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Protected routes require valid token
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/vault')) {
-    const token = await getToken({ req: request });
-    if (!token) {
-      return NextResponse.redirect(new URL('/auth/signin', request.url));
-    }
-  }
-
-  // Admin routes require role check
-  if (pathname.startsWith('/admin')) {
-    const token = await getToken({ req: request });
-    if (!token || !['ADMIN', 'OWNER'].includes(token.role as string)) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-  }
-
-  return NextResponse.next();
-}
-
+// proxy.ts — matcher covers all non-static routes
 export const config = {
-  matcher: ['/dashboard/:path*', '/vault/:path*', '/admin/:path*'],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
+  ],
 };
 ```
 
 > **WARNING**
 >
-> Middleware runs on every matched request at the Edge. It must be fast (< 50ms). Do not perform database queries, heavy computation, or external API calls in middleware. Use it for token checks and redirects only.
+> The proxy runs on every matched request at the Edge. It must remain fast. Database queries are limited to lockdown checks (cached 15s). Auth uses JWT verification only (no DB round-trip). Constitutional authority validation uses in-memory caches with 5-minute TTL.
+
+> **KEY PRINCIPLE**
+>
+> Routes not covered by proxy tier enforcement (e.g., `/api/diagnostics/*`, `/api/strategy-room/*`, `/api/billing/*`) must implement their own auth guards. The proxy provides security headers and rate limiting but NOT auth gating for these routes.
 
 ---
 
@@ -3716,14 +3718,21 @@ The `DiagnosticJourney` model stores complete diagnostic lifecycle data. The `Mo
 
 ### Rate Limiting by Endpoint
 
-| Endpoint Type | Limit | Window |
-|---------------|-------|--------|
-| Public API | 120 requests | 60 seconds |
-| Auth endpoints | 60 requests | 60 seconds |
-| Admin API | 100 requests | 60 seconds |
-| API Strict | 30 requests | 60 seconds |
-| Contact form | 5 requests | 1 hour |
-| Downloads | 20 requests | 1 hour |
+Rate limiting is enforced in `proxy.ts` per-IP per-pathname, using tiered configuration:
+
+| Endpoint Type | Limit | Window | Source |
+|---------------|-------|--------|--------|
+| API General | 200 requests | 60 seconds | `proxy.ts` |
+| Admin (`/admin/`) | 60 requests | 60 seconds | `proxy.ts` |
+| Constitutional (`/constitutional/`) | 30 requests | 60 seconds | `proxy.ts` |
+| Sovereign (`/sovereign/`) | 20 requests | 60 seconds | `proxy.ts` |
+| Auth (`/auth/`) | 10 requests | 60 seconds | `proxy.ts` |
+| Contact form | 5 requests | 1 hour | Route-level |
+| Downloads | 20 requests | 1 hour | Route-level |
+
+> **WARNING**
+>
+> Proxy rate limiting uses in-memory storage (per-isolate). It does not persist across serverless cold starts or share across Netlify edge instances. For strict global enforcement, route-level rate limiting via Upstash Redis is used on critical paths (diagnostics capture, inner-circle verify, email endpoints).
 
 ### CSRF Protection
 
@@ -3897,6 +3906,76 @@ DENYLIST_PEPPER=<random-secret>     # Denylist matching without storing emails
 | Telemetry events | 365 days | Annual performance review |
 | User data | Until deletion request | GDPR compliance |
 | Assessment data | 5 years | Client contract requirement |
+
+---
+
+## Chapter 32A: ZTHVF Security Validation Framework
+
+### Overview
+
+The Zero-Trust Hostile Validation Framework (ZTHVF) is the system's formal security verification protocol. It converts security from belief to evidence by requiring every security claim to be runtime-provable, adversarially tested, and forensically observable.
+
+ZTHVF is not a penetration test. It is a convergence operation that eliminates unverifiable assumptions and produces forensic-grade proof of system behaviour under attack.
+
+### Verification Levels
+
+| Level | Name | Meaning |
+|-------|------|---------|
+| SV | STATICALLY VERIFIED | Source code inspected |
+| BV | BUILD VERIFIED | Build succeeded without errors |
+| RV | RUNTIME VERIFIED | Executed and observed locally |
+| DV | DEPLOYMENT VERIFIED | Executed on deployed infrastructure |
+| AV | ADVERSARIALLY VERIFIED | Attack attempted against running system |
+| FV | FORENSICALLY VERIFIED | Audit logs confirm expected events |
+
+### Static Gates (Pre-Runtime)
+
+Three static gates must pass before any runtime validation:
+
+| Gate | Script | Requirement |
+|------|--------|-------------|
+| Dependency audit | `pnpm audit --prod` | 0 critical/high. Moderate must be patched or documented unreachable |
+| Client bundle audit | `scripts/security/audit-client-bundle-secrets.mjs` | Zero banned patterns in `.next/static/` |
+| Public IP exposure audit | `scripts/security/audit-public-ip-exposure.mjs` | Zero IP-exposing terms in public-facing source |
+
+### Hostile Test Suite
+
+The adversarial test suite lives at `scripts/security/red-team-smoke.mjs` and covers:
+
+| Category | Tests |
+|----------|-------|
+| Auth bypass | Cron without secret, admin without session, forged tokens |
+| Input abuse | Malformed JSON, oversized payload, schema bypass, proto pollution |
+| Access control | Cross-user access, IDOR, null ownership, download without entitlement |
+| Rate limiting | Burst attacks, replay floods |
+| Payment | Price injection, entitlement injection, webhook replay |
+| Bundle exposure | Secret/key scan of client-shipped JavaScript |
+
+### Artifacts
+
+ZTHVF produces the following documentation in `docs/security/zthvf/`:
+
+| File | Purpose |
+|------|---------|
+| `surface-map.json` | Machine-readable attack surface summary |
+| `route-inventory.md` | Every API route with auth classification |
+| `public-asset-map.md` | All publicly accessible static files |
+| `trust-boundaries.md` | Cookie, token, session, entitlement mechanisms |
+| `middleware-coverage.md` | Proxy execution order and gap analysis |
+
+### Release Gate
+
+No system may be declared market-ready unless:
+
+- All static gates pass
+- Build compiles with zero TypeScript errors
+- Hostile test suite produces zero exploitable findings
+- All deployment-dependent tests pass on staging/production
+- Forensic logs confirm denial events for every hostile attempt
+
+> **KEY PRINCIPLE**
+>
+> The words "secure", "hardened", "protected", and "market-ready" are banned in engineering communication unless accompanied by a specific verification level (SV/BV/RV/DV/AV/FV) and evidence reference. Security is proved, not declared.
 
 ---
 
@@ -5467,6 +5546,7 @@ node scripts/quality/full-validation.mjs
 |---------|------|--------|---------|
 | 1.0 | April 2026 | Engineering Lead | Initial release (Parts A, B, C) |
 | 2.0 | April 2026 | Engineering Lead | Merged manual. Architecture updates: server-side scoring, PostgreSQL-only, React state only, Pages Router primary, Product Elevation Layer, Intelligence Spine contract, 6-tier severity target, 13-archetype target |
+| 3.0 | May 2026 | Engineering Lead | ZTHVF security convergence. Replaced middleware.ts with proxy.ts V5.1 architecture. Added Chapter 32A (ZTHVF Security Validation Framework). Updated rate limiting to match proxy configuration. IP exposure purge across 74 source files. PDF quarantine (84 PDFs moved to private_storage). Dependency audit closeout (hono >=4.12.16). Client bundle audit scoped to .next/static only. Red-team hostile suite expanded to 31 test cases |
 
 ---
 
