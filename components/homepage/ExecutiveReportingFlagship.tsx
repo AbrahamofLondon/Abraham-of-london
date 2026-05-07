@@ -177,7 +177,7 @@ export default function ExecutiveReportingFlagship({
                 lineHeight: 0.96, letterSpacing: "-0.028em",
                 color: "rgba(255,255,255,0.92)",
               }}>
-                From diagnostic signal
+                From diagnostic reading
                 <span style={{ display: "block", color: "rgba(255,255,255,0.35)" }}>
                   to decision-grade output.
                 </span>
@@ -189,7 +189,7 @@ export default function ExecutiveReportingFlagship({
                 fontWeight: 300, fontSize: "1.08rem", lineHeight: 1.72,
                 color: "rgba(255,255,255,0.48)",
               }}>
-                The governed layer between raw diagnostic signal and private mandate work.
+                The governed layer between raw diagnostic reading and private mandate work.
                 A 22-field intake produces a 12-field board-grade report.
               </p>
 

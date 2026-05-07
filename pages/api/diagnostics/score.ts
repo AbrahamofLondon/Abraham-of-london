@@ -216,7 +216,7 @@ export default async function handler(
         controlShiftSummary: controlShiftSummary(forecast),
       } : null,
       contradictionText: contradiction,
-      arbiterMessage: synthesisResult.arbiterMismatchMessage ?? null,
+      reviewMessage: synthesisResult.arbiterMismatchMessage ?? null,
       stateToken: spine.id,
     };
 

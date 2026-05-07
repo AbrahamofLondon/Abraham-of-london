@@ -64,7 +64,7 @@ export default function ClientReportRequestPanel({ diagnostics }: Props) {
       </div>
 
       <h2 className="font-serif text-3xl italic text-gray-900">
-        Commission a report from existing diagnostic signal.
+        Commission a report from existing diagnostic reading.
       </h2>
 
       <p className="mt-4 max-w-3xl text-sm leading-relaxed text-gray-600">

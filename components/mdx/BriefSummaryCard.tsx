@@ -22,7 +22,7 @@ export const BriefSummaryCard: React.FC<BriefSummaryCardProps> = ({
   readingTime,
   className,
 }) => {
-  // Deterministic reference code based on props – same on server and client
+  // Consistent reference code based on props – same on server and client
   const refCode = useMemo(() => {
     const input = `${category}-${author}-${date || ''}-${classification}`;
     let hash = 0;

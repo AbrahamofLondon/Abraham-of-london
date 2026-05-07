@@ -150,7 +150,7 @@ export const FragilityRadar: React.FC<FragilityRadarProps> = ({
           style={{ borderColor: signalColor, color: signalColor, boxShadow: `0 0 20px ${signalColor}20` }}
         >
           <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: signalColor }} />
-          <span>{fragilitySignal} FRAGILITY SIGNAL</span>
+          <span>{fragilitySignal} FRAGILITY INDICATOR</span>
         </div>
       </div>
     </div>

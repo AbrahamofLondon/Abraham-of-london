@@ -100,7 +100,7 @@ export default function RegistrySearch() {
   }, []);
 
   const handleResultClick = (href: string) => {
-    // Close first for UX; navigation is deterministic
+    // Close first for UX; navigation is consistent
     setIsOpen(false);
     safeNavigate(href);
   };

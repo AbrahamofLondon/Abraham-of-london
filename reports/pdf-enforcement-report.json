@@ -1,15 +1,10 @@
 {
-  "generatedAt": "2026-05-07T01:03:56.311Z",
+  "generatedAt": "2026-05-07T07:48:39.578Z",
   "totals": {
-    "failures": 1,
+    "failures": 0,
     "warnings": 2
   },
   "findings": [
-    {
-      "rule": "canonical_binary_exists",
-      "severity": "fail",
-      "message": "frontier-resilience-01 is missing physical canonical binary /assets/downloads/frontier-resilience-01.pdf."
-    },
     {
       "rule": "generated_pdf_inventory_outside_canonical_path",
       "severity": "warn",

@@ -510,7 +510,7 @@ const FastDiagnosticPage: NextPage = () => {
               {/* Executive Decision Authority Block */}
               <ExecutiveDecisionAuthorityBlock authorityIndex={result.authorityIndex} costOfInaction={result.costOfInaction} executionFailure={result.executionFailure} />
 
-              {result.arbiterMessage && <ResultBlock label="System integrity note">{result.arbiterMessage}</ResultBlock>}
+              {result.reviewMessage && <ResultBlock label="System integrity note">{result.reviewMessage}</ResultBlock>}
 
               <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", padding: "0.5rem 0" }}>
                 Governed analysis · {result.signalStrength} reading strength

@@ -56,7 +56,7 @@ const FoundationsPage: NextPage = () => (
             {[
               { label: "Alignment Index", href: "/diagnostics/purpose-alignment" },
               { label: "Decision Instruments", href: "/decision-instruments" },
-              { label: "Intelligence Spine", href: "/diagnostics" },
+              { label: "Diagnostic Engine", href: "/diagnostics" },
               { label: "Constitutional Diagnostic", href: "/diagnostics/constitutional-diagnostic" },
               { label: "Strategy Room", href: "/strategy-room" },
               { label: "Evidence Ledger", href: "/evidence" },

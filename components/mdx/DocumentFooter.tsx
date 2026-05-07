@@ -212,7 +212,7 @@ export default function DocumentFooter({
             <div className="mt-6 flex items-center gap-3">
               <Scale className="h-4 w-4 text-amber-400/60" />
               <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
-                Risk Threshold • {directive.riskThreshold}
+                Risk Level • {directive.riskLevel}
               </span>
             </div>
 

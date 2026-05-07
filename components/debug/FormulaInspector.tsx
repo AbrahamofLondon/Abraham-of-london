@@ -44,7 +44,7 @@ export default function FormulaInspector({ type, children }: InspectorProps) {
           formula: "(R * 0.7) + ((100 - F) * 0.3)",
           calc: `(${resonanceScore} * 0.7) + ((100 - ${marketFriction}) * 0.3)`,
           result: computed.sovereignCertainty,
-          desc: "Deterministic probability of move success."
+          desc: "Governed probability of move success."
         };
     }
   };

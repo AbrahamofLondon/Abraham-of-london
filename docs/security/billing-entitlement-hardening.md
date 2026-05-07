@@ -27,14 +27,15 @@
 - Raw body via `micro.buffer()` with `bodyParser: false` — ensures signature matches exact payload.
 - Missing/invalid signature returns 400 immediately.
 
-### 2. Idempotency enforced (replayed webhook does not duplicate grant)
+### 2. Idempotency control implemented in webhook handler
 
-**Status: PASS**
+**Status: IMPLEMENTED**
 
-- `grantCanonicalEntitlement()` (entitlement-authority.ts:284) checks for existing active entitlement BEFORE creating.
-- If entitlement already exists with same email + productCode + status="active", it updates (idempotent) rather than creating a duplicate.
-- `ensureEntitlementAfterPayment()` performs the same idempotent check as a repair mechanism.
-- Stripe `session.id` is stored as `externalRef` for audit trail.
+- `pages/api/billing/webhook.ts` checks `ProcessedWebhookEvent` by `event.id` before processing.
+- If the event ID already exists, the handler returns early with a replay acknowledgement.
+- New events are inserted into `ProcessedWebhookEvent` before downstream fulfillment logic runs.
+- Prisma unique constraint handling (`P2002`) closes the parallel-delivery race by treating the second insert as a replay.
+- Entitlement authority idempotency remains in place as a secondary safeguard if downstream grant logic is retried.
 
 ### 3. Client cannot set price
 
@@ -63,13 +64,13 @@
 - `ensureEntitlementAfterPayment()` explicitly checks `payment_status === "paid"` and rejects non-production simulated sessions.
 - Do-Not-Sell gate (`checkDoNotSellGate()`) blocks checkout if diagnostic prerequisites are not met.
 
-### 6. Replayed webhook does not duplicate grant
+### 6. Replayed webhook grant path
 
-**Status: PASS** (same as #2)
+**Status: IMPLEMENTED** (same control path as #2)
 
-- Entitlement authority uses find-first + update-or-create pattern.
-- Same email + productCode + active status → update (no duplication).
-- `accessAuditLog` records each completion for forensics even on replay.
+- Primary replay lock is the `ProcessedWebhookEvent` ledger in `pages/api/billing/webhook.ts`.
+- Entitlement authority still uses idempotent update-or-create semantics as defense in depth.
+- `accessAuditLog` records checkout completion handling for forensics.
 
 ### 7. Downloads require entitlement
 
@@ -104,5 +105,5 @@ Additional integration tests in `lib/commercial/monetisation.test.ts`:
 
 ## Residual Notes
 
-- Stripe webhook does not use a dedicated "processed events" table for deduplication. Instead, it relies on the entitlement authority's idempotent find-or-update pattern. This is functionally equivalent for preventing duplicate grants, though not as explicit as a processed-events ledger.
-- This is acceptable for controlled launch. A dedicated processed-events table can be added as a hardening enhancement post-launch if webhook volume warrants it.
+- Stripe webhook now uses a dedicated `ProcessedWebhookEvent` table for replay control in addition to entitlement-layer idempotency.
+- Runtime replay proof and concurrency proof must come from the validation close-out run; this document only describes the control present in code.

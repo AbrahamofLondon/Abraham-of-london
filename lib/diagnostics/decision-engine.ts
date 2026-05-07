@@ -454,7 +454,7 @@ export function buildEnterpriseDecisionResult(input: {
   if (band === "ESCALATE" || (leadership < 50 && governance < 50 && execution < 50 && risk < 50)) {
     patternTitle = "Distributed constitutional strain";
     primaryReading =
-      "Leadership, governance, execution, and risk posture are all below threshold together. This is distributed institutional strain, not an isolated operating defect.";
+      "Leadership, governance, execution, and risk posture are all below the minimum standard together. This is distributed institutional strain, not an isolated operating defect.";
     firstAction =
       "Pause discretionary strategic work and identify the few decisions that must not proceed until consequence is governed.";
     escalationNote =
@@ -464,7 +464,7 @@ export function buildEnterpriseDecisionResult(input: {
     signals.push({
       id: "structural_inconsistency",
       label: "Distributed institutional strain",
-      summary: "All major enterprise sections are below threshold at once.",
+      summary: "All major enterprise sections are below the minimum standard at once.",
       severity: 9,
       weight: 1.35,
     });
@@ -576,7 +576,7 @@ export function buildEnterpriseDecisionResult(input: {
   } else if (band === "STABLE") {
     patternTitle = "Institutional posture remains ordered";
     primaryReading =
-      "Leadership, governance, execution, and risk posture are all above threshold. The institution is currently ordered enough to correct without distortion.";
+      "Leadership, governance, execution, and risk posture are all above the minimum standard. The institution is currently ordered enough to correct without distortion.";
     firstAction =
       "Stress-test the conditions under which this coherence would degrade, rather than escalating immediately.";
     escalationNote =
@@ -715,7 +715,7 @@ export function buildConstitutionalDecisionObject(input: {
       ? "Execution-ready constitutional condition"
       : input.decision.route === "DIAGNOSTIC"
         ? "Constitutional weakness requires governed clarification"
-        : "Constitutional signal below escalation threshold";
+        : "Constitutional reading below escalation level";
 
   const action =
     input.decision.recommendedInterventions[0] ??

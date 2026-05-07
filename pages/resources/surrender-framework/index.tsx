@@ -72,7 +72,7 @@ function hasTag(tags: unknown, tag: string): boolean {
 }
 
 /**
- * Deterministic classification:
+ * Governed classification:
  * - Uses tags/category primarily
  * - Has a safe fallback for id/title pattern
  * - Never breaks due to casing mismatch
@@ -260,7 +260,7 @@ const SurrenderFrameworkPage: NextPage<Props> = ({ canonical, assets, grouped, s
 
       {isFallbackData ? (
         <div className="fixed top-4 right-4 z-50 rounded-lg border border-amber-500/30 bg-amber-500/15 px-4 py-2 text-amber-200 text-xs font-semibold backdrop-blur-sm">
-          Data mode: fallback
+          Data mode: recovery
         </div>
       ) : null}
 

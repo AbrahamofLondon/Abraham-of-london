@@ -9,7 +9,10 @@ import Layout from "@/components/Layout";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 
 import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
-import { canUnlockReport } from "@/lib/server/diagnostics/report-engine";
+import {
+  assertDiagnosticReportAccess,
+  canUnlockReport,
+} from "@/lib/server/diagnostics/report-engine";
 import { resolveDiagnosticReport } from "@/lib/server/diagnostics/report-resolver";
 
 type Props = {
@@ -226,9 +229,13 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     const tier = safeString((ctx as any)?.tier, "public");
     const memberId = safeString((ctx as any)?.memberId);
     const isAdmin = tierAtLeast(tier, "private");
-
-    const actorUserId = safeString(item?.actor?.userId);
-    if (!isAdmin && actorUserId && actorUserId !== memberId) {
+    const access = assertDiagnosticReportAccess({
+      record: item,
+      userId: memberId || null,
+      token: null,
+      purpose: "diagnostic_report_access",
+    });
+    if (!access.allowed) {
       return { notFound: true };
     }
 
@@ -236,6 +243,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       record: item,
       userTier: tier,
       isAdmin,
+      accessGranted: true,
     });
 
     const renderedReport = resolveDiagnosticReport({

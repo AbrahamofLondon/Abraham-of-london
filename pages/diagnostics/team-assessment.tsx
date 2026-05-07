@@ -445,7 +445,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             <>
               <InheritedThreadContext
                 thread={constitutionalThread}
-                title="Inherited constitutional signal"
+                title="Inherited constitutional reading"
               />
               <TrajectoryLine trajectory={inferTrajectory(
                 constitutionalThread.domainScores.coherence,

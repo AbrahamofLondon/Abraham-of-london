@@ -10,6 +10,7 @@
 import * as React from "react";
 import { FileText } from "lucide-react";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
+import { getGovernedOutput } from "@/lib/decision/spine-accessors";
 
 export type DecisionTracePanelProps = {
   spine: IntelligenceSpine;
@@ -18,7 +19,8 @@ export type DecisionTracePanelProps = {
 
 export default function DecisionTracePanel({ spine, expanded = false }: DecisionTracePanelProps) {
   const [open, setOpen] = React.useState(expanded);
-  const condition = spine.deterministic.conditionClass;
+  const governed = getGovernedOutput(spine);
+  const condition = governed.conditionClass;
 
   const inputsUsed = [
     spine.case.decision ? "Decision text" : null,
@@ -30,7 +32,7 @@ export default function DecisionTracePanel({ spine, expanded = false }: Decision
   ].filter(Boolean);
 
   const signalsTriggered = [
-    spine.deterministic.contradictionSet.length > 0 ? `${spine.deterministic.contradictionSet.length} contradiction(s) detected` : null,
+    governed.contradictionSet.length > 0 ? `${governed.contradictionSet.length} contradiction(s) detected` : null,
     spine.flags?.avoidanceSuspected ? "Avoidance pattern suspected" : null,
     spine.flags?.falseAuthority ? "False authority detected" : null,
     spine.flags?.economicSanitySuspicious ? "Economic estimate flagged" : null,

@@ -394,7 +394,7 @@ const EducationResearchPage: NextPage = () => {
               ))}
             </div>
             <p className="mt-6" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
-              Publication and research boundary: all outputs are deterministic, citable, and available for academic or institutional review. No proprietary lock-in on foundational thinking.
+              Publication and research boundary: all outputs are governed, citable, and available for academic or institutional review. No proprietary lock-in on foundational thinking.
             </p>
           </div>
         </section>

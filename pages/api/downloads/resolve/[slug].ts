@@ -156,9 +156,7 @@ export default async function handler(
       tokenId: issued?.tokenId ?? null,
       watermarkId: forensics.watermarkId,
       forensicFooter: forensics.expectedFooter,
-      downloadUrl: issued?.token
-        ? `/api/dl/${encodeURIComponent(issued.token)}`
-        : null,
+      downloadUrl: `/api/downloads/${encodeURIComponent(asset.slug)}`,
     });
   }
 
@@ -221,9 +219,7 @@ export default async function handler(
     tokenId: issued?.tokenId ?? null,
     watermarkId: forensics.watermarkId,
     forensicFooter: forensics.expectedFooter,
-    downloadUrl: issued?.token
-      ? `/api/dl/${encodeURIComponent(issued.token)}`
-      : null,
+    downloadUrl: `/api/downloads/${encodeURIComponent(asset.slug)}`,
   });
 }
 

@@ -314,33 +314,6 @@ const nextConfig = {
     }
 
     /**
-     * Pages Router server-only module boundary enforcement.
-     *
-     * Modules under lib/server/ that import "server-only" cannot be resolved
-     * by webpack's client compiler (the package throws at resolution time).
-     * These modules are only reachable from Pages Router via getServerSideProps,
-     * which is exclusively server-side — but webpack still attempts to resolve
-     * the full import tree for both server and client compilations.
-     *
-     * This alias tells the client compiler to replace server-only modules with
-     * empty stubs so it never attempts to resolve their dependency trees. The
-     * security boundary is preserved because:
-     * 1. "server-only" remains on the actual modules (enforced in App Router)
-     * 2. The .server.ts naming convention marks them as server-only
-     * 3. They are only imported inside getServerSideProps (dead code on client)
-     * 4. Client bundles receive empty stubs, not the actual implementation
-     */
-    if (!isServer) {
-      const emptyStub = path.resolve(__dirname, "lib/server/empty-client-stub.js");
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "@/lib/server/strategy-room/access.server": emptyStub,
-        "@/lib/server/security/signed-action-token": emptyStub,
-        "@/lib/prisma.server": emptyStub,
-      };
-    }
-
-    /**
      * Client-side chunk discipline.
      */
     if (!dev && !isServer) {

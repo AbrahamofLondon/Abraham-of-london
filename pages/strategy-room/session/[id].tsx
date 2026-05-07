@@ -669,48 +669,46 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   }
 
   try {
-    const { prisma } = await import("@/lib/prisma.server");
-    const { assertStrategyRoomAccess } = await import("@/lib/server/strategy-room/access.server");
-
+    // Access validation via internal API call — the canonical access.server.ts
+    // uses "server-only" which is incompatible with Pages Router webpack compilation.
+    // Calling our own API route keeps the security boundary intact while allowing
+    // Pages Router to render the session page.
     const host = ctx.req.headers.host ?? "localhost";
-    const url = `${ctx.req.headers["x-forwarded-proto"] || "http"}://${host}${ctx.req.url || `/strategy-room/session/${id}`}`;
-    const headers = new Headers();
-    if (ctx.req.headers.cookie) headers.set("cookie", ctx.req.headers.cookie);
-    if (ctx.req.headers.authorization) headers.set("authorization", ctx.req.headers.authorization);
-    if (typeof ctx.query.access === "string") {
-      headers.set("x-strategy-access-token", ctx.query.access);
-    }
-    const accessRequest = new Request(url, { headers });
-    const access = await assertStrategyRoomAccess({
-      request: accessRequest,
-      sessionRef: id,
-      purpose: "strategy_room_session",
-      allowTokenPurposes: ["strategy_room_session", "return_brief"],
-    });
+    const proto = ctx.req.headers["x-forwarded-proto"] || "http";
+    const baseUrl = `${proto}://${host}`;
 
-    if (!access.ok) {
+    const fetchHeaders: Record<string, string> = {
+      "content-type": "application/json",
+    };
+    if (ctx.req.headers.cookie) fetchHeaders.cookie = ctx.req.headers.cookie;
+    if (ctx.req.headers.authorization) fetchHeaders.authorization = ctx.req.headers.authorization;
+    if (typeof ctx.query.access === "string") {
+      fetchHeaders["x-strategy-access-token"] = ctx.query.access;
+    }
+
+    const accessRes = await fetch(
+      `${baseUrl}/api/strategy-room/execution/${id}`,
+      { headers: fetchHeaders },
+    );
+
+    if (!accessRes.ok) {
       return {
         props: {
           session: null,
-          error: access.status === 404 ? "Session not found" : "Access denied",
+          error: accessRes.status === 404 ? "Session not found" : "Access denied",
         },
       };
     }
 
-    const raw = await prisma.strategyRoomExecutionSession.findFirst({
-      where: {
-        OR: [
-          { id: access.subject.id },
-          { sessionKey: access.subject.sessionKey },
-        ],
-      },
-      include: { decisions: { orderBy: { createdAt: "asc" } } },
-    });
+    const accessData = await accessRes.json();
+    const raw = accessData.session;
 
     if (!raw) {
       return { props: { session: null, error: "Session not found" } };
     }
 
+    // The API route already parses JSON fields (constraints, interventionStack, etc.)
+    // and returns dates as ISO strings in JSON serialization.
     const session: SessionData = {
       id: raw.id,
       sessionKey: raw.sessionKey,
@@ -719,24 +717,25 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       conditionSummary: raw.conditionSummary,
       coreProblem: raw.coreProblem,
       decisionQuestion: raw.decisionQuestion,
-      constraints: parseJsonFallback(raw.constraints, []),
+      constraints: Array.isArray(raw.constraints) ? raw.constraints : parseJsonFallback(raw.constraints, []),
       exposureLevel: raw.exposureLevel,
-      interventionStack: parseJsonFallback(raw.interventionStack, []),
-      constraintMap: parseJsonFallback(raw.constraintMap, null),
-      evidenceGraph: parseJsonFallback<{ evidenceGraph?: SessionData["evidenceGraph"] }>(
-        raw.canonicalSnapshot,
-        {},
-      ).evidenceGraph ?? null,
+      interventionStack: Array.isArray(raw.interventionStack) ? raw.interventionStack : parseJsonFallback(raw.interventionStack, []),
+      constraintMap: raw.constraintMap && typeof raw.constraintMap === "object" ? raw.constraintMap : parseJsonFallback(raw.constraintMap, null),
+      evidenceGraph: raw.canonicalSnapshot?.evidenceGraph ?? (
+        typeof raw.canonicalSnapshot === "object"
+          ? (raw.canonicalSnapshot as any)?.evidenceGraph ?? null
+          : parseJsonFallback<{ evidenceGraph?: SessionData["evidenceGraph"] }>(raw.canonicalSnapshot, {}).evidenceGraph ?? null
+      ),
       status: raw.status,
-      decisions: raw.decisions.map((d) => ({
+      decisions: Array.isArray(raw.decisions) ? raw.decisions.map((d: any) => ({
         id: d.id,
         decision: d.decision,
         status: d.status as "pending" | "executed" | "blocked",
         notes: d.notes,
-        createdAt: d.createdAt.toISOString(),
-        updatedAt: d.updatedAt.toISOString(),
-      })),
-      createdAt: raw.createdAt.toISOString(),
+        createdAt: typeof d.createdAt === "string" ? d.createdAt : new Date(d.createdAt).toISOString(),
+        updatedAt: typeof d.updatedAt === "string" ? d.updatedAt : new Date(d.updatedAt).toISOString(),
+      })) : [],
+      createdAt: typeof raw.createdAt === "string" ? raw.createdAt : new Date(raw.createdAt).toISOString(),
     };
 
     return { props: { session } };

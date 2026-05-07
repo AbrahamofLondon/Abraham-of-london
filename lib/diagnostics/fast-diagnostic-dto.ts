@@ -48,8 +48,8 @@ export type FastDiagnosticResult = {
   } | null;
   /** Contradiction detected during pre-synthesis check */
   contradictionText: string | null;
-  /** Arbiter integrity message (if synthesis was rejected) */
-  arbiterMessage: string | null;
+  /** Integrity review message (if synthesis was rejected) */
+  reviewMessage: string | null;
   /** Encrypted state token for session continuity */
   stateToken: string;
 

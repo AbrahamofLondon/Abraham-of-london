@@ -1,5 +1,5 @@
 /* components/downloads/SurrenderAssetsLanding.tsx — SSOT SAFE (PRESENTATIONAL, PROP-DRIVEN)
-   - Never renders empty silently: shows deterministic diagnostics if assets are missing.
+   - Never renders empty silently: shows systematic diagnostics if assets are missing.
    - Accepts pre-grouped props, but can derive grouped+stats from `assets` if caller passes only assets.
    - No registry imports here (presentational only).
 */

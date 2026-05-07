@@ -543,7 +543,7 @@ export default function StrategyRoomIntake({
             >
               {phase === "reading" && "Reading mandate signal..."}
               {phase === "parsing" && "Parsing authority, scale, and consequence..."}
-              {phase === "weighing" && "Weighing against constitutional thresholds..."}
+              {phase === "weighing" && "Weighing against constitutional standards..."}
               {phase === "complete" && "Constitutional reading complete"}
               {phase === "idle" && "Awaiting mandate..."}
             </span>
@@ -560,7 +560,7 @@ export default function StrategyRoomIntake({
                   color: "rgba(255,255,255,0.30)",
                 }}
               >
-                Signal profile from your answers
+                Diagnostic profile from your answers
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -636,9 +636,9 @@ export default function StrategyRoomIntake({
 
                 <div className="flex-1">
                   <div className="font-medium text-white">
-                    {isQualified && "Mandate meets Strategy Room thresholds"}
-                    {isDiagnostic && "Signal credible — refinement recommended"}
-                    {!isQualified && !isDiagnostic && "Below threshold — more substance needed"}
+                    {isQualified && "Mandate meets Strategy Room standards"}
+                    {isDiagnostic && "Reading credible — refinement recommended"}
+                    {!isQualified && !isDiagnostic && "Below standard — more substance needed"}
                   </div>
 
                   <div className="mt-2 flex items-center gap-3">

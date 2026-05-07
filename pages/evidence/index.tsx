@@ -45,7 +45,7 @@ const EVIDENCE = [
     slug: "escalation-denied-case",
     title: "Why Escalation Was Denied (And That Saved the System)",
     context: "Condition appeared critical but evidence incomplete.",
-    insight: "Escalation threshold not met under governed criteria.",
+    insight: "Escalation criteria not met under governed rules.",
     signal: "Premature escalation would have increased systemic risk.",
   },
 ];

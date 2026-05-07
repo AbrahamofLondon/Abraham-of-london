@@ -91,7 +91,7 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
     ],
     whatItProduces: [
       "Bounded annual exposure figure (\u00a3)",
-      "Exposure classification (contained / exposed / critical) with published thresholds",
+      "Exposure classification (contained / exposed / critical) with published standards",
       "Probability-weighted downside calculation",
       "Composite score against revenue-band reference table",
       "Required next action with escalation note",

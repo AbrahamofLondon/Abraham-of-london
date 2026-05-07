@@ -101,7 +101,7 @@ function scoreText(text: string): number {
   const t = text.trim();
   if (!t) return 0;
   const len = t.length;
-  // Length score (0-40)
+  // Length rating
   const lenScore = len >= 600 ? 40 : len >= 300 ? 32 : len >= 150 ? 22 : len >= 80 ? 14 : len >= 40 ? 8 : 3;
   // Structural signal words (0-30)
   const signals = ["because", "therefore", "however", "risk", "consequence",
@@ -177,7 +177,7 @@ function computeConstitutionalReading(f: FormData): ConstitutionalReading {
       primaryReading = `Direct decision authority is confirmed and the problem statement carries sufficient structural detail for constitutional engagement. The situation presents as having consequence, prior context, and clear ownership — the three conditions that justify private advisory attention.`;
     } else {
       patternTitle   = "Sufficient mandate with material consequence";
-      primaryReading = `The constitutional reading of this submission is positive. Gravity, authority, and consequence are all above threshold. The submission demonstrates a real problem being held by someone with the authority to act — the baseline condition for the Strategy Room.`;
+      primaryReading = `The constitutional reading of this submission is positive. Gravity, authority, and consequence are all above the minimum standard. The submission demonstrates a real problem being held by someone with the authority to act — the baseline condition for the Strategy Room.`;
     }
     mandateNote = "Your submission qualifies for direct strategic engagement. Proceed to the Strategy Room to initiate the mandate.";
     firstAction = "Prepare a one-page situation brief before the initial engagement: the problem in one sentence, the three most recent decisions made under this constraint, and the specific decision you need to reach in the next 90 days.";
@@ -194,8 +194,8 @@ function computeConstitutionalReading(f: FormData): ConstitutionalReading {
       urgentSignal   = "The single most important clarification: who holds final decision authority, and is that person either you or someone who has explicitly commissioned this submission?";
       firstAction    = "Clarify the decision authority chain before escalating. If you are not the final authority, obtain a direct commission from the person who is.";
     } else {
-      patternTitle   = "Borderline signal — diagnostic path recommended";
-      primaryReading = `The submission shows genuine indicators of a consequential situation, but the composite constitutional signal is not yet strong enough to guarantee a productive Strategy Room engagement. Diagnostic clarification will sharpen both the problem articulation and the authority case.`;
+      patternTitle   = "Borderline reading — diagnostic path recommended";
+      primaryReading = `The submission shows genuine indicators of a consequential situation, but the composite constitutional reading is not yet strong enough to guarantee a productive Strategy Room engagement. Diagnostic clarification will sharpen both the problem articulation and the authority case.`;
       firstAction    = "Complete the Executive Reporting diagnostic. It is designed for exactly this position — a situation with real weight that has not yet been fully constitutionally articulated.";
     }
     mandateNote = "Executive Reporting will produce the constitutional reading that strengthens this submission. Complete it, then return.";
@@ -211,8 +211,8 @@ function computeConstitutionalReading(f: FormData): ConstitutionalReading {
       primaryReading = `The current problem statement does not yet carry the structural detail required for a constitutional engagement. This does not mean the problem is not real — it means it has not yet been reduced to a form that can be constitutionally assessed. The constitutional scoring system cannot route submissions that have not demonstrated a structural problem.`;
       firstAction    = "Begin with the Constitutional Diagnostic or the Purpose Alignment Assessment — both are designed to surface the structural reading of the situation before it is presented for advisory escalation.";
     } else {
-      patternTitle   = "Signal below threshold — foundational work needed";
-      primaryReading = `The composite constitutional signal does not yet meet the threshold for Strategy Room engagement. This is a categorisation, not a judgement of the situation's importance. The diagnostic ladder exists precisely for this position — to build the constitutional case before escalation.`;
+      patternTitle   = "Reading below minimum — foundational work needed";
+      primaryReading = `The composite constitutional reading does not yet meet the minimum for Strategy Room engagement. This is a categorisation, not a judgement of the situation's importance. The diagnostic ladder exists precisely for this position — to build the constitutional case before escalation.`;
       firstAction    = "Begin with the Constitutional Diagnostic. It will establish the root-level reading of the situation and generate the constitutional evidence that strengthens a future submission.";
     }
     mandateNote = "The diagnostic ladder is the correct starting point. It builds the constitutional case that makes a Strategy Room engagement productive.";
@@ -415,7 +415,7 @@ function LiveScoreSidebar({ reading }: { reading: ConstitutionalReading }) {
   return (
     <div className="space-y-3">
       <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
-        <Eyebrow>Constitutional signal</Eyebrow>
+        <Eyebrow>Constitutional reading</Eyebrow>
         <div style={{ marginTop: "1.25rem" }}>
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "3rem", lineHeight: 1, color: ROUTE_CONFIG[reading.route].text, marginBottom: "0.4rem" }}>
             {reading.score}

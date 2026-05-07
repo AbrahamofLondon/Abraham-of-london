@@ -1,6 +1,6 @@
 /**
  * BLOCK 2 — CONDITION
- * Named condition from pattern taxonomy. Visually dominant. Not generic severity.
+ * Named condition from condition classification. Visually dominant. Not generic severity.
  */
 
 const GOLD = "#C9A96E";

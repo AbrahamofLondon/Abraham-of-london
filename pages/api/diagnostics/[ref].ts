@@ -3,8 +3,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
+import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
+import { assertDiagnosticReportAccess } from "@/lib/server/diagnostics/report-engine";
 
 type ResponseData =
   | { ok: true; item: any }
@@ -25,26 +26,27 @@ export default async function handler(
   }
 
   try {
-    const sessionId = readAccessCookie(req);
-    if (!sessionId) {
-      return res.status(401).json({ ok: false, error: "AUTH_REQUIRED" });
-    }
-
-    const ctx = await getSessionContext(sessionId);
-    if (!ctx?.ok || !ctx?.valid) {
-      return res.status(401).json({ ok: false, error: "SESSION_INVALID" });
-    }
-
-    const tier = String(ctx.tier || "public");
-    const isAdmin = tierAtLeast(tier, "private");
-
     const item = await getDiagnosticRecordByRef(diagnosticRef);
     if (!item) {
       return res.status(404).json({ ok: false, error: "NOT_FOUND" });
     }
 
-    if (!isAdmin && item.actor.userId && item.actor.userId !== ctx.memberId) {
-      return res.status(403).json({ ok: false, error: "FORBIDDEN" });
+    const token =
+      typeof req.query.token === "string"
+        ? req.query.token.trim()
+        : "";
+
+    const sessionId = readAccessCookie(req);
+    const ctx = sessionId ? await getSessionContext(sessionId) : null;
+    const access = assertDiagnosticReportAccess({
+      record: item,
+      userId: ctx?.ok && ctx?.valid ? ctx.memberId : null,
+      token,
+      purpose: "diagnostic_report_access",
+    });
+
+    if (!access.allowed) {
+      return res.status(access.status).json({ ok: false, error: access.error });
     }
 
     return res.status(200).json({ ok: true, item });

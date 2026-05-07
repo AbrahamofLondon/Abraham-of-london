@@ -227,7 +227,209 @@ results.push(await request(
   [400],
 ));
 
+// ── AUTH / ACCESS ────────────────────────────────────────────────────────────
+
+// 18. forged-session-id — access Strategy Room with fabricated session ID
+results.push(await request(
+  "forged-session-id",
+  `${targetUrl}/api/strategy-room/results?sessionKey=forged_abc123_nonexistent&type=session`,
+  { method: "GET" },
+  [401, 403, 404],
+));
+
+// 19. expired-token — use a clearly invalid signed token
+results.push(await request(
+  "expired-token",
+  `${targetUrl}/api/strategy-room/briefing/return/sr_test123`,
+  {
+    method: "GET",
+    headers: { authorization: "Bearer expired.fake.token.value" },
+  },
+  [401, 403, 404],
+));
+
+// 20. cross-session-access — try accessing execution with wrong session
+results.push(await request(
+  "cross-session-access",
+  `${targetUrl}/api/strategy-room/execution/nonexistent-session-id`,
+  {
+    method: "GET",
+    headers: { authorization: "Bearer wrong_user_token_abc" },
+  },
+  [401, 403, 404],
+));
+
+// ── TOKEN REPLAY ─────────────────────────────────────────────────────────────
+
+// 21. reused-download-token — attempt download with forged token
+results.push(await request(
+  "reused-download-token",
+  `${targetUrl}/api/dl/fake_expired_download_token_123`,
+  { method: "GET" },
+  [400, 401, 403, 404],
+));
+
+// ── CHECKOUT ABUSE ───────────────────────────────────────────────────────────
+
+// 22. checkout-price-injection — attempt to set price via body
+results.push(await request(
+  "checkout-price-injection",
+  `${targetUrl}/api/billing/checkout`,
+  {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      email: "attacker@test.com",
+      productCode: "decision_exposure_instrument",
+      amount: 1,
+      price: 1,
+      priceId: "price_ATTACKER_INJECTED",
+    }),
+  },
+  [400, 403],
+));
+
+// 23. checkout-entitlement-injection — attempt to set entitlement slug
+results.push(await request(
+  "checkout-entitlement-injection",
+  `${targetUrl}/api/billing/checkout`,
+  {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      email: "attacker@test.com",
+      entitlementSlug: "executive_reporting",
+    }),
+  },
+  [400, 403],
+));
+
+// ── DOWNLOAD BYPASS ──────────────────────────────────────────────────────────
+
+// 24. download-old-public-url — attempt old public PDF path
+results.push(await request(
+  "download-old-public-url",
+  `${targetUrl}/assets/downloads/decision-exposure-instrument.pdf`,
+  { method: "GET" },
+  [401, 403, 404],
+));
+
+// 25. download-slug-traversal — path traversal in download slug
+results.push(await request(
+  "download-slug-traversal",
+  `${targetUrl}/api/downloads/..%2F..%2F..%2Fetc%2Fpasswd`,
+  { method: "GET" },
+  [400, 403, 404],
+));
+
+// ── MALFORMED INPUT ──────────────────────────────────────────────────────────
+
+// 26. oversized-payload — send very large body to strategy room init
+results.push(await request(
+  "oversized-payload",
+  `${targetUrl}/api/strategy-room/session/init`,
+  {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ intake: { fullName: "A".repeat(50000) } }),
+  },
+  [400, 413],
+));
+
+// 27. invalid-json — send malformed JSON
+results.push(await request(
+  "invalid-json",
+  `${targetUrl}/api/strategy-room/session/init`,
+  {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: "{invalid json!!!",
+  },
+  [400],
+));
+
+// 28. unexpected-fields — strict schema rejects extra fields
+results.push(await request(
+  "unexpected-fields",
+  `${targetUrl}/api/strategy-room/session/init`,
+  {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      intake: { fullName: "Test", __proto__: { admin: true } },
+      _inject: true,
+      admin: true,
+    }),
+  },
+  [400, 403],
+));
+
+// ── RATE LIMIT ABUSE ─────────────────────────────────────────────────────────
+
+// 29. rapid-fire-capture — burst 12 capture requests, last should be limited
+{
+  let lastStatus = 0;
+  for (let i = 0; i < 12; i++) {
+    try {
+      const res = await fetch(`${targetUrl}/api/diagnostics/capture`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ resultRef: `burst-${i}`, email: "burst@test.com" }),
+      });
+      lastStatus = res.status;
+    } catch { lastStatus = 0; }
+  }
+  const ok = lastStatus === 429 || lastStatus === 400;
+  console.log(`${ok ? "PASS" : "FAIL"} rapid-fire-capture -> ${lastStatus} (expect 429 or 400 after burst)`);
+  results.push(ok);
+}
+
+// ── WEBHOOK REPLAY ───────────────────────────────────────────────────────────
+
+// 30. webhook-no-signature — POST to webhook without Stripe signature
+results.push(await request(
+  "webhook-no-signature",
+  `${targetUrl}/api/billing/webhook`,
+  {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ type: "checkout.session.completed", id: "evt_fake" }),
+  },
+  [400],
+));
+
+// ── CLIENT BUNDLE SCAN ───────────────────────────────────────────────────────
+
+// 31. client-bundle-scan (static only — the real security check)
+{
+  const clientRoots = [".next/static"];
+  const clientBanned = [
+    /CRON_SECRET/, /DOWNLOAD_SECRET/, /NEXTAUTH_SECRET/,
+    /DecisionAnchors?/, /AnchorContradiction/, /SOVEREIGN_KEYS?/,
+    /STRIPE_SECRET_KEY/, /STRIPE_WEBHOOK_SECRET/, /ADMIN_API_KEY/,
+    /ADMIN_PASSWORD_HASH/, /MFA_ENCRYPTION_KEY/,
+  ];
+  let clientFound = 0;
+  for (const root of clientRoots) {
+    for (const file of walk(root)) {
+      const content = fs.readFileSync(file, "utf8");
+      for (const pat of clientBanned) {
+        if (pat.test(content)) {
+          clientFound++;
+          console.log(`FAIL client-bundle-secrets ${file} matched ${pat}`);
+        }
+      }
+    }
+  }
+  if (clientFound === 0) {
+    console.log("PASS client-bundle-secrets (zero findings in .next/static)");
+    results.push(true);
+  } else {
+    results.push(false);
+  }
+}
+
 const passed = results.filter(Boolean).length;
 const failed = results.length - passed;
-console.log(`\nSummary: ${passed} passed, ${failed} failed`);
+console.log(`\nSummary: ${passed} passed, ${failed} failed out of ${results.length} tests`);
 process.exit(failed > 0 ? 1 : 0);

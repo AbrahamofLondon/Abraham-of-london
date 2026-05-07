@@ -1,11 +1,11 @@
 /**
  * DeterminismProof — makes the system auditable in UI.
  *
- * "This decision was reached deterministically.
+ * "This decision was reached by governed analysis.
  *  Same input → same output."
  *
- * Shows: deterministic verification badge + abstracted confidence.
- * Does NOT expose: tier names, scoring dimensions, integrity formula, thresholds.
+ * Shows: governed verification badge + abstracted confidence.
+ * Does NOT expose: tier names, scoring dimensions, integrity formula, criteria.
  */
 
 import * as React from "react";
@@ -28,7 +28,7 @@ export default function DeterminismProof({ spine, compact = false }: Determinism
       <div className="flex items-center gap-2 border border-white/[0.06] bg-white/[0.02] px-3 py-2">
         <Shield className="h-3 w-3 shrink-0" style={{ color: "rgba(110,231,183,0.50)" }} />
         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
-          Deterministic · {level} signal strength
+          Governed · {level} confidence
         </span>
       </div>
     );
@@ -39,12 +39,12 @@ export default function DeterminismProof({ spine, compact = false }: Determinism
       <div className="flex items-center gap-2 mb-3">
         <Shield className="h-3.5 w-3.5" style={{ color: "rgba(110,231,183,0.50)" }} />
         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(110,231,183,0.40)" }}>
-          Deterministic Decision Proof
+          Governed Decision Proof
         </span>
       </div>
 
       <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
-        This result was reached deterministically. Same input produces same output. The logic path is auditable.
+        This result was reached by governed analysis. Same input produces same output. The logic path is auditable.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-2" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.08em" }}>

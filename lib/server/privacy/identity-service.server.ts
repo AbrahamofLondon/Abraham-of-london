@@ -147,6 +147,15 @@ export async function isUnsubscribed(email: string): Promise<boolean> {
   return user?.unsubscribed ?? false;
 }
 
+export async function hasUserIdentity(email: string): Promise<boolean> {
+  const emailHash = hashEmail(email);
+  const user = await prisma.userIdentity.findUnique({
+    where: { emailHash },
+    select: { id: true },
+  });
+  return Boolean(user?.id);
+}
+
 /**
  * Unsubscribe a user from all communications.
  */

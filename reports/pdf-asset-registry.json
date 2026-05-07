@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-05-07T01:03:23.955Z",
+  "generatedAt": "2026-05-07T07:48:11.311Z",
   "canonicalBinaryTarget": "/assets/downloads/{slug}.pdf",
   "totals": {
-    "pdfs": 83,
-    "duplicateFilenameGroups": 0,
-    "duplicateAssets": 0
+    "pdfs": 84,
+    "duplicateFilenameGroups": 1,
+    "duplicateAssets": 2
   },
   "byFolderClass": {
-    "canonical_download": 82,
+    "canonical_download": 83,
     "generated_download": 1
   },
   "byCanonicalityStatus": {
-    "candidate_canonical": 82,
+    "candidate_canonical": 83,
     "generated": 1
   },
   "assets": [
@@ -43,8 +43,8 @@
       "filename": "canon-system-constitution.pdf",
       "slugCandidate": "canon-system-constitution",
       "folderClass": "canonical_download",
-      "fileSizeBytes": 95284,
-      "sha256": "9f735bb9120a8658ec5a77a8e76cef29f29aa91e948d6703fc09ed6f888254e0",
+      "fileSizeBytes": 95293,
+      "sha256": "0a77752ed13d3a4134d3129ef8fb5961bbb29ae2bb66de7180a4b7ea16381aef",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": null
     },
@@ -57,7 +57,7 @@
       "fileSizeBytes": 76695,
       "sha256": "fccb6a2de3b063ec2461cbe4167af394d5f76e39f03cf3dcd5128b4972056fe2",
       "canonicalityStatus": "generated",
-      "duplicateGroupId": null
+      "duplicateGroupId": "filename:frontier-resilience-01.pdf"
     },
     {
       "relativePath": "public/assets/downloads/conviction-vs-coercion.pdf",
@@ -80,6 +80,17 @@
       "sha256": "b5e8b231d5a707dcef7ad4032145be31aa2c5cad4e0c9ee35ee45ef196387f8d",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": null
+    },
+    {
+      "relativePath": "public/assets/downloads/frontier-resilience-01.pdf",
+      "publicUrl": "/assets/downloads/frontier-resilience-01.pdf",
+      "filename": "frontier-resilience-01.pdf",
+      "slugCandidate": "frontier-resilience-01",
+      "folderClass": "canonical_download",
+      "fileSizeBytes": 76695,
+      "sha256": "fccb6a2de3b063ec2461cbe4167af394d5f76e39f03cf3dcd5128b4972056fe2",
+      "canonicalityStatus": "candidate_canonical",
+      "duplicateGroupId": "filename:frontier-resilience-01.pdf"
     },
     {
       "relativePath": "public/assets/downloads/frontier-resilience-beyond-survival-mode.pdf",
@@ -263,8 +274,8 @@
       "filename": "frontier-resilience-the-cost-of-living-in-escalation.pdf",
       "slugCandidate": "frontier-resilience-the-cost-of-living-in-escalation",
       "folderClass": "canonical_download",
-      "fileSizeBytes": 48902,
-      "sha256": "e55f546b2ddfaf2cd0427ba19c6cdb50a076da74b0a4fda1f7698fc663a6b21c",
+      "fileSizeBytes": 48376,
+      "sha256": "2f0a8a335b6f3d63ad4abfaa6d4e6f5a446b168b6ac2d1f1bb4371ba4376da61",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": null
     },
@@ -549,8 +560,8 @@
       "filename": "institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
       "slugCandidate": "institutional-alpha-the-politics-of-suppressed-bad-news",
       "folderClass": "canonical_download",
-      "fileSizeBytes": 49307,
-      "sha256": "73f6a49b224b1295c59997697e11ee6c24ee4ee1357dd75a72804039cefe47f1",
+      "fileSizeBytes": 49327,
+      "sha256": "04581ee0debc406d300068d63f15eeac3f7d2b2e071669fccd78374e429a7528",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": null
     },
@@ -560,8 +571,8 @@
       "filename": "institutional-alpha-weak-signals-before-reputational-fracture.pdf",
       "slugCandidate": "institutional-alpha-weak-signals-before-reputational-fracture",
       "folderClass": "canonical_download",
-      "fileSizeBytes": 49853,
-      "sha256": "3639e51cec5d548413cd6fb0b47b51b21f6ecc49fba2a9a0769f9fe2ff6d1383",
+      "fileSizeBytes": 49548,
+      "sha256": "aaea4ae5abb052ea44e920b22ac85d6f89a6511ac8800b4dde919e58f8c9afb3",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": null
     },
@@ -593,8 +604,8 @@
       "filename": "institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
       "slugCandidate": "institutional-alpha-when-risk-travels-faster-than-reporting",
       "folderClass": "canonical_download",
-      "fileSizeBytes": 50338,
-      "sha256": "d98868c449752261a3c511d2b0e94c38ae2d74724d81c26ff0fc7d24e07cdbb5",
+      "fileSizeBytes": 50683,
+      "sha256": "c9560ca9e68535ff859ba12b1ee5fe570728ce096d901354bafeb0d555e6bd5d",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": null
     },
@@ -648,8 +659,8 @@
       "filename": "institutional-integrity-audit.pdf",
       "slugCandidate": "institutional-integrity-audit",
       "folderClass": "canonical_download",
-      "fileSizeBytes": 82442,
-      "sha256": "e1beabca14770060003e10beaf11d27ecb7534c6d3ebbc6f3457f4be76605f41",
+      "fileSizeBytes": 82575,
+      "sha256": "1c762abb8ceb0d025d80a2ed2749b8ffb009c615485c585f3c45508434966753",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": null
     },

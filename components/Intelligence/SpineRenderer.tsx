@@ -22,6 +22,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { IntelligenceSpine, ConfidenceBand } from "@/lib/decision/intelligence-spine";
+import { getGovernedOutput } from "@/lib/decision/spine-accessors";
 import { controlShiftSummary } from "@/lib/decision/default-path-forecast";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -44,8 +45,8 @@ export type SpineRendererProps = {
   memoryInterruptMessage?: string;
   /** Callback when user acknowledges memory interrupt */
   onMemoryAcknowledged?: () => void;
-  /** Arbiter mismatch message to show */
-  arbiterMismatchMessage?: string;
+  /** Integrity review message to show */
+  integrityReviewMessage?: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,9 +92,10 @@ export default function SpineRenderer({
   showMemoryInterrupt = false,
   memoryInterruptMessage,
   onMemoryAcknowledged,
-  arbiterMismatchMessage,
+  integrityReviewMessage,
 }: SpineRendererProps) {
   const [memoryDismissed, setMemoryDismissed] = React.useState(false);
+  const governed = getGovernedOutput(spine);
   const band = spine.c3.confidenceBand;
   const styles = BAND_STYLES[band];
   const synthesis = spine.synthesis;
@@ -153,13 +155,13 @@ export default function SpineRenderer({
             ))}
           </div>
           <span className="font-mono text-[9px] uppercase tracking-wider text-white/30">
-            {spine.deterministic.conditionClass}
+            {governed.conditionClass}
           </span>
         </div>
       </div>
 
-      {/* ── Arbiter Mismatch Warning ────────────────────────────────────── */}
-      {arbiterMismatchMessage && (
+      {/* ── Integrity Review Warning ────────────────────────────────────── */}
+      {integrityReviewMessage && (
         <div className="rounded-lg border border-orange-500/40 bg-orange-500/10 p-5">
           <div className="mb-2 flex items-center gap-2">
             <Shield className="h-4 w-4 text-orange-400" />
@@ -168,7 +170,7 @@ export default function SpineRenderer({
             </span>
           </div>
           <p className="text-sm leading-relaxed text-orange-200/90">
-            {arbiterMismatchMessage}
+            {integrityReviewMessage}
           </p>
         </div>
       )}

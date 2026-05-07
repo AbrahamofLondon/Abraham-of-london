@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-07T01:03:39.282Z",
+  "generatedAt": "2026-05-07T07:48:23.507Z",
   "totals": {
     "assetGroups": 83,
     "resolved": 83,
     "unresolved": 0,
-    "canonical": 83,
-    "alias": 0,
+    "canonical": 82,
+    "alias": 1,
     "duplicate": 0,
     "conflict": 0
   },
@@ -78,14 +78,17 @@
     {
       "slug": "frontier-resilience-01",
       "canonicalPath": "/assets/downloads/frontier-resilience-01.pdf",
-      "decision": "canonical",
-      "reason": "Only one file exists for this slug. Canonical endpoint /assets/downloads/frontier-resilience-01.pdf must be materialised from /assets/downloads/content-downloads/frontier-resilience-01.pdf; physical canonical binary is not represented in this candidate group.",
+      "decision": "alias",
+      "reason": "All files are byte-identical; /assets/downloads/{slug}.pdf is the preferred canonical endpoint and all other paths are aliases. Canonical endpoint already exists at /assets/downloads/frontier-resilience-01.pdf.",
       "sourcePaths": [
-        "/assets/downloads/content-downloads/frontier-resilience-01.pdf"
+        "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
+        "/assets/downloads/frontier-resilience-01.pdf"
       ],
       "resolved": true,
-      "aliasPaths": [],
-      "materialisationRequired": true,
+      "aliasPaths": [
+        "/assets/downloads/content-downloads/frontier-resilience-01.pdf"
+      ],
+      "materialisationRequired": false,
       "confidence": "high"
     },
     {

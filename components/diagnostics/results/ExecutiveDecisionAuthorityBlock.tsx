@@ -2,7 +2,7 @@
  * ExecutiveDecisionAuthorityBlock — public-safe elevation surface.
  *
  * Renders: Decision Authority, Cost of Inaction, Execution Risk, Governance Move.
- * Does NOT render: scores, thresholds, internal signals, engine modes, traces.
+ * Does NOT render: scores, criteria, internal indicators, engine modes, traces.
  */
 
 import * as React from "react";

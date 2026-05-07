@@ -143,7 +143,7 @@ export function formatReadTime(wordCount: number | null | undefined): string {
 // =============================================================================
 
 /**
- * Generates a deterministic gradient pair based on a string input
+ * Generates a consistent gradient pair based on a string input
  */
 export function getGradientPair(input: string = ''): GradientPair {
   // Default gradient pair
@@ -204,7 +204,7 @@ export function createGradientCSS(color1: string, color2: string): string {
 }
 
 /**
- * Generates a deterministic gradient CSS based on input
+ * Generates a consistent gradient CSS based on input
  */
 export function getGradientCSS(input: string = ''): string {
   const [color1, color2] = getGradientPair(input);

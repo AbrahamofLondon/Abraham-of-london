@@ -2,9 +2,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
+import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
-import { canUnlockReport } from "@/lib/server/diagnostics/report-engine";
+import {
+  assertDiagnosticReportAccess,
+  canUnlockReport,
+} from "@/lib/server/diagnostics/report-engine";
 import { getArchivedDiagnosticPdfSignedUrl } from "@/lib/server/diagnostics/report-archive";
 import { getDiagnosticStorageAdapter } from "@/lib/server/diagnostics/storage";
 
@@ -42,30 +45,33 @@ export default async function handler(
       return res.status(400).json({ ok: false, error: "SIGNED_URLS_NOT_ENABLED" });
     }
 
-    const sessionId = readAccessCookie(req);
-    if (!sessionId) {
-      return res.status(401).json({ ok: false, error: "AUTH_REQUIRED" });
-    }
-
-    const ctx = await getSessionContext(sessionId);
-    if (!ctx?.ok || !ctx?.valid) {
-      return res.status(401).json({ ok: false, error: "SESSION_INVALID" });
-    }
-
     const item = await getDiagnosticRecordByRef(ref);
     if (!item) {
       return res.status(404).json({ ok: false, error: "NOT_FOUND" });
     }
 
-    const isAdmin = tierAtLeast(String(ctx.tier || "public"), "private");
-    if (!isAdmin && item.actor.userId && item.actor.userId !== ctx.memberId) {
-      return res.status(403).json({ ok: false, error: "FORBIDDEN" });
+    const token =
+      typeof req.query.token === "string"
+        ? req.query.token.trim()
+        : "";
+    const sessionId = readAccessCookie(req);
+    const ctx = sessionId ? await getSessionContext(sessionId) : null;
+    const access = assertDiagnosticReportAccess({
+      record: item,
+      userId: ctx?.ok && ctx?.valid ? ctx.memberId : null,
+      token,
+      purpose: "diagnostic_report_access",
+    });
+
+    if (!access.allowed) {
+      return res.status(access.status).json({ ok: false, error: access.error });
     }
 
     const unlocked = canUnlockReport({
       record: item,
-      userTier: String(ctx.tier || "public"),
-      isAdmin,
+      userTier: String(ctx?.ok && ctx?.valid ? ctx.tier || "public" : "public"),
+      isAdmin: false,
+      accessGranted: true,
     });
 
     if (!unlocked) {

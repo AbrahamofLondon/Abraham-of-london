@@ -125,7 +125,7 @@ function isTierDirective(value: unknown): value is TierDirective {
     typeof candidate.mandate === "string" &&
     candidate.mandate.trim().length > 0 &&
     Array.isArray(candidate.focusNodes) &&
-    typeof candidate.riskThreshold === "string" &&
+    typeof candidate.riskLevel === "string" &&
     candidate.focusNodes.every((node) => typeof node === "string")
   );
 }

@@ -2,9 +2,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
+import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
-import { canUnlockReport } from "@/lib/server/diagnostics/report-engine";
+import {
+  assertDiagnosticReportAccess,
+  canUnlockReport,
+} from "@/lib/server/diagnostics/report-engine";
 import { resolveDiagnosticReport } from "@/lib/server/diagnostics/report-resolver";
 import {
   getArchivedDiagnosticPdf,
@@ -40,25 +43,31 @@ export default async function handler(
       return res.status(400).send("REF_MISSING");
     }
 
-    const sessionId = readAccessCookie(req);
-    if (!sessionId) return res.status(401).send("AUTH_REQUIRED");
-
-    const ctx = await getSessionContext(sessionId);
-    if (!ctx?.ok || !ctx?.valid) return res.status(401).send("SESSION_INVALID");
-
     const item = await getDiagnosticRecordByRef(diagnosticRef);
     if (!item) return res.status(404).send("NOT_FOUND");
 
-    const isAdmin = tierAtLeast(String(ctx.tier || "public"), "private");
+    const token =
+      typeof req.query.token === "string"
+        ? req.query.token.trim()
+        : "";
+    const sessionId = readAccessCookie(req);
+    const ctx = sessionId ? await getSessionContext(sessionId) : null;
+    const access = assertDiagnosticReportAccess({
+      record: item,
+      userId: ctx?.ok && ctx?.valid ? ctx.memberId : null,
+      token,
+      purpose: "diagnostic_report_access",
+    });
 
-    if (!isAdmin && item.actor.userId && item.actor.userId !== ctx.memberId) {
-      return res.status(403).send("FORBIDDEN");
+    if (!access.allowed) {
+      return res.status(access.status).send(access.error);
     }
 
     const unlocked = canUnlockReport({
       record: item,
-      userTier: String(ctx.tier || "public"),
-      isAdmin,
+      userTier: String(ctx?.ok && ctx?.valid ? ctx.tier || "public" : "public"),
+      isAdmin: false,
+      accessGranted: true,
     });
 
     if (!unlocked) {

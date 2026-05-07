@@ -252,7 +252,7 @@ export default function EnhancedFooter(): React.ReactElement {
       href: "/diagnostics/executive-reporting",
       eyebrow: "Flagship product",
       title: "Executive Reporting",
-      body: "Board-grade interpretation. Diagnostic signal converted into decision-grade output.",
+      body: "Board-grade interpretation. Diagnostic reading converted into decision-grade output.",
       icon: FileText,
       tag: "EXEC·V2",
     },

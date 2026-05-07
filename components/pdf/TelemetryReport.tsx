@@ -186,7 +186,7 @@ export const TelemetryReport = ({
         {isDisordered && (
           <View style={styles.alertBox}>
             <Text style={styles.alertText}>
-              ⚠️ SYSTEM ALERT: Resonance below threshold ({data.resonance}%). 
+              ⚠️ SYSTEM ALERT: Resonance below minimum ({data.resonance}%). 
               Immediate intervention required in {Math.round(data.metrics.friction)}% of domains.
             </Text>
           </View>

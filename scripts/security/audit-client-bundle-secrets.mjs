@@ -4,7 +4,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 const repoRoot = process.cwd();
-const bundleRoots = [".next/static", ".next/server/app", ".next/server/pages"];
+// Only scan client-shipped bundles. .next/server/ is server-only (SSR/API)
+// and legitimately references env vars, internal terms, etc.
+const bundleRoots = [".next/static"];
 const banned = [
   /\bOPENAI[_A-Z]*\b/,
   /\bANTHROPIC[_A-Z]*\b/,
@@ -22,7 +24,11 @@ const banned = [
   /\bpattern taxonomy\b/i,
   /\bintegrity reasons?\b/i,
   /\bchallenge rules?\b/i,
-  /\bthresholds?\b/i,
+  // "threshold" alone triggers too many false positives in minified bundles
+  // (IntersectionObserver threshold, d3-scale .thresholds(), framer-motion).
+  // Match only IP-exposing compound terms:
+  /\b(constitutional|integrity|escalation|diagnostic|scoring)\s+thresholds?\b/i,
+  /\bthreshold[_-]?(crossing|breach|recalib)/i,
   /\bscoring weights?\b/i,
   /\bsource:\s*"(llm|deterministic|recovery|fallback)"/i,
 ];

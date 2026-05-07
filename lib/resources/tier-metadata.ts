@@ -12,7 +12,7 @@ export interface TierDirective {
 
   mandate: string;
   focusNodes: string[];
-  riskThreshold: string;
+  riskLevel: string;
 }
 
 /**
@@ -58,7 +58,7 @@ export const TIER_DIRECTIVES: Record<DisplayTier, TierDirective> = {
     displayTier: "Board",
     mandate: "Fiduciary Sovereignty & Long-Range Survival",
     focusNodes: ["Capital Structure", "Governance", "Succession"],
-    riskThreshold: "Existential / Systemic",
+    riskLevel: "Existential / Systemic",
   },
 
   Founder: {
@@ -66,7 +66,7 @@ export const TIER_DIRECTIVES: Record<DisplayTier, TierDirective> = {
     displayTier: "Founder",
     mandate: "Operational Agency & Velocity Calibration",
     focusNodes: ["Product-Logic", "Talent Density", "Market-Entry"],
-    riskThreshold: "Strategic / Competitive",
+    riskLevel: "Strategic / Competitive",
   },
 
   Household: {
@@ -74,7 +74,7 @@ export const TIER_DIRECTIVES: Record<DisplayTier, TierDirective> = {
     displayTier: "Household",
     mandate: "Legacy Persistence & Private Stability",
     focusNodes: ["Asset Protection", "Knowledge Transfer", "Privacy"],
-    riskThreshold: "Generational / Personal",
+    riskLevel: "Generational / Personal",
   },
 
   Director: {
@@ -82,7 +82,7 @@ export const TIER_DIRECTIVES: Record<DisplayTier, TierDirective> = {
     displayTier: "Director",
     mandate: "Control, Stewardship & Institutional Integrity",
     focusNodes: ["Controls", "Risk", "Governance Cadence"],
-    riskThreshold: "Board / Enterprise",
+    riskLevel: "Board / Enterprise",
   },
 
   Partner: {
@@ -90,7 +90,7 @@ export const TIER_DIRECTIVES: Record<DisplayTier, TierDirective> = {
     displayTier: "Partner",
     mandate: "Strategic Leverage & Coalition Execution",
     focusNodes: ["Partnership Architecture", "Distribution", "Credibility"],
-    riskThreshold: "Strategic / Market",
+    riskLevel: "Strategic / Market",
   },
 
   Principal: {
@@ -98,7 +98,7 @@ export const TIER_DIRECTIVES: Record<DisplayTier, TierDirective> = {
     displayTier: "Principal",
     mandate: "Ownership Authority & Final Accountability",
     focusNodes: ["Decision Rights", "Capital Allocation", "Succession Logic"],
-    riskThreshold: "Existential / Ultimate",
+    riskLevel: "Existential / Ultimate",
   },
 };
 

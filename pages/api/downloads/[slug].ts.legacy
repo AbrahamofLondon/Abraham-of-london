@@ -170,9 +170,7 @@ export default async function handler(
         watermarkId: forensics.watermarkId,
         tokenId: issued?.tokenId ?? null,
         forensicFooter: forensics.expectedFooter,
-        downloadUrl: issued?.token
-          ? `/api/dl/${encodeURIComponent(issued.token)}`
-          : null,
+        downloadUrl: `/api/downloads/${encodeURIComponent(asset.slug)}`,
         slug: asset.slug,
         title: asset.title,
         contentType: asset.contentType,

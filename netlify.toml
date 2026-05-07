@@ -112,6 +112,11 @@
   NEXT_DISABLE_SOURCEMAPS = "true"
 
 [[redirects]]
+  from = "/assets/downloads/*"
+  to = "/404"
+  status = 404
+  force = true
+[[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
   status = 301
@@ -156,1273 +161,1273 @@
 
 [[redirects]]
   from = "/lexicon/brotherhood.pdf"
-  to = "/assets/downloads/brotherhood.pdf"
+  to = "/api/downloads/brotherhood"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/clarity.pdf"
-  to = "/assets/downloads/clarity.pdf"
+  to = "/api/downloads/clarity"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/covenant.pdf"
-  to = "/assets/downloads/covenant.pdf"
+  to = "/api/downloads/covenant"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/family.pdf"
-  to = "/assets/downloads/family.pdf"
+  to = "/api/downloads/family"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/father.pdf"
-  to = "/assets/downloads/father.pdf"
+  to = "/api/downloads/father"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/governance.pdf"
-  to = "/assets/downloads/governance.pdf"
+  to = "/api/downloads/governance"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/identity.pdf"
-  to = "/assets/downloads/identity.pdf"
+  to = "/api/downloads/identity"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/integrity.pdf"
-  to = "/assets/downloads/integrity.pdf"
+  to = "/api/downloads/integrity"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/leadership.pdf"
-  to = "/assets/downloads/leadership.pdf"
+  to = "/api/downloads/leadership"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/legacy.pdf"
-  to = "/assets/downloads/legacy.pdf"
+  to = "/api/downloads/legacy"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/purpose.pdf"
-  to = "/assets/downloads/purpose.pdf"
+  to = "/api/downloads/purpose"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/responsibility.pdf"
-  to = "/assets/downloads/responsibility.pdf"
+  to = "/api/downloads/responsibility"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/sisterhood.pdf"
-  to = "/assets/downloads/sisterhood.pdf"
+  to = "/api/downloads/sisterhood"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/sovereignty.pdf"
-  to = "/assets/downloads/sovereignty.pdf"
+  to = "/api/downloads/sovereignty"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/strategic-autonomy.pdf"
-  to = "/assets/downloads/strategic-autonomy.pdf"
+  to = "/api/downloads/strategic-autonomy"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/strategy.pdf"
-  to = "/assets/downloads/strategy.pdf"
+  to = "/api/downloads/strategy"
   status = 301
   force = true
 
 [[redirects]]
   from = "/lexicon/surrender.pdf"
-  to = "/assets/downloads/surrender.pdf"
+  to = "/api/downloads/surrender"
   status = 301
   force = true
 
 [[redirects]]
   from = "/prints/entrepreneur-operating-pack.pdf"
-  to = "/assets/downloads/entrepreneur-operating-pack.pdf"
+  to = "/api/downloads/entrepreneur-operating-pack"
   status = 301
   force = true
 
 [[redirects]]
   from = "/prints/fatherhood-standards-card.pdf"
-  to = "/assets/downloads/fatherhood-standards-card.pdf"
+  to = "/api/downloads/fatherhood-standards-card"
   status = 301
   force = true
 
 [[redirects]]
   from = "/prints/leadership-playbook.pdf"
-  to = "/assets/downloads/leadership-playbook.pdf"
+  to = "/api/downloads/leadership-playbook"
   status = 301
   force = true
 
 [[redirects]]
   from = "/prints/mentorship-starter-kit.pdf"
-  to = "/assets/downloads/mentorship-starter-kit.pdf"
+  to = "/api/downloads/mentorship-starter-kit"
   status = 301
   force = true
 
 [[redirects]]
   from = "/prints/standards-brief.pdf"
-  to = "/assets/downloads/standards-brief.pdf"
+  to = "/api/downloads/standards-brief"
   status = 301
   force = true
 
 [[redirects]]
   from = "/prints/weekly-operating-rhythm.pdf"
-  to = "/assets/downloads/weekly-operating-rhythm.pdf"
+  to = "/api/downloads/weekly-operating-rhythm"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/brotherhood-leader-guide.pdf"
-  to = "/assets/downloads/brotherhood-leader-guide.pdf"
+  to = "/api/downloads/brotherhood-leader-guide"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/brotherhood-starter-kit.pdf"
-  to = "/assets/downloads/brotherhood-starter-kit.pdf"
+  to = "/api/downloads/brotherhood-starter-kit"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/canon-campaign.pdf"
-  to = "/assets/downloads/canon-campaign.pdf"
+  to = "/api/downloads/canon-campaign"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/canon-council-table-agenda.pdf"
-  to = "/assets/downloads/canon-council-table-agenda.pdf"
+  to = "/api/downloads/canon-council-table-agenda"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/canon-household-charter-template.pdf"
-  to = "/assets/downloads/canon-household-charter-template.pdf"
+  to = "/api/downloads/canon-household-charter-template"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/canon-household-charter.pdf"
-  to = "/assets/downloads/canon-household-charter.pdf"
+  to = "/api/downloads/canon-household-charter"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/canon-reading-plan-year-one.pdf"
-  to = "/assets/downloads/canon-reading-plan-year-one.pdf"
+  to = "/api/downloads/canon-reading-plan-year-one"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/canon-system-constitution.pdf"
-  to = "/assets/downloads/canon-system-constitution.pdf"
+  to = "/api/downloads/canon-system-constitution"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/destiny-mapping-worksheet.pdf"
-  to = "/assets/downloads/destiny-mapping-worksheet.pdf"
+  to = "/api/downloads/destiny-mapping-worksheet"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/fatherhood-impact-framework.pdf"
-  to = "/assets/downloads/fatherhood-impact-framework.pdf"
+  to = "/api/downloads/fatherhood-impact-framework"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-beyond-survival-mode.pdf"
-  to = "/assets/downloads/frontier-resilience-beyond-survival-mode.pdf"
+  to = "/api/downloads/frontier-resilience-beyond-survival-mode"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-crisis-loops-and-lost-judgment.pdf"
-  to = "/assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf"
+  to = "/api/downloads/frontier-resilience-crisis-loops-and-lost-judgment"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-decision-latency-as-hidden-risk.pdf"
-  to = "/assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf"
+  to = "/api/downloads/frontier-resilience-decision-latency-as-hidden-risk"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-drift-in-the-second-line.pdf"
-  to = "/assets/downloads/frontier-resilience-drift-in-the-second-line.pdf"
+  to = "/api/downloads/frontier-resilience-drift-in-the-second-line"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-drift-inside-the-winning-season.pdf"
-  to = "/assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf"
+  to = "/api/downloads/frontier-resilience-drift-inside-the-winning-season"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-fatigue-at-the-top.pdf"
-  to = "/assets/downloads/frontier-resilience-fatigue-at-the-top.pdf"
+  to = "/api/downloads/frontier-resilience-fatigue-at-the-top"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-founder-endurance-is-not-a-plan.pdf"
-  to = "/assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf"
+  to = "/api/downloads/frontier-resilience-founder-endurance-is-not-a-plan"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-fragility-of-unowned-decisions.pdf"
-  to = "/assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf"
+  to = "/api/downloads/frontier-resilience-fragility-of-unowned-decisions"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-holding-standard-when-cash-tightens.pdf"
-  to = "/assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf"
+  to = "/api/downloads/frontier-resilience-holding-standard-when-cash-tightens"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-institutions-that-cannot-say-no.pdf"
-  to = "/assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf"
+  to = "/api/downloads/frontier-resilience-institutions-that-cannot-say-no"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-operating-cadence-under-strain.pdf"
-  to = "/assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf"
+  to = "/api/downloads/frontier-resilience-operating-cadence-under-strain"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-pressure-tests-for-key-person-risk.pdf"
-  to = "/assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf"
+  to = "/api/downloads/frontier-resilience-pressure-tests-for-key-person-risk"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-resilience-before-expansion.pdf"
-  to = "/assets/downloads/frontier-resilience-resilience-before-expansion.pdf"
+  to = "/api/downloads/frontier-resilience-resilience-before-expansion"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-restoring-command-after-confusion.pdf"
-  to = "/assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf"
+  to = "/api/downloads/frontier-resilience-restoring-command-after-confusion"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-stress-reveals-the-real-culture.pdf"
-  to = "/assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf"
+  to = "/api/downloads/frontier-resilience-stress-reveals-the-real-culture"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-surviving-bad-information.pdf"
-  to = "/assets/downloads/frontier-resilience-surviving-bad-information.pdf"
+  to = "/api/downloads/frontier-resilience-surviving-bad-information"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-the-cost-of-living-in-escalation.pdf"
-  to = "/assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf"
+  to = "/api/downloads/frontier-resilience-the-cost-of-living-in-escalation"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-the-discipline-of-bounded-adaptation.pdf"
-  to = "/assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf"
+  to = "/api/downloads/frontier-resilience-the-discipline-of-bounded-adaptation"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-the-false-order-of-busy-teams.pdf"
-  to = "/assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf"
+  to = "/api/downloads/frontier-resilience-the-false-order-of-busy-teams"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-the-fragility-of-heroic-leadership.pdf"
-  to = "/assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf"
+  to = "/api/downloads/frontier-resilience-the-fragility-of-heroic-leadership"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-the-tax-of-constant-reaction.pdf"
-  to = "/assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf"
+  to = "/api/downloads/frontier-resilience-the-tax-of-constant-reaction"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-when-clarity-has-no-owner.pdf"
-  to = "/assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf"
+  to = "/api/downloads/frontier-resilience-when-clarity-has-no-owner"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-when-growth-hides-breakdown.pdf"
-  to = "/assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf"
+  to = "/api/downloads/frontier-resilience-when-growth-hides-breakdown"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-when-recovery-needs-governance.pdf"
-  to = "/assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf"
+  to = "/api/downloads/frontier-resilience-when-recovery-needs-governance"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/frontier-resilience-when-urgency-corrupts-sequencing.pdf"
-  to = "/assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf"
+  to = "/api/downloads/frontier-resilience-when-urgency-corrupts-sequencing"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/getting-started.pdf"
-  to = "/assets/downloads/getting-started.pdf"
+  to = "/api/downloads/getting-started"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-false-confidence-from-aggregated-metrics.pdf"
-  to = "/assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf"
+  to = "/api/downloads/institutional-alpha-false-confidence-from-aggregated-metrics"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-intelligence-after-the-founder-myth.pdf"
-  to = "/assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf"
+  to = "/api/downloads/institutional-alpha-intelligence-after-the-founder-myth"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-intelligence-debt-in-scaling-firms.pdf"
-  to = "/assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf"
+  to = "/api/downloads/institutional-alpha-intelligence-debt-in-scaling-firms"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf"
-  to = "/assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf"
+  to = "/api/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-overinterpreting-motion-as-momentum.pdf"
-  to = "/assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf"
+  to = "/api/downloads/institutional-alpha-overinterpreting-motion-as-momentum"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-pattern-recognition-without-operating-truth.pdf"
-  to = "/assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf"
+  to = "/api/downloads/institutional-alpha-pattern-recognition-without-operating-truth"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-reporting-systems-that-reward-optimism.pdf"
-  to = "/assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf"
+  to = "/api/downloads/institutional-alpha-reporting-systems-that-reward-optimism"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-signal-decay-in-reporting-chains.pdf"
-  to = "/assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf"
+  to = "/api/downloads/institutional-alpha-signal-decay-in-reporting-chains"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-blindness-of-clean-narratives.pdf"
-  to = "/assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf"
+  to = "/api/downloads/institutional-alpha-the-blindness-of-clean-narratives"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-breakdown-of-field-intelligence.pdf"
-  to = "/assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf"
+  to = "/api/downloads/institutional-alpha-the-breakdown-of-field-intelligence"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-comfort-of-lagging-indicators.pdf"
-  to = "/assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf"
+  to = "/api/downloads/institutional-alpha-the-comfort-of-lagging-indicators"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-danger-of-unaudited-assumptions.pdf"
-  to = "/assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf"
+  to = "/api/downloads/institutional-alpha-the-danger-of-unaudited-assumptions"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-difference-between-insight-and-surveillance.pdf"
-  to = "/assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf"
+  to = "/api/downloads/institutional-alpha-the-difference-between-insight-and-surveillance"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf"
-  to = "/assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf"
+  to = "/api/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-hidden-cost-of-flattering-data.pdf"
-  to = "/assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf"
+  to = "/api/downloads/institutional-alpha-the-hidden-cost-of-flattering-data"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-institutional-price-of-guesswork.pdf"
-  to = "/assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf"
+  to = "/api/downloads/institutional-alpha-the-institutional-price-of-guesswork"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-the-politics-of-suppressed-bad-news.pdf"
-  to = "/assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf"
+  to = "/api/downloads/institutional-alpha-the-politics-of-suppressed-bad-news"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-weak-signals-before-reputational-fracture.pdf"
-  to = "/assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf"
+  to = "/api/downloads/institutional-alpha-weak-signals-before-reputational-fracture"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf"
-  to = "/assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf"
+  to = "/api/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-when-dashboards-outpace-judgment.pdf"
-  to = "/assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf"
+  to = "/api/downloads/institutional-alpha-when-dashboards-outpace-judgment"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-when-risk-travels-faster-than-reporting.pdf"
-  to = "/assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf"
+  to = "/api/downloads/institutional-alpha-when-risk-travels-faster-than-reporting"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-when-scenario-planning-becomes-theatre.pdf"
-  to = "/assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf"
+  to = "/api/downloads/institutional-alpha-when-scenario-planning-becomes-theatre"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-when-the-board-sees-a-different-company.pdf"
-  to = "/assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf"
+  to = "/api/downloads/institutional-alpha-when-the-board-sees-a-different-company"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-why-executive-summaries-mislead.pdf"
-  to = "/assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf"
+  to = "/api/downloads/institutional-alpha-why-executive-summaries-mislead"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-alpha-why-leaders-stop-hearing-reality.pdf"
-  to = "/assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf"
+  to = "/api/downloads/institutional-alpha-why-leaders-stop-hearing-reality"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/institutional-health-scorecard.pdf"
-  to = "/assets/downloads/institutional-health-scorecard.pdf"
+  to = "/api/downloads/institutional-health-scorecard"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/leadership-standards-blueprint.pdf"
-  to = "/assets/downloads/leadership-standards-blueprint.pdf"
+  to = "/api/downloads/leadership-standards-blueprint"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/multi-generational-legacy-ledger.pdf"
-  to = "/assets/downloads/multi-generational-legacy-ledger.pdf"
+  to = "/api/downloads/multi-generational-legacy-ledger"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/purpose-alignment-checklist.pdf"
-  to = "/assets/downloads/purpose-alignment-checklist.pdf"
+  to = "/api/downloads/purpose-alignment-checklist"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/purpose-alignment.pdf"
-  to = "/assets/downloads/purpose-alignment.pdf"
+  to = "/api/downloads/purpose-alignment"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-alignment-without-sovereignty.pdf"
-  to = "/assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf"
+  to = "/api/downloads/sovereign-intelligence-alignment-without-sovereignty"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-control-without-ownership.pdf"
-  to = "/assets/downloads/sovereign-intelligence-control-without-ownership.pdf"
+  to = "/api/downloads/sovereign-intelligence-control-without-ownership"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-dependence-disguised-as-partnership.pdf"
-  to = "/assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf"
+  to = "/api/downloads/sovereign-intelligence-dependence-disguised-as-partnership"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf"
-  to = "/assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf"
+  to = "/api/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf"
-  to = "/assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf"
+  to = "/api/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf"
-  to = "/assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf"
+  to = "/api/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf"
-  to = "/assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf"
+  to = "/api/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf"
-  to = "/assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf"
+  to = "/api/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf"
-  to = "/assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf"
+  to = "/api/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-strategic-exposure-without-red-lines.pdf"
-  to = "/assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf"
+  to = "/api/downloads/sovereign-intelligence-strategic-exposure-without-red-lines"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-geography-of-hidden-influence.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-geography-of-hidden-influence"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf"
-  to = "/assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf"
+  to = "/api/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf"
-  to = "/assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf"
+  to = "/api/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-when-optionality-quietly-dies.pdf"
-  to = "/assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf"
+  to = "/api/downloads/sovereign-intelligence-when-optionality-quietly-dies"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf"
-  to = "/assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf"
+  to = "/api/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/strategic-frameworks.pdf"
-  to = "/assets/downloads/strategic-frameworks.pdf"
+  to = "/api/downloads/strategic-frameworks"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/strategy-room-intake.pdf"
-  to = "/assets/downloads/strategy-room-intake.pdf"
+  to = "/api/downloads/strategy-room-intake"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/surrender-operational-framework.pdf"
-  to = "/assets/downloads/surrender-operational-framework.pdf"
+  to = "/api/downloads/surrender-operational-framework"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/v4.pdf"
-  to = "/assets/downloads/v4.pdf"
+  to = "/api/downloads/v4"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/vault-index.pdf"
-  to = "/assets/downloads/vault-index.pdf"
+  to = "/api/downloads/vault-index"
   status = 301
   force = true
 
 [[redirects]]
   from = "/resources/vault.pdf"
-  to = "/assets/downloads/vault.pdf"
+  to = "/api/downloads/vault"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-001-modern-household.pdf"
-  to = "/assets/downloads/brief-001-modern-household.pdf"
+  to = "/api/downloads/brief-001-modern-household"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-002-economic-fortress.pdf"
-  to = "/assets/downloads/brief-002-economic-fortress.pdf"
+  to = "/api/downloads/brief-002-economic-fortress"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-003-education-of-heirs.pdf"
-  to = "/assets/downloads/brief-003-education-of-heirs.pdf"
+  to = "/api/downloads/brief-003-education-of-heirs"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-004-parallel-estate.pdf"
-  to = "/assets/downloads/brief-004-parallel-estate.pdf"
+  to = "/api/downloads/brief-004-parallel-estate"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-005-brotherhood-protocol.pdf"
-  to = "/assets/downloads/brief-005-brotherhood-protocol.pdf"
+  to = "/api/downloads/brief-005-brotherhood-protocol"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-006-sisterhood-and-hearth.pdf"
-  to = "/assets/downloads/brief-006-sisterhood-and-hearth.pdf"
+  to = "/api/downloads/brief-006-sisterhood-and-hearth"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-007-covenantal-oath.pdf"
-  to = "/assets/downloads/brief-007-covenantal-oath.pdf"
+  to = "/api/downloads/brief-007-covenantal-oath"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-008-ledger-of-legacy.pdf"
-  to = "/assets/downloads/brief-008-ledger-of-legacy.pdf"
+  to = "/api/downloads/brief-008-ledger-of-legacy"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-009-sovereignty-of-time.pdf"
-  to = "/assets/downloads/brief-009-sovereignty-of-time.pdf"
+  to = "/api/downloads/brief-009-sovereignty-of-time"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-010-geometry-of-inner-circle.pdf"
-  to = "/assets/downloads/brief-010-geometry-of-inner-circle.pdf"
+  to = "/api/downloads/brief-010-geometry-of-inner-circle"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-011-geography-of-estate.pdf"
-  to = "/assets/downloads/brief-011-geography-of-estate.pdf"
+  to = "/api/downloads/brief-011-geography-of-estate"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/briefs/brief-012-aesthetics-of-order.pdf"
-  to = "/assets/downloads/brief-012-aesthetics-of-order.pdf"
+  to = "/api/downloads/brief-012-aesthetics-of-order"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-CONVICTION-VS-COERCION.pdf"
-  to = "/assets/downloads/CB-CONVICTION-VS-COERCION.pdf"
+  to = "/api/downloads/CB-CONVICTION-VS-COERCION"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-001.pdf"
-  to = "/assets/downloads/CB-FR-001.pdf"
+  to = "/api/downloads/CB-FR-001"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-004.pdf"
-  to = "/assets/downloads/CB-FR-004.pdf"
+  to = "/api/downloads/CB-FR-004"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-007.pdf"
-  to = "/assets/downloads/CB-FR-007.pdf"
+  to = "/api/downloads/CB-FR-007"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-010.pdf"
-  to = "/assets/downloads/CB-FR-010.pdf"
+  to = "/api/downloads/CB-FR-010"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-013.pdf"
-  to = "/assets/downloads/CB-FR-013.pdf"
+  to = "/api/downloads/CB-FR-013"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-016.pdf"
-  to = "/assets/downloads/CB-FR-016.pdf"
+  to = "/api/downloads/CB-FR-016"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-019.pdf"
-  to = "/assets/downloads/CB-FR-019.pdf"
+  to = "/api/downloads/CB-FR-019"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-022.pdf"
-  to = "/assets/downloads/CB-FR-022.pdf"
+  to = "/api/downloads/CB-FR-022"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-025.pdf"
-  to = "/assets/downloads/CB-FR-025.pdf"
+  to = "/api/downloads/CB-FR-025"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-028.pdf"
-  to = "/assets/downloads/CB-FR-028.pdf"
+  to = "/api/downloads/CB-FR-028"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-031.pdf"
-  to = "/assets/downloads/CB-FR-031.pdf"
+  to = "/api/downloads/CB-FR-031"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-034.pdf"
-  to = "/assets/downloads/CB-FR-034.pdf"
+  to = "/api/downloads/CB-FR-034"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-037.pdf"
-  to = "/assets/downloads/CB-FR-037.pdf"
+  to = "/api/downloads/CB-FR-037"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-040.pdf"
-  to = "/assets/downloads/CB-FR-040.pdf"
+  to = "/api/downloads/CB-FR-040"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-043.pdf"
-  to = "/assets/downloads/CB-FR-043.pdf"
+  to = "/api/downloads/CB-FR-043"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-046.pdf"
-  to = "/assets/downloads/CB-FR-046.pdf"
+  to = "/api/downloads/CB-FR-046"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-049.pdf"
-  to = "/assets/downloads/CB-FR-049.pdf"
+  to = "/api/downloads/CB-FR-049"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-052.pdf"
-  to = "/assets/downloads/CB-FR-052.pdf"
+  to = "/api/downloads/CB-FR-052"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-055.pdf"
-  to = "/assets/downloads/CB-FR-055.pdf"
+  to = "/api/downloads/CB-FR-055"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-058.pdf"
-  to = "/assets/downloads/CB-FR-058.pdf"
+  to = "/api/downloads/CB-FR-058"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-061.pdf"
-  to = "/assets/downloads/CB-FR-061.pdf"
+  to = "/api/downloads/CB-FR-061"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-064.pdf"
-  to = "/assets/downloads/CB-FR-064.pdf"
+  to = "/api/downloads/CB-FR-064"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-067.pdf"
-  to = "/assets/downloads/CB-FR-067.pdf"
+  to = "/api/downloads/CB-FR-067"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-070.pdf"
-  to = "/assets/downloads/CB-FR-070.pdf"
+  to = "/api/downloads/CB-FR-070"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FR-073.pdf"
-  to = "/assets/downloads/CB-FR-073.pdf"
+  to = "/api/downloads/CB-FR-073"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-FRONTIER-RESILIENCE-01.pdf"
-  to = "/assets/downloads/CB-FRONTIER-RESILIENCE-01.pdf"
+  to = "/api/downloads/CB-FRONTIER-RESILIENCE-01"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-003.pdf"
-  to = "/assets/downloads/CB-IA-003.pdf"
+  to = "/api/downloads/CB-IA-003"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-006.pdf"
-  to = "/assets/downloads/CB-IA-006.pdf"
+  to = "/api/downloads/CB-IA-006"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-009.pdf"
-  to = "/assets/downloads/CB-IA-009.pdf"
+  to = "/api/downloads/CB-IA-009"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-012.pdf"
-  to = "/assets/downloads/CB-IA-012.pdf"
+  to = "/api/downloads/CB-IA-012"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-015.pdf"
-  to = "/assets/downloads/CB-IA-015.pdf"
+  to = "/api/downloads/CB-IA-015"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-018.pdf"
-  to = "/assets/downloads/CB-IA-018.pdf"
+  to = "/api/downloads/CB-IA-018"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-021.pdf"
-  to = "/assets/downloads/CB-IA-021.pdf"
+  to = "/api/downloads/CB-IA-021"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-024.pdf"
-  to = "/assets/downloads/CB-IA-024.pdf"
+  to = "/api/downloads/CB-IA-024"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-027.pdf"
-  to = "/assets/downloads/CB-IA-027.pdf"
+  to = "/api/downloads/CB-IA-027"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-030.pdf"
-  to = "/assets/downloads/CB-IA-030.pdf"
+  to = "/api/downloads/CB-IA-030"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-033.pdf"
-  to = "/assets/downloads/CB-IA-033.pdf"
+  to = "/api/downloads/CB-IA-033"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-036.pdf"
-  to = "/assets/downloads/CB-IA-036.pdf"
+  to = "/api/downloads/CB-IA-036"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-039.pdf"
-  to = "/assets/downloads/CB-IA-039.pdf"
+  to = "/api/downloads/CB-IA-039"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-042.pdf"
-  to = "/assets/downloads/CB-IA-042.pdf"
+  to = "/api/downloads/CB-IA-042"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-045.pdf"
-  to = "/assets/downloads/CB-IA-045.pdf"
+  to = "/api/downloads/CB-IA-045"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-048.pdf"
-  to = "/assets/downloads/CB-IA-048.pdf"
+  to = "/api/downloads/CB-IA-048"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-051.pdf"
-  to = "/assets/downloads/CB-IA-051.pdf"
+  to = "/api/downloads/CB-IA-051"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-054.pdf"
-  to = "/assets/downloads/CB-IA-054.pdf"
+  to = "/api/downloads/CB-IA-054"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-057.pdf"
-  to = "/assets/downloads/CB-IA-057.pdf"
+  to = "/api/downloads/CB-IA-057"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-060.pdf"
-  to = "/assets/downloads/CB-IA-060.pdf"
+  to = "/api/downloads/CB-IA-060"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-063.pdf"
-  to = "/assets/downloads/CB-IA-063.pdf"
+  to = "/api/downloads/CB-IA-063"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-066.pdf"
-  to = "/assets/downloads/CB-IA-066.pdf"
+  to = "/api/downloads/CB-IA-066"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-069.pdf"
-  to = "/assets/downloads/CB-IA-069.pdf"
+  to = "/api/downloads/CB-IA-069"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-072.pdf"
-  to = "/assets/downloads/CB-IA-072.pdf"
+  to = "/api/downloads/CB-IA-072"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-IA-075.pdf"
-  to = "/assets/downloads/CB-IA-075.pdf"
+  to = "/api/downloads/CB-IA-075"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-002.pdf"
-  to = "/assets/downloads/CB-SI-002.pdf"
+  to = "/api/downloads/CB-SI-002"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-005.pdf"
-  to = "/assets/downloads/CB-SI-005.pdf"
+  to = "/api/downloads/CB-SI-005"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-008.pdf"
-  to = "/assets/downloads/CB-SI-008.pdf"
+  to = "/api/downloads/CB-SI-008"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-011.pdf"
-  to = "/assets/downloads/CB-SI-011.pdf"
+  to = "/api/downloads/CB-SI-011"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-014.pdf"
-  to = "/assets/downloads/CB-SI-014.pdf"
+  to = "/api/downloads/CB-SI-014"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-017.pdf"
-  to = "/assets/downloads/CB-SI-017.pdf"
+  to = "/api/downloads/CB-SI-017"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-020.pdf"
-  to = "/assets/downloads/CB-SI-020.pdf"
+  to = "/api/downloads/CB-SI-020"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-023.pdf"
-  to = "/assets/downloads/CB-SI-023.pdf"
+  to = "/api/downloads/CB-SI-023"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-026.pdf"
-  to = "/assets/downloads/CB-SI-026.pdf"
+  to = "/api/downloads/CB-SI-026"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-029.pdf"
-  to = "/assets/downloads/CB-SI-029.pdf"
+  to = "/api/downloads/CB-SI-029"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-032.pdf"
-  to = "/assets/downloads/CB-SI-032.pdf"
+  to = "/api/downloads/CB-SI-032"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-035.pdf"
-  to = "/assets/downloads/CB-SI-035.pdf"
+  to = "/api/downloads/CB-SI-035"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-038.pdf"
-  to = "/assets/downloads/CB-SI-038.pdf"
+  to = "/api/downloads/CB-SI-038"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-041.pdf"
-  to = "/assets/downloads/CB-SI-041.pdf"
+  to = "/api/downloads/CB-SI-041"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-044.pdf"
-  to = "/assets/downloads/CB-SI-044.pdf"
+  to = "/api/downloads/CB-SI-044"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-047.pdf"
-  to = "/assets/downloads/CB-SI-047.pdf"
+  to = "/api/downloads/CB-SI-047"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-050.pdf"
-  to = "/assets/downloads/CB-SI-050.pdf"
+  to = "/api/downloads/CB-SI-050"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-053.pdf"
-  to = "/assets/downloads/CB-SI-053.pdf"
+  to = "/api/downloads/CB-SI-053"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-056.pdf"
-  to = "/assets/downloads/CB-SI-056.pdf"
+  to = "/api/downloads/CB-SI-056"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-059.pdf"
-  to = "/assets/downloads/CB-SI-059.pdf"
+  to = "/api/downloads/CB-SI-059"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-062.pdf"
-  to = "/assets/downloads/CB-SI-062.pdf"
+  to = "/api/downloads/CB-SI-062"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-065.pdf"
-  to = "/assets/downloads/CB-SI-065.pdf"
+  to = "/api/downloads/CB-SI-065"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-068.pdf"
-  to = "/assets/downloads/CB-SI-068.pdf"
+  to = "/api/downloads/CB-SI-068"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-071.pdf"
-  to = "/assets/downloads/CB-SI-071.pdf"
+  to = "/api/downloads/CB-SI-071"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/CB-SI-074.pdf"
-  to = "/assets/downloads/CB-SI-074.pdf"
+  to = "/api/downloads/CB-SI-074"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/general/founders-salon.pdf"
-  to = "/assets/downloads/founders-salon.pdf"
+  to = "/api/downloads/founders-salon"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/general/leadership-workshop.pdf"
-  to = "/assets/downloads/leadership-workshop.pdf"
+  to = "/api/downloads/leadership-workshop"
   status = 301
   force = true
 
 [[redirects]]
   from = "/vault/general/rise-decay-index.pdf"
-  to = "/assets/downloads/rise-decay-index.pdf"
+  to = "/api/downloads/rise-decay-index"
   status = 301
   force = true
 

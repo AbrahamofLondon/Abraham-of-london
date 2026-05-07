@@ -11,6 +11,7 @@ import "server-only";
  * It speaks because the decision state changed.
  */
 
+import crypto from "crypto";
 import { siteConfig } from "@/config/site";
 import {
   buildCriticalPatternEmail,
@@ -22,7 +23,6 @@ import { sendEmail } from "@/lib/email/core/sendEmail";
 import { prisma } from "@/lib/prisma.server";
 import { isUnsubscribed } from "@/lib/server/privacy/identity-service.server";
 import { createSignedActionToken } from "@/lib/server/security/signed-action-token";
-import { generateReturnBrief } from "@/lib/server/strategy-room/return-brief.server";
 import {
   computeDecisionState,
   type DecisionStateInput,
@@ -78,14 +78,34 @@ function getBaseUrl(): string {
   ).replace(/\/$/, "");
 }
 
+function hashEmail(email: string): string {
+  return crypto.createHash("sha256").update(email.trim().toLowerCase(), "utf8").digest("hex");
+}
+
 function getDeleteUrl(email?: string | null): string {
   const baseUrl = getBaseUrl();
-  return email ? `${baseUrl}/privacy#delete-data` : `${baseUrl}/privacy`;
+  if (!email) return `${baseUrl}/privacy`;
+
+  const token = createSignedActionToken({
+    purpose: "privacy_delete",
+    subject: hashEmail(email),
+    ttlSeconds: 60 * 60 * 24 * 7,
+  });
+
+  return `${baseUrl}/api/user/delete?email=${encodeURIComponent(email)}&proofToken=${encodeURIComponent(token)}`;
 }
 
 function getUnsubscribeUrl(email?: string | null): string {
   const baseUrl = getBaseUrl();
-  return email ? `${baseUrl}/privacy#unsubscribe` : `${baseUrl}/privacy`;
+  if (!email) return `${baseUrl}/privacy`;
+
+  const token = createSignedActionToken({
+    purpose: "privacy_unsubscribe",
+    subject: hashEmail(email),
+    ttlSeconds: 60 * 60 * 24 * 7,
+  });
+
+  return `${baseUrl}/api/user/unsubscribe?email=${encodeURIComponent(email)}&proofToken=${encodeURIComponent(token)}`;
 }
 
 async function getLastContact(identity: ContactIdentity): Promise<{ sentAt: Date; severity: string } | null> {
@@ -206,49 +226,36 @@ async function buildStrategyRoomEmail(
   const secureLink = `${baseUrl}/briefing/return/${session.sessionKey}?access=${encodeURIComponent(accessToken)}`;
   const unsubscribeUrl = getUnsubscribeUrl(session.email);
   const deleteUrl = getDeleteUrl(session.email);
-  const brief = await generateReturnBrief(session.sessionKey);
-
-  const decision = session.conditionSummary || "the open decision";
-  const pattern = stateResult.reason;
   const lastActivityAt = session.decisions.length > 0
     ? session.decisions.reduce((latest, item) => (item.updatedAt > latest ? item.updatedAt : latest), session.decisions[0]!.updatedAt)
     : session.createdAt;
 
   if (stateResult.state === "recurring_pattern") {
     return buildCriticalPatternEmail({
-      decision,
-      pattern,
       trajectory: mapTrajectory(stateInput.trajectory ?? null),
       secureLink,
       unsubscribeUrl,
       deleteUrl,
-      contradictionSummary: brief?.challenge ?? brief?.trajectory.reason ?? pattern,
       lastActivityAt,
     });
   }
 
   if (stateResult.state === "fragile" || stateResult.state === "deteriorating") {
     return buildReturnBriefEmail({
-      decision,
-      pattern,
       trajectory: mapTrajectory(stateInput.trajectory ?? null),
       secureLink,
       unsubscribeUrl,
       deleteUrl,
-      contradictionSummary: brief?.trajectory.reason ?? brief?.challenge ?? pattern,
       lastActivityAt,
     });
   }
 
   if (stateResult.state === "committed_no_action" || stateResult.state === "stalled") {
     return buildDecisionDriftEmail({
-      decision,
-      pattern,
       trajectory: mapTrajectory(stateInput.trajectory ?? null),
       secureLink,
       unsubscribeUrl,
       deleteUrl,
-      contradictionSummary: brief?.trajectory.reason ?? pattern,
       lastActivityAt,
     });
   }
@@ -263,13 +270,9 @@ function buildPressureLoopEmail(
     startedAt: Date;
   },
   stateInput: DecisionStateInput,
-  stateResult: DecisionStateResult,
-  pattern: string,
 ): BuiltDecisionEmail {
   const baseUrl = getBaseUrl();
   return buildDecisionDriftEmail({
-    decision: "the open decision",
-    pattern,
     trajectory: mapTrajectory(stateInput.trajectory ?? null),
     secureLink: `${baseUrl}/diagnostics/fast?journeyKey=${encodeURIComponent(journey.journeyKey)}`,
     unsubscribeUrl: getUnsubscribeUrl(journey.email),
@@ -478,8 +481,6 @@ async function scanPressureLoopJourneys(
       const email = buildPressureLoopEmail(
         journey,
         stateInput,
-        stateResult,
-        dueMessage.body ?? stateResult.reason,
       );
 
       const identity: ContactIdentity = {

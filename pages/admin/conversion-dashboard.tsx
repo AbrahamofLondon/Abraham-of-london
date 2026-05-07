@@ -120,7 +120,7 @@ export default function ConversionDashboard({ conversionIntelligence }: Conversi
               Decision Matrix
             </div>
             <div className="space-y-2 text-[13px] leading-[1.7]" style={{ color: "var(--ds-text-muted)" }}>
-              <p><strong style={{ color: "rgba(110,231,183,0.80)" }}>A1-A4 above threshold</strong> → LAUNCH</p>
+              <p><strong style={{ color: "rgba(110,231,183,0.80)" }}>A1-A4 above standard</strong> → LAUNCH</p>
               <p><strong style={{ color: "rgba(252,165,165,0.80)" }}>A1 good, A3/A4 weak</strong> → DO NOT LAUNCH (credibility gap)</p>
               <p><strong style={{ color: "rgba(252,165,165,0.80)" }}>A1 weak</strong> → DO NOT LAUNCH (positioning failure)</p>
               <p><strong style={{ color: `${GOLD}CC` }}>A4 strong + A5 strong</strong> → SCALE AGGRESSIVELY</p>

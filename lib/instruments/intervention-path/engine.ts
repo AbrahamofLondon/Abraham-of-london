@@ -67,7 +67,7 @@ export function selectInterventionPath(input: InterventionInput): InterventionRe
   // ESCALATE: high severity + high urgency + high cost
   else if (severity >= 7 && urgency >= 7 && costExposure >= 6) {
     recommended = "ESCALATE";
-    rationale.push("Severity and urgency both exceed threshold. Cost exposure is material.");
+    rationale.push("Severity and urgency both exceed the critical level. Cost exposure is material.");
     rationale.push("Immediate escalation to Strategy Room is the only valid path.");
     fallbackTriggers.push("If escalation is blocked internally, external intervention required within 14 days.");
     rejectedPaths.push(

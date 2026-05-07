@@ -221,7 +221,7 @@ export function ConstitutionalNarrativeBlock({
             <MetricTile
               label="Market Risk"
               value={constitution.marketRiskBand}
-              subtext="Risk environment inferred from constitutional signals."
+              subtext="Risk environment inferred from constitutional indicators."
               variant={variant}
             />
           </div>

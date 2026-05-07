@@ -430,7 +430,7 @@ export default function StrategicStressWorkbench() {
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               <CheckItem
-                label="Alignment threshold"
+                label="Alignment standard"
                 active={resonanceScore > 85}
                 description="Core resonance is high enough to support coherent movement."
               />

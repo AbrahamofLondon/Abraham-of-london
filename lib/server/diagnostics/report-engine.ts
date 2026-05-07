@@ -3,6 +3,7 @@
 /* lib/server/diagnostics/report-engine.ts */
 
 import type { StoredDiagnosticRecord } from "@/lib/server/diagnostics/store";
+import { verifySignedActionToken } from "@/lib/server/security/signed-action-token";
 
 export type ReportPriority = "low" | "medium" | "high" | "critical";
 
@@ -236,7 +237,9 @@ export function canUnlockReport(args: {
   record: StoredDiagnosticRecord;
   userTier: string;
   isAdmin: boolean;
+  accessGranted?: boolean;
 }): boolean {
+  if (args.accessGranted) return true;
   if (args.isAdmin) return true;
 
   const tier = safeString(args.userTier).toLowerCase();
@@ -249,4 +252,61 @@ export function canUnlockReport(args: {
     tier === "restricted" ||
     tier === "top-secret"
   );
+}
+
+function normalize(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function matchesSignedReportSubject(record: StoredDiagnosticRecord, subject: string): boolean {
+  const reportId = normalize(record.report?.reportId);
+  const normalizedSubject = normalize(subject);
+
+  if (!normalizedSubject) return false;
+
+  return [
+    record.diagnosticRef,
+    `ref:${record.diagnosticRef}`,
+    reportId,
+    reportId ? `report:${reportId}` : "",
+  ]
+    .filter(Boolean)
+    .includes(normalizedSubject);
+}
+
+export function assertDiagnosticReportAccess(args: {
+  record: StoredDiagnosticRecord;
+  userId?: string | null;
+  token?: string | null;
+  purpose: string;
+}):
+  | { allowed: true; via: "owner" | "signed_token" }
+  | { allowed: false; status: 401 | 403; error: string } {
+  const ownerUserId = normalize(args.record.actor.userId);
+  const requesterUserId = normalize(args.userId);
+  const token = normalize(args.token);
+
+  if (ownerUserId) {
+    if (!requesterUserId) {
+      return { allowed: false, status: 401, error: "AUTH_REQUIRED" };
+    }
+
+    if (requesterUserId !== ownerUserId) {
+      return { allowed: false, status: 403, error: "FORBIDDEN" };
+    }
+
+    return { allowed: true, via: "owner" };
+  }
+
+  // Ownerless reports are deny-by-default and require an explicit signed token.
+  if (!token) {
+    return { allowed: false, status: 403, error: "FORBIDDEN" };
+  }
+
+  const verified = verifySignedActionToken(token, args.purpose);
+  if (!verified.ok || !matchesSignedReportSubject(args.record, verified.payload.subject)) {
+    return { allowed: false, status: 403, error: "FORBIDDEN" };
+  }
+
+  return { allowed: true, via: "signed_token" };
 }

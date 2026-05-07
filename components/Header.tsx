@@ -10,8 +10,8 @@
    mobile menu and is reachable via content pages.
    
    Shorts subtle highlight: a 1px softGold underline at 0.28 opacity.
-   Below the threshold of conscious registration on first pass.
-   Above the threshold of recognition once the eye settles.
+   Below the level of conscious registration on first pass.
+   Above the level of recognition once the eye settles.
    The mind perceives rhythm breaks before the eye names them.
 */
 

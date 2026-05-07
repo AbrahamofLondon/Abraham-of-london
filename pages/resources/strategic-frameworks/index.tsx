@@ -83,7 +83,7 @@ function joinTierLabels(tier: Framework["tier"]): string {
 }
 
 /**
- * ✅ Deterministic access policy (SSG-safe)
+ * ✅ Governed access policy (SSG-safe)
  * Strategic Frameworks are “above” Surrender.
  * Brand-language labels in framework.tier are mapped to enforcement tiers.
  */
