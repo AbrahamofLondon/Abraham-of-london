@@ -1,0 +1,40 @@
+{
+  "generated": "2026-05-07",
+  "framework": "ZTHVF",
+  "perimeter": "proxy.ts (root) — Institutional Perimeter V5.1",
+  "route_count": {
+    "app_api": 131,
+    "pages_api": 163,
+    "total": 294
+  },
+  "auth_tiers": {
+    "tier_3_admin": ["/inner-circle/admin", "/api/admin", "/directorate"],
+    "tier_2_inner_circle": ["/inner-circle", "/private", "/vault", "/board"],
+    "tier_1_member": ["/consulting", "/strategy"],
+    "tier_0_public": "PUBLIC_PREFIXES in proxy.ts"
+  },
+  "trust_boundaries": {
+    "session": "NextAuth JWT (NEXTAUTH_SECRET)",
+    "access_cookie": "aol_access (inner circle)",
+    "sovereign_session": "ogr_sovereign_session (HMAC-SHA256)",
+    "download_tokens": "JWT signed with DOWNLOAD_TOKEN_SECRET",
+    "cron_auth": "CRON_SECRET bearer token",
+    "webhook_auth": "Stripe signature verification",
+    "admin_auth": "isAuthorizedAdminSubject (email + role)"
+  },
+  "rate_limits": {
+    "admin": "60/min",
+    "api_general": "200/min",
+    "constitutional": "30/min",
+    "sovereign": "20/min",
+    "auth": "10/min",
+    "storage": "in-memory (per-isolate)"
+  },
+  "static_surfaces": {
+    "public_dir": true,
+    "pdf_quarantined": "84 PDFs moved to private_storage/public-static-pdf-quarantine/",
+    "pdf_guard": "proxy.ts redirects /assets/downloads/*.pdf → /api/downloads/{slug}",
+    "source_maps": false,
+    "build_manifests_exposed": false
+  }
+}
