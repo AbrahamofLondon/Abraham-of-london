@@ -50,9 +50,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const MB = 1024 * 1024;
+const isDev = process.env.NODE_ENV !== "production";
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+  // unsafe-eval is required in development for Next.js Fast Refresh / React error overlay.
+  // In production it is removed — Google Tag Manager and Analytics do not require it.
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://www.google-analytics.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
@@ -116,6 +119,7 @@ const nextConfig = {
    */
   serverExternalPackages: [
     "@prisma/client",
+    "@neondatabase/serverless",
     "contentlayer2",
     "next-contentlayer2",
     "@react-pdf/renderer",
@@ -188,7 +192,7 @@ const nextConfig = {
 
   images: {
     formats: ["image/avif", "image/webp"],
-    dangerouslyAllowSVG: true,
+    dangerouslyAllowSVG: false,
     unoptimized: true,
   },
 
@@ -307,6 +311,33 @@ const nextConfig = {
 
     if (config.cache && config.cache.type === "filesystem") {
       config.cache.maxMemoryGenerations = 1;
+    }
+
+    /**
+     * Pages Router server-only module boundary enforcement.
+     *
+     * Modules under lib/server/ that import "server-only" cannot be resolved
+     * by webpack's client compiler (the package throws at resolution time).
+     * These modules are only reachable from Pages Router via getServerSideProps,
+     * which is exclusively server-side — but webpack still attempts to resolve
+     * the full import tree for both server and client compilations.
+     *
+     * This alias tells the client compiler to replace server-only modules with
+     * empty stubs so it never attempts to resolve their dependency trees. The
+     * security boundary is preserved because:
+     * 1. "server-only" remains on the actual modules (enforced in App Router)
+     * 2. The .server.ts naming convention marks them as server-only
+     * 3. They are only imported inside getServerSideProps (dead code on client)
+     * 4. Client bundles receive empty stubs, not the actual implementation
+     */
+    if (!isServer) {
+      const emptyStub = path.resolve(__dirname, "lib/server/empty-client-stub.js");
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "@/lib/server/strategy-room/access.server": emptyStub,
+        "@/lib/server/security/signed-action-token": emptyStub,
+        "@/lib/prisma.server": emptyStub,
+      };
     }
 
     /**

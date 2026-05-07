@@ -11,8 +11,6 @@ import Link from "next/link";
 import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
-import { prisma } from "@/lib/prisma.server";
 import ReturnBriefInterruptionBar from "@/components/strategy-room/ReturnBriefInterruptionBar";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -671,11 +669,39 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   }
 
   try {
+    const { prisma } = await import("@/lib/prisma.server");
+    const { assertStrategyRoomAccess } = await import("@/lib/server/strategy-room/access.server");
+
+    const host = ctx.req.headers.host ?? "localhost";
+    const url = `${ctx.req.headers["x-forwarded-proto"] || "http"}://${host}${ctx.req.url || `/strategy-room/session/${id}`}`;
+    const headers = new Headers();
+    if (ctx.req.headers.cookie) headers.set("cookie", ctx.req.headers.cookie);
+    if (ctx.req.headers.authorization) headers.set("authorization", ctx.req.headers.authorization);
+    if (typeof ctx.query.access === "string") {
+      headers.set("x-strategy-access-token", ctx.query.access);
+    }
+    const accessRequest = new Request(url, { headers });
+    const access = await assertStrategyRoomAccess({
+      request: accessRequest,
+      sessionRef: id,
+      purpose: "strategy_room_session",
+      allowTokenPurposes: ["strategy_room_session", "return_brief"],
+    });
+
+    if (!access.ok) {
+      return {
+        props: {
+          session: null,
+          error: access.status === 404 ? "Session not found" : "Access denied",
+        },
+      };
+    }
+
     const raw = await prisma.strategyRoomExecutionSession.findFirst({
       where: {
         OR: [
-          { id },
-          { sessionKey: id },
+          { id: access.subject.id },
+          { sessionKey: access.subject.sessionKey },
         ],
       },
       include: { decisions: { orderBy: { createdAt: "asc" } } },
@@ -683,35 +709,6 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
 
     if (!raw) {
       return { props: { session: null, error: "Session not found" } };
-    }
-
-    let email: string | null =
-      typeof ctx.query.email === "string" ? ctx.query.email.trim().toLowerCase() : null;
-    let userId: string | null = null;
-    try {
-      const { resolveIdentity } = await import("@/lib/auth/resolve-identity");
-      const headers = new Headers();
-      if (ctx.req.headers.cookie) headers.set("cookie", ctx.req.headers.cookie);
-      if (ctx.req.headers.host) headers.set("host", ctx.req.headers.host);
-      const fakeReq = new Request(`http://${ctx.req.headers.host ?? "localhost"}${ctx.req.url}`, { headers });
-      const identity = await resolveIdentity(fakeReq as any);
-      email = identity.email ?? email;
-      userId = identity.subjectId ?? null;
-    } catch {
-      // no authenticated identity available
-    }
-
-    const entitlement = await resolveCanonicalEntitlement({
-      userId,
-      email,
-      slug: "strategy-room.entry",
-    });
-
-    const sessionEmailMatches =
-      !raw.email || (email && raw.email.toLowerCase() === email.toLowerCase());
-
-    if (!entitlement.granted || !sessionEmailMatches) {
-      return { props: { session: null, error: "Access denied" } };
     }
 
     const session: SessionData = {

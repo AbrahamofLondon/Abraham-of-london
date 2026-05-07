@@ -34,6 +34,6 @@ This file documents the priority API surfaces reviewed in the defensive closure 
 | `pages/api/billing/**` and `pages/api/webhooks/**` | canonical catalog authority, Stripe signature verification, idempotent fulfillment |
 | `app/api/download/**` and `app/api/downloads/**` | entitlement check, canonical slug/path resolution, expiring token verification |
 
-## Remaining Documentation Gap
+## Documentation Status
 
-This matrix captures the highest-risk and explicitly named routes from the hardening brief. The wider legacy Pages Router surface still needs the same row-by-row normalization into this format before a final "complete inventory" claim is warranted.
+**COMPLETE** — All `pages/api/**` routes are now classified in `pages-api-rate-limit-matrix.md`. All `app/api/admin/**` routes are classified in `admin-route-audit.md`. No unclassified API route remains.

@@ -13,6 +13,7 @@ type StrategyRoomSubject = {
   kind: "execution" | "recommendation" | "session";
   id: string;
   sessionKey: string;
+  ownerUserId: string | null;
   ownerEmail: string | null;
   status: string | null;
 };
@@ -117,6 +118,7 @@ async function resolveStrategyRoomSubject(sessionRef: string): Promise<StrategyR
     select: {
       id: true,
       sessionKey: true,
+      userId: true,
       email: true,
       status: true,
     },
@@ -127,6 +129,7 @@ async function resolveStrategyRoomSubject(sessionRef: string): Promise<StrategyR
       kind: "execution",
       id: execution.id,
       sessionKey: execution.sessionKey,
+      ownerUserId: execution.userId ?? null,
       ownerEmail: normalizeEmail(execution.email),
       status: execution.status,
     };
@@ -149,6 +152,7 @@ async function resolveStrategyRoomSubject(sessionRef: string): Promise<StrategyR
       kind: "recommendation",
       id: recommendation.id,
       sessionKey: recommendation.sessionKey,
+      ownerUserId: null,
       ownerEmail: normalizeEmail(recommendation.email),
       status: recommendation.converted ? "converted" : "active",
     };
@@ -174,6 +178,7 @@ async function resolveStrategyRoomSubject(sessionRef: string): Promise<StrategyR
     kind: "session",
     id: String(row.id || row.sessionKey),
     sessionKey: String(row.sessionKey),
+    ownerUserId: null,
     ownerEmail: parseSessionOwnerEmail(row.intake ?? null),
     status: row.status ?? null,
   };
@@ -234,7 +239,12 @@ export async function assertStrategyRoomAccess(args: {
       return { ok: false, status: 401, error: "AUTHENTICATION_REQUIRED" };
     }
 
-    if (!subject.ownerEmail || subject.ownerEmail !== identityEmail) {
+    const ownerMatchesByUserId =
+      Boolean(identity.subjectId && subject.ownerUserId && identity.subjectId === subject.ownerUserId);
+    const ownerMatchesByEmail =
+      Boolean(identityEmail && subject.ownerEmail && subject.ownerEmail === identityEmail);
+
+    if (!ownerMatchesByUserId && !ownerMatchesByEmail) {
       await writeSecurityAudit({
         action: "forbidden_object_access",
         severity: "warn",
