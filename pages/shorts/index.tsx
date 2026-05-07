@@ -963,18 +963,38 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
           style={{ borderColor: "var(--ds-border)" }}
         >
           <div className="mx-auto max-w-5xl">
-            {/* Eyebrow */}
-            <div className="flex items-center gap-3">
-              <span
-                className="inline-block h-5 w-px"
-                style={{ backgroundColor: "var(--ds-accent-soft)" }}
+            {/* Entry mark — SHORTS · ABRAHAM OF LONDON */}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-4">
+                <span
+                  className="font-serif font-light"
+                  style={{
+                    fontSize: "clamp(1.8rem, 3.2vw, 3rem)",
+                    lineHeight: 1,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--ds-text)",
+                  }}
+                >
+                  SHORTS
+                </span>
+                <span
+                  className="font-mono"
+                  style={{
+                    fontSize: "clamp(0.55rem, 0.7vw, 0.7rem)",
+                    letterSpacing: "0.50em",
+                    textTransform: "uppercase",
+                    color: "var(--ds-accent)",
+                    paddingTop: "0.35rem",
+                  }}
+                >
+                  ABRAHAM OF LONDON
+                </span>
+              </div>
+              <div
+                className="mt-3 h-px w-16"
+                style={{ background: "linear-gradient(to right, var(--ds-accent), transparent)" }}
               />
-              <span
-                className="font-mono text-[7.5px] uppercase tracking-[0.40em]"
-                style={{ color: "var(--ds-accent)" }}
-              >
-                SHORTS · ABRAHAM OF LONDON
-              </span>
             </div>
 
             {/* Headline — stunning but controlled */}
