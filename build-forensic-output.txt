@@ -1,0 +1,195 @@
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "node-linker". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "symlink". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+Warning: Custom Cache-Control headers detected for the following routes:
+  - /_next/static/(.*)
+
+Setting a custom Cache-Control header can break Next.js development behavior.
+▲ Next.js 16.2.3 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  · optimizePackageImports
+  · serverActions
+
+  Creating an optimized production build ...
+Turbopack build encountered 6 warnings:
+./lib/assets/pdf-identity.ts:359:39
+The file pattern ('/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 14592 files in [project]/
+  [90m357 |[0m     [36mconst[0m fs = require([32m"fs"[0m) [36mas[0m [36mtypeof[0m [36mimport[0m([32m"fs"[0m);
+  [90m358 |[0m     [36mconst[0m path = require([32m"path"[0m) [36mas[0m [36mtypeof[0m [36mimport[0m([32m"path"[0m);
+[31m[1m>[0m [90m359 |[0m     [36mreturn[0m [33mJSON[0m.parse(fs.readFileSync(path.join(process.cwd(), relativePath), [32m"utf8"[0m)) [36mas[0m [33mT[0m;
+  [90m    |[0m                                       [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m360 |[0m   } [36mcatch[0m {
+  [90m361 |[0m     [36mreturn[0m [36mnull[0m;
+  [90m362 |[0m   }
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [Route]:
+    ./lib/assets/pdf-identity.ts
+    ./pages/api/editorials/preview/[slug].ts
+
+  #2 [App Route]:
+    ./lib/assets/pdf-identity.ts
+    ./app/api/downloads/[slug]/route.ts
+
+  #3 [SSR]:
+    ./lib/assets/pdf-identity.ts
+    ./pages/downloads/[...slug].tsx
+
+  #4 [Route]:
+    ./lib/assets/pdf-identity.ts
+    ./lib/downloads/asset-registry.ts
+    ./pages/api/downloads/resolve/[slug]/[...rest].ts
+
+
+./lib/editorial/discovery.ts:17:35
+The file pattern ('/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 14592 files in [project]/
+  [90m15 |[0m
+  [90m16 |[0m [36mfunction[0m abs(p: string): string {
+[31m[1m>[0m [90m17 |[0m   [36mreturn[0m path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+  [90m   |[0m                                   [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m18 |[0m }
+  [90m19 |[0m
+  [90m20 |[0m [36mfunction[0m safeText(v: unknown): string | [36mundefined[0m {
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  Route:
+    ./lib/editorial/discovery.ts
+    ./pages/api/editorials/preview/[slug].ts
+
+  SSR:
+    ./lib/editorial/discovery.ts
+    ./pages/editorials/catalogue.tsx
+
+
+./pages/api/private/vault/[...path].ts:11:20
+The file pattern ('/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 14592 files in [project]/
+  [90m 9 |[0m [36mimport[0m { vaultRuntimeConfig } [36mfrom[0m [32m"@/lib/runtime/vault-config"[0m;
+  [90m10 |[0m
+[31m[1m>[0m [90m11 |[0m [36mconst[0m [33mVAULT_ROOT[0m = path.join(
+  [90m   |[0m                    [31m[1m^^^^^^^^^[0m
+[31m[1m>[0m [90m12 |[0m   process.cwd(),
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m13 |[0m   ...vaultRuntimeConfig.vaultRootSegments,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m14 |[0m );
+  [90m   |[0m [31m[1m^[0m
+  [90m15 |[0m
+  [90m16 |[0m [36mfunction[0m contentTypeFor(filePath: string): string {
+  [90m17 |[0m   [36mconst[0m ext = path.extname(filePath).toLowerCase();
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import trace:
+  App Route:
+    ./pages/api/private/vault/[...path].ts
+    ./app/api/downloads/[slug]/route.ts
+
+
+./next.config.mjs
+Encountered unexpected file in NFT list
+A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+- filesystem operations (like path.join, path.resolve or fs.readFile), or
+- very dynamic requires (like require('./' + foo)).
+To resolve this, you can
+- remove them if possible, or
+- only use them in development, or
+- make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+- add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+
+Import trace:
+  App Route:
+    ./next.config.mjs
+    ./app/api/downloads/[slug]/route.ts
+
+
+./next.config.mjs
+Encountered unexpected file in NFT list
+A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+- filesystem operations (like path.join, path.resolve or fs.readFile), or
+- very dynamic requires (like require('./' + foo)).
+To resolve this, you can
+- remove them if possible, or
+- only use them in development, or
+- make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+- add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+
+Output asset trace:
+  [output]/.next/server/app/api/inner-circle/verify/route.js
+  [output]/.next/server/chunks/[root-of-the-server]__0jlz-2x._.js
+
+Import trace:
+  App Route:
+    ./next.config.mjs
+    ./app/api/downloads/[slug]/route.ts
+
+
+./next.config.mjs
+Encountered unexpected file in NFT list
+A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+- filesystem operations (like path.join, path.resolve or fs.readFile), or
+- very dynamic requires (like require('./' + foo)).
+To resolve this, you can
+- remove them if possible, or
+- only use them in development, or
+- make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+- add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+
+Output asset trace:
+  [output]/.next/server/pages/api/pdfs/generate.js
+  [output]/.next/server/chunks/[root-of-the-server]__0_hjxxv._.js
+
+Import trace:
+  App Route:
+    ./next.config.mjs
+    ./app/api/downloads/[slug]/route.ts
+
+
+✓ Compiled successfully in 2.4min
+  Running TypeScript ...
+  Finished TypeScript in 3.5min ...
+  Collecting page data using 7 workers ...
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+[Redis] Initializing Script-Mode connection
+  Generating static pages using 7 workers (0/246) ...
+Error: NextRouter was not mounted. https://nextjs.org/docs/messages/next-router-not-mounted
+    at q (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:5:125)
+    at <unknown> (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:27:4033)
+Error occurred prerendering page "/about/founder". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: NextRouter was not mounted. https://nextjs.org/docs/messages/next-router-not-mounted
+    at q (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:5:125)
+    at <unknown> (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:27:4033)
+Export encountered an error on /about/founder, exiting the build.
+Error: NextRouter was not mounted. https://nextjs.org/docs/messages/next-router-not-mounted
+    at q (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:5:125)
+    at <unknown> (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:27:4033)
+Error occurred prerendering page "/inner-circle/login". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: NextRouter was not mounted. https://nextjs.org/docs/messages/next-router-not-mounted
+    at q (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:5:125)
+    at <unknown> (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:27:4033)
+Export encountered an error on /inner-circle/login, exiting the build.
+Error: NextRouter was not mounted. https://nextjs.org/docs/messages/next-router-not-mounted
+    at q (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:5:125)
+    at <unknown> (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:27:4033)
+Error occurred prerendering page "/diagnostics/constitutional-diagnostic". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: NextRouter was not mounted. https://nextjs.org/docs/messages/next-router-not-mounted
+    at q (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:5:125)
+    at <unknown> (C:\aol-check-visual\.next\server\chunks\ssr\_0obm1gl._.js:27:4033)
+Export encountered an error on /diagnostics/constitutional-diagnostic, exiting the build.
+⨯ Next.js build worker exited with code: 1 and signal: null

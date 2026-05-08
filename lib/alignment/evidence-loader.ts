@@ -357,6 +357,18 @@ export function convertPurposeAlignmentToGovernedMemory(
     });
   }
 
+  // Strongest domain
+  if (evidence.strongestDomain) {
+    items.push({
+      ...base,
+      id: "pa_strongest_domain",
+      label: "Strongest alignment domain",
+      summary: `The strongest domain was ${evidence.strongestDomain}.`,
+      status: "ACTIVE",
+      confidenceLabel: "CAPTURED",
+    });
+  }
+
   // Contradictions (summarised, max 3)
   for (const contradiction of evidence.contradictions.slice(0, 3)) {
     items.push({

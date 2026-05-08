@@ -20,7 +20,7 @@ import { persistSpineToJourney } from "@/lib/decision/spine-persistence";
 import { prisma } from "@/lib/prisma";
 import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
 import { computeCostOfInaction } from "@/lib/server/decision/cost-of-inaction.server";
-import { persistFinancialExposureSnapshot } from "@/lib/product/financial-exposure-persistence";
+import { persistFinancialExposureSnapshot, persistCostOfInactionProjection } from "@/lib/product/financial-exposure-persistence";
 import { assessExecutionFailure } from "@/lib/server/decision/execution-failure.server";
 import { computeAuthorityIndex } from "@/lib/server/decision/authority-index.server";
 import { applyPublicTone, buildPublicPatternEvidence } from "@/lib/server/decision/public-pattern-proof.server";
@@ -257,6 +257,25 @@ export default async function handler(
         },
         sourceSurface: "fast_diagnostic",
       });
+    } catch {
+      // Non-fatal: persistence failure should not crash the response
+    }
+
+    // ── PERSIST COST OF INACTION PROJECTIONS ──
+    try {
+      if (result.costOfInaction) {
+        await persistCostOfInactionProjection({
+          email: spine.email ?? undefined,
+          subjectId: spine.id ?? undefined,
+          exposureBand: result.costOfInaction.exposureBand,
+          horizon7: result.costOfInaction.horizon30,
+          horizon30: result.costOfInaction.horizon60,
+          horizon60: result.costOfInaction.horizon90,
+          horizon90: result.costOfInaction.horizon90,
+          executiveWarning: result.costOfInaction.executiveWarning,
+          sourceSurface: "fast_diagnostic",
+        });
+      }
     } catch {
       // Non-fatal: persistence failure should not crash the response
     }

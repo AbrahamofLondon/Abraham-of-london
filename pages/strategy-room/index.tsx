@@ -38,6 +38,9 @@ import GovernanceEvidenceCarryForward from "@/components/strategy-room/Governanc
 import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
+import {
+  convertFinancialExposureToGovernedMemory,
+} from "@/lib/product/financial-exposure-persistence";
 import DecisionStateBanner from "@/components/strategy-room/DecisionStateBanner";
 import DynamicConsequencePanel from "@/components/strategy-room/DynamicConsequencePanel";
 import EscalationTriggerPanel from "@/components/strategy-room/EscalationTriggerPanel";
@@ -1575,9 +1578,23 @@ export default function StrategyRoomPage({
       assessmentId: null,
     });
   }, [canonical]);
+  // ── FINANCIAL EXPOSURE EVIDENCE CARRIED FORWARD ──
+  const feMemory = React.useMemo(() => {
+    const exposureBlock = (canonical as any)?.financialExposure;
+    if (!exposureBlock) return [];
+    return convertFinancialExposureToGovernedMemory({
+      userCostOfDelayText: null,
+      estimatedFinancialExposure: exposureBlock.totalExposure ?? null,
+      exposureBand: exposureBlock.totalExposure >= 100000 ? "high" : exposureBlock.totalExposure >= 25000 ? "moderate" : exposureBlock.totalExposure > 0 ? "low" : null,
+      exposureBasis: null,
+      computedAt: new Date().toISOString(),
+      sourceSurface: "EXECUTIVE_REPORTING",
+      schemaVersion: "1.0.0",
+    });
+  }, [canonical]);
   const mergedStrategyMemory = React.useMemo(
-    () => [...paMemory, ...strategyEntryMemory],
-    [paMemory, strategyEntryMemory],
+    () => [...paMemory, ...feMemory, ...strategyEntryMemory],
+    [paMemory, feMemory, strategyEntryMemory],
   );
 
   if (!hasPaidAccess) {

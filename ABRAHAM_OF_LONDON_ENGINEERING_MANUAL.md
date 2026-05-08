@@ -1,7 +1,7 @@
 # Abraham of London — Engineering Manual
 
-**Version:** 3.0  
-**Date:** May 2026  
+**Version:** 3.1  
+**Date:** 8 May 2026  
 **Classification:** Internal — Engineering  
 **Repository:** `aol-check-visual`
 
@@ -1690,6 +1690,8 @@ The Purpose Alignment assessment (`app/purpose-alignment/`) evaluates individual
 
 Results are classified into four bands (`AlignmentBand`): ALIGNED, DRIFTING, MISALIGNED, DISORDERED.
 
+**Evidence persistence and consumption:** PA results are persisted to the DiagnosticJourney store via `persistDiagnosticStage()` in the assessments API route (`app/api/purpose-alignment/assessments/route.ts`). The evidence is retrievable via `loadPurposeAlignmentEvidence()` in `lib/alignment/evidence-loader.ts` and rendered on all downstream surfaces (Executive Reporting, Strategy Room, Return Brief, Decision Centre, Oversight Brief) via the `GovernanceEvidenceCarryForward` component with source labels like `"CAPTURED in Purpose Alignment"` and `"Previously reported competing obligation"`.
+
 ### AlignmentBand Classification
 
 ```typescript
@@ -2208,6 +2210,8 @@ type CostOfInactionPublic = {
 The engine classifies exposure into bands based on state and financial anchors when available. It produces 30/60/90-day horizon narratives describing projected deterioration in natural language. No formulas or multipliers are exposed in the public output.
 
 When financial data is not provided, the engine derives the band from state alone (DISORDERED -> critical, MISALIGNED -> high, DRIFTING -> moderate). The `undisclosed` band is used when no state or financial anchor is sufficient for classification.
+
+**Persistence:** The computed exposure band and horizon narratives are persisted to the DiagnosticJourney store via `persistFinancialExposureSnapshot()` and `persistCostOfInactionProjection()` in `lib/product/financial-exposure-persistence.ts`. This ensures downstream surfaces (Return Brief, Decision Centre, Oversight Brief) can retrieve what the system originally told the user about delay, consequence, and inaction.
 
 ## Chapter 12: Execution Failure Predictor
 
@@ -3671,9 +3675,76 @@ Redis via Upstash is optional. The system degrades gracefully:
 
 The `SecurityLog` Prisma model records security events: LOGIN_SUCCESS, LOGIN_FAILURE, MFA_CHALLENGE, PASSWORD_CHANGE, UNAUTHORIZED_ACCESS. Each event captures the actor, HTTP method, path, IP address, and user agent.
 
-### DiagnosticJourney Snapshots
+### DiagnosticJourney — Evidence Spine
 
-The `DiagnosticJourney` model stores complete diagnostic lifecycle data. The `MonitoringSnapshot` model captures point-in-time system state for operational observability.
+The `DiagnosticJourney` model is the central evidence spine. Every stage from Fast Diagnostic through Post-Strategy Room persists its evidence to the journey store via `persistDiagnosticStage()` in `lib/diagnostics/journey-store.ts`.
+
+**Evidence flow:**
+
+```
+Fast Diagnostic → persistSpineToJourney() → DiagnosticJourney
+Purpose Alignment → persistDiagnosticStage("purpose_alignment") → DiagnosticJourney
+Constitutional → persistDiagnosticStage("constitutional") → DiagnosticJourney
+Team Assessment → persistDiagnosticStage("team") → DiagnosticJourney
+Enterprise Assessment → persistDiagnosticStage("enterprise") → DiagnosticJourney
+Executive Reporting → persistDiagnosticStage("executive_reporting") → DiagnosticJourney
+Strategy Room → persistDiagnosticStage("strategy_room") → DiagnosticJourney
+```
+
+Each stage stores a `payload` (the stage-specific result data), `snapshot` (core metrics + tensions + escalation level), `evidenceNodes`, `decisionObject`, and `tensions`.
+
+**Evidence retrieval:**
+
+| Loader | File | Purpose |
+|--------|------|---------|
+| `getDiagnosticJourney()` | `lib/diagnostics/journey-store.ts` | Load full journey with all stages |
+| `loadPurposeAlignmentEvidence()` | `lib/alignment/evidence-loader.ts` | Load PA-specific evidence fields |
+| `loadLatestFinancialExposure()` | `lib/product/financial-exposure-persistence.ts` | Load latest FE snapshot |
+| `loadLatestCostOfInactionProjection()` | `lib/product/financial-exposure-persistence.ts` | Load latest cost-of-inaction projection |
+| `resolveLadderContext()` | `lib/diagnostics/ladder-context-resolver.ts` | Load ladder context from Constitutional/Team/Enterprise |
+
+**Evidence rendering — Governed Memory System:**
+
+All evidence is rendered via `GovernanceEvidenceCarryForward` (`components/strategy-room/GovernanceEvidenceCarryForward.tsx`) which displays `GovernedMemoryItem[]` with:
+- Source label: `"{confidenceLabel} in {sourceSurfaceLabel}"` (e.g. `"CAPTURED in Purpose Alignment"`)
+- Date: formatted via `formatCapturedDate()`
+- Status: `ACTIVE`, `UNRESOLVED`, `STALE`, `SUPERSEDED`, `RESOLVED`, `SUPPRESSED`
+- Safety: `isMemoryDisplaySafe()` — suppressed items show explicit reason
+
+**Evidence converters (raw → GovernedMemoryItem[]):**
+
+| Converter | File | Source Surface |
+|-----------|------|---------------|
+| `convertPurposeAlignmentToGovernedMemory()` | `lib/alignment/evidence-loader.ts` | PURPOSE_ALIGNMENT |
+| `convertFinancialExposureToGovernedMemory()` | `lib/product/financial-exposure-persistence.ts` | FAST_DIAGNOSTIC or EXECUTIVE_REPORTING |
+| `buildGovernedMemoryFromEvidenceCapture()` | `lib/product/governed-memory-presenter.ts` | Configurable |
+| `buildGovernedMemoryFromEvidenceStages()` | `lib/product/governed-memory-presenter.ts` | Per-stage |
+
+**Evidence surfaces (where evidence is rendered):**
+
+| Surface | PA Evidence | FE Evidence | Source Labels | Dates |
+|---------|-------------|-------------|---------------|-------|
+| Executive Reporting UI | ✅ | ✅ | ✅ | ✅ |
+| Strategy Room Entry | ✅ | ✅ | ✅ | ✅ |
+| Strategy Room Session | ✅ | ✅ | ✅ | ✅ |
+| Return Brief UI | ✅ | ✅ | ✅ | ✅ |
+| Decision Centre | ✅ | ✅ | ✅ | ✅ |
+| Oversight Brief UI | ✅ | ✅ | ✅ | ✅ |
+
+**Closure status:** 80/80 material fields across 8 ladder stages are CLOSED_RENDERED, CLOSED_SIGNALLED, or CLOSED_SUPPRESSED. See `docs/product/whole-ladder-evidence-spine-closure-register.md` for the definitive field-by-field register.
+
+**Financial Exposure Persistence Policy:**
+
+Defined in `lib/product/financial-exposure-persistence.ts`. Persists computed numeric exposure snapshot when generated:
+- `userCostOfDelayText` — user's free-text description
+- `estimatedFinancialExposure` — computed numeric estimate
+- `exposureBand` — low/moderate/high/critical/undisclosed
+- `exposureBasis` — input parameters used for calculation
+- `computedAt`, `sourceSurface`, `schemaVersion`
+
+Also persists costOfInaction projections (qualitative horizon narratives) via `persistCostOfInactionProjection()`.
+
+Every rendered FE item includes the caveat: *"This is an estimate based on diagnostic inputs and has not been independently verified."*
 
 ### Execution Tracking
 
@@ -4091,13 +4162,15 @@ Validated with zod. The `answers` record must contain at minimum a `decision` fi
 6. Forecast default path
 7. Synthesize (LLM + arbiter tournament)
 8. Compute Cost of Inaction
-9. Assess Execution Failure
-10. Compute Authority Index
-11. Create Decision Memory record
-12. Summarize Decision Memory trend
-13. Create Intelligence Spine
-14. Persist spine to DiagnosticJourney
-15. Return sanitized FastDiagnosticResult
+9. Persist Financial Exposure snapshot (`persistFinancialExposureSnapshot`)
+10. Persist Cost of Inaction projection (`persistCostOfInactionProjection`)
+11. Assess Execution Failure
+12. Compute Authority Index
+13. Create Decision Memory record
+14. Summarize Decision Memory trend
+15. Create Intelligence Spine
+16. Persist spine to DiagnosticJourney
+17. Return sanitized FastDiagnosticResult
 
 ---
 
@@ -5547,6 +5620,7 @@ node scripts/quality/full-validation.mjs
 | 1.0 | April 2026 | Engineering Lead | Initial release (Parts A, B, C) |
 | 2.0 | April 2026 | Engineering Lead | Merged manual. Architecture updates: server-side scoring, PostgreSQL-only, React state only, Pages Router primary, Product Elevation Layer, Intelligence Spine contract, 6-tier severity target, 13-archetype target |
 | 3.0 | May 2026 | Engineering Lead | ZTHVF security convergence. Replaced middleware.ts with proxy.ts V5.1 architecture. Added Chapter 32A (ZTHVF Security Validation Framework). Updated rate limiting to match proxy configuration. IP exposure purge across 74 source files. PDF quarantine (84 PDFs moved to private_storage). Dependency audit closeout (hono >=4.12.16). Client bundle audit scoped to .next/static only. Red-team hostile suite expanded to 31 test cases |
+| 3.1 | 8 May 2026 | Engineering Lead | Whole-ladder evidence spine closure. Added evidence persistence for Purpose Alignment (competingObligation, consequence, weakestDomain, strongestDomain, primaryPattern, contradictions, compositeScore, profile). Added financial exposure persistence (userCostOfDelayText, estimatedFinancialExposure, exposureBand, exposureBasis, costOfInaction projections). Created governed memory system with source-labelled, dated, safety-checked rendering via GovernanceEvidenceCarryForward across all 8 downstream surfaces (Executive Reporting, Strategy Room Entry, Strategy Room Session, Return Brief, Decision Centre, Oversight Brief, Control Room). Created whole-ladder evidence spine closure register (80/80 fields closed). Updated engineering manual with evidence spine architecture documentation. |
 
 ---
 
@@ -5586,4 +5660,4 @@ Build accordingly.
 **END OF ENGINEERING MANUAL**
 
 *Abraham of London — Decision Authority Infrastructure*
-*Version 2.0 — April 2026*
+*Version 3.1 — 8 May 2026*

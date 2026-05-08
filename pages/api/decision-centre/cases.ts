@@ -39,6 +39,10 @@ import {
   buildPatternRecurrenceMemory,
   buildVerificationBoundaryMemory,
 } from "@/lib/product/governed-memory-presenter";
+import {
+  loadPurposeAlignmentEvidence,
+  convertPurposeAlignmentToGovernedMemory,
+} from "@/lib/alignment/evidence-loader";
 
 function parseMoney(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -535,6 +539,16 @@ export default async function handler(
           capturedAt: latestOutcome?.createdAt ?? caseCard.updatedAt,
         }),
       ];
+      // ── PURPOSE ALIGNMENT EVIDENCE ──
+      const paEvidence = await loadPurposeAlignmentEvidence({
+        email: livingCase.email ?? undefined,
+        subjectId: livingCase.subjectKey ?? undefined,
+      });
+      const paMemoryItems = convertPurposeAlignmentToGovernedMemory(paEvidence);
+      if (paMemoryItems.length > 0) {
+        governedMemory.push(...paMemoryItems);
+      }
+
       caseCard.governedMemory = governedMemory.length ? governedMemory : null;
     }
 

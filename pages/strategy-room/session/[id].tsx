@@ -18,6 +18,9 @@ import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
 import {
+  convertFinancialExposureToGovernedMemory,
+} from "@/lib/product/financial-exposure-persistence";
+import {
   extractAssessmentEvidenceCapture,
   type AssessmentEvidenceCapture,
 } from "@/lib/product/evidence-capture-contract";
@@ -360,9 +363,23 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
       assessmentId: null,
     });
   }, [session]);
+  // ── FINANCIAL EXPOSURE EVIDENCE CARRIED FORWARD ──
+  const feMemory = React.useMemo(() => {
+    const exposureBlock = (session as any)?.financialExposure;
+    if (!exposureBlock) return [];
+    return convertFinancialExposureToGovernedMemory({
+      userCostOfDelayText: null,
+      estimatedFinancialExposure: exposureBlock.totalExposure ?? null,
+      exposureBand: exposureBlock.totalExposure >= 100000 ? "high" : exposureBlock.totalExposure >= 25000 ? "moderate" : exposureBlock.totalExposure > 0 ? "low" : null,
+      exposureBasis: null,
+      computedAt: typeof session.createdAt === "string" ? session.createdAt : new Date().toISOString(),
+      sourceSurface: "EXECUTIVE_REPORTING",
+      schemaVersion: "1.0.0",
+    });
+  }, [session]);
   const mergedSessionMemory = React.useMemo(
-    () => [...paMemory, ...sessionMemory],
-    [paMemory, sessionMemory],
+    () => [...paMemory, ...feMemory, ...sessionMemory],
+    [paMemory, feMemory, sessionMemory],
   );
 
   return (
