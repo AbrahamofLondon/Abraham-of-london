@@ -27,7 +27,21 @@ function cloneBrief(input: OversightBrief): OversightBrief {
     costOfInaction: input.costOfInaction ? { ...input.costOfInaction } : undefined,
     counsel: { ...input.counsel },
     boardroom: { ...input.boardroom },
+    cadence: input.cadence ? { ...input.cadence } : undefined,
     verification: { ...input.verification },
+    counselHistory: input.counselHistory
+      ? {
+          ...input.counselHistory,
+          entries: input.counselHistory.entries.map((item) => ({ ...item })),
+        }
+      : undefined,
+    boardroomArchive: input.boardroomArchive ? { ...input.boardroomArchive } : undefined,
+    organisationDivergence: input.organisationDivergence
+      ? {
+          ...input.organisationDivergence,
+          items: input.organisationDivergence.items.map((item) => ({ ...item })),
+        }
+      : undefined,
     retainedEnforcement: input.retainedEnforcement ? { ...input.retainedEnforcement } : undefined,
     decisionCredit: input.decisionCredit ? { ...input.decisionCredit } : undefined,
     patternRecurrence: input.patternRecurrence ? { ...input.patternRecurrence } : undefined,
@@ -77,6 +91,14 @@ function cloneBrief(input: OversightBrief): OversightBrief {
           lostVisibility: input.cancellationLoss.lostVisibility.map((item) => ({ ...item })),
         }
       : undefined,
+    indispensability: input.indispensability
+      ? {
+          ...input.indispensability,
+          wouldLose: [...input.indispensability.wouldLose],
+          preservedVisibility: [...input.indispensability.preservedVisibility],
+          basis: [...input.indispensability.basis],
+        }
+      : undefined,
     structuredActions: input.structuredActions?.map((item) => ({ ...item })),
   };
 }
@@ -110,7 +132,11 @@ export function buildClientSafeOversightBrief(input: {
         costOfInaction: undefined,
         counsel: { reviewsTriggered: 0, requiredNow: 0 },
         boardroom: { dossiersAvailable: 0, exportsQueued: 0 },
+        cadence: undefined,
         verification: { commitmentsDue: 0, commitmentsVerified: 0, unresolvedBreaches: 0 },
+        counselHistory: undefined,
+        boardroomArchive: undefined,
+        organisationDivergence: undefined,
         retainedEnforcement: undefined,
         decisionCredit: undefined,
         decisionLosses: undefined,
@@ -120,6 +146,7 @@ export function buildClientSafeOversightBrief(input: {
         cycleConsequenceProjection: undefined,
         valueProtected: undefined,
         cancellationLoss: undefined,
+        indispensability: undefined,
         requiredActions: [],
         structuredActions: [],
       },
@@ -173,6 +200,17 @@ export function buildClientSafeOversightBrief(input: {
         ...brief.decisionCredit,
         interpretation: undefined,
       },
+      counselHistory: brief.counselHistory
+        ? {
+            ...brief.counselHistory,
+            entries: brief.counselHistory.entries.map((item) => ({
+              id: item.id,
+              caseId: item.caseId,
+              status: item.status,
+              triggerReason: "Governed counsel escalation recorded.",
+            })),
+          }
+        : undefined,
     };
     suppressions.push({
       section: "decisionCredit",
@@ -206,6 +244,15 @@ export function buildClientSafeOversightBrief(input: {
       structuredActions: brief.structuredActions?.filter((item) =>
         item.severity === "HIGH" || item.severity === "CRITICAL"
       ),
+      counselHistory: brief.counselHistory
+        ? {
+            ...brief.counselHistory,
+            entries: brief.counselHistory.entries.map((item) => ({
+              ...item,
+              triggerReason: item.triggerReason,
+            })),
+          }
+        : undefined,
     };
     suppressions.push({
       section: "verification",
@@ -222,7 +269,11 @@ export function buildClientSafeOversightBrief(input: {
       costOfInaction: undefined,
       counsel: { reviewsTriggered: 0, requiredNow: 0 },
       boardroom: { dossiersAvailable: 0, exportsQueued: 0 },
+      cadence: undefined,
       verification: { commitmentsDue: 0, commitmentsVerified: 0, unresolvedBreaches: 0 },
+      counselHistory: undefined,
+      boardroomArchive: undefined,
+      organisationDivergence: undefined,
       retainedEnforcement: undefined,
       decisionCredit: undefined,
       decisionLosses: undefined,
@@ -232,6 +283,7 @@ export function buildClientSafeOversightBrief(input: {
       cycleConsequenceProjection: undefined,
       valueProtected: undefined,
       cancellationLoss: undefined,
+      indispensability: undefined,
       requiredActions: [],
       structuredActions: [],
     };

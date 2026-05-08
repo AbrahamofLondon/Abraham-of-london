@@ -1,8 +1,8 @@
 /**
  * lib/product/oversight-brief-efficacy-scorer.ts — Oversight Brief quality scorer.
  *
- * A retainer-grade brief must justify action, consequence, and continuity.
- * Generation is insufficient. Delivery must be earned.
+ * A retainer-grade brief must justify action, consequence, continuity,
+ * delivery readiness, and what visibility would be lost without oversight.
  */
 
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
@@ -29,6 +29,9 @@ function countHighValueSignals(brief: OversightBrief): number {
     (brief.decisionDependencies?.conflicts.length ?? 0) > 0,
     (brief.irreversibility?.score ?? 0) >= 45,
     Boolean(brief.cycleConsequenceProjection),
+    (brief.counselHistory?.totalEvents ?? 0) > 0,
+    (brief.boardroomArchive?.totalDossiers ?? 0) > 0,
+    (brief.organisationDivergence?.count ?? 0) > 0,
   ].filter(Boolean).length;
 }
 
@@ -46,8 +49,19 @@ export function scoreOversightBriefEfficacy(input: {
   warnings?: string[];
   suppressions?: BriefSuppression[];
   firstCycleException?: boolean;
+  clientSafeAvailable?: boolean;
+  deliveryState?: string;
 }): OversightBriefEfficacyScore {
-  const { brief, previousBrief, warnings = [], suppressions = [], firstCycleException = false } = input;
+  const {
+    brief,
+    previousBrief,
+    warnings = [],
+    suppressions = [],
+    firstCycleException = false,
+    clientSafeAvailable = false,
+    deliveryState,
+  } = input;
+
   const dimensions: EfficacyDimensionScore[] = [];
   const withholdReasons: string[] = [];
   const operatorNotes: string[] = [];
@@ -70,6 +84,9 @@ export function scoreOversightBriefEfficacy(input: {
   if ((brief.irreversibility?.score ?? 0) >= 45) signalCount++;
   if ((brief.decisionDependencies?.conflicts.length ?? 0) > 0) signalCount++;
   if (brief.cycleConsequenceProjection) signalCount++;
+  if ((brief.counselHistory?.totalEvents ?? 0) > 0) signalCount++;
+  if ((brief.boardroomArchive?.totalDossiers ?? 0) > 0) signalCount++;
+  if ((brief.organisationDivergence?.count ?? 0) > 0) signalCount++;
 
   const highValueSignalCount = countHighValueSignals(brief);
   const hasCost = Boolean(brief.costOfInaction && brief.costOfInaction.totalEstimated > 0);
@@ -84,16 +101,22 @@ export function scoreOversightBriefEfficacy(input: {
   const realDeltaCount = comparison.deltas.filter((delta) => delta.direction !== "UNCHANGED").length;
   const hasLossWithoutEvidence = brief.decisionLosses?.entries.some((item) => item.evidenceBasis.length === 0) ?? false;
   const hasIrreversibilityWithoutDrivers = Boolean(brief.irreversibility && brief.irreversibility.score > 0 && brief.irreversibility.drivers.length === 0);
+  const hasCadenceStatus = Boolean(brief.cadence?.status);
+  const hasBoardroomArchive = (brief.boardroomArchive?.totalDossiers ?? 0) > 0;
+  const hasCounselHistory = (brief.counselHistory?.totalEvents ?? 0) > 0;
+  const hasOrganisationDivergence = (brief.organisationDivergence?.count ?? 0) > 0;
+  const hasCancellationLoss = (brief.cancellationLoss?.lostVisibility.length ?? 0) > 0;
+  const hasIndispensability = (brief.indispensability?.wouldLose.length ?? 0) > 0;
+  const deliveryReady = clientSafeAvailable && deliveryState && deliveryState !== "NOT_READY" && deliveryState !== "WITHHELD";
 
-  const signalDensityScore = Math.min(100, signalCount * 15);
   dimensions.push({
     dimension: "SIGNAL_DENSITY",
-    score: signalDensityScore,
+    score: Math.min(100, signalCount * 12),
     reason: `${signalCount} live signal${signalCount !== 1 ? "s" : ""} present in brief.`,
     requiredImprovement: signalCount < 3 ? "Brief needs at least 3 live signals to be substantive." : undefined,
   });
 
-  const evidenceScore = (hasOutcomeVerified ? 40 : 0) + (brief.activeCases.length >= 2 ? 30 : 0) + (brief.activeCases.length > 0 ? 20 : 0);
+  const evidenceScore = (hasOutcomeVerified ? 30 : 0) + (brief.activeCases.length >= 2 ? 25 : 0) + (brief.activeCases.length > 0 ? 20 : 0) + (hasRetainedEnforcement ? 20 : 0);
   dimensions.push({
     dimension: "EVIDENCE_STRENGTH",
     score: Math.min(100, evidenceScore),
@@ -103,15 +126,14 @@ export function scoreOversightBriefEfficacy(input: {
 
   const casesWithActions = brief.activeCases.filter((item) => item.nextAction).length;
   const casesNamed = brief.activeCases.filter((item) => item.title && item.title.length > 10).length;
-  const specificityScore = Math.min(100, (casesWithActions * 25) + (casesNamed * 15));
   dimensions.push({
     dimension: "DECISION_SPECIFICITY",
-    score: specificityScore,
+    score: Math.min(100, (casesWithActions * 22) + (casesNamed * 12) + (brief.structuredActions?.length ? 18 : 0)),
     reason: `${casesNamed} case${casesNamed !== 1 ? "s" : ""} specifically named. ${casesWithActions} with next action.`,
-    requiredImprovement: specificityScore < 50 ? "Brief needs specific case names and actions, not generic language." : undefined,
+    requiredImprovement: casesWithActions === 0 ? "Brief needs more case-specific action logic." : undefined,
   });
 
-  const actionabilityScore = actionCount >= 3 ? 100 : actionCount >= 1 ? 60 : 0;
+  const actionabilityScore = actionCount >= 3 ? 100 : actionCount >= 2 ? 80 : actionCount >= 1 ? 55 : 0;
   dimensions.push({
     dimension: "ACTIONABILITY",
     score: actionabilityScore,
@@ -122,16 +144,30 @@ export function scoreOversightBriefEfficacy(input: {
     withholdReasons.push("No required actions exist. A brief without actions wastes institutional credibility.");
   }
 
-  const consequenceScore = (hasCost ? 35 : 0) + (hasBreaches ? 25 : 0) + (hasCounselRequired ? 25 : 0) + (brief.activeCases.some((item) => item.primaryRisk) ? 15 : 0);
   dimensions.push({
     dimension: "CONSEQUENCE_CLARITY",
-    score: Math.min(100, consequenceScore),
+    score: Math.min(
+      100,
+      (hasCost ? 24 : 0)
+        + (hasBreaches ? 18 : 0)
+        + (hasCounselRequired ? 18 : 0)
+        + (brief.activeCases.some((item) => item.primaryRisk) ? 14 : 0)
+        + (brief.irreversibility ? 14 : 0)
+        + (brief.decisionLosses?.entries.length ? 12 : 0),
+    ),
     reason: `Cost: ${hasCost ? "present" : "absent"}. Breaches: ${hasBreaches ? "yes" : "none"}. Counsel: ${hasCounselRequired ? "required" : "not required"}.`,
   });
 
   const continuityScore = comparison.available
-    ? Math.min(100, realDeltaCount * 20 + (hasRetainedEnforcement ? 20 : 0))
-    : (hasRetainedEnforcement ? 15 : 0);
+    ? Math.min(
+        100,
+        realDeltaCount * 16
+          + (hasRetainedEnforcement ? 14 : 0)
+          + (hasCadenceStatus ? 14 : 0)
+          + (hasBoardroomArchive ? 12 : 0)
+          + (hasCounselHistory ? 12 : 0),
+      )
+    : (hasRetainedEnforcement ? 15 : 0) + (hasCadenceStatus ? 10 : 0);
   dimensions.push({
     dimension: "CONTINUITY_VALUE",
     score: Math.min(100, continuityScore),
@@ -140,22 +176,29 @@ export function scoreOversightBriefEfficacy(input: {
       : "No prior oversight cycle data. Brief lacks trend comparison.",
     requiredImprovement: !comparison.available
       ? "First-cycle briefs cannot be formidable without manual justification."
-      : continuityScore < 30
+      : continuityScore < 35
         ? "Continuity exists but lacks specific movement across cycles."
         : undefined,
   });
 
-  const execScore = (hasBoardroom ? 40 : 0) + (brief.counsel.reviewsTriggered > 0 ? 30 : 0) + (hasCost ? 20 : 0) + (actionCount >= 2 ? 10 : 0);
   dimensions.push({
     dimension: "EXECUTIVE_RELEVANCE",
-    score: Math.min(100, execScore),
+    score: Math.min(
+      100,
+      (hasBoardroom ? 22 : 0)
+        + (brief.counsel.reviewsTriggered > 0 ? 14 : 0)
+        + (hasCost ? 12 : 0)
+        + (actionCount >= 2 ? 8 : 0)
+        + (hasBoardroomArchive ? 14 : 0)
+        + (hasCounselHistory ? 10 : 0)
+        + (hasOrganisationDivergence ? 14 : 0),
+    ),
     reason: `Boardroom: ${hasBoardroom ? "qualified" : "not qualified"}. Counsel: ${brief.counsel.reviewsTriggered > 0 ? "triggered" : "not triggered"}.`,
   });
 
-  const suppressionScore = suppressions.length === 0 ? 100 : unresolvedSensitiveSuppression ? 0 : 70;
   dimensions.push({
     dimension: "SUPPRESSION_SAFETY",
-    score: suppressionScore,
+    score: suppressions.length === 0 ? 100 : unresolvedSensitiveSuppression ? 0 : 70,
     reason: suppressions.length === 0
       ? "No sensitive data suppressions required."
       : `${suppressions.length} suppression${suppressions.length !== 1 ? "s" : ""} applied. ${unresolvedSensitiveSuppression ? "Blocking sensitivity remains." : "Suppressions are bounded and transparent."}`,
@@ -174,24 +217,30 @@ export function scoreOversightBriefEfficacy(input: {
     brief.patternRecurrence && (brief.patternRecurrence.status === "POSSIBLE_RECURRENCE" || brief.patternRecurrence.status === "VERIFIED_RECURRENCE")
       ? "pattern recurrence"
       : null,
+    hasOrganisationDivergence ? "organisation divergence" : null,
+    hasBoardroomArchive ? "boardroom memory" : null,
+    hasCounselHistory ? "counsel history" : null,
   ].filter(Boolean);
 
-  const retainerProofScore = Math.min(100, clientWouldMiss.length * 25);
   dimensions.push({
     dimension: "RETAINER_VALUE_PROOF",
-    score: retainerProofScore,
+    score: Math.min(
+      100,
+      clientWouldMiss.length * 10
+        + (hasCancellationLoss ? 24 : 0)
+        + (hasIndispensability ? 24 : 0)
+        + (deliveryReady ? 12 : 0),
+    ),
     reason: clientWouldMiss.length > 0
       ? `Client would have missed: ${clientWouldMiss.join(", ")}.`
       : "Brief does not clearly demonstrate what the client would have missed without oversight.",
-    requiredImprovement: retainerProofScore < 50 ? "Brief needs stronger proof of oversight value." : undefined,
+    requiredImprovement: !hasCancellationLoss || !hasIndispensability
+      ? "Brief needs clearer proof of what visibility would be lost if oversight stopped."
+      : undefined,
   });
 
-  for (const warning of warnings) {
-    operatorNotes.push(`Warning from composer: ${warning}`);
-  }
-  for (const warning of comparison.warnings) {
-    operatorNotes.push(`Comparison warning: ${warning}`);
-  }
+  for (const warning of warnings) operatorNotes.push(`Warning from composer: ${warning}`);
+  for (const warning of comparison.warnings) operatorNotes.push(`Comparison warning: ${warning}`);
 
   const hasRequiredAction = actionCount >= 1;
   const hasConsequence = Boolean(hasCost || hasBreaches || hasCounselRequired || hasBoardroom || (brief.retainedEnforcement?.deteriorationSignals ?? 0) > 0);
@@ -204,18 +253,15 @@ export function scoreOversightBriefEfficacy(input: {
     || brief.retainedEnforcement?.cyclesReviewed,
   );
 
-  if (unresolvedSensitiveSuppression) {
-    withholdReasons.push("Client-safe rendering still carries unresolved sensitive material.");
-  }
-  if (!hasConsequenceProjection && highValueSignalCount < 2) {
-    withholdReasons.push("No consequence projection exists and there are not enough other high-value signals to justify delivery.");
-  }
-  if (hasLossWithoutEvidence) {
-    withholdReasons.push("The brief claims decision loss without evidence basis.");
-  }
-  if (hasIrreversibilityWithoutDrivers) {
-    withholdReasons.push("The brief claims irreversibility without evidential drivers.");
-  }
+  if (unresolvedSensitiveSuppression) withholdReasons.push("Client-safe rendering still carries unresolved sensitive material.");
+  if (!clientSafeAvailable) withholdReasons.push("No client-safe brief has been produced for delivery review.");
+  if (!hasConsequenceProjection && highValueSignalCount < 2) withholdReasons.push("No consequence projection exists and there are not enough other high-value signals to justify delivery.");
+  if (hasLossWithoutEvidence) withholdReasons.push("The brief claims decision loss without evidence basis.");
+  if (hasIrreversibilityWithoutDrivers) withholdReasons.push("The brief claims irreversibility without evidential drivers.");
+  if (!hasCancellationLoss) operatorNotes.push("Cancellation-loss clarity is absent. The client-facing value of continuity is under-proven.");
+  if (!hasIndispensability) operatorNotes.push("Indispensability summary is absent. The brief does not fully express what visibility would be lost if oversight stopped.");
+  if (!hasCadenceStatus) operatorNotes.push("Cadence status is unavailable. Retainer operating rhythm is not yet visible in the brief.");
+  if (!deliveryReady) operatorNotes.push("Delivery readiness is not yet established. Review may continue, but the brief is not client-deliverable.");
 
   const formidableSignals = [
     comparison.deltas.find((delta) => delta.dimension === "COST" && delta.direction !== "UNCHANGED") ? "cost movement" : null,
@@ -231,10 +277,10 @@ export function scoreOversightBriefEfficacy(input: {
     comparison.deltas.find((delta) => delta.dimension === "IRREVERSIBILITY" && delta.direction !== "UNCHANGED") ? "irreversibility movement" : null,
     brief.strategicOptions?.options.some((item) => item.status === "CLOSING" || item.status === "EXPIRED") ? "option decay" : null,
     (brief.decisionDependencies?.conflicts.length ?? 0) > 0 ? "dependency conflict" : null,
+    hasOrganisationDivergence ? "organisation divergence" : null,
   ].filter(Boolean);
 
   const totalScore = Math.round(dimensions.reduce((sum, dimension) => sum + dimension.score, 0) / dimensions.length);
-
   const formidableCandidate = totalScore >= 75 && actionCount >= 2 && signalCount >= 4 && formidableSignals.length >= 4;
   const comparisonRequiredButUnavailable = formidableCandidate && !comparison.available && !firstCycleException;
   if (comparisonRequiredButUnavailable) {
@@ -247,9 +293,16 @@ export function scoreOversightBriefEfficacy(input: {
   } else if (!hasRequiredAction || !hasConsequence || !hasEvidenceBasis || !hasContinuityOrVerification) {
     grade = totalScore >= 40 ? "ADEQUATE" : "WEAK";
     operatorNotes.push("Brief cannot auto-deliver because it lacks one of: required action, consequence, evidence basis, or continuity/verification marker.");
-  } else if ((comparison.available || firstCycleException) && formidableCandidate) {
+  } else if (
+    (comparison.available || firstCycleException)
+    && formidableCandidate
+    && clientSafeAvailable
+    && deliveryReady
+    && hasCancellationLoss
+    && !unresolvedSensitiveSuppression
+  ) {
     grade = "FORMIDABLE";
-  } else if (totalScore >= 60 && actionCount >= 1 && !unresolvedSensitiveSuppression && highValueSignalCount >= 3) {
+  } else if (totalScore >= 60 && actionCount >= 1 && !unresolvedSensitiveSuppression && highValueSignalCount >= 3 && clientSafeAvailable) {
     grade = "STRONG";
   } else if (totalScore >= 40) {
     grade = "ADEQUATE";
@@ -265,6 +318,9 @@ export function scoreOversightBriefEfficacy(input: {
   }
   if (grade !== "FORMIDABLE" && totalScore >= 75 && formidableSignals.length < 4) {
     operatorNotes.push("Brief score is high, but it lacks the four retainer-grade movement dimensions required for FORMIDABLE.");
+  }
+  if (grade === "STRONG" && !deliveryReady) {
+    operatorNotes.push("Brief quality may be strong, but delivery readiness is not yet established.");
   }
 
   return {

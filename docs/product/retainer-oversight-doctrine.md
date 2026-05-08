@@ -216,5 +216,21 @@ First retainer readiness:
 - enterprise Control Room with durable role-scoped access
 - recurring verification cadence and escalation workflow
 - boardroom history across oversight cycles
+
+## Operating Rhythm
+
+Retainer oversight is delivered through a governed cycle:
+
+1. compose
+2. suppress
+3. review
+4. approve or withhold
+5. archive
+6. deliver through a controlled client-safe surface
+7. derive next-cycle intent
+
+The brief is not delivered because it was generated.
+
+It is delivered only after a governed review decision.
 - counsel oversight pipeline with logged evidence outputs
 - retained enforcement-cycle history across review periods

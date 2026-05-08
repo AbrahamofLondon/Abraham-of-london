@@ -84,6 +84,7 @@ export type RetainerReadiness = {
   level: "LOW" | "MEDIUM" | "HIGH";
   reason: string;
   signals?: string[];
+  cadenceStatus?: string;
 };
 
 export type PatternRecurrenceSummary = {
@@ -160,6 +161,7 @@ export type DecisionCentreCase = {
     qualified: boolean;
     reason?: string;
     href?: string | null;
+    historyCount?: number;
   } | null;
   /** Available Return Briefs */
   returnBriefs: ReturnBriefReference[];

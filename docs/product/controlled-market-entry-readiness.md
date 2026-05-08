@@ -121,6 +121,16 @@ No primary entry point has GENERIC RISK status. See `docs/product/bespoke-surfac
 - £15k+ requires Control Room UI, organisation access enforcement, recurring verification cadence, and counsel review workflow
 - £50k requires enterprise Control Room, operator role model, boardroom history, counsel oversight pipeline, retained enforcement-cycle history, and recurring delivery discipline
 
+## Operating Rhythm Update
+
+- cadence state is now derived from archived cycles and delivery events
+- counsel history is governed evidence, not side-channel memory
+- boardroom memory is now archived at minimum viable depth
+- client-safe brief delivery is controlled, but still not scheduler-backed
+- £5k is operationally defensible in controlled conditions
+- £15k remains blocked by richer organisation divergence and enterprise-safe Control Room depth
+- £50k remains blocked by scheduler-backed cadence, deeper archive depth, and enterprise operating roles
+
 **Formidable brief hardening now required:**
 - no brief without prior cycle may claim trend
 - no thin brief may score FORMIDABLE

@@ -40,6 +40,10 @@ type PreviewResponse = {
   warnings: string[];
 };
 
+function safeArray<T>(value: T[] | undefined | null): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
 const DECISION_OPTIONS: Array<{ value: OversightReviewDecision; label: string }> = [
   { value: "APPROVE_FOR_CLIENT", label: "Approve For Client" },
   { value: "REVISE_BEFORE_DELIVERY", label: "Revise Before Delivery" },
@@ -262,6 +266,7 @@ export default function OversightReviewPage(
                 <DataLine label="Recommended Decision" value={recommendation?.recommendedDecision ?? "WAIT_FOR_MORE_EVIDENCE"} />
                 <DataLine label="Delivery Readiness" value={preview.deliveryIntent.state} />
                 <DataLine label="Next Required Decision" value={preview.nextRequiredOperatorDecision} />
+                <DataLine label="Cadence Status" value={preview.internalBrief?.cadence?.status ?? "UNAVAILABLE"} />
                 <p className="mt-4 text-sm text-white/60">{recommendation?.explanation}</p>
 
                 <div className="mt-5 grid gap-4 md:grid-cols-[1fr_1fr]">
@@ -326,6 +331,101 @@ export default function OversightReviewPage(
                     <p className="mt-1 text-sm text-white/60">Recommended date: {new Date(preview.nextCycleIntent.nextCycleRecommendedDate).toLocaleDateString("en-GB")}</p>
                     <p className="mt-2 text-sm text-white/45">{preview.nextCycleIntent.reason}</p>
                   </div>
+                )}
+              </Panel>
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-3">
+              <Panel title="Account Context">
+                <DataLine label="Account" value={preview.internalBrief?.accountId ?? "unknown"} />
+                <DataLine label="Organisation" value={preview.cycle.organisationId ?? "individual"} />
+                <DataLine label="Audience" value={selectedAudience} />
+                <DataLine label="Cadence Health" value={preview.internalBrief?.cadence?.health ?? "UNAVAILABLE"} />
+                <p className="mt-4 text-sm text-white/55">{preview.internalBrief?.cadence?.explanation ?? "Cadence has not yet been derived for this scope."}</p>
+              </Panel>
+
+              <Panel title="Counsel History">
+                {preview.internalBrief?.counselHistory ? (
+                  <>
+                    <DataLine label="Events" value={preview.internalBrief.counselHistory.totalEvents} />
+                    <DataLine label="Open" value={preview.internalBrief.counselHistory.openCount} />
+                    <p className="mt-4 text-sm text-white/60">{preview.internalBrief.counselHistory.summary}</p>
+                    <div className="mt-4 space-y-3">
+                      {safeArray(preview.internalBrief.counselHistory.entries).slice(0, 4).map((item: any) => (
+                        <div key={item.id} className="border border-white/10 bg-black/20 p-3">
+                          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">{item.status}</p>
+                          <p className="mt-2 text-sm text-white/75">{item.triggerReason}</p>
+                          {item.resultingAction ? <p className="mt-2 text-sm text-white/45">{item.resultingAction}</p> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-white/45">No governed counsel history is available for this cycle scope.</p>
+                )}
+              </Panel>
+
+              <Panel title="Boardroom Archive">
+                {preview.internalBrief?.boardroomArchive ? (
+                  <>
+                    <DataLine label="Total Dossiers" value={preview.internalBrief.boardroomArchive.totalDossiers} />
+                    <DataLine label="Prior Dossiers" value={preview.internalBrief.boardroomArchive.previousDossierCount} />
+                    <DataLine label="Repeated Exposure" value={preview.internalBrief.boardroomArchive.repeatedExposureCount} />
+                    <DataLine label="Unresolved" value={preview.internalBrief.boardroomArchive.unresolvedBoardLevelIssues} />
+                    <p className="mt-4 text-sm text-white/60">{preview.internalBrief.boardroomArchive.summary}</p>
+                  </>
+                ) : (
+                  <p className="text-sm text-white/45">No boardroom archive memory is available for this scope.</p>
+                )}
+              </Panel>
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-2">
+              <Panel title="Organisation Divergence">
+                {preview.internalBrief?.organisationDivergence ? (
+                  <>
+                    <DataLine label="Summaries" value={preview.internalBrief.organisationDivergence.count} />
+                    <DataLine label="Suppressed Detail" value={preview.internalBrief.organisationDivergence.suppressedDetailCount} />
+                    <p className="mt-4 text-sm text-white/60">{preview.internalBrief.organisationDivergence.summary}</p>
+                    <div className="mt-4 space-y-3">
+                      {safeArray(preview.internalBrief.organisationDivergence.items).map((item: any) => (
+                        <div key={`${item.type}-${item.affectedDomain}`} className="border border-white/10 bg-black/20 p-3">
+                          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">{item.type} · {item.confidence}</p>
+                          <p className="mt-2 text-sm text-white/75">{item.sponsorSafeSummary}</p>
+                          <p className="mt-2 text-sm text-white/45">{item.recommendedNextAction}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-white/45">No sponsor-safe organisation divergence summary is currently available.</p>
+                )}
+              </Panel>
+
+              <Panel title="Indispensability Summary">
+                {preview.internalBrief?.indispensability ? (
+                  <>
+                    <DataLine label="Dependency Level" value={preview.internalBrief.indispensability.currentDependencyLevel} />
+                    <p className="mt-4 text-sm text-white/75">{preview.internalBrief.indispensability.headline}</p>
+                    <div className="mt-4">
+                      <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Preserved Visibility</p>
+                      <ul className="mt-2 space-y-2 text-sm text-white/60">
+                        {(preview.internalBrief.indispensability.preservedVisibility as string[]).map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="mt-4">
+                      <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Would Be Lost</p>
+                      <ul className="mt-2 space-y-2 text-sm text-white/60">
+                        {(preview.internalBrief.indispensability.wouldLose as string[]).map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-white/45">Indispensability has not yet been derived for this scope.</p>
                 )}
               </Panel>
             </div>

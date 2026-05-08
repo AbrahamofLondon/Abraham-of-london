@@ -209,6 +209,11 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
                   {c.boardroom.reason}
                 </p>
               )}
+              {(c.boardroom.historyCount ?? 0) > 0 && (
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.25)", marginTop: "6px" }}>
+                  {c.boardroom.historyCount} archived boardroom cycle{c.boardroom.historyCount === 1 ? "" : "s"}
+                </p>
+              )}
             </div>
             {c.boardroom.qualified && c.boardroom.href && (
               <Link
@@ -234,6 +239,11 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
           {c.retainerReadiness.signals && c.retainerReadiness.signals.length > 0 && (
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "6px" }}>
               {c.retainerReadiness.signals.join(" • ")}
+            </p>
+          )}
+          {c.retainerReadiness.cadenceStatus && (
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "6px" }}>
+              Cadence: {c.retainerReadiness.cadenceStatus}
             </p>
           )}
         </div>

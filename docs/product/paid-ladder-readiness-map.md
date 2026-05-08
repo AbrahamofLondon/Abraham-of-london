@@ -77,6 +77,12 @@ type ProductAccessState =
 | £15k+ retainer | Not ready for external packaging | Organisation access helper and Control Room foundation exist | Sponsor-safe oversight preview, richer divergence state, organisation oversight workflow, recurring verification cadence, counsel review workflow |
 | £50k retainer | Not ready | Retainer doctrine, boardroom threshold signal, counsel escalation doctrine | Enterprise Control Room, recurring verification cadence, boardroom history, counsel oversight pipeline, operator console hardening |
 
+## Operating Rhythm Update
+
+- £5k retainer: controlled-sale ready with reviewed archive, client-safe surface, cadence state, and governed delivery lifecycle
+- £15k retainer: still requires stronger organisation divergence memory, deeper sponsor-safe enterprise surfaces, and recurring cadence execution
+- £50k retainer: still requires enterprise Control Room, operator roles, scheduler-backed cadence, boardroom archive depth, and counsel history depth
+
 ---
 
 ## Refund/Restriction Logic

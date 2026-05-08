@@ -30,6 +30,9 @@ import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-cre
 import { detectPatternRecurrenceV0 } from "@/lib/product/pattern-recurrence";
 import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
 import { calculateCostOfInactionClock } from "@/lib/product/cost-of-inaction-clock";
+import { deriveOversightCadenceState } from "@/lib/product/oversight-cadence-engine";
+import { loadPreviousArchivedOversightCycle } from "@/lib/product/oversight-cycle-archive";
+import { loadBoardroomArchiveSummary } from "@/lib/product/boardroom-archive";
 
 function parseMoney(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -244,6 +247,68 @@ function severityRank(severity: string): number {
   }
 }
 
+async function resolveRetainerContext(input: {
+  organisationName?: string | null;
+  caseId: string;
+}) {
+  const organisation = input.organisationName
+    ? await prisma.organisation.findFirst({
+        where: {
+          OR: [
+            { name: input.organisationName },
+            { slug: input.organisationName },
+          ],
+        },
+        select: { id: true },
+      })
+    : null;
+
+  const contract = organisation
+    ? await prisma.retainerContract.findFirst({
+        where: { organisationId: organisation.id, status: "ACTIVE" },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, tier: true },
+      })
+    : null;
+
+  const previousCycle = contract
+    ? await loadPreviousArchivedOversightCycle({
+        accountId: contract.id,
+        beforePeriodStart: new Date().toISOString(),
+      })
+    : null;
+
+  const cadence = contract
+    ? deriveOversightCadenceState({
+        tier: contract.tier === "INSTITUTIONAL"
+          ? "INSTITUTIONAL_COMMAND"
+          : contract.tier === "OPERATIONAL"
+            ? "EXECUTIVE_OVERSIGHT"
+            : "GOVERNED_CONTINUITY",
+        latestArchivedCycle: previousCycle?.record
+          ? {
+              periodEnd: previousCycle.record.periodEnd,
+              createdAt: previousCycle.record.createdAt,
+              approvedAt: previousCycle.record.approvedAt,
+              deliveredAt: previousCycle.record.deliveredAt,
+              deliveryStatus: previousCycle.record.deliveryStatus,
+            }
+          : null,
+      })
+    : null;
+
+  const boardroomArchive = await loadBoardroomArchiveSummary({
+    organisationId: organisation?.id ?? null,
+    caseIds: [input.caseId],
+  }).catch(() => null);
+
+  return {
+    contractId: contract?.id ?? null,
+    cadence,
+    boardroomHistoryCount: boardroomArchive?.totalDossiers ?? 0,
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HANDLER
 // ─────────────────────────────────────────────────────────────────────────────
@@ -406,6 +471,7 @@ export default async function handler(
         href: boardroomQualification.qualified && livingCase.completedStages.includes("executive_reporting")
           ? "/diagnostics/executive-reporting/run"
           : null,
+        historyCount: 0,
       },
       returnBriefs: [],
       updatedAt: livingCase.createdAt || new Date().toISOString(),
@@ -429,6 +495,20 @@ export default async function handler(
     ) {
       retainerReadiness.reason = `${retainerReadiness.reason} ${creditGovernanceExplanation}`;
       retainerReadiness.signals = [...new Set([...(retainerReadiness.signals || []), "decision credit weakening"])];
+    }
+
+    const retainerContext = await resolveRetainerContext({
+      organisationName: livingCase.organisation,
+      caseId: livingCase.caseId,
+    });
+    caseCard.boardroom = caseCard.boardroom
+      ? { ...caseCard.boardroom, historyCount: retainerContext.boardroomHistoryCount }
+      : caseCard.boardroom;
+    if (retainerReadiness && retainerContext.cadence) {
+      retainerReadiness.cadenceStatus = retainerContext.cadence.status;
+      if (retainerContext.cadence.status !== "ON_TRACK" && retainerContext.cadence.status !== "FIRST_CYCLE_PENDING") {
+        retainerReadiness.signals = [...new Set([...(retainerReadiness.signals || []), `cadence ${retainerContext.cadence.status.toLowerCase()}`])];
+      }
     }
 
     caseCard.retainerReadiness = retainerReadiness;

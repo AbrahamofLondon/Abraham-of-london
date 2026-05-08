@@ -24,12 +24,12 @@ const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia,
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DEMO_STEPS = [
-  { label: "Input quality", status: "pass" as const, detail: "C3 fidelity: 0.72 — sufficient for governed synthesis" },
-  { label: "Contradiction scan", status: "warn" as const, detail: "Stated authority: CEO. Stated blocker: 'waiting for board approval.' Contradiction: authority claimed exceeds authority exercised." },
-  { label: "Kernel directive", status: "restrict" as const, detail: "RESTRICT — decision authority unclear. Execution owner absent. Financial exposure stated without evidence." },
-  { label: "Action simulation", status: "pass" as const, detail: "If authority is confirmed and owner assigned: 73% probability of structural improvement within 30 days." },
+  { label: "Finding", status: "pass" as const, detail: "Evidence quality: sufficient. Decision statement is specific enough for governed review." },
+  { label: "Contradiction", status: "warn" as const, detail: "Stated authority: CEO. Stated blocker: 'waiting for board approval.' Authority claimed exceeds authority exercised." },
+  { label: "Consequence test", status: "restrict" as const, detail: "RESTRICT — decision authority unclear. Execution owner absent. Financial exposure stated without evidence." },
+  { label: "Projection", status: "pass" as const, detail: "If authority is confirmed and owner assigned: structural improvement is likely within 30 days." },
   { label: "Required action", status: "action" as const, detail: "Assign one accountable owner. Confirm authority in writing. Re-submit with evidence of financial exposure." },
-  { label: "Outcome memory", status: "pending" as const, detail: "This decision will be tracked. The system verifies whether intervention worked at 14 and 30 days." },
+  { label: "Follow-up", status: "pending" as const, detail: "This decision will be tracked. The system verifies whether intervention worked at 14 and 30 days." },
 ];
 
 function DemoStep({ step, index, visible }: { step: typeof DEMO_STEPS[0]; index: number; visible: boolean }) {
@@ -81,7 +81,7 @@ export default function CategoryFrontDoor() {
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* 1. HERO — CATEGORY CLAIM                                          */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative min-h-[85vh] flex items-center justify-center px-6" style={{ backgroundColor: "rgb(3,3,5)" }}>
+      <section className="relative min-h-[85vh] flex items-start sm:items-center justify-center px-6 pt-[132px] sm:pt-24" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="max-w-[720px] text-center">
           <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "1.5rem" }}>
             Decision Infrastructure by Abraham of London
@@ -101,9 +101,9 @@ export default function CategoryFrontDoor() {
           </h1>
 
           <p className="mt-6 mx-auto max-w-[56ch] text-[15px] leading-[1.85]" style={{ color: "rgba(255,255,255,0.48)" }}>
-            Decision Infrastructure by Abraham of London gives serious individuals and organisations
-            a private operating advantage built on better evidence, sharper contradiction detection,
-            and verified executive memory.
+            Decision Infrastructure by Abraham of London tests serious decisions against evidence,
+            authority, consequence, and execution reality. If the case is not ready, the system
+            can refuse to proceed.
           </p>
 
           <p className="mt-8 mx-auto max-w-[44ch] text-[13px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.32)" }}>
@@ -129,7 +129,7 @@ export default function CategoryFrontDoor() {
               href="#refusal-engine"
               style={{ ...mono, fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}
             >
-              See the refusal engine
+              See the governed review
             </a>
           </div>
 
@@ -165,7 +165,7 @@ export default function CategoryFrontDoor() {
       <section id="refusal-engine" className="px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="max-w-[680px] mx-auto">
           <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.75rem" }}>
-            How the system governs a decision
+            How a decision is governed
           </div>
           <p style={{ ...serif, fontSize: "clamp(1.4rem, 4vw, 2rem)", lineHeight: 1.15, color: "rgba(255,255,255,0.88)", fontStyle: "italic" }}>
             A sample decision enters the system. Watch it get restricted.
@@ -181,8 +181,8 @@ export default function CategoryFrontDoor() {
           </div>
 
           <p className="mt-6 text-xs text-zinc-600 leading-5" style={mono}>
-            This is a deterministic demonstration. Real decisions are scored by the C3 fidelity engine,
-            contradiction kernel, action simulation, and outcome verification system.
+            This is a demonstration. Live decisions are tested against evidence quality,
+            authority clarity, consequence exposure, and execution readiness.
           </p>
         </div>
       </section>
@@ -281,11 +281,11 @@ export default function CategoryFrontDoor() {
 
           <div className="mt-6 grid gap-px md:grid-cols-2 lg:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
             {[
-              { name: "Decision Kernel", desc: "Accumulates contradictions across assessments. Unresolved tensions compound in severity over time." },
-              { name: "C3 Fidelity Score", desc: "Scores input quality on Clarity, Context, and Consequence. Below threshold: the system restricts synthesis." },
-              { name: "Arbiter Validation", desc: "Prevents AI from fabricating claims. Eight constraint checks ensure output is grounded in your evidence." },
-              { name: "Contradiction Graph", desc: "Cross-assessment interference detection. Finds where different stages of evidence point in conflicting directions." },
-              { name: "Action Simulation", desc: "Tests 'what if I escalate / replace owner / force deadline' before committing. Condition-class-specific consequences." },
+              { name: "Contradiction Memory", desc: "Accumulates contradictions across assessments. Unresolved tensions compound in severity over time." },
+              { name: "Evidence Quality", desc: "Grades input on clarity, context, and consequence. Below threshold: the system restricts progression." },
+              { name: "Governed Output", desc: "Prevents fabricated claims. Multiple constraint checks ensure output is grounded in your evidence." },
+              { name: "Cross-Assessment Review", desc: "Detects where different stages of evidence point in conflicting directions." },
+              { name: "Consequence Projection", desc: "Tests what happens if you escalate, replace an owner, or force a deadline — before committing." },
               { name: "Outcome Verification", desc: "14 and 30-day follow-up. Classifies whether intervention resolved, improved, stabilised, or worsened the condition." },
             ].map((item) => (
               <div key={item.name} className="p-5" style={{ backgroundColor: "rgb(3,3,5)" }}>

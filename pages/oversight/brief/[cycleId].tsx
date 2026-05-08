@@ -77,6 +77,12 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Audience</div>
                   <div className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.68)" }}>{audience}</div>
                 </div>
+                <div>
+                  <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence boundary</div>
+                  <div className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.68)" }}>
+                    {audience === "BOARD_LEVEL" ? "Board-safe consequence view" : "Sponsor-safe governed view"}
+                  </div>
+                </div>
               </div>
             ) : null}
           </header>
@@ -105,6 +111,16 @@ const OversightBriefPage: NextPage<PageProps> = ({
                       </div>
                     ))}
                   </div>
+                </Section>
+              )}
+
+              {brief.cadence && (
+                <Section title="Cadence Status">
+                  <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.cadence.explanation}</p>
+                  <p className="mt-2" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.62)" }}>
+                    {brief.cadence.status} · {brief.cadence.health}
+                    {brief.cadence.nextCycleDueDate ? ` · Next review ${new Date(brief.cadence.nextCycleDueDate).toLocaleDateString("en-GB")}` : ""}
+                  </p>
                 </Section>
               )}
 
@@ -151,6 +167,43 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   )}
                 </Section>
               </div>
+
+              {brief.organisationDivergence && brief.organisationDivergence.count > 0 && (
+                <Section title="Organisation Divergence">
+                  <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.organisationDivergence.summary}</p>
+                  <div className="mt-4 space-y-4">
+                    {brief.organisationDivergence.items.map((item) => (
+                      <div key={`${item.type}-${item.affectedDomain}`}>
+                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+                          {item.type} · {item.confidence}
+                        </p>
+                        <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{item.sponsorSafeSummary}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {(brief.boardroomArchive || brief.counselHistory) && (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {brief.boardroomArchive && (
+                    <Section title="Boardroom Memory">
+                      <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.boardroomArchive.summary}</p>
+                      <p className="mt-2" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.62)" }}>
+                        {brief.boardroomArchive.previousDossierCount} prior dossier{brief.boardroomArchive.previousDossierCount === 1 ? "" : "s"} · {brief.boardroomArchive.repeatedExposureCount} repeated exposure{brief.boardroomArchive.repeatedExposureCount === 1 ? "" : "s"}
+                      </p>
+                    </Section>
+                  )}
+                  {brief.counselHistory && (
+                    <Section title="Counsel Status">
+                      <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.counselHistory.summary}</p>
+                      <p className="mt-2" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.62)" }}>
+                        {brief.counselHistory.totalEvents} event{brief.counselHistory.totalEvents === 1 ? "" : "s"} · {brief.counselHistory.openCount} open
+                      </p>
+                    </Section>
+                  )}
+                </div>
+              )}
 
               <Section title="What Must Be Decided Now">
                 {brief.structuredActions?.length ? (
@@ -204,6 +257,30 @@ const OversightBriefPage: NextPage<PageProps> = ({
                         <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{item.description}</p>
                       </div>
                     ))}
+                  </div>
+                </Section>
+              )}
+
+              {brief.indispensability && (
+                <Section title="What Would Be Missed">
+                  <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.indispensability.headline}</p>
+                  <div className="mt-4 grid gap-6 md:grid-cols-2">
+                    <div>
+                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Preserved visibility</p>
+                      <ul className="mt-2 space-y-2">
+                        {brief.indispensability.preservedVisibility.map((item) => (
+                          <li key={item} style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Would be lost</p>
+                      <ul className="mt-2 space-y-2">
+                        {brief.indispensability.wouldLose.map((item) => (
+                          <li key={item} style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </Section>
               )}

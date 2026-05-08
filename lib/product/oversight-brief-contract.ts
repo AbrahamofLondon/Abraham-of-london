@@ -42,10 +42,48 @@ export type OversightBrief = {
     dossiersAvailable: number;
     exportsQueued: number;
   };
+  cadence?: {
+    status: string;
+    health: string;
+    currentCycleDueDate?: string;
+    nextCycleDueDate?: string;
+    explanation: string;
+  };
   verification: {
     commitmentsDue: number;
     commitmentsVerified: number;
     unresolvedBreaches: number;
+  };
+  counselHistory?: {
+    totalEvents: number;
+    openCount: number;
+    summary: string;
+    entries: Array<{
+      id: string;
+      caseId: string;
+      status: string;
+      triggerReason: string;
+      resultingAction?: string;
+    }>;
+  };
+  boardroomArchive?: {
+    totalDossiers: number;
+    previousDossierCount: number;
+    unresolvedBoardLevelIssues: number;
+    repeatedExposureCount: number;
+    summary: string;
+  };
+  organisationDivergence?: {
+    count: number;
+    summary: string;
+    suppressedDetailCount: number;
+    items: Array<{
+      type: string;
+      affectedDomain: string;
+      confidence: string;
+      sponsorSafeSummary: string;
+      recommendedNextAction: string;
+    }>;
   };
   retainedEnforcement?: {
     cyclesReviewed: number;
@@ -166,6 +204,13 @@ export type OversightBrief = {
       evidenceBasis: string;
       severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     }>;
+  };
+  indispensability?: {
+    headline: string;
+    wouldLose: string[];
+    preservedVisibility: string[];
+    currentDependencyLevel: "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
+    basis: string[];
   };
 
   /** Required actions (string form for backward compatibility) */

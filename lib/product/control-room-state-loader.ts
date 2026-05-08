@@ -11,6 +11,8 @@ import type { OrganisationAccessDecision } from "@/lib/product/organisation-acce
 import type { ControlRoomState } from "@/lib/product/control-room-contract";
 import type { AggregationSafety, MultiUserCampaignSummary } from "@/lib/product/multi-user-contract";
 import { evaluateAggregationSafety } from "@/lib/product/multi-user-privacy";
+import { loadOrganisationDivergenceSummary } from "@/lib/product/organisation-divergence-summary";
+import type { CollisionSummary, CollisionSummaryType } from "@/lib/product/multi-user-collision-summary";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -149,6 +151,24 @@ export async function loadControlRoomState(input: {
     nextRequiredAction = `Aggregation safety: ${aggregationSafety}. Ensure sufficient responses before generating reports.`;
   }
 
+  const divergenceResult = await loadOrganisationDivergenceSummary({
+    organisationId: org.id,
+  }).catch(() => ({ summaries: [], warnings: ["Organisation divergence summary could not be loaded."] }));
+  const divergence: CollisionSummary[] = divergenceResult.summaries.map((item) => ({
+    collisionCount: 1,
+    primaryCollision: item.type.replace(/_/g, " "),
+    collisionTypes: [item.type === "COST_ESTIMATE_DIVERGENCE"
+      ? "COST_DIVERGENCE"
+      : item.type === "CONDITION_CLASS_MISMATCH"
+        ? "CONDITION_CLASS_MISMATCH"
+        : item.type === "AUTHORITY_PERCEPTION_GAP"
+          ? "AUTHORITY_PERCEPTION_GAP"
+          : "BLOCKER_CONTRADICTION"] as CollisionSummaryType[],
+    severity: item.confidence === "HIGH" ? "HIGH" : item.confidence === "MEDIUM" ? "MEDIUM" : "LOW",
+    sponsorSafeSummary: item.sponsorSafeSummary,
+    operatorNotes: `${item.affectedDomain}. ${item.recommendedNextAction}`,
+  }));
+
   // ── 10. Assemble state ──
   const state: ControlRoomState = {
     organisationId: org.id,
@@ -161,7 +181,7 @@ export async function loadControlRoomState(input: {
       aggregationSafety,
     },
     campaigns: campaignSummaries,
-    divergence: [],
+    divergence,
     admissions,
     nextRequiredAction,
     privacyNotice: "Aggregated data only. Raw respondent answers are not visible. Anonymous campaigns remain anonymous. Small samples are suppressed.",

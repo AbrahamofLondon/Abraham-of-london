@@ -15,11 +15,15 @@ import {
   loadPreviousArchivedOversightCycle,
   persistOversightCycleArchive,
 } from "@/lib/product/oversight-cycle-archive";
+import { persistBoardroomArchiveEntries, loadBoardroomArchiveSummary } from "@/lib/product/boardroom-archive";
+import { loadCounselHistory } from "@/lib/product/counsel-history-loader";
+import { deriveOversightCadenceState } from "@/lib/product/oversight-cadence-engine";
 import { scoreOversightBriefEfficacy } from "@/lib/product/oversight-brief-efficacy-scorer";
 import type { OversightBriefEfficacyScore } from "@/lib/product/oversight-brief-efficacy-contract";
 import { composeOversightBrief } from "@/lib/product/oversight-brief-composer";
 import type { OversightDeliveryIntent, OversightDeliveryStatus } from "@/lib/product/oversight-delivery-contract";
 import { deriveNextOversightCycleIntent } from "@/lib/product/oversight-next-cycle";
+import { loadOrganisationDivergenceSummary } from "@/lib/product/organisation-divergence-summary";
 import { evaluateOrganisationAccess } from "@/lib/product/organisation-access";
 import type { OrganisationAccessDecision } from "@/lib/product/organisation-access-contract";
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
@@ -40,6 +44,7 @@ import type {
   OversightReviewDecisionRecord,
 } from "@/lib/product/oversight-review-decision-contract";
 import type { OversightReviewCycle } from "@/lib/product/oversight-review-cycle-contract";
+import { buildRetainerIndispensabilitySummary } from "@/lib/product/retainer-indispensability-summary";
 
 function syntheticAggregateAccess(): OrganisationAccessDecision {
   return {
@@ -441,6 +446,111 @@ export async function composeOversightReviewCycle(input: {
   const composed = await composeOversightBrief(input);
   warnings.push(...composed.warnings);
 
+  const cycleId = `review-cycle:${composed.account?.accountId || input.accountId || input.organisationId || input.email || input.userId || "unknown"}:${(composed.brief?.periodStart || input.periodStart || generatedAt).slice(0, 10)}`;
+
+  const previousArchivedCycle = composed.account?.accountId
+    ? await loadPreviousArchivedOversightCycle({
+        accountId: composed.account.accountId,
+        beforePeriodStart: composed.brief?.periodStart || input.periodStart || generatedAt,
+      })
+    : null;
+
+  const previousBrief = previousArchivedCycle?.internalBrief ?? undefined;
+  const cadence = deriveOversightCadenceState({
+    tier: composed.account?.tier ?? "GOVERNED_CONTINUITY",
+    latestArchivedCycle: previousArchivedCycle?.record
+      ? {
+          periodEnd: previousArchivedCycle.record.periodEnd,
+          createdAt: previousArchivedCycle.record.createdAt,
+          approvedAt: previousArchivedCycle.record.approvedAt,
+          deliveredAt: previousArchivedCycle.record.deliveredAt,
+          deliveryStatus: previousArchivedCycle.record.deliveryStatus,
+        }
+      : null,
+  });
+  const counselHistory = composed.brief
+    ? await loadCounselHistory({
+        caseIds: composed.brief.activeCases.map((item) => item.caseId),
+      })
+    : null;
+  const boardroomArchive = composed.brief
+    ? await loadBoardroomArchiveSummary({
+        organisationId: input.organisationId ?? null,
+        cycleId,
+        caseIds: composed.brief.activeCases.map((item) => item.caseId),
+      })
+    : null;
+  const divergenceResult = input.organisationId
+    ? await loadOrganisationDivergenceSummary({ organisationId: input.organisationId })
+    : { summaries: [], warnings: [] };
+  warnings.push(...divergenceResult.warnings);
+
+  if (composed.brief) {
+    composed.brief.cadence = {
+      status: cadence.status,
+      health: cadence.health,
+      currentCycleDueDate: cadence.currentCycleDueDate,
+      nextCycleDueDate: cadence.nextCycleDueDate,
+      explanation: cadence.explanation,
+    };
+    if (counselHistory) {
+      composed.brief.counselHistory = {
+        totalEvents: counselHistory.totalEvents,
+        openCount: counselHistory.openCount,
+        summary: counselHistory.summary,
+        entries: counselHistory.entries.map((item) => ({
+          id: item.id,
+          caseId: item.caseId,
+          status: item.status,
+          triggerReason: item.triggerReason,
+          resultingAction: item.resultingAction,
+        })),
+      };
+    }
+    if (boardroomArchive) {
+      composed.brief.boardroomArchive = {
+        totalDossiers: boardroomArchive.totalDossiers,
+        previousDossierCount: boardroomArchive.previousDossierCount,
+        unresolvedBoardLevelIssues: boardroomArchive.unresolvedBoardLevelIssues,
+        repeatedExposureCount: boardroomArchive.repeatedExposureCount,
+        summary: boardroomArchive.summary,
+      };
+    }
+    if (divergenceResult.summaries.length > 0) {
+      composed.brief.organisationDivergence = {
+        count: divergenceResult.summaries.length,
+        summary: `${divergenceResult.summaries.length} sponsor-safe divergence summar${divergenceResult.summaries.length === 1 ? "y is" : "ies are"} active in this organisation scope.`,
+        suppressedDetailCount: divergenceResult.summaries.reduce((sum, item) => sum + item.suppressedDetailCount, 0),
+        items: divergenceResult.summaries.map((item) => ({
+          type: item.type,
+          affectedDomain: item.affectedDomain,
+          confidence: item.confidence,
+          sponsorSafeSummary: item.sponsorSafeSummary,
+          recommendedNextAction: item.recommendedNextAction,
+        })),
+      };
+    }
+  }
+
+  const cycleComparison = composed.brief
+    ? compareOversightCycles({
+        current: composed.brief,
+        previous: previousBrief,
+      })
+    : { available: false, deltas: [], warnings: ["No internal brief available for comparison."] };
+  warnings.push(...cycleComparison.warnings);
+
+  if (composed.brief) {
+    composed.brief.indispensability = buildRetainerIndispensabilitySummary({
+      brief: composed.brief,
+      cadence,
+      cycleComparison,
+      boardroomArchive,
+      counselHistory,
+      organisationDivergence: divergenceResult.summaries,
+    });
+  }
+
   const access = await resolveOrganisationAccess({
     userId: input.userId,
     email: input.email,
@@ -456,30 +566,13 @@ export async function composeOversightReviewCycle(input: {
   warnings.push(...(sponsorOutput?.warnings ?? []));
   warnings.push(...(audienceOutputs.BOARD_LEVEL?.warnings ?? []));
 
-  const cycleId = `review-cycle:${composed.account?.accountId || input.accountId || input.organisationId || input.email || input.userId || "unknown"}:${(composed.brief?.periodStart || input.periodStart || generatedAt).slice(0, 10)}`;
-
-  const previousArchivedCycle = composed.account?.accountId
-    ? await loadPreviousArchivedOversightCycle({
-        accountId: composed.account.accountId,
-        beforePeriodStart: composed.brief?.periodStart || input.periodStart || generatedAt,
-      })
-    : null;
-
-  const previousBrief = previousArchivedCycle?.internalBrief ?? undefined;
-  const cycleComparison = composed.brief
-    ? compareOversightCycles({
-        current: composed.brief,
-        previous: previousBrief,
-      })
-    : { available: false, deltas: [], warnings: ["No internal brief available for comparison."] };
-  warnings.push(...cycleComparison.warnings);
-
   const baseEfficacy = composed.brief
     ? scoreOversightBriefEfficacy({
         brief: composed.brief,
         previousBrief,
         warnings,
         suppressions: sponsorOutput?.suppressions ?? [],
+        clientSafeAvailable: Boolean(sponsorOutput?.brief),
       })
     : undefined;
 
@@ -502,6 +595,7 @@ export async function composeOversightReviewCycle(input: {
         warnings,
         suppressions: sponsorOutput?.suppressions ?? [],
         firstCycleException: firstCycleExceptionAllowed,
+        clientSafeAvailable: Boolean(sponsorOutput?.brief),
       })
     : undefined;
 
@@ -585,6 +679,27 @@ export async function composeOversightReviewCycle(input: {
     stableUrl: sponsorOutput?.brief ? `/oversight/brief/${cycleId}` : null,
     suppressions: sponsorOutput?.suppressions ?? [],
   });
+  if (composed.brief?.cadence) {
+    composed.brief.cadence = {
+      ...composed.brief.cadence,
+      explanation: `${composed.brief.cadence.explanation} Delivery state: ${deliveryIntent.state}.`,
+    };
+  }
+
+  if (efficacy && composed.brief) {
+    const rescored = scoreOversightBriefEfficacy({
+      brief: composed.brief,
+      previousBrief,
+      warnings,
+      suppressions: sponsorOutput?.suppressions ?? [],
+      firstCycleException: firstCycleExceptionAllowed,
+      clientSafeAvailable: Boolean(sponsorOutput?.brief),
+      deliveryState: deliveryIntent.state,
+    });
+    if (rescored.grade !== efficacy.grade || rescored.totalScore !== efficacy.totalScore) {
+      Object.assign(efficacy, rescored);
+    }
+  }
 
   const cycle: OversightReviewCycle = {
     cycleId,
@@ -700,6 +815,15 @@ export async function composeOversightReviewCycle(input: {
         clientSafeBrief: sponsorOutput,
         suppressions: sponsorOutput?.suppressions ?? [],
         cycleComparison,
+      });
+    }
+
+    if (composed.brief.boardroom.dossiersAvailable > 0) {
+      await persistBoardroomArchiveEntries({
+        cycleId,
+        organisationId: input.organisationId ?? null,
+        brief: composed.brief,
+        actorId: input.userId ?? null,
       });
     }
 

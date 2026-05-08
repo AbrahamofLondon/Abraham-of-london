@@ -83,6 +83,18 @@ It is the version that preserves consequence, action, and accountability while s
 - £50k readiness:
   requires enterprise Control Room, operator role model, boardroom history, counsel oversight pipeline, retained enforcement-cycle history, and recurring oversight brief delivery.
 
+## Operating Rhythm Addendum
+
+A retainer-grade brief should now carry:
+
+- cadence status
+- counsel history where real
+- boardroom archive memory where real
+- sponsor-safe organisation divergence where real
+- cancellation-loss clarity
+- indispensability summary
+- delivery readiness
+
 ---
 
 ## Delivery cadence
