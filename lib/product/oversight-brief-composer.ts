@@ -140,15 +140,24 @@ export async function composeOversightBrief(input: {
   }
 
   // ── TEAM AGGREGATE EVIDENCE ──
+  // Source join: organisationId (DERIVED) > sponsorUserId > none.
+  // createdByEmail does NOT exist on TeamAssessmentCampaign.
   let teamAggregate: Parameters<typeof buildOversightSignals>[0]["teamAggregate"] = null;
   try {
     const p = prisma as any;
-    if (p?.teamAssessmentCampaign?.findFirst && input.email) {
-      const campaign = await p.teamAssessmentCampaign.findFirst({
-        where: { createdByEmail: input.email.toLowerCase() },
-        include: { aggregate: true },
-        orderBy: { createdAt: "desc" },
-      });
+    if (p?.teamAssessmentCampaign?.findFirst) {
+      const whereClause = input.organisationId
+        ? { organisationId: input.organisationId }
+        : input.userId
+          ? { sponsorUserId: input.userId }
+          : null;
+      const campaign = whereClause
+        ? await p.teamAssessmentCampaign.findFirst({
+            where: whereClause,
+            include: { aggregate: true },
+            orderBy: { createdAt: "desc" },
+          })
+        : null;
       if (campaign?.aggregate && campaign.aggregate.respondentCount >= 3) {
         const domains = typeof campaign.aggregate.domainsJson === "string"
           ? JSON.parse(campaign.aggregate.domainsJson)

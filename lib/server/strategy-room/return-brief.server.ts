@@ -362,20 +362,34 @@ export async function generateReturnBrief(
   const paSection = buildReturnBriefPaSection(paEvidence);
 
   // ── TEAM ASSESSMENT EVIDENCE ──
+  // Source join: organisationId (DERIVED from session intake) > sponsorUserId > none.
+  // createdByEmail and strategyRoomSessionId do NOT exist on TeamAssessmentCampaign.
   let teamEvidence: ReturnBrief["teamEvidence"] = null;
   try {
     const p = prisma as any;
     if (p?.teamAssessmentCampaign?.findFirst) {
-      const campaign = await p.teamAssessmentCampaign.findFirst({
-        where: {
-          OR: [
-            ...(session.email ? [{ createdByEmail: session.email }] : []),
-            ...(session.strategyRoomSessionId ? [{ strategyRoomSessionId: session.strategyRoomSessionId }] : []),
-          ].filter((item) => Object.keys(item).length > 0),
-        },
-        include: { aggregate: true },
-        orderBy: { createdAt: "desc" },
-      });
+      let intakeData: Record<string, unknown> = {};
+      try {
+        intakeData = typeof (session as any).intake === "string"
+          ? JSON.parse((session as any).intake)
+          : (session as any).intake ?? {};
+      } catch { /* ignore */ }
+      const orgId = (session as any).organisationId
+        ?? (intakeData as any)?.organisation
+        ?? null;
+      const sponsorId = (session as any).userId ?? null;
+      const whereClause = orgId
+        ? { organisationId: orgId }
+        : sponsorId
+          ? { sponsorUserId: sponsorId }
+          : null;
+      const campaign = whereClause
+        ? await p.teamAssessmentCampaign.findFirst({
+            where: whereClause,
+            include: { aggregate: true },
+            orderBy: { createdAt: "desc" },
+          })
+        : null;
       if (campaign?.aggregate && campaign.aggregate.respondentCount >= 3) {
         const domains = typeof campaign.aggregate.domainsJson === "string"
           ? JSON.parse(campaign.aggregate.domainsJson)
@@ -393,8 +407,8 @@ export async function generateReturnBrief(
           respondentCount: campaign.aggregate.respondentCount,
           claimLevel: campaign.aggregate.claimLevel,
           summary: largest
-            ? `Earlier team reading reported a ${Math.abs(largest[1].deltaFromLeader)}-point leader/team gap in ${largest[0].replace(/_/g, " ")}. Source: Team Assessment (${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}).`
-            : `Team assessment completed with ${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}. Source: Team Assessment.`,
+            ? `An earlier team reading suggested a ${Math.abs(largest[1].deltaFromLeader)}-point leader/team gap in ${largest[0].replace(/_/g, " ")}. Source: Team Assessment (${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}, matched by ${orgId ? "organisation" : "account"} context).`
+            : `An earlier team assessment was completed with ${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}. Source: Team Assessment (matched by ${orgId ? "organisation" : "account"} context).`,
         };
       }
     }

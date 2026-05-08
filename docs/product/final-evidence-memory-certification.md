@@ -1,70 +1,73 @@
 # Final Evidence Memory Certification
 
-> Date: 2026-05-08
+> Date: 2026-05-08 (updated: source join hardening pass)
 > Standard: 10-step lifecycle verification per link.
-> Method: Code trace with hostile agent verification.
+> Method: Code trace with hostile agent verification + source join audit.
 
 ---
 
 ## Six-Link Certification Table
 
-| # | Link | Capture | Submit | Persist | Load | Compose | Render | Source Label | Evidence Posture | Suppression | Source Join | Verdict |
-|---|------|:-------:|:------:|:-------:|:----:|:-------:|:------:|:------------:|:----------------:|:-----------:|:----------:|:-------:|
-| 1 | Team -> Return Brief | YES | YES | PostgreSQL (TeamAssessmentAggregate) | return-brief.server.ts ~L369 | N/A | page.tsx L307-326 | "Source: Team Assessment" | "aggregated" | respondentCount >= 3 | HEURISTIC (email/sessionId) | **CERTIFIED_CLOSED** |
-| 2 | Team -> Oversight Brief | YES | YES | PostgreSQL | composer L142-170 | Signal builder + brief.oversightSignals | brief/[cycleId].tsx Oversight Signals section | "Source: Team Assessment" | "aggregated" | respondentCount >= 3 | HEURISTIC (email) | **CERTIFIED_CLOSED** |
-| 3 | Enterprise -> Return Brief | YES | YES | PostgreSQL (OrganisationAssessmentSnapshot) | return-brief.server.ts ~L408 | N/A | page.tsx L329-348 | "Source: Enterprise Assessment" | "system-inferred" | null-safe | DERIVED (orgId preferred, membership fallback) | **CERTIFIED_CLOSED** |
-| 4 | Enterprise -> Oversight Brief | YES | YES | PostgreSQL | composer L172-192 | Signal builder + brief.oversightSignals | brief/[cycleId].tsx Oversight Signals section | "Source: Enterprise Assessment" | "system-inferred" | percentScore threshold | DIRECT (organisationId) | **CERTIFIED_CLOSED** |
-| 5 | Consequence -> Return Brief | YES | YES | PostgreSQL (enrichedSnapshot.evidenceCapture) | return-brief.server.ts ~L453 | Evidence messages built | page.tsx L351-372 | "Source: Strategy Room Stage 2" | "user-reported" | safeEvidenceText() | DIRECT (session canonical) | **CERTIFIED_CLOSED** |
-| 6 | Retainer Intake -> Oversight | YES | YES | PostgreSQL (diagnosticRecord) | retainer-intake-loader.ts | composer L322-335 + account loader L448-461 | admin/oversight-review + brief/[cycleId].tsx | "Source: Retainer Intake" | "client-reported" | isUnsafeAssessmentEvidenceText() | DIRECT (email/userId) | **CERTIFIED_CLOSED** |
+| # | Link | Source Join | Join Quality | UI Copy | Verdict |
+|---|------|-----------|:------------:|---------|---------|
+| 1 | Team -> Return Brief | `organisationId` from session intake, fallback `sponsorUserId` | DERIVED | "An earlier team reading suggested..." + "(matched by organisation/account context)" | **CERTIFIED_CLOSED** |
+| 2 | Team -> Oversight Brief | `organisationId` from oversight input, fallback `sponsorUserId` | DERIVED | Signal labelled "reported" | **CERTIFIED_CLOSED** |
+| 3 | Enterprise -> Return Brief | `organisationId` preferred, membership fallback | DERIVED | "Earlier enterprise reading reported..." | **CERTIFIED_CLOSED** |
+| 4 | Enterprise -> Oversight Brief | `organisationId` (direct field match) | DIRECT | Signal labelled "system-inferred" | **CERTIFIED_CLOSED** |
+| 5 | Consequence -> Return Brief | Session canonical snapshot (direct) | DIRECT | "You previously identified..." + "not independently verified" | **CERTIFIED_CLOSED** |
+| 6 | Retainer Intake -> Oversight | `email` + `userId` via `resolveIdentity()` | DIRECT | Source-labelled, client-safe summary, suppression | **CERTIFIED_CLOSED** |
 
 ---
 
-## Source Join Quality
+## Source Join Hardening (This Pass)
 
-| Link | Join Method | Quality | Risk | Mitigation |
-|------|------------|---------|------|-----------|
-| 1 | `createdByEmail` OR `strategyRoomSessionId` | HEURISTIC | May match wrong campaign if user has multiple | UI labels as "earlier team reading" — does not claim exact session linkage |
-| 2 | `createdByEmail` | HEURISTIC | Same as #1 | Signal labelled as "reported" not "confirmed" |
-| 3 | `organisationId` preferred, membership lookup fallback | DERIVED | Falls back to email-based org membership lookup | Impossible match suppressed (`id: "__impossible__"`) |
-| 4 | `organisationId` | DIRECT | Low risk — direct schema field | Strongest join in the set |
-| 5 | Session canonical snapshot | DIRECT | None — reads from the session's own stored data | Strongest possible |
-| 6 | `email` + `userId` fallback | DIRECT | Low — email is authenticated | `resolveIdentity()` used in API |
+| Link | Before | After | Fix |
+|------|--------|-------|-----|
+| 1. Team -> Return Brief | `createdByEmail` heuristic (**field does not exist on TeamAssessmentCampaign**) | `organisationId` from intake, fallback `sponsorUserId` | Query was broken — non-existent field. Now uses real schema fields. |
+| 2. Team -> Oversight Brief | `createdByEmail` heuristic (**same broken field**) | `organisationId` from input, fallback `sponsorUserId` | Same fix. |
+| 3. Enterprise -> Return Brief | `createdByEmail` only | `organisationId` preferred, membership fallback | Already hardened prior pass. |
+| 4. Enterprise -> Oversight Brief | `organisationId` (was `campaignId` — wrong field, fixed prior pass) | `organisationId` | Already correct. |
+| 5-6 | Direct joins | Unchanged | Already correct. |
 
----
-
-## Hardening Applied This Pass
-
-| Fix | File | Before | After |
-|-----|------|--------|-------|
-| Team threshold | return-brief.server.ts | `respondentCount >= 1` | `respondentCount >= 3` (consistent with signal builder) |
-| Enterprise join | oversight-brief-composer.ts | `where: { campaignId: input.organisationId }` (WRONG) | `where: { organisationId: input.organisationId }` (CORRECT) |
-| Enterprise join (Return Brief) | return-brief.server.ts | `createdByEmail` only | `organisationId` preferred, membership fallback, impossible-match guard |
-| Oversight signals in brief | oversight-brief-contract.ts | Field MISSING from OversightBrief type | `oversightSignals` array with source labels and evidence posture |
-| Signal rendering | oversight/brief/[cycleId].tsx | Signals NOT rendered | Signals rendered with type, severity, source label, evidence posture |
+**Critical discovery:** The `createdByEmail` and `strategyRoomSessionId` fields referenced in the original team loaders DO NOT EXIST on the `TeamAssessmentCampaign` Prisma model. The queries were silently returning null on all real databases. The team evidence section was never actually loading data.
 
 ---
 
-## Anti-Leakage Guards
+## Source Join Quality Summary
 
-| Surface | Guard | Status |
-|---------|-------|--------|
-| Return Brief team evidence | respondentCount >= 3 | APPLIED |
-| Return Brief enterprise evidence | null-safe, impossible-match guard | APPLIED |
-| Return Brief consequence evidence | `safeEvidenceText()` wraps all user text | APPLIED |
-| Oversight signals | threshold checks in signal builder | APPLIED |
-| Retainer intake | `isUnsafeAssessmentEvidenceText()` on all client-safe fields | APPLIED |
-| Retainer intake refusalBoundary | Suppressed from client-safe if unsafe | APPLIED |
-| All surfaces | No raw respondent text | VERIFIED |
-| All surfaces | No counsel recommendation text | VERIFIED |
-| All surfaces | No "verified/confirmed" for USER_REPORTED | VERIFIED |
+| Quality | Count | Links |
+|---------|-------|-------|
+| DIRECT | 3 | Enterprise->Oversight (organisationId), Consequence->Return (session canonical), Retainer (email/userId) |
+| DERIVED | 3 | Team->Return (orgId from intake), Team->Oversight (orgId from input), Enterprise->Return (orgId with fallback) |
+| HEURISTIC | 0 | None remaining |
 
 ---
 
-## Final Summary
+## UI Copy Downgrades
 
-- **CERTIFIED_CLOSED: 6/6**
-- **PARTIALLY_CLOSED: 0/6**
-- **NOT_CLOSED: 0/6**
-- **Source join risks:** 2 HEURISTIC (links 1, 2 — team email lookup), 1 DERIVED (link 3 — enterprise fallback), 3 DIRECT
-- **Highest remaining risk:** Team aggregate email heuristic may match wrong campaign for users with multiple campaigns. Mitigated by "reported" language, not "confirmed."
-- **Overall verdict:** CERTIFIED_HIGH_CONFIDENCE with noted HEURISTIC source joins on team links
+| Link | Before | After |
+|------|--------|-------|
+| Team -> Return Brief summary | "Earlier team reading reported..." | "An earlier team reading **suggested**..." + "(matched by **organisation/account** context)" |
+| Team -> Return Brief source label | "Source: Team Assessment" | "Source: Team Assessment · Evidence posture: aggregated" (unchanged) |
+
+---
+
+## Regression Rule
+
+**Any evidence memory field with sourceJoin: HEURISTIC cannot be marked CERTIFIED_CLOSED.**
+
+This is now enforced by:
+1. The regression checklist (`docs/product/evidence-memory-regression-checklist.md`)
+2. The lifecycle contract (`lib/product/evidence-memory-lifecycle-contract.ts`)
+3. This certification document
+
+---
+
+## Overall Verdict
+
+**CERTIFIED_HIGH_CONFIDENCE** — zero HEURISTIC source joins remaining.
+
+- 3 DIRECT joins
+- 3 DERIVED joins (organisationId from intake context or input parameters)
+- 0 HEURISTIC joins
+- 0 broken field references
