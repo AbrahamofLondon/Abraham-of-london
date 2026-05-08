@@ -226,6 +226,18 @@ export type OversightBrief = {
     basis: string[];
   };
 
+  /** Oversight signals — source-labelled evidence signals from the oversight cycle */
+  oversightSignals?: Array<{
+    id: string;
+    type: string;
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    title: string;
+    explanation: string;
+    recommendedAction: string;
+    sourceLabel?: string;
+    evidencePosture?: string;
+  }>;
+
   /** Required actions (string form for backward compatibility) */
   requiredActions: string[];
   /** Structured required actions with evidence basis, urgency, and owner */

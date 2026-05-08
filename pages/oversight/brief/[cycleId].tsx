@@ -209,6 +209,35 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 );
               })()}
 
+              {/* ── OVERSIGHT SIGNALS ── */}
+              {(brief as any).oversightSignals?.length > 0 && (
+                <Section title="Oversight Evidence Signals">
+                  <div className="space-y-4">
+                    {((brief as any).oversightSignals as Array<{ id: string; type: string; severity: string; title: string; explanation: string; recommendedAction: string; sourceLabel?: string; evidencePosture?: string }>).map((signal) => (
+                      <div key={signal.id} style={{ borderLeft: `2px solid ${signal.severity === "HIGH" || signal.severity === "CRITICAL" ? "rgba(252,165,165,0.40)" : "rgba(201,169,110,0.30)"}`, paddingLeft: "16px" }}>
+                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: signal.severity === "HIGH" || signal.severity === "CRITICAL" ? "rgba(252,165,165,0.50)" : "rgba(201,169,110,0.50)" }}>
+                          {signal.type.replace(/_/g, " ")} &middot; {signal.severity}
+                        </p>
+                        <p className="mt-1" style={{ ...serif, fontWeight: 500, color: "rgba(255,255,255,0.85)", lineHeight: 1.4 }}>
+                          {signal.title}
+                        </p>
+                        <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.60)", lineHeight: 1.6 }}>
+                          {signal.explanation}
+                        </p>
+                        <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.45)", lineHeight: 1.6, fontStyle: "italic" }}>
+                          Recommended: {signal.recommendedAction}
+                        </p>
+                        {signal.sourceLabel && (
+                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "6px" }}>
+                            {signal.sourceLabel}{signal.evidencePosture ? ` · Evidence posture: ${signal.evidencePosture}` : ""}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
               {/* ── RETAINER INTAKE MANDATE ── */}
               {(brief as any).retainerIntake && (brief as any).retainerIntake.clientSafeSummary?.length > 0 && (
                 <Section title="Retainer Mandate Carried Forward">

@@ -376,7 +376,7 @@ export async function generateReturnBrief(
         include: { aggregate: true },
         orderBy: { createdAt: "desc" },
       });
-      if (campaign?.aggregate && campaign.aggregate.respondentCount >= 1) {
+      if (campaign?.aggregate && campaign.aggregate.respondentCount >= 3) {
         const domains = typeof campaign.aggregate.domainsJson === "string"
           ? JSON.parse(campaign.aggregate.domainsJson)
           : campaign.aggregate.domainsJson ?? {};
@@ -405,12 +405,13 @@ export async function generateReturnBrief(
   try {
     const p = prisma as any;
     if (p?.organisationAssessmentSnapshot?.findFirst) {
+      const orgId = (session as any).organisationId ?? null;
       const snapshot = await p.organisationAssessmentSnapshot.findFirst({
-        where: {
-          OR: [
-            ...(session.email ? [{ createdByEmail: session.email }] : []),
-          ].filter((item) => Object.keys(item).length > 0),
-        },
+        where: orgId
+          ? { organisationId: orgId }
+          : session.email
+            ? { campaign: { organisation: { memberships: { some: { user: { email: session.email.toLowerCase() } } } } } }
+            : { id: "__impossible__" },
         orderBy: { createdAt: "desc" },
       });
       if (snapshot) {

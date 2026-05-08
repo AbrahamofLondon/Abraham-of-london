@@ -175,7 +175,7 @@ export async function composeOversightBrief(input: {
     const p = prisma as any;
     if (p?.organisationAssessmentSnapshot?.findFirst && input.organisationId) {
       const snapshot = await p.organisationAssessmentSnapshot.findFirst({
-        where: { campaignId: input.organisationId },
+        where: { organisationId: input.organisationId },
         orderBy: { createdAt: "desc" },
       });
       if (snapshot) {
@@ -340,6 +340,29 @@ export async function composeOversightBrief(input: {
           interpretation: creditGovernance?.explanation,
         }
       : undefined,
+    oversightSignals: signals
+      .filter((s) =>
+        s.type === "TEAM_DIVERGENCE_REPORTED" ||
+        s.type === "ENTERPRISE_STRAIN_REPORTED" ||
+        s.type === "PATTERN_RECURRED" ||
+        s.type === "OUTCOME_DETERIORATED" ||
+        s.type === "COST_OF_INACTION_ACCUMULATING" ||
+        s.type === "COMMITMENT_UNVERIFIED"
+      )
+      .map((s) => ({
+        id: s.id,
+        type: s.type,
+        severity: s.severity,
+        title: s.title,
+        explanation: s.explanation,
+        recommendedAction: s.recommendedAction,
+        sourceLabel: s.type === "TEAM_DIVERGENCE_REPORTED" ? "Source: Team Assessment"
+          : s.type === "ENTERPRISE_STRAIN_REPORTED" ? "Source: Enterprise Assessment"
+          : s.caseId ? `Source: Case ${s.caseId}` : "Source: Oversight Cycle",
+        evidencePosture: s.type === "TEAM_DIVERGENCE_REPORTED" ? "aggregated"
+          : s.type === "ENTERPRISE_STRAIN_REPORTED" ? "system-inferred"
+          : "system-inferred",
+      })),
     requiredActions: [...new Set(requiredActions)].slice(0, 6),
 
     // ── Premium intelligence primitives (evidence-only, no fabrication) ──
