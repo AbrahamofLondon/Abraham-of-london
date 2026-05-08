@@ -121,7 +121,7 @@ export const DEFAULT_DIAGNOSTIC_QUESTIONS: readonly DiagnosticQuestion[] = [
   },
   {
     id: "q5",
-    text: "Trust between leadership and execution layers is materially intact.",
+    text: "When someone raises a serious objection here, the objection is tested against the decision — not against the person.",
     domain: "trust",
   },
   {
@@ -142,7 +142,7 @@ export const DEFAULT_DIAGNOSTIC_QUESTIONS: readonly DiagnosticQuestion[] = [
   },
   {
     id: "q9",
-    text: "Past attempts to correct the issue have failed due to structural, not motivational, causes.",
+    text: "The same problems keep resurfacing despite repeated attempts to fix them.",
     domain: "pattern",
     reverse: true,
   },

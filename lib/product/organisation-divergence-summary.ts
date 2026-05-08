@@ -19,6 +19,7 @@ export type OrganisationDivergenceSummary = {
   confidence: "LOW" | "MEDIUM" | "HIGH";
   sampleSafety: "SAFE" | "SMALL_SAMPLE_SUPPRESSED" | "IDENTITY_RISK" | "INSUFFICIENT_RESPONSES";
   mode: "NAMED" | "ANONYMOUS";
+  direction?: "WORSENING" | "IMPROVING" | "STABLE" | null;
   sponsorSafeSummary: string;
   suppressedDetailCount: number;
   recommendedNextAction: string;

@@ -181,6 +181,8 @@ export const canonicalDecisionObjectSchema = z.object({
     hasPriorAttempt: z.boolean(),
     hasDelayCost: z.boolean(),
     hasStakeholder: z.boolean(),
+    hasCompetingObligation: z.boolean().default(false),
+    hasInstitutionalConsequence: z.boolean().default(false),
     extractedAt: z.string().trim().min(1),
   }),
 });

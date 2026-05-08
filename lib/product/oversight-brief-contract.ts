@@ -92,6 +92,7 @@ export type OversightBrief = {
     improvementSignals: number;
     deteriorationSignals: number;
   };
+  purposeAlignment?: Record<string, unknown> | null;
   decisionCredit?: {
     score?: number;
     trend?: string;
@@ -238,4 +239,6 @@ export type OversightStructuredAction = {
   ownerRole?: string;
   consequenceIfIgnored?: string;
   severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  continuitySourceLabel?: string;
+  continuityConfidenceLabel?: "REPORTED" | "CAPTURED" | "AGGREGATED" | "CHECKED" | "REVIEWED";
 };

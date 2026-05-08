@@ -1,3 +1,5 @@
+import type { AssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
+
 /* ============================================================================
    FILE: lib/diagnostics/types.ts
    DIAGNOSTIC DOMAIN CONTRACTS
@@ -152,6 +154,7 @@ export type DiagnosticMetadata = Record<string, unknown> & {
   reportRequested?: boolean | null;
   campaignId?: string | null;
   organisationId?: string | null;
+  evidenceCapture?: AssessmentEvidenceCapture | null;
 };
 
 /* -----------------------------------------------------------------------------

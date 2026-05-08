@@ -11,6 +11,20 @@ export type FastDiagnosticRequest = {
   answers: Record<string, string>;
   committed: boolean;
   elapsedMs?: number;
+  /** Numeric financial exposure estimate (computed client-side) */
+  financialExposure?: number | null;
+  /** Exposure band classification */
+  exposureBand?: "low" | "moderate" | "high" | "critical" | "undisclosed" | null;
+  /** Input basis for the exposure calculation */
+  exposureBasis?: {
+    revenueBand?: string | null;
+    urgencyScore?: number | null;
+    ownershipScore?: number | null;
+    clarityScore?: number | null;
+    accountabilityScore?: number | null;
+    stateScore?: number | null;
+    decisionValue?: number | null;
+  } | null;
 };
 
 export type FastDiagnosticResult = {

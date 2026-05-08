@@ -17,6 +17,16 @@ import { evaluateDecision } from "@/lib/decision/kernel";
 import { calculateCostOfInactionClock, type CostOfInactionClockResult } from "@/lib/product/cost-of-inaction-clock";
 import { buildCommitmentVerificationStates, type CommitmentVerificationState } from "@/lib/product/commitment-verification";
 import { detectPatternRecurrenceV0, type PatternRecurrenceResult } from "@/lib/product/pattern-recurrence";
+import {
+  extractAssessmentEvidenceCapture,
+  isUnsafeAssessmentEvidenceText,
+  summarizeAssessmentEvidenceText,
+  type AssessmentEvidenceCapture,
+} from "@/lib/product/evidence-capture-contract";
+import {
+  loadPurposeAlignmentEvidence,
+  buildReturnBriefPaSection,
+} from "@/lib/alignment/evidence-loader";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -68,6 +78,16 @@ export type ReturnBrief = {
   costOfInaction?: CostOfInactionClockResult | null;
   verification?: CommitmentVerificationState[] | null;
   recurrence?: PatternRecurrenceResult | null;
+  evidenceCarryForward?: {
+    source: AssessmentEvidenceCapture;
+    verificationStatus?: string;
+    failureComparison?: string;
+    recurrenceStatus?: string;
+    stopSignalStatus?: string;
+  } | null;
+
+  /** Purpose Alignment evidence carried forward */
+  purposeAlignmentEvidence?: Record<string, unknown> | null;
 
   /** Section 6 — Direct challenge */
   challenge: string;
@@ -117,6 +137,12 @@ function parseCostBasis(text: string | null | undefined): {
     return { monthlyCostEstimate: value };
   }
   return null;
+}
+
+function safeEvidenceText(value: string | undefined, max = 180): string | null {
+  if (!value) return null;
+  if (isUnsafeAssessmentEvidenceText(value)) return "Evidence captured but withheld from display.";
+  return summarizeAssessmentEvidenceText(value, max);
 }
 
 export function evaluateTrigger(
@@ -300,12 +326,54 @@ export async function generateReturnBrief(
     decisionText,
   });
 
+  // ── PURPOSE ALIGNMENT EVIDENCE CARRIED FORWARD ──
+  const paEvidence = await loadPurposeAlignmentEvidence({
+    email: session.email ?? undefined,
+    subjectId: session.id ?? undefined,
+  });
+  const paSection = buildReturnBriefPaSection(paEvidence);
+
   // Section 5 — Delta
   const delta = executionState
     ? {
         clarity: executedCount > 0 ? "+1" : "unchanged",
         authority: blockedCount > 0 ? "contested" : "unchanged",
         readiness: trajectory === "DETERIORATING" ? "decreased" : trajectory === "ASCENDING" ? "increased" : "unchanged",
+      }
+    : null;
+
+  let canonicalSnapshotValue: unknown = session.canonicalSnapshot;
+  if (typeof session.canonicalSnapshot === "string") {
+    try {
+      canonicalSnapshotValue = JSON.parse(session.canonicalSnapshot || "{}");
+    } catch {
+      canonicalSnapshotValue = null;
+    }
+  }
+  const carryForwardSource = extractAssessmentEvidenceCapture(canonicalSnapshotValue);
+  const evidenceCarryForward = Object.keys(carryForwardSource).length > 0
+    ? {
+        source: carryForwardSource,
+        verificationStatus: carryForwardSource.verificationCriteria
+          ? outcomeEvidence.processedDecisionCases > 0
+            ? `The original evidence suggested success should be proven by ${safeEvidenceText(carryForwardSource.verificationCriteria)}. Current outcome evidence is directional, but the system cannot yet verify that standard directly.`
+            : `The original evidence suggested success should be proven by ${safeEvidenceText(carryForwardSource.verificationCriteria)}. The system cannot yet verify it.`
+          : undefined,
+        failureComparison: carryForwardSource.priorAttempts || carryForwardSource.failureCause
+          ? `The original evidence suggested prior correction${carryForwardSource.failureCause ? ` failed because ${safeEvidenceText(carryForwardSource.failureCause)}` : " had already been attempted"}. ${blockedCount > 0 ? "This remains unresolved unless the current execution path breaks that same failure logic." : "The current session has not yet disproved that earlier failure pattern."}`
+          : undefined,
+        recurrenceStatus: carryForwardSource.recurrenceSignal
+          ? recurrence.status === "VERIFIED_RECURRENCE" || recurrence.status === "POSSIBLE_RECURRENCE"
+            ? `The original evidence suggested this pattern recurs. Current recurrence checks indicate the pattern is still unresolved.`
+            : trajectory === "ASCENDING"
+              ? `The original evidence suggested this pattern recurs. Current movement may indicate improvement, but recurrence cannot yet be treated as resolved.`
+              : `The original evidence suggested this pattern recurs. The system cannot yet verify that recurrence has stopped.`
+          : undefined,
+        stopSignalStatus: carryForwardSource.stopSignal
+          ? blockedCount > 0 || pendingCount > 0
+            ? `The original evidence suggested ${safeEvidenceText(carryForwardSource.stopSignal)} had to stop. This remains unresolved unless that condition has actually stopped.`
+            : `The original evidence suggested ${safeEvidenceText(carryForwardSource.stopSignal)} had to stop. The system cannot yet verify that it has stopped.`
+          : undefined,
       }
     : null;
 
@@ -354,6 +422,8 @@ export async function generateReturnBrief(
     costOfInaction,
     verification,
     recurrence: recurrence.status === "INSUFFICIENT_HISTORY" ? null : recurrence,
+    evidenceCarryForward,
+    purposeAlignmentEvidence: paSection,
     challenge,
     retainerTriggered: trigger === "contradiction_persistence",
   };

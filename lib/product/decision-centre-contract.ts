@@ -11,6 +11,7 @@
 import type { LivingCase } from "@/lib/product/living-case-store";
 import type { EvidenceTier } from "@/lib/product/living-intelligence-spine";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
+import type { GovernedMemoryItem } from "@/lib/product/governed-memory-contract";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COGNITIVE STATE
@@ -165,6 +166,8 @@ export type DecisionCentreCase = {
   } | null;
   /** Available Return Briefs */
   returnBriefs: ReturnBriefReference[];
+  /** Governed memory carried with explicit source, date, and evidence posture */
+  governedMemory?: GovernedMemoryItem[] | null;
   /** Last activity timestamp */
   updatedAt: string;
 };

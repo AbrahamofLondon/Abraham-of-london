@@ -14,7 +14,10 @@ export type OversightCadenceStatus =
   | "DELIVERY_DUE"
   | "DELIVERY_OVERDUE"
   | "CYCLE_MISSED"
-  | "CADENCE_BROKEN";
+  | "CADENCE_BROKEN"
+  | "PAUSED_BY_COUNSEL_ESCALATION"
+  | "WAITING_FOR_OPERATOR_REVIEW"
+  | "OVERDUE";
 
 export type OversightCadenceHealth =
   | "HEALTHY"
@@ -30,6 +33,7 @@ export type OversightCadenceState = {
   nextCycleDueDate?: string;
   reviewOverdue: boolean;
   deliveryOverdue: boolean;
+  clientActionRequired?: boolean;
   missedCycleRisk: boolean;
   daysUntilDue?: number;
   basis: string[];
@@ -55,4 +59,6 @@ export type OversightCadenceInput = {
     createdAt: string;
     decision: string;
   } | null;
+  counselOpen?: boolean;
+  evidenceInsufficient?: boolean;
 };

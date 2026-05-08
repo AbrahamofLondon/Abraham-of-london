@@ -224,47 +224,38 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
 };
 
 /* -----------------------------------------------------------------------------
-  SERVER SIDE GATEWAY
+  SERVER SIDE GATEWAY — uses canonical getUserAccess() resolver
 ----------------------------------------------------------------------------- */
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const [
-    { readAccessCookie },
-    { getSessionContext, tierAtLeast },
-  ] = await Promise.all([
-    import("@/lib/server/auth/cookies"),
-    import("@/lib/server/auth/tokenStore.postgres"),
-  ]);
-
   try {
-    const sessionId = readAccessCookie(context.req as any);
+    const { getServerSession } = await import("next-auth");
+    const { authOptions } = await import("@/lib/auth/config");
+    const { prisma } = await import("@/lib/prisma.server");
+    const { getUserAccess } = await import("@/lib/access/get-user-access");
 
-    if (!sessionId) {
-      return { props: { initialAccess: { hasAccess: false, tier: "public" } } };
+    const session = await getServerSession(context.req, context.res, authOptions);
+    const userId = (session?.user as any)?.id ?? null;
+    const access = await getUserAccess(prisma, userId);
+
+    // Admin users should go to /admin instead
+    if (access.permissions.isAdmin || access.permissions.isOwner) {
+      return {
+        redirect: { destination: "/admin", permanent: false },
+      };
     }
-
-    const ctx = await getSessionContext(sessionId);
-    
-    // Check if context returned valid institutional identity
-    if (!ctx.ok || !ctx.valid) {
-      return { props: { initialAccess: { hasAccess: false, tier: "public" } } };
-    }
-
-    const required = "inner-circle";
-    const hasAccess = tierAtLeast(ctx.tier, required);
 
     return {
       props: {
         initialAccess: {
-          hasAccess,
-          tier: ctx.tier || "public"
-        }
+          hasAccess: access.permissions.isAuthenticated,
+          tier: access.tier,
+        },
       },
     };
   } catch (err) {
     console.error("[INNER_CIRCLE_ADMIN_ERROR]:", err);
     return { props: { error: "Vault connectivity lost. Systems re-aligning." } };
   }
-
 };
 
 export default InnerCircleIndex;

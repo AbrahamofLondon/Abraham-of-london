@@ -8,6 +8,11 @@ import type { RetainerOversightAccount, RetainerStatus, RetainerTier } from "@/l
 import { calculateCostOfInactionClock, type CostOfInactionClockResult } from "@/lib/product/cost-of-inaction-clock";
 import { buildCommitmentVerificationStates, type CommitmentVerificationState } from "@/lib/product/commitment-verification";
 import { findLatestStrategyExecutionRecord, type StrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
+import {
+  extractAssessmentEvidenceCapture,
+  mergeAssessmentEvidenceCapture,
+  type AssessmentEvidenceCapture,
+} from "@/lib/product/evidence-capture-contract";
 
 export type OversightAccountCase = {
   caseId: string;
@@ -29,6 +34,7 @@ export type OversightAccountCase = {
   latestExecutionRecord?: StrategyExecutionRecord | null;
   verification?: CommitmentVerificationState[];
   costOfInaction?: CostOfInactionClockResult | null;
+  evidenceCapture?: AssessmentEvidenceCapture;
 };
 
 export type OversightAccountLoadResult = {
@@ -182,7 +188,7 @@ export async function loadOversightAccount(input: {
         },
     include: {
       stages: {
-        select: { stage: true, createdAt: true },
+        select: { stage: true, createdAt: true, payload: true },
         orderBy: { createdAt: "asc" },
       },
       evidenceNodes: {
@@ -251,6 +257,9 @@ export async function loadOversightAccount(input: {
     const contradictionNode = journey.evidenceNodes.find((node) => node.kind === "contradiction") ?? null;
     const patternNode = journey.evidenceNodes.find((node) => node.kind === "pattern_recurrence") ?? null;
     const evidenceTier = deriveEvidenceTier(journey.stages.length);
+    const evidenceCapture = mergeAssessmentEvidenceCapture(
+      ...journey.stages.map((stage) => extractAssessmentEvidenceCapture(stage.payload)),
+    );
 
     const executionRecord = latestDecision?.sessionId || journey.email
       ? await findLatestStrategyExecutionRecord({
@@ -362,6 +371,7 @@ export async function loadOversightAccount(input: {
       latestExecutionRecord: executionRecord,
       verification,
       costOfInaction,
+      evidenceCapture,
     });
   }
 

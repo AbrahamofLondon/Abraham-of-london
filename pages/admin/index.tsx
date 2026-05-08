@@ -196,6 +196,7 @@ const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
         <div>
           <SectionLabel icon={Layers3}>Operational modules</SectionLabel>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <ModuleLink href="/admin/command" title="Institutional Command" description="Governed oversight environment: active decisions, cost exposure, irreversibility, escalations, cadence breaches, and counterfactual." icon={Terminal} color="text-amber-400" bg="bg-amber-500/10" />
             <ModuleLink href="/admin/authority-center" title="Authority Center" description="Active leads, ER completions, SR entries, retainers, contradictions, stakeholders." icon={ShieldCheck} color="text-amber-500" bg="bg-amber-500/10" />
             <ModuleLink href="/admin/enterprise-pipeline" title="Enterprise Pipeline" description="Lead pipeline with route, temperature, win probability, conversion status." icon={Activity} color="text-emerald-500" bg="bg-emerald-500/10" />
             <ModuleLink href="/admin/outcome-ledger" title="Outcome Ledger" description="Decision → Contradiction → Enforcement → Outcome → Delta. Track record." icon={Layers3} color="text-sky-400" bg="bg-sky-500/10" />

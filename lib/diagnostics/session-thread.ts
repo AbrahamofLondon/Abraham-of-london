@@ -1,3 +1,5 @@
+import type { AssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
+
 /**
  * lib/diagnostics/session-thread.ts — Accumulative constitutional thread
  *
@@ -23,6 +25,7 @@ export type TeamFindings = {
   patternTitle: string;
   escalationRoute: string;
   narrative: string;
+  evidenceCapture?: AssessmentEvidenceCapture;
 };
 
 export type EnterpriseFindings = {
@@ -34,6 +37,7 @@ export type EnterpriseFindings = {
   route: string;
   narrative: string;
   decisionClarity?: number;
+  evidenceCapture?: AssessmentEvidenceCapture;
 };
 
 export type ExecutiveFindings = {

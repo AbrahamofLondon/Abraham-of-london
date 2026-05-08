@@ -18,6 +18,8 @@ export type BoardroomArchiveSummary = {
   unresolvedBoardLevelIssues: number;
   repeatedExposureCount: number;
   currentTriggers: number;
+  escalationTrend?: "STABLE" | "ESCALATING" | "DE_ESCALATING" | null;
+  latestDossierReason?: string | null;
   summary: string;
   entries: BoardroomArchiveEntry[];
 };

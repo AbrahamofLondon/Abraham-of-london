@@ -63,6 +63,10 @@ export type CanonicalDecisionObject = {
   costOfDelayText?: string | null;
   stakeholderText?: string | null;
   affectedDomain?: string | null;
+  /** Competing obligation captured during Purpose Alignment */
+  competingObligationText?: string | null;
+  /** Institutional consequence captured during Purpose Alignment */
+  institutionalConsequenceText?: string | null;
   confidence: number;
   aiExposureLevel?: AIExposureLevel;
   aiDisplacementRisk?: boolean;
@@ -74,6 +78,8 @@ export type CanonicalDecisionObject = {
     hasPriorAttempt: boolean;
     hasDelayCost: boolean;
     hasStakeholder: boolean;
+    hasCompetingObligation: boolean;
+    hasInstitutionalConsequence: boolean;
     extractedAt: string;
   };
 };
@@ -136,6 +142,8 @@ export function extractCanonicalDecisionObject(input: {
   costOfDelayText?: string | null;
   stakeholderText?: string | null;
   affectedDomain?: string | null;
+  competingObligationText?: string | null;
+  institutionalConsequenceText?: string | null;
   fallbackDecision?: string;
 }): CanonicalDecisionObject | null {
   const decisionText = clean(input.decisionText || input.fallbackDecision || "");
@@ -144,8 +152,10 @@ export function extractCanonicalDecisionObject(input: {
   const costOfDelayText = clean(input.costOfDelayText || "");
   const stakeholderText = clean(input.stakeholderText || "");
   const affectedDomain = clean(input.affectedDomain || "", 120);
+  const competingObligationText = clean(input.competingObligationText || "");
+  const institutionalConsequenceText = clean(input.institutionalConsequenceText || "");
 
-  if (!decisionText && !constraintText && !priorAttemptText && !costOfDelayText) {
+  if (!decisionText && !constraintText && !priorAttemptText && !costOfDelayText && !competingObligationText && !institutionalConsequenceText) {
     return null;
   }
 
@@ -155,6 +165,8 @@ export function extractCanonicalDecisionObject(input: {
     Boolean(priorAttemptText),
     Boolean(costOfDelayText),
     Boolean(stakeholderText || affectedDomain),
+    Boolean(competingObligationText),
+    Boolean(institutionalConsequenceText),
   ].filter(Boolean).length;
   const preliminary = {
     decisionText: decisionText || input.fallbackDecision || "",
@@ -178,6 +190,8 @@ export function extractCanonicalDecisionObject(input: {
       costOfDelayText,
       stakeholderText,
       affectedDomain,
+      competingObligationText,
+      institutionalConsequenceText,
     ]),
     decisionText: decisionText || "Decision not yet named; the missing decision is itself evidence.",
     constraintText: constraintText || null,
@@ -185,6 +199,8 @@ export function extractCanonicalDecisionObject(input: {
     costOfDelayText: costOfDelayText || null,
     stakeholderText: stakeholderText || null,
     affectedDomain: affectedDomain || null,
+    competingObligationText: competingObligationText || null,
+    institutionalConsequenceText: institutionalConsequenceText || null,
     confidence: clampConfidence(0.25 + completeness * 0.14),
     aiExposureLevel: aiRisk.aiExposureLevel,
     aiDisplacementRisk: aiRisk.aiDisplacementRisk,
@@ -196,6 +212,8 @@ export function extractCanonicalDecisionObject(input: {
       hasPriorAttempt: Boolean(priorAttemptText),
       hasDelayCost: Boolean(costOfDelayText),
       hasStakeholder: Boolean(stakeholderText || affectedDomain),
+      hasCompetingObligation: Boolean(competingObligationText),
+      hasInstitutionalConsequence: Boolean(institutionalConsequenceText),
       extractedAt: new Date().toISOString(),
     },
   };
@@ -209,6 +227,9 @@ export function buildPurposeAuthorityPacket(
   const avoidedDecision = clean(reflections?.avoidedDecision);
   const livedWeek = clean(reflections?.lastSevenDays);
   const dissenter = clean(reflections?.dissenter);
+  /** Use properly-named fields with fallback to legacy field names */
+  const competingObligation = clean(reflections?.competingObligation) || dissenter;
+  const institutionalConsequence = clean(reflections?.consequence) || livedWeek;
   const primary = result.primaryPattern;
   const contradiction = result.contradictions?.[0];
   const weak = result.evidence?.sharpestWeakSignal;
@@ -223,6 +244,8 @@ export function buildPurposeAuthorityPacket(
     decisionText: avoidedDecision,
     constraintText: dissenter,
     costOfDelayText: livedWeek,
+    competingObligationText: competingObligation,
+    institutionalConsequenceText: institutionalConsequence,
     affectedDomain: weak?.domain ?? result.weakestDomains[0],
     fallbackDecision: result.firstAction,
   });
@@ -321,7 +344,9 @@ export function buildPurposeAuthorityPacket(
         decisionObject.constraintText,
         decisionObject.costOfDelayText,
         decisionObject.priorAttemptText,
-      ].filter(Boolean).join(" "),
+        decisionObject.competingObligationText ? `Competing obligation: ${decisionObject.competingObligationText}` : null,
+        decisionObject.institutionalConsequenceText ? `Consequence: ${decisionObject.institutionalConsequenceText}` : null,
+      ].filter(Boolean).join(" | "),
       confidence: decisionObject.confidence,
       severity: consequence.severity,
       payload: { decisionObject },

@@ -40,6 +40,18 @@ export async function handleDiagnosticSubmit(
           answers,
         };
 
+    // Attach financial exposure data if present in the request body
+    if (body.financialExposure !== undefined || body.exposureBand !== undefined) {
+      payload.financialExposure = {
+        estimatedFinancialExposure: body.financialExposure ?? null,
+        exposureBand: body.exposureBand ?? null,
+        exposureBasis: body.exposureBasis ?? null,
+        calculationVersion: "1.0.0",
+        generatedAt: new Date().toISOString(),
+        sourceSurface: "fast_diagnostic",
+      };
+    }
+
     const record = await createDiagnosticRecord({
       diagnosticType: config.diagnosticType,
       score,

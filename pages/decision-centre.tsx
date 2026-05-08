@@ -24,6 +24,12 @@ import type {
   DecisionCreditSummary,
   CognitiveState,
 } from "@/lib/product/decision-centre-contract";
+import {
+  formatMemorySourceLabel,
+  isMemoryDisplaySafe,
+  type GovernedMemoryItem,
+} from "@/lib/product/governed-memory-contract";
+import { groupDecisionCentreMemory } from "@/lib/product/governed-memory-presenter";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -48,6 +54,22 @@ const COGNITIVE_LABELS: Record<CognitiveState, { label: string; color: string }>
 
 function CaseCard({ c }: { c: DecisionCentreCase }) {
   const cognitive = COGNITIVE_LABELS[c.cognitiveState];
+  const memoryGroups = groupDecisionCentreMemory(c.governedMemory ?? []);
+
+  function formatCapturedDate(value: string | null): string | null {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  function statusLabel(status: GovernedMemoryItem["status"]): string {
+    return status.toLowerCase().replace(/_/g, " ");
+  }
 
   return (
     <div style={{ border: `1px solid rgba(255,255,255,0.07)`, backgroundColor: "rgba(255,255,255,0.02)", padding: "24px 28px" }}>
@@ -147,6 +169,47 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
           <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.32)", fontStyle: "italic" }}>
             {c.valueAtRisk}
           </p>
+        </div>
+      )}
+
+      {memoryGroups.length > 0 && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(201,169,110,0.10)", backgroundColor: "rgba(201,169,110,0.03)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
+            Case memory
+          </span>
+          <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
+            This case is carrying forward prior evidence. The next step should not ignore it.
+          </p>
+          <div style={{ display: "grid", gap: "12px", marginTop: "10px" }}>
+            {memoryGroups.map((group) => (
+              <div key={group.key}>
+                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.78)", marginBottom: "6px" }}>
+                  {group.title}
+                </div>
+                <div style={{ display: "grid", gap: "8px" }}>
+                  {group.items.map((item) => {
+                    const safeToShow = isMemoryDisplaySafe(item);
+                    const capturedDate = formatCapturedDate(item.capturedAt);
+                    return (
+                      <div key={item.id} style={{ borderLeft: "1px solid rgba(201,169,110,0.42)", paddingLeft: "10px" }}>
+                        <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                          {formatMemorySourceLabel(item)}
+                          {capturedDate ? ` · ${capturedDate}` : ""}
+                          {` · ${statusLabel(item.status)}`}
+                        </div>
+                        <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: `${GOLD}88`, marginTop: "4px" }}>
+                          {item.label}
+                        </div>
+                        <div style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(255,255,255,0.68)", marginTop: "2px" }}>
+                          {safeToShow ? item.summary : item.suppressedReason || "Evidence captured but withheld from display."}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

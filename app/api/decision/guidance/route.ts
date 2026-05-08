@@ -3,6 +3,10 @@
 import { NextResponse } from "next/server";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
+import {
+  loadPurposeAlignmentEvidence,
+  buildDecisionCentrePaMemory,
+} from "@/lib/alignment/evidence-loader";
 
 export async function POST(request: Request) {
   try {
@@ -73,10 +77,18 @@ export async function POST(request: Request) {
       },
     });
 
+    // ── PURPOSE ALIGNMENT CASE MEMORY ──
+    const paEvidence = await loadPurposeAlignmentEvidence({
+      email: intake?.email ?? undefined,
+      subjectId: intake?.subjectId ?? undefined,
+    });
+    const paMemory = buildDecisionCentrePaMemory(paEvidence);
+
     return NextResponse.json({
       ok: true,
       canonical,
       sections: canonical.sections,
+      purposeAlignmentMemory: paMemory,
     });
   } catch (error) {
     console.error("[DECISION_GUIDANCE_ROUTE_ERROR]", error);

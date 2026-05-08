@@ -5,6 +5,7 @@ import { getPurposeAlignmentAssessmentById } from "@/lib/alignment/repository";
 import { upsertReminderPreference } from "@/lib/alignment/reminders";
 import { getOrCreatePurposeAlignmentSessionKey } from "@/lib/alignment/session";
 import { createDecisionMemory } from "@/lib/server/decision-memory/memory-service.server";
+import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 import {
   enforceAppRouteRateLimit,
   failClosedForFlag,
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
       return noStoreJson({ ok: false, error: "Assessment result unavailable" }, { status: 400 });
     }
 
+    // ── DECISION MEMORY (existing) ──
     await createDecisionMemory({
       sessionId: sessionKey,
       source: "purpose_alignment",
@@ -81,6 +83,63 @@ export async function POST(req: NextRequest) {
       },
       escalationLabel: canonical.routingRecommendation?.label,
       escalationLevel: canonical.severity,
+    });
+
+    // ── JOURNEY STORE PERSISTENCE (new) ──
+    // Persist the full PA evidence so downstream surfaces (Executive Reporting,
+    // Strategy Room, Return Brief, Decision Centre, Oversight Brief) can load it.
+    await persistDiagnosticStage({
+      subjectId: sessionKey,
+      email: parsed.data.email || undefined,
+      stage: "purpose_alignment",
+      payload: {
+        sourceSurface: "PURPOSE_ALIGNMENT",
+        schemaVersion: assessment.reportVersion,
+        scoringVersion: assessment.reportVersion,
+        userId: assessment.userId ?? null,
+        sessionKey: assessment.sessionKey ?? null,
+        createdAt: assessment.createdAt,
+        context: {
+          decision: canonical.reportNarrative?.conditionStatement ?? canonical.narrative,
+          competingObligation: null, // Not stored in capture; enrich from assessment answers
+          consequence: canonical.primaryPattern?.consequence ?? null,
+          institutionalConsequence: canonical.routingRecommendation?.label ?? null,
+        },
+        rawResponses: canonical.rawResponses ?? null,
+        domainScores: canonical.domainProfiles ?? [],
+        compositeScore: canonical.percent,
+        profile: canonical.coherenceBand,
+        strongestDomain: canonical.domainProfiles?.length
+          ? [...canonical.domainProfiles].sort((a, b) => b.percent - a.percent)[0]?.domain ?? null
+          : null,
+        weakestDomain: canonical.weakestDomains[0] ?? null,
+        contradictions: canonical.contradictions ?? [],
+        patternScores: canonical.patternScores ?? [],
+        primaryPattern: canonical.primaryPattern ?? null,
+        resultSummary: {
+          narrative: canonical.narrative,
+          conditionStatement: canonical.reportNarrative?.conditionStatement ?? null,
+          classificationExplanation: canonical.reportNarrative?.classificationExplanation ?? null,
+          consequenceBlock: canonical.reportNarrative?.consequenceBlock ?? null,
+          firstActionBlock: canonical.reportNarrative?.firstActionBlock ?? null,
+        },
+        assessmentId: parsed.data.assessmentId,
+      },
+      snapshot: {
+        timestamp: new Date().toISOString(),
+        stage: "purpose_alignment",
+        coreMetrics: {
+          percent: canonical.percent,
+          coherenceBand: canonical.coherenceBand === "SOVEREIGN" ? 4
+            : canonical.coherenceBand === "ALIGNED" ? 3
+            : canonical.coherenceBand === "DRIFTING" ? 2 : 1,
+        },
+        tensions: canonical.contradictions?.map((c) => c.evidence) ?? [],
+        escalationLevel: canonical.severity === "critical" ? 3
+          : canonical.severity === "high" ? 2
+          : canonical.severity === "medium" ? 1 : 0,
+        directive: canonical.firstAction ?? canonical.corrections[0] ?? null,
+      },
     });
 
     let reminderPreference = null;

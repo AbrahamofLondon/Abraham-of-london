@@ -24,13 +24,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const values = Array.isArray(body?.answers) ? body.answers : [];
       return values;
     },
-    buildPayload: (body, req) => ({
-      sections: body?.sections || null,
-      answers: Array.isArray(body?.answers) ? body.answers : [],
-      notes: typeof body?.notes === "string" ? body.notes : null,
-      submittedAt: new Date().toISOString(),
-      userAgent: req.headers["user-agent"] || null,
-    }),
+    buildPayload: (body, req) => {
+      const base: Record<string, unknown> = {
+        sections: body?.sections || null,
+        answers: Array.isArray(body?.answers) ? body.answers : [],
+        notes: typeof body?.notes === "string" ? body.notes : null,
+        submittedAt: new Date().toISOString(),
+        userAgent: req.headers["user-agent"] || null,
+      };
+
+      // Attach financial exposure snapshot when provided
+      if (body.financialExposure !== undefined || body.exposureBand !== undefined) {
+        base.financialExposure = {
+          estimatedFinancialExposure: body.financialExposure ?? null,
+          exposureBand: body.exposureBand ?? null,
+          exposureBasis: body.exposureBasis ?? null,
+          calculationVersion: "1.0.0",
+          generatedAt: new Date().toISOString(),
+          sourceSurface: "fast_diagnostic",
+        };
+      }
+
+      return base;
+    },
   });
 
   // After response is sent, enqueue the regeneration job

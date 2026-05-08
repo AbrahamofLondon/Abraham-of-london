@@ -23,6 +23,14 @@ import type { OutcomeSnapshot } from "@/lib/outcomes/outcome-model";
 import { evaluateDecision } from "@/lib/decision/kernel";
 import { analyzeContagionRisk, simulateInterventionImpact } from "@/lib/alignment/governance-logic";
 import { qualifiesForBoardroom, generateBoardroomDossier } from "@/lib/constitution/boardroom-mode";
+import {
+  extractAssessmentEvidenceCapture,
+  mergeAssessmentEvidenceCapture,
+} from "@/lib/product/evidence-capture-contract";
+import {
+  loadPurposeAlignmentEvidence,
+  buildExecutiveReportingPaBlock,
+} from "@/lib/alignment/evidence-loader";
 
 type AnyRecord = Record<string, unknown>;
 
@@ -933,11 +941,29 @@ export async function POST(
       ],
     };
 
+    // ── PURPOSE ALIGNMENT EVIDENCE CARRIED FORWARD ──
+    const paEvidence = await loadPurposeAlignmentEvidence({
+      email,
+      subjectId,
+      campaignId,
+    });
+    const paBlock = buildExecutiveReportingPaBlock(paEvidence);
+
     const enrichedCanonical = {
       ...canonical,
       subjectId,
       campaignId,
       ladderContext,
+      purposeAlignmentEvidence: paBlock,
+      evidenceCapture: mergeAssessmentEvidenceCapture(
+        extractAssessmentEvidenceCapture(ladderContext),
+        extractAssessmentEvidenceCapture(intake),
+        extractAssessmentEvidenceCapture(getObject(intake.diagnosticsMeta)),
+        {
+          verificationCriteria: s(getObject(intake.decisionNeed).verificationCriteria) || undefined,
+          priorAttempts: s(getObject(intake.history).priorAttemptOutcome) || undefined,
+        },
+      ),
       evidenceGraph: {
         nodes: evidenceJourney.evidenceNodes,
         decisionObjects: evidenceJourney.decisionObjects,

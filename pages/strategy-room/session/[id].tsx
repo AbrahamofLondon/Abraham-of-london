@@ -13,6 +13,18 @@ import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } fr
 import Layout from "@/components/Layout";
 import ReturnBriefInterruptionBar from "@/components/strategy-room/ReturnBriefInterruptionBar";
 import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
+import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import {
+  convertPurposeAlignmentToGovernedMemory,
+} from "@/lib/alignment/evidence-loader";
+import {
+  extractAssessmentEvidenceCapture,
+  type AssessmentEvidenceCapture,
+} from "@/lib/product/evidence-capture-contract";
+import {
+  buildGovernedMemoryFromEvidenceCapture,
+  selectStrategySessionMemory,
+} from "@/lib/product/governed-memory-presenter";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -72,6 +84,7 @@ type SessionData = {
       confidence?: number;
     }>;
   } | null;
+  evidenceCapture?: AssessmentEvidenceCapture | null;
   status: string;
   decisions: DecisionLog[];
   createdAt: string;
@@ -308,6 +321,49 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
   const graphDecision = [...(session.evidenceGraph?.decisionObjects ?? [])].reverse()[0];
   const graphContradictions = graphNodes.filter((node) => node.kind === "contradiction").slice(-3);
   const graphConsequences = graphNodes.filter((node) => node.kind === "consequence" || node.kind === "exposure_estimate").slice(-3);
+  const evidenceCarryForward = session.evidenceCapture ?? null;
+  const sessionMemory = selectStrategySessionMemory(buildGovernedMemoryFromEvidenceCapture({
+    evidence: evidenceCarryForward,
+    sourceSurface: "STRATEGY_ROOM",
+    capturedAt: session.createdAt,
+    relatedSessionId: session.id,
+    defaultStatus: {
+      failureCause: "UNRESOLVED",
+      verificationCriteria: "ACTIVE",
+      stopSignal: "UNRESOLVED",
+      escalationTrigger: "UNRESOLVED",
+    },
+  }));
+
+  // ── PURPOSE ALIGNMENT EVIDENCE CARRIED FORWARD ──
+  const paMemory = React.useMemo(() => {
+    const paBlock = (session as any)?.purposeAlignmentMemory;
+    if (!paBlock) return [];
+    return convertPurposeAlignmentToGovernedMemory({
+      available: true,
+      sourceSurface: "PURPOSE_ALIGNMENT",
+      assessedAt: paBlock.assessedAt ?? null,
+      schemaVersion: null,
+      profile: null,
+      compositeScore: null,
+      strongestDomain: null,
+      weakestDomain: paBlock.weakestDomain ?? null,
+      competingObligation: paBlock.competingObligation ?? null,
+      consequence: paBlock.consequence ?? null,
+      institutionalConsequence: null,
+      primaryPattern: paBlock.primaryPattern ?? null,
+      patternConsequence: null,
+      contradictions: [],
+      domainScores: [],
+      firstAction: paBlock.firstAction ?? null,
+      corrections: [],
+      assessmentId: null,
+    });
+  }, [session]);
+  const mergedSessionMemory = React.useMemo(
+    () => [...paMemory, ...sessionMemory],
+    [paMemory, sessionMemory],
+  );
 
   return (
     <Layout title="Strategy Room Session | Abraham of London" fullWidth headerTransparent>
@@ -377,6 +433,17 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
               </p>
             )}
           </section>
+
+          {mergedSessionMemory.length > 0 && (
+            <section style={{ padding: "1.15rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <GovernanceEvidenceCarryForward
+                title="Unresolved execution memory"
+                intro="These items remain active in this session. They should shape what is committed, stopped, or escalated."
+                items={mergedSessionMemory}
+                variant="session"
+              />
+            </section>
+          )}
 
           {(graphDecision || graphContradictions.length > 0 || graphConsequences.length > 0) && (
             <section style={{ padding: "1.15rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
@@ -901,6 +968,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
           ? (raw.canonicalSnapshot as any)?.evidenceGraph ?? null
           : parseJsonFallback<{ evidenceGraph?: SessionData["evidenceGraph"] }>(raw.canonicalSnapshot, {}).evidenceGraph ?? null
       ),
+      evidenceCapture: extractAssessmentEvidenceCapture(raw.canonicalSnapshot),
       status: raw.status,
       decisions: Array.isArray(raw.decisions) ? raw.decisions.map((d: any) => ({
         id: d.id,

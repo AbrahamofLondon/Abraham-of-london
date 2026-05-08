@@ -12,7 +12,11 @@ export type TeamAssessmentDomain =
   | "direction_priority"
   | "execution_integrity"
   | "trust_communication"
-  | "authority_escalation";
+  | "authority_escalation"
+  | "priority_alignment"
+  | "consequence_awareness"
+  | "leadership_consistency"
+  | "disagreement_quality";
 
 export type TeamAssessmentCampaignStatus = "draft" | "live" | "closed" | "archived";
 
@@ -50,6 +54,10 @@ export const TEAM_ASSESSMENT_DOMAINS: TeamAssessmentDomain[] = [
   "execution_integrity",
   "trust_communication",
   "authority_escalation",
+  "priority_alignment",
+  "consequence_awareness",
+  "leadership_consistency",
+  "disagreement_quality",
 ];
 
 export type SentimentResponse = {

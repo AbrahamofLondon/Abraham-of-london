@@ -46,6 +46,10 @@ const requestSchema = z.object({
     avoidedDecision: z.string().trim().max(1000).nullable().optional(),
     lastSevenDays: z.string().trim().max(1000).nullable().optional(),
     dissenter: z.string().trim().max(1000).nullable().optional(),
+    /** Properly-named field for institutional consequence */
+    consequence: z.string().trim().max(1000).nullable().optional(),
+    /** Properly-named field for competing obligation */
+    competingObligation: z.string().trim().max(1000).nullable().optional(),
   }).strict().optional(),
 }).strict();
 

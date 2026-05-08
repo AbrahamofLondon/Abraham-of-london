@@ -72,32 +72,16 @@ export async function resolveIdentity(
     result.flags = Array.isArray(aol.flags) ? aol.flags.map(String) : [];
   }
 
-  // 2. Access session (aol_access cookie)
+  // 2. Access session (aol_access cookie) — DISABLED
+  // Legacy session verification via tokenStore.postgres is disabled.
+  // Tier authority comes exclusively from NextAuth JWT (step 1) or
+  // Prisma member record (step 3). The aol_access cookie is informational
+  // only and does not independently grant access.
   const sessionId = readAccessCookieFromReq(req);
   if (sessionId) {
-    const session = await verifyAccessSession(sessionId);
-    if (session) {
-      result.authenticated = true;
-      result.accessSessionId = session.sessionId;
-      result.sessionExpiresAt = session.expiresAt;
-
-      // Access cookie identifies session presence but does NOT independently
-      // upgrade tier. Tier authority comes from NextAuth JWT or Prisma member
-      // record only. The access cookie tier is informational for logging.
-      // result.tier remains as set by NextAuth (step 1) or will be set by
-      // Prisma member lookup (step 3).
-
-      // Prefer the member record from the access session
-      if (session.memberId) {
-        result.subjectId = session.memberId;
-      }
-
-      result.sessionSource =
-        result.sessionSource === "nextauth" ? "both" : "access_cookie";
-
-      // Sliding renewal: extend session if >50% of TTL elapsed
-      await maybeRenewSession(session);
-    }
+    result.sessionSource =
+      result.sessionSource === "nextauth" ? "both" : "access_cookie";
+    result.accessSessionId = sessionId;
   }
 
   // 3. Resolve lifecycle from member record
@@ -232,56 +216,6 @@ function readAccessCookieFromReq(req: NextApiRequest | Request): string | null {
     "";
   const match = String(cookieHeader).match(/aol_access=([^;]+)/);
   return match?.[1] || null;
-}
-
-async function verifyAccessSession(
-  sessionId: string,
-): Promise<{
-  sessionId: string;
-  memberId: string;
-  tier: string;
-  expiresAt: string;
-  createdAt?: string;
-} | null> {
-  try {
-    const { getSessionContext } = await import(
-      "@/lib/server/auth/tokenStore.postgres"
-    );
-    const ctx = await getSessionContext(sessionId);
-    if (!ctx?.ok || !ctx.valid) return null;
-    return {
-      sessionId,
-      memberId: ctx.memberId || "",
-      tier: ctx.tier || "member",
-      expiresAt: ctx.expiresAt || "",
-    };
-  } catch {
-    return null;
-  }
-}
-
-async function maybeRenewSession(session: {
-  sessionId: string;
-  expiresAt: string;
-}): Promise<void> {
-  try {
-    const expiry = new Date(session.expiresAt).getTime();
-    const now = Date.now();
-    const ttlMs = 30 * 24 * 60 * 60 * 1000; // 30 days
-    const elapsed = ttlMs - (expiry - now);
-
-    // Renew if >50% of TTL has elapsed
-    if (elapsed > ttlMs * 0.5) {
-      const { prisma } = await import("@/lib/prisma");
-      const newExpiry = new Date(now + ttlMs);
-      await (prisma as any).session?.update?.({
-        where: { sessionId: session.sessionId },
-        data: { expiresAt: newExpiry.toISOString() },
-      });
-    }
-  } catch {
-    // Non-critical — session continues at current expiry
-  }
 }
 
 async function lookupMember(

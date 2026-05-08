@@ -34,6 +34,10 @@ import {
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
+import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import {
+  convertPurposeAlignmentToGovernedMemory,
+} from "@/lib/alignment/evidence-loader";
 import DecisionStateBanner from "@/components/strategy-room/DecisionStateBanner";
 import DynamicConsequencePanel from "@/components/strategy-room/DynamicConsequencePanel";
 import EscalationTriggerPanel from "@/components/strategy-room/EscalationTriggerPanel";
@@ -61,6 +65,15 @@ import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
 import { evaluateCounselTrigger, deriveCounselStatus } from "@/lib/strategy-room/counsel-trigger";
 import type { StrategyRoomState } from "@/lib/strategy-room/room-state-contract";
 import { deriveEvidenceTierFromStages } from "@/lib/product/evidence-stage-contract";
+import {
+  extractAssessmentEvidenceCapture,
+  mergeAssessmentEvidenceCapture,
+  type AssessmentEvidenceCapture,
+} from "@/lib/product/evidence-capture-contract";
+import {
+  buildGovernedMemoryFromEvidenceCapture,
+  selectStrategyEntryMemory,
+} from "@/lib/product/governed-memory-presenter";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION AUTHORITY GATE
@@ -454,6 +467,20 @@ function buildExecutionIntake(
     marketExposure: safeText(form.marketExposure, "MEDIUM"),
     boardInvolved: safeText(form.boardInvolved, brief.ownerDomain.toLowerCase().includes("board") ? "YES" : "UNCERTAIN"),
   };
+}
+
+function buildCarryForwardEvidence(input: {
+  thread: ConstitutionalThread | null;
+  executiveResult: unknown;
+  canonical: CanonicalSectionsEnvelope | null;
+}): AssessmentEvidenceCapture {
+  return mergeAssessmentEvidenceCapture(
+    input.thread?.teamFindings?.evidenceCapture,
+    input.thread?.enterpriseFindings?.evidenceCapture,
+    extractAssessmentEvidenceCapture(input.executiveResult),
+    extractAssessmentEvidenceCapture((input.executiveResult as any)?.intake),
+    extractAssessmentEvidenceCapture(input.canonical),
+  );
 }
 
 function localSummary(canonical: CanonicalSectionsEnvelope | null) {
@@ -1504,6 +1531,54 @@ export default function StrategyRoomPage({
     () => buildStrategyEntryBrief({ thread, canonical, executiveResult, form }),
     [thread, canonical, executiveResult, form],
   );
+  const carryForwardEvidence = React.useMemo(
+    () => buildCarryForwardEvidence({ thread, executiveResult, canonical }),
+    [thread, executiveResult, canonical],
+  );
+  const strategyEntryMemory = React.useMemo(
+    () => selectStrategyEntryMemory(buildGovernedMemoryFromEvidenceCapture({
+      evidence: carryForwardEvidence,
+      sourceSurface: "STRATEGY_ROOM",
+      defaultStatus: {
+        priorAttempts: "ACTIVE",
+        failureCause: "UNRESOLVED",
+        verificationCriteria: "ACTIVE",
+        decisionDependency: "UNRESOLVED",
+        escalationTrigger: "UNRESOLVED",
+      },
+    })),
+    [carryForwardEvidence],
+  );
+
+  // ── PURPOSE ALIGNMENT EVIDENCE CARRIED FORWARD ──
+  const paMemory = React.useMemo(() => {
+    const paBlock = (canonical as any)?.purposeAlignmentMemory;
+    if (!paBlock) return [];
+    return convertPurposeAlignmentToGovernedMemory({
+      available: true,
+      sourceSurface: "PURPOSE_ALIGNMENT",
+      assessedAt: paBlock.assessedAt ?? null,
+      schemaVersion: null,
+      profile: null,
+      compositeScore: null,
+      strongestDomain: null,
+      weakestDomain: paBlock.weakestDomain ?? null,
+      competingObligation: paBlock.competingObligation ?? null,
+      consequence: paBlock.consequence ?? null,
+      institutionalConsequence: null,
+      primaryPattern: paBlock.primaryPattern ?? null,
+      patternConsequence: null,
+      contradictions: [],
+      domainScores: [],
+      firstAction: paBlock.firstAction ?? null,
+      corrections: [],
+      assessmentId: null,
+    });
+  }, [canonical]);
+  const mergedStrategyMemory = React.useMemo(
+    () => [...paMemory, ...strategyEntryMemory],
+    [paMemory, strategyEntryMemory],
+  );
 
   if (!hasPaidAccess) {
     return (
@@ -1892,7 +1967,11 @@ export default function StrategyRoomPage({
       const raw = await guidanceRes.json();
       if (!guidanceRes.ok) throw new Error(raw?.error || "Decision guidance generation failed.");
 
-      const nextCanonical = raw?.canonical ?? raw?.jsonPayload ?? raw;
+      const baseCanonical = raw?.canonical ?? raw?.jsonPayload ?? raw;
+      const nextCanonical = {
+        ...baseCanonical,
+        evidenceCapture: carryForwardEvidence,
+      };
       if (!hasCanonicalSections(nextCanonical)) {
         throw new Error("Canonical sections payload missing from guidance API.");
       }
@@ -2097,6 +2176,17 @@ export default function StrategyRoomPage({
                 escalationLevel={enforcement?.escalationLevel ?? 0}
               />
             </div>
+
+            {mergedStrategyMemory.length > 0 && (
+              <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+                <GovernanceEvidenceCarryForward
+                  title="Execution memory"
+                  intro="Before execution begins, the system is carrying forward the following unresolved constraints."
+                  items={mergedStrategyMemory}
+                  variant="entry"
+                />
+              </div>
+            )}
 
             <FirstActionPrompt />
             <ExecutionDecisionFrame canonical={canonical} thread={thread} />

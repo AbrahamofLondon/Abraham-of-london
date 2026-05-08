@@ -297,6 +297,8 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
             avoidedDecision: contextAnswers.avoidedDecision || null,
             lastSevenDays: contextAnswers.consequence || null,
             dissenter: contextAnswers.competingObligation || null,
+            consequence: contextAnswers.consequence || null,
+            competingObligation: contextAnswers.competingObligation || null,
           },
           clientMeta: {
             startedAt,

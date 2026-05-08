@@ -52,9 +52,13 @@ type FormData = {
   boardInvolved:     string;
   // Stage 2 — Consequence
   financialExposure:        number;
+  financialEvidence:        string;
   reputationalRisk:         number;
+  reputationalEvidence:     string;
   institutionalConsequence: number;
+  institutionalEvidence:    string;
   timelinePressure:         number;
+  timelineEvidence:         string;
   // Stage 3 — Readiness
   existingAssets:    string;
   blockers:          string;
@@ -79,7 +83,7 @@ type ConstitutionalReading = {
 const INITIAL: FormData = {
   problemStatement: "", priorFailures: "", whatHappensIfNot: "",
   name: "", email: "", organisation: "", role: "", authorityScope: "", boardInvolved: "",
-  financialExposure: 5, reputationalRisk: 5, institutionalConsequence: 5, timelinePressure: 5,
+  financialExposure: 5, financialEvidence: "", reputationalRisk: 5, reputationalEvidence: "", institutionalConsequence: 5, institutionalEvidence: "", timelinePressure: 5, timelineEvidence: "",
   existingAssets: "", blockers: "", capacityNote: "",
 };
 
@@ -629,6 +633,12 @@ export default function StrategyRoomForm() {
             urgencyWindow: form.timelinePressure >= 8 ? "IMMEDIATE" : form.timelinePressure >= 6 ? "NEAR_TERM" : "MID_TERM",
             marketExposure: form.reputationalRisk >= 8 ? "CRITICAL" : form.reputationalRisk >= 6 ? "HIGH" : "MEDIUM",
             revenueBand: "ENTERPRISE",
+            consequenceEvidence: {
+              financial: form.financialEvidence || null,
+              reputational: form.reputationalEvidence || null,
+              institutional: form.institutionalEvidence || null,
+              timeline: form.timelineEvidence || null,
+            },
           },
           mandateScore: reading.score,
           route: reading.route,
@@ -712,10 +722,22 @@ export default function StrategyRoomForm() {
         </p>
       </div>
       <div className="space-y-6">
-        <ConsequenceRail label="Financial exposure" value={form.financialExposure} onChange={v => set("financialExposure", v)} note="The degree of material financial consequence if this is not resolved." />
-        <ConsequenceRail label="Reputational risk" value={form.reputationalRisk} onChange={v => set("reputationalRisk", v)} note="The degree to which reputational capital is at stake." />
-        <ConsequenceRail label="Institutional consequence" value={form.institutionalConsequence} onChange={v => set("institutionalConsequence", v)} note="The degree to which organisational structure, culture, or mandate is affected." />
-        <ConsequenceRail label="Timeline pressure" value={form.timelinePressure} onChange={v => set("timelinePressure", v)} note="The urgency of resolution — how long before inaction becomes irreversible." />
+        <div>
+          <ConsequenceRail label="Financial exposure" value={form.financialExposure} onChange={v => set("financialExposure", v)} note="The degree of material financial consequence if this is not resolved." />
+          {form.financialExposure >= 4 && <FieldTextarea label="What specific financial consequence?" value={form.financialEvidence} onChange={v => set("financialEvidence", v)} rows={2} placeholder="Name the cost — revenue at risk, budget exposure, or opportunity loss. Not a feeling." />}
+        </div>
+        <div>
+          <ConsequenceRail label="Reputational risk" value={form.reputationalRisk} onChange={v => set("reputationalRisk", v)} note="The degree to which reputational capital is at stake." />
+          {form.reputationalRisk >= 4 && <FieldTextarea label="What specific reputational risk?" value={form.reputationalEvidence} onChange={v => set("reputationalEvidence", v)} rows={2} placeholder="Name the stakeholder, market, or trust dimension at stake." />}
+        </div>
+        <div>
+          <ConsequenceRail label="Institutional consequence" value={form.institutionalConsequence} onChange={v => set("institutionalConsequence", v)} note="The degree to which organisational structure, culture, or mandate is affected." />
+          {form.institutionalConsequence >= 4 && <FieldTextarea label="What structural consequence?" value={form.institutionalEvidence} onChange={v => set("institutionalEvidence", v)} rows={2} placeholder="Name the structural change — mandate, authority, team composition, governance." />}
+        </div>
+        <div>
+          <ConsequenceRail label="Timeline pressure" value={form.timelinePressure} onChange={v => set("timelinePressure", v)} note="The urgency of resolution — how long before inaction becomes irreversible." />
+          {form.timelinePressure >= 4 && <FieldTextarea label="What makes the timeline real?" value={form.timelineEvidence} onChange={v => set("timelineEvidence", v)} rows={2} placeholder="Name the deadline, trigger event, or window that closes." />}
+        </div>
       </div>
     </div>,
 

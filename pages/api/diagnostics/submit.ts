@@ -20,12 +20,17 @@ import { pushToCRM } from "@/lib/server/crm/pushToCRM";
 import { hubspotSync } from "@/lib/hubspot/sync";
 import { saveDiagnosticRecord } from "@/lib/server/diagnostics/store";
 import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
+import type { DiagnosticEvidenceNodeInput } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 import {
   diagnosticSubmissionSchema,
   formatZodError,
   stableInputHash,
 } from "@/lib/diagnostics/runtime-validation";
+import {
+  extractAssessmentEvidenceCapture,
+  summarizeAssessmentEvidenceText,
+} from "@/lib/product/evidence-capture-contract";
 import {
   createSubmissionKey,
   getCachedSubmissionResult,
@@ -179,6 +184,54 @@ function readAuthorityPacket(stage: Parameters<typeof persistDiagnosticStage>[0]
   const nodes = generated.nodes;
   const decisionObject = generated.decisionObject;
   return { nodes, decisionObject };
+}
+
+function buildAssessmentEvidenceNodes(
+  stage: Parameters<typeof persistDiagnosticStage>[0]["stage"] | null,
+  payload: DiagnosticSubmissionPayload,
+): DiagnosticEvidenceNodeInput[] {
+  if (!stage) return [];
+
+  const evidence = extractAssessmentEvidenceCapture(payload.metadata);
+  const nodes: DiagnosticEvidenceNodeInput[] = [];
+  const severity =
+    payload.summary.severity === "critical"
+      ? "critical"
+      : payload.summary.severity === "high"
+        ? "high"
+        : "medium";
+
+  const pushNode = (
+    kind: DiagnosticEvidenceNodeInput["kind"],
+    label: string,
+    value: string | undefined,
+    field: string,
+  ) => {
+    if (!value) return;
+    nodes.push({
+      sourceStage: stage,
+      kind,
+      label,
+      summary: summarizeAssessmentEvidenceText(value, 220),
+      evidenceText: summarizeAssessmentEvidenceText(value, 420),
+      confidence: 0.78,
+      severity,
+      payload: {
+        evidenceField: field,
+        diagnosticKind: payload.kind,
+      },
+    });
+  };
+
+  pushNode("failed_attempt", "Prior correction attempt recorded", evidence.priorAttempts, "priorAttempts");
+  pushNode("persistent_root_cause", "Prior correction failure cause recorded", evidence.failureCause, "failureCause");
+  pushNode("pattern_recurrence", "Pattern recurrence recorded", evidence.recurrenceSignal, "recurrenceSignal");
+  pushNode("evidence", "Verification criteria recorded", evidence.verificationCriteria, "verificationCriteria");
+  pushNode("constraint", "Stop condition recorded", evidence.stopSignal, "stopSignal");
+  pushNode("constraint", "Decision dependency recorded", evidence.decisionDependency, "decisionDependency");
+  pushNode("escalation_trigger", "Escalation threshold recorded", evidence.escalationTrigger, "escalationTrigger");
+
+  return nodes;
 }
 
 type ActorContext = {
@@ -352,7 +405,9 @@ export default async function handler(
 
     const stage = stageFromKind(payload.kind);
     const authority = readAuthorityPacket(stage, payload.metadata);
-    if (stage && (authority.nodes.length || authority.decisionObject)) {
+    const assessmentEvidenceNodes = buildAssessmentEvidenceNodes(stage, payload);
+    const persistedEvidenceNodes = [...authority.nodes, ...assessmentEvidenceNodes];
+    if (stage && (persistedEvidenceNodes.length || authority.decisionObject)) {
       await persistDiagnosticStage({
         email: safeString(payload.respondent?.email) || actor.email || null,
         organisation: safeString(payload.respondent?.organisation) || null,
@@ -371,7 +426,7 @@ export default async function handler(
         routeDecision: payload.metadata?.nextRoute
           ? { nextRoute: payload.metadata.nextRoute, diagnosticRef }
           : { diagnosticRef },
-        evidenceNodes: authority.nodes,
+        evidenceNodes: persistedEvidenceNodes,
         decisionObject: authority.decisionObject,
       });
     }

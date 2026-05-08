@@ -11,8 +11,9 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
 import { type DiagnosticAnswers } from "@/lib/diagnostics/constitutional-diagnostic-derivation";
-import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
+import { getDiagnosticJourney, persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 import { runConstitutionalOrchestration } from "@/lib/engine/orchestrator";
+import type { UpstreamEvidenceContext } from "@/lib/diagnostics/constitutional-evidence-bridge";
 import { assessReplicationRisk } from "@/lib/security/replication-detection";
 import { createEncryptedStateToken } from "@/lib/security/secure-client-state";
 import { toPublicResult, type PublicConstitutionalResult } from "@/lib/diagnostics/public-constitutional-result";
@@ -178,8 +179,28 @@ export default async function handler(
       });
     }
 
+    let upstream: UpstreamEvidenceContext | null = null;
+    try {
+      const journey = await getDiagnosticJourney({
+        email: body.email?.toLowerCase() ?? null,
+        subjectId: body.sessionKey ?? body.respondentKey ?? null,
+        campaignId: body.campaignId ?? null,
+      });
+      const latestDecision = journey.decisionObjects?.[journey.decisionObjects.length - 1];
+      if (latestDecision) {
+        upstream = {
+          priorAttemptText: latestDecision.priorAttemptText ?? null,
+          costOfDelayText: latestDecision.costOfDelayText ?? null,
+          avoidedDecision: latestDecision.decisionText ?? null,
+          patternRecurrenceCount: null,
+          resolvedPatternReappeared: false,
+        };
+      }
+    } catch { /* degrade gracefully — upstream context is additive */ }
+
     const result = runConstitutionalOrchestration({
       answers,
+      upstream,
       context: {
         sessionContext: [
           body.sessionKey,
@@ -249,6 +270,7 @@ export default async function handler(
         report: result.bundle.report,
         decision: result.bundle.decision,
         bridge: result.bridge,
+        evidenceBridge: result.evidenceBridge ?? null,
       },
       tensions: result.bundle.decision.disqualifiersTriggered,
       routeDecision: result.bundle.decision,

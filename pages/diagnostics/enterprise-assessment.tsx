@@ -86,6 +86,9 @@ import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSumma
 import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import DualAxisPromptCard from "@/components/diagnostics/DualAxisPromptCard";
+import GovernanceEvidenceBridge, {
+  type GovernanceEvidencePrompt,
+} from "@/components/diagnostics/GovernanceEvidenceBridge";
 import type { DualAxisAnswer } from "@/lib/alignment/types";
 import {
   clearVersionedAssessmentState,
@@ -93,6 +96,13 @@ import {
   saveVersionedAssessmentState,
 } from "@/lib/client/assessment-state";
 import { detectDualAxisIntegrityChallenge } from "@/lib/client/assessment-integrity";
+import {
+  hasRequiredAssessmentEvidenceCaptureFields,
+  missingAssessmentEvidenceCaptureFields,
+  sanitizeAssessmentEvidenceCapture,
+  type AssessmentEvidenceCapture,
+  type AssessmentEvidenceCaptureField,
+} from "@/lib/product/evidence-capture-contract";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOKENS
@@ -153,6 +163,37 @@ const BLOCKS: Block[] = [
 const SCORE_LABELS: Record<DiagnosticAnswerValue, string> = {
   1: "Strongly no", 2: "No", 3: "Mixed", 4: "Yes", 5: "Strongly yes",
 };
+
+const ENTERPRISE_EVIDENCE_REQUIRED_FIELDS: AssessmentEvidenceCaptureField[] = [
+  "priorAttempts",
+  "failureCause",
+  "recurrenceSignal",
+  "decisionDependency",
+  "verificationCriteria",
+];
+
+const ENTERPRISE_EVIDENCE_PROMPTS: GovernanceEvidencePrompt[] = [
+  {
+    field: "priorAttempts",
+    prompt: "What institutional correction has already been attempted?",
+  },
+  {
+    field: "failureCause",
+    prompt: "Why did that correction fail, stall, or fail to hold?",
+  },
+  {
+    field: "recurrenceSignal",
+    prompt: "Where has this pattern appeared before in the organisation?",
+  },
+  {
+    field: "decisionDependency",
+    prompt: "What decision dependency is currently making this condition harder to resolve?",
+  },
+  {
+    field: "verificationCriteria",
+    prompt: "What observable evidence would prove this institution has materially improved?",
+  },
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ANALYSIS ENGINE
@@ -428,13 +469,30 @@ function ScoreSelector({ value, onChange }: { value: DiagnosticAnswerValue | 0; 
 // RESULT SURFACE
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, teamAlignmentPct, submitResult, onSubmit, isSubmitting, onRevise, constitutionalThread = null, matchedPlaybooks = [] }: {
+function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, teamAlignmentPct, evidenceCapture, onEvidenceChange, submitResult, onSubmit, isSubmitting, onRevise, constitutionalThread = null, matchedPlaybooks = [] }: {
   reading: EnterpriseReading; sections: SectionScore[]; totalScore: number; maxScore: number; totalPct: number;
   teamAlignmentPct: number | null; submitResult: DiagnosticSubmitResponse | null;
+  evidenceCapture: AssessmentEvidenceCapture;
+  onEvidenceChange: (field: AssessmentEvidenceCaptureField, nextValue: string) => void;
   onSubmit: () => void; isSubmitting: boolean; onRevise: () => void;
   constitutionalThread?: ConstitutionalThread | null;
   matchedPlaybooks?: ReturnType<typeof matchPlaybooks>;
 }) {
+  const bridgePrompts: GovernanceEvidencePrompt[] = reading.band === "ESCALATE"
+    ? [
+        ...ENTERPRISE_EVIDENCE_PROMPTS,
+        {
+          field: "escalationTrigger",
+          prompt: "What must now be escalated because further delay would worsen the cost, politics, or irreversibility?",
+          optional: true,
+        },
+      ]
+    : ENTERPRISE_EVIDENCE_PROMPTS;
+  const missingEvidenceFields = missingAssessmentEvidenceCaptureFields(
+    evidenceCapture,
+    ENTERPRISE_EVIDENCE_REQUIRED_FIELDS,
+  );
+  const evidenceReady = missingEvidenceFields.length === 0;
   const bc = bandColor(reading.band);
   const routeConfig = {
     EXECUTIVE_REPORTING: { href: "/diagnostics/executive-reporting", label: "Move to Executive Reporting", border: `${GOLD}35`, bg: `${GOLD}0D`, text: `${GOLD}BB` },
@@ -583,6 +641,15 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.decisionObject.action}</p>
           </div>
 
+          <GovernanceEvidenceBridge
+            title="Evidence Confirmation"
+            intro="The reading is complete. The next step is evidence discipline."
+            prompts={bridgePrompts}
+            value={evidenceCapture}
+            onChange={onEvidenceChange}
+            missingFields={missingEvidenceFields}
+          />
+
           <details style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
             <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
               How this was determined
@@ -649,9 +716,13 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
           <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.008)", padding: "1.25rem" }}>
             {!submitResult ? (
               <div className="flex items-center justify-between gap-4">
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.28)", fontStyle: "italic" }}>Save the diagnostic record and receive a reference.</p>
-                <button type="button" onClick={onSubmit} disabled={isSubmitting}
-                  style={{ padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.50)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", cursor: isSubmitting ? "not-allowed" : "pointer", flexShrink: 0 }}>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.28)", fontStyle: "italic" }}>
+                  {evidenceReady
+                    ? "Save the diagnostic record and receive a reference."
+                    : "Before this can be governed, the system needs the evidence history."}
+                </p>
+                <button type="button" onClick={onSubmit} disabled={isSubmitting || !evidenceReady}
+                  style={{ padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.50)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", cursor: isSubmitting || !evidenceReady ? "not-allowed" : "pointer", flexShrink: 0, opacity: evidenceReady ? 1 : 0.6 }}>
                   {isSubmitting ? "Saving…" : "Save record"}
                 </button>
               </div>
@@ -731,6 +802,7 @@ export default function EnterpriseAssessmentPage() {
   const [instrumentPage, setInstrumentPage] = React.useState(0);
   const [showResume, setShowResume] = React.useState(false);
   const [draftSnapshot, setDraftSnapshot] = React.useState<EnterpriseDraftSnapshot | null>(null);
+  const [evidenceCapture, setEvidenceCapture] = React.useState<AssessmentEvidenceCapture>({});
   const startedAtRef = React.useRef(Date.now());
   const recentDecisionReady = identity.recentDecision.trim().length >= 40;
 
@@ -912,6 +984,11 @@ export default function EnterpriseAssessmentPage() {
 
   async function handleSubmit() {
     setIsSubmitting(true);
+    const cleanedEvidenceCapture = sanitizeAssessmentEvidenceCapture(evidenceCapture);
+    if (!hasRequiredAssessmentEvidenceCaptureFields(cleanedEvidenceCapture, ENTERPRISE_EVIDENCE_REQUIRED_FIELDS)) {
+      setIsSubmitting(false);
+      return;
+    }
     const res = await submitDiagnostic({
       kind: "enterprise", version: "2026.1", source: "diagnostics", entry: "enterprise-assessment",
       intent: "enterprise-diagnostic", title: "Enterprise Assessment",
@@ -920,6 +997,7 @@ export default function EnterpriseAssessmentPage() {
       summary: { totalScore, maxScore, pct: totalPct, severity: severityFromPct(totalPct), band: bandFromPct(totalPct), sectionScores: BLOCKS.map(b => buildSectionScore({ sectionId: b.id, title: b.title, answers: answerList.filter(a => a.sectionId === b.id) })) },
       metadata: {
         ui: "enterprise-assessment",
+        evidenceCapture: cleanedEvidenceCapture,
         nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting",
         nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute,
         teamAlignmentPct,
@@ -975,6 +1053,7 @@ export default function EnterpriseAssessmentPage() {
       route: reading?.route ?? "EXECUTIVE_REPORTING",
       narrative: (reading?.primaryReading ?? "").slice(0, 300),
       decisionClarity: reading?.decisionSignal.clarityScore,
+      evidenceCapture: cleanedEvidenceCapture,
     });
 
     // Handoff to /diagnostics/executive-reporting (and the Strategy Room chain).
@@ -995,11 +1074,15 @@ export default function EnterpriseAssessmentPage() {
           severity: severityFromPct(totalPct),
           band: bandFromPct(totalPct),
           sections: sections.map(s => ({ id: s.id, title: s.title, pct: s.pct })),
+          patternTitle: reading?.patternTitle ?? null,
+          primaryReading: reading?.primaryReading ?? null,
+          dominantFailure: reading?.dominantFailure ?? null,
           decisionSignal: reading?.decisionSignal ?? null,
           recentDecision: identity.recentDecision,
           subjectId,
           nextRoute: reading?.route ?? "EXECUTIVE_REPORTING",
           teamAlignmentPct,
+          evidenceCapture: cleanedEvidenceCapture,
         }),
       );
     } catch {
@@ -1403,7 +1486,24 @@ export default function EnterpriseAssessmentPage() {
             {phase === "result" && reading && (
               <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
                 <div className="py-14">
-                  <ResultSurface reading={reading} sections={sections} totalScore={totalScore} maxScore={maxScore} totalPct={totalPct} teamAlignmentPct={teamAlignmentPct} submitResult={submitResult} onSubmit={handleSubmit} isSubmitting={isSubmitting} onRevise={() => advance("instrument")} constitutionalThread={constitutionalThread} matchedPlaybooks={matchedPlaybooks} />
+                  <ResultSurface
+                    reading={reading}
+                    sections={sections}
+                    totalScore={totalScore}
+                    maxScore={maxScore}
+                    totalPct={totalPct}
+                    teamAlignmentPct={teamAlignmentPct}
+                    evidenceCapture={evidenceCapture}
+                    onEvidenceChange={(field, nextValue) =>
+                      setEvidenceCapture((current) => ({ ...current, [field]: nextValue }))
+                    }
+                    submitResult={submitResult}
+                    onSubmit={handleSubmit}
+                    isSubmitting={isSubmitting}
+                    onRevise={() => advance("instrument")}
+                    constitutionalThread={constitutionalThread}
+                    matchedPlaybooks={matchedPlaybooks}
+                  />
 
                   {/* ═══ LIVING INTELLIGENCE PANELS ═══ */}
                   <div className="mx-auto max-w-3xl mt-8 space-y-4 px-6">

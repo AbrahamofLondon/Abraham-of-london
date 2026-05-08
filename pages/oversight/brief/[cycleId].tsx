@@ -214,6 +214,21 @@ const OversightBriefPage: NextPage<PageProps> = ({
                           {action.actionType} · {action.severity}
                         </p>
                         <p className="mt-2" style={{ ...serif, color: "rgba(255,255,255,0.78)", lineHeight: 1.65 }}>{action.action}</p>
+                        {action.evidenceBasis ? (
+                          <p className="mt-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.62)" }}>
+                            {action.continuitySourceLabel
+                              ? `Continuity source · ${action.continuityConfidenceLabel || "CAPTURED"}`
+                              : "Continuity source"}
+                          </p>
+                        ) : null}
+                        {action.continuitySourceLabel ? (
+                          <p className="mt-1" style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.34)" }}>
+                            {action.continuitySourceLabel}
+                          </p>
+                        ) : null}
+                        {action.evidenceBasis ? (
+                          <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.56)", lineHeight: 1.58 }}>{action.evidenceBasis}</p>
+                        ) : null}
                         {action.consequenceIfIgnored ? (
                           <p className="mt-2" style={{ ...serif, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>{action.consequenceIfIgnored}</p>
                         ) : null}

@@ -17,6 +17,10 @@ import GovernedActionPanel from "@/components/living/GovernedActionPanel";
 import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
 import ContinuityStatement from "@/components/product/ContinuityStatement";
 import AdmissionNotice from "@/components/product/AdmissionNotice";
+import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import {
+  convertPurposeAlignmentToGovernedMemory,
+} from "@/lib/alignment/evidence-loader";
 
 type ReturnBriefData = {
   sessionId: string;
@@ -60,6 +64,14 @@ type ReturnBriefData = {
     priorCount: number;
     explanation: string;
   } | null;
+  evidenceCarryForward?: {
+    source: Record<string, string | undefined>;
+    verificationStatus?: string;
+    failureComparison?: string;
+    recurrenceStatus?: string;
+    stopSignalStatus?: string;
+  } | null;
+  purposeAlignmentEvidence?: Record<string, unknown> | null;
   challenge: string;
   retainerTriggered: boolean;
 };
@@ -209,6 +221,63 @@ export default function ReturnBriefPage() {
         </div>
 
         {/* ═══ 3. CONTRADICTION RE-EXPOSED ═══ */}
+        {brief.evidenceCarryForward && (
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "16px" }}>
+              Against your prior standard
+            </p>
+            <div style={{ background: "#111", padding: "22px 24px", borderLeft: "2px solid rgba(201,169,110,0.42)" }}>
+              <p style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.62)", marginBottom: "12px" }}>
+                You previously said this would count as proof. The system is now checking the case against that standard.
+              </p>
+              {[brief.evidenceCarryForward.verificationStatus, brief.evidenceCarryForward.failureComparison, brief.evidenceCarryForward.recurrenceStatus, brief.evidenceCarryForward.stopSignalStatus]
+                .filter(Boolean)
+                .map((statement, index) => (
+                  <p key={index} style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.55)", marginTop: index === 0 ? 0 : "12px" }}>
+                    {statement}
+                  </p>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* ═══ PA EVIDENCE CARRIED FORWARD ═══ */}
+        {(() => {
+          const paItems = brief.purposeAlignmentEvidence
+            ? convertPurposeAlignmentToGovernedMemory({
+                available: true,
+                sourceSurface: "PURPOSE_ALIGNMENT",
+                assessedAt: (brief.purposeAlignmentEvidence.assessedAt as string) ?? null,
+                schemaVersion: null,
+                profile: (brief.purposeAlignmentEvidence.profile as string) ?? null,
+                compositeScore: null,
+                strongestDomain: null,
+                weakestDomain: (brief.purposeAlignmentEvidence.weakestDomain as string) ?? null,
+                competingObligation: (brief.purposeAlignmentEvidence.previouslyReportedCompetingObligation as string) ?? null,
+                consequence: (brief.purposeAlignmentEvidence.previouslyReportedConsequence as string) ?? null,
+                institutionalConsequence: null,
+                primaryPattern: null,
+                patternConsequence: (brief.purposeAlignmentEvidence.currentStateAgainstPriorConsequence as string) ?? null,
+                contradictions: [],
+                domainScores: [],
+                firstAction: null,
+                corrections: [],
+                assessmentId: null,
+              })
+            : [];
+          if (paItems.length === 0) return null;
+          return (
+            <div style={{ paddingBottom: "48px" }}>
+              <GovernanceEvidenceCarryForward
+                title="Purpose Alignment evidence carried forward"
+                intro="The following evidence from your earlier Purpose Alignment assessment remains relevant to this case."
+                items={paItems}
+                variant="session"
+              />
+            </div>
+          );
+        })()}
+
         {brief.contradiction && (
           <div style={{ background: "#111", padding: "24px 28px", borderLeft: "2px solid #444", marginBottom: "64px" }}>
             <p style={{ fontSize: "14px", lineHeight: 1.7, color: "#777" }}>

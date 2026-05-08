@@ -10,6 +10,7 @@ import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
 import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 import { trackExecGateView } from "@/lib/analytics/journey-client";
+import type { AssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
 
 /* ─── Design tokens ─────────────────────────────────────────────────────── */
 const GOLD = "#C9A96E";
@@ -24,6 +25,7 @@ type UserEvidence = {
   condition: string | null;
   owner: string | null;
   pattern: string | null;
+  evidenceCapture: AssessmentEvidenceCapture | null;
   completedAssessments: string[];
 };
 
@@ -33,7 +35,7 @@ type LadderItem = { key: string; label: string; completed: boolean };
 function loadUserEvidence(): UserEvidence {
   const result: UserEvidence = {
     decision: null, blocker: null, consequence: null,
-    condition: null, owner: null, pattern: null,
+    condition: null, owner: null, pattern: null, evidenceCapture: null,
     completedAssessments: [],
   };
 
@@ -67,9 +69,10 @@ function loadUserEvidence(): UserEvidence {
     if (ent) {
       const parsed = JSON.parse(ent);
       if (!result.decision) result.decision = parsed?.recentDecision || null;
-      if (!result.blocker) result.blocker = parsed?.dominantFailure || null;
+      if (!result.blocker) result.blocker = parsed?.dominantFailure || parsed?.evidenceCapture?.decisionDependency || parsed?.evidenceCapture?.failureCause || null;
       if (!result.consequence) result.consequence = parsed?.primaryReading || null;
       if (!result.condition) result.condition = parsed?.band || null;
+      if (!result.evidenceCapture && parsed?.evidenceCapture && typeof parsed.evidenceCapture === "object") result.evidenceCapture = parsed.evidenceCapture as AssessmentEvidenceCapture;
     }
 
     const purpose = sessionStorage.getItem("purpose-alignment-result");
@@ -82,7 +85,8 @@ function loadUserEvidence(): UserEvidence {
     const team = sessionStorage.getItem("team-assessment-result");
     if (team) {
       const parsed = JSON.parse(team);
-      if (!result.pattern) result.pattern = parsed?.patternTitle || null;
+      if (!result.pattern) result.pattern = parsed?.patternTitle || parsed?.evidenceCapture?.recurrenceSignal || null;
+      if (!result.evidenceCapture && parsed?.evidenceCapture && typeof parsed.evidenceCapture === "object") result.evidenceCapture = parsed.evidenceCapture as AssessmentEvidenceCapture;
     }
   } catch { /* ignore */ }
 
@@ -101,7 +105,7 @@ export default function ExecutiveReportingEntryPage() {
   const accessRequired = router.query.access === "required";
   const [evidence, setEvidence] = useState<UserEvidence>({
     decision: null, blocker: null, consequence: null,
-    condition: null, owner: null, pattern: null,
+    condition: null, owner: null, pattern: null, evidenceCapture: null,
     completedAssessments: [],
   });
   const [ladder, setLadder] = useState<LadderItem[]>([]);

@@ -54,12 +54,22 @@ import BoundaryProximityLine, {
 } from "@/components/diagnostics/results/ThresholdProximityLine";
 import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
+import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import {
+  convertPurposeAlignmentToGovernedMemory,
+} from "@/lib/alignment/evidence-loader";
 import {
   setCommercialAccessCookie,
   verifyCheckoutSessionForProduct,
 } from "@/lib/server/billing/commercial-access";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
+import {
+  extractAssessmentEvidenceCapture,
+  mergeAssessmentEvidenceCapture,
+  type AssessmentEvidenceCapture,
+} from "@/lib/product/evidence-capture-contract";
+import { buildGovernedMemoryFromEvidenceCapture } from "@/lib/product/governed-memory-presenter";
 
 type ExecutiveReportingIntakeForm = {
   // Identity (minimal)
@@ -84,6 +94,8 @@ type ExecutiveReportingIntakeForm = {
   currentConstraint: string;
   /** Consumer: pattern engine, correction history */
   priorAttemptOutcome: string;
+  /** Consumer: outcome verification, return brief anchor */
+  verificationCriteria: string;
   // Legacy fields (maintained for API compat, not shown in form)
   problemStatement: string;
   symptoms: string;
@@ -402,6 +414,7 @@ const INITIAL: ExecutiveReportingIntakeForm = {
   evidenceQuality: "",
   evidenceNotes: "",
   priorAttemptOutcome: "",
+  verificationCriteria: "",
   decisionQuestion: "",
   whatHappensIfNothingChanges: "",
 };
@@ -432,6 +445,7 @@ type LadderUpstreamContext = {
   overallGap?: number;
   fragilityStatus?: string;
   percent?: number;
+  evidenceCapture?: AssessmentEvidenceCapture;
 };
 
 function readLadderUpstreamContext(): LadderUpstreamContext | null {
@@ -478,6 +492,7 @@ function readLadderUpstreamContext(): LadderUpstreamContext | null {
         fragilityStatus:
           typeof p.fragilityStatus === "string" ? p.fragilityStatus : undefined,
         percent: typeof p.percent === "number" ? p.percent : undefined,
+        evidenceCapture: extractAssessmentEvidenceCapture(p),
       };
     }
   } catch {
@@ -1214,6 +1229,56 @@ function ResultSurface({
   const graphActions = evidenceNodes
     .filter((node: any) => node?.kind === "action")
     .slice(-4);
+  const evidenceCarryForward = mergeAssessmentEvidenceCapture(
+    extractAssessmentEvidenceCapture(canonical),
+    extractAssessmentEvidenceCapture((result as any)?.intake),
+    extractAssessmentEvidenceCapture((result as any)?.intake?.diagnosticsMeta),
+  );
+  const executiveMemory = buildGovernedMemoryFromEvidenceCapture({
+    evidence: evidenceCarryForward,
+    sourceSurface: "EXECUTIVE_REPORTING",
+    defaultStatus: {
+      decisionDependency: "UNRESOLVED",
+      failureCause: "UNRESOLVED",
+      priorAttempts: "ACTIVE",
+      verificationCriteria: "ACTIVE",
+      escalationTrigger: "UNRESOLVED",
+    },
+  }).filter((item) =>
+    ["decisionDependency", "failureCause", "priorAttempts", "verificationCriteria", "escalationTrigger"].includes(item.id),
+  ).slice(0, 3);
+
+  // ── PURPOSE ALIGNMENT EVIDENCE CARRIED FORWARD ──
+  const paBlock = (canonical as any)?.purposeAlignmentEvidence;
+  const paMemoryItems = paBlock
+    ? convertPurposeAlignmentToGovernedMemory({
+        available: true,
+        sourceSurface: "PURPOSE_ALIGNMENT",
+        assessedAt: paBlock.assessedAt ?? null,
+        schemaVersion: null,
+        profile: paBlock.profile ?? null,
+        compositeScore: paBlock.compositeScore ?? null,
+        strongestDomain: null,
+        weakestDomain: paBlock.weakestDomain ?? null,
+        competingObligation: paBlock.previouslyReportedCompetingObligation ?? null,
+        consequence: paBlock.previouslyReportedConsequence ?? null,
+        institutionalConsequence: null,
+        primaryPattern: paBlock.earlierAlignmentSignal?.split(":")[0]?.trim() ?? null,
+        patternConsequence: paBlock.earlierAlignmentSignal?.includes(":") ? paBlock.earlierAlignmentSignal.split(":").slice(1).join(":").trim() : null,
+        contradictions: [],
+        domainScores: [],
+        firstAction: paBlock.carriedForwardDirective ?? null,
+        corrections: [],
+        assessmentId: null,
+      })
+    : [];
+  const mergedMemory = [...paMemoryItems, ...executiveMemory];
+
+  const executiveMemoryImpact = executiveMemory.some((item) => item.id === "decisionDependency")
+    ? "The recommendation is being shaped around the unresolved dependency rather than assuming execution authority already exists."
+    : executiveMemory.some((item) => item.id === "failureCause" || item.id === "priorAttempts")
+      ? "The recommendation has been narrowed to avoid repeating earlier correction logic that was reported to fail or fail to hold."
+      : "The recommendation is being shaped against the declared verification standard rather than generic progress language.";
 
   const dominantDomains = summary?.dominantDomains ?? constitution?.dominantDomains ?? [];
   const failureModes = summary?.failureModes ?? constitution?.failureModes ?? [];
@@ -1323,6 +1388,17 @@ function ResultSurface({
           competitivePosition: advantagePath.competitivePosition.replace("_", " "),
           requiredAction: safeString(nextAction) || boardActions[0] || "Action required — see priority stack",
         }} />
+        {mergedMemory.length > 0 && (
+          <div style={{ marginTop: "1rem" }}>
+            <GovernanceEvidenceCarryForward
+              title="Evidence carried forward"
+              intro="This report has inherited prior governance evidence. It affects the recommendation because earlier failure logic, dependency, or proof standards remain relevant."
+              impact={executiveMemoryImpact}
+              items={mergedMemory}
+              variant="executive"
+            />
+          </div>
+        )}
         {result.boardroom?.qualified && (
           <div style={{ textAlign: "right", marginTop: "0.35rem" }}>
             <a
@@ -1604,7 +1680,16 @@ function ExecutiveReportingIntake({
     React.useState<LadderUpstreamContext | null>(null);
 
   React.useEffect(() => {
-    setUpstreamContext(readLadderUpstreamContext());
+    const nextContext = readLadderUpstreamContext();
+    setUpstreamContext(nextContext);
+    const evidence = nextContext?.evidenceCapture;
+    if (!evidence) return;
+    setForm((prev) => ({
+      ...prev,
+      currentConstraint: prev.currentConstraint || evidence.decisionDependency || evidence.failureCause || prev.currentConstraint,
+      priorAttemptOutcome: prev.priorAttemptOutcome || evidence.priorAttempts || evidence.failureCause || prev.priorAttemptOutcome,
+      verificationCriteria: prev.verificationCriteria || evidence.verificationCriteria || prev.verificationCriteria,
+    }));
   }, []);
 
   function handleChange(
@@ -1648,6 +1733,7 @@ function ExecutiveReportingIntake({
       decisionNeed: {
         decisionQuestion: form.decisionQuestion,
         whatHappensIfNothingChanges: form.whatHappensIfNothingChanges,
+        verificationCriteria: form.verificationCriteria,
       },
       diagnosticsMeta: {
         signalReadinessScore: 0,
@@ -1940,6 +2026,15 @@ function ExecutiveReportingIntake({
                     onChange={handleChange}
                     rows={3}
                     placeholder="If nothing: say nothing. If something failed: state what and why."
+                  />
+                </Field>
+                <Field label="Fourteen days from now, what observable evidence would prove this action changed the condition?">
+                  <Textarea
+                    name="verificationCriteria"
+                    value={form.verificationCriteria}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Name the specific evidence — not a feeling, not a metric. What would you point to?"
                   />
                 </Field>
               </div>

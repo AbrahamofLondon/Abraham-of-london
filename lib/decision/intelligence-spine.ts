@@ -117,6 +117,26 @@ export type IntelligenceSpine = {
     costOfDelayMonthly?: number;
     decisionOwner?: string;
     deadline?: string;
+    /** Numeric financial exposure estimate from cost-of-delay engine */
+    estimatedFinancialExposure?: number | null;
+    /** Exposure band classification */
+    exposureBand?: string | null;
+    /** Input basis for the exposure calculation */
+    exposureBasis?: {
+      revenueBand?: string | null;
+      urgencyScore?: number | null;
+      ownershipScore?: number | null;
+      clarityScore?: number | null;
+      accountabilityScore?: number | null;
+      stateScore?: number | null;
+      decisionValue?: number | null;
+    } | null;
+    /** Calculation version for audit trail */
+    calculationVersion?: string;
+    /** When the exposure was calculated */
+    generatedAt?: string;
+    /** Surface that generated the exposure */
+    sourceSurface?: string;
   };
 
   /** System flags — avoidance, sanity checks, behavioural signals */

@@ -8,6 +8,11 @@ import { loadControlRoomState } from "@/lib/product/control-room-state-loader";
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
 import { projectOversightCycleConsequence } from "@/lib/product/oversight-cycle-consequence-projection";
 import type { OversightCycle, RetainerOversightAccount } from "@/lib/product/retainer-oversight-contract";
+import { describeOversightContinuity } from "@/lib/product/governed-memory-presenter";
+import {
+  loadPurposeAlignmentEvidence,
+  buildOversightBriefPaAggregate,
+} from "@/lib/alignment/evidence-loader";
 
 function sum(values: number[]): number {
   return values.reduce((total, value) => total + value, 0);
@@ -158,7 +163,11 @@ export async function composeOversightBrief(input: {
     item.outcomeClassification === "deteriorated" || item.outcomeClassification === "invalid"
   ).length;
   const retainedCyclesReviewed = loaded.retainedEnforcement?.cyclesReviewed ?? 0;
-  const escalationRequired = signals.some((signal) => signal.severity === "CRITICAL" || signal.type === "COUNSEL_REVIEW_TRIGGERED");
+  const escalationRequired = signals.some((signal) =>
+    signal.severity === "CRITICAL"
+    || signal.type === "COUNSEL_REVIEW_TRIGGERED"
+    || signal.type === "COUNSEL_OR_BOARDROOM_REVIEW"
+  );
 
   const cycle = buildCycle({
     accountId: loaded.account.accountId,
@@ -200,6 +209,13 @@ export async function composeOversightBrief(input: {
     retainedCyclesReviewed,
   });
 
+  // ── PURPOSE ALIGNMENT EVIDENCE AGGREGATE ──
+  const paEvidence = await loadPurposeAlignmentEvidence({
+    email: input.email ?? undefined,
+    subjectId: input.userId ?? undefined,
+  });
+  const paAggregate = buildOversightBriefPaAggregate(paEvidence);
+
   const account: RetainerOversightAccount = {
     ...loaded.account,
     currentCycle: cycle,
@@ -232,7 +248,10 @@ export async function composeOversightBrief(input: {
       : undefined,
     counsel: {
       reviewsTriggered: counselCount,
-      requiredNow: signals.filter((signal) => signal.type === "COUNSEL_REVIEW_TRIGGERED" && signal.severity !== "LOW").length,
+      requiredNow: signals.filter((signal) =>
+        (signal.type === "COUNSEL_REVIEW_TRIGGERED" || signal.type === "COUNSEL_OR_BOARDROOM_REVIEW")
+        && signal.severity !== "LOW"
+      ).length,
     },
     boardroom: {
       dossiersAvailable: boardroomCount,
@@ -244,6 +263,7 @@ export async function composeOversightBrief(input: {
       unresolvedBreaches: unresolvedCommitments,
     },
     retainedEnforcement: loaded.retainedEnforcement,
+    purposeAlignment: paAggregate,
     decisionCredit: creditProfile
       ? {
           score: creditProfile.score,
@@ -449,6 +469,7 @@ export async function composeOversightBrief(input: {
   // ── Structured Actions ──
   const structuredActions: NonNullable<OversightBrief["structuredActions"]> = [];
   for (const signal of signals) {
+    const continuity = describeOversightContinuity(signal.type);
     if (signal.type === "COMMITMENT_UNVERIFIED" && signal.caseId) {
       structuredActions.push({
         id: `act_verify_${signal.caseId}`,
@@ -457,6 +478,8 @@ export async function composeOversightBrief(input: {
         action: `Confirm whether the commitment for "${signal.title}" has been executed. If not, classify the blocker as authority, resource, or avoidance before the next cycle.`,
         evidenceBasis: signal.explanation,
         severity: signal.severity === "CRITICAL" ? "CRITICAL" : signal.severity === "HIGH" ? "HIGH" : "MEDIUM",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
       });
     }
     if (signal.type === "COUNSEL_REVIEW_TRIGGERED" && signal.caseId) {
@@ -468,6 +491,8 @@ export async function composeOversightBrief(input: {
         evidenceBasis: signal.explanation,
         ownerRole: "COUNSEL",
         severity: "HIGH",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
       });
     }
     if (signal.type === "BOARDROOM_THRESHOLD_MET" && signal.caseId) {
@@ -479,6 +504,8 @@ export async function composeOversightBrief(input: {
         evidenceBasis: signal.explanation,
         ownerRole: "BOARD",
         severity: "HIGH",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
       });
     }
     if (signal.type === "PATTERN_RECURRED" && signal.caseId) {
@@ -489,6 +516,57 @@ export async function composeOversightBrief(input: {
         action: `Pattern recurrence detected. Investigate whether the structural root has been addressed or whether intervention is treating symptoms.`,
         evidenceBasis: signal.explanation,
         severity: "MEDIUM",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
+      });
+    }
+    if (signal.type === "INTERVENTION_FAILURE_RISK" && signal.caseId) {
+      structuredActions.push({
+        id: `act_failure_logic_${signal.caseId}`,
+        caseId: signal.caseId,
+        actionType: "REVIEW_LOSS",
+        action: `Review whether the current intervention path is repeating earlier reported failure logic before further execution is committed.`,
+        evidenceBasis: signal.explanation,
+        severity: signal.severity === "HIGH" ? "HIGH" : "MEDIUM",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
+      });
+    }
+    if (signal.type === "DEPENDENCY_RISK" && signal.caseId) {
+      structuredActions.push({
+        id: `act_dependency_${signal.caseId}`,
+        caseId: signal.caseId,
+        actionType: "RESOLVE_DEPENDENCY",
+        action: `Resolve the blocking dependency before treating this case as execution-ready.`,
+        evidenceBasis: signal.explanation,
+        severity: signal.severity === "CRITICAL" ? "CRITICAL" : signal.severity === "HIGH" ? "HIGH" : "MEDIUM",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
+      });
+    }
+    if (signal.type === "EXECUTION_DRIFT" && signal.caseId) {
+      structuredActions.push({
+        id: `act_drift_${signal.caseId}`,
+        caseId: signal.caseId,
+        actionType: "VERIFY_COMMITMENT",
+        action: `Verify whether the stop condition has actually ceased before current execution is treated as holding.`,
+        evidenceBasis: signal.explanation,
+        severity: signal.severity === "HIGH" ? "HIGH" : "MEDIUM",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
+      });
+    }
+    if (signal.type === "COUNSEL_OR_BOARDROOM_REVIEW" && signal.caseId) {
+      structuredActions.push({
+        id: `act_escalation_threshold_${signal.caseId}`,
+        caseId: signal.caseId,
+        actionType: "ESCALATE_COUNSEL",
+        action: `Review whether the captured escalation threshold now requires counsel or board-level handling.`,
+        evidenceBasis: signal.explanation,
+        ownerRole: "COUNSEL",
+        severity: signal.severity === "HIGH" ? "HIGH" : "MEDIUM",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
       });
     }
   }
@@ -499,6 +577,8 @@ export async function composeOversightBrief(input: {
       action: `Irreversibility index is ${brief.irreversibility.score}/100. Prioritise the highest-weight driver before the situation becomes unrecoverable.`,
       evidenceBasis: brief.irreversibility.explanation,
       severity: brief.irreversibility.score >= 80 ? "CRITICAL" : "HIGH",
+      continuitySourceLabel: "Captured in oversight consequence analysis",
+      continuityConfidenceLabel: "CAPTURED",
     });
   }
   if (structuredActions.length > 0) {

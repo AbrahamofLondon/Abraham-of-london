@@ -13,6 +13,15 @@ import type { AggregationSafety, MultiUserCampaignSummary } from "@/lib/product/
 import { evaluateAggregationSafety } from "@/lib/product/multi-user-privacy";
 import { loadOrganisationDivergenceSummary } from "@/lib/product/organisation-divergence-summary";
 import type { CollisionSummary, CollisionSummaryType } from "@/lib/product/multi-user-collision-summary";
+import {
+  extractAssessmentEvidenceCapture,
+  mergeAssessmentEvidenceCapture,
+} from "@/lib/product/evidence-capture-contract";
+import { buildGovernanceEvidenceCoverage } from "@/lib/product/governed-memory-presenter";
+import {
+  loadPurposeAlignmentEvidence,
+  buildOversightBriefPaAggregate,
+} from "@/lib/alignment/evidence-loader";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -169,6 +178,44 @@ export async function loadControlRoomState(input: {
     operatorNotes: `${item.affectedDomain}. ${item.recommendedNextAction}`,
   }));
 
+  const journeys = await prisma.diagnosticJourney.findMany({
+    where: {
+      OR: [
+        { organisationKey: org.slug },
+        { organisation: org.name },
+      ],
+    },
+    select: {
+      stages: {
+        select: { payload: true },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 50,
+  }).catch(() => []);
+
+  const evidenceCases = journeys.map((journey) => mergeAssessmentEvidenceCapture(
+    ...journey.stages.map((stage) => extractAssessmentEvidenceCapture(stage.payload)),
+  ));
+  const canShowEvidenceAggregation = aggregationSafety === "SAFE" && evidenceCases.length >= 3;
+  const governanceEvidenceCoverage = buildGovernanceEvidenceCoverage({
+    cases: evidenceCases.map((item) => ({
+      evidenceCapture: item,
+      unresolvedCommitments: 0,
+    })),
+    aggregationSafe: canShowEvidenceAggregation,
+    suppressionReason: aggregationSafety !== "SAFE"
+      ? `Aggregation withheld: ${aggregationSafety}.`
+      : "Aggregation withheld: insufficient safe case count.",
+  });
+
+  // ── PURPOSE ALIGNMENT EVIDENCE AGGREGATE ──
+  const paEvidence = await loadPurposeAlignmentEvidence({
+    email: input.email ?? undefined,
+    subjectId: input.userId ?? undefined,
+  });
+  const paAggregate = buildOversightBriefPaAggregate(paEvidence);
+
   // ── 10. Assemble state ──
   const state: ControlRoomState = {
     organisationId: org.id,
@@ -179,10 +226,12 @@ export async function loadControlRoomState(input: {
       responseCoverage: totalParticipants,
       evidenceTier,
       aggregationSafety,
+      governanceEvidenceCoverage,
     },
     campaigns: campaignSummaries,
     divergence,
     admissions,
+    purposeAlignment: paAggregate,
     nextRequiredAction,
     privacyNotice: "Aggregated data only. Raw respondent answers are not visible. Anonymous campaigns remain anonymous. Small samples are suppressed.",
   };

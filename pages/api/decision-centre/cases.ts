@@ -33,6 +33,12 @@ import { calculateCostOfInactionClock } from "@/lib/product/cost-of-inaction-clo
 import { deriveOversightCadenceState } from "@/lib/product/oversight-cadence-engine";
 import { loadPreviousArchivedOversightCycle } from "@/lib/product/oversight-cycle-archive";
 import { loadBoardroomArchiveSummary } from "@/lib/product/boardroom-archive";
+import { extractAssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
+import {
+  buildGovernedMemoryFromEvidenceStages,
+  buildPatternRecurrenceMemory,
+  buildVerificationBoundaryMemory,
+} from "@/lib/product/governed-memory-presenter";
 
 function parseMoney(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -95,7 +101,7 @@ function buildAdmissionStatus(
     status: "RESTRICTED",
     reasons: [result.reason],
     repairActions: [result.reason],
-    returnPath: "/diagnostics",
+      returnPath: "/diagnostics",
   };
 }
 
@@ -474,8 +480,63 @@ export default async function handler(
         historyCount: 0,
       },
       returnBriefs: [],
+      governedMemory: null,
       updatedAt: livingCase.createdAt || new Date().toISOString(),
     };
+
+    const journey = await prisma.diagnosticJourney.findUnique({
+      where: { journeyKey: livingCase.caseId },
+      include: {
+        stages: {
+          select: { stage: true, createdAt: true, payload: true },
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    }).catch(() => null);
+
+    const outcomeWhere = [
+      ...(journey?.id ? [{ baselineJourneyId: journey.id }, { followUpJourneyId: journey.id }] : []),
+      ...(latestExecutionRecord?.sessionId ? [{ sessionId: latestExecutionRecord.sessionId }] : []),
+    ];
+    const latestOutcome = outcomeWhere.length > 0
+      ? await prisma.outcomeVerificationRecord.findFirst({
+          where: { OR: outcomeWhere },
+          orderBy: { createdAt: "desc" },
+          select: { outcomeClassification: true, createdAt: true },
+        }).catch(() => null)
+      : null;
+    caseCard.outcomeStatus = latestOutcome?.outcomeClassification || null;
+
+    if (journey?.stages?.length) {
+      const governedMemory = [
+        ...buildGovernedMemoryFromEvidenceStages(
+          journey.stages.map((stage) => ({
+            stage: stage.stage,
+            createdAt: stage.createdAt,
+            payload: stage.payload,
+          })),
+          { relatedCaseId: livingCase.caseId },
+        ),
+        ...buildPatternRecurrenceMemory({
+          caseId: livingCase.caseId,
+          sourceSurface: "DECISION_CENTRE",
+          capturedAt: caseCard.updatedAt,
+          status: patternRecurrence?.status ?? null,
+          priorCount: patternRecurrence?.priorCount,
+          explanation: patternRecurrence?.explanation ?? null,
+        }),
+        ...buildVerificationBoundaryMemory({
+          caseId: livingCase.caseId,
+          verificationCriteria: journey.stages
+            .map((stage) => extractAssessmentEvidenceCapture(stage.payload).verificationCriteria ?? null)
+            .filter((value): value is string => Boolean(value))
+            .at(-1) ?? null,
+          outcomeStatus: caseCard.outcomeStatus,
+          capturedAt: latestOutcome?.createdAt ?? caseCard.updatedAt,
+        }),
+      ];
+      caseCard.governedMemory = governedMemory.length ? governedMemory : null;
+    }
 
     const retainerReadiness = deriveRetainerReadiness({
       livingCase,

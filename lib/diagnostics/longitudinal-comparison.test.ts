@@ -45,6 +45,8 @@ const baseline = {
         hasPriorAttempt: false,
         hasDelayCost: false,
         hasStakeholder: true,
+        hasCompetingObligation: false,
+        hasInstitutionalConsequence: false,
         extractedAt: "2026-01-01T00:00:00.000Z",
       },
     },

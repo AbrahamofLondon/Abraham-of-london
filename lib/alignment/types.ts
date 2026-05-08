@@ -40,6 +40,10 @@ export type PurposeAlignmentContext = {
     avoidedDecision?: string | null;
     lastSevenDays?: string | null;
     dissenter?: string | null;
+    /** Properly-named: what becomes worse if unresolved */
+    consequence?: string | null;
+    /** Properly-named: what pulls against the decision */
+    competingObligation?: string | null;
   } | null;
 };
 

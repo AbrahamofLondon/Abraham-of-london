@@ -19,10 +19,14 @@ interface AssessmentContext {
 }
 
 const TEAM_DOMAIN_LABELS: Record<string, string> = {
-  direction_priority: "Direction and priority are clear in day-to-day work.",
-  execution_integrity: "Execution reality matches what leadership believes is happening.",
-  trust_communication: "Trust and communication are strong enough for honest escalation.",
-  authority_escalation: "Authority and escalation paths are clear when decisions get stuck.",
+  direction_priority: "I can name the team's top priority right now without checking.",
+  execution_integrity: "This team has delivered at least one visible outcome this cycle that proves movement.",
+  trust_communication: "I can say something uncomfortable here without being punished for it later.",
+  authority_escalation: "When work gets blocked, it is clear who can make the decision.",
+  priority_alignment: "If you asked five people here what matters most, their answers would mostly match.",
+  consequence_awareness: "People here know what will happen if the current issue is not resolved.",
+  leadership_consistency: "Leadership decisions and day-to-day priorities usually point in the same direction.",
+  disagreement_quality: "The last serious disagreement produced a better decision, not a political wound.",
 };
 
 export default function EnterpriseAssessmentPage({ params }: { params: { token: string } }) {
@@ -208,11 +212,11 @@ export default function EnterpriseAssessmentPage({ params }: { params: { token: 
         ) : (
           <section className="space-y-12 mb-20">
             {[
-            { id: "q1", label: "Operational transparency is maintained across all levels." },
-            { id: "q2", label: "Strategic objectives are synchronized with team execution." },
-            { id: "q3", label: "Resource allocation is prioritized by institutional impact." },
-            { id: "q4", label: "Decision-making follows established governance processes." },
-            { id: "q5", label: "Data integrity is verified before strategic commitments." }
+            { id: "q1", label: "I know what the organisation's top priority is without having to ask." },
+            { id: "q2", label: "What leadership says matters and what actually gets resourced are usually the same thing." },
+            { id: "q3", label: "When a decision gets stuck, I know who can unstick it." },
+            { id: "q4", label: "I would raise an uncomfortable concern if I believed it mattered." },
+            { id: "q5", label: "The last major change here improved the work, not just the structure around the work." }
             ].map((q, idx) => (
               <div key={q.id} className="group relative border-l border-white/5 pl-8 py-2 hover:border-[#8A6A2F]/50 transition-colors">
                 <span className="absolute left-[-1px] top-0 h-4 w-[1px] bg-[#8A6A2F]" />

@@ -2,6 +2,7 @@ import type { CreditProfile } from "@/lib/decision-ledger/ledger-service";
 import type { OversightAccountCase } from "@/lib/product/oversight-account-loader";
 import type { ControlRoomState } from "@/lib/product/control-room-contract";
 import type { OversightSignal } from "@/lib/product/retainer-oversight-contract";
+import { summarizeAssessmentEvidenceText } from "@/lib/product/evidence-capture-contract";
 
 function severityFromCost(amount: number): OversightSignal["severity"] {
   if (amount >= 50000) return "CRITICAL";
@@ -70,6 +71,71 @@ export function buildOversightSignals(input: {
         title: "Pattern recurrence detected",
         explanation: item.recurrence.explanation,
         recommendedAction: "Review prior case history and confirm whether the same structural contradiction has returned.",
+        createdAt,
+      });
+    }
+
+    if (item.evidenceCapture?.priorAttempts && item.evidenceCapture?.recurrenceSignal) {
+      signals.push({
+        id: `${item.caseId}:pattern-history`,
+        type: "PATTERN_RECURRED",
+        caseId: item.caseId,
+        severity: "MEDIUM",
+        title: "Pattern has prior failed history",
+        explanation: `Pattern recurrence is being tracked because earlier governance evidence reported prior failed attempts and the same failure pattern returning.`,
+        recommendedAction: "Do not repeat the last intervention without naming what has changed structurally.",
+        createdAt,
+      });
+    }
+
+    if (item.evidenceCapture?.failureCause && ((item.latestExecutionRecord && (item.unresolvedCommitments ?? 0) > 0) || item.outcomeClassification === "deteriorated")) {
+      signals.push({
+        id: `${item.caseId}:failure-cause`,
+        type: "INTERVENTION_FAILURE_RISK",
+        caseId: item.caseId,
+        severity: item.outcomeClassification === "deteriorated" ? "HIGH" : "MEDIUM",
+        title: "Earlier failure logic may still be unresolved",
+        explanation: `${item.title} still carries a reported prior failure cause: ${summarizeAssessmentEvidenceText(item.evidenceCapture.failureCause, 180)}.`,
+        recommendedAction: "Confirm the current intervention is materially different from the earlier failure path.",
+        createdAt,
+      });
+    }
+
+    if (item.evidenceCapture?.decisionDependency && (item.unresolvedCommitments ?? 0) > 0) {
+      signals.push({
+        id: `${item.caseId}:dependency`,
+        type: "DEPENDENCY_RISK",
+        caseId: item.caseId,
+        severity: "MEDIUM",
+        title: "Decision dependency remains unresolved",
+        explanation: `${item.title} still depends on a reported unresolved dependency: ${summarizeAssessmentEvidenceText(item.evidenceCapture.decisionDependency, 180)}.`,
+        recommendedAction: "Resolve the blocked dependency before treating the case as execution-ready.",
+        createdAt,
+      });
+    }
+
+    if (item.evidenceCapture?.stopSignal && ((item.unresolvedCommitments ?? 0) > 0 || item.outcomeClassification === "deteriorated")) {
+      signals.push({
+        id: `${item.caseId}:stop`,
+        type: "EXECUTION_DRIFT",
+        caseId: item.caseId,
+        severity: "MEDIUM",
+        title: "Execution drift against stop condition",
+        explanation: `${item.title} named something that had to stop, but current case evidence does not show that condition has cleared.`,
+        recommendedAction: "Verify whether the stop condition has actually ceased before advancing the case narrative.",
+        createdAt,
+      });
+    }
+
+    if (item.evidenceCapture?.escalationTrigger && (item.counselTriggered || item.boardroomQualified)) {
+      signals.push({
+        id: `${item.caseId}:escalation`,
+        type: "COUNSEL_OR_BOARDROOM_REVIEW",
+        caseId: item.caseId,
+        severity: item.boardroomQualified ? "HIGH" : "MEDIUM",
+        title: "Captured escalation threshold may now be engaged",
+        explanation: `${item.title} defined a reported escalation trigger and the current case state now meets review territory.`,
+        recommendedAction: "Review whether counsel or boardroom handling is now required before routine execution continues.",
         createdAt,
       });
     }

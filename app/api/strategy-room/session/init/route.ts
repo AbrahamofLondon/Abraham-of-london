@@ -20,6 +20,10 @@ import {
 } from "@/lib/server/security/app-route-guards";
 import { authorizeStrategyRoomEntry } from "@/lib/server/strategy-room/access.server";
 import { writeSecurityAudit } from "@/lib/security/audit-log";
+import {
+  loadPurposeAlignmentEvidence,
+  buildStrategyRoomPaMemory,
+} from "@/lib/alignment/evidence-loader";
 
 const intakeSchema = z.object({
   fullName: z.string().trim().min(1).max(160),
@@ -36,6 +40,12 @@ const intakeSchema = z.object({
   currentConstraint: z.string().trim().max(4000).optional().nullable(),
   marketExposure: z.string().trim().max(80).optional().nullable(),
   boardInvolved: z.string().trim().max(80).optional().nullable(),
+  consequenceEvidence: z.object({
+    financial: z.string().trim().max(2000).nullable().optional(),
+    reputational: z.string().trim().max(2000).nullable().optional(),
+    institutional: z.string().trim().max(2000).nullable().optional(),
+    timeline: z.string().trim().max(2000).nullable().optional(),
+  }).optional().nullable(),
 }).strict();
 
 const requestSchema = z.object({
@@ -303,12 +313,32 @@ export async function POST(request: NextRequest) {
     });
 
     stage = "persist_strategy_room_session";
+    const consequenceEv = intake.consequenceEvidence;
+
+    // ── PURPOSE ALIGNMENT EVIDENCE CARRIED FORWARD ──
+    const paEvidence = await loadPurposeAlignmentEvidence({
+      email: intake.email ?? undefined,
+      subjectId: authz.subjectId ?? undefined,
+    });
+    const paMemory = buildStrategyRoomPaMemory(paEvidence);
+
+    const enrichedSnapshot = {
+      ...canonicalSnapshot,
+      purposeAlignmentMemory: paMemory,
+      evidenceCapture: {
+        ...(typeof (canonicalSnapshot as Record<string, unknown>).evidenceCapture === "object" ? (canonicalSnapshot as Record<string, unknown>).evidenceCapture as Record<string, unknown> : {}),
+        ...(consequenceEv?.financial ? { consequenceFinancial: consequenceEv.financial } : {}),
+        ...(consequenceEv?.reputational ? { consequenceReputational: consequenceEv.reputational } : {}),
+        ...(consequenceEv?.institutional ? { consequenceInstitutional: consequenceEv.institutional } : {}),
+        ...(consequenceEv?.timeline ? { consequenceTimeline: consequenceEv.timeline } : {}),
+      },
+    };
     await createStrategyRoomSession({
       sessionKey,
       status: "active",
       source: "strategy-room",
       intake: toJsonString(intake),
-      canonicalSnapshot: toJsonString(canonicalSnapshot),
+      canonicalSnapshot: toJsonString(enrichedSnapshot),
       route: assembled.constitution.route,
       readinessTier: assembled.constitution.readinessTier,
       authorityType: assembled.constitution.authorityType,
