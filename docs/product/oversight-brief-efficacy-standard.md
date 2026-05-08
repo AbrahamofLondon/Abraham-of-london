@@ -1,7 +1,7 @@
 # Oversight Brief Efficacy Standard
 
 **Date:** 2026-05-08
-**Rule:** No brief may be delivered unless it reaches at least STRONG or is manually approved with operator justification.
+**Rule:** No brief may be delivered unless it reaches at least STRONG, is client-safe, and is explicitly approved through a governed review decision.
 
 ---
 
@@ -9,8 +9,8 @@
 
 | Grade | Score | Auto-deliver | Operator review |
 |-------|-------|-------------|----------------|
-| FORMIDABLE | 75+ with 2+ actions, 4+ signals | YES | NO |
-| STRONG | 60+ with 1+ action | YES | NO |
+| FORMIDABLE | 75+ with 2+ actions, 4+ signals, and real continuity movement | NO | REQUIRED |
+| STRONG | 60+ with 1+ action and clean client-safe output | NO | REQUIRED |
 | ADEQUATE | 40+ | NO | REQUIRED |
 | WEAK | <40 | NO | REQUIRED |
 | WITHHOLD | Any score with withhold reason | NO | REQUIRED |
@@ -33,7 +33,7 @@ Cases must be named with specific decisions and actions. Generic language scores
 
 ### Retainer-grade threshold
 
-A brief without historical comparison cannot be FORMIDABLE unless manually justified.
+A brief without historical comparison cannot be FORMIDABLE unless a first-cycle exception is manually recorded with an operator note.
 
 FORMIDABLE requires at least four of:
 
@@ -54,6 +54,8 @@ STRONG requires:
 - at least one consequence
 - at least one evidence basis
 - at least one continuity or verification marker
+- no unresolved sensitive suppressions
+- enough live signals to justify delivery
 
 ### Consequence Clarity
 Must name cost, exposure, breaches, counsel triggers, or risk. Vague consequence scores low.
@@ -65,7 +67,7 @@ Score high when comparing this cycle against prior state. First-cycle briefs inh
 Score high when boardroom/counsel/retainer-level signals are present. Operational noise alone scores low.
 
 ### Suppression Safety
-**WITHHOLD if raw/anonymous/identity-sensitive data detected** in client-safe version. Correct suppressions score 70. No suppressions needed scores 100.
+**WITHHOLD if unresolved sensitive content remains** in client-safe version. Correct suppressions score 70. No suppressions needed scores 100.
 
 ### Retainer Value Proof
 Must clearly show what the client would have missed without oversight. Score high when cost, breaches, boardroom threshold, counsel trigger, or credit movement are present.
@@ -93,4 +95,5 @@ A brief is not retainer-grade unless it is:
 - reviewed
 - scored
 - client-safe
+- approved, revised, withheld, or escalated through a recorded review decision
 - tied to the next governed cycle

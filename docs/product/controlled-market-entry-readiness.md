@@ -106,12 +106,14 @@ No primary entry point has GENERIC RISK status. See `docs/product/bespoke-surfac
 - organisation oversight scope is denied by default and checked through `evaluateOrganisationAccess()`
 - missing continuity is surfaced as warnings rather than fabricated account intelligence
 - client-safe brief can now be derived through a suppression layer with explicit suppressions and warnings
+- operator review decisions can now be recorded against the cycle with delivery intent and next-cycle intent
+- internal review bench now exists at `pages/admin/oversight-review.tsx`
 
 **Remaining blockers before first retainer sale:**
-- operator monthly review cadence is not yet formalised in product workflow
 - organisation divergence remains partial until Control Room state is richer
 - sponsor-safe client preview surface does not yet exist
-- delivery recording and next-cycle scheduling are not yet persisted
+- delivery execution and scheduler-backed next-cycle automation do not yet exist
+- counsel escalation handoff is not yet persisted as a full workflow
 
 **Retainer grade threshold:**
 - first manual retainer is possible only when the internal review cycle can generate and govern a client-safe brief from live data

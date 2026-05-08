@@ -177,6 +177,18 @@ The platform can now assemble an internal oversight brief from:
 
 This is not yet a public client surface. It is an internal monthly oversight artifact.
 
+The system can now:
+
+- generate an internal oversight brief
+- produce a client-safe version
+- score efficacy
+- apply suppressions
+- recommend an operator decision
+- record an operator decision
+- persist review-cycle events
+- prepare delivery state without claiming delivery
+- derive next-cycle intent without fake scheduling
+
 First retainer readiness:
 
 - possible only after the Oversight Brief Composer returns a real brief from live data
@@ -185,9 +197,9 @@ First retainer readiness:
 
 ## What remains before first retainer
 
-- internal operator preview and review cadence
+- client-safe delivery surface beyond the internal review bench
 - clearer organisation-level divergence coverage
-- monthly workflow discipline for brief review and action logging
+- delivery execution and real cycle scheduling beyond recorded intent
 
 ## What remains before £15k+
 
@@ -197,6 +209,7 @@ First retainer readiness:
 - recurring verification cadence
 - counsel review workflow
 - sponsor-safe preview surface
+- persisted counsel review handoff workflow
 
 ## What remains before £50k
 

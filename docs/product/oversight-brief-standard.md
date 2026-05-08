@@ -56,21 +56,28 @@ Oversight delivery follows:
 - Generate
 - Review
 - Suppress or redact
-- Approve
-- Deliver
+- Approve or withhold
+- Prepare delivery state
 - Record
-- Schedule next cycle
+- Record next-cycle intent
 
 Client-safe and internal briefs may differ. Suppressions must be explicit and logged.
 
 A brief is not retainer-grade unless it is reviewed, scored, client-safe, and tied to the next governed cycle.
+
+Generation is mechanical.
+Review is institutional.
+Delivery is earned.
+
+A client-safe brief is not a watered-down internal brief.
+It is the version that preserves consequence, action, and accountability while suppressing what the client is not entitled or safe to see.
 
 ## Readiness standard
 
 - First retainer readiness:
   possible only once the live Oversight Brief Composer can assemble a brief from real journeys, execution records, outcomes, recurrence, credit data, and retained enforcement cycles.
 - Client-safe retainer delivery:
-  requires a working suppression layer and internal review cycle.
+  requires a working suppression layer, a recorded review decision, and client delivery state prepared without fabricated delivery.
 - £15k+ readiness:
   requires Control Room UI, organisation access enforcement, recurring verification cadence, and counsel review workflow.
 - £50k readiness:

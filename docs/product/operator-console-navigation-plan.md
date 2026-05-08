@@ -22,6 +22,7 @@
 | **Access & Revocation** | Key management, revocation | `access-keys.tsx` |
 | **System Health** | Redis, foundation risk, assets | `redis.tsx`, `enterprise-foundation.tsx`, `assets.tsx` |
 | **Audit Logs** | Audit stream, intelligence | `intelligence.tsx`, `command-wall.tsx` |
+| **Oversight Review** | Governed retainer brief review, suppressions, decisions, delivery state | `oversight-review.tsx` |
 
 ---
 
@@ -45,6 +46,7 @@
 | `access-revoke.tsx` | MERGE into access-keys | Access & Revocation | NONE — already redirects |
 | `pdf-dashboard.tsx` | KEEP | ER Queue | LOW |
 | `pdf-status.tsx` | MERGE into pdf-dashboard later | ER Queue | LOW |
+| `oversight-review.tsx` | KEEP | Oversight Review | LOW |
 | `redis.tsx` | KEEP | System Health | LOW |
 | `login.tsx` | KEEP | Auth | LOW |
 
@@ -95,3 +97,19 @@ The current navigation plan needs a small extension for the multi-user foundatio
 - Operator console may inspect campaign safety state before any sponsor-facing Control Room is exposed.
 - Control Room readiness is a governance section, not a UI launch flag hidden in code.
 - Respondent privacy posture must be visible to operators before divergence or reporting actions are commissioned.
+
+## Retainer Review Bench
+
+The operator console now also needs a governed review bench for retainer oversight.
+
+This bench is not a dashboard. It exists to let operators:
+
+- inspect the internal brief
+- inspect the client-safe brief
+- inspect the suppression ledger
+- review efficacy and recommendation
+- record approve, revise, withhold, counsel, boardroom, or wait decisions
+- inspect delivery state
+- inspect next-cycle intent
+
+This surface must remain internal-only until a sponsor-safe delivery surface exists.

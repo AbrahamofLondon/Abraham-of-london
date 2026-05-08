@@ -13,6 +13,7 @@ import {
   BarChart3,
   Building2,
   Crown,
+  ClipboardCheck,
   FileCheck,
   FileText,
   Gauge,
@@ -204,6 +205,7 @@ const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
             <ModuleLink href="/admin/campaigns" title="Campaigns" description="Campaign management, participant tracking, and report delivery." icon={Megaphone} color="text-violet-400" bg="bg-violet-500/10" />
             <ModuleLink href="/admin/organisations" title="Organisations" description="Organisation management, dashboards, and linked campaigns." icon={Building2} color="text-teal-400" bg="bg-teal-500/10" />
             <ModuleLink href="/admin/pdf-dashboard" title="PDF & Reports" description="PDF intelligence registry, report status, and documents." icon={FileText} color="text-pink-400" bg="bg-pink-500/10" />
+            <ModuleLink href="/admin/oversight-review" title="Oversight Review" description="Governed review bench for internal briefs, client-safe output, suppressions, and operator decisions." icon={ClipboardCheck} color="text-orange-400" bg="bg-orange-500/10" />
           </div>
         </div>
 
