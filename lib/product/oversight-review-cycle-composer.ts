@@ -8,10 +8,17 @@ import {
   type ClientSafeOversightBrief,
   type OversightSuppression,
 } from "@/lib/product/client-safe-oversight-brief";
+import { listCounselWorkflowActions } from "@/lib/product/counsel-review-workflow";
+import type { CounselReviewAction } from "@/lib/product/counsel-review-workflow-contract";
+import {
+  loadOversightCycleArchive,
+  loadPreviousArchivedOversightCycle,
+  persistOversightCycleArchive,
+} from "@/lib/product/oversight-cycle-archive";
 import { scoreOversightBriefEfficacy } from "@/lib/product/oversight-brief-efficacy-scorer";
 import type { OversightBriefEfficacyScore } from "@/lib/product/oversight-brief-efficacy-contract";
 import { composeOversightBrief } from "@/lib/product/oversight-brief-composer";
-import type { OversightDeliveryIntent } from "@/lib/product/oversight-delivery-contract";
+import type { OversightDeliveryIntent, OversightDeliveryStatus } from "@/lib/product/oversight-delivery-contract";
 import { deriveNextOversightCycleIntent } from "@/lib/product/oversight-next-cycle";
 import { evaluateOrganisationAccess } from "@/lib/product/organisation-access";
 import type { OrganisationAccessDecision } from "@/lib/product/organisation-access-contract";
@@ -20,13 +27,13 @@ import {
   compareOversightCycles,
   type OversightCycleComparison,
 } from "@/lib/product/oversight-cycle-comparison";
-import type { OversightCycleLedgerEvent, OversightCycleLedgerEventType } from "@/lib/product/oversight-cycle-ledger-contract";
-import {
-  persistOversightReviewDecision,
-} from "@/lib/product/oversight-review-decision-ledger";
-import {
-  recommendOversightReviewDecision,
-} from "@/lib/product/oversight-review-decision-engine";
+import type {
+  OversightCycleAudience,
+  OversightCycleLedgerEvent,
+  OversightCycleLedgerEventType,
+} from "@/lib/product/oversight-cycle-ledger-contract";
+import { persistOversightReviewDecision } from "@/lib/product/oversight-review-decision-ledger";
+import { recommendOversightReviewDecision } from "@/lib/product/oversight-review-decision-engine";
 import type {
   OversightReviewDecision,
   OversightReviewDecisionReason,
@@ -60,11 +67,14 @@ function mapLedgerActionType(eventType: OversightCycleLedgerEventType): "CREATED
     case "BRIEF_GENERATED":
     case "CLIENT_SAFE_VERSION_CREATED":
     case "NEXT_CYCLE_SCHEDULED":
+    case "CYCLE_ARCHIVED":
+    case "CLIENT_VIEW_READY":
       return "CREATED";
     case "APPROVED_FOR_DELIVERY":
     case "DELIVERED":
       return "RESOLVED";
     case "WITHHELD":
+    case "DELIVERY_FAILED":
       return "BLOCKED";
     default:
       return "UPDATED";
@@ -139,46 +149,6 @@ async function listOversightCycleLedgerEvents(input: {
     .filter((item) => item.cycleId === input.cycleId);
 }
 
-async function loadPreviousOversightBrief(input: {
-  accountId?: string;
-  currentCycleId: string;
-  currentPeriodStart: string;
-}): Promise<OversightBrief | undefined> {
-  if (!input.accountId) return undefined;
-
-  const rows = await prisma.auditEvent.findMany({
-    where: {
-      objectType: "OVERSIGHT_CYCLE",
-      objectId: input.accountId,
-    },
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    select: {
-      createdAt: true,
-      metadata: true,
-    },
-  });
-
-  const candidates = rows
-    .map((row) => {
-      const metadata = asRecord(row.metadata);
-      const eventType = typeof metadata.eventType === "string" ? metadata.eventType : null;
-      const cycleId = typeof metadata.cycleId === "string" ? metadata.cycleId : null;
-      const briefSnapshot = asRecord(metadata.briefSnapshot);
-      const periodStart = typeof briefSnapshot.periodStart === "string" ? briefSnapshot.periodStart : null;
-      if (eventType !== "BRIEF_GENERATED" || !cycleId || cycleId === input.currentCycleId || !periodStart) return null;
-      if (periodStart >= input.currentPeriodStart) return null;
-      return {
-        createdAt: row.createdAt,
-        brief: briefSnapshot as unknown as OversightBrief,
-      };
-    })
-    .filter((item): item is { createdAt: Date; brief: OversightBrief } => Boolean(item))
-    .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime());
-
-  return candidates[0]?.brief;
-}
-
 async function persistCycleLedgerEvent(input: {
   accountId?: string;
   cycleId: string;
@@ -236,14 +206,14 @@ async function persistCycleLedgerEvent(input: {
 
 function deriveBaseStatus(input: {
   internalBrief?: OversightBrief;
-  clientSafe?: ClientSafeOversightBrief | null;
+  sponsorBrief?: ClientSafeOversightBrief | null;
   access?: OrganisationAccessDecision;
   warnings: string[];
   suppressions: OversightSuppression[];
 }): OversightReviewCycle["status"] {
   if (!input.internalBrief) return "WITHHELD";
   if (input.access && !input.access.allowed) return "WITHHELD";
-  if (!input.clientSafe?.brief) return "WITHHELD";
+  if (!input.sponsorBrief?.brief) return "WITHHELD";
   if (input.warnings.length > 0 || input.suppressions.length > 0) return "OPERATOR_REVIEW_REQUIRED";
   return "CLIENT_SAFE_REVIEW_READY";
 }
@@ -325,21 +295,13 @@ function buildDeliveryIntent(input: {
   recommendedDecision: OversightReviewDecision;
   efficacy?: OversightBriefEfficacyScore;
   deliveryAllowed: boolean;
+  stableUrl?: string | null;
+  suppressions: OversightSuppression[];
 }): OversightDeliveryIntent {
   const decision = input.decision ?? input.recommendedDecision;
+  const blockingSuppression = unresolvedSensitiveSuppression(input.suppressions);
 
-  if (decision === "ESCALATE_TO_COUNSEL" || decision === "ESCALATE_TO_BOARDROOM") {
-    return {
-      state: "ESCALATED",
-      deliveryAllowed: false,
-      deliveryMethod: "INTERNAL_PREVIEW",
-      reason: "Escalation is required before any client delivery state can be prepared.",
-      nextStep: decision === "ESCALATE_TO_BOARDROOM" ? "Prepare boardroom escalation path." : "Prepare counsel review handoff.",
-      scheduledFor: null,
-    };
-  }
-
-  if (decision === "WITHHOLD_FROM_CLIENT") {
+  if (decision === "WITHHOLD_FROM_CLIENT" || input.efficacy?.grade === "WITHHOLD") {
     return {
       state: "WITHHELD",
       deliveryAllowed: false,
@@ -350,24 +312,44 @@ function buildDeliveryIntent(input: {
     };
   }
 
+  if (blockingSuppression) {
+    return {
+      state: "NOT_READY",
+      deliveryAllowed: false,
+      deliveryMethod: "INTERNAL_PREVIEW",
+      reason: "Unresolved sensitive suppression risk prevents client delivery.",
+      nextStep: "Resolve the suppression risk before moving the brief to client view.",
+      scheduledFor: null,
+    };
+  }
+
+  if (decision === "ESCALATE_TO_COUNSEL" || decision === "ESCALATE_TO_BOARDROOM") {
+    return {
+      state: "OPERATOR_REVIEW_REQUIRED",
+      deliveryAllowed: false,
+      deliveryMethod: "INTERNAL_PREVIEW",
+      reason: "Escalation is required before any client delivery state can be prepared.",
+      nextStep: decision === "ESCALATE_TO_BOARDROOM" ? "Prepare boardroom escalation path." : "Prepare counsel review handoff.",
+      scheduledFor: null,
+    };
+  }
+
   if (decision === "APPROVE_FOR_CLIENT" && input.deliveryAllowed) {
     return {
-      state: "READY_FOR_DELIVERY",
+      state: "APPROVED_FOR_DELIVERY",
       deliveryAllowed: true,
-      deliveryMethod: "INTERNAL_PREVIEW",
-      reason: "The brief is approved as client-safe, but actual client delivery is still a manual process.",
-      nextStep: "Operator may prepare manual sponsor-safe delivery from the approved internal preview.",
+      deliveryMethod: "CLIENT_PORTAL",
+      reason: "The brief is approved and can be prepared for controlled client view.",
+      nextStep: input.stableUrl ? "Mark client view ready once the review bench confirms the governed brief URL." : "Prepare the stable client-view surface before delivery.",
       scheduledFor: null,
     };
   }
 
   return {
-    state: "NOT_READY",
+    state: "OPERATOR_REVIEW_REQUIRED",
     deliveryAllowed: false,
     deliveryMethod: "INTERNAL_PREVIEW",
-    reason: input.efficacy?.grade === "WITHHOLD"
-      ? "The brief is not strong enough for delivery."
-      : "The brief still requires revision or more evidence before delivery.",
+    reason: "The brief still requires revision or more evidence before delivery.",
     nextStep: decision === "WAIT_FOR_MORE_EVIDENCE"
       ? "Gather more verified evidence and regenerate the cycle."
       : "Revise the brief and repeat operator review.",
@@ -401,6 +383,29 @@ async function resolveOrganisationAccess(input: {
   return access;
 }
 
+function selectPrimaryAudienceOutput(outputs: Partial<Record<OversightCycleAudience, ClientSafeOversightBrief>>): ClientSafeOversightBrief | null {
+  return outputs.CLIENT_SPONSOR ?? null;
+}
+
+function buildAudienceOutputs(input: {
+  brief?: OversightBrief;
+  access: OrganisationAccessDecision;
+}): Partial<Record<OversightCycleAudience, ClientSafeOversightBrief>> {
+  if (!input.brief || !input.access.allowed) return {};
+
+  const audiences: OversightCycleAudience[] = ["CLIENT_SPONSOR", "BOARD_LEVEL", "RESPONDENT_SAFE"];
+  return Object.fromEntries(
+    audiences.map((audience) => [
+      audience,
+      buildClientSafeOversightBrief({
+        brief: input.brief!,
+        access: input.access,
+        audience,
+      }),
+    ])
+  ) as Partial<Record<OversightCycleAudience, ClientSafeOversightBrief>>;
+}
+
 export async function composeOversightReviewCycle(input: {
   userId?: string;
   email?: string;
@@ -415,6 +420,7 @@ export async function composeOversightReviewCycle(input: {
 }): Promise<{
   internalBrief?: OversightBrief;
   clientSafeBrief?: OversightBrief;
+  audienceOutputs: Partial<Record<OversightCycleAudience, ClientSafeOversightBrief>>;
   cycle: OversightReviewCycle;
   warnings: string[];
   efficacy?: OversightBriefEfficacyScore;
@@ -426,6 +432,8 @@ export async function composeOversightReviewCycle(input: {
   previousBrief?: OversightBrief;
   deliveryIntent: OversightDeliveryIntent;
   nextCycleIntent?: ReturnType<typeof deriveNextOversightCycleIntent>;
+  archivedCycle?: Awaited<ReturnType<typeof loadOversightCycleArchive>>;
+  counselWorkflows: CounselReviewAction[];
 }> {
   const generatedAt = new Date().toISOString();
   const warnings: string[] = [];
@@ -440,22 +448,24 @@ export async function composeOversightReviewCycle(input: {
     warnings,
   });
 
-  let clientSafe: ClientSafeOversightBrief | null = null;
-  if (composed.brief && access.allowed) {
-    clientSafe = buildClientSafeOversightBrief({
-      brief: composed.brief,
-      access,
-    });
-    warnings.push(...clientSafe.warnings);
-  }
+  const audienceOutputs = buildAudienceOutputs({
+    brief: composed.brief,
+    access,
+  });
+  const sponsorOutput = selectPrimaryAudienceOutput(audienceOutputs);
+  warnings.push(...(sponsorOutput?.warnings ?? []));
+  warnings.push(...(audienceOutputs.BOARD_LEVEL?.warnings ?? []));
 
   const cycleId = `review-cycle:${composed.account?.accountId || input.accountId || input.organisationId || input.email || input.userId || "unknown"}:${(composed.brief?.periodStart || input.periodStart || generatedAt).slice(0, 10)}`;
-  const previousBrief = await loadPreviousOversightBrief({
-    accountId: composed.account?.accountId || input.accountId,
-    currentCycleId: cycleId,
-    currentPeriodStart: composed.brief?.periodStart || input.periodStart || generatedAt,
-  });
 
+  const previousArchivedCycle = composed.account?.accountId
+    ? await loadPreviousArchivedOversightCycle({
+        accountId: composed.account.accountId,
+        beforePeriodStart: composed.brief?.periodStart || input.periodStart || generatedAt,
+      })
+    : null;
+
+  const previousBrief = previousArchivedCycle?.internalBrief ?? undefined;
   const cycleComparison = composed.brief
     ? compareOversightCycles({
         current: composed.brief,
@@ -469,7 +479,7 @@ export async function composeOversightReviewCycle(input: {
         brief: composed.brief,
         previousBrief,
         warnings,
-        suppressions: clientSafe?.suppressions ?? [],
+        suppressions: sponsorOutput?.suppressions ?? [],
       })
     : undefined;
 
@@ -478,7 +488,7 @@ export async function composeOversightReviewCycle(input: {
     const validation = validateFirstCycleException({
       brief: composed.brief,
       baseEfficacy,
-      suppressions: clientSafe?.suppressions ?? [],
+      suppressions: sponsorOutput?.suppressions ?? [],
       operatorNote: input.operatorNote,
     });
     warnings.push(...validation.warnings);
@@ -490,7 +500,7 @@ export async function composeOversightReviewCycle(input: {
         brief: composed.brief,
         previousBrief,
         warnings,
-        suppressions: clientSafe?.suppressions ?? [],
+        suppressions: sponsorOutput?.suppressions ?? [],
         firstCycleException: firstCycleExceptionAllowed,
       })
     : undefined;
@@ -498,10 +508,10 @@ export async function composeOversightReviewCycle(input: {
   const recommendedDecision = efficacy
     ? recommendOversightReviewDecision({
         efficacy,
-        suppressions: clientSafe?.suppressions ?? [],
+        suppressions: sponsorOutput?.suppressions ?? [],
         warnings,
         cycleComparison,
-        clientSafeBrief: clientSafe,
+        clientSafeBrief: sponsorOutput,
         hasCounselTrigger: (composed.brief?.counsel.requiredNow ?? 0) > 0,
         hasBoardroomTrigger: (composed.brief?.boardroom.dossiersAvailable ?? 0) > 0,
       })
@@ -515,10 +525,10 @@ export async function composeOversightReviewCycle(input: {
 
   let status = deriveBaseStatus({
     internalBrief: composed.brief,
-    clientSafe,
+    sponsorBrief: sponsorOutput,
     access,
     warnings,
-    suppressions: clientSafe?.suppressions ?? [],
+    suppressions: sponsorOutput?.suppressions ?? [],
   });
 
   const decisions: OversightReviewCycle["decisions"] = [];
@@ -555,7 +565,7 @@ export async function composeOversightReviewCycle(input: {
         operatorNote: input.operatorNote?.trim() || null,
         efficacyGrade: efficacy.grade,
         efficacyScore: efficacy.totalScore,
-        clientSafe: Boolean(clientSafe?.brief),
+        clientSafe: Boolean(sponsorOutput?.brief),
         deliveryAllowed: chosenDecision === "APPROVE_FOR_CLIENT" && recommendedDecision.deliveryAllowed,
         createdAt: generatedAt,
       };
@@ -567,6 +577,15 @@ export async function composeOversightReviewCycle(input: {
     }
   }
 
+  const deliveryIntent = buildDeliveryIntent({
+    decision: operatorDecisionRecord?.decision,
+    recommendedDecision: recommendedDecision.recommendedDecision,
+    efficacy,
+    deliveryAllowed: operatorDecisionRecord?.deliveryAllowed ?? recommendedDecision.deliveryAllowed,
+    stableUrl: sponsorOutput?.brief ? `/oversight/brief/${cycleId}` : null,
+    suppressions: sponsorOutput?.suppressions ?? [],
+  });
+
   const cycle: OversightReviewCycle = {
     cycleId,
     accountId: composed.brief?.accountId,
@@ -577,7 +596,7 @@ export async function composeOversightReviewCycle(input: {
     generatedAt,
     reviewedAt: operatorDecisionRecord ? generatedAt : undefined,
     approvedAt: operatorDecisionRecord?.decision === "APPROVE_FOR_CLIENT" ? generatedAt : undefined,
-    deliveredAt: undefined,
+    deliveredAt: deliveryIntent.state === "DELIVERED" ? generatedAt : undefined,
     reviewer: input.email
       ? {
           userId: input.userId,
@@ -586,18 +605,11 @@ export async function composeOversightReviewCycle(input: {
         }
       : undefined,
     decisions,
-    suppressions: clientSafe?.suppressions ?? [],
+    suppressions: sponsorOutput?.suppressions ?? [],
     warnings: [...warnings],
   };
 
   const nextRequiredOperatorDecision = recommendedDecision.recommendedDecision;
-  const deliveryIntent = buildDeliveryIntent({
-    decision: operatorDecisionRecord?.decision,
-    recommendedDecision: recommendedDecision.recommendedDecision,
-    efficacy,
-    deliveryAllowed: operatorDecisionRecord?.deliveryAllowed ?? recommendedDecision.deliveryAllowed,
-  });
-
   const nextCycleIntent = efficacy
     ? deriveNextOversightCycleIntent({
         tier: composed.account?.tier ?? "GOVERNED_CONTINUITY",
@@ -609,7 +621,15 @@ export async function composeOversightReviewCycle(input: {
       })
     : undefined;
 
-  if (input.persist && composed.brief?.accountId) {
+  const counselWorkflows = composed.brief
+    ? await listCounselWorkflowActions({
+        cycleId,
+      })
+    : [];
+
+  let archivedCycle: Awaited<ReturnType<typeof loadOversightCycleArchive>> | undefined;
+
+  if (input.persist && composed.brief?.accountId && composed.brief) {
     const actor = input.email
       ? { userId: input.userId, email: input.email, role: access.role }
       : undefined;
@@ -635,14 +655,14 @@ export async function composeOversightReviewCycle(input: {
       });
     }
 
-    if (clientSafe?.brief) {
+    if (sponsorOutput?.brief) {
       await persistCycleLedgerEvent({
         accountId: composed.brief.accountId,
         cycleId,
         eventType: "CLIENT_SAFE_VERSION_CREATED",
         actor,
         warnings,
-        briefSnapshot: clientSafe.brief,
+        briefSnapshot: sponsorOutput.brief,
       });
     }
 
@@ -659,6 +679,15 @@ export async function composeOversightReviewCycle(input: {
       await persistCycleLedgerEvent({
         accountId: composed.brief.accountId,
         cycleId,
+        eventType: "OPERATOR_REVIEWED",
+        actor,
+        reason: operatorDecisionRecord.operatorNote || decisionReasonsToText(operatorDecisionRecord.reasons),
+        warnings,
+      });
+
+      await persistCycleLedgerEvent({
+        accountId: composed.brief.accountId,
+        cycleId,
         eventType: eventTypeMap[operatorDecisionRecord.decision],
         actor,
         reason: operatorDecisionRecord.operatorNote || decisionReasonsToText(operatorDecisionRecord.reasons),
@@ -668,11 +697,36 @@ export async function composeOversightReviewCycle(input: {
       await persistOversightReviewDecision({
         decisionRecord: operatorDecisionRecord,
         internalBrief: composed.brief,
-        clientSafeBrief: clientSafe,
-        suppressions: clientSafe?.suppressions ?? [],
+        clientSafeBrief: sponsorOutput,
+        suppressions: sponsorOutput?.suppressions ?? [],
         cycleComparison,
       });
     }
+
+    const archive = await persistOversightCycleArchive({
+      cycle,
+      accountId: composed.brief.accountId,
+      organisationId: input.organisationId ?? null,
+      subjectEmail: input.email ?? null,
+      internalBrief: composed.brief,
+      audienceBriefs: audienceOutputs,
+      efficacy,
+      suppressions: sponsorOutput?.suppressions ?? [],
+      warnings,
+      reviewDecision: operatorDecisionRecord ?? null,
+      deliveryIntent,
+      nextCycleIntent: nextCycleIntent ?? null,
+      cycleComparison,
+    });
+
+    await persistCycleLedgerEvent({
+      accountId: composed.brief.accountId,
+      cycleId,
+      eventType: "CYCLE_ARCHIVED",
+      actor,
+      reason: `Archive ${archive.archiveId} persisted for cycle ${cycleId}.`,
+      warnings,
+    });
 
     if (nextCycleIntent) {
       await persistCycleLedgerEvent({
@@ -684,6 +738,8 @@ export async function composeOversightReviewCycle(input: {
         warnings,
       });
     }
+
+    archivedCycle = await loadOversightCycleArchive({ cycleId });
   }
 
   const ledgerEvents = await listOversightCycleLedgerEvents({
@@ -693,7 +749,8 @@ export async function composeOversightReviewCycle(input: {
 
   return {
     internalBrief: composed.brief,
-    clientSafeBrief: clientSafe?.brief,
+    clientSafeBrief: sponsorOutput?.brief,
+    audienceOutputs,
     cycle,
     warnings,
     efficacy,
@@ -705,5 +762,7 @@ export async function composeOversightReviewCycle(input: {
     previousBrief,
     deliveryIntent,
     nextCycleIntent,
+    archivedCycle,
+    counselWorkflows,
   };
 }

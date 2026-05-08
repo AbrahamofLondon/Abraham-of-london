@@ -138,6 +138,18 @@ export default async function handler(
     ok: true,
     internalBrief: composed.internalBrief ?? null,
     clientSafeBrief: composed.clientSafeBrief ?? null,
+    audienceOutputs: Object.fromEntries(
+      Object.entries(composed.audienceOutputs).map(([audience, safe]) => [
+        audience,
+        safe
+          ? {
+              brief: safe.brief,
+              suppressions: safe.suppressions,
+              warnings: safe.warnings,
+            }
+          : null,
+      ])
+    ),
     efficacy: composed.efficacy ?? null,
     cycle: composed.cycle,
     suppressions: composed.cycle.suppressions,
@@ -148,6 +160,8 @@ export default async function handler(
     operatorDecisionRecord: composed.operatorDecisionRecord ?? null,
     deliveryIntent: composed.deliveryIntent,
     nextCycleIntent: composed.nextCycleIntent ?? null,
+    archivedCycle: composed.archivedCycle ?? null,
+    counselWorkflows: composed.counselWorkflows,
     warnings: composed.warnings,
   });
 }

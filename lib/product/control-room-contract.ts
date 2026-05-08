@@ -6,6 +6,7 @@ import type {
 } from "@/lib/product/multi-user-contract";
 import type { CollisionSummary } from "@/lib/product/multi-user-collision-summary";
 import type { EvidenceTier } from "@/lib/product/living-intelligence-spine";
+import type { OversightCycleAudience } from "@/lib/product/oversight-cycle-ledger-contract";
 
 export type ControlRoomState = {
   organisationId: string;
@@ -25,4 +26,5 @@ export type ControlRoomState = {
   };
   nextRequiredAction?: string;
   privacyNotice: string;
+  safeAudiences?: OversightCycleAudience[];
 };

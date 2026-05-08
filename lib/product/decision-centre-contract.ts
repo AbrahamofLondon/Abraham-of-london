@@ -135,6 +135,14 @@ export type DecisionCentreCase = {
     paymentRequiredFor: string[];
     restrictedProducts: string[];
   };
+  /** Cost-of-inaction clock — delay is not neutral */
+  costOfInaction?: {
+    accumulatedCost: number;
+    daysElapsed: number;
+    basis: string;
+  } | null;
+  /** What this case would lose if the user stopped here */
+  valueAtRisk?: string | null;
   /** Next required action — the single most important thing to do */
   nextRequiredAction?: string | null;
   /** Unresolved contradictions count */

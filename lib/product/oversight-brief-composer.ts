@@ -416,6 +416,36 @@ export async function composeOversightBrief(input: {
     };
   }
 
+  if (missedSignals.length > 0) {
+    brief.cancellationLoss = {
+      summary: "This cycle preserved visibility over material decision signals that would otherwise return to manual tracking or become harder to detect between reviews.",
+      lostVisibility: missedSignals.map((signal) => ({
+        area:
+          signal.label === "Cost accumulation"
+            ? "COST"
+            : signal.label === "Pattern recurrence"
+              ? "RECURRENCE"
+              : signal.label === "Strategic option closing"
+                ? "OPTIONS"
+                : signal.label === "Irreversibility rising"
+                  ? "IRREVERSIBILITY"
+                  : signal.label === "Boardroom threshold met"
+                    ? "BOARDROOM"
+                    : "COMMITMENT",
+        description:
+          signal.label === "Boardroom threshold met"
+            ? "Boardroom-grade consequence visibility would likely revert to manual synthesis between cycles."
+            : signal.label === "Pattern recurrence"
+              ? "Without continued oversight, this recurring pattern may become harder to detect early."
+              : signal.label === "Cost accumulation"
+                ? "Accumulating cost exposure would likely return to manual tracking between reviews."
+                : signal.whyItMatters,
+        evidenceBasis: signal.evidenceBasis,
+        severity: signal.severity,
+      })),
+    };
+  }
+
   // ── Structured Actions ──
   const structuredActions: NonNullable<OversightBrief["structuredActions"]> = [];
   for (const signal of signals) {

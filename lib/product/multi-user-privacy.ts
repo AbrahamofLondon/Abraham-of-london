@@ -3,6 +3,7 @@ import type {
   CampaignMode,
   RespondentVisibility,
 } from "@/lib/product/multi-user-contract";
+import type { OversightCycleAudience } from "@/lib/product/oversight-cycle-ledger-contract";
 
 export const DEFAULT_MINIMUM_SAFE_RESPONSES = 5;
 
@@ -86,4 +87,20 @@ export function sponsorPrivacyNotice(input: {
   }
 
   return "Anonymous campaign. Sponsor view is aggregation-only by default.";
+}
+
+export function canViewOversightAudience(input: {
+  audience: OversightCycleAudience;
+  aggregationSafety: AggregationSafety;
+  namedConsent?: boolean;
+}): boolean {
+  if (input.audience === "INTERNAL_OPERATOR") return true;
+  if (input.audience === "RESPONDENT_SAFE") return true;
+  if (input.audience === "CLIENT_SPONSOR") {
+    return input.aggregationSafety === "SAFE" || input.aggregationSafety === "SMALL_SAMPLE_SUPPRESSED";
+  }
+  if (input.audience === "BOARD_LEVEL") {
+    return input.aggregationSafety !== "INSUFFICIENT_RESPONSES";
+  }
+  return false;
 }

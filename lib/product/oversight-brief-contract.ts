@@ -147,6 +147,27 @@ export type OversightBrief = {
     }>;
   };
 
+  /** What visibility would likely be lost without continued oversight */
+  cancellationLoss?: {
+    summary: string;
+    lostVisibility: Array<{
+      area:
+        | "COST"
+        | "COMMITMENT"
+        | "RECURRENCE"
+        | "IRREVERSIBILITY"
+        | "OPTIONS"
+        | "LOSSES"
+        | "DEPENDENCIES"
+        | "BOARDROOM"
+        | "COUNSEL"
+        | "OUTCOMES";
+      description: string;
+      evidenceBasis: string;
+      severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    }>;
+  };
+
   /** Required actions (string form for backward compatibility) */
   requiredActions: string[];
   /** Structured required actions with evidence basis, urgency, and owner */

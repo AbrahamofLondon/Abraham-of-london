@@ -29,6 +29,7 @@ import { qualifiesForBoardroom } from "@/lib/constitution/boardroom-mode";
 import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-credit-governance";
 import { detectPatternRecurrenceV0 } from "@/lib/product/pattern-recurrence";
 import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
+import { calculateCostOfInactionClock } from "@/lib/product/cost-of-inaction-clock";
 
 function parseMoney(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -377,6 +378,23 @@ export default async function handler(
         paymentRequiredFor: paymentRequired,
         restrictedProducts: restricted,
       },
+      costOfInaction: (() => {
+        const costText = livingCase.primaryDecision?.costOfDelayText;
+        if (!costText) return null;
+        const monthly = parseFloat(costText.replace(/[^\d.]/g, "")) || 0;
+        if (monthly <= 0) return null;
+        const startedAt = livingCase.createdAt || new Date().toISOString();
+        const result = calculateCostOfInactionClock({ monthlyCostEstimate: monthly, startedAt });
+        if (result.basis === "UNAVAILABLE" || result.accumulatedCost <= 0) return null;
+        return { accumulatedCost: result.accumulatedCost, daysElapsed: result.daysElapsed, basis: result.basis };
+      })(),
+      valueAtRisk: (() => {
+        const signals: string[] = [];
+        if (livingCase.contradictions.length > 0) signals.push(`${livingCase.contradictions.length} unresolved contradiction${livingCase.contradictions.length !== 1 ? "s" : ""}`);
+        if (livingCase.completedStages.length >= 3) signals.push("multi-source evidence accumulated");
+        if (livingCase.unresolvedTensions.length > 0) signals.push(`${livingCase.unresolvedTensions.length} unresolved tension${livingCase.unresolvedTensions.length !== 1 ? "s" : ""}`);
+        return signals.length > 0 ? `If you stopped here, the following visibility would be lost: ${signals.join(", ")}.` : null;
+      })(),
       nextRequiredAction: deriveNextAction(livingCase),
       unresolvedContradictions: livingCase.contradictions.length,
       latestDirective: livingCase.latestDirective,

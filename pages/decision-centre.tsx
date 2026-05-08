@@ -126,6 +126,30 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
         </div>
       )}
 
+      {/* Cost-of-Inaction Clock */}
+      {c.costOfInaction && c.costOfInaction.accumulatedCost > 0 && (
+        <div style={{ marginBottom: "16px", border: `1px solid rgba(252,165,165,0.12)`, backgroundColor: "rgba(252,165,165,0.02)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
+            Cost of inaction
+          </span>
+          <p style={{ ...serif, fontSize: "1.1rem", color: `${GOLD}CC`, marginTop: "4px" }}>
+            &pound;{c.costOfInaction.accumulatedCost.toLocaleString()}
+          </p>
+          <p style={{ fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", marginTop: "2px" }}>
+            Estimated over {c.costOfInaction.daysElapsed} day{c.costOfInaction.daysElapsed !== 1 ? "s" : ""} since last action. Delay is not neutral.
+          </p>
+        </div>
+      )}
+
+      {/* Value at risk — what would be lost */}
+      {c.valueAtRisk && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)", padding: "10px 14px" }}>
+          <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.32)", fontStyle: "italic" }}>
+            {c.valueAtRisk}
+          </p>
+        </div>
+      )}
+
       {/* Return Briefs */}
       {c.returnBriefs.length > 0 && (
         <div style={{ marginBottom: "16px" }}>

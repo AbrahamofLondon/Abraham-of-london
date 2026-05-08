@@ -1,21 +1,27 @@
-export type CounselReviewStatus =
+export type CounselWorkflowStatus =
   | "NOT_REQUIRED"
   | "RECOMMENDED"
   | "REQUIRED"
   | "ASSIGNED"
-  | "REVIEWED"
-  | "ACTION_ADDED"
-  | "ESCALATED"
-  | "CLOSED";
+  | "UNDER_REVIEW"
+  | "COUNSEL_RESPONSE_RECORDED"
+  | "COUNSEL_ACTION_ACCEPTED"
+  | "COUNSEL_ACTION_REJECTED"
+  | "ESCALATED_TO_RETAINER_OVERSIGHT";
 
 export type CounselReviewAction = {
   id: string;
   caseId: string;
   cycleId?: string;
-  status: CounselReviewStatus;
+  status: CounselWorkflowStatus;
   triggerReason: string;
+  triggerSource?: string;
   assignedTo?: string;
-  counselNote?: string;
+  assignedBy?: string;
+  requestedReviewQuestion?: string;
+  counselResponseSummary?: string;
   evidenceNodeIds?: string[];
   requiredActionIds?: string[];
+  operatorDisposition?: "ACCEPTED" | "REJECTED" | "PENDING";
+  nextAction?: string;
 };
