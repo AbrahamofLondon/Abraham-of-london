@@ -89,6 +89,34 @@ export type ReturnBrief = {
   /** Purpose Alignment evidence carried forward */
   purposeAlignmentEvidence?: Record<string, unknown> | null;
 
+  /** Team assessment evidence carried forward */
+  teamEvidence?: {
+    source: "team_assessment";
+    largestGapDomain?: string;
+    largestGapDelta?: number;
+    trustScore?: number;
+    respondentCount?: number;
+    claimLevel?: string;
+    summary: string;
+  } | null;
+
+  /** Enterprise assessment evidence carried forward */
+  enterpriseEvidence?: {
+    source: "enterprise_assessment";
+    fragilitySignal?: string;
+    percentScore?: number;
+    weakestDomains?: string[];
+    summary: string;
+  } | null;
+
+  /** Consequence evidence from Strategy Room Stage 2 */
+  consequenceEvidence?: {
+    financial?: string;
+    reputational?: string;
+    institutional?: string;
+    timeline?: string;
+  } | null;
+
   /** Section 6 — Direct challenge */
   challenge: string;
 
@@ -333,6 +361,78 @@ export async function generateReturnBrief(
   });
   const paSection = buildReturnBriefPaSection(paEvidence);
 
+  // ── TEAM ASSESSMENT EVIDENCE ──
+  let teamEvidence: ReturnBrief["teamEvidence"] = null;
+  try {
+    const p = prisma as any;
+    if (p?.teamAssessmentCampaign?.findFirst) {
+      const campaign = await p.teamAssessmentCampaign.findFirst({
+        where: {
+          OR: [
+            ...(session.email ? [{ createdByEmail: session.email }] : []),
+            ...(session.strategyRoomSessionId ? [{ strategyRoomSessionId: session.strategyRoomSessionId }] : []),
+          ].filter((item) => Object.keys(item).length > 0),
+        },
+        include: { aggregate: true },
+        orderBy: { createdAt: "desc" },
+      });
+      if (campaign?.aggregate && campaign.aggregate.respondentCount >= 1) {
+        const domains = typeof campaign.aggregate.domainsJson === "string"
+          ? JSON.parse(campaign.aggregate.domainsJson)
+          : campaign.aggregate.domainsJson ?? {};
+        const gaps = Object.entries(domains)
+          .filter(([, v]: [string, any]) => typeof v?.deltaFromLeader === "number" && v.deltaFromLeader !== null)
+          .sort(([, a]: [string, any], [, b]: [string, any]) => Math.abs(b.deltaFromLeader) - Math.abs(a.deltaFromLeader));
+        const largest = gaps[0] as [string, any] | undefined;
+        const trustDomain = domains.trust_communication ?? domains.trust ?? null;
+        teamEvidence = {
+          source: "team_assessment",
+          largestGapDomain: largest ? largest[0].replace(/_/g, " ") : undefined,
+          largestGapDelta: largest ? Math.abs(largest[1].deltaFromLeader) : undefined,
+          trustScore: trustDomain?.teamMean ?? undefined,
+          respondentCount: campaign.aggregate.respondentCount,
+          claimLevel: campaign.aggregate.claimLevel,
+          summary: largest
+            ? `Earlier team reading reported a ${Math.abs(largest[1].deltaFromLeader)}-point leader/team gap in ${largest[0].replace(/_/g, " ")}. Source: Team Assessment (${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}).`
+            : `Team assessment completed with ${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}. Source: Team Assessment.`,
+        };
+      }
+    }
+  } catch { /* degrade gracefully */ }
+
+  // ── ENTERPRISE ASSESSMENT EVIDENCE ──
+  let enterpriseEvidence: ReturnBrief["enterpriseEvidence"] = null;
+  try {
+    const p = prisma as any;
+    if (p?.organisationAssessmentSnapshot?.findFirst) {
+      const snapshot = await p.organisationAssessmentSnapshot.findFirst({
+        where: {
+          OR: [
+            ...(session.email ? [{ createdByEmail: session.email }] : []),
+          ].filter((item) => Object.keys(item).length > 0),
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      if (snapshot) {
+        const domainScores = typeof snapshot.domainScoresJson === "string"
+          ? JSON.parse(snapshot.domainScoresJson)
+          : snapshot.domainScoresJson ?? {};
+        const weakest = typeof snapshot.weakestDomainsJson === "string"
+          ? JSON.parse(snapshot.weakestDomainsJson)
+          : snapshot.weakestDomainsJson ?? [];
+        enterpriseEvidence = {
+          source: "enterprise_assessment",
+          fragilitySignal: snapshot.fragilitySignal ?? undefined,
+          percentScore: snapshot.percentScore ?? undefined,
+          weakestDomains: Array.isArray(weakest) ? weakest : undefined,
+          summary: snapshot.fragilitySignal
+            ? `Earlier enterprise reading reported institutional strain: ${snapshot.fragilitySignal}. Score: ${snapshot.percentScore ?? "—"}%. Source: Enterprise Assessment.`
+            : `Enterprise assessment completed with score ${snapshot.percentScore ?? "—"}%. Source: Enterprise Assessment.`,
+        };
+      }
+    }
+  } catch { /* degrade gracefully */ }
+
   // Section 5 — Delta
   const delta = executionState
     ? {
@@ -376,6 +476,28 @@ export async function generateReturnBrief(
           : undefined,
       }
     : null;
+
+  // ── CONSEQUENCE EVIDENCE FROM STAGE 2 ──
+  const consequenceEvidence: ReturnBrief["consequenceEvidence"] =
+    carryForwardSource.consequenceFinancial ||
+    carryForwardSource.consequenceReputational ||
+    carryForwardSource.consequenceInstitutional ||
+    carryForwardSource.consequenceTimeline
+      ? {
+          financial: carryForwardSource.consequenceFinancial
+            ? `You identified this financial consequence: ${safeEvidenceText(carryForwardSource.consequenceFinancial)}`
+            : undefined,
+          reputational: carryForwardSource.consequenceReputational
+            ? `You identified this reputational consequence: ${safeEvidenceText(carryForwardSource.consequenceReputational)}`
+            : undefined,
+          institutional: carryForwardSource.consequenceInstitutional
+            ? `You identified this institutional consequence: ${safeEvidenceText(carryForwardSource.consequenceInstitutional)}`
+            : undefined,
+          timeline: carryForwardSource.consequenceTimeline
+            ? `You identified this timeline pressure: ${safeEvidenceText(carryForwardSource.consequenceTimeline)}`
+            : undefined,
+        }
+      : null;
 
   // Section 6 — Direct challenge
   let challenge: string;
@@ -424,6 +546,9 @@ export async function generateReturnBrief(
     recurrence: recurrence.status === "INSUFFICIENT_HISTORY" ? null : recurrence,
     evidenceCarryForward,
     purposeAlignmentEvidence: paSection,
+    teamEvidence,
+    enterpriseEvidence,
+    consequenceEvidence,
     challenge,
     retainerTriggered: trigger === "contradiction_persistence",
   };

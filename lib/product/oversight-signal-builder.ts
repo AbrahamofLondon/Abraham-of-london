@@ -15,10 +15,26 @@ function dedupe<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
+export type TeamAggregateSignalInput = {
+  largestGapDomain?: string;
+  largestGapDelta?: number;
+  trustScore?: number;
+  respondentCount?: number;
+  claimLevel?: string;
+};
+
+export type EnterpriseStrainSignalInput = {
+  fragilitySignal?: string;
+  percentScore?: number;
+  weakestDomains?: string[];
+};
+
 export function buildOversightSignals(input: {
   cases: OversightAccountCase[];
   creditProfile?: CreditProfile | null;
   controlRoomState?: ControlRoomState | null;
+  teamAggregate?: TeamAggregateSignalInput | null;
+  enterpriseStrain?: EnterpriseStrainSignalInput | null;
   retainedEnforcement?: {
     cyclesReviewed: number;
     activeRetainedDecisions: number;
@@ -241,6 +257,45 @@ export function buildOversightSignals(input: {
       title: "Retained enforcement shows deterioration signals",
       explanation: `${retainedEnforcement.deteriorationSignals} retained enforcement cycle${retainedEnforcement.deteriorationSignals === 1 ? "" : "s"} recorded negative outcome movement this period.`,
       recommendedAction: "Reassess retained decisions where enforcement cycles show deterioration rather than stabilisation.",
+      createdAt,
+    });
+  }
+
+  const team = input.teamAggregate;
+  if (team && team.largestGapDelta && team.largestGapDelta >= 15 && (team.respondentCount ?? 0) >= 3) {
+    signals.push({
+      id: "team:divergence",
+      type: "TEAM_DIVERGENCE_REPORTED",
+      severity: team.largestGapDelta >= 30 ? "HIGH" : team.largestGapDelta >= 20 ? "MEDIUM" : "LOW",
+      title: "Team perception gap previously reported",
+      explanation: `Earlier team assessment reported a ${team.largestGapDelta}-point leader/team gap in ${team.largestGapDomain ?? "an unspecified domain"}. Source: Team Assessment (${team.respondentCount} respondent${(team.respondentCount ?? 0) === 1 ? "" : "s"}).`,
+      recommendedAction: "Verify whether the reported team divergence has changed since the original assessment.",
+      createdAt,
+    });
+  }
+  if (team && team.trustScore !== undefined && team.trustScore < 45 && (team.respondentCount ?? 0) >= 3) {
+    signals.push({
+      id: "team:trust-low",
+      type: "TEAM_DIVERGENCE_REPORTED",
+      severity: team.trustScore < 30 ? "HIGH" : "MEDIUM",
+      title: "Low team trust previously reported",
+      explanation: `Team trust score was ${team.trustScore}/100 at last measurement. Source: Team Assessment.`,
+      recommendedAction: "Low team trust may reduce execution honesty and escalation quality. Verify current condition.",
+      createdAt,
+    });
+  }
+
+  const enterprise = input.enterpriseStrain;
+  if (enterprise && enterprise.percentScore !== undefined && enterprise.percentScore < 55) {
+    signals.push({
+      id: "enterprise:strain",
+      type: "ENTERPRISE_STRAIN_REPORTED",
+      severity: enterprise.percentScore < 35 ? "HIGH" : enterprise.percentScore < 45 ? "MEDIUM" : "LOW",
+      title: "Institutional strain previously reported",
+      explanation: enterprise.fragilitySignal
+        ? `Earlier enterprise reading reported: ${summarizeAssessmentEvidenceText(enterprise.fragilitySignal, 180)}. Score: ${enterprise.percentScore}%. Source: Enterprise Assessment.`
+        : `Enterprise assessment score was ${enterprise.percentScore}%. Source: Enterprise Assessment.`,
+      recommendedAction: "Verify whether institutional strain has changed since the original assessment. This may affect oversight cadence.",
       createdAt,
     });
   }
