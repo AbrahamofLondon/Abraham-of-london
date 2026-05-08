@@ -444,7 +444,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
 
         <header className="grid gap-5 rounded-[32px] border border-neutral-200 bg-white/90 p-6 shadow-sm backdrop-blur sm:p-8">
           <div className="text-[11px] uppercase tracking-[0.28em] text-[#8a6a2f]">
-            Assessment = interrogation → refinement → verdict
+            Alignment under pressure — decision, behaviour, consequence
           </div>
           <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
             <div>

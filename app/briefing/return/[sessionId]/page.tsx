@@ -136,12 +136,42 @@ export default function ReturnBriefPage() {
 
   if (noBrief || !brief) {
     return (
-      <div style={{ backgroundColor: "#0B0B0B", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div>
-          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "15px" }}>No return brief is warranted at this time.</p>
-          <Link href="/strategy-room" style={{ color: "#C9A96E", fontSize: "13px", marginTop: "16px", display: "inline-block", textDecoration: "none" }}>
-            Return to Strategy Room
-          </Link>
+      <div style={{ backgroundColor: "#0B0B0B", minHeight: "100vh", color: "#F5F5F5" }}>
+        <div style={{ maxWidth: "580px", margin: "0 auto", padding: "120px 24px 80px" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "24px" }}>
+            Governed monitoring active
+          </p>
+          <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "clamp(24px, 3.5vw, 36px)", lineHeight: 1.2, color: "#F5F5F5", marginBottom: "24px" }}>
+            No return brief is warranted yet.
+          </h1>
+          <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", marginBottom: "24px" }}>
+            The system is monitoring this case. A return brief is generated only when the evidence threshold is crossed:
+          </p>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {[
+              "A committed action remains unverified past its checkpoint",
+              "A recurring pattern is detected",
+              "Execution trajectory deteriorates",
+              "Cost of inaction exceeds the monitored threshold",
+              "A counsel or boardroom escalation trigger is met",
+            ].map((item, i) => (
+              <li key={i} style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.35)", paddingLeft: "16px", position: "relative", marginBottom: "8px" }}>
+                <span style={{ position: "absolute", left: 0, color: "rgba(201,169,110,0.40)" }}>&bull;</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.30)", marginTop: "24px" }}>
+            This is governed monitoring, not absence of product. The system will surface a brief when the evidence requires it.
+          </p>
+          <div style={{ marginTop: "32px", display: "flex", gap: "16px", flexWrap: "wrap" }}>
+            <Link href="/strategy-room" style={{ color: "#C9A96E", fontSize: "12px", textDecoration: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Return to Strategy Room
+            </Link>
+            <Link href="/decision-centre" style={{ color: "rgba(255,255,255,0.35)", fontSize: "12px", textDecoration: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Decision Centre
+            </Link>
+          </div>
         </div>
       </div>
     );

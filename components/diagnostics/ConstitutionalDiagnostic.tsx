@@ -857,8 +857,8 @@ export default function ConstitutionalDiagnostic() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-white/52">
-              This gate produces a real micro-report: posture, readiness, authority,
-              risks, interventions, state, and inherited context for the next layers.
+              This tests whether your decision environment can process truth without punishing it —
+              whether authority is clear, trust is intact, and the organisation can act on what it finds.
             </p>
           </div>
 
