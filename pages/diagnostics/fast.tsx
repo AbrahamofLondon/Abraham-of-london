@@ -464,41 +464,32 @@ const FastDiagnosticPage: NextPage = () => {
           <div className="px-6 py-20">
             <div className="mx-auto max-w-2xl" style={{ display: "grid", gap: "1.5rem" }}>
 
-              {/* OPENING */}
+              {/* SECTION 1: THE FINDING — one sentence */}
               <div style={{ paddingBottom: "1.5rem", borderBottom: `1px solid ${GOLD}18` }}>
                 <p style={{ ...serif, fontSize: "clamp(1.3rem, 3vw, 1.8rem)", lineHeight: 1.25, color: "rgba(255,255,255,0.94)" }}>
-                  {an ? an.opening : "You are not stuck because this is complex. You are stuck because the decision structure is broken."}
+                  {an ? an.opening : `This is ${result.conditionLabel || "a decision condition"}.`}
                 </p>
-              </div>
-
-              {/* CONDITION */}
-              <ResultBlock label="Condition">
-                {an ? an.condition : "The decision exists, but it does not have clean authority. It cannot move in its current form."}
-              </ResultBlock>
-
-              {/* PERSONAL MIRROR LINE */}
-              <div style={{ padding: "1.25rem 0", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.5, color: "rgba(255,255,255,0.65)", fontStyle: "italic" }}>
+                <p style={{ marginTop: "0.75rem", ...serif, fontSize: "1rem", lineHeight: 1.5, color: "rgba(255,255,255,0.55)", fontStyle: "italic" }}>
                   You already know this. You&rsquo;ve been circling it.
                 </p>
               </div>
 
-              {/* ── Email capture — above fold after verdict ─── */}
-              <ResultEmailCapture source="fast_diagnostic" resultRef={result.caseRef} />
-
-              {/* WHY IT EXISTS */}
-              <ResultBlock label="Why it exists">
-                {an ? an.whyItExists : result.synthesis?.whyPriorAttemptsFailed ?? "The stated decision conflicts with the current ownership structure. As long as authority remains distributed, progress will continue to stall."}
+              {/* SECTION 2: THE PATTERN */}
+              <ResultBlock label="What the system found">
+                {an?.whyItExists ?? result.synthesis?.whyPriorAttemptsFailed ?? result.synthesis?.primaryContradiction ?? "The decision exists, but it does not have clean authority. It cannot move in its current form."}
               </ResultBlock>
 
-              {/* PATTERN */}
-              <ResultBlock label="Pattern">
-                {an ? an.pattern : "This pattern appears when decisions are discussed, but not actually assigned. Agreement replaces ownership. Movement stops."}
-              </ResultBlock>
+              {/* SECTION 3: THE REQUIRED MOVE — promoted above secondary intelligence */}
+              <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}06`, padding: "1.25rem 1.5rem" }}>
+                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>Required move</div>
+                <p style={{ marginTop: "0.6rem", ...serif, fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(255,255,255,0.85)" }}>
+                  {an?.requiredMove ?? result.synthesis?.concreteMove ?? "Assign one accountable owner. Remove competing authority. Force a decision window. Anything less will preserve the current outcome."}
+                </p>
+              </div>
 
-              {/* COST OF INACTION — scenario projection */}
+              {/* SECTION 4: COST OF INACTION */}
               <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
-                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Scenario projection — if unresolved</div>
+                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Cost of inaction — if unresolved</div>
                 <div style={{ marginTop: "0.75rem", display: "grid", gap: "0.65rem" }}>
                   <CostLine label="30 days" text={an?.costOfInaction.thirtyDays ?? result.costOfInaction?.horizon30 ?? "Delay becomes normalised. Workarounds emerge."} />
                   <CostLine label="60 days" text={an?.costOfInaction.sixtyDays ?? result.costOfInaction?.horizon60 ?? "Resources are spent without forward movement."} />
@@ -509,191 +500,121 @@ const FastDiagnosticPage: NextPage = () => {
                 </p>
               </div>
 
-              {/* BOARD / EXTERNAL VIEW */}
-              <ResultBlock label="External view">
-                {an?.perspective ?? "From the outside, this does not appear as complexity. It appears as hesitation. That is how it will be interpreted."}
-              </ResultBlock>
-
-              {/* REQUIRED MOVE */}
-              <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}06`, padding: "1.25rem 1.5rem" }}>
-                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>Required move</div>
-                <p style={{ marginTop: "0.6rem", ...serif, fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(255,255,255,0.85)" }}>
-                  {an?.requiredMove ?? "Assign one accountable owner. Remove competing authority. Force a decision window. Anything less will preserve the current outcome."}
-                </p>
-              </div>
-
-              {/* Executive Decision Authority Block */}
-              <ExecutiveDecisionAuthorityBlock authorityIndex={result.authorityIndex} costOfInaction={result.costOfInaction} executionFailure={result.executionFailure} />
-
-              {result.reviewMessage && <ResultBlock label="System integrity note">{result.reviewMessage}</ResultBlock>}
-
-              <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", padding: "0.5rem 0" }}>
-                Governed analysis · {result.signalStrength} reading strength
-                {!committed && " · readiness: unresolved"}
-              </div>
-
-              {/* ═══ LIVING INTELLIGENCE PANELS — real engine data ═══ */}
-
-              <IntelligenceGainPanel
-                stage="Fast Diagnostic"
-                findings={[
-                  ...(result.condition ? [{ label: "Condition", value: result.conditionLabel || result.condition }] : []),
-                  ...(result.synthesis?.primaryContradiction ? [{ label: "Contradiction", value: result.synthesis.primaryContradiction }] : []),
-                  ...(result.synthesis?.avoidedDecision ? [{ label: "Avoidance", value: result.synthesis.avoidedDecision }] : []),
-                  ...(result.authorityIndex ? [{ label: "Authority", value: `${result.authorityIndex.band} — ${result.authorityIndex.label}` }] : []),
-                  ...(result.costOfInaction ? [{ label: "Exposure", value: result.costOfInaction.exposureBand }] : []),
-                  ...(result.executionFailure ? [{ label: "Failure mode", value: result.executionFailure.likelyFailureMode }] : []),
-                  { label: "Signal", value: result.signalStrength },
-                ]}
-              />
-
-              <EvidenceStrengthMeter
-                level="single_source"
-                stagesCompleted={1}
-                whatWouldStrengthen={
-                  result.signalStrength === "low"
-                    ? "Provide more specific detail about the decision, owner, and consequence to strengthen this reading."
-                    : "Add a Purpose Alignment or Constitutional Diagnostic to move from single-source to multi-source evidence."
-                }
-              />
-
-              <DecisionAdvantageSummary
-                advantages={[
-                  ...(result.synthesis?.primaryContradiction ? [{
-                    label: "Contradiction identified",
-                    description: `The system detected a gap between your stated blocker and forced action: ${result.synthesis.primaryContradiction}`,
-                  }] : []),
-                  ...(result.synthesis?.concreteMove ? [{
-                    label: "Required move named",
-                    description: result.synthesis.concreteMove,
-                  }] : []),
-                  ...(result.forecast?.controlShiftSummary ? [{
-                    label: "Control shift forecast",
-                    description: result.forecast.controlShiftSummary,
-                  }] : []),
-                  ...(result.executionFailure ? [{
-                    label: "Execution failure predicted",
-                    description: `${result.executionFailure.likelyFailureMode} — ${result.executionFailure.requiredCorrection}`,
-                  }] : []),
-                ]}
-                confidenceBand={result.signalStrength === "high" ? "high" : result.signalStrength === "moderate" ? "medium" : "low"}
-                limitations={[
-                  "Single-source reading — your perspective only. Team or enterprise assessment strengthens evidence.",
-                  ...(result.synthesis?.certaintyBoundary ? [result.synthesis.certaintyBoundary] : []),
-                ]}
-              />
-
-              <NextLayerUnlockedPanel
-                currentStage="Fast Diagnostic"
-                nextStage={{
-                  name: "Purpose Alignment",
-                  href: "/diagnostics/purpose-alignment",
-                  whatItDetects: "Whether this decision fracture is personal (conviction vs obligation) or structural (governance vs authority). That distinction changes the intervention entirely.",
-                  whyContinue: "The fast diagnostic reveals the fracture. Purpose alignment reveals whether you are the right person to resolve it — or the person most likely to avoid it.",
-                }}
-                unresolvedItems={[
-                  ...(result.synthesis?.certaintyBoundary ? [result.synthesis.certaintyBoundary] : []),
-                  ...(!result.fullAnalysis ? ["Input quality was below threshold for full synthesis — more specificity would improve the reading."] : []),
-                  ...(result.contradictionText ? [`Unresolved contradiction: ${result.contradictionText}`] : []),
-                ]}
-              />
-
-              <GovernedActionPanel
-                requiredAction={an?.requiredMove ?? result.synthesis?.concreteMove ?? null}
-                whyThisAction={result.synthesis?.whyPriorAttemptsFailed
-                  ? `Prior attempts failed because: ${result.synthesis.whyPriorAttemptsFailed}`
-                  : null}
-                whatProvesProgress="The decision has a named owner, a stated deadline, and one irreversible first step taken within 14 days."
-                whatHappensNext={result.forecast?.controlShiftSummary ?? null}
-                evidenceBasis={[
-                  `Condition: ${result.conditionLabel || result.condition}`,
-                  `Signal strength: ${result.signalStrength}`,
-                  ...(result.synthesis?.quotedUserLanguage?.slice(0, 2).map((q) => `Your words: "${q}"`) ?? []),
-                ]}
-              />
-
-              {/* Outcome memory — shows prior readings if they exist */}
-              {result.memoryTrend && result.memoryTrend.totalDecisions > 0 && (
-                <OutcomeMemoryPreview
-                  entries={result.memoryTrend.repeatedConditions.map((c, i) => ({
-                    stage: "Prior reading",
-                    date: "",
-                    finding: c,
-                  }))}
-                  dominantPattern={result.memoryTrend.dominantState}
-                  escalationTrend={result.memoryTrend.escalationTrend}
-                />
-              )}
-
-              {/* Pattern evidence — recurring patterns across sessions */}
-              {result.patternEvidence && (
-                <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
-                  <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>Recognised pattern</div>
-                  <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
-                    {result.patternEvidence.recognitionLine}
-                  </p>
-                  {result.patternEvidence.observations.length > 0 && (
-                    <div style={{ marginTop: "0.5rem" }}>
-                      {result.patternEvidence.observations.map((obs, i) => (
-                        <p key={i} style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.45)", marginTop: "0.25rem" }}>
-                          {obs}
-                        </p>
-                      ))}
-                    </div>
-                  )}
+              {/* SECTION 5: YOUR COMMITMENT */}
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem 1.25rem" }}>
+                <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: committed ? "rgba(110,231,183,0.55)" : "rgba(255,255,255,0.25)" }}>
+                  {committed ? "Commitment accepted — 48-hour window active" : "No commitment recorded — readiness unresolved"}
                 </div>
-              )}
-
-              <HumanReviewPrompt context="Fast Diagnostic" />
-
-              <GovernanceDisclosure context="fast_diagnostic" compact />
-              <DiagnosticStandardPanel />
-
-              {/* ── ESCALATION: Fast → Purpose ─── */}
-              <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.25rem 1.5rem" }}>
-                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Earned escalation</div>
-                <p style={{ marginTop: "0.5rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.82)" }}>
-                  What is not yet clear is whether this is personal or systemic.
+                <p style={{ marginTop: "0.35rem", fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.40)" }}>
+                  {committed
+                    ? "You committed to act within 48 hours if the system identified the real blocker. The system will track whether this happens."
+                    : "Without a commitment window, the reading remains diagnostic. Return when you are prepared to act."}
                 </p>
-                <p style={{ marginTop: "0.35rem", fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
-                  Purpose Alignment reads the person — your mandate, your operating pattern, your decision structure. This is personal decision infrastructure, not a personality test.
-                </p>
-                <Link href="/diagnostics/purpose-alignment" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "0.85rem", padding: "12px 22px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                  Start Purpose Alignment <ArrowRight style={{ width: 11, height: 11 }} />
-                </Link>
               </div>
 
-              <details style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
-                <summary style={{ cursor: "pointer", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
-                  How this was determined
-                </summary>
-                <div style={{ marginTop: "1rem", display: "grid", gap: "0.9rem" }}>
-                  <p style={{ ...serif, fontSize: "0.96rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
-                    You indicated: {answers.decision || "an unresolved decision"}, under authority held by {answers.claimedOwner || "an unclear owner"}, with consequence described as {answers.consequence || "increasing cost"}.
-                  </p>
-                  <p style={{ ...serif, fontSize: "0.96rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
-                    This combination typically produces decision drift because the structure carrying the decision is weaker than the urgency surrounding it.
-                  </p>
-                </div>
-              </details>
-
-              <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.30)", fontStyle: "italic", padding: "0.75rem 0" }}>
-                This pattern is commonly seen before structural correction. This reading can be tracked over time. Re-evaluate in 14 days to see whether the pattern improves or repeats.
-              </p>
-
-              <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginBottom: "1rem" }}>
-                  {an?.cta ?? "Your evidence justifies a governed brief."}
+              {/* SECTION 6: NEXT ROUTE — single primary CTA */}
+              <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", marginBottom: "1rem" }}>
+                  {an?.cta ?? "Your decision pattern is now on record. The next step determines whether this becomes a structural correction or a repeated pattern."}
                 </p>
                 <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                  <Link href="/diagnostics/executive-reporting" style={{ padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                    Open Executive Reporting <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
+                  <Link href="/diagnostics/purpose-alignment" style={{ padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                    Find the internal constraint <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
                   </Link>
-                  <button type="button" onClick={resetDiagnostic} style={{ padding: "12px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
+                  <button type="button" onClick={resetDiagnostic} style={{ padding: "14px 28px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
                     Start again
                   </button>
                 </div>
               </div>
+
+              {/* SECTION 7: EVIDENCE & GOVERNANCE — collapsible below the fold */}
+              <details style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem 1.25rem" }}>
+                <summary style={{ cursor: "pointer", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                  Evidence &amp; governance — {result.signalStrength} reading strength
+                </summary>
+                <div style={{ marginTop: "1rem", display: "grid", gap: "1rem" }}>
+
+                  {/* Authority + execution summary */}
+                  <ExecutiveDecisionAuthorityBlock authorityIndex={result.authorityIndex} costOfInaction={result.costOfInaction} executionFailure={result.executionFailure} />
+
+                  {/* Intelligence summary */}
+                  <IntelligenceGainPanel
+                    stage="Fast Diagnostic"
+                    findings={[
+                      ...(result.condition ? [{ label: "Condition", value: result.conditionLabel || result.condition }] : []),
+                      ...(result.synthesis?.primaryContradiction ? [{ label: "Contradiction", value: result.synthesis.primaryContradiction }] : []),
+                      ...(result.authorityIndex ? [{ label: "Authority", value: `${result.authorityIndex.band} — ${result.authorityIndex.label}` }] : []),
+                      ...(result.costOfInaction ? [{ label: "Exposure", value: result.costOfInaction.exposureBand }] : []),
+                      ...(result.executionFailure ? [{ label: "Failure mode", value: result.executionFailure.likelyFailureMode }] : []),
+                    ]}
+                  />
+
+                  {/* Evidence strength */}
+                  <EvidenceStrengthMeter
+                    level="single_source"
+                    stagesCompleted={1}
+                    whatWouldStrengthen={
+                      result.signalStrength === "low"
+                        ? "Provide more specific detail about the decision, owner, and consequence to strengthen this reading."
+                        : "Add an Internal Constraint or Governance Diagnostic to move from single-source to multi-source evidence."
+                    }
+                  />
+
+                  {/* How this was determined */}
+                  <div>
+                    <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>How this was determined</div>
+                    <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                      You indicated: {answers.decision || "an unresolved decision"}, under authority held by {answers.claimedOwner || "an unclear owner"}, with consequence described as {answers.consequence || "increasing cost"}.
+                    </p>
+                    <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)", marginTop: "0.5rem" }}>
+                      This combination typically produces decision drift because the structure carrying the decision is weaker than the urgency surrounding it.
+                    </p>
+                  </div>
+
+                  {/* Pattern evidence */}
+                  {result.patternEvidence && (
+                    <div>
+                      <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.35rem" }}>Recognised pattern</div>
+                      <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                        {result.patternEvidence.recognitionLine}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Outcome memory */}
+                  {result.memoryTrend && result.memoryTrend.totalDecisions > 0 && (
+                    <OutcomeMemoryPreview
+                      entries={result.memoryTrend.repeatedConditions.map((c, i) => ({
+                        stage: "Prior reading",
+                        date: "",
+                        finding: c,
+                      }))}
+                      dominantPattern={result.memoryTrend.dominantState}
+                      escalationTrend={result.memoryTrend.escalationTrend}
+                    />
+                  )}
+
+                  {/* Review message */}
+                  {result.reviewMessage && (
+                    <p style={{ fontSize: "0.82rem", color: "rgba(252,165,165,0.55)" }}>{result.reviewMessage}</p>
+                  )}
+
+                  {/* Governance disclosures */}
+                  <HumanReviewPrompt context="Fast Diagnostic" />
+                  <GovernanceDisclosure context="fast_diagnostic" compact />
+                  <DiagnosticStandardPanel />
+
+                  {/* Re-evaluation note */}
+                  <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.25)", fontStyle: "italic" }}>
+                    This pattern is commonly seen before structural correction. This reading can be tracked over time. Re-evaluate in 14 days to see whether the pattern improves or repeats.
+                  </p>
+
+                </div>
+              </details>
+
+              {/* Email capture — below the fold, after value is proven */}
+              <ResultEmailCapture source="fast_diagnostic" resultRef={result.caseRef} />
+
             </div>
           </div>
         )}
