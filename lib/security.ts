@@ -12,10 +12,11 @@ const ALGORITHM = 'aes-256-gcm';
  * We use Buffer.alloc to guarantee length regardless of the env string.
  */
 const rawEncryptionKey = String(process.env.ENCRYPTION_KEY || "").trim();
-if (!rawEncryptionKey) {
-  throw new Error("[security] ENCRYPTION_KEY is required");
-}
-const ENCRYPTION_KEY = Buffer.alloc(32, rawEncryptionKey);
+// Defer the missing-key check to runtime, not module load time.
+// During build (e.g. Netlify page data collection), ENCRYPTION_KEY may not be set.
+const ENCRYPTION_KEY = rawEncryptionKey
+  ? Buffer.alloc(32, rawEncryptionKey)
+  : Buffer.alloc(32);
 const IV_LENGTH = 16;
 
 /**
@@ -34,6 +35,9 @@ export function hashEmail(email: string): string {
  * Returns the hex-encoded content, IV, and GCM Authentication Tag.
  */
 export function encryptDocument(text: string) {
+  if (!rawEncryptionKey) {
+    throw new Error("[security] ENCRYPTION_KEY is not configured. Cannot encrypt at runtime.");
+  }
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
   
@@ -54,6 +58,9 @@ export function encryptDocument(text: string) {
  * Reconstructs the cipher state using the stored IV and Auth Tag.
  */
 export function decryptDocument(encryptedText: string, iv: string, authTag: string) {
+  if (!rawEncryptionKey) {
+    throw new Error("[security] ENCRYPTION_KEY is not configured. Cannot decrypt at runtime.");
+  }
   const decipher = crypto.createDecipheriv(
     ALGORITHM, 
     ENCRYPTION_KEY, 

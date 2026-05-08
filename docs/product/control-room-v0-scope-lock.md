@@ -1,35 +1,35 @@
 # Control Room v0 Scope Lock
 
-**Date:** 2026-05-07
+**Date:** 2026-05-08
 **Rule:** Build only what can be built safely with existing schema, models, and privacy rules. Do not overbuild.
 
 ---
 
-## Control Room v0 WILL include
+## Control Room v0 includes only
 
 | Feature | Data source | Privacy-safe | Notes |
-|---------|-----------|-------------|-------|
-| Organisation current state | `Organisation` model | YES | Name, sector, size, status |
-| Active campaigns | `AlignmentCampaign` | YES | Title, type, status, dates |
-| Respondent completion | `CampaignParticipant` count by status | YES | Aggregated counts only |
-| Aggregated evidence tier | Derived from campaign stage completions | YES | No individual data |
-| Divergence map | `TeamAssessmentAggregate` + leader scores | YES | Aggregated domain gaps |
-| Admission readiness | `isAdmissibleFor()` at org level | YES | Derived from aggregate evidence |
-| Next required organisational action | Derived from gaps + admission | YES | Actionable guidance |
+|---------|-------------|--------------|-------|
+| Organisation current state | `Organisation` + aggregate campaign counts | YES | Name, scope, current posture |
+| Active campaigns | `AlignmentCampaign` / `TeamAssessmentCampaign` summary only | YES | Title, status, counts, mode |
+| Response coverage | Participant and response counts | YES | Aggregated coverage only |
+| Aggregation safety | Campaign mode + response threshold evaluation | YES | Must be explicit in payload |
+| Divergence summary | Sponsor-safe collision or gap summary | YES | No raw respondent answers |
+| Evidence tier | Derived from aggregate and campaign evidence | YES | Must distinguish aggregate from individual evidence |
+| Admission readiness | ER / Strategy Room readiness only | YES | Organisation-level readiness, not individual override |
+| Next required action | Derived summary guidance | YES | Single highest-signal organisational next step |
 
-## Control Room v0 WILL NOT include
+## Control Room v0 excludes
 
 | Feature | Why not | When |
 |---------|---------|------|
-| Full strategic twin | Requires significant engine work | LONG-TERM |
-| Raw respondent browser | Privacy violation in anonymous mode | NEVER (anonymous) / LATER (named, with consent) |
-| Organisation-level entitlements | Requires schema migration | SCHEMA_REQUIRED |
-| Complex retainer analytics | Retainer contracts are inactive | AFTER retainer activation |
-| Cross-client benchmarks | Cross-org data exposure risk | LONG-TERM with anonymisation |
-| Board export automation | Requires PDF/report pipeline | LATER |
-| Advanced predictive modelling | Requires calibration data | LONG-TERM |
-| Individual respondent scores | Privacy rule: anonymous mode = aggregate only | See guardrails |
-| Other organisations' data | Multi-tenancy boundary | NEVER without explicit grant |
+| Raw responses | Sponsor privacy breach | NEVER in v0 |
+| Strategic twin | Requires additional model/engine work | LATER |
+| Cross-client benchmarks | Cross-org exposure risk | LATER with anonymisation |
+| Unrestricted respondent identity | Unsafe in anonymous and hybrid conditions | NEVER in v0 |
+| Advanced predictive analytics | Needs stronger calibration and governance | LATER |
+| Automated board export | Requires separate export pipeline hardening | LATER |
+| Retainer command centre | Overbuilds before contracts and auth are settled | LATER |
+| Other organisations' data | Multi-tenant boundary violation | NEVER |
 
 ---
 
@@ -42,8 +42,10 @@
 | Participant/response models | EXISTS |
 | Aggregation models | EXISTS (TeamAssessmentAggregate, OrganisationAssessmentSnapshot) |
 | Privacy rules documented | EXISTS (multi-user-control-room-guardrails.md) |
-| Sponsor role model | PARTIAL — `createdByMembershipId` on campaign, needs role enforcement |
-| Organisation-level entitlement | NOT YET — derive from sponsor's individual entitlements initially |
+| Sponsor/operator role enforcement | NOT YET — membership exists, canonical sponsor auth helper does not |
+| Aggregation safety rules in product layer | NOW — use `multi-user-privacy.ts` |
+| Sponsor-safe divergence contract | NOW — use `multi-user-collision-summary.ts` |
+| Organisation-level entitlement | NOT YET — derive from member/sponsor entitlements initially |
 
 ---
 
@@ -51,4 +53,9 @@
 
 `/control-room/[organisationSlug]`
 
-Protected by: sponsor role verification + organisation membership check.
+Protected by:
+
+- authenticated identity
+- organisation membership check
+- sponsor/operator role verification
+- aggregation safety enforcement

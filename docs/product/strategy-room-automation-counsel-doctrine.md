@@ -76,3 +76,25 @@ The Strategy Room is Execution Command — a mostly automated governed execution
 ```
 
 Counsel is scarce because it is triggered, not sold. That scarcity is the premium.
+
+---
+
+## Retainer Oversight Link
+
+Strategy Room resolves a decision.
+Retainer Oversight governs the decision environment.
+
+The automation boundary now extends into:
+
+- cost-of-inaction clocking where a real basis exists
+- commitment verification checkpoints
+- pattern recurrence detection
+- decision credit governance interpretation
+- oversight signal assembly
+
+Counsel Oversight is retainer-only:
+
+- it monitors multiple cases
+- receives escalation triggers
+- contributes to monthly oversight brief
+- does not bypass the evidence system

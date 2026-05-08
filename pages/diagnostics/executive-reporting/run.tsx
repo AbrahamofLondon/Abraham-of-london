@@ -26,7 +26,7 @@ import { assessAITerrain } from "@/lib/diagnostics/ai-terrain";
 import { assessAdvantageTerrain } from "@/lib/diagnostics/advantage-terrain";
 import CompetitivePositionSignal from "@/components/diagnostics/results/CompetitivePosition";
 import BoardSnapshot from "@/components/diagnostics/results/BoardSnapshot";
-import BoardroomMode from "@/components/admin/reporting/boardroom-mode";
+import BoardroomModeSurface from "@/components/reporting/boardroom/BoardroomModeSurface";
 import AdvantagePathBlock from "@/components/strategy-room/AdvantagePathBlock";
 import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
 import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
@@ -1160,7 +1160,7 @@ function BoardroomDossierSection({
       {/* Slide deck — only when expanded */}
       {expanded && slides.length > 0 && (
         <div style={{ marginTop: "1rem" }}>
-          <BoardroomMode
+          <BoardroomModeSurface
             slides={slides}
             title={dossier.title || "Executive Reporting Boardroom Briefing"}
             classification={dossier.classification || "BOARD_RESTRICTED"}

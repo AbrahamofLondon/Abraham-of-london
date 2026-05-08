@@ -1,6 +1,6 @@
 # Controlled Market Entry Readiness
 
-**Date:** 2026-05-07
+**Date:** 2026-05-08
 **Product:** Decision Infrastructure by Abraham of London
 **Verdict:** Ready for controlled market entry with design partners.
 
@@ -34,6 +34,8 @@
 | Strategy Room execution | Server admission gate. RESTRICTED returns structured repair guidance. |
 | Executive Reporting checkout | Server evidence validation. Fabricated stages detected and rejected. |
 | Return Brief | Continuity header ("The system remembers this case"), signal continuity, trajectory |
+| Return Brief cost clock | Cost-of-inaction clock when a real cost basis is present |
+| Return Brief verification | Commitment verification checkpoints derived from execution record timing |
 | AdmissionNotice component | Reusable: status, evidence tier, authority, repair actions, case preservation, return path |
 | ContinuityStatement component | Reusable: NEW/REPEATED/WORSENING/IMPROVING/RESOLVED/VERIFIED_PATTERN with explanation |
 
@@ -50,6 +52,7 @@
 | Real DB-backed proof evidence (5+ approved) | Content maturity | LONG-TERM — requires real customer outcomes |
 | Behavioural verification engine | Moat work | LONG-TERM |
 | Decision credit score visible to users | Moat work | LONG-TERM |
+| Retainer oversight account lifecycle | Product/commercial foundation | NEXT |
 
 ## Which surfaces are ready for design partners
 
@@ -83,6 +86,16 @@ No primary entry point has GENERIC RISK status. See `docs/product/bespoke-surfac
 - `AdmissionNotice` → Return Brief, Strategy Room admission responses
 - `ContinuityStatement` → Return Brief (with bespoke contradiction references)
 - `EvidenceStrengthMeter` → Return Brief (with bespoke stage checklist and contributions)
+
+**Retainer oversight foundation now present:**
+- Retainer doctrine: `docs/product/retainer-oversight-doctrine.md`
+- Oversight contract: `lib/product/retainer-oversight-contract.ts`
+- Oversight brief contract: `lib/product/oversight-brief-contract.ts`
+- Cost-of-inaction clock: `lib/product/cost-of-inaction-clock.ts`
+- Commitment verification: `lib/product/commitment-verification.ts`
+- Decision credit governance policy: `docs/product/decision-credit-governance-policy.md`
+- Pattern recurrence v0: `lib/product/pattern-recurrence.ts`
+- Counsel service model: `docs/product/counsel-service-model.md`
 
 **Bespoke reference contract:** Existing types `CaseObject`, `GovernedSynthesis`, `AnchorNarrative`, `DiagnosticEvidenceNodeInput`, `CanonicalDecisionObject` already serve as the canonical bespoke reference contract. No new types required.
 

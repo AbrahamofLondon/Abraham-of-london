@@ -1,4 +1,5 @@
-// components/admin/reporting/boardroom-mode.tsx
+// components/reporting/boardroom/BoardroomModeSurface.tsx
+// Rehomed from components/admin/reporting/boardroom-mode.tsx — now user-facing.
 "use client";
 
 import * as React from "react";
@@ -33,7 +34,7 @@ function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-export default function BoardroomMode({
+export default function BoardroomModeSurface({
   slides,
   title = "Executive Reporting Boardroom Briefing",
   classification = "RESTRICTED",

@@ -159,6 +159,44 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
         </div>
       )}
 
+      {/* Boardroom eligibility */}
+      {c.boardroom && (
+        <div style={{ marginBottom: "16px", border: c.boardroom.qualified ? `1px solid rgba(201,169,110,0.20)` : "1px solid rgba(255,255,255,0.05)", backgroundColor: c.boardroom.qualified ? "rgba(201,169,110,0.03)" : "rgba(255,255,255,0.01)", padding: "10px 14px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.boardroom.qualified ? `${GOLD}AA` : "rgba(255,255,255,0.22)" }}>
+                {c.boardroom.qualified ? "Boardroom Dossier available" : "Boardroom Dossier not generated"}
+              </span>
+              {!c.boardroom.qualified && c.boardroom.reason && (
+                <p style={{ fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.28)", marginTop: "2px" }}>
+                  {c.boardroom.reason}
+                </p>
+              )}
+            </div>
+            {c.boardroom.qualified && c.boardroom.href && (
+              <Link
+                href={c.boardroom.href}
+                style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}30`, padding: "4px 10px" }}
+              >
+                Open
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Retainer readiness */}
+      {c.retainerReadiness && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.retainerReadiness.level === "HIGH" ? `${GOLD}AA` : c.retainerReadiness.level === "MEDIUM" ? "rgba(251,191,36,0.60)" : "rgba(255,255,255,0.22)" }}>
+            Oversight potential: {c.retainerReadiness.level}
+          </span>
+          <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
+            {c.retainerReadiness.reason}
+          </p>
+        </div>
+      )}
+
       {/* Continuity */}
       {c.continuity && (
         <div style={{ marginBottom: "20px" }}>

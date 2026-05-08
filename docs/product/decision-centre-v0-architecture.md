@@ -1,6 +1,6 @@
 # Decision Centre v0 Architecture
 
-**Date:** 2026-05-07
+**Date:** 2026-05-08
 **Authority:** Decision Infrastructure by Abraham of London
 **Route:** `/decision-centre`
 **API:** `/api/decision-centre/cases`
@@ -36,6 +36,7 @@ Each case card shows:
 - Evidence tier badge
 - Completed stage checklist (bespoke contributions)
 - Admission status per deep surface (ER: Admitted/Restricted, SR: Admitted/Restricted)
+- Retainer-readiness signal (Low / Medium / High) with evidence-based reason
 - Latest directive
 - Unresolved contradictions count
 - Last updated
@@ -72,6 +73,23 @@ The single most important thing the user should do next, derived from:
 - Incomplete stage in active case
 - Repair action for restricted surface
 
+### 7. Retainer Readiness
+
+Decision Centre may show restrained retainer oversight potential where evidence already supports it.
+
+Allowed reasons:
+
+- repeated pattern
+- boardroom threshold
+- counsel trigger
+- unresolved execution
+
+Not allowed:
+
+- generic subscription language
+- generic “upgrade” language
+- price-led prompts
+
 ---
 
 ## API Shape
@@ -107,3 +125,5 @@ Server-authoritative. Uses `deriveLivingCase()` from `lib/product/living-case-st
 No sessionStorage. No client-derived state.
 
 The API calls `getLatestLivingCaseForActor(email)` and enriches with entitlement lookups from `ClientEntitlement` and admission evaluations from the admission modules.
+
+Retainer readiness is additive and evidence-based. It must not create a commercial bypass around admission or privacy rules.

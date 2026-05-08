@@ -14,6 +14,8 @@ import { prisma } from "@/lib/prisma.server";
 import { buildObservedOutcomeEvidenceFromDB, type OutcomeEvidenceSummary } from "@/lib/outcomes/evidence";
 import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
 import { evaluateDecision } from "@/lib/decision/kernel";
+import { calculateCostOfInactionClock, type CostOfInactionClockResult } from "@/lib/product/cost-of-inaction-clock";
+import { buildCommitmentVerificationStates, type CommitmentVerificationState } from "@/lib/product/commitment-verification";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -61,6 +63,10 @@ export type ReturnBrief = {
     readiness: string;
   } | null;
 
+  /** Oversight signals */
+  costOfInaction?: CostOfInactionClockResult | null;
+  verification?: CommitmentVerificationState[] | null;
+
   /** Section 6 — Direct challenge */
   challenge: string;
 
@@ -89,6 +95,26 @@ function parseExecutionState(canonical: string | null): ExecutionState | null {
 
 function daysSince(dateStr: string): number {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function parseCostBasis(text: string | null | undefined): {
+  monthlyCostEstimate?: number;
+  dailyCostEstimate?: number;
+} | null {
+  if (!text) return null;
+  const amountMatch = text.match(/£\s?([\d,]+(?:\.\d+)?)/i) || text.match(/\b([\d,]+(?:\.\d+)?)\b/);
+  if (!amountMatch?.[1]) return null;
+  const value = Number(amountMatch[1].replace(/,/g, ""));
+  if (!Number.isFinite(value) || value <= 0) return null;
+
+  const normalized = text.toLowerCase();
+  if (normalized.includes("day")) {
+    return { dailyCostEstimate: value };
+  }
+  if (normalized.includes("month")) {
+    return { monthlyCostEstimate: value };
+  }
+  return null;
 }
 
 export function evaluateTrigger(
@@ -243,6 +269,29 @@ export async function generateReturnBrief(
     organisationKey: session.email ?? undefined,
   });
 
+  const costBasis = parseCostBasis(executionRecord?.timeline || null)
+    || parseCostBasis(session.conditionSummary)
+    || parseCostBasis(executionRecord?.decision)
+    || parseCostBasis(session.decisionQuestion)
+    || parseCostBasis(session.coreProblem);
+  const costOfInaction = costBasis
+    ? calculateCostOfInactionClock({
+        ...costBasis,
+        startedAt: executionRecord?.createdAt || session.createdAt,
+      })
+    : null;
+
+  const latestDecision = session.decisions
+    .slice()
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
+  const verification = executionRecord
+    ? buildCommitmentVerificationStates({
+        executionRecord,
+        latestDecisionStatus: latestDecision?.status ?? null,
+        latestDecisionUpdatedAt: latestDecision?.updatedAt ?? null,
+      })
+    : null;
+
   // Section 5 — Delta
   const delta = executionState
     ? {
@@ -294,6 +343,8 @@ export async function generateReturnBrief(
     contradiction,
     outcomeEvidence: outcomeEvidence.processedDecisionCases > 0 ? outcomeEvidence : null,
     delta,
+    costOfInaction,
+    verification,
     challenge,
     retainerTriggered: trigger === "contradiction_persistence",
   };

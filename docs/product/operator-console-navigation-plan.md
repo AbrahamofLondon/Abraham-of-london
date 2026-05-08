@@ -1,6 +1,6 @@
 # Operator Console Navigation Plan
 
-**Date:** 2026-05-07
+**Date:** 2026-05-08
 **Rule:** Do not refactor admin pages yet. Map existing pages into a coherent navigation structure first.
 
 ---
@@ -74,3 +74,24 @@ Update `pages/admin/index.tsx` to group existing links under the 13 section head
 - Do not expose admin pages publicly
 - Do not restructure routing aggressively
 - Do not implement role-scoped access before the role model is extended
+
+---
+
+## Multi-User Implications
+
+The current navigation plan needs a small extension for the multi-user foundation pass. This does not require route refactors yet.
+
+| Section | Purpose | Existing anchor |
+|---------|---------|-----------------|
+| Organisation Campaigns | Campaign list, campaign health, active sponsors, completion posture | `app/admin/organisations/[id]/dashboard/page.tsx`, `app/admin/campaigns/*` |
+| Aggregation Safety | Threshold suppression, anonymity mode, sponsor-safe visibility checks | New operator sub-panel over existing campaign data |
+| Divergence Review | Collision summary, leadership gap, blocker mismatch | `LeadershipGapSnapshot`, multi-user collision summary helper |
+| Control Room Readiness | Whether org data is safe enough for Control Room v0 exposure | New operator checklist view |
+| Respondent Privacy | Anonymous/named/hybrid campaign mode audit and suppression state | Existing campaign metadata + invite/aggregate surfaces |
+| Enterprise Entitlements | Sponsor/retainer/commercial readiness for multi-user upgrade surfaces | Existing entitlements pages plus organisation context |
+
+### Additional rules
+
+- Operator console may inspect campaign safety state before any sponsor-facing Control Room is exposed.
+- Control Room readiness is a governance section, not a UI launch flag hidden in code.
+- Respondent privacy posture must be visible to operators before divergence or reporting actions are commissioned.

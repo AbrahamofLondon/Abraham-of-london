@@ -80,6 +80,11 @@ export type DecisionCreditSummary = {
   disputed: number;
 };
 
+export type RetainerReadiness = {
+  level: "LOW" | "MEDIUM" | "HIGH";
+  reason: string;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RETURN BRIEF REFERENCE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -131,6 +136,14 @@ export type DecisionCentreCase = {
   latestDirective?: string | null;
   /** Outcome status */
   outcomeStatus?: string | null;
+  /** Retainer oversight potential */
+  retainerReadiness?: RetainerReadiness | null;
+  /** Boardroom Mode eligibility */
+  boardroom?: {
+    qualified: boolean;
+    reason?: string;
+    href?: string | null;
+  } | null;
   /** Available Return Briefs */
   returnBriefs: ReturnBriefReference[];
   /** Last activity timestamp */

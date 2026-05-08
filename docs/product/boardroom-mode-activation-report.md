@@ -11,7 +11,7 @@
 |-----------|------|--------|
 | `qualifiesForBoardroom()` | `lib/constitution/boardroom-mode.ts` | ACTIVE — gate logic: £5k+/month AND accuracy, or £20k+/month auto-qualify |
 | `generateBoardroomDossier()` | `lib/constitution/boardroom-mode.ts` | ACTIVE — generates 9-section dossier with objection handling + decision path |
-| Boardroom UI (presentation deck) | `components/admin/reporting/boardroom-mode.tsx` | ACTIVE — slide-based presentation with fullscreen, keyboard nav |
+| Boardroom UI (presentation deck) | `components/reporting/boardroom/BoardroomModeSurface.tsx` | ACTIVE — rehomed from admin to user-facing reporting path |
 | BoardSnapshot (5-line summary) | `components/diagnostics/results/BoardSnapshot.tsx` | ACTIVE — rendered at top of ER result |
 
 ## API / Export Status
@@ -73,4 +73,4 @@ Plus: 3 objection-response pairs, 3-option decision path (Act Now / Delay 30d / 
 ## Remaining Gaps
 
 1. **PDF renderer not implemented** — the export route queues artifacts but no async worker generates the actual PDF. The dossier structure is in the payload for when the renderer is built.
-2. **Boardroom Mode component lives in `components/admin/reporting/`** — should eventually be rehomed to `components/reporting/` or `components/product/` since it's now user-facing. Functional as-is.
+2. **Boardroom Mode rehomed** — moved from `components/admin/reporting/boardroom-mode.tsx` to `components/reporting/boardroom/BoardroomModeSurface.tsx`. Component renamed to `BoardroomModeSurface`. Old admin file deleted. ER result page updated to import from new path.

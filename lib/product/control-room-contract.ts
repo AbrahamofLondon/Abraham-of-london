@@ -1,0 +1,28 @@
+import type {
+  AdmissionReadiness,
+  AggregationSafety,
+  MultiUserCampaignSummary,
+  OrganisationScope,
+} from "@/lib/product/multi-user-contract";
+import type { CollisionSummary } from "@/lib/product/multi-user-collision-summary";
+import type { EvidenceTier } from "@/lib/product/living-intelligence-spine";
+
+export type ControlRoomState = {
+  organisationId: string;
+  organisationName: string;
+  scope: OrganisationScope;
+  currentState: {
+    activeCampaigns: number;
+    responseCoverage: number;
+    evidenceTier: EvidenceTier | string;
+    aggregationSafety: AggregationSafety;
+    primaryRisk?: string;
+  };
+  campaigns: MultiUserCampaignSummary[];
+  divergence: CollisionSummary[];
+  admissions: AdmissionReadiness & {
+    boardroom: "QUALIFIED" | "NOT_QUALIFIED" | "NOT_EVALUATED";
+  };
+  nextRequiredAction?: string;
+  privacyNotice: string;
+};

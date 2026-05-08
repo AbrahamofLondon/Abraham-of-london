@@ -1,0 +1,162 @@
+# Retainer Oversight Doctrine
+
+**Date:** 2026-05-08
+**Authority:** Decision Infrastructure by Abraham of London
+
+---
+
+## Why retainer exists
+
+Retainer exists because one decision is rarely the full problem.
+
+Strategy Room can resolve a decision.
+Retainer Oversight governs the decision environment.
+
+The retainer layer exists where the system can:
+
+- remember decisions across time
+- monitor whether action is actually taken
+- detect recurrence
+- price sustained delay
+- verify outcomes
+- escalate counsel when automation boundaries are exceeded
+- surface board-grade oversight signals
+- preserve institutional intelligence
+- compound decision advantage month after month
+
+---
+
+## What retainer is not
+
+Retainer is not:
+
+- a generic subscription
+- a monthly advice call
+- an always-on consulting package
+- a loose access pass to human opinion
+- a dashboard with prettier charts
+
+It is a governed oversight relationship with persistent monitoring, intervention discipline, and escalation logic.
+
+---
+
+## Strategy Room vs Counsel Review vs Retainer Oversight
+
+| Surface | Purpose | Time horizon | Human involvement |
+|---------|---------|--------------|-------------------|
+| Strategy Room | Resolve a specific decision under governance | Immediate / short-cycle | Mostly automated, human counsel only when triggered |
+| Counsel Review | Examine a case that exceeds automated governance boundary | Episodic | Structured human review |
+| Retainer Oversight | Govern the environment in which decisions keep recurring | Continuous | Human counsel is part of the system, not the centre of it |
+
+---
+
+## Retainer value logic
+
+Retainer value is created by turning recurrence, delay, and governance drift into visible, accountable signals.
+
+Value comes from:
+
+- fewer unresolved commitments
+- faster detection of repeated patterns
+- earlier consequence escalation
+- better authority clarity
+- improved decision credit over time
+- fewer ungoverned board-level surprises
+- preserved institutional memory
+
+Monthly value is proven through:
+
+- cases reviewed
+- commitments verified
+- escalations resolved
+- recurrence surfaced
+- decision credit movement
+- cost-of-inaction exposure tracked
+- boardroom dossier readiness where relevant
+
+---
+
+## Future tiers
+
+### Governed Continuity
+
+Commercial range:
+
+- £5k–£10k
+
+Purpose:
+
+- maintain continuity over active cases
+- verify commitments
+- track recurrence and delay
+- issue structured oversight signals
+
+### Executive Oversight
+
+Commercial range:
+
+- £15k–£25k
+
+Purpose:
+
+- govern multiple active cases
+- trigger counsel review where thresholds are crossed
+- maintain board-grade brief readiness
+- surface divergence and consequence accumulation faster
+
+### Institutional Command
+
+Commercial range:
+
+- £35k–£50k
+
+Purpose:
+
+- govern a multi-case decision environment
+- operate across organisational or portfolio-level oversight
+- sustain boardroom readiness and escalated counsel structures
+
+---
+
+## What must be automated
+
+- oversight cycle tracking
+- case state persistence
+- cost-of-inaction clocking where evidence exists
+- commitment verification checkpoints
+- recurrence detection
+- decision credit interpretation
+- counsel trigger detection
+- boardroom readiness detection
+- monthly oversight brief assembly
+
+---
+
+## What requires counsel
+
+- contested authority under serious consequence
+- legal or regulatory sensitivity
+- board-level conflict
+- multi-stakeholder deadlock
+- repeated execution failure beyond automated threshold
+- cases where evidence is sufficient to escalate but not sufficient to automate safely
+
+Counsel is escalation, not ambient commentary.
+
+---
+
+## What requires board escalation
+
+- consequence exposure that crosses board-level materiality
+- repeated contradiction persistence with governance implications
+- divergence that materially alters organisational decision authority
+- execution failure that can no longer be handled at operator level
+- cases that reach boardroom dossier threshold
+
+---
+
+## Oversight principle
+
+Human counsel is part of the oversight model, not the centre of it.
+
+The system should do the remembering, monitoring, verification, and escalation detection. Human counsel should enter where judgment, authority, or governance legitimacy cannot be automated.

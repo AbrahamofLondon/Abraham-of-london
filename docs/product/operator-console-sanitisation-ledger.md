@@ -92,3 +92,22 @@
 | `NEXT_PUBLIC_ADMIN_API_KEY` may exist elsewhere in codebase | MEDIUM | Primary consumers deleted; broader audit recommended |
 | `public/system/intel-audit-log.json` still exists on disk | LOW | File is inert without IntelDashboard consuming it |
 | 4 orphaned consulting/strategy components remain | LOW | Documented in strategy-room-consulting-component-reclassification.md — await approval to delete |
+
+---
+
+## Multi-User Sanitisation Requirements
+
+These are now required before any sponsor-facing Control Room or enterprise campaign surface is treated as safe.
+
+| Requirement | Why | Current status |
+|-------------|-----|----------------|
+| Organisation campaign state must be role-scoped | Sponsor and operator views are different products | NOT YET CANONICAL |
+| Aggregation safety must be explicit in operator review | Anonymous and small-sample exposure can leak identity | PARTIAL |
+| Divergence review must use sponsor-safe summaries | Raw respondent contradictions are not sponsor-safe | NOT YET CANONICAL |
+| Respondent identity must stay hidden in anonymous mode | Core privacy rule | INCONSISTENT ACROSS PUBLIC ROUTES |
+| Enterprise entitlements must not bypass privacy or admission | Paid upgrade is not a data disclosure override | NOT YET ENFORCED AT ORG SURFACE |
+| Public campaign/report routes need containment | Current enterprise/team routes expose too much for premium multi-user use | OPEN RISK |
+
+### Immediate consequence
+
+Do not treat existing public campaign APIs as Control Room backends. They are operationally useful, but not sanitised enough for sponsor-facing multi-user intelligence.

@@ -21,8 +21,11 @@ import {
   type DecisionCentreResponse,
   type SurfaceAdmissionStatus,
   type DecisionCreditSummary,
+  type RetainerReadiness,
 } from "@/lib/product/decision-centre-contract";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
+import { qualifiesForBoardroom } from "@/lib/constitution/boardroom-mode";
+import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-credit-governance";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -171,6 +174,55 @@ function deriveNextAction(livingCase: LivingCase): string | null {
   return null;
 }
 
+function deriveRetainerReadiness(livingCase: LivingCase): RetainerReadiness | null {
+  const patternRecurrenceNode = livingCase.evidenceNodes.find((node) => node.kind === "pattern_recurrence");
+  if (livingCase.contradictions.length >= 3 || patternRecurrenceNode) {
+    return {
+      level: "HIGH",
+      reason: patternRecurrenceNode?.summary || "Repeated contradiction persistence indicates a recurring governance condition.",
+    };
+  }
+
+  const boardroomQualified = (() => {
+    try {
+      const spineProxy = {
+        costOfDelay: livingCase.primaryDecision?.costOfDelayText
+          ? { monthly: parseFloat(livingCase.primaryDecision.costOfDelayText.replace(/[^\d.]/g, "")) || 0 }
+          : null,
+        accuracy: livingCase.evidenceTier === "multi_source" || livingCase.evidenceTier === "outcome_verified" ? "yes" : null,
+      } as any;
+      return qualifiesForBoardroom(spineProxy).qualified;
+    } catch {
+      return false;
+    }
+  })();
+  if (boardroomQualified) {
+    return {
+      level: "HIGH",
+      reason: "Boardroom threshold appears met. This case has oversight significance beyond a single intervention cycle.",
+    };
+  }
+
+  if (livingCase.completedStages.includes("strategy_room") && livingCase.contradictions.length > 0) {
+    return {
+      level: "MEDIUM",
+      reason: "Execution has begun, but unresolved contradiction remains in the active case.",
+    };
+  }
+
+  if (livingCase.completedStages.includes("executive_reporting") && livingCase.evidenceTier === "multi_source") {
+    return {
+      level: "MEDIUM",
+      reason: "Evidence depth and intervention readiness suggest this case may warrant continuing oversight if execution falters.",
+    };
+  }
+
+  return {
+    level: "LOW",
+    reason: "Current evidence supports case progression, but recurring oversight conditions are not yet established.",
+  };
+}
+
 function severityRank(severity: string): number {
   switch (severity) {
     case "critical": return 4;
@@ -252,12 +304,34 @@ export default async function handler(
       unresolvedContradictions: livingCase.contradictions.length,
       latestDirective: livingCase.latestDirective,
       outcomeStatus: null,
+      boardroom: (() => {
+        try {
+          // Build a minimal spine-like object for boardroom qualification from Living Case evidence
+          const spineProxy = {
+            costOfDelay: livingCase.primaryDecision?.costOfDelayText
+              ? { monthly: parseFloat(livingCase.primaryDecision.costOfDelayText.replace(/[^\d.]/g, "")) || 0 }
+              : null,
+            accuracy: livingCase.evidenceTier === "multi_source" || livingCase.evidenceTier === "outcome_verified" ? "yes" : null,
+          } as any;
+          const qualification = qualifiesForBoardroom(spineProxy);
+          return {
+            qualified: qualification.qualified,
+            reason: qualification.reason,
+            href: qualification.qualified && livingCase.completedStages.includes("executive_reporting")
+              ? "/diagnostics/executive-reporting/run"
+              : null,
+          };
+        } catch {
+          return null;
+        }
+      })(),
       returnBriefs: [],
       updatedAt: livingCase.createdAt || new Date().toISOString(),
     };
 
     // ── Decision Credit (best-effort) ──
     let credit: DecisionCreditSummary | null = null;
+    let creditGovernanceExplanation: string | null = null;
     try {
       const { getCreditProfile } = await import("@/lib/decision-ledger/ledger-service");
       const profile = await getCreditProfile(email);
@@ -269,10 +343,27 @@ export default async function handler(
           breached: profile.breached,
           disputed: profile.disputed,
         };
+        creditGovernanceExplanation = deriveDecisionCreditGovernanceEffect({
+          score: profile.score,
+          trend: profile.trend,
+          breached: profile.breached,
+        }).explanation;
       }
     } catch {
       // Decision credit is best-effort — not critical
     }
+
+    const retainerReadiness = deriveRetainerReadiness(livingCase);
+    if (
+      retainerReadiness &&
+      retainerReadiness.level === "MEDIUM" &&
+      creditGovernanceExplanation &&
+      credit?.trend === "declining"
+    ) {
+      retainerReadiness.reason = `${retainerReadiness.reason} ${creditGovernanceExplanation}`;
+    }
+
+    caseCard.retainerReadiness = retainerReadiness;
 
     res.setHeader("Cache-Control", "private, no-cache");
     return res.status(200).json({

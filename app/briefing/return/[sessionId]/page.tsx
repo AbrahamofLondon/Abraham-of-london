@@ -35,6 +35,26 @@ type ReturnBriefData = {
     statements: string[];
   } | null;
   delta: { clarity: string; authority: string; readiness: string } | null;
+  costOfInaction?: {
+    accumulatedCost: number;
+    daysElapsed: number;
+    basis: "MONTHLY" | "DAILY" | "UNAVAILABLE";
+    explanation: string;
+  } | null;
+  verification?: Array<{
+    commitmentId: string;
+    label: string;
+    dueAt?: string;
+    checkpoint: "DAY_14" | "DAY_30" | "DAY_60" | "MONTHLY_RETAINER";
+    status:
+      | "NOT_DUE"
+      | "DUE"
+      | "OVERDUE"
+      | "VERIFIED_EXECUTED"
+      | "VERIFIED_BLOCKED"
+      | "UNVERIFIED";
+    prompt: string;
+  }> | null;
   challenge: string;
   retainerTriggered: boolean;
 };
@@ -235,6 +255,52 @@ export default function ReturnBriefPage() {
               <DeltaLine label="Clarity" value={brief.delta.clarity} />
               <DeltaLine label="Authority" value={brief.delta.authority} />
               <DeltaLine label="Readiness" value={brief.delta.readiness} />
+            </div>
+          </div>
+        )}
+
+        {/* ═══ 5b. COST OF INACTION CLOCK ═══ */}
+        {brief.costOfInaction && brief.costOfInaction.basis !== "UNAVAILABLE" && brief.costOfInaction.accumulatedCost > 0 && (
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "12px" }}>
+              Cost of inaction since last session
+            </p>
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "24px", color: "#C9A96E" }}>
+              £{brief.costOfInaction.accumulatedCost.toLocaleString()} estimated over {brief.costOfInaction.daysElapsed} day{brief.costOfInaction.daysElapsed === 1 ? "" : "s"}
+            </p>
+            <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.42)", marginTop: "10px" }}>
+              {brief.costOfInaction.explanation}
+            </p>
+          </div>
+        )}
+
+        {/* ═══ 5c. COMMITMENT VERIFICATION ═══ */}
+        {brief.verification && brief.verification.length > 0 && (
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "12px" }}>
+              Commitment verification
+            </p>
+            <div style={{ display: "grid", gap: "8px" }}>
+              {brief.verification.map((checkpoint) => (
+                <div key={`${checkpoint.commitmentId}-${checkpoint.checkpoint}`} style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)", padding: "12px 14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
+                      {checkpoint.label}
+                    </span>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: checkpoint.status === "OVERDUE" ? "rgba(252,165,165,0.55)" : checkpoint.status === "DUE" ? "#C9A96E" : checkpoint.status.startsWith("VERIFIED") ? "rgba(110,231,183,0.55)" : "rgba(255,255,255,0.25)" }}>
+                      {checkpoint.status.replace(/_/g, " ")}
+                    </span>
+                  </div>
+                  {checkpoint.dueAt && (
+                    <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.32)", marginTop: "4px" }}>
+                      Due {new Date(checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                  )}
+                  <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.46)", marginTop: "6px" }}>
+                    {checkpoint.prompt}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         )}
