@@ -21,6 +21,9 @@ import GovernanceEvidenceCarryForward from "@/components/strategy-room/Governanc
 import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
+import {
+  convertFinancialExposureToGovernedMemory,
+} from "@/lib/product/financial-exposure-persistence";
 
 type ReturnBriefData = {
   sessionId: string;
@@ -72,6 +75,28 @@ type ReturnBriefData = {
     stopSignalStatus?: string;
   } | null;
   purposeAlignmentEvidence?: Record<string, unknown> | null;
+  teamEvidence?: {
+    source: string;
+    largestGapDomain?: string;
+    largestGapDelta?: number;
+    trustScore?: number;
+    respondentCount?: number;
+    claimLevel?: string;
+    summary: string;
+  } | null;
+  enterpriseEvidence?: {
+    source: string;
+    fragilitySignal?: string;
+    percentScore?: number;
+    weakestDomains?: string[];
+    summary: string;
+  } | null;
+  consequenceEvidence?: {
+    financial?: string;
+    reputational?: string;
+    institutional?: string;
+    timeline?: string;
+  } | null;
   challenge: string;
   retainerTriggered: boolean;
 };
@@ -278,6 +303,74 @@ export default function ReturnBriefPage() {
           );
         })()}
 
+        {/* ═══ TEAM EVIDENCE CARRIED FORWARD ═══ */}
+        {brief.teamEvidence && (
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "12px" }}>
+              Team evidence carried forward
+            </p>
+            <div style={{ background: "#111", padding: "20px 24px", borderLeft: "2px solid rgba(201,169,110,0.30)" }}>
+              <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>
+                {brief.teamEvidence.summary}
+              </p>
+              {brief.teamEvidence.trustScore !== undefined && brief.teamEvidence.trustScore < 50 && (
+                <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(252,165,165,0.60)", marginTop: "10px" }}>
+                  Team trust was reported at {brief.teamEvidence.trustScore}/100. This may affect execution honesty and escalation safety.
+                </p>
+              )}
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
+                Source: Team Assessment &middot; {brief.teamEvidence.respondentCount ?? 0} respondent{(brief.teamEvidence.respondentCount ?? 0) === 1 ? "" : "s"} &middot; Evidence posture: aggregated
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ ENTERPRISE STRAIN CARRIED FORWARD ═══ */}
+        {brief.enterpriseEvidence && (
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "12px" }}>
+              Enterprise strain carried forward
+            </p>
+            <div style={{ background: "#111", padding: "20px 24px", borderLeft: "2px solid rgba(201,169,110,0.30)" }}>
+              <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>
+                {brief.enterpriseEvidence.summary}
+              </p>
+              {brief.enterpriseEvidence.weakestDomains && brief.enterpriseEvidence.weakestDomains.length > 0 && (
+                <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.40)", marginTop: "8px" }}>
+                  Weakest domain{brief.enterpriseEvidence.weakestDomains.length > 1 ? "s" : ""}: {brief.enterpriseEvidence.weakestDomains.join(", ")}.
+                </p>
+              )}
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
+                Source: Enterprise Assessment &middot; Evidence posture: system-inferred
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ CONSEQUENCE EVIDENCE CARRIED FORWARD ═══ */}
+        {brief.consequenceEvidence && (
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "12px" }}>
+              Consequences you previously identified
+            </p>
+            <div style={{ background: "#111", padding: "20px 24px", borderLeft: "2px solid rgba(201,169,110,0.30)" }}>
+              {[brief.consequenceEvidence.financial, brief.consequenceEvidence.reputational, brief.consequenceEvidence.institutional, brief.consequenceEvidence.timeline]
+                .filter(Boolean)
+                .map((text, i) => (
+                  <p key={i} style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.55)", marginTop: i === 0 ? 0 : "8px" }}>
+                    {text}
+                  </p>
+                ))}
+              <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.35)", marginTop: "10px" }}>
+                These consequences have not been independently verified. They represent what you reported during Strategy Room intake.
+              </p>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "8px" }}>
+                Source: Strategy Room Stage 2 &middot; Evidence posture: user-reported
+              </p>
+            </div>
+          </div>
+        )}
+
         {brief.contradiction && (
           <div style={{ background: "#111", padding: "24px 28px", borderLeft: "2px solid #444", marginBottom: "64px" }}>
             <p style={{ fontSize: "14px", lineHeight: 1.7, color: "#777" }}>
@@ -350,6 +443,34 @@ export default function ReturnBriefPage() {
             </p>
           </div>
         )}
+
+        {/* ═══ 5b-ii. FINANCIAL EXPOSURE EVIDENCE ═══ */}
+        {(() => {
+          const feItems = convertFinancialExposureToGovernedMemory(
+            brief.costOfInaction && brief.costOfInaction.accumulatedCost > 0
+              ? {
+                  userCostOfDelayText: null,
+                  estimatedFinancialExposure: brief.costOfInaction.accumulatedCost,
+                  exposureBand: brief.costOfInaction.accumulatedCost >= 50000 ? "high" : brief.costOfInaction.accumulatedCost >= 10000 ? "moderate" : "low",
+                  exposureBasis: null,
+                  computedAt: brief.generatedAt,
+                  sourceSurface: "RETURN_BRIEF",
+                  schemaVersion: "1.0.0",
+                }
+              : null,
+          );
+          if (feItems.length === 0) return null;
+          return (
+            <div style={{ paddingBottom: "48px" }}>
+              <GovernanceEvidenceCarryForward
+                title="Financial exposure evidence"
+                intro="The following financial exposure estimates are based on diagnostic inputs and have not been independently verified."
+                items={feItems}
+                variant="session"
+              />
+            </div>
+          );
+        })()}
 
         {/* ═══ 5c. COMMITMENT VERIFICATION ═══ */}
         {brief.verification && brief.verification.length > 0 && (

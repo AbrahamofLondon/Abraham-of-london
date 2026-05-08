@@ -1,5 +1,6 @@
 import "server-only";
 
+import { prisma } from "@/lib/prisma.server";
 import { getCreditProfile } from "@/lib/decision-ledger/ledger-service";
 import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-credit-governance";
 import { loadOversightAccount } from "@/lib/product/oversight-account-loader";
@@ -138,10 +139,64 @@ export async function composeOversightBrief(input: {
     warnings.push("Organisation Control Room state was unavailable. Divergence signals remain partial.");
   }
 
+  // ── TEAM AGGREGATE EVIDENCE ──
+  let teamAggregate: Parameters<typeof buildOversightSignals>[0]["teamAggregate"] = null;
+  try {
+    const p = prisma as any;
+    if (p?.teamAssessmentCampaign?.findFirst && input.email) {
+      const campaign = await p.teamAssessmentCampaign.findFirst({
+        where: { createdByEmail: input.email.toLowerCase() },
+        include: { aggregate: true },
+        orderBy: { createdAt: "desc" },
+      });
+      if (campaign?.aggregate && campaign.aggregate.respondentCount >= 3) {
+        const domains = typeof campaign.aggregate.domainsJson === "string"
+          ? JSON.parse(campaign.aggregate.domainsJson)
+          : campaign.aggregate.domainsJson ?? {};
+        const gaps = Object.entries(domains)
+          .filter(([, v]: [string, any]) => typeof v?.deltaFromLeader === "number" && v.deltaFromLeader !== null)
+          .sort(([, a]: [string, any], [, b]: [string, any]) => Math.abs(b.deltaFromLeader) - Math.abs(a.deltaFromLeader));
+        const largest = gaps[0] as [string, any] | undefined;
+        const trustDomain = domains.trust_communication ?? domains.trust ?? null;
+        teamAggregate = {
+          largestGapDomain: largest ? largest[0].replace(/_/g, " ") : undefined,
+          largestGapDelta: largest ? Math.abs(largest[1].deltaFromLeader) : undefined,
+          trustScore: trustDomain?.teamMean ?? undefined,
+          respondentCount: campaign.aggregate.respondentCount,
+          claimLevel: campaign.aggregate.claimLevel,
+        };
+      }
+    }
+  } catch { /* degrade gracefully */ }
+
+  // ── ENTERPRISE STRAIN EVIDENCE ──
+  let enterpriseStrain: Parameters<typeof buildOversightSignals>[0]["enterpriseStrain"] = null;
+  try {
+    const p = prisma as any;
+    if (p?.organisationAssessmentSnapshot?.findFirst && input.organisationId) {
+      const snapshot = await p.organisationAssessmentSnapshot.findFirst({
+        where: { campaignId: input.organisationId },
+        orderBy: { createdAt: "desc" },
+      });
+      if (snapshot) {
+        const weakest = typeof snapshot.weakestDomainsJson === "string"
+          ? JSON.parse(snapshot.weakestDomainsJson)
+          : snapshot.weakestDomainsJson ?? [];
+        enterpriseStrain = {
+          fragilitySignal: snapshot.fragilitySignal ?? undefined,
+          percentScore: snapshot.percentScore ?? undefined,
+          weakestDomains: Array.isArray(weakest) ? weakest : undefined,
+        };
+      }
+    }
+  } catch { /* degrade gracefully */ }
+
   const signals = buildOversightSignals({
     cases: loaded.cases,
     creditProfile,
     controlRoomState: controlRoom?.state ?? null,
+    teamAggregate,
+    enterpriseStrain,
     retainedEnforcement: loaded.retainedEnforcement ?? null,
   });
 
