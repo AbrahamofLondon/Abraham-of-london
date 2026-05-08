@@ -20,6 +20,7 @@ import { persistSpineToJourney } from "@/lib/decision/spine-persistence";
 import { prisma } from "@/lib/prisma";
 import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
 import { computeCostOfInaction } from "@/lib/server/decision/cost-of-inaction.server";
+import { persistFinancialExposureSnapshot } from "@/lib/product/financial-exposure-persistence";
 import { assessExecutionFailure } from "@/lib/server/decision/execution-failure.server";
 import { computeAuthorityIndex } from "@/lib/server/decision/authority-index.server";
 import { applyPublicTone, buildPublicPatternEvidence } from "@/lib/server/decision/public-pattern-proof.server";
@@ -230,11 +231,35 @@ export default async function handler(
     const publicState = stateMap[condition] ?? "DRIFTING";
     const publicConditions = synth ? [condition, synth.verdict.slice(0, 50)] : [condition];
 
+    const estimatedExposureGBP = caseObj.costOfDelay ? parseFloat(caseObj.costOfDelay.replace(/[^0-9.]/g, "")) || null : null;
     result.costOfInaction = computeCostOfInaction({
       state: publicState,
-      estimatedExposureGBP: caseObj.costOfDelay ? parseFloat(caseObj.costOfDelay.replace(/[^0-9.]/g, "")) || null : null,
+      estimatedExposureGBP,
       decisionWindow: caseObj.costOfDelay ?? null,
     });
+
+    // ── PERSIST FINANCIAL EXPOSURE SNAPSHOT ──
+    try {
+      await persistFinancialExposureSnapshot({
+        email: spine.email ?? undefined,
+        subjectId: spine.id ?? undefined,
+        userCostOfDelayText: caseObj.costOfDelay ?? null,
+        estimatedFinancialExposure: estimatedExposureGBP,
+        exposureBand: result.costOfInaction?.exposureBand ?? null,
+        exposureBasis: {
+          revenueBand: null,
+          urgencyScore: null,
+          ownershipScore: null,
+          clarityScore: null,
+          accountabilityScore: null,
+          stateScore: null,
+          decisionValue: estimatedExposureGBP,
+        },
+        sourceSurface: "fast_diagnostic",
+      });
+    } catch {
+      // Non-fatal: persistence failure should not crash the response
+    }
 
     result.executionFailure = assessExecutionFailure({
       state: publicState,
