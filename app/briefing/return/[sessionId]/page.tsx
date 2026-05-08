@@ -607,6 +607,9 @@ export default function ReturnBriefPage() {
           </p>
         </div>
 
+        {/* ═══ 7. CHECKPOINT RESPONSE ═══ */}
+        <CheckpointResponsePanel sessionId={brief.sessionKey} />
+
         {/* ═══ CTA ═══ */}
         <Link
           href={`/strategy-room/session/${brief.sessionKey}`}
@@ -632,6 +635,125 @@ export default function ReturnBriefPage() {
 
       </div>
     </main>
+  );
+}
+
+function CheckpointResponsePanel({ sessionId }: { sessionId: string }) {
+  const [status, setStatus] = React.useState<string | null>(null);
+  const [note, setNote] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [submitted, setSubmitted] = React.useState(false);
+
+  const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+
+  async function respond(responseStatus: string) {
+    setSubmitting(true);
+    try {
+      await fetch("/api/checkpoints/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          checkpointId: sessionId,
+          responseStatus,
+          ...(responseStatus === "BLOCKED" ? { blockerDescription: note } : {}),
+          ...(responseStatus === "ABANDONED" ? { whatChanged: note } : {}),
+          ...(responseStatus === "COMPLETED" ? { evidenceNote: note } : {}),
+          ...(responseStatus === "DISPUTED_FINDING" ? { whatChanged: note } : {}),
+        }),
+      });
+      setSubmitted(true);
+    } catch { /* best effort */ }
+    setSubmitting(false);
+  }
+
+  if (submitted) {
+    return (
+      <div style={{ paddingBottom: "48px" }}>
+        <div style={{ border: "1px solid rgba(110,231,183,0.20)", backgroundColor: "rgba(110,231,183,0.03)", padding: "20px 24px" }}>
+          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(110,231,183,0.50)" }}>
+            Response recorded
+          </p>
+          <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "8px" }}>
+            Your response has been recorded. The system will use it to update case memory and governance signals.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const options = [
+    { value: "COMPLETED", label: "Completed", color: "rgba(110,231,183,0.50)", noteLabel: "What evidence shows this? (optional)" },
+    { value: "PARTIALLY_COMPLETED", label: "Partially completed", color: "rgba(201,169,110,0.50)", noteLabel: null },
+    { value: "BLOCKED", label: "Blocked", color: "rgba(252,165,165,0.50)", noteLabel: "What is blocking execution? (required)" },
+    { value: "ABANDONED", label: "Abandoned", color: "rgba(252,165,165,0.50)", noteLabel: "Why was this abandoned? (required)" },
+    { value: "DISPUTED_FINDING", label: "Dispute this finding", color: "rgba(255,255,255,0.30)", noteLabel: "What does the system have wrong? (required)" },
+  ];
+
+  return (
+    <div style={{ paddingBottom: "48px" }}>
+      <div style={{ height: "1px", background: "#1A1A1A", marginBottom: "32px" }} />
+      <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "16px" }}>
+        What happened?
+      </p>
+      <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", marginBottom: "20px" }}>
+        The system needs your confirmation. This is not optional feedback — it is governance evidence that changes how the system treats this case.
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => setStatus(status === opt.value ? null : opt.value)}
+            disabled={submitting}
+            style={{
+              padding: "10px 16px",
+              border: status === opt.value ? `1px solid ${opt.color}` : "1px solid rgba(255,255,255,0.08)",
+              backgroundColor: status === opt.value ? `${opt.color.replace(/[\d.]+\)$/, "0.08)")}` : "transparent",
+              color: status === opt.value ? opt.color : "rgba(255,255,255,0.40)",
+              fontSize: "12px",
+              cursor: "pointer",
+              ...mono,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase" as const,
+            }}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      {status && (() => {
+        const selected = options.find((o) => o.value === status);
+        const needsNote = status === "BLOCKED" || status === "ABANDONED" || status === "DISPUTED_FINDING";
+        return (
+          <div style={{ marginTop: "12px" }}>
+            {selected?.noteLabel && (
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder={selected.noteLabel}
+                rows={3}
+                style={{
+                  width: "100%", padding: "12px", background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.08)", color: "#F5F5F5", fontSize: "13px",
+                  lineHeight: 1.6, resize: "vertical", marginBottom: "12px",
+                }}
+              />
+            )}
+            <button
+              onClick={() => respond(status)}
+              disabled={submitting || (needsNote && note.trim().length < 5)}
+              style={{
+                padding: "12px 24px", backgroundColor: "#F5F5F5", color: "#0B0B0B",
+                border: "none", cursor: submitting || (needsNote && note.trim().length < 5) ? "not-allowed" : "pointer",
+                opacity: submitting || (needsNote && note.trim().length < 5) ? 0.3 : 1,
+                ...mono, fontSize: "10px", letterSpacing: "0.10em", textTransform: "uppercase" as const,
+              }}
+            >
+              {submitting ? "Recording..." : "Record response"}
+            </button>
+          </div>
+        );
+      })()}
+    </div>
   );
 }
 

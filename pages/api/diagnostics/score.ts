@@ -178,6 +178,26 @@ export default async function handler(
       // Best-effort DB persistence
     }
 
+    // 6b. Create efficacy checkpoint
+    let checkpointId: string | null = null;
+    try {
+      const { buildFastDiagnosticCommand } = await import("@/lib/product/efficacy-contract");
+      const { createCheckpointForCommand } = await import("@/lib/product/checkpoint-service");
+      const command = buildFastDiagnosticCommand({
+        decisionText: answers.decision ?? "",
+        ownerText: answers.claimedOwner ?? "",
+        consequenceText: answers.consequence ?? "",
+        committed,
+      });
+      const cp = await createCheckpointForCommand({
+        command,
+        email: spine.email ?? undefined,
+        userId: spine.userId ?? undefined,
+        caseId: spine.id,
+      });
+      checkpointId = cp?.checkpointId ?? null;
+    } catch { /* best-effort */ }
+
     // 7. Condition labels (public-safe)
     const conditionLabels: Record<string, string> = {
       authority: "an authority problem — who decides is unclear",
@@ -219,6 +239,7 @@ export default async function handler(
       contradictionText: contradiction,
       reviewMessage: synthesisResult.arbiterMismatchMessage ?? null,
       stateToken: spine.id,
+      checkpointId: checkpointId ?? undefined,
     };
 
     // 9. ELEVATION LAYER — public-safe consequence outputs

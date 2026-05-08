@@ -512,6 +512,22 @@ const FastDiagnosticPage: NextPage = () => {
                 </p>
               </div>
 
+              {/* SECTION 5b: CHECKPOINT CREATED */}
+              {committed && (
+                <div style={{ border: "1px solid rgba(110,231,183,0.15)", backgroundColor: "rgba(110,231,183,0.03)", padding: "1rem 1.25rem" }}>
+                  <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(110,231,183,0.50)" }}>
+                    Checkpoint scheduled
+                  </div>
+                  <p style={{ marginTop: "0.35rem", fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.50)" }}>
+                    In 48 hours, the system will ask whether you acted on the identified blocker.
+                    Your response will be recorded and will affect how the system governs this case.
+                  </p>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "0.5rem" }}>
+                    Checkpoint visible in Decision Centre when due
+                  </p>
+                </div>
+              )}
+
               {/* SECTION 6: NEXT ROUTE — single primary CTA */}
               <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", marginBottom: "1rem" }}>

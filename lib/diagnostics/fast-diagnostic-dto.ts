@@ -66,6 +66,8 @@ export type FastDiagnosticResult = {
   reviewMessage: string | null;
   /** Encrypted state token for session continuity */
   stateToken: string;
+  /** Checkpoint ID for efficacy tracking */
+  checkpointId?: string;
 
   // ── ELEVATION LAYER (v1) ──────────────────────────────────────────────
 
