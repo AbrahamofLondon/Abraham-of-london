@@ -47,6 +47,7 @@ export type OversightAccountLoadResult = {
     improvementSignals: number;
     deteriorationSignals: number;
   };
+  retainerIntakeContext?: import("@/lib/product/retainer-intake-loader").RetainerIntakeContext | null;
   warnings: string[];
 };
 
@@ -444,10 +445,26 @@ export async function loadOversightAccount(input: {
     warnings.push("Active retainer contract exists but no enforcement cycles are recorded for this oversight period.");
   }
 
+  // ── RETAINER INTAKE CONTEXT ──
+  let retainerIntakeContext: OversightAccountLoadResult["retainerIntakeContext"] = null;
+  try {
+    const { loadLatestRetainerIntakeForAccount } = await import("@/lib/product/retainer-intake-loader");
+    retainerIntakeContext = await loadLatestRetainerIntakeForAccount({
+      email: input.email ?? null,
+      userId: input.userId ?? null,
+    });
+    if (!retainerIntakeContext) {
+      warnings.push("No retainer intake has been captured for this account.");
+    }
+  } catch {
+    warnings.push("Retainer intake loader failed. Intake context unavailable.");
+  }
+
   return {
     account,
     cases,
     retainedEnforcement,
+    retainerIntakeContext,
     warnings,
   };
 }

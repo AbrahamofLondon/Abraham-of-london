@@ -319,6 +319,20 @@ export async function composeOversightBrief(input: {
     },
     retainedEnforcement: loaded.retainedEnforcement,
     purposeAlignment: paAggregate,
+    retainerIntake: loaded.retainerIntakeContext
+      ? {
+          source: "RETAINER_INTAKE" as const,
+          capturedAt: loaded.retainerIntakeContext.capturedAt,
+          mandate: loaded.retainerIntakeContext.mandate,
+          oversightScope: loaded.retainerIntakeContext.oversightScope,
+          refusalBoundary: loaded.retainerIntakeContext.refusalBoundary ?? null,
+          cadenceExpectation: null,
+          counselThreshold: null,
+          retainedRiskPosture: loaded.retainerIntakeContext.costExposure ?? null,
+          clientSafeSummary: loaded.retainerIntakeContext.clientSafeSummary,
+          suppressionReasons: loaded.retainerIntakeContext.suppressionReasons,
+        }
+      : null,
     decisionCredit: creditProfile
       ? {
           score: creditProfile.score,

@@ -93,6 +93,18 @@ export type OversightBrief = {
     deteriorationSignals: number;
   };
   purposeAlignment?: Record<string, unknown> | null;
+  retainerIntake?: {
+    source: "RETAINER_INTAKE";
+    capturedAt?: string;
+    mandate?: string;
+    oversightScope?: string;
+    refusalBoundary?: string | null;
+    cadenceExpectation?: string | null;
+    counselThreshold?: string | null;
+    retainedRiskPosture?: string | null;
+    clientSafeSummary?: string[];
+    suppressionReasons?: string[];
+  } | null;
   decisionCredit?: {
     score?: number;
     trend?: string;

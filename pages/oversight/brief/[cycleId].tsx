@@ -10,6 +10,10 @@ import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
 import type { OversightCycleAudience, OversightCycleArchiveRecord } from "@/lib/product/oversight-cycle-ledger-contract";
 import type { OversightCycleComparison } from "@/lib/product/oversight-cycle-comparison";
 import { verifyRetainerAccess } from "@/lib/retainers/retainer-service";
+import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import {
+  convertPurposeAlignmentToGovernedMemory,
+} from "@/lib/alignment/evidence-loader";
 
 type PageProps = {
   blockedReason: string | null;
@@ -167,6 +171,66 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   )}
                 </Section>
               </div>
+
+              {/* ── PURPOSE ALIGNMENT EVIDENCE ── */}
+              {(() => {
+                if (!brief.purposeAlignment) return null;
+                const pa = brief.purposeAlignment as Record<string, unknown>;
+                const paItems = convertPurposeAlignmentToGovernedMemory({
+                  available: true,
+                  sourceSurface: "PURPOSE_ALIGNMENT",
+                  assessedAt: (pa.assessedAt as string) ?? null,
+                  schemaVersion: null,
+                  profile: (pa.profile as string) ?? null,
+                  compositeScore: (pa.compositeScore as number) ?? null,
+                  strongestDomain: null,
+                  weakestDomain: (pa.weakestDomain as string) ?? null,
+                  competingObligation: null,
+                  consequence: null,
+                  institutionalConsequence: null,
+                  primaryPattern: (pa.patternLabel as string) ?? null,
+                  patternConsequence: null,
+                  contradictions: [],
+                  domainScores: [],
+                  firstAction: null,
+                  corrections: [],
+                  assessmentId: null,
+                });
+                if (paItems.length === 0) return null;
+                return (
+                  <Section title="Purpose Alignment Memory">
+                    <GovernanceEvidenceCarryForward
+                      title="Earlier alignment signal"
+                      intro="The following Purpose Alignment evidence remains relevant to this oversight scope. Only safe, summarised signals are shown."
+                      items={paItems}
+                      variant="session"
+                    />
+                  </Section>
+                );
+              })()}
+
+              {/* ── RETAINER INTAKE MANDATE ── */}
+              {(brief as any).retainerIntake && (brief as any).retainerIntake.clientSafeSummary?.length > 0 && (
+                <Section title="Retainer Mandate Carried Forward">
+                  <p style={{ ...serif, color: "rgba(255,255,255,0.55)", lineHeight: 1.6, marginBottom: "16px" }}>
+                    This section reflects the oversight mandate recorded at intake. It is used to keep this cycle aligned with the scope the client entered, not as independently verified evidence.
+                  </p>
+                  {((brief as any).retainerIntake.clientSafeSummary as string[]).map((item: string, i: number) => (
+                    <p key={i} style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6, marginBottom: "6px" }}>
+                      {item}
+                    </p>
+                  ))}
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "12px" }}>
+                    Source: Retainer Intake &middot; Evidence posture: client-reported
+                    {(brief as any).retainerIntake.capturedAt && ` · Captured: ${new Date((brief as any).retainerIntake.capturedAt).toLocaleDateString("en-GB")}`}
+                  </p>
+                  {(brief as any).retainerIntake.suppressionReasons?.length > 0 && (
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(201,169,110,0.35)", marginTop: "6px" }}>
+                      Some intake fields were suppressed for safety.
+                    </p>
+                  )}
+                </Section>
+              )}
 
               {brief.organisationDivergence && brief.organisationDivergence.count > 0 && (
                 <Section title="Organisation Divergence">

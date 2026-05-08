@@ -532,6 +532,50 @@ export default function OversightReviewPage(
                 </div>
               </Panel>
 
+              <Panel title="Retainer Intake Context">
+                {preview?.internalBrief?.retainerIntake ? (
+                  <div className="space-y-3">
+                    <p className="text-[9px] font-mono uppercase tracking-[0.22em] text-amber-500/50">Source: Retainer Intake &middot; Evidence posture: client-reported</p>
+                    {preview.internalBrief.retainerIntake.mandate && (
+                      <div>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/35 mb-1">Mandate</p>
+                        <p className="text-sm text-white/70">{preview.internalBrief.retainerIntake.mandate}</p>
+                      </div>
+                    )}
+                    {preview.internalBrief.retainerIntake.refusalBoundary && (
+                      <div>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/35 mb-1">Refusal boundary</p>
+                        <p className="text-sm text-white/70">{preview.internalBrief.retainerIntake.refusalBoundary}</p>
+                      </div>
+                    )}
+                    {preview.internalBrief.retainerIntake.clientSafeSummary && preview.internalBrief.retainerIntake.clientSafeSummary.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/35 mb-1">Client-safe summary</p>
+                        {preview.internalBrief.retainerIntake.clientSafeSummary.map((item: string, i: number) => (
+                          <p key={i} className="text-sm text-white/60">{item}</p>
+                        ))}
+                      </div>
+                    )}
+                    {preview.internalBrief.retainerIntake.suppressionReasons && preview.internalBrief.retainerIntake.suppressionReasons.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-amber-400/50 mb-1">Suppression</p>
+                        {preview.internalBrief.retainerIntake.suppressionReasons.map((item: string, i: number) => (
+                          <p key={i} className="text-xs text-amber-200/40">{item}</p>
+                        ))}
+                      </div>
+                    )}
+                    {preview.internalBrief.retainerIntake.capturedAt && (
+                      <p className="text-[8px] font-mono text-white/20">Captured: {new Date(preview.internalBrief.retainerIntake.capturedAt).toLocaleDateString("en-GB")}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-amber-200/50">No retainer intake found.</p>
+                    <p className="text-xs text-white/30 mt-1">Operator should not approve first retained oversight cycle until intake is captured or absence is justified.</p>
+                  </div>
+                )}
+              </Panel>
+
               <Panel title="Counsel Handoff">
                 <div className="space-y-4">
                   <label className="block text-sm text-white/70">
