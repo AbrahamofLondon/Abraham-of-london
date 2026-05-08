@@ -540,13 +540,33 @@ export default function DecisionCentrePage() {
               <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "12px" }}>
                 Requires your response
               </p>
-              {((data as any).dueCheckpoints as Array<{ id: string; commandTitle: string; verificationQuestion: string; dueAt: string; status: string }>).map((cp) => (
-                <div key={cp.id} style={{ borderLeft: `2px solid ${cp.status === "OVERDUE" ? "rgba(252,165,165,0.40)" : "rgba(201,169,110,0.30)"}`, paddingLeft: "12px", marginBottom: "10px" }}>
+              {((data as any).dueCheckpoints as Array<{ id: string; commandTitle: string; verificationQuestion: string; dueAt: string; status: string; responseStatus?: string | null; respondedAt?: string | null; evidenceNote?: string | null }>).map((cp) => (
+                <div key={cp.id} style={{ borderLeft: `2px solid ${cp.status === "OVERDUE" ? "rgba(252,165,165,0.40)" : cp.status === "RESPONDED" ? "rgba(110,231,183,0.30)" : "rgba(201,169,110,0.30)"}`, paddingLeft: "12px", marginBottom: "10px" }}>
                   <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>{cp.commandTitle}</p>
-                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.40)", marginTop: "2px" }}>{cp.verificationQuestion}</p>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: cp.status === "OVERDUE" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.20)", marginTop: "4px" }}>
-                    {cp.status} &middot; Due: {new Date(cp.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                  </p>
+                  {cp.status === "RESPONDED" && cp.responseStatus ? (
+                    <div>
+                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: cp.responseStatus === "COMPLETED" ? "rgba(110,231,183,0.55)" : cp.responseStatus === "BLOCKED" ? "rgba(252,165,165,0.55)" : "rgba(201,169,110,0.55)", marginTop: "4px" }}>
+                        Response: {cp.responseStatus.replace(/_/g, " ")}
+                      </p>
+                      {cp.evidenceNote && (
+                        <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.35)", marginTop: "2px", fontStyle: "italic" }}>
+                          &ldquo;{cp.evidenceNote.slice(0, 150)}&rdquo;
+                        </p>
+                      )}
+                      {cp.respondedAt && (
+                        <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.15)", marginTop: "2px" }}>
+                          Responded: {new Date(cp.respondedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.40)", marginTop: "2px" }}>{cp.verificationQuestion}</p>
+                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: cp.status === "OVERDUE" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.20)", marginTop: "4px" }}>
+                        {cp.status} &middot; Due: {new Date(cp.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

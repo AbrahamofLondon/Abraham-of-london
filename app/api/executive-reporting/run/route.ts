@@ -1097,9 +1097,33 @@ export async function POST(
       ? generateBoardroomDossier(enrichedCanonical as any)
       : null;
 
+    // ── EFFICACY CHECKPOINT ──
+    let erCheckpointId: string | null = null;
+    try {
+      const { buildExecutiveReportingCommand } = await import("@/lib/product/efficacy-contract");
+      const { createCheckpointForCommand } = await import("@/lib/product/checkpoint-service");
+      const topPriority = (enrichedCanonical as any).priorityStack?.[0]
+        ?? (enrichedCanonical as any).sections?.priorityStack?.[0]
+        ?? (enrichedCanonical as any).requiredInterventions?.[0]
+        ?? "Address the governing condition.";
+      const command = buildExecutiveReportingCommand({
+        topPriority: typeof topPriority === "string" ? topPriority : "Address the governing condition.",
+        decisionText: s(intake.decisionQuestion) || s(intake.problemStatement) || "",
+        constraintText: s(intake.currentConstraint) || "",
+        hasVerificationCriteria: Boolean(s(intake.verificationCriteria)),
+      });
+      const cp = await createCheckpointForCommand({
+        command,
+        email: email || undefined,
+        caseId: run.id,
+      });
+      erCheckpointId = cp?.checkpointId ?? null;
+    } catch { /* best-effort */ }
+
     return NextResponse.json({
       ok: true,
       runKey: run.runKey,
+      checkpointId: erCheckpointId,
       route,
       canonical: enrichedCanonical,
       viewModel,

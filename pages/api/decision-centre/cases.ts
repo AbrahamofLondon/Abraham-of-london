@@ -598,6 +598,9 @@ export default async function handler(
         verificationQuestion: c.verificationQuestion,
         dueAt: c.dueAt,
         status: c.status,
+        responseStatus: c.responseStatus ?? null,
+        respondedAt: c.respondedAt ?? null,
+        evidenceNote: c.evidenceNote ?? null,
       }));
     } catch { /* best-effort */ }
 

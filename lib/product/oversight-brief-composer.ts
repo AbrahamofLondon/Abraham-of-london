@@ -200,6 +200,17 @@ export async function composeOversightBrief(input: {
     }
   } catch { /* degrade gracefully */ }
 
+  // ── CHECKPOINT OUTCOME SIGNALS ──
+  let checkpointSignalCount = 0;
+  try {
+    const { loadDueCheckpointsForUser } = await import("@/lib/product/checkpoint-service");
+    const checkpoints = await loadDueCheckpointsForUser({ email: input.email ?? undefined, userId: input.userId ?? undefined });
+    const overdue = checkpoints.filter((c) => c.status === "OVERDUE");
+    const blocked = checkpoints.filter((c) => c.responseStatus === "BLOCKED");
+    const abandoned = checkpoints.filter((c) => c.responseStatus === "ABANDONED");
+    checkpointSignalCount = overdue.length + blocked.length + abandoned.length;
+  } catch { /* degrade gracefully */ }
+
   const signals = buildOversightSignals({
     cases: loaded.cases,
     creditProfile,
@@ -208,6 +219,19 @@ export async function composeOversightBrief(input: {
     enterpriseStrain,
     retainedEnforcement: loaded.retainedEnforcement ?? null,
   });
+
+  // Inject checkpoint-level signals from the efficacy system
+  if (checkpointSignalCount > 0) {
+    signals.push({
+      id: "efficacy:checkpoint-attention",
+      type: "CHECKPOINT_OVERDUE" as any,
+      severity: checkpointSignalCount >= 3 ? "HIGH" : "MEDIUM",
+      title: `${checkpointSignalCount} checkpoint${checkpointSignalCount === 1 ? "" : "s"} require${checkpointSignalCount === 1 ? "s" : ""} attention`,
+      explanation: `The efficacy checkpoint system has detected ${checkpointSignalCount} overdue, blocked, or abandoned checkpoint${checkpointSignalCount === 1 ? "" : "s"} that should be reviewed in this oversight cycle.`,
+      recommendedAction: "Review checkpoint outcomes in Decision Centre before approving this cycle.",
+      createdAt: new Date().toISOString(),
+    });
+  }
 
   const commitmentsDue = sum(loaded.cases.map((item) =>
     item.verification?.filter((checkpoint) => checkpoint.status === "DUE" || checkpoint.status === "OVERDUE").length ?? 0

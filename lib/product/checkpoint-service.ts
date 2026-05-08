@@ -69,7 +69,7 @@ export async function loadDueCheckpointsForUser(input: {
     const records = await prisma.diagnosticRecord.findMany({
       where: {
         diagnosticType: "efficacy_checkpoint",
-        status: "draft",
+        status: { in: ["draft", "completed"] },
         ...(input.email ? { userEmail: input.email.toLowerCase() } : {}),
         ...(input.userId ? { userId: input.userId } : {}),
       },
@@ -79,6 +79,7 @@ export async function loadDueCheckpointsForUser(input: {
 
     return records.map((r) => {
       const data = JSON.parse(r.responsesJson || "{}");
+      const response = data.response;
       const dueAt = data.dueAt ?? r.createdAt.toISOString();
       const isOverdue = new Date(dueAt).getTime() < Date.now();
 
@@ -95,7 +96,12 @@ export async function loadDueCheckpointsForUser(input: {
         verificationQuestion: data.verificationQuestion ?? "What happened?",
         requiredResponseType: data.requiredResponseType ?? "STATUS_SELECT",
         dueAt,
-        status: (isOverdue ? "OVERDUE" : "DUE") as CheckpointStatus,
+        status: (r.status === "completed" ? "RESPONDED" : isOverdue ? "OVERDUE" : "DUE") as CheckpointStatus,
+        responseStatus: response?.status ?? undefined,
+        respondedAt: response?.respondedAt ?? undefined,
+        evidenceNote: response?.evidenceNote ?? undefined,
+        blockerDescription: response?.blockerDescription ?? undefined,
+        whatChanged: response?.whatChanged ?? undefined,
         createdAt: r.createdAt.toISOString(),
         updatedAt: r.updatedAt.toISOString(),
       };
