@@ -134,8 +134,42 @@ export type OversightBrief = {
     requiredAction: string;
   };
 
+  /** What this cycle surfaced that would likely have remained hidden */
+  valueProtected?: {
+    title: string;
+    summary: string;
+    missedSignals: Array<{
+      label: string;
+      source: string;
+      whyItMatters: string;
+      evidenceBasis: string;
+      severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    }>;
+  };
+
   /** Required actions (string form for backward compatibility) */
   requiredActions: string[];
   /** Structured required actions with evidence basis, urgency, and owner */
-  structuredActions?: OversightRequiredAction[];
+  structuredActions?: OversightStructuredAction[];
+};
+
+export type OversightStructuredAction = {
+  id: string;
+  caseId?: string;
+  decisionText?: string;
+  actionType:
+    | "VERIFY_COMMITMENT"
+    | "ESCALATE_COUNSEL"
+    | "GENERATE_BOARDROOM_DOSSIER"
+    | "RESOLVE_DEPENDENCY"
+    | "PROTECT_OPTION"
+    | "ADDRESS_IRREVERSIBILITY"
+    | "REVIEW_LOSS"
+    | "RECHECK_PATTERN";
+  action: string;
+  evidenceBasis: string;
+  deadline?: string;
+  ownerRole?: string;
+  consequenceIfIgnored?: string;
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 };

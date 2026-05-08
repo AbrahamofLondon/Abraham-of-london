@@ -349,6 +349,132 @@ export async function composeOversightBrief(input: {
     warnings.push(...consequenceProjection.warnings);
   }
 
+  // ── Value Protected — what this cycle surfaced ──
+  const missedSignals: NonNullable<OversightBrief["valueProtected"]>["missedSignals"] = [];
+
+  if (brief.costOfInaction && brief.costOfInaction.totalEstimated > 0) {
+    missedSignals.push({
+      label: "Cost accumulation",
+      source: "Cost-of-Inaction Clock",
+      whyItMatters: `£${brief.costOfInaction.totalEstimated.toLocaleString()} has accumulated across ${brief.costOfInaction.casesIncluded} case${brief.costOfInaction.casesIncluded !== 1 ? "s" : ""} since the last intervention.`,
+      evidenceBasis: "Monthly cost estimate from Executive Reporting or Strategy Room",
+      severity: brief.costOfInaction.totalEstimated >= 20000 ? "CRITICAL" : brief.costOfInaction.totalEstimated >= 5000 ? "HIGH" : "MEDIUM",
+    });
+  }
+  if (brief.patternRecurrence && brief.patternRecurrence.status !== "NO_PRIOR_PATTERN" && brief.patternRecurrence.status !== "INSUFFICIENT_HISTORY") {
+    missedSignals.push({
+      label: "Pattern recurrence",
+      source: "Pattern Recurrence Engine",
+      whyItMatters: brief.patternRecurrence.explanation,
+      evidenceBasis: "Cross-case pattern matching from diagnostic journey history",
+      severity: brief.patternRecurrence.status === "VERIFIED_RECURRENCE" ? "HIGH" : "MEDIUM",
+    });
+  }
+  if (brief.strategicOptions && brief.strategicOptions.options.some((o) => o.status === "CLOSING")) {
+    const closingCount = brief.strategicOptions.options.filter((o) => o.status === "CLOSING").length;
+    missedSignals.push({
+      label: "Strategic option closing",
+      source: "Strategic Option Register",
+      whyItMatters: `${closingCount} strategic option${closingCount !== 1 ? "s are" : " is"} closing due to decision delay.`,
+      evidenceBasis: "Derived from unresolved commitments and active cost basis",
+      severity: "HIGH",
+    });
+  }
+  if (brief.irreversibility && brief.irreversibility.score >= 45) {
+    missedSignals.push({
+      label: "Irreversibility rising",
+      source: "Irreversibility Index",
+      whyItMatters: brief.irreversibility.explanation,
+      evidenceBasis: brief.irreversibility.drivers.map((d) => d.label).join("; "),
+      severity: brief.irreversibility.level === "CRITICAL" || brief.irreversibility.level === "IRREVERSIBLE" ? "CRITICAL" : "HIGH",
+    });
+  }
+  if (brief.boardroom.dossiersAvailable > 0) {
+    missedSignals.push({
+      label: "Boardroom threshold met",
+      source: "Boardroom Mode Engine",
+      whyItMatters: "Cost and evidence convergence now justify board-level treatment.",
+      evidenceBasis: "Boardroom qualification from exposure and evidence threshold",
+      severity: "HIGH",
+    });
+  }
+  if (brief.verification.unresolvedBreaches > 0) {
+    missedSignals.push({
+      label: "Commitment breach",
+      source: "Commitment Verification",
+      whyItMatters: `${brief.verification.unresolvedBreaches} commitment${brief.verification.unresolvedBreaches !== 1 ? "s" : ""} remain unverified or breached.`,
+      evidenceBasis: "Execution record timing against commitment checkpoint",
+      severity: brief.verification.unresolvedBreaches >= 3 ? "HIGH" : "MEDIUM",
+    });
+  }
+
+  if (missedSignals.length > 0) {
+    brief.valueProtected = {
+      title: "What this cycle surfaced",
+      summary: `This oversight cycle identified ${missedSignals.length} signal${missedSignals.length !== 1 ? "s" : ""} that would likely have remained hidden without governed monitoring.`,
+      missedSignals,
+    };
+  }
+
+  // ── Structured Actions ──
+  const structuredActions: NonNullable<OversightBrief["structuredActions"]> = [];
+  for (const signal of signals) {
+    if (signal.type === "COMMITMENT_UNVERIFIED" && signal.caseId) {
+      structuredActions.push({
+        id: `act_verify_${signal.caseId}`,
+        caseId: signal.caseId,
+        actionType: "VERIFY_COMMITMENT",
+        action: `Confirm whether the commitment for "${signal.title}" has been executed. If not, classify the blocker as authority, resource, or avoidance before the next cycle.`,
+        evidenceBasis: signal.explanation,
+        severity: signal.severity === "CRITICAL" ? "CRITICAL" : signal.severity === "HIGH" ? "HIGH" : "MEDIUM",
+      });
+    }
+    if (signal.type === "COUNSEL_REVIEW_TRIGGERED" && signal.caseId) {
+      structuredActions.push({
+        id: `act_counsel_${signal.caseId}`,
+        caseId: signal.caseId,
+        actionType: "ESCALATE_COUNSEL",
+        action: `Counsel review triggered for this case. Schedule governance review before execution proceeds.`,
+        evidenceBasis: signal.explanation,
+        ownerRole: "COUNSEL",
+        severity: "HIGH",
+      });
+    }
+    if (signal.type === "BOARDROOM_THRESHOLD_MET" && signal.caseId) {
+      structuredActions.push({
+        id: `act_boardroom_${signal.caseId}`,
+        caseId: signal.caseId,
+        actionType: "GENERATE_BOARDROOM_DOSSIER",
+        action: `Generate Boardroom Dossier for board-level presentation.`,
+        evidenceBasis: signal.explanation,
+        ownerRole: "BOARD",
+        severity: "HIGH",
+      });
+    }
+    if (signal.type === "PATTERN_RECURRED" && signal.caseId) {
+      structuredActions.push({
+        id: `act_pattern_${signal.caseId}`,
+        caseId: signal.caseId,
+        actionType: "RECHECK_PATTERN",
+        action: `Pattern recurrence detected. Investigate whether the structural root has been addressed or whether intervention is treating symptoms.`,
+        evidenceBasis: signal.explanation,
+        severity: "MEDIUM",
+      });
+    }
+  }
+  if (brief.irreversibility && brief.irreversibility.score >= 60) {
+    structuredActions.push({
+      id: "act_irreversibility_global",
+      actionType: "ADDRESS_IRREVERSIBILITY",
+      action: `Irreversibility index is ${brief.irreversibility.score}/100. Prioritise the highest-weight driver before the situation becomes unrecoverable.`,
+      evidenceBasis: brief.irreversibility.explanation,
+      severity: brief.irreversibility.score >= 80 ? "CRITICAL" : "HIGH",
+    });
+  }
+  if (structuredActions.length > 0) {
+    brief.structuredActions = structuredActions;
+  }
+
   if (boardroomCount > 0) {
     warnings.push("Boardroom export queue is not yet modelled. Dossier readiness is signal-only in v0.");
   }
