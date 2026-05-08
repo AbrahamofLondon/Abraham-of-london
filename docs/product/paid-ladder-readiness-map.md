@@ -69,6 +69,14 @@ type ProductAccessState =
 | Executive Oversight | `QUALIFIED` -> `ACTIVE` | Retainer contract entitlement | Counsel/review conditions may be active | Multi-case and organisation privacy rules still govern | Contracted | Oversight brief + escalation management |
 | Institutional Command | `QUALIFIED` -> `ACTIVE` | Institutional retainer entitlement | Board/counsel thresholds typically already present | Organisation and boardroom governance rules still apply | Contracted | Board-grade oversight layer |
 
+## Retainer Sales Readiness
+
+| Level | Current status | What is real now | What remains |
+|------|----------------|------------------|--------------|
+| First retainer | Possible only when live brief composes cleanly | Internal oversight composer, commitment verification, recurrence, cost clock, decision credit interpretation | Manual operator review cadence and internal preview discipline |
+| £15k+ retainer | Not ready for external packaging | Organisation access helper and Control Room foundation exist | Sponsor-safe oversight preview, richer divergence state, organisation oversight workflow, recurring verification cadence, counsel review workflow |
+| £50k retainer | Not ready | Retainer doctrine, boardroom threshold signal, counsel escalation doctrine | Enterprise Control Room, recurring verification cadence, boardroom history, counsel oversight pipeline, operator console hardening |
+
 ---
 
 ## Refund/Restriction Logic

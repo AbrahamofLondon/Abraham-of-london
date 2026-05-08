@@ -16,6 +16,7 @@ import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution
 import { evaluateDecision } from "@/lib/decision/kernel";
 import { calculateCostOfInactionClock, type CostOfInactionClockResult } from "@/lib/product/cost-of-inaction-clock";
 import { buildCommitmentVerificationStates, type CommitmentVerificationState } from "@/lib/product/commitment-verification";
+import { detectPatternRecurrenceV0, type PatternRecurrenceResult } from "@/lib/product/pattern-recurrence";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -66,6 +67,7 @@ export type ReturnBrief = {
   /** Oversight signals */
   costOfInaction?: CostOfInactionClockResult | null;
   verification?: CommitmentVerificationState[] | null;
+  recurrence?: PatternRecurrenceResult | null;
 
   /** Section 6 — Direct challenge */
   challenge: string;
@@ -291,6 +293,12 @@ export async function generateReturnBrief(
         latestDecisionUpdatedAt: latestDecision?.updatedAt ?? null,
       })
     : null;
+  const recurrence = await detectPatternRecurrenceV0({
+    email: session.email,
+    currentCaseId: session.sessionKey,
+    contradiction: constraintText,
+    decisionText,
+  });
 
   // Section 5 — Delta
   const delta = executionState
@@ -345,6 +353,7 @@ export async function generateReturnBrief(
     delta,
     costOfInaction,
     verification,
+    recurrence: recurrence.status === "INSUFFICIENT_HISTORY" ? null : recurrence,
     challenge,
     retainerTriggered: trigger === "contradiction_persistence",
   };

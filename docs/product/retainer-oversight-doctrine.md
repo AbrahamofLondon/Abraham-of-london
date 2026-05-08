@@ -160,3 +160,48 @@ Counsel is escalation, not ambient commentary.
 Human counsel is part of the oversight model, not the centre of it.
 
 The system should do the remembering, monitoring, verification, and escalation detection. Human counsel should enter where judgment, authority, or governance legitimacy cannot be automated.
+
+---
+
+## What is now operationally real
+
+The platform can now assemble an internal oversight brief from:
+
+- real active case history
+- real execution records
+- real commitment checkpoints
+- real verified outcomes
+- real decision credit profiles
+- real recurrence checks
+- real boardroom threshold signals when a true cost basis exists
+
+This is not yet a public client surface. It is an internal monthly oversight artifact.
+
+First retainer readiness:
+
+- possible only after the Oversight Brief Composer returns a real brief from live data
+- possible manually after the oversight review cycle can generate, suppress, review, and approve a client-safe brief
+- retainer-grade only when the brief is scored, compared against prior cycle where available, and tied to the next governed cycle
+
+## What remains before first retainer
+
+- internal operator preview and review cadence
+- clearer organisation-level divergence coverage
+- monthly workflow discipline for brief review and action logging
+
+## What remains before £15k+
+
+- organisation-safe oversight preview for sponsors
+- stronger Control Room divergence and coverage signals
+- role-aware oversight brief access at organisation level
+- recurring verification cadence
+- counsel review workflow
+- sponsor-safe preview surface
+
+## What remains before £50k
+
+- enterprise Control Room with durable role-scoped access
+- recurring verification cadence and escalation workflow
+- boardroom history across oversight cycles
+- counsel oversight pipeline with logged evidence outputs
+- retained enforcement-cycle history across review periods

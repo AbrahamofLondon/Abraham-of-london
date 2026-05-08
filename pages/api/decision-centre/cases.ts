@@ -22,10 +22,21 @@ import {
   type SurfaceAdmissionStatus,
   type DecisionCreditSummary,
   type RetainerReadiness,
+  type PatternRecurrenceSummary,
 } from "@/lib/product/decision-centre-contract";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
 import { qualifiesForBoardroom } from "@/lib/constitution/boardroom-mode";
 import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-credit-governance";
+import { detectPatternRecurrenceV0 } from "@/lib/product/pattern-recurrence";
+import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
+
+function parseMoney(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const match = value.match(/£\s?([\d,]+(?:\.\d+)?)/i) || value.match(/\b([\d,]+(?:\.\d+)?)\b/);
+  if (!match?.[1]) return null;
+  const amount = Number(match[1].replace(/,/g, ""));
+  return Number.isFinite(amount) && amount > 0 ? amount : null;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -174,52 +185,51 @@ function deriveNextAction(livingCase: LivingCase): string | null {
   return null;
 }
 
-function deriveRetainerReadiness(livingCase: LivingCase): RetainerReadiness | null {
-  const patternRecurrenceNode = livingCase.evidenceNodes.find((node) => node.kind === "pattern_recurrence");
-  if (livingCase.contradictions.length >= 3 || patternRecurrenceNode) {
+function deriveRetainerReadiness(input: {
+  livingCase: LivingCase;
+  recurrence: PatternRecurrenceSummary | null;
+  boardroomQualified: boolean;
+  counselTriggered: boolean;
+  costBasisAvailable: boolean;
+  unresolvedCommitments: number;
+  credit?: DecisionCreditSummary | null;
+  outcomeStatus?: string | null;
+}): RetainerReadiness | null {
+  const signals: string[] = [];
+
+  if (input.boardroomQualified) signals.push("boardroom threshold met");
+  if (input.recurrence?.status === "VERIFIED_RECURRENCE") signals.push("recurrence detected");
+  if (input.recurrence?.status === "POSSIBLE_RECURRENCE") signals.push("possible recurrence");
+  if (input.counselTriggered) signals.push("counsel trigger present");
+  if (input.unresolvedCommitments > 0) signals.push("unresolved commitment remains");
+  if (input.costBasisAvailable) signals.push("cost basis available");
+  if (input.credit && (input.credit.trend === "declining" || input.credit.score < 60)) signals.push("decision credit weakening");
+  if (input.outcomeStatus === "deteriorated" || input.outcomeStatus === "invalid") signals.push("outcome deteriorated");
+
+  if (signals.length === 0) {
     return {
-      level: "HIGH",
-      reason: patternRecurrenceNode?.summary || "Repeated contradiction persistence indicates a recurring governance condition.",
+      level: "LOW",
+      reason: "Current evidence supports case progression, but recurring oversight conditions are not yet established.",
+      signals: [],
     };
   }
 
-  const boardroomQualified = (() => {
-    try {
-      const spineProxy = {
-        costOfDelay: livingCase.primaryDecision?.costOfDelayText
-          ? { monthly: parseFloat(livingCase.primaryDecision.costOfDelayText.replace(/[^\d.]/g, "")) || 0 }
-          : null,
-        accuracy: livingCase.evidenceTier === "multi_source" || livingCase.evidenceTier === "outcome_verified" ? "yes" : null,
-      } as any;
-      return qualifiesForBoardroom(spineProxy).qualified;
-    } catch {
-      return false;
-    }
-  })();
-  if (boardroomQualified) {
-    return {
-      level: "HIGH",
-      reason: "Boardroom threshold appears met. This case has oversight significance beyond a single intervention cycle.",
-    };
-  }
+  const level = signals.some((signal) =>
+    signal === "boardroom threshold met"
+      || signal === "recurrence detected"
+      || signal === "counsel trigger present"
+      || signal === "outcome deteriorated"
+  )
+    ? "HIGH"
+    : signals.length >= 2
+      ? "MEDIUM"
+      : "LOW";
 
-  if (livingCase.completedStages.includes("strategy_room") && livingCase.contradictions.length > 0) {
-    return {
-      level: "MEDIUM",
-      reason: "Execution has begun, but unresolved contradiction remains in the active case.",
-    };
-  }
-
-  if (livingCase.completedStages.includes("executive_reporting") && livingCase.evidenceTier === "multi_source") {
-    return {
-      level: "MEDIUM",
-      reason: "Evidence depth and intervention readiness suggest this case may warrant continuing oversight if execution falters.",
-    };
-  }
-
+  const orderedSignals = [...new Set(signals)];
   return {
-    level: "LOW",
-    reason: "Current evidence supports case progression, but recurring oversight conditions are not yet established.",
+    level,
+    reason: `Reason: ${orderedSignals.join(", ")}.`,
+    signals: orderedSignals,
   };
 }
 
@@ -273,6 +283,73 @@ export default async function handler(
     const paymentRequired = derivePaymentRequired(eligible, owned);
     const restricted = deriveRestrictedProducts(livingCase, owned);
 
+    const recurrenceResult = await detectPatternRecurrenceV0({
+      email,
+      organisationKey: livingCase.organisation,
+      currentCaseId: livingCase.caseId,
+      contradiction: livingCase.contradictions[0]?.summary || null,
+      decisionText: livingCase.primaryDecision?.decisionText || null,
+    });
+    const patternRecurrence: PatternRecurrenceSummary | null =
+      recurrenceResult.status === "INSUFFICIENT_HISTORY" && recurrenceResult.priorCount === 0
+        ? null
+        : recurrenceResult;
+
+    const monthlyCost = parseMoney(livingCase.primaryDecision?.costOfDelayText);
+    const boardroomQualification = (() => {
+      if (!monthlyCost) {
+        return {
+          qualified: false,
+          reason: "This is not a board-level issue. Resolve operationally.",
+        };
+      }
+      return qualifiesForBoardroom({
+        economics: { estimatedMonthlyCost: monthlyCost },
+        accuracyFeedback: {
+          response: livingCase.evidenceTier === "multi_source" || livingCase.evidenceTier === "outcome_verified"
+            ? "yes"
+            : "partial",
+        },
+      } as never);
+    })();
+
+    const latestExecutionRecord = await findLatestStrategyExecutionRecord({
+      email,
+    });
+    const latestDecisionLog = latestExecutionRecord?.sessionId
+      ? await prisma.strategyDecisionLog.findFirst({
+          where: { sessionId: latestExecutionRecord.sessionId },
+          orderBy: { updatedAt: "desc" },
+          select: { status: true },
+        })
+      : null;
+    const unresolvedCommitments = latestDecisionLog && latestDecisionLog.status !== "executed" ? 1 : 0;
+    const counselTriggered = livingCase.completedStages.includes("strategy_room")
+      && (latestDecisionLog?.status === "blocked" || livingCase.contradictions.length >= 2);
+
+    let credit: DecisionCreditSummary | null = null;
+    let creditGovernanceExplanation: string | null = null;
+    try {
+      const { getCreditProfile } = await import("@/lib/decision-ledger/ledger-service");
+      const profile = await getCreditProfile(email);
+      if (profile) {
+        credit = {
+          score: profile.score,
+          trend: profile.trend as "improving" | "stable" | "declining",
+          fulfilled: profile.fulfilled,
+          breached: profile.breached,
+          disputed: profile.disputed,
+        };
+        creditGovernanceExplanation = deriveDecisionCreditGovernanceEffect({
+          score: profile.score,
+          trend: profile.trend,
+          breached: profile.breached,
+        }).explanation;
+      }
+    } catch {
+      // Decision credit is best-effort — not critical
+    }
+
     const caseCard: DecisionCentreCase = {
       caseId: livingCase.caseId,
       title: buildCaseTitle(livingCase),
@@ -304,63 +381,36 @@ export default async function handler(
       unresolvedContradictions: livingCase.contradictions.length,
       latestDirective: livingCase.latestDirective,
       outcomeStatus: null,
-      boardroom: (() => {
-        try {
-          // Build a minimal spine-like object for boardroom qualification from Living Case evidence
-          const spineProxy = {
-            costOfDelay: livingCase.primaryDecision?.costOfDelayText
-              ? { monthly: parseFloat(livingCase.primaryDecision.costOfDelayText.replace(/[^\d.]/g, "")) || 0 }
-              : null,
-            accuracy: livingCase.evidenceTier === "multi_source" || livingCase.evidenceTier === "outcome_verified" ? "yes" : null,
-          } as any;
-          const qualification = qualifiesForBoardroom(spineProxy);
-          return {
-            qualified: qualification.qualified,
-            reason: qualification.reason,
-            href: qualification.qualified && livingCase.completedStages.includes("executive_reporting")
-              ? "/diagnostics/executive-reporting/run"
-              : null,
-          };
-        } catch {
-          return null;
-        }
-      })(),
+      patternRecurrence,
+      boardroom: {
+        qualified: boardroomQualification.qualified,
+        reason: boardroomQualification.reason,
+        href: boardroomQualification.qualified && livingCase.completedStages.includes("executive_reporting")
+          ? "/diagnostics/executive-reporting/run"
+          : null,
+      },
       returnBriefs: [],
       updatedAt: livingCase.createdAt || new Date().toISOString(),
     };
 
-    // ── Decision Credit (best-effort) ──
-    let credit: DecisionCreditSummary | null = null;
-    let creditGovernanceExplanation: string | null = null;
-    try {
-      const { getCreditProfile } = await import("@/lib/decision-ledger/ledger-service");
-      const profile = await getCreditProfile(email);
-      if (profile) {
-        credit = {
-          score: profile.score,
-          trend: profile.trend as "improving" | "stable" | "declining",
-          fulfilled: profile.fulfilled,
-          breached: profile.breached,
-          disputed: profile.disputed,
-        };
-        creditGovernanceExplanation = deriveDecisionCreditGovernanceEffect({
-          score: profile.score,
-          trend: profile.trend,
-          breached: profile.breached,
-        }).explanation;
-      }
-    } catch {
-      // Decision credit is best-effort — not critical
-    }
-
-    const retainerReadiness = deriveRetainerReadiness(livingCase);
+    const retainerReadiness = deriveRetainerReadiness({
+      livingCase,
+      recurrence: patternRecurrence,
+      boardroomQualified: boardroomQualification.qualified,
+      counselTriggered,
+      costBasisAvailable: Boolean(monthlyCost),
+      unresolvedCommitments,
+      credit,
+      outcomeStatus: caseCard.outcomeStatus,
+    });
     if (
       retainerReadiness &&
-      retainerReadiness.level === "MEDIUM" &&
+      (retainerReadiness.level === "MEDIUM" || retainerReadiness.level === "HIGH") &&
       creditGovernanceExplanation &&
       credit?.trend === "declining"
     ) {
       retainerReadiness.reason = `${retainerReadiness.reason} ${creditGovernanceExplanation}`;
+      retainerReadiness.signals = [...new Set([...(retainerReadiness.signals || []), "decision credit weakening"])];
     }
 
     caseCard.retainerReadiness = retainerReadiness;

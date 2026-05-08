@@ -90,6 +90,28 @@ Not allowed:
 - generic “upgrade” language
 - price-led prompts
 
+### 8. Future Oversight Brief Preview
+
+Decision Centre may later show an **Oversight Brief Preview** state when `retainerReadiness` is `HIGH`.
+
+That preview must:
+
+- show only that a brief is operationally composable
+- avoid exposing the full internal oversight artifact publicly
+- remain locked behind access, entitlement, and privacy checks
+
+Allowed future preview copy:
+
+- brief-ready
+- oversight review available
+- internal review pending
+
+Not allowed:
+
+- public retainer dashboard
+- full monthly report without access validation
+- price-led upsell copy
+
 ---
 
 ## API Shape
@@ -127,3 +149,7 @@ No sessionStorage. No client-derived state.
 The API calls `getLatestLivingCaseForActor(email)` and enriches with entitlement lookups from `ClientEntitlement` and admission evaluations from the admission modules.
 
 Retainer readiness is additive and evidence-based. It must not create a commercial bypass around admission or privacy rules.
+
+Internal oversight brief composition now exists server-side only. Decision Centre should treat it as an internal operator artifact until a client-safe preview contract is explicitly admitted.
+
+Retainer readiness becomes credible only once the Oversight Brief Composer returns a real brief from live case data. Decision Centre should reflect readiness signals, not pretend the client-facing oversight layer already exists.

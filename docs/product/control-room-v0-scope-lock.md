@@ -59,3 +59,10 @@ Protected by:
 - organisation membership check
 - sponsor/operator role verification
 - aggregation safety enforcement
+
+## Retainer readiness after this pass
+
+- First manual retainer: possible if the internal oversight review cycle works.
+- Client-safe retainer delivery: requires sponsor-safe preview surface.
+- £15k+ retainer: requires Control Room UI and recurring review cadence.
+- £50k retainer: requires enterprise Control Room, operator roles, counsel workflow, and enforcement-cycle history.

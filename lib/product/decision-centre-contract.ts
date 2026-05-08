@@ -83,6 +83,13 @@ export type DecisionCreditSummary = {
 export type RetainerReadiness = {
   level: "LOW" | "MEDIUM" | "HIGH";
   reason: string;
+  signals?: string[];
+};
+
+export type PatternRecurrenceSummary = {
+  status: "NO_PRIOR_PATTERN" | "POSSIBLE_RECURRENCE" | "VERIFIED_RECURRENCE" | "INSUFFICIENT_HISTORY";
+  priorCount: number;
+  explanation: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -136,6 +143,8 @@ export type DecisionCentreCase = {
   latestDirective?: string | null;
   /** Outcome status */
   outcomeStatus?: string | null;
+  /** Pattern recurrence */
+  patternRecurrence?: PatternRecurrenceSummary | null;
   /** Retainer oversight potential */
   retainerReadiness?: RetainerReadiness | null;
   /** Boardroom Mode eligibility */

@@ -159,6 +159,19 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
         </div>
       )}
 
+      {c.patternRecurrence && c.patternRecurrence.status !== "NO_PRIOR_PATTERN" && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.patternRecurrence.status === "VERIFIED_RECURRENCE" ? `${GOLD}AA` : "rgba(251,191,36,0.60)" }}>
+            Pattern recurrence: {c.patternRecurrence.status === "VERIFIED_RECURRENCE" ? "verified" : "possible"}
+          </span>
+          <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
+            {c.patternRecurrence.status === "VERIFIED_RECURRENCE"
+              ? c.patternRecurrence.explanation
+              : `This case resembles ${c.patternRecurrence.priorCount} prior case${c.patternRecurrence.priorCount === 1 ? "" : "s"}. Treat as recurrence risk, not proof.`}
+          </p>
+        </div>
+      )}
+
       {/* Boardroom eligibility */}
       {c.boardroom && (
         <div style={{ marginBottom: "16px", border: c.boardroom.qualified ? `1px solid rgba(201,169,110,0.20)` : "1px solid rgba(255,255,255,0.05)", backgroundColor: c.boardroom.qualified ? "rgba(201,169,110,0.03)" : "rgba(255,255,255,0.01)", padding: "10px 14px" }}>
@@ -194,6 +207,11 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
           <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
             {c.retainerReadiness.reason}
           </p>
+          {c.retainerReadiness.signals && c.retainerReadiness.signals.length > 0 && (
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "6px" }}>
+              {c.retainerReadiness.signals.join(" • ")}
+            </p>
+          )}
         </div>
       )}
 

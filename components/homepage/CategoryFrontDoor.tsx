@@ -106,7 +106,11 @@ export default function CategoryFrontDoor() {
             and verified executive memory.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <p className="mt-8 mx-auto max-w-[44ch] text-[13px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.32)" }}>
+            Submit one decision under pressure. The system will return its first finding. No account required.
+          </p>
+
+          <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/diagnostics/fast"
               className="group inline-flex items-center gap-3 border px-7 py-4 min-h-[48px] transition-all duration-200 hover:-translate-y-0.5"

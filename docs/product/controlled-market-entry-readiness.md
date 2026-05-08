@@ -96,6 +96,33 @@ No primary entry point has GENERIC RISK status. See `docs/product/bespoke-surfac
 - Decision credit governance policy: `docs/product/decision-credit-governance-policy.md`
 - Pattern recurrence v0: `lib/product/pattern-recurrence.ts`
 - Counsel service model: `docs/product/counsel-service-model.md`
+- Oversight account loader: `lib/product/oversight-account-loader.ts`
+- Oversight signal builder: `lib/product/oversight-signal-builder.ts`
+- Oversight brief composer: `lib/product/oversight-brief-composer.ts`
+- Internal preview route: `pages/api/internal/oversight/brief-preview.ts`
+
+**What is now real for first retainer operations:**
+- internal monthly oversight brief can be composed from real journeys, execution records, outcomes, credit, and retainer contract state
+- organisation oversight scope is denied by default and checked through `evaluateOrganisationAccess()`
+- missing continuity is surfaced as warnings rather than fabricated account intelligence
+- client-safe brief can now be derived through a suppression layer with explicit suppressions and warnings
+
+**Remaining blockers before first retainer sale:**
+- operator monthly review cadence is not yet formalised in product workflow
+- organisation divergence remains partial until Control Room state is richer
+- sponsor-safe client preview surface does not yet exist
+- delivery recording and next-cycle scheduling are not yet persisted
+
+**Retainer grade threshold:**
+- first manual retainer is possible only when the internal review cycle can generate and govern a client-safe brief from live data
+- client-safe retainer delivery requires sponsor-safe preview surface
+- £15k+ requires Control Room UI, organisation access enforcement, recurring verification cadence, and counsel review workflow
+- £50k requires enterprise Control Room, operator role model, boardroom history, counsel oversight pipeline, retained enforcement-cycle history, and recurring delivery discipline
+
+**Formidable brief hardening now required:**
+- no brief without prior cycle may claim trend
+- no thin brief may score FORMIDABLE
+- no brief without required action may auto-deliver
 
 **Bespoke reference contract:** Existing types `CaseObject`, `GovernedSynthesis`, `AnchorNarrative`, `DiagnosticEvidenceNodeInput`, `CanonicalDecisionObject` already serve as the canonical bespoke reference contract. No new types required.
 

@@ -55,6 +55,11 @@ type ReturnBriefData = {
       | "UNVERIFIED";
     prompt: string;
   }> | null;
+  recurrence?: {
+    status: "NO_PRIOR_PATTERN" | "POSSIBLE_RECURRENCE" | "VERIFIED_RECURRENCE" | "INSUFFICIENT_HISTORY";
+    priorCount: number;
+    explanation: string;
+  } | null;
   challenge: string;
   retainerTriggered: boolean;
 };
@@ -268,6 +273,9 @@ export default function ReturnBriefPage() {
             <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "24px", color: "#C9A96E" }}>
               £{brief.costOfInaction.accumulatedCost.toLocaleString()} estimated over {brief.costOfInaction.daysElapsed} day{brief.costOfInaction.daysElapsed === 1 ? "" : "s"}
             </p>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "8px" }}>
+              Basis: {brief.costOfInaction.basis === "MONTHLY" ? "monthly estimate from original case" : "daily estimate from original case"}
+            </p>
             <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.42)", marginTop: "10px" }}>
               {brief.costOfInaction.explanation}
             </p>
@@ -302,6 +310,23 @@ export default function ReturnBriefPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {brief.recurrence && (brief.recurrence.status === "POSSIBLE_RECURRENCE" || brief.recurrence.status === "VERIFIED_RECURRENCE") && (
+          <div style={{ paddingBottom: "48px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "12px" }}>
+              Pattern recurrence
+            </p>
+            <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.58)" }}>
+              This condition has appeared before in your case history.
+            </p>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "8px" }}>
+              Prior cases matched: {brief.recurrence.priorCount}
+            </p>
+            <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.42)", marginTop: "10px" }}>
+              {brief.recurrence.explanation}
+            </p>
           </div>
         )}
 
@@ -380,17 +405,8 @@ export default function ReturnBriefPage() {
               The pattern is persistent. Without ongoing enforcement, this will continue to recur.
             </p>
             <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase", color: "#C9A96E", marginTop: "20px" }}>
-              Decision Integrity Programme
+              Ongoing oversight may be required
             </p>
-            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontSize: "28px", fontWeight: 300, color: "rgba(255,255,255,0.85)", marginTop: "8px" }}>
-              &pound;25,000+
-            </p>
-            <Link
-              href="/consulting?retainer=qualified"
-              style={{ display: "inline-block", marginTop: "16px", padding: "12px 24px", border: "1px solid rgba(201,169,110,0.40)", backgroundColor: "rgba(201,169,110,0.08)", color: "#C9A96E", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}
-            >
-              Request programme access
-            </Link>
           </div>
         )}
 

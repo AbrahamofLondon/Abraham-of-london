@@ -28,6 +28,13 @@ export type OversightBrief = {
     commitmentsVerified: number;
     unresolvedBreaches: number;
   };
+  retainedEnforcement?: {
+    cyclesReviewed: number;
+    activeRetainedDecisions: number;
+    enforcementBreaches: number;
+    improvementSignals: number;
+    deteriorationSignals: number;
+  };
   decisionCredit?: {
     score?: number;
     trend?: string;
