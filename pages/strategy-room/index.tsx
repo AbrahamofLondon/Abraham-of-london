@@ -728,10 +728,10 @@ function FirstActionPrompt() {
             color: `${GOLD}AA`,
             marginBottom: "0.55rem",
           }}>
-            First action prompt
+            Your required move
           </div>
           <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
-            Start with the first intervention. Do not optimise. Execute.
+            Your report named the condition. The Strategy Room tests whether you will act against it. Start with the first intervention. Do not optimise. Execute.
           </p>
         </div>
         <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.25rem" }}>

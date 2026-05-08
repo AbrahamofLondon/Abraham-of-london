@@ -588,17 +588,31 @@ export default async function handler(
 
     caseCard.retainerReadiness = retainerReadiness;
 
+    let dueCheckpoints: Array<{ id: string; commandTitle: string; verificationQuestion: string; dueAt: string; status: string }> = [];
+    try {
+      const { loadDueCheckpointsForUser } = await import("@/lib/product/checkpoint-service");
+      const checkpoints = await loadDueCheckpointsForUser({ email });
+      dueCheckpoints = checkpoints.map((c) => ({
+        id: c.id,
+        commandTitle: c.commandTitle,
+        verificationQuestion: c.verificationQuestion,
+        dueAt: c.dueAt,
+        status: c.status,
+      }));
+    } catch { /* best-effort */ }
+
     res.setHeader("Cache-Control", "private, no-cache");
     return res.status(200).json({
       ok: true,
       cases: [caseCard],
+      dueCheckpoints,
       commercial: {
         ownedProducts: owned,
         eligibleProducts: eligible,
         restrictedProducts: restricted,
       },
       credit,
-    } satisfies DecisionCentreResponse);
+    } as any);
   } catch (error) {
     console.error("[decision-centre/cases]", error);
     return res.status(500).json({ ok: false, reason: "INTERNAL_ERROR" });

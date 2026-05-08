@@ -534,6 +534,24 @@ export default function DecisionCentrePage() {
           {/* Empty state */}
           {!loading && data && data.cases.length === 0 && <EmptyState />}
 
+          {/* Due Checkpoints */}
+          {!loading && data && (data as any).dueCheckpoints?.length > 0 && (
+            <div style={{ border: `1px solid rgba(201,169,110,0.20)`, backgroundColor: "rgba(201,169,110,0.03)", padding: "16px 20px", marginBottom: "16px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "12px" }}>
+                Requires your response
+              </p>
+              {((data as any).dueCheckpoints as Array<{ id: string; commandTitle: string; verificationQuestion: string; dueAt: string; status: string }>).map((cp) => (
+                <div key={cp.id} style={{ borderLeft: `2px solid ${cp.status === "OVERDUE" ? "rgba(252,165,165,0.40)" : "rgba(201,169,110,0.30)"}`, paddingLeft: "12px", marginBottom: "10px" }}>
+                  <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>{cp.commandTitle}</p>
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.40)", marginTop: "2px" }}>{cp.verificationQuestion}</p>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: cp.status === "OVERDUE" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.20)", marginTop: "4px" }}>
+                    {cp.status} &middot; Due: {new Date(cp.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Cases */}
           {!loading && data && data.cases.length > 0 && (
             <div style={{ display: "grid", gap: "16px" }}>

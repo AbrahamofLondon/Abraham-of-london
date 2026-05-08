@@ -1581,7 +1581,34 @@ function ResultSurface({
         {/* ── BLOCK 7c: COST OF NON-DECISION (AI-ADJUSTED) ── */}
         <PredictiveConsequence data={consequenceProjection} />
 
-        {/* ── BLOCK 7d: ADVANTAGE PATH ── */}
+        {/* ── BLOCK 7d: EFFICACY COMMAND — accept/challenge/escalate ── */}
+        {(() => {
+          const topPriority = (canonical as any)?.priorityStack?.[0] ?? (canonical as any)?.requiredInterventions?.[0] ?? (canonical as any)?.sections?.priorityStack?.[0] ?? "Address the governing condition.";
+          return (
+            <div style={{ borderLeft: `2px solid rgba(201,169,110,0.25)`, backgroundColor: "rgba(201,169,110,0.03)", padding: "20px 24px", marginTop: "24px" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.24em", textTransform: "uppercase", color: "#C9A96E" }}>Your required move</p>
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontSize: "1.15rem", lineHeight: 1.45, color: "rgba(255,255,255,0.85)", marginTop: "8px" }}>
+                Accept or challenge the governed priority: {typeof topPriority === "string" ? topPriority.slice(0, 150) : "Address the governing condition."}
+              </p>
+              <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.45)", marginTop: "8px" }}>
+                The report has identified the priority intervention. Accept and proceed to execution, or challenge with evidence. Non-response will be treated as implicit acceptance.
+              </p>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "14px" }}>
+                <a href="/strategy-room" style={{ padding: "10px 18px", backgroundColor: "#F5F5F5", color: "#0B0B0B", textDecoration: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
+                  Accept — enter Strategy Room
+                </a>
+                <button onClick={() => { const note = prompt("What evidence challenges this priority?"); if (note) { fetch("/api/checkpoints/respond", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ checkpointId: "er_challenge", responseStatus: "DISPUTED_FINDING", whatChanged: note }) }).catch(() => {}); } }} style={{ padding: "10px 18px", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.12)", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
+                  Challenge with evidence
+                </button>
+              </div>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
+                Checkpoint: 7-day priority decision &middot; Source: Executive Reporting &middot; Evidence posture: system-inferred
+              </p>
+            </div>
+          );
+        })()}
+
+        {/* ── BLOCK 7e: ADVANTAGE PATH ── */}
         <AdvantagePathBlock data={advantagePath} />
 
         {/* ── BLOCK 8: FORCED LADDER PROGRESSION ── */}

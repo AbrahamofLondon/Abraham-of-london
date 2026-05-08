@@ -300,5 +300,22 @@ export function buildOversightSignals(input: {
     });
   }
 
+  // ── CHECKPOINT OUTCOME SIGNALS ──
+  // Load efficacy checkpoint outcomes for oversight signal generation
+  for (const item of input.cases) {
+    if (item.evidenceCapture?.verificationCriteria && (item.unresolvedCommitments ?? 0) > 0) {
+      signals.push({
+        id: `${item.caseId}:checkpoint-overdue`,
+        type: "CHECKPOINT_OVERDUE",
+        caseId: item.caseId,
+        severity: (item.unresolvedCommitments ?? 0) >= 2 ? "HIGH" : "MEDIUM",
+        title: "Efficacy checkpoint is overdue",
+        explanation: `${item.title} has ${item.unresolvedCommitments} unresolved commitment${(item.unresolvedCommitments ?? 0) === 1 ? "" : "s"} with verification criteria that have not been confirmed.`,
+        recommendedAction: "Confirm whether committed actions were completed, blocked, or abandoned.",
+        createdAt,
+      });
+    }
+  }
+
   return dedupe(signals.map((signal) => JSON.stringify(signal))).map((signal) => JSON.parse(signal) as OversightSignal);
 }

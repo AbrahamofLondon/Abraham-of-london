@@ -399,6 +399,26 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
             </p>
           </div>
 
+          {/* ── Next Required Action ── */}
+          {(() => {
+            const pending = session.decisions?.filter((d: any) => d.status === "pending").length ?? 0;
+            const blocked = session.decisions?.filter((d: any) => d.status === "blocked").length ?? 0;
+            const total = session.decisions?.length ?? 0;
+            const action = blocked > 0
+              ? `${blocked} decision${blocked === 1 ? " is" : "s are"} blocked. Name the structural cause and determine whether escalation is required.`
+              : pending > 0
+                ? `${pending} decision${pending === 1 ? "" : "s"} pending execution. Record whether each was executed, blocked, or abandoned.`
+                : total === 0
+                  ? "Record your first decision. The system cannot govern what it cannot see."
+                  : "All decisions addressed. Schedule the next verification checkpoint.";
+            return (
+              <div style={{ borderLeft: `2px solid rgba(201,169,110,0.35)`, backgroundColor: "rgba(201,169,110,0.04)", padding: "14px 18px", marginBottom: "12px" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>Next required action</p>
+                <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>{action}</p>
+              </div>
+            );
+          })()}
+
           {/* ── Return brief interruption (if available) ── */}
           <ReturnBriefInterruptionBar sessionKey={session.sessionKey} />
 
