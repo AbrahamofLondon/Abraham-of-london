@@ -1,3 +1,7 @@
+import type { OversightReviewDecision } from "@/lib/product/oversight-review-decision-contract";
+
+export type { OversightReviewDecision } from "@/lib/product/oversight-review-decision-contract";
+
 export type OversightReviewCycleStatus =
   | "DRAFT_GENERATED"
   | "OPERATOR_REVIEW_REQUIRED"
@@ -6,13 +10,6 @@ export type OversightReviewCycleStatus =
   | "DELIVERED"
   | "REVISION_REQUIRED"
   | "WITHHELD";
-
-export type OversightReviewDecision =
-  | "APPROVE"
-  | "REVISE"
-  | "WITHHOLD"
-  | "ESCALATE_TO_COUNSEL"
-  | "ESCALATE_TO_BOARDROOM";
 
 export type OversightSuppressionReason =
   | "RAW_RESPONSE_PROTECTED"

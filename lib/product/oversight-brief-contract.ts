@@ -1,3 +1,22 @@
+/**
+ * lib/product/oversight-brief-contract.ts — Canonical Oversight Brief type.
+ *
+ * The brief must answer: what changed, what worsened, what repeated,
+ * what became more expensive, what became harder to reverse, what option
+ * is closing, what loss is becoming permanent, what must be decided now,
+ * what happens if this cycle is ignored.
+ */
+
+export type OversightRequiredAction = {
+  action: string;
+  reason: string;
+  caseId?: string;
+  urgency: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  evidenceBasis: string[];
+  ownerRole?: "CLIENT" | "OPERATOR" | "COUNSEL" | "BOARD";
+  clientSafe: boolean;
+};
+
 export type OversightBrief = {
   briefId: string;
   accountId: string;
@@ -40,5 +59,83 @@ export type OversightBrief = {
     trend?: string;
     interpretation?: string;
   };
+  patternRecurrence?: {
+    status: string;
+    priorCount: number;
+    explanation: string;
+  };
+
+  // ── Premium intelligence primitives ──
+
+  decisionLosses?: {
+    totalKnownLoss?: number;
+    currency?: "GBP" | "USD" | "EUR" | "UNKNOWN";
+    entries: Array<{
+      id: string;
+      caseId: string;
+      category: string;
+      description: string;
+      evidenceBasis: string[];
+      confidence: "LOW" | "MEDIUM" | "HIGH";
+      clientSafe: boolean;
+    }>;
+    warnings: string[];
+  };
+
+  strategicOptions?: {
+    valueAtRisk?: number;
+    currency?: "GBP" | "USD" | "EUR" | "UNKNOWN";
+    options: Array<{
+      id: string;
+      caseId: string;
+      label: string;
+      status: "AVAILABLE" | "CLOSING" | "CLOSED" | "EXERCISED" | "EXPIRED";
+      closingReason?: string;
+      deadline?: string;
+      evidenceBasis: string[];
+      recommendedAction?: string;
+    }>;
+    warnings: string[];
+  };
+
+  decisionDependencies?: {
+    conflicts: Array<{
+      id: string;
+      sourceCaseId: string;
+      targetCaseId?: string;
+      relationship: "BLOCKS" | "REQUIRES" | "INVALIDATES" | "ENABLES" | "COMPOUNDS";
+      severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+      explanation: string;
+      evidenceBasis: string[];
+      requiredAction?: string;
+    }>;
+    warnings: string[];
+  };
+
+  irreversibility?: {
+    score: number;
+    level: "LOW" | "MODERATE" | "HIGH" | "CRITICAL" | "IRREVERSIBLE";
+    drivers: Array<{
+      label: string;
+      evidenceBasis: string[];
+      weight: number;
+    }>;
+    explanation: string;
+    warnings: string[];
+  };
+
+  cycleConsequenceProjection?: {
+    summary: string;
+    likelyMovement: Array<{
+      dimension: "COST" | "COMMITMENT" | "RECURRENCE" | "OPTION_DECAY" | "IRREVERSIBILITY" | "LOSS";
+      direction: "WORSENING" | "UNCHANGED" | "UNKNOWN";
+      explanation: string;
+    }>;
+    requiredAction: string;
+  };
+
+  /** Required actions (string form for backward compatibility) */
   requiredActions: string[];
+  /** Structured required actions with evidence basis, urgency, and owner */
+  structuredActions?: OversightRequiredAction[];
 };

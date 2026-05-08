@@ -2,10 +2,16 @@ import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
 import type { OrganisationAccessDecision } from "@/lib/product/organisation-access-contract";
 import type { OversightSuppressionReason } from "@/lib/product/oversight-review-cycle-contract";
 
-type SuppressionRecord = {
+export type OversightSuppression = {
   section: string;
   reason: OversightSuppressionReason;
   explanation: string;
+};
+
+export type ClientSafeOversightBrief = {
+  brief: OversightBrief;
+  suppressions: OversightSuppression[];
+  warnings: string[];
 };
 
 function genericCaseLabel(index: number): string {
@@ -15,12 +21,8 @@ function genericCaseLabel(index: number): string {
 export function buildClientSafeOversightBrief(input: {
   brief: OversightBrief;
   access: OrganisationAccessDecision;
-}): {
-  brief: OversightBrief;
-  suppressions: SuppressionRecord[];
-  warnings: string[];
-} {
-  const suppressions: SuppressionRecord[] = [];
+}): ClientSafeOversightBrief {
+  const suppressions: OversightSuppression[] = [];
   const warnings: string[] = [];
   const { access } = input;
   let brief: OversightBrief = {

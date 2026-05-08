@@ -1,9 +1,6 @@
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
 
-export function compareOversightCycles(input: {
-  current: OversightBrief;
-  previous?: OversightBrief;
-}): {
+export type OversightCycleComparison = {
   available: boolean;
   deltas: Array<{
     dimension:
@@ -19,7 +16,12 @@ export function compareOversightCycles(input: {
     explanation: string;
   }>;
   warnings: string[];
-} {
+};
+
+export function compareOversightCycles(input: {
+  current: OversightBrief;
+  previous?: OversightBrief;
+}): OversightCycleComparison {
   const previous = input.previous;
   if (!previous) {
     return {

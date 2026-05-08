@@ -6,6 +6,7 @@ import { loadOversightAccount } from "@/lib/product/oversight-account-loader";
 import { buildOversightSignals } from "@/lib/product/oversight-signal-builder";
 import { loadControlRoomState } from "@/lib/product/control-room-state-loader";
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
+import { projectOversightCycleConsequence } from "@/lib/product/oversight-cycle-consequence-projection";
 import type { OversightCycle, RetainerOversightAccount } from "@/lib/product/retainer-oversight-contract";
 
 function sum(values: number[]): number {
@@ -100,6 +101,7 @@ export async function composeOversightBrief(input: {
   periodEnd?: string;
 }): Promise<{
   brief?: OversightBrief;
+  account?: RetainerOversightAccount;
   warnings: string[];
 }> {
   const warnings: string[] = [];
@@ -250,7 +252,102 @@ export async function composeOversightBrief(input: {
         }
       : undefined,
     requiredActions: [...new Set(requiredActions)].slice(0, 6),
+
+    // ── Premium intelligence primitives (evidence-only, no fabrication) ──
+    // These sections appear only when real evidence exists. If unavailable,
+    // they are omitted entirely — not rendered with empty/fake data.
+
+    patternRecurrence: (() => {
+      const recurrenceCases = loaded.cases.filter(
+        (c) => c.patternRecurrenceStatus === "POSSIBLE_RECURRENCE" || c.patternRecurrenceStatus === "VERIFIED_RECURRENCE",
+      );
+      if (recurrenceCases.length === 0) return undefined;
+      return {
+        status: recurrenceCases.some((c) => c.patternRecurrenceStatus === "VERIFIED_RECURRENCE") ? "VERIFIED_RECURRENCE" : "POSSIBLE_RECURRENCE",
+        priorCount: recurrenceCases.length,
+        explanation: `${recurrenceCases.length} case${recurrenceCases.length !== 1 ? "s show" : " shows"} pattern recurrence across the oversight scope.`,
+      };
+    })(),
+
+    // Decision losses — only from signals indicating realised loss
+    decisionLosses: (() => {
+      const lossSignals = signals.filter((s) => s.type === "OUTCOME_DETERIORATED" || s.type === "COMMITMENT_UNVERIFIED");
+      if (lossSignals.length === 0) return undefined;
+      return {
+        totalKnownLoss: undefined,
+        currency: "GBP" as const,
+        entries: lossSignals.map((s, i) => ({
+          id: `loss_${i}_${s.caseId}`,
+          caseId: s.caseId || "",
+          category: s.type === "OUTCOME_DETERIORATED" ? "CONSEQUENCE_MATERIALISED" : "TRUST_ERODED",
+          description: s.explanation,
+          evidenceBasis: [s.title],
+          confidence: (s.severity === "CRITICAL" || s.severity === "HIGH" ? "HIGH" : "MEDIUM") as "LOW" | "MEDIUM" | "HIGH",
+          clientSafe: true,
+        })),
+        warnings: ["Decision losses are derived from oversight signals. Independent verification recommended."],
+      };
+    })(),
+
+    // Strategic options — inferred from cost + commitment signals
+    // V0: options are derived from cases with overdue commitments + accumulating cost
+    strategicOptions: (() => {
+      const atRiskCases = loaded.cases.filter((c) =>
+        (c.unresolvedCommitments ?? 0) > 0 && c.costBasisAvailable,
+      );
+      if (atRiskCases.length === 0) return undefined;
+      return {
+        valueAtRisk: undefined,
+        currency: "GBP" as const,
+        options: atRiskCases.map((c, i) => ({
+          id: `opt_${i}_${c.caseId}`,
+          caseId: c.caseId,
+          label: c.title,
+          status: "CLOSING" as const,
+          closingReason: "Decision delay with unresolved commitments is narrowing the available window.",
+          evidenceBasis: ["Derived from unresolved commitments and active cost basis."],
+        })),
+        warnings: ["Option status is inferred from commitment and cost signals. Confirm with case owner."],
+      };
+    })(),
+
+    // Irreversibility — inferred from loss signals + high cost + multiple breaches
+    irreversibility: (() => {
+      const hasHighCost = totalEstimatedCost >= 20000;
+      const hasMultipleBreaches = unresolvedCommitments >= 3;
+      const hasDeterioration = signals.some((s) => s.type === "OUTCOME_DETERIORATED");
+      if (!hasHighCost && !hasMultipleBreaches && !hasDeterioration) return undefined;
+      const drivers: Array<{ label: string; evidenceBasis: string[]; weight: number }> = [];
+      if (hasHighCost) drivers.push({ label: "High accumulated cost of inaction", evidenceBasis: [`£${totalEstimatedCost.toLocaleString()} accumulated`], weight: 35 });
+      if (hasMultipleBreaches) drivers.push({ label: "Multiple unresolved commitment breaches", evidenceBasis: [`${unresolvedCommitments} breaches`], weight: 30 });
+      if (hasDeterioration) drivers.push({ label: "Outcome deterioration detected", evidenceBasis: ["Deterioration signal from oversight signals"], weight: 25 });
+      const score = Math.min(100, drivers.reduce((sum, d) => sum + d.weight, 0));
+      const level = score >= 90 ? "IRREVERSIBLE" : score >= 70 ? "CRITICAL" : score >= 45 ? "HIGH" : "MODERATE";
+      return {
+        score,
+        level: level as "LOW" | "MODERATE" | "HIGH" | "CRITICAL" | "IRREVERSIBLE",
+        drivers,
+        explanation: `Irreversibility index ${score}/100 (${level}). ${drivers.length} contributing driver${drivers.length !== 1 ? "s" : ""}.`,
+        warnings: ["Irreversibility is inferred from available signals. Not all drivers may be captured."],
+      };
+    })(),
   };
+
+  // ── Cycle consequence projection ──
+  const consequenceProjection = projectOversightCycleConsequence({
+    costOfInaction: brief.costOfInaction,
+    patternRecurrence: brief.patternRecurrence,
+    verification: brief.verification,
+    irreversibility: brief.irreversibility,
+    strategicOptions: brief.strategicOptions,
+    decisionLosses: brief.decisionLosses,
+  });
+  if (consequenceProjection.available && consequenceProjection.projection) {
+    brief.cycleConsequenceProjection = consequenceProjection.projection;
+  }
+  if (consequenceProjection.warnings.length > 0) {
+    warnings.push(...consequenceProjection.warnings);
+  }
 
   if (boardroomCount > 0) {
     warnings.push("Boardroom export queue is not yet modelled. Dossier readiness is signal-only in v0.");
@@ -267,6 +364,7 @@ export async function composeOversightBrief(input: {
 
   return {
     brief,
+    account,
     warnings,
   };
 }
