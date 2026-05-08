@@ -18,11 +18,17 @@ import { EmailLinks } from "@/lib/email/links";
 interface EmailProps {
   fullName: string;
   decisionStatement: string;
+  evidenceTier?: string | null;
+  caseId?: string | null;
+  directive?: string | null;
 }
 
 export const StrategyRoomAcceptedEmail = ({
   fullName,
   decisionStatement,
+  evidenceTier,
+  caseId,
+  directive,
 }: EmailProps) => (
   <EmailHtml lang="en">
     <EmailHead />
@@ -39,6 +45,18 @@ export const StrategyRoomAcceptedEmail = ({
           Your Strategy Room entry regarding the decision:
           <strong style={highlight}> “{decisionStatement}”</strong> has been accepted.
         </Text>
+
+        <Section style={section}>
+          <Text style={sectionTitle}>Admissibility Review</Text>
+          <Text style={reviewRow}>Status: Admitted</Text>
+          {evidenceTier && <Text style={reviewRow}>Evidence tier: {evidenceTier}</Text>}
+          {directive && <Text style={reviewRow}>Directive: {directive}</Text>}
+          {caseId && <Text style={reviewRow}>Case reference: {caseId}</Text>}
+          <Text style={reviewRow}>Pre-commitment: Confirmed</Text>
+          <Text style={reviewNote}>
+            Your admission was evaluated against diagnostic evidence, decision specificity, authority signal, and readiness. This is not a generic confirmation.
+          </Text>
+        </Section>
 
         <Section style={section}>
           <Text style={sectionTitle}>Execution References</Text>
@@ -134,6 +152,22 @@ const link = {
 const hr = {
   borderColor: "#1b2230",
   margin: "40px 0",
+};
+
+const reviewRow = {
+  fontSize: "14px",
+  lineHeight: "1.4",
+  color: "#D4D4D4",
+  fontFamily: "monospace",
+  marginBottom: "4px",
+};
+
+const reviewNote = {
+  fontSize: "13px",
+  lineHeight: "1.6",
+  color: "#9CA3AF",
+  marginTop: "12px",
+  fontStyle: "italic" as const,
 };
 
 const footer = {

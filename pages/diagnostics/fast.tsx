@@ -10,6 +10,15 @@ import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto
 import ExecutiveDecisionAuthorityBlock from "@/components/diagnostics/results/ExecutiveDecisionAuthorityBlock";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
+import DiagnosticStandardPanel from "@/components/trust/DiagnosticStandardPanel";
+import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
+import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
+import NextLayerUnlockedPanel from "@/components/living/NextLayerUnlockedPanel";
+import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSummary";
+import GovernedActionPanel from "@/components/living/GovernedActionPanel";
+import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
+import OutcomeMemoryPreview from "@/components/living/OutcomeMemoryPreview";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 import {
   clearVersionedAssessmentState,
@@ -313,7 +322,7 @@ const FastDiagnosticPage: NextPage = () => {
         {(stage === "decision" || stage === "authority" || stage === "consequence") && currentStep && (
           <div className="flex flex-col items-center justify-center min-h-screen px-6">
             <div style={{ width: "100%", maxWidth: "640px" }}>
-              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "2rem" }}>
+              <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "2rem" }}>
                 Step {stepIndex + 1} of {STEPS.length}
               </div>
               <h2 style={{ ...serif, fontSize: "clamp(1.4rem, 3vw, 2rem)", lineHeight: 1.2, color: "rgba(255,255,255,0.92)", maxWidth: "28ch" }}>
@@ -408,10 +417,13 @@ const FastDiagnosticPage: NextPage = () => {
         {stage === "commitment_declined" && (
           <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
             <p style={{ ...serif, fontSize: "clamp(1.3rem, 3vw, 1.8rem)", lineHeight: 1.3, color: "rgba(255,255,255,0.88)", maxWidth: "28ch" }}>
-              Then this is not yet a decision.
+              The system is designed for decisions ready to move.
             </p>
-            <p style={{ marginTop: "1rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.48)", maxWidth: "36ch" }}>
-              You can still view the analysis, but the system will treat this as unresolved.
+            <p style={{ marginTop: "1rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.48)", maxWidth: "42ch" }}>
+              You can still view the analysis. The system will classify this as unresolved and track whether the pattern repeats.
+            </p>
+            <p style={{ marginTop: "0.75rem", fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.30)", maxWidth: "38ch" }}>
+              Return when the decision has a named consequence and an owner prepared to act.
             </p>
             <button
               type="button"
@@ -426,7 +438,7 @@ const FastDiagnosticPage: NextPage = () => {
         {/* Loading */}
         {stage === "loading" && (
           <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1.5rem" }}>Resolution</div>
+            <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1.5rem" }}>Resolution</div>
             <LoadingLine />
             <div style={{ marginTop: "2rem", width: "200px", height: "3px", borderRadius: "2px", backgroundColor: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
               <div style={{ width: "50%", height: "100%", borderRadius: "2px", backgroundColor: GOLD, animation: "pulse 1.5s ease-in-out infinite" }} />
@@ -437,7 +449,7 @@ const FastDiagnosticPage: NextPage = () => {
         {/* Recovery */}
         {stage === "recovery" && result && (
           <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>More detail required</div>
+            <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>More detail required</div>
             <p style={{ marginTop: "1rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.74)", maxWidth: "40ch" }}>{result.recoveryQuestion}</p>
             <button type="button" onClick={resetDiagnostic} style={{ marginTop: "1.5rem", padding: "14px 24px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.20em", textTransform: "uppercase", cursor: "pointer" }}>
               Restart with more detail
@@ -484,14 +496,17 @@ const FastDiagnosticPage: NextPage = () => {
                 {an ? an.pattern : "This pattern appears when decisions are discussed, but not actually assigned. Agreement replaces ownership. Movement stops."}
               </ResultBlock>
 
-              {/* COST OF INACTION */}
+              {/* COST OF INACTION — scenario projection */}
               <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Cost of inaction</div>
+                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Scenario projection — if unresolved</div>
                 <div style={{ marginTop: "0.75rem", display: "grid", gap: "0.65rem" }}>
                   <CostLine label="30 days" text={an?.costOfInaction.thirtyDays ?? result.costOfInaction?.horizon30 ?? "Delay becomes normalised. Workarounds emerge."} />
                   <CostLine label="60 days" text={an?.costOfInaction.sixtyDays ?? result.costOfInaction?.horizon60 ?? "Resources are spent without forward movement."} />
                   <CostLine label="90 days" text={an?.costOfInaction.ninetyDays ?? result.costOfInaction?.horizon90 ?? "The cost of reversing direction exceeds the cost of deciding now."} />
                 </div>
+                <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.20)", marginTop: "0.75rem" }}>
+                  Based on your stated decision context and declared consequence. Scenario only — not a financial forecast.
+                </p>
               </div>
 
               {/* BOARD / EXTERNAL VIEW */}
@@ -501,7 +516,7 @@ const FastDiagnosticPage: NextPage = () => {
 
               {/* REQUIRED MOVE */}
               <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}06`, padding: "1.25rem 1.5rem" }}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>Required move</div>
+                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>Required move</div>
                 <p style={{ marginTop: "0.6rem", ...serif, fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(255,255,255,0.85)" }}>
                   {an?.requiredMove ?? "Assign one accountable owner. Remove competing authority. Force a decision window. Anything less will preserve the current outcome."}
                 </p>
@@ -512,19 +527,139 @@ const FastDiagnosticPage: NextPage = () => {
 
               {result.reviewMessage && <ResultBlock label="System integrity note">{result.reviewMessage}</ResultBlock>}
 
-              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", padding: "0.5rem 0" }}>
+              <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", padding: "0.5rem 0" }}>
                 Governed analysis · {result.signalStrength} reading strength
                 {!committed && " · readiness: unresolved"}
               </div>
 
+              {/* ═══ LIVING INTELLIGENCE PANELS — real engine data ═══ */}
+
+              <IntelligenceGainPanel
+                stage="Fast Diagnostic"
+                findings={[
+                  ...(result.condition ? [{ label: "Condition", value: result.conditionLabel || result.condition }] : []),
+                  ...(result.synthesis?.primaryContradiction ? [{ label: "Contradiction", value: result.synthesis.primaryContradiction }] : []),
+                  ...(result.synthesis?.avoidedDecision ? [{ label: "Avoidance", value: result.synthesis.avoidedDecision }] : []),
+                  ...(result.authorityIndex ? [{ label: "Authority", value: `${result.authorityIndex.band} — ${result.authorityIndex.label}` }] : []),
+                  ...(result.costOfInaction ? [{ label: "Exposure", value: result.costOfInaction.exposureBand }] : []),
+                  ...(result.executionFailure ? [{ label: "Failure mode", value: result.executionFailure.likelyFailureMode }] : []),
+                  { label: "Signal", value: result.signalStrength },
+                ]}
+              />
+
+              <EvidenceStrengthMeter
+                level="single_source"
+                stagesCompleted={1}
+                whatWouldStrengthen={
+                  result.signalStrength === "low"
+                    ? "Provide more specific detail about the decision, owner, and consequence to strengthen this reading."
+                    : "Add a Purpose Alignment or Constitutional Diagnostic to move from single-source to multi-source evidence."
+                }
+              />
+
+              <DecisionAdvantageSummary
+                advantages={[
+                  ...(result.synthesis?.primaryContradiction ? [{
+                    label: "Contradiction identified",
+                    description: `The system detected a gap between your stated blocker and forced action: ${result.synthesis.primaryContradiction}`,
+                  }] : []),
+                  ...(result.synthesis?.concreteMove ? [{
+                    label: "Required move named",
+                    description: result.synthesis.concreteMove,
+                  }] : []),
+                  ...(result.forecast?.controlShiftSummary ? [{
+                    label: "Control shift forecast",
+                    description: result.forecast.controlShiftSummary,
+                  }] : []),
+                  ...(result.executionFailure ? [{
+                    label: "Execution failure predicted",
+                    description: `${result.executionFailure.likelyFailureMode} — ${result.executionFailure.requiredCorrection}`,
+                  }] : []),
+                ]}
+                confidenceBand={result.signalStrength === "high" ? "high" : result.signalStrength === "moderate" ? "medium" : "low"}
+                limitations={[
+                  "Single-source reading — your perspective only. Team or enterprise assessment strengthens evidence.",
+                  ...(result.synthesis?.certaintyBoundary ? [result.synthesis.certaintyBoundary] : []),
+                ]}
+              />
+
+              <NextLayerUnlockedPanel
+                currentStage="Fast Diagnostic"
+                nextStage={{
+                  name: "Purpose Alignment",
+                  href: "/diagnostics/purpose-alignment",
+                  whatItDetects: "Whether this decision fracture is personal (conviction vs obligation) or structural (governance vs authority). That distinction changes the intervention entirely.",
+                  whyContinue: "The fast diagnostic reveals the fracture. Purpose alignment reveals whether you are the right person to resolve it — or the person most likely to avoid it.",
+                }}
+                unresolvedItems={[
+                  ...(result.synthesis?.certaintyBoundary ? [result.synthesis.certaintyBoundary] : []),
+                  ...(!result.fullAnalysis ? ["Input quality was below threshold for full synthesis — more specificity would improve the reading."] : []),
+                  ...(result.contradictionText ? [`Unresolved contradiction: ${result.contradictionText}`] : []),
+                ]}
+              />
+
+              <GovernedActionPanel
+                requiredAction={an?.requiredMove ?? result.synthesis?.concreteMove ?? null}
+                whyThisAction={result.synthesis?.whyPriorAttemptsFailed
+                  ? `Prior attempts failed because: ${result.synthesis.whyPriorAttemptsFailed}`
+                  : null}
+                whatProvesProgress="The decision has a named owner, a stated deadline, and one irreversible first step taken within 14 days."
+                whatHappensNext={result.forecast?.controlShiftSummary ?? null}
+                evidenceBasis={[
+                  `Condition: ${result.conditionLabel || result.condition}`,
+                  `Signal strength: ${result.signalStrength}`,
+                  ...(result.synthesis?.quotedUserLanguage?.slice(0, 2).map((q) => `Your words: "${q}"`) ?? []),
+                ]}
+              />
+
+              {/* Outcome memory — shows prior readings if they exist */}
+              {result.memoryTrend && result.memoryTrend.totalDecisions > 0 && (
+                <OutcomeMemoryPreview
+                  entries={result.memoryTrend.repeatedConditions.map((c, i) => ({
+                    stage: "Prior reading",
+                    date: "",
+                    finding: c,
+                  }))}
+                  dominantPattern={result.memoryTrend.dominantState}
+                  escalationTrend={result.memoryTrend.escalationTrend}
+                />
+              )}
+
+              {/* Pattern evidence — recurring patterns across sessions */}
+              {result.patternEvidence && (
+                <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
+                  <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>Recognised pattern</div>
+                  <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
+                    {result.patternEvidence.recognitionLine}
+                  </p>
+                  {result.patternEvidence.observations.length > 0 && (
+                    <div style={{ marginTop: "0.5rem" }}>
+                      {result.patternEvidence.observations.map((obs, i) => (
+                        <p key={i} style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.45)", marginTop: "0.25rem" }}>
+                          {obs}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <HumanReviewPrompt context="Fast Diagnostic" />
+
+              <GovernanceDisclosure context="fast_diagnostic" compact />
+              <DiagnosticStandardPanel />
+
               {/* ── ESCALATION: Fast → Purpose ─── */}
               <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}05`, padding: "1.25rem 1.5rem" }}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Next unknown</div>
+                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Earned escalation</div>
                 <p style={{ marginTop: "0.5rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.82)" }}>
-                  This appears to be a decision structure issue. What is not yet clear is whether this is personal or systemic.
+                  What is not yet clear is whether this is personal or systemic.
                 </p>
-                <Link href="/purpose-alignment" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "0.85rem", padding: "12px 22px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                  Continue to Purpose Alignment <ArrowRight style={{ width: 11, height: 11 }} />
+                <p style={{ marginTop: "0.35rem", fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
+                  Purpose Alignment reads the person — your mandate, your operating pattern, your decision structure. This is personal decision infrastructure, not a personality test.
+                </p>
+                <Link href="/diagnostics/purpose-alignment" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "0.85rem", padding: "12px 22px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                  Start Purpose Alignment <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
               </div>
 
@@ -548,11 +683,11 @@ const FastDiagnosticPage: NextPage = () => {
 
               <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                 <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginBottom: "1rem" }}>
-                  {an?.cta ?? "This is now structural, not situational."}
+                  {an?.cta ?? "Your evidence justifies a governed brief."}
                 </p>
                 <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
                   <Link href="/diagnostics/executive-reporting" style={{ padding: "12px 20px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                    Move this into a controlled decision environment <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
+                    Open Executive Reporting <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
                   </Link>
                   <button type="button" onClick={resetDiagnostic} style={{ padding: "12px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
                     Start again
@@ -570,7 +705,7 @@ const FastDiagnosticPage: NextPage = () => {
 function ResultBlock({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
         {label}
       </div>
       <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>
@@ -602,7 +737,7 @@ function LoadingLine() {
 function CostLine({ label, text }: { label: string; text: string }) {
   return (
     <div>
-      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginRight: "0.75rem" }}>{label}:</span>
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginRight: "0.75rem" }}>{label}:</span>
       <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.68)" }}>{text}</span>
     </div>
   );

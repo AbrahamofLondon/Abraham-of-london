@@ -26,6 +26,7 @@ import { assessAITerrain } from "@/lib/diagnostics/ai-terrain";
 import { assessAdvantageTerrain } from "@/lib/diagnostics/advantage-terrain";
 import CompetitivePositionSignal from "@/components/diagnostics/results/CompetitivePosition";
 import BoardSnapshot from "@/components/diagnostics/results/BoardSnapshot";
+import BoardroomMode from "@/components/admin/reporting/boardroom-mode";
 import AdvantagePathBlock from "@/components/strategy-room/AdvantagePathBlock";
 import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
 import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
@@ -345,6 +346,11 @@ type ExecutiveReportingResult =
       };
       aiAdjustedConsequence?: any;
       diagnostics?: any;
+      boardroom?: {
+        qualified: boolean;
+        reason?: string;
+        dossier?: any;
+      };
     }
   | {
       ok: false;
@@ -996,6 +1002,176 @@ function MetricTile({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BOARDROOM DOSSIER SECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function BoardroomDossierSection({
+  boardroom,
+  runKey,
+  email,
+}: {
+  boardroom: { qualified: boolean; reason?: string; dossier?: any } | null;
+  runKey?: string;
+  email?: string | null;
+}) {
+  const [expanded, setExpanded] = React.useState(false);
+  const [exporting, setExporting] = React.useState(false);
+  const [exportResult, setExportResult] = React.useState<string | null>(null);
+
+  if (!boardroom) return null;
+
+  // Non-qualified: restrained message
+  if (!boardroom.qualified) {
+    return (
+      <div style={{ margin: "1rem 0", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem 1rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.35rem" }}>
+          Boardroom Dossier not generated
+        </div>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.86rem", lineHeight: 1.55, color: "rgba(255,255,255,0.35)" }}>
+          {boardroom.reason || "This case does not currently meet board-level exposure or evidence threshold."}
+        </p>
+      </div>
+    );
+  }
+
+  const dossier = boardroom.dossier;
+  if (!dossier?.sections?.length) return null;
+
+  // Convert BoardroomDossier sections → BoardroomSlide[]
+  const slides = [
+    // Dossier sections
+    ...dossier.sections.map((section: { id: string; label: string; content: string; tone: string }) => ({
+      id: section.id,
+      eyebrow: section.tone === "confrontational" ? "CONFRONTATIONAL" : section.tone === "quantified" ? "QUANTIFIED" : "FACTUAL",
+      title: section.label,
+      render: (
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.65, color: "rgba(255,255,255,0.75)" }}>
+          {section.content}
+        </p>
+      ),
+    })),
+    // Objection handling slide
+    ...(dossier.objectionHandling?.length ? [{
+      id: "objection-handling",
+      eyebrow: "GOVERNANCE",
+      title: "Anticipated Objections",
+      render: (
+        <div style={{ display: "grid", gap: "1rem" }}>
+          {dossier.objectionHandling.map((oh: { objection: string; response: string }, i: number) => (
+            <div key={i}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.35rem" }}>
+                Objection: {oh.objection}
+              </p>
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.60)" }}>
+                {oh.response}
+              </p>
+            </div>
+          ))}
+        </div>
+      ),
+    }] : []),
+    // Decision path slide
+    ...(dossier.decisionPath?.length ? [{
+      id: "decision-path",
+      eyebrow: "DECISION",
+      title: "Decision Path Options",
+      render: (
+        <div style={{ display: "grid", gap: "0.75rem" }}>
+          {dossier.decisionPath.map((dp: { option: string; consequence: string; recommended: boolean }, i: number) => (
+            <div key={i} style={{ border: `1px solid ${dp.recommended ? "rgba(201,169,110,0.30)" : "rgba(255,255,255,0.06)"}`, backgroundColor: dp.recommended ? "rgba(201,169,110,0.04)" : "rgba(255,255,255,0.015)", padding: "0.85rem 1rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: dp.recommended ? "#C9A96E" : "rgba(255,255,255,0.35)" }}>
+                  {dp.option}
+                </span>
+                {dp.recommended && <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A96E" }}>Recommended</span>}
+              </div>
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(255,255,255,0.50)" }}>
+                {dp.consequence}
+              </p>
+            </div>
+          ))}
+        </div>
+      ),
+    }] : []),
+  ];
+
+  async function handleExportPdf() {
+    if (!runKey || !email) return;
+    setExporting(true);
+    setExportResult(null);
+    try {
+      const res = await fetch("/api/executive-reporting/export/boardroom-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ runKey, email }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setExportResult(data.message || "Boardroom PDF export queued.");
+      } else {
+        setExportResult(data.error || "Export failed.");
+      }
+    } catch {
+      setExportResult("Export request failed.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  return (
+    <div id="boardroom-dossier" style={{ margin: "1.5rem 0" }}>
+      {/* Qualification banner + controls */}
+      <div style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "rgba(201,169,110,0.04)", padding: "1rem 1.25rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.75rem" }}>
+          <div>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#C9A96E", marginBottom: "0.5rem" }}>
+              Boardroom Dossier available
+            </div>
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.55)", maxWidth: "50ch" }}>
+              This case qualifies for board-level treatment. {slides.length} presentation sections generated from governed evidence.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+            <button
+              onClick={() => setExpanded(!expanded)}
+              style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "#C9A96E", border: "1px solid rgba(201,169,110,0.35)", backgroundColor: expanded ? "rgba(201,169,110,0.12)" : "rgba(201,169,110,0.06)", padding: "8px 16px", cursor: "pointer" }}
+            >
+              {expanded ? "Close Boardroom Mode" : "Open Boardroom Mode"}
+            </button>
+            {runKey && email && (
+              <button
+                onClick={handleExportPdf}
+                disabled={exporting}
+                style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", padding: "8px 16px", cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.5 : 1 }}
+              >
+                {exporting ? "Exporting..." : "Export Boardroom PDF"}
+              </button>
+            )}
+          </div>
+        </div>
+        {exportResult && (
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.35)", marginTop: "0.5rem" }}>
+            {exportResult}
+          </p>
+        )}
+      </div>
+
+      {/* Slide deck — only when expanded */}
+      {expanded && slides.length > 0 && (
+        <div style={{ marginTop: "1rem" }}>
+          <BoardroomMode
+            slides={slides}
+            title={dossier.title || "Executive Reporting Boardroom Briefing"}
+            classification={dossier.classification || "BOARD_RESTRICTED"}
+            generatedAt={dossier.generatedAt}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ResultSurface({
   result,
   onRerun,
@@ -1147,6 +1323,23 @@ function ResultSurface({
           competitivePosition: advantagePath.competitivePosition.replace("_", " "),
           requiredAction: safeString(nextAction) || boardActions[0] || "Action required — see priority stack",
         }} />
+        {result.boardroom?.qualified && (
+          <div style={{ textAlign: "right", marginTop: "0.35rem" }}>
+            <a
+              href="#boardroom-dossier"
+              style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", textDecoration: "none" }}
+            >
+              Open Boardroom Dossier &darr;
+            </a>
+          </div>
+        )}
+
+        {/* ── BLOCK 0b: BOARDROOM DOSSIER ── */}
+        <BoardroomDossierSection
+          boardroom={result.boardroom ?? null}
+          runKey={result.runKey}
+          email={email}
+        />
 
         {/* ── BLOCK 1: OPENING COST LINE ── */}
         <div style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(252,165,165,0.15)" }}>

@@ -10,6 +10,7 @@ import {
   type StrategyRoomIntakePayload,
 } from "@/lib/consulting/strategy-room";
 import { Prisma } from "@prisma/client";
+import { evaluateStrategyRoomAdmission } from "@/lib/strategy-room/admission";
 
 export type StrategyRoomCanonicalInput = {
   name: string;
@@ -24,10 +25,21 @@ export type StrategyRoomCanonicalInput = {
 export type StrategyRoomApiResult =
   | {
       ok: true;
+      admitted: boolean;
+      status: "ADMITTED" | "RESTRICTED" | "PENDING";
       message: string;
       referenceId: string;
       priorityStatus?: string | null;
       warning?: string;
+      admission?: {
+        evidenceTier?: string;
+        caseId?: string;
+        directive?: string;
+        reasons?: string[];
+        missingEvidence?: string[];
+        repairActions?: string[];
+        returnPath?: string;
+      } | null;
     }
   | {
       ok: false;
@@ -51,6 +63,15 @@ function normalizeEmail(value: unknown): string {
 
 function isEmailLike(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+if (
+  process.env.NODE_ENV === "production" &&
+  process.env.ALLOW_RECAPTCHA_BYPASS === "true"
+) {
+  throw new Error(
+    "[strategy-room] ALLOW_RECAPTCHA_BYPASS must never be enabled in production.",
+  );
 }
 
 function bypassAllowed(): boolean {
@@ -408,6 +429,22 @@ export async function processStrategyRoomEnrolment(
     recaptchaWarning = "bypass_active_missing_token";
   }
 
+  // ── SERVER-SIDE ADMISSION ENFORCEMENT ──
+  // Validates prior diagnostic evidence before creating StrategyInquiry.
+  // Enrollment proceeds even if restricted (intake is captured), but the
+  // admission result is attached to metadata so downstream surfaces can enforce.
+  let admissionResult: Awaited<ReturnType<typeof evaluateStrategyRoomAdmission>> | null = null;
+  try {
+    admissionResult = await evaluateStrategyRoomAdmission({
+      email,
+      decisionStatement: intent,
+      preCommitment: true,
+    });
+  } catch (admissionError) {
+    console.error("[STRATEGY_ROOM_ADMISSION_ERROR]:", admissionError);
+    // Admission failure should not block intake capture — record proceeds with null admission
+  }
+
   try {
     const consultingPayload = buildConsultingPayload(
       {
@@ -440,6 +477,22 @@ export async function processStrategyRoomEnrolment(
           : null,
         score: consultingEvaluation.score,
       },
+      admission: admissionResult
+        ? {
+            status: admissionResult.status,
+            ...(admissionResult.status === "ADMITTED"
+              ? {
+                  caseId: admissionResult.caseId,
+                  evidenceTier: admissionResult.evidenceTier,
+                  directive: admissionResult.directive,
+                }
+              : {
+                  reasons: admissionResult.reasons,
+                  missingEvidence: admissionResult.missingEvidence,
+                  repairActions: admissionResult.repairActions,
+                }),
+          }
+        : null,
     };
 
     const entry = await prisma.strategyInquiry.create({
@@ -519,19 +572,39 @@ export async function processStrategyRoomEnrolment(
       },
     });
 
+    // ── Admission-aware email: ADMITTED vs RESTRICTED receive different messaging ──
+    const restrictedAdmission = admissionResult?.status === "RESTRICTED" ? admissionResult as Extract<typeof admissionResult, { status: "RESTRICTED" }> : null;
     const emailResult = await sendEmail({
       type: "TRANSACTIONAL",
       to: email,
-      subject: "Strategy Room access confirmed",
-      template: {
-        name: "strategy-room-accepted",
-        data: {
-          fullName: name,
-          decisionStatement: intent,
-        },
-      },
+      subject: restrictedAdmission
+        ? "Strategy Room — case recorded, admission restricted"
+        : "Strategy Room access confirmed",
+      template: restrictedAdmission
+        ? {
+            name: "strategy-room-restricted",
+            data: {
+              fullName: name,
+              decisionStatement: intent,
+              referenceId: entry.id,
+              reasons: restrictedAdmission.reasons,
+              missingEvidence: restrictedAdmission.missingEvidence,
+              repairActions: restrictedAdmission.repairActions,
+              returnPath: restrictedAdmission.returnPath,
+            },
+          }
+        : {
+            name: "strategy-room-accepted",
+            data: {
+              fullName: name,
+              decisionStatement: intent,
+              evidenceTier: admissionResult?.status === "ADMITTED" ? admissionResult.evidenceTier : null,
+              caseId: admissionResult?.status === "ADMITTED" ? admissionResult.caseId : null,
+              directive: admissionResult?.status === "ADMITTED" ? admissionResult.directive : null,
+            },
+          },
       meta: {
-        source: "strategy-room:accepted",
+        source: restrictedAdmission ? "strategy-room:restricted" : "strategy-room:accepted",
       },
     });
 
@@ -541,12 +614,35 @@ export async function processStrategyRoomEnrolment(
 
     return {
       ok: true,
-      message: consultingEvaluation.result.ok
-        ? "Institutional sequence initialized."
-        : "Institutional sequence initialized. Additional clarification will strengthen routing.",
+      admitted: !restrictedAdmission,
+      status: restrictedAdmission
+        ? ("RESTRICTED" as const)
+        : admissionResult?.status === "ADMITTED"
+          ? ("ADMITTED" as const)
+          : ("PENDING" as const),
+      message: restrictedAdmission
+        ? "Case recorded. Strategy Room admission requires additional evidence before access is granted."
+        : consultingEvaluation.result.ok
+          ? "Strategy Room access confirmed."
+          : "Strategy Room access confirmed. Additional clarification will strengthen routing.",
       referenceId: entry.id,
       priorityStatus: vettedEntry?.status || null,
       warning: finalWarning || undefined,
+      admission: restrictedAdmission
+        ? {
+            reasons: restrictedAdmission.reasons,
+            missingEvidence: restrictedAdmission.missingEvidence,
+            repairActions: restrictedAdmission.repairActions,
+            returnPath: restrictedAdmission.returnPath,
+          }
+        : admissionResult?.status === "ADMITTED"
+          ? {
+              evidenceTier: admissionResult.evidenceTier,
+              caseId: admissionResult.caseId,
+              directive: admissionResult.directive,
+              reasons: admissionResult.reasons,
+            }
+          : null,
     };
   } catch (error) {
     console.error("[STRATEGY_ROOM_ENROL_ERROR]:", error);

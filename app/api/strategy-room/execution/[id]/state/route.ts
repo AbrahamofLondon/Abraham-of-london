@@ -15,8 +15,45 @@ import {
 import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
 import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
 import { noStoreJson, requireMethod } from "@/lib/server/security/app-route-guards";
+import { evaluateDecision } from "@/lib/decision/kernel";
+import { simulateAction } from "@/lib/decision/simulation-engine";
+import { analyzeContagionRisk, simulateInterventionImpact } from "@/lib/alignment/governance-logic";
+import { SIGNALS } from "@/lib/diagnostics/signals";
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+function normalizeDecisionState(value: string | null | undefined): DecisionAction["status"] {
+  const normalized = String(value || "").toUpperCase();
+  if (normalized === "EXECUTED") return "EXECUTED";
+  if (normalized === "BLOCKED") return "BLOCKED";
+  if (normalized === "ESCALATED") return "ESCALATED";
+  if (normalized === "FAILED") return "FAILED";
+  return "PENDING";
+}
+
+function parseSnapshot(value: string | null | undefined): Record<string, unknown> {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function buildTelemetryMetrics(snapshot: Record<string, unknown>, consequenceScore: number) {
+  const executionRecord = snapshot.executionRecord && typeof snapshot.executionRecord === "object"
+    ? snapshot.executionRecord as Record<string, unknown>
+    : null;
+  return [
+    { label: "AUTHORITY", intent: 88, reality: executionRecord?.authority ? 62 : 42 },
+    { label: "EXECUTION", intent: 90, reality: Math.max(18, 100 - consequenceScore) },
+    { label: "GOVERNANCE", intent: 84, reality: executionRecord?.decision ? 58 : 46 },
+    { label: "TIMING", intent: 82, reality: Math.max(20, 92 - consequenceScore) },
+  ];
+}
 
 /**
  * GET /api/strategy-room/execution/[id]/state
@@ -61,6 +98,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
       ? await prisma.diagnosticDecisionObject.findUnique({ where: { id: linkedDecisionObjectId } })
       : null;
     const aiRisk = linkedDecisionObject ? classifyAIDecisionRisk(linkedDecisionObject) : null;
+    const snapshot = parseSnapshot(session.canonicalSnapshot);
 
     if (linkedDecisionObjectId) {
       const inactiveRetainer = await prisma.retainedDecision.findFirst({
@@ -84,9 +122,9 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
     const actions: DecisionAction[] = rawActions.map((d) => ({
       id: d.id,
       text: d.decision,
-      status: (d.status as DecisionAction["status"]) || "PENDING",
+      status: normalizeDecisionState(d.status),
       deadline: computeDefaultDeadline(
-        d.status === "PENDING" ? "near_term" : "structural",
+        normalizeDecisionState(d.status) === "PENDING" ? "near_term" : "structural",
       ),
       createdAt: d.createdAt.toISOString(),
       updatedAt: d.updatedAt.toISOString(),
@@ -98,7 +136,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
           .map((dd) => ({
             id: dd.id,
             text: dd.decision,
-            status: (dd.status as DecisionAction["status"]) || "PENDING",
+            status: normalizeDecisionState(dd.status),
             deadline: "",
             createdAt: dd.createdAt.toISOString(),
             updatedAt: dd.updatedAt.toISOString(),
@@ -114,7 +152,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
     // Build execution state
     const executionState: SessionExecutionState = {
       sessionId: id,
-      systemState: (session.status as DecisionAction["status"]) || "PENDING",
+      systemState: normalizeDecisionState(session.status),
       actions,
       escalationTriggers: [],
       consequenceScore: 0,
@@ -125,6 +163,104 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
 
     const transition = evaluateStateTransition(executionState);
     const consequence = computeDynamicConsequence(executionState);
+    const kernel = evaluateDecision({
+      id,
+      source: "strategy_room",
+      condition: session.conditionSummary || session.coreProblem || "Strategy Room execution condition",
+      decisionRequired: session.decisionQuestion || linkedDecisionObject?.decisionText || "Execute the next governed action.",
+      evidenceChain: actions.slice(0, 5).map((action) => ({
+        inputSource: "strategy_room",
+        observedPattern: action.text,
+        weight: action.status === "EXECUTED" ? 0.72 : action.status === "BLOCKED" ? 0.88 : 0.62,
+        explanation: `Execution action is currently ${action.status.toLowerCase()}.`,
+      })),
+      internalContradictions: actions
+        .filter((action) => action.status === "BLOCKED" || action.status === "PENDING")
+        .map((action) => `${action.text} remains ${action.status.toLowerCase()}.`),
+      scores: {
+        blockedCount: actions.filter((action) => action.status === "BLOCKED").length,
+        pendingCount: actions.filter((action) => action.status === "PENDING").length,
+        consequenceScore: consequence.score,
+      },
+      signalStrength: consequence.score >= 70 ? "STRONG" : consequence.score >= 40 ? "MODERATE" : "WEAK",
+      sources: [
+        { type: "system_computed", count: Math.max(actions.length, 1) },
+        ...(linkedDecisionObject ? [{ type: "self_report" as const, count: 1 }] : []),
+      ],
+      authorityType: linkedDecisionObject?.stakeholderText || undefined,
+      aiExposureLevel: linkedDecisionObject?.aiExposureLevel,
+      aiLeverageAction: null,
+      expectedOutcome: actions[0]?.text,
+      daysSinceIdentification: Math.max(0, Math.floor((Date.now() - session.createdAt.getTime()) / 86_400_000)),
+    });
+    const telemetryMetrics = buildTelemetryMetrics(snapshot, consequence.score);
+    const contagionMap = analyzeContagionRisk(telemetryMetrics);
+    const governanceImpact = simulateInterventionImpact(telemetryMetrics, {
+      domain: contagionMap[0]?.sourceDomain || telemetryMetrics[0]?.label || "AUTHORITY",
+      estimatedRecovery: Math.max(4, Math.round(Math.max(transition.triggers.length, 1) * 2)),
+      estimatedTimeframe: transition.newState === "ESCALATED" ? 7 : 14,
+    });
+    const simulationSpine = {
+      id: session.id,
+      case: {
+        id: session.id,
+        decision: session.decisionQuestion || linkedDecisionObject?.decisionText || "Execute the next governed action.",
+        priorAttempt: session.conditionSummary || "",
+        costOfDelay: session.conditionSummary || "",
+        claimedOwner: linkedDecisionObject?.stakeholderText || "",
+        blocker: session.coreProblem || "",
+        forcedAction: actions[0]?.text || "",
+        email: session.email || undefined,
+      },
+      c3: {
+        clarity: 0.7,
+        context: 0.7,
+        consequence: 0.7,
+        specificityScore: 0.7,
+        mode: "SYNTHESIS_READY",
+        tier: "FULL_SYNTHESIS",
+        confidenceBand: "high",
+        missing: [],
+        scoringExplanation: { clarity: "", context: "", consequence: "" },
+        recoveryClassification: null,
+      },
+      deterministic: {
+        conditionClass: "execution",
+        signal: SIGNALS.EXECUTION_AVOIDANCE,
+        contradictionSet: kernel.decision.reason ? [kernel.decision.reason] : [],
+        blockerClass: "execution",
+      },
+      synthesis: null,
+      forecast: {} as never,
+      memory: null,
+      stakeholderMap: {
+        formalOwner: linkedDecisionObject?.stakeholderText || null,
+        realOwner: linkedDecisionObject?.stakeholderText || null,
+        blockers: actions.filter((action) => action.status === "BLOCKED").map((action) => action.text),
+        silentInfluencers: [] as string[],
+        misalignedParties: [] as string[],
+      },
+      stage: "strategy_room" as const,
+      history: [],
+      createdAt: session.createdAt.toISOString(),
+      updatedAt: session.updatedAt.toISOString(),
+    };
+    const actionSimulations = [
+      "escalate",
+      "delay",
+      "delegate",
+      "replace owner",
+      "force deadline",
+      "pause",
+      "do nothing",
+    ].map((action) => ({
+      action,
+      ...simulateAction({
+        action,
+        spine: simulationSpine as never,
+        stakeholderMap: simulationSpine.stakeholderMap,
+      }),
+    }));
 
     // Build trigger list
     const triggers = transition.triggers.map((t) => ({
@@ -211,6 +347,14 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
       consequenceExplanation: consequence.explanation,
       consequenceTrend: consequence.trend,
       ai: aiRisk,
+      kernel,
+      governanceImpact: {
+        contagionRisk: contagionMap[0]?.riskLevel ?? "LOW",
+        affectedDomains: contagionMap.map((risk) => risk.targetDomain),
+        interventionUrgency: transition.newState === "ESCALATED" || contagionMap[0]?.riskLevel === "HIGH" ? "HIGH" : consequence.score >= 40 ? "MEDIUM" : "LOW",
+        simulation: governanceImpact,
+      },
+      actionSimulations,
       directive: transition.directive,
       triggers: allTriggers,
     });

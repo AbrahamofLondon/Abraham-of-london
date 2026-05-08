@@ -6,6 +6,7 @@
  * Integrates with constitutional routing logic.
  * Deterministic. Same input → same output.
  */
+import { evaluateDecision, type DecisionKernelOutput } from "@/lib/decision/kernel";
 
 export type InterventionPath = "STABILISE" | "RESTRUCTURE" | "ESCALATE" | "MONITOR" | "REJECT";
 
@@ -27,6 +28,7 @@ export type InterventionResult = {
   executionBlocked: boolean;
   blockReason: string | null;
   composite: number;
+  decisionKernel: DecisionKernelOutput;
   deterministic: true;
   version: "1.0";
 };
@@ -116,6 +118,33 @@ export function selectInterventionPath(input: InterventionInput): InterventionRe
     : recommended === "STABILISE" ? 14
     : recommended === "MONITOR" ? 60
     : 0;
+  const decisionKernel = evaluateDecision({
+    id: `intervention-path:${recommended.toLowerCase()}:${composite}`,
+    source: recommended === "ESCALATE" ? "strategy_room" : "executive_reporting",
+    condition: `Intervention path ${recommended}`,
+    decisionRequired: `Route the case to ${recommended}`,
+    evidenceChain: [
+      {
+        inputSource: "intervention_path_selector",
+        observedPattern: `Severity ${severity}, urgency ${urgency}, authority clarity ${authorityClarity}`,
+        weight: Math.min(0.92, 0.45 + composite / 100),
+        explanation: "The intervention selector converts routing factors into one governed path decision.",
+      },
+    ],
+    internalContradictions: executionBlocked && blockReason ? [blockReason] : rejectedPaths.map((path) => `${path.path}: ${path.reason}`),
+    scores: {
+      severity,
+      urgency,
+      authorityClarity,
+      failureHistory,
+      costExposure,
+      stakeholderAlignment,
+      composite,
+    },
+    signalStrength: recommended === "ESCALATE" ? "STRONG" : composite >= 50 ? "MODERATE" : "WEAK",
+    sources: [{ type: "system_computed", count: 1 }],
+    expectedOutcome: rationale[0],
+  });
 
   return {
     recommendedPath: recommended,
@@ -126,6 +155,7 @@ export function selectInterventionPath(input: InterventionInput): InterventionRe
     executionBlocked,
     blockReason,
     composite,
+    decisionKernel,
     deterministic: true,
     version: "1.0",
   };

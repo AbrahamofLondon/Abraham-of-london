@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getRedisStats, safePing } from "@/lib/redis-safe";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 import { getRateLimiterStats } from "@/lib/server/rate-limit-unified";
 
 type HealthResponse = {
@@ -25,9 +26,10 @@ export default async function handler(
     return res.status(405).json({ ok: false, timestamp, error: "Method not allowed" });
   }
 
-  if (req.headers.authorization !== `Bearer ${process.env.ADMIN_API_KEY}`) {
-    return res.status(401).json({ ok: false, timestamp, error: "Unauthorized" });
-  }
+  if (!(await requireAdminServer(req, res, {
+    routeKey: "admin-system-health",
+    rateLimit: { limit: 30, windowMs: 15 * 60_000 },
+  }))) return;
 
   try {
     const [redisStats, rateLimiter, redisPing] = await Promise.all([

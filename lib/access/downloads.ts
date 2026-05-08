@@ -24,7 +24,16 @@ export const ACCESS_DOWNLOADS: Record<string, ProtectedAsset> = {
 };
 
 const SIGNED_URL_TTL_SECONDS = 300;
-const SIGNING_SECRET = process.env.DOWNLOAD_SIGNING_SECRET || "aol-download-secret";
+const SIGNING_SECRET = (() => {
+  const secret = process.env.DOWNLOAD_SIGNING_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("[FATAL] DOWNLOAD_SIGNING_SECRET is required in production");
+    }
+    return "aol-download-secret-dev-only";
+  }
+  return secret;
+})();
 
 export function createSignedDownloadToken(artifactKey: string, userId: string) {
   const expires = Math.floor(Date.now() / 1000) + SIGNED_URL_TTL_SECONDS;

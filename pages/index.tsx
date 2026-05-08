@@ -9,6 +9,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { track } from "@/lib/analytics/track";
 import { trackLanding } from "@/lib/analytics/journey-client";
+import CategoryFrontDoor from "@/components/homepage/CategoryFrontDoor";
 import { motion } from "framer-motion";
 import {
   AlertTriangle,
@@ -2906,12 +2907,10 @@ const HomePage: NextPage<HomePageProps> = ({
   },
   latestReport,
 }) => {
-  const intelligenceHref = "/artifacts";
-
   return (
     <Layout
       title="Abraham of London"
-      description="A governed executive reporting system. Structured diagnostic evidence produces a board-grade brief: position, financial exposure, priority stack, and next action."
+      description="Decision Infrastructure by Abraham of London. A private operating advantage built on better evidence, sharper contradiction detection, and verified executive memory."
       canonicalUrl="/"
       fullWidth
       headerTransparent
@@ -2921,29 +2920,21 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta property="og:image" content="/assets/images/social/og-image.jpg" />
       </Head>
 
-      {/* 1. Recognition — unified hero */}
-      <HomeHero intelligenceHref={intelligenceHref} />
+      {/* 1. Category front door — Decision Infrastructure by Abraham of London */}
+      <CategoryFrontDoor />
 
-      {/* 2. Proof — what the system returns + example output */}
-      <ProofLayer />
-
-      {/* 3. Consequence escalation — emotional pressure after proof */}
-      <ConsequenceEscalation />
-
-      {/* 4. Evidence — observed in practice */}
+      {/* 2. Applied proof — observed in practice */}
       <HomeEvidenceSection />
 
-      {/* 5. Product ladder — Diagnostic → ER → Strategy Room */}
-      <HowItWorksLadder />
-
-      {/* 5b. Product clarity — what happens after the diagnostic */}
-      <ProductClarity />
-
-      {/* 6. Flagship — ER + Strategy Room */}
+      {/* 3. Flagship output detail — ER + Strategy Room deliverables */}
       <HomeDecisionSection />
 
-      {/* 7. Who this is for / not for */}
+      {/* 4. When to use this — trigger conditions + deliverables + poor fit */}
       <WhoThisIsFor />
+
+      {/* NOTE: HowItWorksLadder and ProductClarity removed from render path —
+           their content is covered by CategoryFrontDoor sections 4 and 6.
+           Component definitions preserved in this file for sub-page reuse. */}
 
       {/* 8. Engagement lanes strip */}
       <div className="mx-auto max-w-[1100px] px-6 py-6 lg:px-12">
@@ -2975,8 +2966,8 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </div>
 
-      {/* 9. Final action */}
-      <HomeFinalCta intelligenceHref={intelligenceHref} />
+      {/* NOTE: HomeFinalCta removed — CategoryFrontDoor section 8 provides
+           the final CTA. Component definition preserved for sub-page reuse. */}
     </Layout>
   );
 };

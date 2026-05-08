@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   buildObservedOutcomeEvidence,
-  recordOutcomeSnapshot,
+  recordOutcomeSnapshotSync as recordOutcomeSnapshot,
   resetOutcomeEvidenceForTests,
 } from "./evidence";
 import {

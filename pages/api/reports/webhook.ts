@@ -4,6 +4,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
+import { prisma } from "@/lib/prisma";
 import { updateReportRequestByCheckoutSessionId } from "@/lib/reports/store";
 
 export const config = {
@@ -39,6 +40,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const rawBody = await buffer(req);
     const event = stripe.webhooks.constructEvent(rawBody, sig, stripeWebhookSecret);
+    const processedEventId = `reports:${event.id}`;
+
+    const existing = await prisma.processedWebhookEvent.findUnique({
+      where: { id: processedEventId },
+      select: { id: true },
+    });
+    if (existing) {
+      return res.status(200).json({ received: true, replay: true });
+    }
+
+    await prisma.processedWebhookEvent.create({
+      data: { id: processedEventId },
+    });
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
@@ -55,6 +69,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json({ received: true });
   } catch (error) {
+    if ((error as { code?: string } | null)?.code === "P2002") {
+      return res.status(200).json({ received: true, replay: true });
+    }
     console.error("[REPORT_WEBHOOK_ERROR]", error);
     return res.status(400).end("Webhook error");
   }

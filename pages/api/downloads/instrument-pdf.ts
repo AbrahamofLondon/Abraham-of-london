@@ -7,13 +7,12 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import * as fs from "fs";
-import * as path from "path";
 
 const ALLOWED_SLUGS = new Set([
   "decision-exposure-instrument",
   "mandate-clarity-framework",
   "intervention-path-selector",
+  "operator-decision-pack",
 ]);
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -24,18 +23,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(404).json({ error: "Instrument not found" });
   }
 
-  const filePath = path.join(process.cwd(), "private", "assets", "paid-instruments", `${slug}.pdf`);
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: "PDF not available" });
-  }
-
-  const stat = fs.statSync(filePath);
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Length", stat.size);
-  res.setHeader("Content-Disposition", `attachment; filename="${slug}.pdf"`);
-  res.setHeader("Cache-Control", "private, max-age=3600");
-
-  const stream = fs.createReadStream(filePath);
-  stream.pipe(res);
+  res.setHeader("Cache-Control", "private, no-store, max-age=0");
+  res.setHeader("Location", `/api/downloads/${encodeURIComponent(slug)}`);
+  return res.status(307).end();
 }

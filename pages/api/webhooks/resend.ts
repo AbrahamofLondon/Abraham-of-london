@@ -17,6 +17,23 @@ type ResendWebhookBody = {
 
 const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET?.trim() || "";
 
+function redactEmail(value: string): string {
+  const trimmed = String(value || "").trim().toLowerCase();
+  const [local, domain] = trimmed.split("@");
+  if (!local || !domain) return "unknown";
+  const visible = local.slice(0, 2);
+  return `${visible}${"*".repeat(Math.max(1, local.length - visible.length))}@${domain}`;
+}
+
+function sanitizeUrlForNotification(value: string): string {
+  try {
+    const parsed = new URL(value);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return "unavailable";
+  }
+}
+
 function extractPrimaryRecipient(
   to: NonNullable<ResendWebhookBody["data"]>["to"],
 ): string {
@@ -66,7 +83,7 @@ function verifyWebhookSignature(req: NextApiRequest): boolean {
 }
 
 async function handleOpened(data: NonNullable<ResendWebhookBody["data"]>) {
-  const recipient = extractPrimaryRecipient(data.to ?? []);
+  const recipient = redactEmail(extractPrimaryRecipient(data.to ?? []));
 
   await notifyDiscord({
     title: "EMAIL OPENED",
@@ -88,7 +105,7 @@ async function handleOpened(data: NonNullable<ResendWebhookBody["data"]>) {
 }
 
 async function handleClicked(data: NonNullable<ResendWebhookBody["data"]>) {
-  const recipient = extractPrimaryRecipient(data.to ?? []);
+  const recipient = redactEmail(extractPrimaryRecipient(data.to ?? []));
   const clickUrl = String(data.click_url || "");
   const version = inferDocumentVariant(clickUrl);
 
@@ -99,8 +116,8 @@ async function handleClicked(data: NonNullable<ResendWebhookBody["data"]>) {
     fields: [
       { name: "Format", value: version, inline: true },
       {
-        name: "URL",
-        value: clickUrl || "Unknown",
+        name: "Path",
+        value: sanitizeUrlForNotification(clickUrl),
         inline: false,
       },
       {

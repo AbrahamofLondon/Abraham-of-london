@@ -99,9 +99,8 @@ These paths require sovereign session authentication with authority level enforc
 Authority hierarchy: OBSERVER(0) < PARTICIPANT(1) < DELEGATE(2) < AUTHORITY(3) < SOVEREIGN(4).
 
 Sovereign auth sources (checked in order):
-1. `sovereign_session` cookie -- format: `userId:campaignId:authorityLevel:signature`
-2. `ogr_sovereign_session` cookie -- HMAC-signed payload (verified against `OGR_SESSION_SECRET`)
-3. `Authorization: Bearer <SOVEREIGN_ACCESS_TOKEN>` header
+1. `ogr_sovereign_session` cookie -- HMAC-signed payload (verified against `OGR_SESSION_SECRET`)
+2. `Authorization: Bearer <SOVEREIGN_ACCESS_TOKEN>` header
 
 ### 1.6 Global Lockdown
 
@@ -115,7 +114,7 @@ When system lock is active, non-admin users are blocked from all non-exempt path
 | Bypass | Mechanism | Risk |
 |---|---|---|
 | Development bypass | `NODE_ENV=development` + `BYPASS_SOVEREIGN=true` | Dev only -- acceptable |
-| Internal bypass | `X-Directorate-Bypass` header == `INTERNAL_BYPASS_KEY` env | Secret-gated -- moderate risk if key leaks |
+| Internal bypass | `X-Directorate-Bypass` header == `INTERNAL_BYPASS_KEY` env in development only | Development-only bypass; must not execute in production |
 | PDF guard | `/assets/downloads/*.pdf` -> 307 redirect to `/api/downloads/[slug]` | Prevents direct PDF access |
 
 ### 1.8 Rate Limiting

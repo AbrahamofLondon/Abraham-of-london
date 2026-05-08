@@ -1,21 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import "server-only";
+import { requireAdmin } from "@/lib/access/require-admin";
 import { revokeKey } from "@/lib/server/inner-circle/keys";
 
 type ResData = { success: boolean } | { error: string };
 
-// Phase 0: consolidated admin auth — standard Authorization: Bearer pattern.
-function assertAdmin(req: NextApiRequest) {
-  const adminKey = (process.env.ADMIN_API_KEY || "").trim();
-  if (!adminKey) throw new Error("forbidden");
-  const auth = String(req.headers.authorization || "");
-  const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-  if (!token || token !== adminKey) throw new Error("forbidden");
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResData>) {
   try {
-    assertAdmin(req);
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
     if (req.method !== "POST") {
       res.setHeader("Allow", "POST");
       return res.status(405).json({ error: "method_not_allowed" });
@@ -25,7 +18,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const ok = await revokeKey(key);
     return res.status(200).json({ success: ok });
   } catch (e: any) {
-    if (e?.message === "forbidden") return res.status(403).json({ error: "forbidden" });
     return res.status(500).json({ error: "server_error" });
   }
 }

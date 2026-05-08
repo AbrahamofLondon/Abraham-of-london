@@ -363,7 +363,7 @@ export default function ExecutiveReportingEntryPage() {
             description="The diagnostic ladder accumulates structural evidence. Executive Reporting translates that evidence into consequence: financial exposure, institutional constraint, and the priority decisions that follow."
             sampleLines={[
               { label: "Position statement", value: "Execution coherence collapsing under governance drift" },
-              { label: "Financial exposure", value: "£420,000 estimated loss over 6 months" },
+              { label: "Financial exposure", value: "Scenario projection derived from your stated inputs (example only)" },
               { label: "Priority stack", value: "Re-establish authority clarity → collapse redundant reporting → stabilise execution cadence" },
             ]}
           />

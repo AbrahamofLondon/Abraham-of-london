@@ -260,6 +260,39 @@ export default function ExecutiveReportingPaywall({
         </p>
       </div>
 
+      {/* CHECKOUT TRUST BLOCK */}
+      <div className="mb-6 border border-white/10 bg-white/[0.02] p-5 sm:p-6 space-y-3">
+        <div className="font-medium text-white" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>Before you proceed</div>
+        <ul className="space-y-2 text-sm leading-6 text-white/60">
+          <li className="flex items-start gap-2">
+            <span className="mt-0.5 text-amber-500/80">&#10003;</span>
+            <span>Payment processed securely through Stripe. Card details never touch our servers.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-0.5 text-amber-500/80">&#10003;</span>
+            <span>You will receive: a personalised Executive Report derived from your diagnostic evidence.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-0.5 text-amber-500/80">&#10003;</span>
+            <span>One-time payment of <strong className="text-white/80">&pound;{price}</strong>. No recurring charges.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-0.5 text-amber-500/80">&#10003;</span>
+            <span>
+              <a href="/refund-policy" className="text-amber-400/80 hover:text-amber-300 underline underline-offset-2">Refund and cancellation policy</a> applies. 14-day cancellation right before delivery begins.
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-0.5 text-amber-500/80">&#10003;</span>
+            <span>Your data is handled under our <a href="/privacy" className="text-amber-400/80 hover:text-amber-300 underline underline-offset-2">privacy policy</a>. Diagnostic data is not shared externally.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="mt-0.5 text-amber-500/80">&#10003;</span>
+            <span>Questions? Contact <a href="mailto:info@abrahamoflondon.org" className="text-amber-400/80 hover:text-amber-300 underline underline-offset-2">info@abrahamoflondon.org</a></span>
+          </li>
+        </ul>
+      </div>
+
       {/* EMAIL */}
       <input
         type="email"
@@ -293,7 +326,7 @@ export default function ExecutiveReportingPaywall({
             <button
               onClick={() => {
                 track("er_commitment_declined");
-                setMessage("Then do not proceed. This only works if the decision matters.");
+                setMessage("This report is designed for decisions with real consequence. Return when the decision has a named owner and a cost that is already moving.");
               }}
               className="flex-1 border border-white/10 py-3 text-sm text-white/50"
             >
@@ -320,7 +353,13 @@ export default function ExecutiveReportingPaywall({
       )}
 
       {message && (
-        <p className="mt-3 text-sm text-white/56">{message}</p>
+        <div className={`mt-4 border p-4 text-sm leading-6 ${
+          message.includes("cancelled") || message.includes("could not") || message.includes("required")
+            ? "border-amber-500/30 bg-amber-950/20 text-amber-100/90"
+            : "text-white/70 border-white/10 bg-white/[0.02]"
+        }`}>
+          {message}
+        </div>
       )}
     </div>
   );

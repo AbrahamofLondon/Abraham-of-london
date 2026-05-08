@@ -11,7 +11,9 @@ import "server-only";
  */
 
 import { prisma } from "@/lib/prisma.server";
-import { buildObservedOutcomeEvidence, type OutcomeEvidenceSummary } from "@/lib/outcomes/evidence";
+import { buildObservedOutcomeEvidenceFromDB, type OutcomeEvidenceSummary } from "@/lib/outcomes/evidence";
+import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
+import { evaluateDecision } from "@/lib/decision/kernel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -36,6 +38,11 @@ export type ReturnBrief = {
     state: "ASCENDING" | "STAGNANT" | "FRAGILE" | "DETERIORATING";
     reason: string;
   };
+  kernel: {
+    blocked: boolean;
+    reason: string | null;
+    activeContradictions: number;
+  } | null;
 
   /** Section 3 — Contradiction re-exposed */
   contradiction: {
@@ -144,11 +151,47 @@ export async function generateReturnBrief(
   if (!trigger) return null;
 
   const trajectory = executionState?.trajectory ?? "FRAGILE";
-  const decisionText = session.decisionQuestion ?? "the stated decision";
-  const constraintText = session.coreProblem ?? "the primary constraint";
+  const executionRecord = await findLatestStrategyExecutionRecord({
+    sessionId: session.id,
+    email: session.email,
+  });
+  const decisionText = executionRecord?.decision ?? session.decisionQuestion ?? "the stated decision";
+  const constraintText = executionRecord?.conflictResolved ?? session.coreProblem ?? "the primary constraint";
   const pendingCount = session.decisions.filter((d) => d.status === "pending").length;
   const blockedCount = session.decisions.filter((d) => d.status === "blocked").length;
   const executedCount = session.decisions.filter((d) => d.status === "executed").length;
+  const kernel = evaluateDecision({
+    id: session.id,
+    source: "strategy_room",
+    condition: session.conditionSummary || constraintText,
+    decisionRequired: decisionText,
+    evidenceChain: [
+      {
+        inputSource: "strategy_room",
+        observedPattern: constraintText,
+        weight: Math.max(0.45, Math.min(1, 0.5 + blockedCount * 0.1)),
+        explanation: "Return Brief evaluates the unresolved execution condition against the accumulated strategy state.",
+      },
+    ],
+    internalContradictions: blockedCount > 0
+      ? [`${blockedCount} execution decision(s) remain blocked.`]
+      : pendingCount > 0
+        ? [`${pendingCount} execution decision(s) remain pending.`]
+        : [],
+    scores: {
+      blockedCount,
+      pendingCount,
+      executedCount,
+    },
+    signalStrength: blockedCount > 0 ? "STRONG" : pendingCount > 0 ? "MODERATE" : "WEAK",
+    sources: [
+      { type: "system_computed", count: 1 },
+      ...(blockedCount + pendingCount + executedCount > 1 ? [{ type: "multi_respondent" as const, count: blockedCount + pendingCount + executedCount }] : []),
+    ],
+    authorityType: executionRecord?.authority || undefined,
+    expectedOutcome: executionRecord?.firstAction || undefined,
+    daysSinceIdentification: daysSince(session.createdAt.toISOString()),
+  });
 
   // Section 1 — Opening
   let opening: string;
@@ -195,7 +238,10 @@ export async function generateReturnBrief(
     : null;
 
   // Section 4 — Outcome evidence
-  const outcomeEvidence = buildObservedOutcomeEvidence();
+  const outcomeEvidence = await buildObservedOutcomeEvidenceFromDB({
+    sessionId: session.id,
+    organisationKey: session.email ?? undefined,
+  });
 
   // Section 5 — Delta
   const delta = executionState
@@ -236,7 +282,14 @@ export async function generateReturnBrief(
     opening,
     trajectory: {
       state: trajectory as ReturnBrief["trajectory"]["state"],
-      reason: trajectoryReason,
+      reason: kernel.decision.blocked && kernel.decision.reason
+        ? `${trajectoryReason} ${kernel.decision.reason}`
+        : trajectoryReason,
+    },
+    kernel: {
+      blocked: kernel.decision.blocked,
+      reason: kernel.decision.reason ?? null,
+      activeContradictions: kernel.graphMetrics.activeContradictions,
     },
     contradiction,
     outcomeEvidence: outcomeEvidence.processedDecisionCases > 0 ? outcomeEvidence : null,

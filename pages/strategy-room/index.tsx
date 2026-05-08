@@ -55,6 +55,12 @@ import CaseActiveBanner from "@/components/diagnostics/unified/CaseActiveBanner"
 import FeedbackLoopBlock from "@/components/diagnostics/unified/FeedbackLoop";
 import LimitationsBlock from "@/components/diagnostics/unified/LimitationsBlock";
 import ExecutionFlow from "@/components/strategy-room/ExecutionFlow";
+import AdmissionNotice from "@/components/product/AdmissionNotice";
+import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
+import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
+import { evaluateCounselTrigger, deriveCounselStatus } from "@/lib/strategy-room/counsel-trigger";
+import type { StrategyRoomState } from "@/lib/strategy-room/room-state-contract";
+import { deriveEvidenceTierFromStages } from "@/lib/product/evidence-stage-contract";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION AUTHORITY GATE
@@ -1400,6 +1406,9 @@ export default function StrategyRoomPage({
   const [executiveResult, setExecutiveResult] = React.useState<unknown>(null);
   const [showExecutionFlow, setShowExecutionFlow] = React.useState(false);
   const [executionFlowComplete, setExecutionFlowComplete] = React.useState(false);
+  const executionRecordSessionIdRef = React.useRef(
+    `qual_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
+  );
 
   // Enforcement state — reactive system visibility
   const [enforcement, setEnforcement] = React.useState<{
@@ -1582,10 +1591,33 @@ export default function StrategyRoomPage({
                       inheritedDecision={thread?.summary?.title ?? null}
                       inheritedBlocker={thread?.summary?.narrative ?? null}
                       inheritedConsequence={null}
-                      onComplete={() => {
+                      onComplete={(record) => {
                         setExecutionFlowComplete(true);
                         setShowExecutionFlow(false);
-                        track("strategy_room_execution_flow_completed");
+                        track("strategy_room_execution_flow_completed", {
+                          hasDecision: Boolean(record?.decision),
+                          hasAuthority: Boolean(record?.authority),
+                          hasFirstAction: Boolean(record?.firstAction),
+                        });
+                        // Persist the locked decision record
+                        if (record) {
+                          fetch("/api/strategy-room/execution-record", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              sessionId: executionRecordSessionIdRef.current,
+                              decision: record.decision,
+                              authority: record.authority,
+                              conflictResolved: record.conflictResolution,
+                              firstAction: record.firstAction,
+                              timeline: record.consequence,
+                              owner: record.authority,
+                              createdAt: record.completedAt,
+                              evidenceSource: "execution_flow",
+                              email: form.email || undefined,
+                            }),
+                          }).catch(() => {});
+                        }
                       }}
                     />
                   )}
@@ -1999,6 +2031,65 @@ export default function StrategyRoomPage({
             </div>
 
             <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
+
+            {/* ── ADMISSION + EVIDENCE + COUNSEL STATUS (derived from room state) ── */}
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+              <div style={{ display: "grid", gap: "8px", marginBottom: "8px" }}>
+                <AdmissionNotice
+                  status="ADMITTED"
+                  surface="Strategy Room"
+                  evidenceTier={enforcement ? deriveEvidenceTierFromStages(Object.keys(canonical?.sections ?? {}).length) : undefined}
+                  authorityStatus={enforcement?.directive ?? null}
+                  caseId={executionSessionId ?? null}
+                  compact
+                />
+                {enforcement && (
+                  <EvidenceStrengthMeter
+                    level={deriveEvidenceTierFromStages(Object.keys(canonical?.sections ?? {}).length)}
+                    stagesCompleted={Object.keys(canonical?.sections ?? {}).length || 0}
+                  />
+                )}
+                {(() => {
+                  // Derive counsel status from real room state via the counsel trigger engine
+                  const roomState: StrategyRoomState = {
+                    sessionId: executionSessionId ?? "",
+                    caseId: executionSessionId ?? "",
+                    decisionId: null,
+                    admissionStatus: "ADMITTED",
+                    decisionStatement: String((canonical?.sections as any)?.decisionSpace?.decisionStatement ?? (canonical?.sections as any)?.decision ?? ""),
+                    evidenceTier: deriveEvidenceTierFromStages(Object.keys(canonical?.sections ?? {}).length),
+                    authorityStatus: enforcement?.directive ?? null,
+                    consequence: enforcement?.consequence ? {
+                      score: enforcement.consequence.currentExposure,
+                      trend: enforcement.consequence.currentExposure >= 75 ? "ESCALATING" : "STABLE",
+                      currentExposure: enforcement.consequence.currentExposure,
+                      previousExposure: enforcement.consequence.previousExposure ?? null,
+                    } : null,
+                    avoidance: enforcement?.avoidanceCount ? {
+                      count: enforcement.avoidanceCount,
+                      pattern: enforcement.repeatedPatternLabel ?? null,
+                    } : null,
+                    escalation: enforcement?.escalationTriggers?.length ? {
+                      triggers: enforcement.escalationTriggers,
+                      currentLevel: String(enforcement.escalationLevel),
+                    } : null,
+                    execution: { state: "ACTIVE", requiredActions: [] },
+                    retainer: null,
+                  };
+                  const counselResult = evaluateCounselTrigger(roomState);
+                  const counselStatus = deriveCounselStatus(counselResult);
+                  return (
+                    <CounselStatusPanel
+                      status={counselStatus}
+                      reasons={counselResult.reasons.map(String)}
+                      explanation={counselResult.explanation}
+                      repairActions={counselResult.repairActions}
+                      compact
+                    />
+                  );
+                })()}
+              </div>
+            </div>
 
             <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
               <DecisionStateBanner

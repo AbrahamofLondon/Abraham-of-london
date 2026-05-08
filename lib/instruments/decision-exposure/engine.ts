@@ -5,6 +5,7 @@
  * Band: LOW / MODERATE / HIGH / CRITICAL.
  * Deterministic. Same input → same output.
  */
+import { evaluateDecision, type DecisionKernelOutput } from "@/lib/decision/kernel";
 
 export type ExposureDimension = "financial" | "operational" | "reputational" | "strategic" | "temporal";
 
@@ -17,6 +18,7 @@ export type ExposureResult = {
   dimensionScores: Record<ExposureDimension, { raw: number; weighted: number }>;
   projectedMonthlyCost: number | null;
   recommendation: string;
+  decisionKernel: DecisionKernelOutput;
   deterministic: true;
   version: "1.0";
 };
@@ -77,6 +79,25 @@ export function scoreExposure(input: ExposureInput, monthlyCostAnchor?: number):
     HIGH: `Multiple exposure vectors are active. ${DIMENSION_LABELS[weakest]} requires immediate attention. Executive Reporting recommended to price the full consequence.`,
     CRITICAL: `Exposure is critical across multiple dimensions. ${DIMENSION_LABELS[weakest]} is the most acute. Delay beyond 7 days will shift this from operational to structural damage. Strategy Room entry recommended.`,
   };
+  const decisionKernel = evaluateDecision({
+    id: `decision-exposure:${score}`,
+    source: band === "CRITICAL" ? "strategy_room" : "executive_reporting",
+    condition: `${band} decision exposure`,
+    decisionRequired: recommendations[band],
+    evidenceChain: (Object.keys(dimensions) as ExposureDimension[]).map((dim) => ({
+      inputSource: "decision_exposure",
+      observedPattern: `${DIMENSION_LABELS[dim]} scored ${dimensions[dim].raw}/10`,
+      weight: Math.min(0.9, 0.35 + dimensions[dim].weighted / 100),
+      explanation: "The exposure engine quantifies which consequence vectors are already live.",
+    })),
+    internalContradictions: score >= 50 ? [`${DIMENSION_LABELS[weakest]} is the acute exposure vector.`] : [],
+    scores: Object.fromEntries(
+      (Object.keys(dimensions) as ExposureDimension[]).map((dim) => [dim, dimensions[dim].weighted]),
+    ),
+    signalStrength: band === "CRITICAL" ? "STRONG" : band === "HIGH" ? "MODERATE" : "WEAK",
+    sources: [{ type: "system_computed", count: 1 }],
+    expectedOutcome: recommendationForBand(band, weakest),
+  });
 
   return {
     exposureScore: score,
@@ -85,7 +106,18 @@ export function scoreExposure(input: ExposureInput, monthlyCostAnchor?: number):
     dimensionScores: dimensions,
     projectedMonthlyCost,
     recommendation: recommendations[band],
+    decisionKernel,
     deterministic: true,
     version: "1.0",
   };
+}
+
+function recommendationForBand(
+  band: ExposureResult["exposureBand"],
+  weakest: ExposureDimension,
+): string {
+  if (band === "CRITICAL") return `Escalate against ${DIMENSION_LABELS[weakest]}.`;
+  if (band === "HIGH") return `Price consequence around ${DIMENSION_LABELS[weakest]}.`;
+  if (band === "MODERATE") return `Contain ${DIMENSION_LABELS[weakest]} before it compounds.`;
+  return "Monitor for new exposure triggers.";
 }

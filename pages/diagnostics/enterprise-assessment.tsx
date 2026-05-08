@@ -79,6 +79,12 @@ import BoundaryProximityLine, {
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
+import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
+import NextLayerUnlockedPanel from "@/components/living/NextLayerUnlockedPanel";
+import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSummary";
+import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
+import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import DualAxisPromptCard from "@/components/diagnostics/DualAxisPromptCard";
 import type { DualAxisAnswer } from "@/lib/alignment/types";
 import {
@@ -1398,6 +1404,48 @@ export default function EnterpriseAssessmentPage() {
               <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
                 <div className="py-14">
                   <ResultSurface reading={reading} sections={sections} totalScore={totalScore} maxScore={maxScore} totalPct={totalPct} teamAlignmentPct={teamAlignmentPct} submitResult={submitResult} onSubmit={handleSubmit} isSubmitting={isSubmitting} onRevise={() => advance("instrument")} constitutionalThread={constitutionalThread} matchedPlaybooks={matchedPlaybooks} />
+
+                  {/* ═══ LIVING INTELLIGENCE PANELS ═══ */}
+                  <div className="mx-auto max-w-3xl mt-8 space-y-4 px-6">
+                    <IntelligenceGainPanel
+                      stage="Enterprise Assessment"
+                      findings={[
+                        { label: "Score", value: `${totalPct}% (${totalScore}/${maxScore})` },
+                        ...(reading ? [{ label: "Pattern", value: (reading as any).patternTitle || (reading as any).label || "Enterprise pattern identified" }] : []),
+                        ...(reading ? [{ label: "Route", value: (reading as any).route || (reading as any).escalationRoute || "—" }] : []),
+                        ...(sections?.length ? sections.filter((s: any) => s.pct < 50).slice(0, 3).map((s: any) => ({ label: s.label || s.domain, value: `${s.pct}% — below threshold` })) : []),
+                      ]}
+                    />
+
+                    <EvidenceStrengthMeter
+                      level="single_source"
+                      stagesCompleted={4}
+                      whatWouldStrengthen="For board-grade conclusions, consider multi-stakeholder enterprise assessment or advance to Executive Reporting."
+                    />
+
+                    <DecisionAdvantageSummary
+                      advantages={[
+                        { label: "Institutional pressure mapped", description: `${sections?.length ?? 0} governance blocks assessed across leadership, execution, governance, and risk` },
+                        ...(totalPct < 50 ? [{ label: "Critical band detected", description: `Enterprise score ${totalPct}% indicates structural misalignment requiring intervention` }] : []),
+                        ...(teamAlignmentPct != null ? [{ label: "Cross-layer alignment measured", description: `${teamAlignmentPct}% alignment between team and enterprise assessment` }] : []),
+                      ]}
+                      confidenceBand={totalPct != null ? "medium" : "low"}
+                      limitations={["Executive-perspective enterprise reading. Multi-stakeholder validation strengthens board-grade conclusions."]}
+                    />
+
+                    <NextLayerUnlockedPanel
+                      currentStage="Enterprise Assessment"
+                      nextStage={{
+                        name: "Executive Reporting",
+                        href: "/diagnostics/executive-reporting",
+                        whatItDetects: "Board-grade synthesis: financial exposure, priority stack, required interventions, confidence bands. Converts all accumulated evidence into decision-grade output.",
+                        whyContinue: "You now have structural, team, and institutional evidence. Executive Reporting synthesises this into a report your board can act on.",
+                      }}
+                    />
+
+                    <HumanReviewPrompt context="Enterprise Assessment" />
+                    <GovernanceDisclosure context="enterprise_assessment" compact />
+                  </div>
                 </div>
               </motion.div>
             )}

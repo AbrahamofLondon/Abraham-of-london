@@ -8,7 +8,8 @@
 const HUBSPOT_BASE = "https://api.hubapi.com";
 
 function getAccessToken(): string | null {
-  return process.env.HUBSPOT_ACCESS_TOKEN || process.env.CRM_API_KEY || null;
+  const token = String(process.env.HUBSPOT_ACCESS_TOKEN || "").trim();
+  return token || null;
 }
 
 export function isHubSpotConfigured(): boolean {

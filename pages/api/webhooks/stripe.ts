@@ -88,6 +88,19 @@ export default async function handler(
   }
 
   try {
+    const processedEventId = `legacy-stripe:${event.id}`;
+    const existing = await prisma.processedWebhookEvent.findUnique({
+      where: { id: processedEventId },
+      select: { id: true },
+    });
+    if (existing) {
+      return res.status(200).json({ received: true });
+    }
+
+    await prisma.processedWebhookEvent.create({
+      data: { id: processedEventId },
+    });
+
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId || null;
@@ -269,6 +282,9 @@ export default async function handler(
 
     return res.status(200).json({ received: true });
   } catch (error) {
+    if ((error as { code?: string } | null)?.code === "P2002") {
+      return res.status(200).json({ received: true });
+    }
     console.error("[STRIPE_WEBHOOK_HANDLER_ERROR]", error);
     return res.status(500).json({ error: "Webhook handler failed" });
   }

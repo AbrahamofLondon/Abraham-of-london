@@ -26,6 +26,15 @@ function env(name: string): string | undefined {
   return typeof value === "string" ? value.trim() : undefined;
 }
 
+if (
+  process.env.NODE_ENV === "production" &&
+  env("ALLOW_RECAPTCHA_BYPASS") === "true"
+) {
+  throw new Error(
+    "[reCAPTCHA] ALLOW_RECAPTCHA_BYPASS must never be enabled in production.",
+  );
+}
+
 function getSecret(): string | null {
   const candidates = [env("RECAPTCHA_SECRET_KEY"), env("RECAPTCHA_SECRET")];
 

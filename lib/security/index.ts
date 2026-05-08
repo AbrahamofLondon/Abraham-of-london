@@ -179,7 +179,14 @@ class SecurityConfiguration {
       ...this.config,
       jwt: {
         ...this.config.jwt,
-        secret: env.INNER_CIRCLE_JWT_SECRET || env.JWT_SECRET || (() => { throw new Error("[Security] Missing INNER_CIRCLE_JWT_SECRET or JWT_SECRET"); })(),
+        secret: (() => {
+          if (env.INNER_CIRCLE_JWT_SECRET) return env.INNER_CIRCLE_JWT_SECRET;
+          if (env.NODE_ENV === "production") {
+            throw new Error("[Security] INNER_CIRCLE_JWT_SECRET is required in production — must not fall back to JWT_SECRET");
+          }
+          if (env.JWT_SECRET) return env.JWT_SECRET;
+          throw new Error("[Security] Missing INNER_CIRCLE_JWT_SECRET or JWT_SECRET");
+        })(),
         expiresIn: env.JWT_EXPIRES_IN || this.config.jwt.expiresIn,
         algorithm: env.JWT_ALGORITHM || this.config.jwt.algorithm,
         issuer: env.JWT_ISSUER || this.config.jwt.issuer,

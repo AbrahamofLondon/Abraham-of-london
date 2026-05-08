@@ -139,7 +139,30 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
   }
 
   try {
-    const file = await fs.readFile(absolutePath);
+    const [allowedRootRealPath, assetRealPath, assetStat] = await Promise.all([
+      fs.realpath(allowedRoot),
+      fs.realpath(absolutePath),
+      fs.lstat(absolutePath),
+    ]);
+
+    if (assetStat.isSymbolicLink()) {
+      return NextResponse.json(
+        { ok: false, error: "Symlinked PDF assets are not allowed" },
+        { status: 403 },
+      );
+    }
+
+    if (
+      assetRealPath !== allowedRootRealPath &&
+      !assetRealPath.startsWith(allowedRootRealPath + path.sep)
+    ) {
+      return NextResponse.json(
+        { ok: false, error: "Resolved PDF asset escaped allowed root" },
+        { status: 403 },
+      );
+    }
+
+    const file = await fs.readFile(assetRealPath);
     return new NextResponse(new Uint8Array(file), {
       headers: {
         "Content-Type": "application/pdf",

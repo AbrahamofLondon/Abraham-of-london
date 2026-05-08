@@ -12,6 +12,7 @@ import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } fr
 
 import Layout from "@/components/Layout";
 import ReturnBriefInterruptionBar from "@/components/strategy-room/ReturnBriefInterruptionBar";
+import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -91,8 +92,8 @@ const AMBER = "#F59E0B";
 
 const mono: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: "7.5px",
-  letterSpacing: "0.28em",
+  fontSize: "10px",
+  letterSpacing: "0.22em",
   textTransform: "uppercase",
 };
 
@@ -109,14 +110,14 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2">
       <span className="h-4 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{ ...mono, fontSize: "7px", color: `${GOLD}90` }}>{children}</span>
+      <span style={{ ...mono, fontSize: "10px", color: `${GOLD}90` }}>{children}</span>
     </div>
   );
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.24)", marginBottom: "0.65rem" }}>
+    <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.24)", marginBottom: "0.65rem" }}>
       {children}
     </div>
   );
@@ -160,6 +161,56 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
   const [localError, setLocalError] = React.useState("");
   const [microFeedback, setMicroFeedback] = React.useState("");
 
+  // Execution engine state — populated from decisions API responses
+  const [executionState, setExecutionState] = React.useState<{
+    systemState: string | null;
+    consequenceScore: number | null;
+    consequenceTrend: string | null;
+    consequenceLabel: string | null;
+    consequenceExplanation: string | null;
+    directive: string | null;
+    avoidancePattern: string | null;
+    escalationTriggers: Array<{ triggerType: string; message: string }>;
+  }>({
+    systemState: initial?.status ?? null,
+    consequenceScore: null,
+    consequenceTrend: null,
+    consequenceLabel: null,
+    consequenceExplanation: null,
+    directive: null,
+    avoidancePattern: null,
+    escalationTriggers: [],
+  });
+
+  // Load execution state on mount from the state API
+  React.useEffect(() => {
+    if (!initial?.id) return;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    // Forward access token if present in URL
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const accessToken = params.get("access");
+      if (accessToken) headers["x-strategy-access-token"] = accessToken;
+    }
+    fetch(`/api/strategy-room/execution/${initial.id}/state`, { headers })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data) return;
+        setExecutionState((prev) => ({
+          ...prev,
+          systemState: data.state ?? prev.systemState,
+          consequenceScore: data.consequence?.currentExposure ?? null,
+          consequenceTrend: data.consequenceTrend ?? null,
+          consequenceLabel: data.consequenceLabel ?? null,
+          consequenceExplanation: data.consequenceExplanation ?? null,
+          directive: data.directive ?? prev.directive,
+          avoidancePattern: data.repeatedPatternLabel ? `Decision avoidance detected (${data.avoidanceCount}x)` : null,
+          escalationTriggers: data.triggers ?? [],
+        }));
+      })
+      .catch(() => {});
+  }, [initial?.id]);
+
   if (error || !session) {
     return (
       <Layout title="Strategy Room Session | Abraham of London" fullWidth headerTransparent>
@@ -188,7 +239,24 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to log decision");
-      setSession((prev) => prev ? { ...prev, decisions: [...prev.decisions, data.decision] } : prev);
+      setSession((prev) => prev ? {
+        ...prev,
+        decisions: [...prev.decisions, data.decision],
+        status: data.systemState ?? prev.status,
+      } : prev);
+      // Update execution engine state from API response
+      if (data.consequence || data.systemState) {
+        setExecutionState((prev) => ({
+          ...prev,
+          systemState: data.systemState ?? prev.systemState,
+          consequenceScore: data.consequence?.score ?? prev.consequenceScore,
+          consequenceTrend: data.consequence?.trend ?? prev.consequenceTrend,
+          consequenceLabel: data.consequence?.label ?? prev.consequenceLabel,
+          consequenceExplanation: data.consequence?.explanation ?? prev.consequenceExplanation,
+          directive: data.directive ?? prev.directive,
+          avoidancePattern: data.avoidancePattern ?? prev.avoidancePattern,
+        }));
+      }
       setNewDecision("");
       setMicroFeedback("Recorded.");
       setTimeout(() => setMicroFeedback(""), 2000);
@@ -261,24 +329,43 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
           {/* ── Return brief interruption (if available) ── */}
           <ReturnBriefInterruptionBar sessionKey={session.sessionKey} />
 
+          {/* ── Counsel status — automated governance or escalation ── */}
+          <div style={{ paddingBottom: "0.75rem" }}>
+            <CounselStatusPanel
+              status={
+                session.directive === "block" || session.directive === "restrict"
+                  ? "REQUIRED"
+                  : "NOT_REQUIRED"
+              }
+              explanation={
+                session.directive === "block"
+                  ? "Execution is paused. Authority enforcement has blocked further automated governance for this session."
+                  : session.directive === "restrict"
+                    ? "Counsel review is recommended. The session directive indicates restricted governance."
+                    : "Automated governance is active. The system has sufficient authority and evidence to continue."
+              }
+              compact
+            />
+          </div>
+
           {/* ── 1. ENTRY STATE — immediate grounding ── */}
           <section style={{ paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
             <Eyebrow>Execution Session</Eyebrow>
             <div style={{ marginTop: "0.75rem", display: "grid", gap: "0.5rem", gridTemplateColumns: "repeat(3, 1fr)" }}>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
-                <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Directive</div>
+                <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.22)" }}>Directive</div>
                 <div style={{ ...mono, fontSize: "9px", marginTop: "0.25rem", color: session.directive === "allow" ? "rgba(110,231,183,0.80)" : session.directive === "block" ? "rgba(252,165,165,0.80)" : `${GOLD}CC` }}>
                   {session.directive ?? "allow"}
                 </div>
               </div>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
-                <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Escalation</div>
+                <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.22)" }}>Escalation</div>
                 <div style={{ ...mono, fontSize: "9px", marginTop: "0.25rem", color: "rgba(255,255,255,0.65)" }}>
                   {session.escalationLevel ?? "standard"}
                 </div>
               </div>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
-                <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Status</div>
+                <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.22)" }}>Status</div>
                 <div style={{ ...mono, fontSize: "9px", marginTop: "0.25rem", color: isActive ? GOLD : "rgba(255,255,255,0.45)" }}>
                   {session.status}
                 </div>
@@ -297,7 +384,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
               <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: "rgba(201,169,110,0.035)", padding: "0.85rem 0.95rem" }}>
                 {graphDecision?.decisionText && (
                   <div style={{ marginBottom: "0.75rem" }}>
-                    <div style={{ ...mono, fontSize: "6px", color: `${GOLD}80` }}>Decision under execution</div>
+                    <div style={{ ...mono, fontSize: "10px", color: `${GOLD}80` }}>Decision under execution</div>
                     <div style={{ ...serif, marginTop: "0.25rem", fontSize: "1rem", lineHeight: 1.45, color: "rgba(255,255,255,0.78)" }}>
                       {graphDecision.decisionText}
                     </div>
@@ -305,7 +392,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                       .filter(Boolean)
                       .slice(0, 3)
                       .map((item, index) => (
-                        <div key={`${item}-${index}`} style={{ ...mono, marginTop: "0.35rem", fontSize: "6px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.30)" }}>
+                        <div key={`${item}-${index}`} style={{ ...mono, marginTop: "0.35rem", fontSize: "10px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.30)" }}>
                           {index === 0 ? "Constraint" : index === 1 ? "Prior failure" : "Delay cost"}: {item}
                         </div>
                       ))}
@@ -313,7 +400,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                 )}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
                   <div>
-                    <div style={{ ...mono, fontSize: "6px", color: "rgba(252,165,165,0.52)", marginBottom: "0.35rem" }}>Contradiction evidence</div>
+                    <div style={{ ...mono, fontSize: "10px", color: "rgba(252,165,165,0.52)", marginBottom: "0.35rem" }}>Contradiction evidence</div>
                     {graphContradictions.length ? graphContradictions.map((node, index) => (
                       <div key={`${node.label}-${index}`} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(252,165,165,0.58)", marginBottom: "0.35rem" }}>
                         {node.summary || node.label}
@@ -323,7 +410,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                     )}
                   </div>
                   <div>
-                    <div style={{ ...mono, fontSize: "6px", color: `${GOLD}80`, marginBottom: "0.35rem" }}>Consequence evidence</div>
+                    <div style={{ ...mono, fontSize: "10px", color: `${GOLD}80`, marginBottom: "0.35rem" }}>Consequence evidence</div>
                     {graphConsequences.length ? graphConsequences.map((node, index) => (
                       <div key={`${node.label}-${index}`} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.52)", marginBottom: "0.35rem" }}>
                         {node.summary}{node.evidenceText ? ` · ${node.evidenceText}` : ""}
@@ -343,7 +430,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
             <div style={{ display: "grid", gap: "0.5rem" }}>
               {session.coreProblem && (
                 <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
-                  <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Core Problem</div>
+                  <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.22)" }}>Core Problem</div>
                   <div style={{ ...serif, marginTop: "0.3rem", fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.72)" }}>
                     {session.coreProblem}
                   </div>
@@ -351,7 +438,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
               )}
               {session.decisionQuestion && (
                 <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "0.65rem 0.85rem" }}>
-                  <div style={{ ...mono, fontSize: "6px", color: `${GOLD}80` }}>Decision Question</div>
+                  <div style={{ ...mono, fontSize: "10px", color: `${GOLD}80` }}>Decision Question</div>
                   <div style={{ ...serif, marginTop: "0.3rem", fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>
                     {session.decisionQuestion}
                   </div>
@@ -360,7 +447,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
                 {session.constraints.length > 0 && (
                   <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
-                    <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>Constraints</div>
+                    <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.22)" }}>Constraints</div>
                     {session.constraints.map((c, i) => (
                       <div key={i} style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.48)", marginTop: "0.2rem" }}>{c}</div>
                     ))}
@@ -368,7 +455,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                 )}
                 {session.exposureLevel && (
                   <div style={{ border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "rgba(252,165,165,0.03)", padding: "0.65rem 0.85rem" }}>
-                    <div style={{ ...mono, fontSize: "6px", color: "rgba(252,165,165,0.55)" }}>Exposure Level</div>
+                    <div style={{ ...mono, fontSize: "10px", color: "rgba(252,165,165,0.55)" }}>Exposure Level</div>
                     <div style={{ ...mono, fontSize: "10px", marginTop: "0.3rem", color: "rgba(252,165,165,0.80)" }}>
                       {session.exposureLevel}
                     </div>
@@ -400,7 +487,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                         {step.urgency}
                       </span>
                       {step.dependency && (
-                        <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>
+                        <span style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.22)" }}>
                           depends on {String(step.dependency).padStart(2, "0")}
                         </span>
                       )}
@@ -410,15 +497,15 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                     </div>
                     <div style={{ marginTop: "0.4rem", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem" }}>
                       <div>
-                        <div style={{ ...mono, fontSize: "5.5px", color: "rgba(255,255,255,0.18)" }}>Intent</div>
+                        <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.18)" }}>Intent</div>
                         <div style={{ ...serif, fontSize: "0.8rem", lineHeight: 1.45, color: "rgba(255,255,255,0.42)" }}>{step.intent}</div>
                       </div>
                       <div>
-                        <div style={{ ...mono, fontSize: "5.5px", color: "rgba(255,255,255,0.18)" }}>Expected Effect</div>
+                        <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.18)" }}>Expected Effect</div>
                         <div style={{ ...serif, fontSize: "0.8rem", lineHeight: 1.45, color: "rgba(255,255,255,0.42)" }}>{step.expectedEffect}</div>
                       </div>
                       <div>
-                        <div style={{ ...mono, fontSize: "5.5px", color: "rgba(252,165,165,0.35)" }}>Risk if Ignored</div>
+                        <div style={{ ...mono, fontSize: "10px", color: "rgba(252,165,165,0.35)" }}>Risk if Ignored</div>
                         <div style={{ ...serif, fontSize: "0.8rem", lineHeight: 1.45, color: "rgba(252,165,165,0.55)" }}>{step.riskIfIgnored}</div>
                       </div>
                     </div>
@@ -439,7 +526,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                   { label: "Stakeholder Resistance", items: constraints.stakeholderResistance, color: "rgba(255,255,255,0.40)" },
                 ].map((col) => (
                   <div key={col.label} style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.65rem 0.85rem" }}>
-                    <div style={{ ...mono, fontSize: "6px", color: col.color }}>{col.label}</div>
+                    <div style={{ ...mono, fontSize: "10px", color: col.color }}>{col.label}</div>
                     {col.items.length === 0 ? (
                       <div style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.22)", marginTop: "0.25rem" }}>None identified</div>
                     ) : (
@@ -450,6 +537,95 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                   </div>
                 ))}
               </div>
+            </section>
+          )}
+
+          {/* ── EXECUTION INTELLIGENCE — live engine data ── */}
+          {(executionState.consequenceScore != null || executionState.directive || executionState.avoidancePattern || executionState.escalationTriggers.length > 0) && (
+            <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <SectionLabel>Execution Intelligence</SectionLabel>
+              <div style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+
+                {/* Decision State Banner */}
+                {executionState.systemState && (
+                  <div style={{
+                    border: `1px solid ${executionState.systemState === "EXECUTED" ? "rgba(110,231,183,0.25)" : executionState.systemState === "ESCALATED" || executionState.systemState === "FAILED" ? "rgba(252,165,165,0.25)" : executionState.systemState === "BLOCKED" ? "rgba(253,186,116,0.25)" : "rgba(255,255,255,0.08)"}`,
+                    backgroundColor: "rgba(255,255,255,0.015)",
+                    padding: "0.75rem 0.85rem",
+                  }}>
+                    <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.22)" }}>System State</div>
+                    <div style={{
+                      ...mono, fontSize: "12px", marginTop: "0.3rem",
+                      color: executionState.systemState === "EXECUTED" ? "rgba(110,231,183,0.80)" : executionState.systemState === "ESCALATED" || executionState.systemState === "FAILED" ? "rgba(252,165,165,0.80)" : `${GOLD}CC`,
+                    }}>
+                      {executionState.systemState}
+                    </div>
+                  </div>
+                )}
+
+                {/* Consequence Score */}
+                {executionState.consequenceScore != null && (
+                  <div style={{
+                    border: `1px solid ${executionState.consequenceScore >= 70 ? "rgba(252,165,165,0.25)" : executionState.consequenceScore >= 40 ? "rgba(253,186,116,0.25)" : "rgba(255,255,255,0.08)"}`,
+                    backgroundColor: "rgba(255,255,255,0.015)",
+                    padding: "0.75rem 0.85rem",
+                  }}>
+                    <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.22)" }}>Consequence Score</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginTop: "0.3rem" }}>
+                      <span style={{
+                        ...mono, fontSize: "18px", fontWeight: "bold",
+                        color: executionState.consequenceScore >= 70 ? "rgba(252,165,165,0.90)" : executionState.consequenceScore >= 40 ? "rgba(253,186,116,0.90)" : "rgba(110,231,183,0.80)",
+                      }}>
+                        {executionState.consequenceScore}
+                      </span>
+                      <span style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.30)" }}>/100</span>
+                    </div>
+                    {executionState.consequenceTrend && (
+                      <div style={{ ...mono, fontSize: "10px", marginTop: "0.25rem", color: executionState.consequenceTrend === "CRITICAL" ? "rgba(252,165,165,0.70)" : executionState.consequenceTrend === "ESCALATING" ? "rgba(253,186,116,0.70)" : "rgba(255,255,255,0.35)" }}>
+                        {executionState.consequenceTrend}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Directive */}
+                {executionState.directive && (
+                  <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}06`, padding: "0.75rem 0.85rem", gridColumn: "1 / -1" }}>
+                    <div style={{ ...mono, fontSize: "10px", color: `${GOLD}80` }}>System Directive</div>
+                    <div style={{ ...serif, marginTop: "0.3rem", fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.72)" }}>
+                      {executionState.directive}
+                    </div>
+                  </div>
+                )}
+
+                {/* Avoidance Pattern */}
+                {executionState.avoidancePattern && (
+                  <div style={{ border: "1px solid rgba(252,165,165,0.15)", backgroundColor: "rgba(252,165,165,0.03)", padding: "0.75rem 0.85rem", gridColumn: "1 / -1" }}>
+                    <div style={{ ...mono, fontSize: "10px", color: "rgba(252,165,165,0.55)" }}>Avoidance Pattern Detected</div>
+                    <div style={{ ...serif, marginTop: "0.3rem", fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.65)" }}>
+                      {executionState.avoidancePattern}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Escalation Triggers */}
+              {executionState.escalationTriggers.length > 0 && (
+                <div style={{ marginTop: "0.75rem", border: "1px solid rgba(252,165,165,0.20)", backgroundColor: "rgba(252,165,165,0.02)", padding: "0.75rem 0.85rem" }}>
+                  <div style={{ ...mono, fontSize: "10px", color: "rgba(252,165,165,0.65)", marginBottom: "0.4rem" }}>Escalation Triggers Active</div>
+                  {executionState.escalationTriggers.map((trigger, i) => (
+                    <div key={i} style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(252,165,165,0.55)", marginBottom: "0.25rem" }}>
+                      {trigger.triggerType}: {trigger.message}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {executionState.consequenceExplanation && (
+                <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.55, color: "rgba(255,255,255,0.35)", marginTop: "0.5rem", fontStyle: "italic" }}>
+                  {executionState.consequenceExplanation}
+                </p>
+              )}
             </section>
           )}
 
@@ -489,7 +665,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                       onClick={() => updateDecisionStatus(d.id, "executed")}
                       style={{
                         ...mono,
-                        fontSize: "6.5px",
+                        fontSize: "10px",
                         background: "none",
                         border: "1px solid rgba(110,231,183,0.25)",
                         color: "rgba(110,231,183,0.70)",
@@ -503,7 +679,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                       onClick={() => updateDecisionStatus(d.id, "blocked")}
                       style={{
                         ...mono,
-                        fontSize: "6.5px",
+                        fontSize: "10px",
                         background: "none",
                         border: "1px solid rgba(252,165,165,0.25)",
                         color: "rgba(252,165,165,0.70)",
@@ -614,23 +790,22 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                 </button>
                 <button
                   onClick={() => updateSessionStatus("escalated")}
-                  disabled
-                  title="Escalation capability — future release"
                   style={{
                     ...mono,
-                    fontSize: "7.5px",
+                    fontSize: "10px",
                     background: "none",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    color: "rgba(255,255,255,0.22)",
+                    border: "1px solid rgba(252,165,165,0.25)",
+                    color: "rgba(252,165,165,0.70)",
                     padding: "8px 16px",
-                    cursor: "not-allowed",
+                    cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     gap: "0.35rem",
+                    minHeight: "44px",
                   }}
                 >
-                  <Lock style={{ width: 9, height: 9 }} />
-                  Escalate further
+                  <AlertTriangle style={{ width: 10, height: 10 }} />
+                  Escalate
                 </button>
               </div>
             ) : (

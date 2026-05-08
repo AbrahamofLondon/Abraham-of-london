@@ -44,6 +44,32 @@ function loadEnv(): EnvShape {
   }
 
   cachedEnv = env.data;
+
+  // Production bypass guard — fail fast if any dev-only bypass is enabled
+  if (cachedEnv.NODE_ENV === 'production') {
+    const FORBIDDEN_IN_PRODUCTION = [
+      'PREMIUM_DEV_BYPASS',
+      'ALLOW_RECAPTCHA_BYPASS',
+      'NEXT_PUBLIC_ALLOW_RECAPTCHA_BYPASS',
+      'BYPASS_SOVEREIGN',
+      'INTERNAL_BYPASS_KEY',
+      'SKIP_ASSET_AUDIT',
+      'DEV_ADMIN_PASSWORD',
+    ] as const;
+
+    const activeBypass = FORBIDDEN_IN_PRODUCTION.filter((key) => {
+      const val = String(process.env[key] || '').trim().toLowerCase();
+      return val && val !== 'false' && val !== '0';
+    });
+
+    if (activeBypass.length > 0) {
+      throw new Error(
+        `[FATAL] Production boot blocked — development bypass flags are active: ${activeBypass.join(', ')}. ` +
+        `Remove or set to "false" before deploying.`
+      );
+    }
+  }
+
   return cachedEnv;
 }
 

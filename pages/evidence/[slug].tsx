@@ -406,8 +406,13 @@ export default function EvidenceDetailPage({ asset }: PageProps) {
         <div className="mx-auto max-w-6xl px-6 lg:px-12">
 
           {/* TITLE */}
-          <div className="pt-14 pb-3 lg:pt-20">
-            <Eyebrow>Case Dossier</Eyebrow>
+          <div className="pt-14 pb-3 lg:pt-20" data-evidence-classification="STATIC_PROOF_ASSET">
+            <div className="flex items-center gap-3 mb-2">
+              <Eyebrow>Case Dossier</Eyebrow>
+              <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.08)", padding: "2px 6px" }}>
+                Static proof asset
+              </span>
+            </div>
             <h1 style={{ ...serif, marginTop: "0.75rem", fontSize: "clamp(1.5rem, 4.5vw, 2.2rem)", lineHeight: 1.05, color: "rgba(255,255,255,0.92)", maxWidth: "40ch", fontStyle: "italic" }}>{asset.title}</h1>
           </div>
 

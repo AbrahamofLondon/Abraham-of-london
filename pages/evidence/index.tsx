@@ -58,7 +58,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
         {children}
       </span>
     </div>
@@ -120,15 +120,15 @@ export default function EvidencePage() {
               </p>
 
               <div style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", padding: "4px 10px", border: "1px solid rgba(201,169,110,0.15)" }}>
-                  5 outcome-verified cases
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", padding: "4px 10px", border: "1px solid rgba(201,169,110,0.15)" }}>
+                  {EVIDENCE.length} outcome-verified {EVIDENCE.length === 1 ? "case" : "cases"}
                 </div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)" }}>
                   14–60 day enforcement windows
                 </div>
               </div>
 
-              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.15)", marginTop: "0.75rem", maxWidth: "50ch" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.15)", marginTop: "0.75rem", maxWidth: "50ch" }}>
                 All cases anonymised due to commercial confidentiality. Outcome metrics preserved and auditable at system level.
               </p>
             </div>
@@ -149,7 +149,7 @@ export default function EvidencePage() {
                 { title: "What this proves", body: "That the system can identify a live condition, direct action, and verify whether movement occurred." },
               ].map((item) => (
                 <div key={item.title} style={{ backgroundColor: VOID, padding: "1rem" }}>
-                  <div style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+                  <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                     {item.title}
                   </div>
                   <p style={{ ...serif, marginTop: "0.45rem", fontSize: "0.84rem", lineHeight: 1.5, color: "rgba(255,255,255,0.44)" }}>
@@ -171,13 +171,13 @@ export default function EvidencePage() {
                 { pre: "Not theory", post: "Operator-facing outputs" },
               ].map((item) => (
                 <div key={item.pre} style={{ backgroundColor: VOID, padding: "0.85rem 1rem" }}>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     {item.pre}
                   </span>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     {" \u2192 "}
                   </span>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
                     {item.post}
                   </span>
                 </div>
@@ -209,7 +209,7 @@ export default function EvidencePage() {
 
                     {/* Context */}
                     <div style={{ marginTop: "0.65rem" }}>
-                      <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                      <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                         Context
                       </span>
                       <p style={{ ...serif, marginTop: "0.1rem", fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.38)" }}>
@@ -219,7 +219,7 @@ export default function EvidencePage() {
 
                     {/* System insight */}
                     <div style={{ marginTop: "0.5rem" }}>
-                      <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+                      <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                         System insight
                       </span>
                       <p style={{ ...serif, marginTop: "0.1rem", fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.50)" }}>
@@ -229,7 +229,7 @@ export default function EvidencePage() {
 
                     {/* Outcome signal */}
                     <div style={{ marginTop: "0.5rem" }}>
-                      <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                      <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                         Outcome signal
                       </span>
                       <p style={{ ...serif, marginTop: "0.1rem", fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.38)" }}>
@@ -241,7 +241,7 @@ export default function EvidencePage() {
                     <div style={{ marginTop: "auto", paddingTop: "0.75rem" }}>
                       <span
                         className="inline-flex items-center gap-2"
-                        style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: AMBER }}
+                        style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: AMBER }}
                       >
                         View evidence
                         <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-1" />
@@ -258,7 +258,7 @@ export default function EvidencePage() {
         <section>
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="py-6" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.5rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.5rem" }}>
                 Public proof is designed to be sufficient for due diligence without disclosing the private operating model.
               </p>
               <p style={{ ...serif, fontSize: "0.88rem", color: "rgba(252,165,165,0.45)", fontStyle: "italic" }}>
@@ -273,14 +273,14 @@ export default function EvidencePage() {
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="py-10" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
               <div className="flex flex-wrap justify-center gap-3">
-                <Link href="/verification" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Verify</Link>
-                <Link href="/trust" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Trust boundaries</Link>
-                <Link href="/foundations" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Foundations</Link>
-                <Link href="/terms-of-service" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Terms</Link>
-                <Link href="/privacy" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Privacy</Link>
+                <Link href="/verification" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Verify</Link>
+                <Link href="/trust" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Trust boundaries</Link>
+                <Link href="/foundations" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Foundations</Link>
+                <Link href="/terms-of-service" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Terms</Link>
+                <Link href="/privacy" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>Privacy</Link>
               </div>
               <div className="mt-6 text-center">
-                <Link href="/diagnostics/fast" className="inline-flex items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: GOLD, padding: "0.75rem 1rem", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}06` }}>
+                <Link href="/diagnostics/fast" className="inline-flex items-center gap-2" style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: GOLD, padding: "0.75rem 1rem", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}06` }}>
                   Run the diagnostic <ArrowRight style={{ width: 10, height: 10 }} />
                 </Link>
               </div>

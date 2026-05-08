@@ -21,7 +21,7 @@ export const isEdgeRuntime =
 // -----------------------------------------------------------------------------
 
 export type AdminAuthResult =
-  | { valid: true; userId?: string; method: "api_key" | "dev_mode" | "jwt" }
+  | { valid: true; userId?: string; method: "api_key" | "jwt" }
   | { valid: false; reason: string; statusCode?: number };
 
 export interface ValidationResult<T = any> {
@@ -51,7 +51,7 @@ export function isInvalidAdmin(
 
 export function isValidAdmin(
   result: AdminAuthResult
-): result is { valid: true; userId?: string; method: "api_key" | "dev_mode" | "jwt" } {
+): result is { valid: true; userId?: string; method: "api_key" | "jwt" } {
   return result.valid === true;
 }
 
@@ -133,9 +133,8 @@ function getJwtTokenNode(req: NextApiRequest): string | null {
 
   const cookies = req.cookies;
   if (cookies && typeof cookies === "object") {
-    const adminToken = "admin_token" in cookies ? cookies.admin_token : undefined;
     const accessToken = "access_token" in cookies ? cookies.access_token : undefined;
-    return adminToken || accessToken || null;
+    return accessToken || null;
   }
 
   return null;
@@ -147,9 +146,8 @@ function getJwtTokenEdge(req: NextRequest): string | null {
     return bearerToken;
   }
 
-  const adminCookie = req.cookies.get("admin_token");
   const accessCookie = req.cookies.get("access_token");
-  return adminCookie?.value || accessCookie?.value || null;
+  return accessCookie?.value || null;
 }
 
 // -----------------------------------------------------------------------------
@@ -168,28 +166,13 @@ async function validateJwtToken(token: string): Promise<JwtValidationResult> {
     if (!adminJwtSecret) {
       return { valid: false };
     }
-
-    const parts = token.split(".");
-    if (parts.length !== 3) {
-      return { valid: false };
-    }
-
-    const [, payloadB64] = parts;
-    if (!payloadB64) {
-      return { valid: false };
-    }
-
-    const decodedPayload = decodeBase64ToUtf8(payloadB64);
-    const payload = JSON.parse(decodedPayload) as Record<string, unknown>;
-
-    const exp = typeof payload.exp === "number" ? payload.exp : undefined;
-    if (exp && Date.now() >= exp * 1000) {
-      return { valid: false };
-    }
-
-    if (payload.iss !== "admin-api" || payload.aud !== "inner-circle") {
-      return { valid: false };
-    }
+    const { jwtVerify } = await import("jose");
+    const secret = new TextEncoder().encode(adminJwtSecret);
+    const verified = await jwtVerify(token, secret, {
+      issuer: "admin-api",
+      audience: "inner-circle",
+    });
+    const payload = verified.payload as Record<string, unknown>;
 
     const userId =
       typeof payload.sub === "string"
@@ -217,11 +200,6 @@ export async function validateAdminAccessNode(
 ): Promise<AdminAuthResult> {
   const adminKey = process.env.ADMIN_API_KEY;
   const adminJwtEnabled = process.env.ADMIN_JWT_ENABLED === "true";
-  const nodeEnv = process.env.NODE_ENV;
-
-  if (nodeEnv !== "production" && !adminKey && !adminJwtEnabled) {
-    return { valid: true, method: "dev_mode" };
-  }
 
   if (adminJwtEnabled) {
     const jwtToken = getJwtTokenNode(req);
@@ -287,11 +265,6 @@ export async function validateAdminAccessEdge(
 ): Promise<AdminAuthResult> {
   const adminKey = process.env.ADMIN_API_KEY;
   const adminJwtEnabled = process.env.ADMIN_JWT_ENABLED === "true";
-  const nodeEnv = process.env.NODE_ENV;
-
-  if (nodeEnv !== "production" && !adminKey && !adminJwtEnabled) {
-    return { valid: true, method: "dev_mode" };
-  }
 
   if (adminJwtEnabled) {
     const jwtToken = getJwtTokenEdge(req);

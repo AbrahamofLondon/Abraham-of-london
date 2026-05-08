@@ -133,10 +133,21 @@ export default function ResultEmailCapture({ source, resultRef }: Props) {
       )}
 
       {/* Trust disclosure */}
-      <p style={{ marginTop: "10px", fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.22)" }}>
-        We store your responses to track your decision pattern over time.
-        We do not sell or share your data. You can remove your data at any time.
-      </p>
+      <div style={{ marginTop: "10px", fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.25)" }}>
+        <p style={{ marginBottom: "6px" }}>
+          <strong style={{ color: "rgba(255,255,255,0.35)" }}>Why we ask:</strong> Your email
+          allows us to send you this reading and track your decision pattern over time.
+        </p>
+        <p style={{ marginBottom: "6px" }}>
+          <strong style={{ color: "rgba(255,255,255,0.35)" }}>What you receive:</strong> A copy
+          of this result. You may also receive a follow-up check-in at 14 days. No other
+          messages without your request.
+        </p>
+        <p style={{ marginBottom: "6px" }}>
+          We do not sell or share your data. You can unsubscribe or request data removal at any
+          time. See our <a href="/privacy" style={{ color: "rgba(201,169,110,0.50)" }}>privacy policy</a>.
+        </p>
+      </div>
 
       {/* Error */}
       {status === "error" && (

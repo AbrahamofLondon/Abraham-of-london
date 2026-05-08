@@ -12,6 +12,12 @@ import { storeUserTokens, getAccessToken, listUserIntegrations, removeIntegratio
 import { buildCalendarDataSource } from "./google-calendar-sync";
 import { buildSlackDataSource } from "./slack-sync";
 import type { ProviderType } from "./token-store";
+export type {
+  BehavioralEvidenceContract,
+  BehavioralEvidenceProvider,
+  BehavioralEvidenceSource,
+  CommitmentVerificationStatus,
+} from "./behavioral-evidence-contract";
 
 export type { ProviderType } from "./token-store";
 

@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
+import { qualifiesForBoardroom, generateBoardroomDossier } from "@/lib/constitution/boardroom-mode";
 
 function s(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
@@ -52,6 +53,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // ── Generate structured boardroom dossier from canonical data ──
+    const canonicalSnapshot = run.canonicalSnapshot as Record<string, unknown> | null;
+    const viewModelSnapshot = run.viewModelSnapshot as Record<string, unknown> | null;
+    const spineForBoardroom = {
+      costOfDelay: viewModelSnapshot?.costOfDelay ?? canonicalSnapshot?.costOfDelay ?? null,
+      accuracy: viewModelSnapshot?.accuracy ?? canonicalSnapshot?.accuracy ?? null,
+      synthesis: viewModelSnapshot?.synthesis ?? canonicalSnapshot?.synthesis ?? null,
+      conditionClass: viewModelSnapshot?.conditionClass ?? canonicalSnapshot?.conditionClass ?? null,
+      decisionText: viewModelSnapshot?.decisionText ?? canonicalSnapshot?.decisionText ?? null,
+    } as any;
+
+    const boardroomQualification = qualifiesForBoardroom(spineForBoardroom);
+    const boardroomDossier = boardroomQualification.qualified
+      ? generateBoardroomDossier(spineForBoardroom)
+      : null;
+
     const existing = await prisma.executiveReportingArtifact.findFirst({
       where: {
         runId: run.id,
@@ -89,6 +106,11 @@ export async function POST(request: Request) {
           classification: "RESTRICTED",
           canonicalSnapshot: run.canonicalSnapshot,
           viewModelSnapshot: run.viewModelSnapshot,
+          boardroomQualification: {
+            qualified: boardroomQualification.qualified,
+            reason: boardroomQualification.reason,
+          },
+          boardroomDossier: boardroomDossier ?? null,
         },
         status: "queued",
       },

@@ -5,6 +5,7 @@ import {
   buildDecisionSurfacePayload,
   insufficientEvidenceContradiction,
 } from "@/lib/contracts/decision-surface";
+import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
 
 /**
  * GET /api/diagnostics/outcome?email=...&sessionId=...
@@ -131,11 +132,18 @@ export async function GET(req: NextRequest) {
 
     // Strategy Room linkage
     let strategyRoomHeld: string | null = null;
+    let executionRecord = email
+      ? await findLatestStrategyExecutionRecord({ email: email.toLowerCase() })
+      : null;
     if (sessionId) {
       const session = await prisma.strategyRoomExecutionSession.findFirst({
         where: { OR: [{ id: sessionId }, { sessionKey: sessionId }] },
       });
       if (session) {
+        executionRecord = await findLatestStrategyExecutionRecord({
+          sessionId: session.id,
+          email: session.email,
+        });
         strategyRoomHeld = session.status === "completed" ? "held"
           : session.status === "monitoring" ? "partially_held"
           : session.status === "escalated" ? "failed"
@@ -204,6 +212,7 @@ export async function GET(req: NextRequest) {
       },
       contradictionEvidence,
       strategyRoomHeld,
+      executionRecord,
       baselineDate: baselineSnapshot.timestamp,
       currentDate: currentSnapshot.timestamp,
     });

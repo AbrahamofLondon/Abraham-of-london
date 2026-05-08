@@ -68,32 +68,47 @@ const STARTING_SIGNALS = [
   {
     label: "The direction is unclear, or the pressure is personal",
     href: "/diagnostics/purpose-alignment",
-    route: "Personal diagnostic",
-    detail: "Start here when leadership clarity, decision pattern, or personal mandate is the first question. Produces a dual-axis reading of alignment vs assumption.",
+    route: "Personal decision infrastructure",
+    detail: "Tests whether your stated direction can survive evidence, pressure, contradiction, and consequence. Produces a dual-axis reading of alignment vs assumption.",
+    tests: "Decision pattern, mandate coherence, personal authority",
+    output: "Pattern classification, cost of inaction, required move",
+    restricts: "Flags vague input. Classifies unresolved patterns for tracking.",
   },
   {
     label: "The organisation is carrying structural strain",
     href: "/diagnostics/constitutional-diagnostic",
     route: "Constitutional diagnostic",
     detail: "Use this when governance, authority, execution, or trust may be producing the pressure. Routes to STRATEGY, DIAGNOSTIC, or REJECT with constitutional confidence.",
+    tests: "Posture, authority, readiness, failure mode density",
+    output: "Constitutional route, confidence score, rationale",
+    restricts: "REJECT when evidence does not support escalation. Other pathways remain open.",
   },
   {
     label: "Leadership perception and team experience have diverged",
     href: "/diagnostics/team-assessment",
     route: "Team assessment",
     detail: "Measures the gap between how leadership reads the team and how leadership estimates the team would read itself. Produces a structural perception gap, not a satisfaction survey.",
+    tests: "Perception divergence across leadership and team domains",
+    output: "Perception gap severity, fragility classification, domain-level gaps",
+    restricts: "Escalates to Enterprise when gap is too wide to be a contained team issue.",
   },
   {
     label: "The pressure is institutional, not local",
     href: "/diagnostics/enterprise-assessment",
     route: "Enterprise assessment",
     detail: "Stress-tests leadership coherence, governance reliability, execution variance, and institutional risk posture. Routes to Executive Reporting or WATCH.",
+    tests: "Institutional architecture, governance reliability, execution variance",
+    output: "Enterprise pressure map, risk posture, escalation routing",
+    restricts: "WATCH when escalation is not yet warranted. Evidence continues to accumulate.",
   },
   {
     label: "Evidence is established — consequence needs pricing",
     href: "/diagnostics/executive-reporting",
     route: "Executive Reporting · Flagship",
     detail: "The governed executive brief. Translates accumulated diagnostic evidence into financial exposure, institutional constraint, and a priority stack that can be acted on.",
+    tests: "Accumulated evidence across all prior diagnostic layers",
+    output: "Financial exposure, governed priority stack, position statement, trajectory outlook",
+    restricts: "Requires evidence of consequence. The system will not generate a brief from weak input.",
   },
 ];
 
@@ -310,6 +325,18 @@ function StartingSignalCard({ signal }: { signal: (typeof STARTING_SIGNALS)[numb
       >
         {signal.detail}
       </p>
+      <div className="mt-3 space-y-1">
+        {[
+          { k: "Tests", v: signal.tests },
+          { k: "Output", v: signal.output },
+          { k: "Restricts", v: signal.restricts },
+        ].map(({ k, v }) => (
+          <div key={k} className="flex gap-2">
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", minWidth: "52px", flexShrink: 0 }}>{k}</span>
+            <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.32)" }}>{v}</span>
+          </div>
+        ))}
+      </div>
       <div
         className="mt-4 inline-flex items-center gap-2"
         style={{
@@ -328,7 +355,7 @@ function StartingSignalCard({ signal }: { signal: (typeof STARTING_SIGNALS)[numb
 
 export default function DiagnosticsIndexPage() {
   return (
-    <Layout title="Governed Diagnostic System | Abraham of London">
+    <Layout title="Governed Diagnostic System | Decision Infrastructure by Abraham of London">
       <Head>
         <meta
           name="description"
@@ -340,7 +367,7 @@ export default function DiagnosticsIndexPage() {
         <section>
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="py-16 lg:py-24">
-              <Eyebrow>GOVERNED DIAGNOSTIC SYSTEM</Eyebrow>
+              <Eyebrow>Decision Infrastructure by Abraham of London</Eyebrow>
               <h1
                 style={{
                   marginTop: "1rem",
@@ -401,7 +428,7 @@ export default function DiagnosticsIndexPage() {
               style={{ borderColor: "rgba(255,255,255,0.06)" }}
             >
               <div>
-                <Eyebrow>Personal diagnostic path</Eyebrow>
+                <Eyebrow>Personal decision infrastructure</Eyebrow>
                 <h2
                   style={{
                     marginTop: "0.9rem",

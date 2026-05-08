@@ -173,7 +173,7 @@ export async function POST(request: Request) {
 
     const outcomeSnapshot = buildOutcomeSnapshotFromBody(rawBody, sessionKey);
     const recordedOutcome = outcomeSnapshot
-      ? recordOutcomeSnapshot(outcomeSnapshot)
+      ? await recordOutcomeSnapshot(outcomeSnapshot)
       : null;
     const decisionOutcomeLink = createDecisionOutcomeLink({
       decisionId: String(rawBody?.decisionId || sessionKey),

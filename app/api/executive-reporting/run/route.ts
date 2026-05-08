@@ -18,8 +18,11 @@ import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
 import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
 import { resolveLadderContext } from "@/lib/diagnostics/ladder-context-resolver";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
-import { buildObservedOutcomeEvidence } from "@/lib/outcomes/evidence";
+import { buildObservedOutcomeEvidenceFromDB } from "@/lib/outcomes/evidence";
 import type { OutcomeSnapshot } from "@/lib/outcomes/outcome-model";
+import { evaluateDecision } from "@/lib/decision/kernel";
+import { analyzeContagionRisk, simulateInterventionImpact } from "@/lib/alignment/governance-logic";
+import { qualifiesForBoardroom, generateBoardroomDossier } from "@/lib/constitution/boardroom-mode";
 
 type AnyRecord = Record<string, unknown>;
 
@@ -744,9 +747,63 @@ export async function POST(
       take: 100,
       select: { metadata: true, createdAt: true },
     });
-    const observedOutcomeEvidence = buildObservedOutcomeEvidence(
-      outcomeSnapshotsFromFollowups(outcomeFollowups),
-    );
+    const fallbackOutcomeEvidence = outcomeSnapshotsFromFollowups(outcomeFollowups);
+    const observedOutcomeEvidence = await buildObservedOutcomeEvidenceFromDB({
+      organisationKey: s(intake.organisation),
+    });
+    const telemetryMetrics = telemetryDomains.map((domain) => ({
+      label: domain.label,
+      intent: domain.intent,
+      reality: domain.reality,
+    }));
+    const contagionMap = analyzeContagionRisk(telemetryMetrics);
+    const governanceImpact = telemetryMetrics.length > 0
+      ? simulateInterventionImpact(telemetryMetrics, {
+          domain: telemetryMetrics[0]?.label || "AUTHORITY",
+          estimatedRecovery: Math.max(6, Math.round(averageDissonance / 6)),
+          estimatedTimeframe: route === "STRATEGY" ? 14 : 30,
+        })
+      : null;
+    const executiveKernel = evaluateDecision({
+      id: runKey,
+      source: "executive_reporting",
+      condition: s(constitution.orgState, "DRIFTING"),
+      decisionRequired: s(decisionNeed.decisionQuestion) || latestDecisionObject?.decisionText || "Formalise the governed next move.",
+      evidenceChain: [
+        {
+          inputSource: "executive_reporting",
+          observedPattern: buildNarrativeHeadline({
+            organisation: s(intake.organisation, "Prospective Organisation"),
+            route,
+            orgState: s(constitution.orgState, "DRIFTING"),
+            stakeholderBreadth: s(governance.stakeholderBreadth, "LOCAL"),
+            marketExposure: s(economics.marketExposure, "MEDIUM"),
+          }),
+          weight: evidenceQuality === "HIGH" ? 0.88 : evidenceQuality === "LOW" ? 0.56 : 0.72,
+          explanation: "Executive Reporting synthesises constitutional, economic, and contradiction evidence into one decision state.",
+        },
+      ],
+      internalContradictions: evidenceGraphSummary.contradictionLabels,
+      scores: {
+        averageDissonance,
+        severityScore: n(constitution.severityScore),
+        governanceScore: n(constitution.governanceScore),
+        exposureScore: exposure.totalExposure > 0 ? Math.min(100, Math.round(exposure.totalExposure / 10000)) : 0,
+      },
+      signalStrength: route === "STRATEGY" ? "STRONG" : evidenceQuality === "LOW" ? "WEAK" : "MODERATE",
+      sources: [
+        { type: "self_report", count: 1 },
+        ...(ladderContext.team ? [{ type: "multi_respondent" as const, count: 1 }] : []),
+        ...(observedOutcomeEvidence.processedDecisionCases > 0 || fallbackOutcomeEvidence.length > 0
+          ? [{ type: "outcome_verified" as const, count: Math.max(observedOutcomeEvidence.processedDecisionCases, fallbackOutcomeEvidence.length, 1) }]
+          : []),
+      ],
+      authorityType: s(constitution.authorityType) || undefined,
+      aiExposureLevel: latestDecisionObject?.aiExposureLevel,
+      aiLeverageAction: null,
+      expectedOutcome: s(guidance.nextAction) || undefined,
+      daysSinceIdentification: 0,
+    });
 
     const intakeGovernance = {
       intakeMode: accessDecision.intakeMode,
@@ -823,6 +880,14 @@ export async function POST(
         },
         intakeGovernance,
         observedOutcomeEvidence,
+        decisionKernel: executiveKernel,
+        governanceImpact: governanceImpact ? {
+          predictedIntegrityIndex: governanceImpact.predictedIntegrityIndex,
+          predictedStatus: governanceImpact.predictedStatus,
+          contagionRisk: contagionMap[0]?.riskLevel ?? "LOW",
+          affectedDomains: contagionMap.map((risk) => risk.targetDomain),
+          interventionUrgency: route === "STRATEGY" || (contagionMap[0]?.riskLevel === "HIGH") ? "HIGH" : averageDissonance >= 45 ? "MEDIUM" : "LOW",
+        } : null,
         ...capabilityStack.blocks,
       },
       // Pass the typed assembler outputs directly into buildCanonicalReportContract.
@@ -880,6 +945,13 @@ export async function POST(
       },
       claimDecisions: capabilityStack.claims,
       aiAdjustedConsequence,
+      decisionKernel: executiveKernel,
+      governanceImpact: governanceImpact ? {
+        simulation: governanceImpact,
+        contagionMap,
+        affectedDomains: contagionMap.map((risk) => risk.targetDomain),
+        interventionUrgency: route === "STRATEGY" || (contagionMap[0]?.riskLevel === "HIGH") ? "HIGH" : averageDissonance >= 45 ? "MEDIUM" : "LOW",
+      } : null,
     };
 
     const viewModel = buildExecutiveReportViewModel(enrichedCanonical as typeof canonical);
@@ -993,6 +1065,12 @@ export async function POST(
       },
     });
 
+    // ── Boardroom qualification: generate dossier if threshold met ──
+    const boardroomQualification = qualifiesForBoardroom(enrichedCanonical as any);
+    const boardroomDossier = boardroomQualification.qualified
+      ? generateBoardroomDossier(enrichedCanonical as any)
+      : null;
+
     return NextResponse.json({
       ok: true,
       runKey: run.runKey,
@@ -1002,8 +1080,12 @@ export async function POST(
       aiAdjustedConsequence,
       entitlements,
       diagnostics: assembled.diagnostics,
-      // Include intake for client-side interpretation engine
       intake,
+      boardroom: {
+        qualified: boardroomQualification.qualified,
+        reason: boardroomQualification.reason,
+        dossier: boardroomDossier,
+      },
     });
   } catch (error) {
     console.error("[EXECUTIVE_REPORTING_RUN_ERROR]", error);

@@ -200,17 +200,23 @@ function checkFallbackChains() {
 
   let output = "";
   try {
-    // Build grep args individually to avoid shell quoting issues on Windows
-    const args = ["-rn", "--include=*.ts", "--include=*.tsx",
-      "process\\.env\\.[A-Za-z_]*.*||.*process\\.env\\.[A-Za-z_]*"];
-    for (const d of dirs) args.push(d + "/");
-    for (const f of files) args.push(f);
+    const args = [
+      "rg",
+      "-n",
+      "--glob",
+      "*.ts",
+      "--glob",
+      "*.tsx",
+      "process\\.env\\.[A-Za-z_][A-Za-z0-9_]*\\s*\\|\\|\\s*process\\.env\\.[A-Za-z_][A-Za-z0-9_]*",
+      ...dirs,
+      ...files,
+    ];
     output = execSync(
-      `grep ${args.map(a => `"${a}"`).join(" ")}`,
+      args.map((arg) => `"${arg}"`).join(" "),
       { encoding: "utf-8", cwd: ROOT, timeout: 15000 }
     ).trim();
   } catch (e) {
-    // grep returns exit 1 when no matches
+    // rg returns exit 1 when no matches
     if (e.stdout) output = e.stdout.trim();
   }
 
@@ -299,6 +305,8 @@ const PROD_REQUIRED = [
   "SYSTEM_INTEGRITY_SALT",
   "DIAGNOSTIC_HMAC_SECRET",
   "DIAGNOSTIC_WATERMARK_SECRET",
+  "DOWNLOAD_SIGNING_SECRET",
+  "COMMERCIAL_COOKIE_SECRET",
 ];
 
 function checkProdRequired(label, entries) {

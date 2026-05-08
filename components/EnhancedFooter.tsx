@@ -312,12 +312,14 @@ export default function EnhancedFooter(): React.ReactElement {
     { label: "Security", href: "/security" },
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
+    { label: "Refund Policy", href: "/refund-policy" },
   ],
 };
 
   const policyLinks = [
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
+    { label: "Refund Policy", href: "/refund-policy" },
     { label: "Security", href: "/security" },
     { label: "Cookies", href: "/cookies" },
   ] as const;

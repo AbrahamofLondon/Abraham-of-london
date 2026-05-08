@@ -439,7 +439,7 @@ function deriveScores(input: AssessmentInput): AssessmentScores {
     clamp(
       (input.precomputed?.trustCondition ?? 55) -
         graduatedBonus(matchCount(narrative.toLowerCase(), distrustPatterns), 22, 1) -
-        (frrictionPenaltyFromNarrative(narrative) * 0.25),
+        (frictionPenaltyFromNarrative(narrative) * 0.25),
       0,
       100,
     ),
@@ -483,7 +483,7 @@ function deriveScores(input: AssessmentInput): AssessmentScores {
   };
 }
 
-function frrictionPenaltyFromNarrative(narrative: string): number {
+function frictionPenaltyFromNarrative(narrative: string): number {
   return includesAny(narrative, ["friction", "conflict", "politics", "misaligned"]) ? 20 : 0;
 }
 

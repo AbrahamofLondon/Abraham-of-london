@@ -72,6 +72,13 @@ import BoundaryProximityLine, {
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
+import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
+import NextLayerUnlockedPanel from "@/components/living/NextLayerUnlockedPanel";
+import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSummary";
+import GovernedActionPanel from "@/components/living/GovernedActionPanel";
+import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
+import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import DualAxisPromptCard from "@/components/diagnostics/DualAxisPromptCard";
 import type { DualAxisAnswer } from "@/lib/alignment/types";
 import {
@@ -1345,6 +1352,51 @@ export default function TeamAssessmentPage() {
               <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
                 <div className="py-14">
                   <ResultSurface gaps={gaps} reading={reading} overallLeader={overallLeader} overallReality={overallReality} fragility={fragility} purposePct={purposePct} submitResult={submitResult} onSubmit={handleSubmit} isSubmitting={isSubmitting} constitutionalThread={constitutionalThread} matchedPlaybooks={matchedPlaybooks} />
+
+                  {/* ═══ LIVING INTELLIGENCE PANELS ═══ */}
+                  <div className="mx-auto max-w-3xl mt-8 space-y-4 px-6">
+                    <IntelligenceGainPanel
+                      stage="Team Assessment"
+                      findings={[
+                        ...(reading ? [{ label: "Pattern", value: reading.title || reading.pattern || "Structural pattern identified" }] : []),
+                        ...(fragility ? [{ label: "Fragility", value: `${fragility.status} (σ=${typeof fragility.score === "number" ? fragility.score.toFixed(1) : "—"})` }] : []),
+                        { label: "Leader score", value: `${overallLeader}%` },
+                        { label: "Reality score", value: `${overallReality}%` },
+                        { label: "Gap", value: `${Math.abs(overallLeader - overallReality)}%` },
+                        ...(purposePct != null ? [{ label: "Purpose alignment", value: `${purposePct}%` }] : []),
+                      ]}
+                    />
+
+                    <EvidenceStrengthMeter
+                      level="single_source"
+                      stagesCompleted={3}
+                      whatWouldStrengthen="This is a leader-estimated team reading. Invite team members for multi-source validation, or continue to Enterprise Assessment."
+                    />
+
+                    <DecisionAdvantageSummary
+                      advantages={[
+                        { label: "Perception gap measured", description: `${Math.abs(overallLeader - overallReality)}% gap between leader intent and team reality` },
+                        ...(fragility?.status === "FRACTURED" || fragility?.status === "VOLATILE" ? [{ label: "Fragility detected", description: `Team cohesion: ${fragility.status}. This affects execution reliability.` }] : []),
+                        ...(gaps?.length ? [{ label: `${gaps.length} domain gaps mapped`, description: "Each domain gap represents a structural execution risk" }] : []),
+                      ]}
+                      confidenceBand="medium"
+                      limitations={["Single-respondent team reading. Multi-source assessment from actual team members strengthens this to governed-tier evidence."]}
+                    />
+
+                    <NextLayerUnlockedPanel
+                      currentStage="Team Assessment"
+                      nextStage={{
+                        name: "Enterprise Assessment",
+                        href: "/diagnostics/enterprise-assessment",
+                        whatItDetects: "Institutional pressure that extends beyond your team — governance reliability, execution variance, and structural failure modes across the organisation.",
+                        whyContinue: "Team assessment reveals divergence. Enterprise assessment reveals whether this divergence is isolated or systemic.",
+                      }}
+                      unresolvedItems={fragility?.status === "FRACTURED" ? ["Team fragility is critical. Multi-respondent validation recommended before major interventions."] : undefined}
+                    />
+
+                    <HumanReviewPrompt context="Team Assessment" />
+                    <GovernanceDisclosure context="team_assessment" compact />
+                  </div>
                 </div>
               </motion.div>
             )}

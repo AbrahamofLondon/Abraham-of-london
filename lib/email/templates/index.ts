@@ -14,6 +14,7 @@ function getRenderer(): (element: React.ReactElement) => string {
 import { siteConfig } from "@/config/site";
 import ContactEmail from "@/emails/ContactEmail";
 import { StrategyRoomAcceptedEmail } from "@/emails/StrategyRoomAccepted";
+import { StrategyRoomRestrictedEmail } from "@/emails/StrategyRoomRestricted";
 import TeaserEmail from "@/components/emails/TeaserEmail";
 import { InnerCircleEmail } from "@/lib/email/templates/InnerCircleEmail";
 import { EmailLinks } from "@/lib/email/links";
@@ -177,6 +178,9 @@ function renderStrategyRoomAccepted(data: Record<string, any>): TemplateResult {
       React.createElement(StrategyRoomAcceptedEmail, {
         fullName: data.fullName,
         decisionStatement: data.decisionStatement,
+        evidenceTier: data.evidenceTier || null,
+        caseId: data.caseId || null,
+        directive: data.directive || null,
       }),
     ),
     text: [
@@ -194,12 +198,51 @@ function renderStrategyRoomAccepted(data: Record<string, any>): TemplateResult {
   };
 }
 
+function renderStrategyRoomRestricted(data: Record<string, any>): TemplateResult {
+  const reasons: string[] = Array.isArray(data.reasons) ? data.reasons : [];
+  const missingEvidence: string[] = Array.isArray(data.missingEvidence) ? data.missingEvidence : [];
+  const repairActions: string[] = Array.isArray(data.repairActions) ? data.repairActions : [];
+  return {
+    subject: "Strategy Room — case recorded, admission restricted",
+    html: renderReactEmail(
+      React.createElement(StrategyRoomRestrictedEmail, {
+        fullName: data.fullName,
+        decisionStatement: data.decisionStatement,
+        referenceId: String(data.referenceId || ""),
+        reasons,
+        missingEvidence,
+        repairActions,
+        returnPath: String(data.returnPath || "/diagnostics"),
+      }),
+    ),
+    text: [
+      `Strategy Room — case recorded, admission restricted`,
+      "",
+      data.fullName ? `Principal: ${data.fullName}` : "",
+      `Decision: ${String(data.decisionStatement || "")}`,
+      `Reference: ${String(data.referenceId || "")}`,
+      "",
+      "What is missing:",
+      ...missingEvidence.map((e: string) => `  • ${e}`),
+      "",
+      "Repair actions:",
+      ...repairActions.map((a: string) => `  • ${a}`),
+      "",
+      "Your case has been preserved. You do not need to start again.",
+      `Continue building evidence: ${EmailLinks.home}${(data.returnPath || "/diagnostics").replace(/^\//, "")}`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  };
+}
+
 export const EmailTemplates: Record<string, Builder> = {
   "inner-circle": renderInnerCircle,
   "contact-internal": renderContactInternal,
   "contact-teaser": renderContactTeaser,
   invite: renderInvite,
   "strategy-room-accepted": renderStrategyRoomAccepted,
+  "strategy-room-restricted": renderStrategyRoomRestricted,
 };
 
 export type EmailTemplateName = keyof typeof EmailTemplates;

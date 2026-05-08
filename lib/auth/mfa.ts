@@ -273,11 +273,9 @@ function decryptSecret(value: string): string {
 }
 
 function getBackupCodePepper(): string {
-  const pepper = String(
-    process.env.MFA_BACKUP_CODE_PEPPER || process.env.MFA_ENCRYPTION_KEY || "",
-  ).trim();
+  const pepper = String(process.env.MFA_BACKUP_CODE_PEPPER || "").trim();
   if (!pepper) {
-    throw new Error("[MFA] Missing MFA_BACKUP_CODE_PEPPER or MFA_ENCRYPTION_KEY");
+    throw new Error("[MFA] Missing MFA_BACKUP_CODE_PEPPER");
   }
   return pepper;
 }

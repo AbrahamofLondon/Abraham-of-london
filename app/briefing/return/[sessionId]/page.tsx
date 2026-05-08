@@ -10,6 +10,13 @@
 import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
+import WhatChangedPanel from "@/components/living/WhatChangedPanel";
+import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
+import GovernedActionPanel from "@/components/living/GovernedActionPanel";
+import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
+import ContinuityStatement from "@/components/product/ContinuityStatement";
+import AdmissionNotice from "@/components/product/AdmissionNotice";
 
 type ReturnBriefData = {
   sessionId: string;
@@ -82,6 +89,27 @@ export default function ReturnBriefPage() {
     <main style={{ backgroundColor: "#0B0B0B", minHeight: "100vh", color: "#F5F5F5" }}>
       <div style={{ maxWidth: "680px", margin: "0 auto", padding: "96px 24px 96px" }}>
 
+        {/* ═══ 0. CONTINUITY HEADER ═══ */}
+        <div style={{ paddingBottom: "32px", borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: "32px" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "8px" }}>
+            Decision Infrastructure by Abraham of London
+          </p>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+            You are not starting again. The system remembers this case.
+          </p>
+          <div style={{ display: "flex", gap: "16px", marginTop: "12px", flexWrap: "wrap" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+              Session: {brief.sessionKey?.slice(0, 12) || sessionId?.toString().slice(0, 12)}
+            </span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+              Generated: {brief.generatedAt ? new Date(brief.generatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+            </span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: brief.trajectory.state === "DETERIORATING" ? "rgba(252,165,165,0.50)" : brief.trajectory.state === "FRAGILE" ? "rgba(201,169,110,0.50)" : "rgba(110,231,183,0.50)" }}>
+              Trajectory: {brief.trajectory.state}
+            </span>
+          </div>
+        </div>
+
         {/* ═══ 1. OPENING ═══ */}
         <div style={{ paddingBottom: "64px" }}>
           <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "24px" }}>
@@ -103,6 +131,56 @@ export default function ReturnBriefPage() {
           <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.50)", marginTop: "12px" }}>
             {brief.trajectory.reason}
           </p>
+        </div>
+
+        {/* ═══ 2b. SIGNAL CONTINUITY ═══ */}
+        <div style={{ paddingBottom: "48px" }}>
+          <ContinuityStatement
+            continuity={
+              brief.contradiction
+                ? brief.trajectory.state === "DETERIORATING" ? "WORSENING"
+                  : brief.trajectory.state === "FRAGILE" ? "REPEATED"
+                  : "IMPROVING"
+                : brief.trajectory.state === "DETERIORATING" ? "NEW"
+                : "UNKNOWN"
+            }
+            reason={
+              brief.contradiction
+                ? brief.trajectory.state === "DETERIORATING"
+                  ? `The contradiction between "${brief.contradiction.decision}" and "${brief.contradiction.constraint}" has intensified since the last session. The condition is compounding.`
+                  : brief.trajectory.state === "FRAGILE"
+                    ? `The contradiction between "${brief.contradiction.decision}" and "${brief.contradiction.constraint}" persists at similar severity. The structure has not changed.`
+                    : `Early indicators suggest the intervention on "${brief.contradiction.decision}" is producing movement.`
+                : brief.trajectory.state === "DETERIORATING"
+                  ? "The trajectory has shifted since the last session."
+                  : null
+            }
+            priorOccurrences={brief.contradiction ? 1 : 0}
+            trend={
+              brief.trajectory.state === "DETERIORATING" ? "escalating"
+                : brief.trajectory.state === "STABLE" ? "de-escalating"
+                : "stable"
+            }
+            implication={
+              brief.trajectory.state === "DETERIORATING"
+                ? "Immediate structural correction required. The cost of inaction is compounding."
+                : brief.trajectory.state === "FRAGILE"
+                  ? "The pattern persists. Consider whether intervention is reaching the structural root."
+                  : undefined
+            }
+          />
+        </div>
+
+        {/* ═══ 2c. ADMISSION STATUS ═══ */}
+        <div style={{ paddingBottom: "48px" }}>
+          <AdmissionNotice
+            status="ADMITTED"
+            surface="Return Brief"
+            evidenceTier={brief.outcomeEvidence?.confidence === "governed" ? "outcome_verified" : brief.outcomeEvidence?.confidence === "directional" ? "multi_source" : "single_source"}
+            caseId={brief.sessionKey}
+            continuityStatus={brief.contradiction ? "Active contradiction tracked" : "No active contradiction"}
+            compact
+          />
         </div>
 
         {/* ═══ 3. CONTRADICTION RE-EXPOSED ═══ */}
@@ -160,6 +238,55 @@ export default function ReturnBriefPage() {
             </div>
           </div>
         )}
+
+        {/* ═══ LIVING INTELLIGENCE PANELS ═══ */}
+        <div style={{ display: "grid", gap: "16px", paddingBottom: "48px" }}>
+          <IntelligenceGainPanel
+            stage="Return Brief"
+            findings={[
+              { label: "Trajectory", value: `${brief.trajectory.state} — ${brief.trajectory.reason}` },
+              ...(brief.contradiction ? [{ label: "Contradiction", value: `${brief.contradiction.decision} vs ${brief.contradiction.constraint} (${brief.contradiction.status})` }] : []),
+              ...(brief.outcomeEvidence ? [{ label: "Outcomes processed", value: `${brief.outcomeEvidence.processedDecisionCases} cases, ${brief.outcomeEvidence.improvedPercent}% improved` }] : []),
+              ...(brief.outcomeEvidence?.confidence ? [{ label: "Evidence confidence", value: brief.outcomeEvidence.confidence }] : []),
+            ]}
+          />
+
+          {brief.delta && (
+            <WhatChangedPanel
+              deltas={[
+                ...(brief.delta.clarity != null ? [{ metric: "Clarity", before: null, after: String(brief.delta.clarity), direction: (Number(brief.delta.clarity) > 0 ? "improved" : Number(brief.delta.clarity) < 0 ? "deteriorated" : "stable") as "improved" | "stable" | "deteriorated" }] : []),
+                ...(brief.delta.authority != null ? [{ metric: "Authority", before: null, after: String(brief.delta.authority), direction: (Number(brief.delta.authority) > 0 ? "improved" : Number(brief.delta.authority) < 0 ? "deteriorated" : "stable") as "improved" | "stable" | "deteriorated" }] : []),
+                ...(brief.delta.readiness != null ? [{ metric: "Readiness", before: null, after: String(brief.delta.readiness), direction: (Number(brief.delta.readiness) > 0 ? "improved" : Number(brief.delta.readiness) < 0 ? "deteriorated" : "stable") as "improved" | "stable" | "deteriorated" }] : []),
+              ]}
+              newEvidence={brief.outcomeEvidence?.statements}
+            />
+          )}
+
+          <EvidenceStrengthMeter
+            level={brief.outcomeEvidence?.confidence === "governed" ? "outcome_verified" : brief.outcomeEvidence?.confidence === "directional" ? "multi_source" : "single_source"}
+            stagesCompleted={7}
+            stages={[
+              { key: "fast_diagnostic", label: "Fast Diagnostic", status: "completed", contribution: "Identified initial decision structure and urgency signal." },
+              { key: "purpose_alignment", label: "Purpose Alignment", status: "completed", contribution: "Detected personal mandate and conviction-obligation tension." },
+              { key: "constitutional", label: "Constitutional Diagnostic", status: "completed", contribution: "Confirmed governance route and authority posture." },
+              { key: "team", label: "Team Assessment", status: "completed", contribution: "Measured leadership-team perception gap." },
+              { key: "enterprise", label: "Enterprise Assessment", status: "completed", contribution: "Mapped institutional pressure and execution variance." },
+              { key: "executive_reporting", label: "Executive Reporting", status: "completed", contribution: "Priced consequence and issued governed priority stack." },
+              { key: "strategy_room", label: "Strategy Room", status: "completed", contribution: brief.contradiction ? `Governed intervention on: "${brief.contradiction.decision}"` : "Governed intervention sequence initiated." },
+              { key: "outcome_verification", label: "Outcome Verification", status: brief.outcomeEvidence?.confidence === "governed" ? "completed" : "pending", contribution: brief.outcomeEvidence ? `${brief.outcomeEvidence.processedDecisionCases} cases processed, ${brief.outcomeEvidence.improvedPercent}% improved.` : undefined },
+            ]}
+            whatWouldStrengthen={brief.outcomeEvidence?.confidence !== "governed" ? "Complete the outcome verification loop to reach governed-tier evidence." : undefined}
+          />
+
+          <GovernedActionPanel
+            requiredAction={brief.challenge}
+            whyThisAction={brief.trajectory.state === "DETERIORATING" ? "The trajectory is deteriorating. Immediate correction is required." : brief.contradiction ? `Contradiction between ${brief.contradiction.decision} and ${brief.contradiction.constraint} remains unresolved.` : null}
+            whatProvesProgress="Return to Strategy Room and log the action taken. The system tracks execution against the decision ledger."
+            whatHappensNext={brief.retainerTriggered ? "Pattern is persistent. Retainer governance is recommended." : "Return to Strategy Room and execute the next intervention."}
+          />
+
+          <HumanReviewPrompt context="Return Brief" />
+        </div>
 
         {/* ═══ 6. DIRECT CHALLENGE ═══ */}
         <div style={{ paddingBottom: "64px" }}>

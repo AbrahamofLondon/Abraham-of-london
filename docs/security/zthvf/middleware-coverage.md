@@ -23,7 +23,7 @@ This functions identically to Next.js middleware — every request (except stati
 |------|-------|-------------------|
 | 0 | **PDF download guard** | Redirects `/assets/downloads/*.pdf` → `/api/downloads/{slug}` (307) |
 | 1 | **Dev bypass** | `BYPASS_SOVEREIGN=true` in development only — passes through |
-| 2 | **Internal bypass** | `X-Directorate-Bypass` header matches `INTERNAL_BYPASS_KEY` env |
+| 2 | **Internal bypass** | `X-Directorate-Bypass` header matches `INTERNAL_BYPASS_KEY` env in development only |
 | 3 | **Canonical host redirect** | Non-canonical hostname → 308 to `www.abrahamoflondon.org` |
 | 4 | **Global lockdown** | Checks `/api/system/lock-status` — non-admin users get 503/redirect |
 | 5 | **Public path bypass** | Matches `PUBLIC_PREFIXES` — passes through with security headers |
@@ -155,5 +155,5 @@ These routes must implement their own auth checks. The proxy provides security h
 1. **In-memory rate limiting** — resets on cold start, not shared across instances
 2. **X-Forwarded-For trust** — first IP from header accepted without proxy trust validation
 3. **BYPASS_SOVEREIGN dev flag** — must never reach production
-4. **INTERNAL_BYPASS_KEY header** — full auth bypass if key leaks
-5. **Compatibility sovereign_session cookie** — accepts `userId:campaignId:authorityLevel:signature` format without HMAC verification on the compat path
+4. **INTERNAL_BYPASS_KEY header** — development-only bypass; production must not honor it
+5. **Compatibility sovereign_session cookie** — legacy risk retired; active path must remain `ogr_sovereign_session` only

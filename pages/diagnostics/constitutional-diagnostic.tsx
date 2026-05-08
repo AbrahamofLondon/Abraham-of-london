@@ -283,6 +283,35 @@ export default function ConstitutionalDiagnosticPage() {
                       </div>
                     ))}
                   </div>
+                  {/* Route explanation */}
+                  <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.85rem" }}>
+                      What the routes mean
+                    </div>
+                    {[
+                      { route: "STRATEGY", desc: "Evidence supports escalation. The decision has structural consequence that warrants governed intervention." },
+                      { route: "DIAGNOSTIC", desc: "Evidence is developing. Additional diagnostic layers will strengthen the reading before escalation." },
+                      { route: "REJECT", desc: "Current evidence does not support escalation. This is governed preparation, not dismissal. Other assessment pathways remain open. Strengthen the evidence and return." },
+                    ].map(item => (
+                      <div key={item.route} style={{ marginBottom: "0.65rem" }}>
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase",
+                          color: item.route === "REJECT" ? "rgba(248,113,113,0.55)" : item.route === "STRATEGY" ? "rgba(110,231,183,0.55)" : "rgba(251,191,36,0.55)",
+                        }}>
+                          {item.route}
+                        </span>
+                        <p style={{
+                          marginTop: "0.2rem",
+                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                          fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5,
+                          color: "rgba(255,255,255,0.35)",
+                        }}>
+                          {item.desc}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </motion.div>
 
               </div>

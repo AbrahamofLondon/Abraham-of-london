@@ -11,6 +11,7 @@ import {
 import { resolveProductIdentity } from "@/lib/commercial/product-identity";
 import { hubspotSync } from "@/lib/hubspot/sync";
 import { checkDoNotSellGate } from "@/lib/commercial/do-not-sell-gate";
+import { evaluateERAdmission } from "@/lib/diagnostics/executive-reporting/admission";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeKey
@@ -64,6 +65,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const gate = await checkDoNotSellGate(String(email).trim().toLowerCase(), code);
   if (!gate.allowed) {
     return res.status(403).json({ ok: false, reason: gate.reason, message: gate.message });
+  }
+
+  // ── Server-side admission enforcement for Executive Reporting ──
+  // Cross-validates client evidence against server-side diagnostic journey.
+  // Payment must not override evidence requirements.
+  if (code === "executive_reporting") {
+    const erAdmission = await evaluateERAdmission({
+      email: String(email).trim().toLowerCase(),
+      intakeMode: (req.body.intakeMode as string) || "ladder",
+      sponsoredDirect: Boolean(req.body.sponsoredDirect),
+      sponsorNameOrSeat: req.body.sponsorNameOrSeat || null,
+      monitoringAccountId: req.body.monitoringAccountId || null,
+      monitoringContext: Boolean(req.body.monitoringContext),
+      clientEvidenceSummary: req.body.clientEvidenceSummary || null,
+    });
+
+    if (erAdmission.status === "RESTRICTED") {
+      return res.status(403).json({
+        ok: false,
+        reason: "ADMISSION_RESTRICTED",
+        admission: {
+          status: erAdmission.status,
+          reasons: erAdmission.reasons,
+          missingEvidence: erAdmission.missingEvidence,
+          repairActions: erAdmission.repairActions,
+          returnPath: erAdmission.returnPath,
+        },
+      });
+    }
   }
 
   const eligibility = checkCheckoutEligibility(code);

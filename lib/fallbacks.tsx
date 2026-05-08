@@ -18,7 +18,12 @@ export const FallbackLayout = ({ children }: { children: React.ReactNode }) => {
 export const fallbackAuthOptions = {
   providers: [],
   session: { strategy: 'jwt' as const },
-  secret: 'fallback-secret-do-not-use-in-production',
+  secret: (() => {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("[FATAL] fallbackAuthOptions must not be used in production — configure NEXTAUTH_SECRET");
+    }
+    return "fallback-secret-do-not-use-in-production";
+  })(),
 };
 
 // Safe require function with proper type handling

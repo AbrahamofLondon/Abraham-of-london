@@ -1,3 +1,13 @@
+/**
+ * lib/outcomes/evidence.ts — Outcome evidence persistence and aggregation.
+ *
+ * Records outcome snapshots to the OutcomeVerificationRecord table (durable)
+ * AND maintains a process-level cache for fast same-session reads.
+ *
+ * buildObservedOutcomeEvidence() reads from DB when available,
+ * falls back to in-memory cache, and always returns honest confidence levels.
+ */
+
 import {
   classifyOutcome,
   normalizeOutcomeSnapshot,
@@ -18,7 +28,8 @@ export type OutcomeEvidenceSummary = {
   statements: string[];
 };
 
-const recordedOutcomes: OutcomeSnapshot[] = [];
+// Process-level cache for fast same-session reads
+const processCache: OutcomeSnapshot[] = [];
 
 function roundTo(value: number, digits = 2): number {
   return Number(value.toFixed(digits));
@@ -43,24 +54,127 @@ function isPositiveOutcome(outcome: OutcomeClassification): boolean {
   return outcome === "resolved" || outcome === "improved";
 }
 
-export function recordOutcomeSnapshot(snapshot: OutcomeSnapshot): OutcomeSnapshot {
+/**
+ * Record an outcome snapshot — persists to DB and updates process cache.
+ * Falls back to cache-only if DB write fails.
+ */
+export async function recordOutcomeSnapshot(snapshot: OutcomeSnapshot): Promise<OutcomeSnapshot> {
   const normalized = normalizeOutcomeSnapshot(snapshot);
-  recordedOutcomes.push(normalized);
+
+  // Persist to database
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    await (prisma as any).outcomeVerificationRecord.create({
+      data: {
+        sessionId: normalized.sessionId || null,
+        organisationKey: normalized.organisation || null,
+        outcomeClassification: normalized.outcomeClassification,
+        magnitudeOfChange: Math.abs(normalized.delta.dissonanceChange) +
+          Math.abs(normalized.delta.burnoutChange) +
+          Math.abs(normalized.delta.certaintyChange),
+        effectivenessScore: 0, // computed by outcome-verification.ts
+        payload: JSON.stringify({
+          baseline: normalized.baseline,
+          followUp: normalized.followUp,
+          delta: normalized.delta,
+          timeToOutcomeDays: normalized.timeToOutcomeDays,
+        }),
+      },
+    });
+  } catch (err) {
+    // DB write failed — outcome still recorded in process cache
+    console.error("[outcomes/evidence] DB persist failed, using cache:", err);
+  }
+
+  // Always update process cache and feedback loop
+  processCache.push(normalized);
+  recordOutcomeFeedback(normalized);
+  return normalized;
+}
+
+/** Synchronous record for backward compatibility (cache-only) */
+export function recordOutcomeSnapshotSync(snapshot: OutcomeSnapshot): OutcomeSnapshot {
+  const normalized = normalizeOutcomeSnapshot(snapshot);
+  processCache.push(normalized);
   recordOutcomeFeedback(normalized);
   return normalized;
 }
 
 export function getRecordedOutcomeSnapshots(): OutcomeSnapshot[] {
-  return [...recordedOutcomes];
+  return [...processCache];
 }
 
 export function resetOutcomeEvidenceForTests(): void {
-  recordedOutcomes.length = 0;
+  processCache.length = 0;
 }
 
+/**
+ * Load outcome evidence from DB for a given organisation or session.
+ * Returns snapshots reconstructed from OutcomeVerificationRecord rows.
+ */
+async function loadOutcomesFromDB(filter?: {
+  sessionId?: string;
+  organisationKey?: string;
+  limit?: number;
+}): Promise<OutcomeSnapshot[]> {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const where: Record<string, unknown> = {};
+    if (filter?.sessionId) where.sessionId = filter.sessionId;
+    if (filter?.organisationKey) where.organisationKey = filter.organisationKey;
+
+    const records = await (prisma as any).outcomeVerificationRecord.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: filter?.limit ?? 200,
+    });
+
+    return records.map((r: any) => {
+      const payload = typeof r.payload === "string" ? JSON.parse(r.payload) : r.payload;
+      return normalizeOutcomeSnapshot({
+        id: r.id,
+        sessionId: r.sessionId ?? "",
+        organisation: r.organisationKey ?? undefined,
+        baseline: payload?.baseline ?? { dissonance: 0, burnoutIndex: 0, sovereignCertainty: 0, escalationLevel: "NONE" },
+        followUp: payload?.followUp ?? { dissonance: 0, burnoutIndex: 0, sovereignCertainty: 0, escalationLevel: "NONE" },
+        delta: payload?.delta ?? { dissonanceChange: 0, burnoutChange: 0, certaintyChange: 0 },
+        outcomeClassification: r.outcomeClassification as OutcomeClassification,
+        timeToOutcomeDays: payload?.timeToOutcomeDays ?? 0,
+        createdAt: r.createdAt,
+      });
+    });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Build observed outcome evidence summary (synchronous — uses process cache).
+ *
+ * This is the primary export. Uses the process cache for fast same-session reads.
+ * For DB-backed evidence across sessions, use buildObservedOutcomeEvidenceFromDB().
+ */
 export function buildObservedOutcomeEvidence(
-  outcomes: OutcomeSnapshot[] = recordedOutcomes,
+  outcomes: OutcomeSnapshot[] = processCache,
 ): OutcomeEvidenceSummary {
+  return computeEvidenceSummary(outcomes);
+}
+
+/**
+ * Build observed outcome evidence from database (async).
+ * Falls back to process cache if DB is unavailable.
+ */
+export async function buildObservedOutcomeEvidenceFromDB(
+  dbFilter?: { sessionId?: string; organisationKey?: string },
+): Promise<OutcomeEvidenceSummary> {
+  const dbOutcomes = await loadOutcomesFromDB(dbFilter);
+  if (dbOutcomes.length > 0) {
+    return computeEvidenceSummary(dbOutcomes);
+  }
+  return computeEvidenceSummary(processCache);
+}
+
+function computeEvidenceSummary(outcomes: OutcomeSnapshot[]): OutcomeEvidenceSummary {
   const valid = outcomes
     .map((snapshot) => normalizeOutcomeSnapshot(snapshot))
     .filter((snapshot) => classifyOutcome(snapshot) !== "invalid");

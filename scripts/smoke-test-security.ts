@@ -13,12 +13,14 @@ async function runSmokeTest() {
   console.log("🚀 INITIALIZING SOVEREIGN SECURITY SMOKE TEST...\n");
 
   const testEmail = "director@abrahamoflondon.org";
-  const masterSecret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET;
+  const masterSecret = process.env.JWT_SECRET;
+  const nextAuthSecret = process.env.NEXTAUTH_SECRET;
   const encryptionKey = process.env.ENCRYPTION_KEY;
 
   // --- TEST 1: Environment Integrity ---
   console.log("📋 [TEST 1/4] Checking Environment Variables...");
-  if (!masterSecret) throw new Error("❌ FAIL: JWT_SECRET / NEXTAUTH_SECRET is missing.");
+  if (!masterSecret) throw new Error("❌ FAIL: JWT_SECRET is missing.");
+  if (!nextAuthSecret) throw new Error("❌ FAIL: NEXTAUTH_SECRET is missing.");
   if (!encryptionKey) throw new Error("❌ FAIL: ENCRYPTION_KEY is missing.");
   console.log("✅ PASS: Environment Secure.\n");
 

@@ -108,7 +108,7 @@ export async function getCreditProfile(email: string): Promise<CreditProfile> {
   // Count contracts (fulfilled vs breached)
   const contracts = await prisma.patternBreakerContract.findMany({
     where: { ownerEmail: email },
-    select: { status: true, breachCount: true, verificationStatus: true },
+    select: { status: true, breachCount: true, verificationStatus: true, createdAt: true },
   });
 
   const fulfilled = contracts.filter(
@@ -128,15 +128,27 @@ export async function getCreditProfile(email: string): Promise<CreditProfile> {
 
   // Trend: compare recent contracts (last 30d) vs older ones
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const recentContracts = contracts.filter(() => true); // all available
+  const recentContracts = contracts.filter((c) => c.createdAt >= thirtyDaysAgo);
+  const olderContracts = contracts.filter((c) => c.createdAt < thirtyDaysAgo);
   const recentBreaches = recentContracts.filter((c) => c.breachCount > 0).length;
   const recentFulfilled = recentContracts.filter(
-    (c) => c.status === "completed",
+    (c) => c.status === "completed" || c.verificationStatus === "verified",
+  ).length;
+  const olderBreaches = olderContracts.filter((c) => c.breachCount > 0).length;
+  const olderFulfilled = olderContracts.filter(
+    (c) => c.status === "completed" || c.verificationStatus === "verified",
   ).length;
 
+  // Trend compares recent 30-day window against prior history
   let trend: CreditProfile["trend"] = "stable";
-  if (recentFulfilled > recentBreaches + 1) trend = "improving";
-  else if (recentBreaches > recentFulfilled + 1) trend = "declining";
+  const recentRatio = recentContracts.length > 0
+    ? (recentFulfilled - recentBreaches) / recentContracts.length
+    : 0;
+  const olderRatio = olderContracts.length > 0
+    ? (olderFulfilled - olderBreaches) / olderContracts.length
+    : 0;
+  if (recentContracts.length >= 2 && recentRatio > olderRatio + 0.15) trend = "improving";
+  else if (recentContracts.length >= 2 && recentRatio < olderRatio - 0.15) trend = "declining";
 
   return {
     email,

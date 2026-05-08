@@ -37,6 +37,15 @@ const patchSchema = z.object({
   aiLeverageAction: z.string().trim().max(64).optional(),
 }).strict();
 
+function normalizeDecisionState(value: string | null | undefined): DecisionAction["status"] {
+  const normalized = String(value || "").toUpperCase();
+  if (normalized === "EXECUTED") return "EXECUTED";
+  if (normalized === "BLOCKED") return "BLOCKED";
+  if (normalized === "ESCALATED") return "ESCALATED";
+  if (normalized === "FAILED") return "FAILED";
+  return "PENDING";
+}
+
 function parseJsonObject(value: string | null | undefined): Record<string, unknown> {
   if (!value) return {};
   try {
@@ -217,17 +226,17 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     });
     const executionState: SessionExecutionState = {
       sessionId,
-      systemState: (session.status as any) || "PENDING",
+      systemState: normalizeDecisionState(session.status),
       actions: allDecisions.map((d) => ({
         id: d.id,
         text: d.decision,
-        status: (d.status as any) || "PENDING",
+        status: normalizeDecisionState(d.status),
         deadline: computeDefaultDeadline("near_term"),
         createdAt: d.createdAt.toISOString(),
         updatedAt: d.updatedAt.toISOString(),
         blockReason: d.notes,
         avoidanceCount: detectRepeatedAvoidance(d.decision, allDecisions.map((dd) => ({
-          id: dd.id, text: dd.decision, status: (dd.status as any) || "PENDING",
+          id: dd.id, text: dd.decision, status: normalizeDecisionState(dd.status),
           deadline: "", createdAt: dd.createdAt.toISOString(), updatedAt: dd.updatedAt.toISOString(),
           avoidanceCount: 0,
         }))),
@@ -448,11 +457,11 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
     });
     const executionState: SessionExecutionState = {
       sessionId,
-      systemState: (session?.status as any) || "PENDING",
+      systemState: normalizeDecisionState(session?.status),
       actions: allDecisions.map((d) => ({
         id: d.id,
         text: d.decision,
-        status: (d.status as any) || "PENDING",
+        status: normalizeDecisionState(d.status),
         deadline: computeDefaultDeadline("near_term"),
         createdAt: d.createdAt.toISOString(),
         updatedAt: d.updatedAt.toISOString(),

@@ -27,9 +27,9 @@ The application uses multiple cookie-based identity channels. Trust derivation v
 - **Trust level:** SERVER-SIDE -- opaque ID, state is server-managed
 
 ### 1.3 Sovereign Session Cookie
-- **Cookie name:** `sovereign_session`, `ogr_sovereign_session`
+- **Cookie name:** `ogr_sovereign_session`
 - **Set by:** `app/api/auth/sovereign/route.ts:170-179`
-- **Used in:** `proxy.ts:871-872`, `middleware/sovereign.ts:90`
+- **Used in:** `proxy.ts`, `middleware/sovereign.ts:90`
 - **Trust level:** SERVER-SIDE -- validated by `SovereignAuthService` and `validateAuthority()`
 
 ### 1.4 Inner Circle Access Cookies

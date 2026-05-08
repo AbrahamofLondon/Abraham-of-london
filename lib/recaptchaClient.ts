@@ -47,6 +47,15 @@ function env(name: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+if (
+  process.env.NODE_ENV === "production" &&
+  env("NEXT_PUBLIC_ALLOW_RECAPTCHA_BYPASS") === "true"
+) {
+  throw new Error(
+    "[reCAPTCHA] NEXT_PUBLIC_ALLOW_RECAPTCHA_BYPASS must never be enabled in production.",
+  );
+}
+
 function isClientBypassAllowed(): boolean {
   return (
     process.env.NODE_ENV !== "production" &&

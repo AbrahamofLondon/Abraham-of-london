@@ -9,7 +9,7 @@ import { normalizeUserTier, hasAccess as tierHasAccess } from "@/lib/access/tier
 import type { AccessTier } from "@/lib/access/tier-policy";
 
 export type AdminAuthResult =
-  | { valid: true; userId?: string; tier?: AccessTier; method: "api_key" | "dev_mode" | "session" }
+  | { valid: true; userId?: string; tier?: AccessTier; method: "api_key" | "session" }
   | { valid: false; reason: string; statusCode?: number };
 
 export function isInvalidAdmin(
@@ -20,7 +20,7 @@ export function isInvalidAdmin(
 
 export function isValidAdmin(
   result: AdminAuthResult
-): result is { valid: true; userId?: string; tier?: AccessTier; method: "api_key" | "dev_mode" | "session" } {
+): result is { valid: true; userId?: string; tier?: AccessTier; method: "api_key" | "session" } {
   return result.valid === true;
 }
 
@@ -68,7 +68,7 @@ function timingSafeEqualString(a: string, b: string): boolean {
  * INSTITUTIONAL ADMIN VALIDATION
  * 1) DB session tier (cookie -> prisma.session -> prisma.innerCircleMember -> tier)
  * 2) Bearer API key (timing-safe)
- * 3) Dev fallback (only when ADMIN_API_KEY is not set)
+ * 3) No development bypass. Missing auth must fail closed.
  */
 export async function validateAdminAccess(req: ExtendedRequest): Promise<AdminAuthResult> {
   const adminKey = process.env.ADMIN_API_KEY || "";
@@ -131,11 +131,6 @@ export async function validateAdminAccess(req: ExtendedRequest): Promise<AdminAu
       console.error("[validateAdminAccess] api key check error:", e);
       return { valid: false, reason: "Security validation failure", statusCode: 500 };
     }
-  }
-
-  // 3) Development Fallback (only if you have not configured an admin key)
-  if (isDevelopment() && !adminKey) {
-    return { valid: true, method: "dev_mode" };
   }
 
   return { valid: false, reason: "Unauthorized: Directorate Clearance Required.", statusCode: 401 };

@@ -62,7 +62,7 @@ export default function PurposeAlignmentPage() {
                   fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
                   color: `${GOLD}BB`,
                 }}>
-                  Personal Analysis · Free · 8 minutes
+                  Personal Decision Infrastructure · Free · 8 minutes
                 </span>
               </div>
 
@@ -118,7 +118,7 @@ export default function PurposeAlignmentPage() {
                     color: "rgba(255,255,255,0.46)",
                   }}
                 >
-                  This is a personal decision surface. The institutional ladder begins with the Constitutional Diagnostic.
+                  Test whether your stated direction can survive evidence, pressure, contradiction, and consequence. The institutional ladder begins with the Constitutional Diagnostic.
                 </p>
               </div>
             </div>

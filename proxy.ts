@@ -868,47 +868,8 @@ async function trackSessionEvent(
 async function getSovereignAuthority(
   req: NextRequest
 ): Promise<ConstitutionalAuthority | null> {
-  const compatCookie = req.cookies.get("sovereign_session")?.value;
   const primaryCookie = req.cookies.get("ogr_sovereign_session")?.value;
   const sessionSecret = String(process.env.OGR_SESSION_SECRET || "").trim();
-
-  // Compatibility cookie:
-  // userId:campaignId:authorityLevel:signature
-  if (compatCookie) {
-    try {
-      const parts = compatCookie.split(":");
-      if (parts.length >= 4) {
-        const [userId, campaignId, authorityLevel, signature] = parts;
-        const validLevels = [
-          "OBSERVER",
-          "PARTICIPANT",
-          "DELEGATE",
-          "AUTHORITY",
-          "SOVEREIGN",
-        ];
-
-        if (
-          userId &&
-          campaignId &&
-          signature &&
-          validLevels.includes(authorityLevel)
-        ) {
-          return {
-            userId,
-            campaignId,
-            authorityLevel:
-              authorityLevel as ConstitutionalAuthority["authorityLevel"],
-            grantedAt: new Date().toISOString(),
-            grantedBy: "system",
-            signature,
-            scope: ["*"],
-          };
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }
 
   // Primary cookie:
   // payload.mac where mac = HMAC(payload, secret)

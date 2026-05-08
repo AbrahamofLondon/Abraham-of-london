@@ -341,14 +341,11 @@ The following secret variables use `A || B` fallback patterns, meaning if the pr
 | Primary Secret | Fallback | Location |
 |---|---|---|
 | `MFA_BACKUP_CODE_PEPPER` | `MFA_ENCRYPTION_KEY` | `lib/auth/mfa.ts:277` |
-| `DOWNLOAD_TOKEN_SECRET` | `NEXTAUTH_SECRET` | `lib/premium/download-token.ts:69` |
-| `SECURE_CLIENT_STATE_SECRET` | `NEXTAUTH_SECRET` | `lib/security/secure-client-state.ts:21` |
-| `ADMIN_JWT_SECRET` | `NEXTAUTH_SECRET` | `lib/server/auth/admin-utils.ts:49` |
 | `INNER_CIRCLE_DB_URL` | `DATABASE_URL` | `lib/server/secrets-db.ts:9` |
 | `HUBSPOT_ACCESS_TOKEN` | `CRM_API_KEY` | `lib/hubspot/client.ts:11` |
 | `REDIS_URL` | `INNER_CIRCLE_REDIS_URL` | `lib/server/token-store.ts:20` |
 
-**Recommendation:** Each secret should be explicitly required in production. Remove fallback chains and fail loudly if a required secret is missing.
+Secret-domain fallback chains for action, download, admin JWT, and secure client state were removed on 2026-05-07. Remaining rows above are the residual fallback map still requiring review.
 
 ---
 
@@ -364,10 +361,10 @@ The following secret variables use `A || B` fallback patterns, meaning if the pr
 ### 3.2 `INTERNAL_BYPASS_KEY` + `X-Directorate-Bypass` header (proxy.ts:1207-1213, lib/auth/proxy.ts:129-134)
 
 - **What it bypasses:** ALL middleware authentication and authorization. Complete proxy bypass.
-- **Dev-only guard:** No. Active in ALL environments including production.
-- **Production protection:** Protected by a shared secret (`INTERNAL_BYPASS_KEY`). Anyone with the key and the header can bypass all auth.
-- **Risk:** HIGH. This is a master key. If the key leaks, the entire authentication layer is void. Present in both `proxy.ts` and `lib/auth/proxy.ts`.
-- **Recommendation:** Restrict to specific IP ranges. Add audit logging for every use. Consider time-limited tokens instead of a static key.
+- **Dev-only guard:** Yes. Active only when `NODE_ENV === "development"`.
+- **Production protection:** Production must not honor the header.
+- **Risk:** LOW in production if environment classification is correct. Still sensitive in development.
+- **Recommendation:** Keep usage auditable and remove entirely if it is no longer needed by local recovery flows.
 
 ### 3.3 `X-Institutional-Action: true` header (lib/auth/proxy.ts:181)
 

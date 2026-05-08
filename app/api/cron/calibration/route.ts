@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import { proposeCalibrationAdjustment } from "@/lib/calibration/calibration-engine";
+import { writeSecurityAudit } from "@/lib/security/audit-log";
+import { noStoreJson } from "@/lib/server/security/app-route-guards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,8 +12,33 @@ export const dynamic = "force-dynamic";
  *
  * Daily calibration cron. Fetches unapplied events, proposes adjustments,
  * applies only if threshold met. Persists updated CalibrationState.
+ *
+ * Guard: CRON_SECRET (Bearer token)
  */
-export async function POST() {
+export async function POST(req: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET?.trim();
+  const authHeader = req.headers.get("authorization");
+
+  if (!cronSecret) {
+    return noStoreJson({ ok: false, error: "CRON_NOT_CONFIGURED" }, { status: 503 });
+  }
+
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    await writeSecurityAudit({
+      action: "invalid_token",
+      severity: "warn",
+      status: "BLOCKED",
+      resourceId: "/api/cron/calibration",
+    });
+    return noStoreJson({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  await writeSecurityAudit({
+    action: "cron_started",
+    status: "SUCCESS",
+    resourceId: "/api/cron/calibration",
+  });
+
   try {
     // Fetch all calibration states
     const states = await prisma.calibrationState.findMany({
@@ -129,7 +156,17 @@ export async function POST() {
       }
     }
 
-    return NextResponse.json({
+    await writeSecurityAudit({
+      action: "cron_completed",
+      status: "SUCCESS",
+      resourceId: "/api/cron/calibration",
+      metadata: {
+        evaluatedModels: results.length,
+        appliedAdjustments: results.filter((r) => r.applied).length,
+      },
+    });
+
+    return noStoreJson({
       ok: true,
       evaluatedModels: results.length,
       appliedAdjustments: results.filter((r) => r.applied).length,
@@ -138,6 +175,13 @@ export async function POST() {
     });
   } catch (err) {
     console.error("[calibration-cron]", err);
-    return NextResponse.json({ ok: false, error: "CALIBRATION_CRON_FAILED" }, { status: 500 });
+    await writeSecurityAudit({
+      action: "cron_error",
+      severity: "error",
+      status: "FAILED",
+      resourceId: "/api/cron/calibration",
+      errorMessage: err instanceof Error ? err.message : "Calibration failed",
+    });
+    return noStoreJson({ ok: false, error: "CALIBRATION_CRON_FAILED" }, { status: 500 });
   }
 }

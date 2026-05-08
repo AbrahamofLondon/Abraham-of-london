@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma.server";
 import { computeDecisionCreditScore } from "@/lib/follow-up/decision-credit-score";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
+import { getCreditProfile } from "@/lib/decision-ledger/ledger-service";
 
 type Band = "EXCELLENT" | "GOOD" | "FAIR" | "POOR";
 
@@ -74,6 +75,7 @@ export async function GET() {
     .filter((s) => s && s.id && s.case);
 
   const dcs = computeDecisionCreditScore(currentSpine, priorSpines.length > 0 ? priorSpines : undefined);
+  const profile = await getCreditProfile(email);
 
   return NextResponse.json({
     ok: true,
@@ -88,6 +90,24 @@ export async function GET() {
         recurrence: dcs.components.consistency,
       },
       lastAssessed: journey.updatedAt?.toISOString() ?? null,
+      reliability: {
+        score: dcs.score,
+        band: scoreToBand(dcs.score),
+      },
+      followThrough: {
+        score: dcs.components.followThrough,
+        fulfilled: profile.fulfilled,
+        totalDecisions: profile.totalDecisions,
+      },
+      delayPattern: {
+        penalty: dcs.components.breachPenalty,
+        breached: profile.breached,
+        disputed: profile.disputed,
+      },
+      improvementTrend: {
+        trend: dcs.trend,
+        label: dcs.label,
+      },
     },
   });
 }

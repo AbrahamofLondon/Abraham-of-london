@@ -15,6 +15,8 @@ import {
   requireMethod,
 } from "@/lib/server/security/app-route-guards";
 import { assertStrategyRoomAccess, authorizeStrategyRoomEntry } from "@/lib/server/strategy-room/access.server";
+import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
+import { evaluateStrategyRoomAdmission } from "@/lib/strategy-room/admission";
 
 const postSchema = z.object({
   strategyRoomSessionId: z.string().trim().max(128).optional().nullable(),
@@ -81,6 +83,31 @@ export async function POST(req: NextRequest) {
       canonicalSnapshot,
     } = body;
 
+    // ── SERVER-SIDE ADMISSION ENFORCEMENT ──
+    // Validates diagnostic evidence, decision specificity, authority, and readiness
+    // before allowing execution session creation. Client-side state is not authoritative.
+    const admission = await evaluateStrategyRoomAdmission({
+      email: email ?? entryAuth.identityEmail ?? null,
+      decisionStatement: decisionQuestion ?? coreProblem ?? null,
+      preCommitment: true, // Reaching execution endpoint implies pre-commitment
+    });
+
+    if (admission.status === "RESTRICTED") {
+      return noStoreJson(
+        {
+          error: "Strategy Room admission restricted.",
+          admission: {
+            status: admission.status,
+            reasons: admission.reasons,
+            missingEvidence: admission.missingEvidence,
+            repairActions: admission.repairActions,
+            returnPath: admission.returnPath,
+          },
+        },
+        { status: 403 },
+      );
+    }
+
     if (strategyRoomSessionId) {
       const access = await assertStrategyRoomAccess({
         request: req,
@@ -110,6 +137,10 @@ export async function POST(req: NextRequest) {
           .slice(-3)
           .map((node) => node.summary)
       : [];
+    const latestExecutionRecord = await findLatestStrategyExecutionRecord({
+      sessionId: strategyRoomSessionId ?? null,
+      email: email ?? null,
+    });
 
     if (!latestDecisionObject) {
       return NextResponse.json(
@@ -125,9 +156,21 @@ export async function POST(req: NextRequest) {
         email: email ?? null,
         directive: directive ?? null,
         escalationLevel: escalationLevel ?? null,
-        conditionSummary: conditionSummary ?? latestContradictions[0]?.summary ?? null,
-        coreProblem: coreProblem ?? latestContradictions[0]?.label ?? null,
-        decisionQuestion: decisionQuestion ?? latestDecisionObject?.decisionText ?? null,
+        conditionSummary:
+          conditionSummary
+          ?? latestExecutionRecord?.timeline
+          ?? latestContradictions[0]?.summary
+          ?? null,
+        coreProblem:
+          coreProblem
+          ?? latestExecutionRecord?.conflictResolved
+          ?? latestContradictions[0]?.label
+          ?? null,
+        decisionQuestion:
+          decisionQuestion
+          ?? latestExecutionRecord?.decision
+          ?? latestDecisionObject?.decisionText
+          ?? null,
         constraints: constraints
           ? JSON.stringify(constraints)
           : latestDecisionObject?.constraintText
@@ -153,10 +196,20 @@ export async function POST(req: NextRequest) {
           ? JSON.stringify(canonicalSnapshot)
           : evidenceJourney
             ? JSON.stringify({
+                executionRecord: latestExecutionRecord,
                 evidenceGraph: {
                   decisionObjects: evidenceJourney.decisionObjects,
                   nodes: evidenceJourney.evidenceNodes,
                 },
+                admission: admission.status === "ADMITTED"
+                  ? {
+                      caseId: admission.caseId,
+                      decisionId: admission.decisionId,
+                      evidenceTier: admission.evidenceTier,
+                      directive: admission.directive,
+                      reasons: admission.reasons,
+                    }
+                  : null,
               })
             : null,
         status: "active",
