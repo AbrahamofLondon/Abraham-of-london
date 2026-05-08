@@ -15,6 +15,7 @@ import { siteConfig } from "@/config/site";
 import ContactEmail from "@/emails/ContactEmail";
 import { StrategyRoomAcceptedEmail } from "@/emails/StrategyRoomAccepted";
 import { StrategyRoomRestrictedEmail } from "@/emails/StrategyRoomRestricted";
+import { OversightBriefReadyEmail } from "@/emails/OversightBriefReady";
 import TeaserEmail from "@/components/emails/TeaserEmail";
 import { InnerCircleEmail } from "@/lib/email/templates/InnerCircleEmail";
 import { EmailLinks } from "@/lib/email/links";
@@ -236,6 +237,34 @@ function renderStrategyRoomRestricted(data: Record<string, any>): TemplateResult
   };
 }
 
+function renderOversightBriefReady(data: Record<string, any>): TemplateResult {
+  return {
+    subject: `Oversight Brief Ready — ${data.cyclePeriod || "Current Cycle"}`,
+    html: renderReactEmail(
+      React.createElement(OversightBriefReadyEmail, {
+        recipientName: data.recipientName || undefined,
+        cyclePeriod: String(data.cyclePeriod || "Current Cycle"),
+        briefUrl: String(data.briefUrl || ""),
+        signalCount: data.signalCount ?? undefined,
+        actionCount: data.actionCount ?? undefined,
+      }),
+    ),
+    text: [
+      `Oversight Brief Ready — ${data.cyclePeriod || "Current Cycle"}`,
+      "",
+      data.recipientName ? `Principal: ${data.recipientName}` : "",
+      "Your retained oversight brief is ready.",
+      "This cycle has been reviewed and released through the governed oversight process.",
+      "",
+      `View brief: ${data.briefUrl || ""}`,
+      "",
+      "This brief should be read before the next retained decision review.",
+      "",
+      "Abraham of London · Decision Infrastructure · Retained Oversight",
+    ].filter(Boolean).join("\n"),
+  };
+}
+
 export const EmailTemplates: Record<string, Builder> = {
   "inner-circle": renderInnerCircle,
   "contact-internal": renderContactInternal,
@@ -243,6 +272,7 @@ export const EmailTemplates: Record<string, Builder> = {
   invite: renderInvite,
   "strategy-room-accepted": renderStrategyRoomAccepted,
   "strategy-room-restricted": renderStrategyRoomRestricted,
+  "oversight-brief-ready": renderOversightBriefReady,
 };
 
 export type EmailTemplateName = keyof typeof EmailTemplates;
