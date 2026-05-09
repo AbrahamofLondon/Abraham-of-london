@@ -279,6 +279,10 @@ function Field({ label, required, children, mono, serif, GOLD }: { label: string
 
 export const getServerSideProps: GetServerSideProps<IntakePageProps> = async (ctx) => {
   try {
+    const { requireRole } = await import("@/lib/access/require-role.server");
+    const roleCheck = await requireRole(ctx, "COUNSEL_VIEW");
+    if ("redirect" in roleCheck) return { redirect: roleCheck.redirect };
+
     const { session, access } = await resolvePageAccess(ctx);
     if (!access.permissions.isAuthenticated || !session?.user?.email) {
       return { redirect: { destination: `/api/auth/signin?callbackUrl=${encodeURIComponent("/counsel/intake")}`, permanent: false } };

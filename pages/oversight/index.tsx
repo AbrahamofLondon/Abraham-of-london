@@ -260,6 +260,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                 <Link href="/counsel/status" className="border border-white/10 px-4 py-3 text-sm text-white/68 transition hover:bg-white/5">Counsel status</Link>
                 <Link href="/account/proof-pack" className="border border-white/10 px-4 py-3 text-sm text-white/68 transition hover:bg-white/5">Proof pack</Link>
                 <Link href="/boardroom" className="border border-white/10 px-4 py-3 text-sm text-white/68 transition hover:bg-white/5">Boardroom archive</Link>
+                <Link href="/engagements/retained-oversight" className="border border-white/10 px-4 py-3 text-sm text-white/68 transition hover:bg-white/5">Review retained oversight pathway</Link>
               </section>
 
               {warnings.length > 0 && (
@@ -279,6 +280,10 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+  const { requireRole } = await import("@/lib/access/require-role.server");
+  const roleCheck = await requireRole(ctx, "OVERSIGHT_VIEW");
+  if ("redirect" in roleCheck) return { redirect: roleCheck.redirect };
+
   const { session, access } = await resolvePageAccess(ctx);
   const email = typeof session?.user?.email === "string" ? session.user.email.toLowerCase() : null;
   const userId = typeof session?.user?.id === "string" ? session.user.id : null;

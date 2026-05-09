@@ -32,3 +32,33 @@ export async function logAccessAudit(input: AuditInput): Promise<void> {
     // intentionally swallow audit failures
   }
 }
+
+type VisibilityAuditInput = {
+  userId: string | null;
+  email: string | null;
+  role: string | null;
+  surface: string;
+  allowed: boolean;
+  reason?: string;
+};
+
+/**
+ * Log a visibility/role check to the AccessAuditLog.
+ * Uses action "VISIBILITY_CHECK" to distinguish from other audit events.
+ */
+export async function logVisibilityAudit(input: VisibilityAuditInput): Promise<void> {
+  await logAccessAudit({
+    actorType: input.userId ? "USER" : "SYSTEM",
+    actorUserId: input.userId,
+    actorEmail: input.email,
+    action: "VISIBILITY_CHECK",
+    targetType: "SURFACE",
+    targetKey: input.surface,
+    success: input.allowed,
+    reason: input.reason ?? null,
+    metadata: {
+      role: input.role,
+      surface: input.surface,
+    },
+  });
+}

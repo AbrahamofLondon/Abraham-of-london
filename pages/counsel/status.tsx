@@ -139,6 +139,10 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+  const { requireRole } = await import("@/lib/access/require-role.server");
+  const roleCheck = await requireRole(ctx, "COUNSEL_VIEW");
+  if ("redirect" in roleCheck) return { redirect: roleCheck.redirect };
+
   const { session, access } = await resolvePageAccess(ctx);
   const email = typeof session?.user?.email === "string" ? session.user.email.toLowerCase() : null;
   const userId = typeof session?.user?.id === "string" ? session.user.id : null;

@@ -80,6 +80,10 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+  const { requireRole } = await import("@/lib/access/require-role.server");
+  const roleCheck = await requireRole(ctx, "OVERSIGHT_VIEW");
+  if ("redirect" in roleCheck) return { redirect: roleCheck.redirect };
+
   const { session, access } = await resolvePageAccess(ctx);
   if (!access.permissions.isAuthenticated || !session?.user?.email) {
     return { props: { authenticated: false, summary: null } };
