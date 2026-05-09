@@ -662,7 +662,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                 { href: "/artifacts", eyebrow: "Products", title: "Intelligence Archives", icon: Archive },
                 { href: "/editorials", eyebrow: "Publications", title: "Editorials", icon: ScrollText },
                 { href: "/diagnostics", eyebrow: "Gateway", title: "Diagnostics", icon: ScanSearch },
-                { href: "/consulting", eyebrow: "Advisory", title: "Consulting", icon: Briefcase },
+                { href: "/counsel", eyebrow: "Escalation", title: "Counsel Review", icon: Briefcase },
               ].map((dest) => (
                 <Link
                   key={dest.href}

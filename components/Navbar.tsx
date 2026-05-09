@@ -91,11 +91,11 @@ export default function Navbar(): React.ReactElement {
 
             {/* CTA: always visible, never pushes nav into brand */}
             <Link
-              href="/consulting"
+              href="/counsel"
               className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.2em] text-black shadow-xl shadow-amber-900/25 transition-all hover:scale-[1.02]"
             >
               <Briefcase className="h-4 w-4" />
-              Inquiries
+              Counsel
               <ArrowRight className="h-4 w-4" />
             </Link>
           </nav>
@@ -155,10 +155,10 @@ export default function Navbar(): React.ReactElement {
               </div>
 
               <Link
-                href="/consulting"
+                href="/counsel"
                 className="mt-6 inline-flex w-full items-center justify-between rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-5 py-4 text-sm font-extrabold text-black"
               >
-                Inquiries
+                Counsel
                 <ArrowRight className="h-4 w-4" />
               </Link>
 

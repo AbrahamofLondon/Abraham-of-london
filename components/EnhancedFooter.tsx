@@ -292,7 +292,7 @@ export default function EnhancedFooter(): React.ReactElement {
     { label: "Vault", href: "/vault" },
   ],
   Engagements: [
-    { label: "Consulting", href: "/consulting" },
+    { label: "Counsel Review", href: "/counsel" },
     { label: "Strategy Room", href: "/strategy-room" },
     { label: "Diagnostics", href: "/diagnostics" },
     { label: "Gatherings", href: "/events" },

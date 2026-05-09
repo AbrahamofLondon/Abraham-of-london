@@ -13,6 +13,7 @@ import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } fr
 import Layout from "@/components/Layout";
 import ReturnBriefInterruptionBar from "@/components/strategy-room/ReturnBriefInterruptionBar";
 import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
+import DecisionTimeline, { type DecisionTimelineItem } from "@/components/strategy-room/DecisionTimeline";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import {
   convertPurposeAlignmentToGovernedMemory,
@@ -28,6 +29,7 @@ import {
   buildGovernedMemoryFromEvidenceCapture,
   selectStrategySessionMemory,
 } from "@/lib/product/governed-memory-presenter";
+import { computeIrreversibilityIndex } from "@/lib/product/irreversibility-index";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -88,6 +90,20 @@ type SessionData = {
     }>;
   } | null;
   evidenceCapture?: AssessmentEvidenceCapture | null;
+  financialExposure?: {
+    totalExposure?: number | null;
+    totalExposureFormatted?: string | null;
+  } | null;
+  whatChanged?: {
+    hasPriorState: boolean;
+    headline: string;
+    caution?: string;
+    changes: Array<{
+      field: string;
+      previous: string | number | null;
+      current: string | number | null;
+    }>;
+  } | null;
   status: string;
   decisions: DecisionLog[];
   createdAt: string;
@@ -164,6 +180,12 @@ function parseJsonFallback<T>(value: string | null, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+function daysSince(value: string): number | null {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.max(0, Math.round((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24)));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -396,6 +418,77 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
     () => [...paMemory, ...feMemory, ...sessionMemory],
     [paMemory, feMemory, sessionMemory],
   );
+  const blockedCount = decisions.filter((d) => d.status === "blocked").length;
+  const pendingCount = decisions.filter((d) => d.status === "pending").length;
+  const nextAction = blockedCount > 0
+    ? `${blockedCount} decision${blockedCount === 1 ? " is" : "s are"} blocked. Name the cause and record whether escalation is required.`
+    : pendingCount > 0
+      ? `${pendingCount} decision${pendingCount === 1 ? "" : "s"} still require execution or response.`
+      : decisions.length === 0
+        ? "Record the first action. The system cannot govern an unrecorded move."
+        : "All logged decisions have a status. Confirm the checkpoint response or open the next move.";
+  const ignoredConsequence = blockedCount > 0
+    ? "Blocked execution remains unresolved and will continue to degrade governance confidence."
+    : executionState.checkpoint?.status === "OVERDUE"
+      ? "The checkpoint remains overdue. The system will continue to treat the condition as unresolved."
+      : "If ignored, execution memory stalls and the next checkpoint cannot confirm movement.";
+  const sessionIrreversibility = React.useMemo(() => {
+    const exposure = session.financialExposure?.totalExposure ?? null;
+    const days = daysSince(session.createdAt);
+    const signalCount = [
+      exposure != null && exposure > 0,
+      days != null && days > 0,
+      blockedCount > 0,
+      executionState.checkpoint?.status === "OVERDUE",
+    ].filter(Boolean).length;
+    if (signalCount < 2) return null;
+    return computeIrreversibilityIndex({
+      daysWithoutAction: days ?? undefined,
+      executionFailures: blockedCount || undefined,
+      costAccumulated: exposure ?? undefined,
+      costThreshold: exposure ? Math.max(exposure * 1.5, 1) : undefined,
+      consequenceMaterialised: executionState.checkpoint?.status === "OVERDUE",
+    });
+  }, [blockedCount, executionState.checkpoint?.status, session.createdAt, session.financialExposure?.totalExposure]);
+  const timelineItems = React.useMemo(() => {
+    const items: DecisionTimelineItem[] = decisions.map((d) => ({
+      id: d.id,
+      label: d.decision,
+      status: d.status.toUpperCase() as "PENDING" | "EXECUTED" | "BLOCKED",
+      date: d.updatedAt || d.createdAt,
+      checkpointRelationship: executionState.checkpoint ? `Tracked under ${executionState.checkpoint.commandTitle}` : "No checkpoint linked yet.",
+      evidencePosture: "SYSTEM_INFERRED",
+    }));
+    if (executionState.checkpoint?.status === "OVERDUE") {
+      items.push({
+        id: `${executionState.checkpoint.checkpointId}:overdue`,
+        label: executionState.checkpoint.commandTitle,
+        status: "CHECKPOINT_OVERDUE",
+        date: executionState.checkpoint.dueAt,
+        checkpointRelationship: executionState.checkpoint.verificationQuestion,
+        evidencePosture: executionState.checkpoint.evidencePosture,
+      });
+    } else if (executionState.checkpoint?.status && executionState.checkpoint.status !== "RESPONDED") {
+      items.push({
+        id: `${executionState.checkpoint.checkpointId}:due`,
+        label: executionState.checkpoint.commandTitle,
+        status: "CHECKPOINT_DUE",
+        date: executionState.checkpoint.dueAt,
+        checkpointRelationship: executionState.checkpoint.verificationQuestion,
+        evidencePosture: executionState.checkpoint.evidencePosture,
+      });
+    } else if (executionState.checkpoint?.responseStatus === "DISPUTED_FINDING") {
+      items.push({
+        id: `${executionState.checkpoint.checkpointId}:disputed`,
+        label: executionState.checkpoint.commandTitle,
+        status: "DISPUTED",
+        date: executionState.checkpoint.respondedAt,
+        checkpointRelationship: executionState.checkpoint.verificationQuestion,
+        evidencePosture: executionState.checkpoint.evidencePosture,
+      });
+    }
+    return items;
+  }, [decisions, executionState.checkpoint]);
 
   return (
     <Layout title="Strategy Room Session | Abraham of London" fullWidth headerTransparent>
@@ -414,25 +507,37 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
             </p>
           </div>
 
-          {/* ── Next Required Action ── */}
-          {(() => {
-            const pending = session.decisions?.filter((d: any) => d.status === "pending").length ?? 0;
-            const blocked = session.decisions?.filter((d: any) => d.status === "blocked").length ?? 0;
-            const total = session.decisions?.length ?? 0;
-            const action = blocked > 0
-              ? `${blocked} decision${blocked === 1 ? " is" : "s are"} blocked. Name the structural cause and determine whether escalation is required.`
-              : pending > 0
-                ? `${pending} decision${pending === 1 ? "" : "s"} pending execution. Record whether each was executed, blocked, or abandoned.`
-                : total === 0
-                  ? "Record your first decision. The system cannot govern what it cannot see."
-                  : "All decisions addressed. Schedule the next verification checkpoint.";
-            return (
-              <div style={{ borderLeft: `2px solid rgba(201,169,110,0.35)`, backgroundColor: "rgba(201,169,110,0.04)", padding: "14px 18px", marginBottom: "12px" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>Next required action</p>
-                <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>{action}</p>
+          <div style={{ borderLeft: `2px solid rgba(201,169,110,0.35)`, backgroundColor: "rgba(201,169,110,0.04)", padding: "16px 18px", marginBottom: "12px" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>Your required move</p>
+            <div style={{ display: "grid", gap: "8px", marginTop: "8px" }}>
+              <p style={{ ...serif, fontSize: "0.94rem", lineHeight: 1.5, color: "rgba(255,255,255,0.46)" }}>
+                Current directive: {executionState.directive ?? session.directive ?? "Continue governed execution."}
+              </p>
+              <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)" }}>
+                Next action: {nextAction}
+              </p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", color: executionState.checkpoint?.status === "OVERDUE" ? "rgba(252,165,165,0.60)" : "rgba(255,255,255,0.30)" }}>
+                Checkpoint due: {executionState.checkpoint?.dueAt ? new Date(executionState.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "No due date recorded"}
+              </p>
+              <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(252,165,165,0.50)" }}>
+                What happens if ignored: {ignoredConsequence}
+              </p>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => {
+                    const input = document.querySelector<HTMLInputElement>('input[placeholder="Record action taken"]');
+                    input?.focus();
+                  }}
+                  style={{ ...mono, fontSize: "7px", background: "none", border: `1px solid ${GOLD}35`, color: `${GOLD}BB`, padding: "8px 12px", cursor: "pointer" }}
+                >
+                  Record action
+                </button>
+                <Link href="/decision-centre" style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.44)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.12)", padding: "8px 12px" }}>
+                  Respond to checkpoint
+                </Link>
               </div>
-            );
-          })()}
+            </div>
+          </div>
 
           {executionState.checkpoint && (
             <div style={{ borderLeft: "2px solid rgba(255,255,255,0.18)", backgroundColor: "rgba(255,255,255,0.02)", padding: "14px 18px", marginBottom: "12px" }}>
@@ -464,6 +569,32 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
                 </div>
               )}
             </div>
+          )}
+
+          {sessionIrreversibility && (
+            <div style={{ borderLeft: "2px solid rgba(252,165,165,0.30)", backgroundColor: "rgba(252,165,165,0.03)", padding: "14px 18px", marginBottom: "12px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", color: "rgba(252,165,165,0.55)" }}>
+                Irreversibility estimate: {sessionIrreversibility.level}
+              </p>
+              <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.70)", marginTop: "4px" }}>
+                {sessionIrreversibility.summary} This is an irreversibility estimate, not a verified external fact.
+              </p>
+            </div>
+          )}
+
+          {session.whatChanged?.hasPriorState && session.whatChanged.changes.length > 0 && (
+            <section style={{ paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.04)", marginBottom: "1rem" }}>
+              <SectionLabel>What changed since last reading</SectionLabel>
+              <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.72)" }}>{session.whatChanged.headline}</p>
+              {session.whatChanged.changes.slice(0, 4).map((change) => (
+                <p key={`${change.field}-${String(change.current)}`} style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
+                  {change.field}: {String(change.previous ?? "unknown")} → {String(change.current ?? "unknown")}
+                </p>
+              ))}
+              {session.whatChanged.caution && (
+                <p style={{ fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.28)", marginTop: "6px", fontStyle: "italic" }}>{session.whatChanged.caution}</p>
+              )}
+            </section>
           )}
 
           {/* ── Return brief interruption (if available) ── */}
@@ -780,6 +911,8 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
             </section>
           )}
 
+          <DecisionTimeline items={timelineItems} />
+
           {/* ── 6. DECISION LOG ── */}
           <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
             <SectionLabel>Decision Log</SectionLabel>
@@ -1053,6 +1186,8 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
           : parseJsonFallback<{ evidenceGraph?: SessionData["evidenceGraph"] }>(raw.canonicalSnapshot, {}).evidenceGraph ?? null
       ),
       evidenceCapture: extractAssessmentEvidenceCapture(raw.canonicalSnapshot),
+      financialExposure: raw.canonicalSnapshot?.financialExposure ?? null,
+      whatChanged: raw.whatChanged ?? null,
       status: raw.status,
       decisions: Array.isArray(raw.decisions) ? raw.decisions.map((d: any) => ({
         id: d.id,

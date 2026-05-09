@@ -13,6 +13,10 @@ import type { EvidenceTier } from "@/lib/product/living-intelligence-spine";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
 import type { GovernedMemoryItem } from "@/lib/product/governed-memory-contract";
 import type { EfficacySurface, CheckpointResponseStatus } from "@/lib/product/efficacy-contract";
+import type { DecisionVelocitySnapshot } from "@/lib/analytics/decision-velocity";
+import type { WhatChangedSummary } from "@/lib/analytics/what-changed";
+import type { CrossAssessmentIntelligence } from "@/lib/analytics/cross-assessment-intelligence";
+import type { ContradictionMapView } from "@/lib/analytics/contradiction-graph-presenter";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COGNITIVE STATE
@@ -121,6 +125,14 @@ export type DecisionCentreCheckpointItem = {
   evidenceNote?: string | null;
 };
 
+export type DecisionCentreIrreversibility = {
+  level: string;
+  score: number;
+  summary: string;
+  windowRemaining?: string | null;
+  evidencePosture: "SYSTEM_INFERRED" | "PARTIAL";
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION CENTRE CASE — the primary card model
 // ─────────────────────────────────────────────────────────────────────────────
@@ -179,6 +191,24 @@ export type DecisionCentreCase = {
     href?: string | null;
     historyCount?: number;
   } | null;
+  /** Strategy Room is currently active for this case */
+  strategyRoomActive?: boolean;
+  /** Counsel escalation is currently warranted */
+  counselWarranted?: boolean;
+  /** Return Brief has been triggered for this case */
+  returnBriefTriggered?: boolean;
+  /** Explicit urgency reasons used for ranking */
+  urgencyReasons?: string[];
+  /** Optional decision velocity from Agent 1 */
+  decisionVelocity?: DecisionVelocitySnapshot | null;
+  /** Optional prior-vs-current comparison from Agent 1 */
+  whatChanged?: WhatChangedSummary | null;
+  /** Optional cross-assessment intelligence from Agent 1 */
+  crossAssessmentIntelligence?: CrossAssessmentIntelligence | null;
+  /** Optional contradiction presentation from Agent 1 */
+  contradictionMap?: ContradictionMapView | null;
+  /** Safe irreversibility estimate */
+  irreversibility?: DecisionCentreIrreversibility | null;
   /** Available Return Briefs */
   returnBriefs: ReturnBriefReference[];
   /** Governed memory carried with explicit source, date, and evidence posture */
@@ -194,6 +224,10 @@ export type DecisionCentreCase = {
 export type DecisionCentreResponse = {
   ok: true;
   cases: DecisionCentreCase[];
+  mostUrgentCase?: {
+    caseId: string;
+    reasons: string[];
+  } | null;
   checkpoints: {
     requiresResponse: DecisionCentreCheckpointItem[];
     recentResponses: DecisionCentreCheckpointItem[];

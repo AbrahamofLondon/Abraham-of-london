@@ -1,0 +1,137 @@
+import * as React from "react";
+import type { GetServerSideProps, NextPage } from "next";
+import Head from "next/head";
+
+import Layout from "@/components/Layout";
+import OutcomeVerificationPanel from "@/components/outcomes/OutcomeVerificationPanel";
+import { resolvePageAccess } from "@/lib/access/server";
+import type { OutcomeVerificationContext } from "@/lib/product/outcome-verification-contract";
+import { generateProofPack, type ProofPack } from "@/lib/product/proof-pack-generator";
+import { loadOutcomeVerificationContext } from "@/lib/product/outcome-verification-service";
+
+type Props = {
+  authenticated: boolean;
+  pack: ProofPack | null;
+  outcomeContext: OutcomeVerificationContext | null;
+  outcomeToken: string | null;
+};
+
+const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+
+const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, outcomeToken }) => {
+  if (!authenticated) {
+    return (
+      <Layout title="Proof Pack" description="Account proof pack" fullWidth>
+        <Head><meta name="robots" content="noindex,nofollow" /></Head>
+        <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
+          <div className="mx-auto max-w-3xl">
+            <p className="text-white/70">Sign in to view your proof pack.</p>
+          </div>
+        </main>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout title="Proof Pack" description="Durable record of action, evidence, and follow-up." fullWidth>
+      <Head><meta name="robots" content="noindex,nofollow" /></Head>
+      <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
+        <div className="mx-auto max-w-5xl space-y-6">
+          <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+              Proof Pack
+            </p>
+            <h1 className="mt-3 text-3xl text-white">Durable proof, not performance theatre.</h1>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60">
+              This pack records what the system captured, what you answered, what outcomes were later reported, and what was reviewed by human operators.
+            </p>
+            {pack ? <p className="mt-4 text-sm text-white/40">Generated {new Date(pack.generatedAt).toLocaleString("en-GB")} for {pack.ownerEmail}.</p> : null}
+          </header>
+
+          {outcomeToken ? (
+            <OutcomeVerificationPanel
+              context={outcomeContext}
+              token={outcomeToken}
+            />
+          ) : null}
+
+          {pack ? (
+            <>
+              <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {[
+                  pack.diagnosticsCompleted,
+                  pack.evidenceCaptured,
+                  pack.contradictionsDetected,
+                  pack.checkpointsCreated,
+                  pack.checkpointResponses,
+                  pack.outcomesVerified,
+                  pack.decisionVelocityTrend,
+                  pack.counselReviews,
+                  pack.oversightCycles,
+                ].map((item) => (
+                  <article key={item.label} style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
+                      {item.label}
+                    </p>
+                    <p className="mt-3 text-3xl text-white">{item.count}</p>
+                    <p className="mt-3 text-sm text-white/60">{item.note}</p>
+                    <p className="mt-4 text-xs uppercase tracking-[0.22em] text-[#C9A96E]" style={mono}>
+                      {item.posture}
+                    </p>
+                  </article>
+                ))}
+              </section>
+
+              <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+                  Summary
+                </p>
+                <p className="mt-3 text-sm leading-7 text-white/65">{pack.summary}</p>
+              </section>
+            </>
+          ) : (
+            <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+              <p className="text-white/60">No proof pack could be assembled yet.</p>
+            </section>
+          )}
+        </div>
+      </main>
+    </Layout>
+  );
+};
+
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+  const { session, access } = await resolvePageAccess(ctx);
+  const email = typeof session?.user?.email === "string" ? session.user.email.toLowerCase() : null;
+  const userId = typeof session?.user?.id === "string" ? session.user.id : null;
+  const outcomeToken = typeof ctx.query.outcomeToken === "string" ? ctx.query.outcomeToken : null;
+
+  if (!access.permissions.isAuthenticated || !email) {
+    return {
+      props: {
+        authenticated: false,
+        pack: null,
+        outcomeContext: null,
+        outcomeToken,
+      },
+    };
+  }
+
+  const [pack, outcomeContext] = await Promise.all([
+    generateProofPack({ email, userId }),
+    outcomeToken
+      ? loadOutcomeVerificationContext({ email, userId, token: outcomeToken })
+      : Promise.resolve(null),
+  ]);
+
+  return {
+    props: {
+      authenticated: true,
+      pack,
+      outcomeContext,
+      outcomeToken,
+    },
+  };
+};
+
+export default ProofPackPage;

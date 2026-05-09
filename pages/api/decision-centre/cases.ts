@@ -10,6 +10,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { prisma } from "@/lib/prisma";
+import { getDiagnosticJourney, type DiagnosticJourneyRecord } from "@/lib/diagnostics/journey-store";
 import {
   deriveLivingCase,
   isAdmissibleFor,
@@ -33,6 +34,7 @@ import { calculateCostOfInactionClock } from "@/lib/product/cost-of-inaction-clo
 import { deriveOversightCadenceState } from "@/lib/product/oversight-cadence-engine";
 import { loadPreviousArchivedOversightCycle } from "@/lib/product/oversight-cycle-archive";
 import { loadBoardroomArchiveSummary } from "@/lib/product/boardroom-archive";
+import { computeIrreversibilityIndex } from "@/lib/product/irreversibility-index";
 import { extractAssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
 import {
   buildGovernedMemoryFromEvidenceStages,
@@ -43,6 +45,17 @@ import {
   loadPurposeAlignmentEvidence,
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
+import {
+  buildDecisionVelocitySnapshot,
+  buildDecisionVelocityMemoryItems,
+  type DecisionVelocitySnapshot,
+} from "@/lib/analytics/decision-velocity";
+import {
+  buildWhatChangedSummary,
+  type ComparableCaseState,
+} from "@/lib/analytics/what-changed";
+import { buildCrossAssessmentIntelligence } from "@/lib/analytics/cross-assessment-intelligence";
+import { buildContradictionMapView } from "@/lib/analytics/contradiction-graph-presenter";
 
 function parseMoney(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -50,6 +63,162 @@ function parseMoney(value: string | null | undefined): number | null {
   if (!match?.[1]) return null;
   const amount = Number(match[1].replace(/,/g, ""));
   return Number.isFinite(amount) && amount > 0 ? amount : null;
+}
+
+function normaliseText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+}
+
+function stagePayload(journey: DiagnosticJourneyRecord, stage: string): Record<string, unknown> {
+  return asRecord(journey.stages[stage as keyof typeof journey.stages]);
+}
+
+function findStageTimestamp(journey: DiagnosticJourneyRecord, stage: string): string | null {
+  const payload = stagePayload(journey, stage);
+  return normaliseText(payload.createdAt)
+    || normaliseText(payload.assessedAt)
+    || normaliseText(payload.completedAt)
+    || null;
+}
+
+function pickCoherenceBand(payload: Record<string, unknown>): string | null {
+  return normaliseText(payload.profile)
+    || normaliseText(payload.coherenceBand)
+    || normaliseText(payload.band)
+    || null;
+}
+
+function pickWeakestDomain(payload: Record<string, unknown>): string | null {
+  return normaliseText(payload.weakestDomain)
+    || (Array.isArray(payload.weakestDomains) && payload.weakestDomains.length > 0 ? normaliseText(payload.weakestDomains[0]) : null)
+    || null;
+}
+
+function pickAuthorityClarity(payload: Record<string, unknown>): "CLEAR" | "UNCLEAR" | "MIXED" | null {
+  const authorityScore = typeof payload.authorityScore === "number" ? payload.authorityScore : null;
+  const clarityScore = typeof payload.clarityScore === "number" ? payload.clarityScore : null;
+  const governanceScore = typeof payload.governanceScore === "number" ? payload.governanceScore : null;
+  const score = authorityScore ?? clarityScore ?? governanceScore;
+  if (score == null) return null;
+  if (score >= 70) return "CLEAR";
+  if (score <= 45) return "UNCLEAR";
+  return "MIXED";
+}
+
+function pickRouteDecision(livingCase: LivingCase): string | null {
+  const last = livingCase.routeDecisions.at(-1);
+  if (!last || typeof last !== "object") return null;
+  return normaliseText((last as Record<string, unknown>).route)?.toUpperCase() ?? null;
+}
+
+function classifyFinancialExposureBand(monthlyCost: number | null): string | null {
+  if (monthlyCost == null || monthlyCost <= 0) return null;
+  if (monthlyCost >= 100000) return "CRITICAL";
+  if (monthlyCost >= 25000) return "HIGH";
+  if (monthlyCost >= 5000) return "MODERATE";
+  return "LOW";
+}
+
+function deriveComparableStates(input: {
+  livingCase: LivingCase;
+  journey: DiagnosticJourneyRecord;
+  checkpoints: Array<{
+    createdAt: string;
+    dueAt: string;
+    responseStatus?: string | null;
+    respondedAt?: string | null;
+  }>;
+  decisionVelocity: DecisionVelocitySnapshot | null;
+  financialExposureBand: string | null;
+}): { current: ComparableCaseState; previous: ComparableCaseState | null } {
+  const purposePayload = stagePayload(input.journey, "purpose_alignment");
+  const currentCheckpoint = input.checkpoints.at(-1) ?? null;
+  const previousCheckpoint = input.checkpoints.length > 1 ? input.checkpoints[input.checkpoints.length - 2] : null;
+
+  const current: ComparableCaseState = {
+    coherenceBand: pickCoherenceBand(purposePayload),
+    weakestDomain: pickWeakestDomain(purposePayload),
+    contradictionCount: input.livingCase.contradictions.length,
+    checkpointResponseStatus: currentCheckpoint?.responseStatus ?? null,
+    decisionVelocityBand: input.decisionVelocity?.velocityBand ?? null,
+    financialExposureBand: input.financialExposureBand,
+    routeDecision: pickRouteDecision(input.livingCase),
+  };
+
+  const previousVelocity = previousCheckpoint
+    ? buildDecisionVelocitySnapshot({
+        caseId: input.livingCase.caseId,
+        journeyId: input.journey.journeyKey,
+        userId: input.livingCase.subjectKey,
+        userEmail: input.livingCase.email,
+        sourceSurface: "DECISION_CENTRE",
+        diagnosisAt: input.journey.startedAt,
+        checkpointCreatedAt: previousCheckpoint.createdAt,
+        firstResponseAt: previousCheckpoint.respondedAt ?? null,
+        completedAt: previousCheckpoint.responseStatus === "COMPLETED" ? previousCheckpoint.respondedAt ?? null : null,
+        responseStatus: previousCheckpoint.responseStatus ?? null,
+        outcomeClassification: null,
+      })
+    : null;
+
+  const previous: ComparableCaseState = {
+    coherenceBand: null,
+    weakestDomain: null,
+    contradictionCount: null,
+    checkpointResponseStatus: previousCheckpoint?.responseStatus ?? null,
+    decisionVelocityBand: previousVelocity?.velocityBand ?? null,
+    financialExposureBand: null,
+    irreversibilityBand: null,
+    routeDecision: input.livingCase.routeDecisions.length > 1
+      ? normaliseText((input.livingCase.routeDecisions[input.livingCase.routeDecisions.length - 2] as Record<string, unknown>)?.route)?.toUpperCase() ?? null
+      : null,
+  };
+
+  if (input.journey.snapshots.length >= 2) {
+    const previousSnapshot = input.journey.snapshots[input.journey.snapshots.length - 2]!;
+    previous.contradictionCount = previousSnapshot.tensions.length;
+  }
+
+  return {
+    current,
+    previous: Object.values(previous).some((value) => value != null) ? previous : null,
+  };
+}
+
+function buildCrossAssessmentSignals(input: {
+  journey: DiagnosticJourneyRecord;
+  livingCase: LivingCase;
+  latestDecisionLogStatus?: string | null;
+}): Array<{ stage: string; payload: unknown }> {
+  const stages: Array<{ key: string }> = [
+    { key: "purpose_alignment" },
+    { key: "constitutional" },
+    { key: "team" },
+    { key: "enterprise" },
+    { key: "executive_reporting" },
+    { key: "strategy_room" },
+  ];
+
+  return stages
+    .map(({ key }) => {
+      const payload = stagePayload(input.journey, key);
+      if (Object.keys(payload).length === 0 && !input.livingCase.completedStages.includes(key as never)) return null;
+      return {
+        stage: key,
+        payload: {
+          ...payload,
+          _blocked: key === "strategy_room" ? input.latestDecisionLogStatus === "blocked" : null,
+          _contradictionCount: input.livingCase.evidenceNodes.filter((node) => node.sourceStage === key && node.kind === "contradiction").length,
+        },
+      };
+    })
+    .filter(Boolean) as Array<{ stage: string; payload: unknown }>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -257,6 +426,86 @@ function severityRank(severity: string): number {
   }
 }
 
+function daysSince(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const diff = Date.now() - date.getTime();
+  return diff >= 0 ? Math.round(diff / (1000 * 60 * 60 * 24)) : 0;
+}
+
+function deriveCaseIrreversibility(input: {
+  monthlyCost: number | null;
+  createdAt: string | null | undefined;
+  unresolvedContradictions: number;
+  blockedDecisions: number;
+  boardroomQualified: boolean;
+}) {
+  const daysWithoutAction = daysSince(input.createdAt);
+  const signalCount = [
+    input.monthlyCost != null && input.monthlyCost > 0,
+    daysWithoutAction != null && daysWithoutAction > 0,
+    input.unresolvedContradictions > 0,
+    input.blockedDecisions > 0,
+  ].filter(Boolean).length;
+
+  if (signalCount < 2) return null;
+
+  const index = computeIrreversibilityIndex({
+    daysWithoutAction: daysWithoutAction ?? undefined,
+    executionFailures: input.blockedDecisions || undefined,
+    costAccumulated: input.monthlyCost ? input.monthlyCost * Math.max(1, daysWithoutAction ?? 1) / 30 : undefined,
+    costThreshold: input.monthlyCost ? input.monthlyCost * 3 : undefined,
+    consequenceMaterialised: input.boardroomQualified,
+    factors: input.unresolvedContradictions > 0
+      ? [{
+          factor: "TRUST_EROSION",
+          contribution: Math.min(20, input.unresolvedContradictions * 6),
+          description: `${input.unresolvedContradictions} unresolved contradiction${input.unresolvedContradictions === 1 ? "" : "s"} remain active.`,
+        }]
+      : undefined,
+  });
+
+  return {
+    level: index.level,
+    score: index.score,
+    summary: `${index.summary} This is an irreversibility estimate, not a verified external fact.`,
+    windowRemaining: index.windowRemaining ?? null,
+    evidencePosture: signalCount >= 3 ? "SYSTEM_INFERRED" as const : "PARTIAL" as const,
+  };
+}
+
+function buildUrgencyReasons(input: {
+  requiresResponse: DecisionCentreResponse["checkpoints"]["requiresResponse"];
+  recentResponses: DecisionCentreResponse["checkpoints"]["recentResponses"];
+  caseCard: DecisionCentreCase;
+}): string[] {
+  const reasons: string[] = [];
+  if (input.requiresResponse.some((item) => item.status === "OVERDUE")) reasons.push("checkpoint overdue");
+  if (input.recentResponses.some((item) => item.responseStatus === "BLOCKED")) reasons.push("blocked checkpoint");
+  if ((input.caseCard.costOfInaction?.accumulatedCost ?? 0) >= 10000) reasons.push("financial exposure high");
+  if ((input.caseCard.irreversibility?.score ?? 0) >= 45) reasons.push("irreversibility high");
+  if (input.caseCard.contradictionMap?.activeContradictions.some((item) => item.trend === "WORSENING")) reasons.push("contradiction worsening");
+  if (input.caseCard.strategyRoomActive) reasons.push("strategy room active");
+  if (input.caseCard.returnBriefTriggered) reasons.push("return brief triggered");
+  if (input.caseCard.counselWarranted) reasons.push("counsel warranted");
+  return reasons;
+}
+
+function urgencyScore(reasons: string[]): number {
+  const weight: Record<string, number> = {
+    "checkpoint overdue": 100,
+    "blocked checkpoint": 90,
+    "financial exposure high": 70,
+    "irreversibility high": 60,
+    "contradiction worsening": 50,
+    "strategy room active": 40,
+    "return brief triggered": 35,
+    "counsel warranted": 30,
+  };
+  return reasons.reduce((sum, reason) => sum + (weight[reason] ?? 0), 0);
+}
+
 async function resolveRetainerContext(input: {
   organisationName?: string | null;
   caseId: string;
@@ -348,6 +597,7 @@ export default async function handler(
       return res.status(200).json({
         ok: true,
         cases: [],
+        mostUrgentCase: null,
         checkpoints: {
           requiresResponse: [],
           recentResponses: [],
@@ -406,6 +656,7 @@ export default async function handler(
     const unresolvedCommitments = latestDecisionLog && latestDecisionLog.status !== "executed" ? 1 : 0;
     const counselTriggered = livingCase.completedStages.includes("strategy_room")
       && (latestDecisionLog?.status === "blocked" || livingCase.contradictions.length >= 2);
+    const blockedDecisionCount = latestDecisionLog?.status === "blocked" ? 1 : 0;
 
     let credit: DecisionCreditSummary | null = null;
     let creditGovernanceExplanation: string | null = null;
@@ -482,25 +733,29 @@ export default async function handler(
       boardroom: {
         qualified: boardroomQualification.qualified,
         reason: boardroomQualification.reason,
-        href: boardroomQualification.qualified && livingCase.completedStages.includes("executive_reporting")
-          ? "/diagnostics/executive-reporting/run"
+        href: boardroomQualification.qualified && latestExecutionRecord?.sessionId
+          ? `/boardroom/${latestExecutionRecord.sessionId}`
           : null,
         historyCount: 0,
       },
+      strategyRoomActive: Boolean(latestExecutionRecord?.sessionId),
+      counselWarranted: counselTriggered,
+      returnBriefTriggered: false,
+      urgencyReasons: [],
+      decisionVelocity: null,
+      whatChanged: null,
+      crossAssessmentIntelligence: null,
+      contradictionMap: null,
+      irreversibility: null,
       returnBriefs: [],
       governedMemory: null,
       updatedAt: livingCase.createdAt || new Date().toISOString(),
     };
 
-    const journey = await prisma.diagnosticJourney.findUnique({
-      where: { journeyKey: livingCase.caseId },
-      include: {
-        stages: {
-          select: { stage: true, createdAt: true, payload: true },
-          orderBy: { createdAt: "asc" },
-        },
-      },
-    }).catch(() => null);
+    const journey = await getDiagnosticJourney({
+      email: livingCase.email ?? undefined,
+      subjectId: livingCase.subjectKey ?? undefined,
+    });
 
     const outcomeWhere = [
       ...(journey?.id ? [{ baselineJourneyId: journey.id }, { followUpJourneyId: journey.id }] : []),
@@ -515,14 +770,16 @@ export default async function handler(
       : null;
     caseCard.outcomeStatus = latestOutcome?.outcomeClassification || null;
 
-    if (journey?.stages?.length) {
+    const journeyStages = Object.entries(journey.stages).map(([stage, payload]) => ({
+      stage,
+      createdAt: findStageTimestamp(journey, stage),
+      payload,
+    }));
+
+    if (journeyStages.length > 0) {
       const governedMemory = [
         ...buildGovernedMemoryFromEvidenceStages(
-          journey.stages.map((stage) => ({
-            stage: stage.stage,
-            createdAt: stage.createdAt,
-            payload: stage.payload,
-          })),
+          journeyStages,
           { relatedCaseId: livingCase.caseId },
         ),
         ...buildPatternRecurrenceMemory({
@@ -535,8 +792,8 @@ export default async function handler(
         }),
         ...buildVerificationBoundaryMemory({
           caseId: livingCase.caseId,
-          verificationCriteria: journey.stages
-            .map((stage) => extractAssessmentEvidenceCapture(stage.payload).verificationCriteria ?? null)
+          verificationCriteria: Object.values(journey.stages)
+            .map((payload) => extractAssessmentEvidenceCapture(payload).verificationCriteria ?? null)
             .filter((value): value is string => Boolean(value))
             .at(-1) ?? null,
           outcomeStatus: caseCard.outcomeStatus,
@@ -552,6 +809,68 @@ export default async function handler(
       if (paMemoryItems.length > 0) {
         governedMemory.push(...paMemoryItems);
       }
+
+      const { loadCheckpointsForCase } = await import("@/lib/product/checkpoint-service");
+      const caseCheckpoints = await loadCheckpointsForCase(livingCase.caseId);
+      const sortedCaseCheckpoints = [...caseCheckpoints].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+      const firstCheckpoint = sortedCaseCheckpoints[0] ?? null;
+      const firstRespondedCheckpoint = sortedCaseCheckpoints.find((checkpoint) => Boolean(checkpoint.respondedAt)) ?? null;
+      const firstCompletedCheckpoint = sortedCaseCheckpoints.find((checkpoint) => checkpoint.responseStatus === "COMPLETED") ?? null;
+      const latestCheckpoint = sortedCaseCheckpoints.at(-1) ?? null;
+      const monthlyExposureBand = classifyFinancialExposureBand(monthlyCost);
+
+      if (firstCheckpoint) {
+        caseCard.decisionVelocity = buildDecisionVelocitySnapshot({
+          caseId: livingCase.caseId,
+          journeyId: journey.journeyKey,
+          userId: livingCase.subjectKey,
+          userEmail: livingCase.email,
+          sourceSurface: latestCheckpoint?.surface ?? "DECISION_CENTRE",
+          diagnosisAt: journey.startedAt,
+          checkpointCreatedAt: firstCheckpoint.createdAt,
+          firstResponseAt: firstRespondedCheckpoint?.respondedAt ?? null,
+          completedAt: firstCompletedCheckpoint?.respondedAt ?? null,
+          responseStatus: latestCheckpoint?.responseStatus ?? null,
+          outcomeClassification: caseCard.outcomeStatus,
+        });
+        governedMemory.push(...buildDecisionVelocityMemoryItems(caseCard.decisionVelocity));
+      }
+
+      const comparable = deriveComparableStates({
+        livingCase,
+        journey,
+        checkpoints: sortedCaseCheckpoints.map((checkpoint) => ({
+          createdAt: checkpoint.createdAt,
+          dueAt: checkpoint.dueAt,
+          responseStatus: checkpoint.responseStatus ?? null,
+          respondedAt: checkpoint.respondedAt ?? null,
+        })),
+        decisionVelocity: caseCard.decisionVelocity ?? null as any,
+        financialExposureBand: monthlyExposureBand,
+      });
+      caseCard.whatChanged = buildWhatChangedSummary({
+        previous: comparable.previous,
+        current: comparable.current,
+        sourceLabel: "Case comparison engine",
+        evidencePosture: "SYSTEM_INFERRED",
+      });
+      caseCard.crossAssessmentIntelligence = buildCrossAssessmentIntelligence({
+        livingCase,
+        stages: buildCrossAssessmentSignals({
+          journey,
+          livingCase,
+          latestDecisionLogStatus: latestDecisionLog?.status ?? null,
+        }),
+        purposeAlignment: paEvidence,
+        strategyRoomActive: caseCard.strategyRoomActive,
+        latestCheckpointStatus: latestCheckpoint?.responseStatus ?? latestCheckpoint?.status ?? null,
+      });
+      caseCard.contradictionMap = buildContradictionMapView({
+        livingCase,
+        createdAt: livingCase.createdAt,
+      });
 
       caseCard.governedMemory = governedMemory.length ? governedMemory : null;
     }
@@ -618,10 +937,30 @@ export default async function handler(
       };
     } catch { /* best-effort */ }
 
+    caseCard.irreversibility = deriveCaseIrreversibility({
+      monthlyCost,
+      createdAt: livingCase.createdAt,
+      unresolvedContradictions: livingCase.contradictions.length,
+      blockedDecisions: blockedDecisionCount,
+      boardroomQualified: boardroomQualification.qualified,
+    });
+    caseCard.urgencyReasons = buildUrgencyReasons({
+      requiresResponse: checkpointSections.requiresResponse,
+      recentResponses: checkpointSections.recentResponses,
+      caseCard,
+    });
+
+    const cases = [caseCard];
+    const ranked = [...cases].sort((a, b) => urgencyScore(b.urgencyReasons ?? []) - urgencyScore(a.urgencyReasons ?? []));
+    const mostUrgentCase = ranked[0] && (ranked[0].urgencyReasons?.length ?? 0) > 0
+      ? { caseId: ranked[0].caseId, reasons: ranked[0].urgencyReasons ?? [] }
+      : null;
+
     res.setHeader("Cache-Control", "private, no-cache");
     return res.status(200).json({
       ok: true,
-      cases: [caseCard],
+      cases,
+      mostUrgentCase,
       checkpoints: checkpointSections,
       commercial: {
         ownedProducts: owned,

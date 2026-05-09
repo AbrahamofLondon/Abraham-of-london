@@ -2142,6 +2142,38 @@ export default function StrategyRoomPage({
 
             <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
 
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+              <div style={{ borderLeft: `2px solid ${GOLD}55`, backgroundColor: `${GOLD}08`, padding: "16px 18px" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                  Your required move
+                </p>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.46)", marginTop: "8px" }}>
+                  Current directive: {enforcement?.directive ?? localSummary(canonical)?.nextAction ?? "Execution is admitted."}
+                </p>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>
+                  Next action: {localSummary(canonical)?.nextAction ?? "Select and execute the first governed intervention."}
+                </p>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", color: enforcement?.checkpoint?.status === "OVERDUE" ? "rgba(252,165,165,0.60)" : "rgba(255,255,255,0.30)", marginTop: "8px" }}>
+                  Checkpoint due: {enforcement?.checkpoint?.dueAt ? new Date(enforcement.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "No due date recorded"}
+                </p>
+                <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(252,165,165,0.50)", marginTop: "6px" }}>
+                  What happens if ignored: {enforcement?.checkpoint?.status === "OVERDUE"
+                    ? "The checkpoint remains overdue and the condition stays unresolved."
+                    : "The system cannot verify execution and the next cycle will treat this as unconfirmed action."}
+                </p>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "10px" }}>
+                  {executionSessionId ? (
+                    <Link href={`/strategy-room/session/${executionSessionId}`} style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}35`, padding: "8px 12px" }}>
+                      Open session
+                    </Link>
+                  ) : null}
+                  <Link href="/decision-centre" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.12)", padding: "8px 12px" }}>
+                    Respond to checkpoint
+                  </Link>
+                </div>
+              </div>
+            </div>
+
             {/* ── ADMISSION + EVIDENCE + COUNSEL STATUS (derived from room state) ── */}
             <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
               <div style={{ display: "grid", gap: "8px", marginBottom: "8px" }}>

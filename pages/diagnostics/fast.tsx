@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { recommendNextInstrument } from "@/lib/commercial/recommendation-engine";
 import { ProductRecommendationCard } from "@/components/commercial/ProductRecommendationCard";
+import { ArbiterBadge } from "@/components/trust/ArbiterBadge";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
 import { trackHesitation, trackScrollDepth } from "@/lib/analytics/hesitation";
@@ -668,6 +669,7 @@ const FastDiagnosticPage: NextPage = () => {
                   )}
 
                   {/* Governance disclosures */}
+                  <ArbiterBadge context="fast_diagnostic" variant="dark" />
                   <HumanReviewPrompt context="Fast Diagnostic" />
                   <GovernanceDisclosure context="fast_diagnostic" compact />
                   <DiagnosticStandardPanel />

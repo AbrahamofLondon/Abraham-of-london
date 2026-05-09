@@ -52,30 +52,35 @@ const COGNITIVE_LABELS: Record<CognitiveState, { label: string; color: string }>
 // CASE CARD
 // ─────────────────────────────────────────────────────────────────────────────
 
-function CaseCard({ c }: { c: DecisionCentreCase }) {
+function formatDisplayDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: boolean }) {
   const cognitive = COGNITIVE_LABELS[c.cognitiveState];
   const memoryGroups = groupDecisionCentreMemory(c.governedMemory ?? []);
-
-  function formatCapturedDate(value: string | null): string | null {
-    if (!value) return null;
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return null;
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  }
 
   function statusLabel(status: GovernedMemoryItem["status"]): string {
     return status.toLowerCase().replace(/_/g, " ");
   }
 
   return (
-    <div style={{ border: `1px solid rgba(255,255,255,0.07)`, backgroundColor: "rgba(255,255,255,0.02)", padding: "24px 28px" }}>
+    <div style={{ border: isMostUrgent ? `1px solid ${GOLD}30` : `1px solid rgba(255,255,255,0.07)`, backgroundColor: isMostUrgent ? "rgba(201,169,110,0.04)" : "rgba(255,255,255,0.02)", padding: "24px 28px" }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "16px" }}>
         <div>
+          {isMostUrgent && (
+            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA`, display: "block", marginBottom: "8px" }}>
+              Most urgent case
+            </span>
+          )}
           <h2 style={{ ...serif, fontSize: "1.25rem", lineHeight: 1.2, color: "rgba(255,255,255,0.85)", fontStyle: "italic" }}>
             {c.title}
           </h2>
@@ -104,6 +109,19 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
           <p style={{ fontSize: "14px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>
             &ldquo;{c.decisionText.length > 200 ? c.decisionText.slice(0, 197) + "..." : c.decisionText}&rdquo;
           </p>
+        </div>
+      )}
+
+      {c.urgencyReasons && c.urgencyReasons.length > 0 && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "rgba(252,165,165,0.03)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.62)" }}>
+            Why this case is first
+          </span>
+          {c.urgencyReasons.map((reason) => (
+            <p key={reason} style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.42)", marginTop: "4px" }}>
+              {reason}
+            </p>
+          ))}
         </div>
       )}
 
@@ -172,6 +190,93 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
         </div>
       )}
 
+      {c.irreversibility && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(252,165,165,0.10)", backgroundColor: "rgba(252,165,165,0.02)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.irreversibility.score >= 45 ? "rgba(252,165,165,0.58)" : `${GOLD}88` }}>
+            Irreversibility estimate: {c.irreversibility.level}
+          </span>
+          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.70)", marginTop: "4px" }}>
+            {c.irreversibility.summary}
+          </p>
+          {c.irreversibility.windowRemaining && (
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+              Window remaining: {c.irreversibility.windowRemaining}
+            </p>
+          )}
+        </div>
+      )}
+
+      {c.decisionVelocity && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.decisionVelocity.velocityBand === "STALLED" ? "rgba(252,165,165,0.58)" : c.decisionVelocity.velocityBand === "FAST" ? "rgba(110,231,183,0.58)" : `${GOLD}88` }}>
+            Decision velocity: {c.decisionVelocity.velocityBand}
+          </span>
+          <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
+            {c.decisionVelocity.explanation}
+          </p>
+        </div>
+      )}
+
+      {c.whatChanged?.hasPriorState && c.whatChanged.changes.length > 0 && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+            What changed since last reading
+          </span>
+          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.72)", marginTop: "4px" }}>
+            {c.whatChanged.headline}
+          </p>
+          {c.whatChanged.changes.slice(0, 4).map((change) => (
+            <p key={`${change.field}-${String(change.current)}`} style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
+              {change.field}: {String(change.previous ?? "unknown")} → {String(change.current ?? "unknown")}
+            </p>
+          ))}
+          {c.whatChanged.caution && (
+            <p style={{ fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.28)", marginTop: "6px", fontStyle: "italic" }}>
+              {c.whatChanged.caution}
+            </p>
+          )}
+        </div>
+      )}
+
+      {c.crossAssessmentIntelligence && (c.crossAssessmentIntelligence.conflicts.length > 0 || c.crossAssessmentIntelligence.reinforcingSignals.length > 0) && (
+        <div style={{ marginBottom: "16px", border: `1px solid ${GOLD}16`, backgroundColor: `${GOLD}04`, padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
+            System intelligence
+          </span>
+          {c.crossAssessmentIntelligence.conflicts.slice(0, 2).map((conflict) => (
+            <p key={conflict.label} style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.52, color: "rgba(255,255,255,0.72)", marginTop: "5px" }}>
+              {conflict.userSafeExplanation}
+            </p>
+          ))}
+          {c.crossAssessmentIntelligence.reinforcingSignals.slice(0, 1).map((signal) => (
+            <p key={signal.label} style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.36)", marginTop: "5px" }}>
+              {signal.description}
+            </p>
+          ))}
+          {c.crossAssessmentIntelligence.caution && (
+            <p style={{ fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.28)", marginTop: "6px", fontStyle: "italic" }}>
+              {c.crossAssessmentIntelligence.caution}
+            </p>
+          )}
+        </div>
+      )}
+
+      {c.contradictionMap && c.contradictionMap.activeContradictions.length > 0 && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(252,165,165,0.10)", backgroundColor: "rgba(252,165,165,0.02)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.58)" }}>
+            Contradiction map
+          </span>
+          <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.5, color: "rgba(255,255,255,0.72)", marginTop: "4px" }}>
+            {c.contradictionMap.headline}
+          </p>
+          {c.contradictionMap.activeContradictions.filter((item) => item.safeToDisplay).slice(0, 2).map((item) => (
+            <p key={item.id} style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
+              {item.plainEnglish}
+            </p>
+          ))}
+        </div>
+      )}
+
       {memoryGroups.length > 0 && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(201,169,110,0.10)", backgroundColor: "rgba(201,169,110,0.03)", padding: "10px 14px" }}>
           <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
@@ -189,7 +294,7 @@ function CaseCard({ c }: { c: DecisionCentreCase }) {
                 <div style={{ display: "grid", gap: "8px" }}>
                   {group.items.map((item) => {
                     const safeToShow = isMemoryDisplaySafe(item);
-                    const capturedDate = formatCapturedDate(item.capturedAt);
+                    const capturedDate = formatDisplayDate(item.capturedAt);
                     return (
                       <div key={item.id} style={{ borderLeft: "1px solid rgba(201,169,110,0.42)", paddingLeft: "10px" }}>
                         <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
@@ -500,8 +605,8 @@ function CheckpointSection({
             <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>{cp.verificationQuestion}</p>
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: responded ? responseColor : cp.status === "OVERDUE" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.20)", marginTop: "6px" }}>
               {responded
-                ? `Response: ${(cp.responseStatus ?? "RESPONDED").replace(/_/g, " ")} · ${cp.respondedAt ? new Date(cp.respondedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Date unavailable"}`
-                : `${cp.status} · Due ${new Date(cp.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
+                ? `Response: ${(cp.responseStatus ?? "RESPONDED").replace(/_/g, " ")} · ${formatDisplayDate(cp.respondedAt) ?? "Date unavailable"}`
+                : `${cp.status} · Due ${formatDisplayDate(cp.dueAt) ?? "Date unavailable"}`}
             </p>
             {cp.evidenceNote && (
               <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.35)", marginTop: "4px", fontStyle: "italic" }}>
@@ -594,8 +699,20 @@ export default function DecisionCentrePage() {
           {/* Cases */}
           {!loading && data && data.cases.length > 0 && (
             <div style={{ display: "grid", gap: "16px" }}>
+              {data.mostUrgentCase && (
+                <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}05`, padding: "16px 20px" }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "10px" }}>
+                    Most urgent case
+                  </p>
+                  {data.mostUrgentCase.reasons.map((reason) => (
+                    <p key={reason} style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.48)" }}>
+                      {reason}
+                    </p>
+                  ))}
+                </div>
+              )}
               {data.cases.map((c) => (
-                <CaseCard key={c.caseId} c={c} />
+                <CaseCard key={c.caseId} c={c} isMostUrgent={data.mostUrgentCase?.caseId === c.caseId} />
               ))}
 
               {/* Decision Credit */}

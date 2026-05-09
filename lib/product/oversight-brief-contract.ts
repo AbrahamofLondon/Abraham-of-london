@@ -264,5 +264,5 @@ export type OversightStructuredAction = {
   consequenceIfIgnored?: string;
   severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   continuitySourceLabel?: string;
-  continuityConfidenceLabel?: "REPORTED" | "CAPTURED" | "AGGREGATED" | "CHECKED" | "REVIEWED";
+  continuityConfidenceLabel?: "REPORTED" | "CAPTURED" | "AGGREGATED" | "CHECKED" | "REVIEWED" | "PARTIAL" | "VERIFIED";
 };

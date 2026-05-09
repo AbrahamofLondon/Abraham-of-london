@@ -70,6 +70,7 @@ import {
   type AssessmentEvidenceCapture,
 } from "@/lib/product/evidence-capture-contract";
 import { buildGovernedMemoryFromEvidenceCapture } from "@/lib/product/governed-memory-presenter";
+import { computeIrreversibilityIndex } from "@/lib/product/irreversibility-index";
 
 type ExecutiveReportingIntakeForm = {
   // Identity (minimal)
@@ -1372,10 +1373,98 @@ function ResultSurface({
       ? `\u00a3${consequenceProjection.estimatedExposure.quarterly.toLocaleString()}`
       : exposureFormatted;
   const aiAdjustedConsequence = (result as any).aiAdjustedConsequence ?? (canonical as any)?.aiAdjustedConsequence;
+  const executiveIrreversibility = (() => {
+    const signalCount = [
+      financialExposure?.totalExposure != null && Number(financialExposure.totalExposure) > 0,
+      consequenceProjection.estimatedExposure.quarterly > 0,
+      Boolean(graphContradictions.length),
+      Boolean(costOfDelayText),
+    ].filter(Boolean).length;
+    if (signalCount < 2) return null;
+    return computeIrreversibilityIndex({
+      costAccumulated: Number(financialExposure?.totalExposure ?? 0) || consequenceProjection.estimatedExposure.quarterly || undefined,
+      costThreshold: consequenceProjection.estimatedExposure.quarterly || Number(financialExposure?.totalExposure ?? 0) || undefined,
+      daysWithoutAction: costOfDelayText ? 30 : undefined,
+      consequenceMaterialised: route === "STRATEGY",
+      factors: graphContradictions.length > 0 ? [{
+        factor: "TRUST_EROSION",
+        contribution: Math.min(25, graphContradictions.length * 8),
+        description: `${graphContradictions.length} contradiction signal${graphContradictions.length === 1 ? "" : "s"} remain active in the report evidence.`,
+      }] : undefined,
+    });
+  })();
 
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
       <div className="mx-auto max-w-6xl px-6 py-14 lg:px-12">
+
+        <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "20px 24px", marginBottom: "18px" }}>
+          <div style={{ display: "grid", gap: "14px" }}>
+            <section>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Dominant finding</span>
+              <p style={{ marginTop: "6px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.45, color: "rgba(255,255,255,0.84)" }}>
+                {interpretation?.conditionLabel ?? summary?.headline ?? "Condition identified"}
+              </p>
+              <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.42)" }}>
+                {interpretation?.contradictionInsight ?? summary?.summary ?? interpretation?.narrative ?? "The report has identified a governing condition that now requires a decision."}
+              </p>
+            </section>
+
+            {boardActions.length > 0 && (
+              <section>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Governed priority stack</span>
+                {boardActions.slice(0, 3).map((action: unknown, index: number) => (
+                  <p key={`${String(action)}-${index}`} style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
+                    {String(index + 1).padStart(2, "0")} {String(action)}
+                  </p>
+                ))}
+              </section>
+            )}
+
+            {decisionText && (
+              <section>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Required decision</span>
+                <p style={{ marginTop: "4px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>
+                  {decisionText}
+                </p>
+              </section>
+            )}
+
+            {(exposureFormatted || projectedCost90 || executiveIrreversibility) && (
+              <section>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>Financial exposure / cost of delay</span>
+                {exposureFormatted && <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>Current priced exposure: {exposureFormatted}</p>}
+                {projectedCost90 && <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>Projected 90-day cost of delay: {projectedCost90}</p>}
+                {executiveIrreversibility && <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>Irreversibility estimate: {executiveIrreversibility.summary} This is an irreversibility estimate, not a verified external fact.</p>}
+              </section>
+            )}
+
+            <section>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Boardroom readiness</span>
+              <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
+                {result.boardroom?.qualified ? "Boardroom-ready. A dossier is available for board-level review." : result.boardroom?.reason || "Boardroom readiness has not been earned yet."}
+              </p>
+            </section>
+
+            {mergedMemory.length > 0 && (
+              <section>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Evidence carried forward</span>
+                <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
+                  This report is carrying forward prior governance evidence. The recommendation has not been generated in isolation.
+                </p>
+              </section>
+            )}
+
+            <section>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Next admitted step</span>
+              <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
+                {route === "STRATEGY"
+                  ? "Enter Strategy Room. Execution is admitted and the checkpoint has been created against this report."
+                  : "No forced paid escalation is being claimed. Strategy Room remains available only if execution conditions are met."}
+              </p>
+            </section>
+          </div>
+        </div>
 
         {/* ── BLOCK 0: BOARD SNAPSHOT ── */}
         <BoardSnapshot data={{
@@ -1644,10 +1733,16 @@ function ResultSurface({
           </div>
         )}
 
-        {/* Institutional intelligence layers */}
-        <LongitudinalIntelligence data={longitudinal} />
-        <MultiStakeholderDivergence data={multiStakeholder} />
-        <OutcomeVerification data={outcome} />
+        <details style={{ marginTop: "1.5rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem 1.1rem" }}>
+          <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+            Evidence, governance, and method
+          </summary>
+          <div style={{ marginTop: "1rem" }}>
+            <LongitudinalIntelligence data={longitudinal} />
+            <MultiStakeholderDivergence data={multiStakeholder} />
+            <OutcomeVerification data={outcome} />
+          </div>
+        </details>
 
         {/* Retainer gate — conditional on longitudinal/multi-stakeholder evidence */}
         <RetainerEntryGate qualification={evaluateRetainerQualification({

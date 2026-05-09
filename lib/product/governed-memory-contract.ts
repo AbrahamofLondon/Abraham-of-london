@@ -19,7 +19,8 @@ export type GovernedMemoryEvidenceOrigin =
   | "AGGREGATED_RESPONDENT"
   | "BEHAVIOURAL"
   | "VERIFIED_OUTCOME"
-  | "OPERATOR_REVIEWED";
+  | "OPERATOR_REVIEWED"
+  | "SYSTEM_COMPUTED";
 
 export type GovernedMemoryStatus =
   | "ACTIVE"
@@ -34,6 +35,8 @@ export type GovernedMemoryConfidenceLabel =
   | "CAPTURED"
   | "AGGREGATED"
   | "CHECKED"
+  | "PARTIAL"
+  | "VERIFIED"
   | "REVIEWED";
 
 export type GovernedMemoryItem = {
