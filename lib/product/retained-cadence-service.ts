@@ -3,6 +3,8 @@ import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma.server";
 import {
   type BuyerVisibleCadencePosture,
+  type CadenceHistoryEvent,
+  type CadencePostureForSponsor,
   type RetainedCadenceSource,
   type RetainedCadenceState,
   type RetainedReviewCycle,
@@ -303,7 +305,7 @@ export async function loadDueRetainedReviewCycles(input?: {
   const rows = await loadCycleRows();
   return latestScopedCycles(rows)
     .map((cycle) => ({ cycle, derivedState: deriveStateFromDates(cycle, now) }))
-    .filter((item) => item.derivedState === "DUE_SOON" || item.derivedState === "OVERDUE");
+    .filter((item) => item.derivedState === "DUE_SOON" || item.derivedState === "OVERDUE" || item.derivedState === "ESCALATED");
 }
 
 export async function loadOverdueRetainedReviewCycles(input?: {
@@ -375,11 +377,277 @@ export async function buildOperatorCadenceQueue(input?: {
 
   const all = [...queue, ...notConfigured];
   return {
-    due: all.filter((item) => item.cadenceState === "DUE_SOON"),
+    due: all.filter((item) => item.cadenceState === "DUE_SOON" || item.cadenceState === "REVIEW_DUE"),
+    inProgress: all.filter((item) => item.cadenceState === "REVIEW_IN_PROGRESS"),
     overdue: all.filter((item) => item.cadenceState === "OVERDUE"),
-    skipped: all.filter((item) => item.cadenceState === "SKIPPED_WITH_REASON"),
+    skipped: all.filter((item) => item.cadenceState === "SKIPPED_WITH_REASON" || item.cadenceState === "REVIEW_SKIPPED"),
     escalated: all.filter((item) => item.cadenceState === "ESCALATED"),
+    cadenceBroken: all.filter((item) => item.cadenceState === "CADENCE_BROKEN"),
     notConfigured: all.filter((item) => item.cadenceState === "NOT_CONFIGURED"),
     all,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Cadence enforcement functions
+// ---------------------------------------------------------------------------
+
+const DEFAULT_INTERVAL_DAYS = 30;
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+/**
+ * Creates a new review cycle for a given scope, setting status to REVIEW_DUE
+ * and computing dueAt from the cadence interval.
+ */
+export async function createNextReviewCycle(scopeId: string, options?: {
+  intervalDays?: number;
+  note?: string;
+  operatorId?: string | null;
+}) {
+  const intervalDays = options?.intervalDays ?? DEFAULT_INTERVAL_DAYS;
+  const now = new Date();
+  const dueAt = addDays(now, intervalDays);
+
+  const cycle = await createRetainedReviewCycle({
+    accountId: scopeId,
+    cadenceState: "REVIEW_DUE",
+    cadenceSource: "scheduled",
+    cadenceType: intervalDays === 30 ? "monthly" : intervalDays === 90 ? "quarterly" : "custom",
+    scheduledFor: dueAt.toISOString(),
+    operatorId: options?.operatorId ?? null,
+  });
+
+  if (cycle && options?.note) {
+    await appendCadenceHistoryEvent(scopeId, {
+      eventId: `evt_${randomUUID()}`,
+      cycleId: cycle.cycleId,
+      scopeId,
+      action: "CYCLE_CREATED",
+      operatorId: options?.operatorId ?? null,
+      reason: options.note,
+      timestamp: now.toISOString(),
+    });
+  }
+
+  return cycle;
+}
+
+/**
+ * Returns all cycles that are DUE, OVERDUE, or ESCALATED for operator triage.
+ */
+export async function loadCadenceQueueForOperator() {
+  const queue = await buildOperatorCadenceQueue();
+  return [...queue.due, ...queue.overdue, ...queue.escalated, ...queue.inProgress, ...queue.cadenceBroken];
+}
+
+/**
+ * Marks a cycle as REVIEW_IN_PROGRESS.
+ */
+export async function markCycleInProgress(cycleId: string, operatorId: string) {
+  const result = await updateCycle(cycleId, (cycle) => ({
+    ...cycle,
+    cadenceState: "REVIEW_IN_PROGRESS",
+    operatorId,
+  }));
+
+  if (result) {
+    const scopeId = result.accountId ?? result.organisationId ?? "";
+    await appendCadenceHistoryEvent(scopeId, {
+      eventId: `evt_${randomUUID()}`,
+      cycleId,
+      scopeId,
+      action: "MARKED_IN_PROGRESS",
+      operatorId,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Marks cycle REVIEW_COMPLETED and creates the next cycle automatically.
+ */
+export async function completeCycle(cycleId: string, operatorId: string, options?: {
+  intervalDays?: number;
+}) {
+  const result = await updateCycle(cycleId, (cycle) => ({
+    ...cycle,
+    cadenceState: "REVIEW_COMPLETED",
+    completedAt: new Date().toISOString(),
+    operatorId,
+  }));
+
+  if (result) {
+    const scopeId = result.accountId ?? result.organisationId ?? "";
+    await appendCadenceHistoryEvent(scopeId, {
+      eventId: `evt_${randomUUID()}`,
+      cycleId,
+      scopeId,
+      action: "CYCLE_COMPLETED",
+      operatorId,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Auto-create next cycle
+    await createNextReviewCycle(scopeId, {
+      intervalDays: options?.intervalDays,
+      operatorId,
+      note: `Auto-created after completing cycle ${cycleId}`,
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Marks cycle REVIEW_SKIPPED with a recorded reason.
+ */
+export async function skipCycleWithReason(cycleId: string, reason: string, operatorId: string) {
+  const result = await updateCycle(cycleId, (cycle) => ({
+    ...cycle,
+    cadenceState: "REVIEW_SKIPPED",
+    skippedAt: new Date().toISOString(),
+    skippedReason: reason,
+    operatorId,
+  }));
+
+  if (result) {
+    const scopeId = result.accountId ?? result.organisationId ?? "";
+    await appendCadenceHistoryEvent(scopeId, {
+      eventId: `evt_${randomUUID()}`,
+      cycleId,
+      scopeId,
+      action: "CYCLE_SKIPPED",
+      operatorId,
+      reason,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Marks a cycle as ESCALATED.
+ */
+export async function escalateOverdueCycle(cycleId: string, operatorId?: string | null) {
+  const result = await updateCycle(cycleId, (cycle) => ({
+    ...cycle,
+    cadenceState: "ESCALATED",
+    escalationReason: "Overdue cycle escalated by cadence enforcement.",
+    operatorId: operatorId ?? cycle.operatorId ?? null,
+  }));
+
+  if (result) {
+    const scopeId = result.accountId ?? result.organisationId ?? "";
+    await appendCadenceHistoryEvent(scopeId, {
+      eventId: `evt_${randomUUID()}`,
+      cycleId,
+      scopeId,
+      action: "CYCLE_ESCALATED",
+      operatorId: operatorId ?? null,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Returns a sponsor-safe cadence posture with reliability metrics.
+ */
+export async function computeCadencePostureForSponsor(scopeId: string): Promise<CadencePostureForSponsor> {
+  const rows = await loadCycleRows();
+  const now = new Date();
+
+  const allCycles = rows
+    .map(parseCycle)
+    .filter((c): c is RetainedReviewCycle => c !== null)
+    .filter((c) => c.accountId === scopeId || c.organisationId === scopeId);
+
+  const completed = allCycles.filter((c) =>
+    c.cadenceState === "COMPLETED" || c.cadenceState === "REVIEW_COMPLETED"
+  );
+  const overdue = allCycles.filter((c) => {
+    const derived = deriveStateFromDates(c, now);
+    return derived === "OVERDUE" || c.cadenceState === "ESCALATED" || c.cadenceState === "CADENCE_BROKEN";
+  });
+
+  const totalCycles = allCycles.length;
+  const reliability = totalCycles > 0 ? completed.length / totalCycles : 0;
+
+  const latestCycle = allCycles[0] ?? null;
+  const derivedStatus = latestCycle ? deriveStateFromDates(latestCycle, now) : "NOT_CONFIGURED";
+
+  const lastCompleted = completed.sort((a, b) =>
+    new Date(b.completedAt ?? 0).getTime() - new Date(a.completedAt ?? 0).getTime()
+  )[0] ?? null;
+
+  const nextDue = allCycles.find((c) => {
+    const derived = deriveStateFromDates(c, now);
+    return derived === "SCHEDULED" || derived === "DUE_SOON" || c.cadenceState === "REVIEW_DUE";
+  });
+
+  return {
+    status: derivedStatus,
+    lastReviewDate: lastCompleted?.completedAt ?? null,
+    nextDueDate: nextDue?.scheduledFor ?? latestCycle?.scheduledFor ?? null,
+    cyclesCompleted: completed.length,
+    cyclesOverdue: overdue.length,
+    reliability: Math.round(reliability * 100) / 100,
+  };
+}
+
+/**
+ * Appends a cadence history event using DiagnosticRecord as persistence.
+ */
+export async function appendCadenceHistoryEvent(scopeId: string, event: CadenceHistoryEvent) {
+  await prisma.diagnosticRecord.create({
+    data: {
+      diagnosticType: "retained_cadence_history",
+      userId: event.operatorId ?? null,
+      userEmail: null,
+      status: "completed",
+      score: 0,
+      severity: "low",
+      verdict: `Cadence event: ${event.action}`,
+      responsesJson: JSON.stringify({
+        ...event,
+        scopeId,
+      }),
+    },
+  });
+}
+
+/**
+ * Loads cadence history events for a scope.
+ */
+export async function loadCadenceHistory(scopeId: string): Promise<CadenceHistoryEvent[]> {
+  const rows = await prisma.diagnosticRecord.findMany({
+    where: { diagnosticType: "retained_cadence_history" },
+    select: {
+      responsesJson: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+  });
+
+  return rows
+    .map((row) => {
+      try {
+        const parsed = JSON.parse(row.responsesJson || "{}") as CadenceHistoryEvent & { scopeId?: string };
+        if (parsed.scopeId !== scopeId) return null;
+        return parsed;
+      } catch {
+        return null;
+      }
+    })
+    .filter((e): e is CadenceHistoryEvent => e !== null);
 }

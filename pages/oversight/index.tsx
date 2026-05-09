@@ -7,6 +7,8 @@ import Layout from "@/components/Layout";
 import RetainedMemoryLossPanel from "@/components/oversight/RetainedMemoryLossPanel";
 import { resolvePageAccess } from "@/lib/access/server";
 import { prisma } from "@/lib/prisma.server";
+import type { CadenceHistoryEvent, CadencePostureForSponsor } from "@/lib/product/retained-cadence-contract";
+import { computeCadencePostureForSponsor, loadCadenceHistory } from "@/lib/product/retained-cadence-service";
 import {
   canViewBoardroomArchive,
   canViewPortfolioMemory,
@@ -22,6 +24,8 @@ type Props = {
   warnings: string[];
   role: RetainedProductRole | null;
   blockedByRole: boolean;
+  cadencePosture: CadencePostureForSponsor | null;
+  cadenceHistory: CadenceHistoryEvent[];
 };
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -67,7 +71,7 @@ function formatDate(value?: string | null) {
   return value ? new Date(value).toLocaleDateString("en-GB") : "Not available";
 }
 
-const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role, blockedByRole }) => {
+const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role, blockedByRole, cadencePosture, cadenceHistory }) => {
   if (!authenticated) {
     return (
       <Layout title="Retained Oversight Command" description="Sponsor-safe retained oversight visibility." fullWidth>
@@ -139,14 +143,34 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
                   <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Retained cadence posture</p>
                   <p className="mt-3 text-white">{summary.retainedCadencePosture.summary}</p>
-                  <p className="mt-3 text-sm leading-7 text-white/58">{summary.retainedCadencePosture.state === "NOT_CONFIGURED" ? "Retained cadence is not configured for this account." : summary.retainedCadencePosture.state === "MANUAL_OPERATOR_REVIEW" ? "Retained review is operator-confirmed. Automated scheduling is not active for this account." : summary.retainedCadencePosture.state === "SCHEDULED" ? `Next retained review is scheduled for ${formatDate(summary.retainedCadencePosture.scheduledFor)}.` : summary.retainedCadencePosture.state === "DUE_SOON" ? "A retained review is due soon." : summary.retainedCadencePosture.state === "OVERDUE" ? "A retained review is overdue. Operator attention is required." : summary.retainedCadencePosture.state === "COMPLETED" ? `Latest retained review completed on ${formatDate(summary.retainedCadencePosture.lastCompletedAt)}.` : summary.retainedCadencePosture.state === "SKIPPED_WITH_REASON" ? "Latest retained review was skipped with recorded reason." : "This retained review cycle has been escalated."}</p>
+                  <p className="mt-3 text-sm leading-7 text-white/58">{summary.retainedCadencePosture.state === "NOT_CONFIGURED" ? "Retained cadence is not configured for this account." : summary.retainedCadencePosture.state === "CONFIGURED" ? "Retained cadence is configured. No cycle is currently due." : summary.retainedCadencePosture.state === "MANUAL_OPERATOR_REVIEW" ? "Retained review is operator-confirmed. Automated scheduling is not active for this account." : summary.retainedCadencePosture.state === "SCHEDULED" ? `Next retained review is scheduled for ${formatDate(summary.retainedCadencePosture.scheduledFor)}.` : summary.retainedCadencePosture.state === "DUE_SOON" || summary.retainedCadencePosture.state === "REVIEW_DUE" ? "A retained review is due." : summary.retainedCadencePosture.state === "REVIEW_IN_PROGRESS" ? "A retained review is in progress." : summary.retainedCadencePosture.state === "OVERDUE" ? "A retained review is overdue. Operator attention is required." : summary.retainedCadencePosture.state === "COMPLETED" || summary.retainedCadencePosture.state === "REVIEW_COMPLETED" ? `Latest retained review completed on ${formatDate(summary.retainedCadencePosture.lastCompletedAt)}.` : summary.retainedCadencePosture.state === "SKIPPED_WITH_REASON" || summary.retainedCadencePosture.state === "REVIEW_SKIPPED" ? "Latest retained review was skipped with recorded reason." : summary.retainedCadencePosture.state === "CADENCE_BROKEN" ? "Retained cadence has been broken. Operator intervention required." : "This retained review cycle has been escalated."}</p>
+
+                  {(summary.retainedCadencePosture.state === "OVERDUE" || summary.retainedCadencePosture.state === "CADENCE_BROKEN" || summary.retainedCadencePosture.state === "ESCALATED") && (
+                    <div className="mt-3 border border-amber-500/20 bg-amber-500/5 px-3 py-2">
+                      <p className="text-xs text-amber-200">Attention required: this cadence state indicates that a retained review has not been completed within the expected window.</p>
+                    </div>
+                  )}
+
                   <div className="mt-4 space-y-1">
                     <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
-                      Last review date · {formatDate(summary.retainedCadencePosture.lastCompletedAt)}
+                      Last review date · {cadencePosture ? formatDate(cadencePosture.lastReviewDate) : formatDate(summary.retainedCadencePosture.lastCompletedAt)}
                     </p>
                     <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
-                      Next scheduled review date · {formatDate(summary.retainedCadencePosture.scheduledFor)}
+                      Next due date · {cadencePosture ? formatDate(cadencePosture.nextDueDate) : formatDate(summary.retainedCadencePosture.scheduledFor)}
                     </p>
+                    {cadencePosture && (
+                      <>
+                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                          Cycles completed · {cadencePosture.cyclesCompleted}
+                        </p>
+                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: cadencePosture.cyclesOverdue > 0 ? "rgba(245,158,11,0.60)" : "rgba(255,255,255,0.34)" }}>
+                          Cycles overdue · {cadencePosture.cyclesOverdue}
+                        </p>
+                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: cadencePosture.reliability < 0.5 ? "rgba(245,158,11,0.60)" : "rgba(255,255,255,0.34)" }}>
+                          Cadence reliability · {Math.round(cadencePosture.reliability * 100)}%
+                        </p>
+                      </>
+                    )}
                     <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
                       Cadence source · {summary.retainedCadencePosture.cadenceSource}
                     </p>
@@ -254,9 +278,29 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                 </section>
               </section>
 
+              {cadenceHistory.length > 0 && (
+                <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Cadence history</p>
+                  <div className="mt-4 space-y-2">
+                    {cadenceHistory.slice(0, 20).map((event) => (
+                      <div key={event.eventId} className="flex items-start gap-4 border-t border-white/5 pt-2 text-sm">
+                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.30)", minWidth: "80px" }}>
+                          {new Date(event.timestamp).toLocaleDateString("en-GB")}
+                        </p>
+                        <p className="text-white/60">{event.action.replace(/_/g, " ").toLowerCase()}</p>
+                        {event.reason && <p className="text-white/40">{event.reason}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               <RetainedMemoryLossPanel summary={summary.cancellationLoss.summary} retainedAssets={summary.cancellationLoss.retainedAssets} />
 
               <section className="flex flex-wrap gap-3">
+                {canViewPortfolioMemory(role) && (
+                  <Link href="/oversight/portfolio" className="border border-white/10 px-4 py-3 text-sm text-white/68 transition hover:bg-white/5">View Portfolio Memory &rarr;</Link>
+                )}
                 <Link href="/counsel/status" className="border border-white/10 px-4 py-3 text-sm text-white/68 transition hover:bg-white/5">Counsel status</Link>
                 <Link href="/account/proof-pack" className="border border-white/10 px-4 py-3 text-sm text-white/68 transition hover:bg-white/5">Proof pack</Link>
                 <Link href="/boardroom" className="border border-white/10 px-4 py-3 text-sm text-white/68 transition hover:bg-white/5">Boardroom archive</Link>
@@ -288,7 +332,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const email = typeof session?.user?.email === "string" ? session.user.email.toLowerCase() : null;
   const userId = typeof session?.user?.id === "string" ? session.user.id : null;
   if (!access.permissions.isAuthenticated || !email) {
-    return { props: { authenticated: false, summary: null, warnings: [], role: null, blockedByRole: false } };
+    return { props: { authenticated: false, summary: null, warnings: [], role: null, blockedByRole: false, cadencePosture: null, cadenceHistory: [] } };
   }
 
   const organisationId = typeof ctx.query.organisationId === "string" ? ctx.query.organisationId : null;
@@ -314,6 +358,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     authenticated: access.permissions.isAuthenticated,
   });
 
+  // Compute cadence posture and history for the resolved scope
+  const scopeId = resolvedOrganisationId ?? result.account?.accountId ?? null;
+  let cadencePosture: CadencePostureForSponsor | null = null;
+  let cadenceHistory: CadenceHistoryEvent[] = [];
+  if (scopeId && canViewSponsorCommandSummary(role)) {
+    cadencePosture = await computeCadencePostureForSponsor(scopeId).catch(() => null);
+    cadenceHistory = await loadCadenceHistory(scopeId).catch(() => []);
+  }
+
   return {
     props: {
       authenticated: true,
@@ -321,6 +374,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       warnings: result.warnings,
       role,
       blockedByRole: !canViewSponsorCommandSummary(role),
+      cadencePosture,
+      cadenceHistory,
     },
   };
 };

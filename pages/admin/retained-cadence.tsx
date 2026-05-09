@@ -7,6 +7,7 @@ import { requireAdminPage } from "@/lib/access/server";
 import { buildOperatorCadenceQueue } from "@/lib/product/retained-cadence-service";
 
 type QueueResponse = Awaited<ReturnType<typeof buildOperatorCadenceQueue>>;
+type Action = "MARK_IN_PROGRESS" | "MARK_COMPLETED" | "SKIP_WITH_REASON" | "ESCALATE";
 
 export const getServerSideProps: GetServerSideProps<{
   initialQueue: QueueResponse;
@@ -23,10 +24,17 @@ function Row({
   busy,
 }: {
   item: QueueResponse["all"][number];
-  onAction: (cycleId: string, action: "MARK_COMPLETED" | "SKIP_WITH_REASON" | "ESCALATE") => void;
+  onAction: (cycleId: string, action: Action) => void;
   busy: boolean;
 }) {
   const actionable = typeof item.cycleId === "string" && item.cycleId.length > 0;
+  const isInProgress = item.cadenceState === "REVIEW_IN_PROGRESS";
+  const isDueOrOverdue =
+    item.cadenceState === "DUE_SOON" ||
+    item.cadenceState === "REVIEW_DUE" ||
+    item.cadenceState === "OVERDUE" ||
+    item.cadenceState === "CADENCE_BROKEN";
+
   return (
     <tr className="border-t border-white/5 align-top text-sm text-white/70">
       <td className="py-3 pr-4 text-white">{item.organisationLabel}</td>
@@ -38,9 +46,16 @@ function Row({
       <td className="py-3">
         {actionable ? (
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => onAction(item.cycleId!, "MARK_COMPLETED")} disabled={busy} className="border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200 disabled:opacity-50">
-              Mark completed
-            </button>
+            {isDueOrOverdue && !isInProgress && (
+              <button onClick={() => onAction(item.cycleId!, "MARK_IN_PROGRESS")} disabled={busy} className="border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-xs text-blue-200 disabled:opacity-50">
+                Start review
+              </button>
+            )}
+            {(isInProgress || isDueOrOverdue) && (
+              <button onClick={() => onAction(item.cycleId!, "MARK_COMPLETED")} disabled={busy} className="border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200 disabled:opacity-50">
+                Complete
+              </button>
+            )}
             <button onClick={() => onAction(item.cycleId!, "SKIP_WITH_REASON")} disabled={busy} className="border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs text-amber-100 disabled:opacity-50">
               Skip with reason
             </button>
@@ -53,6 +68,65 @@ function Row({
         )}
       </td>
     </tr>
+  );
+}
+
+function CreateCycleForm({ onCreated }: { onCreated: () => void }) {
+  const [scopeId, setScopeId] = React.useState("");
+  const [intervalDays, setIntervalDays] = React.useState("30");
+  const [note, setNote] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [result, setResult] = React.useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!scopeId.trim()) return;
+    setBusy(true);
+    setResult(null);
+    try {
+      const response = await fetch("/api/admin/retained-cadence/create-cycle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scopeId: scopeId.trim(),
+          intervalDays: Number(intervalDays) || 30,
+          note: note.trim() || undefined,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Failed to create cycle.");
+      }
+      setResult(`Cycle created: ${data.cycle?.cycleId ?? "OK"}`);
+      setScopeId("");
+      setNote("");
+      onCreated();
+    } catch (err) {
+      setResult(err instanceof Error ? err.message : "Failed to create cycle.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
+      <div>
+        <label className="block text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">Scope ID (account or org)</label>
+        <input value={scopeId} onChange={(e) => setScopeId(e.target.value)} className="mt-1 border border-white/10 bg-black/30 px-3 py-2 text-sm text-white" placeholder="acct_... or org_..." />
+      </div>
+      <div>
+        <label className="block text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">Interval (days)</label>
+        <input value={intervalDays} onChange={(e) => setIntervalDays(e.target.value)} type="number" min="1" className="mt-1 w-20 border border-white/10 bg-black/30 px-3 py-2 text-sm text-white" />
+      </div>
+      <div>
+        <label className="block text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">Note (optional)</label>
+        <input value={note} onChange={(e) => setNote(e.target.value)} className="mt-1 border border-white/10 bg-black/30 px-3 py-2 text-sm text-white" placeholder="Initial cycle setup" />
+      </div>
+      <button type="submit" disabled={busy || !scopeId.trim()} className="border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-xs text-emerald-200 disabled:opacity-50">
+        Create cycle
+      </button>
+      {result && <p className="text-xs text-white/55">{result}</p>}
+    </form>
   );
 }
 
@@ -72,14 +146,45 @@ export default function RetainedCadencePage({
     setQueue(data.queue);
   }
 
-  async function handleAction(cycleId: string, action: "MARK_COMPLETED" | "SKIP_WITH_REASON" | "ESCALATE") {
+  async function handleAction(cycleId: string, action: Action) {
     setBusyCycleId(cycleId);
     setError(null);
     try {
-      const reason = action === "MARK_COMPLETED"
-        ? ""
-        : window.prompt(action === "SKIP_WITH_REASON" ? "Enter skip reason" : "Enter escalation reason", "") || "";
-      if (action !== "MARK_COMPLETED" && !reason.trim()) {
+      // Actions that use the new /action endpoint
+      if (action === "MARK_IN_PROGRESS") {
+        const response = await fetch("/api/admin/retained-cadence/action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cycleId, action }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || "Failed to start review.");
+        }
+        await refreshQueue();
+        return;
+      }
+
+      if (action === "MARK_COMPLETED") {
+        const response = await fetch("/api/admin/retained-cadence/action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cycleId, action: "COMPLETE" }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || "Failed to complete cycle.");
+        }
+        await refreshQueue();
+        return;
+      }
+
+      // Legacy actions via update endpoint
+      const reason = window.prompt(
+        action === "SKIP_WITH_REASON" ? "Enter skip reason" : "Enter escalation reason",
+        ""
+      ) || "";
+      if (!reason.trim()) {
         throw new Error(action === "SKIP_WITH_REASON" ? "Skip reason is required." : "Escalation reason is required.");
       }
       const response = await fetch("/api/admin/retained-cadence/update", {
@@ -101,7 +206,9 @@ export default function RetainedCadencePage({
 
   const sections: Array<[string, QueueResponse["all"]]> = [
     ["Overdue cycles", queue.overdue],
+    ["In progress", queue.inProgress],
     ["Due cycles", queue.due],
+    ["Cadence broken", queue.cadenceBroken],
     ["Skipped cycles", queue.skipped],
     ["Escalated cycles", queue.escalated],
     ["Not configured", queue.notConfigured],
@@ -119,8 +226,15 @@ export default function RetainedCadencePage({
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-amber-500/60">Retained oversight cadence</p>
           <h1 className="mt-3 font-serif text-3xl text-white">Operator cadence queue</h1>
           <p className="mt-2 max-w-3xl text-sm text-white/55">
-            This queue shows due, overdue, skipped, escalated, and unconfigured retained review cycles. Actions are operator-only and do not publish internal notes to buyer-facing surfaces.
+            This queue shows due, in-progress, overdue, skipped, escalated, broken, and unconfigured retained review cycles. Actions are operator-only and do not publish internal notes to buyer-facing surfaces.
           </p>
+        </section>
+
+        <section className="border border-white/10 bg-zinc-950/70 p-5">
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Create new review cycle</h2>
+          <div className="mt-4">
+            <CreateCycleForm onCreated={refreshQueue} />
+          </div>
         </section>
 
         {error ? <p className="text-sm text-rose-300">{error}</p> : null}
