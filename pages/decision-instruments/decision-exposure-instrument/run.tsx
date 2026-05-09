@@ -35,7 +35,7 @@ const DecisionExposureRun: NextPage = () => {
       slug="decision-exposure-instrument"
       completed={!!result}
       pdfHref="/api/downloads/instrument-pdf?slug=decision-exposure-instrument"
-      nextStepLabel="See the cost you are already paying"
+      nextStepLabel="Analyse institutional consequence"
       nextStepHref={nextHref}
     >
       {!result ? (

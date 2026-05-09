@@ -21,7 +21,7 @@ type ExecutiveReportingPaywallProps = {
 export default function ExecutiveReportingPaywall({
   price = getProductAmountGbp("executive_reporting"),
   checkoutPriceCode = "executive_reporting",
-  primaryCtaLabel = "See the cost you are already paying",
+  primaryCtaLabel = "Analyse institutional consequence",
 }: ExecutiveReportingPaywallProps) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -183,7 +183,7 @@ export default function ExecutiveReportingPaywall({
           </div>
           <div className="border border-amber-700/30 bg-amber-950/10 p-4">
             <div className="text-amber-200/70 mb-1">This stage</div>
-            <div className="text-gray-200">Price the consequence. Order the decisions.</div>
+            <div className="text-gray-200">Analyse the consequence. Order the decisions.</div>
           </div>
         </div>
       </div>

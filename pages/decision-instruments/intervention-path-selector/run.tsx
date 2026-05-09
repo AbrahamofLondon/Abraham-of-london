@@ -23,7 +23,7 @@ const InterventionPathRun: NextPage = () => {
   const nextHref = resultKey ? `${nextDest}?instrumentResultId=${encodeURIComponent(resultKey)}` : nextDest;
 
   return (
-    <InstrumentShell title="Intervention Path Selector" slug="intervention-path-selector" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=intervention-path-selector" nextStepLabel={result?.recommendedPath === "ESCALATE" ? "Enter Strategy Room" : "See the cost you are already paying"} nextStepHref={nextHref}>
+    <InstrumentShell title="Intervention Path Selector" slug="intervention-path-selector" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=intervention-path-selector" nextStepLabel={result?.recommendedPath === "ESCALATE" ? "Enter governed execution" : "Analyse institutional consequence"} nextStepHref={nextHref}>
       {!result ? <InterventionPathRunner onComplete={handleComplete} /> : (
         <div className="space-y-4">
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: result.executionBlocked ? "rgba(252,165,165,0.70)" : "#C9A96ECC" }}>

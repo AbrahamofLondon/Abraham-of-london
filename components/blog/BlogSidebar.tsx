@@ -64,10 +64,10 @@ const BlogSidebar: React.FC<BlogSidebarProps> = ({
           This artifact is part of the {tier} repository. Members gain access to interactive worksheets and fillable PDF frameworks.
         </p>
         <Link
-          href="/diagnostics/executive-reporting"
+          href="/diagnostics/fast"
           className="group flex items-center justify-between w-full bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-bold uppercase tracking-widest py-4 px-6 rounded-xl transition-all"
         >
-          Executive Reporting <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          Start diagnostic <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
 
