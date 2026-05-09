@@ -27,18 +27,12 @@ import {
   ChevronRight,
   Fingerprint,
   FileText,
-  Activity,
   ScanSearch,
   Compass,
-  Archive,
   BookOpen,
-  ScrollText,
-  Layers,
-  Zap,
   Lock,
   Key,
 } from "lucide-react";
-import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES + CONSTANTS
@@ -57,41 +51,12 @@ type NavItem = {
   signal?: true; // marks the live signal item for subtle treatment
 };
 
-// Desktop nav — system-first. Primary = conversion surfaces, Secondary = content/authority.
-const PRIMARY_NAV: readonly NavItem[] = [
-  { href: "/diagnostics",                     label: "Diagnostics",       sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/diagnostics/executive-reporting",  label: "Executive Report",  sub: `Consequence layer · ${getProductDisplayPrice("executive_reporting")}`,     icon: ScrollText },
-  { href: "/strategy-room",                    label: "Strategy Room",     sub: `Decision intervention · ${getProductDisplayPrice("strategy_room")}`, icon: Crown      },
-] as const;
-
-const PRIMARY_NAV_HINTS: Record<string, string> = {
-  Diagnostics: "identify the condition",
-  "Executive Report": "price the consequence",
-  "Strategy Room": "execute the intervention",
-};
-
-const SECONDARY_NAV: readonly NavItem[] = [
-  { href: "/artifacts",  label: "Intelligence", sub: "Market intelligence", icon: Zap,     signal: true },
-  { href: "/playbooks",  label: "Playbooks",    sub: "Execution Frameworks",        icon: Layers   },
-  { href: "/canon",      label: "Canon",         sub: "Doctrine & Method",           icon: Compass  },
-] as const;
-
-// Combined for backward compat (mobile menu iteration)
-const DESKTOP_NAV: readonly NavItem[] = [...PRIMARY_NAV, ...SECONDARY_NAV] as const;
-
-// Mobile menu — system-first, then content/reference.
-const MOBILE_NAV: readonly NavItem[] = [
-  // Product surfaces
-  { href: "/diagnostics",                     label: "Diagnostics",      sub: "Free diagnostic system",      icon: ScanSearch },
-  { href: "/diagnostics/executive-reporting",  label: "Executive Report", sub: `Consequence layer · ${getProductDisplayPrice("executive_reporting")}`,     icon: ScrollText },
-  { href: "/strategy-room",                    label: "Strategy Room",    sub: `Decision intervention · ${getProductDisplayPrice("strategy_room")}`, icon: Crown      },
-  // Content & authority
-  { href: "/artifacts",    label: "Intelligence",  sub: "Market intelligence",          icon: Zap,       signal: true },
-  { href: "/playbooks",    label: "Playbooks",     sub: "Execution Frameworks",         icon: Layers     },
-  { href: "/canon",        label: "Canon",          sub: "Doctrine & Method",            icon: Compass    },
-  // Reference
-  { href: "/library",      label: "Library",        sub: "Knowledge Shelf",              icon: BookOpen   },
-  { href: "/vault/briefs", label: "Briefs",         sub: "Operational Intelligence",     icon: FileText   },
+const NAV_ITEMS: readonly NavItem[] = [
+  { href: "/#hero", label: "Start", sub: "Decision entry", icon: ScanSearch },
+  { href: "/#refusal-demo", label: "How it works", sub: "Refusal and governed review", icon: Crown },
+  { href: "/evidence", label: "Evidence", sub: "Applied proof", icon: FileText },
+  { href: "/library", label: "Library", sub: "Doctrine and archive", icon: BookOpen },
+  { href: "/about", label: "About", sub: "Founder and method", icon: Compass },
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,6 +70,9 @@ function normalizePath(path: string): string {
 }
 
 function isActive(currentPath: string, href: string): boolean {
+  if (href.includes("#")) {
+    return href === "/#hero" ? currentPath === "/" : false;
+  }
   const current = normalizePath(currentPath);
   const target  = normalizePath(href);
   if (target === "/") return current === "/";
@@ -208,8 +176,8 @@ export default function Header({
               <span className="font-['Cormorant_Garamond',Georgia,serif] text-[1.05rem] font-light italic leading-none tracking-[-0.01em] text-white/90 transition-colors group-hover:text-white">
                 Abraham of London
               </span>
-              <span className="hidden font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.32em] text-white/38 md:block">
-                Diagnostics · Intelligence · Advisory
+              <span className="hidden font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.22em] text-white/42 md:block">
+                Decision Infrastructure
               </span>
             </div>
           </Link>
@@ -217,55 +185,25 @@ export default function Header({
           {/* ── Right cluster ─────────────────────────────────────────────── */}
           <div className="flex items-center gap-5">
 
-            {/* Desktop nav — two-tier: primary system surfaces | secondary content */}
+            {/* Desktop nav */}
             {!minimal && (
               <nav className="hidden items-center gap-3 md:flex" aria-label="Primary navigation">
-                {/* PRIMARY: system surfaces */}
-                {PRIMARY_NAV.map((item) => {
+                {NAV_ITEMS.map((item) => {
                   const active = mounted && isActive(currentPath, item.href);
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      title={`${item.label} — ${PRIMARY_NAV_HINTS[item.label] || item.sub}`}
-                      aria-label={`${item.label} — ${PRIMARY_NAV_HINTS[item.label] || item.sub}`}
+                      title={`${item.label} — ${item.sub}`}
+                      aria-label={`${item.label} — ${item.sub}`}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "relative font-['JetBrains_Mono',ui-monospace,monospace] text-[8.5px] uppercase tracking-[0.26em] transition-colors duration-300",
+                        "relative font-['JetBrains_Mono',ui-monospace,monospace] text-[8.5px] uppercase tracking-[0.24em] transition-colors duration-300",
                         active ? "text-[#C9A96E]" : "text-white/78 hover:text-white/92",
                       )}
                       style={active ? { color: GOLD } : {}}
                     >
                       {item.label}
-                    </Link>
-                  );
-                })}
-
-                {/* Separator */}
-                <span className="mx-1 h-3 w-px bg-white/10" aria-hidden="true" />
-
-                {/* SECONDARY: content & authority */}
-                {SECONDARY_NAV.map((item) => {
-                  const active = mounted && isActive(currentPath, item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      aria-current={active ? "page" : undefined}
-                      className={cn(
-                        "relative font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.22em] transition-colors duration-300",
-                        active ? "text-[#C9A96E]" : "text-white/50 hover:text-white/72",
-                      )}
-                      style={active ? { color: GOLD } : {}}
-                    >
-                      {item.label}
-                      {item.signal && !active && (
-                        <span
-                          aria-hidden="true"
-                          className="absolute inset-x-0 -bottom-[5px] block h-px"
-                          style={{ backgroundColor: `${GOLD}47` }}
-                        />
-                      )}
                     </Link>
                   );
                 })}
@@ -278,7 +216,7 @@ export default function Header({
             {!minimal && (
               <Link
                 href={isAuthenticated ? "/inner-circle/dashboard" : "/inner-circle"}
-                className="hidden items-center gap-2 border px-3 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] transition-all duration-300 md:inline-flex"
+                className="hidden items-center gap-2 border px-3 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] transition-all duration-300 lg:inline-flex"
                 style={{
                   borderColor: `${GOLD}38`,
                   color: `${GOLD}D0`,
@@ -359,7 +297,7 @@ export default function Header({
 
           {/* Nav items */}
           <nav className="space-y-0 divide-y divide-white/[0.04]" aria-label="Mobile navigation">
-            {MOBILE_NAV.map((item, idx) => {
+            {NAV_ITEMS.map((item, idx) => {
               const active = mounted && isActive(currentPath, item.href);
               const Icon = item.icon;
 
@@ -379,12 +317,7 @@ export default function Header({
                       <div
                         className={cn(
                           "font-['Cormorant_Garamond',Georgia,serif] text-[1.9rem] font-light leading-none tracking-[-0.02em] transition-colors duration-200 md:text-[2.4rem]",
-                          // Shorts in mobile menu: very slightly elevated opacity vs other items
-                          active
-                            ? ""
-                            : item.signal
-                              ? "text-white/88 group-hover:text-white"
-                              : "text-white/80 group-hover:text-white",
+                          active ? "" : "text-white/80 group-hover:text-white",
                         )}
                         style={active ? { color: GOLD } : {}}
                       >
@@ -400,9 +333,9 @@ export default function Header({
                     <Icon
                       className={cn(
                         "h-4 w-4 transition-colors",
-                        active ? "" : item.signal ? "text-white/22 group-hover:text-white/45" : "text-white/20 group-hover:text-white/35",
+                        active ? "" : "text-white/20 group-hover:text-white/35",
                       )}
-                      style={active ? { color: `${GOLD}CC` } : item.signal ? { color: `${GOLD}60` } : {}}
+                      style={active ? { color: `${GOLD}CC` } : {}}
                     />
                     <ChevronRight
                       className={cn(
@@ -421,15 +354,8 @@ export default function Header({
               <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
             </div>
 
-            {/* Special entries — Strategy Room is public; Member entries are auth-gated. */}
+            {/* Special entries — member access only. */}
             {[
-              {
-                href: "/strategy-room",
-                label: "Strategy Room",
-                sub: "Qualified Access Only",
-                tag: "Selective",
-                icon: Crown,
-              },
               ...(isAuthenticated
                 ? [
                     {
@@ -505,7 +431,7 @@ export default function Header({
               Abraham of London
             </div>
             <div className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.32em] text-white/12">
-              Strategy · Canon · Library
+              Decision Infrastructure
             </div>
           </div>
         </div>
