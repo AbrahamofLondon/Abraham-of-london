@@ -150,11 +150,11 @@ export default function VerificationStandardsPage() {
           {/* 8. What we do not publish */}
           <Section eyebrow="Boundaries" title="What we do not publish">
             <ul className="space-y-1.5 text-xs text-zinc-500">
-              <li>Scoring formulas or engine weights</li>
-              <li>Arbitration logic or prompt structures</li>
+              <li>Internal classification methods or computational structures</li>
+              <li>Routing logic or decision-engine internals</li>
               <li>Exact admission or refusal thresholds</li>
               <li>Internal state architecture</li>
-              <li>Contradiction graph mechanics</li>
+              <li>Proprietary operating mechanics</li>
               <li>Individual respondent data</li>
               <li>Unapproved or suppressed evidence</li>
               <li>Client-identifying information without permission</li>

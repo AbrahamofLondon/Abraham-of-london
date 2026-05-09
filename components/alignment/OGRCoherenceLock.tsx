@@ -117,7 +117,7 @@ export default function OGRCoherenceLock({ organisationName = "The Institution" 
               <h5 className="font-mono text-[10px] uppercase tracking-widest text-[#2C2416]">Validation Proof</h5>
             </div>
             <p className="font-sans text-[10px] text-neutral-500 leading-relaxed">
-              Institutional resonance has been verified against the 75 core intelligence briefs. The variance in {organisationName}'s primary domains is now below the 15% dissonance review point.
+              Institutional resonance has been measured against the 75 core intelligence briefs. The variance in {organisationName}'s primary domains is now below the 15% dissonance review point.
             </p>
           </div>
           <div className="flex justify-end items-end space-y-1 text-right">

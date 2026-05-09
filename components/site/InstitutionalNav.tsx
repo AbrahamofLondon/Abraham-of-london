@@ -18,7 +18,7 @@ const navLinks = [
   { name: "Intel Briefings", href: "/shorts", tag: "DB-01" },
   { name: "Ventures", href: "/ventures", tag: "PTRN-02" },
   { name: "The Vault", href: "/vault", tag: "SEC-03" },
-  { name: "Strategic Advisory", href: "/consulting", tag: "ADV-04" },
+  { name: "Counsel Review", href: "/counsel", tag: "ADV-04" },
 ];
 
 export default function InstitutionalNav(): React.ReactElement {

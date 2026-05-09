@@ -465,7 +465,7 @@ const VaultPage: NextPage<
   return (
     <Layout
       title="The Vault | Abraham of London"
-      description="Institutional archive of strategic intelligence, premium assets, and private frameworks."
+      description="Institutional archive of strategic intelligence, structured operating material, and restricted frameworks."
       canonicalUrl="/vault"
       fullWidth
       className="bg-black text-white"
@@ -490,11 +490,11 @@ const VaultPage: NextPage<
               </div>
 
               <h2 className="text-4xl font-serif text-white md:text-5xl">
-                Unlock the Full Archive
+                Explore the Full Archive
               </h2>
 
               <p className="mx-auto mt-4 max-w-2xl text-white/50">
-                Premium frameworks, intelligence briefs, and serious operating material
+                Extended frameworks, intelligence briefs, and serious operating material
                 for builders who want systems, not noise.
               </p>
             </div>
@@ -518,7 +518,7 @@ const VaultPage: NextPage<
                 emphasis
                 features={[
                   "Everything in Vault",
-                  "Premium reports access",
+                  "Extended reports access",
                   "Advanced frameworks",
                   "Executive briefings",
                   "Priority support",
@@ -526,12 +526,12 @@ const VaultPage: NextPage<
               />
 
               <VaultTierCard
-                title="Private Access"
+                title="Restricted Access"
                 features={[
                   "Strategy proximity",
                   "Direct escalation",
                   "Restricted entry",
-                  "Private advisory",
+                  "Private working access",
                   "Inner Circle access",
                 ]}
               />

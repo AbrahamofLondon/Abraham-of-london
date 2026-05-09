@@ -1,16 +1,7 @@
 "use client";
 
 /**
- * GovernanceDisclosure — surfaces real governance infrastructure to the user.
- *
- * This component does NOT contain hardcoded governance descriptions.
- * It reads from the existing constitutional thread (session-thread.ts),
- * canonical sections, and decision state engine to show users what
- * the system actually computed for their case.
- *
- * For contexts where session data is available, it shows real governance data.
- * For contexts without session data, it describes the governance system
- * in terms of the actual engines that power it.
+ * GovernanceDisclosure — user-safe explanation of evidence posture and challenge path.
  */
 
 import { useState, useEffect } from "react";
@@ -36,68 +27,58 @@ type Props = {
   className?: string;
 };
 
-// Map context to the governance engines that power it
 const ENGINE_MAP: Record<GovernanceContext, {
   label: string;
-  engines: string[];
-  scoringBasis: string;
-  escalationPath: string;
+  evidenceBasis: string;
+  movementRule: string;
   challengeRoute: string;
 }> = {
   fast_diagnostic: {
     label: "Fast Diagnostic",
-    engines: ["Decision-pattern logic", "Consistency check engine", "Cost-of-delay engine"],
-    scoringBasis: "Your answers to decision-structure questions, scored against authority clarity, ownership, and consequence exposure.",
-    escalationPath: "Results feed into the Constitutional Diagnostic if structural tension is confirmed.",
+    evidenceBasis: "Based on your stated decision, owner, and consequence.",
+    movementRule: "The next governed response adds evidence and can change how the case is treated.",
     challengeRoute: "Request human review via info@abrahamoflondon.org with your session reference.",
   },
   constitutional_diagnostic: {
     label: "Constitutional Diagnostic",
-    engines: ["Constitutional authority model", "Domain dissonance scoring", "Governance rules engine", "Escalation governor"],
-    scoringBasis: "Multi-domain scoring across coherence, authority, trust, pressure, friction, seriousness, and governance. Each domain scored independently.",
-    escalationPath: "Route assignment (REJECT / DIAGNOSTIC / STRATEGY) with governed escalation paths: REVIEW → APPEAL → OVERRIDE → CONSTITUTIONAL_COURT.",
+    evidenceBasis: "Based on your recorded answers and the constitutional evidence captured in this assessment.",
+    movementRule: "Route decisions become stronger when additional governed evidence is added.",
     challengeRoute: "Constitutional appeal available. Contact support to file.",
   },
   team_assessment: {
     label: "Team Assessment",
-    engines: ["Cross-respondent engine", "Team tension evidence model", "Fragility scoring"],
-    scoringBasis: "Structured questions scored for intent-reality gap across team domains. Single-respondent = leader-estimated. Multi-respondent = cross-validated.",
-    escalationPath: "Fragility status (STABLE / VOLATILE / FRACTURED) determines escalation to Strategy Room.",
+    evidenceBasis: "Based on the responses recorded in this team assessment.",
+    movementRule: "Additional respondents strengthen the evidence posture and can change the reading.",
     challengeRoute: "Request multi-respondent validation or human review via support.",
   },
   enterprise_assessment: {
     label: "Enterprise Assessment",
-    engines: ["Enterprise block scoring", "Decision clarity engine", "Governance logic engine"],
-    scoringBasis: "Enterprise governance blocks scored with band classification. Single-respondent = executive perspective.",
-    escalationPath: "Weak blocks surface as governance alerts. Critical findings route to Strategy Room.",
-    challengeRoute: "Request multi-stakeholder validation or advisory review via support.",
+    evidenceBasis: "Based on the institutional signals recorded in this enterprise intake.",
+    movementRule: "Further evidence can change the route, the urgency, or the required intervention.",
+    challengeRoute: "Request multi-stakeholder validation or operator review via support.",
   },
   executive_reporting: {
     label: "Executive Reporting",
-    engines: ["Canonical sections engine", "Financial exposure model", "Recommendation governance", "Integrity snapshot"],
-    scoringBasis: "Your accumulated diagnostic evidence. Financial projections use your declared exposure data only — never fabricated.",
-    escalationPath: "Governed recommendations with priority stack, failure modes, and required interventions derived from your case.",
+    evidenceBasis: "Based on your accumulated diagnostic evidence and recorded exposure context.",
+    movementRule: "The report can change when new evidence, checkpoints, or execution signals are recorded.",
     challengeRoute: "Challenge findings or request clarification via info@abrahamoflondon.org.",
   },
   strategy_room: {
     label: "Strategy Room",
-    engines: ["Decision state engine", "Decision ledger", "Consequence scoring", "Escalation trigger system", "Pattern breaker contracts"],
-    scoringBasis: "Reactive execution state machine. Every decision tracked through PENDING → EXECUTED / BLOCKED / ESCALATED / FAILED. Consequence score compounds with delay.",
-    escalationPath: "Avoidance detection triggers governed escalation. Deadman's switch on protocol expiry. Breach detection active.",
+    evidenceBasis: "Based on your recorded directives, checkpoint history, and execution responses.",
+    movementRule: "Checkpoint responses and execution evidence determine whether the route is holding.",
     challengeRoute: "Challenge any decision or routing. Appeal path available at every stage.",
   },
   return_brief: {
     label: "Return Brief",
-    engines: ["Outcome verification model", "Longitudinal comparison engine", "Contradiction detection"],
-    scoringBasis: "Delta analysis between baseline and follow-up readings. Outcome classified as resolved / improved / stable / deteriorated.",
-    escalationPath: "Regression triggers re-escalation. Unresolved contradictions surface explicitly.",
+    evidenceBasis: "Based on your prior checkpoint history and the evidence recorded since the earlier decision.",
+    movementRule: "A return brief becomes more precise when a later checkpoint or outcome record is added.",
     challengeRoute: "Contact support if prior context has changed materially.",
   },
   purpose_alignment: {
     label: "Purpose Alignment",
-    engines: ["Alignment scoring engine", "Governance logic engine"],
-    scoringBasis: "Structured purpose and values questions scored for alignment between stated intent and structural readiness.",
-    escalationPath: "Dissonance above threshold routes to deeper diagnostic or advisory.",
+    evidenceBasis: "Based on your recorded purpose, pressure, and obligation answers.",
+    movementRule: "Later diagnostics can confirm whether the issue is personal, structural, or both.",
     challengeRoute: "Contact support to discuss findings.",
   },
 };
@@ -135,10 +116,9 @@ export default function GovernanceDisclosure({ context, compact = false, classNa
         </div>
         {expanded && (
           <div className="mt-3 space-y-3 border-t border-white/10 pt-3" onClick={(e) => e.stopPropagation()}>
-            <EngineList engines={config.engines} />
-            <DetailRow label="Scoring basis" value={config.scoringBasis} />
+            <DetailRow label="Evidence basis" value={config.evidenceBasis} />
             {hasLiveData && thread && <LiveGovernanceData thread={thread} />}
-            <DetailRow label="Escalation path" value={config.escalationPath} />
+            <DetailRow label="Movement rule" value={config.movementRule} />
             <DetailRow label="How to challenge" value={config.challengeRoute} />
           </div>
         )}
@@ -168,37 +148,15 @@ export default function GovernanceDisclosure({ context, compact = false, classNa
 
       {expanded && (
         <div className="px-4 pb-4 space-y-4 border-t border-white/10 pt-4">
-          <EngineList engines={config.engines} />
-          <DetailRow label="Scoring basis" value={config.scoringBasis} />
+          <DetailRow label="Evidence basis" value={config.evidenceBasis} />
           {hasLiveData && thread && <LiveGovernanceData thread={thread} />}
-          <DetailRow label="Escalation path" value={config.escalationPath} />
+          <DetailRow label="Movement rule" value={config.movementRule} />
           <DetailRow label="How to challenge this reading" value={config.challengeRoute} />
           <p className="text-xs text-zinc-600 pt-2">
-            Governance infrastructure: constitutional authority model, decision ledger,
-            outcome verification, calibration engine. All outputs are auditable.
+            The visible result shows consequence and evidence posture, not internal machinery.
           </p>
         </div>
       )}
-    </div>
-  );
-}
-
-function EngineList({ engines }: { engines: string[] }) {
-  return (
-    <div>
-      <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-amber-500/50 mb-1">
-        What powers this
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {engines.map((e) => (
-          <span
-            key={e}
-            className="text-[10px] font-mono text-zinc-500 border border-white/8 px-2 py-0.5"
-          >
-            {e}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }

@@ -152,7 +152,7 @@ export default function HeroSection({ counts }: Props): React.ReactElement {
               </Link>
 
               <Link
-                href="/consulting/strategy-room"
+                href="/strategy-room"
                 className="inline-flex items-center gap-2 transition-all duration-300"
                 style={{
                   padding: "13px 26px",

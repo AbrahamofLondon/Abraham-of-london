@@ -49,8 +49,8 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       id: 'upgrade',
       icon: <Zap className="w-5 h-5" />,
-      label: 'Upgrade Plan',
-      description: 'Unlock premium features',
+      label: 'Advance Your Plan',
+      description: 'Access higher-tier features',
       onClick: onUpgrade,
       color: 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-600',
       available: userTier !== 'inner-circle-elite'

@@ -175,7 +175,7 @@ const StatsOverview: React.FC<StatsOverviewProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium text-gray-900">Progress to Next Tier</h4>
-                  <p className="text-sm text-gray-600">Complete more content to unlock higher tiers</p>
+                  <p className="text-sm text-gray-600">Complete more content to progress to higher tiers</p>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-gray-900">

@@ -7,7 +7,7 @@ const NAV_LINKS = [
   { href: "/inner-circle/dashboard", label: "Vault" },
   { href: "/inner-circle/briefs", label: "Briefs" },
   { href: "/diagnostics", label: "Diagnostics" },
-  { href: "/consulting/strategy-room", label: "Strategy Room" },
+  { href: "/strategy-room", label: "Strategy Room" },
   { href: "/inner-circle/account", label: "Account" },
 ];
 

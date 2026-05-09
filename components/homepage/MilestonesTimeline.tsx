@@ -65,9 +65,9 @@ const DEFAULT_ITEMS: Milestone[] = [
     detail:
       "Conducted 48+ private strategy sessions for founders and boards, focusing on market positioning, narrative strategy, and execution cadence for ventures from seed to Series C.",
     icon: Briefcase,
-    tag: "Consulting",
+    tag: "Counsel",
     accent: "purple",
-    href: "/consulting",
+    href: "/counsel",
   },
   {
     year: 2024,

@@ -24,15 +24,15 @@ type RouteItem = {
 
 const ROUTES: readonly RouteItem[] = [
   {
-    href: "/consulting",
-    label: "Advisory & Consulting",
-    tag: "Direct engagement",
+    href: "/counsel",
+    label: "Counsel Review",
+    tag: "Governed escalation",
     description:
-      "Board-level architecture for founders and leadership teams navigating growth, transition, or structural pressure.",
+      "Evidence-gated human review for decisions that exceed what the system can safely model alone.",
     Icon: Briefcase,
   },
   {
-    href: "/consulting/strategy-room",
+    href: "/strategy-room",
     label: "Strategy Room",
     tag: "Private mandate",
     description:

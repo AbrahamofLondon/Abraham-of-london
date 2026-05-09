@@ -42,7 +42,7 @@ export default function QuickActionBar({
     { href: "/blog", label: "Essays", icon: "💭", badge: "New" },
     { href: "/events", label: "Events", icon: "📅", badge: "Live" },
     { href: "/downloads", label: "Resources", icon: "📥", badge: "Free" },
-    { href: "/consulting", label: "Consulting", icon: "🎯", badge: null },
+    { href: "/counsel", label: "Counsel", icon: "🎯", badge: null },
   ];
 
   return (

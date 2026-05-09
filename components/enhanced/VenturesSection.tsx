@@ -137,7 +137,7 @@ export default function EnhancedVenturesSection() {
           {/* Header CTAs */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", flexShrink: 0 }}>
             <Link
-              href="/consulting"
+              href="/counsel"
               className="group inline-flex items-center gap-2 transition-all duration-300"
               style={{
                 padding: "11px 22px",

@@ -81,7 +81,7 @@ export default function OGRHandoverDocument({
           
           <div className="ml-12 space-y-4">
             <p className="font-serif text-base leading-relaxed text-[#5C4E36]">
-              This document certifies that <span className="font-bold text-[#2C2416]">{organisationName}</span> has successfully completed the 12-week OGR Calibration Sequence. Through the synthesis of leadership narratives and the forensic correction of operational protocols, the institution has achieved a verified Resonance Fidelity of
+              This document certifies that <span className="font-bold text-[#2C2416]">{organisationName}</span> has successfully completed the 12-week OGR Calibration Sequence. Through the synthesis of leadership narratives and the forensic correction of operational protocols, the institution has achieved a measured Resonance Fidelity of
             </p>
             
             <div className="flex items-baseline gap-4 py-4">

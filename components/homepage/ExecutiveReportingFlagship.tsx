@@ -395,7 +395,7 @@ export default function ExecutiveReportingFlagship({
               }}>
                 Diagnostics surfaces the signal. Executive Reporting interprets it precisely.
                 Strategy Room intervenes when the report reveals material consequence and
-                warrants governed advisory attention.
+                warrants governed escalation.
               </p>
             </div>
 

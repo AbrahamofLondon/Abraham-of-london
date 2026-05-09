@@ -422,7 +422,7 @@ const CommandCentrePage: NextPage<
               </Link>
 
               <Link
-                href="/consulting/strategy-room"
+                href="/strategy-room"
                 className="rounded-[20px] border border-white/10 bg-black/20 p-5 transition hover:border-white/20 hover:bg-white/[0.03]"
               >
                 <Lock className="h-5 w-5 text-[#C9A96A]" />

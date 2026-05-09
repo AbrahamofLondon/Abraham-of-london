@@ -9,13 +9,11 @@ import { Menu, X, ArrowRight, Briefcase } from "lucide-react";
 const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" ");
 
 const NAV = [
-  { href: "/canon", label: "Canon" },
-  { href: "/briefs", label: "Briefs" },
+  { href: "/#hero", label: "Start" },
+  { href: "/#refusal-demo", label: "How it works" },
+  { href: "/evidence", label: "Evidence" },
   { href: "/library", label: "Library" },
-  { href: "/ventures", label: "Ventures" },
-  { href: "/shorts", label: "Shorts" },
   { href: "/about", label: "About" },
-  { href: "/vault", label: "Vault" },
 ];
 
 export default function Navbar(): React.ReactElement {
@@ -44,7 +42,10 @@ export default function Navbar(): React.ReactElement {
   }, [open]);
 
   const currentPath = (router.asPath || "/").split("#")[0] || "/";
-  const isActive = (href: string) => (href === "/" ? currentPath === "/" : currentPath.startsWith(href));
+  const isActive = (href: string) => {
+    if (href.includes("#")) return href === "/#hero" ? currentPath === "/" : false;
+    return href === "/" ? currentPath === "/" : currentPath.startsWith(href);
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-[100]">
@@ -65,7 +66,7 @@ export default function Navbar(): React.ReactElement {
               Abraham<span className="text-amber-300"> of London</span>
             </span>
             <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.45em] text-gray-500">
-              Institutional Platform
+              Decision Infrastructure
             </span>
           </Link>
 
@@ -91,11 +92,11 @@ export default function Navbar(): React.ReactElement {
 
             {/* CTA: always visible, never pushes nav into brand */}
             <Link
-              href="/counsel"
+              href="/diagnostics/fast"
               className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.2em] text-black shadow-xl shadow-amber-900/25 transition-all hover:scale-[1.02]"
             >
               <Briefcase className="h-4 w-4" />
-              Counsel
+              Test a Decision
               <ArrowRight className="h-4 w-4" />
             </Link>
           </nav>
@@ -155,10 +156,10 @@ export default function Navbar(): React.ReactElement {
               </div>
 
               <Link
-                href="/counsel"
+                href="/diagnostics/fast"
                 className="mt-6 inline-flex w-full items-center justify-between rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-5 py-4 text-sm font-extrabold text-black"
               >
-                Counsel
+                Test a Decision
                 <ArrowRight className="h-4 w-4" />
               </Link>
 

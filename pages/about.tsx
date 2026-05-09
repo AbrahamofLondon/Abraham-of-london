@@ -44,7 +44,7 @@ const AboutPage: NextPage = () => {
             <div className="mt-12 pt-8" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
               <h2 className="font-serif text-xl font-light text-white/80">Who built this</h2>
               <p className="mt-3 max-w-[60ch] text-sm leading-7 text-white/50">
-                Abraham Adaramola is a London-based commercial strategist with 15+ years&apos; experience across cross-border contracting, procurement governance, energy, infrastructure, and public–private advisory environments.
+                Abraham Adaramola is a London-based commercial strategist with 15+ years&apos; experience across cross-border contracting, procurement governance, energy, infrastructure, and mixed public-private operating environments.
               </p>
               <Link href="/founders" className="mt-3 inline-flex items-center gap-2 text-sm" style={{ color: `${GOLD}AA` }}>
                 Meet the founder <ArrowRight style={{ width: 10, height: 10 }} />

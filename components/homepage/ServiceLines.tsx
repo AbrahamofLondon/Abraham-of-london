@@ -36,10 +36,10 @@ type ServiceItem = {
 const ITEMS: readonly ServiceItem[] = [
   {
     Icon:  Briefcase,
-    title: "Advisory",
-    tag:   "Consulting",
-    body:  "Institutional-grade strategy for founders and leadership teams. Governance, operating logic, decision rights.",
-    href:  "/consulting",
+    title: "Counsel Review",
+    tag:   "Governed Escalation",
+    body:  "Evidence-gated counsel for decisions the system should not resolve alone. Governance, decision rights, structural correction.",
+    href:  "/counsel",
   },
   {
     Icon:  Layers,

@@ -11,6 +11,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { getSocialLinks, type SocialLink } from "@/config/site";
 import {
   ArrowRight,
@@ -227,6 +228,9 @@ function SocialChannel({ social }: { social: SocialLink }) {
 }
 
 export default function EnhancedFooter(): React.ReactElement {
+  const router = useRouter();
+  const isHome = (router.asPath || "/").split("#")[0] === "/";
+
   // Hardcoded to avoid hydration mismatch between server build time and client render time.
   // Update annually.
   const year = 2026;
@@ -243,7 +247,7 @@ export default function EnhancedFooter(): React.ReactElement {
       href: "/strategy-room",
       eyebrow: "Qualified access",
       title: "Strategy Room",
-      body: "Controlled entry for qualified operators. Score-based routing. Institutional gatekeeping.",
+      body: "Controlled entry for qualified operators. Evidence-based routing. Governed access.",
       icon: Crown,
       tag: "STRAT·V1",
       gold: true,
@@ -260,7 +264,7 @@ export default function EnhancedFooter(): React.ReactElement {
       href: "/diagnostics",
       eyebrow: "Gateway layer",
       title: "Diagnostics",
-      body: "Establish signal, pressure, and fit before forcing a solution.",
+      body: "Establish signal, pressure, and fit before forcing an intervention.",
       icon: ScanSearch,
       tag: "DIAG·V3",
     },
@@ -330,17 +334,55 @@ export default function EnhancedFooter(): React.ReactElement {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(201,169,110,0.08),transparent_35%),radial-gradient(circle_at_78%_82%,rgba(255,255,255,0.025),transparent_30%)]" />
 
       <div className="relative mx-auto max-w-7xl px-6 pb-10 pt-20 lg:px-12">
-        <div className="grid grid-cols-1 gap-px bg-white/[0.05] md:grid-cols-4">
-          {primaryGateways.map((card) => (
-            <GatewayCard key={card.href} {...card} />
-          ))}
-        </div>
+        {!isHome ? (
+          <>
+            <div className="grid grid-cols-1 gap-px bg-white/[0.05] md:grid-cols-4">
+              {primaryGateways.map((card) => (
+                <GatewayCard key={card.href} {...card} />
+              ))}
+            </div>
 
-        <div className="mt-px grid grid-cols-1 gap-px bg-white/[0.05] md:grid-cols-4">
-          {secondaryGateways.map((card) => (
-            <GatewayCard key={card.href} {...card} />
-          ))}
-        </div>
+            <div className="mt-px grid grid-cols-1 gap-px bg-white/[0.05] md:grid-cols-4">
+              {secondaryGateways.map((card) => (
+                <GatewayCard key={card.href} {...card} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="grid gap-4 border border-white/10 bg-white/[0.02] p-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+            <div>
+              <div className="font-serif text-[2rem] font-light italic leading-none tracking-[-0.02em] text-white/92">
+                Abraham of London
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <div className="h-px w-10 bg-[#C9A96E]/60" />
+                <span className="font-mono text-[8px] uppercase tracking-[0.42em] text-[#C9A96E]/86">
+                  Decision Infrastructure
+                </span>
+              </div>
+              <p className="mt-4 max-w-[42ch] text-[14px] leading-7 text-white/62">
+                Start with evidence. The system can refuse escalation, retain the
+                record, and route later surfaces only when the case has earned them.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
+              <Link
+                href="/diagnostics/fast"
+                className="group inline-flex items-center justify-center gap-3 border border-[#C9A96E]/35 bg-[#C9A96E]/[0.08] px-6 py-[14px] font-mono text-[9px] uppercase tracking-[0.24em] text-[#D7B77E] transition-colors duration-300 hover:border-[#C9A96E]/55 hover:bg-[#C9A96E]/[0.13] hover:text-[#E8C991]"
+              >
+                Test a Decision
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/library"
+                className="group inline-flex items-center justify-center gap-3 border border-white/14 bg-white/[0.035] px-6 py-[14px] font-mono text-[9px] uppercase tracking-[0.24em] text-white/72 transition-colors duration-300 hover:border-white/22 hover:bg-white/[0.055] hover:text-white"
+              >
+                Library
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         <div className="mt-20 grid gap-16 border-t border-white/10 pt-16 lg:grid-cols-12">
           <div className="space-y-9 lg:col-span-5">
@@ -352,15 +394,16 @@ export default function EnhancedFooter(): React.ReactElement {
               <div className="mt-3 flex items-center gap-3">
                 <div className="h-px w-10 bg-[#C9A96E]/60" />
                 <span className="font-mono text-[8px] uppercase tracking-[0.44em] text-[#C9A96E]/88">
-                  Governance · Architecture · Execution
+                  Decision Infrastructure
                 </span>
               </div>
             </div>
 
             <p className="max-w-[38ch] border-l border-white/15 pl-5 font-serif text-[15px] font-light italic leading-8 text-white/72">
-              A platform for disciplined thinking: doctrine, systems, and strategic
-              execution arranged for leaders, builders, and institutions that
-              intend to endure.
+              Decision Infrastructure for decisions under consequence. The system
+              captures evidence, carries memory forward, schedules checkpoints,
+              verifies outcomes, and escalates to counsel only when the record
+              warrants it.
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -373,18 +416,44 @@ export default function EnhancedFooter(): React.ReactElement {
               </Link>
 
               <Link
-                href="/strategy-room"
+                href="/diagnostics/fast"
                 className="group inline-flex items-center justify-center gap-3 border border-[#C9A96E]/35 bg-[#C9A96E]/[0.08] px-6 py-[14px] font-mono text-[9px] uppercase tracking-[0.28em] text-[#D7B77E] transition-colors duration-300 hover:border-[#C9A96E]/55 hover:bg-[#C9A96E]/[0.13] hover:text-[#E8C991]"
               >
                 <Crown className="h-3.5 w-3.5" />
-                Enter Strategy Room
+                Test a Decision
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
               </Link>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-x-10 gap-y-10 sm:grid-cols-4 lg:col-span-7">
-            {Object.entries(directory).map(([title, links]) => (
+            {Object.entries(
+              isHome
+                ? {
+                    Archive: [
+                      { label: "Canon", href: "/canon" },
+                      { label: "Library", href: "/library" },
+                      { label: "Shorts", href: "/shorts", highlight: true },
+                    ],
+                    Entry: [
+                      { label: "Diagnostics", href: "/diagnostics", highlight: true },
+                      { label: "Evidence", href: "/evidence" },
+                      { label: "Verification", href: "/verification" },
+                    ],
+                    "Trust & Proof": [
+                      { label: "Trust", href: "/trust" },
+                      { label: "Foundations", href: "/foundations" },
+                      { label: "Method", href: "/method" },
+                    ],
+                    Governance: [
+                      { label: "About", href: "/about" },
+                      { label: "Security", href: "/security" },
+                      { label: "Privacy", href: "/privacy" },
+                      { label: "Terms", href: "/terms" },
+                    ],
+                  }
+                : directory,
+            ).map(([title, links]) => (
               <DirectoryColumn key={title} title={title} links={links} />
             ))}
           </div>

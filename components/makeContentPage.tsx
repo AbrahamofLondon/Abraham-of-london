@@ -12,7 +12,7 @@ type Props = {
 // All your existing routes from your pages directory
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
-  { href: "/consulting", label: "Consulting" },
+  { href: "/counsel", label: "Counsel" },
   { href: "/canon", label: "Canon" },
   { href: "/strategy", label: "Strategy" },
   { href: "/ventures", label: "Ventures" },
@@ -28,7 +28,7 @@ const NAV_ITEMS = [
 
 // Sort by priority - keep most important ones visible
 const PRIORITY_ITEMS = [
-  { href: "/consulting", label: "Consulting" },
+  { href: "/counsel", label: "Counsel" },
   { href: "/canon", label: "Canon" },
   { href: "/strategy", label: "Strategy" },
   { href: "/ventures", label: "Ventures" },
@@ -85,7 +85,7 @@ export default function LuxuryNavbar({ transparent = false }: Props) {
 
   // Desktop navigation items
   const desktopNavItems = [
-    { href: "/consulting", label: "Consulting" },
+    { href: "/counsel", label: "Counsel" },
     { href: "/canon", label: "Canon" },
     { href: "/strategy", label: "Strategy" },
     { href: "/ventures", label: "Ventures" },
@@ -189,7 +189,7 @@ export default function LuxuryNavbar({ transparent = false }: Props) {
 
             {/* CTA Button */}
             <Link
-              href="/consulting#book"
+              href="/counsel#book"
               className="rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-sm font-semibold text-black hover:from-amber-400 hover:to-amber-500 transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/20"
             >
               Book Session
@@ -287,7 +287,7 @@ export default function LuxuryNavbar({ transparent = false }: Props) {
                 {/* CTA Button */}
                 <div className="mt-8">
                   <Link
-                    href="/consulting#book"
+                    href="/counsel#book"
                     className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 py-4 text-center text-sm font-semibold text-black hover:from-amber-400 hover:to-amber-500 transition-all"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

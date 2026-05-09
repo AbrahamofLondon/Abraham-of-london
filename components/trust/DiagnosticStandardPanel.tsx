@@ -39,8 +39,7 @@ export default function DiagnosticStandardPanel({ className = "", defaultOpen = 
 
           <div className="space-y-2">
             <BulletItem>
-              It uses your supplied answers, consistency checks, challenge prompts,
-              and decision-pattern logic to identify structural tensions and decision risks.
+              It uses your supplied answers and recorded evidence to identify structural tensions and decision risk.
             </BulletItem>
             <BulletItem>
               It does not guarantee outcomes. Readings are strongest when combined with
@@ -58,7 +57,7 @@ export default function DiagnosticStandardPanel({ className = "", defaultOpen = 
 
           <p className="text-xs leading-5 text-zinc-500 pt-1">
             For high-consequence decisions, we recommend combining instrument findings with
-            professional advisory support. Contact{" "}
+            independent professional review. Contact{" "}
             <a
               href="mailto:info@abrahamoflondon.org"
               className="text-amber-400/70 hover:text-amber-300"

@@ -915,7 +915,7 @@ const GlobalMarketOutlookPublicPage: NextPage<PublicBriefProps> = ({
                     </p>
 
                     <Link
-                      href="/consulting/strategy-room"
+                      href="/strategy-room"
                       className="group inline-flex items-center gap-2 mt-3 transition-opacity hover:opacity-75"
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",

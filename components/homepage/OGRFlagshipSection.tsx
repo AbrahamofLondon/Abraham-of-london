@@ -460,8 +460,8 @@ export default function OGRFlagshipSection() {
                 <div className="mt-10 space-y-5">
                   {[
                     "Use OGR when the next move still needs pressure-testing.",
-                    "Use advisory when the cost of error is already material.",
-                    "Use both when clarity and execution must meet in one disciplined chain.",
+                    "Use counsel review when the cost of error is already material.",
+                    "Use both when evidence and execution must meet in one governed chain.",
                   ].map((item, index) => (
                     <motion.div
                       key={item}
@@ -489,7 +489,7 @@ export default function OGRFlagshipSection() {
               <HardFrame className="h-full">
                 <div className="flex items-center justify-between gap-4">
                   <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/82">
-                    Private advisory pathway
+                    Governed escalation pathway
                   </div>
                   <Briefcase className="h-5 w-5 text-amber-300/65" />
                 </div>
@@ -517,11 +517,11 @@ export default function OGRFlagshipSection() {
                 </div>
 
                 <Link
-                  href="/consulting"
+                  href="/counsel"
                   className="group mt-8 inline-flex w-full items-center justify-center gap-3 border border-amber-500/25 bg-amber-500/[0.05] px-6 py-4 transition-colors hover:border-amber-500/55 hover:bg-amber-500/[0.08]"
                 >
                   <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300/82">
-                    View advisory
+                    View counsel review
                   </span>
                   <ArrowRight className="h-4 w-4 text-amber-400/48 transition-transform group-hover:translate-x-1 group-hover:text-amber-300" />
                 </Link>

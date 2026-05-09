@@ -68,7 +68,7 @@ const MethodPage: NextPage = () => (
             {[
               { label: "A survey", you: "tells you how you feel", system: "shows where your position collapses under evidence" },
               { label: "A coaching tool", you: "helps you reflect", system: "forces the decision you have been avoiding" },
-              { label: "An AI prompt", you: "generates plausible advice", system: "scores your condition against a proprietary contradiction engine, then prices it" },
+              { label: "An AI prompt", you: "generates plausible advice", system: "tests your condition against a governed contradiction detection system, then prices it" },
               { label: "A consulting report", you: "tells you what the consultant thinks", system: "shows what your own data proves — and what it costs to ignore" },
             ].map((d) => (
               <div key={d.label} style={{ borderLeft: "2px solid rgba(255,255,255,0.05)", paddingLeft: "0.85rem" }}>
@@ -84,7 +84,7 @@ const MethodPage: NextPage = () => (
         {/* ── 4. THREE AUTHORITY PANELS (replaces 5-column grid) ── */}
         <div className="grid gap-3 md:grid-cols-3">
           {[
-            { n: "01", title: "Detects contradiction", desc: "Each input is evaluated across independent proprietary dimensions to assess structural coherence and decision integrity. The system classifies named structural patterns from these signals — not categories, named conditions.", color: "rgba(252,165,165,0.55)" },
+            { n: "01", title: "Detects contradiction", desc: "Each input is evaluated across independent structural dimensions to assess coherence and decision integrity. The system classifies named structural patterns from these signals — not categories, named conditions.", color: "rgba(252,165,165,0.55)" },
             { n: "02", title: "Prices consequence", desc: "Detected contradictions are connected to time horizons and costs using the user's own stated inputs. The system derives exposure from what you provide — it does not fabricate data it does not have.", color: `${GOLD}80` },
             { n: "03", title: "Forces action", desc: "The output is a named decision, a sequenced priority stack, and a first move with a deadline. Patterns that persist across stages escalate. The system remembers what you have not resolved.", color: `${AMBER}80` },
           ].map((p) => (
@@ -99,7 +99,7 @@ const MethodPage: NextPage = () => (
         {/* Secondary mechanism detail (collapsed, not primary) */}
         <div className="mt-6 grid gap-2 md:grid-cols-5">
           {[
-            { label: "Multi-dimensional scoring", detail: "Proprietary evaluation per statement" },
+            { label: "Multi-dimensional scoring", detail: "Structured evaluation per statement" },
             { label: "Structural pattern engine", detail: "Named conditions, not categories" },
             { label: "Cross-stage memory", detail: "Patterns that persist escalate" },
             { label: "Evidence graph", detail: "Typed nodes across the journey" },

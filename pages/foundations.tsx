@@ -48,7 +48,7 @@ const FoundationsPage: NextPage = () => (
 
         {/* Divider */}
         <div className="mt-10 pt-6" style={{ borderTop: `1px solid ${GOLD}15` }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Proprietary Systems</span>
+          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Original Systems</span>
           <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.7 }}>
             The following are original frameworks developed by Abraham of London, derived from the traditions above but applied as structured decision systems:
           </p>

@@ -121,7 +121,7 @@ function PrimaryActions({ onScroll }: { onScroll?: () => void }) {
       </button>
 
       <Link
-        href="/consulting/strategy-room"
+        href="/strategy-room"
         className="group inline-flex items-center justify-center gap-3 border border-white/[0.06] px-7 py-4 font-['JetBrains_Mono',ui-monospace,monospace] text-[9px] uppercase tracking-[0.32em] text-white/32 backdrop-blur-sm transition hover:border-white/[0.12] hover:bg-white/[0.03] hover:text-white/55"
       >
         <Crown className="h-3.5 w-3.5" style={{ color: `${GOLD}90` }} />

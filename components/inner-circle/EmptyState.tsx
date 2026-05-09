@@ -91,10 +91,10 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   ];
 
   const upgradeSuggestions = [
-    { label: 'Unlock premium content', icon: <PlusCircle className="w-4 h-4" /> },
-    { label: 'Get exclusive insights', icon: <TrendingUp className="w-4 h-4" /> },
-    { label: 'Access advanced tools', icon: <FileText className="w-4 h-4" /> },
-    { label: 'Join elite community', icon: <ArrowRight className="w-4 h-4" /> }
+    { label: 'Access earned-tier content', icon: <PlusCircle className="w-4 h-4" /> },
+    { label: 'Receive governed intelligence', icon: <TrendingUp className="w-4 h-4" /> },
+    { label: 'Enter advanced instruments', icon: <FileText className="w-4 h-4" /> },
+    { label: 'Join the inner circle', icon: <ArrowRight className="w-4 h-4" /> }
   ];
 
   const activeSuggestions = variant === 'upgrade' ? upgradeSuggestions : suggestions;
@@ -168,13 +168,13 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="font-medium text-gray-900">Want more content?</h5>
-                <p className="text-sm text-gray-600 mt-1">Upgrade your tier for exclusive access</p>
+                <p className="text-sm text-gray-600 mt-1">Progress your tier through engagement</p>
               </div>
               <button
-                onClick={() => window.location.href = '/inner-circle/upgrade'}
+                onClick={() => window.location.href = '/inner-circle'}
                 className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-md transition-shadow"
               >
-                Upgrade Now
+                Progress Now
               </button>
             </div>
           </div>

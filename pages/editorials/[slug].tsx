@@ -748,7 +748,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                 >
                   Enter diagnostics <ArrowRight style={{ width: "11px", height: "11px" }} />
                 </Link>
-                <Link href="/consulting/strategy-room"
+                <Link href="/strategy-room"
                   className="inline-flex items-center gap-2.5 transition-all duration-300"
                   style={{
                     padding: "11px 22px",

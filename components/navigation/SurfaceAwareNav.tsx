@@ -194,7 +194,7 @@ export const SurfaceAwareNav: React.FC<SurfaceAwareNavProps> = ({
 
           <div className="flex items-center gap-3">
             <Link
-              href="/consulting/strategy-room"
+              href="/strategy-room"
               className="hidden border px-4 py-2 font-mono text-[8px] uppercase tracking-[0.28em] transition-colors duration-200 lg:inline-flex"
               style={{
                 color: "var(--ds-accent)",

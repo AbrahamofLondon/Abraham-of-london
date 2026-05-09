@@ -116,7 +116,7 @@ const ENGAGEMENTS: Engagement[] = [
     bullets: ["Constraint-aware options + explicit trade-offs", "Artifacts: memo, matrix, cadence, controls", "Designed for irreversible decisions"],
   },
   {
-    label: "Engagement", title: "Private Advisory",
+    label: "Engagement", title: "Private Working Access",
     desc:  "Ongoing strategic counsel for leaders operating under sustained complexity, scrutiny, or consequence.",
     href:  "/contact?source=consulting&intent=consultation", tier: "private", icon: Crown,
     bullets: ["Governance and operating cadence", "Founder counsel under pressure", "Strategic oversight and alignment"],

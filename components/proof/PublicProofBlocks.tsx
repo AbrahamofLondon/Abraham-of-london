@@ -51,7 +51,7 @@ export function ObservedOutcomesBlock({
 
   const approved = (data?.items || []).filter((item) => item.anonymisedSummary).slice(0, 4);
   const isLiveEvidence = approved.length > 0;
-  const proofStatus = isLiveEvidence ? "VERIFIED_CASE_EVIDENCE" : "DEMONSTRATION_FALLBACK";
+  const proofStatus = isLiveEvidence ? "SOURCE_LABELLED_EVIDENCE" : "DEMONSTRATION_FALLBACK";
   const cards = approved.length
     ? approved.map((item) => item.anonymisedSummary as string)
     : fallback
@@ -80,7 +80,7 @@ export function ObservedOutcomesBlock({
             borderColor: "rgba(255,255,255,0.10)",
             backgroundColor: "rgba(255,255,255,0.035)",
           }}
-          data-evidence-classification={isLiveEvidence ? "VERIFIED_CASE_EVIDENCE" : "DEMONSTRATION_FALLBACK"}
+          data-evidence-classification={isLiveEvidence ? "SOURCE_LABELLED_EVIDENCE" : "DEMONSTRATION_FALLBACK"}
         >
           <p className="text-[14px] leading-[1.65]" style={{ color: "#F5F5F5" }}>
             {outcome}
@@ -98,7 +98,7 @@ export function ObservedOutcomesBlock({
             textAlign: "center",
           }}
         >
-          Demonstration patterns · Verified case evidence displayed when available
+          Demonstration patterns · Source-labelled case evidence displayed when available
         </p>
       )}
     </div>
@@ -121,7 +121,7 @@ export function AccuracyMetricsBlock() {
     };
   }, []);
 
-  if (!data || data.metrics.sampleSize < 5) return null;
+  if (!data || data.metrics.sampleSize < 15) return null;
 
   const metrics = [
     data.metrics.precisePct != null
@@ -138,7 +138,7 @@ export function AccuracyMetricsBlock() {
   if (!metrics.length) return null;
 
   return (
-    <div className="mt-6 grid gap-3 md:grid-cols-3" data-proof-status="VERIFIED_CASE_EVIDENCE" data-sample-size={data.metrics.sampleSize}>
+    <div className="mt-6 grid gap-3 md:grid-cols-3" data-proof-status="SOURCE_LABELLED_EVIDENCE" data-sample-size={data.metrics.sampleSize}>
       {metrics.map((metric) => (
         <div
           key={metric}
@@ -147,7 +147,7 @@ export function AccuracyMetricsBlock() {
             borderColor: "rgba(201,169,110,0.22)",
             backgroundColor: "rgba(0,0,0,0.35)",
           }}
-          data-evidence-classification="VERIFIED_CASE_EVIDENCE"
+          data-evidence-classification="SOURCE_LABELLED_EVIDENCE"
         >
           <p className="text-[13px] leading-[1.55]" style={{ color: "#B8B8B8" }}>
             {metric}

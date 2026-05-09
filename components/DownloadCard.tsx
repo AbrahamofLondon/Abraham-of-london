@@ -224,7 +224,7 @@ export default function DownloadCard({
           requiresAuth={ctaRequiresAuth || gated}
           fileSize={size || "2.5 MB"}
           fileFormat="PDF"
-          buttonText={gated ? "Unlock Access" : "Download Now"}
+          buttonText={gated ? "Request Access" : "Download Now"}
           pdfFormats={pdfFormats}
         />
       </div>

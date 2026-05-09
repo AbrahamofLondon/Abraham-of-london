@@ -46,7 +46,7 @@ const WhyNotAI: NextPage = () => {
               { ai: "No enforcement — suggests but cannot require action", us: "Enforcement layer — tracks commitment, escalates non-action" },
               { ai: "No trust decay — treats every interaction as new", us: "Institutional memory — the system remembers what you have not resolved" },
               { ai: "No auditability — outputs cannot be traced to logic", us: "Full traceability — every conclusion is auditable against your inputs" },
-              { ai: "No economic anchoring — cannot price consequences", us: "Proprietary cost modelling — derives exposure from your stated data" },
+              { ai: "No economic anchoring — cannot price consequences", us: "Case-grounded cost modelling — derives exposure from your stated data" },
             ].map((row, i) => (
               <div key={i} className="grid gap-3 sm:grid-cols-2">
                 <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem" }}>

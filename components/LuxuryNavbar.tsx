@@ -193,7 +193,7 @@ export default function Navbar(): React.ReactElement {
 
             {/* Inquiries CTA */}
             <Link
-              href="/consulting"
+              href="/counsel"
               className="shrink-0 inline-flex items-center gap-3 bg-white/[0.03] border border-white/10 px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-amber-200 transition-all hover:bg-amber-500 hover:text-black hover:border-amber-500"
             >
               <Briefcase className="h-3.5 w-3.5" />

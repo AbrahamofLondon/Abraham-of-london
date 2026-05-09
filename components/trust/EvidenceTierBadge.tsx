@@ -46,7 +46,7 @@ const TIER_CONFIG: Record<EvidenceTier, { label: string; color: string; descript
   human_reviewed: {
     label: "Human-reviewed",
     color: "border-blue-500/40 text-blue-400/80",
-    description: "Reviewed by a qualified analyst through advisory or Strategy Room",
+    description: "Reviewed by a qualified analyst through operator review or Strategy Room",
   },
 };
 
@@ -110,8 +110,8 @@ export function EvidenceTierExplainer({ className = "" }: { className?: string }
       )}
       <p className="text-xs text-zinc-600 pt-2">
         Stronger tiers require more evidence. Single-source readings can be
-        upgraded through multi-respondent validation, outcome tracking, or
-        advisory review.
+        strengthened through multi-respondent validation, outcome tracking, or
+        operator review.
       </p>
     </div>
   );

@@ -688,7 +688,7 @@ export default function InterventionConsole() {
 
               {/* Breadcrumb */}
               <Link
-                href="/consulting"
+                href="/counsel"
                 className="inline-flex items-center gap-1.5 mb-8 transition-opacity hover:opacity-70"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -884,7 +884,7 @@ export default function InterventionConsole() {
                 </span>
               </div>
               <Link
-                href="/consulting/strategy-room"
+                href="/strategy-room"
                 className="inline-flex items-center gap-2 transition-opacity hover:opacity-70"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",

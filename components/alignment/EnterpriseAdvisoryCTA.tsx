@@ -63,7 +63,7 @@ export function EnterpriseAdvisoryCTA({
           </Link>
 
           <Link
-            href="/consulting/strategy-room"
+            href="/strategy-room"
             className="group inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-white/80 transition-all hover:border-white/20 hover:bg-white/10"
           >
             Private chamber

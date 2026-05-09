@@ -100,7 +100,7 @@ const DownloadHero: React.FC<DownloadHeroProps> = ({
                     <span className="font-semibold text-amber-100">Members Only</span>
                   </div>
                   <p className="text-sm text-slate-300 mb-4">
-                    This download requires {accessLevel} access. Join our community to unlock premium resources.
+                    This download requires {accessLevel} access. Progress your membership to access this resource.
                   </p>
                   <Link
                     href="/inner-circle"
