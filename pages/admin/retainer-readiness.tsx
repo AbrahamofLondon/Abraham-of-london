@@ -7,7 +7,7 @@ import { requireAdminPage } from "@/lib/access/server";
 import { prisma } from "@/lib/prisma.server";
 import { buildOperatorCadenceQueue } from "@/lib/product/retained-cadence-service";
 import { canManageCadence } from "@/lib/product/retained-role-contract";
-import { classifyRetainerReadiness } from "@/lib/product/retainer-readiness-classifier";
+import { classifyRetainerReadiness, classifyRetainerReadinessAreas } from "@/lib/product/retainer-readiness-classifier";
 import { buildSponsorSafeCommandSummary } from "@/lib/product/sponsor-safe-command-summary";
 
 export const getServerSideProps: GetServerSideProps<{
@@ -132,13 +132,15 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-const SCORECARD = [
-  ["Enforced retained cadence", "Retained cadence queue, persistence, and overdue posture are now runtime-backed."],
-  ["Product-layer role model", "Retained sponsor surfaces and cadence operations now use an explicit role contract."],
-  ["Sponsor command surface", "Cadence, attention, brief, counsel, boardroom, outcome, and continuity summaries are now structured runtime sections."],
-  ["Retained outcome history", "Outcome history is surfaced conservatively and flagged as thin where evidence is still sparse."],
-  ["£50k classifier", "Classification remains conservative and only promotes when cadence, role, summary, history, and memory conditions are met."],
-];
+const AREA_SCORECARD = classifyRetainerReadinessAreas();
+
+const STATUS_COLOUR: Record<string, string> = {
+  NOT_READY: "text-red-400",
+  FOUNDATION_READY: "text-orange-400",
+  SELECTIVELY_DEFENSIBLE: "text-amber-400",
+  DEFENSIBLE: "text-emerald-400",
+  GENERAL_50K_READY: "text-green-300",
+};
 
 export default function RetainerReadinessPage(
   props: InferGetServerSidePropsType<typeof getServerSideProps>,
@@ -181,26 +183,45 @@ export default function RetainerReadinessPage(
         </section>
 
         <section className="border border-white/10 bg-zinc-950/70 p-5">
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Runtime scorecard</h2>
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Area readiness scorecard</h2>
+          <p className="mt-1 text-xs text-white/40">
+            Overall: <span className="font-mono text-amber-400">{AREA_SCORECARD.overallClassification}</span>
+            {" | "}Classified at build time. GENERAL_50K_READY requires all areas DEFENSIBLE or higher with all guards passing.
+          </p>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm text-white/70">
               <thead className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">
                 <tr>
                   <th className="pb-3 pr-4">Area</th>
-                  <th className="pb-3">State</th>
+                  <th className="pb-3 pr-4">Status</th>
+                  <th className="pb-3 pr-4">Evidence</th>
+                  <th className="pb-3">Gap</th>
                 </tr>
               </thead>
               <tbody>
-                {SCORECARD.map(([area, note]) => (
-                  <tr key={area} className="border-t border-white/5 align-top">
-                    <td className="py-3 pr-4 text-white">{area}</td>
-                    <td className="py-3">{note}</td>
+                {AREA_SCORECARD.areas.map((item) => (
+                  <tr key={item.area} className="border-t border-white/5 align-top">
+                    <td className="py-3 pr-4 text-white">{item.area}</td>
+                    <td className={`py-3 pr-4 font-mono text-xs ${STATUS_COLOUR[item.status] ?? "text-white/50"}`}>{item.status}</td>
+                    <td className="py-3 pr-4">{item.evidence}</td>
+                    <td className="py-3 text-white/40">{item.gap ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </section>
+
+        {AREA_SCORECARD.blockers.length > 0 && (
+          <section className="border border-white/10 bg-zinc-950/70 p-5">
+            <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Blockers for GENERAL_50K_READY</h2>
+            <ul className="mt-3 list-disc pl-5 space-y-1 text-sm text-white/60">
+              {AREA_SCORECARD.blockers.map((b) => (
+                <li key={b}>{b}</li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section className="grid gap-6 xl:grid-cols-2">
           <section className="border border-white/10 bg-zinc-950/70 p-5">
