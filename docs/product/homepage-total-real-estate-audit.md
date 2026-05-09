@@ -280,3 +280,12 @@ See `docs/product/homepage-fix-register.md`.
 ## Bottom Line
 
 The homepage has a real category insight and a real differentiator: refusal. That is enough to build around. The current page fails because it does not discipline itself around that advantage. It expands into ladder, audience segmentation, trust doctrine, and final CTA too early, then places some of its best proof after the first close. The result feels serious, but not yet governed by its own logic.
+
+## Implementation Update
+
+Status after rebuild pass on 2026-05-09:
+
+- `pages/index.tsx` was reduced to a thin route wrapper around `CategoryFrontDoor`.
+- `CategoryFrontDoor` now orchestrates eight focused sections instead of containing the whole homepage message stack itself.
+- Direct homepage routes into `Executive Reporting`, `Strategy Room`, `Enterprise Assessment`, `Counsel`, and `Boardroom` were removed from the live homepage body.
+- The homepage now behaves as an evidence-entry surface with one dominant CTA: `Test a Decision`.

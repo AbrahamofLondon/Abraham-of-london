@@ -85,3 +85,24 @@ Do not accept:
 - never collapse Executive Reporting and Strategy Room into one blurred offer
 - never lower price by adding vagueness around the actual stakes
 - never justify price using quantity when consequence is the real variable
+
+## Decision Instruments
+
+Decision instruments sit below premium escalation.
+
+- `Decision Exposure Instrument`
+- `Mandate Clarity Framework`
+- `Intervention Path Selector`
+- `Operator Decision Pack`
+
+Principle:
+
+- these are not replacements for `Executive Reporting`
+- these are not replacements for `Strategy Room`
+- these are lower-stakes paid instruments for users whose evidence does not yet justify premium escalation
+
+Commercial rule:
+
+- they may be monetised later
+- they must not bypass earned progression
+- they should be recommended only when the evidence supports that instrument

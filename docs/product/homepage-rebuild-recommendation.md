@@ -62,3 +62,22 @@ Rebuild the homepage as the category front door for Decision Infrastructure. It 
 ## Bottom Line
 
 The rebuild should not become more decorative. It should become stricter. Fewer sections, fewer claims, harder proof, cleaner routing.
+
+## Implemented Structure
+
+The current rebuild pass implements this eight-section order:
+
+1. Hero
+2. Market Defect
+3. Refusal Demo
+4. Output Preview
+5. Decision Memory
+6. Earned Progression
+7. Trust Architecture
+8. Final CTA
+
+Key implementation decisions:
+
+- `Test a Decision` remains the only dominant CTA in the homepage body.
+- Later-stage products are described as conditional or earned, not presented as casual starting paths.
+- The homepage now shows both a sample return artifact and a continuity chain so refusal and memory are visible instead of only asserted.

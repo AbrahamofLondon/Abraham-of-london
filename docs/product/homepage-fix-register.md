@@ -42,3 +42,19 @@ Date: 2026-05-09
 ## Bottom Line
 
 P0 is not cosmetic. It is structural. The homepage must stop contradicting its own earned-progression doctrine before it is pushed publicly.
+
+## Implementation Status
+
+Completed in this pass:
+
+- Removed the premature front-door final CTA by rebuilding the homepage into a single ordered flow.
+- Rebuilt buyer-path logic into an earned-progression section with only one open entry point.
+- Reordered the homepage so output proof and memory proof appear before trust doctrine and final CTA.
+- Replaced the monolithic `pages/index.tsx` route with a materially simplified wrapper.
+- Updated the header for colder visitor vocabulary and kept `Test a Decision` dominant.
+- Added homepage-specific footer restraint on `/`.
+
+Still pending for a strict launch bar:
+
+- Full `next build --webpack` completion under an unconstrained runtime window.
+- Visual QA in a browser for final spacing, mobile rhythm, and anchor behavior.
