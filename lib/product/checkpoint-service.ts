@@ -1,4 +1,4 @@
-import "server-only";
+// Server-only module — imported by API routes and server components
 
 import type { DiagnosticRecord } from "@prisma/client";
 
