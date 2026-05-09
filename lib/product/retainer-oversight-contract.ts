@@ -36,6 +36,7 @@ export type OversightSignalType =
   | "CHECKPOINT_BLOCKED"
   | "CHECKPOINT_ABANDONED"
   | "CHECKPOINT_CONFIRMED"
+  | "RETAINED_REVIEW_OVERDUE"
   | "OUTCOME_IMPROVED"
   | "OUTCOME_DETERIORATED";
 
@@ -48,6 +49,8 @@ export type OversightSignal = {
   explanation: string;
   recommendedAction: string;
   createdAt: string;
+  sourceLabel?: string;
+  evidencePosture?: string;
 };
 
 export type OversightCycle = {

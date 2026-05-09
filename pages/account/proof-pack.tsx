@@ -1,6 +1,8 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import OutcomeVerificationPanel from "@/components/outcomes/OutcomeVerificationPanel";
@@ -84,9 +86,67 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
 
               <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
                 <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+                  Retained Outcome History
+                </p>
+                <p className="mt-3 text-sm leading-7 text-white/65">
+                  {pack.retainedOutcomeHistory.thinState
+                    ? "Outcome history is thin."
+                    : `${pack.retainedOutcomeHistory.confirmedOutcomes} confirmed, ${pack.retainedOutcomeHistory.blockedOutcomes} blocked, ${pack.retainedOutcomeHistory.abandonedOutcomes} abandoned, ${pack.retainedOutcomeHistory.disputedFindings} disputed.`}
+                </p>
+                <p className="mt-3 text-xs uppercase tracking-[0.22em] text-[#C9A96E]" style={mono}>
+                  {pack.retainedOutcomeHistory.evidencePosture}
+                  {pack.retainedOutcomeHistory.latestOutcomeDate ? ` · ${new Date(pack.retainedOutcomeHistory.latestOutcomeDate).toLocaleDateString("en-GB")}` : ""}
+                </p>
+              </section>
+
+              <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
                   Summary
                 </p>
                 <p className="mt-3 text-sm leading-7 text-white/65">{pack.summary}</p>
+              </section>
+
+              {/* Forward actions */}
+              <section className="border border-white/[0.08] bg-white/[0.02] p-5">
+                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#C9A96E]">
+                  Next Actions
+                </p>
+                <p className="mt-3 text-sm leading-7 text-white/50">
+                  This proof pack preserves what the system can safely show. It does not replace verification, counsel review, or retained oversight.
+                </p>
+                <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  <Link
+                    href="/diagnostics/fast"
+                    className="flex items-center justify-between border border-white/[0.08] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.15]"
+                  >
+                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#C9A96E]">
+                      Test another decision
+                    </span>
+                    <ArrowRight className="h-3.5 w-3.5 text-[#C9A96E]" />
+                  </Link>
+
+                  {pack.outcomesVerified.count > 0 && pack.outcomesVerified.posture === "VERIFIED" && (
+                    <Link
+                      href="/decision-centre"
+                      className="flex items-center justify-between border border-white/[0.08] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.15]"
+                    >
+                      <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#C9A96E]">
+                        View Decision Centre
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5 text-[#C9A96E]" />
+                    </Link>
+                  )}
+
+                  <Link
+                    href="/evidence/standards"
+                    className="flex items-center justify-between border border-white/[0.08] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.15]"
+                  >
+                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#C9A96E]">
+                      View Evidence Standards
+                    </span>
+                    <ArrowRight className="h-3.5 w-3.5 text-[#C9A96E]" />
+                  </Link>
+                </div>
               </section>
             </>
           ) : (

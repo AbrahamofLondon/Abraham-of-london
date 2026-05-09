@@ -2,6 +2,7 @@ import type { CreditProfile } from "@/lib/decision-ledger/ledger-service";
 import type { OversightAccountCase } from "@/lib/product/oversight-account-loader";
 import type { ControlRoomState } from "@/lib/product/control-room-contract";
 import type { OversightSignal } from "@/lib/product/retainer-oversight-contract";
+import type { BuyerVisibleCadencePosture } from "@/lib/product/retained-cadence-contract";
 import { summarizeAssessmentEvidenceText } from "@/lib/product/evidence-capture-contract";
 
 function severityFromCost(amount: number): OversightSignal["severity"] {
@@ -42,6 +43,7 @@ export function buildOversightSignals(input: {
     improvementSignals: number;
     deteriorationSignals: number;
   } | null;
+  retainedCadence?: BuyerVisibleCadencePosture | null;
   now?: Date | string;
 }): OversightSignal[] {
   const createdAt = new Date(input.now ?? new Date()).toISOString();
@@ -258,6 +260,20 @@ export function buildOversightSignals(input: {
       explanation: `${retainedEnforcement.deteriorationSignals} retained enforcement cycle${retainedEnforcement.deteriorationSignals === 1 ? "" : "s"} recorded negative outcome movement this period.`,
       recommendedAction: "Reassess retained decisions where enforcement cycles show deterioration rather than stabilisation.",
       createdAt,
+    });
+  }
+
+  if (input.retainedCadence?.state === "OVERDUE") {
+    signals.push({
+      id: "retained-cadence:overdue",
+      type: "RETAINED_REVIEW_OVERDUE",
+      severity: "HIGH",
+      title: "Retained review cycle is overdue",
+      explanation: "A retained review cycle is overdue. Operator attention is required.",
+      recommendedAction: "Review the retained cadence queue and complete, skip with reason, or escalate the overdue cycle.",
+      createdAt,
+      sourceLabel: "Retained Oversight Cadence",
+      evidencePosture: input.retainedCadence.evidencePosture,
     });
   }
 

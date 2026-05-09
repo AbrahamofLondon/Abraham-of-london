@@ -1,6 +1,18 @@
 import { composeOversightBrief } from "@/lib/product/oversight-brief-composer";
 import { loadOversightAccount } from "@/lib/product/oversight-account-loader";
 import { loadInstitutionalMemoryArchive } from "@/lib/product/institutional-memory-loader";
+import { buildBuyerVisibleCadencePosture, loadLatestRetainedReviewCycleForAccount } from "@/lib/product/retained-cadence-service";
+import { buildRetainedOutcomeSummary } from "@/lib/product/retained-outcome-summary";
+
+type SummarySection = {
+  title: string;
+  summary: string;
+  sourceLabel: string;
+  evidencePosture: string;
+  asOf?: string | null;
+  thinState?: boolean;
+  empty: boolean;
+};
 
 export type SponsorSafeCommandSummary = {
   generatedAt: string;
@@ -38,6 +50,36 @@ export type SponsorSafeCommandSummary = {
     summary: string;
     retainedAssets: string[];
   };
+  retainedCadencePosture: SummarySection & {
+    state: string;
+    scheduledFor?: string | null;
+    lastCompletedAt?: string | null;
+    cadenceSource: string;
+    cadenceType?: string | null;
+  };
+  activeAttentionQueueSummary: SummarySection & {
+    count: number;
+  };
+  latestOversightBriefStatus: SummarySection & {
+    status: string;
+  };
+  counselMemorySummary: SummarySection & {
+    totalEvents: number;
+    openCount: number;
+  };
+  boardroomArchiveSummary: SummarySection & {
+    totalDossiers: number;
+    unresolvedCount: number;
+  };
+  outcomeVerificationSummary: SummarySection & {
+    confirmedOutcomes: number;
+    blockedOutcomes: number;
+    abandonedOutcomes: number;
+    disputedFindings: number;
+  };
+  cancellationLossSummary: SummarySection & {
+    retainedAssetCount: number;
+  };
 };
 
 function dedupe(items: string[]) {
@@ -51,6 +93,25 @@ function deriveEvidencePosture(brief: Awaited<ReturnType<typeof composeOversight
   const hasSystem = [...postures].some((item) => item.includes("INFERRED"));
   if (hasSource && hasSystem) return "MIXED" as const;
   return hasSource ? "SOURCE_LABELLED" as const : "SYSTEM_INFERRED" as const;
+}
+
+function latestBriefStatus(brief: Awaited<ReturnType<typeof composeOversightBrief>>["brief"] | null) {
+  if (!brief) {
+    return {
+      status: "UNAVAILABLE",
+      summary: "No oversight brief is available for this account.",
+      empty: true,
+      asOf: null,
+    };
+  }
+
+  const status = brief.cadence?.status ?? "AVAILABLE";
+  return {
+    status,
+    summary: brief.executiveSummary || "Oversight brief is available.",
+    empty: false,
+    asOf: brief.periodEnd ?? null,
+  };
 }
 
 export async function buildSponsorSafeCommandSummary(input: {
@@ -72,6 +133,20 @@ export async function buildSponsorSafeCommandSummary(input: {
   const account = composed.account ?? oversight.account;
   const warnings = [...oversight.warnings, ...composed.warnings];
   const archive = account?.accountId ? await loadInstitutionalMemoryArchive(account.accountId).catch(() => null) : null;
+  const retainedCycle = account
+    ? await loadLatestRetainedReviewCycleForAccount({
+        accountId: account.accountId,
+        organisationId: input.organisationId ?? account.organisationId,
+        sponsorUserId: input.userId ?? account.ownerUserId,
+        sponsorEmail: input.email ?? undefined,
+      }).catch(() => null)
+    : null;
+  const retainedCadence = buildBuyerVisibleCadencePosture(retainedCycle);
+  const outcomeSummary = await buildRetainedOutcomeSummary({
+    email: input.email ?? null,
+    userId: input.userId ?? null,
+    organisationId: input.organisationId ?? null,
+  }).catch(() => null);
 
   const completedStages = oversight.cases.reduce((sum, item) => (
     sum + Object.values(item.evidenceCapture ?? {}).filter(Boolean).length
@@ -92,11 +167,11 @@ export async function buildSponsorSafeCommandSummary(input: {
           label: "Oversight intake required",
           explanation: "Retained oversight should not be treated as active continuity until mandate and review posture are captured.",
         }
-      : brief.cadence?.status === "REVIEW_DUE" || brief.cadence?.status === "REVIEW_OVERDUE" || brief.cadence?.status === "DELIVERY_DUE" || brief.cadence?.status === "DELIVERY_OVERDUE" || brief.cadence?.status === "OVERDUE"
+      : retainedCadence.state === "OVERDUE" || retainedCadence.state === "DUE_SOON"
         ? {
             state: "REVIEW_DUE" as const,
             label: "Retained review due",
-            explanation: "Review cadence requires operator confirmation. The next retained review should not be treated as complete.",
+            explanation: retainedCadence.label,
           }
         : (brief?.verification.unresolvedBreaches ?? 0) > 0 || (brief?.counsel.requiredNow ?? 0) > 0
           ? {
@@ -134,8 +209,10 @@ export async function buildSponsorSafeCommandSummary(input: {
     (brief?.counselHistory?.totalEvents ?? 0) > 0 ? `${brief?.counselHistory?.totalEvents} counsel event${brief?.counselHistory?.totalEvents === 1 ? "" : "s"}` : "",
     (brief?.boardroomArchive?.totalDossiers ?? 0) > 0 ? `${brief?.boardroomArchive?.totalDossiers} boardroom dossier record${brief?.boardroomArchive?.totalDossiers === 1 ? "" : "s"}` : "",
     (brief?.verification.commitmentsVerified ?? 0) > 0 ? `${brief?.verification.commitmentsVerified} verified commitment marker${brief?.verification.commitmentsVerified === 1 ? "" : "s"}` : "",
+    outcomeSummary?.confirmedOutcomes ? `${outcomeSummary.confirmedOutcomes} confirmed outcome${outcomeSummary.confirmedOutcomes === 1 ? "" : "s"}` : "",
   ]);
 
+  const briefStatus = latestBriefStatus(brief);
   const summary: SponsorSafeCommandSummary = {
     generatedAt: new Date().toISOString(),
     subjectLabel: input.organisationId ? "Organisation retained oversight" : "Account retained oversight",
@@ -163,7 +240,97 @@ export async function buildSponsorSafeCommandSummary(input: {
       summary: brief?.cancellationLoss?.summary || "Ending retained oversight does not delete your records, but it ends active continuity, review cadence, and sponsor-safe command visibility.",
       retainedAssets,
     },
+    retainedCadencePosture: {
+      title: "Retained cadence posture",
+      state: retainedCadence.state,
+      summary: retainedCadence.label,
+      sourceLabel: retainedCadence.sourceLabel,
+      evidencePosture: retainedCadence.evidencePosture,
+      asOf: retainedCycle?.updatedAt ?? null,
+      empty: retainedCadence.state === "NOT_CONFIGURED",
+      thinState: retainedCadence.state === "NOT_CONFIGURED",
+      scheduledFor: retainedCadence.scheduledFor ?? null,
+      lastCompletedAt: retainedCadence.lastCompletedAt ?? null,
+      cadenceSource: retainedCadence.cadenceSource,
+      cadenceType: retainedCadence.cadenceType ?? null,
+    },
+    activeAttentionQueueSummary: {
+      title: "Active attention queue summary",
+      count: attention.length,
+      summary: attention.length > 0
+        ? `${attention.length} sponsor-safe attention item${attention.length === 1 ? "" : "s"} currently require review.`
+        : "No sponsor-safe attention queue is currently published.",
+      sourceLabel: "Sponsor-safe command summary",
+      evidencePosture: deriveEvidencePosture(brief ?? undefined),
+      asOf: new Date().toISOString(),
+      empty: attention.length === 0,
+    },
+    latestOversightBriefStatus: {
+      title: "Latest oversight brief status",
+      status: briefStatus.status,
+      summary: briefStatus.summary,
+      sourceLabel: "Governed oversight brief",
+      evidencePosture: deriveEvidencePosture(brief ?? undefined),
+      asOf: briefStatus.asOf,
+      empty: briefStatus.empty,
+    },
+    counselMemorySummary: {
+      title: "Counsel memory summary",
+      totalEvents: brief?.counselHistory?.totalEvents ?? 0,
+      openCount: brief?.counselHistory?.openCount ?? 0,
+      summary: brief?.counselHistory?.summary ?? "No governed counsel history is available yet.",
+      sourceLabel: "Governed counsel history",
+      evidencePosture: brief?.counselHistory?.totalEvents ? "OPERATOR_RECORDED" : "INSUFFICIENT_EVIDENCE",
+      asOf: summaryTime(brief?.periodEnd, archive?.cycleSnapshots[archive.cycleSnapshots.length - 1]?.periodEnd ?? null),
+      empty: !(brief?.counselHistory?.totalEvents),
+    },
+    boardroomArchiveSummary: {
+      title: "Boardroom archive summary",
+      totalDossiers: brief?.boardroomArchive?.totalDossiers ?? 0,
+      unresolvedCount: brief?.boardroomArchive?.unresolvedBoardLevelIssues ?? 0,
+      summary: brief?.boardroomArchive?.summary ?? "No boardroom archive memory is available yet.",
+      sourceLabel: "Boardroom archive",
+      evidencePosture: brief?.boardroomArchive?.totalDossiers ? "OPERATOR_RECORDED" : "INSUFFICIENT_EVIDENCE",
+      asOf: summaryTime(brief?.periodEnd, archive?.cycleSnapshots[archive.cycleSnapshots.length - 1]?.periodEnd ?? null),
+      empty: !(brief?.boardroomArchive?.totalDossiers),
+    },
+    outcomeVerificationSummary: {
+      title: "Outcome verification summary",
+      confirmedOutcomes: outcomeSummary?.confirmedOutcomes ?? 0,
+      blockedOutcomes: outcomeSummary?.blockedOutcomes ?? 0,
+      abandonedOutcomes: outcomeSummary?.abandonedOutcomes ?? 0,
+      disputedFindings: outcomeSummary?.disputedFindings ?? 0,
+      summary: !outcomeSummary
+        ? "Outcome history is unavailable."
+        : outcomeSummary.thinState
+          ? "Outcome history is thin."
+          : `${outcomeSummary.confirmedOutcomes} confirmed, ${outcomeSummary.blockedOutcomes} blocked, ${outcomeSummary.abandonedOutcomes} abandoned, ${outcomeSummary.disputedFindings} disputed.`,
+      sourceLabel: outcomeSummary?.sourceLabel ?? "Retained Outcome History",
+      evidencePosture: outcomeSummary?.evidencePosture ?? "INSUFFICIENT_EVIDENCE",
+      asOf: outcomeSummary?.latestOutcomeDate ?? null,
+      thinState: outcomeSummary?.thinState ?? true,
+      empty: !outcomeSummary || (
+        outcomeSummary.confirmedOutcomes
+        + outcomeSummary.blockedOutcomes
+        + outcomeSummary.abandonedOutcomes
+        + outcomeSummary.disputedFindings
+      ) === 0,
+    },
+    cancellationLossSummary: {
+      title: "Cancellation-loss / continuity-loss summary",
+      retainedAssetCount: retainedAssets.length,
+      summary: brief?.cancellationLoss?.summary || "Cancellation-loss visibility is still thin.",
+      sourceLabel: "Retained continuity summary",
+      evidencePosture: retainedAssets.length > 0 ? "SYSTEM_INFERRED" : "INSUFFICIENT_EVIDENCE",
+      asOf: brief?.periodEnd ?? null,
+      empty: !brief?.cancellationLoss && retainedAssets.length === 0,
+      thinState: retainedAssets.length < 2,
+    },
   };
 
-  return { summary, brief, account, warnings };
+  return { summary, brief, account, warnings, retainedCadence, outcomeSummary };
+}
+
+function summaryTime(primary?: string | null, fallback?: string | null) {
+  return primary ?? fallback ?? null;
 }

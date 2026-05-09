@@ -3,6 +3,7 @@ import { getCreditProfile } from "@/lib/decision-ledger/ledger-service";
 import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-credit-governance";
 import { loadOversightAccount } from "@/lib/product/oversight-account-loader";
 import { buildOversightSignals } from "@/lib/product/oversight-signal-builder";
+import { buildBuyerVisibleCadencePosture, loadLatestRetainedReviewCycleForAccount } from "@/lib/product/retained-cadence-service";
 import { loadControlRoomState } from "@/lib/product/control-room-state-loader";
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
 import { projectOversightCycleConsequence } from "@/lib/product/oversight-cycle-consequence-projection";
@@ -120,6 +121,14 @@ export async function composeOversightBrief(input: {
     return { warnings };
   }
 
+  const latestRetainedCycle = await loadLatestRetainedReviewCycleForAccount({
+    accountId: loaded.account.accountId,
+    organisationId: input.organisationId ?? loaded.account.organisationId,
+    sponsorUserId: input.userId ?? loaded.account.ownerUserId,
+    sponsorEmail: input.email ?? undefined,
+  });
+  const retainedCadence = buildBuyerVisibleCadencePosture(latestRetainedCycle);
+
   const creditProfile = input.email ? await getCreditProfile(input.email.toLowerCase()) : null;
   if (!creditProfile && input.email) {
     warnings.push("Decision credit profile was unavailable for this oversight scope.");
@@ -216,6 +225,7 @@ export async function composeOversightBrief(input: {
     teamAggregate,
     enterpriseStrain,
     retainedEnforcement: loaded.retainedEnforcement ?? null,
+    retainedCadence,
   });
 
   // Inject checkpoint-level signals from the efficacy system
@@ -378,7 +388,8 @@ export async function composeOversightBrief(input: {
         s.type === "PATTERN_RECURRED" ||
         s.type === "OUTCOME_DETERIORATED" ||
         s.type === "COST_OF_INACTION_ACCUMULATING" ||
-        s.type === "COMMITMENT_UNVERIFIED"
+        s.type === "COMMITMENT_UNVERIFIED" ||
+        s.type === "RETAINED_REVIEW_OVERDUE"
       )
       .map((s) => ({
         id: s.id,
@@ -387,10 +398,12 @@ export async function composeOversightBrief(input: {
         title: s.title,
         explanation: s.explanation,
         recommendedAction: s.recommendedAction,
-        sourceLabel: s.type === "TEAM_DIVERGENCE_REPORTED" ? "Source: Team Assessment"
+        sourceLabel: s.sourceLabel ? s.sourceLabel
+          : s.type === "TEAM_DIVERGENCE_REPORTED" ? "Source: Team Assessment"
           : s.type === "ENTERPRISE_STRAIN_REPORTED" ? "Source: Enterprise Assessment"
           : s.caseId ? `Source: Case ${s.caseId}` : "Source: Oversight Cycle",
-        evidencePosture: s.type === "TEAM_DIVERGENCE_REPORTED" ? "aggregated"
+        evidencePosture: s.evidencePosture ? s.evidencePosture
+          : s.type === "TEAM_DIVERGENCE_REPORTED" ? "aggregated"
           : s.type === "ENTERPRISE_STRAIN_REPORTED" ? "system-inferred"
           : "system-inferred",
       })),
@@ -477,6 +490,14 @@ export async function composeOversightBrief(input: {
   };
 
   // ── Cycle consequence projection ──
+  brief.cadence = {
+    status: retainedCadence.state,
+    health: retainedCadence.state === "OVERDUE" || retainedCadence.state === "ESCALATED" ? "AT_RISK" : retainedCadence.state === "NOT_CONFIGURED" ? "WATCH" : "HEALTHY",
+    currentCycleDueDate: retainedCadence.scheduledFor ?? undefined,
+    nextCycleDueDate: retainedCadence.scheduledFor ?? undefined,
+    explanation: `${retainedCadence.label} ${retainedCadence.explanation}`.trim(),
+  };
+
   const consequenceProjection = projectOversightCycleConsequence({
     costOfInaction: brief.costOfInaction,
     patternRecurrence: brief.patternRecurrence,

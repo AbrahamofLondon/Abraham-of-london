@@ -9,6 +9,9 @@ import { loadOversightCycleArchive } from "@/lib/product/oversight-cycle-archive
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
 import type { OversightCycleAudience, OversightCycleArchiveRecord } from "@/lib/product/oversight-cycle-ledger-contract";
 import type { OversightCycleComparison } from "@/lib/product/oversight-cycle-comparison";
+import type { BuyerVisibleCadencePosture } from "@/lib/product/retained-cadence-contract";
+import { loadLatestRetainedReviewCycleForAccount, buildBuyerVisibleCadencePosture } from "@/lib/product/retained-cadence-service";
+import { canViewSponsorCommandSummary, deriveRetainedProductRole } from "@/lib/product/retained-role-contract";
 import { verifyRetainerAccess } from "@/lib/retainers/retainer-service";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import {
@@ -23,6 +26,7 @@ type PageProps = {
   nextCycleIntent: OversightCycleArchiveRecord["nextCycleIntent"] | null;
   cycleComparison: OversightCycleComparison | null;
   audience: OversightCycleAudience;
+  cadencePosture: BuyerVisibleCadencePosture | null;
 };
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -46,6 +50,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
   nextCycleIntent,
   cycleComparison,
   audience,
+  cadencePosture,
 }) => {
   return (
     <Layout title="Oversight Brief" description="Governed monthly oversight brief" fullWidth>
@@ -118,15 +123,38 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 </Section>
               )}
 
-              {brief.cadence && (
+              {(brief.cadence || cadencePosture) && (
                 <Section title="Cadence Posture">
-                  <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.cadence.explanation}</p>
+                  <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>
+                    {cadencePosture?.state === "NOT_CONFIGURED"
+                      ? "Retained cadence is not configured for this account."
+                      : cadencePosture?.state === "MANUAL_OPERATOR_REVIEW"
+                        ? "Retained review is operator-confirmed. Automated scheduling is not active for this account."
+                        : cadencePosture?.state === "SCHEDULED"
+                          ? `Next retained review is scheduled for ${cadencePosture.scheduledFor ? new Date(cadencePosture.scheduledFor).toLocaleDateString("en-GB") : "the recorded date"}.`
+                          : cadencePosture?.state === "DUE_SOON"
+                            ? "A retained review is due soon."
+                            : cadencePosture?.state === "OVERDUE"
+                              ? "A retained review is overdue. Operator attention is required."
+                              : cadencePosture?.state === "COMPLETED"
+                                ? `Latest retained review completed on ${cadencePosture.lastCompletedAt ? new Date(cadencePosture.lastCompletedAt).toLocaleDateString("en-GB") : "the recorded date"}.`
+                                : cadencePosture?.state === "SKIPPED_WITH_REASON"
+                                  ? "Latest retained review was skipped with recorded reason."
+                                  : cadencePosture?.state === "ESCALATED"
+                                    ? "This retained review cycle has been escalated."
+                                    : brief.cadence?.explanation}
+                  </p>
                   <p className="mt-2" style={{ ...serif, color: "rgba(255,255,255,0.58)", lineHeight: 1.6 }}>
-                    Manual retained review is available. No automated cadence is claimed on this surface unless separately configured by operators.
+                    {cadencePosture?.explanation ?? brief.cadence?.explanation}
                   </p>
                   <p className="mt-2" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.62)" }}>
-                    {brief.cadence.status} · {brief.cadence.health}
-                    {brief.cadence.nextCycleDueDate ? ` · Next review ${new Date(brief.cadence.nextCycleDueDate).toLocaleDateString("en-GB")}` : ""}
+                    {(cadencePosture?.state ?? brief.cadence?.status ?? "UNAVAILABLE")}
+                    {brief.cadence?.health ? ` · ${brief.cadence.health}` : ""}
+                    {cadencePosture?.scheduledFor ? ` · Next review ${new Date(cadencePosture.scheduledFor).toLocaleDateString("en-GB")}` : ""}
+                    {cadencePosture?.lastCompletedAt ? ` · Last review ${new Date(cadencePosture.lastCompletedAt).toLocaleDateString("en-GB")}` : ""}
+                    {cadencePosture?.cadenceSource ? ` · ${cadencePosture.cadenceSource}` : ""}
+                    {cadencePosture?.evidencePosture ? ` · ${cadencePosture.evidencePosture}` : ""}
+                    {cadencePosture?.sourceLabel ? ` · ${cadencePosture.sourceLabel}` : ""}
                   </p>
                 </Section>
               )}
@@ -436,19 +464,38 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const cycleId = typeof ctx.query.cycleId === "string" ? ctx.query.cycleId : null;
   const audience = ctx.query.audience === "BOARD_LEVEL" ? "BOARD_LEVEL" : "CLIENT_SPONSOR";
   if (!cycleId) {
-    return { props: { blockedReason: "Cycle id is required.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience } };
+    return { props: { blockedReason: "Cycle id is required.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
   }
 
   const archive = await loadOversightCycleArchive({ cycleId });
   if (!archive) {
-    return { props: { blockedReason: "Oversight cycle could not be found.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience } };
+    return { props: { blockedReason: "Oversight cycle could not be found.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
   }
 
   const email = session.user.email.toLowerCase();
   const isAdmin = access.permissions.isAdmin;
+  const membership = archive.record.organisationId
+    ? await prisma.organisationMembership.findFirst({
+        where: {
+          organisationId: archive.record.organisationId,
+          email,
+          status: "active",
+        },
+        select: { roleTitle: true, isExecutive: true },
+      })
+    : null;
+  const role = deriveRetainedProductRole({
+    isAdmin,
+    organisationRole: membership?.roleTitle ?? (membership?.isExecutive ? "EXECUTIVE" : archive.record.accountId ? "SPONSOR" : null),
+    authenticated: access.permissions.isAuthenticated,
+  });
+
+  if (!isAdmin && !canViewSponsorCommandSummary(role)) {
+    return { props: { blockedReason: "This sponsor-safe oversight brief is not available to the current role.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
+  }
 
   if (!isAdmin && archive.record.organisationId) {
-    const membership = await prisma.organisationMembership.findFirst({
+    const membershipGate = await prisma.organisationMembership.findFirst({
       where: {
         organisationId: archive.record.organisationId,
         email,
@@ -456,8 +503,8 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       },
       select: { id: true },
     });
-    if (!membership) {
-      return { props: { blockedReason: "Organisation access is required for this oversight brief.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience } };
+    if (!membershipGate) {
+      return { props: { blockedReason: "Organisation access is required for this oversight brief.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
     }
   }
 
@@ -467,8 +514,15 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     email,
   });
   if (!retainerAccess.ok && !isAdmin) {
-    return { props: { blockedReason: "Retainer access is not active for this account.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience } };
+    return { props: { blockedReason: "Retainer access is not active for this account.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
   }
+
+  const retainedCycle = await loadLatestRetainedReviewCycleForAccount({
+    accountId: archive.record.accountId,
+    organisationId: archive.record.organisationId ?? null,
+    sponsorEmail: email,
+  }).catch(() => null);
+  const cadencePosture = buildBuyerVisibleCadencePosture(retainedCycle);
 
   return {
     props: {
@@ -479,6 +533,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       nextCycleIntent: archive.record.nextCycleIntent ?? null,
       cycleComparison: archive.cycleComparison ?? null,
       audience,
+      cadencePosture,
     },
   };
 };

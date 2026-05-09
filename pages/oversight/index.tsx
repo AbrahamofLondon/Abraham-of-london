@@ -6,16 +6,22 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import RetainedMemoryLossPanel from "@/components/oversight/RetainedMemoryLossPanel";
 import { resolvePageAccess } from "@/lib/access/server";
-import { loadBoardroomArchiveCommandSummary } from "@/lib/product/boardroom-archive-summary";
-import type { OversightCadenceVisibility } from "@/lib/product/oversight-cadence-contract";
+import { prisma } from "@/lib/prisma.server";
+import {
+  canViewBoardroomArchive,
+  canViewPortfolioMemory,
+  canViewSponsorCommandSummary,
+  deriveRetainedProductRole,
+  type RetainedProductRole,
+} from "@/lib/product/retained-role-contract";
 import { buildSponsorSafeCommandSummary, type SponsorSafeCommandSummary } from "@/lib/product/sponsor-safe-command-summary";
 
 type Props = {
   authenticated: boolean;
   summary: SponsorSafeCommandSummary | null;
-  boardroomSummary: Awaited<ReturnType<typeof loadBoardroomArchiveCommandSummary>> | null;
-  cadence: OversightCadenceVisibility | null;
   warnings: string[];
+  role: RetainedProductRole | null;
+  blockedByRole: boolean;
 };
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -30,7 +36,38 @@ function Stat({ label, value, note }: { label: string; value: string | number; n
   );
 }
 
-const OversightPage: NextPage<Props> = ({ authenticated, summary, boardroomSummary, cadence, warnings }) => {
+function SectionCard({
+  eyebrow,
+  title,
+  body,
+  meta,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  meta: string[];
+}) {
+  return (
+    <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>{eyebrow}</p>
+      <p className="mt-3 text-white">{title}</p>
+      <p className="mt-3 text-sm leading-7 text-white/60">{body}</p>
+      <div className="mt-4 space-y-1">
+        {meta.map((item) => (
+          <p key={item} style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+            {item}
+          </p>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function formatDate(value?: string | null) {
+  return value ? new Date(value).toLocaleDateString("en-GB") : "Not available";
+}
+
+const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role, blockedByRole }) => {
   if (!authenticated) {
     return (
       <Layout title="Retained Oversight Command" description="Sponsor-safe retained oversight visibility." fullWidth>
@@ -55,11 +92,19 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, boardroomSumma
             </p>
             <h1 className="mt-3 text-3xl text-white">Sponsor-safe oversight visibility.</h1>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60">
-              This surface shows what is being retained: review posture, memory, escalation history, and continuity. It does not expose respondent-level evidence or operator-only material.
+              This surface shows retained cadence posture, brief status, memory, active attention, and continuity loss without exposing respondent text, operator notes, counsel notes, or internal trigger mechanics.
+            </p>
+            <p className="mt-4 text-xs uppercase tracking-[0.2em] text-white/35" style={mono}>
+              Product role: {role ?? "UNRESOLVED"}
             </p>
           </header>
 
-          {!summary ? (
+          {blockedByRole ? (
+            <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+              <p className="text-white/65">This sponsor-safe surface is not available to the current role.</p>
+              <p className="mt-3 text-sm leading-7 text-white/50">Respondent-facing access does not expose Control Room or sponsor command surfaces.</p>
+            </section>
+          ) : !summary ? (
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
               <p className="text-white/65">Retained oversight command is not yet established for this account.</p>
               <p className="mt-3 text-sm leading-7 text-white/50">Start with diagnostic evidence, then capture retained oversight intake before expecting sponsor-safe command visibility.</p>
@@ -92,40 +137,111 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, boardroomSumma
                 </section>
 
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Retained cadence posture</p>
+                  <p className="mt-3 text-white">{summary.retainedCadencePosture.summary}</p>
+                  <p className="mt-3 text-sm leading-7 text-white/58">{summary.retainedCadencePosture.state === "NOT_CONFIGURED" ? "Retained cadence is not configured for this account." : summary.retainedCadencePosture.state === "MANUAL_OPERATOR_REVIEW" ? "Retained review is operator-confirmed. Automated scheduling is not active for this account." : summary.retainedCadencePosture.state === "SCHEDULED" ? `Next retained review is scheduled for ${formatDate(summary.retainedCadencePosture.scheduledFor)}.` : summary.retainedCadencePosture.state === "DUE_SOON" ? "A retained review is due soon." : summary.retainedCadencePosture.state === "OVERDUE" ? "A retained review is overdue. Operator attention is required." : summary.retainedCadencePosture.state === "COMPLETED" ? `Latest retained review completed on ${formatDate(summary.retainedCadencePosture.lastCompletedAt)}.` : summary.retainedCadencePosture.state === "SKIPPED_WITH_REASON" ? "Latest retained review was skipped with recorded reason." : "This retained review cycle has been escalated."}</p>
+                  <div className="mt-4 space-y-1">
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                      Last review date · {formatDate(summary.retainedCadencePosture.lastCompletedAt)}
+                    </p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                      Next scheduled review date · {formatDate(summary.retainedCadencePosture.scheduledFor)}
+                    </p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                      Cadence source · {summary.retainedCadencePosture.cadenceSource}
+                    </p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                      Evidence posture · {summary.retainedCadencePosture.evidencePosture}
+                    </p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                      Source label · {summary.retainedCadencePosture.sourceLabel}
+                    </p>
+                  </div>
+                </section>
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-3">
+                <SectionCard
+                  eyebrow="Active Attention Queue"
+                  title={summary.activeAttentionQueueSummary.summary}
+                  body="This is the sponsor-safe count of active attention items currently published from retained oversight."
+                  meta={[
+                    `Source label · ${summary.activeAttentionQueueSummary.sourceLabel}`,
+                    `Evidence posture · ${summary.activeAttentionQueueSummary.evidencePosture}`,
+                    `As of · ${formatDate(summary.activeAttentionQueueSummary.asOf)}`,
+                  ]}
+                />
+                <SectionCard
+                  eyebrow="Latest Oversight Brief"
+                  title={summary.latestOversightBriefStatus.status}
+                  body={summary.latestOversightBriefStatus.summary}
+                  meta={[
+                    `Source label · ${summary.latestOversightBriefStatus.sourceLabel}`,
+                    `Evidence posture · ${summary.latestOversightBriefStatus.evidencePosture}`,
+                    `Date · ${formatDate(summary.latestOversightBriefStatus.asOf)}`,
+                  ]}
+                />
+                <SectionCard
+                  eyebrow="Outcome Verification"
+                  title={summary.outcomeVerificationSummary.summary}
+                  body={summary.outcomeVerificationSummary.thinState ? "Outcome history is thin." : "Outcome history is sufficient to contribute to retained oversight posture."}
+                  meta={[
+                    `Source label · ${summary.outcomeVerificationSummary.sourceLabel}`,
+                    `Evidence posture · ${summary.outcomeVerificationSummary.evidencePosture}`,
+                    `Date · ${formatDate(summary.outcomeVerificationSummary.asOf)}`,
+                  ]}
+                />
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-3">
+                <SectionCard
+                  eyebrow="Counsel Memory"
+                  title={summary.counselMemorySummary.summary}
+                  body={summary.counselMemorySummary.empty ? "No counsel history has been retained yet." : `${summary.counselMemorySummary.totalEvents} event(s), ${summary.counselMemorySummary.openCount} open.`}
+                  meta={[
+                    `Source label · ${summary.counselMemorySummary.sourceLabel}`,
+                    `Evidence posture · ${summary.counselMemorySummary.evidencePosture}`,
+                    `Date · ${formatDate(summary.counselMemorySummary.asOf)}`,
+                  ]}
+                />
+                <SectionCard
+                  eyebrow="Boardroom Archive"
+                  title={canViewBoardroomArchive(role) ? summary.boardroomArchiveSummary.summary : "Boardroom archive summary is suppressed for this role."}
+                  body={canViewBoardroomArchive(role) ? (summary.boardroomArchiveSummary.empty ? "No boardroom archive has been retained yet." : `${summary.boardroomArchiveSummary.totalDossiers} dossier record(s), ${summary.boardroomArchiveSummary.unresolvedCount} unresolved.`) : "Boardroom archive visibility is restricted on this surface."}
+                  meta={[
+                    `Source label · ${summary.boardroomArchiveSummary.sourceLabel}`,
+                    `Evidence posture · ${summary.boardroomArchiveSummary.evidencePosture}`,
+                    `Date · ${formatDate(summary.boardroomArchiveSummary.asOf)}`,
+                  ]}
+                />
+                <SectionCard
+                  eyebrow="Continuity Loss"
+                  title={summary.cancellationLossSummary.summary}
+                  body={summary.cancellationLoss.retainedAssets.length > 0 ? summary.cancellationLoss.retainedAssets.join(", ") : "Continuity-loss detail remains thin until more retained history exists."}
+                  meta={[
+                    `Source label · ${summary.cancellationLossSummary.sourceLabel}`,
+                    `Evidence posture · ${summary.cancellationLossSummary.evidencePosture}`,
+                    `Date · ${formatDate(summary.cancellationLossSummary.asOf)}`,
+                  ]}
+                />
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-3">
+                <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
                   <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Institutional memory retained</p>
                   <div className="mt-4 space-y-3 text-sm text-white/62">
                     <p>First captured: {summary.retainedMemory.firstCapturedAt ? new Date(summary.retainedMemory.firstCapturedAt).toLocaleDateString("en-GB") : "Not yet established"}</p>
                     <p>Most recent update: {summary.retainedMemory.lastUpdatedAt ? new Date(summary.retainedMemory.lastUpdatedAt).toLocaleDateString("en-GB") : "No retained update yet"}</p>
                     <p>Continuity fields carried forward: {summary.retainedMemory.completedStages}</p>
                     <p>Checkpoint responses retained: {summary.retainedMemory.checkpointResponses}</p>
-                  </div>
-                  <div className="mt-5 border-t border-white/10 pt-4">
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.36)" }}>Suppression boundary</p>
-                    <ul className="mt-3 space-y-2 text-sm text-white/55">
-                      {summary.suppression.map((item) => <li key={`${item.reason}-${item.scope}`}>{item.reason} ({item.scope})</li>)}
-                    </ul>
+                    <p>Portfolio memory: {canViewPortfolioMemory(role) ? "Visible on sponsor-safe basis where data exists." : "Suppressed for this role."}</p>
                   </div>
                 </section>
-              </section>
-
-              <section className="grid gap-6 xl:grid-cols-3">
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Cadence posture</p>
-                  <p className="mt-3 text-white">{cadence?.label || "Manual retained review is available."}</p>
-                  <p className="mt-3 text-sm leading-7 text-white/58">{cadence?.explanation || "No automated cadence has been configured. Review cadence requires operator confirmation."}</p>
-                </section>
-                <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Counsel and boardroom history</p>
-                  <p className="mt-3 text-sm leading-7 text-white/58">
-                    {summary.retainedMemory.counselCases} counsel event{summary.retainedMemory.counselCases === 1 ? "" : "s"} and {summary.retainedMemory.boardroomDossiers} boardroom dossier record{summary.retainedMemory.boardroomDossiers === 1 ? "" : "s"} remain in retained memory.
-                  </p>
-                  {boardroomSummary?.latestDossier ? (
-                    <p className="mt-3 text-sm text-white/48">
-                      Latest dossier: {new Date(boardroomSummary.latestDossier.generatedAt).toLocaleDateString("en-GB")} · {boardroomSummary.latestDossier.qualificationStatus.replace(/_/g, " ").toLowerCase()}
-                    </p>
-                  ) : (
-                    <p className="mt-3 text-sm text-white/45">No boardroom dossier has been archived yet. Boardroom memory appears only when the evidence justifies it.</p>
-                  )}
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Suppression boundary</p>
+                  <ul className="mt-3 space-y-2 text-sm text-white/55">
+                    {summary.suppression.map((item) => <li key={`${item.reason}-${item.scope}`}>{item.reason} ({item.scope})</li>)}
+                  </ul>
                 </section>
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
                   <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Role-safe visibility</p>
@@ -167,49 +283,41 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const email = typeof session?.user?.email === "string" ? session.user.email.toLowerCase() : null;
   const userId = typeof session?.user?.id === "string" ? session.user.id : null;
   if (!access.permissions.isAuthenticated || !email) {
-    return { props: { authenticated: false, summary: null, boardroomSummary: null, cadence: null, warnings: [] } };
+    return { props: { authenticated: false, summary: null, warnings: [], role: null, blockedByRole: false } };
   }
 
   const organisationId = typeof ctx.query.organisationId === "string" ? ctx.query.organisationId : null;
   const result = await buildSponsorSafeCommandSummary({ userId, email, organisationId });
-  const cadence: OversightCadenceVisibility = !result.brief?.cadence
-    ? {
-        state: "AUTOMATION_NOT_CONFIGURED",
-        label: "No automated cadence has been configured.",
-        explanation: "Manual retained review is available. Next review is not yet scheduled until operator confirmation exists.",
-      }
-    : result.brief.cadence.status === "REVIEW_DUE" || result.brief.cadence.status === "REVIEW_OVERDUE" || result.brief.cadence.status === "DELIVERY_DUE" || result.brief.cadence.status === "DELIVERY_OVERDUE" || result.brief.cadence.status === "OVERDUE"
-      ? {
-          state: "MANUAL_REVIEW_READY",
-          label: "Manual retained review is available.",
-          explanation: "Review cadence requires operator confirmation. No automated cadence has been configured on this surface.",
-        }
-      : result.brief.cadence.status === "PAUSED_BY_COUNSEL_ESCALATION"
-        ? {
-            state: "CADENCE_BLOCKED",
-            label: "Review cadence is blocked pending escalation.",
-            explanation: "A live escalation is holding the next retained review. This is not automated oversight.",
-          }
-        : {
-            state: "MANUAL_REVIEW_SCHEDULED",
-            label: "Review cadence requires operator confirmation.",
-            explanation: `Next review is ${result.brief.cadence.nextCycleDueDate ? `scheduled manually for ${new Date(result.brief.cadence.nextCycleDueDate).toLocaleDateString("en-GB")}` : "not yet scheduled"}. No automated cadence has been configured.`,
-          };
-
-  const boardroomSummary = organisationId || result.account?.organisationId
-    ? await loadBoardroomArchiveCommandSummary({ organisationId: organisationId ?? result.account?.organisationId ?? null }).catch(() => null)
+  const resolvedOrganisationId = organisationId ?? result.account?.organisationId ?? null;
+  const membership = resolvedOrganisationId
+    ? await prisma.organisationMembership.findFirst({
+        where: {
+          organisationId: resolvedOrganisationId,
+          email,
+          status: "active",
+        },
+        select: {
+          roleTitle: true,
+          isExecutive: true,
+        },
+      }).catch(() => null)
     : null;
+
+  const role = deriveRetainedProductRole({
+    isAdmin: access.permissions.isAdmin,
+    organisationRole: membership?.roleTitle ?? (membership?.isExecutive ? "EXECUTIVE" : result.account?.ownerUserId === userId ? "OWNER" : null),
+    authenticated: access.permissions.isAuthenticated,
+  });
 
   return {
     props: {
       authenticated: true,
-      summary: result.summary,
-      boardroomSummary,
-      cadence,
+      summary: canViewSponsorCommandSummary(role) ? result.summary : null,
       warnings: result.warnings,
+      role,
+      blockedByRole: !canViewSponsorCommandSummary(role),
     },
   };
 };
 
 export default OversightPage;
-

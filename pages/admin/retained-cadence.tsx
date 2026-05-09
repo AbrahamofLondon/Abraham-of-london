@@ -1,0 +1,169 @@
+import * as React from "react";
+import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import Head from "next/head";
+
+import AdminLayout from "@/components/admin/AdminLayout";
+import { requireAdminPage } from "@/lib/access/server";
+import { buildOperatorCadenceQueue } from "@/lib/product/retained-cadence-service";
+
+type QueueResponse = Awaited<ReturnType<typeof buildOperatorCadenceQueue>>;
+
+export const getServerSideProps: GetServerSideProps<{
+  initialQueue: QueueResponse;
+}> = async (ctx) => {
+  const guard = await requireAdminPage(ctx);
+  if (!guard.authorized) return guard.redirect as any;
+  const initialQueue = await buildOperatorCadenceQueue();
+  return { props: { initialQueue } };
+};
+
+function Row({
+  item,
+  onAction,
+  busy,
+}: {
+  item: QueueResponse["all"][number];
+  onAction: (cycleId: string, action: "MARK_COMPLETED" | "SKIP_WITH_REASON" | "ESCALATE") => void;
+  busy: boolean;
+}) {
+  const actionable = typeof item.cycleId === "string" && item.cycleId.length > 0;
+  return (
+    <tr className="border-t border-white/5 align-top text-sm text-white/70">
+      <td className="py-3 pr-4 text-white">{item.organisationLabel}</td>
+      <td className="py-3 pr-4">{item.organisationId ?? item.accountId ?? "Unscoped"}</td>
+      <td className="py-3 pr-4">{item.scheduledFor ? new Date(item.scheduledFor).toLocaleDateString("en-GB") : "Not scheduled"}</td>
+      <td className="py-3 pr-4">{item.cadenceState}</td>
+      <td className="py-3 pr-4">{item.cadenceSource}</td>
+      <td className="py-3 pr-4">{item.evidencePosture}</td>
+      <td className="py-3">
+        {actionable ? (
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => onAction(item.cycleId!, "MARK_COMPLETED")} disabled={busy} className="border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200 disabled:opacity-50">
+              Mark completed
+            </button>
+            <button onClick={() => onAction(item.cycleId!, "SKIP_WITH_REASON")} disabled={busy} className="border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs text-amber-100 disabled:opacity-50">
+              Skip with reason
+            </button>
+            <button onClick={() => onAction(item.cycleId!, "ESCALATE")} disabled={busy} className="border border-rose-500/25 bg-rose-500/10 px-3 py-1 text-xs text-rose-200 disabled:opacity-50">
+              Escalate
+            </button>
+          </div>
+        ) : (
+          <span className="text-white/35">No cycle record yet</span>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+export default function RetainedCadencePage({
+  initialQueue,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const [queue, setQueue] = React.useState(initialQueue);
+  const [busyCycleId, setBusyCycleId] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  async function refreshQueue() {
+    const response = await fetch("/api/admin/retained-cadence/list");
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Failed to reload retained cadence queue.");
+    }
+    setQueue(data.queue);
+  }
+
+  async function handleAction(cycleId: string, action: "MARK_COMPLETED" | "SKIP_WITH_REASON" | "ESCALATE") {
+    setBusyCycleId(cycleId);
+    setError(null);
+    try {
+      const reason = action === "MARK_COMPLETED"
+        ? ""
+        : window.prompt(action === "SKIP_WITH_REASON" ? "Enter skip reason" : "Enter escalation reason", "") || "";
+      if (action !== "MARK_COMPLETED" && !reason.trim()) {
+        throw new Error(action === "SKIP_WITH_REASON" ? "Skip reason is required." : "Escalation reason is required.");
+      }
+      const response = await fetch("/api/admin/retained-cadence/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cycleId, action, reason }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Cadence update failed.");
+      }
+      await refreshQueue();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Cadence update failed.");
+    } finally {
+      setBusyCycleId(null);
+    }
+  }
+
+  const sections: Array<[string, QueueResponse["all"]]> = [
+    ["Overdue cycles", queue.overdue],
+    ["Due cycles", queue.due],
+    ["Skipped cycles", queue.skipped],
+    ["Escalated cycles", queue.escalated],
+    ["Not configured", queue.notConfigured],
+  ];
+
+  return (
+    <AdminLayout title="Retained Cadence">
+      <Head>
+        <title>Retained Cadence | Admin</title>
+        <meta name="robots" content="noindex,nofollow" />
+      </Head>
+
+      <div className="space-y-6">
+        <section className="border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-6">
+          <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-amber-500/60">Retained oversight cadence</p>
+          <h1 className="mt-3 font-serif text-3xl text-white">Operator cadence queue</h1>
+          <p className="mt-2 max-w-3xl text-sm text-white/55">
+            This queue shows due, overdue, skipped, escalated, and unconfigured retained review cycles. Actions are operator-only and do not publish internal notes to buyer-facing surfaces.
+          </p>
+        </section>
+
+        {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+
+        {sections.map(([title, items]) => (
+          <section key={title} className="border border-white/10 bg-zinc-950/70 p-5">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">{title}</h2>
+              <span className="text-sm text-white/45">{items.length}</span>
+            </div>
+
+            {items.length === 0 ? (
+              <p className="mt-4 text-sm text-white/45">No records in this state.</p>
+            ) : (
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[1100px] text-left">
+                  <thead className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">
+                    <tr>
+                      <th className="pb-3 pr-4">Account / Organisation</th>
+                      <th className="pb-3 pr-4">Reference</th>
+                      <th className="pb-3 pr-4">Scheduled date</th>
+                      <th className="pb-3 pr-4">State</th>
+                      <th className="pb-3 pr-4">Source</th>
+                      <th className="pb-3 pr-4">Evidence posture</th>
+                      <th className="pb-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item) => (
+                      <Row
+                        key={`${title}-${item.accountId}-${item.organisationId}-${item.cycleId ?? "unconfigured"}`}
+                        item={item}
+                        onAction={handleAction}
+                        busy={busyCycleId === item.cycleId}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        ))}
+      </div>
+    </AdminLayout>
+  );
+}

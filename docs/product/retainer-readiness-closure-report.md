@@ -1,87 +1,103 @@
 # Retainer Readiness Closure Report
 
-Final classification after this pass: `SELECTIVE_15K_READY`
+Final runtime claim posture after this pass:
+
+- `SELECTIVE_HIGH_VALUE_READY`
+- Not `GENERAL_50K_READY`
+
+## Files changed
+
+- `lib/product/retained-cadence-contract.ts`
+- `lib/product/retained-cadence-service.ts`
+- `lib/product/retained-role-contract.ts`
+- `lib/product/retained-outcome-summary.ts`
+- `lib/product/retainer-readiness-classifier.ts`
+- `lib/product/retainer-oversight-contract.ts`
+- `lib/product/oversight-signal-builder.ts`
+- `lib/product/oversight-brief-composer.ts`
+- `lib/product/sponsor-safe-command-summary.ts`
+- `lib/product/proof-pack-generator.ts`
+- `pages/oversight/index.tsx`
+- `pages/oversight/brief/[cycleId].tsx`
+- `pages/admin/retained-cadence.tsx`
+- `pages/admin/retainer-readiness.tsx`
+- `pages/api/admin/retained-cadence/list.ts`
+- `pages/api/admin/retained-cadence/update.ts`
+- `pages/account/proof-pack.tsx`
+- `docs/product/retainer-readiness-final-verification.md`
+- `docs/product/retainer-readiness-closure-report.md`
+- `docs/product/retainer-and-surface-discipline-closure-report.md`
+
+## Runtime capabilities added
+
+- Persisted retained cadence state using `DiagnosticRecord`
+- Buyer-visible cadence posture
+- Operator due / overdue / skipped / escalated cadence queue
+- `RETAINED_REVIEW_OVERDUE` oversight signal
+- Product-layer retained role contract
+- Sponsor-safe command surface sections
+- Retained outcome history summary
+- Conservative retainer readiness classifier
+
+## What buyers can now see
+
+- Retained cadence posture with public-safe copy
+- Last review date where available
+- Next scheduled review date where available
+- Cadence source and evidence posture
+- Sponsor-safe attention queue summary
+- Latest oversight brief status
+- Counsel memory summary
+- Boardroom archive summary
+- Outcome verification summary
+- Continuity-loss summary
+
+## What remains operator-only
+
+- Cadence queue operations
+- Completion / skip / escalation mutation
+- Operational review handling
+- Raw cadence reasons beyond public-safe labels
+- Operator notes and counsel notes
+
+## Signals added
+
+- `RETAINED_REVIEW_OVERDUE`
+
+Signal behaviour:
+
+- source label: `Retained Oversight Cadence`
+- explanation: `A retained review cycle is overdue. Operator attention is required.`
+- no threshold disclosure
+- no scheduler mechanics disclosure
+
+## Role and suppression protections
+
+- Respondents are blocked from sponsor command surfaces.
+- Sponsors and owners can view aggregate sponsor-safe summaries.
+- Operators and admins can manage cadence.
+- Raw respondent text is denied by default.
+- Operator notes are withheld from client-facing surfaces.
+- Counsel notes are withheld from client-facing surfaces.
+- Portfolio memory remains sponsor-safe/suppressed unless role and entitlement maturity justify more.
+
+## Honest claim status
 
 | Tier | Current claim |
 | --- | --- |
 | £5k | Defensible today |
-| £15k | Selectively defensible today |
-| £50k | Not generally defensible yet |
+| £15k | Defensible today, with stronger runtime discipline |
+| £50k | Still blocked for general claim |
 
-## What became buyer-visible
+## Remaining blockers
 
-- sponsor-safe retained oversight command visibility at `/oversight`
-- retained evidence and continuity counts
-- explicit cadence posture with manual-review honesty
-- cumulative counsel history
-- boardroom archive memory
-- truthful cancellation-loss distinction between retained records and lost active oversight
+1. Live retained scopes still need real scheduled/system-triggered cadence configuration, not merely product support.
+2. General £50k readiness still requires non-thin retained outcome history.
+3. General £50k readiness still requires real counsel or boardroom memory on the evaluated scope.
+4. Portfolio exposure is still suppressed/controlled rather than fully entitlement-mature.
 
-## What remains behind the curtain
+## Final classification
 
-- raw respondent text
-- operator notes
-- counsel notes
-- thresholds
-- trigger mechanics
-- internal subsystem naming
-- portfolio memory without entitlement
-
-## WHAT BLOCKS £50K — TURN INTO BUILD TARGETS
-
-Do not merely list these as reasons we are not ready. Convert each into an implementation target.
-
-1. Automated / enforced cadence
-   Current blocker:
-   Cadence is too manual.
-   Required build:
-   Scheduled retained review cycles, overdue detection, operator queue, escalation signal, buyer-visible cadence posture.
-
-2. Stronger role model
-   Current blocker:
-   Role separation still relies too much on environment/admin assumptions.
-   Required build:
-   Product-layer role contract for sponsor, respondent, operator, counsel reviewer, owner/admin, with access rules and suppression boundaries.
-
-3. Richer enterprise Control Room
-   Current blocker:
-   Enterprise Control Room is foundation-ready but not yet a finished sponsor command surface.
-   Required build:
-   Sponsor-safe command summary, aggregate-only risk map, active attention queue, suppressed-data indicators, no raw respondent text.
-
-4. Portfolio memory entitlement maturity
-   Current blocker:
-   Portfolio intelligence exists but exposure is not entitlement-mature.
-   Required build:
-   Explicit portfolio entitlement, privacy-safe aggregation, small-sample suppression, organisation-level comparison only where permitted.
-
-5. Mature retained outcome history
-   Current blocker:
-   Outcome verification exists but retained outcome history is still thin.
-   Required build:
-   Retained outcome archive, cycle-over-cycle movement, confirmed/blocked/abandoned classification, proof-pack inclusion.
-
-Strategic posture:
-The goal is not to explain why £50k is unavailable. The goal is to build until the explanation disappears.
-
-## What supports £5k today
-
-- retained oversight intake
-- sponsor-safe visibility
-- proof pack continuity
-- cycle memory
-- counsel escalation history
-
-## What supports selective £15k today
-
-- retained oversight command surface
-- institutional memory archive
-- boardroom archive visibility
-- cumulative counsel process memory
-- cancellation-loss visibility framed honestly
-
-## Honest final classification
-
-- `SELECTIVE_15K_READY`
-
-Do not claim `SELECTIVE_HIGH_VALUE_READY`, `GENERAL_50K_READY`, or general £50k readiness from the current product state.
+- Product claim posture: `SELECTIVE_HIGH_VALUE_READY`
+- General market classification: `GENERAL_50K_BLOCKED`
+- Not claimed: `GENERAL_50K_READY`

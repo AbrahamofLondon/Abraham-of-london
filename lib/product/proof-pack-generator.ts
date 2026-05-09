@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma.server";
 import { getLedgerSummary } from "@/lib/decision-ledger/ledger-service";
 import { loadCounselCaseForUser } from "@/lib/product/counsel-case-service";
+import { buildRetainedOutcomeSummary, type RetainedOutcomeSummary } from "@/lib/product/retained-outcome-summary";
 
 export type ProofLabel =
   | "USER_REPORTED"
@@ -28,6 +29,7 @@ export type ProofPack = {
   decisionVelocityTrend: ProofPackLine;
   counselReviews: ProofPackLine;
   oversightCycles: ProofPackLine;
+  retainedOutcomeHistory: RetainedOutcomeSummary;
   summary: string;
 };
 
@@ -64,6 +66,7 @@ export async function generateProofPack(input: {
     ledger,
     counselCase,
     oversightArchives,
+    retainedOutcomeHistory,
   ] = await Promise.all([
     prisma.diagnosticRecord.count({
       where: {
@@ -121,6 +124,7 @@ export async function generateProofPack(input: {
       orderBy: { createdAt: "desc" },
       take: 200,
     }),
+    buildRetainedOutcomeSummary({ email, userId: input.userId ?? null }),
   ]);
 
   const journeyIds = journeys.map((item) => item.id);
@@ -235,6 +239,7 @@ export async function generateProofPack(input: {
       posture: oversightCycleCount > 0 ? "OPERATOR_REVIEWED" : "INSUFFICIENT_EVIDENCE",
       note: "Archived oversight cycles released for this account or sponsor email.",
     },
+    retainedOutcomeHistory,
     summary: [
       `${diagnosticsCompleted} diagnostic record${diagnosticsCompleted === 1 ? "" : "s"} completed.`,
       `${allCheckpoints.length} checkpoint${allCheckpoints.length === 1 ? "" : "s"} created and ${checkpointResponses} response${checkpointResponses === 1 ? "" : "s"} recorded.`,

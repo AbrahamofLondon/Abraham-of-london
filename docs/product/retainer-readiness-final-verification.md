@@ -1,121 +1,110 @@
 # Retainer Readiness Final Verification
 
-Route verified: `/oversight`
+Runtime verification route set:
 
-## A2. Build toward enforced cadence, not manual disclaimer
+- `/oversight`
+- `/oversight/brief/[cycleId]`
+- `/admin/retained-cadence`
+- `/admin/retainer-readiness`
+- `/api/admin/retained-cadence/list`
+- `/api/admin/retained-cadence/update`
 
-Current state:
-Retainer cadence may still be manual or operator-confirmed today. Do not falsely describe it as automated, continuous, or always-on unless the runtime actually enforces it.
+## Files changed
 
-But the implementation target is not “manual honesty.” The target is to remove the blocker preventing £50k readiness.
+- `lib/product/retained-cadence-contract.ts`
+- `lib/product/retained-cadence-service.ts`
+- `lib/product/retained-role-contract.ts`
+- `lib/product/retained-outcome-summary.ts`
+- `lib/product/retainer-readiness-classifier.ts`
+- `lib/product/retainer-oversight-contract.ts`
+- `lib/product/oversight-signal-builder.ts`
+- `lib/product/oversight-brief-composer.ts`
+- `lib/product/sponsor-safe-command-summary.ts`
+- `lib/product/proof-pack-generator.ts`
+- `pages/oversight/index.tsx`
+- `pages/oversight/brief/[cycleId].tsx`
+- `pages/admin/retained-cadence.tsx`
+- `pages/admin/retainer-readiness.tsx`
+- `pages/api/admin/retained-cadence/list.ts`
+- `pages/api/admin/retained-cadence/update.ts`
+- `pages/account/proof-pack.tsx`
 
-Required direction:
-Build the cadence layer so retained oversight becomes enforceable, scheduled, auditable, and buyer-visible.
+## What was built
 
-Required capabilities:
+1. Enforced retained cadence
+- Runtime cadence states now exist as a product contract.
+- Retained review cycles can be created, persisted, loaded, completed, skipped, escalated, and derived into buyer-safe posture.
+- Persistence uses `DiagnosticRecord` with `diagnosticType: "retained_review_cycle"`.
 
-1. Cadence contract
-   - Define retained cadence states:
-     - `NOT_CONFIGURED`
-     - `MANUAL_OPERATOR_REVIEW`
-     - `SCHEDULED`
-     - `OVERDUE`
-     - `COMPLETED`
-     - `SKIPPED_WITH_REASON`
-     - `ESCALATED`
-   - Each state must have public-safe language and operator-only detail.
+2. Buyer-visible cadence posture
+- `/oversight` now shows retained cadence posture with state-safe copy, last review date, next scheduled review date, cadence source, evidence posture, and source label.
+- `/oversight/brief/[cycleId]` now carries the same cadence posture into the brief surface.
 
-2. Scheduled review record
-   - Persist a retained oversight cycle record with:
-     - `accountId` / `organisationId`
-     - `cycleId`
-     - `cadenceType`
-     - `scheduledFor`
-     - `completedAt`
-     - `skippedAt`
-     - `skippedReason`
-     - `escalationReason`
-     - `operatorId` if available
-     - `source: manual | scheduled | system_triggered`
-     - `evidencePosture`
+3. Operator cadence queue
+- `/admin/retained-cadence` now shows due, overdue, skipped, escalated, and not-configured retained review items.
+- Guarded admin APIs now support queue listing and safe state mutation.
 
-3. Buyer-visible cadence posture
-   - `/oversight` must show:
-     - next scheduled review
-     - last completed review
-     - overdue review warning
-     - whether cadence is manual, scheduled, or not configured
-   - If cadence is manual, say:
-     `Retained review is operator-confirmed. Automated scheduling is not yet active for this account.`
-   - If scheduled, say:
-     `Next retained review is scheduled for [date].`
-   - If overdue, say:
-     `A retained review is overdue. Operator attention is required.`
+4. Overdue retained-review signal
+- `RETAINED_REVIEW_OVERDUE` is now a runtime signal.
+- Signal copy is public-safe and does not expose thresholds, internal cadence rules, or scheduler mechanics.
 
-4. Operator enforcement surface
-   - Add or extend an operator/admin view showing:
-     - due cycles
-     - overdue cycles
-     - skipped cycles
-     - escalation-required cycles
-   - This does not need full automation yet, but it must create operational enforceability.
+5. Product-layer role model
+- Explicit retained product roles now exist: `OWNER`, `SPONSOR`, `RESPONDENT`, `OPERATOR`, `COUNSEL_REVIEWER`, `ADMIN`.
+- Sponsor surfaces now use product-layer permission checks instead of relying only on route-level assumptions.
 
-5. Escalation rule
-   - If a retained cycle becomes overdue, create or expose a signal:
-     `RETAINED_REVIEW_OVERDUE`
-   - This signal must be available to Oversight Brief / operator review / command summary.
-   - Do not expose trigger thresholds publicly.
+6. Sponsor command surface upgrade
+- `/oversight` now exposes sponsor-safe sections for cadence posture, active attention queue, latest oversight brief status, counsel memory, boardroom archive, outcome verification, and continuity-loss summary.
 
-6. Future automation compatibility
-   - The implementation must be compatible with external scheduler integration later.
-   - Do not hard-code cadence as static copy.
-   - Do not make cadence purely visual.
-   - Cadence must be represented as state.
+7. Retained outcome history hooks
+- Retained outcome summary now exists as a runtime service.
+- Proof pack now includes retained outcome history and explicitly labels thin history as thin.
 
-Forbidden public claims until scheduler enforcement is active:
+8. Conservative readiness classifier
+- A runtime classifier now exists.
+- It remains conservative and does not emit `GENERAL_50K_READY` unless all required conditions are met.
 
-- `Automated oversight is active`
-- `Continuous monitoring`
-- `Always-on governance`
-- `Autonomous retained oversight`
-- `Automatically reviewed every month`
+## Buyer-visible verification
 
-Allowed public claims after this pass if implemented:
+- Cadence posture is now visible to buyers on `/oversight`.
+- Latest oversight brief status is visible in sponsor-safe form.
+- Counsel memory, boardroom archive summary, outcome summary, and continuity-loss summary now appear only as sponsor-safe sections.
+- No raw respondent text is shown.
+- No operator notes are shown.
+- No counsel notes are shown.
+- No thresholds or trigger mechanics are shown.
 
-- `Retained oversight cadence is configured.`
-- `Next review is scheduled.`
-- `This cycle is overdue.`
-- `Operator review is required.`
-- `Oversight continuity is being tracked.`
-- `A missed retained review is recorded as a governance event.`
+## Operator-only verification
 
-Target outcome:
-Move cadence from a £50k blocker to a partially closed readiness pillar.
+- Due and overdue retained review cycles are now operationally visible.
+- Operators can mark a cycle completed, skip with recorded reason, or escalate it.
+- Not-configured retained scopes are visible as queue gaps rather than hidden state.
 
-Classification after implementation:
+## Claim status
 
-- If only manual cadence is visible: `FOUNDATION_READY`
-- If scheduled cycles are persisted and shown: `NEAR_DEFENSIBLE`
-- If overdue cycles create retained oversight signals: `DEFENSIBLE`
-- If external automation runs without operator initiation: `£50K_READY_CADENCE`
+- £5k: still defensible.
+- £15k: still defensible and materially improved by runtime surface discipline.
+- High-value selective retained posture: now materially stronger because cadence, role control, overdue signalling, and sponsor command sections are runtime-backed.
+- £50k: no general claim is made.
 
-## Sponsor-safe verification
+## Final classification
 
-- no raw respondent text shown
-- no operator notes shown
-- no counsel notes shown
-- no thresholds shown
-- no trigger mechanics shown
-- no internal engine naming shown
-- cadence language is manual and explicit
-- cancellation-loss language distinguishes active oversight loss from data deletion
+- Platform claim status after this pass: `SELECTIVE_HIGH_VALUE_READY`
+- General market claim status: `GENERAL_50K_BLOCKED`
+- Forbidden claim: `GENERAL_50K_READY`
 
-| Capability | Buyer-visible? | Sponsor-safe? | Operator-safe? | Status | Remaining gap |
-| --- | --- | --- | --- | --- | --- |
-| Oversight status | Yes | Yes | Yes | `PASS` | No hard entitlement banner yet beyond authenticated/account context |
-| Retained evidence counts | Yes | Yes | Yes | `PASS` | Counts are stronger than explanations in thin states |
-| Cadence posture | Yes | Yes | Yes | `PASS` | Mostly manual, not automated |
-| Counsel history | Yes | Yes | Yes | `PASS` | Role model behind the scenes is still partly env-driven |
-| Boardroom archive | Yes | Yes | Yes | `PASS` | Organisation-scoped archive depth still depends on source evidence |
-| Cancellation-loss visibility | Yes | Yes | Yes | `PASS` | More powerful once more cycles accumulate |
-| Portfolio memory | No | N/A | Partial | `INTENTIONALLY_WITHHELD` | Entitlement and suppression maturity still required |
+## Remaining blockers
+
+- General £50k readiness still requires consistently non-thin retained outcome history across live scopes.
+- General £50k readiness still requires cadence to be configured on live retained scopes, not merely supported by product code.
+- General £50k readiness still depends on real counsel or boardroom memory on the evaluated scope.
+- Portfolio exposure remains sponsor-safe/suppressed rather than fully entitlement-mature.
+
+## Verification gates
+
+- `npx tsc --noEmit --pretty false`
+- `node scripts/public-copy-guard.mjs`
+- `node scripts/evidence-posture-guard.mjs`
+- `node scripts/earned-progression-guard.mjs`
+- `node scripts/intelligence-boundary-guard.mjs`
+- `node scripts/public-dto-guard.mjs`
+- `npx next build`

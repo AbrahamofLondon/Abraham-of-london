@@ -1,65 +1,71 @@
 # Retainer And Surface Discipline Closure Report
 
-## 1. Retainer readiness final state
+## Final state
 
-- `SELECTIVE_15K_READY`
+- Runtime surface discipline improved
+- Retained oversight gap materially reduced
+- No general £50k claim made
 
-## 2. Whether £5k, £15k, £50k are defensible
+## Files changed
 
-- £5k: defensible today
-- £15k: selectively defensible today
-- £50k: not generally defensible yet
+- `lib/product/retained-cadence-contract.ts`
+- `lib/product/retained-cadence-service.ts`
+- `lib/product/retained-role-contract.ts`
+- `lib/product/retained-outcome-summary.ts`
+- `lib/product/retainer-readiness-classifier.ts`
+- `lib/product/retainer-oversight-contract.ts`
+- `lib/product/oversight-signal-builder.ts`
+- `lib/product/oversight-brief-composer.ts`
+- `lib/product/sponsor-safe-command-summary.ts`
+- `lib/product/proof-pack-generator.ts`
+- `pages/oversight/index.tsx`
+- `pages/oversight/brief/[cycleId].tsx`
+- `pages/admin/retained-cadence.tsx`
+- `pages/admin/retainer-readiness.tsx`
+- `pages/api/admin/retained-cadence/list.ts`
+- `pages/api/admin/retained-cadence/update.ts`
+- `pages/account/proof-pack.tsx`
+- `docs/product/retainer-readiness-final-verification.md`
+- `docs/product/retainer-readiness-closure-report.md`
+- `docs/product/retainer-and-surface-discipline-closure-report.md`
 
-## 3. Diagnostics Index pricing violation fixed or not
-
-- Fixed
-- Executive Reporting is no longer presented as a normal starting option with a fallback conversion path
-- It now appears only as an earned-state panel
-
-## 4. Pricing strategy document updated or not
-
-- Updated
-- Added a decision-instruments section clarifying that lower-stakes instruments do not bypass earned progression
-
-## 5. Product surfaces preserved as strong
+## Buyer-visible surfaces strengthened
 
 - `/oversight`
-- `/counsel/status`
-- `/boardroom/[sessionId]`
 - `/oversight/brief/[cycleId]`
+- `/account/proof-pack`
 
-## 6. Product surfaces requiring structural split
+What changed on those surfaces:
 
-- homepage front door path
-- Strategy Room
-- Executive Reporting run
-- Team Assessment
-- Enterprise Assessment
+- retained cadence posture is now runtime-backed
+- sponsor command sections are now explicit and source-labelled
+- outcome history is now surfaced conservatively
+- continuity-loss language is now connected to retained runtime state
 
-## 7. Technical-debt register summary
+## Operator-visible surfaces strengthened
 
-- P0 items are now documented, with the Diagnostics Index violation closed in code
-- Remaining debt is mostly structural rather than doctrinal
+- `/admin/retained-cadence`
+- `/admin/retainer-readiness`
 
-## 8. Files changed
+What changed on those surfaces:
 
-- `pages/diagnostics/index.tsx`
-- `pages/oversight/brief/[cycleId].tsx`
-- `pages/oversight/index.tsx`
-- `pages/boardroom/index.tsx`
-- `pages/counsel/status.tsx`
-- `pages/counsel/index.tsx`
-- `components/counsel/CounselMemorySummary.tsx`
-- `components/oversight/RetainedMemoryLossPanel.tsx`
-- `lib/product/sponsor-safe-command-summary.ts`
-- `lib/product/boardroom-archive-summary.ts`
-- `docs/revenue/pricing-strategy.md`
-- `docs/product/retainer-readiness-final-verification.md`
-- `docs/product/surface-technical-debt-closure-register.md`
-- `docs/product/retainer-and-surface-discipline-closure-report.md`
-- `docs/product/retainer-readiness-closure-report.md`
+- operator queue now exposes due, overdue, skipped, escalated, and not-configured retained review states
+- readiness view now reflects live classifier inputs rather than static doctrine copy
 
-## 9. Gates run
+## Surface discipline preserved
+
+- No raw respondent data was exposed.
+- No operator notes were exposed to buyer-facing pages.
+- No counsel notes were exposed to buyer-facing pages.
+- No thresholds, formulas, or trigger mechanics were exposed.
+- No fake automation language was introduced.
+
+## Final classification
+
+- `SELECTIVE_HIGH_VALUE_READY`
+- Not `GENERAL_50K_READY`
+
+## Verification gates run
 
 - `npx tsc --noEmit --pretty false`
 - `node scripts/public-copy-guard.mjs`
@@ -67,8 +73,9 @@
 - `node scripts/earned-progression-guard.mjs`
 - `node scripts/intelligence-boundary-guard.mjs`
 - `node scripts/public-dto-guard.mjs`
-- `npx next build` pending because build lane may be occupied by Claude
+- `npx next build`
 
-## 10. Honest final verdict
+## Honest verdict
 
-- `SELECTIVE_15K_READY_SURFACE_DISCIPLINE_IMPROVED`
+- `SELECTIVE_15K_READY_SURFACE_DISCIPLINE_IMPROVED` minimum exceeded by runtime implementation
+- Current general-market posture remains below `GENERAL_50K_READY`
