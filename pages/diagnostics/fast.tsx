@@ -474,6 +474,31 @@ const FastDiagnosticPage: NextPage = () => {
                 </p>
               </div>
 
+              {/* SECTION 1b: CONTRADICTION MIRROR — your own words */}
+              {result.synthesis?.primaryContradiction && (
+                <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>The contradiction</p>
+                  <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.80)" }}>
+                    {result.synthesis.primaryContradiction}
+                  </p>
+                </div>
+              )}
+              {answers.decision && answers.consequence && (
+                <div style={{ padding: "0.5rem 0" }}>
+                  <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)" }}>
+                    You said the decision is: <span style={{ color: "rgba(255,255,255,0.60)" }}>&ldquo;{answers.decision.slice(0, 120)}&rdquo;</span>
+                  </p>
+                  <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", marginTop: "0.25rem" }}>
+                    You said the cost is: <span style={{ color: "rgba(255,255,255,0.60)" }}>&ldquo;{answers.consequence.slice(0, 120)}&rdquo;</span>
+                  </p>
+                  {answers.claimedOwner && (
+                    <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", marginTop: "0.25rem" }}>
+                      You said the owner is: <span style={{ color: "rgba(255,255,255,0.60)" }}>&ldquo;{answers.claimedOwner.slice(0, 80)}&rdquo;</span>
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* SECTION 2: THE PATTERN */}
               <ResultBlock label="What the system found">
                 {an?.whyItExists ?? result.synthesis?.whyPriorAttemptsFailed ?? result.synthesis?.primaryContradiction ?? "The decision exists, but it does not have clean authority. It cannot move in its current form."}
@@ -528,18 +553,38 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               )}
 
+              {/* SECTION 5c: RETURN BRIEF PROMISE */}
+              {committed && (
+                <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem 1.25rem" }}>
+                  <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+                    The system will remember this
+                  </div>
+                  <p style={{ marginTop: "0.35rem", fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.45)" }}>
+                    If this remains unresolved, your Return Brief will confront the gap between what you committed to do and what actually happened. This is not optional feedback — it is governed memory.
+                  </p>
+                </div>
+              )}
+
               {/* SECTION 6: NEXT ROUTE — single primary CTA */}
               <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", marginBottom: "1rem" }}>
                   {an?.cta ?? "Your decision pattern is now on record. The next step determines whether this becomes a structural correction or a repeated pattern."}
                 </p>
+                <p style={{ fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.35)", marginBottom: "0.75rem" }}>
+                  {result.condition === "authority" || result.condition === "definition"
+                    ? "This case may benefit from a deeper diagnostic to test whether the authority gap or definition problem is personal or structural."
+                    : "This case may qualify for Executive Reporting if the decision affects money, staff, reputation, or board-level governance."}
+                </p>
                 <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                  <Link href="/diagnostics/purpose-alignment" style={{ padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                    Find the internal constraint <ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
+                  <Link href={result.condition === "authority" || result.condition === "definition" ? "/diagnostics/purpose-alignment" : "/diagnostics/executive-reporting"} style={{ padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                    {result.condition === "authority" || result.condition === "definition"
+                      ? "Test the personal constraint"
+                      : "Run Executive Report"}
+                    {" "}<ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
                   </Link>
-                  <button type="button" onClick={resetDiagnostic} style={{ padding: "14px 28px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
-                    Start again
-                  </button>
+                  <Link href="/decision-centre" style={{ padding: "14px 28px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                    Decision Centre
+                  </Link>
                 </div>
               </div>
 

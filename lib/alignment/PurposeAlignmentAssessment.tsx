@@ -649,13 +649,15 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
             <div className="rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
               <div className="mx-auto max-w-[680px]">
                 <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">
-                  Result document
+                  Personal decision audit
                 </div>
                 <h2 className="mt-4 font-serif text-4xl leading-tight text-neutral-950">
-                  Your Pattern: {result.primaryPattern?.label ?? result.coherenceBand}
+                  {result.contradictions?.[0]
+                    ? `Your strongest contradiction is between ${result.contradictions[0].domains.join(" and ")}.`
+                    : `Your pattern: ${result.primaryPattern?.label ?? result.coherenceBand}`}
                 </h2>
                 <p className="mt-4 text-lg leading-8 text-neutral-800">
-                  This is not random. This is structural.
+                  This is not a personality result. It is a structural reading of the gap between what you say matters and what your behaviour actually serves.
                 </p>
                 {socialProof ? (
                   <p className="mt-4 border-l-2 border-[#8a6a2f] pl-4 text-sm leading-7 text-neutral-700">
@@ -715,10 +717,39 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                   </div>
                 </section>
 
+                {contextAnswers.competingObligation && (
+                  <section className="mt-10">
+                    <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Competing obligation</div>
+                    <p className="mt-2 text-base leading-8 text-neutral-800">
+                      You named this as the force pulling against your decision: &ldquo;{contextAnswers.competingObligation}&rdquo;
+                    </p>
+                    <p className="mt-2 text-sm leading-7 text-neutral-600">
+                      The system reads this as the likely reason your stated priority is not converting into action. Until this is renegotiated, removed, or directly confronted, the pattern will recur.
+                    </p>
+                  </section>
+                )}
+
                 <section className="mt-10">
-                  <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Required move</div>
+                  <div className="text-[11px] uppercase tracking-[0.24em] text-[#8a6a2f]">Your required correction</div>
                   <p className="mt-2 text-base leading-8 text-neutral-900">
                     {anchorNarrative?.requiredMove ?? result.firstAction ?? result.corrections[0]}
+                  </p>
+                </section>
+
+                <section className="mt-6 rounded-[20px] border border-emerald-200/30 bg-emerald-50/30 p-4">
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-emerald-700/50">Checkpoint scheduled</div>
+                  <p className="mt-1 text-sm leading-6 text-neutral-700">
+                    In 7 days, the system will ask whether this correction happened. Your response will be recorded and will affect how the system governs this case.
+                  </p>
+                  <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-neutral-400">
+                    Visible in Decision Centre when due
+                  </p>
+                </section>
+
+                <section className="mt-6 rounded-[20px] border border-neutral-200 bg-neutral-50 p-4">
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-neutral-500">The system will remember this</div>
+                  <p className="mt-1 text-sm leading-6 text-neutral-600">
+                    If this remains unresolved, your Return Brief will confront the gap between what you identified here and what actually changed. This is governed memory, not optional feedback.
                   </p>
                 </section>
 
