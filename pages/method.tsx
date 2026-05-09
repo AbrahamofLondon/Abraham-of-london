@@ -152,7 +152,7 @@ const MethodPage: NextPage = () => (
         <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
           <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>Does it work?</p>
           <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
-            Observed outcomes, accuracy metrics, and anonymised case evidence are published. Every diagnostic output includes a <Link href="/#proof-layer" style={{ color: `${GOLD}AA`, borderBottom: `1px solid ${GOLD}30` }}>determinism proof and full decision trace</Link> — the user can verify exactly how the system reached its conclusion.
+            Observed outcomes, accuracy metrics, and anonymised case evidence are published. Where supported, diagnostic outputs show <Link href="/evidence/standards" style={{ color: `${GOLD}AA`, borderBottom: `1px solid ${GOLD}30` }}>source labels, evidence posture, challenge status, and the basis of the finding</Link>. Internal reasoning mechanics are not exposed.
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
             <Link href="/evidence" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>See applied evidence</Link>
