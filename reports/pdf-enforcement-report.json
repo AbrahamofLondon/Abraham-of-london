@@ -1,15 +1,10 @@
 {
-  "generatedAt": "2026-05-07T07:48:39.578Z",
+  "generatedAt": "2026-05-09T02:03:24.529Z",
   "totals": {
     "failures": 0,
-    "warnings": 2
+    "warnings": 1
   },
   "findings": [
-    {
-      "rule": "generated_pdf_inventory_outside_canonical_path",
-      "severity": "warn",
-      "message": "1 generated PDF artifacts remain outside /assets/downloads/{slug}.pdf. Legacy inventory should be normalized, but it is not blocking release."
-    },
     {
       "rule": "generated_reports_committed",
       "severity": "warn",

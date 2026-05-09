@@ -347,6 +347,7 @@ type ExecutiveReportingResult =
       ok: true;
       runKey: string;
       route?: "STRATEGY" | "DIAGNOSTIC" | "REJECT";
+      checkpointId?: string | null;
       canonical?: CanonicalReport;
       viewModel?: ExecutiveReportViewModel;
       entitlements?: {
@@ -1597,7 +1598,7 @@ function ResultSurface({
                 <a href="/strategy-room" style={{ padding: "10px 18px", backgroundColor: "#F5F5F5", color: "#0B0B0B", textDecoration: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
                   Accept — enter Strategy Room
                 </a>
-                <button onClick={() => { const note = prompt("What evidence challenges this priority?"); if (note) { fetch("/api/checkpoints/respond", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ checkpointId: "er_challenge", responseStatus: "DISPUTED_FINDING", whatChanged: note }) }).catch(() => {}); } }} style={{ padding: "10px 18px", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.12)", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
+                <button onClick={() => { const cid = result.checkpointId; if (!cid) { alert("No checkpoint available for this report. The system cannot record your challenge without a checkpoint reference."); return; } const note = prompt("What evidence challenges this priority?"); if (note) { fetch("/api/checkpoints/respond", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ checkpointId: cid, responseStatus: "DISPUTED_FINDING", whatChanged: note }) }).catch(() => {}); } }} style={{ padding: "10px 18px", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.12)", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
                   Challenge with evidence
                 </button>
               </div>

@@ -23,13 +23,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const record = await prisma.diagnosticRecord.findFirst({
+    // Try direct ID lookup first, then fall back to sessionId/caseId lookup
+    let record = await prisma.diagnosticRecord.findFirst({
       where: {
         id: body.checkpointId,
         diagnosticType: "efficacy_checkpoint",
         userEmail: identity.email.toLowerCase(),
       },
     });
+
+    // Fallback: look up by sessionId or caseId stored in responsesJson
+    if (!record) {
+      record = await prisma.diagnosticRecord.findFirst({
+        where: {
+          diagnosticType: "efficacy_checkpoint",
+          userEmail: identity.email.toLowerCase(),
+          responsesJson: { contains: body.checkpointId },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    }
 
     if (!record) {
       return res.status(404).json({ ok: false, error: "CHECKPOINT_NOT_FOUND" });

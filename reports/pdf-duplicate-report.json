@@ -1,41 +1,12 @@
 {
-  "generatedAt": "2026-05-07T07:48:19.708Z",
+  "generatedAt": "2026-05-09T02:03:03.880Z",
   "totals": {
-    "duplicateFilenameGroups": 1,
-    "identicalDuplicateGroups": 1,
+    "duplicateFilenameGroups": 0,
+    "identicalDuplicateGroups": 0,
     "divergentDuplicateGroups": 0,
     "generatedVsStaticConflictGroups": 0
   },
-  "byClassification": {
-    "identical_duplicate": 1
-  },
-  "byRecommendedAction": {
-    "safe_redirect_candidate": 1
-  },
-  "groups": [
-    {
-      "groupId": "filename:frontier-resilience-01.pdf",
-      "filename": "frontier-resilience-01.pdf",
-      "classification": "identical_duplicate",
-      "recommendedAction": "safe_redirect_candidate",
-      "recommendedCanonicalPath": "/assets/downloads/frontier-resilience-01.pdf",
-      "uniqueHashCount": 1,
-      "files": [
-        {
-          "publicUrl": "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
-          "folderClass": "generated_download",
-          "canonicalityStatus": "generated",
-          "fileSizeBytes": 76695,
-          "sha256": "fccb6a2de3b063ec2461cbe4167af394d5f76e39f03cf3dcd5128b4972056fe2"
-        },
-        {
-          "publicUrl": "/assets/downloads/frontier-resilience-01.pdf",
-          "folderClass": "canonical_download",
-          "canonicalityStatus": "candidate_canonical",
-          "fileSizeBytes": 76695,
-          "sha256": "fccb6a2de3b063ec2461cbe4167af394d5f76e39f03cf3dcd5128b4972056fe2"
-        }
-      ]
-    }
-  ]
+  "byClassification": {},
+  "byRecommendedAction": {},
+  "groups": []
 }
