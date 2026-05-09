@@ -1,4 +1,10 @@
-/* pages/library/[slug].tsx — LIBRARY DETAIL (SSG, SSOT, no URL leakage) */
+/* pages/library/[slug].tsx — LIBRARY DETAIL (PRIVATE BANK CADENCE)
+ *
+ * Private bank presentation for every asset:
+ *   - Public PDFs: direct download + iframe preview (unchanged access)
+ *   - Restricted PDFs: auth-gated via /api/library/[slug]
+ *   - All assets: beautifully curated metadata, elegant layout, client delight
+ */
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
@@ -8,18 +14,28 @@ import { useSession } from "next-auth/react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
-import { ArrowLeft, ExternalLink, Download, FileText, Lock, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Download,
+  FileText,
+  Lock,
+  Loader2,
+  Shield,
+  Bookmark,
+  Clock,
+  Tag,
+} from "lucide-react";
 
 import tiers, { type AccessTier } from "@/lib/access/tiers";
 
 type PdfAsset = {
-  slug: string; // registry slug (may include folders)
+  slug: string;
   title: string;
   description?: string | null;
   category?: string | null;
   tags?: string[] | null;
 
-  // raw registry fields (never shipped for restricted)
   href?: string | null;
   url?: string | null;
   path?: string | null;
@@ -34,9 +50,11 @@ type PdfAsset = {
 type Props = {
   asset: PdfAsset;
   requiredTier: AccessTier;
-  resolvedUrl: string | null; // public => real URL, restricted => /api/library/<secureKey>
-  routeSlug: string; // /library/[routeSlug]
+  resolvedUrl: string | null;
+  routeSlug: string;
 };
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function safeStr(v: any): string {
   return typeof v === "string" ? v : v == null ? "" : String(v);
@@ -58,21 +76,37 @@ function toRouteSlug(registrySlug: string): string {
 }
 
 function jsonSafe<T>(v: T): T {
-  return JSON.parse(JSON.stringify(v, (_k, val) => (val === undefined ? null : val)));
+  return JSON.parse(
+    JSON.stringify(v, (_k, val) => (val === undefined ? null : val)),
+  );
 }
 
 function coerceAsset(x: any): PdfAsset | null {
   if (!x) return null;
 
-  const rawSlug = safeStr(x.slug || x.id || x.key || x.name || x.file || x.pdf || "");
+  const rawSlug = safeStr(
+    x.slug || x.id || x.key || x.name || x.file || x.pdf || "",
+  );
   const slug = normalizeSlug(rawSlug);
   if (!slug) return null;
 
-  const title = safeStr(x.title || x.name || x.label || toRouteSlug(slug) || "Untitled");
+  const title = safeStr(
+    x.title || x.name || x.label || toRouteSlug(slug) || "Untitled",
+  );
 
-  const tags = Array.isArray(x.tags) ? x.tags.map((t: any) => safeStr(t)).filter(Boolean) : null;
+  const tags = Array.isArray(x.tags)
+    ? x.tags.map((t: any) => safeStr(t)).filter(Boolean)
+    : null;
 
-  const updated = safeStr(x.updated || x.updatedAt || x.modified || x.lastModified || x.date || "") || null;
+  const updated =
+    safeStr(
+      x.updated ||
+        x.updatedAt ||
+        x.modified ||
+        x.lastModified ||
+        x.date ||
+        "",
+    ) || null;
 
   const isPublic =
     x.public === true ||
@@ -86,7 +120,8 @@ function coerceAsset(x: any): PdfAsset | null {
   return {
     slug,
     title,
-    description: safeStr(x.description || x.excerpt || x.summary || "") || null,
+    description:
+      safeStr(x.description || x.excerpt || x.summary || "") || null,
     category: safeStr(x.category || x.collection || x.kind || "") || null,
     tags,
     href: safeStr(x.href || "") || null,
@@ -95,8 +130,12 @@ function coerceAsset(x: any): PdfAsset | null {
     public: Boolean(isPublic),
     updated,
     date: safeStr(x.date || x.publishedAt || "") || null,
-    accessLevel: safeStr(x.accessLevel || x.tier || (isPublic ? "public" : "member")) || null,
-    tier: safeStr(x.tier || x.accessLevel || (isPublic ? "public" : "member")) || null,
+    accessLevel:
+      safeStr(x.accessLevel || x.tier || (isPublic ? "public" : "member")) ||
+      null,
+    tier:
+      safeStr(x.tier || x.accessLevel || (isPublic ? "public" : "member")) ||
+      null,
   };
 }
 
@@ -122,13 +161,23 @@ function resolvePublicAssetUrl(asset: PdfAsset): string | null {
 async function loadPdfAssets(): Promise<PdfAsset[]> {
   try {
     const mod: any = await import("@/scripts/pdf/pdf-registry.source");
-    const list = mod?.ALL_SOURCE_PDFS || mod?.PDF_REGISTRY || mod?.ALL_PDFS || mod?.default;
-    const arr: any[] = Array.isArray(list) ? list : Array.isArray(list?.items) ? list.items : [];
+    const list =
+      mod?.ALL_SOURCE_PDFS ||
+      mod?.PDF_REGISTRY ||
+      mod?.ALL_PDFS ||
+      mod?.default;
+    const arr: any[] = Array.isArray(list)
+      ? list
+      : Array.isArray(list?.items)
+        ? list.items
+        : [];
     return arr.map(coerceAsset).filter(Boolean) as PdfAsset[];
   } catch {
     return [];
   }
 }
+
+// ─── Static Generation ───────────────────────────────────────────────────────
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const assets = await loadPdfAssets();
@@ -146,15 +195,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
     return true;
   });
 
-  // Prerender all paths to avoid ISR failures on Netlify.
   return { paths: deduped, fallback: "blocking" };
-
-
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const rawParam = params?.slug;
-  const paramSlug = normalizeSlug(Array.isArray(rawParam) ? rawParam.join("/") : safeStr(rawParam));
+  const paramSlug = normalizeSlug(
+    Array.isArray(rawParam) ? rawParam.join("/") : safeStr(rawParam),
+  );
   if (!paramSlug) return { notFound: true, revalidate: 60 };
 
   const assets = await loadPdfAssets();
@@ -168,10 +216,15 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (!asset) return { notFound: true, revalidate: 300 };
 
   const routeSlug = toRouteSlug(asset.slug);
-  const requiredTier = tiers.normalizeRequired(asset.accessLevel ?? asset.tier ?? (asset.public ? "public" : "member"));
+  const requiredTier = tiers.normalizeRequired(
+    asset.accessLevel ??
+      asset.tier ??
+      (asset.public ? "public" : "member"),
+  );
   const isPublic = requiredTier === "public";
 
-  // ✅ FIXED: Use full normalized slug for secure API key
+  // Public: resolve direct URL for open download + preview
+  // Restricted: route through secure API proxy
   const secureKey = encodeURIComponent(normalizeSlug(asset.slug));
   const resolvedUrl = isPublic
     ? resolvePublicAssetUrl(asset)
@@ -190,27 +243,68 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     }),
     revalidate: 900,
   };
-
-
 };
 
-const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl, routeSlug }) => {
+// ─── Presentation Helpers ────────────────────────────────────────────────────
+
+function formatDate(value?: string | null) {
+  if (!value) return null;
+  const t = Date.parse(value);
+  if (Number.isNaN(t)) return null;
+  return new Date(t).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function assetCategoryIcon(category?: string | null) {
+  const cat = (category || "").toLowerCase();
+  if (cat.includes("framework") || cat.includes("governance")) return "🏛";
+  if (cat.includes("leadership") || cat.includes("personal")) return "👤";
+  if (cat.includes("theology") || cat.includes("family")) return "📖";
+  if (cat.includes("operations") || cat.includes("strategic")) return "⚙";
+  if (cat.includes("legacy")) return "🏗";
+  if (cat.includes("market") || cat.includes("intel")) return "📊";
+  return "📄";
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+const LibrarySlugPage: NextPage<Props> = ({
+  asset,
+  requiredTier,
+  resolvedUrl,
+  routeSlug,
+}) => {
   const canonical = `/library/${encodeURIComponent(routeSlug)}`;
-  const desc = asset.description || "Verified Library asset // Abraham of London.";
+  const desc =
+    asset.description || "Verified Library asset // Abraham of London.";
 
   const { data: session, status } = useSession();
 
   const required = tiers.normalizeRequired(requiredTier);
-  const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
+  const user = tiers.normalizeUser(
+    (session?.user as any)?.tier ?? "public",
+  );
 
   const needsAuth = required !== "public";
-  const canAccess = !needsAuth || (!!session?.user && tiers.hasAccess(user, required));
+  const canAccess =
+    !needsAuth || (!!session?.user && tiers.hasAccess(user, required));
+
+  const url = resolvedUrl || null;
+  const formattedDate = formatDate(asset.updated || asset.date);
 
   if (needsAuth && status === "loading") {
     return (
       <Layout title={asset.title}>
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
+        <div className="min-h-screen bg-[rgb(3,3,5)] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-5 w-5 animate-spin text-[#C9A96E]" />
+            <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/40">
+              Verifying clearance...
+            </span>
+          </div>
         </div>
       </Layout>
     );
@@ -219,7 +313,7 @@ const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl, ro
   if (needsAuth && (!session?.user || !canAccess)) {
     return (
       <Layout title={asset.title}>
-        <div className="min-h-screen bg-black flex items-center justify-center px-6">
+        <div className="min-h-screen bg-[rgb(3,3,5)] flex items-center justify-center px-6">
           <AccessGate
             title={asset.title}
             requiredTier={required}
@@ -231,97 +325,255 @@ const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl, ro
     );
   }
 
-  const url = resolvedUrl || null;
-
   return (
-    <Layout title={asset.title} description={desc} canonicalUrl={canonical} fullWidth className="bg-black text-white">
+    <Layout
+      title={asset.title}
+      description={desc}
+      canonicalUrl={canonical}
+      fullWidth
+      className="bg-[rgb(3,3,5)] text-white"
+    >
       <Head>
-        <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
+        <meta
+          name="robots"
+          content={
+            required === "public" ? "index, follow" : "noindex, nofollow"
+          }
+        />
       </Head>
 
-      <main className="min-h-screen bg-black text-white">
-        <header className="border-b border-white/5 bg-zinc-950/40">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-10">
+      <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
+        {/* ── Hero Section ── */}
+        <header
+          className="border-b"
+          style={{ borderBottomColor: "rgba(255,255,255,0.06)" }}
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+            {/* Breadcrumb */}
             <Link
               href="/library"
-              className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-white/45 hover:text-amber-300 transition-colors"
+              className="group inline-flex items-center gap-2 text-[9px] font-mono uppercase tracking-[0.35em] transition-colors"
+              style={{ color: "rgba(255,255,255,0.3)" }}
             >
-              <ArrowLeft className="h-4 w-4" /> Back to Library
+              <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+              <span className="group-hover:text-white/60 transition-colors">
+                Library
+              </span>
             </Link>
 
-            <div className="mt-6 flex items-start justify-between gap-6">
-              <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-                  <FileText className="h-4 w-4 text-amber-400" />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/55">
+            <div className="mt-10 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+              {/* Left: Metadata */}
+              <div className="min-w-0 max-w-2xl">
+                {/* Badge row */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Category badge */}
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-mono uppercase tracking-[0.28em]"
+                    style={{
+                      backgroundColor: "rgba(201,169,110,0.08)",
+                      color: "rgba(201,169,110,0.75)",
+                      border: "1px solid rgba(201,169,110,0.15)",
+                    }}
+                  >
+                    {assetCategoryIcon(asset.category)}{" "}
                     {asset.category || "Library Asset"}
                   </span>
-                  {required !== "public" && (
-                    <>
-                      <span className="h-1 w-1 bg-white/20 rounded-full" />
-                      <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-400">
-                        <Lock className="h-3 w-3 inline mr-1" />
-                        {required}
-                      </span>
-                    </>
+
+                  {/* Tier badge */}
+                  {required !== "public" ? (
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-mono uppercase tracking-[0.28em]"
+                      style={{
+                        backgroundColor: "rgba(245,158,11,0.08)",
+                        color: "rgba(245,158,11,0.7)",
+                        border: "1px solid rgba(245,158,11,0.15)",
+                      }}
+                    >
+                      <Lock className="h-3 w-3" />
+                      {required}
+                    </span>
+                  ) : (
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-mono uppercase tracking-[0.28em]"
+                      style={{
+                        backgroundColor: "rgba(34,197,94,0.08)",
+                        color: "rgba(34,197,94,0.6)",
+                        border: "1px solid rgba(34,197,94,0.12)",
+                      }}
+                    >
+                      <Shield className="h-3 w-3" />
+                      Public
+                    </span>
+                  )}
+
+                  {/* Date */}
+                  {formattedDate && (
+                    <span
+                      className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-[0.28em]"
+                      style={{ color: "rgba(255,255,255,0.25)" }}
+                    >
+                      <Clock className="h-3 w-3" />
+                      {formattedDate}
+                    </span>
                   )}
                 </div>
 
-                <h1 className="mt-6 font-serif text-3xl md:text-5xl text-white/95 leading-tight">
+                {/* Title */}
+                <h1
+                  className="mt-6 font-serif text-[2.2rem] md:text-[3.2rem] leading-tight"
+                  style={{
+                    color: "rgba(255,255,255,0.92)",
+                    fontWeight: 300,
+                  }}
+                >
                   {asset.title}
                 </h1>
 
+                {/* Description */}
                 {asset.description && (
-                  <p className="mt-4 max-w-3xl text-sm md:text-base text-white/45 leading-relaxed">
+                  <p
+                    className="mt-5 max-w-2xl text-sm md:text-base leading-relaxed"
+                    style={{ color: "rgba(255,255,255,0.5)" }}
+                  >
                     {asset.description}
                   </p>
                 )}
 
-                <div className="mt-6 text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-                  Slug: <span className="text-white/60">{asset.slug}</span>
-                </div>
-
+                {/* Tags */}
                 {Array.isArray(asset.tags) && asset.tags.length > 0 && (
-                  <div className="mt-6 flex flex-wrap gap-2">
+                  <div className="mt-8 flex flex-wrap gap-2">
                     {asset.tags.map((t) => (
                       <span
                         key={t}
-                        className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 text-[9px] font-mono uppercase tracking-[0.28em] text-white/40"
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[8px] font-mono uppercase tracking-[0.25em]"
+                        style={{
+                          backgroundColor: "rgba(255,255,255,0.04)",
+                          color: "rgba(255,255,255,0.3)",
+                          border: "1px solid rgba(255,255,255,0.06)",
+                        }}
                       >
+                        <Tag className="h-2.5 w-2.5" />
                         {t}
                       </span>
                     ))}
                   </div>
                 )}
+
+                {/* Slug reference */}
+                <div
+                  className="mt-8 text-[8px] font-mono uppercase tracking-[0.3em]"
+                  style={{ color: "rgba(255,255,255,0.15)" }}
+                >
+                  Reference:{" "}
+                  <span style={{ color: "rgba(255,255,255,0.3)" }}>
+                    {asset.slug}
+                  </span>
+                </div>
               </div>
 
-              <div className="shrink-0 flex flex-col gap-3">
+              {/* Right: Actions */}
+              <div className="shrink-0 flex flex-col gap-3 min-w-[200px]">
                 {url ? (
                   <>
+                    {/* Open button */}
                     <a
                       href={url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white/70 hover:border-amber-500/25 hover:text-amber-300 transition-all"
+                      className="group inline-flex items-center justify-center gap-2.5 rounded-lg px-5 py-3 text-[10px] font-mono uppercase tracking-[0.32em] transition-all duration-200"
+                      style={{
+                        backgroundColor: "rgba(255,255,255,0.04)",
+                        color: "rgba(255,255,255,0.6)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          "rgba(255,255,255,0.07)";
+                        e.currentTarget.style.color =
+                          "rgba(255,255,255,0.8)";
+                        e.currentTarget.style.borderColor =
+                          "rgba(201,169,110,0.25)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          "rgba(255,255,255,0.04)";
+                        e.currentTarget.style.color =
+                          "rgba(255,255,255,0.6)";
+                        e.currentTarget.style.borderColor =
+                          "rgba(255,255,255,0.08)";
+                      }}
                     >
-                      <ExternalLink className="h-4 w-4" /> Open
+                      <ExternalLink className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
+                      Open
                     </a>
 
+                    {/* Download button */}
                     <a
                       href={url}
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-600 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white hover:bg-amber-700 transition-all shadow-lg shadow-amber-900/20"
+                      className="group inline-flex items-center justify-center gap-2.5 rounded-lg px-5 py-3 text-[10px] font-mono uppercase tracking-[0.32em] transition-all duration-200"
+                      style={{
+                        backgroundColor: "rgba(201,169,110,0.12)",
+                        color: "rgba(201,169,110,0.85)",
+                        border: "1px solid rgba(201,169,110,0.2)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          "rgba(201,169,110,0.2)";
+                        e.currentTarget.style.color = "#C9A96E";
+                        e.currentTarget.style.borderColor =
+                          "rgba(201,169,110,0.35)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          "rgba(201,169,110,0.12)";
+                        e.currentTarget.style.color =
+                          "rgba(201,169,110,0.85)";
+                        e.currentTarget.style.borderColor =
+                          "rgba(201,169,110,0.2)";
+                      }}
                     >
-                      <Download className="h-4 w-4" /> Download
+                      <Download className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
+                      Download PDF
                     </a>
+
+                    {/* Status note */}
+                    <div
+                      className="mt-1 rounded-lg px-4 py-2.5 text-[8px] font-mono uppercase tracking-[0.25em] leading-relaxed text-center"
+                      style={{
+                        backgroundColor: "rgba(255,255,255,0.02)",
+                        color: "rgba(255,255,255,0.2)",
+                        border: "1px solid rgba(255,255,255,0.04)",
+                      }}
+                    >
+                      {required === "public"
+                        ? "Open access · No authentication required"
+                        : `Restricted · ${required} clearance required`}
+                    </div>
                   </>
                 ) : (
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-white/45 w-[260px]">
-                    No resolvable URL for this asset.
-                    <div className="mt-2 text-[10px] font-mono text-white/35">
-                      For public assets, add one of: <span className="text-white/55">url</span>,{" "}
-                      <span className="text-white/55">href</span>, or{" "}
-                      <span className="text-white/55">path</span>.
-                    </div>
+                  <div
+                    className="rounded-lg px-5 py-6 text-center"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <FileText
+                      className="h-8 w-8 mx-auto mb-3"
+                      style={{ color: "rgba(255,255,255,0.12)" }}
+                    />
+                    <p
+                      className="text-[9px] font-mono uppercase tracking-[0.3em]"
+                      style={{ color: "rgba(255,255,255,0.25)" }}
+                    >
+                      Asset URL unavailable
+                    </p>
+                    <p
+                      className="mt-2 text-[7px] font-mono uppercase tracking-[0.25em]"
+                      style={{ color: "rgba(255,255,255,0.15)" }}
+                    >
+                      Contact administration
+                    </p>
                   </div>
                 )}
               </div>
@@ -329,16 +581,55 @@ const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl, ro
           </div>
         </header>
 
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+        {/* ── Preview Section ── */}
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
           {url ? (
-            <div className="rounded-3xl border border-white/10 bg-black overflow-hidden">
-              <div className="px-5 py-3 border-b border-white/10 bg-white/[0.02] text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">
-                Preview
+            <div
+              className="rounded-2xl overflow-hidden"
+              style={{
+                border: "1px solid rgba(255,255,255,0.06)",
+                backgroundColor: "rgb(5,5,7)",
+              }}
+            >
+              {/* Preview header */}
+              <div
+                className="flex items-center justify-between px-5 py-3"
+                style={{
+                  borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  backgroundColor: "rgba(255,255,255,0.015)",
+                }}
+              >
+                <span
+                  className="text-[8px] font-mono uppercase tracking-[0.35em]"
+                  style={{ color: "rgba(255,255,255,0.25)" }}
+                >
+                  <FileText className="h-3 w-3 inline mr-2" />
+                  Document Preview
+                </span>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[8px] font-mono uppercase tracking-[0.3em] transition-colors"
+                  style={{ color: "rgba(201,169,110,0.5)" }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "#C9A96E")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color =
+                      "rgba(201,169,110,0.5)")
+                  }
+                >
+                  <ExternalLink className="h-3 w-3 inline mr-1" />
+                  Open in new tab
+                </a>
               </div>
+
+              {/* Preview frame */}
               <div className="aspect-[16/10] w-full">
                 {needsAuth && !session?.user ? (
                   <div className="h-full w-full flex items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
+                    <Loader2 className="h-5 w-5 animate-spin text-[#C9A96E]" />
                   </div>
                 ) : (
                   <iframe
@@ -351,10 +642,53 @@ const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl, ro
               </div>
             </div>
           ) : (
-            <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center text-white/45">
-              Preview unavailable without a resolvable URL.
+            <div
+              className="rounded-2xl px-8 py-16 text-center"
+              style={{
+                border: "1px solid rgba(255,255,255,0.06)",
+                backgroundColor: "rgb(5,5,7)",
+              }}
+            >
+              <Bookmark
+                className="h-10 w-10 mx-auto mb-4"
+                style={{ color: "rgba(255,255,255,0.08)" }}
+              />
+              <p
+                className="text-[10px] font-mono uppercase tracking-[0.3em]"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+              >
+                Preview unavailable
+              </p>
+              <p
+                className="mt-2 text-[8px] font-mono uppercase tracking-[0.25em]"
+                style={{ color: "rgba(255,255,255,0.12)" }}
+              >
+                {required === "public"
+                  ? "This public asset has no resolvable preview URL"
+                  : "Sign in with appropriate clearance to access"}
+              </p>
             </div>
           )}
+        </section>
+
+        {/* ── Footer metadata ── */}
+        <section
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16"
+          style={{ color: "rgba(255,255,255,0.12)" }}
+        >
+          <div
+            className="h-px w-full mb-8"
+            style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
+          />
+          <div className="flex flex-wrap gap-x-8 gap-y-2 text-[7px] font-mono uppercase tracking-[0.3em]">
+            <span>Abraham of London · Library</span>
+            <span>Asset: {asset.slug}</span>
+            <span>
+              Access:{" "}
+              {required === "public" ? "Open" : required}
+            </span>
+            {formattedDate && <span>Updated: {formattedDate}</span>}
+          </div>
         </section>
       </main>
     </Layout>
