@@ -229,7 +229,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     amount: 0,
     displayPrice: "Free",
     stripeProductId: null,
-    stripePriceId: "price_1TP1lhQFpelVFMXJN4xf1yxW",
+    stripePriceId: null, // Removed — free products do not require Stripe checkout
     entitlementSlug: "case-dossier-tariff-shock",
     tier: "evidence",
     category: "evidence",
@@ -248,7 +248,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     amount: 0,
     displayPrice: "Free",
     stripeProductId: null,
-    stripePriceId: "price_1TP1nMQFpelVFMXJukt9E22Z",
+    stripePriceId: null, // Removed — free products do not require Stripe checkout
     entitlementSlug: "case-dossier-team-alignment-illusion",
     tier: "evidence",
     category: "evidence",
@@ -267,7 +267,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     amount: 0,
     displayPrice: "Free",
     stripeProductId: null,
-    stripePriceId: "price_1TP1omQFpelVFMXJtUTNXdkc",
+    stripePriceId: null, // Removed — free products do not require Stripe checkout
     entitlementSlug: "case-dossier-escalation-denied",
     tier: "evidence",
     category: "evidence",

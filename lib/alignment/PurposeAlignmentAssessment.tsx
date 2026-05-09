@@ -904,19 +904,43 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                   <GovernanceDisclosure context="purpose_alignment" compact />
                 </div>
 
+                {/* ═══ RECOMMENDED NEXT INSTRUMENT ═══ */}
                 <section className="mt-10">
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">Next pressure point</div>
-                  <p className="mt-2 text-base leading-8 text-neutral-800">
-                    {strongestPressure
-                      ? `The sharpest live pressure is ${strongestPressure.label.toLowerCase()} at ${strongestPressure.percent}%.`
-                      : "The next move is to test this pattern against a wider operating system."}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-3">
+                  <div className="text-[11px] uppercase tracking-[0.22em] text-[#8a6a2f]">Recommended next instrument</div>
+                  {(() => {
+                    const { recommendNextInstrument } = require("@/lib/commercial/recommendation-engine");
+                    const { ProductRecommendationCard } = require("@/components/commercial/ProductRecommendationCard");
+                    const weakest = result.weakestDomains?.[0] ?? null;
+                    const rec = recommendNextInstrument({
+                      sourceSurface: "personal_decision_audit" as const,
+                      weakestDomain: weakest,
+                      primaryPattern: result.primaryPattern?.id ?? null,
+                      competingObligationDominant: Boolean(contextAnswers.competingObligation && contextAnswers.competingObligation.length > 10),
+                      authorityGap: weakest === "identity" || weakest === "decision",
+                      interventionUnclear: weakest === "behaviour" || weakest === "environment",
+                      consequenceHigh: result.severity === "high" || result.severity === "critical",
+                      institutionalStakes: Boolean(contextAnswers.consequence && /(organisation|company|team|board|institution|staff|revenue)/i.test(contextAnswers.consequence)),
+                      evidenceInsufficient: result.percent < 30,
+                    });
+                    return rec ? (
+                      <div className="mt-3">
+                        <ProductRecommendationCard recommendation={rec} variant="compact" />
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-base leading-8 text-neutral-800">
+                        The next move is to test this pattern against a wider operating system.
+                      </p>
+                    );
+                  })()}
+                </section>
+
+                <section className="mt-6">
+                  <div className="flex flex-wrap gap-3">
                     <a
-                      href="/diagnostics/team-assessment"
+                      href="/diagnostics/constitutional-diagnostic"
                       className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white"
                     >
-                      Run Team Diagnostic
+                      Constitutional Diagnostic
                     </a>
                     <a
                       href={`/.netlify/functions/purpose-alignment-report?ts=${encodeURIComponent(result.createdAt)}`}
