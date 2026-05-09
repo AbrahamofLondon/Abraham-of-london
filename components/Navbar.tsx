@@ -9,8 +9,8 @@ import { Menu, X, ArrowRight, Briefcase } from "lucide-react";
 const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" ");
 
 const NAV = [
-  { href: "/#hero", label: "Start" },
   { href: "/#refusal-demo", label: "How it works" },
+  { href: "/diagnostics", label: "Diagnostics" },
   { href: "/evidence", label: "Evidence" },
   { href: "/library", label: "Library" },
   { href: "/about", label: "About" },
@@ -43,7 +43,7 @@ export default function Navbar(): React.ReactElement {
 
   const currentPath = (router.asPath || "/").split("#")[0] || "/";
   const isActive = (href: string) => {
-    if (href.includes("#")) return href === "/#hero" ? currentPath === "/" : false;
+    if (href.includes("#")) return false;
     return href === "/" ? currentPath === "/" : currentPath.startsWith(href);
   };
 

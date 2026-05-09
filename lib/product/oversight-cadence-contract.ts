@@ -40,6 +40,19 @@ export type OversightCadenceState = {
   explanation: string;
 };
 
+export type OversightCadenceVisibilityState =
+  | "MANUAL_REVIEW_READY"
+  | "MANUAL_REVIEW_SCHEDULED"
+  | "AUTOMATED_CHECK_PENDING"
+  | "AUTOMATION_NOT_CONFIGURED"
+  | "CADENCE_BLOCKED";
+
+export type OversightCadenceVisibility = {
+  state: OversightCadenceVisibilityState;
+  label: string;
+  explanation: string;
+};
+
 export type OversightCadenceInput = {
   tier: RetainerTier;
   frequency?: OversightCadenceFrequency;

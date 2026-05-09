@@ -1087,6 +1087,28 @@ export default function TeamAssessmentPage() {
                     <p style={{ marginTop: "1.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1rem, 1.4vw, 1.18rem)", lineHeight: 1.72, color: "rgba(255,255,255,0.42)", maxWidth: "48ch" }}>
                       This instrument operates in two modes. <strong style={{ color: "rgba(255,255,255,0.58)", fontWeight: 400 }}>Leader View</strong> is a fast directional read based on your estimate of team experience. <strong style={{ color: "rgba(255,255,255,0.58)", fontWeight: 400 }}>Respondent-Based</strong> collects structured responses from team members directly — producing stronger evidence with higher confidence.
                     </p>
+                    <div style={{ marginTop: "1.25rem", padding: "1rem 1.1rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", maxWidth: "52ch" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem" }}>
+                        Entry discipline
+                      </div>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.58, color: "rgba(255,255,255,0.58)", margin: 0 }}>
+                        This assessment is most useful after a constitutional or fast diagnostic has named the decision condition. Without that context, the result may be less precise.
+                      </p>
+                      {constitutionalThread ? (
+                        <p style={{ marginTop: "0.7rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(110,231,183,0.86)" }}>
+                          Prior constitutional evidence detected. This reading can inherit the active decision condition instead of starting cold.
+                        </p>
+                      ) : (
+                        <div style={{ marginTop: "0.8rem", display: "flex", flexWrap: "wrap", gap: "0.7rem 1rem", alignItems: "center" }}>
+                          <Link href="/diagnostics/fast" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}D9` }}>
+                            Recommended first step: Fast Diagnostic
+                          </Link>
+                          <Link href="/diagnostics/constitutional-diagnostic" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.56)" }}>
+                            Or run Constitutional Diagnostic
+                          </Link>
+                        </div>
+                      )}
+                    </div>
                     {purposePct !== null && (
                       <div style={{ marginTop: "1.25rem", padding: "0.85rem 1.25rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}07`, display: "inline-flex", alignItems: "center", gap: "0.75rem" }}>
                         <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Purpose alignment loaded — {purposePct}%</span>

@@ -119,8 +119,11 @@ const OversightBriefPage: NextPage<PageProps> = ({
               )}
 
               {brief.cadence && (
-                <Section title="Cadence Status">
+                <Section title="Cadence Posture">
                   <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.cadence.explanation}</p>
+                  <p className="mt-2" style={{ ...serif, color: "rgba(255,255,255,0.58)", lineHeight: 1.6 }}>
+                    Manual retained review is available. No automated cadence is claimed on this surface unless separately configured by operators.
+                  </p>
                   <p className="mt-2" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.62)" }}>
                     {brief.cadence.status} · {brief.cadence.health}
                     {brief.cadence.nextCycleDueDate ? ` · Next review ${new Date(brief.cadence.nextCycleDueDate).toLocaleDateString("en-GB")}` : ""}

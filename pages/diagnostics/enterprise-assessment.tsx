@@ -1130,6 +1130,28 @@ export default function EnterpriseAssessmentPage() {
                       governance, execution consistency, and institutional risk posture are
                       failing across the full institutional architecture.
                     </p>
+                    <div style={{ marginTop: "1.25rem", padding: "1rem 1.1rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", maxWidth: "54ch" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", marginBottom: "0.5rem" }}>
+                        Entry discipline
+                      </div>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.58, color: "rgba(255,255,255,0.58)", margin: 0 }}>
+                        This surface is designed for institutional evidence, not casual exploration. It is strongest after prior diagnostic context or an active organisational case.
+                      </p>
+                      {constitutionalThread || teamAlignmentPct !== null ? (
+                        <p style={{ marginTop: "0.7rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(110,231,183,0.86)" }}>
+                          Prior organisational evidence detected. This stage can inherit the current decision condition and existing operating strain.
+                        </p>
+                      ) : (
+                        <div style={{ marginTop: "0.8rem", display: "flex", flexWrap: "wrap", gap: "0.7rem 1rem", alignItems: "center" }}>
+                          <Link href="/diagnostics/fast" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}D9` }}>
+                            Recommended first step: Fast Diagnostic
+                          </Link>
+                          <Link href="/diagnostics/constitutional-diagnostic" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.56)" }}>
+                            Or run Constitutional Diagnostic
+                          </Link>
+                        </div>
+                      )}
+                    </div>
                     {teamAlignmentPct !== null && (
                       <div style={{ marginTop: "1.25rem", padding: "0.85rem 1.25rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}07`, display: "inline-flex", alignItems: "center", gap: "0.75rem" }}>
                         <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Team assessment loaded — {teamAlignmentPct}%</span>

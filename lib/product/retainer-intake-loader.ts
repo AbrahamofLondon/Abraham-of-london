@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/lib/prisma.server";
 import type { RetainerIntakeResponse } from "@/lib/product/retainer-intake-contract";
 import {

@@ -1,542 +1,323 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2, Lock, ShieldCheck } from "lucide-react";
 
 import Layout from "@/components/Layout";
-
-type Rung = {
-  n: string;
-  label: string;
-  href: string;
-  cta: string;
-  duration: string;
-  route: string;
-  role: string;
-  produces: string;
-};
+import {
+  readConstitutionalThread,
+  type ConstitutionalThread,
+} from "@/lib/diagnostics/session-thread";
 
 const GOLD = "#C9A96E";
-const AMBER = "#F59E0B";
-const VOID = "rgb(3 3 5)";
+const mono: React.CSSProperties = {
+  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+};
+const serif: React.CSSProperties = {
+  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+  fontWeight: 300,
+};
 
-const RUNGS: Rung[] = [
-  {
-    n: "01",
-    label: "Constitutional Diagnostic",
-    href: "/diagnostics/constitutional-diagnostic",
-    cta: "Start diagnostic",
-    duration: "6 min",
-    route: "STRATEGY",
-    role: "Evidence layer · Public",
-    produces: "Constitutional route, confidence score, posture, readiness tier, failure mode density",
-  },
-  {
-    n: "02",
-    label: "Team Assessment",
-    href: "/diagnostics/team-assessment",
-    cta: "Begin team assessment",
-    duration: "10 min",
-    route: "DIAGNOSTIC",
-    role: "Evidence layer · Continuation",
-    produces: "Leadership–team perception gap, fragility classification, domain-level gap severity",
-  },
-  {
-    n: "03",
-    label: "Enterprise Assessment",
-    href: "/diagnostics/enterprise-assessment",
-    cta: "Begin enterprise assessment",
-    duration: "15 min",
-    route: "DIAGNOSTIC",
-    role: "Evidence layer · Institutional",
-    produces: "Enterprise pressure map, governance reliability, escalation routing or WATCH classification",
-  },
-  {
-    n: "04",
-    label: "Executive Reporting",
-    href: "/diagnostics/executive-reporting",
-    cta: "View Executive Reporting",
-    duration: "12 min",
-    route: "STRATEGY",
-    role: "Flagship · Consequence interpretation",
-    produces: "Board-grade position, financial exposure, governed priority stack, trajectory outlook",
-  },
-];
-
-const TOTAL_STAGES = RUNGS.length;
-const STARTING_SIGNALS = [
-  {
-    label: "The direction is unclear, or the pressure is personal",
-    href: "/diagnostics/purpose-alignment",
-    route: "Personal decision infrastructure",
-    detail: "Tests whether your stated direction can survive evidence, pressure, contradiction, and consequence. Produces a dual-axis reading of alignment vs assumption.",
-    tests: "Decision pattern, mandate coherence, personal authority",
-    output: "Pattern classification, cost of inaction, required move",
-    restricts: "Flags vague input. Classifies unresolved patterns for tracking.",
-  },
-  {
-    label: "The organisation is carrying structural strain",
-    href: "/diagnostics/constitutional-diagnostic",
-    route: "Constitutional diagnostic",
-    detail: "Use this when governance, authority, execution, or trust may be producing the pressure. Routes to STRATEGY, DIAGNOSTIC, or REJECT with constitutional confidence.",
-    tests: "Posture, authority, readiness, failure mode density",
-    output: "Constitutional route, confidence score, rationale",
-    restricts: "REJECT when evidence does not support escalation. Other pathways remain open.",
-  },
-  {
-    label: "Leadership perception and team experience have diverged",
-    href: "/diagnostics/team-assessment",
-    route: "Team assessment",
-    detail: "Measures the gap between how leadership reads the team and how leadership estimates the team would read itself. Produces a structural perception gap, not a satisfaction survey.",
-    tests: "Perception divergence across leadership and team domains",
-    output: "Perception gap severity, fragility classification, domain-level gaps",
-    restricts: "Escalates to Enterprise when gap is too wide to be a contained team issue.",
-  },
-  {
-    label: "The pressure is institutional, not local",
-    href: "/diagnostics/enterprise-assessment",
-    route: "Enterprise assessment",
-    detail: "Stress-tests leadership coherence, governance reliability, execution variance, and institutional risk posture. Routes to Executive Reporting or WATCH.",
-    tests: "Institutional architecture, governance reliability, execution variance",
-    output: "Enterprise pressure map, risk posture, escalation routing",
-    restricts: "WATCH when escalation is not yet warranted. Evidence continues to accumulate.",
-  },
-  {
-    label: "Evidence is established — consequence needs pricing",
-    href: "/diagnostics/executive-reporting",
-    route: "Executive Reporting · Flagship",
-    detail: "The governed executive brief. Translates accumulated diagnostic evidence into financial exposure, institutional constraint, and a priority stack that can be acted on.",
-    tests: "Accumulated evidence across all prior diagnostic layers",
-    output: "Financial exposure, governed priority stack, position statement, trajectory outlook",
-    restricts: "Requires evidence of consequence. The system will not generate a brief from weak input.",
-  },
-];
+type SurfaceState = "OPEN" | "AVAILABLE" | "COMPLETED" | "LOCKED";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
-          letterSpacing: "0.28em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.38)",
-        }}
-      >
-        {children}
-      </span>
-    </div>
-  );
-}
-
-function RouteStrip() {
-  const items = [
-    { label: "STRATEGY", color: GOLD },
-    { label: "DIAGNOSTIC", color: "rgba(255,255,255,0.48)" },
-    { label: "WATCH", color: AMBER },
-    { label: "REJECT", color: "rgba(255,255,255,0.24)" },
-  ];
-
-  return (
-    <div className="mt-5 flex flex-wrap items-center gap-2">
-      {items.map((item, index) => (
-        <React.Fragment key={item.label}>
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: item.color,
-            }}
-          >
-            {item.label}
-          </span>
-          {index < items.length - 1 ? (
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.16)",
-              }}
-            >
-              ·
-            </span>
-          ) : null}
-        </React.Fragment>
-      ))}
-    </div>
-  );
-}
-
-function routeColor(route: string) {
-  if (route === "STRATEGY") return GOLD;
-  if (route === "DIAGNOSTIC") return "rgba(255,255,255,0.48)";
-  return "rgba(255,255,255,0.24)";
-}
-
-function Dot() {
-  return (
-    <span
+    <p
       style={{
-        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7.5px",
-        letterSpacing: "0.12em",
+        ...mono,
+        fontSize: "9px",
+        letterSpacing: "0.2em",
         textTransform: "uppercase",
-        color: "rgba(255,255,255,0.16)",
+        color: `${GOLD}88`,
       }}
     >
-      ·
+      {children}
+    </p>
+  );
+}
+
+function statusColor(state: SurfaceState) {
+  if (state === "OPEN") return `${GOLD}CC`;
+  if (state === "AVAILABLE") return "rgba(110,231,183,0.90)";
+  if (state === "COMPLETED") return "rgba(110,231,183,0.90)";
+  return "rgba(255,255,255,0.38)";
+}
+
+function StatusBadge({ state }: { state: SurfaceState }) {
+  const Icon = state === "COMPLETED" ? CheckCircle2 : state === "LOCKED" ? Lock : ShieldCheck;
+  return (
+    <span
+      className="inline-flex items-center gap-2"
+      style={{
+        ...mono,
+        fontSize: "9px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: statusColor(state),
+      }}
+    >
+      <Icon className="h-3 w-3" />
+      {state === "OPEN"
+        ? "Open entry"
+        : state === "AVAILABLE"
+          ? "Available"
+          : state === "COMPLETED"
+            ? "Completed"
+            : "Not yet earned"}
     </span>
   );
 }
 
-function RungRow({ rung }: { rung: Rung }) {
+function SurfaceCard({
+  title,
+  state,
+  detail,
+  why,
+  href,
+  cta,
+}: {
+  title: string;
+  state: SurfaceState;
+  detail: string;
+  why: string;
+  href?: string;
+  cta?: string;
+}) {
   return (
-    <div className="grid gap-3 border-t border-white/[0.06] py-5 md:grid-cols-[0.8fr_1fr_auto] md:items-start">
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.68)",
-            }}
-          >
-            {`STAGE ${rung.n} OF ${TOTAL_STAGES}`}
-          </span>
-          <Dot />
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: routeColor(rung.route),
-            }}
-          >
-            {rung.route}
-          </span>
-        </div>
+    <div className="border border-white/[0.08] bg-white/[0.02] p-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div
           style={{
-            marginTop: "0.65rem",
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "1.12rem",
-            color: "rgba(255,255,255,0.78)",
+            ...serif,
+            fontSize: "1.35rem",
+            lineHeight: 1.05,
+            color: "rgba(255,255,255,0.88)",
+            fontStyle: "italic",
           }}
         >
-          {rung.label}
+          {title}
         </div>
+        <StatusBadge state={state} />
       </div>
-      <div>
-        <div
-          style={{
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px",
-            letterSpacing: "0.20em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.32)",
-          }}
-        >
-          {rung.role} · {rung.duration}
+      <p className="mt-4 text-[14px] leading-[1.8] text-white/60">{detail}</p>
+      <p className="mt-3 text-[13px] leading-[1.75] text-white/42">{why}</p>
+      {href && cta ? (
+        <div className="mt-5">
+          <Link
+            href={href}
+            className="group inline-flex min-h-[44px] items-center gap-2 border px-5 py-3 transition-all duration-200 hover:-translate-y-0.5"
+            style={{
+              borderColor: state === "LOCKED" ? "rgba(255,255,255,0.10)" : `${GOLD}40`,
+              backgroundColor: state === "LOCKED" ? "rgba(255,255,255,0.03)" : `${GOLD}10`,
+              color: state === "LOCKED" ? "rgba(255,255,255,0.42)" : "#F5F5F5",
+              ...mono,
+              fontSize: "10px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              pointerEvents: state === "LOCKED" ? "none" : "auto",
+            }}
+            aria-disabled={state === "LOCKED"}
+          >
+            {cta}
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </div>
-        <p
-          style={{
-            marginTop: "0.55rem",
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "0.92rem",
-            lineHeight: 1.55,
-            color: "rgba(255,255,255,0.44)",
-          }}
-        >
-          Produces: {rung.produces}.
-        </p>
-      </div>
-      <Link
-        href={rung.href}
-        className="inline-flex items-center gap-2 transition-all hover:underline md:justify-self-end"
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: AMBER,
-        }}
-      >
-        {rung.cta}
-        <ArrowRight style={{ width: "10px", height: "10px" }} />
-      </Link>
+      ) : null}
     </div>
   );
 }
 
-function StartingSignalCard({ signal }: { signal: (typeof STARTING_SIGNALS)[number] }) {
-  return (
-    <Link
-      href={signal.href}
-      className="group block border transition-all duration-200 hover:-translate-y-0.5"
-      style={{
-        borderColor: "rgba(255,255,255,0.08)",
-        backgroundColor: "rgba(255,255,255,0.025)",
-        padding: "1rem",
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: GOLD,
-        }}
-      >
-        {signal.route}
-      </div>
-      <div
-        style={{
-          marginTop: "0.7rem",
-          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-          fontWeight: 300,
-          fontSize: "1.25rem",
-          lineHeight: 1.08,
-          color: "rgba(255,255,255,0.88)",
-        }}
-      >
-        {signal.label}
-      </div>
-      <p
-        style={{
-          marginTop: "0.7rem",
-          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-          fontWeight: 300,
-          fontSize: "0.95rem",
-          lineHeight: 1.55,
-          color: "rgba(255,255,255,0.50)",
-        }}
-      >
-        {signal.detail}
-      </p>
-      <div className="mt-3 space-y-1">
-        {[
-          { k: "Tests", v: signal.tests },
-          { k: "Output", v: signal.output },
-          { k: "Restricts", v: signal.restricts },
-        ].map(({ k, v }) => (
-          <div key={k} className="flex gap-2">
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", minWidth: "52px", flexShrink: 0 }}>{k}</span>
-            <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.32)" }}>{v}</span>
-          </div>
-        ))}
-      </div>
-      <div
-        className="mt-4 inline-flex items-center gap-2"
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.16em",
-          textTransform: "uppercase",
-          color: AMBER,
-        }}
-      >
-        Start here <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-      </div>
-    </Link>
-  );
-}
-
 export default function DiagnosticsIndexPage() {
+  const [thread, setThread] = React.useState<ConstitutionalThread | null>(null);
+  const [teamDone, setTeamDone] = React.useState(false);
+  const [enterpriseDone, setEnterpriseDone] = React.useState(false);
+
+  React.useEffect(() => {
+    setThread(readConstitutionalThread());
+    try {
+      setTeamDone(Boolean(window.sessionStorage.getItem("team-assessment-result")));
+      setEnterpriseDone(Boolean(window.sessionStorage.getItem("enterprise-assessment-result")));
+    } catch {
+      setTeamDone(false);
+      setEnterpriseDone(false);
+    }
+  }, []);
+
+  const hasConstitutionalEvidence = Boolean(thread);
+  const executiveReady =
+    enterpriseDone ||
+    Boolean(thread?.enterpriseFindings) ||
+    teamDone ||
+    Boolean(thread?.teamFindings) ||
+    thread?.route === "STRATEGY";
+
   return (
-    <Layout title="Governed Diagnostic System | Decision Infrastructure by Abraham of London">
+    <Layout
+      title="Diagnostics | Abraham of London"
+      description="Enter through evidence. Start with a live decision, then earn the next surface only if the record justifies it."
+      canonicalUrl="/diagnostics"
+      fullWidth
+      headerTransparent
+    >
       <Head>
         <meta
           name="description"
-          content="The governed diagnostic evidence ladder. Identifies structural condition, accumulates tension, and escalates to Executive Reporting when consequence must be priced."
+          content="The governed evidence path for Decision Infrastructure. Start with a live decision, accumulate evidence, and earn the next surface only when justified."
         />
       </Head>
 
-      <div style={{ backgroundColor: VOID }}>
-        <section>
-          <div className="mx-auto max-w-6xl px-6 lg:px-12">
-            <div className="py-16 lg:py-24">
-              <Eyebrow>Decision Infrastructure by Abraham of London</Eyebrow>
-              <h1
-                style={{
-                  marginTop: "1rem",
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "clamp(2rem, 9vw, 4rem)",
-                  lineHeight: 0.98,
-                  letterSpacing: 0,
-                  color: "rgba(255,255,255,0.92)",
-                  maxWidth: "48ch",
-                  fontStyle: "italic",
-                }}
-              >
-                Where is the contradiction?
-              </h1>
-              <p
-                style={{
-                  marginTop: "1rem",
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "1rem",
-                  lineHeight: 1.6,
-                  color: "rgba(255,255,255,0.48)",
-                  maxWidth: "56ch",
-                }}
-              >
-                Each stage identifies contradictions between what you claim and what is evidenced. Patterns that persist are structural, not accidental. The condition compounds whether or not you continue. When consequence must be priced, the system escalates.
-              </p>
-              <div className="mt-6 grid gap-3 md:grid-cols-2">
-                {STARTING_SIGNALS.map((signal) => (
-                  <StartingSignalCard key={signal.label} signal={signal} />
-                ))}
-              </div>
-              <div
-                className="mt-6"
-                style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.28)",
-                }}
-              >
-                Governed entry · staged evidence ladder · no account required
-                <br />
-                No preparation required. The system requires you to name the decision.
-              </div>
+      <div style={{ backgroundColor: "rgb(3,3,5)", minHeight: "100vh", color: "white" }}>
+        <section className="px-6 pb-12 pt-[128px] md:pb-16 md:pt-36">
+          <div className="mx-auto max-w-[1100px]">
+            <Eyebrow>Diagnostics</Eyebrow>
+            <h1
+              className="mt-6"
+              style={{
+                ...serif,
+                fontSize: "clamp(2.3rem, 6vw, 4.4rem)",
+                lineHeight: 0.98,
+                color: "#F5F5F5",
+                fontStyle: "italic",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Enter through evidence.
+            </h1>
+            <p className="mt-6 max-w-[54ch] text-[16px] leading-[1.85] text-white/58">
+              This is not a catalogue of diagnostics. Start with a real decision,
+              receive a finding, and earn the next surface only if the record
+              justifies it.
+            </p>
+          </div>
+        </section>
+
+        <section className="border-t border-white/[0.05] px-6 py-16">
+          <div className="mx-auto max-w-[1100px]">
+            <Eyebrow>Start here</Eyebrow>
+            <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.85] text-white/50">
+              Start with one decision under pressure. The system will decide whether anything further is warranted.
+            </p>
+            <div className="mt-8 grid gap-4 lg:grid-cols-2">
+              <SurfaceCard
+                title="Fast Diagnostic"
+                state="OPEN"
+                detail="The public entry point for a live decision under pressure."
+                why="Use this when the decision is real, the pressure is active, and you need the first governed reading."
+                href="/diagnostics/fast"
+                cta="Test a Decision"
+              />
+              <SurfaceCard
+                title="Personal Decision Audit / Purpose Alignment"
+                state="OPEN"
+                detail="Use this when the issue appears personal, mandate-related, or bound up with competing obligation."
+                why="This is still an entry surface, but it is for cases where the personal layer needs to be tested before the institutional one."
+                href="/diagnostics/purpose-alignment"
+                cta="Take Purpose Alignment"
+              />
             </div>
           </div>
         </section>
 
-        <section>
-          <div className="mx-auto max-w-6xl px-6 lg:px-12">
-            <div
-              className="grid gap-5 border-y py-8 md:grid-cols-[0.9fr_1.1fr_auto] md:items-center"
-              style={{ borderColor: "rgba(255,255,255,0.06)" }}
-            >
-              <div>
-                <Eyebrow>Personal decision infrastructure</Eyebrow>
-                <h2
+        <section className="border-t border-white/[0.05] px-6 py-16">
+          <div className="mx-auto max-w-[1100px]">
+            <Eyebrow>Evidence gate</Eyebrow>
+            <div className="mt-8">
+              <SurfaceCard
+                title="Constitutional Diagnostic"
+                state={hasConstitutionalEvidence ? "COMPLETED" : "AVAILABLE"}
+                detail="Tests whether escalation is structurally warranted."
+                why="Use this when governance, authority, execution reality, or trust may be the real source of pressure."
+                href="/diagnostics/constitutional-diagnostic"
+                cta={hasConstitutionalEvidence ? "Re-open Constitutional Diagnostic" : "Run Constitutional Diagnostic"}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-white/[0.05] px-6 py-16">
+          <div className="mx-auto max-w-[1100px]">
+            <Eyebrow>Organisational evidence</Eyebrow>
+            <div className="mt-8 grid gap-4 lg:grid-cols-2">
+              <SurfaceCard
+                title="Team Assessment"
+                state={teamDone || Boolean(thread?.teamFindings) ? "COMPLETED" : hasConstitutionalEvidence ? "AVAILABLE" : "LOCKED"}
+                detail="Measures leadership-team divergence after a decision condition has already been named."
+                why={
+                  hasConstitutionalEvidence
+                    ? "Prior diagnostic context is present, so this surface can sharpen the record."
+                    : "Without prior diagnostic context, this should not be treated as a casual standalone quiz. Start with Fast or Constitutional first."
+                }
+                href={hasConstitutionalEvidence ? "/diagnostics/team-assessment" : "/diagnostics/constitutional-diagnostic"}
+                cta={hasConstitutionalEvidence ? "Open Team Assessment" : "Start with Constitutional"}
+              />
+              <SurfaceCard
+                title="Enterprise Assessment"
+                state={enterpriseDone || Boolean(thread?.enterpriseFindings) ? "COMPLETED" : hasConstitutionalEvidence || teamDone ? "AVAILABLE" : "LOCKED"}
+                detail="Designed for institutional evidence when the condition is bigger than one team or one perception gap."
+                why={
+                  hasConstitutionalEvidence || teamDone
+                    ? "This surface is now qualified because earlier evidence exists."
+                    : "This is strongest after prior diagnostic context or an active organisational case. It is not for casual exploration."
+                }
+                href={hasConstitutionalEvidence || teamDone ? "/diagnostics/enterprise-assessment" : "/diagnostics/fast"}
+                cta={hasConstitutionalEvidence || teamDone ? "Open Enterprise Assessment" : "Start with Fast Diagnostic"}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-white/[0.05] px-6 py-16">
+          <div className="mx-auto max-w-[1100px]">
+            <Eyebrow>Earned consequence layer</Eyebrow>
+            <div className="mt-8 border border-white/[0.08] bg-white/[0.02] p-5">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div
                   style={{
-                    marginTop: "0.9rem",
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
+                    ...serif,
+                    fontSize: "1.35rem",
                     lineHeight: 1.05,
-                    letterSpacing: "-0.02em",
-                    color: "rgba(255,255,255,0.84)",
+                    color: "rgba(255,255,255,0.88)",
+                    fontStyle: "italic",
                   }}
                 >
-                  Start with the person.
-                </h2>
+                  Executive Reporting
+                </div>
+                <StatusBadge state={executiveReady ? "AVAILABLE" : "LOCKED"} />
               </div>
-              <p
-                style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "1rem",
-                  lineHeight: 1.65,
-                  color: "rgba(255,255,255,0.45)",
-                }}
-              >
-                Purpose Alignment reads the person. The Constitutional Diagnostic reads the
-                organisation. Use this path when personal clarity is the first trust-building step,
-                not as a replacement for the institutional ladder.
+              <p className="mt-4 text-[14px] leading-[1.8] text-white/60">
+                Executive Reporting is not a starting point. It becomes available when the evidence shows decision stakes, consequence, and sufficient seriousness.
               </p>
-              <Link
-                href="/diagnostics/purpose-alignment"
-                className="inline-flex items-center gap-2 transition-all hover:underline md:justify-self-end"
-                style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
-                  letterSpacing: "0.24em",
-                  textTransform: "uppercase",
-                  color: "rgba(110,231,183,0.76)",
-                }}
-              >
-                Take Purpose Alignment
-                <ArrowRight style={{ width: "10px", height: "10px" }} />
-              </Link>
+              <p className="mt-3 text-[13px] leading-[1.75] text-white/42">
+                {executiveReady
+                  ? "Eligible for Executive Reporting. Earlier evidence is present, so this gate can be reviewed responsibly."
+                  : "Not yet earned. Submit evidence first through Fast Diagnostic or the Constitutional Diagnostic."}
+              </p>
+              {executiveReady ? (
+                <div className="mt-5">
+                  <Link
+                    href="/diagnostics/executive-reporting"
+                    className="group inline-flex min-h-[44px] items-center gap-2 border px-5 py-3 transition-all duration-200 hover:-translate-y-0.5"
+                    style={{
+                      borderColor: `${GOLD}40`,
+                      backgroundColor: `${GOLD}10`,
+                      color: "#F5F5F5",
+                      ...mono,
+                      fontSize: "10px",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Review Executive Reporting gate
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </div>
+              ) : null}
             </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="mx-auto max-w-6xl px-6 lg:px-12">
-            <div className="py-8 lg:py-10">
-              <div className="space-y-1">
-                {RUNGS.map((rung) => (
-                  <RungRow key={rung.n} rung={rung} />
-                ))}
-              </div>
-
-              <div
-                className="mt-6 flex items-center gap-2"
-                style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.24em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.24)",
-                }}
-              >
-                <span style={{ display: "inline-block", width: "16px", height: "1px", backgroundColor: "rgba(255,255,255,0.12)" }} />
-                WATCH = governed observation, not escalation · STRATEGY = escalation justified · Strategy Room opens only when evidence warrants intervention
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Product hierarchy */}
-        <section>
-          <div className="mx-auto max-w-6xl px-6 lg:px-12">
-            <div className="py-8 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-              <Eyebrow>How the system works</Eyebrow>
-              <div
-                className="mt-4 grid gap-x-8 gap-y-2 md:grid-cols-2"
-                style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "0.92rem",
-                  lineHeight: 1.55,
-                  color: "rgba(255,255,255,0.38)",
-                }}
-              >
-                <p>Diagnostics identify contradiction. Team assessment measures perception divergence. Enterprise assessment prices institutional drag.</p>
-                <p>Executive Reporting forces a decision with priced consequence. Strategy Room sequences the intervention. Each layer increases what is at stake.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="mx-auto max-w-6xl px-6 lg:px-12">
-            <div className="py-10">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 transition-all hover:underline"
-                style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.3)",
-                }}
-              >
-                Back to home
-              </Link>
-            </div>
+            <p className="mt-6 max-w-[62ch] text-[13px] leading-[1.8] text-white/40">
+              Strategy Room, Return Brief, and Counsel Review are not starting
+              points on this page. They appear only when the case record has
+              earned them.
+            </p>
           </div>
         </section>
       </div>

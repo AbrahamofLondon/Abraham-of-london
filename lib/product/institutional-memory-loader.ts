@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/lib/prisma.server";
 import type { InstitutionalMemoryArchive, InstitutionalMemoryCycleSnapshot } from "@/lib/product/institutional-memory-contract";
 

@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/lib/prisma.server";
 import { evaluateAggregationSafety } from "@/lib/product/multi-user-privacy";
 

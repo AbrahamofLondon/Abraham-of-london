@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/lib/prisma.server";
 import { getCreditProfile } from "@/lib/decision-ledger/ledger-service";
 import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-credit-governance";

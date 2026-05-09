@@ -52,8 +52,8 @@ type NavItem = {
 };
 
 const NAV_ITEMS: readonly NavItem[] = [
-  { href: "/#hero", label: "Start", sub: "Decision entry", icon: ScanSearch },
   { href: "/#refusal-demo", label: "How it works", sub: "Refusal and governed review", icon: Crown },
+  { href: "/diagnostics", label: "Diagnostics", sub: "Evidence entry surfaces", icon: ScanSearch },
   { href: "/evidence", label: "Evidence", sub: "Applied proof", icon: FileText },
   { href: "/library", label: "Library", sub: "Doctrine and archive", icon: BookOpen },
   { href: "/about", label: "About", sub: "Founder and method", icon: Compass },
@@ -71,7 +71,7 @@ function normalizePath(path: string): string {
 
 function isActive(currentPath: string, href: string): boolean {
   if (href.includes("#")) {
-    return href === "/#hero" ? currentPath === "/" : false;
+    return false;
   }
   const current = normalizePath(currentPath);
   const target  = normalizePath(href);

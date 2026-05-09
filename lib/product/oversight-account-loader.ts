@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/lib/prisma.server";
 import { qualifiesForBoardroom } from "@/lib/constitution/boardroom-mode";
 import { detectPatternRecurrenceV0, type PatternRecurrenceResult } from "@/lib/product/pattern-recurrence";

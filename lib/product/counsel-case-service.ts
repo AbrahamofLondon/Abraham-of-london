@@ -80,6 +80,29 @@ export async function loadCounselCaseForUser(input: {
   }
 }
 
+export async function loadCounselCasesForUser(input: {
+  email?: string;
+  userId?: string;
+}): Promise<CounselCase[]> {
+  if (!input.email && !input.userId) return [];
+
+  try {
+    const records = await prisma.diagnosticRecord.findMany({
+      where: {
+        diagnosticType: "counsel_case",
+        ...(input.email ? { userEmail: input.email.toLowerCase() } : {}),
+        ...(input.userId ? { userId: input.userId } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+
+    return records.map(mapRecordToCounselCase).filter(Boolean) as CounselCase[];
+  } catch {
+    return [];
+  }
+}
+
 export async function loadOpenCounselCasesForOperator(): Promise<CounselCase[]> {
   try {
     const records = await prisma.diagnosticRecord.findMany({

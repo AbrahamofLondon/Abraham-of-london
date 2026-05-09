@@ -13,8 +13,8 @@ export default function HomepageHero() {
         <p
           style={{
             ...mono,
-            fontSize: "11px",
-            letterSpacing: "0.22em",
+            fontSize: "12px",
+            letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: `${HOMEPAGE_GOLD}88`,
           }}
@@ -77,8 +77,8 @@ export default function HomepageHero() {
             className="inline-flex min-h-[44px] items-center"
             style={{
               ...mono,
-              fontSize: "10px",
-              letterSpacing: "0.12em",
+              fontSize: "11px",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.36)",
             }}
@@ -106,8 +106,8 @@ export default function HomepageHero() {
                 <span
                   style={{
                     ...mono,
-                    fontSize: "9px",
-                    letterSpacing: "0.1em",
+                    fontSize: "11px",
+                    letterSpacing: "0.06em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.42)",
                   }}

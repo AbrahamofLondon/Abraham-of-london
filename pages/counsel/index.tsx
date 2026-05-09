@@ -168,7 +168,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
                 </Link>
               )}
               {state.recommendedPath === "RETAINER_REVIEW" && (
-                <Link href="/retainer/dashboard" style={{ padding: "14px 28px", backgroundColor: "rgba(255,255,255,0.96)", color: "rgb(3 3 5)", ...mono, fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", textDecoration: "none" }}>
+                <Link href="/oversight" style={{ padding: "14px 28px", backgroundColor: "rgba(255,255,255,0.96)", color: "rgb(3 3 5)", ...mono, fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", textDecoration: "none" }}>
                   Open Retained Review <ArrowRight style={{ width: "13px", height: "13px", display: "inline", marginLeft: 6 }} />
                 </Link>
               )}
@@ -335,9 +335,9 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
                   </span>
                 </div>
                 <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
-                  Your retained oversight agreement includes counsel review. Open the retained dashboard to view your review cadence, active cases, and next scheduled review.
+                  Your retained oversight agreement includes counsel review. Open retained oversight command visibility to view review cadence, active cases, and next required sponsor-safe action.
                 </p>
-                <Link href="/retainer/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                <Link href="/oversight" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
                   Open retained review <ArrowRight style={{ width: 10, height: 10 }} />
                 </Link>
               </div>

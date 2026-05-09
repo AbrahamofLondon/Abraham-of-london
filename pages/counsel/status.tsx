@@ -3,19 +3,21 @@ import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
+import CounselMemorySummary from "@/components/counsel/CounselMemorySummary";
 import CounselCaseTimeline from "@/components/counsel/CounselCaseTimeline";
 import { resolvePageAccess } from "@/lib/access/server";
-import { loadCounselCaseForUser } from "@/lib/product/counsel-case-service";
+import { loadCounselCaseForUser, loadCounselCasesForUser } from "@/lib/product/counsel-case-service";
 import type { CounselCase } from "@/lib/product/counsel-room-contract";
 
 type Props = {
   authenticated: boolean;
   counselCase: CounselCase | null;
+  counselCaseCount: number;
 };
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
-const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase }) => {
+const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counselCaseCount }) => {
   return (
     <Layout title="Counsel Status" description="Track counsel case state." fullWidth>
       <Head><meta name="robots" content="noindex,nofollow" /></Head>
@@ -68,6 +70,8 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase }) => {
 
               <CounselCaseTimeline counselCase={counselCase} />
 
+              <CounselMemorySummary counselCase={counselCase} caseCount={counselCaseCount} />
+
               <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
                 <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
                   Current case summary
@@ -100,14 +104,19 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       props: {
         authenticated: false,
         counselCase: null,
+        counselCaseCount: 0,
       },
     };
   }
 
+  const counselCases = await loadCounselCasesForUser({ email, userId: userId ?? undefined });
+  const counselCase = counselCases[0] ?? await loadCounselCaseForUser({ email, userId: userId ?? undefined });
+
   return {
     props: {
       authenticated: true,
-      counselCase: await loadCounselCaseForUser({ email, userId: userId ?? undefined }),
+      counselCase,
+      counselCaseCount: counselCases.length || (counselCase ? 1 : 0),
     },
   };
 };

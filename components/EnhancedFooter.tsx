@@ -11,7 +11,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { getSocialLinks, type SocialLink } from "@/config/site";
 import {
   ArrowRight,
@@ -228,8 +228,8 @@ function SocialChannel({ social }: { social: SocialLink }) {
 }
 
 export default function EnhancedFooter(): React.ReactElement {
-  const router = useRouter();
-  const isHome = (router.asPath || "/").split("#")[0] === "/";
+  const pathname = usePathname();
+  const isHome = (pathname || "/") === "/";
 
   // Hardcoded to avoid hydration mismatch between server build time and client render time.
   // Update annually.
