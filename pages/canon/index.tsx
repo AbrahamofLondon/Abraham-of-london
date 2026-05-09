@@ -452,6 +452,33 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
 
             <div className="mt-6 h-px w-full" style={{ backgroundColor: "var(--ds-border)" }} />
 
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1rem" }}>
+                <div className="font-mono text-[7px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-accent)" }}>
+                  What the Canon is
+                </div>
+                <p className="mt-3 text-sm leading-6" style={{ color: "var(--ds-text-muted)" }}>
+                  The governing doctrine, worldview, and institutional thesis behind Abraham of London and the Decision Infrastructure system.
+                </p>
+              </div>
+              <div style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1rem" }}>
+                <div className="font-mono text-[7px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-accent)" }}>
+                  Start with the Prelude
+                </div>
+                <p className="mt-3 text-sm leading-6" style={{ color: "var(--ds-text-muted)" }}>
+                  <Link href="/books/the-architecture-of-human-purpose-landing" className="underline-offset-4 hover:underline">The Architecture of Human Purpose</Link> is the gateway volume into the broader Canon.
+                </p>
+              </div>
+              <div style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1rem" }}>
+                <div className="font-mono text-[7px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-accent)" }}>
+                  Relation to Decision Infrastructure
+                </div>
+                <p className="mt-3 text-sm leading-6" style={{ color: "var(--ds-text-muted)" }}>
+                  Diagnostics, evidence posture, escalation rules, and institutional continuity are downstream of this doctrine rather than detached software behavior.
+                </p>
+              </div>
+            </div>
+
             {series.length > 0 ? (
               <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
                 {series.map((entry, index) => (

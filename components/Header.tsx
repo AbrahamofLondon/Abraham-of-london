@@ -52,10 +52,12 @@ type NavItem = {
 };
 
 const NAV_ITEMS: readonly NavItem[] = [
-  { href: "/#refusal-demo", label: "How it works", sub: "Refusal and governed review", icon: Crown },
+  { href: "/", label: "System", sub: "Decision infrastructure", icon: Crown },
   { href: "/diagnostics", label: "Diagnostics", sub: "Evidence entry surfaces", icon: ScanSearch },
+  { href: "/canon", label: "Canon", sub: "Foundational doctrine", icon: BookOpen },
   { href: "/evidence", label: "Evidence", sub: "Applied proof", icon: FileText },
-  { href: "/library", label: "Library", sub: "Doctrine and archive", icon: BookOpen },
+  { href: "/intelligence", label: "Intelligence", sub: "Memory and market reading", icon: Fingerprint },
+  { href: "/library", label: "Library", sub: "Structured reading room", icon: BookOpen },
   { href: "/about", label: "About", sub: "Founder and method", icon: Compass },
 ] as const;
 
@@ -213,6 +215,22 @@ export default function Header({
             {/* Member slot — auth-aware.
                 Authenticated: Inner Circle → dashboard.
                 Unauthenticated: Inner Circle → /inner-circle (registration/unlock). */}
+            {!minimal && (
+              <Link
+                href="/diagnostics/fast"
+                className="hidden items-center gap-2 border px-3 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] transition-all duration-300 lg:inline-flex"
+                style={{
+                  borderColor: `${GOLD}38`,
+                  color: `${GOLD}D0`,
+                  backgroundColor: `${GOLD}12`,
+                }}
+                aria-label="Test a decision"
+              >
+                <ScanSearch className="h-3 w-3" style={{ color: GOLD }} />
+                Test a Decision
+              </Link>
+            )}
+
             {!minimal && (
               <Link
                 href={isAuthenticated ? "/inner-circle/dashboard" : "/inner-circle"}

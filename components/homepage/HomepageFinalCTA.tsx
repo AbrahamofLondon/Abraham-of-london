@@ -55,6 +55,20 @@ export default function HomepageFinalCTA() {
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
+        <div className="mt-5">
+          <Link
+            href="/engagements"
+            style={{
+              ...mono,
+              fontSize: "9px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.38)",
+            }}
+          >
+            Selective engagements
+          </Link>
+        </div>
       </div>
     </section>
   );

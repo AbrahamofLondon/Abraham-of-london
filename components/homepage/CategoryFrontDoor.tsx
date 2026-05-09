@@ -5,6 +5,7 @@ import OutputArtifactPreview from "@/components/homepage/OutputArtifactPreview";
 import MemoryContinuityPreview from "@/components/homepage/MemoryContinuityPreview";
 import EarnedProgressionBlock from "@/components/homepage/EarnedProgressionBlock";
 import TrustArchitectureBlock from "@/components/homepage/TrustArchitectureBlock";
+import BodyOfWorkBehindSystem from "@/components/homepage/BodyOfWorkBehindSystem";
 import HomepageFinalCTA from "@/components/homepage/HomepageFinalCTA";
 
 export default function CategoryFrontDoor() {
@@ -17,6 +18,7 @@ export default function CategoryFrontDoor() {
       <MemoryContinuityPreview />
       <EarnedProgressionBlock />
       <TrustArchitectureBlock />
+      <BodyOfWorkBehindSystem />
       <HomepageFinalCTA />
     </>
   );

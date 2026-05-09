@@ -1303,6 +1303,27 @@ function ResultSurface({
           />
         )}
 
+        {(route === "STRATEGY" || engagementReadiness.readinessPercent >= 70) && (
+          <div style={{ border: "1px solid rgba(201,169,110,0.18)", backgroundColor: "rgba(201,169,110,0.04)", padding: "1rem 1.1rem", marginTop: "1rem" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "#C9A96E" }}>
+              Selective continuation pathways
+            </span>
+            <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.62)" }}>
+              Your existing case record may support a selective engagement review. These pathways remain evidence-led and are not a starting point.
+            </p>
+            <div style={{ display: "flex", gap: "14px", flexWrap: "wrap", marginTop: "10px" }}>
+              <Link href="/engagements/selective-pilot" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#C9A96E", textDecoration: "none" }}>
+                View selective pilot terms
+              </Link>
+              {route === "STRATEGY" ? (
+                <Link href="/engagements/retained-oversight" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.52)", textDecoration: "none" }}>
+                  Review retained oversight pathway
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        )}
+
         <details style={{ marginTop: "1.5rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem 1.1rem" }}>
           <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
             Evidence, governance, and method

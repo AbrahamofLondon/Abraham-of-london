@@ -670,6 +670,22 @@ export default function DecisionCentrePage() {
             />
           )}
 
+          {!loading && data && (data.cases.length > 0 || data.checkpoints.requiresResponse.length > 0) && (
+            <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}05`, padding: "16px 20px", marginBottom: "16px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>
+                Selective engagement pathway
+              </p>
+              <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.48)" }}>
+                Your existing case record may support a selective engagement review. This is not a starting point and not a generic offer menu.
+              </p>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "10px" }}>
+                <Link href="/engagements/selective-pilot" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none" }}>
+                  Review engagement path
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Cases */}
           {!loading && data && data.cases.length > 0 && (
             <div style={{ display: "grid", gap: "16px" }}>

@@ -512,6 +512,49 @@ export default function BooksPage({
             </div>
           )}
         </section>
+
+        <section
+          className="mx-auto max-w-7xl px-6 py-12 lg:px-12"
+          style={{ borderTop: "1px solid var(--ds-border)" }}
+        >
+          <SectionHeading
+            eyebrow="In Development"
+            title="Book Projects & Continuations"
+            count="Long-form work in motion"
+          />
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                title: "The Architecture of Human Purpose",
+                body: "Prelude entry point into the Canon and its wider multi-volume architecture.",
+                href: "/books/the-architecture-of-human-purpose-landing",
+              },
+              {
+                title: "Canon Reading Path",
+                body: "A structured route from the Prelude into longer doctrinal and civilisational work.",
+                href: "/canon",
+              },
+              {
+                title: "Related Essays",
+                body: "Essays and public thought that sit beside the book layer rather than replacing it.",
+                href: "/library",
+              },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-[1.5rem] border p-6 transition hover:bg-white/[0.03]"
+                style={{
+                  borderColor: "var(--ds-border)",
+                  backgroundColor: "var(--ds-panel)",
+                }}
+              >
+                <p className="font-serif text-2xl italic ds-text">{item.title}</p>
+                <p className="mt-3 text-sm leading-7 ds-text-muted">{item.body}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
       </main>
     </Layout>
   );

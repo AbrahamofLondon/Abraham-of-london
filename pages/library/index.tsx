@@ -1,348 +1,180 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/library/index.tsx — LIBRARY INDEX (PDF REGISTRY, SSOT)
-
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
-import Link from "next/link";
 import Head from "next/head";
-import { FileText, Lock } from "lucide-react";
+import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import tiers, { type AccessTier } from "@/lib/access/tiers";
+import {
+  getAllBooks,
+  getAllCanons,
+  getAllDownloads,
+  getAllPlaybooks,
+  getAllPosts,
+  getAllResources,
+  getAllShorts,
+  getAllBriefs,
+  getAllVault,
+} from "@/lib/content/server";
 
-type PdfAsset = {
-  slug: string;
-  routeSlug: string;
+type Group = {
   title: string;
-  description?: string | null;
-  category?: string | null;
-  tags?: string[] | null;
-  updated?: string | null;
-  date?: string | null;
-  requiredTier: AccessTier;
-  isPublic: boolean;
-  displayPath?: string | null;
+  description: string;
+  href: string;
+  count: number;
+};
+
+type RecentItem = {
+  title: string;
+  description: string;
+  href: string;
+  group: string;
 };
 
 type Props = {
-  items: PdfAsset[];
-  counts: {
-    total: number;
-    public: number;
-    restricted: number;
-  };
+  groups: Group[];
+  recent: RecentItem[];
 };
 
-const RULE = "rgba(255,255,255,0.08)";
+const GOLD = "#C9A96E";
+const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
-function safeStr(v: any): string {
-  return typeof v === "string" ? v : v == null ? "" : String(v);
+function safeString(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
-function normalizeSlug(input: string) {
-  return (input || "")
-    .trim()
-    .replace(/\\/g, "/")
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/");
+function normalizeSlug(value: unknown): string {
+  return safeString(value)
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/^books\//i, "")
+    .replace(/^canon\//i, "")
+    .replace(/^playbooks\//i, "")
+    .replace(/^briefs\//i, "")
+    .replace(/^blog\//i, "")
+    .replace(/^posts\//i, "")
+    .replace(/^resources\/strategic-frameworks\//i, "");
 }
 
-function toRouteSlug(registrySlug: string): string {
-  const n = normalizeSlug(registrySlug);
-  const parts = n.split("/").filter(Boolean);
-  return parts.length ? (parts[parts.length - 1] ?? "") : "";
-}
-
-function toIsoDate(input: any): string | null {
-  const s = safeStr(input);
-  if (!s) return null;
-  const t = Date.parse(s);
-  if (Number.isNaN(t)) return null;
-  return new Date(t).toISOString();
-}
-
-function jsonSafe<T>(v: T): T {
-  return JSON.parse(JSON.stringify(v, (_k, val) => (val === undefined ? null : val)));
-}
-
-function coerceTags(v: any): string[] | null {
-  if (!Array.isArray(v)) return null;
-  const out = v.map((x) => safeStr(x)).filter(Boolean);
-  return out.length ? out : null;
-}
-
-function inferIsPublic(x: any): boolean {
-  return (
-    x?.public === true ||
-    x?.isPublic === true ||
-    String(x?.accessLevel || "").toLowerCase() === "public" ||
-    String(x?.tier || "").toLowerCase() === "public" ||
-    String(x?.visibility || "").toLowerCase() === "public" ||
-    String(x?.access || "").toLowerCase() === "public" ||
-    x?.locked === false
-  );
-}
-
-function inferRequiredTier(x: any, isPublic: boolean): AccessTier {
-  const raw = safeStr(x?.accessLevel || x?.tier || (isPublic ? "public" : "member"));
-  return tiers.normalizeRequired(raw as any);
-}
-
-function inferDisplayPath(x: any): string | null {
-  const href = safeStr(x?.href || "");
-  const url = safeStr(x?.url || x?.publicUrl || "");
-  const path = safeStr(x?.path || x?.filePath || x?.file || "");
-
-  if (href && href.startsWith("/")) return href;
-  if (path) {
-    const p = normalizeSlug(path);
-    if (p.startsWith("assets/") || p.startsWith("pdfs/")) return `/${p}`;
-    if (p.startsWith("public/")) return `/${p.replace(/^public\//, "")}`;
-    if (p.startsWith("http://") || p.startsWith("https://")) return p;
-  }
-  if (url) return url;
-  return null;
-}
-
-async function loadPdfAssets(): Promise<PdfAsset[]> {
-  try {
-    const mod: any = await import("@/scripts/pdf/pdf-registry.source");
-    const list = mod?.ALL_SOURCE_PDFS || mod?.PDF_REGISTRY || mod?.ALL_PDFS || mod?.default;
-    const arr: any[] = Array.isArray(list) ? list : Array.isArray(list?.items) ? list.items : [];
-
-    const out = arr
-      .map((x: any) => {
-        const rawSlug = safeStr(x?.slug || x?.id || x?.key || x?.name || x?.file || x?.pdf || "");
-        const slug = normalizeSlug(rawSlug);
-        if (!slug) return null;
-
-        const routeSlug = toRouteSlug(slug);
-        if (!routeSlug) return null;
-
-        const title = safeStr(x?.title || x?.name || x?.label || routeSlug || "Untitled");
-        const desc = safeStr(x?.description || x?.excerpt || x?.summary || "") || null;
-        const isPublic = inferIsPublic(x);
-        const requiredTier = inferRequiredTier(x, isPublic);
-
-        const updated =
-          safeStr(x?.updated || x?.updatedAt || x?.modified || x?.lastModified || x?.date || "") ||
-          null;
-        const date = safeStr(x?.date || x?.publishedAt || "") || null;
-
-        return {
-          slug,
-          routeSlug,
-          title,
-          description: desc,
-          category: safeStr(x?.category || x?.collection || x?.kind || "Library") || "Library",
-          tags: coerceTags(x?.tags),
-          updated,
-          date,
-          requiredTier,
-          isPublic: requiredTier === "public",
-          displayPath: inferDisplayPath(x),
-        } as PdfAsset;
-      })
-      .filter(Boolean) as PdfAsset[];
-
-    const seen = new Set<string>();
-    const deduped: PdfAsset[] = [];
-    for (const it of out) {
-      const k = it.routeSlug.toLowerCase();
-      if (seen.has(k)) continue;
-      seen.add(k);
-      deduped.push(it);
-    }
-
-    deduped.sort((a, b) => {
-      const aIso = toIsoDate(a.updated || a.date || "") || "";
-      const bIso = toIsoDate(b.updated || b.date || "") || "";
-      return bIso.localeCompare(aIso);
-    });
-
-    return deduped;
-  } catch {
-    return [];
-  }
+function buildRecentItem(doc: any, group: string, href: string): RecentItem {
+  return {
+    title: safeString(doc?.title, "Untitled"),
+    description: safeString(doc?.description || doc?.summary || doc?.excerpt, "Source-labelled material."),
+    href,
+    group,
+  };
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const items = await loadPdfAssets();
+  const books = getAllBooks().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const canons = getAllCanons().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const posts = getAllPosts().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const playbooks = getAllPlaybooks().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const resources = getAllResources().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const briefs = getAllBriefs().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const downloads = getAllDownloads().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const vault = getAllVault().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const shorts = getAllShorts().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
 
-  const counts = items.reduce(
-    (acc, it) => {
-      acc.total++;
-      if (it.isPublic) acc.public++;
-      else acc.restricted++;
-      return acc;
-    },
-    { total: 0, public: 0, restricted: 0 }
-  );
+  const frameworkResources = resources.filter((doc: any) => String(doc?._raw?.sourceFilePath || "").includes("strategic-frameworks"));
 
-  return {
-    props: jsonSafe({ items, counts }),
-    revalidate: 900,
-  };
+  const groups: Group[] = [
+    { title: "Essays", description: "Public thought, essays, and commentary.", href: "/blog", count: posts.length + shorts.length },
+    { title: "Briefs", description: "Strategic briefs and intelligence notes.", href: "/intelligence/market", count: briefs.length },
+    { title: "Playbooks", description: "Execution-grade public playbooks.", href: "/playbooks", count: playbooks.length },
+    { title: "Frameworks", description: "Decision frameworks and strategic instruments.", href: "/frameworks", count: frameworkResources.length },
+    { title: "Market Intelligence", description: "Public and restricted intelligence lines.", href: "/intelligence/market", count: briefs.length + downloads.length },
+    { title: "Books", description: "Long-form works and featured volumes.", href: "/books", count: books.length },
+    { title: "Evidence Materials", description: "Standards, evidence pages, and proof posture.", href: "/evidence", count: downloads.length },
+    { title: "Vault", description: "Controlled archive and restricted materials.", href: "/vault", count: vault.length },
+  ];
 
+  const recent: RecentItem[] = [
+    books[0] ? buildRecentItem(books[0], "Books", `/books/${normalizeSlug(books[0].slugSafe || books[0].slug)}`) : null,
+    canons[0] ? buildRecentItem(canons[0], "Canon", `/canon/${normalizeSlug(canons[0].slugSafe || canons[0].slug)}`) : null,
+    playbooks[0] ? buildRecentItem(playbooks[0], "Playbooks", `/playbooks/${normalizeSlug(playbooks[0].urlSlug || playbooks[0].slug)}`) : null,
+    frameworkResources[0] ? buildRecentItem(frameworkResources[0], "Frameworks", `/resources/strategic-frameworks/${normalizeSlug(frameworkResources[0].slug || frameworkResources[0].url)}`) : null,
+    briefs[0] ? buildRecentItem(briefs[0], "Briefs", `/briefs/${normalizeSlug(briefs[0].slug || briefs[0].urlSlug)}`) : null,
+    posts[0] ? buildRecentItem(posts[0], "Essays", `/blog/${normalizeSlug(posts[0].slug || posts[0].url)}`) : null,
+  ].filter(Boolean) as RecentItem[];
 
+  return { props: { groups, recent }, revalidate: 1800 };
 };
 
-function formatDate(value?: string | null) {
-  const iso = toIsoDate(value || "");
-  if (!iso) return "Undated";
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function assetType(item: PdfAsset) {
-  const cat = String(item.category || "").toLowerCase();
-  if (cat.includes("framework")) return "Framework";
-  if (cat.includes("reference")) return "Reference";
-  return "PDF";
-}
-
-function formatBadge(item: PdfAsset) {
-  const path = item.displayPath || "";
-  if (path.toLowerCase().endsWith(".epub")) return "EPUB";
-  return "PDF";
-}
-
-function filterKey(item: PdfAsset) {
-  const type = assetType(item);
-  if (!item.isPublic) return "Restricted";
-  return type;
-}
-
-function LibraryRow({ item }: { item: PdfAsset }) {
-  return (
-    <Link
-      href={`/library/${encodeURIComponent(item.routeSlug)}`}
-      className="group grid gap-3 border-b py-3 transition-colors duration-200 md:grid-cols-[1.5rem_5rem_1fr_3rem_5rem_6rem]"
-      style={{ borderBottomColor: "rgba(255,255,255,0.04)" }}
-    >
-      <div className="pt-0.5">
-        <FileText className="h-3.5 w-3.5" style={{ color: "rgba(255,255,255,0.2)" }} />
-      </div>
-      <div className="font-mono text-[6.5px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.22)" }}>
-        {assetType(item)}
-      </div>
-      <div className="min-w-0">
-        <h2 className="truncate font-serif text-[1rem] italic transition-colors duration-200 group-hover:text-white" style={{ color: "rgba(255,255,255,0.72)" }}>
-          {item.title}
-        </h2>
-        <p className="mt-0.5 truncate text-[12px]" style={{ color: "rgba(255,255,255,0.32)" }}>
-          {item.description || item.slug.replace(/\//g, " · ")}
-        </p>
-      </div>
-      <div className="font-mono text-[6.5px] uppercase tracking-[0.26em] md:text-right" style={{ color: "rgba(255,255,255,0.18)" }}>
-        {formatBadge(item)}
-      </div>
-      <div className="font-mono text-[6.5px] uppercase tracking-[0.26em] md:text-right" style={{ color: "rgba(255,255,255,0.2)" }}>
-        {item.isPublic ? "Public" : "Restricted"}
-      </div>
-      <div className="font-mono text-[6.5px] uppercase tracking-[0.24em] md:text-right" style={{ color: "rgba(255,255,255,0.18)" }}>
-        {formatDate(item.updated || item.date)}
-      </div>
-    </Link>
-  );
-}
-
-const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
-  const [activeFilter, setActiveFilter] = React.useState("All");
-
-  const filtered = React.useMemo(() => {
-    if (activeFilter === "All") return items;
-    return items.filter((item) => filterKey(item) === activeFilter);
-  }, [items, activeFilter]);
-
-  const filters = ["All", "PDF", "Framework", "Reference", "Restricted"];
-
+const LibraryIndexPage: NextPage<Props> = ({ groups, recent }) => {
   return (
     <Layout
       title="Library | Abraham of London"
-      description="Verified PDF library assets — controlled distribution, audit-friendly URLs."
+      description="Structured reading room for essays, briefs, playbooks, frameworks, books, evidence materials, and archive pathways."
+      canonicalUrl="/library"
       fullWidth
-      className="bg-black text-white"
-      headerTransparent={false}
+      headerTransparent
     >
       <Head>
-        <title>Library | Abraham of London</title>
+        <meta name="robots" content="index,follow" />
       </Head>
 
-      <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
-        <section className="border-b" style={{ borderBottomColor: RULE }}>
-          <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 lg:px-10 lg:pb-10 lg:pt-24">
-            <div className="flex items-center gap-3">
-              <span style={{ width: 1, height: 18, backgroundColor: "rgba(201,169,110,0.42)", display: "inline-block" }} />
-              <span className="font-mono text-[7.5px] uppercase tracking-[0.4em]" style={{ color: "rgba(201,169,110,0.8)" }}>
-                LIBRARY · ASSET REGISTRY
-              </span>
-            </div>
-
-            <h1 className="mt-6 font-serif text-[1.8rem] italic" style={{ color: "rgba(255,255,255,0.88)", fontWeight: 300 }}>
-              The reference corpus.
+      <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
+        <div className="mx-auto max-w-6xl space-y-8">
+          <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>Library</p>
+            <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3rem)", color: "rgba(255,255,255,0.92)" }}>
+              A structured reading room, not a dumping ground.
             </h1>
-
-            <p className="mt-5 font-mono text-[8px] uppercase tracking-[0.34em]" style={{ color: "rgba(255,255,255,0.28)" }}>
-              Documents, frameworks, and reference materials organized by type and access.
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/60">
+              The public Library is the broad reading room for essays, briefs, playbooks, frameworks, books, evidence materials, and archive pathways. The Canon remains a distinct foundation and is linked here without being swallowed by the Library.
             </p>
-            <p className="mt-3 max-w-2xl text-sm leading-6" style={{ color: "rgba(255,255,255,0.48)" }}>
-              A reference layer for operators who need to verify the thinking, tools, and source materials behind the diagnostic system.
-            </p>
+          </header>
 
-            <div className="mt-6 h-px w-full" style={{ backgroundColor: RULE }} />
-
-            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
-              {filters.map((entry) => {
-                const active = activeFilter === entry;
-                return (
-                  <button
-                    key={entry}
-                    type="button"
-                    onClick={() => setActiveFilter(entry)}
-                    className="font-mono text-[7.5px] uppercase tracking-[0.3em]"
-                    style={{
-                      color: active ? "rgba(255,255,255,0.62)" : "rgba(255,255,255,0.28)",
-                      textDecoration: active ? "underline" : "none",
-                      textUnderlineOffset: "0.35rem",
-                    }}
-                  >
-                    {entry}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-8 lg:py-10">
-          <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="mb-6 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[6.5px] uppercase tracking-[0.28em]" style={{ color: "rgba(255,255,255,0.22)" }}>
-              <span>{counts.total} assets indexed</span>
-              <span>{counts.public} public</span>
-              <span>{counts.restricted} restricted</span>
-              <span>{filtered.length} visible</span>
-            </div>
-
-            {filtered.length === 0 ? (
-              <div className="border px-6 py-16 text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.24)" }}>
-                  No assets matching current classification
+          <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {groups.map((group) => (
+              <Link key={group.href} href={group.href} className="border border-white/10 bg-white/[0.02] p-5 transition hover:bg-white/[0.04]">
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>{group.title}</p>
+                <p className="mt-3 text-sm leading-7 text-white/58">{group.description}</p>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)", marginTop: "16px" }}>
+                  {group.count} indexed
                 </p>
+              </Link>
+            ))}
+          </section>
+
+          <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>How to use this layer</p>
+              <div className="mt-4 space-y-3 text-sm text-white/62">
+                <p>Start with the Canon if you want origin, worldview, and governing principles.</p>
+                <p>Use Evidence if you want standards, proof boundaries, and verification posture.</p>
+                <p>Use Frameworks and Playbooks if you want practical instruments under consequence.</p>
+                <p>Use Intelligence if you want market reading, strategic briefs, and report pathways.</p>
+                <p>Use Vault when the material is controlled, restricted, or earned rather than openly browsable.</p>
               </div>
-            ) : (
-              <div>
-                {filtered.map((item) => (
-                  <LibraryRow key={item.slug} item={item} />
-                ))}
+            </section>
+
+            <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Canon stays distinct</p>
+              <p className="mt-4 text-sm leading-7 text-white/60">
+                The Canon is linked from the Library, but it is not merely another shelf. It remains the governing intellectual foundation behind the public reading room and the decision system itself.
+              </p>
+              <div className="mt-5">
+                <Link href="/canon" className="text-sm text-white/72 underline-offset-4 hover:underline">
+                  Enter the Canon
+                </Link>
               </div>
-            )}
-          </div>
-        </section>
+            </section>
+          </section>
+
+          <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Recent routes into the archive</p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {recent.map((item) => (
+                <div key={item.href} style={{ borderLeft: "1px solid rgba(201,169,110,0.32)", paddingLeft: "12px" }}>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>{item.group}</p>
+                  <Link href={item.href} className="mt-2 block text-white hover:underline">{item.title}</Link>
+                  <p className="mt-1 text-sm leading-6 text-white/55">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
       </main>
     </Layout>
   );
