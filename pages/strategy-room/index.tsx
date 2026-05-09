@@ -189,6 +189,71 @@ function StrategyRoomGate() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// EVIDENCE CARRIED FROM EXECUTIVE REPORTING
+// ─────────────────────────────────────────────────────────────────────────────
+
+function EvidenceCarriedFromER() {
+  const [fromER, setFromER] = React.useState<string | null>(null);
+  const [erRoute, setErRoute] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const run = params.get("fromER");
+    const route = params.get("route");
+    if (run) setFromER(run);
+    if (route) setErRoute(route);
+  }, []);
+
+  if (!fromER) return null;
+
+  return (
+    <div className="mx-auto max-w-6xl px-6 pt-6 lg:px-12">
+      <div style={{
+        border: `1px solid rgba(201,169,110,0.22)`,
+        backgroundColor: "rgba(201,169,110,0.04)",
+        padding: "14px 18px",
+      }}>
+        <p style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "7px",
+          letterSpacing: "0.32em",
+          textTransform: "uppercase",
+          color: "#C9A96E",
+          marginBottom: "6px",
+        }}>
+          Evidence carried from Executive Reporting
+        </p>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300,
+          fontSize: "0.92rem",
+          lineHeight: 1.55,
+          color: "rgba(255,255,255,0.60)",
+        }}>
+          Run reference: <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: "rgba(255,255,255,0.75)" }}>{fromER}</span>
+          {erRoute && (
+            <span style={{ marginLeft: "12px", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: "rgba(255,255,255,0.45)" }}>
+              Route: {erRoute}
+            </span>
+          )}
+        </p>
+        <p style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "7px",
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.25)",
+          marginTop: "6px",
+        }}>
+          Source: Executive Reporting &middot; Evidence posture: CASE_SCOPED
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1628,6 +1693,7 @@ export default function StrategyRoomPage({
         <main style={{ backgroundColor: VOID, minHeight: "100vh", color: "white" }}>
 
           <StrategyRoomGate />
+          <EvidenceCarriedFromER />
 
           <div className="mx-auto max-w-5xl px-6 lg:px-12">
             <div className="py-20 lg:py-24">
@@ -2445,6 +2511,7 @@ export default function StrategyRoomPage({
         {!isSubmitting && !canonical && (
           <>
             <StrategyRoomGate />
+            <EvidenceCarriedFromER />
             <EntryBrief
               brief={entryBrief}
               form={form}

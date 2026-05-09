@@ -49,7 +49,6 @@ import BoundaryProximityLine, {
   boundaryProximityText,
 } from "@/components/diagnostics/results/ThresholdProximityLine";
 import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
-import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import ClientIntelligenceStack from "@/components/Intelligence/user/ClientIntelligenceStack";
 import { ArbiterBadge } from "@/components/trust/ArbiterBadge";
@@ -1261,9 +1260,9 @@ function ResultSurface({
                 The report has identified the priority intervention. Accept and proceed to execution, or challenge with evidence. Non-response will be treated as implicit acceptance.
               </p>
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "14px" }}>
-                <a href="/strategy-room" style={{ padding: "10px 18px", backgroundColor: "#F5F5F5", color: "#0B0B0B", textDecoration: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
+                <Link href={`/strategy-room?fromER=${encodeURIComponent(result.runKey)}&route=${encodeURIComponent(route)}`} style={{ padding: "10px 18px", backgroundColor: "#F5F5F5", color: "#0B0B0B", textDecoration: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
                   Accept — enter Strategy Room
-                </a>
+                </Link>
                 <button onClick={() => { const cid = result.checkpointId; if (!cid) { alert("No checkpoint available for this report. The system cannot record your challenge without a checkpoint reference."); return; } const note = prompt("What evidence challenges this priority?"); if (note) { fetch("/api/checkpoints/respond", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ checkpointId: cid, responseStatus: "DISPUTED_FINDING", whatChanged: note }) }).catch(() => {}); } }} style={{ padding: "10px 18px", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.12)", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
                   Challenge with evidence
                 </button>

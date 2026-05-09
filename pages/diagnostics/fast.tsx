@@ -90,6 +90,12 @@ const FastDiagnosticPage: NextPage = () => {
   const [showResume, setShowResume] = React.useState(false);
   const [draftSnapshot, setDraftSnapshot] = React.useState<FastDraftSnapshot | null>(null);
 
+  // Optional evidence strengthener fields
+  const [strengthEvidence, setStrengthEvidence] = React.useState("");
+  const [strengthAuthority, setStrengthAuthority] = React.useState("");
+  const [strengthConsequence, setStrengthConsequence] = React.useState("");
+  const [strengthExpanded, setStrengthExpanded] = React.useState(false);
+
   React.useEffect(() => {
     const saved = loadVersionedAssessmentState<FastDraftSnapshot>(
       STORAGE_KEY,
@@ -252,7 +258,18 @@ const FastDiagnosticPage: NextPage = () => {
       const response = await fetch("/api/diagnostics/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, committed: commitmentValue, elapsedMs: Date.now() - startedAt.current }),
+        body: JSON.stringify({
+          answers,
+          committed: commitmentValue,
+          elapsedMs: Date.now() - startedAt.current,
+          ...((() => {
+            const opt: Record<string, string> = {};
+            if (strengthEvidence.trim()) opt.failureEvidence = strengthEvidence.trim();
+            if (strengthAuthority.trim()) opt.changeAuthority = strengthAuthority.trim();
+            if (strengthConsequence.trim()) opt.thirtyDayConsequence = strengthConsequence.trim();
+            return Object.keys(opt).length > 0 ? { optionalEvidence: { ...opt, sourceLabel: "USER_REPORTED" } } : {};
+          })()),
+        }),
       });
       const json = (await response.json()) as FastDiagnosticResult | { ok?: false; error?: string };
       if (!response.ok || "caseRef" in json === false) {
@@ -275,6 +292,7 @@ const FastDiagnosticPage: NextPage = () => {
   function resetDiagnostic() {
     setAnswers({}); setStepIndex(0); setStage("hero");
     setCommitted(false); setResult(null); setError(""); setChallenge(null); setLiveHint("");
+    setStrengthEvidence(""); setStrengthAuthority(""); setStrengthConsequence(""); setStrengthExpanded(false);
     startedAt.current = Date.now();
     try { sessionStorage.removeItem("aol_fast_result"); } catch { /* ignore */ }
     clearVersionedAssessmentState(STORAGE_KEY);
@@ -417,6 +435,72 @@ const FastDiagnosticPage: NextPage = () => {
                 <p style={{ marginTop: "0.75rem", color: "rgba(252,165,165,0.82)", fontSize: "0.88rem" }}>{error}</p>
               )}
 
+              {/* Optional evidence strengthener — last step only */}
+              {stepIndex === STEPS.length - 1 && (
+                <div style={{ marginTop: "1.5rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                  <button
+                    type="button"
+                    onClick={() => setStrengthExpanded((prev) => !prev)}
+                    style={{ width: "100%", padding: "1rem 1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                  >
+                    <div>
+                      <div style={{ ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                        Strengthen the evidence
+                      </div>
+                      <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.22)", marginTop: "0.25rem" }}>
+                        Optional. Additional context produces a more precise finding.
+                      </div>
+                    </div>
+                    <span style={{ ...mono, fontSize: "12px", color: "rgba(255,255,255,0.25)", transform: strengthExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 200ms" }}>
+                      ▼
+                    </span>
+                  </button>
+                  {strengthExpanded && (
+                    <div style={{ padding: "0 1.25rem 1.25rem", display: "grid", gap: "1rem" }}>
+                      <div>
+                        <label style={{ ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "0.4rem" }}>
+                          What evidence would prove this decision is already failing?
+                        </label>
+                        <textarea
+                          value={strengthEvidence}
+                          onChange={(e) => setStrengthEvidence(e.target.value)}
+                          rows={3}
+                          placeholder="Missed deadlines, lost clients, repeated escalation — name what already happened."
+                          style={{ width: "100%", padding: "16px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.88)", fontSize: "1rem", lineHeight: 1.65, resize: "none", outline: "none" }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "0.4rem" }}>
+                          Who has authority to change the outcome?
+                        </label>
+                        <textarea
+                          value={strengthAuthority}
+                          onChange={(e) => setStrengthAuthority(e.target.value)}
+                          rows={3}
+                          placeholder="Name the person or role whose decision would actually change the trajectory."
+                          style={{ width: "100%", padding: "16px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.88)", fontSize: "1rem", lineHeight: 1.65, resize: "none", outline: "none" }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "0.4rem" }}>
+                          What happens if no decision is made within 30 days?
+                        </label>
+                        <textarea
+                          value={strengthConsequence}
+                          onChange={(e) => setStrengthConsequence(e.target.value)}
+                          rows={3}
+                          placeholder="Describe the specific cost, loss, or irreversible change that occurs."
+                          style={{ width: "100%", padding: "16px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.88)", fontSize: "1rem", lineHeight: 1.65, resize: "none", outline: "none" }}
+                        />
+                      </div>
+                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+                        Source: user-reported. These fields do not change the core scoring model.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5rem" }}>
                 <button
                   type="button"
@@ -523,6 +607,12 @@ const FastDiagnosticPage: NextPage = () => {
                 <p style={{ marginTop: "0.75rem", ...serif, fontSize: "1rem", lineHeight: 1.5, color: "rgba(255,255,255,0.55)", fontStyle: "italic" }}>
                   You already know this. You&rsquo;ve been circling it.
                 </p>
+                {/* Evidence strengthened badge — shown only when ≥2 optional fields were completed */}
+                {[strengthEvidence, strengthAuthority, strengthConsequence].filter((v) => v.trim().length > 0).length >= 2 && (
+                  <span style={{ display: "inline-flex", alignItems: "center", marginTop: "0.75rem", padding: "4px 10px", border: "1px solid rgba(16,185,129,0.30)", backgroundColor: "rgba(16,185,129,0.06)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(16,185,129,0.70)" }}>
+                    Evidence strength: Strengthened
+                  </span>
+                )}
               </div>
 
               {/* SECTION 1b: CONTRADICTION MIRROR — your own words */}

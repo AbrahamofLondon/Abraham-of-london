@@ -1,6 +1,8 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { X } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import CounselMemorySummary from "@/components/counsel/CounselMemorySummary";
@@ -16,8 +18,14 @@ type Props = {
 };
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
 const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counselCaseCount }) => {
+  const router = useRouter();
+  const justSubmitted = router.query.submitted === "true";
+  const queryCaseId = typeof router.query.caseId === "string" ? router.query.caseId : null;
+  const [bannerDismissed, setBannerDismissed] = React.useState(false);
+
   return (
     <Layout title="Counsel Status" description="Track counsel case state." fullWidth>
       <Head><meta name="robots" content="noindex,nofollow" /></Head>
@@ -33,6 +41,42 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
             </p>
           </header>
 
+          {justSubmitted && !bannerDismissed ? (
+            <section
+              style={{
+                border: "1px solid rgba(16,185,129,0.30)",
+                backgroundColor: "rgba(16,185,129,0.06)",
+                padding: "1rem",
+                position: "relative",
+              }}
+            >
+              <button
+                onClick={() => setBannerDismissed(true)}
+                aria-label="Dismiss confirmation"
+                style={{
+                  position: "absolute",
+                  top: "0.75rem",
+                  right: "0.75rem",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "rgba(16,185,129,0.60)",
+                  padding: "2px",
+                }}
+              >
+                <X style={{ width: 14, height: 14 }} />
+              </button>
+              <p style={{ ...serif, fontSize: "1.05rem", lineHeight: 1.6, color: "rgba(255,255,255,0.88)" }}>
+                Counsel request received. Your case has entered evidence review.
+              </p>
+              {queryCaseId ? (
+                <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.14em", color: "rgba(16,185,129,0.70)", marginTop: "0.5rem" }}>
+                  Case reference: {queryCaseId}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+
           {!authenticated ? (
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
               <p className="text-white/65">Sign in to view counsel case status.</p>
@@ -41,7 +85,7 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
 
           {authenticated && !counselCase ? (
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-              <p className="text-white/65">No counsel case is currently attached to this account.</p>
+              <p className="text-white/65">No counsel cases are currently recorded for this account.</p>
             </section>
           ) : null}
 

@@ -12,7 +12,13 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArrowRight, ShieldCheck, AlertTriangle, Clock, CheckCircle, XCircle } from "lucide-react";
+
+const DecisionCentreOrientation = dynamic(
+  () => import("@/components/decision-centre/DecisionCentreOrientation"),
+  { ssr: false },
+);
 
 import Layout from "@/components/Layout";
 import AdmissionNotice from "@/components/product/AdmissionNotice";
@@ -635,6 +641,9 @@ export default function DecisionCentrePage() {
               You are not viewing reports. You are viewing the state of decisions under governance.
             </p>
           </div>
+
+          {/* First-visit orientation */}
+          <DecisionCentreOrientation />
 
           {/* Loading */}
           {loading && (

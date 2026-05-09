@@ -6,7 +6,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ArrowLeft, ArrowRight, ShieldCheck, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 import Layout from "@/components/Layout";
@@ -59,7 +59,6 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
   const router = useRouter();
   const [form, setForm] = React.useState<IntakeForm>(INITIAL_FORM);
   const [submitting, setSubmitting] = React.useState(false);
-  const [submitted, setSubmitted] = React.useState(false);
   const [error, setError] = React.useState("");
 
   React.useEffect(() => {
@@ -88,26 +87,6 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
     );
   }
 
-  if (submitted) {
-    return (
-      <Layout title="Intake Submitted | Abraham of London" fullWidth headerTransparent>
-        <Head><meta name="robots" content="noindex,nofollow" /></Head>
-        <main style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
-          <div className="mx-auto max-w-3xl px-6 py-32 text-center">
-            <ShieldCheck style={{ width: "40px", height: "40px", color: `${GOLD}60`, margin: "0 auto 1.5rem" }} />
-            <h1 style={{ ...serif, fontSize: "2rem", color: "rgba(255,255,255,0.92)" }}>Intake submitted</h1>
-            <p style={{ marginTop: "1rem", ...serif, fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", maxWidth: "40ch", margin: "1rem auto 0" }}>
-              Your counsel case has been created and queued for review. You will be notified when a counsel response is ready.
-            </p>
-            <Link href="/counsel" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "2rem", padding: "12px 24px", backgroundColor: "rgba(255,255,255,0.96)", color: "rgb(3 3 5)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-              Return to Counsel Review <ArrowRight style={{ width: 10, height: 10 }} />
-            </Link>
-          </div>
-        </main>
-      </Layout>
-    );
-  }
-
   async function handleSubmit() {
     if (!canSubmit) return;
     setSubmitting(true);
@@ -126,8 +105,12 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
       if (!res.ok || !data.ok) {
         throw new Error(data.error || data.message || "Submission failed.");
       }
-      setSubmitted(true);
       trackLaunch("counsel_intake_submitted", "counsel_intake");
+      const caseId = data.caseId;
+      const statusUrl = caseId
+        ? `/counsel/status?submitted=true&caseId=${encodeURIComponent(caseId)}`
+        : `/counsel/status?submitted=true`;
+      router.push(statusUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submission failed.");
     } finally {
