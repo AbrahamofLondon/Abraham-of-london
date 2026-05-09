@@ -97,6 +97,7 @@ export async function loadOrganisationDivergenceSummary(input: {
     minimumSafeResponses: 3,
   });
   if (sampleSafety === "INSUFFICIENT_RESPONSES" || sampleSafety === "SMALL_SAMPLE_SUPPRESSED") {
+    // TODO: integrate recordSuppression() here — log small-sample suppression to the suppression audit ledger
     return {
       summaries: [],
       warnings: ["Organisation divergence is suppressed because the available respondent sample is below the safe threshold."],

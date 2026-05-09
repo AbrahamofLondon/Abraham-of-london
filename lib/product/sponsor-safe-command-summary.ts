@@ -3,6 +3,7 @@ import { loadOversightAccount } from "@/lib/product/oversight-account-loader";
 import { loadInstitutionalMemoryArchive } from "@/lib/product/institutional-memory-loader";
 import { buildBuyerVisibleCadencePosture, loadLatestRetainedReviewCycleForAccount } from "@/lib/product/retained-cadence-service";
 import { buildRetainedOutcomeSummary } from "@/lib/product/retained-outcome-summary";
+import { recordSuppression } from "@/lib/product/suppression-ledger";
 
 type SummarySection = {
   title: string;
@@ -327,6 +328,46 @@ export async function buildSponsorSafeCommandSummary(input: {
       thinState: retainedAssets.length < 2,
     },
   };
+
+  // Record each static suppression rule to the suppression audit ledger
+  const scopeId = input.organisationId ?? input.email ?? input.userId ?? "unknown";
+  const suppressionRules = [
+    {
+      fieldName: "respondentText",
+      suppressionReason: "Raw respondent text is not shown here.",
+      suppressionRule: "RESPONDENT_TEXT_WITHHELD",
+      evidenceSource: "Respondent evidence",
+    },
+    {
+      fieldName: "operatorNotes",
+      suppressionReason: "Operator and counsel notes remain withheld.",
+      suppressionRule: "OPERATOR_NOTES_WITHHELD",
+      evidenceSource: "Operator-only analysis",
+    },
+    {
+      fieldName: "unsafeAggregates",
+      suppressionReason: "Unsafe aggregate detail is suppressed rather than over-exposed.",
+      suppressionRule: "UNSAFE_AGGREGATE_SUPPRESSED",
+      evidenceSource: "Small-sample and privacy-risk evidence",
+    },
+  ];
+  for (const rule of suppressionRules) {
+    recordSuppression({
+      scopeId,
+      surface: "SPONSOR_SAFE_COMMAND_SUMMARY",
+      fieldName: rule.fieldName,
+      evidenceSource: rule.evidenceSource,
+      originalPosture: summary.evidencePosture,
+      suppressionReason: rule.suppressionReason,
+      suppressionRule: rule.suppressionRule,
+      suppressedAt: summary.generatedAt,
+      suppressedBySystem: true,
+      reviewedByOperator: null,
+      reviewedAt: null,
+      overrideStatus: "NONE",
+      overrideReason: null,
+    }).catch(() => {});
+  }
 
   return { summary, brief, account, warnings, retainedCadence, outcomeSummary };
 }

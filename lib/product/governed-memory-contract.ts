@@ -1,3 +1,5 @@
+// TODO: integrate recordSuppression() from @/lib/product/suppression-ledger when governed memory
+// items transition to SUPPRESSED status — log the suppression event with field reference and reason
 import type { FieldProvenance } from "@/lib/product/field-provenance-contract";
 import {
   formatFieldProvenanceLine,

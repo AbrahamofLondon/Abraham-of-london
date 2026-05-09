@@ -1,3 +1,5 @@
+// TODO: integrate recordSuppression() from @/lib/product/suppression-ledger where evidence posture
+// causes fields to be withheld or downgraded (e.g. INSUFFICIENT_EVIDENCE, SYSTEM_INFERRED fallback)
 import type { PurposeAlignmentEvidenceCarryForward } from "@/lib/alignment/evidence-loader";
 import type { CheckpointRecord } from "@/lib/product/checkpoint-scheduler-contract";
 import type { AssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
