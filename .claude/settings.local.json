@@ -55,7 +55,25 @@
       "Bash(find content/toolkits content/resources/strategic-frameworks -name \"*.mdx\" -exec sed -i 's/\\\\r$//' {} \\\\;)",
       "Bash(find content/toolkits -name \"*.mdx\" -exec sed -i 's/\\\\r$//' {} \\\\;)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://www.abrahamoflondon.org/founders\")",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://www.abrahamoflondon.org/about/founder\")"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://www.abrahamoflondon.org/about/founder\")",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(mkdir -p /tmp/aol-linter-hold)",
+      "Bash(mv pages/oversight/index.tsx /tmp/aol-linter-hold/)",
+      "Bash(mv pages/boardroom/index.tsx /tmp/aol-linter-hold/)",
+      "Bash(mv lib/product/boardroom-archive-summary.ts /tmp/aol-linter-hold/)",
+      "Bash(mv lib/product/sponsor-safe-command-summary.ts /tmp/aol-linter-hold/)",
+      "Bash(mv /tmp/aol-linter-hold/index.tsx pages/oversight/)",
+      "Bash(mv /tmp/aol-linter-hold/boardroom-archive-summary.ts lib/product/)",
+      "Bash(mv /tmp/aol-linter-hold/sponsor-safe-command-summary.ts lib/product/)",
+      "Bash(mv /tmp/aol-linter-hold/retainer-readiness.tsx pages/admin/)",
+      "Bash(mv /tmp/aol-linter-hold/CounselMemorySummary.tsx components/counsel/)",
+      "Bash(git reset:*)",
+      "Bash(node scripts/public-dto-guard.mjs)",
+      "Bash(node scripts/intelligence-boundary-guard.mjs)",
+      "Bash(node scripts/public-copy-guard.mjs)",
+      "Bash(node scripts/evidence-posture-guard.mjs)",
+      "Bash(node scripts/earned-progression-guard.mjs)"
     ]
   }
 }
