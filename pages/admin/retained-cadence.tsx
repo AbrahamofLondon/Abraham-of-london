@@ -136,6 +136,7 @@ export default function RetainedCadencePage({
   const [queue, setQueue] = React.useState(initialQueue);
   const [busyCycleId, setBusyCycleId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [tickResult, setTickResult] = React.useState<string | null>(null);
 
   async function refreshQueue() {
     const response = await fetch("/api/admin/retained-cadence/list");
@@ -204,6 +205,28 @@ export default function RetainedCadencePage({
     }
   }
 
+  async function handleRunNow() {
+    setTickResult("Running scheduler...");
+    setError(null);
+    try {
+      const response = await fetch("/api/admin/retained-cadence/run-now", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Failed to run cadence scheduler.");
+      }
+      await refreshQueue();
+      const result = data.result;
+      setTickResult(
+        `Tick complete: ${result.createdCycleIds.length} created, ${result.markedOverdue.length} overdue, ${result.escalated.length} escalated.`,
+      );
+    } catch (err) {
+      setTickResult(null);
+      setError(err instanceof Error ? err.message : "Failed to run cadence scheduler.");
+    }
+  }
+
   const sections: Array<[string, QueueResponse["all"]]> = [
     ["Overdue cycles", queue.overdue],
     ["In progress", queue.inProgress],
@@ -232,8 +255,17 @@ export default function RetainedCadencePage({
 
         <section className="border border-white/10 bg-zinc-950/70 p-5">
           <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Create new review cycle</h2>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
             <CreateCycleForm onCreated={refreshQueue} />
+            <div className="space-y-2">
+              <button
+                onClick={handleRunNow}
+                className="border border-blue-500/25 bg-blue-500/10 px-4 py-2 text-xs text-blue-200"
+              >
+                Run cadence now
+              </button>
+              {tickResult ? <p className="max-w-sm text-xs text-white/55">{tickResult}</p> : null}
+            </div>
           </div>
         </section>
 

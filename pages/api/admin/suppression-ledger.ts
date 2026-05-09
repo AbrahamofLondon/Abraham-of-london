@@ -18,10 +18,11 @@ export default async function handler(
     try {
       const scopeId = typeof req.query.scopeId === "string" ? req.query.scopeId : undefined;
       const surface = typeof req.query.surface === "string" ? req.query.surface : undefined;
+      const reason = typeof req.query.reason === "string" ? req.query.reason : undefined;
       const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : undefined;
 
       const [events, summary] = await Promise.all([
-        loadSuppressionLedger({ scopeId, surface, limit }),
+        loadSuppressionLedger({ scopeId, surface, reason, limit }),
         buildSuppressionSummary(scopeId),
       ]);
 

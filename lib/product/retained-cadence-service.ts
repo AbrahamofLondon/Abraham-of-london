@@ -95,6 +95,14 @@ async function loadCycleRows(): Promise<CycleRecord[]> {
   });
 }
 
+export async function listRetainedReviewCycles(): Promise<RetainedReviewCycle[]> {
+  const rows = await loadCycleRows();
+  return rows
+    .map(parseCycle)
+    .filter((cycle): cycle is RetainedReviewCycle => cycle !== null)
+    .sort((left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime());
+}
+
 function matchesScope(cycle: RetainedReviewCycle, input: {
   accountId?: string | null;
   organisationId?: string | null;
@@ -256,6 +264,22 @@ async function updateCycle(cycleId: string, updater: (cycle: RetainedReviewCycle
     },
   });
   return parseCycle(updated);
+}
+
+export async function setRetainedReviewCycleState(input: {
+  cycleId: string;
+  cadenceState: RetainedCadenceState;
+  operatorId?: string | null;
+  escalationReason?: string | null;
+  skippedReason?: string | null;
+}) {
+  return updateCycle(input.cycleId, (cycle) => ({
+    ...cycle,
+    cadenceState: input.cadenceState,
+    operatorId: input.operatorId ?? cycle.operatorId ?? null,
+    escalationReason: input.escalationReason ?? cycle.escalationReason ?? null,
+    skippedReason: input.skippedReason ?? cycle.skippedReason ?? null,
+  }));
 }
 
 export async function markRetainedReviewCompleted(input: {

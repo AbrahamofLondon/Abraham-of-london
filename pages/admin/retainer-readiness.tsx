@@ -7,11 +7,20 @@ import { requireAdminPage } from "@/lib/access/server";
 import { prisma } from "@/lib/prisma.server";
 import { buildOperatorCadenceQueue } from "@/lib/product/retained-cadence-service";
 import { canManageCadence } from "@/lib/product/retained-role-contract";
-import { classifyRetainerReadiness, classifyRetainerReadinessAreas } from "@/lib/product/retainer-readiness-classifier";
+import {
+  classifyGeneral50KRuntime,
+  classifyRetainerReadiness,
+  classifyRetainerReadinessAreas,
+  type General50KRuntimeInput,
+} from "@/lib/product/retainer-readiness-classifier";
 import { buildSponsorSafeCommandSummary } from "@/lib/product/sponsor-safe-command-summary";
+import { buildPortfolioMemory } from "@/lib/product/portfolio-memory-surface";
+import { resolvePortfolioScopes } from "@/lib/product/portfolio-scope-resolver";
+import { getEmailTransportStatus } from "@/lib/email/transport";
 
 export const getServerSideProps: GetServerSideProps<{
   classification: ReturnType<typeof classifyRetainerReadiness>;
+  general50KClassification: ReturnType<typeof classifyGeneral50KRuntime>;
   scope: {
     organisationId: string | null;
     contractId: string | null;
@@ -34,6 +43,7 @@ export const getServerSideProps: GetServerSideProps<{
     boardroomMemoryExists: boolean;
     outcomeThin: boolean;
   };
+  runtime: General50KRuntimeInput;
   summaryView: {
     cadence: string;
     brief: string;
@@ -60,6 +70,50 @@ export const getServerSideProps: GetServerSideProps<{
       organisationId,
     }),
   ]);
+  const resolution = await resolvePortfolioScopes({
+    role: "ADMIN",
+    organisationId,
+  });
+  const portfolio = await buildPortfolioMemory({
+    organisationId,
+    resolution,
+  }).catch(() => null);
+  const suppressionEvents = await prisma.accessAuditLog.findMany({
+    where: {
+      targetType: "SUPPRESSION_EVENT",
+      action: { in: ["SUPPRESSION_RECORDED", "SUPPRESSION_REVIEWED"] },
+    },
+    select: { metadata: true },
+    take: 500,
+  }).catch(() => []);
+  const suppressionSurfaces = new Set(
+    suppressionEvents
+      .map((row) => {
+        const metadata = row.metadata as Record<string, unknown> | null;
+        return typeof metadata?.surface === "string" ? metadata.surface : null;
+      })
+      .filter((value): value is string => Boolean(value)),
+  );
+  const emailDeliveryAttempts = await prisma.auditEvent.count({
+    where: { objectType: "EMAIL_DELIVERY_ATTEMPT" },
+  }).catch(() => 0);
+  const { existsSync, statSync } = await import("node:fs");
+  const tickRouteExists = existsSync("pages/api/internal/retained-cadence/tick.ts");
+  const runNowRouteExists = existsSync("pages/api/admin/retained-cadence/run-now.ts");
+  const recentCadenceTick = await prisma.diagnosticRecord.count({
+    where: {
+      diagnosticType: "retained_cadence_history",
+      verdict: { contains: "Cadence event" },
+    },
+  }).catch(() => 0);
+  const oversightPdfPath = "tmp/retained-pdf-runtime/oversight-brief.pdf";
+  const proofPdfPath = "tmp/retained-pdf-runtime/proof-pack.pdf";
+  const pdfVerificationManifestPath = "tmp/retained-pdf-runtime/verification.json";
+  const pdfRuntimeVerified = existsSync(oversightPdfPath)
+    && existsSync(proofPdfPath)
+    && existsSync(pdfVerificationManifestPath)
+    && statSync(oversightPdfPath).size > 1000
+    && statSync(proofPdfPath).size > 1000;
 
   const summary = summaryResult.summary;
   const classification = classifyRetainerReadiness({
@@ -90,10 +144,42 @@ export const getServerSideProps: GetServerSideProps<{
     evidenceIntegrity: true,
     ipExposureControl: true,
   });
+  const runtime: General50KRuntimeInput = {
+    schedulerBackedCadence: tickRouteExists && runNowRouteExists,
+    cadenceTickVerified: recentCadenceTick > 0,
+    emailTransportStatus: getEmailTransportStatus(),
+    pdfRuntimeVerified,
+    suppressionLedgerCoverage: suppressionSurfaces.size,
+    portfolioScopeMaturity: portfolio?.scopeMode === "single_org"
+      ? "SELECTIVELY_DEFENSIBLE"
+      : portfolio?.crossScopePatterns?.depth === "DEFENSIBLE"
+        ? "DEFENSIBLE"
+        : portfolio?.crossScopePatterns?.depth === "SELECTIVELY_DEFENSIBLE"
+          ? "SELECTIVELY_DEFENSIBLE"
+          : "FOUNDATION_READY",
+    crossOrgPatternDepth: portfolio?.crossScopePatterns?.depth ?? "FOUNDATION_READY",
+    roleDataLayerCoverage: "DEFENSIBLE",
+    retainedHistoryDepth: summary.outcomeVerificationSummary.thinState ? "THIN" : "SUFFICIENT",
+    deliveryAuditDepth: emailDeliveryAttempts > 0 ? "DEFENSIBLE" : "FOUNDATION_READY",
+    // Institutional corridor dimensions
+    institutionalCaseContinuity: "SELECTIVELY_DEFENSIBLE",
+    executiveToStrategyContinuity: "SELECTIVELY_DEFENSIBLE",
+    strategyToCounselContinuity: "SELECTIVELY_DEFENSIBLE",
+    strategyToBoardroomContinuity: "SELECTIVELY_DEFENSIBLE",
+    boardroomArchiveDepth: summary.boardroomArchiveSummary.totalDossiers > 0 ? "SELECTIVELY_DEFENSIBLE" : "FOUNDATION_READY",
+    oversightCaseCoverage: "SELECTIVELY_DEFENSIBLE",
+    cadenceRuntimeDepth: recentCadenceTick > 0 ? "SELECTIVELY_DEFENSIBLE" : "FOUNDATION_READY",
+    portfolioInstitutionalCoverage: portfolio ? "SELECTIVELY_DEFENSIBLE" : "FOUNDATION_READY",
+    suppressionCorridorCoverage: suppressionSurfaces.size >= 5 ? "DEFENSIBLE" : "SELECTIVELY_DEFENSIBLE",
+    deliveryRuntimeProof: pdfRuntimeVerified ? "SELECTIVELY_DEFENSIBLE" : "FOUNDATION_READY",
+    retainedOutcomeDepth: summary.outcomeVerificationSummary.thinState ? "FOUNDATION_READY" : "SELECTIVELY_DEFENSIBLE",
+  };
+  const general50KClassification = classifyGeneral50KRuntime(runtime);
 
   return {
     props: {
       classification,
+      general50KClassification,
       scope: {
         organisationId,
         contractId: fallbackContract?.id ?? null,
@@ -120,6 +206,7 @@ export const getServerSideProps: GetServerSideProps<{
         boardroomMemoryExists: summary.boardroomArchiveSummary.totalDossiers > 0,
         outcomeThin: summary.outcomeVerificationSummary.thinState ?? true,
       },
+      runtime,
       summaryView: {
         cadence: summary.retainedCadencePosture.summary,
         brief: summary.latestOversightBriefStatus.summary,
@@ -168,12 +255,12 @@ export default function RetainerReadinessPage(
               <p className="mt-2 text-xl text-white">{props.classification}</p>
             </div>
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Scoped organisation</p>
-              <p className="mt-2 text-xl text-white">{props.scope.organisationId ?? "Unscoped"}</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">General £50k runtime</p>
+              <p className="mt-2 text-xl text-white">{props.general50KClassification}</p>
             </div>
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Operator warning</p>
-              <p className="mt-2 text-xl text-white">No public GENERAL_50K_READY claim</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Scoped organisation</p>
+              <p className="mt-2 text-xl text-white">{props.scope.organisationId ?? "Unscoped"}</p>
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Cadence queue</p>
@@ -249,6 +336,22 @@ export default function RetainerReadinessPage(
               <p>Not configured: {props.queueCounts.notConfigured}</p>
             </div>
           </section>
+        </section>
+
+        <section className="border border-white/10 bg-zinc-950/70 p-5">
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">General £50k Runtime Inputs</h2>
+          <div className="mt-4 grid gap-3 md:grid-cols-2 text-sm text-white/70">
+            <p>Scheduler-backed cadence: {String(props.runtime.schedulerBackedCadence)}</p>
+            <p>Cadence tick verified: {String(props.runtime.cadenceTickVerified)}</p>
+            <p>Email transport status: {props.runtime.emailTransportStatus}</p>
+            <p>PDF runtime verified: {String(props.runtime.pdfRuntimeVerified)}</p>
+            <p>Suppression ledger coverage: {props.runtime.suppressionLedgerCoverage}</p>
+            <p>Portfolio scope maturity: {props.runtime.portfolioScopeMaturity}</p>
+            <p>Cross-org pattern depth: {props.runtime.crossOrgPatternDepth}</p>
+            <p>Role data-layer coverage: {props.runtime.roleDataLayerCoverage}</p>
+            <p>Retained history depth: {props.runtime.retainedHistoryDepth}</p>
+            <p>Delivery audit depth: {props.runtime.deliveryAuditDepth}</p>
+          </div>
         </section>
 
         <section className="grid gap-6 xl:grid-cols-3">

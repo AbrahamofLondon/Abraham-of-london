@@ -26,6 +26,8 @@ import type {
   CounselEvidencePackage,
   CounselRoomState,
 } from "@/lib/product/counsel-room-contract";
+import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
+import { recordSuppression } from "@/lib/product/suppression-ledger";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RESOLVER
@@ -201,6 +203,23 @@ export async function resolveCounselRoomState(input: {
     suppressionReasons,
   };
 
+  if (activeContradictions.length > 0) {
+    suppressionReasons.push("Respondent-level contradiction text remains withheld from sponsor-safe counsel evidence.");
+    void recordSuppression(createSuppressionInput({
+      scopeId: input.caseId ?? input.userId ?? email ?? "counsel-room",
+      scopeType: input.caseId ? "CYCLE" : "ACCOUNT",
+      surface: "COUNSEL_ROOM",
+      fieldName: "activeContradictions",
+      evidenceSource: "Counsel room evidence package",
+      evidencePosture: "SYSTEM_INFERRED",
+      sourceLabel: "Counsel room",
+      suppressionReason: "Raw respondent text is not shown here.",
+      suppressionRule: "RESPONDENT_TEXT_WITHHELD",
+      suppressionRuleCategory: "PRIVACY_BOUNDARY",
+      operatorReviewAvailable: true,
+    })).catch(() => null);
+  }
+
   // ── 10. Determine access state ──
   let accessState: CounselAccessState;
   let canRequestCounsel: boolean;
@@ -260,6 +279,38 @@ export async function resolveCounselRoomState(input: {
 
   const reason = getReasonForState(accessState, triggers, escalationLevel);
 
+  // ── 11. Stakeholder pressure (best-effort from journey spine) ──
+  let stakeholderPressure: CounselRoomState["stakeholderPressure"] = null;
+  try {
+    const { getDiagnosticJourney } = await import("@/lib/diagnostics/journey-store");
+    const journey = await getDiagnosticJourney({ email: email ?? undefined, subjectId: input.userId ?? undefined });
+    const caseObj = journey.decisionObjects?.slice(-1)?.[0];
+    if (caseObj) {
+      const { buildStakeholderMapFromCase } = await import("@/lib/decision/stakeholder-map");
+      const { buildStakeholderPressureSummary } = await import("@/lib/product/institutional-case-summary");
+      const map = buildStakeholderMapFromCase(caseObj as any);
+      stakeholderPressure = buildStakeholderPressureSummary(map);
+    }
+  } catch { /* degrade gracefully */ }
+
+  // ── 12. Counsel warranted estimate (best-effort simulation) ──
+  let counselWarrantedEstimate: CounselRoomState["counselWarrantedEstimate"] = null;
+  if (triggers.length > 0 || escalationLevel >= 2) {
+    counselWarrantedEstimate = {
+      whatMayWorsen: estimatedExposure?.amount && estimatedExposure.amount > 0
+        ? `Financial exposure of ${estimatedExposure.band ?? "unknown"} band may increase without intervention.`
+        : "The underlying condition may deteriorate without governed review.",
+      missingEvidence: completedStages.length < 3
+        ? "Diagnostic evidence is incomplete. Key decision variables may be unmeasured."
+        : "Evidence base is developing but has not been independently verified.",
+      cannotAutomate: triggers.includes("SYSTEM_CANNOT_MODEL_CONDITION")
+        ? "The system has detected a condition it cannot safely model. Human counsel is recommended."
+        : "Complex escalation conditions benefit from human review before further execution.",
+      sourceLabel: "Counsel warrant estimate — based on current record, not independently verified",
+      thinState: completedStages.length < 2,
+    };
+  }
+
   return {
     accessState,
     canRequestCounsel,
@@ -268,6 +319,8 @@ export async function resolveCounselRoomState(input: {
     reason,
     evidencePackage: canViewEvidencePackage ? evidencePackage : null,
     recommendedPath,
+    stakeholderPressure,
+    counselWarrantedEstimate,
   };
 }
 

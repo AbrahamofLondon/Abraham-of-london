@@ -1,11 +1,11 @@
-// TODO: integrate recordSuppression() from @/lib/product/suppression-ledger where evidence posture
-// causes fields to be withheld or downgraded (e.g. INSUFFICIENT_EVIDENCE, SYSTEM_INFERRED fallback)
 import type { PurposeAlignmentEvidenceCarryForward } from "@/lib/alignment/evidence-loader";
 import type { CheckpointRecord } from "@/lib/product/checkpoint-scheduler-contract";
 import type { AssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
 import type { FinancialExposureSnapshot, CostOfInactionProjectionSnapshot } from "@/lib/product/financial-exposure-persistence";
 import type { GovernedMemoryItem } from "@/lib/product/governed-memory-contract";
 import type { OutcomeVerificationRecord } from "@/lib/product/outcome-verification-contract";
+import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
+import { recordSuppression } from "@/lib/product/suppression-ledger";
 import {
   createFieldProvenance,
   mergeFieldProvenance,
@@ -101,6 +101,21 @@ export function normaliseAssessmentEvidenceCapture(
 export function normaliseGovernedMemoryItem(item: GovernedMemoryItem | null | undefined): FieldProvenance[] {
   if (!item) return [];
   if (item.provenance?.length) return item.provenance;
+  if (item.status === "SUPPRESSED" || item.suppressedReason) {
+    void recordSuppression(createSuppressionInput({
+      scopeId: item.relatedCaseId ?? item.relatedSessionId ?? item.relatedCycleId ?? item.id,
+      scopeType: item.relatedCycleId ? "CYCLE" : "ACCOUNT",
+      surface: "FIELD_PROVENANCE_NORMALISER",
+      fieldName: item.id,
+      evidenceSource: sourceSurfaceLabel(item.sourceSurface),
+      evidencePosture: postureFromMemory(item),
+      sourceLabel: sourceSurfaceLabel(item.sourceSurface),
+      suppressionReason: item.suppressedReason ?? "Governed memory item remained suppressed.",
+      suppressionRule: "GOVERNED_MEMORY_SUPPRESSED",
+      suppressionRuleCategory: "PRIVACY_BOUNDARY",
+      operatorReviewAvailable: true,
+    })).catch(() => null);
+  }
   return [
     createFieldProvenance({
       fieldKey: item.id,

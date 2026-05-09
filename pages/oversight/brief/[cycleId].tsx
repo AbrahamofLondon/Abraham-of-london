@@ -203,6 +203,43 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 </Section>
               </div>
 
+              {/* ── CYCLE PROJECTION ── */}
+              {(brief as any).cycleProjection && (
+                <Section title="Cycle Projection">
+                  <div className="space-y-3">
+                    <div>
+                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>What became harder</p>
+                      <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{(brief as any).cycleProjection.whatBecameHarder}</p>
+                    </div>
+                    <div>
+                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>What may become more expensive</p>
+                      <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{(brief as any).cycleProjection.whatMayBecomeMoreExpensive}</p>
+                    </div>
+                    <div>
+                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>What needs review before next cycle</p>
+                      <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{(brief as any).cycleProjection.whatNeedsReviewBeforeNextCycle}</p>
+                    </div>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.5rem" }}>
+                      {(brief as any).cycleProjection.sourceLabel}
+                    </p>
+                  </div>
+                </Section>
+              )}
+
+              {/* ── STAKEHOLDER FRICTION ── */}
+              {(brief as any).stakeholderFriction && !(brief as any).stakeholderFriction.suppressedBelowThreshold && (
+                <Section title="Repeated Stakeholder Friction">
+                  <ul className="space-y-2">
+                    {((brief as any).stakeholderFriction.recurringPatterns as string[]).map((pattern: string, i: number) => (
+                      <li key={i} style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{pattern}</li>
+                    ))}
+                  </ul>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.5rem" }}>
+                    {(brief as any).stakeholderFriction.sourceLabel}
+                  </p>
+                </Section>
+              )}
+
               {/* ── PURPOSE ALIGNMENT EVIDENCE ── */}
               {(() => {
                 if (!brief.purposeAlignment) return null;
@@ -454,10 +491,17 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 <button
                   className="mt-4 border border-amber-500/30 bg-amber-500/10 px-5 py-2 text-sm text-amber-200 transition-colors hover:bg-amber-500/20"
                   onClick={() => {
+                    if (!cycle?.subjectEmail) {
+                      alert("No sponsor email is available for PDF generation.");
+                      return;
+                    }
                     fetch("/api/pdf/oversight-brief", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email: brief.accountId }),
+                      body: JSON.stringify({
+                        email: cycle.subjectEmail,
+                        organisationId: cycle.organisationId ?? null,
+                      }),
                     })
                       .then((r) => {
                         if (!r.ok) throw new Error("PDF generation failed");

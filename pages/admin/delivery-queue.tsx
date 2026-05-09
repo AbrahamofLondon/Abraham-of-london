@@ -75,6 +75,20 @@ export default function DeliveryQueuePage({
     }
   }
 
+  async function handleSend(deliveryId: string) {
+    setLoading(deliveryId);
+    try {
+      await fetch("/api/admin/delivery-queue/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deliveryId }),
+      });
+      await refresh();
+    } finally {
+      setLoading(null);
+    }
+  }
+
   return (
     <AdminLayout title="Delivery Queue">
       <Head>
@@ -106,7 +120,9 @@ export default function DeliveryQueuePage({
                 <th className="px-4 py-3">Recipient</th>
                 <th className="px-4 py-3">Channel</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Provider</th>
                 <th className="px-4 py-3">Client Safe</th>
+                <th className="px-4 py-3">Case</th>
                 <th className="px-4 py-3">Operator</th>
                 <th className="px-4 py-3">Created</th>
                 <th className="px-4 py-3">Delivered</th>
@@ -116,7 +132,7 @@ export default function DeliveryQueuePage({
             <tbody>
               {deliveries.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-6 text-center text-white/30">
+                  <td colSpan={11} className="px-4 py-6 text-center text-white/30">
                     No delivery records found.
                   </td>
                 </tr>
@@ -133,7 +149,11 @@ export default function DeliveryQueuePage({
                   <td className="px-4 py-3" style={{ ...mono, fontSize: "10px", color: statusColour(d.status) }}>
                     {d.status}
                   </td>
+                  <td className="px-4 py-3 text-white/50" style={{ ...mono, fontSize: "10px" }}>{d.providerStatus ?? "TRANSPORT_PENDING"}</td>
                   <td className="px-4 py-3 text-white/50">{d.clientSafe ? "Yes" : "No"}</td>
+                  <td className="px-4 py-3 text-white/40" style={{ ...mono, fontSize: "9px" }}>
+                    {(d as any).institutionalCaseId ? (d as any).institutionalCaseId.slice(0, 8) + "..." : "—"}
+                  </td>
                   <td className="px-4 py-3 text-white/50">{d.approvedBy ?? "—"}</td>
                   <td className="px-4 py-3 text-white/40" style={{ ...mono, fontSize: "10px" }}>
                     {new Date(d.createdAt).toLocaleDateString("en-GB")}
@@ -150,6 +170,24 @@ export default function DeliveryQueuePage({
                           className="border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-200 disabled:opacity-40"
                         >
                           {loading === d.id ? "..." : "Approve"}
+                        </button>
+                      )}
+                      {d.clientSafe && (d.status === "APPROVED" || d.status === "TRANSPORT_PENDING") && (
+                        <button
+                          onClick={() => handleSend(d.id)}
+                          disabled={loading === d.id}
+                          className="border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200 disabled:opacity-40"
+                        >
+                          {loading === d.id ? "..." : "Send"}
+                        </button>
+                      )}
+                      {(d.status === "APPROVED" || d.status === "TRANSPORT_PENDING" || d.status === "FAILED") && (
+                        <button
+                          onClick={() => handleAction(d.id, "fail")}
+                          disabled={loading === d.id}
+                          className="border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs text-red-200 disabled:opacity-40"
+                        >
+                          {loading === d.id ? "..." : "Mark failed"}
                         </button>
                       )}
                       {d.artifactType === "OVERSIGHT_BRIEF" && (

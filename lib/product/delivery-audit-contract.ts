@@ -22,5 +22,13 @@ export type DeliveryRecord = {
   status: DeliveryStatus;
   suppressionSummary: string;
   clientSafe: boolean;
+  providerStatus?: "PROVIDER_READY" | "TEST_MODE_READY" | "TRANSPORT_PENDING";
+  providerMessageId?: string | null;
+  failureReason?: string | null;
+  sourceLabel?: string | null;
+  evidencePosture?: string | null;
+  latestAttemptAt?: string | null;
+  attemptCount?: number;
+  institutionalCaseId?: string | null;
   createdAt: string;
 };

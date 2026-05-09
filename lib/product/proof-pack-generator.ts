@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma.server";
 import { getLedgerSummary } from "@/lib/decision-ledger/ledger-service";
 import { loadCounselCaseForUser } from "@/lib/product/counsel-case-service";
 import { buildRetainedOutcomeSummary, type RetainedOutcomeSummary } from "@/lib/product/retained-outcome-summary";
+import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
+import { recordSuppression } from "@/lib/product/suppression-ledger";
 
 export type ProofLabel =
   | "USER_REPORTED"
@@ -173,7 +175,7 @@ export async function generateProofPack(input: {
       ? "Decision history is deteriorating."
       : "Decision history is presently mixed.";
 
-  return {
+  const pack: ProofPack = {
     generatedAt: new Date().toISOString(),
     ownerEmail: email,
     diagnosticsCompleted: {
@@ -246,4 +248,20 @@ export async function generateProofPack(input: {
       `${verifiedOutcomes.length} journey-linked outcome verification record${verifiedOutcomes.length === 1 ? "" : "s"} found.`,
     ].join(" "),
   };
+
+  await recordSuppression(createSuppressionInput({
+    scopeId: email,
+    scopeType: "ACCOUNT",
+    surface: "PROOF_PACK",
+    fieldName: "operatorOnlyNotes",
+    evidenceSource: "Proof pack evidence rollup",
+    evidencePosture: "SOURCE_LABELLED",
+    sourceLabel: "Proof pack",
+    suppressionReason: "Operator and counsel notes remain withheld.",
+    suppressionRule: "OPERATOR_NOTES_WITHHELD",
+    suppressionRuleCategory: "ROLE_BOUNDARY",
+    operatorReviewAvailable: true,
+  })).catch(() => null);
+
+  return pack;
 }

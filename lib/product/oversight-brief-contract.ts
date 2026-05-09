@@ -226,6 +226,22 @@ export type OversightBrief = {
     basis: string[];
   };
 
+  /** Cycle projection — scenario estimate for what may change next cycle */
+  cycleProjection?: {
+    whatBecameHarder: string;
+    whatMayBecomeMoreExpensive: string;
+    whatNeedsReviewBeforeNextCycle: string;
+    sourceLabel: string;
+    evidencePosture: string;
+  };
+
+  /** Repeated stakeholder friction — only shown when sponsor-safe and sample sufficient */
+  stakeholderFriction?: {
+    recurringPatterns: string[];
+    suppressedBelowThreshold: boolean;
+    sourceLabel: string;
+  };
+
   /** Oversight signals — source-labelled evidence signals from the oversight cycle */
   oversightSignals?: Array<{
     id: string;

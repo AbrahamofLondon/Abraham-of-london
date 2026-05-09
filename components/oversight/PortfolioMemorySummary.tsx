@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { PortfolioMemory } from "@/lib/product/portfolio-memory-surface";
+import CrossScopePatternSummary from "@/components/oversight/CrossScopePatternSummary";
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
@@ -116,6 +117,8 @@ export default function PortfolioMemorySummary({ data }: Props) {
         )}
       </section>
 
+      <CrossScopePatternSummary data={data.crossScopePatterns} />
+
       {/* Decision Velocity */}
       <section style={cardStyle}>
         <p style={eyebrowStyle}>Decision Velocity</p>
@@ -170,6 +173,31 @@ export default function PortfolioMemorySummary({ data }: Props) {
         </section>
       )}
 
+      {/* Portfolio Scenario Pressure */}
+      {data.portfolioScenarioPressure && !data.portfolioScenarioPressure.suppressedBelowThreshold && (
+        <section style={cardStyle}>
+          <p style={eyebrowStyle}>Portfolio Scenario Pressure</p>
+          <p className="mt-4 text-sm text-white/70">{data.portfolioScenarioPressure.summary}</p>
+          <p style={metaStyle} className="mt-3">
+            {data.portfolioScenarioPressure.casesCovered} case{data.portfolioScenarioPressure.casesCovered !== 1 ? "s" : ""} covered ·
+            {data.portfolioScenarioPressure.sourceLabel}
+          </p>
+        </section>
+      )}
+
+      {/* Portfolio Stakeholder Recurrence */}
+      {data.portfolioStakeholderRecurrence && !data.portfolioStakeholderRecurrence.suppressedBelowThreshold && (
+        <section style={cardStyle}>
+          <p style={eyebrowStyle}>Repeated Stakeholder Friction</p>
+          <div className="mt-4 space-y-2">
+            {data.portfolioStakeholderRecurrence.patterns.map((pattern, index) => (
+              <p key={index} className="text-sm text-white/65">{pattern}</p>
+            ))}
+          </div>
+          <p style={metaStyle} className="mt-3">{data.portfolioStakeholderRecurrence.sourceLabel}</p>
+        </section>
+      )}
+
       {/* Suppression & Limitations */}
       <footer style={{ ...cardStyle, borderColor: "rgba(201,169,110,0.18)" }}>
         <p style={eyebrowStyle}>Disclosure Boundary</p>
@@ -178,7 +206,7 @@ export default function PortfolioMemorySummary({ data }: Props) {
           <p className="mt-2 text-sm italic leading-7 text-white/40">{data.sampleLimitation}</p>
         )}
         <p style={metaStyle} className="mt-4">
-          Evidence posture · {data.evidencePosture} · Generated {formatDate(data.generatedAt)}
+          Evidence posture · {data.evidencePosture} · {data.scopeMode.replace(/_/g, " ")} · Generated {formatDate(data.generatedAt)}
         </p>
       </footer>
     </div>

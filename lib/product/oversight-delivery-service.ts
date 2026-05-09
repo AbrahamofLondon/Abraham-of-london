@@ -25,6 +25,7 @@ export async function queueDelivery(input: {
   suppressionSummary: string;
   clientSafe: boolean;
   actorId?: string | null;
+  institutionalCaseId?: string | null;
 }): Promise<DeliveryRecord> {
   const event = await prisma.auditEvent.create({
     data: {
@@ -46,9 +47,27 @@ export async function queueDelivery(input: {
         status: "QUEUED" as DeliveryStatus,
         suppressionSummary: input.suppressionSummary,
         clientSafe: input.clientSafe,
+        providerStatus: "TRANSPORT_PENDING",
+        providerMessageId: null,
+        failureReason: null,
+        latestAttemptAt: null,
+        attemptCount: 0,
+        institutionalCaseId: input.institutionalCaseId ?? null,
       },
     },
   });
+
+  // Attach delivery to institutional case corridor if present
+  if (input.institutionalCaseId) {
+    try {
+      const { attachCorridorSurface } = await import("@/lib/product/institutional-case-service");
+      await attachCorridorSurface({
+        caseId: input.institutionalCaseId,
+        surface: "DELIVERY",
+        referenceId: event.id,
+      });
+    } catch { /* best-effort */ }
+  }
 
   return auditEventToDeliveryRecord(event);
 }
@@ -133,6 +152,11 @@ export async function recordDeliveryOutcome(
   outcome: {
     status: DeliveryStatus;
     deliveredBy?: string | null;
+    providerStatus?: DeliveryRecord["providerStatus"];
+    providerMessageId?: string | null;
+    failureReason?: string | null;
+    sourceLabel?: string | null;
+    evidencePosture?: string | null;
   },
 ): Promise<DeliveryRecord | null> {
   const existing = await prisma.auditEvent.findUnique({
@@ -152,6 +176,13 @@ export async function recordDeliveryOutcome(
         ...meta,
         status: outcome.status,
         deliveredBy: outcome.deliveredBy ?? meta.deliveredBy ?? null,
+        providerStatus: outcome.providerStatus ?? meta.providerStatus ?? "TRANSPORT_PENDING",
+        providerMessageId: outcome.providerMessageId ?? meta.providerMessageId ?? null,
+        failureReason: outcome.failureReason ?? meta.failureReason ?? null,
+        sourceLabel: outcome.sourceLabel ?? meta.sourceLabel ?? null,
+        evidencePosture: outcome.evidencePosture ?? meta.evidencePosture ?? null,
+        latestAttemptAt: new Date().toISOString(),
+        attemptCount: typeof meta.attemptCount === "number" ? meta.attemptCount + 1 : 1,
         deliveredAt:
           outcome.status === "DELIVERED"
             ? new Date().toISOString()
@@ -187,6 +218,13 @@ function auditEventToDeliveryRecord(event: {
     status: (meta.status as DeliveryStatus) ?? "TRANSPORT_PENDING",
     suppressionSummary: (meta.suppressionSummary as string) ?? "",
     clientSafe: (meta.clientSafe as boolean) ?? false,
+    providerStatus: (meta.providerStatus as DeliveryRecord["providerStatus"]) ?? "TRANSPORT_PENDING",
+    providerMessageId: (meta.providerMessageId as string) ?? null,
+    failureReason: (meta.failureReason as string) ?? null,
+    sourceLabel: (meta.sourceLabel as string) ?? null,
+    evidencePosture: (meta.evidencePosture as string) ?? null,
+    latestAttemptAt: (meta.latestAttemptAt as string) ?? null,
+    attemptCount: typeof meta.attemptCount === "number" ? meta.attemptCount : 0,
     createdAt: event.createdAt.toISOString(),
   };
 }

@@ -12,6 +12,11 @@ export type ReadinessStatus =
   | "DEFENSIBLE"
   | "GENERAL_50K_READY";
 
+export type EmailTransportStatus =
+  | "TRANSPORT_PENDING"
+  | "TEST_MODE_READY"
+  | "PROVIDER_READY";
+
 export type ReadinessArea = {
   area: string;
   status: ReadinessStatus;
@@ -34,7 +39,33 @@ export type RetainerReadinessClassification =
   | "SELECTIVE_HIGH_VALUE_READY"
   | "HIGH_VALUE_RETAINER_READY"
   | "GENERAL_50K_BLOCKED"
-  | "GENERAL_50K_READY";
+  | "GENERAL_50K_READY"
+  | "GENERAL_50K_INFRASTRUCTURE_READY_HISTORY_LIMITED";
+
+export type General50KRuntimeInput = {
+  schedulerBackedCadence: boolean;
+  cadenceTickVerified: boolean;
+  emailTransportStatus: EmailTransportStatus;
+  pdfRuntimeVerified: boolean;
+  suppressionLedgerCoverage: number;
+  portfolioScopeMaturity: ReadinessStatus;
+  crossOrgPatternDepth: ReadinessStatus;
+  roleDataLayerCoverage: ReadinessStatus;
+  retainedHistoryDepth: "THIN" | "SUFFICIENT";
+  deliveryAuditDepth: ReadinessStatus;
+  // Institutional corridor dimensions
+  institutionalCaseContinuity: ReadinessStatus;
+  executiveToStrategyContinuity: ReadinessStatus;
+  strategyToCounselContinuity: ReadinessStatus;
+  strategyToBoardroomContinuity: ReadinessStatus;
+  boardroomArchiveDepth: ReadinessStatus;
+  oversightCaseCoverage: ReadinessStatus;
+  cadenceRuntimeDepth: ReadinessStatus;
+  portfolioInstitutionalCoverage: ReadinessStatus;
+  suppressionCorridorCoverage: ReadinessStatus;
+  deliveryRuntimeProof: ReadinessStatus;
+  retainedOutcomeDepth: ReadinessStatus;
+};
 
 /* ------------------------------------------------------------------ */
 /*  Area classifier (new)                                             */
@@ -137,6 +168,66 @@ export function classifyRetainerReadinessAreas(): RetainerReadinessResult {
       status: "SELECTIVELY_DEFENSIBLE",
       evidence: "Enterprise control room contract, loader, and safety modules exist.",
       gap: "Control room is operator-only; no sponsor-facing control room surface.",
+    },
+    {
+      area: "Institutional case corridor",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "Institutional case contract, resolver, and service are runtime-backed. ER creates/updates institutional case on completion.",
+      gap: "Corridor continuity requires live retained history across all surfaces.",
+    },
+    {
+      area: "ER to Strategy Room continuity",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "ER result carries institutional case context into Strategy Room via corridor panel.",
+      gap: null,
+    },
+    {
+      area: "Strategy to Counsel continuity",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "Counsel case creation attaches to institutional case corridor.",
+      gap: null,
+    },
+    {
+      area: "Strategy to Boardroom continuity",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "Boardroom page shows institutional case qualification context.",
+      gap: null,
+    },
+    {
+      area: "Boardroom archive depth",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "Boardroom archive and dossier services exist with institutional case reference.",
+      gap: "Archive depth requires cumulative boardroom history across retained scope.",
+    },
+    {
+      area: "Oversight case coverage",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "Oversight command shows institutional case counts and qualification metrics.",
+      gap: null,
+    },
+    {
+      area: "Suppression corridor coverage",
+      status: "DEFENSIBLE",
+      evidence: "Suppression events are recorded across all corridor surfaces including ER, counsel, boardroom, oversight, portfolio, and proof pack.",
+      gap: null,
+    },
+    {
+      area: "Delivery runtime proof",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "Delivery queue references institutional case. PDF generation is runtime-verified.",
+      gap: "Email transport remains TRANSPORT_PENDING until provider is configured.",
+    },
+    {
+      area: "Role and permission corridor enforcement",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "Corridor permissions added to role contract. All corridor surfaces declare required permission.",
+      gap: null,
+    },
+    {
+      area: "Retained outcome depth",
+      status: "SELECTIVELY_DEFENSIBLE",
+      evidence: "Outcome verification service and retained outcome summary exist.",
+      gap: "Outcome history may be thin on live scopes.",
     },
   ];
 
@@ -243,4 +334,39 @@ export function classifyRetainerReadiness(input: {
   }
 
   return "FOUNDATION_READY";
+}
+
+export function classifyGeneral50KRuntime(input: General50KRuntimeInput): RetainerReadinessClassification {
+  const atLeastDefensible = (s: ReadinessStatus) => s === "DEFENSIBLE" || s === "GENERAL_50K_READY";
+
+  const baseInfrastructureReady =
+    input.schedulerBackedCadence
+    && input.cadenceTickVerified
+    && (input.emailTransportStatus === "PROVIDER_READY" || input.emailTransportStatus === "TEST_MODE_READY")
+    && input.pdfRuntimeVerified
+    && input.suppressionLedgerCoverage >= 5
+    && atLeastDefensible(input.portfolioScopeMaturity)
+    && atLeastDefensible(input.crossOrgPatternDepth)
+    && atLeastDefensible(input.roleDataLayerCoverage)
+    && atLeastDefensible(input.deliveryAuditDepth);
+
+  // Institutional corridor readiness — all corridor surfaces must be connected
+  const corridorReady =
+    atLeastDefensible(input.institutionalCaseContinuity)
+    && atLeastDefensible(input.executiveToStrategyContinuity)
+    && atLeastDefensible(input.strategyToCounselContinuity)
+    && atLeastDefensible(input.strategyToBoardroomContinuity)
+    && atLeastDefensible(input.boardroomArchiveDepth)
+    && atLeastDefensible(input.oversightCaseCoverage)
+    && atLeastDefensible(input.cadenceRuntimeDepth)
+    && atLeastDefensible(input.portfolioInstitutionalCoverage)
+    && atLeastDefensible(input.suppressionCorridorCoverage)
+    && atLeastDefensible(input.deliveryRuntimeProof)
+    && atLeastDefensible(input.retainedOutcomeDepth);
+
+  const infrastructureReady = baseInfrastructureReady && corridorReady;
+
+  if (!infrastructureReady) return "GENERAL_50K_BLOCKED";
+  if (input.retainedHistoryDepth === "THIN") return "GENERAL_50K_INFRASTRUCTURE_READY_HISTORY_LIMITED";
+  return "GENERAL_50K_READY";
 }

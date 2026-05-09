@@ -96,6 +96,25 @@ export type CounselRoomState = {
     | "REQUEST_COUNSEL_REVIEW"
     | "RETAINER_REVIEW"
     | "CONTACT_ONLY";
+
+  /** Stakeholder pressure summary — who decides, who blocks, who may resist */
+  stakeholderPressure?: {
+    decisionOwner: string | null;
+    affectedGroups: string[];
+    unresolvedAuthorityTension: string | null;
+    potentialBlockers: string[];
+    sourceLabel: string;
+    thinState: boolean;
+  } | null;
+
+  /** Why counsel may be warranted — scenario estimate */
+  counselWarrantedEstimate?: {
+    whatMayWorsen: string;
+    missingEvidence: string;
+    cannotAutomate: string;
+    sourceLabel: string;
+    thinState: boolean;
+  } | null;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

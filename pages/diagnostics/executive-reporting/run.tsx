@@ -764,6 +764,96 @@ function MetricTile({ label, value }: { label: string; value: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// INSTITUTIONAL CASE CORRIDOR PANEL
+// ─────────────────────────────────────────────────────────────────────────────
+
+function InstitutionalCaseCorridorPanel({
+  ic,
+  route,
+}: {
+  ic: {
+    caseId: string;
+    qualificationState: string;
+    evidencePosture: string;
+    admitted: string[];
+    notYetAdmitted: string[];
+    strategyRoomEarned: boolean;
+    boardroomEarned: boolean;
+    counselWarranted: boolean;
+    oversightStatus: string;
+  };
+  route: string;
+}) {
+  const stateLabels: Record<string, string> = {
+    NOT_INSTITUTIONAL: "Not institutional",
+    INSTITUTIONAL_CANDIDATE: "Institutional candidate",
+    INSTITUTIONAL_QUALIFIED: "Institutional qualified",
+    BOARDROOM_ELIGIBLE: "Boardroom eligible",
+    BOARDROOM_QUALIFIED: "Boardroom qualified",
+    OVERSIGHT_ELIGIBLE: "Oversight eligible",
+    RETAINED_OVERSIGHT_ACTIVE: "Retained oversight active",
+    RETAINED_OVERSIGHT_HISTORY_LIMITED: "Infrastructure ready, history limited",
+    RETAINED_OVERSIGHT_MATURE: "Retained oversight mature",
+  };
+
+  return (
+    <div style={{ border: "1px solid rgba(201,169,110,0.18)", backgroundColor: "rgba(201,169,110,0.03)", padding: "20px 24px", marginBottom: "18px" }}>
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+        Institutional case state
+      </span>
+
+      <div style={{ marginTop: "12px", display: "grid", gap: "10px", gridTemplateColumns: "1fr 1fr" }}>
+        <div>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Qualification</span>
+          <p style={{ marginTop: "3px", fontSize: "13px", color: "rgba(255,255,255,0.64)" }}>{stateLabels[ic.qualificationState] ?? ic.qualificationState}</p>
+        </div>
+        <div>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Evidence posture</span>
+          <p style={{ marginTop: "3px", fontSize: "13px", color: "rgba(255,255,255,0.64)" }}>{ic.evidencePosture.replace(/_/g, " ").toLowerCase()}</p>
+        </div>
+      </div>
+
+      {ic.admitted.length > 0 && (
+        <div style={{ marginTop: "12px" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Admitted</span>
+          <p style={{ marginTop: "3px", fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>{ic.admitted.join(" · ")}</p>
+        </div>
+      )}
+
+      {ic.notYetAdmitted.length > 0 && (
+        <div style={{ marginTop: "8px" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Not yet admitted</span>
+          <p style={{ marginTop: "3px", fontSize: "12px", color: "rgba(255,255,255,0.28)" }}>{ic.notYetAdmitted.join(" · ")}</p>
+        </div>
+      )}
+
+      <div style={{ marginTop: "14px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+        {ic.strategyRoomEarned && route === "STRATEGY" && (
+          <Link href="/strategy-room" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.68)", textDecoration: "none", border: "1px solid rgba(201,169,110,0.22)", padding: "6px 12px" }}>
+            Enter Strategy Room
+          </Link>
+        )}
+        {ic.counselWarranted && (
+          <Link href="/counsel" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
+            Counsel review
+          </Link>
+        )}
+        {ic.boardroomEarned && (
+          <a href="#boardroom-dossier" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
+            Boardroom dossier
+          </a>
+        )}
+        {ic.oversightStatus !== "PREMATURE" && (
+          <Link href="/oversight" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
+            Oversight {ic.oversightStatus === "ACTIVE" ? "(active)" : "(eligible)"}
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // BOARDROOM DOSSIER SECTION
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1059,6 +1149,14 @@ function ResultSurface({
             </section>
           </div>
         </div>
+
+        {/* ── INSTITUTIONAL CASE CORRIDOR ── */}
+        {(result as any).institutionalCase && (
+          <InstitutionalCaseCorridorPanel
+            ic={(result as any).institutionalCase}
+            route={route}
+          />
+        )}
 
         {/* ── BLOCK 0: BOARD SNAPSHOT ── */}
         <BoardSnapshot data={report.boardSnapshot} />

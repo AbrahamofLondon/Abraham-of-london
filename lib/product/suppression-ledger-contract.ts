@@ -17,12 +17,18 @@ export type SuppressionOverrideStatus =
 export type SuppressionEvent = {
   eventId: string;
   scopeId: string;
+  scopeType?: "ACCOUNT" | "ORGANISATION" | "CONTRACT" | "CYCLE" | "PORTFOLIO" | "DELIVERY" | "INSTITUTIONAL_CASE" | "CORRIDOR" | "UNKNOWN";
   surface: string;
   fieldName: string;
+  fieldReference?: string;
   evidenceSource: string;
   originalPosture: string;
+  evidencePosture?: string;
+  sourceLabel?: string;
   suppressionReason: string;
   suppressionRule: string;
+  suppressionRuleCategory?: string;
+  operatorReviewAvailable?: boolean;
   suppressedAt: string;
   suppressedBySystem: boolean;
   reviewedByOperator: string | null;
@@ -34,6 +40,7 @@ export type SuppressionEvent = {
 export type SuppressionSummary = {
   totalSuppressed: number;
   bySurface: Record<string, number>;
+  byReason?: Record<string, number>;
   latestAt: string | null;
   sponsorSafeNotice: string;
 };

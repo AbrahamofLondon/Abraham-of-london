@@ -10,9 +10,9 @@ export {
   checkDatabaseConnection,
   getVaultStatus,
   getStrategicContext,
-} from "./prisma.pages";
+} from "@/lib/prisma.pages";
 
 export type { Prisma } from "@prisma/client";
-export type { PrismaClientType } from "./prisma.pages";
+export type { PrismaClientType } from "@/lib/prisma.pages";
 
-export { default } from "./prisma.pages";
+export { default } from "@/lib/prisma.pages";

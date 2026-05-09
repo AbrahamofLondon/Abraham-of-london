@@ -45,14 +45,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       if (action === "deliver") {
-        const record = await recordDeliveryOutcome(deliveryId, {
-          status: "DELIVERED",
-          deliveredBy: operatorId,
+        return res.status(400).json({
+          ok: false,
+          error: "USE_PROVIDER_SEND_ROUTE",
         });
-        if (!record) {
-          return res.status(404).json({ ok: false, error: "Delivery not found" });
-        }
-        return res.status(200).json({ ok: true, record });
       }
 
       if (action === "fail") {

@@ -9,11 +9,18 @@
  */
 
 import { prisma } from "@/lib/prisma.server";
+import type { CrossOrgPatternIntelligence } from "@/lib/product/cross-org-pattern-intelligence";
+import type { PortfolioScopeResolution } from "@/lib/product/portfolio-scope-resolver";
+import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
+import { recordSuppression } from "@/lib/product/suppression-ledger";
 
 export type PortfolioMemory = {
   generatedAt: string;
   scopeLabel: string;
   visibility: "SPONSOR_SAFE";
+  scopeMode: "single_org" | "multi_scope" | "cross_org";
+  authorisedOrganisationCount: number;
+  authorisedScopeCount: number;
 
   retainedScopes: { label: string; status: string; firstCaptured: string | null }[];
   activeCases: number;
@@ -34,6 +41,22 @@ export type PortfolioMemory = {
   suppressionNotice: string;
   sampleLimitation: string | null;
   evidencePosture: string;
+  crossScopePatterns: CrossOrgPatternIntelligence | null;
+
+  /** Portfolio-level scenario pressure — aggregated, sponsor-safe */
+  portfolioScenarioPressure?: {
+    summary: string;
+    casesCovered: number;
+    suppressedBelowThreshold: boolean;
+    sourceLabel: string;
+  } | null;
+
+  /** Portfolio-level stakeholder recurrence — only when sample sufficient */
+  portfolioStakeholderRecurrence?: {
+    patterns: string[];
+    suppressedBelowThreshold: boolean;
+    sourceLabel: string;
+  } | null;
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -54,17 +77,106 @@ function asNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
+function normaliseComparableId(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function buildScopeMatcher(input: {
+  organisationIds: string[];
+  contractIds: string[];
+}) {
+  const organisationIds = new Set(input.organisationIds.filter(Boolean));
+  const contractIds = new Set(input.contractIds.filter(Boolean));
+
+  return (value: unknown): boolean => {
+    const meta = asRecord(value);
+    const directCandidates = [
+      normaliseComparableId(meta.scopeId),
+      normaliseComparableId(meta.organisationId),
+      normaliseComparableId(meta.contractId),
+      normaliseComparableId(meta.accountId),
+      normaliseComparableId(meta.retainerContractId),
+      normaliseComparableId(meta.subjectId),
+      normaliseComparableId(meta.objectId),
+    ].filter((candidate): candidate is string => Boolean(candidate));
+
+    if (directCandidates.some((candidate) => organisationIds.has(candidate) || contractIds.has(candidate))) {
+      return true;
+    }
+
+    const nested = [
+      asRecord(meta.internalBrief),
+      asRecord(meta.entry),
+      asRecord(meta.payload),
+    ];
+    for (const item of nested) {
+      const nestedCandidates = [
+        normaliseComparableId(item.organisationId),
+        normaliseComparableId(item.contractId),
+        normaliseComparableId(item.accountId),
+        normaliseComparableId(item.scopeId),
+      ].filter((candidate): candidate is string => Boolean(candidate));
+      if (nestedCandidates.some((candidate) => organisationIds.has(candidate) || contractIds.has(candidate))) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+}
+
 export async function buildPortfolioMemory(input: {
   organisationId?: string | null;
   email?: string | null;
   userId?: string | null;
+  resolution?: PortfolioScopeResolution | null;
 }): Promise<PortfolioMemory> {
+  // Institutional case filtering: portfolio memory includes institutional cases only
+  // when they exist. Non-institutional records do not pollute retained oversight.
+  let institutionalCaseEmails: string[] | null = null;
+  try {
+    const { listInstitutionalCases } = await import("@/lib/product/institutional-case-service");
+    const cases = await listInstitutionalCases({
+      email: input.email ?? undefined,
+      organisationId: input.organisationId ?? undefined,
+    });
+    if (cases.length > 0) {
+      institutionalCaseEmails = [...new Set(cases.map((c) => c.subjectEmail.toLowerCase()))];
+    }
+  } catch { /* fall through — use all records if case resolution fails */ }
+
   const now = new Date().toISOString();
+  const contractIds = input.resolution?.scopes.map((scope) => scope.contractId) ?? [];
+  const organisationIds = input.resolution?.scopes.map((scope) => scope.organisationId)
+    ?? (input.organisationId ? [input.organisationId] : []);
+  const organisationSlugs = input.resolution?.scopes.map((scope) => scope.organisationSlug) ?? [];
+  const matchesScope = buildScopeMatcher({ organisationIds, contractIds });
+  const membershipEmails = organisationIds.length > 0
+    ? await prisma.organisationMembership.findMany({
+        where: {
+          organisationId: { in: organisationIds },
+          status: "active",
+        },
+        select: { email: true },
+        take: 200,
+      }).then((rows) => rows.map((row) => row.email.toLowerCase()))
+    : [];
 
   // --- Diagnostic records ---
-  const diagnosticWhere: Record<string, unknown> = {};
-  if (input.email) diagnosticWhere.userEmail = input.email;
-  else if (input.userId) diagnosticWhere.userId = input.userId;
+  const diagnosticClauses = [
+    ...(membershipEmails.length > 0 ? [{ userEmail: { in: membershipEmails } }] : []),
+    ...(input.email ? [{ userEmail: input.email }] : []),
+    ...(input.userId ? [{ userId: input.userId }] : []),
+  ];
+  const diagnosticWhere: Record<string, unknown> = organisationIds.length > 0
+    ? diagnosticClauses.length > 0
+      ? { OR: diagnosticClauses }
+      : {}
+    : input.email
+      ? { userEmail: input.email }
+      : input.userId
+        ? { userId: input.userId }
+        : {};
 
   const diagnosticRecords = await prisma.diagnosticRecord.findMany({
     where: diagnosticWhere,
@@ -171,7 +283,6 @@ export async function buildPortfolioMemory(input: {
   const checkpointEvents = await prisma.auditEvent.findMany({
     where: {
       objectType: { in: ["CHECKPOINT", "CHECKPOINT_CREATED", "CHECKPOINT_RESPONSE"] },
-      ...(input.userId ? { actorId: input.userId } : {}),
     },
     orderBy: { createdAt: "desc" },
     take: 500,
@@ -183,6 +294,7 @@ export async function buildPortfolioMemory(input: {
   let checkpointOverdue = 0;
 
   for (const event of checkpointEvents) {
+    if ((organisationIds.length > 0 || contractIds.length > 0) && !matchesScope(event.metadata)) continue;
     if (event.actionType === "CREATED") checkpointCreated += 1;
     else if (event.actionType === "RESOLVED" || event.actionType === "UPDATED") checkpointResponded += 1;
     else if (event.actionType === "BLOCKED") checkpointOverdue += 1;
@@ -232,27 +344,29 @@ export async function buildPortfolioMemory(input: {
   const counselEvents = await prisma.auditEvent.findMany({
     where: {
       objectType: "OVERSIGHT_COUNSEL_WORKFLOW",
-      ...(input.userId ? { actorId: input.userId } : {}),
     },
     take: 500,
-    select: { id: true },
+    select: { id: true, metadata: true },
   });
-  const counselEscalations = counselEvents.length;
+  const counselEscalations = counselEvents.filter((event) =>
+    organisationIds.length === 0 && contractIds.length === 0 ? true : matchesScope(event.metadata)
+  ).length;
 
   // --- Boardroom dossiers ---
   const boardroomEvents = await prisma.auditEvent.findMany({
     where: {
       objectType: "OVERSIGHT_BOARDROOM_ARCHIVE",
-      ...(input.userId ? { actorId: input.userId } : {}),
     },
     take: 500,
-    select: { id: true },
+    select: { id: true, metadata: true },
   });
-  const boardroomDossiers = boardroomEvents.length;
+  const boardroomDossiers = boardroomEvents.filter((event) =>
+    organisationIds.length === 0 && contractIds.length === 0 ? true : matchesScope(event.metadata)
+  ).length;
 
   // --- Outcome verifications ---
   const outcomeWhere: Record<string, unknown> = {};
-  if (input.organisationId) outcomeWhere.organisationKey = input.organisationId;
+  if (organisationSlugs.length > 0) outcomeWhere.organisationKey = { in: organisationSlugs };
 
   const retainedOutcomes = await prisma.outcomeVerificationRecord
     .count({ where: outcomeWhere })
@@ -272,9 +386,7 @@ export async function buildPortfolioMemory(input: {
 
   for (const event of cadenceEvents) {
     const meta = asRecord(event.metadata);
-    if (input.userId && meta.accountId) {
-      // Only count cycles for the relevant account/user
-    }
+    if ((organisationIds.length > 0 || contractIds.length > 0) && !matchesScope(meta)) continue;
     cadenceTotal += 1;
     const brief = asRecord(meta.internalBrief);
     if (brief.periodEnd) cadenceCompleted += 1;
@@ -302,13 +414,85 @@ export async function buildPortfolioMemory(input: {
       ? "Portfolio intelligence is based on limited observations. Trend claims require additional cycles."
       : null;
 
+  if (sampleLimitation) {
+    await recordSuppression(createSuppressionInput({
+      scopeId: organisationIds[0] ?? input.email ?? input.userId ?? "portfolio",
+      scopeType: organisationIds[0] ? "ORGANISATION" : "PORTFOLIO",
+      surface: "PORTFOLIO_MEMORY_SURFACE",
+      fieldName: "sampleLimitation",
+      evidenceSource: "Portfolio memory aggregate",
+      evidencePosture: totalDataPoints < 3 ? "INSUFFICIENT_EVIDENCE" : "SYSTEM_INFERRED",
+      sourceLabel: "Portfolio memory",
+      suppressionReason: "Insufficient sample.",
+      suppressionRule: "SMALL_SAMPLE_SUPPRESSED",
+      suppressionRuleCategory: "SMALL_SAMPLE",
+      operatorReviewAvailable: true,
+    })).catch(() => null);
+  }
+
+  const crossScopePatterns = input.resolution
+    ? await import("@/lib/product/cross-org-pattern-intelligence")
+      .then((mod) => mod.buildCrossOrgPatternIntelligence(input.resolution!))
+      .catch(() => null)
+    : null;
+
+  // ── Portfolio-level scenario pressure ──
+  let portfolioScenarioPressure: PortfolioMemory["portfolioScenarioPressure"] = null;
+  if (diagnosticRecords.length >= 3) {
+    const deterioratedCount = diagnosticRecords.filter((r) => r.severity === "high").length;
+    const costCases = diagnosticRecords.filter((r) => {
+      try {
+        const parsed = JSON.parse(r.responsesJson || "{}");
+        return parsed.estimatedFinancialExposure || parsed.costBasis;
+      } catch { return false; }
+    }).length;
+
+    if (deterioratedCount > 0 || costCases > 0) {
+      portfolioScenarioPressure = {
+        summary: `${deterioratedCount} high-severity case${deterioratedCount !== 1 ? "s" : ""} detected across portfolio. ${costCases > 0 ? `${costCases} case${costCases !== 1 ? "s" : ""} carry cost basis.` : ""}`.trim(),
+        casesCovered: diagnosticRecords.length,
+        suppressedBelowThreshold: diagnosticRecords.length < 5,
+        sourceLabel: "Portfolio scenario pressure — aggregated estimate, not independently verified",
+      };
+    }
+  }
+
+  // ── Portfolio-level stakeholder recurrence ──
+  let portfolioStakeholderRecurrence: PortfolioMemory["portfolioStakeholderRecurrence"] = null;
+  if (diagnosticRecords.length >= 3) {
+    const blockerPatterns: string[] = [];
+    for (const record of diagnosticRecords.slice(0, 20)) {
+      try {
+        const parsed = JSON.parse(record.responsesJson || "{}");
+        const responses = asRecord(parsed);
+        const blockerText = asString(responses.blocker) ?? asString(responses.primary_blocker);
+        if (blockerText && blockerText.length > 5) {
+          blockerPatterns.push(blockerText.slice(0, 60));
+        }
+      } catch { /* skip */ }
+    }
+    const uniqueBlockers = [...new Set(blockerPatterns)];
+    if (uniqueBlockers.length > 0) {
+      portfolioStakeholderRecurrence = {
+        patterns: uniqueBlockers.slice(0, 5),
+        suppressedBelowThreshold: diagnosticRecords.length < 5,
+        sourceLabel: "Repeated stakeholder friction — sponsor-safe aggregate only",
+      };
+    }
+  }
+
   return {
     generatedAt: now,
-    scopeLabel: input.organisationId
-      ? "Organisation portfolio memory"
-      : input.email
-        ? "Account portfolio memory"
-        : "Portfolio memory",
+    scopeLabel: organisationIds.length > 1
+      ? "Authorised portfolio memory"
+      : input.organisationId
+        ? "Organisation portfolio memory"
+        : input.email
+          ? "Account portfolio memory"
+          : "Portfolio memory",
+    scopeMode: input.resolution?.scopeMode ?? "single_org",
+    authorisedOrganisationCount: input.resolution?.authorisedOrganisationCount ?? (organisationIds.length || 1),
+    authorisedScopeCount: input.resolution?.authorisedScopeCount ?? Math.max(retainedScopes.length, 1),
     visibility: "SPONSOR_SAFE",
 
     retainedScopes,
@@ -333,8 +517,11 @@ export async function buildPortfolioMemory(input: {
     cadenceReliability,
 
     suppressionNotice:
-      "Portfolio memory is limited to source-labelled aggregate signals. Raw respondent text and operator notes are withheld.",
+      "Portfolio memory is limited to source-labelled aggregate signals. Raw respondent text, team identifiers, and operator notes are withheld.",
     sampleLimitation,
     evidencePosture: totalDataPoints < 3 ? "INSUFFICIENT" : totalDataPoints < 10 ? "PARTIAL" : "SOURCE_LABELLED",
+    crossScopePatterns,
+    portfolioScenarioPressure,
+    portfolioStakeholderRecurrence,
   };
 }

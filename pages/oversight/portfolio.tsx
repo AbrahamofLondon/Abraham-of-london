@@ -7,6 +7,7 @@ import Layout from "@/components/Layout";
 import PortfolioMemorySummary from "@/components/oversight/PortfolioMemorySummary";
 import { resolvePageAccess } from "@/lib/access/server";
 import { buildPortfolioMemory, type PortfolioMemory } from "@/lib/product/portfolio-memory-surface";
+import { resolvePortfolioScopes } from "@/lib/product/portfolio-scope-resolver";
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
@@ -84,11 +85,18 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   }
 
   const organisationId = typeof ctx.query.organisationId === "string" ? ctx.query.organisationId : null;
+  const resolution = await resolvePortfolioScopes({
+    role: roleCheck.role,
+    organisationId,
+    email,
+    userId,
+  });
 
   const data = await buildPortfolioMemory({
     organisationId,
     email,
     userId,
+    resolution,
   }).catch(() => null);
 
   return {

@@ -158,3 +158,111 @@ export function buildContradictionMapView(input: {
     }),
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AGGREGATE SAFE METRICS — for Oversight, Portfolio Memory, and case cards.
+// No graph internals (nodes, edges, weights) are exposed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { computeGraphHealth } from "@/lib/engine/contradiction-graph";
+
+export type ContradictionPressureBand = "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
+
+export type ContradictionGraphSafeMetrics = {
+  activeContradictions: number;
+  unresolvedDependencies: number;
+  pressureBand: ContradictionPressureBand;
+  firstDetected: string | null;
+  recurrenceCount: number;
+  recurrenceSignal: string | null;
+  resolutionTrend: string | null;
+  provenanceDate: string;
+  sourceLabel: string;
+  limitations: string[];
+};
+
+/**
+ * Build public-safe aggregate contradiction metrics from a graph.
+ * No graph structure (nodes, edges, weights, decay) is exposed.
+ */
+export function buildContradictionGraphSafeMetrics(
+  graph: ContradictionGraph,
+): ContradictionGraphSafeMetrics {
+  const health = computeGraphHealth(graph);
+  const conflicts = detectActiveConflicts(graph);
+
+  const activeContradictions = health.activeContradictions;
+  const unresolvedDependencies = health.blockedDecisions;
+
+  const hasBlockingConflict = conflicts.some((c) => c.blocksDecision);
+  const highSeverityCount = conflicts.filter((c) => c.combinedSeverity >= 7).length;
+  const pressureBand: ContradictionPressureBand =
+    hasBlockingConflict || highSeverityCount >= 3 ? "CRITICAL"
+    : highSeverityCount >= 1 || activeContradictions >= 4 ? "HIGH"
+    : activeContradictions >= 2 ? "MODERATE"
+    : "LOW";
+
+  const activeNodes = graph.nodes.filter(
+    (n) => n.kind === "contradiction" && n.status === "active",
+  );
+  const firstDetected = activeNodes.length > 0
+    ? activeNodes.map((n) => n.createdAt).sort()[0] ?? null
+    : null;
+
+  const resolvedCount = health.resolvedContradictions;
+  const recurrenceCount = Math.min(resolvedCount, activeContradictions);
+  const recurrenceSignal = recurrenceCount > 0
+    ? `This pattern has appeared ${recurrenceCount} time${recurrenceCount !== 1 ? "s" : ""} before.`
+    : null;
+
+  const resolutionTrend = resolvedCount > activeContradictions
+    ? "More contradictions have been resolved than are currently active."
+    : activeContradictions > 0 && resolvedCount === 0
+      ? "No contradictions have been resolved yet."
+      : activeContradictions > resolvedCount
+        ? "This issue is becoming harder to resolve."
+        : null;
+
+  const limitations: string[] = [];
+  if (graph.nodes.length < 5) {
+    limitations.push("Based on limited evidence. Pressure assessment may change with additional data.");
+  }
+  if (health.staleness > 0.5) {
+    limitations.push("Some signals may be outdated. Review recommended.");
+  }
+  limitations.push("Contradiction metrics are derived from the decision record and are not independently verified.");
+
+  return {
+    activeContradictions,
+    unresolvedDependencies,
+    pressureBand,
+    firstDetected,
+    recurrenceCount,
+    recurrenceSignal,
+    resolutionTrend,
+    provenanceDate: new Date().toISOString(),
+    sourceLabel: "Derived from decision record",
+    limitations,
+  };
+}
+
+/**
+ * Thin-state metrics when no graph is available.
+ */
+export function buildThinContradictionMetrics(): ContradictionGraphSafeMetrics {
+  return {
+    activeContradictions: 0,
+    unresolvedDependencies: 0,
+    pressureBand: "LOW",
+    firstDetected: null,
+    recurrenceCount: 0,
+    recurrenceSignal: null,
+    resolutionTrend: null,
+    provenanceDate: new Date().toISOString(),
+    sourceLabel: "No decision record available",
+    limitations: [
+      "No contradiction data is available for this case.",
+      "Complete a diagnostic to begin building the decision record.",
+    ],
+  };
+}

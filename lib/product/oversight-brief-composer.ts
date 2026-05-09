@@ -13,6 +13,8 @@ import {
   loadPurposeAlignmentEvidence,
   buildOversightBriefPaAggregate,
 } from "@/lib/alignment/evidence-loader";
+import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
+import { recordSuppression } from "@/lib/product/suppression-ledger";
 
 function sum(values: number[]): number {
   return values.reduce((total, value) => total + value, 0);
@@ -318,6 +320,24 @@ export async function composeOversightBrief(input: {
     oversightSignals: signals,
     nextRequiredAction: requiredActions[0],
   };
+
+  if (loaded.retainerIntakeContext?.suppressionReasons?.length) {
+    for (const reason of loaded.retainerIntakeContext.suppressionReasons) {
+      void recordSuppression(createSuppressionInput({
+        scopeId: loaded.account.organisationId ?? loaded.account.accountId,
+        scopeType: loaded.account.organisationId ? "ORGANISATION" : "CONTRACT",
+        surface: "OVERSIGHT_BRIEF_COMPOSER",
+        fieldName: "retainerIntake",
+        evidenceSource: "Retainer intake context",
+        evidencePosture: "OPERATOR_RECORDED",
+        sourceLabel: "Oversight brief",
+        suppressionReason: reason,
+        suppressionRule: "INTAKE_SUPPRESSED",
+        suppressionRuleCategory: "PRIVACY_BOUNDARY",
+        operatorReviewAvailable: true,
+      })).catch(() => null);
+    }
+  }
 
   const brief: OversightBrief = {
     briefId: `brief:${account.accountId}:${periodStart.slice(0, 10)}`,
@@ -727,6 +747,60 @@ export async function composeOversightBrief(input: {
   }
   if (structuredActions.length > 0) {
     brief.structuredActions = structuredActions;
+  }
+
+  // ── Cycle Projection — scenario estimate for next cycle ──
+  if (loaded.cases.length > 0) {
+    const deteriorationSignals = signals.filter((s) => s.type === "OUTCOME_DETERIORATED" || s.type === "COST_OF_INACTION_ACCUMULATING");
+    const patternSignals = signals.filter((s) => s.type === "PATTERN_RECURRED");
+
+    brief.cycleProjection = {
+      whatBecameHarder: deteriorationSignals.length > 0
+        ? `${deteriorationSignals.length} outcome${deteriorationSignals.length !== 1 ? "s have" : " has"} deteriorated this cycle. Resolution complexity has increased.`
+        : "No material deterioration detected this cycle.",
+      whatMayBecomeMoreExpensive: totalEstimatedCost > 0
+        ? `Cost-of-inaction estimate: £${totalEstimatedCost.toLocaleString()}. This will continue accumulating without intervention.`
+        : "No verified cost basis available for projection.",
+      whatNeedsReviewBeforeNextCycle: patternSignals.length > 0
+        ? `${patternSignals.length} recurring pattern${patternSignals.length !== 1 ? "s" : ""} detected. Review whether structural root has been addressed.`
+        : requiredActions.length > 0
+          ? requiredActions[0]!
+          : "No critical review items identified for the next cycle.",
+      sourceLabel: "Cycle projection — scenario estimate, not independently verified",
+      evidencePosture: "SYSTEM_INFERRED",
+    };
+  }
+
+  // ── Stakeholder Friction — recurring authority patterns across cycles ──
+  if (loaded.cases.length >= 3) {
+    try {
+      const { getDiagnosticJourney } = await import("@/lib/diagnostics/journey-store");
+      const frictionPatterns: string[] = [];
+      let sampleCount = 0;
+      for (const caseItem of loaded.cases.slice(0, 10)) {
+        try {
+          const journey = await getDiagnosticJourney({ email: input.email ?? undefined });
+          const caseObj = journey.decisionObjects?.slice(-1)?.[0];
+          if (caseObj && (caseObj as any).blocker) {
+            sampleCount++;
+            const { buildStakeholderMapFromCase } = await import("@/lib/decision/stakeholder-map");
+            const map = buildStakeholderMapFromCase(caseObj as any);
+            if (map.blockers.length > 0) {
+              frictionPatterns.push(`Authority tension: ${map.blockers[0]}`);
+            }
+          }
+        } catch { /* skip individual case */ }
+        break; // one journey per email — stakeholder friction is cross-cycle, not cross-case
+      }
+
+      if (frictionPatterns.length > 0 && sampleCount >= 1) {
+        brief.stakeholderFriction = {
+          recurringPatterns: [...new Set(frictionPatterns)].slice(0, 5),
+          suppressedBelowThreshold: sampleCount < 3,
+          sourceLabel: "Repeated stakeholder friction — sponsor-safe aggregate only",
+        };
+      }
+    } catch { /* degrade gracefully */ }
   }
 
   if (boardroomCount > 0) {

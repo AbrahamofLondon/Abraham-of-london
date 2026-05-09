@@ -36,6 +36,35 @@ function OverrideBadge({ status }: { status: string }) {
 
 const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
   const [actionState, setActionState] = React.useState<Record<string, string>>({});
+  const [surface, setSurface] = React.useState("");
+  const [scopeId, setScopeId] = React.useState("");
+  const [reason, setReason] = React.useState("");
+  const [filteredEvents, setFilteredEvents] = React.useState(events);
+
+  React.useEffect(() => {
+    setFilteredEvents(events);
+  }, [events]);
+
+  async function applyFilters() {
+    const params = new URLSearchParams();
+    if (surface.trim()) params.set("surface", surface.trim());
+    if (scopeId.trim()) params.set("scopeId", scopeId.trim());
+    if (reason.trim()) params.set("reason", reason.trim());
+    const res = await fetch(`/api/admin/suppression-ledger?${params.toString()}`);
+    const data = await res.json();
+    if (Array.isArray(data.events)) setFilteredEvents(data.events);
+  }
+
+  function exportSummary() {
+    const payload = JSON.stringify({ summary, events: filteredEvents }, null, 2);
+    const blob = new Blob([payload], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "suppression-audit-summary.json";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function handleOverride(eventId: string, decision: "APPROVED_FOR_RELEASE" | "REMAIN_SUPPRESSED") {
     setActionState((prev) => ({ ...prev, [eventId]: "loading" }));
@@ -89,6 +118,20 @@ const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
             </div>
           </div>
 
+          <div className="mt-6 grid gap-3 sm:grid-cols-4">
+            <input value={surface} onChange={(e) => setSurface(e.target.value)} placeholder="Surface" style={{ ...mono, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "0.65rem", color: "white" }} />
+            <input value={scopeId} onChange={(e) => setScopeId(e.target.value)} placeholder="Scope" style={{ ...mono, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "0.65rem", color: "white" }} />
+            <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" style={{ ...mono, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "0.65rem", color: "white" }} />
+            <div className="flex gap-2">
+              <button onClick={applyFilters} style={{ ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", border: "1px solid rgba(201,169,110,0.25)", padding: "0.65rem 0.9rem", color: "rgba(201,169,110,0.88)" }}>
+                Filter
+              </button>
+              <button onClick={exportSummary} style={{ ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", border: "1px solid rgba(255,255,255,0.14)", padding: "0.65rem 0.9rem", color: "rgba(255,255,255,0.70)" }}>
+                Export
+              </button>
+            </div>
+          </div>
+
           {/* Sponsor-safe notice */}
           <div className="mt-4" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem" }}>
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>
@@ -98,12 +141,12 @@ const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
 
           {/* Suppression event table */}
           <div className="mt-10 space-y-3">
-            {events.length === 0 && (
+            {filteredEvents.length === 0 && (
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "2rem", textAlign: "center" }}>
                 <p style={{ ...serif, color: "rgba(255,255,255,0.30)" }}>No suppression events recorded yet.</p>
               </div>
             )}
-            {events.map((ev) => {
+            {filteredEvents.map((ev) => {
               const resolved = actionState[ev.eventId];
               return (
                 <div key={ev.eventId} style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem" }}>
@@ -124,7 +167,7 @@ const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
                       { label: "Field", value: ev.fieldName },
                       { label: "Rule", value: ev.suppressionRule },
                       { label: "Evidence source", value: ev.evidenceSource },
-                      { label: "Original posture", value: ev.originalPosture },
+                      { label: "Evidence posture", value: ev.evidencePosture || ev.originalPosture },
                       { label: "Scope", value: ev.scopeId },
                     ].map((d) => (
                       <div key={d.label}>

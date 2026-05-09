@@ -26,7 +26,12 @@ export type DecisionPermission =
   | "ADMIN_FULL"
   | "CLIENT_SAFE_VIEW"
   | "DELIVERY_APPROVE"
-  | "SUPPRESSION_REVIEW";
+  | "SUPPRESSION_REVIEW"
+  | "INSTITUTIONAL_CASE_VIEW"
+  | "STRATEGY_EXECUTION_VIEW"
+  | "BOARDROOM_VIEW"
+  | "DELIVERY_MANAGE"
+  | "CADENCE_MANAGE";
 
 const ALL_PERMISSIONS: DecisionPermission[] = [
   "OVERSIGHT_VIEW",
@@ -41,6 +46,11 @@ const ALL_PERMISSIONS: DecisionPermission[] = [
   "CLIENT_SAFE_VIEW",
   "DELIVERY_APPROVE",
   "SUPPRESSION_REVIEW",
+  "INSTITUTIONAL_CASE_VIEW",
+  "STRATEGY_EXECUTION_VIEW",
+  "BOARDROOM_VIEW",
+  "DELIVERY_MANAGE",
+  "CADENCE_MANAGE",
 ];
 
 export const ROLE_PERMISSIONS: Record<DecisionRole, DecisionPermission[]> = {
@@ -56,17 +66,26 @@ export const ROLE_PERMISSIONS: Record<DecisionRole, DecisionPermission[]> = {
     "PORTFOLIO_VIEW",
     "DELIVERY_APPROVE",
     "SUPPRESSION_REVIEW",
+    "INSTITUTIONAL_CASE_VIEW",
+    "STRATEGY_EXECUTION_VIEW",
+    "BOARDROOM_VIEW",
+    "DELIVERY_MANAGE",
+    "CADENCE_MANAGE",
   ],
   SPONSOR: [
     "OVERSIGHT_VIEW",
     "PROOF_VIEW",
     "CLIENT_SAFE_VIEW",
     "PORTFOLIO_VIEW",
+    "INSTITUTIONAL_CASE_VIEW",
+    "BOARDROOM_VIEW",
   ],
   CLIENT: [
     "PROOF_VIEW",
     "CLIENT_SAFE_VIEW",
     "COUNSEL_VIEW",
+    "INSTITUTIONAL_CASE_VIEW",
+    "STRATEGY_EXECUTION_VIEW",
   ],
   RESPONDENT: [
     "CLIENT_SAFE_VIEW",
@@ -74,6 +93,7 @@ export const ROLE_PERMISSIONS: Record<DecisionRole, DecisionPermission[]> = {
   COUNSEL_REVIEWER: [
     "COUNSEL_VIEW",
     "COUNSEL_WORKFLOW",
+    "INSTITUTIONAL_CASE_VIEW",
   ],
 };
 
@@ -84,12 +104,19 @@ export const ROLE_PERMISSIONS: Record<DecisionRole, DecisionPermission[]> = {
 export const SURFACE_PERMISSIONS: Record<string, DecisionPermission> = {
   "oversight": "OVERSIGHT_VIEW",
   "oversight/brief": "OVERSIGHT_VIEW",
-  "boardroom": "OVERSIGHT_VIEW",
+  "oversight/portfolio": "PORTFOLIO_VIEW",
+  "boardroom": "BOARDROOM_VIEW",
+  "boardroom/dossier": "BOARDROOM_VIEW",
   "counsel/status": "COUNSEL_VIEW",
   "counsel/intake": "COUNSEL_VIEW",
   "account/proof-pack": "PROOF_VIEW",
-  "admin/delivery-queue": "DELIVERY_APPROVE",
+  "admin/delivery-queue": "DELIVERY_MANAGE",
+  "admin/suppression-ledger": "SUPPRESSION_REVIEW",
+  "admin/retained-cadence": "CADENCE_MANAGE",
+  "admin/retainer-readiness": "ADMIN_FULL",
   "admin/full": "ADMIN_FULL",
+  "institutional-case": "INSTITUTIONAL_CASE_VIEW",
+  "strategy-room": "STRATEGY_EXECUTION_VIEW",
 };
 
 /**

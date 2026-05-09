@@ -18,6 +18,13 @@ import {
 } from "@/lib/product/retained-role-contract";
 import { buildSponsorSafeCommandSummary, type SponsorSafeCommandSummary } from "@/lib/product/sponsor-safe-command-summary";
 
+type InstitutionalCaseOversight = {
+  totalInstitutionalCases: number;
+  qualifiedCount: number;
+  boardroomCount: number;
+  oversightActiveCount: number;
+};
+
 type Props = {
   authenticated: boolean;
   summary: SponsorSafeCommandSummary | null;
@@ -26,6 +33,7 @@ type Props = {
   blockedByRole: boolean;
   cadencePosture: CadencePostureForSponsor | null;
   cadenceHistory: CadenceHistoryEvent[];
+  institutionalCaseSummary: InstitutionalCaseOversight | null;
 };
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -71,7 +79,7 @@ function formatDate(value?: string | null) {
   return value ? new Date(value).toLocaleDateString("en-GB") : "Not available";
 }
 
-const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role, blockedByRole, cadencePosture, cadenceHistory }) => {
+const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role, blockedByRole, cadencePosture, cadenceHistory, institutionalCaseSummary }) => {
   if (!authenticated) {
     return (
       <Layout title="Retained Oversight Command" description="Sponsor-safe retained oversight visibility." fullWidth>
@@ -102,6 +110,15 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
               Product role: {role ?? "UNRESOLVED"}
             </p>
           </header>
+
+          {institutionalCaseSummary && institutionalCaseSummary.totalInstitutionalCases > 0 && (
+            <section className="grid gap-4 md:grid-cols-4">
+              <Stat label="Institutional cases" value={institutionalCaseSummary.totalInstitutionalCases} note="Total cases in the institutional corridor." />
+              <Stat label="Qualified" value={institutionalCaseSummary.qualifiedCount} note="Cases that have passed institutional qualification." />
+              <Stat label="Boardroom" value={institutionalCaseSummary.boardroomCount} note="Cases with boardroom dossier attached." />
+              <Stat label="Oversight active" value={institutionalCaseSummary.oversightActiveCount} note="Cases under retained oversight." />
+            </section>
+          )}
 
           {blockedByRole ? (
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
@@ -332,7 +349,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const email = typeof session?.user?.email === "string" ? session.user.email.toLowerCase() : null;
   const userId = typeof session?.user?.id === "string" ? session.user.id : null;
   if (!access.permissions.isAuthenticated || !email) {
-    return { props: { authenticated: false, summary: null, warnings: [], role: null, blockedByRole: false, cadencePosture: null, cadenceHistory: [] } };
+    return { props: { authenticated: false, summary: null, warnings: [], role: null, blockedByRole: false, cadencePosture: null, cadenceHistory: [], institutionalCaseSummary: null } };
   }
 
   const organisationId = typeof ctx.query.organisationId === "string" ? ctx.query.organisationId : null;
@@ -367,6 +384,22 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     cadenceHistory = await loadCadenceHistory(scopeId).catch(() => []);
   }
 
+  // Load institutional case metrics for corridor awareness
+  let institutionalCaseSummary: InstitutionalCaseOversight | null = null;
+  try {
+    const { listInstitutionalCases } = await import("@/lib/product/institutional-case-service");
+    const { QUALIFICATION_RANK } = await import("@/lib/product/institutional-case-contract");
+    const cases = await listInstitutionalCases({ email, organisationId: resolvedOrganisationId ?? undefined });
+    if (cases.length > 0) {
+      institutionalCaseSummary = {
+        totalInstitutionalCases: cases.length,
+        qualifiedCount: cases.filter((c) => QUALIFICATION_RANK[c.qualificationState] >= QUALIFICATION_RANK.INSTITUTIONAL_QUALIFIED).length,
+        boardroomCount: cases.filter((c) => c.institutionalFlags.hasBoardroomDossier).length,
+        oversightActiveCount: cases.filter((c) => QUALIFICATION_RANK[c.qualificationState] >= QUALIFICATION_RANK.RETAINED_OVERSIGHT_ACTIVE).length,
+      };
+    }
+  } catch { /* best-effort */ }
+
   return {
     props: {
       authenticated: true,
@@ -376,6 +409,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       blockedByRole: !canViewSponsorCommandSummary(role),
       cadencePosture,
       cadenceHistory,
+      institutionalCaseSummary,
     },
   };
 };

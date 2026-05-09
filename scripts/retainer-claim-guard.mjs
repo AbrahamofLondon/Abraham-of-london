@@ -20,6 +20,8 @@ const PATTERNS = [
   { pattern: /continuous monitoring/gi, label: "Premature claim: continuous monitoring" },
   { pattern: /automated oversight is active/gi, label: "Premature claim: automated oversight is active" },
   { pattern: /fully automated retained oversight/gi, label: "Premature claim: fully automated retained oversight" },
+  { pattern: /enterprise-ready £50k/gi, label: "Premature claim: enterprise-ready £50k" },
+  { pattern: /guaranteed governance/gi, label: "Premature claim: guaranteed governance" },
 ];
 
 const WHITELIST_PREFIXES = [
@@ -35,6 +37,7 @@ const NEGATION_PHRASES = [
   "no continuous monitoring",
   "not claimed",
   "what is not claimed",
+  "unless actual verified outcome exists",
 ];
 
 function isWhitelisted(file) {

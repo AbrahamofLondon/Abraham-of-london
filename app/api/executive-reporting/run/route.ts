@@ -1167,11 +1167,36 @@ export async function POST(
       },
     });
 
+    // ── INSTITUTIONAL CASE — create or update ──
+    let institutionalCaseSummary = null;
+    try {
+      const { createOrUpdateFromER } = await import("@/lib/product/institutional-case-service");
+      const ic = await createOrUpdateFromER({
+        email,
+        userId: subjectId ?? null,
+        executiveRunId: run.id,
+        organisationId: campaignId ?? null,
+        sponsorUserId: null,
+        sourceLabels: [
+          "executive_reporting",
+          ...(paBlock ? ["purpose_alignment"] : []),
+          ...(boardroomQualification.qualified ? ["boardroom_qualified"] : []),
+        ],
+        boardroomQualified: boardroomQualification.qualified,
+        counselWarranted: route === "STRATEGY",
+        oversightEligible: Boolean(boardroomQualification.qualified && campaignId),
+      });
+
+      const { buildPublicSummary } = await import("@/lib/product/institutional-case-contract");
+      institutionalCaseSummary = buildPublicSummary(ic);
+    } catch { /* best-effort — corridor creation must not block ER result */ }
+
     return NextResponse.json({
       ok: true,
       runKey: run.runKey,
       checkpointId: erCheckpointId,
       result: publicResult,
+      institutionalCase: institutionalCaseSummary,
     });
   } catch (error) {
     console.error("[EXECUTIVE_REPORTING_RUN_ERROR]", error);

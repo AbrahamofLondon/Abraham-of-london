@@ -1481,6 +1481,84 @@ const labelStyle: React.CSSProperties = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// INSTITUTIONAL CORRIDOR PANEL
+// ─────────────────────────────────────────────────────────────────────────────
+
+function InstitutionalCorridorPanel({
+  caseReference,
+  canonical,
+  enforcement,
+}: {
+  caseReference: string | null;
+  canonical: any;
+  enforcement: any;
+}) {
+  const [corridorState, setCorridorState] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    if (!caseReference) return;
+    fetch(`/api/institutional-case/resolve?sessionId=${encodeURIComponent(caseReference)}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data?.case) setCorridorState(data.case); })
+      .catch(() => {});
+  }, [caseReference]);
+
+  const escalationLevel = enforcement?.escalationLevel ?? 0;
+  const evidencePosture = corridorState?.evidencePosture ?? "STRATEGY_EXECUTED";
+  const counselEligible = escalationLevel >= 2 || Boolean(enforcement?.escalationTriggers?.length);
+  const boardroomEligible = corridorState?.boardroomEarned ?? Boolean((canonical as any)?.boardroomQualified);
+  const oversightEligible = corridorState?.oversightStatus === "ELIGIBLE" || corridorState?.oversightStatus === "ACTIVE";
+
+  const stateLabel = corridorState
+    ? (corridorState.qualificationState ?? "INSTITUTIONAL_QUALIFIED").replace(/_/g, " ").toLowerCase()
+    : "execution active";
+
+  return (
+    <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "14px 18px" }}>
+      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}88` }}>
+        Institutional case in execution
+      </p>
+      <div style={{ marginTop: "10px", display: "grid", gap: "6px", gridTemplateColumns: "1fr 1fr 1fr" }}>
+        <div>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>State</span>
+          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.56)", marginTop: "2px" }}>{stateLabel}</p>
+        </div>
+        <div>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence</span>
+          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.56)", marginTop: "2px" }}>{evidencePosture.replace(/_/g, " ").toLowerCase()}</p>
+        </div>
+        <div>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Source</span>
+          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.56)", marginTop: "2px" }}>Executive Reporting</p>
+        </div>
+      </div>
+      <div style={{ marginTop: "10px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+        {counselEligible && (
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", border: "1px solid rgba(252,165,165,0.18)", padding: "4px 8px" }}>
+            Counsel review recommended
+          </span>
+        )}
+        {boardroomEligible && (
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: `${GOLD}88`, border: `1px solid ${GOLD}22`, padding: "4px 8px" }}>
+            Boardroom dossier qualified
+          </span>
+        )}
+        {oversightEligible && (
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)", border: "1px solid rgba(110,231,183,0.18)", padding: "4px 8px" }}>
+            Oversight {corridorState?.oversightStatus === "ACTIVE" ? "active" : "eligible"}
+          </span>
+        )}
+        {!counselEligible && !boardroomEligible && !oversightEligible && (
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", border: "1px solid rgba(255,255,255,0.08)", padding: "4px 8px" }}>
+            Oversight not yet warranted
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2209,6 +2287,15 @@ export default function StrategyRoomPage({
             </div>
 
             <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
+
+            {/* ── INSTITUTIONAL CORRIDOR PANEL ── */}
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+              <InstitutionalCorridorPanel
+                caseReference={executionSessionId ?? null}
+                canonical={canonical}
+                enforcement={enforcement}
+              />
+            </div>
 
             <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
               <div style={{ borderLeft: `2px solid ${GOLD}55`, backgroundColor: `${GOLD}08`, padding: "16px 18px" }}>

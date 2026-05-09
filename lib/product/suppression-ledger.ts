@@ -16,6 +16,7 @@ import type {
   SuppressionOverrideStatus,
   SuppressionSummary,
 } from "@/lib/product/suppression-ledger-contract";
+import { createSuppressionInput, type SuppressionInput } from "@/lib/product/suppression-event-helpers";
 
 function generateEventId(): string {
   return `sup_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
@@ -26,11 +27,11 @@ function generateEventId(): string {
  * Returns the generated eventId.
  */
 export async function recordSuppression(
-  event: Omit<SuppressionEvent, "eventId">,
+  event: SuppressionInput,
 ): Promise<string> {
   const eventId = generateEventId();
-
-  const full: SuppressionEvent = { ...event, eventId };
+  const normalized = createSuppressionInput(event);
+  const full: SuppressionEvent = { ...normalized, eventId };
 
   try {
     await prisma.accessAuditLog.create({
@@ -59,6 +60,7 @@ export async function recordSuppression(
 export async function loadSuppressionLedger(filters?: {
   scopeId?: string;
   surface?: string;
+  reason?: string;
   limit?: number;
 }): Promise<SuppressionEvent[]> {
   const rows = await prisma.accessAuditLog.findMany({
@@ -78,10 +80,17 @@ export async function loadSuppressionLedger(filters?: {
 
     const ev = meta as unknown as SuppressionEvent;
     if (!ev.eventId) continue;
+    if (!ev.fieldReference) ev.fieldReference = ev.fieldName;
+    if (!ev.evidencePosture) ev.evidencePosture = ev.originalPosture;
+    if (!ev.sourceLabel) ev.sourceLabel = ev.evidenceSource;
+    if (!ev.scopeType) ev.scopeType = "UNKNOWN";
+    if (!ev.suppressionRuleCategory) ev.suppressionRuleCategory = ev.suppressionRule;
+    if (typeof ev.operatorReviewAvailable !== "boolean") ev.operatorReviewAvailable = true;
 
     // Apply filters
     if (filters?.scopeId && ev.scopeId !== filters.scopeId) continue;
     if (filters?.surface && ev.surface !== filters.surface) continue;
+    if (filters?.reason && ev.suppressionReason !== filters.reason) continue;
 
     events.push(ev);
   }
@@ -150,10 +159,12 @@ export async function buildSuppressionSummary(
   );
 
   const bySurface: Record<string, number> = {};
+  const byReason: Record<string, number> = {};
   let latestAt: string | null = null;
 
   for (const ev of events) {
     bySurface[ev.surface] = (bySurface[ev.surface] ?? 0) + 1;
+    byReason[ev.suppressionReason] = (byReason[ev.suppressionReason] ?? 0) + 1;
     if (!latestAt || ev.suppressedAt > latestAt) {
       latestAt = ev.suppressedAt;
     }
@@ -170,6 +181,7 @@ export async function buildSuppressionSummary(
   return {
     totalSuppressed,
     bySurface,
+    byReason,
     latestAt,
     sponsorSafeNotice,
   };

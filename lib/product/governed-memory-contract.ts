@@ -1,5 +1,3 @@
-// TODO: integrate recordSuppression() from @/lib/product/suppression-ledger when governed memory
-// items transition to SUPPRESSED status — log the suppression event with field reference and reason
 import type { FieldProvenance } from "@/lib/product/field-provenance-contract";
 import {
   formatFieldProvenanceLine,
@@ -97,6 +95,10 @@ export function deriveConfidenceLabel(
 
 export function isMemoryDisplaySafe(item: GovernedMemoryItem): boolean {
   return item.audienceSafe && item.status !== "SUPPRESSED" && !item.suppressedReason;
+}
+
+export function isGovernedMemorySuppressed(item: GovernedMemoryItem): boolean {
+  return item.status === "SUPPRESSED" || Boolean(item.suppressedReason);
 }
 
 function sourceSurfaceLabel(surface: GovernedMemorySourceSurface): string {

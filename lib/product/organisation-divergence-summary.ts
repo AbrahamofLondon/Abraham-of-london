@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma.server";
 import { evaluateAggregationSafety } from "@/lib/product/multi-user-privacy";
+import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
+import { recordSuppression } from "@/lib/product/suppression-ledger";
 
 export type OrganisationDivergenceType =
   | "AUTHORITY_PERCEPTION_GAP"
@@ -97,7 +99,19 @@ export async function loadOrganisationDivergenceSummary(input: {
     minimumSafeResponses: 3,
   });
   if (sampleSafety === "INSUFFICIENT_RESPONSES" || sampleSafety === "SMALL_SAMPLE_SUPPRESSED") {
-    // TODO: integrate recordSuppression() here — log small-sample suppression to the suppression audit ledger
+    await recordSuppression(createSuppressionInput({
+      scopeId: organisation.id,
+      scopeType: "ORGANISATION",
+      surface: "ORGANISATION_DIVERGENCE_SUMMARY",
+      fieldName: "organisationDivergence",
+      evidenceSource: "Organisation divergence analysis",
+      evidencePosture: "SYSTEM_INFERRED",
+      sourceLabel: "Organisation divergence",
+      suppressionReason: "Insufficient sample.",
+      suppressionRule: "SMALL_SAMPLE_SUPPRESSED",
+      suppressionRuleCategory: "SMALL_SAMPLE",
+      operatorReviewAvailable: true,
+    })).catch(() => null);
     return {
       summaries: [],
       warnings: ["Organisation divergence is suppressed because the available respondent sample is below the safe threshold."],

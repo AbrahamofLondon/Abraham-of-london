@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { ReactElement } from "react";
-import type { DocumentProps } from "@react-pdf/renderer";
 import { requireAdminApi } from "@/lib/access/server";
-import { generateProofPack } from "@/lib/product/proof-pack-generator";
+import { generateProofPackPdfBuffer } from "@/lib/pdf/runtime-verification";
 import { prisma } from "@/lib/prisma.server";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -23,19 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ ok: false, error: "email is required" });
     }
 
-    const pack = await generateProofPack({ email, userId });
-
-    const generatedAt = new Date().toISOString();
-
-    // Dynamic import to keep @react-pdf/renderer out of module graph at load time
-    const { ensureFontsRegistered } = await import("@/lib/pdf/ensure-fonts");
-    await ensureFontsRegistered();
-
-    const { renderToBuffer } = await import("@react-pdf/renderer");
-    const { ProofPackPdfDocument } = await import("@/lib/pdf/proof-pack-pdf");
-
-    const documentElement = ProofPackPdfDocument({ pack, generatedAt });
-    const pdfBuffer = await renderToBuffer(documentElement as ReactElement<DocumentProps>);
+    const generated = await generateProofPackPdfBuffer({ email, userId });
 
     // Log to audit
     await prisma.auditEvent.create({
@@ -49,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         metadata: {
           email,
           userId: userId ?? null,
-          generatedAt,
+          generatedAt: generated.generatedAt,
         },
       },
     });
@@ -60,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `attachment; filename="proof-pack-${email.replace(/[^a-zA-Z0-9]/g, "-")}.pdf"`,
     );
     res.setHeader("Cache-Control", "no-store");
-    res.send(Buffer.from(pdfBuffer));
+    res.send(generated.pdfBuffer);
   } catch (error) {
     console.error("[PROOF_PACK_PDF_ERROR]", error);
     return res.status(500).json({

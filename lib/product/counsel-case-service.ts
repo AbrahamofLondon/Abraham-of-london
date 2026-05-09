@@ -47,7 +47,23 @@ export async function createCounselCaseFromIntake(input: {
       },
     });
 
-    return mapRecordToCounselCase(record);
+    const counselCase = mapRecordToCounselCase(record);
+
+    // Attach to institutional case corridor if one exists
+    try {
+      const { resolveInstitutionalCase } = await import("@/lib/product/institutional-case-resolver");
+      const { attachCorridorSurface } = await import("@/lib/product/institutional-case-service");
+      const ic = await resolveInstitutionalCase(input.email.toLowerCase());
+      if (ic && counselCase) {
+        await attachCorridorSurface({
+          caseId: ic.caseId,
+          surface: "COUNSEL_REVIEW",
+          referenceId: record.id,
+        });
+      }
+    } catch { /* corridor attachment is best-effort */ }
+
+    return counselCase;
   } catch (error) {
     console.error("[counsel-case-service] create failed:", error);
     return null;
