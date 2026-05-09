@@ -1,8 +1,15 @@
 /**
  * lib/commercial/catalog.ts — COMMERCIAL CATALOG (SINGLE SOURCE OF TRUTH)
  *
- * All 15 canonical products. Stripe IDs embedded. No env var price deps.
- * Checkout, webhook, admin, and access-resolution all read from here.
+ * Canonical commercial products, access identities, Stripe references,
+ * entitlement slugs, product lifecycle status, success/cancel routing,
+ * and commercial display metadata.
+ *
+ * Checkout, webhook, admin, entitlement, access-resolution, and UI pricing
+ * must resolve through this file or helpers derived from this file.
+ *
+ * Do not hardcode product names, prices, entitlement slugs, or Stripe price IDs
+ * in UI surfaces.
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -23,6 +30,14 @@ export type ProductCategory =
   | "membership"
   | "retainer";
 
+export type CommercialStatus =
+  | "free_controlled"
+  | "paid"
+  | "contracted"
+  | "inactive"
+  | "retired"
+  | "internal_only";
+
 export type CatalogProduct = {
   code: string;
   displayName: string;
@@ -41,13 +56,88 @@ export type CatalogProduct = {
   cancelPath: string;
   cookieName: string | null;
   includes: string[];
+  // Extended identity fields
+  commercialStatus?: CommercialStatus;
+  marketName?: string;
+  publicLabel?: string;
+  legacyNames?: string[];
+  shortDescription?: string;
+  userPromise?: string;
+  pricingNote?: string;
+  primaryCta?: string;
+  upgradePath?: string[];
+  requiresCheckout?: boolean;
+  requiresContract?: boolean;
+  futurePaidCandidate?: boolean;
 };
 
 // ─────────────────────────────────────���───────────────────────────────────────
-// Catalog — 15 Products
+// Catalog — Canonical Products
 // ──────────────���────────────────────────────��─────────────────────────────────
 
 export const CATALOG: Record<string, CatalogProduct> = {
+
+  // ═══ ENTRY LAYER ═══════════════════════════════════════════════════════
+
+  fast_diagnostic: {
+    code: "fast_diagnostic",
+    displayName: "Fast Diagnostic",
+    marketName: "Fast Diagnostic",
+    publicLabel: "Fast Diagnostic",
+    amount: 0,
+    displayPrice: "Currently free",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "fast-diagnostic",
+    tier: "public-entry",
+    category: "decision_tools",
+    accessType: "free",
+    duration: "lifetime",
+    active: true,
+    commercialStatus: "free_controlled",
+    requiresCheckout: false,
+    requiresContract: false,
+    futurePaidCandidate: true,
+    successPath: "/diagnostics/fast",
+    cancelPath: "/diagnostics",
+    cookieName: null,
+    includes: [],
+    shortDescription: "Identify the decision fracture, required move, and checkpoint.",
+    userPromise: "Identify the decision fracture, receive one required move, and create a 48-hour checkpoint.",
+    pricingNote: "Currently free during controlled market entry.",
+    primaryCta: "Start Fast Diagnostic",
+    upgradePath: ["personal_decision_audit", "executive_reporting", "strategy_room"],
+  },
+
+  personal_decision_audit: {
+    code: "personal_decision_audit",
+    displayName: "Personal Decision Audit",
+    marketName: "Personal Decision Audit",
+    publicLabel: "Personal Decision Audit",
+    legacyNames: ["Purpose Alignment", "Purpose Alignment Assessment"],
+    amount: 4900,
+    displayPrice: "£49",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "personal-decision-audit",
+    tier: "personal-decision-audit",
+    category: "decision_tools",
+    accessType: "one_time",
+    duration: "lifetime",
+    active: false,
+    commercialStatus: "paid",
+    requiresCheckout: true,
+    requiresContract: false,
+    successPath: "/diagnostics/purpose-alignment",
+    cancelPath: "/diagnostics/purpose-alignment",
+    cookieName: "aol_paid_personal_decision_audit",
+    includes: [],
+    shortDescription: "Expose contradiction between stated mandate, behaviour, and competing obligation.",
+    userPromise: "Contradiction map, competing obligation diagnosis, correction command, 7-day checkpoint.",
+    pricingNote: "Inactive until Stripe product and price IDs are created.",
+    primaryCta: "Start Personal Decision Audit",
+    upgradePath: ["executive_reporting", "strategy_room", "retainer_core"],
+  },
 
   // ═══ A. DECISION LAYER ═══════════════════════════════════════════════════
 
@@ -558,4 +648,46 @@ export function assertNoDeadCheckoutProducts(): CatalogIntegrityError[] {
   return getActiveProducts()
     .filter((p) => p.amount > 0 && !p.successPath)
     .map((p) => ({ code: p.code, message: `Active paid product "${p.code}" has no successPath` }));
+}
+
+/** Check whether a product is safe for self-serve checkout. */
+export function isCheckoutAvailable(product: CatalogProduct): boolean {
+  return Boolean(
+    product.active &&
+      product.requiresCheckout !== false &&
+      product.amount > 0 &&
+      product.stripePriceId
+  );
+}
+
+/** Check whether a product requires a contract (not self-serve). */
+export function isContractedProduct(product: CatalogProduct): boolean {
+  return product.commercialStatus === "contracted" || product.requiresContract === true;
+}
+
+/** Get display price with commercial status awareness. */
+export function getCommercialDisplayPrice(product: CatalogProduct): string {
+  if (product.commercialStatus === "contracted") {
+    return product.displayPrice || "Contracted monthly";
+  }
+  if (product.commercialStatus === "free_controlled") {
+    return product.pricingNote || product.displayPrice || "Currently free";
+  }
+  return product.displayPrice;
+}
+
+/** Resolve product by code, entitlement slug, or legacy name. */
+export function resolveProductByAlias(alias: string): CatalogProduct | null {
+  const normalized = alias.trim().toLowerCase().replace(/-/g, "_");
+  // Direct code match
+  if (CATALOG[normalized]) return CATALOG[normalized];
+  // Entitlement slug match
+  const bySlug = Object.values(CATALOG).find((p) => p.entitlementSlug === alias || p.entitlementSlug === normalized);
+  if (bySlug) return bySlug;
+  // Legacy name match
+  const byLegacy = Object.values(CATALOG).find((p) =>
+    p.legacyNames?.some((n) => n.toLowerCase().replace(/\s+/g, "_") === normalized || n.toLowerCase() === alias.toLowerCase())
+  );
+  if (byLegacy) return byLegacy;
+  return null;
 }
