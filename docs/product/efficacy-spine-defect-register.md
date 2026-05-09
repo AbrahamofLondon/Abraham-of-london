@@ -1,89 +1,98 @@
-# Efficacy Spine — Defect Register
+# Efficacy Spine Defect Register
 
-**Date:** 8 May 2026  
-**Status:** 2 critical defects fixed, 3 remaining (low/medium)
+Date: 9 May 2026
+Status: Permanent closure pass
 
----
+## Closed defects
 
-## Fixed Defects
+### D2-HARDEN
 
-### D1 — Executive Reporting challenge uses hardcoded checkpoint ID
+Status: CLOSED
 
-**Severity:** CRITICAL  
-**Status:** FIXED  
+Problem:
 
-**Problem:** The "Challenge with evidence" button in the Executive Reporting result page used a hardcoded `checkpointId: "er_challenge"` instead of the real checkpoint ID returned by the API. The `/api/checkpoints/respond` endpoint would return 404 because no `diagnosticRecord` with that ID exists. The user's challenge response was silently lost.
+- Return Brief correlation was relying on a brittle `responsesJson contains` fallback because session ids were being treated as checkpoint ids.
 
-**Fix applied:**
-1. Added `checkpointId?: string | null` to the `ExecutiveReportingResult` type (`pages/diagnostics/executive-reporting/run.tsx`)
-2. Changed the challenge button to use `result.checkpointId` instead of `"er_challenge"`
-3. Added a guard: if `checkpointId` is null, shows an alert instead of silently failing
+Closure:
 
-**Files changed:**
-- `pages/diagnostics/executive-reporting/run.tsx` — type definition + button handler
+- Added explicit checkpoint correlation fields to persisted payloads
+- Added canonical `resolveCheckpointForResponse(input)`
+- Moved primary resolution order to explicit identity fields
+- Kept `responsesJson contains` as deprecated last resort only
+- Return Brief now passes real `checkpointId` when resolved, otherwise explicit `strategyRoomSessionId` lookup mode
 
----
+### D3
 
-### D2 — Return Brief checkpoint response uses wrong ID
+Status: CLOSED
 
-**Severity:** CRITICAL  
-**Status:** FIXED  
+Problem:
 
-**Problem:** The Return Brief's `CheckpointResponsePanel` used `sessionId` (a strategy room session key like `sr_...`) as the `checkpointId`. But checkpoints are created with `caseId` (a Fast Diagnostic spine ID like `fast_...` or an ER run ID). The IDs never match, so the response would always return 404.
+- Strategy Room entry and session surfaces displayed required moves without creating durable checkpoints.
 
-**Fix applied:**
-Added a fallback lookup in the respond endpoint: if direct ID lookup fails, search for a checkpoint where `responsesJson` contains the provided ID string (matching against `caseId`, `journeyId`, or `sessionId` stored in the checkpoint payload).
+Closure:
 
-**Files changed:**
-- `pages/api/checkpoints/respond.ts` — added fallback `responsesJson` contains lookup
+- `buildStrategyRoomCommand()` now handles the zero-decision entry state
+- `app/api/strategy-room/execution/route.ts` creates or reuses entry checkpoints
+- `app/api/strategy-room/execution/[id]/decisions/route.ts` refreshes checkpoints when execution state changes
+- `app/api/strategy-room/execution/[id]/route.ts` refreshes checkpoints on session PATCH
+- Strategy Room state route now returns real checkpoint state for rendering
 
----
+### D4
 
-## Open Defects
+Status: CLOSED
 
-### D3 — Strategy Room surfaces don't create checkpoints
+Problem:
 
-**Severity:** MEDIUM  
-**Status:** OPEN — P1 work  
+- Decision Centre mixed due and responded checkpoints under `Requires your response`.
 
-**Problem:** `buildStrategyRoomCommand()` exists in the efficacy contract but is never called from any Strategy Room surface. The "Next required action" in the session page is dynamic local state, not a persisted checkpoint. No checkpoint is created when entering or using the Strategy Room.
+Closure:
 
-**Impact:** Strategy Room decisions are not tracked by the checkpoint system. Users cannot respond to Strategy Room checkpoints from Decision Centre. Oversight Brief cannot detect overdue Strategy Room actions.
+- API now returns:
+- `checkpoints.requiresResponse`
+- `checkpoints.recentResponses`
+- UI renders the two sections separately
 
-**Files involved:**
-- `pages/strategy-room/index.tsx` — should call `buildStrategyRoomCommand()` + `createCheckpointForCommand()` on entry
-- `pages/strategy-room/session/[id].tsx` — should call `buildStrategyRoomCommand()` on state change
+### D5
 
----
+Status: CLOSED
 
-### D4 — Decision Centre heading misleading for responded checkpoints
+Problem:
 
-**Severity:** LOW  
-**Status:** OPEN  
+- Oversight checkpoint attention signal used `CHECKPOINT_OVERDUE as any`.
 
-**Problem:** The Decision Centre checkpoint section is headed "Requires your response" but also shows already-responded checkpoints. This is confusing for items the user has already completed.
+Closure:
 
-**Suggested fix:** Split into two sections: "Requires response" (DUE/OVERDUE) and "Recent responses" (RESPONDED).
+- Removed `as any`
+- Oversight composer now emits the canonical signal type directly
+- Wording now avoids overclaiming verification
 
----
+### BUILD
 
-### D5 — Oversight Brief checkpoint signal uses `as any` cast
+Status: CLOSED
 
-**Severity:** LOW  
-**Status:** OPEN  
+Problem:
 
-**Problem:** The `CHECKPOINT_OVERDUE` signal type is pushed with `as any` cast because it's not in the canonical signal type union.
+- Full Next build had not been completed.
 
-**Suggested fix:** Add `CHECKPOINT_OVERDUE` to the signal type definition in the oversight signal contract.
+Closure:
 
----
+- `npx tsc --noEmit --pretty false` passed on 9 May 2026
+- `npx next build` passed on 9 May 2026
 
-## Defect Summary
+## Residual compatibility item
 
-| ID | Severity | Surface | Status | Fix |
-|----|----------|---------|--------|-----|
-| D1 | CRITICAL | Executive Reporting | ✅ FIXED | Use real checkpointId from API response |
-| D2 | CRITICAL | Return Brief | ✅ FIXED | Add fallback lookup in respond endpoint |
-| D3 | MEDIUM | Strategy Room | OPEN | Wire buildStrategyRoomCommand() into surfaces |
-| D4 | LOW | Decision Centre | OPEN | Split checkpoint section heading |
-| D5 | LOW | Oversight Brief | OPEN | Add CHECKPOINT_OVERDUE to signal type |
+### Legacy fallback
+
+Status: TEMPORARY_COMPATIBILITY_ONLY
+
+Description:
+
+- `responsesJson contains` remains in `resolveCheckpointForResponse()` as a deprecated last resort for older checkpoint rows.
+
+Exit condition:
+
+- Remove after legacy checkpoint rows without explicit correlation fields are no longer in circulation.
+
+Constraint:
+
+- It must never become the primary lookup path again.

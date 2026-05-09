@@ -1,154 +1,134 @@
 # Checkpoint Lifecycle Trace
 
-**Date:** 8 May 2026  
-**Purpose:** Trace a checkpoint from creation through response to downstream consumption.
+Date: 9 May 2026
+Status: Runtime trace after permanent closure pass
 
----
+## Lifecycle
 
-## Lifecycle Stages
+`CREATED -> DUE -> OVERDUE -> RESPONDED -> CONSUMED`
 
-```
-CREATED → DUE → OVERDUE → RESPONDED → CONSUMED
-```
+## 1. Created
 
----
+Runtime writer: `createCheckpointForCommand()` in `lib/product/checkpoint-service.ts`
 
-## Stage 1: CREATED
+Persistence target:
 
-**Trigger:** User completes a diagnostic surface (Fast Diagnostic or Executive Reporting).
+- `DiagnosticRecord.diagnosticType = "efficacy_checkpoint"`
+- `DiagnosticRecord.status = "draft"`
+- `DiagnosticRecord.responsesJson = CheckpointPayload`
 
-**Action:** `createCheckpointForCommand()` in `lib/product/checkpoint-service.ts`
+Creation behaviour:
 
-**Persistence:** `prisma.diagnosticRecord.create()` with:
-- `diagnosticType: "efficacy_checkpoint"`
-- `status: "draft"`
-- `responsesJson` containing: `commandId`, `surface`, `actionType`, `commandTitle`, `verificationQuestion`, `checkpointType`, `dueAt`, `caseId`, `journeyId`, `escalationIfIgnored`, `createdAt`
+- Computes `commandFingerprint`
+- Reuses an existing checkpoint when the same fingerprint already exists for the same user identity
+- Creates a new checkpoint only when the required move materially changes
 
-**ID linking:**
-- `record.id` = the checkpoint's unique ID (returned to caller)
-- `caseId` = the originating diagnostic's ID (e.g. `spine.id` for Fast Diagnostic, `run.id` for ER)
-- `userEmail` = the user's email (used for retrieval)
+## 2. Due
 
-**Example:**
-```
-diagnosticRecord {
-  id: "ckp_abc123",
-  diagnosticType: "efficacy_checkpoint",
-  userEmail: "user@example.com",
-  status: "draft",
-  responsesJson: {
-    commandId: "fast_clarify_owner_m1x2k3",
-    surface: "FAST_DIAGNOSTIC",
-    commandTitle: "Clarify who owns this decision",
-    verificationQuestion: "Have you identified and contacted the decision owner?",
-    checkpointType: "48_HOUR_ACTION",
-    dueAt: "2026-05-10T12:00:00.000Z",
-    caseId: "fast_abc123",
-    createdAt: "2026-05-08T12:00:00.000Z"
-  }
-}
-```
+Runtime reader: `loadDueCheckpointsForUser()` in `lib/product/checkpoint-service.ts`
 
----
+Due logic:
 
-## Stage 2: DUE
+- Unresponded checkpoint
+- `dueAt <= now + 3 days`
+- `dueAt >= now` yields `DUE`
 
-**Condition:** `dueAt` is within the next 3 days AND `status` is `"draft"`.
+Consumer surfaces:
 
-**Detection:** `loadDueCheckpointsForUser()` in `lib/product/checkpoint-service.ts`:
-- Queries `diagnosticType: "efficacy_checkpoint"`
-- Filters by `status: { in: ["draft", "completed"] }`
-- Filters by `dueAt <= now + 3 days`
+- Decision Centre `Requires response`
+- Strategy Room checkpoint state
+- Return Brief checkpoint state
 
-**Displayed in:**
-- Decision Centre: "Requires your response" section with gold border
-- Shows: command title, verification question, due date, "DUE" status
+## 3. Overdue
 
----
+Runtime reader: `loadDueCheckpointsForUser()`
 
-## Stage 3: OVERDUE
+Overdue logic:
 
-**Condition:** `dueAt` is in the past AND `status` is still `"draft"`.
+- Unresponded checkpoint
+- `dueAt < now`
 
-**Detection:** Same `loadDueCheckpointsForUser()` — computes `isOverdue` from `dueAt`.
+Consumer surfaces:
 
-**Displayed in:**
-- Decision Centre: Red border, "OVERDUE" status
-- Oversight Brief: `CHECKPOINT_OVERDUE` signal injected into oversight cycle
+- Decision Centre `Requires response`
+- Strategy Room checkpoint state
+- Oversight checkpoint attention signal
 
----
+## 4. Responded
 
-## Stage 4: RESPONDED
+Runtime writer: `recordCheckpointResponse()` in `lib/product/checkpoint-service.ts`
 
-**Trigger:** User submits response via `CheckpointResponsePanel` (Return Brief) or challenge button (ER).
+Response behaviour:
 
-**Action:** POST to `/api/checkpoints/respond` with:
-- `checkpointId`: the checkpoint's `record.id` (or sessionId for Return Brief fallback)
-- `responseStatus`: COMPLETED | PARTIALLY_COMPLETED | BLOCKED | ABANDONED | NO_LONGER_RELEVANT | DISPUTED_FINDING
-- Optional: `evidenceNote`, `blockerDescription`, `whatChanged`, `whatShouldSystemRemember`
+- Resolves checkpoint through canonical lookup order
+- Sanitises response text
+- Appends to `responses`
+- Mirrors the latest response into `response`
+- Updates payload `status` to `RESPONDED`
+- Updates `DiagnosticRecord.status` to `completed`
 
-**Server processing:** `pages/api/checkpoints/respond.ts`:
-1. Looks up `diagnosticRecord` by ID (direct match) or by `responsesJson` contains (fallback)
-2. Validates `userEmail` matches authenticated user
-3. Calls `classifyCheckpointOutcome()` to map response status → outcome classification
-4. Updates `status: "completed"` and appends response data to `responsesJson`
+Outcome classifications:
 
-**Outcome classification mapping:**
+- `COMPLETED -> ACTION_CONFIRMED`
+- `PARTIALLY_COMPLETED -> OUTCOME_IMPROVED`
+- `BLOCKED -> ACTION_BLOCKED`
+- `ABANDONED -> ACTION_ABANDONED`
+- `NO_LONGER_RELEVANT -> OUTCOME_UNCHANGED`
+- `DISPUTED_FINDING -> SYSTEM_FINDING_DISPUTED`
+- `NOT_RESPONDED -> INSUFFICIENT_EVIDENCE`
 
-| Response Status | Outcome Classification |
-|----------------|----------------------|
-| COMPLETED | ACTION_CONFIRMED |
-| PARTIALLY_COMPLETED | OUTCOME_IMPROVED |
-| BLOCKED | ACTION_BLOCKED |
-| ABANDONED | ACTION_ABANDONED |
-| NO_LONGER_RELEVANT | OUTCOME_UNCHANGED |
-| DISPUTED_FINDING | SYSTEM_FINDING_DISPUTED |
-| NOT_RESPONDED | INSUFFICIENT_EVIDENCE |
+## 5. Consumed
 
-**Example response data:**
-```json
-{
-  "response": {
-    "status": "BLOCKED",
-    "blockerDescription": "The decision owner is on leave until next month. No delegate was assigned.",
-    "respondedAt": "2026-05-10T14:00:00.000Z",
-    "classification": "ACTION_BLOCKED"
-  }
-}
-```
+### Decision Centre
 
----
+API: `pages/api/decision-centre/cases.ts`
 
-## Stage 5: CONSUMED
+- Splits runtime output into:
+- `checkpoints.requiresResponse`
+- `checkpoints.recentResponses`
 
-**Where checkpoint outcomes are consumed:**
+UI: `pages/decision-centre.tsx`
 
-| Consumer | What it reads | How it uses it |
-|----------|--------------|----------------|
-| Decision Centre | `loadDueCheckpointsForUser()` | Shows response status, evidence note, date. Green border for RESPONDED. |
-| Oversight Brief | `loadDueCheckpointsForUser()` | Counts OVERDUE/BLOCKED/ABANDONED → injects CHECKPOINT_OVERDUE signal |
+- Shows source surface
+- Shows due or responded date
+- Shows response status
+- Shows evidence note when safe
+- Shows source label
+- Shows evidence posture
 
-**Not yet consuming:**
-- Return Brief — has response panel but doesn't display prior checkpoint outcomes from the checkpoint system
-- Strategy Room — no checkpoint integration at all
+### Return Brief
 
----
+Server: `lib/server/strategy-room/return-brief.server.ts`
 
-## Duplicate/Conflict Prevention
+- Resolves the Strategy Room checkpoint by `strategyRoomSessionId + email`
+- Returns explicit checkpoint reference metadata
 
-| Mechanism | Implementation |
-|-----------|---------------|
-| Single response per checkpoint | `respond.ts` updates existing record, doesn't create new one. Second POST overwrites with new response. |
-| Auth gate | `resolveIdentity()` — only the owning user can respond |
-| Email match | `userEmail: identity.email.toLowerCase()` in query |
-| Status check | No explicit "already responded" check — second response overwrites. This is intentional (user may update their response). |
+UI: `app/briefing/return/[sessionId]/page.tsx`
 
-## Security
+- Uses real checkpoint id when present
+- Falls back to `strategyRoomSessionId` with explicit lookup mode
+- Shows graceful `No checkpoint created yet` state when no checkpoint exists
 
-| Concern | Status |
-|---------|--------|
-| Checkpoint notes in sponsor-safe surfaces | ✅ Decision Centre shows evidence notes with user attribution ("user-reported blocker") |
-| Raw respondent data leakage | ✅ Checkpoint payloads contain only user-submitted text |
-| Admin-only content in client views | ✅ No admin-only fields in checkpoint data |
-| Client-side checkpoint authority | ✅ All mutations go through authenticated server route |
-| localStorage/sessionStorage authority | ✅ No checkpoint state stored client-side |
+### Oversight Brief
+
+Composer: `lib/product/oversight-brief-composer.ts`
+
+- Loads checkpoint outcomes through `loadDueCheckpointsForUser()`
+- Injects `CHECKPOINT_OVERDUE` without `as any`
+- Uses disciplined language:
+- `checkpoint overdue`
+- `user-reported blocker`
+- `response not yet received`
+
+## Local runtime evidence captured on 9 May 2026
+
+Harness results:
+
+- Fast Diagnostic checkpoint reuse: confirmed
+- Executive Reporting real checkpoint id and disputed response persistence: confirmed
+- Strategy Room entry checkpoint reuse: confirmed
+- Strategy Room session checkpoint resolution via `strategyRoomSessionId`: confirmed
+- Return Brief-style response correlation via `strategyRoomSessionId`: confirmed
+- Decision Centre partition counts: `requiresResponse = 2`, `recentResponses = 3`
+- Overdue computation: confirmed with a locally created overdue unresolved checkpoint
+- Blocker sanitisation: confirmed

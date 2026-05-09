@@ -348,6 +348,10 @@ export default async function handler(
       return res.status(200).json({
         ok: true,
         cases: [],
+        checkpoints: {
+          requiresResponse: [],
+          recentResponses: [],
+        },
         commercial: { ownedProducts: [], eligibleProducts: [], restrictedProducts: [] },
         credit: null,
       } satisfies DecisionCentreResponse);
@@ -588,12 +592,18 @@ export default async function handler(
 
     caseCard.retainerReadiness = retainerReadiness;
 
-    let dueCheckpoints: Array<{ id: string; commandTitle: string; verificationQuestion: string; dueAt: string; status: string }> = [];
+    let checkpointSections: DecisionCentreResponse["checkpoints"] = {
+      requiresResponse: [],
+      recentResponses: [],
+    };
     try {
       const { loadDueCheckpointsForUser } = await import("@/lib/product/checkpoint-service");
       const checkpoints = await loadDueCheckpointsForUser({ email });
-      dueCheckpoints = checkpoints.map((c) => ({
+      const mapped = checkpoints.map((c) => ({
         id: c.id,
+        sourceSurface: c.surface,
+        sourceLabel: c.sourceLabel ?? `Checkpoint from ${c.surface.replace(/_/g, " ").toLowerCase()}`,
+        evidencePosture: c.evidencePosture ?? "SYSTEM_INFERRED",
         commandTitle: c.commandTitle,
         verificationQuestion: c.verificationQuestion,
         dueAt: c.dueAt,
@@ -602,13 +612,17 @@ export default async function handler(
         respondedAt: c.respondedAt ?? null,
         evidenceNote: c.evidenceNote ?? null,
       }));
+      checkpointSections = {
+        requiresResponse: mapped.filter((checkpoint) => checkpoint.status !== "RESPONDED"),
+        recentResponses: mapped.filter((checkpoint) => checkpoint.status === "RESPONDED"),
+      };
     } catch { /* best-effort */ }
 
     res.setHeader("Cache-Control", "private, no-cache");
     return res.status(200).json({
       ok: true,
       cases: [caseCard],
-      dueCheckpoints,
+      checkpoints: checkpointSections,
       commercial: {
         ownedProducts: owned,
         eligibleProducts: eligible,

@@ -1449,6 +1449,19 @@ export default function StrategyRoomPage({
     consequence?: { currentExposure: number; previousExposure?: number | null; baseRisk?: number | null; timePenalty?: number | null; failurePenalty?: number | null };
     escalationTriggers: Array<{ triggerType: string; message: string; createdAt?: string }>;
     directive?: string | null;
+    checkpoint?: {
+      checkpointId: string;
+      strategyRoomSessionId: string;
+      sourceSurface: string;
+      sourceLabel: string;
+      evidencePosture: string;
+      commandTitle: string;
+      verificationQuestion: string;
+      dueAt: string | null;
+      status: string;
+      responseStatus: string | null;
+      respondedAt: string | null;
+    } | null;
   } | null>(null);
 
   // Fetch enforcement state when execution session exists
@@ -1466,6 +1479,7 @@ export default function StrategyRoomPage({
           consequence: data.consequence ?? undefined,
           escalationTriggers: data.triggers ?? [],
           directive: data.directive ?? null,
+          checkpoint: data.checkpoint ?? null,
         });
       }
     } catch { /* non-blocking */ }
@@ -2193,6 +2207,30 @@ export default function StrategyRoomPage({
                 escalationLevel={enforcement?.escalationLevel ?? 0}
               />
             </div>
+
+            {enforcement?.checkpoint && (
+              <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+                <div style={{ borderLeft: "2px solid rgba(255,255,255,0.18)", backgroundColor: "rgba(255,255,255,0.02)", padding: "14px 18px" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)" }}>
+                    Checkpoint governance
+                  </p>
+                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>
+                    {enforcement.checkpoint.commandTitle}
+                  </p>
+                  <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.52)", marginTop: "6px" }}>
+                    {enforcement.checkpoint.verificationQuestion}
+                  </p>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: enforcement.checkpoint.status === "OVERDUE" ? "rgba(252,165,165,0.55)" : enforcement.checkpoint.status === "RESPONDED" ? "rgba(110,231,183,0.55)" : `${GOLD}A0`, marginTop: "8px" }}>
+                    {enforcement.checkpoint.status === "RESPONDED"
+                      ? `Responded${enforcement.checkpoint.respondedAt ? ` · ${new Date(enforcement.checkpoint.respondedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}`
+                      : `${enforcement.checkpoint.status}${enforcement.checkpoint.dueAt ? ` · Due ${new Date(enforcement.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}`}
+                  </p>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginTop: "6px" }}>
+                    Source: {enforcement.checkpoint.sourceLabel} · Evidence posture: {enforcement.checkpoint.evidencePosture.replace(/_/g, " ").toLowerCase()}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {mergedStrategyMemory.length > 0 && (
               <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>

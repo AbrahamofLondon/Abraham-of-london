@@ -27,6 +27,7 @@ import {
   loadPurposeAlignmentEvidence,
   buildReturnBriefPaSection,
 } from "@/lib/alignment/evidence-loader";
+import { resolveCheckpointForResponse } from "@/lib/product/checkpoint-service";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -40,6 +41,12 @@ export type ReturnBriefTrigger =
 export type ReturnBrief = {
   sessionId: string;
   sessionKey: string;
+  checkpointReference?: {
+    checkpointId?: string | null;
+    strategyRoomSessionId?: string | null;
+    lookupMode: "CHECKPOINT_ID" | "STRATEGY_ROOM_SESSION";
+    available: boolean;
+  } | null;
   generatedAt: string;
   trigger: ReturnBriefTrigger;
 
@@ -353,6 +360,10 @@ export async function generateReturnBrief(
     contradiction: constraintText,
     decisionText,
   });
+  const resolvedCheckpoint = await resolveCheckpointForResponse({
+    strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+    email: session.email,
+  });
 
   // ── PURPOSE ALIGNMENT EVIDENCE CARRIED FORWARD ──
   const paEvidence = await loadPurposeAlignmentEvidence({
@@ -539,6 +550,19 @@ export async function generateReturnBrief(
   return {
     sessionId: session.id,
     sessionKey: session.sessionKey,
+    checkpointReference: resolvedCheckpoint
+        ? {
+          checkpointId: resolvedCheckpoint.record.id,
+          strategyRoomSessionId: resolvedCheckpoint.payload.strategyRoomSessionId ?? session.strategyRoomSessionId ?? session.sessionKey,
+          lookupMode: "CHECKPOINT_ID",
+          available: true,
+        }
+      : {
+          checkpointId: null,
+          strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+          lookupMode: "STRATEGY_ROOM_SESSION",
+          available: false,
+        },
     generatedAt: new Date().toISOString(),
     trigger,
     opening,

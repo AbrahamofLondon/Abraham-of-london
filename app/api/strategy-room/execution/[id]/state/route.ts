@@ -19,6 +19,7 @@ import { evaluateDecision } from "@/lib/decision/kernel";
 import { simulateAction } from "@/lib/decision/simulation-engine";
 import { analyzeContagionRisk, simulateInterventionImpact } from "@/lib/alignment/governance-logic";
 import { SIGNALS } from "@/lib/diagnostics/signals";
+import { resolveCheckpointForResponse } from "@/lib/product/checkpoint-service";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -328,6 +329,20 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
       } : undefined,
     });
 
+    const checkpoint = await resolveCheckpointForResponse({
+      strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+      email: session.email,
+    });
+    const checkpointPayload = checkpoint?.payload;
+    const latestResponse = checkpointPayload?.responses?.at(-1) ?? checkpointPayload?.response ?? null;
+    const checkpointStatus = latestResponse
+      ? "RESPONDED"
+      : checkpointPayload?.dueAt && new Date(checkpointPayload.dueAt).getTime() < Date.now()
+        ? "OVERDUE"
+        : checkpointPayload?.dueAt
+          ? "DUE"
+          : "SCHEDULED";
+
     return NextResponse.json({
       ok: true,
       decisionSurface,
@@ -354,6 +369,21 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
         interventionUrgency: transition.newState === "ESCALATED" || contagionMap[0]?.riskLevel === "HIGH" ? "HIGH" : consequence.score >= 40 ? "MEDIUM" : "LOW",
         simulation: governanceImpact,
       },
+      checkpoint: checkpoint
+        ? {
+            checkpointId: checkpoint.record.id,
+            strategyRoomSessionId: checkpointPayload?.strategyRoomSessionId ?? session.strategyRoomSessionId ?? session.sessionKey,
+            sourceSurface: checkpointPayload?.sourceSurface ?? "STRATEGY_ROOM",
+            sourceLabel: checkpointPayload?.sourceLabel ?? "Strategy Room: execution state",
+            evidencePosture: checkpointPayload?.evidencePosture ?? "SYSTEM_INFERRED",
+            commandTitle: checkpointPayload?.commandTitle ?? "Strategy Room checkpoint",
+            verificationQuestion: checkpointPayload?.verificationQuestion ?? "What happened?",
+            dueAt: checkpointPayload?.dueAt ?? null,
+            status: checkpointStatus,
+            responseStatus: latestResponse?.status ?? null,
+            respondedAt: latestResponse?.respondedAt ?? null,
+          }
+        : null,
       actionSimulations,
       directive: transition.directive,
       triggers: allTriggers,

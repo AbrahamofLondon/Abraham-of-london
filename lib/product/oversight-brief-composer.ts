@@ -224,10 +224,10 @@ export async function composeOversightBrief(input: {
   if (checkpointSignalCount > 0) {
     signals.push({
       id: "efficacy:checkpoint-attention",
-      type: "CHECKPOINT_OVERDUE" as any,
+      type: "CHECKPOINT_OVERDUE",
       severity: checkpointSignalCount >= 3 ? "HIGH" : "MEDIUM",
       title: `${checkpointSignalCount} checkpoint${checkpointSignalCount === 1 ? "" : "s"} require${checkpointSignalCount === 1 ? "s" : ""} attention`,
-      explanation: `The efficacy checkpoint system has detected ${checkpointSignalCount} overdue, blocked, or abandoned checkpoint${checkpointSignalCount === 1 ? "" : "s"} that should be reviewed in this oversight cycle.`,
+      explanation: `The efficacy checkpoint system has detected ${checkpointSignalCount} checkpoint${checkpointSignalCount === 1 ? "" : "s"} that are overdue, user-reported blocked, abandoned, or still awaiting response.`,
       recommendedAction: "Review checkpoint outcomes in Decision Centre before approving this cycle.",
       createdAt: new Date().toISOString(),
     });

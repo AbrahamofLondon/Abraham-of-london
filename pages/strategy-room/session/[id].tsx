@@ -187,6 +187,19 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
     directive: string | null;
     avoidancePattern: string | null;
     escalationTriggers: Array<{ triggerType: string; message: string }>;
+    checkpoint: null | {
+      checkpointId: string;
+      strategyRoomSessionId: string;
+      sourceSurface: string;
+      sourceLabel: string;
+      evidencePosture: string;
+      commandTitle: string;
+      verificationQuestion: string;
+      dueAt: string | null;
+      status: string;
+      responseStatus: string | null;
+      respondedAt: string | null;
+    };
   }>({
     systemState: initial?.status ?? null,
     consequenceScore: null,
@@ -196,6 +209,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
     directive: null,
     avoidancePattern: null,
     escalationTriggers: [],
+    checkpoint: null,
   });
 
   // Load execution state on mount from the state API
@@ -222,6 +236,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
           directive: data.directive ?? prev.directive,
           avoidancePattern: data.repeatedPatternLabel ? `Decision avoidance detected (${data.avoidanceCount}x)` : null,
           escalationTriggers: data.triggers ?? [],
+          checkpoint: data.checkpoint ?? null,
         }));
       })
       .catch(() => {});
@@ -418,6 +433,38 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
               </div>
             );
           })()}
+
+          {executionState.checkpoint && (
+            <div style={{ borderLeft: "2px solid rgba(255,255,255,0.18)", backgroundColor: "rgba(255,255,255,0.02)", padding: "14px 18px", marginBottom: "12px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)" }}>
+                Checkpoint governance
+              </p>
+              <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>
+                {executionState.checkpoint.commandTitle}
+              </p>
+              <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.52)", marginTop: "6px" }}>
+                {executionState.checkpoint.verificationQuestion}
+              </p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: executionState.checkpoint.status === "OVERDUE" ? "rgba(252,165,165,0.55)" : executionState.checkpoint.status === "RESPONDED" ? "rgba(110,231,183,0.55)" : "rgba(201,169,110,0.55)", marginTop: "8px" }}>
+                {executionState.checkpoint.status === "RESPONDED"
+                  ? `Responded${executionState.checkpoint.respondedAt ? ` · ${new Date(executionState.checkpoint.respondedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}`
+                  : `${executionState.checkpoint.status} · ${executionState.checkpoint.dueAt ? `Due ${new Date(executionState.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : "No due date"}`}
+              </p>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginTop: "6px" }}>
+                Source: {executionState.checkpoint.sourceLabel} · Evidence posture: {executionState.checkpoint.evidencePosture.replace(/_/g, " ").toLowerCase()}
+              </p>
+              {(executionState.checkpoint.status !== "RESPONDED" || executionState.checkpoint.responseStatus === "BLOCKED") && (
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "10px" }}>
+                  <Link href="/decision-centre" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none" }}>
+                    Respond in Decision Centre
+                  </Link>
+                  <Link href={`/briefing/return/${session.sessionKey}`} style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none" }}>
+                    Use Return Brief response
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Return brief interruption (if available) ── */}
           <ReturnBriefInterruptionBar sessionKey={session.sessionKey} />

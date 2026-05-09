@@ -1,13 +1,12 @@
 // pages/consulting/index.tsx
-// Design: Institutional Monumentalism — matches platform design system
-// All amber-400/amber-500 replaced with #C9A96E softGold
-// All rounded-full badges replaced with sharp platform pills
-// RailLabel/RailDivider updated to platform Eyebrow/GoldRule
-// bg-black replaced with canonical tokens
-// engagement cards use platform sharp panel system
+// Design: Institutional Monumentalism — governed escalation surface
+// This page is the human counsel entry point. It inherits system evidence
+// when available and shows escalation paths when the system detects
+// conditions that exceed what it can model.
+// Connected to: Strategy Room enforcement, evidence spine, checkpoint system
 
 import * as React from "react";
-import type { NextPage } from "next";
+import type { NextPage, GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -32,11 +31,21 @@ import {
   Gavel,
   Radar,
   Layers,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import {
+  convertPurposeAlignmentToGovernedMemory,
+} from "@/lib/alignment/evidence-loader";
+import {
+  convertFinancialExposureToGovernedMemory,
+} from "@/lib/product/financial-exposure-persistence";
+import { resolvePageAccess } from "@/lib/access/server";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -234,8 +243,64 @@ function Atmosphere() {
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ConsultingPage: NextPage = () => {
+type ConsultingPageProps = {
+  paEvidence?: Record<string, unknown> | null;
+  feEvidence?: Record<string, unknown> | null;
+  hasActiveCheckpoints?: boolean;
+  checkpointCount?: number;
+  escalationLevel?: number;
+};
+
+const ConsultingPage: NextPage<ConsultingPageProps> = (props) => {
   const reduceMotion = useReducedMotion();
+  const {
+    paEvidence: paBlock,
+    feEvidence: feBlock,
+    hasActiveCheckpoints,
+    checkpointCount,
+    escalationLevel,
+  } = props;
+
+  // ── Convert evidence to governed memory items ──
+  const paMemory = React.useMemo(() => {
+    if (!paBlock) return [];
+    return convertPurposeAlignmentToGovernedMemory({
+      available: true,
+      sourceSurface: "PURPOSE_ALIGNMENT",
+      assessedAt: (paBlock as any).assessedAt ?? null,
+      schemaVersion: null,
+      profile: (paBlock as any).profile ?? null,
+      compositeScore: (paBlock as any).compositeScore ?? null,
+      strongestDomain: (paBlock as any).strongestDomain ?? null,
+      weakestDomain: (paBlock as any).weakestDomain ?? null,
+      competingObligation: (paBlock as any).competingObligation ?? null,
+      consequence: (paBlock as any).consequence ?? null,
+      institutionalConsequence: (paBlock as any).institutionalConsequence ?? null,
+      primaryPattern: (paBlock as any).primaryPattern ?? null,
+      patternConsequence: (paBlock as any).patternConsequence ?? null,
+      contradictions: (paBlock as any).contradictions ?? [],
+      domainScores: (paBlock as any).domainScores ?? [],
+      firstAction: (paBlock as any).firstAction ?? null,
+      corrections: [],
+      assessmentId: (paBlock as any).assessmentId ?? null,
+    });
+  }, [paBlock]);
+
+  const feMemory = React.useMemo(() => {
+    if (!feBlock) return [];
+    return convertFinancialExposureToGovernedMemory({
+      userCostOfDelayText: (feBlock as any).userCostOfDelayText ?? null,
+      estimatedFinancialExposure: (feBlock as any).estimatedFinancialExposure ?? null,
+      exposureBand: (feBlock as any).exposureBand ?? null,
+      exposureBasis: (feBlock as any).exposureBasis ?? null,
+      computedAt: (feBlock as any).computedAt ?? "",
+      sourceSurface: (feBlock as any).sourceSurface ?? "unknown",
+      schemaVersion: (feBlock as any).schemaVersion ?? "1.0.0",
+    });
+  }, [feBlock]);
+
+  const hasEvidence = paMemory.length > 0 || feMemory.length > 0;
+  const mergedMemory = [...paMemory, ...feMemory];
 
   return (
     <Layout
@@ -432,6 +497,36 @@ const ConsultingPage: NextPage = () => {
             </div>
           </div>
         </section>
+
+        {/* ── EVIDENCE CARRY-FORWARD ── */}
+        {hasEvidence && (
+          <section style={{ backgroundColor: BASE, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+            <div className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
+              <GovernanceEvidenceCarryForward
+                title="System evidence carried forward"
+                intro="The system has detected the following conditions from your diagnostic history. These inform the counsel engagement."
+                items={mergedMemory}
+                variant="entry"
+              />
+              {hasActiveCheckpoints && (
+                <div className="mt-4 flex items-center gap-3" style={{ padding: "0.75rem 1rem", border: "1px solid rgba(252,165,165,0.15)", backgroundColor: "rgba(252,165,165,0.03)" }}>
+                  <Clock style={{ width: "14px", height: "14px", color: "rgba(252,165,165,0.50)", flexShrink: 0 }} />
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
+                    {checkpointCount} checkpoint{checkpointCount !== 1 ? "s" : ""} require{checkpointCount === 1 ? "s" : ""} attention — unresolved checkpoints may affect counsel readiness
+                  </span>
+                </div>
+              )}
+              {escalationLevel !== undefined && escalationLevel > 0 && (
+                <div className="mt-3 flex items-center gap-3" style={{ padding: "0.75rem 1rem", border: "1px solid rgba(201,169,110,0.15)", backgroundColor: "rgba(201,169,110,0.03)" }}>
+                  <AlertTriangle style={{ width: "14px", height: "14px", color: `${GOLD}70`, flexShrink: 0 }} />
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                    Escalation level {escalationLevel} — the system recommends governed counsel review
+                  </span>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ── MANDATE ───────────────────────────────────────────────────── */}
         <section className="relative py-24" style={{ backgroundColor: BASE }}>
@@ -1109,3 +1204,71 @@ const ConsultingPage: NextPage = () => {
 };
 
 export default ConsultingPage;
+
+export const getServerSideProps: GetServerSideProps<ConsultingPageProps> = async (ctx) => {
+  const props: ConsultingPageProps = {
+    paEvidence: null,
+    feEvidence: null,
+    hasActiveCheckpoints: false,
+    checkpointCount: 0,
+    escalationLevel: 0,
+  };
+
+  try {
+    const { session, access } = await resolvePageAccess(ctx);
+    if (!access.permissions.isAuthenticated || !session?.user?.email) {
+      return { props };
+    }
+
+    const email = session.user.email;
+
+    // Load Purpose Alignment evidence
+    try {
+      const { loadPurposeAlignmentEvidence } = await import("@/lib/alignment/evidence-loader");
+      const paEvidence = await loadPurposeAlignmentEvidence({ email });
+      if (paEvidence.available) {
+        props.paEvidence = paEvidence as unknown as Record<string, unknown>;
+      }
+    } catch { /* best-effort */ }
+
+    // Load financial exposure evidence
+    try {
+      const { loadLatestFinancialExposure } = await import("@/lib/product/financial-exposure-persistence");
+      const feEvidence = await loadLatestFinancialExposure({ email });
+      if (feEvidence) {
+        props.feEvidence = feEvidence as unknown as Record<string, unknown>;
+      }
+    } catch { /* best-effort */ }
+
+    // Load checkpoint data
+    try {
+      const { loadDueCheckpointsForUser } = await import("@/lib/product/checkpoint-service");
+      const checkpoints = await loadDueCheckpointsForUser({ email });
+      const active = checkpoints.filter((c) => c.status === "OVERDUE" || c.status === "DUE");
+      props.hasActiveCheckpoints = active.length > 0;
+      props.checkpointCount = active.length;
+    } catch { /* best-effort */ }
+
+    // Load enforcement state for escalation level
+    try {
+      const { prisma } = await import("@/lib/prisma");
+      const latestJourney = await (prisma as any).diagnosticJourney?.findFirst?.({
+        where: { email: email.toLowerCase() },
+        orderBy: { updatedAt: "desc" },
+        select: { escalationHistory: true },
+      });
+      if (latestJourney?.escalationHistory) {
+        const history = Array.isArray(latestJourney.escalationHistory)
+          ? latestJourney.escalationHistory
+          : typeof latestJourney.escalationHistory === "string"
+            ? JSON.parse(latestJourney.escalationHistory)
+            : [];
+        props.escalationLevel = history.length;
+      }
+    } catch { /* best-effort */ }
+
+    return { props };
+  } catch {
+    return { props };
+  }
+};

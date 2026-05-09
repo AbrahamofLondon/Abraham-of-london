@@ -3,6 +3,8 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { recommendNextInstrument } from "@/lib/commercial/recommendation-engine";
+import { ProductRecommendationCard } from "@/components/commercial/ProductRecommendationCard";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
 import { trackHesitation, trackScrollDepth } from "@/lib/analytics/hesitation";
@@ -565,23 +567,28 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               )}
 
-              {/* SECTION 6: NEXT ROUTE — single primary CTA */}
+              {/* SECTION 6: NEXT INSTRUMENT — from recommendation engine */}
               <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", marginBottom: "1rem" }}>
                   {an?.cta ?? "Your decision pattern is now on record. The next step determines whether this becomes a structural correction or a repeated pattern."}
                 </p>
-                <p style={{ fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.35)", marginBottom: "0.75rem" }}>
-                  {result.condition === "authority" || result.condition === "definition"
-                    ? "This case may benefit from a deeper diagnostic to test whether the authority gap or definition problem is personal or structural."
-                    : "This case may qualify for Executive Reporting if the decision affects money, staff, reputation, or board-level governance."}
-                </p>
-                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                  <Link href={result.condition === "authority" || result.condition === "definition" ? "/diagnostics/purpose-alignment" : "/diagnostics/executive-reporting"} style={{ padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}12`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                    {result.condition === "authority" || result.condition === "definition"
-                      ? "Test the personal constraint"
-                      : "Run Executive Report"}
-                    {" "}<ArrowRight style={{ width: 10, height: 10, display: "inline", marginLeft: 4 }} />
-                  </Link>
+                {(() => {
+                  const rec = recommendNextInstrument({
+                    sourceSurface: "fast_diagnostic",
+                    condition: result.condition,
+                    authorityGap: result.condition === "authority",
+                    ownershipGap: result.condition === "authority" || /(everyone|the team|shared|unclear)/i.test(answers.claimedOwner || ""),
+                    interventionUnclear: result.condition === "definition",
+                    consequenceHigh: result.signalStrength === "high",
+                    executionBlocked: result.condition === "execution",
+                    evidenceInsufficient: result.signalStrength === "low",
+                    preCommitmentMissing: !committed,
+                  });
+                  return rec ? (
+                    <ProductRecommendationCard recommendation={rec} variant="dark" />
+                  ) : null;
+                })()}
+                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem" }}>
                   <Link href="/decision-centre" style={{ padding: "14px 28px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
                     Decision Centre
                   </Link>

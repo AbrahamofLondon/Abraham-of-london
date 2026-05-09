@@ -21,6 +21,8 @@ import {
   requireMethod,
 } from "@/lib/server/security/app-route-guards";
 import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
+import { buildStrategyRoomCommand } from "@/lib/product/efficacy-contract";
+import { createCheckpointForCommand } from "@/lib/product/checkpoint-service";
 
 type RouteContext = { params: Promise<{ id: string }> };
 const postSchema = z.object({
@@ -65,6 +67,33 @@ async function findInactiveRetainerForDecision(decisionObjectId: string) {
       contract: { status: { not: "ACTIVE" } },
     },
     include: { contract: true },
+  });
+}
+
+async function syncStrategyRoomCheckpoint(input: {
+  sessionId: string;
+  sessionKey: string;
+  strategyRoomSessionId?: string | null;
+  sessionStatus: string;
+  email?: string | null;
+}) {
+  const decisions = await prisma.strategyDecisionLog.findMany({
+    where: { sessionId: input.sessionId },
+    select: { status: true },
+  });
+  const pendingDecisions = decisions.filter((decision) => decision.status === "pending").length;
+  const blockedDecisions = decisions.filter((decision) => decision.status === "blocked").length;
+  const executedDecisions = decisions.filter((decision) => decision.status === "executed").length;
+  const command = buildStrategyRoomCommand({
+    sessionStatus: input.sessionStatus,
+    pendingDecisions,
+    blockedDecisions,
+    executedDecisions,
+  });
+  return createCheckpointForCommand({
+    command,
+    email: input.email ?? undefined,
+    strategyRoomSessionId: input.strategyRoomSessionId ?? input.sessionKey,
   });
 }
 
@@ -281,6 +310,14 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
       }).catch(() => {});
     }
 
+    const checkpoint = await syncStrategyRoomCheckpoint({
+      sessionId,
+      sessionKey: session.sessionKey,
+      strategyRoomSessionId: session.strategyRoomSessionId,
+      sessionStatus: transition.newState,
+      email: session.email,
+    });
+
     const decisionSurface = buildDecisionSurfacePayload({
       decisionId: decisionObjectId,
       contradictions: packet.nodes
@@ -310,6 +347,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     return NextResponse.json({
       ok: true,
       decision: log,
+      checkpointId: checkpoint?.checkpointId ?? null,
       decisionSurface,
       decisionSurfacePayload: decisionSurface,
       systemState: transition.newState,
@@ -485,6 +523,16 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       }).catch(() => {});
     }
 
+    const checkpoint = session
+      ? await syncStrategyRoomCheckpoint({
+          sessionId,
+          sessionKey: session.sessionKey,
+          strategyRoomSessionId: session.strategyRoomSessionId,
+          sessionStatus: transition.newState,
+          email: session.email,
+        })
+      : null;
+
     const decisionSurface = buildDecisionSurfacePayload({
       decisionId: log.decisionObjectId,
       contradictions: session
@@ -522,6 +570,7 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
     return NextResponse.json({
       ok: true,
       decision: log,
+      checkpointId: checkpoint?.checkpointId ?? null,
       decisionSurface,
       decisionSurfacePayload: decisionSurface,
       systemState: transition.newState,

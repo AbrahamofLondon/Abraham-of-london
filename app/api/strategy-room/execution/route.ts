@@ -17,6 +17,8 @@ import {
 import { assertStrategyRoomAccess, authorizeStrategyRoomEntry } from "@/lib/server/strategy-room/access.server";
 import { findLatestStrategyExecutionRecord } from "@/lib/strategy-room/execution-record";
 import { evaluateStrategyRoomAdmission } from "@/lib/strategy-room/admission";
+import { buildStrategyRoomCommand } from "@/lib/product/efficacy-contract";
+import { createCheckpointForCommand } from "@/lib/product/checkpoint-service";
 
 const postSchema = z.object({
   strategyRoomSessionId: z.string().trim().max(128).optional().nullable(),
@@ -149,6 +151,62 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const existingSession = strategyRoomSessionId
+      ? await prisma.strategyRoomExecutionSession.findFirst({
+          where: {
+            strategyRoomSessionId,
+            ...(email ? { email } : {}),
+          },
+          orderBy: { createdAt: "desc" },
+        })
+      : null;
+
+    if (existingSession) {
+      const existingDecisionCounts = await prisma.strategyDecisionLog.groupBy({
+        by: ["status"],
+        where: { sessionId: existingSession.id },
+        _count: { status: true },
+      });
+      const command = buildStrategyRoomCommand({
+        sessionStatus: existingSession.status,
+        pendingDecisions: existingDecisionCounts.find((entry) => entry.status === "pending")?._count.status ?? 0,
+        blockedDecisions: existingDecisionCounts.find((entry) => entry.status === "blocked")?._count.status ?? 0,
+        executedDecisions: existingDecisionCounts.find((entry) => entry.status === "executed")?._count.status ?? 0,
+      });
+      const checkpoint = await createCheckpointForCommand({
+        command,
+        email: email ?? undefined,
+        strategyRoomSessionId: strategyRoomSessionId ?? existingSession.sessionKey,
+      });
+      const decisionSurface = buildDecisionSurfacePayload({
+        decisionId: latestDecisionObject.decisionKey,
+        contradictions: latestContradictions.length
+          ? latestContradictions.map((node) => ({
+              label: node.label,
+              summary: node.summary,
+              severity: node.severity,
+              confidence: node.confidence,
+              sourceStage: node.sourceStage,
+            }))
+          : [insufficientEvidenceContradiction({
+              id: `strategy-room:${existingSession.id}:no-contradictions`,
+              sourceStage: "strategy_room",
+              summary: "Execution session has a decision object but no persisted contradiction node.",
+            })],
+        enforcementState: "ACTIVE",
+        consequenceScore: 70,
+      });
+      return NextResponse.json({
+        ok: true,
+        id: existingSession.id,
+        sessionKey: existingSession.sessionKey,
+        checkpointId: checkpoint?.checkpointId ?? null,
+        decisionSurface,
+        decisionSurfacePayload: decisionSurface,
+        reused: true,
+      });
+    }
+
     const session = await prisma.strategyRoomExecutionSession.create({
       data: {
         sessionKey: `exec_${randomUUID().replace(/-/g, "").slice(0, 16)}`,
@@ -235,7 +293,26 @@ export async function POST(req: NextRequest) {
       consequenceScore: 70,
     });
 
-    return NextResponse.json({ ok: true, id: session.id, sessionKey: session.sessionKey, decisionSurface, decisionSurfacePayload: decisionSurface });
+    const command = buildStrategyRoomCommand({
+      sessionStatus: session.status,
+      pendingDecisions: 0,
+      blockedDecisions: 0,
+      executedDecisions: 0,
+    });
+    const checkpoint = await createCheckpointForCommand({
+      command,
+      email: email ?? undefined,
+      strategyRoomSessionId: strategyRoomSessionId ?? session.sessionKey,
+    });
+
+    return NextResponse.json({
+      ok: true,
+      id: session.id,
+      sessionKey: session.sessionKey,
+      checkpointId: checkpoint?.checkpointId ?? null,
+      decisionSurface,
+      decisionSurfacePayload: decisionSurface,
+    });
   } catch (err) {
     console.error("[execution-session-create]", err);
     return NextResponse.json(

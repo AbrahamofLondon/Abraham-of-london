@@ -372,7 +372,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     category: "reporting_premium",
     accessType: "one_time",
     duration: "lifetime",
-    active: true,
+    active: false, // Deactivated — duplicate of executive_reporting at same price. Use executive_reporting as canonical.
     successPath: "/diagnostics/executive-reporting/run",
     cancelPath: "/diagnostics/executive-reporting",
     cookieName: "aol_paid_executive_reporting",

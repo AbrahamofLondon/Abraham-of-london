@@ -472,6 +472,49 @@ function AuthRequired() {
   );
 }
 
+function CheckpointSection({
+  title,
+  items,
+}: {
+  title: string;
+  items: DecisionCentreResponse["checkpoints"]["requiresResponse"];
+}) {
+  return (
+    <div style={{ border: `1px solid rgba(201,169,110,0.20)`, backgroundColor: "rgba(201,169,110,0.03)", padding: "16px 20px", marginBottom: "16px" }}>
+      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "12px" }}>
+        {title}
+      </p>
+      {items.map((cp) => {
+        const responded = cp.status === "RESPONDED";
+        const responseColor = cp.responseStatus === "COMPLETED"
+          ? "rgba(110,231,183,0.55)"
+          : cp.responseStatus === "BLOCKED" || cp.responseStatus === "ABANDONED"
+            ? "rgba(252,165,165,0.55)"
+            : "rgba(201,169,110,0.55)";
+        return (
+          <div key={cp.id} style={{ borderLeft: `2px solid ${cp.status === "OVERDUE" ? "rgba(252,165,165,0.40)" : responded ? "rgba(110,231,183,0.30)" : "rgba(201,169,110,0.30)"}`, paddingLeft: "12px", marginBottom: "10px" }}>
+            <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>{cp.commandTitle}</p>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginTop: "4px" }}>
+              Source: {cp.sourceLabel} · Surface: {cp.sourceSurface.replace(/_/g, " ").toLowerCase()} · Evidence posture: {cp.evidencePosture.replace(/_/g, " ").toLowerCase()}
+            </p>
+            <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>{cp.verificationQuestion}</p>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: responded ? responseColor : cp.status === "OVERDUE" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.20)", marginTop: "6px" }}>
+              {responded
+                ? `Response: ${(cp.responseStatus ?? "RESPONDED").replace(/_/g, " ")} · ${cp.respondedAt ? new Date(cp.respondedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Date unavailable"}`
+                : `${cp.status} · Due ${new Date(cp.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
+            </p>
+            {cp.evidenceNote && (
+              <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.35)", marginTop: "4px", fontStyle: "italic" }}>
+                &ldquo;{cp.evidenceNote.slice(0, 150)}&rdquo;
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -534,42 +577,18 @@ export default function DecisionCentrePage() {
           {/* Empty state */}
           {!loading && data && data.cases.length === 0 && <EmptyState />}
 
-          {/* Due Checkpoints */}
-          {!loading && data && (data as any).dueCheckpoints?.length > 0 && (
-            <div style={{ border: `1px solid rgba(201,169,110,0.20)`, backgroundColor: "rgba(201,169,110,0.03)", padding: "16px 20px", marginBottom: "16px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "12px" }}>
-                Requires your response
-              </p>
-              {((data as any).dueCheckpoints as Array<{ id: string; commandTitle: string; verificationQuestion: string; dueAt: string; status: string; responseStatus?: string | null; respondedAt?: string | null; evidenceNote?: string | null }>).map((cp) => (
-                <div key={cp.id} style={{ borderLeft: `2px solid ${cp.status === "OVERDUE" ? "rgba(252,165,165,0.40)" : cp.status === "RESPONDED" ? "rgba(110,231,183,0.30)" : "rgba(201,169,110,0.30)"}`, paddingLeft: "12px", marginBottom: "10px" }}>
-                  <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>{cp.commandTitle}</p>
-                  {cp.status === "RESPONDED" && cp.responseStatus ? (
-                    <div>
-                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: cp.responseStatus === "COMPLETED" ? "rgba(110,231,183,0.55)" : cp.responseStatus === "BLOCKED" ? "rgba(252,165,165,0.55)" : "rgba(201,169,110,0.55)", marginTop: "4px" }}>
-                        Response: {cp.responseStatus.replace(/_/g, " ")}
-                      </p>
-                      {cp.evidenceNote && (
-                        <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.35)", marginTop: "2px", fontStyle: "italic" }}>
-                          &ldquo;{cp.evidenceNote.slice(0, 150)}&rdquo;
-                        </p>
-                      )}
-                      {cp.respondedAt && (
-                        <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.15)", marginTop: "2px" }}>
-                          Responded: {new Date(cp.respondedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div>
-                      <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.40)", marginTop: "2px" }}>{cp.verificationQuestion}</p>
-                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: cp.status === "OVERDUE" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.20)", marginTop: "4px" }}>
-                        {cp.status} &middot; Due: {new Date(cp.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+          {!loading && data && data.checkpoints.requiresResponse.length > 0 && (
+            <CheckpointSection
+              title="Requires response"
+              items={data.checkpoints.requiresResponse}
+            />
+          )}
+
+          {!loading && data && data.checkpoints.recentResponses.length > 0 && (
+            <CheckpointSection
+              title="Recent checkpoint responses"
+              items={data.checkpoints.recentResponses}
+            />
           )}
 
           {/* Cases */}

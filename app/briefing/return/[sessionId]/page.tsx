@@ -28,6 +28,12 @@ import {
 type ReturnBriefData = {
   sessionId: string;
   sessionKey: string;
+  checkpointReference?: {
+    checkpointId?: string | null;
+    strategyRoomSessionId?: string | null;
+    lookupMode: "CHECKPOINT_ID" | "STRATEGY_ROOM_SESSION";
+    available: boolean;
+  } | null;
   generatedAt: string;
   trigger: string;
   opening: string;
@@ -608,7 +614,7 @@ export default function ReturnBriefPage() {
         </div>
 
         {/* ═══ 7. CHECKPOINT RESPONSE ═══ */}
-        <CheckpointResponsePanel sessionId={brief.sessionKey} />
+        <CheckpointResponsePanel checkpointReference={brief.checkpointReference ?? { checkpointId: null, strategyRoomSessionId: brief.sessionKey, lookupMode: "STRATEGY_ROOM_SESSION", available: false }} />
 
         {/* ═══ CTA ═══ */}
         <Link
@@ -638,22 +644,35 @@ export default function ReturnBriefPage() {
   );
 }
 
-function CheckpointResponsePanel({ sessionId }: { sessionId: string }) {
+function CheckpointResponsePanel({
+  checkpointReference,
+}: {
+  checkpointReference: {
+    checkpointId?: string | null;
+    strategyRoomSessionId?: string | null;
+    lookupMode: "CHECKPOINT_ID" | "STRATEGY_ROOM_SESSION";
+    available: boolean;
+  };
+}) {
   const [status, setStatus] = React.useState<string | null>(null);
   const [note, setNote] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
 
   const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
   async function respond(responseStatus: string) {
     setSubmitting(true);
+    setSubmitError(null);
     try {
-      await fetch("/api/checkpoints/respond", {
+      const response = await fetch("/api/checkpoints/respond", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          checkpointId: sessionId,
+          checkpointId: checkpointReference.checkpointId ?? undefined,
+          strategyRoomSessionId: checkpointReference.strategyRoomSessionId ?? undefined,
+          lookupMode: checkpointReference.lookupMode,
           responseStatus,
           ...(responseStatus === "BLOCKED" ? { blockerDescription: note } : {}),
           ...(responseStatus === "ABANDONED" ? { whatChanged: note } : {}),
@@ -661,8 +680,13 @@ function CheckpointResponsePanel({ sessionId }: { sessionId: string }) {
           ...(responseStatus === "DISPUTED_FINDING" ? { whatChanged: note } : {}),
         }),
       });
+      if (!response.ok) {
+        throw new Error("Checkpoint response could not be recorded.");
+      }
       setSubmitted(true);
-    } catch { /* best effort */ }
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Checkpoint response could not be recorded.");
+    }
     setSubmitting(false);
   }
 
@@ -675,6 +699,21 @@ function CheckpointResponsePanel({ sessionId }: { sessionId: string }) {
           </p>
           <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "8px" }}>
             Your response has been recorded. The system will use it to update case memory and governance signals.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!checkpointReference.available) {
+    return (
+      <div style={{ paddingBottom: "48px" }}>
+        <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "20px 24px" }}>
+          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+            No checkpoint created yet
+          </p>
+          <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "8px" }}>
+            This return brief is present, but no durable checkpoint has been created for this session yet. The system will not fabricate one here.
           </p>
         </div>
       </div>
@@ -750,6 +789,11 @@ function CheckpointResponsePanel({ sessionId }: { sessionId: string }) {
             >
               {submitting ? "Recording..." : "Record response"}
             </button>
+            {submitError && (
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)", marginTop: "10px" }}>
+                {submitError}
+              </p>
+            )}
           </div>
         );
       })()}

@@ -1116,6 +1116,7 @@ export async function POST(
         command,
         email: email || undefined,
         caseId: run.id,
+        executiveRunId: run.id,
       });
       erCheckpointId = cp?.checkpointId ?? null;
     } catch { /* best-effort */ }

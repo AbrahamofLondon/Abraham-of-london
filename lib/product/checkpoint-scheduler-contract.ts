@@ -30,6 +30,12 @@ export type CheckpointRecord = {
   email?: string;
   caseId?: string;
   sessionId?: string;
+  journeyId?: string;
+  strategyRoomSessionId?: string;
+  executiveRunId?: string;
+  commandId?: string;
+  sourceLabel?: string;
+  evidencePosture?: string;
   surface: EfficacySurface;
   actionType: EfficacyActionType;
   checkpointType: CheckpointType;
@@ -64,7 +70,12 @@ export type CreateCheckpointInput = {
 };
 
 export type RespondToCheckpointInput = {
-  checkpointId: string;
+  checkpointId?: string;
+  lookupMode?: "CHECKPOINT_ID" | "STRATEGY_ROOM_SESSION" | "CASE_ID" | "EXECUTIVE_RUN_ID" | "JOURNEY_ID";
+  strategyRoomSessionId?: string;
+  caseId?: string;
+  executiveRunId?: string;
+  journeyId?: string;
   responseStatus: CheckpointResponseStatus;
   evidenceNote?: string;
   blockerDescription?: string;

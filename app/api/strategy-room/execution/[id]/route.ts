@@ -8,6 +8,8 @@ import {
   requireMethod,
 } from "@/lib/server/security/app-route-guards";
 import { assertStrategyRoomAccess } from "@/lib/server/strategy-room/access.server";
+import { buildStrategyRoomCommand } from "@/lib/product/efficacy-contract";
+import { createCheckpointForCommand } from "@/lib/product/checkpoint-service";
 
 type RouteContext = { params: Promise<{ id: string }> };
 const patchSchema = z.object({
@@ -114,7 +116,27 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       data: updateData,
     });
 
-    return NextResponse.json({ ok: true, session });
+    const decisionCounts = await prisma.strategyDecisionLog.groupBy({
+      by: ["status"],
+      where: { sessionId: id },
+      _count: { status: true },
+    });
+    const pendingDecisions = decisionCounts.find((entry) => entry.status === "pending")?._count.status ?? 0;
+    const blockedDecisions = decisionCounts.find((entry) => entry.status === "blocked")?._count.status ?? 0;
+    const executedDecisions = decisionCounts.find((entry) => entry.status === "executed")?._count.status ?? 0;
+    const command = buildStrategyRoomCommand({
+      sessionStatus: session.status,
+      pendingDecisions,
+      blockedDecisions,
+      executedDecisions,
+    });
+    const checkpoint = await createCheckpointForCommand({
+      command,
+      email: session.email ?? undefined,
+      strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+    });
+
+    return NextResponse.json({ ok: true, session, checkpointId: checkpoint?.checkpointId ?? null });
   } catch (err) {
     console.error("[execution-session-update]", err);
     return NextResponse.json(

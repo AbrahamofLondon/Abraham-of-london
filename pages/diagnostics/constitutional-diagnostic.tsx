@@ -84,6 +84,8 @@ export default function ConstitutionalDiagnosticPage() {
     return () => window.removeEventListener("beforeunload", handleUnload);
   }, []);
 
+  const executiveBlocked = router.isReady && router.query.executive === "blocked";
+
   React.useEffect(() => {
     if (!router.isReady) return;
     const queryOrigin = router.query.origin === "purpose_alignment";
@@ -99,6 +101,74 @@ export default function ConstitutionalDiagnosticPage() {
       source: queryOrigin ? "query" : "session",
     });
   }, [router.isReady, router.query.origin]);
+
+  // ── EXECUTIVE BLOCKED STATE ──
+  // When a user without access tries to visit Executive Reporting, they are
+  // redirected here with ?executive=blocked. Show a premium upsell instead of
+  // the normal assessment flow.
+  if (executiveBlocked) {
+    return (
+      <Layout
+        title="Executive Reporting | Abraham of London"
+        description="Executive Reporting requires completed diagnostic evidence or direct sponsorship."
+        canonicalUrl="/diagnostics/constitutional-diagnostic"
+        fullWidth
+        headerTransparent
+      >
+        <Head><meta name="robots" content="noindex,nofollow" /></Head>
+        <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
+          <div className="mx-auto max-w-3xl px-6 py-32">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                Executive Reporting · Premium
+              </span>
+            </div>
+
+            <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: 1.05, letterSpacing: "-0.03em", color: "rgba(255,255,255,0.92)", maxWidth: "18ch" }}>
+              Executive Reporting requires completed diagnostic evidence.
+            </h1>
+
+            <p style={{ marginTop: "1.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.48)", maxWidth: "48ch" }}>
+              The system does not generate executive briefs from weak or incomplete evidence. To access Executive Reporting, complete the diagnostic ladder or enter through a sponsored or monitoring path.
+            </p>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "1.25rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.5rem" }}>
+                  Complete the ladder
+                </div>
+                <p style={{ fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
+                  Complete the Constitutional Diagnostic, Team Assessment, and Enterprise Assessment to build sufficient evidence for an executive brief.
+                </p>
+                <Link href="/diagnostics" style={{ display: "inline-block", marginTop: "0.85rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                  View diagnostics ladder
+                </Link>
+              </div>
+
+              <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+                  Sponsored or monitoring access
+                </div>
+                <p style={{ fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
+                  If you have a sponsorship token, monitoring account ID, or direct access link, use the original link you were given.
+                </p>
+                <Link href="/diagnostics/executive-reporting" style={{ display: "inline-block", marginTop: "0.85rem", padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                  Try again
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-10" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+                Executive Reporting is the flagship product. It prices consequence, orders priorities, and produces a governed brief. The system will not generate one from weak or incomplete evidence — that protects the integrity of every report issued.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout

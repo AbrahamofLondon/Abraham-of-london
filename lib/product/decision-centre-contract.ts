@@ -12,6 +12,7 @@ import type { LivingCase } from "@/lib/product/living-case-store";
 import type { EvidenceTier } from "@/lib/product/living-intelligence-spine";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
 import type { GovernedMemoryItem } from "@/lib/product/governed-memory-contract";
+import type { EfficacySurface, CheckpointResponseStatus } from "@/lib/product/efficacy-contract";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COGNITIVE STATE
@@ -106,6 +107,20 @@ export type ReturnBriefReference = {
   outcomeClassification?: string | null;
 };
 
+export type DecisionCentreCheckpointItem = {
+  id: string;
+  sourceSurface: EfficacySurface;
+  sourceLabel: string;
+  evidencePosture: string;
+  commandTitle: string;
+  verificationQuestion: string;
+  dueAt: string;
+  status: string;
+  responseStatus?: CheckpointResponseStatus | null;
+  respondedAt?: string | null;
+  evidenceNote?: string | null;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION CENTRE CASE — the primary card model
 // ─────────────────────────────────────────────────────────────────────────────
@@ -179,6 +194,10 @@ export type DecisionCentreCase = {
 export type DecisionCentreResponse = {
   ok: true;
   cases: DecisionCentreCase[];
+  checkpoints: {
+    requiresResponse: DecisionCentreCheckpointItem[];
+    recentResponses: DecisionCentreCheckpointItem[];
+  };
   commercial: {
     ownedProducts: string[];
     eligibleProducts: string[];

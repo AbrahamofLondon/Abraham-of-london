@@ -241,6 +241,31 @@ export function buildStrategyRoomCommand(input: {
   blockedDecisions: number;
   executedDecisions: number;
 }): EfficacyCommand {
+  const totalDecisions = input.pendingDecisions + input.blockedDecisions + input.executedDecisions;
+
+  if (totalDecisions === 0) {
+    return {
+      id: makeId("SR", "START_ACTION"),
+      surface: "STRATEGY_ROOM",
+      actionType: "START_ACTION",
+      title: "Record the first governed move",
+      instruction: "This case has entered Strategy Room without a recorded execution move. Name the first governed action now so the system can track whether execution actually starts.",
+      whyThisMatters: "The Strategy Room cannot govern theory. It can only govern named moves, owners, and outcomes.",
+      sourceEvidence: [{
+        label: "Strategy Room: entry state",
+        sourceSurface: "STRATEGY_ROOM",
+        posture: "SYSTEM_INFERRED",
+      }],
+      checkpoint: {
+        type: "48_HOUR_ACTION",
+        dueAt: addDays(2),
+        verificationQuestion: "Have you recorded and initiated the first governed move?",
+        requiredResponseType: "STATUS_SELECT",
+      },
+      clientSafe: true,
+    };
+  }
+
   if (input.blockedDecisions > 0) {
     return {
       id: makeId("SR", "REPORT_BLOCKER"),
