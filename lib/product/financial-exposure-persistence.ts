@@ -23,6 +23,7 @@
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 import { getDiagnosticJourney } from "@/lib/diagnostics/journey-store";
 import type { GovernedMemoryItem } from "@/lib/product/governed-memory-contract";
+import { normaliseFinancialExposureSnapshot } from "@/lib/product/field-provenance-normaliser";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -359,6 +360,7 @@ export function convertFinancialExposureToGovernedMemory(
     : ("EXECUTIVE_REPORTING" as const);
 
   const items: GovernedMemoryItem[] = [];
+  const provenance = normaliseFinancialExposureSnapshot(exposure);
   const base = {
     sourceSurface: surface,
     capturedAt: exposure.computedAt,
@@ -374,6 +376,7 @@ export function convertFinancialExposureToGovernedMemory(
       summary: `Estimated financial exposure: \u00a3${exposure.estimatedFinancialExposure.toLocaleString()}${exposure.exposureBand ? ` (${exposure.exposureBand})` : ""}. This is an estimate based on diagnostic inputs and has not been independently verified.`,
       status: "ACTIVE",
       confidenceLabel: "REPORTED",
+      provenance: provenance.filter((item) => item.fieldKey === "estimatedFinancialExposure" || item.fieldKey === "exposureBand"),
     });
   }
 
@@ -385,6 +388,7 @@ export function convertFinancialExposureToGovernedMemory(
       summary: `Exposure band: ${exposure.exposureBand}. This is estimated from diagnostic inputs and has not been independently verified.`,
       status: "ACTIVE",
       confidenceLabel: "REPORTED",
+      provenance: provenance.filter((item) => item.fieldKey === "exposureBand"),
     });
   }
 
@@ -396,6 +400,7 @@ export function convertFinancialExposureToGovernedMemory(
       summary: exposure.userCostOfDelayText,
       status: "ACTIVE",
       confidenceLabel: "REPORTED",
+      provenance: provenance.filter((item) => item.fieldKey === "userCostOfDelayText"),
     });
   }
 

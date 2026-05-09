@@ -485,8 +485,8 @@ export function deriveRouteSummary(
         route: "STRATEGY_ROOM",
         title: "Strategy Room — escalation justified",
         description:
-          "This signal shows sufficient authority, consequence, and readiness to justify private strategic escalation.",
-        href: "/consulting/strategy-room",
+          "This signal shows sufficient authority, consequence, and readiness to justify governed strategic execution.",
+        href: "/strategy-room",
         cta: "Enter Strategy Room",
         tone: "emerald",
       };

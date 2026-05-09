@@ -347,6 +347,30 @@ export async function createCheckpointForCommand(input: {
       data: { responsesJson: JSON.stringify(payload) },
     });
 
+    // Launch instrumentation — server-side, best-effort
+    try {
+      await prisma.diagnosticRecord.create({
+        data: {
+          diagnosticType: "launch_event",
+          userEmail: input.email ? normalizeEmail(input.email) : undefined,
+          userId: input.userId ?? undefined,
+          status: "completed",
+          score: 0,
+          severity: "moderate",
+          verdict: "checkpoint_created",
+          responsesJson: JSON.stringify({
+            eventName: "checkpoint_created",
+            surface: "checkpoint_service",
+            checkpointId: record.id,
+            caseId: input.caseId ?? null,
+            journeyId: input.journeyId ?? null,
+            sessionId: input.strategyRoomSessionId ?? null,
+            timestamp: new Date().toISOString(),
+          }),
+        },
+      });
+    } catch { /* instrumentation must never block checkpoint creation */ }
+
     return { checkpointId: record.id };
   } catch (error) {
     console.error("[checkpoint-service] create failed:", error);
@@ -527,6 +551,28 @@ export async function recordCheckpointResponse(input: RespondToCheckpointInput &
         responsesJson: JSON.stringify(payload),
       },
     });
+
+    // Launch instrumentation — server-side, best-effort
+    try {
+      await prisma.diagnosticRecord.create({
+        data: {
+          diagnosticType: "launch_event",
+          userEmail: resolved.record.userEmail ?? undefined,
+          status: "completed",
+          score: 0,
+          severity: "moderate",
+          verdict: "checkpoint_responded",
+          responsesJson: JSON.stringify({
+            eventName: "checkpoint_responded",
+            surface: "checkpoint_service",
+            checkpointId: resolved.record.id,
+            caseId: resolved.payload.caseId ?? null,
+            sessionId: resolved.payload.strategyRoomSessionId ?? null,
+            timestamp: new Date().toISOString(),
+          }),
+        },
+      });
+    } catch { /* instrumentation must never block checkpoint response */ }
 
     return {
       checkpointId: resolved.record.id,

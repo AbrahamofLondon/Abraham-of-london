@@ -15,6 +15,7 @@
 import { getDiagnosticJourney } from "@/lib/diagnostics/journey-store";
 import type { PurposeProfileResult, AlignmentDomain } from "@/lib/alignment/types";
 import type { GovernedMemoryItem } from "@/lib/product/governed-memory-contract";
+import { normalisePurposeAlignmentEvidence } from "@/lib/product/field-provenance-normaliser";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES — Public contract for downstream consumption
@@ -290,6 +291,7 @@ export function convertPurposeAlignmentToGovernedMemory(
   if (!evidence.available) return [];
 
   const items: GovernedMemoryItem[] = [];
+  const provenance = normalisePurposeAlignmentEvidence(evidence);
   const base = {
     sourceSurface: "PURPOSE_ALIGNMENT" as const,
     capturedAt: evidence.assessedAt,
@@ -306,6 +308,7 @@ export function convertPurposeAlignmentToGovernedMemory(
       summary: `Coherence band: ${evidence.profile}${evidence.compositeScore != null ? ` (${evidence.compositeScore}%)` : ""}`,
       status: "ACTIVE",
       confidenceLabel: "CAPTURED",
+      provenance: provenance.filter((item) => item.fieldKey === "profile" || item.fieldKey === "compositeScore"),
     });
   }
 
@@ -318,6 +321,7 @@ export function convertPurposeAlignmentToGovernedMemory(
       summary: evidence.competingObligation,
       status: "ACTIVE",
       confidenceLabel: "REPORTED",
+      provenance: provenance.filter((item) => item.fieldKey === "competingObligation"),
     });
   }
 
@@ -330,6 +334,7 @@ export function convertPurposeAlignmentToGovernedMemory(
       summary: evidence.consequence,
       status: "UNRESOLVED",
       confidenceLabel: "REPORTED",
+      provenance: provenance.filter((item) => item.fieldKey === "consequence"),
     });
   }
 
@@ -342,6 +347,7 @@ export function convertPurposeAlignmentToGovernedMemory(
       summary: `${evidence.primaryPattern}${evidence.patternConsequence ? `: ${evidence.patternConsequence}` : ""}`,
       status: "ACTIVE",
       confidenceLabel: "CAPTURED",
+      provenance: provenance.filter((item) => item.fieldKey === "primaryPattern" || item.fieldKey === "patternConsequence"),
     });
   }
 
@@ -354,6 +360,7 @@ export function convertPurposeAlignmentToGovernedMemory(
       summary: `The weakest domain was ${evidence.weakestDomain}.`,
       status: "UNRESOLVED",
       confidenceLabel: "CAPTURED",
+      provenance: provenance.filter((item) => item.fieldKey === "weakestDomain"),
     });
   }
 
@@ -366,11 +373,12 @@ export function convertPurposeAlignmentToGovernedMemory(
       summary: `The strongest domain was ${evidence.strongestDomain}.`,
       status: "ACTIVE",
       confidenceLabel: "CAPTURED",
+      provenance: provenance.filter((item) => item.fieldKey === "strongestDomain"),
     });
   }
 
   // Contradictions (summarised, max 3)
-  for (const contradiction of evidence.contradictions.slice(0, 3)) {
+  for (const [index, contradiction] of evidence.contradictions.slice(0, 3).entries()) {
     items.push({
       ...base,
       id: `pa_contradiction_${contradiction.type}`,
@@ -378,6 +386,7 @@ export function convertPurposeAlignmentToGovernedMemory(
       summary: contradiction.evidence,
       status: "UNRESOLVED",
       confidenceLabel: "CAPTURED",
+      provenance: provenance.filter((item) => item.fieldKey === `contradictions.${index}`),
     });
   }
 
@@ -390,6 +399,7 @@ export function convertPurposeAlignmentToGovernedMemory(
       summary: evidence.firstAction,
       status: "ACTIVE",
       confidenceLabel: "CAPTURED",
+      provenance: provenance.filter((item) => item.fieldKey === "firstAction"),
     });
   }
 

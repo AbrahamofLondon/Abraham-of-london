@@ -40,13 +40,13 @@ function AssessmentSuccessContent() {
               <ShieldCheck className="w-8 h-8 text-[#8A6A2F]" />
             </div>
             <h1 className="text-[10px] uppercase tracking-[0.5em] text-[#8A6A2F] font-bold mb-4">
-              Commitment Verified
+              Commitment Recorded
             </h1>
             <h2 className="text-4xl md:text-5xl font-serif font-light tracking-tight mb-2">
               The Registry is <span className="italic text-zinc-400">Updated.</span>
             </h2>
             <p className="text-zinc-500 text-sm font-light max-w-xs mx-auto">
-              Your institutional resonance has been successfully synchronized.
+              Your institutional resonance record has been successfully updated.
             </p>
           </header>
 

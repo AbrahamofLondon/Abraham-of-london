@@ -11,13 +11,18 @@ import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
-import WhatChangedPanel from "@/components/living/WhatChangedPanel";
 import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
 import GovernedActionPanel from "@/components/living/GovernedActionPanel";
 import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
+import ClientIntelligenceStack from "@/components/Intelligence/user/ClientIntelligenceStack";
 import ContinuityStatement from "@/components/product/ContinuityStatement";
 import AdmissionNotice from "@/components/product/AdmissionNotice";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import {
+  formatFieldProvenanceLine,
+  type FieldProvenance,
+} from "@/lib/product/field-provenance-contract";
 import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
@@ -79,6 +84,7 @@ type ReturnBriefData = {
     failureComparison?: string;
     recurrenceStatus?: string;
     stopSignalStatus?: string;
+    provenance: FieldProvenance[];
   } | null;
   purposeAlignmentEvidence?: Record<string, unknown> | null;
   teamEvidence?: {
@@ -89,6 +95,7 @@ type ReturnBriefData = {
     respondentCount?: number;
     claimLevel?: string;
     summary: string;
+    provenance: FieldProvenance[];
   } | null;
   enterpriseEvidence?: {
     source: string;
@@ -96,12 +103,14 @@ type ReturnBriefData = {
     percentScore?: number;
     weakestDomains?: string[];
     summary: string;
+    provenance: FieldProvenance[];
   } | null;
   consequenceEvidence?: {
     financial?: string;
     reputational?: string;
     institutional?: string;
     timeline?: string;
+    provenance: FieldProvenance[];
   } | null;
   challenge: string;
   retainerTriggered: boolean;
@@ -124,6 +133,7 @@ export default function ReturnBriefPage() {
       .then((data) => {
         if (data.ok && data.briefAvailable) {
           setBrief(data.brief);
+          trackLaunch("return_brief_opened", "return_brief", { sessionId: sessionId ?? undefined });
         } else {
           setNoBrief(true);
         }
@@ -298,6 +308,12 @@ export default function ReturnBriefPage() {
                     {statement}
                   </p>
                 ))}
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
+                {formatFieldProvenanceLine(brief.evidenceCarryForward.provenance, {
+                  includeEvidencePosture: true,
+                  includeComparisonBasis: true,
+                })}
+              </p>
             </div>
           </div>
         )}
@@ -355,7 +371,9 @@ export default function ReturnBriefPage() {
                 </p>
               )}
               <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
-                Source: Team Assessment &middot; {brief.teamEvidence.respondentCount ?? 0} respondent{(brief.teamEvidence.respondentCount ?? 0) === 1 ? "" : "s"} &middot; Evidence posture: aggregated
+                {formatFieldProvenanceLine(brief.teamEvidence.provenance, {
+                  includeEvidencePosture: true,
+                })}
               </p>
             </div>
           </div>
@@ -377,7 +395,9 @@ export default function ReturnBriefPage() {
                 </p>
               )}
               <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
-                Source: Enterprise Assessment &middot; Evidence posture: system-inferred
+                {formatFieldProvenanceLine(brief.enterpriseEvidence.provenance, {
+                  includeEvidencePosture: true,
+                })}
               </p>
             </div>
           </div>
@@ -401,7 +421,9 @@ export default function ReturnBriefPage() {
                 These consequences have not been independently verified. They represent what you reported during Strategy Room intake.
               </p>
               <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "8px" }}>
-                Source: Strategy Room Stage 2 &middot; Evidence posture: user-reported
+                {formatFieldProvenanceLine(brief.consequenceEvidence.provenance, {
+                  includeEvidencePosture: true,
+                })}
               </p>
             </div>
           </div>
@@ -568,16 +590,17 @@ export default function ReturnBriefPage() {
             ]}
           />
 
-          {brief.delta && (
-            <WhatChangedPanel
-              deltas={[
-                ...(brief.delta.clarity != null ? [{ metric: "Clarity", before: null, after: String(brief.delta.clarity), direction: (Number(brief.delta.clarity) > 0 ? "improved" : Number(brief.delta.clarity) < 0 ? "deteriorated" : "stable") as "improved" | "stable" | "deteriorated" }] : []),
-                ...(brief.delta.authority != null ? [{ metric: "Authority", before: null, after: String(brief.delta.authority), direction: (Number(brief.delta.authority) > 0 ? "improved" : Number(brief.delta.authority) < 0 ? "deteriorated" : "stable") as "improved" | "stable" | "deteriorated" }] : []),
-                ...(brief.delta.readiness != null ? [{ metric: "Readiness", before: null, after: String(brief.delta.readiness), direction: (Number(brief.delta.readiness) > 0 ? "improved" : Number(brief.delta.readiness) < 0 ? "deteriorated" : "stable") as "improved" | "stable" | "deteriorated" }] : []),
-              ]}
-              newEvidence={brief.outcomeEvidence?.statements}
-            />
-          )}
+          <ClientIntelligenceStack
+            scope={{
+              strategyRoomSessionId: brief.checkpointReference?.strategyRoomSessionId ?? brief.sessionKey,
+              sourceSurface: "RETURN_BRIEF",
+              scopeLabel: "Return Brief case",
+              scopeType: "CASE",
+            }}
+            showVelocity
+            emptyTitle="No case-bound decision velocity is available for this Return Brief yet."
+            thinTitle="Decision velocity is still forming for this Return Brief."
+          />
 
           <EvidenceStrengthMeter
             level={brief.outcomeEvidence?.confidence === "governed" ? "outcome_verified" : brief.outcomeEvidence?.confidence === "directional" ? "multi_source" : "single_source"}
@@ -684,6 +707,7 @@ function CheckpointResponsePanel({
         throw new Error("Checkpoint response could not be recorded.");
       }
       setSubmitted(true);
+      trackLaunch("return_brief_response_submitted", "return_brief", { checkpointId: checkpointReference.checkpointId ?? undefined, sessionId: checkpointReference.strategyRoomSessionId ?? undefined });
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Checkpoint response could not be recorded.");
     }

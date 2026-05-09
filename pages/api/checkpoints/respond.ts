@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { recordCheckpointResponse } from "@/lib/product/checkpoint-service";
 import type { RespondToCheckpointInput } from "@/lib/product/checkpoint-scheduler-contract";
+import { createFieldProvenance } from "@/lib/product/field-provenance-contract";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -46,6 +47,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ok: true,
       checkpointId: outcome.checkpointId,
       classification: outcome.classification,
+      dataQuality: "CASE_SCOPED",
+      evidencePosture: "USER_REPORTED",
+      provenance: [
+        createFieldProvenance({
+          fieldKey: "checkpoint.responseStatus",
+          sourceSurface: "DECISION_CENTRE",
+          sourceLabel: "Checkpoint response",
+          capturedAt: new Date().toISOString(),
+          caseId: body.caseId ?? null,
+          journeyId: body.journeyId ?? null,
+          strategyRoomSessionId: body.strategyRoomSessionId ?? null,
+          executiveRunId: body.executiveRunId ?? null,
+          scopeType: "CHECKPOINT",
+          scopeId: outcome.checkpointId,
+          evidencePosture: "USER_REPORTED",
+          confidenceLabel: "REPORTED",
+        }),
+      ],
+      emptyState: null,
       message: "Checkpoint response recorded.",
     });
   } catch (error) {

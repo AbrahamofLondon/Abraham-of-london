@@ -54,7 +54,7 @@ export default function VaultPage() {
               The <span className="italic text-white/30">Vault.</span>
             </h1>
             <p className="mt-6 text-lg font-light text-white/40 leading-relaxed">
-              Proprietary artifacts, templates, and frameworks developed for the Abraham of London mandates. Available for immediate deployment.
+              Restricted artifacts, templates, and frameworks developed for Abraham of London mandates. Available for direct use where access permits.
             </p>
           </div>
 

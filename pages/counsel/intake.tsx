@@ -7,6 +7,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ArrowLeft, ArrowRight, ShieldCheck, AlertTriangle } from "lucide-react";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 import Layout from "@/components/Layout";
 import { resolvePageAccess } from "@/lib/access/server";
@@ -60,6 +61,10 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
   const [submitting, setSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
   const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    trackLaunch("counsel_intake_started", "counsel_intake");
+  }, []);
 
   const canSubmit = form.whatDecisionRequiresCounsel.trim().length >= 20
     && form.userSummary.trim().length >= 20
@@ -122,6 +127,7 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
         throw new Error(data.error || data.message || "Submission failed.");
       }
       setSubmitted(true);
+      trackLaunch("counsel_intake_submitted", "counsel_intake");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submission failed.");
     } finally {

@@ -20,6 +20,7 @@ import {
 } from "@/lib/server/security/app-route-guards";
 import { authorizeStrategyRoomEntry } from "@/lib/server/strategy-room/access.server";
 import { writeSecurityAudit } from "@/lib/security/audit-log";
+import { createFieldProvenance } from "@/lib/product/field-provenance-contract";
 import {
   loadPurposeAlignmentEvidence,
   buildStrategyRoomPaMemory,
@@ -363,6 +364,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       sessionKey,
+      generatedAt: new Date().toISOString(),
+      dataQuality: "CASE_SCOPED",
+      evidencePosture: paMemory ? "SYSTEM_INFERRED" : "THIN",
+      intelligenceScope: {
+        caseId: sessionKey,
+        strategyRoomSessionId: sessionKey,
+        userId: authz.subjectId ?? null,
+        userEmail: authz.identityEmail ?? intake.email ?? null,
+        sourceSurface: "STRATEGY_ROOM",
+        scopeLabel: "Strategy Room case",
+        scopeType: "CASE",
+      },
+      provenance: [
+        createFieldProvenance({
+          fieldKey: "strategyRoomSession.init",
+          sourceSurface: "STRATEGY_ROOM",
+          sourceLabel: "Strategy Room",
+          computedAt: new Date().toISOString(),
+          caseId: sessionKey,
+          strategyRoomSessionId: sessionKey,
+          scopeType: "CASE",
+          scopeId: sessionKey,
+          evidencePosture: paMemory ? "SYSTEM_INFERRED" : "INSUFFICIENT_DATA",
+          confidenceLabel: paMemory ? "CAPTURED" : "UNAVAILABLE",
+        }),
+      ],
+      emptyState: paMemory ? undefined : {
+        reason: "No carried-forward evidence was available at session creation.",
+        nextAction: "Continue the governed session to build case-specific evidence.",
+      },
       constitution: {
         route: assembled.constitution.route,
         priority: assembled.constitution.priority,

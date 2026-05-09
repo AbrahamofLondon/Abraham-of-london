@@ -156,7 +156,7 @@ export function assessAITerrain(inputs: AITerrainInputs): AITerrainAssessment {
   const riskFactors: string[] = [];
   if (classification === "AI_LAG") riskFactors.push("Organisation operating at pre-AI decision speed");
   if (competitorAIAdoption) riskFactors.push("Competitors have adopted AI in this domain");
-  if (gapPercent > 100) riskFactors.push(`Decision cycle ${gapPercent}% slower than AI-accelerated baseline`);
+  if (gapPercent > 100) riskFactors.push(`Decision cycle ${gapPercent}% slower than competitive baseline`);
   if (blockedDecisionCount > 0) riskFactors.push(`${blockedDecisionCount} blocked decisions compounding velocity loss`);
   if (contradictionCount > 0) riskFactors.push(`${contradictionCount} active contradictions reducing decision throughput`);
   if (classification === "AI_DEPENDENT") riskFactors.push("AI adopted without governance — execution risk elevated");
@@ -166,7 +166,7 @@ export function assessAITerrain(inputs: AITerrainInputs): AITerrainAssessment {
     exposureLevel === "CRITICAL"
       ? "AI acceleration is active in your competitive environment. Every decision made at current speed increases structural disadvantage. This is not optional."
       : exposureLevel === "HIGH"
-      ? "AI-accelerated competitors are widening the gap. Decision velocity must increase or consequence will compound."
+      ? "Faster-moving competitors are widening the gap. Decision velocity must increase or consequence will compound."
       : exposureLevel === "MEDIUM"
       ? "AI exposure is present but manageable. Governance and velocity alignment needed within 60 days."
       : "AI terrain exposure is currently contained. Monitor for sector acceleration.";

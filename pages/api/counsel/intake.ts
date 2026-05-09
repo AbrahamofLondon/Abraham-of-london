@@ -8,6 +8,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
+import { normaliseCounselIntakeEvidence } from "@/lib/product/field-provenance-normaliser";
 
 const intakeSchema = z.object({
   userSummary: z.string().trim().min(20).max(3000),
@@ -100,6 +101,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ok: true,
       caseId: caseRecord.id,
       status: caseRecord.status,
+      dataQuality: "CASE_SCOPED",
+      evidencePosture: "USER_REPORTED",
+      scope: {
+        userId: identity.subjectId ?? null,
+        userEmail: identity.email,
+        caseId: caseRecord.id,
+        journeyId: evidencePackage.journeyId ?? null,
+        sourceSurface: "COUNSEL_REVIEW",
+        scopeLabel: "Counsel intake case",
+        scopeType: "CASE",
+      },
+      provenance: normaliseCounselIntakeEvidence({
+        caseId: caseRecord.id,
+        journeyId: evidencePackage.journeyId ?? null,
+        userSummary: parsed.data.userSummary,
+        whatChangedSinceSystemAssessment: parsed.data.whatChangedSinceSystemAssessment || null,
+        whatHumanCounselMustConsider: parsed.data.whatHumanCounselMustConsider,
+      }),
+      emptyState: null,
       message: "Counsel intake submitted. Your case has been created and queued for review.",
     });
   } catch (error) {

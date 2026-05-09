@@ -11,6 +11,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { trackStrategyRoomEntry, trackStrategyRoomConversion } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import {
   trackStrategyGateView,
   trackStrategyAttempt,
@@ -65,6 +66,7 @@ import ExecutionFlow from "@/components/strategy-room/ExecutionFlow";
 import AdmissionNotice from "@/components/product/AdmissionNotice";
 import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
 import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
+import ClientIntelligenceStack from "@/components/Intelligence/user/ClientIntelligenceStack";
 import { evaluateCounselTrigger, deriveCounselStatus } from "@/lib/strategy-room/counsel-trigger";
 import type { StrategyRoomState } from "@/lib/strategy-room/room-state-contract";
 import { deriveEvidenceTierFromStages } from "@/lib/product/evidence-stage-contract";
@@ -177,8 +179,7 @@ function StrategyRoomGate() {
             </Link>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link href="/institutional" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Institutional mandate</Link>
-              <Link href="/private-clients" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Private advisory</Link>
-              <Link href="/contact" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Contact</Link>
+              <Link href="/evidence/standards" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Evidence standards</Link>
             </div>
           </div>
         )}
@@ -654,7 +655,7 @@ function ExecutionEntryState({
               fontStyle: "italic",
               maxWidth: "52ch",
             }}>
-              In an AI-accelerated environment, stagnation is negative movement. This condition compounds whether or not you act.
+              Stagnation is negative movement. This condition compounds whether or not you act.
             </p>
             <p style={{
               marginTop: "0.35rem",
@@ -672,7 +673,7 @@ function ExecutionEntryState({
               letterSpacing: "0.10em",
               color: "rgba(255,255,255,0.13)",
             }}>
-              Decisions are evaluated against an AI-accelerated market baseline.
+              Decisions are evaluated against cost, consequence, and execution evidence.
             </p>
           </div>
 
@@ -1493,6 +1494,7 @@ export default function StrategyRoomPage({
   React.useEffect(() => {
     trackStrategyRoomEntry();
     trackStrategyGateView();
+    trackLaunch("strategy_room_entered", "strategy_room");
     // Behavioural tracking
     const { trackHesitation, trackExitAfterCtaView } = require("@/lib/analytics/hesitation");
     const cleanH = trackHesitation({ page: "strategy_room", idleTimeout: 10000 });
@@ -2230,6 +2232,17 @@ export default function StrategyRoomPage({
                     />
                   );
                 })()}
+                <ClientIntelligenceStack
+                  scope={{
+                    strategyRoomSessionId: executionSessionId ?? null,
+                    sourceSurface: "STRATEGY_ROOM",
+                    scopeLabel: executionSessionId ? "Strategy Room case" : "Strategy Room entry",
+                    scopeType: executionSessionId ? "CASE" : "ACCOUNT",
+                  }}
+                  showCrossAssessment
+                  emptyTitle="No case-bound cross-assessment signal is available for this Strategy Room entry yet."
+                  thinTitle="Cross-assessment intelligence is still forming for this Strategy Room entry."
+                />
               </div>
             </div>
 

@@ -1,3 +1,9 @@
+import type { FieldProvenance } from "@/lib/product/field-provenance-contract";
+import {
+  formatFieldProvenanceLine,
+  sourceSurfaceLabel as canonicalSourceSurfaceLabel,
+} from "@/lib/product/field-provenance-contract";
+
 export type GovernedMemorySourceSurface =
   | "FAST_DIAGNOSTIC"
   | "PURPOSE_ALIGNMENT"
@@ -53,6 +59,7 @@ export type GovernedMemoryItem = {
   relatedCaseId?: string | null;
   relatedCycleId?: string | null;
   relatedSessionId?: string | null;
+  provenance?: FieldProvenance[];
 };
 
 export type GovernanceEvidenceCoverage = {
@@ -91,38 +98,15 @@ export function isMemoryDisplaySafe(item: GovernedMemoryItem): boolean {
 }
 
 function sourceSurfaceLabel(surface: GovernedMemorySourceSurface): string {
-  switch (surface) {
-    case "FAST_DIAGNOSTIC":
-      return "Fast Diagnostic";
-    case "PURPOSE_ALIGNMENT":
-      return "Purpose Alignment";
-    case "TEAM_ASSESSMENT":
-      return "Team Assessment";
-    case "ENTERPRISE_ASSESSMENT":
-      return "Enterprise Assessment";
-    case "EXECUTIVE_REPORTING":
-      return "Executive Reporting";
-    case "STRATEGY_ROOM":
-      return "Strategy Room";
-    case "RETURN_BRIEF":
-      return "Return Brief";
-    case "OVERSIGHT_BRIEF":
-      return "Oversight Brief";
-    case "CONTROL_ROOM":
-      return "Control Room";
-    case "DECISION_CENTRE":
-      return "Decision Centre";
-    case "OUTCOME_VERIFICATION":
-      return "Outcome Verification";
-    case "COUNSEL_REVIEW":
-      return "Counsel Review";
-    case "BOARDROOM_MODE":
-      return "Boardroom Mode";
-    default:
-      return "Governed Memory";
-  }
+  return canonicalSourceSurfaceLabel(surface);
 }
 
 export function formatMemorySourceLabel(item: GovernedMemoryItem): string {
+  if (item.provenance?.length) {
+    return formatFieldProvenanceLine(item.provenance, {
+      includeComparisonBasis: false,
+      includeScope: false,
+    });
+  }
   return `${item.confidenceLabel} in ${sourceSurfaceLabel(item.sourceSurface)}`;
 }

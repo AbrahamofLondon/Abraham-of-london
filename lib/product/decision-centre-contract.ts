@@ -13,10 +13,12 @@ import type { EvidenceTier } from "@/lib/product/living-intelligence-spine";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
 import type { GovernedMemoryItem } from "@/lib/product/governed-memory-contract";
 import type { EfficacySurface, CheckpointResponseStatus } from "@/lib/product/efficacy-contract";
-import type { DecisionVelocitySnapshot } from "@/lib/analytics/decision-velocity";
+import type { DecisionVelocitySnapshot, DecisionVelocitySummary } from "@/lib/analytics/decision-velocity";
 import type { WhatChangedSummary } from "@/lib/analytics/what-changed";
 import type { CrossAssessmentIntelligence } from "@/lib/analytics/cross-assessment-intelligence";
 import type { ContradictionMapView } from "@/lib/analytics/contradiction-graph-presenter";
+import type { IntelligenceDataQuality, IntelligenceEmptyState, IntelligenceScope } from "@/lib/product/intelligence-contract";
+import type { FieldProvenance } from "@/lib/product/field-provenance-contract";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COGNITIVE STATE
@@ -131,6 +133,10 @@ export type DecisionCentreIrreversibility = {
   summary: string;
   windowRemaining?: string | null;
   evidencePosture: "SYSTEM_INFERRED" | "PARTIAL";
+  sourceLabel: string;
+  computedAt: string | null;
+  evidenceBasis: string;
+  nextAction?: string | null;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -140,6 +146,8 @@ export type DecisionCentreIrreversibility = {
 export type DecisionCentreCase = {
   /** Living Case ID (journeyKey) */
   caseId: string;
+  /** Intelligence scope for all shared cards tied to this case */
+  scope: IntelligenceScope;
   /** User-stated decision or generated title */
   title: string;
   /** Full decision text from canonical decision object */
@@ -201,6 +209,8 @@ export type DecisionCentreCase = {
   urgencyReasons?: string[];
   /** Optional decision velocity from Agent 1 */
   decisionVelocity?: DecisionVelocitySnapshot | null;
+  /** Aggregate decision movement summary */
+  decisionVelocitySummary?: DecisionVelocitySummary | null;
   /** Optional prior-vs-current comparison from Agent 1 */
   whatChanged?: WhatChangedSummary | null;
   /** Optional cross-assessment intelligence from Agent 1 */
@@ -215,6 +225,8 @@ export type DecisionCentreCase = {
   governedMemory?: GovernedMemoryItem[] | null;
   /** Last activity timestamp */
   updatedAt: string;
+  /** Latest evidence timestamp used for freshness/provenance */
+  lastEvidenceAt: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -223,6 +235,12 @@ export type DecisionCentreCase = {
 
 export type DecisionCentreResponse = {
   ok: true;
+  generatedAt: string;
+  dataQuality: IntelligenceDataQuality;
+  evidencePosture?: string;
+  scope?: IntelligenceScope;
+  provenance?: FieldProvenance[];
+  emptyState?: IntelligenceEmptyState;
   cases: DecisionCentreCase[];
   mostUrgentCase?: {
     caseId: string;

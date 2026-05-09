@@ -11,6 +11,7 @@ import Link from "next/link";
 import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import ReturnBriefInterruptionBar from "@/components/strategy-room/ReturnBriefInterruptionBar";
 import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
 import DecisionTimeline, { type DecisionTimelineItem } from "@/components/strategy-room/DecisionTimeline";
@@ -312,6 +313,7 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
       }
       setNewDecision("");
       setMicroFeedback("Recorded.");
+      trackLaunch("strategy_room_decision_recorded", "strategy_room_session", { sessionId: session?.id });
       setTimeout(() => setMicroFeedback(""), 2000);
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : "Error logging decision");
@@ -578,6 +580,12 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
               </p>
               <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.70)", marginTop: "4px" }}>
                 {sessionIrreversibility.summary} This is an irreversibility estimate, not a verified external fact.
+              </p>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+                Source: recorded session signals · Recorded: {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} · Evidence posture: estimated
+              </p>
+              <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
+                Based on recorded signals including execution delay, blocked decisions, and checkpoint state.
               </p>
             </div>
           )}

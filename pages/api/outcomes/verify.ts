@@ -6,6 +6,7 @@ import {
   loadOutcomeVerificationContext,
   submitOutcomeVerification,
 } from "@/lib/product/outcome-verification-service";
+import { normaliseOutcomeVerificationRecord } from "@/lib/product/field-provenance-normaliser";
 
 const payloadSchema = z.object({
   token: z.string().trim().optional().nullable(),
@@ -75,6 +76,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       record: result.record,
       checkpointId: result.checkpointId ?? null,
       checkpointResponseStatus: result.checkpointResponseStatus ?? null,
+      dataQuality: "CASE_SCOPED",
+      evidencePosture: result.record.evidencePosture,
+      scope: {
+        userId: identity.subjectId ?? null,
+        userEmail: identity.email,
+        caseId: context?.caseId ?? parsed.data.caseId ?? null,
+        journeyId: context?.journeyId ?? parsed.data.journeyId ?? null,
+        strategyRoomSessionId: context?.strategyRoomSessionId ?? parsed.data.strategyRoomSessionId ?? null,
+        executiveRunId: context?.executiveRunId ?? parsed.data.executiveRunId ?? null,
+        sourceSurface: "OUTCOME_VERIFICATION",
+        scopeLabel: "Outcome verification case",
+        scopeType: "CASE",
+      },
+      provenance: normaliseOutcomeVerificationRecord(result.record),
+      emptyState: null,
       calibration: result.calibration ?? null,
       context,
     });

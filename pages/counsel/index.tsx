@@ -8,6 +8,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight, AlertTriangle, ShieldCheck, Clock, FileText, Activity } from "lucide-react";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 import Layout from "@/components/Layout";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
@@ -102,6 +103,10 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
   const labels = COUNSEL_ACCESS_LABELS[state.accessState];
   const isRestricted = !state.canRequestCounsel && !state.canViewEvidencePackage;
   const isEligible = state.canRequestCounsel || state.canSubmitStructuredIntake;
+
+  React.useEffect(() => {
+    trackLaunch("counsel_room_viewed", "counsel", { admissionState: state.accessState });
+  }, [state.accessState]);
 
   return (
     <Layout

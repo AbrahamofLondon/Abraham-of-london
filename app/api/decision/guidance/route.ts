@@ -7,6 +7,7 @@ import {
   loadPurposeAlignmentEvidence,
   buildDecisionCentrePaMemory,
 } from "@/lib/alignment/evidence-loader";
+import { normalisePurposeAlignmentEvidence } from "@/lib/product/field-provenance-normaliser";
 
 export async function POST(request: Request) {
   try {
@@ -86,6 +87,26 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
+      dataQuality: paMemory ? "CASE_SCOPED" : "THIN",
+      evidencePosture: paMemory ? "SYSTEM_INFERRED" : "INSUFFICIENT_DATA",
+      scope: {
+        userId: intake?.subjectId ?? null,
+        userEmail: intake?.email ?? null,
+        sourceSurface: "DECISION_CENTRE",
+        scopeLabel: "Decision guidance case",
+        scopeType: "CASE",
+        caseId: intake?.caseId ?? null,
+        journeyId: intake?.journeyId ?? null,
+      },
+      provenance: normalisePurposeAlignmentEvidence(paEvidence, {
+        caseId: intake?.caseId ?? null,
+        journeyId: intake?.journeyId ?? null,
+        assessmentId: paEvidence.assessmentId ?? null,
+      }),
+      emptyState: paMemory ? undefined : {
+        reason: "No carried-forward Purpose Alignment evidence was available.",
+        nextAction: "Complete another governed assessment to strengthen the comparison.",
+      },
       canonical,
       sections: canonical.sections,
       purposeAlignmentMemory: paMemory,

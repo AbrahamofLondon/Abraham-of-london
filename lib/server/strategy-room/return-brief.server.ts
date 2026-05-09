@@ -23,6 +23,17 @@ import {
   summarizeAssessmentEvidenceText,
   type AssessmentEvidenceCapture,
 } from "@/lib/product/evidence-capture-contract";
+import type { FieldProvenance } from "@/lib/product/field-provenance-contract";
+import {
+  createFieldProvenance,
+  safeDateLabel,
+} from "@/lib/product/field-provenance-contract";
+import {
+  normaliseAssessmentEvidenceCapture,
+  normaliseEnterpriseStrainEvidence,
+  normaliseStrategyRoomConsequenceEvidence,
+  normaliseTeamAggregateEvidence,
+} from "@/lib/product/field-provenance-normaliser";
 import {
   loadPurposeAlignmentEvidence,
   buildReturnBriefPaSection,
@@ -91,6 +102,7 @@ export type ReturnBrief = {
     failureComparison?: string;
     recurrenceStatus?: string;
     stopSignalStatus?: string;
+    provenance: FieldProvenance[];
   } | null;
 
   /** Purpose Alignment evidence carried forward */
@@ -105,6 +117,7 @@ export type ReturnBrief = {
     respondentCount?: number;
     claimLevel?: string;
     summary: string;
+    provenance: FieldProvenance[];
   } | null;
 
   /** Enterprise assessment evidence carried forward */
@@ -114,6 +127,7 @@ export type ReturnBrief = {
     percentScore?: number;
     weakestDomains?: string[];
     summary: string;
+    provenance: FieldProvenance[];
   } | null;
 
   /** Consequence evidence from Strategy Room Stage 2 */
@@ -122,6 +136,7 @@ export type ReturnBrief = {
     reputational?: string;
     institutional?: string;
     timeline?: string;
+    provenance: FieldProvenance[];
   } | null;
 
   /** Section 6 — Direct challenge */
@@ -418,8 +433,23 @@ export async function generateReturnBrief(
           respondentCount: campaign.aggregate.respondentCount,
           claimLevel: campaign.aggregate.claimLevel,
           summary: largest
-            ? `An earlier team reading suggested a ${Math.abs(largest[1].deltaFromLeader)}-point leader/team gap in ${largest[0].replace(/_/g, " ")}. Source: Team Assessment (${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}, matched by ${orgId ? "organisation" : "account"} context).`
-            : `An earlier team assessment was completed with ${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}. Source: Team Assessment (matched by ${orgId ? "organisation" : "account"} context).`,
+            ? `An earlier team reading suggested a ${Math.abs(largest[1].deltaFromLeader)}-point leader/team gap in ${largest[0].replace(/_/g, " ")}.`
+            : `An earlier team assessment was completed with ${campaign.aggregate.respondentCount} respondent${campaign.aggregate.respondentCount === 1 ? "" : "s"}.`,
+          provenance: normaliseTeamAggregateEvidence(
+            {
+              respondentCount: campaign.aggregate.respondentCount,
+              trustScore: trustDomain?.teamMean ?? undefined,
+              largestGapDomain: largest ? largest[0].replace(/_/g, " ") : undefined,
+              largestGapDelta: largest ? Math.abs(largest[1].deltaFromLeader) : undefined,
+            },
+            {
+              caseId: session.sessionKey,
+              strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+              scopeType: "ASSESSMENT",
+              scopeId: campaign.id,
+              assessmentId: campaign.id,
+            },
+          ),
         };
       }
     }
@@ -452,8 +482,22 @@ export async function generateReturnBrief(
           percentScore: snapshot.percentScore ?? undefined,
           weakestDomains: Array.isArray(weakest) ? weakest : undefined,
           summary: snapshot.fragilitySignal
-            ? `Earlier enterprise reading reported institutional strain: ${snapshot.fragilitySignal}. Score: ${snapshot.percentScore ?? "—"}%. Source: Enterprise Assessment.`
-            : `Enterprise assessment completed with score ${snapshot.percentScore ?? "—"}%. Source: Enterprise Assessment.`,
+            ? `Earlier enterprise reading reported institutional strain: ${snapshot.fragilitySignal}. Score: ${snapshot.percentScore ?? "—"}%.`
+            : `Enterprise assessment completed with score ${snapshot.percentScore ?? "—"}%.`,
+          provenance: normaliseEnterpriseStrainEvidence(
+            {
+              fragilitySignal: snapshot.fragilitySignal ?? null,
+              percentScore: snapshot.percentScore ?? null,
+              weakestDomains: Array.isArray(weakest) ? weakest : null,
+            },
+            {
+              caseId: session.sessionKey,
+              strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+              scopeType: "ASSESSMENT",
+              scopeId: snapshot.id,
+              assessmentId: snapshot.id,
+            },
+          ),
         };
       }
     }
@@ -478,8 +522,8 @@ export async function generateReturnBrief(
   }
   const carryForwardSource = extractAssessmentEvidenceCapture(canonicalSnapshotValue);
   const evidenceCarryForward = Object.keys(carryForwardSource).length > 0
-    ? {
-        source: carryForwardSource,
+      ? {
+          source: carryForwardSource,
         verificationStatus: carryForwardSource.verificationCriteria
           ? outcomeEvidence.processedDecisionCases > 0
             ? `The original evidence suggested success should be proven by ${safeEvidenceText(carryForwardSource.verificationCriteria)}. Current outcome evidence is directional, but the system cannot yet verify that standard directly.`
@@ -495,11 +539,19 @@ export async function generateReturnBrief(
               ? `The original evidence suggested this pattern recurs. Current movement may indicate improvement, but recurrence cannot yet be treated as resolved.`
               : `The original evidence suggested this pattern recurs. The system cannot yet verify that recurrence has stopped.`
           : undefined,
-        stopSignalStatus: carryForwardSource.stopSignal
-          ? blockedCount > 0 || pendingCount > 0
-            ? `The original evidence suggested ${safeEvidenceText(carryForwardSource.stopSignal)} had to stop. This remains unresolved unless that condition has actually stopped.`
-            : `The original evidence suggested ${safeEvidenceText(carryForwardSource.stopSignal)} had to stop. The system cannot yet verify that it has stopped.`
-          : undefined,
+          stopSignalStatus: carryForwardSource.stopSignal
+            ? blockedCount > 0 || pendingCount > 0
+              ? `The original evidence suggested ${safeEvidenceText(carryForwardSource.stopSignal)} had to stop. This remains unresolved unless that condition has actually stopped.`
+              : `The original evidence suggested ${safeEvidenceText(carryForwardSource.stopSignal)} had to stop. The system cannot yet verify that it has stopped.`
+            : undefined,
+          provenance: normaliseAssessmentEvidenceCapture(carryForwardSource, {
+            sourceSurface: "RETURN_BRIEF",
+            sourceLabel: "Return Brief carry-forward",
+            caseId: session.sessionKey,
+            strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+            scopeType: "CASE",
+            scopeId: session.sessionKey,
+          }),
       }
     : null;
 
@@ -522,6 +574,20 @@ export async function generateReturnBrief(
           timeline: carryForwardSource.consequenceTimeline
             ? `You identified this timeline pressure: ${safeEvidenceText(carryForwardSource.consequenceTimeline)}`
             : undefined,
+          provenance: normaliseStrategyRoomConsequenceEvidence(
+            {
+              financial: carryForwardSource.consequenceFinancial ?? null,
+              reputational: carryForwardSource.consequenceReputational ?? null,
+              institutional: carryForwardSource.consequenceInstitutional ?? null,
+              timeline: carryForwardSource.consequenceTimeline ?? null,
+            },
+            {
+              caseId: session.sessionKey,
+              strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+              scopeType: "SESSION",
+              scopeId: session.strategyRoomSessionId ?? session.sessionKey,
+            },
+          ),
         }
       : null;
 

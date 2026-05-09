@@ -47,6 +47,7 @@ import {
 } from "@/lib/alignment/evidence-loader";
 import {
   buildDecisionVelocitySnapshot,
+  buildDecisionVelocitySummary,
   buildDecisionVelocityMemoryItems,
   type DecisionVelocitySnapshot,
 } from "@/lib/analytics/decision-velocity";
@@ -56,6 +57,8 @@ import {
 } from "@/lib/analytics/what-changed";
 import { buildCrossAssessmentIntelligence } from "@/lib/analytics/cross-assessment-intelligence";
 import { buildContradictionMapView } from "@/lib/analytics/contradiction-graph-presenter";
+import type { IntelligenceDataQuality, IntelligenceScope } from "@/lib/product/intelligence-contract";
+import { createFieldProvenance } from "@/lib/product/field-provenance-contract";
 
 function parseMoney(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -66,6 +69,11 @@ function parseMoney(value: string | null | undefined): number | null {
 }
 
 function normaliseText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function normaliseQueryValue(value: string | string[] | undefined): string | null {
+  if (Array.isArray(value)) return value[0] ?? null;
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
@@ -136,19 +144,28 @@ function deriveComparableStates(input: {
   }>;
   decisionVelocity: DecisionVelocitySnapshot | null;
   financialExposureBand: string | null;
+  irreversibilityBand: string | null;
+  strategyRoomExecutionStatus: string | null;
+  counselCaseStatus: string | null;
 }): { current: ComparableCaseState; previous: ComparableCaseState | null } {
   const purposePayload = stagePayload(input.journey, "purpose_alignment");
   const currentCheckpoint = input.checkpoints.at(-1) ?? null;
   const previousCheckpoint = input.checkpoints.length > 1 ? input.checkpoints[input.checkpoints.length - 2] : null;
+  const currentObservedAt = currentCheckpoint?.respondedAt ?? currentCheckpoint?.createdAt ?? findStageTimestamp(input.journey, "purpose_alignment") ?? input.livingCase.createdAt;
+  const previousObservedAt = previousCheckpoint?.respondedAt ?? previousCheckpoint?.createdAt ?? (input.journey.snapshots.length >= 2 ? input.journey.snapshots[input.journey.snapshots.length - 2]?.timestamp ?? null : null);
 
   const current: ComparableCaseState = {
+    observedAt: currentObservedAt,
     coherenceBand: pickCoherenceBand(purposePayload),
     weakestDomain: pickWeakestDomain(purposePayload),
     contradictionCount: input.livingCase.contradictions.length,
     checkpointResponseStatus: currentCheckpoint?.responseStatus ?? null,
     decisionVelocityBand: input.decisionVelocity?.velocityBand ?? null,
     financialExposureBand: input.financialExposureBand,
+    irreversibilityBand: input.irreversibilityBand,
     routeDecision: pickRouteDecision(input.livingCase),
+    strategyRoomExecutionStatus: input.strategyRoomExecutionStatus,
+    counselCaseStatus: input.counselCaseStatus,
   };
 
   const previousVelocity = previousCheckpoint
@@ -168,6 +185,7 @@ function deriveComparableStates(input: {
     : null;
 
   const previous: ComparableCaseState = {
+    observedAt: previousObservedAt,
     coherenceBand: null,
     weakestDomain: null,
     contradictionCount: null,
@@ -178,6 +196,8 @@ function deriveComparableStates(input: {
     routeDecision: input.livingCase.routeDecisions.length > 1
       ? normaliseText((input.livingCase.routeDecisions[input.livingCase.routeDecisions.length - 2] as Record<string, unknown>)?.route)?.toUpperCase() ?? null
       : null,
+    strategyRoomExecutionStatus: null,
+    counselCaseStatus: null,
   };
 
   if (input.journey.snapshots.length >= 2) {
@@ -440,6 +460,8 @@ function deriveCaseIrreversibility(input: {
   unresolvedContradictions: number;
   blockedDecisions: number;
   boardroomQualified: boolean;
+  sourceLabel?: string;
+  nextAction?: string | null;
 }) {
   const daysWithoutAction = daysSince(input.createdAt);
   const signalCount = [
@@ -472,7 +494,30 @@ function deriveCaseIrreversibility(input: {
     summary: `${index.summary} This is an irreversibility estimate, not a verified external fact.`,
     windowRemaining: index.windowRemaining ?? null,
     evidencePosture: signalCount >= 3 ? "SYSTEM_INFERRED" as const : "PARTIAL" as const,
+    sourceLabel: input.sourceLabel ?? "Recorded case signals",
+    computedAt: new Date().toISOString(),
+    evidenceBasis: "Based on recorded signals.",
+    nextAction: input.nextAction ?? null,
   };
+}
+
+function latestEvidenceTimestamp(input: {
+  livingCase: LivingCase;
+  journey?: DiagnosticJourneyRecord | null;
+  latestCheckpoint?: { respondedAt?: string | null; createdAt?: string | null } | null;
+  latestOutcome?: { createdAt?: Date | string | null } | null;
+}): string {
+  const candidates = [
+    input.latestCheckpoint?.respondedAt ?? null,
+    input.latestCheckpoint?.createdAt ?? null,
+    input.latestOutcome?.createdAt ? new Date(input.latestOutcome.createdAt).toISOString() : null,
+    ...(input.journey ? Object.keys(input.journey.stages).map((stage) => findStageTimestamp(input.journey!, stage)) : []),
+    input.livingCase.createdAt ?? null,
+  ].filter((value): value is string => Boolean(value));
+  return candidates
+    .map((value) => ({ value, time: new Date(value).getTime() }))
+    .filter((item) => !Number.isNaN(item.time))
+    .sort((a, b) => b.time - a.time)[0]?.value ?? new Date().toISOString();
 }
 
 function buildUrgencyReasons(input: {
@@ -582,7 +627,13 @@ export default async function handler(
   }
 
   try {
+    const generatedAt = new Date().toISOString();
     const identity = await resolveIdentity(req);
+    const requestedCaseId = normaliseQueryValue(req.query.caseId);
+    const requestedJourneyId = normaliseQueryValue(req.query.journeyId);
+    const requestedStrategyRoomSessionId = normaliseQueryValue(req.query.strategyRoomSessionId);
+    const requestedExecutiveRunId = normaliseQueryValue(req.query.executiveRunId);
+    const accountWide = normaliseQueryValue(req.query.accountWide) === "true";
 
     if (!identity.authenticated || !identity.email) {
       return res.status(401).json({ ok: false, reason: "AUTH_REQUIRED" });
@@ -596,6 +647,21 @@ export default async function handler(
     if (!livingCase) {
       return res.status(200).json({
         ok: true,
+        generatedAt,
+        dataQuality: "EMPTY",
+        evidencePosture: "INSUFFICIENT_DATA",
+        scope: {
+          userId: identity.subjectId ?? null,
+          userEmail: email,
+          sourceSurface: "DECISION_CENTRE",
+          scopeLabel: "Decision Centre account view",
+          scopeType: "ACCOUNT",
+        },
+        provenance: [],
+        emptyState: {
+          reason: "No decision memory has been created yet.",
+          nextAction: "Start with Fast Diagnostic.",
+        },
         cases: [],
         mostUrgentCase: null,
         checkpoints: {
@@ -683,6 +749,18 @@ export default async function handler(
 
     const caseCard: DecisionCentreCase = {
       caseId: livingCase.caseId,
+      scope: {
+        userId: identity.subjectId ?? null,
+        userEmail: email,
+        caseId: livingCase.caseId,
+        journeyId: null,
+        strategyRoomSessionId: latestExecutionRecord?.sessionId ?? null,
+        executiveRunId: null,
+        organisationId: livingCase.organisation ?? null,
+        sourceSurface: accountWide ? "INTELLIGENCE_MEMORY" : "DECISION_CENTRE",
+        scopeLabel: accountWide ? "Account-wide view" : buildCaseTitle(livingCase),
+        scopeType: accountWide ? "ACCOUNT" : "CASE",
+      },
       title: buildCaseTitle(livingCase),
       decisionText: livingCase.primaryDecision?.decisionText || null,
       cognitiveState: deriveCognitiveState(livingCase),
@@ -743,13 +821,15 @@ export default async function handler(
       returnBriefTriggered: false,
       urgencyReasons: [],
       decisionVelocity: null,
+      decisionVelocitySummary: null,
       whatChanged: null,
       crossAssessmentIntelligence: null,
       contradictionMap: null,
       irreversibility: null,
       returnBriefs: [],
       governedMemory: null,
-      updatedAt: livingCase.createdAt || new Date().toISOString(),
+      updatedAt: livingCase.createdAt || generatedAt,
+      lastEvidenceAt: livingCase.createdAt || generatedAt,
     };
 
     const journey = await getDiagnosticJourney({
@@ -820,6 +900,15 @@ export default async function handler(
       const firstCompletedCheckpoint = sortedCaseCheckpoints.find((checkpoint) => checkpoint.responseStatus === "COMPLETED") ?? null;
       const latestCheckpoint = sortedCaseCheckpoints.at(-1) ?? null;
       const monthlyExposureBand = classifyFinancialExposureBand(monthlyCost);
+      caseCard.irreversibility = deriveCaseIrreversibility({
+        monthlyCost,
+        createdAt: livingCase.createdAt,
+        unresolvedContradictions: livingCase.contradictions.length,
+        blockedDecisions: blockedDecisionCount,
+        boardroomQualified: boardroomQualification.qualified,
+        sourceLabel: "Recorded case signals",
+        nextAction: caseCard.nextRequiredAction,
+      });
 
       if (firstCheckpoint) {
         caseCard.decisionVelocity = buildDecisionVelocitySnapshot({
@@ -837,6 +926,18 @@ export default async function handler(
         });
         governedMemory.push(...buildDecisionVelocityMemoryItems(caseCard.decisionVelocity));
       }
+      caseCard.decisionVelocitySummary = buildDecisionVelocitySummary({
+        checkpoints: sortedCaseCheckpoints.map((checkpoint) => ({
+          createdAt: checkpoint.createdAt,
+          dueAt: checkpoint.dueAt,
+          responseStatus: checkpoint.responseStatus ?? null,
+          respondedAt: checkpoint.respondedAt ?? null,
+        })),
+        scope: caseCard.scope,
+        sourceLabel: "Checkpoint history",
+        generatedAt,
+        sourceSurfaces: ["Checkpoint history", "Decision Centre"],
+      });
 
       const comparable = deriveComparableStates({
         livingCase,
@@ -849,15 +950,21 @@ export default async function handler(
         })),
         decisionVelocity: caseCard.decisionVelocity ?? null as any,
         financialExposureBand: monthlyExposureBand,
+        irreversibilityBand: caseCard.irreversibility?.level ?? null,
+        strategyRoomExecutionStatus: latestDecisionLog?.status?.toUpperCase() ?? null,
+        counselCaseStatus: counselTriggered ? "OPEN_SIGNAL" : null,
       });
       caseCard.whatChanged = buildWhatChangedSummary({
         previous: comparable.previous,
         current: comparable.current,
+        scope: caseCard.scope,
         sourceLabel: "Case comparison engine",
         evidencePosture: "SYSTEM_INFERRED",
+        generatedAt,
       });
       caseCard.crossAssessmentIntelligence = buildCrossAssessmentIntelligence({
         livingCase,
+        scope: caseCard.scope,
         stages: buildCrossAssessmentSignals({
           journey,
           livingCase,
@@ -866,13 +973,18 @@ export default async function handler(
         purposeAlignment: paEvidence,
         strategyRoomActive: caseCard.strategyRoomActive,
         latestCheckpointStatus: latestCheckpoint?.responseStatus ?? latestCheckpoint?.status ?? null,
+        generatedAt,
       });
       caseCard.contradictionMap = buildContradictionMapView({
+        scope: caseCard.scope,
         livingCase,
         createdAt: livingCase.createdAt,
+        generatedAt,
+        nextAction: caseCard.nextRequiredAction,
       });
 
       caseCard.governedMemory = governedMemory.length ? governedMemory : null;
+      caseCard.scope.journeyId = journey.journeyKey;
     }
 
     const retainerReadiness = deriveRetainerReadiness({
@@ -910,6 +1022,25 @@ export default async function handler(
     }
 
     caseCard.retainerReadiness = retainerReadiness;
+    caseCard.lastEvidenceAt = latestEvidenceTimestamp({
+      livingCase,
+      journey,
+      latestOutcome,
+    });
+    caseCard.updatedAt = caseCard.lastEvidenceAt;
+
+    const executiveRunMatch = requestedExecutiveRunId
+      ? await prisma.executiveReportingRun.findFirst({
+          where: {
+            OR: [{ id: requestedExecutiveRunId }, { runKey: requestedExecutiveRunId }],
+            email,
+          },
+          select: { id: true, runKey: true },
+        }).catch(() => null)
+      : null;
+    if (executiveRunMatch) {
+      caseCard.scope.executiveRunId = executiveRunMatch.id;
+    }
 
     let checkpointSections: DecisionCentreResponse["checkpoints"] = {
       requiresResponse: [],
@@ -937,28 +1068,54 @@ export default async function handler(
       };
     } catch { /* best-effort */ }
 
-    caseCard.irreversibility = deriveCaseIrreversibility({
-      monthlyCost,
-      createdAt: livingCase.createdAt,
-      unresolvedContradictions: livingCase.contradictions.length,
-      blockedDecisions: blockedDecisionCount,
-      boardroomQualified: boardroomQualification.qualified,
-    });
     caseCard.urgencyReasons = buildUrgencyReasons({
       requiresResponse: checkpointSections.requiresResponse,
       recentResponses: checkpointSections.recentResponses,
       caseCard,
     });
 
-    const cases = [caseCard];
+    const matchesRequestedScope =
+      (!requestedCaseId || caseCard.caseId === requestedCaseId)
+      && (!requestedJourneyId || caseCard.scope.journeyId === requestedJourneyId)
+      && (!requestedStrategyRoomSessionId
+        || caseCard.scope.strategyRoomSessionId === requestedStrategyRoomSessionId
+        || caseCard.returnBriefs.some((item) => item.sessionId === requestedStrategyRoomSessionId || item.sessionKey === requestedStrategyRoomSessionId))
+      && (!requestedExecutiveRunId || executiveRunMatch != null);
+
+    const cases = matchesRequestedScope ? [caseCard] : [];
     const ranked = [...cases].sort((a, b) => urgencyScore(b.urgencyReasons ?? []) - urgencyScore(a.urgencyReasons ?? []));
     const mostUrgentCase = ranked[0] && (ranked[0].urgencyReasons?.length ?? 0) > 0
       ? { caseId: ranked[0].caseId, reasons: ranked[0].urgencyReasons ?? [] }
       : null;
+    const dataQuality: IntelligenceDataQuality = cases.length === 0
+      ? "EMPTY"
+      : accountWide
+        ? "ACCOUNT_SCOPED"
+        : caseCard.decisionVelocitySummary?.meta.dataQuality === "MATURE"
+          || caseCard.crossAssessmentIntelligence?.meta.dataQuality === "MATURE"
+          || caseCard.contradictionMap?.meta.dataQuality === "MATURE"
+          ? "MATURE"
+          : "CASE_SCOPED";
 
     res.setHeader("Cache-Control", "private, no-cache");
     return res.status(200).json({
       ok: true,
+      generatedAt,
+      dataQuality,
+      evidencePosture: cases.some((item) => item.crossAssessmentIntelligence || item.contradictionMap)
+        ? "SYSTEM_INFERRED"
+        : "INSUFFICIENT_DATA",
+      scope: caseCard.scope,
+      provenance: cases.flatMap((item) => [
+        ...(item.decisionVelocitySummary?.meta.provenance ?? []),
+        ...(item.whatChanged?.meta.provenance ?? []),
+        ...(item.crossAssessmentIntelligence?.meta.provenance ?? []),
+        ...(item.contradictionMap?.meta.provenance ?? []),
+      ]),
+      emptyState: cases.length === 0 ? {
+        reason: "No case-bound intelligence could be matched to this scope.",
+        nextAction: "Open the original case surface or complete another governed stage.",
+      } : undefined,
       cases,
       mostUrgentCase,
       checkpoints: checkpointSections,

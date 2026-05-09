@@ -13,6 +13,7 @@ import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSumma
 import GovernedActionPanel from "@/components/living/GovernedActionPanel";
 import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import { PURPOSE_ALIGNMENT_QUESTIONS } from "@/lib/alignment/checklist";
 import { scorePurposeProfile } from "@/lib/alignment/scoring";
 import type { AlignmentDomain, DualAxisAnswer, PurposeProfileResult } from "@/lib/alignment/types";
@@ -155,6 +156,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   const pendingAdvanceRef = React.useRef<null | (() => void)>(null);
 
   React.useEffect(() => {
+    trackLaunch("purpose_alignment_started", "purpose_alignment");
     try {
       if (sessionStorage.getItem("aol_purpose_fresh_session")) return;
     } catch { /* ignore */ }
@@ -326,6 +328,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
       if (json.anchorNarrative) setAnchorNarrative(json.anchorNarrative);
       if (json.socialProof) setSocialProof(json.socialProof);
       if (json.assessmentId) setAssessmentId(json.assessmentId);
+      trackLaunch("purpose_alignment_completed", "purpose_alignment", { caseId: json.assessmentId ?? undefined });
       clearAssessmentState();
     } catch (error) {
       setAnalysisError(

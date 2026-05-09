@@ -16,8 +16,13 @@ import { ArrowRight, ShieldCheck, AlertTriangle, Clock, CheckCircle, XCircle } f
 
 import Layout from "@/components/Layout";
 import AdmissionNotice from "@/components/product/AdmissionNotice";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import ContinuityStatement from "@/components/product/ContinuityStatement";
 import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
+import DecisionVelocityCard from "@/components/Intelligence/public/DecisionVelocityCard";
+import WhatChangedPanel from "@/components/Intelligence/public/WhatChangedPanel";
+import CrossAssessmentInsight from "@/components/Intelligence/public/CrossAssessmentInsight";
+import ContradictionMapPreview from "@/components/Intelligence/public/ContradictionMapPreview";
 import type {
   DecisionCentreCase,
   DecisionCentreResponse,
@@ -193,10 +198,16 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {c.irreversibility && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(252,165,165,0.10)", backgroundColor: "rgba(252,165,165,0.02)", padding: "10px 14px" }}>
           <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.irreversibility.score >= 45 ? "rgba(252,165,165,0.58)" : `${GOLD}88` }}>
-            Irreversibility estimate: {c.irreversibility.level}
+            Irreversibility: {c.irreversibility.level}
           </span>
           <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.70)", marginTop: "4px" }}>
             {c.irreversibility.summary}
+          </p>
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+            Source: {c.irreversibility.sourceLabel} · Recorded: {formatDisplayDate(c.irreversibility.computedAt) ?? "Date unavailable"} · Evidence posture: {c.irreversibility.evidencePosture.replace(/_/g, " ").toLowerCase()}
+          </p>
+          <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
+            {c.irreversibility.evidenceBasis}
           </p>
           {c.irreversibility.windowRemaining && (
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
@@ -206,74 +217,27 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
         </div>
       )}
 
-      {c.decisionVelocity && (
-        <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.decisionVelocity.velocityBand === "STALLED" ? "rgba(252,165,165,0.58)" : c.decisionVelocity.velocityBand === "FAST" ? "rgba(110,231,183,0.58)" : `${GOLD}88` }}>
-            Decision velocity: {c.decisionVelocity.velocityBand}
-          </span>
-          <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
-            {c.decisionVelocity.explanation}
-          </p>
+      {c.decisionVelocitySummary && (
+        <div style={{ marginBottom: "16px" }}>
+          <DecisionVelocityCard summary={c.decisionVelocitySummary} />
         </div>
       )}
 
-      {c.whatChanged?.hasPriorState && c.whatChanged.changes.length > 0 && (
-        <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
-            What changed since last reading
-          </span>
-          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.72)", marginTop: "4px" }}>
-            {c.whatChanged.headline}
-          </p>
-          {c.whatChanged.changes.slice(0, 4).map((change) => (
-            <p key={`${change.field}-${String(change.current)}`} style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
-              {change.field}: {String(change.previous ?? "unknown")} → {String(change.current ?? "unknown")}
-            </p>
-          ))}
-          {c.whatChanged.caution && (
-            <p style={{ fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.28)", marginTop: "6px", fontStyle: "italic" }}>
-              {c.whatChanged.caution}
-            </p>
-          )}
+      {c.whatChanged && (
+        <div style={{ marginBottom: "16px" }}>
+          <WhatChangedPanel summary={c.whatChanged} title="What changed since your last assessment" />
         </div>
       )}
 
       {c.crossAssessmentIntelligence && (c.crossAssessmentIntelligence.conflicts.length > 0 || c.crossAssessmentIntelligence.reinforcingSignals.length > 0) && (
-        <div style={{ marginBottom: "16px", border: `1px solid ${GOLD}16`, backgroundColor: `${GOLD}04`, padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
-            System intelligence
-          </span>
-          {c.crossAssessmentIntelligence.conflicts.slice(0, 2).map((conflict) => (
-            <p key={conflict.label} style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.52, color: "rgba(255,255,255,0.72)", marginTop: "5px" }}>
-              {conflict.userSafeExplanation}
-            </p>
-          ))}
-          {c.crossAssessmentIntelligence.reinforcingSignals.slice(0, 1).map((signal) => (
-            <p key={signal.label} style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.36)", marginTop: "5px" }}>
-              {signal.description}
-            </p>
-          ))}
-          {c.crossAssessmentIntelligence.caution && (
-            <p style={{ fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.28)", marginTop: "6px", fontStyle: "italic" }}>
-              {c.crossAssessmentIntelligence.caution}
-            </p>
-          )}
+        <div style={{ marginBottom: "16px" }}>
+          <CrossAssessmentInsight intelligence={c.crossAssessmentIntelligence} />
         </div>
       )}
 
       {c.contradictionMap && c.contradictionMap.activeContradictions.length > 0 && (
-        <div style={{ marginBottom: "16px", border: "1px solid rgba(252,165,165,0.10)", backgroundColor: "rgba(252,165,165,0.02)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.58)" }}>
-            Contradiction map
-          </span>
-          <p style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.5, color: "rgba(255,255,255,0.72)", marginTop: "4px" }}>
-            {c.contradictionMap.headline}
-          </p>
-          {c.contradictionMap.activeContradictions.filter((item) => item.safeToDisplay).slice(0, 2).map((item) => (
-            <p key={item.id} style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
-              {item.plainEnglish}
-            </p>
-          ))}
+        <div style={{ marginBottom: "16px" }}>
+          <ContradictionMapPreview view={c.contradictionMap} />
         </div>
       )}
 
@@ -635,6 +599,7 @@ export default function DecisionCentrePage() {
       .then((json) => {
         if (json.ok) {
           setData(json);
+          trackLaunch("decision_centre_opened", "decision_centre");
         } else if (json.reason === "AUTH_REQUIRED") {
           setAuthRequired(true);
         }
