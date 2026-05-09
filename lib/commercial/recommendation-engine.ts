@@ -1,16 +1,19 @@
 /**
  * lib/commercial/recommendation-engine.ts
  *
- * Maps diagnostic conditions to product recommendations.
- * The system recommends the next appropriate instrument
- * because the evidence requires it — not because the platform wants revenue.
+ * Earned progression engine. Not a sales funnel.
+ *
+ * A next instrument appears only when the user's evidence earns it.
+ * The system must be willing to say: "No paid step is warranted yet."
  *
  * All products resolve through catalog.ts. No hardcoded prices or names.
  */
 
-import { getProduct, type CatalogProduct } from "@/lib/commercial/catalog";
+import { getProduct, isCheckoutAvailable, type CatalogProduct } from "@/lib/commercial/catalog";
 
-export type RecommendationInput = {
+// ─── TYPES ───────────────────────────────────────────────────────────────────
+
+export type ProgressionInput = {
   sourceSurface:
     | "fast_diagnostic"
     | "personal_decision_audit"
@@ -32,21 +35,37 @@ export type RecommendationInput = {
   competingObligationDominant?: boolean;
   institutionalStakes?: boolean;
   executionReady?: boolean;
+  hasUnresolvedCheckpoint?: boolean;
 };
 
-export type ProductRecommendation = {
+export type ProductProgressionState =
+  | "NOT_RELEVANT"
+  | "INSUFFICIENT_EVIDENCE"
+  | "AVAILABLE_BUT_NOT_WARRANTED"
+  | "EARNED_ACCESS"
+  | "RECOMMENDED_BY_EVIDENCE"
+  | "ESCALATION_WARRANTED"
+  | "RETAINER_SIGNAL_DETECTED"
+  | "COUNSEL_WARRANTED"
+  | "BLOCKED_UNTIL_MORE_EVIDENCE"
+  | "ALREADY_ENTITLED";
+
+export type EarnedProgression = {
   productCode: string;
   product: CatalogProduct;
+  state: ProductProgressionState;
   reason: string;
-  urgency: "LOW" | "MODERATE" | "HIGH";
-  recommendationType:
-    | "NEXT_INSTRUMENT"
-    | "DEEPEN_ANALYSIS"
-    | "EXECUTE"
-    | "ESCALATE"
-    | "BUNDLE";
+  evidenceThreshold: string[];
+  whatItWillTest: string;
+  whatHappensIfYouStop: string;
   ctaLabel: string;
 };
+
+// Legacy alias for backward compatibility
+export type ProductRecommendation = EarnedProgression;
+export type RecommendationInput = ProgressionInput;
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 function tryProduct(code: string): CatalogProduct | null {
   try {
@@ -56,7 +75,35 @@ function tryProduct(code: string): CatalogProduct | null {
   }
 }
 
-export function recommendNextInstrument(input: RecommendationInput): ProductRecommendation | null {
+function buildProgression(input: {
+  productCode: string;
+  product: CatalogProduct;
+  state: ProductProgressionState;
+  reason: string;
+  evidenceThreshold: string[];
+  whatItWillTest: string;
+}): EarnedProgression {
+  return {
+    ...input,
+    whatHappensIfYouStop: "Your current finding and checkpoint remain active. The system will still check whether you acted.",
+    ctaLabel: input.product.primaryCta ?? input.product.displayName,
+  };
+}
+
+// ─── MAIN ENGINE ─────────────────────────────────────────────────────────────
+
+export function determineEarnedNextStep(input: ProgressionInput): EarnedProgression | null {
+  // If user has an unresolved checkpoint, do not push a product.
+  // The primary action is: respond to your checkpoint.
+  if (input.hasUnresolvedCheckpoint) {
+    return null;
+  }
+
+  // If evidence is genuinely insufficient, say so. Do not recommend a paid product.
+  if (input.evidenceInsufficient && !input.authorityGap && !input.ownershipGap && !input.consequenceHigh) {
+    return null; // "No paid step is warranted yet."
+  }
+
   // Count how many decision instrument needs are present
   const instrumentNeeds = [
     input.authorityGap,
@@ -65,95 +112,106 @@ export function recommendNextInstrument(input: RecommendationInput): ProductReco
     input.consequenceHigh,
   ].filter(Boolean).length;
 
-  // Bundle recommendation if multiple needs
+  // Bundle if multiple needs converge
   if (instrumentNeeds >= 2) {
     const product = tryProduct("operator_decision_pack");
-    if (product?.active) {
-      return {
+    if (product?.active && isCheckoutAvailable(product)) {
+      return buildProgression({
         productCode: "operator_decision_pack",
         product,
-        reason: "Multiple decision pressure points detected. The bundle addresses authority, intervention path, and consequence exposure together.",
-        urgency: "HIGH",
-        recommendationType: "BUNDLE",
-        ctaLabel: product.primaryCta ?? product.displayName,
-      };
+        state: "EARNED_ACCESS",
+        reason: "Multiple decision pressure points detected. The evidence threshold for the decision instrument bundle has been crossed.",
+        evidenceThreshold: [
+          input.authorityGap ? "Authority gap detected" : "",
+          input.ownershipGap ? "Ownership unclear" : "",
+          input.interventionUnclear ? "Intervention path undefined" : "",
+          input.consequenceHigh ? "High consequence confirmed" : "",
+        ].filter(Boolean),
+        whatItWillTest: "Authority, intervention route, and consequence exposure — tested together.",
+      });
     }
   }
 
   // Authority or ownership gap → mandate clarity
   if (input.authorityGap || input.ownershipGap) {
     const product = tryProduct("mandate_clarity_framework");
-    if (product?.active) {
-      return {
+    if (product?.active && isCheckoutAvailable(product)) {
+      return buildProgression({
         productCode: "mandate_clarity_framework",
         product,
+        state: "EARNED_ACCESS",
         reason: input.authorityGap
-          ? "The diagnostic detected an authority gap. The mandate framework tests whether the decision has a clear, exercisable owner."
-          : "Decision ownership is unclear. The mandate framework helps identify who can actually make this binding.",
-        urgency: "HIGH",
-        recommendationType: "NEXT_INSTRUMENT",
-        ctaLabel: product.primaryCta ?? product.displayName,
-      };
+          ? "Your evidence shows a decision exists but authority to act is unclear. This instrument tests whether the mandate is clear enough to proceed."
+          : "Decision ownership could not be confirmed. This instrument tests whether a binding owner exists.",
+        evidenceThreshold: [
+          input.authorityGap ? "Authority gap confirmed in diagnostic" : "",
+          input.ownershipGap ? "Owner named but not binding" : "",
+        ].filter(Boolean),
+        whatItWillTest: "Whether this decision has a clear, exercisable mandate owner.",
+      });
     }
   }
 
-  // Intervention unclear → intervention path selector
+  // Intervention unclear → path selector
   if (input.interventionUnclear) {
     const product = tryProduct("intervention_path_selector");
-    if (product?.active) {
-      return {
+    if (product?.active && isCheckoutAvailable(product)) {
+      return buildProgression({
         productCode: "intervention_path_selector",
         product,
-        reason: "The decision exists but the intervention path is unclear. This instrument tests which type of correction is appropriate.",
-        urgency: "MODERATE",
-        recommendationType: "NEXT_INSTRUMENT",
-        ctaLabel: product.primaryCta ?? product.displayName,
-      };
+        state: "EARNED_ACCESS",
+        reason: "The decision is named, but the correction path is undefined. This instrument tests which type of intervention is appropriate.",
+        evidenceThreshold: ["Intervention route unresolved"],
+        whatItWillTest: "Which correction type — authority, execution, or structural — matches the evidence.",
+      });
     }
   }
 
-  // High consequence → decision exposure instrument
-  if (input.consequenceHigh) {
+  // High consequence → exposure instrument
+  if (input.consequenceHigh && !input.institutionalStakes) {
     const product = tryProduct("decision_exposure_instrument");
-    if (product?.active) {
-      return {
+    if (product?.active && isCheckoutAvailable(product)) {
+      return buildProgression({
         productCode: "decision_exposure_instrument",
         product,
-        reason: "High consequence detected. This instrument maps the financial, reputational, and structural exposure of the current decision state.",
-        urgency: "HIGH",
-        recommendationType: "NEXT_INSTRUMENT",
-        ctaLabel: product.primaryCta ?? product.displayName,
-      };
+        state: "EARNED_ACCESS",
+        reason: "Consequence severity is high. This instrument maps the financial, reputational, and structural exposure of the current decision state.",
+        evidenceThreshold: ["High consequence detected in diagnostic"],
+        whatItWillTest: "The scale and type of exposure if the decision remains unresolved.",
+      });
     }
   }
 
-  // Personal contradiction / competing obligation → personal decision audit
-  if (input.competingObligationDominant || input.weakestDomain === "identity" || input.weakestDomain === "decision") {
-    const product = tryProduct("personal_decision_audit");
-    if (product) {
-      return {
-        productCode: "personal_decision_audit",
-        product,
-        reason: "The diagnostic suggests the constraint is personal — a competing obligation or mandate confusion is blocking the decision.",
-        urgency: "MODERATE",
-        recommendationType: "DEEPEN_ANALYSIS",
-        ctaLabel: product.primaryCta ?? product.displayName,
-      };
-    }
-  }
-
-  // Board-grade / institutional stakes → executive reporting
-  if (input.institutionalStakes || input.consequenceHigh) {
+  // Institutional stakes → executive reporting (not immediate checkout — preview)
+  if (input.institutionalStakes) {
     const product = tryProduct("executive_reporting");
     if (product?.active) {
-      return {
+      return buildProgression({
         productCode: "executive_reporting",
         product,
-        reason: "The decision has institutional or board-level consequence. Executive Reporting produces a governed priority stack and escalation route.",
-        urgency: "HIGH",
-        recommendationType: "ESCALATE",
-        ctaLabel: product.primaryCta ?? product.displayName,
-      };
+        state: "RECOMMENDED_BY_EVIDENCE",
+        reason: "The decision appears to carry institutional, board-level, or multi-stakeholder consequence. Executive Reporting produces a governed priority stack when the evidence supports it.",
+        evidenceThreshold: [
+          "Institutional consequence language detected",
+          input.consequenceHigh ? "High consequence confirmed" : "",
+        ].filter(Boolean),
+        whatItWillTest: "Whether the consequence justifies a board-grade priority stack and escalation route.",
+      });
+    }
+  }
+
+  // Competing obligation dominant → personal decision audit
+  if (input.competingObligationDominant) {
+    const product = tryProduct("personal_decision_audit");
+    if (product) {
+      return buildProgression({
+        productCode: "personal_decision_audit",
+        product,
+        state: product.active ? "EARNED_ACCESS" : "AVAILABLE_BUT_NOT_WARRANTED",
+        reason: "The diagnostic suggests the primary blocker is a competing obligation — something the user is protecting at the expense of the decision.",
+        evidenceThreshold: ["Competing obligation identified"],
+        whatItWillTest: "The contradiction between stated mandate, actual behaviour, and competing obligation.",
+      });
     }
   }
 
@@ -161,31 +219,22 @@ export function recommendNextInstrument(input: RecommendationInput): ProductReco
   if (input.executionReady) {
     const product = tryProduct("strategy_room");
     if (product?.active) {
-      return {
+      return buildProgression({
         productCode: "strategy_room",
         product,
-        reason: "Evidence and authority are sufficient. The Strategy Room converts diagnosis into governed execution with checkpoints and memory.",
-        urgency: "MODERATE",
-        recommendationType: "EXECUTE",
-        ctaLabel: product.primaryCta ?? product.displayName,
-      };
+        state: "EARNED_ACCESS",
+        reason: "Evidence and authority are sufficient for governed execution. The Strategy Room converts diagnosis into action with checkpoints and memory.",
+        evidenceThreshold: ["Authority confirmed", "Evidence sufficient", "Execution readiness met"],
+        whatItWillTest: "Whether the user will execute against the identified condition with governance.",
+      });
     }
   }
 
-  // Default: if evidence is insufficient, recommend deepening
-  if (input.evidenceInsufficient) {
-    const product = tryProduct("personal_decision_audit");
-    if (product) {
-      return {
-        productCode: "personal_decision_audit",
-        product,
-        reason: "The current evidence base is thin. A deeper personal audit would strengthen the diagnostic reading.",
-        urgency: "LOW",
-        recommendationType: "DEEPEN_ANALYSIS",
-        ctaLabel: product.primaryCta ?? product.displayName,
-      };
-    }
-  }
-
+  // No earned progression — this is fine
   return null;
+}
+
+// Legacy alias
+export function recommendNextInstrument(input: ProgressionInput): EarnedProgression | null {
+  return determineEarnedNextStep(input);
 }
