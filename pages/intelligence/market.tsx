@@ -5,15 +5,24 @@ import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 
 import Layout from "@/components/Layout";
 import { getAllBriefs } from "@/lib/content/server";
+import { getPremiumContentList } from "@/lib/premium/content-registry";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
 type BriefItem = { title: string; href: string; description: string };
+type IntelligenceArtifactItem = {
+  title: string;
+  href: string;
+  description: string;
+  edition: string;
+  classification: string;
+};
 
 type Props = {
   briefs: BriefItem[];
+  intelligenceArtifacts: IntelligenceArtifactItem[];
 };
 
 function safeString(value: unknown, fallback = ""): string {
@@ -34,10 +43,24 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       description: safeString(doc.description || doc.summary || doc.excerpt, "Strategic brief."),
     }));
 
-  return { props: { briefs }, revalidate: 1800 };
+  const intelligenceArtifacts = getPremiumContentList()
+    .filter((item) =>
+      item.id === "global-market-outlook-q1-2026-public" ||
+      item.id === "global-market-intelligence-report-q1-2026" ||
+      item.id === "global-market-intelligence-board-deck-q1-2026"
+    )
+    .map((item) => ({
+      title: safeString(item.title, "Untitled intelligence artifact"),
+      href: `/artifacts/${item.id}`,
+      description: safeString(item.description, "Quarterly intelligence artifact."),
+      edition: safeString(item.metadata?.editionType || item.metadata?.productLine || item.category, "Edition"),
+      classification: safeString(item.metadata?.classification, "PUBLIC"),
+    }));
+
+  return { props: { briefs, intelligenceArtifacts }, revalidate: 1800 };
 };
 
-const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ briefs }) => {
+const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ briefs, intelligenceArtifacts }) => {
   return (
     <Layout
       title="Market Intelligence | Abraham of London"
@@ -55,7 +78,7 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               Strategic reading for operators and decision-makers.
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/60">
-              This layer connects Global Market Intelligence, market briefs, and strategic reports. Public and restricted materials are separated honestly. Catalog identity governs access where a report is active, and inactive materials are not presented as freely purchasable.
+              This layer is led by the quarterly intelligence briefing line: public surface edition, institutional PDF edition, and board briefing deck. Briefs sit alongside that line, but they do not replace it. Public and restricted materials are separated honestly, and artifact identity governs access where a report is active.
             </p>
           </header>
 
@@ -63,11 +86,11 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
               <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Global Market Intelligence</p>
               <p className="mt-3 text-sm leading-7 text-white/60">
-                The flagship market intelligence surface connects public brief, institutional edition, and boardroom-facing material without collapsing them into one generic content listing.
+                The flagship market intelligence line connects the quarterly public briefing, the institutional report, and the board briefing deck without collapsing them into one generic content listing.
               </p>
               <div className="mt-5 space-y-2 text-sm">
                 <p><Link href="/intelligence/global-market-intelligence-q1-2026" className="text-white hover:underline">Open market intelligence landing</Link></p>
-                <p><Link href="/artifacts" className="text-white hover:underline">Browse artifact archive</Link></p>
+                <p><Link href="/artifacts/global-market-outlook-q1-2026-public" className="text-white hover:underline">Open public quarterly briefing</Link></p>
               </div>
             </section>
 
@@ -83,14 +106,32 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
               <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Strategic reports</p>
               <p className="mt-3 text-sm leading-7 text-white/60">
-                Reports stay connected to intelligence lines, consequence framing, and catalog identity. They are not presented as a random shelf of PDFs.
+                Quarterly intelligence artifacts stay connected to consequence framing, edition control, and governed access. They are not presented as a random shelf of PDFs.
               </p>
             </section>
           </section>
 
           <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
             <div className="flex items-center justify-between gap-3">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Recent briefs</p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Quarterly intelligence artifacts</p>
+              <Link href="/artifacts" className="text-sm text-white/68 underline-offset-4 hover:underline">Browse artifact archive</Link>
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {intelligenceArtifacts.length > 0 ? intelligenceArtifacts.map((artifact) => (
+                <div key={artifact.href} style={{ borderLeft: "1px solid rgba(201,169,110,0.32)", paddingLeft: "12px" }}>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                    {artifact.edition} · {artifact.classification}
+                  </p>
+                  <Link href={artifact.href} className="mt-2 block text-white hover:underline">{artifact.title}</Link>
+                  <p className="mt-1 text-sm leading-6 text-white/55">{artifact.description}</p>
+                </div>
+              )) : <p className="text-sm text-white/45">No quarterly intelligence artifacts are currently indexed here.</p>}
+            </div>
+          </section>
+
+          <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+            <div className="flex items-center justify-between gap-3">
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Related briefs and intelligence notes</p>
               <Link href="/library" className="text-sm text-white/68 underline-offset-4 hover:underline">View structured archive</Link>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2">

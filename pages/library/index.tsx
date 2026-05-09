@@ -15,6 +15,7 @@ import {
   getAllBriefs,
   getAllVault,
 } from "@/lib/content/server";
+import { getPremiumContentList } from "@/lib/premium/content-registry";
 
 type Group = {
   title: string;
@@ -74,6 +75,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const downloads = getAllDownloads().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
   const vault = getAllVault().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
   const shorts = getAllShorts().filter((doc: any) => doc?.draft !== true && doc?.published !== false);
+  const intelligenceArtifacts = getPremiumContentList().filter((item) =>
+    item.category === "market-intelligence" ||
+    item.tags.some((tag) => tag.toLowerCase().includes("market-intelligence"))
+  );
 
   const frameworkResources = resources.filter((doc: any) => String(doc?._raw?.sourceFilePath || "").includes("strategic-frameworks"));
 
@@ -82,7 +87,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     { title: "Briefs", description: "Strategic briefs and intelligence notes.", href: "/intelligence/market", count: briefs.length },
     { title: "Playbooks", description: "Execution-grade public playbooks.", href: "/playbooks", count: playbooks.length },
     { title: "Frameworks", description: "Decision frameworks and strategic instruments.", href: "/frameworks", count: frameworkResources.length },
-    { title: "Market Intelligence", description: "Public and restricted intelligence lines.", href: "/intelligence/market", count: briefs.length + downloads.length },
+    { title: "Market Intelligence", description: "Quarterly intelligence briefings, strategic notes, and restricted report lines.", href: "/intelligence/market", count: briefs.length + intelligenceArtifacts.length },
     { title: "Books", description: "Long-form works and featured volumes.", href: "/books", count: books.length },
     { title: "Evidence Materials", description: "Standards, evidence pages, and proof posture.", href: "/evidence", count: downloads.length },
     { title: "Vault", description: "Controlled archive and restricted materials.", href: "/vault", count: vault.length },
@@ -93,6 +98,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     canons[0] ? buildRecentItem(canons[0], "Canon", `/canon/${normalizeSlug(canons[0].slugSafe || canons[0].slug)}`) : null,
     playbooks[0] ? buildRecentItem(playbooks[0], "Playbooks", `/playbooks/${normalizeSlug(playbooks[0].urlSlug || playbooks[0].slug)}`) : null,
     frameworkResources[0] ? buildRecentItem(frameworkResources[0], "Frameworks", `/resources/strategic-frameworks/${normalizeSlug(frameworkResources[0].slug || frameworkResources[0].url)}`) : null,
+    intelligenceArtifacts[0] ? buildRecentItem(intelligenceArtifacts[0], "Market Intelligence", `/artifacts/${safeString(intelligenceArtifacts[0].id)}`) : null,
     briefs[0] ? buildRecentItem(briefs[0], "Briefs", `/briefs/${normalizeSlug(briefs[0].slug || briefs[0].urlSlug)}`) : null,
     posts[0] ? buildRecentItem(posts[0], "Essays", `/blog/${normalizeSlug(posts[0].slug || posts[0].url)}`) : null,
   ].filter(Boolean) as RecentItem[];

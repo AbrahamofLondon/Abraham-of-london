@@ -73,7 +73,8 @@
       "Bash(node scripts/intelligence-boundary-guard.mjs)",
       "Bash(node scripts/public-copy-guard.mjs)",
       "Bash(node scripts/evidence-posture-guard.mjs)",
-      "Bash(node scripts/earned-progression-guard.mjs)"
+      "Bash(node scripts/earned-progression-guard.mjs)",
+      "Bash(node scripts/retainer-claim-guard.mjs)"
     ]
   }
 }
