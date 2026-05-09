@@ -442,6 +442,43 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   </p>
                 </Section>
               )}
+
+              {/* ── PDF Download ── */}
+              <section className="border border-white/[0.08] bg-white/[0.02] p-5">
+                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#C9A96E]">
+                  Export
+                </p>
+                <p className="mt-3 text-sm leading-7 text-white/50">
+                  Download a client-safe PDF of this oversight brief.
+                </p>
+                <button
+                  className="mt-4 border border-amber-500/30 bg-amber-500/10 px-5 py-2 text-sm text-amber-200 transition-colors hover:bg-amber-500/20"
+                  onClick={() => {
+                    fetch("/api/pdf/oversight-brief", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email: brief.accountId }),
+                    })
+                      .then((r) => {
+                        if (!r.ok) throw new Error("PDF generation failed");
+                        return r.blob();
+                      })
+                      .then((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `oversight-brief-${brief.briefId}.pdf`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      })
+                      .catch(() => {
+                        alert("PDF generation failed. Admin access may be required.");
+                      });
+                  }}
+                >
+                  Download PDF
+                </button>
+              </section>
             </>
           )}
         </div>
@@ -451,6 +488,10 @@ const OversightBriefPage: NextPage<PageProps> = ({
 };
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => {
+  const { requireRole } = await import("@/lib/access/require-role.server");
+  const roleCheck = await requireRole(ctx, "OVERSIGHT_VIEW");
+  if ("redirect" in roleCheck) return { redirect: roleCheck.redirect };
+
   const { session, access } = await resolvePageAccess(ctx);
   if (!access.permissions.isAuthenticated || !session?.user?.email) {
     return {
