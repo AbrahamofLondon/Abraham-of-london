@@ -89,7 +89,7 @@ export function buildContradictionMapView(input: {
       ? "One active contradiction is currently shaping this case."
       : `${items.length} active contradictions are currently shaping this case.`,
     warning: items.some((item) => item.severityBand === "CRITICAL")
-      ? "Critical contradictions are active. This map describes the conflict in plain language, not the raw kernel graph."
+      ? "Critical contradictions are active. This map describes the conflict in plain language."
       : undefined,
   };
 }

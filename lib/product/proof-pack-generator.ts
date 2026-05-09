@@ -175,7 +175,7 @@ export async function generateProofPack(input: {
     diagnosticsCompleted: {
       label: "Diagnostics completed",
       count: diagnosticsCompleted,
-      posture: diagnosticsCompleted > 0 ? "VERIFIED" : "INSUFFICIENT_EVIDENCE",
+      posture: diagnosticsCompleted > 0 ? "SYSTEM_INFERRED" : "INSUFFICIENT_EVIDENCE",
       note: "Count of completed diagnostic records attached to this account.",
     },
     evidenceCaptured: {
@@ -188,12 +188,12 @@ export async function generateProofPack(input: {
       label: "Contradictions detected",
       count: contradictionNodes,
       posture: contradictionNodes > 0 ? "SYSTEM_INFERRED" : "INSUFFICIENT_EVIDENCE",
-      note: "Contradiction nodes written into the evidence graph.",
+      note: "Contradictions detected and recorded against this account.",
     },
     checkpointsCreated: {
       label: "Checkpoints created",
       count: allCheckpoints.length,
-      posture: allCheckpoints.length > 0 ? "VERIFIED" : "INSUFFICIENT_EVIDENCE",
+      posture: allCheckpoints.length > 0 ? "SYSTEM_INFERRED" : "INSUFFICIENT_EVIDENCE",
       note: "Durable efficacy checkpoints created for this account.",
     },
     checkpointResponses: {
