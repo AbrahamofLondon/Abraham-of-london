@@ -16,7 +16,7 @@ import {
   Compass,
 } from "lucide-react";
 import { SovereignDashboard } from "@/lib/components/ai/SovereignDashboard";
-import { KnowledgeGraph } from "@/components/Intelligence/KnowledgeGraph";
+import { KnowledgeGraph } from "@/components/Intelligence/operator/KnowledgeGraph";
 import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
 
 interface AuditLogEntry {
