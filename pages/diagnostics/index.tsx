@@ -413,9 +413,7 @@ export default function DiagnosticsIndexPage() {
               >
                 Governed entry · staged evidence ladder · no account required
                 <br />
-                No preparation required. The system extracts the decision.
-                <br />
-                Decisions evaluated against an AI-accelerated market baseline.
+                No preparation required. The system requires you to name the decision.
               </div>
             </div>
           </div>

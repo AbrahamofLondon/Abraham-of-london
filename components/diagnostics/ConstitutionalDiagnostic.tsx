@@ -575,11 +575,9 @@ export default function ConstitutionalDiagnostic() {
                 findings={[
                   ...(decision ? [{ label: "Route", value: decision.route }] : []),
                   ...(decision ? [{ label: "Confidence", value: `${Math.round((decision.confidence ?? 0) * 100)}%` }] : []),
-                  ...(report ? [{ label: "Authority", value: `${report.authorityScore ?? 0}%` }] : []),
-                  ...(report ? [{ label: "Coherence", value: `${report.coherenceScore ?? 0}%` }] : []),
-                  ...(report ? [{ label: "Pressure", value: `${report.pressureScore ?? 0}%` }] : []),
-                  ...(report ? [{ label: "Seriousness", value: `${report.seriousnessScore ?? 0}%` }] : []),
-                  ...(decision?.disqualifiersTriggered?.length ? [{ label: "Disqualifiers", value: decision.disqualifiersTriggered.join(", ") }] : []),
+                  ...(report ? [{ label: "Readiness", value: report.readinessTier?.replace(/_/g, " ") ?? "—" }] : []),
+                  ...(report ? [{ label: "Posture", value: report.posture ?? "—" }] : []),
+                  ...(decision?.disqualifiersTriggered?.length ? [{ label: "Restrictions", value: decision.disqualifiersTriggered.join(", ") }] : []),
                 ]}
               />
 
@@ -791,8 +789,8 @@ export default function ConstitutionalDiagnostic() {
                   Pattern trigger explanation
                 </div>
                 <p className="mt-3">
-                  This combination produces {routeSummary.title.toLowerCase()} because the authority,
-                  coherence, friction, and pressure scores resolved into a {report.posture.toLowerCase()} posture with{" "}
+                  This combination produces {routeSummary.title.toLowerCase()} because the structural
+                  signals resolved into a {report.posture.toLowerCase()} posture with{" "}
                   {report.readinessTier.toLowerCase().replaceAll("_", " ")} readiness.
                 </p>
               </div>
@@ -1093,7 +1091,7 @@ export default function ConstitutionalDiagnostic() {
               Product posture
             </div>
             <p className="mt-2 text-sm leading-relaxed text-white/56">
-              This gate is now a real microcosm of the wider estate: interrogation, diagnosis, routing, recommendations, and downstream inheritance.
+              A structural reading that the system remembers. Evidence carries forward into deeper assessment, governed routing, and downstream execution.
             </p>
           </div>
         </motion.aside>

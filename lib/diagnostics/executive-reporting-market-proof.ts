@@ -204,11 +204,11 @@ export const EXECUTIVE_PRICING_TIERS: ExecutivePricingTier[] = [
     id: "mandate",
     label: "Selective",
     title: "Mandate Escalation",
-    price: "Private Advisory",
+    price: "Governed Escalation",
     positioning:
       "For matters where the consequence is already material and structured intervention is warranted.",
     bestFor:
-      "Situations requiring correction architecture, decision design, or private advisory support.",
+      "Situations requiring correction architecture, decision design, or governed escalation support.",
     includes: [
       "Strategy Room entry",
       "Intervention design",

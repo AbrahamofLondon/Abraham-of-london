@@ -268,7 +268,7 @@ const StrategyPage: NextPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/consulting/strategy-room"
+                  href="/strategy-room"
                   className="bg-amber-400 px-8 py-4 rounded-xl text-black font-bold uppercase tracking-widest hover:bg-amber-300"
                 >
                   Enter Strategy Room

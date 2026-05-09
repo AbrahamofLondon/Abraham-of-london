@@ -24,7 +24,7 @@ const DEFAULT_OFFERS: Offer[] = [
       "The first disciplined layer for leaders who need clarity before escalation.",
     bullets: [
       "Pattern reading and structural interpretation",
-      "Useful before advisory is justified",
+      "Useful before deeper intervention is justified",
       "Best when drift is visible but diagnosis is still weak",
     ],
     href: "/diagnostics",
@@ -32,7 +32,7 @@ const DEFAULT_OFFERS: Offer[] = [
   {
     title: "Executive Reporting",
     label: "Flagship",
-    price: "Premium",
+    price: "Flagship",
     body:
       "The core reporting layer for decision-makers who need a sharper reading, clearer exposure, and correction architecture.",
     bullets: [
@@ -50,7 +50,7 @@ const DEFAULT_OFFERS: Offer[] = [
     body:
       "The private chamber for situations where consequence is already material and structured intervention is justified.",
     bullets: [
-      "Private advisory path",
+      "Private working path",
       "Correction environment design",
       "Decision architecture under pressure",
     ],

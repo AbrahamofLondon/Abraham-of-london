@@ -36,7 +36,7 @@ function stageMeta(stage: ConstitutionalHandoffStage) {
         icon: Crown,
         title: "Escalation context has been carried forward",
         body: "This room can use the initial constitutional reading instead of forcing a blind restart.",
-        href: "/consulting/strategy-room",
+        href: "/strategy-room",
         cta: "Remain in Strategy Room",
       };
     case "executive-reporting":

@@ -14,7 +14,7 @@ const OBJECTIONS: Objection[] = [
   {
     objection: "Why not just hire a consultant directly?",
     answer:
-      "Because not every serious problem is ready for advisory. Some problems first require disciplined interpretation. This product creates a cleaner reading before money is spent on intervention theatre.",
+      "Because not every serious problem is ready for direct intervention. Some problems first require disciplined interpretation. This product creates a cleaner reading before money is spent on intervention theatre.",
     icon: Scale,
   },
   {
@@ -30,7 +30,7 @@ const OBJECTIONS: Objection[] = [
     icon: ShieldCheck,
   },
   {
-    objection: "What if we are not ready for private advisory?",
+    objection: "What if we are not ready for private working access?",
     answer:
       "Then this is exactly the correct entry point. The reporting layer stands on its own. It helps you understand whether the matter needs correction, restraint, or escalation into a deeper mandate.",
     icon: XCircle,

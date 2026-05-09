@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import type { EarnedProgression } from "@/lib/commercial/recommendation-engine";
 import { getCommercialDisplayPrice, isCheckoutAvailable, isContractedProduct } from "@/lib/commercial/catalog";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -32,6 +33,14 @@ export function ProductAdmissionCard({
   const isContracted = isContractedProduct(product);
   const isInactive = !product.active;
   const isFree = product.commercialStatus === "free_controlled" || product.amount === 0;
+
+  React.useEffect(() => {
+    trackLaunch("earned_step_shown", "earned_progression", { productCode: product.code, admissionState: state });
+  }, [product.code, state]);
+
+  const onEarnedStepClicked = () => {
+    trackLaunch("earned_step_clicked", "earned_progression", { productCode: product.code, admissionState: state });
+  };
 
   const textPrimary = isDark ? "rgba(255,255,255,0.85)" : "#1a1a1a";
   const textSecondary = isDark ? "rgba(255,255,255,0.50)" : "#666";
@@ -75,11 +84,11 @@ export function ProductAdmissionCard({
 
       <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", marginTop: "10px" }}>
         {isFree ? (
-          <Link href={product.successPath} style={{ padding: "8px 18px", backgroundColor: isDark ? "#F5F5F5" : "#1a1a1a", color: isDark ? "#0B0B0B" : "#F5F5F5", textDecoration: "none", ...mono, fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
+          <Link href={product.successPath} onClick={onEarnedStepClicked} style={{ padding: "8px 18px", backgroundColor: isDark ? "#F5F5F5" : "#1a1a1a", color: isDark ? "#0B0B0B" : "#F5F5F5", textDecoration: "none", ...mono, fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
             {ctaLabel}
           </Link>
         ) : canCheckout && state === "EARNED_ACCESS" ? (
-          <Link href={`/checkout?product=${product.code}`} style={{ padding: "8px 18px", backgroundColor: GOLD, color: "#0B0B0B", textDecoration: "none", ...mono, fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
+          <Link href={`/checkout?product=${product.code}`} onClick={onEarnedStepClicked} style={{ padding: "8px 18px", backgroundColor: GOLD, color: "#0B0B0B", textDecoration: "none", ...mono, fontSize: "9px", letterSpacing: "0.10em", textTransform: "uppercase" }}>
             {ctaLabel} — {price}
           </Link>
         ) : isContracted ? (

@@ -12,7 +12,7 @@ const ITEMS = [
     icon: ShieldCheck,
   },
   {
-    title: "Premium flagship",
+    title: "Flagship layer",
     body:
       "Executive Reporting stands as a consequence layer with its own decision value.",
     icon: Crown,
@@ -20,7 +20,7 @@ const ITEMS = [
   {
     title: "Selective escalation",
     body:
-      "Private advisory is reserved for situations that justify mandate-level intervention.",
+      "Private working access is reserved for situations that justify mandate-level intervention.",
     icon: Layers,
   },
 ];

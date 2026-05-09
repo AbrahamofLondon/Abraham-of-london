@@ -33,11 +33,11 @@ const PATHS: GatePath[] = [
   {
     href: "/diagnostics/executive-reporting",
     title: "Review Executive Reporting",
-    body: "Go here when the condition is serious enough to justify a flagship interpretation layer before advisory escalation.",
+    body: "Go here when the condition is serious enough to justify a flagship interpretation layer before governed escalation.",
     icon: FileText,
   },
   {
-    href: "/consulting/strategy-room",
+    href: "/strategy-room",
     title: "Enter Strategy Room",
     body: "Use the chamber when the cost of delay, misjudgment, or mis-execution is already material and mandate fit is clear.",
     icon: Crown,

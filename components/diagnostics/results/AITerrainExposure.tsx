@@ -1,7 +1,7 @@
 /**
- * AITerrainExposure — AI-accelerated competitive gap surface.
+ * AITerrainExposure — competitive gap surface.
  *
- * Shows: classification, decision velocity vs baseline, projected gap 30/60/90.
+ * Shows: classification, current decision velocity pressure, projected gap 30/60/90.
  * This is survival condition intelligence, not AI readiness.
  */
 
@@ -69,7 +69,7 @@ export default function AITerrainExposure({ data }: { data: AITerrainAssessment 
             </div>
           </div>
           <div>
-            <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>AI baseline</span>
+            <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Reference pace</span>
             <div style={{ ...mono, fontSize: "12px", color: "rgba(110,231,183,0.50)" }}>
               {data.decisionVelocity.baseline}d
             </div>
@@ -77,7 +77,7 @@ export default function AITerrainExposure({ data }: { data: AITerrainAssessment 
           <div>
             <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Gap</span>
             <div style={{ ...mono, fontSize: "12px", color: "rgba(252,165,165,0.60)" }}>
-              +{data.decisionVelocity.gap}d ({data.decisionVelocity.gapPercent}% slower)
+              +{data.decisionVelocity.gap}d ({data.decisionVelocity.gapPercent}% slower than the reference pace)
             </div>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function AITerrainExposure({ data }: { data: AITerrainAssessment 
 
       {/* Evaluation context */}
       <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.15)", marginTop: "0.75rem" }}>
-        This decision is being evaluated against an AI-accelerated market baseline.
+        This decision is being evaluated against recorded competitive position and execution evidence.
       </p>
     </div>
   );

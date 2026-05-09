@@ -2,7 +2,7 @@
  * DecisionTerrainStatus — visible indicator of competitive terrain state.
  *
  * States: STABLE | DRIFTING | OUTPACED | ACCELERATING
- * Shows where the organisation sits relative to AI-accelerated market movement.
+ * Shows where the organisation sits relative to recorded decision pressure.
  */
 
 import * as React from "react";
@@ -16,19 +16,19 @@ export type TerrainState = "STABLE" | "DRIFTING" | "OUTPACED" | "ACCELERATING";
 const TERRAIN_CONFIG: Record<TerrainState, { color: string; message: string }> = {
   STABLE: {
     color: "rgba(110,231,183,0.60)",
-    message: "Decision velocity aligned with market baseline. Terrain conditions are holding.",
+    message: "Recorded decision movement is currently holding.",
   },
   DRIFTING: {
     color: `${GOLD}CC`,
-    message: "Decision velocity falling behind market acceleration. Gap widening but recoverable.",
+    message: "Recorded decision movement is slowing. The gap appears recoverable if acted on now.",
   },
   OUTPACED: {
     color: "rgba(252,165,165,0.70)",
-    message: "Competitors operating materially faster. Structural disadvantage accumulating.",
+    message: "Recorded decision movement is materially delayed. Structural disadvantage may be accumulating.",
   },
   ACCELERATING: {
     color: "rgba(110,231,183,0.75)",
-    message: "Decision velocity exceeding market baseline. Competitive advantage building.",
+    message: "Recorded decision movement is faster than the recent case pattern.",
   },
 };
 
@@ -70,7 +70,7 @@ export default function DecisionTerrainStatus({
           Terrain: {state}
         </span>
         <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.18)", marginLeft: "0.5rem" }}>
-          {velocityGapPercent > 0 ? `${velocityGapPercent}% behind baseline` : "At or ahead of baseline"}
+          {velocityGapPercent > 0 ? `${velocityGapPercent}% under recorded pace target` : "Holding or ahead of recorded pace target"}
         </span>
       </div>
     </div>

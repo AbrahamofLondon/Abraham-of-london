@@ -91,7 +91,7 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
         color: "rgba(255,255,255,0.15)",
         marginBottom: "0.75rem",
       }}>
-        Decisions are evaluated against an AI-accelerated market baseline.
+        Decisions are evaluated against cost, consequence, and execution evidence.
       </p>
 
       {/* Evidence — why this qualifies */}
@@ -123,7 +123,7 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
 
       {/* CTA — fixed, no alternatives */}
       <a
-        href="/consulting?retainer=qualified"
+        href="/counsel?retainer=qualified"
         style={{
           display: "inline-flex",
           alignItems: "center",

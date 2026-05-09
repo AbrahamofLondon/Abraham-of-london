@@ -6,10 +6,14 @@ import { ArrowRight } from "lucide-react";
 import { recommendNextInstrument } from "@/lib/commercial/recommendation-engine";
 import { ProductRecommendationCard } from "@/components/commercial/ProductRecommendationCard";
 import { ArbiterBadge } from "@/components/trust/ArbiterBadge";
+import ClientIntelligenceStack from "@/components/Intelligence/user/ClientIntelligenceStack";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
 import { trackHesitation, trackScrollDepth } from "@/lib/analytics/hesitation";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
+import type { DecisionVelocitySummary } from "@/lib/analytics/decision-velocity";
+import { defaultIntelligenceMeta } from "@/lib/product/intelligence-contract";
 import ExecutiveDecisionAuthorityBlock from "@/components/diagnostics/results/ExecutiveDecisionAuthorityBlock";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
@@ -259,6 +263,7 @@ const FastDiagnosticPage: NextPage = () => {
       clearVersionedAssessmentState(STORAGE_KEY);
       try { sessionStorage.setItem("aol_fast_result", JSON.stringify(publicResult)); } catch { /* ignore */ }
       track("fast_diagnostic_completed", { committed: commitmentValue, elapsed_seconds: Math.round((Date.now() - startedAt.current) / 1000) });
+      trackLaunch("fast_completed", "fast_diagnostic", { caseId: publicResult.caseRef });
       if (publicResult.recoveryQuestion) { setStage("recovery"); return; }
       setStage("result");
     } catch (submissionError) {
@@ -276,6 +281,49 @@ const FastDiagnosticPage: NextPage = () => {
   }
 
   const an = result?.anchorNarrative;
+  const fallbackVelocitySummary: DecisionVelocitySummary | null = React.useMemo(() => {
+    if (!result) return null;
+    return {
+      status: committed && result.checkpointId ? "FIRST_CHECKPOINT_CREATED" : "NO_DATA",
+      averageTimeToFirstResponseDays: null,
+      previousAverageTimeToFirstResponseDays: null,
+      trendDeltaDays: null,
+      openCheckpointCount: committed && result.checkpointId ? 1 : 0,
+      overdueCheckpointCount: 0,
+      completedCheckpointCount: 0,
+      blockedCheckpointCount: 0,
+      decisionVelocityBand: committed && result.checkpointId ? "INSUFFICIENT_DATA" : "INSUFFICIENT_DATA",
+      sourceLabel: committed && result.checkpointId ? "Fast Diagnostic checkpoint" : "Fast Diagnostic baseline",
+      evidencePosture: committed && result.checkpointId ? "PARTIAL" : "INSUFFICIENT",
+      summary: committed && result.checkpointId
+        ? "A checkpoint has been scheduled. The next governed response will establish your decision velocity."
+        : "No durable checkpoint exists yet, so decision velocity cannot be measured.",
+      caution: committed && result.checkpointId
+        ? "External benchmark unavailable. This is based only on your record."
+        : "No decision velocity has been measured yet.",
+      meta: defaultIntelligenceMeta({
+        scope: {
+          caseId: result.caseRef ?? null,
+          sourceSurface: "FAST_DIAGNOSTIC",
+          scopeLabel: "Fast Diagnostic case",
+          scopeType: "CASE",
+        },
+        sourceLabel: committed && result.checkpointId ? "Fast Diagnostic checkpoint" : "Fast Diagnostic baseline",
+        capturedAt: new Date().toISOString(),
+        evidencePosture: committed && result.checkpointId ? "INSUFFICIENT_DATA" : "INSUFFICIENT_DATA",
+        confidenceLabel: "UNAVAILABLE",
+        dataQuality: committed && result.checkpointId ? "THIN" : "EMPTY",
+        evidenceBasis: committed && result.checkpointId ? "Checkpoint created but not yet answered." : "No recorded checkpoint response yet.",
+        meaning: "Velocity becomes meaningful once a governed response is recorded.",
+        limitation: "Not a benchmark.",
+        nextAction: committed && result.checkpointId ? "Wait for the checkpoint and record the outcome." : "Create a checkpoint by committing to act.",
+        emptyState: !committed || !result.checkpointId ? {
+          reason: "No decision velocity has been measured yet.",
+          nextAction: "Commit to a checkpoint to begin measurement.",
+        } : undefined,
+      }),
+    };
+  }, [committed, result]);
 
   return (
     <Layout title="Decision Check" description="A governed fast diagnostic for live decision exposure.">
@@ -304,12 +352,12 @@ const FastDiagnosticPage: NextPage = () => {
                 <button type="button" onClick={() => { resumeDraft(); startedAt.current = Date.now(); }} style={{ padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
                   Continue your session
                 </button>
-                <button type="button" onClick={() => { startFresh(); setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); }} style={{ padding: "16px 36px", border: "1px solid rgba(255,255,255,0.15)", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                <button type="button" onClick={() => { startFresh(); setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); trackLaunch("fast_started", "fast_diagnostic"); }} style={{ padding: "16px 36px", border: "1px solid rgba(255,255,255,0.15)", backgroundColor: "transparent", color: "rgba(255,255,255,0.45)", ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
                   Start fresh
                 </button>
               </div>
             ) : (
-              <button type="button" onClick={() => { setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); }} style={{ marginTop: "2.5rem", padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+              <button type="button" onClick={() => { setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); trackLaunch("fast_started", "fast_diagnostic"); }} style={{ marginTop: "2.5rem", padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
                 Find the break
               </button>
             )}
@@ -555,6 +603,17 @@ const FastDiagnosticPage: NextPage = () => {
                   </p>
                 </div>
               )}
+
+              <ClientIntelligenceStack
+                scope={{
+                  caseId: result.caseRef ?? null,
+                  sourceSurface: "FAST_DIAGNOSTIC",
+                  scopeLabel: "Fast Diagnostic case",
+                  scopeType: "CASE",
+                }}
+                showVelocity
+                fallbackVelocitySummary={fallbackVelocitySummary}
+              />
 
               {/* SECTION 5c: RETURN BRIEF PROMISE */}
               {committed && (

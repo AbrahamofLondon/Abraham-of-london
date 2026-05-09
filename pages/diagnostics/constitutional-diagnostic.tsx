@@ -312,7 +312,7 @@ export default function ConstitutionalDiagnosticPage() {
                         { label: "Questions",      value: "10 dual-axis statements" },
                         { label: "Scoring",        value: "Resonance × certainty weight" },
                         { label: "Domains",        value: "9 constitutional domains" },
-                        { label: "Engine",         value: "V2.2 sovereign routing kernel" },
+                        { label: "Engine",         value: "Constitutional routing system" },
                         { label: "Routes",         value: "STRATEGY · DIAGNOSTIC · REJECT" },
                         { label: "Output",         value: "Route, posture, readiness, rationale" },
                         { label: "Duration",       value: "4–7 minutes" },

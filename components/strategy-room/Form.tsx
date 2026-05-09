@@ -178,7 +178,7 @@ function computeConstitutionalReading(f: FormData): ConstitutionalReading {
   if (route === "QUALIFIED") {
     if (authority >= 85) {
       patternTitle   = "Sovereign mandate with high structural clarity";
-      primaryReading = `Direct decision authority is confirmed and the problem statement carries sufficient structural detail for constitutional engagement. The situation presents as having consequence, prior context, and clear ownership — the three conditions that justify private advisory attention.`;
+      primaryReading = `Direct decision authority is confirmed and the problem statement carries sufficient structural detail for constitutional engagement. The situation presents as having consequence, prior context, and clear ownership — the three conditions that justify direct strategic intervention.`;
     } else {
       patternTitle   = "Sufficient mandate with material consequence";
       primaryReading = `The constitutional reading of this submission is positive. Gravity, authority, and consequence are all above the minimum standard. The submission demonstrates a real problem being held by someone with the authority to act — the baseline condition for the Strategy Room.`;
