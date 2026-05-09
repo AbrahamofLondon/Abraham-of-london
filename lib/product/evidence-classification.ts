@@ -48,7 +48,7 @@ export const EVIDENCE_ORIGIN_RANK: Record<EvidenceOrigin, number> = {
  * - SAMPLE_RESTRICTED_DECISION: example showing a restricted/refused decision
  * - SAMPLE_ALLOWED_DECISION: example showing an admitted/allowed decision
  * - STATIC_PROOF_ASSET: hardcoded evidence dossier (e.g., /evidence/[slug] pages)
- * - VERIFIED_CASE_EVIDENCE: DB-backed, approved, outcome-verified evidence
+ * - SOURCE_LABELLED_EVIDENCE: DB-backed, approved, source-labelled evidence
  * - LIVE_ENGINE_OUTPUT: real-time engine-generated output from user input
  */
 export type EvidenceAssetClassification =
@@ -56,7 +56,7 @@ export type EvidenceAssetClassification =
   | "SAMPLE_RESTRICTED_DECISION"
   | "SAMPLE_ALLOWED_DECISION"
   | "STATIC_PROOF_ASSET"
-  | "VERIFIED_CASE_EVIDENCE"
+  | "SOURCE_LABELLED_EVIDENCE"
   | "LIVE_ENGINE_OUTPUT";
 
 // ─────────────────────────────────────────────────────────────────────────────

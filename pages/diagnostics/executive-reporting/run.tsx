@@ -7,7 +7,6 @@ import Head from "next/head";
 import Link from "next/link";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
-import { useInterpretation } from "@/lib/ai/use-interpretation";
 import {
   mergeExecutiveFindingsIntoThread,
   readConstitutionalThread,
@@ -22,15 +21,12 @@ import LadderProgressionGate from "@/components/diagnostics/results/LadderProgre
 import PredictiveConsequence from "@/components/diagnostics/results/PredictiveConsequence";
 import AITerrainExposure from "@/components/diagnostics/results/AITerrainExposure";
 import DecisionTerrainStatus, { deriveTerrainState } from "@/components/diagnostics/results/DecisionTerrainStatus";
-import { assessAITerrain } from "@/lib/diagnostics/ai-terrain";
-import { assessAdvantageTerrain } from "@/lib/diagnostics/advantage-terrain";
 import CompetitivePositionSignal from "@/components/diagnostics/results/CompetitivePosition";
 import BoardSnapshot from "@/components/diagnostics/results/BoardSnapshot";
 import BoardroomModeSurface from "@/components/reporting/boardroom/BoardroomModeSurface";
 import AdvantagePathBlock from "@/components/strategy-room/AdvantagePathBlock";
 import RetainerEntryGate from "@/components/strategy-room/RetainerEntryGate";
 import { evaluateRetainerQualification } from "@/lib/retainer/qualification";
-import { projectConsequence } from "@/lib/diagnostics/predictive-consequence";
 import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { useInstitutionalLayers } from "@/hooks/useInstitutionalLayers";
 import { inferTrajectory, deriveEngagementReadiness, type EngagementReadiness } from "@/lib/diagnostics/prognosis";
@@ -55,22 +51,18 @@ import BoundaryProximityLine, {
 import ProofCapturePrompt from "@/components/proof/ProofCapturePrompt";
 import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoomConversionBridge";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
-import {
-  convertPurposeAlignmentToGovernedMemory,
-} from "@/lib/alignment/evidence-loader";
+import ClientIntelligenceStack from "@/components/Intelligence/user/ClientIntelligenceStack";
+import { ArbiterBadge } from "@/components/trust/ArbiterBadge";
 import {
   setCommercialAccessCookie,
   verifyCheckoutSessionForProduct,
 } from "@/lib/server/billing/commercial-access";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
-import {
-  extractAssessmentEvidenceCapture,
-  mergeAssessmentEvidenceCapture,
-  type AssessmentEvidenceCapture,
-} from "@/lib/product/evidence-capture-contract";
-import { buildGovernedMemoryFromEvidenceCapture } from "@/lib/product/governed-memory-presenter";
-import { computeIrreversibilityIndex } from "@/lib/product/irreversibility-index";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
+import type { ExecutiveReportingPublicResult } from "@/lib/product/executive-reporting-public-dto";
+import type { AssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
+import { extractAssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
 
 type ExecutiveReportingIntakeForm = {
   // Identity (minimal)
@@ -108,263 +100,16 @@ type ExecutiveReportingIntakeForm = {
   evidenceNotes: string;
 };
 
-type ExecutiveReportRecommendationView = {
-  id: string;
-  title: string;
-  type: string;
-  kind: string;
-  description: string;
-  priority: "high" | "medium" | "low";
-  href?: string | null;
-  score: number;
-  reasons: string[];
-};
-
-type ExecutiveReportAssetView = {
-  id: string;
-  title: string;
-  kind: string;
-  confidence: number;
-  href?: string | null;
-  worldviewAnchors?: string[];
-  commercialUseCases?: string[];
-  audience?: string[];
-  transformationStage?: string[];
-};
-
-type ExecutiveReportViewModel = {
-  header: {
-    reportId: string;
-    organisationName: string;
-    title: string;
-    subtitle: string;
-    generatedAt: string;
-    classification: string;
-    route: string;
-    authorityType: string;
-    readinessTier: string;
-    confidence: number;
-  };
-  summary: {
-    state: string;
-    headline: string;
-    summary: string;
-    mandate: string;
-    primaryConstraint?: string;
-    structuralImplication?: string;
-    routeReason?: string;
-    failureModes: string[];
-    priorityStack: string[];
-    requiredInterventions: string[];
-    dominantDomains: string[];
-    rationale: string[];
-  };
-  telemetry: {
-    averageDissonance: number;
-    burnoutIndex: number;
-    sovereignCertainty: number;
-    authorized: boolean;
-    domains: Array<{
-      label: string;
-      intent: number;
-      reality: number;
-      dissonance: number;
-    }>;
-  };
-  financialExposure: {
-    replacementCost: number;
-    executionLoss: number;
-    totalExposure: number;
-    replacementCostFormatted: string;
-    executionLossFormatted: string;
-    totalExposureFormatted: string;
-  };
-  observedOutcomes?: {
-    title: "Observed Outcomes (System Evidence)";
-    processedDecisionCases: number;
-    comparableCaseCount: number;
-    improvedPercent: number;
-    averageTimeToImprovementDays: number | null;
-    failureRateWhenIgnored: number;
-    medianResolutionWindowDays: number | null;
-    confidence: "insufficient" | "directional" | "governed";
-    statements: string[];
-  };
-  constitution: {
-    route: string;
-    confidence?: number;
-    priority: string;
-    temperature: string;
-    orgState: string;
-    posture?: string;
-    readinessTier: string;
-    authorityType: string;
-    revenueBand: string;
-    marketRiskBand: string;
-    clarityScore: number;
-    authorityScore: number;
-    governanceScore: number;
-    escalationLevel?: number;
-    revenueScore: number;
-    dominantDomains: string[];
-    failureModes: string[];
-    requiredInterventions: string[];
-    sponsorTypes: string[];
-    worldviewAnchors: string[];
-    disqualifiersTriggered?: string[];
-    escalationAllowed?: boolean;
-    narrativeSummary: string;
-    rationale: string[];
-  };
-  recommendations: {
-    summary: string;
-    nextAction: string;
-    worldviewAnchors: string[];
-    commercialUseCases: string[];
-    audience: string[];
-    transformationStage: string[];
-    matchedAssets: ExecutiveReportAssetView[];
-    recommendations: ExecutiveReportRecommendationView[];
-  };
-
-  // legacy-friendly extras
-  findings?: Array<{
-    domain?: string;
-    severity?: string;
-    headline?: string;
-    reading?: string;
-    signal?: string;
-  }>;
-  boardActions?: string[];
-  nextAction?: string;
-};
-
-type CanonicalReport = {
-  schemaVersion?: string;
-  generatedAt?: string;
-  reportId?: string;
-  campaign?: {
-    id?: string;
-    title?: string;
-    organisationName?: string;
-    generatedAt?: string;
-  };
-  registry?: {
-    model?: string;
-    node?: string;
-    protocol?: string;
-  };
-  sections?: {
-    executiveSummary?: {
-      title?: string;
-      subtitle?: string;
-      state?: string;
-      headline?: string;
-      summary?: string;
-      mandate?: string;
-    };
-    constitutionalPosture?: {
-      route?: string;
-      priority?: string;
-      temperature?: string;
-      orgState?: string;
-      readinessTier?: string;
-      authorityType?: string;
-      revenueBand?: string;
-      marketRiskBand?: string;
-      clarityScore?: number;
-      authorityScore?: number;
-      governanceScore?: number;
-      escalationLevel?: number;
-      revenueScore?: number;
-      dominantDomains?: string[];
-      failureModes?: string[];
-      requiredInterventions?: string[];
-      sponsorTypes?: string[];
-      worldviewAnchors?: string[];
-      narrativeSummary?: string;
-      rationale?: string[];
-    };
-    strategicDomainAnalysis?: {
-      averageDissonance?: number;
-      domains?: Array<{
-        label?: string;
-        intent?: number;
-        reality?: number;
-        dissonance?: number;
-      }>;
-    };
-    financialExposure?: {
-      replacementCost?: number;
-      executionLoss?: number;
-      totalExposure?: number;
-      replacementCostFormatted?: string;
-      executionLossFormatted?: string;
-      totalExposureFormatted?: string;
-    };
-    integritySnapshot?: {
-      sovereignCertainty?: number;
-      burnoutIndex?: number;
-      averageDissonance?: number;
-      authorized?: boolean;
-    };
-    governedRecommendations?: {
-      summary?: string;
-      nextAction?: string;
-      rationale?: string[];
-      recommendations?: Array<{
-        id?: string;
-        title?: string;
-        href?: string | null;
-        kind?: string;
-        score?: number;
-        summary?: string;
-        reasons?: string[];
-      }>;
-    };
-    priorityStack?: { items?: string[] };
-    failureModes?: { items?: string[] };
-    requiredInterventions?: { items?: string[] };
-    dominantDomains?: { items?: string[] };
-    worldviewAnchors?: { items?: string[] };
-    sponsorTypes?: { items?: string[] };
-    rationale?: { items?: string[] };
-    observedOutcomeEvidence?: {
-      title?: string;
-      processedDecisionCases?: number;
-      comparableCaseCount?: number;
-      improvedPercent?: number;
-      averageTimeToImprovementDays?: number | null;
-      failureRateWhenIgnored?: number;
-      medianResolutionWindowDays?: number | null;
-      confidence?: "insufficient" | "directional" | "governed";
-      statements?: string[];
-    };
-  };
-};
-
 type ExecutiveReportingResult =
   | {
       ok: true;
       runKey: string;
-      route?: "STRATEGY" | "DIAGNOSTIC" | "REJECT";
       checkpointId?: string | null;
-      canonical?: CanonicalReport;
-      viewModel?: ExecutiveReportViewModel;
-      entitlements?: {
-        hasAccess?: boolean;
-        status?: string;
-        tier?: string;
-        remainingRuns?: number | null;
-        [key: string]: unknown;
-      };
-      aiAdjustedConsequence?: any;
-      diagnostics?: any;
-      boardroom?: {
-        qualified: boolean;
-        reason?: string;
-        dossier?: any;
-      };
+      result: ExecutiveReportingPublicResult;
+      viewModel?: any;
+      canonical?: any;
+      route?: string;
+      entitlements?: any;
     }
   | {
       ok: false;
@@ -719,15 +464,15 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
 
   const blocks: React.ReactNode[] = [];
 
-  // Benchmark position — only when claim-governor permits
+  // Comparative position — only when claim-governor permits
   if (claims.benchmarked?.allowed) {
     blocks.push(
       <div key="benchmark" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
         <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
-          Benchmark position · Cohort comparison
+          Comparative position · Anonymised comparison set
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
-          This report includes benchmark positioning against an anonymised cohort of comparable organisations. Cohort sample meets the minimum standard for governed comparison.
+          This report includes comparative positioning against an anonymised comparison set of comparable organisations. The available sample meets the minimum standard for governed comparison.
         </p>
       </div>,
     );
@@ -1028,7 +773,7 @@ function BoardroomDossierSection({
   runKey,
   email,
 }: {
-  boardroom: { qualified: boolean; reason?: string; dossier?: any } | null;
+  boardroom: ExecutiveReportingPublicResult["boardroom"] | null;
   runKey?: string;
   email?: string | null;
 }) {
@@ -1181,7 +926,7 @@ function BoardroomDossierSection({
             slides={slides}
             title={dossier.title || "Executive Reporting Boardroom Briefing"}
             classification={dossier.classification || "BOARD_RESTRICTED"}
-            generatedAt={dossier.generatedAt}
+            generatedAt={dossier.generatedAt ?? undefined}
           />
         </div>
       )}
@@ -1201,198 +946,41 @@ function ResultSurface({
   email?: string | null;
 }) {
   const { longitudinal, multiStakeholder, outcome } = useInstitutionalLayers({ email, stage: "executive", enabled: !!email });
-  const vm = result.viewModel;
-  const canonical = result.canonical;
-  const header = vm?.header;
-  const summary = vm?.summary;
-  const telemetry = vm?.telemetry;
-  const financialExposure = vm?.financialExposure;
-  const observedOutcomes =
-    vm?.observedOutcomes ?? canonical?.sections?.observedOutcomeEvidence;
-  const constitution = vm?.constitution;
-  const recommendations = vm?.recommendations;
-  const findings = vm?.findings ?? [];
-  const boardActions = vm?.boardActions ?? summary?.priorityStack ?? [];
-  const nextAction = vm?.nextAction ?? recommendations?.nextAction ?? summary?.mandate ?? "";
-  const route = header?.route ?? result.route ?? constitution?.route ?? "DIAGNOSTIC";
+  const report = result.result;
+  const header = report.header;
+  const summary = report.summary;
+  const financialExposure = report.financialExposure;
+  const constitution = report.constitution;
+  const boardActions = report.boardActions ?? summary.priorityStack ?? [];
+  const nextAction = report.nextAction ?? summary.mandate ?? "";
+  const route = report.route ?? header.route ?? constitution.route ?? "DIAGNOSTIC";
   const rc = routeColor(route);
-  const entitlements = result.entitlements;
   const clarityScore = safeNumber(constitution?.clarityScore, header?.confidence ?? 0);
-  const evidenceGraph = (canonical as any)?.evidenceGraph ?? {};
-  const evidenceNodes = Array.isArray(evidenceGraph.nodes) ? evidenceGraph.nodes : [];
-  const decisionObjects = Array.isArray(evidenceGraph.decisionObjects) ? evidenceGraph.decisionObjects : [];
-  const latestDecisionObject = [...decisionObjects].reverse()[0] as any;
-  const graphContradictions = evidenceNodes
-    .filter((node: any) => node?.kind === "contradiction")
-    .slice(-5);
-  const graphConsequences = evidenceNodes
-    .filter((node: any) => node?.kind === "consequence" || node?.kind === "exposure_estimate")
-    .slice(-4);
-  const graphActions = evidenceNodes
-    .filter((node: any) => node?.kind === "action")
-    .slice(-4);
-  const evidenceCarryForward = mergeAssessmentEvidenceCapture(
-    extractAssessmentEvidenceCapture(canonical),
-    extractAssessmentEvidenceCapture((result as any)?.intake),
-    extractAssessmentEvidenceCapture((result as any)?.intake?.diagnosticsMeta),
-  );
-  const executiveMemory = buildGovernedMemoryFromEvidenceCapture({
-    evidence: evidenceCarryForward,
-    sourceSurface: "EXECUTIVE_REPORTING",
-    defaultStatus: {
-      decisionDependency: "UNRESOLVED",
-      failureCause: "UNRESOLVED",
-      priorAttempts: "ACTIVE",
-      verificationCriteria: "ACTIVE",
-      escalationTrigger: "UNRESOLVED",
-    },
-  }).filter((item) =>
-    ["decisionDependency", "failureCause", "priorAttempts", "verificationCriteria", "escalationTrigger"].includes(item.id),
-  ).slice(0, 3);
-
-  // ── PURPOSE ALIGNMENT EVIDENCE CARRIED FORWARD ──
-  const paBlock = (canonical as any)?.purposeAlignmentEvidence;
-  const paMemoryItems = paBlock
-    ? convertPurposeAlignmentToGovernedMemory({
-        available: true,
-        sourceSurface: "PURPOSE_ALIGNMENT",
-        assessedAt: paBlock.assessedAt ?? null,
-        schemaVersion: null,
-        profile: paBlock.profile ?? null,
-        compositeScore: paBlock.compositeScore ?? null,
-        strongestDomain: null,
-        weakestDomain: paBlock.weakestDomain ?? null,
-        competingObligation: paBlock.previouslyReportedCompetingObligation ?? null,
-        consequence: paBlock.previouslyReportedConsequence ?? null,
-        institutionalConsequence: null,
-        primaryPattern: paBlock.earlierAlignmentSignal?.split(":")[0]?.trim() ?? null,
-        patternConsequence: paBlock.earlierAlignmentSignal?.includes(":") ? paBlock.earlierAlignmentSignal.split(":").slice(1).join(":").trim() : null,
-        contradictions: [],
-        domainScores: [],
-        firstAction: paBlock.carriedForwardDirective ?? null,
-        corrections: [],
-        assessmentId: null,
-      })
-    : [];
-  const mergedMemory = [...paMemoryItems, ...executiveMemory];
-
-  const executiveMemoryImpact = executiveMemory.some((item) => item.id === "decisionDependency")
-    ? "The recommendation is being shaped around the unresolved dependency rather than assuming execution authority already exists."
-    : executiveMemory.some((item) => item.id === "failureCause" || item.id === "priorAttempts")
-      ? "The recommendation has been narrowed to avoid repeating earlier correction logic that was reported to fail or fail to hold."
-      : "The recommendation is being shaped against the declared verification standard rather than generic progress language.";
-
-  const dominantDomains = summary?.dominantDomains ?? constitution?.dominantDomains ?? [];
   const failureModes = summary?.failureModes ?? constitution?.failureModes ?? [];
-  const requiredInterventions =
-    summary?.requiredInterventions ?? constitution?.requiredInterventions ?? [];
+  const consequenceProjection = report.consequenceProjection;
+  const aiTerrain = report.aiTerrain;
+  const advantagePath = report.advantagePath;
+  const governanceEvidenceCarryForward = report.governanceEvidenceCarryForward;
+  const aiAdjustedConsequence = report.aiConsequenceSummary;
 
-  // Intelligence layer — async interpretation enrichment
-  const intake = (result as any)?.intake;
-
-  // Predictive consequence — "Cost of Non-Decision"
-  const consequenceProjection = React.useMemo(() => projectConsequence({
-    contradictions: graphContradictions.map((n: any) => ({
-      severity: String(n.severity ?? "medium"),
-      confidence: typeof n.confidence === "number" ? n.confidence : 0.5,
-    })),
-    recurrenceCount: 0,
-    maxDivergenceGap: 0,
-    escalationLevel: safeNumber(constitution?.escalationLevel, 0),
-    daysSinceIdentification: 0,
-    revenueBand: safeString(constitution?.revenueBand ?? intake?.revenueBand),
-    priorInterventionCount: 0,
-  }), [graphContradictions, constitution, intake]);
-
-  // AI Terrain Assessment
-  const aiTerrain = React.useMemo(() => assessAITerrain({
-    sector: safeString(intake?.sector ?? (constitution as any)?.sector, "professional_services"),
-    revenueBand: safeString(constitution?.revenueBand ?? intake?.revenueBand, ""),
-    avgDecisionCycleDays: safeNumber((constitution as any)?.decisionCycleDays, 21),
-    aiMentionedInProblem: safeString(intake?.problemStatement ?? intake?.decisionQuestion).toLowerCase().includes("ai") ||
-      safeString(intake?.symptoms ?? intake?.currentConstraint).toLowerCase().includes("automat"),
-    competitorAIAdoption: safeString(intake?.sector).toLowerCase().includes("tech") ||
-      safeString(intake?.sector).toLowerCase().includes("fintech") ||
-      safeString(intake?.problemStatement).toLowerCase().includes("competitor"),
-    blockedDecisionCount: graphContradictions.length,
-    contradictionCount: graphContradictions.length,
-    hasAIGovernance: false,
-    aiInOperations: safeString(intake?.problemStatement ?? "").toLowerCase().includes("ai") &&
-      safeString(intake?.currentConstraint ?? "").toLowerCase().includes("implement"),
-  }), [intake, constitution, graphContradictions]);
-
-  // Advantage terrain assessment
-  const advantagePath = React.useMemo(() => assessAdvantageTerrain({
-    velocityGapPercent: aiTerrain.decisionVelocity.gapPercent,
-    aiClassification: aiTerrain.classification,
-    contradictionCount: graphContradictions.length,
-    resolvedContradictionCount: 0,
-    sector: safeString(intake?.sector, "professional_services"),
-    competitorAIAdoption: aiTerrain.decisionVelocity.gapPercent > 30,
-    activeDomains: dominantDomains.map(String),
-    revenueBand: safeString(constitution?.revenueBand ?? intake?.revenueBand, ""),
-  }), [aiTerrain, graphContradictions, intake, constitution, dominantDomains]);
-
-  const { interpretation, loading: interpretLoading } = useInterpretation({
-    canonicalResult: canonical?.sections ?? {},
-    userInputs: {
-      problemStatement: intake?.decisionQuestion ?? intake?.problemStatement ?? "",
-      constraints: intake?.currentConstraint ?? "",
-      objective: intake?.whatHappensIfNothingChanges ?? "",
-      symptoms: intake?.priorAttemptOutcome ?? "",
-    },
-    stage: "executive",
-    tensionThread: thread as Record<string, unknown> | null,
-    enabled: Boolean(canonical?.sections),
-  });
-
-  // Prognostic layer
   const readinessNum = ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[safeString(constitution?.readinessTier)] ?? 50;
   const trajectory = inferTrajectory(clarityScore, readinessNum, failureModes);
   const engagementReadiness = deriveEngagementReadiness({
     revenueBand: safeString(constitution?.revenueBand),
-    problemStatement: "", // full problem was in the intake, not persisted in the result
     urgencyWindow: safeString(constitution?.temperature) === "SCORCHING" ? "IMMEDIATE" : safeString(constitution?.temperature) === "HOT" ? "NEAR_TERM" : "MID_TERM",
     authorityScope: safeString(constitution?.authorityType),
   });
 
-  // Decision object — canonical across ER and SR
-  const decisionText = latestDecisionObject?.decisionText
-    ?? safeString(intake?.decisionQuestion)
-    ?? safeString((canonical?.sections as any)?.executiveSummary?.mandate)
-    ?? nextAction;
-  const constraintText = latestDecisionObject?.constraintText
-    ?? safeString(intake?.currentConstraint)
-    ?? "";
-  const costOfDelayText = safeString(intake?.whatHappensIfNothingChanges) || "";
-  const exposureFormatted = financialExposure?.totalExposureFormatted
-    ?? financialExposure?.totalExposureFormatted
-    ?? (financialExposure?.totalExposure ? `\u00a3${Math.round(Number(financialExposure.totalExposure)).toLocaleString()}` : null);
-  const projectedCost90 =
-    consequenceProjection.estimatedExposure.quarterly > 0
-      ? `\u00a3${consequenceProjection.estimatedExposure.quarterly.toLocaleString()}`
-      : exposureFormatted;
-  const aiAdjustedConsequence = (result as any).aiAdjustedConsequence ?? (canonical as any)?.aiAdjustedConsequence;
-  const executiveIrreversibility = (() => {
-    const signalCount = [
-      financialExposure?.totalExposure != null && Number(financialExposure.totalExposure) > 0,
-      consequenceProjection.estimatedExposure.quarterly > 0,
-      Boolean(graphContradictions.length),
-      Boolean(costOfDelayText),
-    ].filter(Boolean).length;
-    if (signalCount < 2) return null;
-    return computeIrreversibilityIndex({
-      costAccumulated: Number(financialExposure?.totalExposure ?? 0) || consequenceProjection.estimatedExposure.quarterly || undefined,
-      costThreshold: consequenceProjection.estimatedExposure.quarterly || Number(financialExposure?.totalExposure ?? 0) || undefined,
-      daysWithoutAction: costOfDelayText ? 30 : undefined,
-      consequenceMaterialised: route === "STRATEGY",
-      factors: graphContradictions.length > 0 ? [{
-        factor: "TRUST_EROSION",
-        contribution: Math.min(25, graphContradictions.length * 8),
-        description: `${graphContradictions.length} contradiction signal${graphContradictions.length === 1 ? "" : "s"} remain active in the report evidence.`,
-      }] : undefined,
-    });
-  })();
+  const decisionText = report.decision.text || nextAction;
+  const constraintText = report.decision.constraintText || "";
+  const costOfDelayText = report.decision.costOfDelayText || "";
+  const exposureFormatted = financialExposure?.totalExposureFormatted ?? null;
+  const projectedCost90 = financialExposure?.projectedCostOfDelay90
+    ?? (consequenceProjection && consequenceProjection.estimatedExposure.quarterly > 0
+      ? `£${consequenceProjection.estimatedExposure.quarterly.toLocaleString()}`
+      : exposureFormatted);
+  const executiveIrreversibility = financialExposure?.irreversibilitySummary ?? null;
+  const topPriority = report.decision.topPriority || "Address the governing condition.";
 
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
@@ -1403,10 +991,10 @@ function ResultSurface({
             <section>
               <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Dominant finding</span>
               <p style={{ marginTop: "6px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.45, color: "rgba(255,255,255,0.84)" }}>
-                {interpretation?.conditionLabel ?? summary?.headline ?? "Condition identified"}
+                {summary?.headline ?? "Condition identified"}
               </p>
               <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.42)" }}>
-                {interpretation?.contradictionInsight ?? summary?.summary ?? interpretation?.narrative ?? "The report has identified a governing condition that now requires a decision."}
+                {summary?.summary ?? "The report has identified a governing condition that now requires a decision."}
               </p>
             </section>
 
@@ -1435,18 +1023,27 @@ function ResultSurface({
                 <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>Financial exposure / cost of delay</span>
                 {exposureFormatted && <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>Current priced exposure: {exposureFormatted}</p>}
                 {projectedCost90 && <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>Projected 90-day cost of delay: {projectedCost90}</p>}
-                {executiveIrreversibility && <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>Irreversibility estimate: {executiveIrreversibility.summary} This is an irreversibility estimate, not a verified external fact.</p>}
+                {executiveIrreversibility && (
+                  <>
+                    <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
+                      Irreversibility estimate: {executiveIrreversibility} This is an irreversibility estimate, not a verified external fact.
+                    </p>
+                    <p style={{ marginTop: "4px", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+                      {financialExposure?.irreversibilityProvenanceLine ?? report.meta.provenanceLine}
+                    </p>
+                  </>
+                )}
               </section>
             )}
 
             <section>
               <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Boardroom readiness</span>
               <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
-                {result.boardroom?.qualified ? "Boardroom-ready. A dossier is available for board-level review." : result.boardroom?.reason || "Boardroom readiness has not been earned yet."}
+                {summary.boardroomReadinessLabel}
               </p>
             </section>
 
-            {mergedMemory.length > 0 && (
+            {governanceEvidenceCarryForward && (
               <section>
                 <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Evidence carried forward</span>
                 <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
@@ -1458,38 +1055,36 @@ function ResultSurface({
             <section>
               <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Next admitted step</span>
               <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
-                {route === "STRATEGY"
-                  ? "Enter Strategy Room. Execution is admitted and the checkpoint has been created against this report."
-                  : "No forced paid escalation is being claimed. Strategy Room remains available only if execution conditions are met."}
+                {summary.nextAdmittedStep}
               </p>
             </section>
           </div>
         </div>
 
         {/* ── BLOCK 0: BOARD SNAPSHOT ── */}
-        <BoardSnapshot data={{
-          primaryContradiction: graphContradictions[0]
-            ? String((graphContradictions[0] as any).summary ?? (graphContradictions[0] as any).label ?? "Structural contradiction detected")
-            : (summary as any)?.headline ?? (header as any)?.headline ?? "Condition identified — contradiction active",
-          costOfInaction90Days: consequenceProjection.estimatedExposure.quarterly > 0
-            ? `£${consequenceProjection.estimatedExposure.quarterly.toLocaleString()}`
-            : exposureFormatted || "Requires pricing",
-          decisionVelocityRisk: `${aiTerrain.decisionVelocity.gapPercent}% behind AI baseline (${aiTerrain.decisionVelocity.current}d vs ${aiTerrain.decisionVelocity.baseline}d)`,
-          competitivePosition: advantagePath.competitivePosition.replace("_", " "),
-          requiredAction: safeString(nextAction) || boardActions[0] || "Action required — see priority stack",
-        }} />
-        {mergedMemory.length > 0 && (
+        <BoardSnapshot data={report.boardSnapshot} />
+        {governanceEvidenceCarryForward && (
           <div style={{ marginTop: "1rem" }}>
             <GovernanceEvidenceCarryForward
-              title="Evidence carried forward"
-              intro="This report has inherited prior governance evidence. It affects the recommendation because earlier failure logic, dependency, or proof standards remain relevant."
-              impact={executiveMemoryImpact}
-              items={mergedMemory}
+              title={governanceEvidenceCarryForward.title}
+              intro={governanceEvidenceCarryForward.intro}
+              impact={governanceEvidenceCarryForward.impact}
+              items={governanceEvidenceCarryForward.items}
               variant="executive"
             />
           </div>
         )}
-        {result.boardroom?.qualified && (
+        <div style={{ marginTop: "1rem", display: "grid", gap: "16px" }}>
+          <ArbiterBadge context="executive_reporting" variant="dark" />
+          <ClientIntelligenceStack
+            scope={report.intelligenceScope}
+            showCrossAssessment
+            showContradictions
+            emptyTitle="No case-bound intelligence is available for this executive report yet."
+            thinTitle="The record is still forming for this executive report."
+          />
+        </div>
+        {report.boardroom?.qualified && (
           <div style={{ textAlign: "right", marginTop: "0.35rem" }}>
             <a
               href="#boardroom-dossier"
@@ -1502,7 +1097,7 @@ function ResultSurface({
 
         {/* ── BLOCK 0b: BOARDROOM DOSSIER ── */}
         <BoardroomDossierSection
-          boardroom={result.boardroom ?? null}
+          boardroom={report.boardroom ?? null}
           runKey={result.runKey}
           email={email}
         />
@@ -1520,9 +1115,7 @@ function ResultSurface({
           }}>
             {exposureFormatted
               ? `This condition is already costing you ${exposureFormatted}.`
-              : interpretation?.conditionLabel
-                ? interpretation.conditionLabel
-                : summary?.headline ?? "The consequence is now priced."}
+              : summary?.headline ?? "The consequence is now priced."}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
@@ -1550,10 +1143,10 @@ function ResultSurface({
             </span>
             <div className="mt-3 grid gap-3 sm:grid-cols-4">
               {[
-                { label: "Exposure", value: aiAdjustedConsequence.aiExposureLevel },
+                { label: "Exposure", value: aiAdjustedConsequence.exposureLevel },
                 { label: "Classification", value: aiAdjustedConsequence.classification },
-                { label: "Velocity", value: `${aiAdjustedConsequence.decisionVelocityScore}/100` },
-                { label: "Acceleration risk", value: `${aiAdjustedConsequence.projectedAccelerationRisk ?? aiAdjustedConsequence.accelerationRiskScore}/100` },
+                { label: "Decision velocity", value: aiAdjustedConsequence.decisionVelocityLabel },
+                { label: "Acceleration risk", value: aiAdjustedConsequence.accelerationRiskLabel },
               ].map((item) => (
                 <div key={item.label} style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.5rem 0.65rem" }}>
                   <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "5.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>{item.label}</div>
@@ -1561,9 +1154,9 @@ function ResultSurface({
                 </div>
               ))}
             </div>
-            {Array.isArray(aiAdjustedConsequence.reasoning) && (
+            {Array.isArray(aiAdjustedConsequence.narrative) && (
               <p style={{ marginTop: "0.65rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.42)" }}>
-                {aiAdjustedConsequence.reasoning.join(" ")}
+                {aiAdjustedConsequence.narrative.join(" ")} {aiAdjustedConsequence.caveat}
               </p>
             )}
           </div>
@@ -1573,32 +1166,11 @@ function ResultSurface({
         <div className="py-4">
           <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>Identified condition</span>
           <h2 style={{ marginTop: "0.3rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "clamp(0.85rem, 1.8vw, 1.1rem)", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.88)", fontWeight: 700 }}>
-            {interpretation?.conditionLabel ?? summary?.headline ?? safeString(constitution?.posture) ?? "CONDITION IDENTIFIED"}
+            {summary?.headline ?? safeString(constitution?.posture) ?? "CONDITION IDENTIFIED"}
           </h2>
-          {interpretation?.conditionExplanation && (
-            <p style={{ marginTop: "0.4rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", maxWidth: "52ch" }}>
-              {interpretation.conditionExplanation}
-            </p>
-          )}
         </div>
 
         {/* ── BLOCK 3: CONTRADICTION ── */}
-        {(graphContradictions.length > 0 || interpretation?.contradictionInsight) && (
-          <div style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.03)", padding: "1.25rem", marginBottom: "0.75rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>Contradiction</span>
-            {interpretation?.contradictionInsight && (
-              <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.55)" }}>
-                {interpretation.contradictionInsight}
-              </p>
-            )}
-            {graphContradictions.map((c: any, i: number) => (
-              <p key={i} style={{ marginTop: "0.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(252,165,165,0.40)" }}>
-                {String(c.summary || c.label || "")}
-              </p>
-            ))}
-          </div>
-        )}
-
         {/* ── BLOCK 4: CONSEQUENCE MODEL (visible math) ── */}
         {financialExposure && (
           <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1.25rem", marginBottom: "0.75rem" }}>
@@ -1620,6 +1192,12 @@ function ResultSurface({
                 If delayed: {costOfDelayText}
               </p>
             )}
+            <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+              {financialExposure.provenanceLine}
+            </p>
+            <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.78rem", lineHeight: 1.5, color: "rgba(255,255,255,0.32)" }}>
+              {financialExposure.caveat}
+            </p>
           </div>
         )}
 
@@ -1656,15 +1234,15 @@ function ResultSurface({
         <div style={{ padding: "0.75rem 0", marginBottom: "0.75rem" }}>
           <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)" }}>If ignored</span>
           <p style={{ marginTop: "0.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.45)" }}>
-            {interpretation?.narrative ?? summary?.mandate ?? "The condition persists. Exposure compounds. The window for effective action narrows."}
+            {summary?.mandate ?? "The condition persists. Exposure compounds. The window for effective action narrows."}
           </p>
         </div>
 
         {/* ── BLOCK 7b: COMPETITIVE POSITION ── */}
-        <CompetitivePositionSignal position={advantagePath.competitivePosition} />
+        {advantagePath && <CompetitivePositionSignal position={advantagePath.competitivePosition} />}
         <DecisionTerrainStatus
-          state={deriveTerrainState(aiTerrain.decisionVelocity.gapPercent)}
-          velocityGapPercent={aiTerrain.decisionVelocity.gapPercent}
+          state={deriveTerrainState(aiTerrain?.decisionVelocity.gapPercent ?? 0)}
+          velocityGapPercent={aiTerrain?.decisionVelocity.gapPercent ?? 0}
         />
         <AITerrainExposure data={aiTerrain} />
 
@@ -1673,12 +1251,11 @@ function ResultSurface({
 
         {/* ── BLOCK 7d: EFFICACY COMMAND — accept/challenge/escalate ── */}
         {(() => {
-          const topPriority = (canonical as any)?.priorityStack?.[0] ?? (canonical as any)?.requiredInterventions?.[0] ?? (canonical as any)?.sections?.priorityStack?.[0] ?? "Address the governing condition.";
           return (
             <div style={{ borderLeft: `2px solid rgba(201,169,110,0.25)`, backgroundColor: "rgba(201,169,110,0.03)", padding: "20px 24px", marginTop: "24px" }}>
               <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.24em", textTransform: "uppercase", color: "#C9A96E" }}>Your required move</p>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontSize: "1.15rem", lineHeight: 1.45, color: "rgba(255,255,255,0.85)", marginTop: "8px" }}>
-                Accept or challenge the governed priority: {typeof topPriority === "string" ? topPriority.slice(0, 150) : "Address the governing condition."}
+                Accept or challenge the governed priority: {topPriority.slice(0, 150)}
               </p>
               <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.45)", marginTop: "8px" }}>
                 The report has identified the priority intervention. Accept and proceed to execution, or challenge with evidence. Non-response will be treated as implicit acceptance.
@@ -1692,7 +1269,7 @@ function ResultSurface({
                 </button>
               </div>
               <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
-                Checkpoint: 7-day priority decision &middot; Source: Executive Reporting &middot; Evidence posture: system-inferred
+                Checkpoint: 7-day priority decision &middot; {report.meta.provenanceLine}
               </p>
             </div>
           );
@@ -1725,12 +1302,6 @@ function ResultSurface({
             }}
             consequenceOfExit="Your condition has been documented but not yet enforced. Re-entry is available when the condition escalates."
           />
-        )}
-
-        {interpretLoading && (
-          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)", marginBottom: "1rem" }}>
-            Interpreting condition...
-          </div>
         )}
 
         <details style={{ marginTop: "1.5rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem 1.1rem" }}>
@@ -1888,6 +1459,7 @@ function ExecutiveReportingIntake({
       }
 
       onResult(data);
+      trackLaunch("executive_reporting_started", "executive_reporting", { caseId: data.runKey });
       if (form.email) onEmailCaptured?.(form.email);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -2256,7 +1828,6 @@ function ExecutiveReportingIntake({
               }}
             >
               Intake is governed. Run record is persisted. Not stored for marketing use.
-              Decisions evaluated against an AI-accelerated market baseline.
             </p>
           </div>
         </form>
@@ -2345,10 +1916,10 @@ export default function ExecutiveReportingRunPage({
     setResult(r);
     setPageState("result");
     track("executive_reporting_intake_completed", {
-      route: r.route || "DIAGNOSTIC",
+      route: r.result.route || "DIAGNOSTIC",
     });
     track("executive_reporting_result_rendered", {
-      route: r.route || "DIAGNOSTIC",
+      route: r.result.route || "DIAGNOSTIC",
       has_thread: Boolean(readConstitutionalThread()),
     });
     trackStageComplete("executive", "strategy", "/strategy-room");
@@ -2363,7 +1934,7 @@ export default function ExecutiveReportingRunPage({
     // the report data and server-computed envelope fields.
     // Write executive findings into the constitutional thread
     // Compute prognosis for thread persistence
-    const erConstitution = (r.canonical as any)?.constitution;
+    const erConstitution = r.result.constitution;
     const erReadinessNum = ({ FRAGILE: 25, EMERGING: 40, STABILIZING: 55, EXECUTION_READY: 75, SOVEREIGN: 90 } as Record<string, number>)[String(erConstitution?.readinessTier || "")] ?? 50;
     const erFailureModes = Array.isArray(erConstitution?.failureModes) ? erConstitution.failureModes : [];
     const erTrajectory = inferTrajectory(Number(erConstitution?.clarityScore) || 50, erReadinessNum, erFailureModes);
@@ -2376,10 +1947,10 @@ export default function ExecutiveReportingRunPage({
     mergeExecutiveFindingsIntoThread({
       completedAt: new Date().toISOString(),
       runKey: r.runKey || "",
-      route: r.route || "DIAGNOSTIC",
+      route: r.result.route || "DIAGNOSTIC",
       orgState: erConstitution?.orgState || "DRIFTING",
       readinessTier: erConstitution?.readinessTier || "EMERGING",
-      narrativeHeadline: (r.canonical as any)?.report?.narrative?.headline || "",
+      narrativeHeadline: r.result.summary?.headline || "",
       trajectory: erTrajectory,
       engagementReadiness: erEngagement.readinessPercent,
       advisoryValueEstimate: erEngagement.advisoryValueFormatted,

@@ -10,6 +10,7 @@ import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
 import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { enforceExecutiveReportingAccess } from "@/lib/diagnostics/executive-reporting-enforcement";
 import { trackExecGateView } from "@/lib/analytics/journey-client";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import type { AssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
 
 /* ─── Design tokens ─────────────────────────────────────────────────────── */
@@ -114,6 +115,7 @@ export default function ExecutiveReportingEntryPage() {
 
   useEffect(() => {
     trackExecGateView();
+    trackLaunch("executive_reporting_gate_viewed", "executive_reporting_gate");
     const ev = loadUserEvidence();
     setEvidence(ev);
     setLadder([
@@ -148,7 +150,7 @@ export default function ExecutiveReportingEntryPage() {
               This is not an execution problem.
             </h1>
             <p style={{ ...serif, fontWeight: 400, fontSize: "clamp(34px, 5.5vw, 52px)", lineHeight: 1.08, letterSpacing: "-0.025em", color: `${GOLD}60`, marginTop: "6px" }}>
-              It is a decision structure failure.
+              The evidence suggests a decision structure problem.
             </p>
             <p style={{ marginTop: "28px", ...mono, fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}90` }}>
               Current condition: {evidence.condition || "unresolved decision exposure"}
@@ -338,6 +340,18 @@ export default function ExecutiveReportingEntryPage() {
             <p style={{ marginTop: "20px", ...serif, fontSize: "16px", lineHeight: 1.75, color: "rgba(255,255,255,0.60)" }}>
               The system combined the decision you surfaced, the constraint that has preserved it, and the consequence attached to delay. Executive Reporting exists because that evidence now points to a structural issue rather than a local execution miss.
             </p>
+            <div style={{ marginTop: "16px", padding: "12px 16px", border: "1px solid rgba(201,169,110,0.12)", backgroundColor: "rgba(255,255,255,0.015)" }}>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "8px" }}>
+                What the report uses and does not claim
+              </p>
+              <ul style={{ ...serif, fontSize: "13px", lineHeight: 1.75, color: "rgba(255,255,255,0.45)", paddingLeft: "16px", listStyleType: "disc" }}>
+                <li>Financial exposure is estimated from your stated inputs — scenario only, not a financial forecast.</li>
+                <li>The report distinguishes user-reported, system-inferred, and estimated evidence.</li>
+                <li>The system may restrict escalation if evidence is insufficient.</li>
+                <li>Boardroom Mode is only available when qualification conditions are met by evidence.</li>
+                <li>You can challenge the priority stack with evidence at any point.</li>
+              </ul>
+            </div>
           </details>
 
           {/* ═══ EMAIL CAPTURE — ABOVE PAYWALL ═══ */}
@@ -363,8 +377,8 @@ export default function ExecutiveReportingEntryPage() {
             secondaryHref="/diagnostics"
             secondaryLabel="Return to diagnostic ladder"
             eyebrow={`Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`}
-            title="For decisions that require board-grade clarity."
-            description="The diagnostic ladder accumulates structural evidence. Executive Reporting translates that evidence into consequence: financial exposure, institutional constraint, and the priority decisions that follow."
+            title="For decisions that require a governed priority stack."
+            description="Executive Reporting does not sell certainty. It produces a governed priority stack from the evidence already captured, identifies what remains unverified, prices consequence as a scenario estimate, and schedules the next checkpoint so the output can be challenged by reality."
             sampleLines={[
               { label: "Position statement", value: "Execution coherence collapsing under governance drift" },
               { label: "Financial exposure", value: "Scenario projection derived from your stated inputs (example only)" },

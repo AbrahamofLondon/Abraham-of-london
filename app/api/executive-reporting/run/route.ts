@@ -17,7 +17,6 @@ import {
 import { buildGenericAuthorityPacket } from "@/lib/diagnostics/evidence-graph";
 import { classifyAIDecisionRisk } from "@/lib/diagnostics/ai-decision-risk";
 import { resolveLadderContext } from "@/lib/diagnostics/ladder-context-resolver";
-import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 import { buildObservedOutcomeEvidenceFromDB } from "@/lib/outcomes/evidence";
 import type { OutcomeSnapshot } from "@/lib/outcomes/outcome-model";
 import { evaluateDecision } from "@/lib/decision/kernel";
@@ -31,6 +30,11 @@ import {
   loadPurposeAlignmentEvidence,
   buildExecutiveReportingPaBlock,
 } from "@/lib/alignment/evidence-loader";
+import { normalisePurposeAlignmentEvidence } from "@/lib/product/field-provenance-normaliser";
+import {
+  toExecutiveReportingPublicResult,
+  type ExecutiveReportingPublicResult,
+} from "@/lib/product/executive-reporting-public-dto";
 
 type AnyRecord = Record<string, unknown>;
 
@@ -41,11 +45,8 @@ type RiskScore = "LOW" | "MEDIUM" | "HIGH";
 type ExecutiveReportingRunSuccess = {
   ok: true;
   runKey: string;
-  route: ExecutiveReportingRoute;
-  canonical: unknown;
-  viewModel: unknown;
-  entitlements: unknown;
-  diagnostics: unknown;
+  checkpointId: string | null;
+  result: ExecutiveReportingPublicResult;
 };
 
 type ExecutiveReportingRunFailure = {
@@ -981,7 +982,6 @@ export async function POST(
     };
 
     const viewModel = buildExecutiveReportViewModel(enrichedCanonical as typeof canonical);
-    const entitlements = await getExecutiveReportingEntitlements(email);
 
     const run = await prisma.executiveReportingRun.create({
       data: {
@@ -1121,22 +1121,57 @@ export async function POST(
       erCheckpointId = cp?.checkpointId ?? null;
     } catch { /* best-effort */ }
 
+    const generatedAt = new Date().toISOString();
+    const dataQuality = paBlock ? "CASE_SCOPED" : "THIN";
+    const evidencePosture = paBlock ? "SYSTEM_INFERRED" : "INSUFFICIENT_DATA";
+    const intelligenceScope = {
+      caseId: evidenceJourney.journeyKey,
+      journeyId: evidenceJourney.journeyKey,
+      executiveRunId: run.id,
+      userId: subjectId ?? null,
+      userEmail: email,
+      sourceSurface: "EXECUTIVE_REPORTING",
+      scopeLabel: "Executive Reporting case",
+      scopeType: "CASE" as const,
+    };
+    const provenance = normalisePurposeAlignmentEvidence(paEvidence, {
+      caseId: evidenceJourney.journeyKey,
+      journeyId: evidenceJourney.journeyKey,
+      executiveRunId: run.id,
+      assessmentId: paEvidence.assessmentId ?? null,
+    });
+    const emptyState = paBlock ? undefined : {
+      reason: "No carried-forward Purpose Alignment evidence was available for this run.",
+      nextAction: "Complete or reconnect the upstream assessment record.",
+    };
+    const publicResult = toExecutiveReportingPublicResult({
+      runKey: run.runKey,
+      caseId: evidenceJourney.journeyKey,
+      executiveRunId: run.id,
+      checkpointId: erCheckpointId,
+      route,
+      generatedAt,
+      dataQuality,
+      evidencePosture,
+      provenance,
+      emptyState,
+      scope: intelligenceScope,
+      viewModel: viewModel as unknown as AnyRecord,
+      canonical: enrichedCanonical as unknown as AnyRecord,
+      intake: intake as unknown as AnyRecord,
+      purposeAlignmentEvidence: paEvidence,
+      boardroom: {
+        qualified: boardroomQualification.qualified,
+        reason: boardroomQualification.reason,
+        dossier: boardroomDossier as unknown as AnyRecord | null,
+      },
+    });
+
     return NextResponse.json({
       ok: true,
       runKey: run.runKey,
       checkpointId: erCheckpointId,
-      route,
-      canonical: enrichedCanonical,
-      viewModel,
-      aiAdjustedConsequence,
-      entitlements,
-      diagnostics: assembled.diagnostics,
-      intake,
-      boardroom: {
-        qualified: boardroomQualification.qualified,
-        reason: boardroomQualification.reason,
-        dossier: boardroomDossier,
-      },
+      result: publicResult,
     });
   } catch (error) {
     console.error("[EXECUTIVE_REPORTING_RUN_ERROR]", error);
