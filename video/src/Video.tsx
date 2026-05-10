@@ -1,5 +1,5 @@
 import React from "react";
-import { Composition, Sequence } from "remotion";
+import { Audio, Composition, Sequence, staticFile } from "remotion";
 
 import { Scene01_Opening } from "./scenes/Scene01_Opening";
 import { Scene02_CategoryProblem } from "./scenes/Scene02_CategoryProblem";
@@ -17,24 +17,25 @@ import { Scene13_WhyItMatters } from "./scenes/Scene13_WhyItMatters";
 import { Scene14_Closing } from "./scenes/Scene14_Closing";
 
 // ── SCENE TIMING (in frames at 30fps) ──
-// Total target: ~5 minutes = 9000 frames
+// Total target: ~5:20 = 320 seconds = 9600 frames
+// Adjust these to match your actual voiceover timing
 
 const FPS = 30;
 const SCENES = [
-  { id: "opening",            component: Scene01_Opening,           duration: 7 * FPS },  // 7s
-  { id: "category-problem",   component: Scene02_CategoryProblem,   duration: 8 * FPS },  // 8s
-  { id: "category-declare",   component: Scene03_CategoryDeclaration, duration: 7 * FPS },// 7s
-  { id: "what-it-does",       component: Scene04_WhatItDoes,        duration: 9 * FPS },  // 9s
-  { id: "fast-diagnostic",    component: Scene05_FastDiagnostic,    duration: 10 * FPS }, // 10s
-  { id: "instruments",        component: Scene06_Instruments,       duration: 10 * FPS }, // 10s
-  { id: "refusal",            component: Scene07_Refusal,           duration: 9 * FPS },  // 9s
-  { id: "decision-centre",    component: Scene08_DecisionCentre,    duration: 7 * FPS },  // 7s
-  { id: "executive-reporting", component: Scene09_ExecutiveReporting, duration: 9 * FPS },// 9s
-  { id: "strategy-room",      component: Scene10_StrategyRoom,      duration: 7 * FPS },  // 7s
-  { id: "boardroom-oversight", component: Scene11_BoardroomOversight, duration: 8 * FPS },// 8s
-  { id: "not-claimed",        component: Scene12_NotClaimed,        duration: 9 * FPS },  // 9s
-  { id: "why-it-matters",     component: Scene13_WhyItMatters,      duration: 9 * FPS },  // 9s
-  { id: "closing",            component: Scene14_Closing,           duration: 8 * FPS },  // 8s
+  { id: "opening",            component: Scene01_Opening,           duration: 25 * FPS },  // 25s
+  { id: "category-problem",   component: Scene02_CategoryProblem,   duration: 22 * FPS },  // 22s
+  { id: "category-declare",   component: Scene03_CategoryDeclaration, duration: 20 * FPS },// 20s
+  { id: "what-it-does",       component: Scene04_WhatItDoes,        duration: 24 * FPS },  // 24s
+  { id: "fast-diagnostic",    component: Scene05_FastDiagnostic,    duration: 30 * FPS },  // 30s
+  { id: "instruments",        component: Scene06_Instruments,       duration: 27 * FPS },  // 27s
+  { id: "refusal",            component: Scene07_Refusal,           duration: 24 * FPS },  // 24s
+  { id: "decision-centre",    component: Scene08_DecisionCentre,    duration: 22 * FPS },  // 22s
+  { id: "executive-reporting", component: Scene09_ExecutiveReporting, duration: 24 * FPS },// 24s
+  { id: "strategy-room",      component: Scene10_StrategyRoom,      duration: 20 * FPS },  // 20s
+  { id: "boardroom-oversight", component: Scene11_BoardroomOversight, duration: 24 * FPS },// 24s
+  { id: "not-claimed",        component: Scene12_NotClaimed,        duration: 27 * FPS },  // 27s
+  { id: "why-it-matters",     component: Scene13_WhyItMatters,      duration: 22 * FPS },  // 22s
+  { id: "closing",            component: Scene14_Closing,           duration: 24 * FPS },  // 24s
 ];
 
 // ── MAIN COMPOSITION ──
@@ -43,6 +44,9 @@ function MainVideo() {
   let offset = 0;
   return (
     <>
+      {/* Voiceover — plays across all scenes */}
+      <Audio src={staticFile("assets/voiceover-main.mp3")} volume={1} />
+
       {SCENES.map((scene) => {
         const from = offset;
         offset += scene.duration;
@@ -61,13 +65,13 @@ function MainVideo() {
 // Uses scenes 1, 3, 4, 7, 13, 14 with tighter timing
 
 const SHORT_SCENES = [
-  { id: "opening",          component: Scene01_Opening,            duration: 5 * FPS },
-  { id: "category-declare", component: Scene03_CategoryDeclaration, duration: 5 * FPS },
-  { id: "what-it-does",     component: Scene04_WhatItDoes,         duration: 7 * FPS },
-  { id: "instruments",      component: Scene06_Instruments,        duration: 6 * FPS },
-  { id: "refusal",          component: Scene07_Refusal,            duration: 6 * FPS },
-  { id: "why-it-matters",   component: Scene13_WhyItMatters,       duration: 6 * FPS },
-  { id: "closing",          component: Scene14_Closing,            duration: 5 * FPS },
+  { id: "opening",          component: Scene01_Opening,            duration: 12 * FPS },
+  { id: "category-declare", component: Scene03_CategoryDeclaration, duration: 12 * FPS },
+  { id: "what-it-does",     component: Scene04_WhatItDoes,         duration: 14 * FPS },
+  { id: "instruments",      component: Scene06_Instruments,        duration: 14 * FPS },
+  { id: "refusal",          component: Scene07_Refusal,            duration: 12 * FPS },
+  { id: "why-it-matters",   component: Scene13_WhyItMatters,       duration: 14 * FPS },
+  { id: "closing",          component: Scene14_Closing,            duration: 12 * FPS },
 ];
 
 function ShortVideo() {
