@@ -1,12 +1,18 @@
 // pages/test-readers.tsx
 // Test page for Reader System implementation
+// Note: Uses getServerSideProps to avoid static prerender issues (test/dev page)
 
 import * as React from "react";
 import Head from "next/head";
+import type { GetServerSideProps } from "next";
 
 import ReaderFrame from "@/components/reader/ReaderFrame";
 import ReaderHeader from "@/components/reader/ReaderHeader";
 import ReaderBody from "@/components/reader/ReaderBody";
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
 
 export default function TestReadersPage() {
   return (

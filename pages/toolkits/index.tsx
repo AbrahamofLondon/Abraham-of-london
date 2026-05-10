@@ -5,7 +5,7 @@
  */
 
 import * as React from "react";
-import type { NextPage } from "next";
+import type { NextPage, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight, Lock } from "lucide-react";
@@ -95,5 +95,9 @@ const ToolkitsIndexPage: NextPage = () => (
     </main>
   </Layout>
 );
+
+export const getStaticProps: GetStaticProps = async () => {
+  return { props: {} };
+};
 
 export default ToolkitsIndexPage;

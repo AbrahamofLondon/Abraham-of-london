@@ -3,9 +3,14 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import Layout from "@/components/Layout";
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
 
 type AuthStep = "request" | "credentials" | "success";
 

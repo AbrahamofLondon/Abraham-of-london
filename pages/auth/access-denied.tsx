@@ -1,5 +1,10 @@
 import Link from "next/link";
+import type { GetServerSideProps } from "next";
 import Layout from "@/components/Layout";
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
 
 export default function AccessDeniedPage() {
   return (

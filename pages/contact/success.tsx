@@ -1,10 +1,15 @@
 /* pages/contact/success.tsx — SECURE SIGNAL TERMINATED */
 import * as React from "react";
+import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShieldCheck, Home, ChevronRight, Activity } from "lucide-react";
 import Layout from "@/components/Layout";
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
 
 export default function ContactSuccessPage() {
   const router = useRouter();

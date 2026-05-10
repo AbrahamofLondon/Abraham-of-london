@@ -4,7 +4,7 @@
  */
 
 import * as React from "react";
-import type { NextPage } from "next";
+import type { NextPage, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
@@ -558,6 +558,10 @@ const FounderPage: NextPage = () => {
       </main>
     </Layout>
   );
+};
+
+export const getStaticProps: GetStaticProps = async () => {
+  return { props: {} };
 };
 
 export default FounderPage;

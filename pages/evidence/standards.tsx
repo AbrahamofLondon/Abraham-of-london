@@ -1,6 +1,7 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import type { GetStaticProps } from "next";
 import { ShieldCheck, FileSearch, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -34,6 +35,10 @@ function StandardItem({ icon: Icon, label, detail }: { icon: typeof ShieldCheck;
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+  return { props: {} };
+};
 
 export default function VerificationStandardsPage() {
   return (

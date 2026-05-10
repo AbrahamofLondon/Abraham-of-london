@@ -1,8 +1,13 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import type { GetStaticProps } from "next";
 import Layout from "@/components/Layout";
 import ClientIntelligenceStack from "@/components/Intelligence/user/ClientIntelligenceStack";
+
+export const getStaticProps: GetStaticProps = async () => {
+  return { props: {} };
+};
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
