@@ -9,6 +9,7 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 
 type EventCounts = Record<string, number>;
@@ -55,13 +56,13 @@ const LaunchDashboard: NextPage<{ isAuthorized: boolean }> = () => {
   }, [window]);
 
   return (
-    <>
+    <AdminLayout title="Launch Dashboard">
       <Head>
         <title>Launch Dashboard | Admin</title>
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px", fontFamily: "'JetBrains Mono', monospace" }}>
+      <div style={{ maxWidth: 900, fontFamily: "'JetBrains Mono', monospace" }}>
         <h1 style={{ fontSize: 18, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>
           Launch Drop-Off Dashboard
         </h1>
@@ -144,7 +145,7 @@ const LaunchDashboard: NextPage<{ isAuthorized: boolean }> = () => {
           </>
         )}
       </div>
-    </>
+    </AdminLayout>
   );
 };
 

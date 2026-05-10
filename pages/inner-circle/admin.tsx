@@ -1,5 +1,4 @@
 /* pages/inner-circle/admin.tsx — PREMIUM PRODUCTION (Router-Safe, Sovereign) */
-'use client';
 
 import * as React from "react";
 import type { NextPage, GetServerSideProps } from "next";

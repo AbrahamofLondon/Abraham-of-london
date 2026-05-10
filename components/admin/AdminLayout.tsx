@@ -1,70 +1,97 @@
-/* components/admin/AdminLayout.tsx — PROFESSIONAL ADMIN INTERFACE */
+/* components/admin/AdminLayout.tsx — INSTITUTIONAL ADMIN COMMAND SURFACE */
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession, signOut } from "next-auth/react";
 import {
-  LayoutDashboard,
-  Brain,
-  Terminal,
-  FileText,
-  Shield,
   Crown,
   LogOut,
-  Activity,
   ChevronLeft,
-  Key,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
+import { ADMIN_NAVIGATION } from "@/lib/admin/admin-navigation";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   title?: string;
 }
 
-const navItems = [
-  {
-    href: "/admin",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    description: "Pipeline overview",
-  },
-  {
-    href: "/admin/intelligence",
-    label: "Intelligence",
-    icon: Brain,
-    description: "Deal flow & audit",
-  },
-  {
-    href: "/admin/command-wall",
-    label: "Command Wall",
-    icon: Terminal,
-    description: "System controls",
-  },
-  {
-    href: "/admin/pdf-dashboard",
-    label: "PDF Analytics",
-    icon: FileText,
-    description: "Document metrics",
-  },
-  {
-    href: "/admin/access-revoke",
-    label: "Access Control",
-    icon: Shield,
-    description: "User permissions",
-  },
-  {
-    href: "/admin/access-keys",
-    label: "Access Keys",
-    icon: Key,
-    description: "Issue & manage keys",
-  },
-  {
-    href: "/admin/validation",
-    label: "Validation",
-    icon: Activity,
-    description: "Launch readiness",
-  },
-];
+function NavSection({
+  section,
+  collapsed,
+  currentPath,
+}: {
+  section: (typeof ADMIN_NAVIGATION)[number];
+  collapsed: boolean;
+  currentPath: string;
+}) {
+  const hasActive = section.items.some((item) => currentPath === item.href || currentPath.startsWith(item.href + "/"));
+  const [open, setOpen] = React.useState(hasActive || section.id === "command");
+
+  if (collapsed) {
+    // Show only first item icon in collapsed mode
+    const first = section.items[0];
+    if (!first) return null;
+    return (
+      <Link
+        href={first.href}
+        className={`flex items-center justify-center rounded px-2 py-2 transition-colors ${
+          hasActive ? "bg-amber-500/10 text-amber-400" : "text-white/30 hover:text-white/60 hover:bg-white/5"
+        }`}
+        title={section.label}
+      >
+        <span className="text-[9px] font-mono">{section.label.charAt(0)}</span>
+      </Link>
+    );
+  }
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between rounded px-3 py-1.5 text-left transition-colors hover:bg-white/5"
+      >
+        <span className={`text-[9px] font-mono uppercase tracking-[0.18em] ${hasActive ? "text-amber-500/70" : "text-white/25"}`}>
+          {section.label}
+        </span>
+        {open ? (
+          <ChevronDown className="h-3 w-3 text-white/20" />
+        ) : (
+          <ChevronRight className="h-3 w-3 text-white/15" />
+        )}
+      </button>
+      {open && (
+        <div className="mt-0.5 space-y-px pl-2">
+          {section.items.map((item) => {
+            const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`flex items-center gap-2 rounded px-3 py-1.5 text-xs transition-colors ${
+                  isActive
+                    ? "bg-amber-500/10 text-amber-400"
+                    : item.status === "stub" || item.status === "rough"
+                      ? "text-white/20 hover:text-white/40 hover:bg-white/5"
+                      : "text-white/45 hover:text-white/80 hover:bg-white/5"
+                }`}
+              >
+                <span>{item.label}</span>
+                {item.status === "stub" && (
+                  <span className="rounded bg-white/5 px-1 py-0.5 text-[7px] font-mono text-white/15">stub</span>
+                )}
+                {item.status === "rough" && (
+                  <span className="rounded bg-white/5 px-1 py-0.5 text-[7px] font-mono text-white/15">rough</span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminLayout({ children, title }: AdminLayoutProps) {
   const router = useRouter();
@@ -135,40 +162,23 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
               {collapsed ? "→" : "←"}
             </button>
 
-            <div className="p-4">
-              <div className={`mb-6 px-3 ${collapsed ? "hidden" : "block"}`}>
-                <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/20">
-                  Command Center
-                </p>
-              </div>
-              <nav className="space-y-1">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = router.pathname === item.href;
-                  
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex items-center gap-3 rounded px-3 py-2 transition-colors ${
-                        isActive
-                          ? "bg-amber-500/10 text-amber-400"
-                          : "text-white/40 hover:text-white/80 hover:bg-white/5"
-                      } ${collapsed ? "justify-center" : ""}`}
-                      title={collapsed ? item.label : undefined}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && (
-                        <div>
-                          <p className="text-xs font-medium">{item.label}</p>
-                          <p className="text-[9px] font-mono text-white/30">
-                            {item.description}
-                          </p>
-                        </div>
-                      )}
-                    </Link>
-                  );
-                })}
+            <div className="p-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 10rem)" }}>
+              {!collapsed && (
+                <div className="mb-4 px-3">
+                  <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/20">
+                    Institutional Command
+                  </p>
+                </div>
+              )}
+              <nav className="space-y-3">
+                {ADMIN_NAVIGATION.map((section) => (
+                  <NavSection
+                    key={section.id}
+                    section={section}
+                    collapsed={collapsed}
+                    currentPath={router.pathname}
+                  />
+                ))}
               </nav>
             </div>
 
