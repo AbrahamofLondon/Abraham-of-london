@@ -280,7 +280,7 @@ export default function DecisionInstrumentsPage() {
                       <h3 style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.12, color: "rgba(255,255,255,0.88)" }}>
                         {inst.title}
                       </h3>
-                      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.06em", color: "rgba(255,255,255,0.30)", flexShrink: 0 }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.04em", color: "#C9A96E", flexShrink: 0 }}>
                         {inst.price}
                       </span>
                     </div>

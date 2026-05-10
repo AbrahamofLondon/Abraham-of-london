@@ -34,7 +34,7 @@ function InstrumentCard({ slug }: { slug: InstrumentSlug }) {
     <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem" }}>
       <div className="flex items-baseline justify-between gap-3">
         <Link href={`/decision-instruments/${slug}`} className="text-sm text-white/80 hover:underline underline-offset-4">{meta.title}</Link>
-        <span style={{ ...mono, fontSize: "9px", color: `${GOLD}CC` }}>{meta.price}</span>
+        <span style={{ ...mono, fontSize: "11px", color: GOLD }}>{meta.price}</span>
       </div>
       <p className="mt-1.5 text-xs text-white/40">{meta.whatItTests}</p>
       <div className="mt-2 flex flex-wrap gap-2">
@@ -68,7 +68,7 @@ function PackCard({ name, price, count, status }: { name: string; price: string;
     <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem" }}>
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-sm text-white/70">{name}</span>
-        <span style={{ ...mono, fontSize: "9px", color: `${GOLD}CC` }}>{price}</span>
+        <span style={{ ...mono, fontSize: "11px", color: GOLD }}>{price}</span>
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
         <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Pack</span>
@@ -85,7 +85,7 @@ function GovernedPlaybookCard({ title, price, time, href, description }: { title
     <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem" }}>
       <div className="flex items-baseline justify-between gap-3">
         <Link href={href} className="text-sm text-white/80 hover:underline underline-offset-4">{title}</Link>
-        <span style={{ ...mono, fontSize: "9px", color: `${GOLD}CC` }}>{price}</span>
+        <span style={{ ...mono, fontSize: "11px", color: GOLD }}>{price}</span>
       </div>
       <p className="mt-1.5 text-xs text-white/40">{description}</p>
       <div className="mt-2 flex flex-wrap gap-2">
