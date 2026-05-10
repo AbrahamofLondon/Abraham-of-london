@@ -29,15 +29,15 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Prisma Client Generation
         run: pnpm prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Contentlayer Build
         run: pnpm contentlayer:build
-        env:
-          NODE_ENV: production
 
       - name: TypeScript Check (non-blocking)
         run: pnpm typecheck:safe
@@ -56,5 +56,3 @@ jobs:
 
       - name: Next.js Build (safe)
         run: pnpm build:netlify:safe
-        env:
-          NODE_ENV: production

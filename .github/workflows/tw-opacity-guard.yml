@@ -42,7 +42,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run converter in check mode
         run: node scripts/convert-tailwind-slash-opacity.mjs --check

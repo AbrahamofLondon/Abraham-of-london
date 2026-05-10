@@ -28,7 +28,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile
 
       # IMPORTANT: converter must run in write mode (no --check)
       - name: Run Tailwind slash-opacity converter (write mode)

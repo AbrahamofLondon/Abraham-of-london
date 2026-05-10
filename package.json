@@ -193,7 +193,7 @@
     "typecheck": "tsc --noEmit",
     "typecheck:safe": "tsc --noEmit --skipLibCheck 2>&1 || echo 'TypeScript errors found (non-blocking)'",
     "lint:safe": "next lint 2>&1 || echo 'Lint warnings found (non-blocking)'",
-    "build:netlify:safe": "pnpm contentlayer:build && pnpm build:fast || echo 'Build completed with warnings'",
+    "build:netlify:safe": "pnpm contentlayer:build && pnpm build:fast",
     "assets:scan": "node scripts/audit-assets.js || echo 'Asset scan complete'",
     "contentlayer2:build": "contentlayer2 build",
     "validate": "pnpm typecheck && pnpm lint && pnpm test",

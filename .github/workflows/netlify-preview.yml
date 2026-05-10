@@ -16,7 +16,6 @@ jobs:
   netlify-build-check:
     runs-on: ubuntu-22.04
     env:
-      NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
@@ -37,7 +36,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build (Netlify-safe)
         run: pnpm run build:netlify:safe
