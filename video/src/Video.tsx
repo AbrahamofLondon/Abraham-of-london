@@ -35,38 +35,36 @@ const FPS = 30;
 
 const VOICE_TIMING = [
   // Scene 1: "Serious decisions rarely fail..."
-  { startAt: 0 },
+  { startAt: 1 },
   // Scene 2: "Consulting gives recommendations..."
-  { startAt: 25 },
+  { startAt: 17 },
   // Scene 3: "Abraham of London is building..."
-  { startAt: 47 },
-  // Scene 4: "The system does not begin by selling..."
-  { startAt: 65 },
+  { startAt: 39 },
+  // Scene 4: "The system does not begin..."
+  { startAt: 60 },
   // Scene 5: "The first entry point is a fast diagnostic..."
-  { startAt: 89 },
-  // Scene 6: "From there, the operator can use decision instruments..."
-  { startAt: 119 },
+  { startAt: 83 },
+  // Scene 6: "From there, the operator can use..."
+  { startAt: 117 },
   // Scene 7: "The category wedge is refusal..."
-  { startAt: 146 },
+  { startAt: 154 },
   // Scene 8: "Once a decision enters the system..."
-  { startAt: 170 },
+  { startAt: 175 },
   // Scene 9: "When the decision is serious enough..."
-  { startAt: 192 },
-  // Scene 10: "Strategy Room is where the decision moves..."
-  { startAt: 216 },
+  { startAt: 199 },
+  // Scene 10: "Strategy Room is where..."
+  { startAt: 220 },
   // Scene 11: "For institutional cases..."
-  { startAt: 236 },
+  { startAt: 240 },
   // Scene 12: "The system is deliberately bounded..."
-  { startAt: 260 },
+  { startAt: 270 },
   // Scene 13: "The aim is simple..."
-  { startAt: 287 },
+  { startAt: 299 },
   // Scene 14: "I am inviting a small number..."
-  { startAt: 309 },
+  { startAt: 315 },
 ];
 
-// Total duration — set this to your audio length in seconds
-// Listen to the end of your recording and note the final timestamp
-const TOTAL_DURATION_SECONDS = 340;
+const TOTAL_DURATION_SECONDS = 345;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
