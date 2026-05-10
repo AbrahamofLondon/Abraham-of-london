@@ -198,6 +198,147 @@ export const CATALOG: Record<string, CatalogProduct> = {
     includes: [],
   },
 
+  // ═══ TIER 1A — EXPOSURE & RISK ═══════════════════════════════════════════
+
+  escalation_readiness_scorecard: {
+    code: "escalation_readiness_scorecard",
+    displayName: "Escalation Readiness Scorecard",
+    amount: 1900,
+    displayPrice: "\u00a319",
+    stripeProductId: null, // TODO: Create in Stripe dashboard
+    stripePriceId: null, // TODO: Add Stripe price ID
+    entitlementSlug: "escalation-readiness-scorecard",
+    tier: "decision-instrument",
+    category: "decision_tools" as ProductCategory,
+    accessType: "one_time" as AccessType,
+    duration: "lifetime" as Duration,
+    active: true,
+    successPath: "/decision-instruments/escalation-readiness-scorecard/run",
+    cancelPath: "/decision-instruments",
+    cookieName: null,
+    includes: [],
+  },
+
+  structural_failure_diagnostic_canvas: {
+    code: "structural_failure_diagnostic_canvas",
+    displayName: "Structural Failure Diagnostic Canvas",
+    amount: 1900,
+    displayPrice: "\u00a319",
+    stripeProductId: null, // TODO: Create in Stripe dashboard
+    stripePriceId: null, // TODO: Add Stripe price ID
+    entitlementSlug: "structural-failure-diagnostic-canvas",
+    tier: "decision-instrument",
+    category: "decision_tools" as ProductCategory,
+    accessType: "one_time" as AccessType,
+    duration: "lifetime" as Duration,
+    active: true,
+    successPath: "/decision-instruments/structural-failure-diagnostic-canvas/run",
+    cancelPath: "/decision-instruments",
+    cookieName: null,
+    includes: [],
+  },
+
+  execution_risk_index: {
+    code: "execution_risk_index",
+    displayName: "Execution Risk Index",
+    amount: 2900,
+    displayPrice: "\u00a329",
+    stripeProductId: null, // TODO: Create in Stripe dashboard
+    stripePriceId: null, // TODO: Add Stripe price ID
+    entitlementSlug: "execution-risk-index",
+    tier: "decision-instrument",
+    category: "decision_tools" as ProductCategory,
+    accessType: "one_time" as AccessType,
+    duration: "lifetime" as Duration,
+    active: true,
+    successPath: "/decision-instruments/execution-risk-index/run",
+    cancelPath: "/decision-instruments",
+    cookieName: null,
+    includes: [],
+  },
+
+  team_alignment_gap_map: {
+    code: "team_alignment_gap_map",
+    displayName: "Team Alignment Gap Map",
+    amount: 2900,
+    displayPrice: "\u00a329",
+    stripeProductId: null, // TODO: Create in Stripe dashboard
+    stripePriceId: null, // TODO: Add Stripe price ID
+    entitlementSlug: "team-alignment-gap-map",
+    tier: "decision-instrument",
+    category: "decision_tools" as ProductCategory,
+    accessType: "one_time" as AccessType,
+    duration: "lifetime" as Duration,
+    active: true,
+    successPath: "/decision-instruments/team-alignment-gap-map/run",
+    cancelPath: "/decision-instruments",
+    cookieName: null,
+    includes: [],
+  },
+
+  // ═══ TIER 1B — ALIGNMENT & AUTHORITY ═════════════════════════════════════
+
+  governance_drift_detector: {
+    code: "governance_drift_detector",
+    displayName: "Governance Drift Detector",
+    amount: 4900,
+    displayPrice: "\u00a349",
+    stripeProductId: null, // TODO: Create in Stripe dashboard
+    stripePriceId: null, // TODO: Add Stripe price ID
+    entitlementSlug: "governance-drift-detector",
+    tier: "decision-instrument",
+    category: "decision_tools" as ProductCategory,
+    accessType: "one_time" as AccessType,
+    duration: "lifetime" as Duration,
+    active: true,
+    successPath: "/decision-instruments/governance-drift-detector/run",
+    cancelPath: "/decision-instruments",
+    cookieName: null,
+    includes: [],
+  },
+
+  strategic_priority_stack_builder: {
+    code: "strategic_priority_stack_builder",
+    displayName: "Strategic Priority Stack Builder",
+    amount: 4900,
+    displayPrice: "\u00a349",
+    stripeProductId: null, // TODO: Create in Stripe dashboard
+    stripePriceId: null, // TODO: Add Stripe price ID
+    entitlementSlug: "strategic-priority-stack-builder",
+    tier: "decision-instrument",
+    category: "decision_tools" as ProductCategory,
+    accessType: "one_time" as AccessType,
+    duration: "lifetime" as Duration,
+    active: true,
+    successPath: "/decision-instruments/strategic-priority-stack-builder/run",
+    cancelPath: "/decision-instruments",
+    cookieName: null,
+    includes: [],
+  },
+
+  // ═══ TIER 1C — BOARD & EXECUTION GRADE ══════════════════════════════════
+
+  board_brief_builder: {
+    code: "board_brief_builder",
+    displayName: "Board Brief Builder",
+    amount: 12900,
+    displayPrice: "\u00a3129",
+    stripeProductId: null, // TODO: Create in Stripe dashboard
+    stripePriceId: null, // TODO: Add Stripe price ID
+    entitlementSlug: "board-brief-builder",
+    tier: "decision-instrument-premium",
+    category: "decision_tools" as ProductCategory,
+    accessType: "one_time" as AccessType,
+    duration: "lifetime" as Duration,
+    active: true,
+    successPath: "/decision-instruments/board-brief-template/run",
+    cancelPath: "/decision-instruments",
+    cookieName: null,
+    includes: [],
+  },
+
+  // ═══ PACKS ══════════════════════════════════════════════════════════════
+
   operator_decision_pack: {
     code: "operator_decision_pack",
     displayName: "Operator Decision Pack",

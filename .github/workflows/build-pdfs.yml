@@ -30,7 +30,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
 
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
       - run: npx tsx scripts/build-pdf-registry-json.ts
 
