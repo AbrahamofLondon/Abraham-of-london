@@ -356,7 +356,7 @@ function readJsonFile<T>(relativePath: string): T | null {
   try {
     const fs = require("fs") as typeof import("fs");
     const path = require("path") as typeof import("path");
-    return JSON.parse(fs.readFileSync(path.join(process.cwd(), relativePath), "utf8")) as T;
+    return JSON.parse(fs.readFileSync(path.join(/* turbopackIgnore: true */ process.cwd(), relativePath), "utf8")) as T;
   } catch {
     return null;
   }

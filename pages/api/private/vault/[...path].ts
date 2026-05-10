@@ -9,7 +9,7 @@ import tiers, { requiredTierFromVaultPath } from "@/lib/access/tiers";
 import { vaultRuntimeConfig } from "@/lib/runtime/vault-config";
 
 const VAULT_ROOT = path.join(
-  process.cwd(),
+  /* turbopackIgnore: true */ process.cwd(),
   ...vaultRuntimeConfig.vaultRootSegments,
 );
 

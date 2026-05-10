@@ -9,7 +9,7 @@
  */
 
 import * as React from "react";
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import {
   ArrowRight,
@@ -22,6 +22,10 @@ import Layout from "@/components/Layout";
 import { loadSpineFromSession } from "@/lib/decision/spine-persistence";
 import { advanceSpine, type IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import { saveSpineToSession, persistSpineToDB } from "@/lib/decision/spine-persistence";
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };

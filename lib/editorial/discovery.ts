@@ -14,7 +14,7 @@ import {
 } from "./catalogue";
 
 function abs(p: string): string {
-  return path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+  return path.isAbsolute(p) ? p : path.join(/* turbopackIgnore: true */ process.cwd(), p);
 }
 
 function safeText(v: unknown): string | undefined {
