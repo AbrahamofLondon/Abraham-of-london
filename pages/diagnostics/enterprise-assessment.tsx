@@ -1017,7 +1017,7 @@ export default function EnterpriseAssessmentPage() {
             ? "Proceed to Executive Reporting because enterprise consequence requires governed interpretation."
             : "Monitor and escalate if the same failure evidence appears in two or more domains.",
           riskScore: Math.min(100, Math.max(0, 100 - totalPct + (reading.decisionSignal.structuralRisk * 0.35))),
-          formula: "(100 - enterprise percent) + decision structural risk x 0.35",
+          formula: "Composite risk score derived from enterprise assessment and structural risk weighting",
           reasoning: [
             `Enterprise score: ${totalPct}%`,
             `Decision clarity: ${reading.decisionSignal.clarityScore}%`,

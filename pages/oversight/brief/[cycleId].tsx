@@ -18,6 +18,14 @@ import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
 
+type ComposerIntelligence = {
+  contradictionPressureBand: string | null;
+  contradictionCount: number;
+  suppressedCount: number;
+  suppressionExplanation: string;
+  thinStateReasons: string[];
+};
+
 type PageProps = {
   blockedReason: string | null;
   cycle: OversightCycleArchiveRecord | null;
@@ -27,6 +35,7 @@ type PageProps = {
   cycleComparison: OversightCycleComparison | null;
   audience: OversightCycleAudience;
   cadencePosture: BuyerVisibleCadencePosture | null;
+  composerIntelligence: ComposerIntelligence | null;
 };
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -51,6 +60,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
   cycleComparison,
   audience,
   cadencePosture,
+  composerIntelligence,
 }) => {
   return (
     <Layout title="Oversight Brief" description="Governed monthly oversight brief" fullWidth>
@@ -549,12 +559,12 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const cycleId = typeof ctx.query.cycleId === "string" ? ctx.query.cycleId : null;
   const audience = ctx.query.audience === "BOARD_LEVEL" ? "BOARD_LEVEL" : "CLIENT_SPONSOR";
   if (!cycleId) {
-    return { props: { blockedReason: "Cycle id is required.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
+    return { props: { blockedReason: "No oversight cycle was specified. Navigate to Retained Oversight Command to view available cycles. A cycle is created when a retained review period is completed.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
   }
 
   const archive = await loadOversightCycleArchive({ cycleId });
   if (!archive) {
-    return { props: { blockedReason: "Oversight cycle could not be found.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
+    return { props: { blockedReason: "This oversight cycle could not be found. It may not have been archived yet, or the cycle reference may be incorrect. Oversight briefs become available after a retained review cycle is completed and archived by the system.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
   }
 
   const email = session.user.email.toLowerCase();
@@ -576,7 +586,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   });
 
   if (!isAdmin && !canViewSponsorCommandSummary(role)) {
-    return { props: { blockedReason: "This sponsor-safe oversight brief is not available to the current role.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
+    return { props: { blockedReason: "This sponsor-safe oversight brief is not available to the current role.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
   }
 
   if (!isAdmin && archive.record.organisationId) {
@@ -589,7 +599,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       select: { id: true },
     });
     if (!membershipGate) {
-      return { props: { blockedReason: "Organisation access is required for this oversight brief.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
+      return { props: { blockedReason: "Organisation access is required for this oversight brief.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
     }
   }
 
@@ -599,7 +609,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     email,
   });
   if (!retainerAccess.ok && !isAdmin) {
-    return { props: { blockedReason: "Retainer access is not active for this account.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null } };
+    return { props: { blockedReason: "Retainer access is not active for this account.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
   }
 
   const retainedCycle = await loadLatestRetainedReviewCycleForAccount({
@@ -608,6 +618,24 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     sponsorEmail: email,
   }).catch(() => null);
   const cadencePosture = buildBuyerVisibleCadencePosture(retainedCycle);
+
+  // Canonical composer — contradiction pressure + suppression
+  let composerIntelligence: ComposerIntelligence | null = null;
+  try {
+    const { composeInstitutionalCaseIntelligence } = await import("@/lib/product/institutional-case-intelligence-composer");
+    const intel = await composeInstitutionalCaseIntelligence({
+      email,
+      organisationId: archive.record.organisationId ?? undefined,
+      viewerRole: isAdmin ? "ADMIN" : "SPONSOR",
+    });
+    composerIntelligence = {
+      contradictionPressureBand: intel.contradictionPressure?.pressureBand ?? null,
+      contradictionCount: intel.contradictionPressure?.activeContradictions ?? 0,
+      suppressedCount: intel.suppressionSummary.suppressedCount,
+      suppressionExplanation: intel.suppressionSummary.explanation,
+      thinStateReasons: intel.evidencePosture.thinStateReasons,
+    };
+  } catch { /* degrade */ }
 
   return {
     props: {
@@ -619,6 +647,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       cycleComparison: archive.cycleComparison ?? null,
       audience,
       cadencePosture,
+      composerIntelligence,
     },
   };
 };

@@ -110,9 +110,20 @@ type SessionData = {
   createdAt: string;
 };
 
+type ComposerStakeholder = {
+  decisionOwner: string | null;
+  potentialBlockers: string[];
+  unresolvedAuthorityTension: string | null;
+  pressureLevel: string;
+  evidencePosture: string;
+  thinState: boolean;
+};
+
 type PageProps = {
   session: SessionData | null;
   error?: string;
+  composerStakeholder?: ComposerStakeholder | null;
+  composerSuppression?: string | null;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -193,7 +204,7 @@ function daysSince(value: string): number | null {
 // PAGE COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function StrategyRoomSessionPage({ session: initial, error }: PageProps) {
+export default function StrategyRoomSessionPage({ session: initial, error, composerStakeholder, composerSuppression }: PageProps) {
   const [session, setSession] = React.useState(initial);
   const [newDecision, setNewDecision] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
@@ -271,8 +282,15 @@ export default function StrategyRoomSessionPage({ session: initial, error }: Pag
         <Head><meta name="robots" content="noindex, nofollow" /></Head>
         <div style={{ backgroundColor: DEEP, minHeight: "100vh", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div>
-            <div style={{ ...mono, color: "rgba(252,165,165,0.70)" }}>Session not found</div>
-            <Link href="/strategy-room" style={{ ...mono, color: AMBER, marginTop: "1rem", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+            <div style={{ ...mono, color: "rgba(252,165,165,0.70)", fontSize: "12px" }}>
+              {error === "Access denied" ? "Access to this session is not available." : "This execution session could not be found."}
+            </div>
+            <p style={{ color: "rgba(255,255,255,0.40)", fontSize: "13px", marginTop: "0.75rem", maxWidth: "420px", lineHeight: 1.6 }}>
+              {error === "Access denied"
+                ? "Strategy Room sessions are restricted to the original participant or an authorised operator. If you believe this is an error, contact the engagement operator."
+                : "The session may have expired, the reference may be incorrect, or the execution record has not yet been created. Sessions are created when a Strategy Room entry is completed and an execution state is generated."}
+            </p>
+            <Link href="/strategy-room" style={{ ...mono, color: AMBER, marginTop: "1.25rem", display: "inline-flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase" }}>
               Return to Strategy Room <ArrowRight style={{ width: 10, height: 10 }} />
             </Link>
           </div>
@@ -1208,7 +1226,35 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       createdAt: typeof raw.createdAt === "string" ? raw.createdAt : new Date(raw.createdAt).toISOString(),
     };
 
-    return { props: { session } };
+    // Canonical composer — stakeholder pressure + suppression
+    let composerStakeholder: ComposerStakeholder | null = null;
+    let composerSuppression: string | null = null;
+    try {
+      const sessionEmail = raw.email ?? raw.userEmail ?? null;
+      if (sessionEmail) {
+        const { composeInstitutionalCaseIntelligence } = await import("@/lib/product/institutional-case-intelligence-composer");
+        const intel = await composeInstitutionalCaseIntelligence({
+          email: sessionEmail,
+          strategyRoomSessionId: id,
+          viewerRole: "CLIENT",
+        });
+        if (intel.status === "COMPOSED" && intel.stakeholderPressure) {
+          composerStakeholder = {
+            decisionOwner: intel.stakeholderPressure.decisionOwner,
+            potentialBlockers: intel.stakeholderPressure.potentialBlockers,
+            unresolvedAuthorityTension: intel.stakeholderPressure.unresolvedAuthorityTension,
+            pressureLevel: intel.contradictionPressure?.pressureBand ?? "UNKNOWN",
+            evidencePosture: intel.stakeholderPressure.evidencePosture,
+            thinState: intel.stakeholderPressure.thinState,
+          };
+        }
+        if (intel.suppressionSummary.suppressedCount > 0) {
+          composerSuppression = intel.suppressionSummary.explanation;
+        }
+      }
+    } catch { /* degrade */ }
+
+    return { props: { session, composerStakeholder, composerSuppression } };
   } catch (err) {
     console.error("[strategy-room-session]", err);
     return { props: { session: null, error: "Failed to load session" } };

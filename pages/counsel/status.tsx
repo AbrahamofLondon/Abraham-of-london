@@ -107,6 +107,9 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
           {authenticated && !counselCase ? (
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
               <p className="text-white/65">No counsel cases are currently recorded for this account.</p>
+              <p className="mt-3 text-sm leading-7 text-white/40">
+                Counsel Review is triggered when the system detects conditions that exceed what automated governance can safely model — such as repeated contradictions, high-consequence exposure, failed execution checkpoints, or boardroom-level escalation. Until those conditions are met, no counsel case is created. Your diagnostic evidence and checkpoint state remain preserved.
+              </p>
             </section>
           ) : null}
 
@@ -238,22 +241,18 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     if (ic) institutionalCase = buildPublicSummary(ic) as InstitutionalCaseSummary;
   } catch { /* best-effort */ }
 
+  // Canonical composer — single source for institutional intelligence
   let stakeholderPressure: StakeholderPressureView | null = null;
   try {
-    const { getDiagnosticJourney } = await import("@/lib/diagnostics/journey-store");
-    const journey = await getDiagnosticJourney({ email });
-    const caseObj = journey.decisionObjects?.slice(-1)?.[0];
-    if (caseObj) {
-      const { buildStakeholderMapFromCase } = await import("@/lib/decision/stakeholder-map");
-      const { buildStakeholderPressureSummary } = await import("@/lib/product/institutional-case-summary");
-      const map = buildStakeholderMapFromCase(caseObj as any);
-      const summary = buildStakeholderPressureSummary(map);
+    const { composeInstitutionalCaseIntelligence } = await import("@/lib/product/institutional-case-intelligence-composer");
+    const intel = await composeInstitutionalCaseIntelligence({ email, viewerRole: "SPONSOR" });
+    if (intel.status === "COMPOSED" && intel.stakeholderPressure) {
       stakeholderPressure = {
-        decisionOwner: summary.decisionOwner,
-        affectedGroups: summary.affectedGroups,
-        unresolvedAuthorityTension: summary.unresolvedAuthorityTension,
-        potentialBlockers: summary.potentialBlockers,
-        thinState: summary.thinState,
+        decisionOwner: intel.stakeholderPressure.decisionOwner,
+        affectedGroups: intel.stakeholderPressure.affectedGroups,
+        unresolvedAuthorityTension: intel.stakeholderPressure.unresolvedAuthorityTension,
+        potentialBlockers: intel.stakeholderPressure.potentialBlockers,
+        thinState: intel.stakeholderPressure.thinState,
       };
     }
   } catch { /* degrade gracefully */ }

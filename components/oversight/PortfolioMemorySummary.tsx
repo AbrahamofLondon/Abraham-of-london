@@ -86,7 +86,7 @@ export default function PortfolioMemorySummary({ data }: Props) {
             ))}
           </div>
         ) : (
-          <p className="mt-4 text-sm text-white/45">No recurring patterns have been detected across current diagnostic evidence.</p>
+          <p className="mt-4 text-sm text-white/45">No recurring patterns have been detected across current diagnostic evidence. Pattern detection requires multiple diagnostic records across the retained scope. As additional cases complete the institutional corridor, recurring themes will surface here automatically.</p>
         )}
 
         {data.contradictionClasses.length > 0 && (
@@ -195,6 +195,18 @@ export default function PortfolioMemorySummary({ data }: Props) {
             ))}
           </div>
           <p style={metaStyle} className="mt-3">{data.portfolioStakeholderRecurrence.sourceLabel}</p>
+        </section>
+      )}
+
+      {/* Sector / Role-Dynamic Thin State */}
+      {data.portfolioScenarioPressure?.suppressedBelowThreshold && (
+        <section style={cardStyle}>
+          <p style={eyebrowStyle}>Sector &amp; Role Intelligence</p>
+          <p className="mt-4 text-sm text-white/40">
+            Sector-level and role-dynamic intelligence requires a minimum sample of retained cases across multiple organisations.
+            Current sample is below the required minimum. As additional retained scopes are onboarded, sector recurrence and
+            role-dynamic patterns will surface here automatically. All role-level intelligence is labelled system-inferred unless operator-reviewed.
+          </p>
         </section>
       )}
 

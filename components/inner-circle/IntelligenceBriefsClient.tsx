@@ -6,8 +6,8 @@ import { useToast } from "@/hooks/useToast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { BRIEF_REGISTRY } from "@/lib/briefs/registry";
 
-import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
+import type { AccessTier } from "@/lib/access/public";
+import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/public";
 
 /**
  * Decide what tier counts as "restricted" for iconography.

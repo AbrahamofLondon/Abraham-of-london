@@ -165,7 +165,7 @@ export function buildOversightSignals(input: {
         caseId: item.caseId,
         severity: (item.unresolvedCommitments ?? 0) >= 2 ? "HIGH" : "MEDIUM",
         title: "Counsel review threshold has been crossed",
-        explanation: `${item.title} shows execution blockage or escalation conditions that exceed routine automated oversight.`,
+        explanation: `${item.title} shows execution blockage or escalation conditions that exceed scheduled retained review.`,
         recommendedAction: "Review the case for counsel escalation and confirm whether authority or evidence boundaries have been exceeded.",
         createdAt,
       });
@@ -246,7 +246,7 @@ export function buildOversightSignals(input: {
       severity: retainedEnforcement.improvementSignals >= 3 ? "MEDIUM" : "LOW",
       title: "Retained enforcement shows improvement signals",
       explanation: `${retainedEnforcement.improvementSignals} retained enforcement cycle${retainedEnforcement.improvementSignals === 1 ? "" : "s"} recorded positive outcome movement this period.`,
-      recommendedAction: "Preserve the intervention pattern that produced the verified improvement.",
+      recommendedAction: "Preserve the intervention pattern associated with this improvement signal.",
       createdAt,
     });
   }

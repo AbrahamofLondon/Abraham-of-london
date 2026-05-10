@@ -277,6 +277,27 @@ export async function buildCrossOrgPatternIntelligence(
     );
   }
 
+  // ── Role-dynamic recurrence (from role pattern extraction) ──
+  try {
+    const { extractRoleDynamicPatterns } = await import("@/lib/product/role-dynamic-patterns");
+    const orgId = resolution.scopes[0]?.organisationId;
+    if (orgId) {
+      const roleIntel = await extractRoleDynamicPatterns({ organisationId: orgId });
+      const materialPatterns = roleIntel.patterns.filter((p) => p.posture === "MATERIAL" || p.posture === "RECURRING");
+      if (materialPatterns.length > 0) {
+        categories.push(
+          makeCategory(
+            "repeated_contradiction_themes",
+            "Recurring institutional pattern by role",
+            materialPatterns.length,
+            `${materialPatterns.length} role-dynamic pattern${materialPatterns.length !== 1 ? "s" : ""} detected: ${materialPatterns.map((p) => p.visibleLabel).join("; ")}.`,
+            false,
+          ),
+        );
+      }
+    }
+  } catch { /* degrade gracefully */ }
+
   const strongCategories = categories.filter((item) => item.occurrences > 0).length;
   const depth = resolution.scopeMode === "cross_org" && strongCategories >= 4
     ? "DEFENSIBLE"

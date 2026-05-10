@@ -13,8 +13,8 @@ import {
   Library,
 } from "lucide-react";
 
-import type { AccessTier } from "@/lib/access/tier-policy";
-import { getTierLabel } from "@/lib/access/tier-policy";
+import type { AccessTier } from "@/lib/access/public";
+import { getTierLabel } from "@/lib/access/public";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import { SafeTableOfContents } from "@/components/mdx/TableOfContents";
 

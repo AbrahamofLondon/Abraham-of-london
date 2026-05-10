@@ -109,7 +109,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
                 <p>{institutionalCase.scenarioPressure.likelyConsequence}</p>
                 <p className="text-white/50">{institutionalCase.scenarioPressure.bestControlledPath}</p>
                 <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.30)", marginTop: "0.75rem" }}>
-                  {institutionalCase.scenarioPressure.uncertaintyCaveat}
+                  {institutionalCase.scenarioPressure.uncertaintyCaveat || "Scenario estimate based on current record. Not independently verified."}
                 </p>
               </div>
             </section>
@@ -190,43 +190,35 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         admitted: pub.admitted,
       };
 
-      // Wire stakeholder map + simulation into boardroom context
+      // Canonical composer — single source for all institutional intelligence
       try {
-        const { getDiagnosticJourney } = await import("@/lib/diagnostics/journey-store");
-        const journey = await getDiagnosticJourney({ email });
-        const caseObj = journey.decisionObjects?.slice(-1)?.[0];
-        if (caseObj) {
-          const { buildStakeholderMapFromCase } = await import("@/lib/decision/stakeholder-map");
-          const map = buildStakeholderMapFromCase(caseObj as any);
-          institutionalCase.stakeholderExposure = {
-            approvalRequired: map.formalOwner,
-            potentialBlockers: map.blockers.slice(0, 3),
-            consequenceBearers: map.misalignedParties.length > 0 ? ["Misaligned stakeholder identified"] : [],
-            unresolvedContradiction: map.realOwner && map.formalOwner && map.realOwner !== map.formalOwner
-              ? `Stated owner (${map.formalOwner}) may not be the actual decision-maker.`
-              : null,
-            thinState: !map.formalOwner && map.blockers.length === 0,
-          };
-
-          // Simulation — scenario pressure
-          try {
-            const { loadSpineFromJourney } = await import("@/lib/decision/spine-persistence");
-            const { prisma } = await import("@/lib/prisma");
-            const spine = await loadSpineFromJourney(email, prisma as unknown as Parameters<typeof loadSpineFromJourney>[1]);
-            if (spine) {
-              const { simulateAction } = await import("@/lib/decision/simulation-engine");
-              const sim = simulateAction({ action: "do_nothing", spine, stakeholderMap: map });
-              institutionalCase.scenarioPressure = {
-                likelyConsequence: sim.immediateEffect,
-                bestControlledPath: sim.recommendation,
-                worstAvoidablePath: sim.secondOrderEffect,
-                uncertaintyCaveat: sim.confidence < 0.5
-                  ? "Scenario estimate has low confidence. Not independently verified."
-                  : "Scenario estimate based on current record. Not independently verified.",
-                thinState: sim.confidence < 0.3,
-              };
-            }
-          } catch { /* degrade */ }
+        const { composeInstitutionalCaseIntelligence } = await import("@/lib/product/institutional-case-intelligence-composer");
+        const intel = await composeInstitutionalCaseIntelligence({ email, caseId: pub.caseId, viewerRole: "SPONSOR" });
+        if (intel.status === "COMPOSED") {
+          if (intel.stakeholderPressure && !intel.stakeholderPressure.thinState) {
+            institutionalCase.stakeholderExposure = {
+              approvalRequired: intel.stakeholderPressure.decisionOwner,
+              potentialBlockers: intel.stakeholderPressure.potentialBlockers,
+              consequenceBearers: intel.stakeholderPressure.affectedGroups.filter((g) => !g.startsWith("Blocking")),
+              unresolvedContradiction: intel.stakeholderPressure.unresolvedAuthorityTension,
+              thinState: false,
+            };
+          }
+          if (intel.scenarioPressure && !intel.scenarioPressure.thinState) {
+            institutionalCase.scenarioPressure = {
+              likelyConsequence: intel.scenarioPressure.likelyConsequence,
+              bestControlledPath: intel.scenarioPressure.bestControlledPath,
+              worstAvoidablePath: intel.scenarioPressure.worstAvoidablePath,
+              uncertaintyCaveat: intel.scenarioPressure.uncertaintyCaveat,
+              thinState: false,
+            };
+          }
+          if (intel.decisionRecordSummary) {
+            institutionalCase.decisionRecordPosture = intel.decisionRecordSummary.posture;
+          }
+          if (intel.contradictionPressure) {
+            institutionalCase.contradictionPressure = intel.contradictionPressure.pressureBand;
+          }
         }
       } catch { /* degrade gracefully */ }
     }

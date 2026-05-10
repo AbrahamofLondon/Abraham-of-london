@@ -990,7 +990,7 @@ export default function TeamAssessmentPage() {
             ? "Proceed to Enterprise Assessment because the gap is too distributed for local correction."
             : "Reassess if the gap widens or repeats after the first intervention.",
           riskScore: Math.min(100, Math.max(0, Math.abs(overallLeader - overallReality) * 2 + criticalGaps.length * 18 + highGaps.length * 10)),
-          formula: "absolute leadership/reality gap x 2 + critical gaps x 18 + high gaps x 10",
+          formula: "Composite risk score derived from gap analysis and severity weighting",
           reasoning: [
             `Leader score: ${overallLeader}%`,
             `Estimated team reality: ${overallReality}%`,
