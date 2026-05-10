@@ -120,6 +120,26 @@ for (const code of PACK_CODES) {
   }
 }
 
+// ── 8. Check for duplicate stripeProductId across instruments ──
+{
+  const productIds = [];
+  for (const code of INSTRUMENT_CODES) {
+    const idx = catalogContent.indexOf(`${code}: {`);
+    if (idx < 0) continue;
+    const block = catalogContent.slice(idx, idx + 500);
+    const match = block.match(/stripeProductId:\s*"(prod_[^"]+)"/);
+    if (match) productIds.push({ code, productId: match[1] });
+  }
+  const seen = new Map();
+  for (const { code, productId } of productIds) {
+    if (seen.has(productId)) {
+      console.warn(`WARNING: ${code} shares stripeProductId ${productId} with ${seen.get(productId)} — create a unique Stripe product for each instrument`);
+      // Warn but don't fail — Stripe allows multiple prices per product
+    }
+    seen.set(productId, code);
+  }
+}
+
 if (violations > 0) {
   console.error(`\nDECISION_INSTRUMENTS_COMMERCIAL_GUARD: FAIL (${violations} violation${violations !== 1 ? "s" : ""})`);
   process.exit(1);
