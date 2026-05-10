@@ -85,6 +85,9 @@ export default function MandateClarityRunner({ onComplete }: { onComplete: (resu
         style={{ width: "100%", padding: "14px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
         Save result
       </button>
+      <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.15)", textAlign: "center", marginTop: "0.75rem" }}>
+        This is a mandate clarity estimate based on your inputs. It is not independently verified.
+      </p>
     </div>
   );
 }
