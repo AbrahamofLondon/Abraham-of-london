@@ -16,7 +16,7 @@ export function Scene14_Closing() {
       <div style={{ marginTop: "50px" }} />
       <FadeIn delay={90}>
         <div style={{ border: `1px solid ${GOLD}40`, padding: "20px 36px", textAlign: "center" }}>
-          <p style={{ ...mono, fontSize: "13px", letterSpacing: "0.08em", color: GOLD }}>
+          <p style={{ ...mono, fontSize: "22px", letterSpacing: "0.06em", color: GOLD }}>
             abrahamoflondon.org/engagements/operator-pilot
           </p>
         </div>

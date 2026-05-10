@@ -13,12 +13,12 @@ export function Scene05_FastDiagnostic() {
       </Body>
       <div style={{ marginTop: "40px" }} />
       <FadeIn delay={80}>
-        <div style={{ border: `1px solid ${GOLD}30`, padding: "28px 36px", maxWidth: "500px" }}>
-          <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>System reading</p>
-          <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-            <p style={{ ...mono, fontSize: "13px", color: "rgba(252,165,165,0.65)" }}>Decision pressure detected</p>
-            <p style={{ ...mono, fontSize: "13px", color: FAINT }}>Evidence posture: thin</p>
-            <p style={{ ...mono, fontSize: "13px", color: `${GOLD}AA` }}>Required move: clarify authority before escalation</p>
+        <div style={{ border: `1px solid ${GOLD}40`, padding: "36px 44px", maxWidth: "640px" }}>
+          <p style={{ ...mono, fontSize: "16px", letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD }}>System reading</p>
+          <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+            <p style={{ ...mono, fontSize: "20px", color: "rgba(252,165,165,0.85)" }}>Decision pressure detected</p>
+            <p style={{ ...mono, fontSize: "20px", color: FAINT }}>Evidence posture: thin</p>
+            <p style={{ ...mono, fontSize: "20px", color: GOLD }}>Required move: clarify authority before escalation</p>
           </div>
         </div>
       </FadeIn>

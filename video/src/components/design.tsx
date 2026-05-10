@@ -6,12 +6,15 @@ import React from "react";
 import { interpolate, useCurrentFrame, useVideoConfig, spring } from "remotion";
 
 // ── TOKENS ──
+// Video requires higher contrast and larger text than web.
+// Minimum readable font size in 1080p video: 18px.
+// Minimum contrast for secondary text: 60% white.
 export const BG = "rgb(3,3,5)";
 export const GOLD = "#C9A96E";
-export const WHITE = "rgba(255,255,255,0.92)";
-export const DIM = "rgba(255,255,255,0.45)";
-export const FAINT = "rgba(255,255,255,0.20)";
-export const AMBER_GLOW = "rgba(201,169,110,0.08)";
+export const WHITE = "rgba(255,255,255,0.95)";
+export const DIM = "rgba(255,255,255,0.70)";
+export const FAINT = "rgba(255,255,255,0.45)";
+export const AMBER_GLOW = "rgba(201,169,110,0.12)";
 
 export const serif: React.CSSProperties = {
   fontFamily: "'Cormorant Garamond', Georgia, 'Times New Roman', serif",
@@ -119,10 +122,10 @@ export function Eyebrow({ children, delay = 0 }: { children: React.ReactNode; de
       <p
         style={{
           ...mono,
-          fontSize: "11px",
+          fontSize: "18px",
           letterSpacing: "0.32em",
           textTransform: "uppercase",
-          color: `${GOLD}99`,
+          color: GOLD,
         }}
       >
         {children}
@@ -209,7 +212,7 @@ export function SystemText({
       <p
         style={{
           ...mono,
-          fontSize: "14px",
+          fontSize: "20px",
           letterSpacing: "0.12em",
           color: color ?? FAINT,
           textAlign: "center",
@@ -259,10 +262,10 @@ export function CorridorNode({
       <span
         style={{
           ...mono,
-          fontSize: "10px",
-          letterSpacing: "0.18em",
+          fontSize: "14px",
+          letterSpacing: "0.14em",
           textTransform: "uppercase",
-          color: active ? GOLD : "rgba(255,255,255,0.35)",
+          color: active ? GOLD : "rgba(255,255,255,0.50)",
         }}
       >
         {label}
@@ -310,12 +313,12 @@ export function ThreeColumns({
               width: "280px",
             }}
           >
-            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: GOLD }}>
+            <p style={{ ...mono, fontSize: "18px", letterSpacing: "0.18em", textTransform: "uppercase", color: GOLD }}>
               {col.header}
             </p>
             {col.items.map((item, ii) => (
               <FadeIn key={item} delay={startDelay + ci * 20 + (ii + 1) * 12}>
-                <p style={{ ...serif, fontSize: "17px", lineHeight: 1.5, color: DIM, marginTop: "10px" }}>
+                <p style={{ ...serif, fontSize: "22px", lineHeight: 1.5, color: DIM, marginTop: "12px" }}>
                   {item}
                 </p>
               </FadeIn>
@@ -343,9 +346,9 @@ export function BulletList({
     <div style={{ display: "flex", flexDirection: "column", gap: "12px", alignItems: "flex-start" }}>
       {items.map((item, i) => (
         <FadeIn key={item} delay={startDelay + i * interval}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "14px" }}>
-            <span style={{ ...mono, fontSize: "9px", color: GOLD }}>—</span>
-            <span style={{ ...serif, fontSize: "20px", lineHeight: 1.5, color: color ?? DIM }}>{item}</span>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "16px" }}>
+            <span style={{ ...mono, fontSize: "18px", color: GOLD }}>—</span>
+            <span style={{ ...serif, fontSize: "24px", lineHeight: 1.5, color: color ?? DIM }}>{item}</span>
           </div>
         </FadeIn>
       ))}
