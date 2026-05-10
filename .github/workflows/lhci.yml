@@ -34,9 +34,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build content
-        run: pnpm contentlayer:build
-
       - name: Build Next.js (safe)
         run: pnpm build:netlify:safe
 

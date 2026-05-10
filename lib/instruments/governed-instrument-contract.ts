@@ -159,19 +159,19 @@ export const INSTRUMENT_REGISTRY: Record<InstrumentSlug, {
   "execution-risk-index": {
     title: "Execution Risk Index",
     category: "exposure_risk",
-    price: "£29",
+    price: "£49",
     timeEstimate: "10 min",
     whatItTests: "Whether a decision can survive execution reality across 8 factors",
     whatItProduces: "Risk index, decay projection, authority gap detection, vulnerability assessment",
     feedsCorridorSurface: "Strategy Room / Oversight",
   },
   "team-alignment-gap-map": {
-    title: "Team Alignment Gap Map",
+    title: "Decision Alignment Gap Map",
     category: "alignment_authority",
     price: "£29",
     timeEstimate: "10 min",
-    whatItTests: "Where stated agreement and practical alignment diverge between leader and team",
-    whatItProduces: "Alignment score, gap map, misalignment zones, divergence signal",
+    whatItTests: "Where decision owners and affected operators diverge on reality, priority, and action",
+    whatItProduces: "Decision alignment score, gap map, divergence zones, correction priority",
     feedsCorridorSurface: "Mandate Clarity / Strategy Room",
   },
   "mandate-clarity-framework": {
@@ -195,7 +195,7 @@ export const INSTRUMENT_REGISTRY: Record<InstrumentSlug, {
   "strategic-priority-stack-builder": {
     title: "Strategic Priority Stack Builder",
     category: "alignment_authority",
-    price: "£49",
+    price: "£79",
     timeEstimate: "15 min",
     whatItTests: "How competing priorities rank by governed composite with conflict and resource pressure",
     whatItProduces: "Priority stack, conflict detection, resource pressure, sequencing recommendation",

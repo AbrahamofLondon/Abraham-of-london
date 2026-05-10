@@ -60,7 +60,7 @@ const RUN_PAGE_SLUGS = [
   "team-alignment-gap-map",
   "governance-drift-detector",
   "strategic-priority-stack-builder",
-  "board-brief-template",
+  "board-brief-builder",
 ];
 
 for (const slug of RUN_PAGE_SLUGS) {

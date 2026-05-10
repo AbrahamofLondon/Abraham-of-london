@@ -30,13 +30,53 @@ const serif: React.CSSProperties = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INSTRUMENTS = [
+  // ── Exposure & Risk ──
   {
     slug: "decision-exposure-instrument",
     title: "Decision Exposure Instrument",
     price: getProductDisplayPrice("decision_exposure_instrument"),
     outcome: "Quantifies the cost of being wrong before the market enforces it.",
     usedWhen: "Financial consequence is unclear but decision cannot wait.",
-    time: "15 min",
+    time: "8 min",
+    category: "Exposure & Risk",
+  },
+  {
+    slug: "escalation-readiness-scorecard",
+    title: "Escalation Readiness Scorecard",
+    price: getProductDisplayPrice("escalation_readiness_scorecard"),
+    outcome: "Classifies whether escalation is premature, warranted, or overdue.",
+    usedWhen: "Escalation is considered but evidence is unclear.",
+    time: "6 min",
+    category: "Exposure & Risk",
+  },
+  {
+    slug: "structural-failure-diagnostic-canvas",
+    title: "Structural Failure Diagnostic Canvas",
+    price: getProductDisplayPrice("structural_failure_diagnostic_canvas"),
+    outcome: "Identifies whether the issue is structural or symptomatic.",
+    usedWhen: "Problems recur despite repeated fixes.",
+    time: "8 min",
+    category: "Exposure & Risk",
+  },
+  {
+    slug: "execution-risk-index",
+    title: "Execution Risk Index",
+    price: getProductDisplayPrice("execution_risk_index"),
+    outcome: "Measures whether a decision can survive execution reality.",
+    usedWhen: "Execution keeps failing despite approval.",
+    time: "10 min",
+    category: "Exposure & Risk",
+  },
+
+  // ── Alignment & Authority ──
+  {
+    slug: "team-alignment-gap-map",
+    title: "Decision Alignment Gap Map",
+    price: getProductDisplayPrice("team_alignment_gap_map"),
+    outcome: "Maps where decision owners and operators diverge on reality.",
+    usedWhen: "Agreement is assumed but actions diverge.",
+    time: "10 min",
+    category: "Alignment & Authority",
   },
   {
     slug: "mandate-clarity-framework",
@@ -44,15 +84,46 @@ const INSTRUMENTS = [
     price: getProductDisplayPrice("mandate_clarity_framework"),
     outcome: "Defines who decides\u2014and where authority is breaking.",
     usedWhen: "Ownership is unclear or contested.",
-    time: "20 min",
+    time: "12 min",
+    category: "Alignment & Authority",
   },
+  {
+    slug: "governance-drift-detector",
+    title: "Governance Drift Detector",
+    price: getProductDisplayPrice("governance_drift_detector"),
+    outcome: "Detects whether governance is drifting from declared standards.",
+    usedWhen: "Quarterly governance health review.",
+    time: "12 min",
+    category: "Alignment & Authority",
+  },
+  {
+    slug: "strategic-priority-stack-builder",
+    title: "Strategic Priority Stack Builder",
+    price: getProductDisplayPrice("strategic_priority_stack_builder"),
+    outcome: "Converts competing priorities into a governed execution sequence.",
+    usedWhen: "Priority conflicts block execution.",
+    time: "15 min",
+    category: "Alignment & Authority",
+  },
+
+  // ── Board & Execution Grade ──
   {
     slug: "intervention-path-selector",
     title: "Intervention Path Selector",
     price: getProductDisplayPrice("intervention_path_selector"),
     outcome: "Determines the correct action when inaction is no longer viable.",
     usedWhen: "Action is required but direction is unclear.",
-    time: "15\u201325 min",
+    time: "15 min",
+    category: "Board & Execution Grade",
+  },
+  {
+    slug: "board-brief-builder",
+    title: "Board Brief Builder",
+    price: getProductDisplayPrice("board_brief_builder"),
+    outcome: "Produces a board-ready decision brief with structured objection handling.",
+    usedWhen: "A decision must go to the board.",
+    time: "20 min",
+    category: "Board & Execution Grade",
   },
 ];
 

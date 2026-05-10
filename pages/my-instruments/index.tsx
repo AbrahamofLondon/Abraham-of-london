@@ -42,6 +42,41 @@ const INSTRUMENT_META: Record<string, { title: string; category: string; href: s
     category: "Toolkit",
     href: "/decision-instruments/intervention-path-selector",
   },
+  "escalation-readiness-scorecard": {
+    title: "Escalation Readiness Scorecard",
+    category: "Instrument",
+    href: "/decision-instruments/escalation-readiness-scorecard",
+  },
+  "structural-failure-diagnostic-canvas": {
+    title: "Structural Failure Diagnostic Canvas",
+    category: "Instrument",
+    href: "/decision-instruments/structural-failure-diagnostic-canvas",
+  },
+  "execution-risk-index": {
+    title: "Execution Risk Index",
+    category: "Instrument",
+    href: "/decision-instruments/execution-risk-index",
+  },
+  "team-alignment-gap-map": {
+    title: "Decision Alignment Gap Map",
+    category: "Instrument",
+    href: "/decision-instruments/team-alignment-gap-map",
+  },
+  "governance-drift-detector": {
+    title: "Governance Drift Detector",
+    category: "Instrument",
+    href: "/decision-instruments/governance-drift-detector",
+  },
+  "strategic-priority-stack-builder": {
+    title: "Strategic Priority Stack Builder",
+    category: "Instrument",
+    href: "/decision-instruments/strategic-priority-stack-builder",
+  },
+  "board-brief-builder": {
+    title: "Board Brief Builder",
+    category: "Premium Instrument",
+    href: "/decision-instruments/board-brief-builder",
+  },
   // GMI and other paid assets
   "global-market-intelligence-report-q1-2026": {
     title: "Global Market Intelligence Report Q1 2026",

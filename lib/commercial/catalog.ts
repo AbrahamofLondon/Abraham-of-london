@@ -28,7 +28,8 @@ export type ProductCategory =
   | "execution"
   | "execution_premium"
   | "membership"
-  | "retainer";
+  | "retainer"
+  | "governed_playbook";
 
 export type CommercialStatus =
   | "free_controlled"
@@ -277,8 +278,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
   execution_risk_index: {
     code: "execution_risk_index",
     displayName: "Execution Risk Index",
-    amount: 2900,
-    displayPrice: "\u00a329",
+    amount: 4900,
+    displayPrice: "\u00a349",
     stripeProductId: null,
     stripePriceId: null,
     entitlementSlug: "execution-risk-index",
@@ -301,7 +302,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
   team_alignment_gap_map: {
     code: "team_alignment_gap_map",
-    displayName: "Team Alignment Gap Map",
+    displayName: "Decision Alignment Gap Map",
     amount: 2900,
     displayPrice: "\u00a329",
     stripeProductId: null,
@@ -316,7 +317,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
-    shortDescription: "Show where stated agreement and practical alignment diverge between leader and team.",
+    shortDescription: "Show where decision owners and affected operators diverge on reality, priority, and action.",
     deliveryFormat: "interactive_instrument",
     estimatedCompletionMinutes: 10,
     writesToDecisionMemory: true,
@@ -354,8 +355,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
   strategic_priority_stack_builder: {
     code: "strategic_priority_stack_builder",
     displayName: "Strategic Priority Stack Builder",
-    amount: 4900,
-    displayPrice: "\u00a349",
+    amount: 7900,
+    displayPrice: "\u00a379",
     stripeProductId: null,
     stripePriceId: null,
     entitlementSlug: "strategic-priority-stack-builder",
@@ -391,7 +392,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     accessType: "one_time" as AccessType,
     duration: "lifetime" as Duration,
     active: true,
-    successPath: "/decision-instruments/board-brief-template/run",
+    successPath: "/decision-instruments/board-brief-builder/run",
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],

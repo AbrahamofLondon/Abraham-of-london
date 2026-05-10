@@ -36,9 +36,6 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Contentlayer Build
-        run: pnpm contentlayer:build
-
       - name: TypeScript Check (non-blocking)
         run: pnpm typecheck:safe
 
