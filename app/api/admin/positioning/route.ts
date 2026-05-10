@@ -5,6 +5,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 import { listAllPositions } from "@/lib/positioning/category-model";
 import { listPackages } from "@/lib/positioning/package-model";
 import { resolveBuyerPath } from "@/lib/positioning/buyer-paths";
@@ -14,6 +15,9 @@ import { resolvePackagePricing, listPricedPackages } from "@/lib/positioning/pac
 import type { OfferPackage } from "@/lib/positioning/package-model";
 
 export async function GET() {
+  const auth = await requireAdminAppRoute();
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   // Category map — every surface resolves to a position
   const categoryMap = listAllPositions();
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 import {
   getFunnelProgression,
   getDropOffMap,
@@ -12,6 +13,9 @@ import {
 } from "@/lib/analytics/decision-journey";
 
 export async function GET() {
+  const auth = await requireAdminAppRoute();
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const range = {
       from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),

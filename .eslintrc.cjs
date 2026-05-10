@@ -21,7 +21,7 @@ module.exports = {
       {
         patterns: [
           {
-            group: ["@/lib/server/*", "@/lib/rate-limit-unified"],
+            group: ["@/lib/server/*"],
             message: "Server-only module. Import only inside server code (API routes, server actions, lib/server/*).",
           },
         ],
