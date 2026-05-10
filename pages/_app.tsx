@@ -59,7 +59,13 @@ export default function MyApp({
   Component,
   pageProps,
 }: AppProps): React.ReactElement {
-  const router = useRouter();
+  // Guard useRouter against static generation where router context is absent
+  let router: ReturnType<typeof useRouter> | { pathname: string; asPath: string; query: Record<string, string | string[]> };
+  try {
+    router = useRouter();
+  } catch {
+    router = { pathname: "", asPath: "", query: {} };
+  }
   const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const session = (pageProps as { session?: import("next-auth").Session | null }).session;
 

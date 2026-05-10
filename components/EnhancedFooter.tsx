@@ -11,8 +11,19 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { getSocialLinks, type SocialLink } from "@/config/site";
+
+// Guard usePathname against static generation where router context is absent.
+// EnhancedFooter is used by Layout (Pages Router) and may be prerendered.
+function usePathnameSafe(): string {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { usePathname } = require("next/navigation");
+    return usePathname();
+  } catch {
+    return "/";
+  }
+}
 import {
   ArrowRight,
   BookOpen,
@@ -228,7 +239,7 @@ function SocialChannel({ social }: { social: SocialLink }) {
 }
 
 export default function EnhancedFooter(): React.ReactElement {
-  const pathname = usePathname();
+  const pathname = usePathnameSafe();
   const isHome = (pathname || "/") === "/";
 
   // Hardcoded to avoid hydration mismatch between server build time and client render time.

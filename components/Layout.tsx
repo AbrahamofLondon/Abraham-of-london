@@ -61,7 +61,13 @@ export default function Layout({
   showFooter = true,
   enableVaultSearch,
 }: LayoutProps) {
-  const router = useRouter();
+  // Guard useRouter against static generation where router context is absent
+  let router: ReturnType<typeof useRouter> | { pathname: string; asPath: string; query: Record<string, string | string[]> };
+  try {
+    router = useRouter();
+  } catch {
+    router = { pathname: "", asPath: "", query: {} };
+  }
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
   const canonicalAbs = React.useMemo(() => {

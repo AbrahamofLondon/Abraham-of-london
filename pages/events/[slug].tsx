@@ -1,5 +1,4 @@
 /* pages/events/[slug].tsx */
-"use client";
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
