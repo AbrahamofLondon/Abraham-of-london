@@ -455,6 +455,7 @@ export default function EnhancedFooter(): React.ReactElement {
                     ],
                     "Trust & Proof": [
                       { label: "Trust", href: "/trust" },
+                      { label: "Instruments", href: "/decision-instruments" },
                       { label: "Frameworks", href: "/frameworks" },
                       { label: "Vault", href: "/vault" },
                     ],
