@@ -47,6 +47,18 @@ const CONTENT_ID_TO_PRODUCT_CODE: Record<string, string> = {
   "decision-exposure-instrument": "decision_exposure_instrument",
   "mandate-clarity-framework": "mandate_clarity_framework",
   "intervention-path-selector": "intervention_path_selector",
+  "escalation-readiness-scorecard": "escalation_readiness_scorecard",
+  "structural-failure-diagnostic-canvas": "structural_failure_diagnostic_canvas",
+  "execution-risk-index": "execution_risk_index",
+  "team-alignment-gap-map": "team_alignment_gap_map",
+  "governance-drift-detector": "governance_drift_detector",
+  "strategic-priority-stack-builder": "strategic_priority_stack_builder",
+  "board-brief-builder": "board_brief_builder",
+  "personal-decision-audit": "personal_decision_audit",
+  // Packs
+  "operator-essentials-pack": "operator_essentials_pack",
+  "command-pack": "command_pack",
+  "governance-suite": "governance_suite",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

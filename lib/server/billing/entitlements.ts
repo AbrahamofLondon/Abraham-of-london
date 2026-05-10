@@ -32,6 +32,27 @@ export const PRODUCT_CODES = {
   RETAINER_CORE:                        "retainer_core",
   RETAINER_OPERATIONAL:                 "retainer_operational",
   RETAINER_INSTITUTIONAL:               "retainer_institutional",
+  // Decision Instruments — Tier 1A
+  ESCALATION_READINESS_SCORECARD:       "escalation-readiness-scorecard",
+  STRUCTURAL_FAILURE_DIAGNOSTIC:        "structural-failure-diagnostic-canvas",
+  EXECUTION_RISK_INDEX:                 "execution-risk-index",
+  TEAM_ALIGNMENT_GAP_MAP:              "team-alignment-gap-map",
+  // Decision Instruments — Tier 1B
+  GOVERNANCE_DRIFT_DETECTOR:            "governance-drift-detector",
+  STRATEGIC_PRIORITY_STACK_BUILDER:     "strategic-priority-stack-builder",
+  // Decision Instruments — Tier 1C
+  BOARD_BRIEF_BUILDER:                  "board-brief-builder",
+  // Personal Decision Audit
+  PERSONAL_DECISION_AUDIT:              "personal-decision-audit",
+  // Governed Playbooks
+  EXECUTION_INTEGRITY_PROTOCOL:         "playbook.execution-integrity-protocol.access",
+  ALIGNMENT_AUDIT_PLAYBOOK:             "playbook.alignment-audit.access",
+  DRIFT_DETECTION_FRAMEWORK:            "playbook.drift-detection-framework.access",
+  // Packs
+  OPERATOR_DECISION_PACK:               "operator-decision-pack",
+  OPERATOR_ESSENTIALS_PACK:             "operator-essentials-pack",
+  COMMAND_PACK:                         "command-pack",
+  GOVERNANCE_SUITE:                     "governance-suite",
 } as const;
 
 export type ProductCode = (typeof PRODUCT_CODES)[keyof typeof PRODUCT_CODES];
