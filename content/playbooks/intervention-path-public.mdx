@@ -3,23 +3,33 @@ type: Playbook
 title: "Intervention Path: Why the Wrong Fix Makes It Worse"
 slug: intervention-path-public
 tier: public
+contentClass: public_method_brief
 description: "Not every problem needs the same intervention. Wrong action compounds the condition. This identifies the valid path before you commit."
 coverImage: /assets/images/playbooks/intervention-path.jpg
 playbookType: decision
 framework: Intervention Path Selector (Public Diagnostic)
 date: "2026-04-26"
+estimatedTime: "5 min"
+difficulty: introductory
 signals:
   - Prior corrections failed without structural change
   - Escalation attempted without matching severity to action
   - Stabilisation attempted when restructuring was required
   - Monitoring chosen when urgency demanded action
   - Authority unclear before intervention selected
+outputs:
+  - Intervention condition awareness
+  - Path mismatch signal
+  - Recommended governed next step
 tags:
   - intervention
   - decision
   - routing
   - enforcement
   - escalation
+upgradePath:
+  label: Run Intervention Path Selector
+  href: /decision-instruments/intervention-path-selector/start
 ---
 
 # Intervention Path: Why the Wrong Fix Makes It Worse
