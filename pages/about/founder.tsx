@@ -4,7 +4,7 @@
  */
 
 import * as React from "react";
-import type { NextPage, GetStaticProps } from "next";
+import type { NextPage, GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
@@ -560,7 +560,7 @@ const FounderPage: NextPage = () => {
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   return { props: {} };
 };
 

@@ -69,6 +69,12 @@ export type CatalogProduct = {
   requiresCheckout?: boolean;
   requiresContract?: boolean;
   futurePaidCandidate?: boolean;
+  // Delivery specs (decision instruments)
+  deliveryFormat?: "interactive_instrument" | "pdf_dossier" | "combined" | "bundle";
+  estimatedCompletionMinutes?: number;
+  writesToDecisionMemory?: boolean;
+  dossierEligible?: boolean;
+  nextAdmissibleMove?: string;
 };
 
 // ─────────────────────────────────────���───────────────────────────────────────
@@ -158,6 +164,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments/decision-exposure-instrument",
     cookieName: null,
     includes: [],
+    shortDescription: "Measure decision exposure across financial, operational, reputational, strategic, and temporal dimensions.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 8,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Executive Reporting",
   },
 
   mandate_clarity_framework: {
@@ -177,6 +189,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments/mandate-clarity-framework",
     cookieName: null,
     includes: [],
+    shortDescription: "Classify whether decision ownership, scope, accountability, and delegation are clear.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 12,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Strategy Room or Boardroom",
   },
 
   intervention_path_selector: {
@@ -196,6 +214,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments/intervention-path-selector",
     cookieName: null,
     includes: [],
+    shortDescription: "Select the risk-adjusted optimal intervention path given constraints and stakeholder state.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 15,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Strategy Room or Boardroom",
   },
 
   // ═══ TIER 1A — EXPOSURE & RISK ═══════════════════════════════════════════
@@ -205,8 +229,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Escalation Readiness Scorecard",
     amount: 1900,
     displayPrice: "\u00a319",
-    stripeProductId: null, // TODO: Create in Stripe dashboard
-    stripePriceId: null, // TODO: Add Stripe price ID
+    stripeProductId: null,
+    stripePriceId: null,
     entitlementSlug: "escalation-readiness-scorecard",
     tier: "decision-instrument",
     category: "decision_tools" as ProductCategory,
@@ -217,6 +241,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
+    shortDescription: "Determine whether a decision is ready for executive, strategy, counsel, or retained escalation.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 6,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Executive Reporting or Strategy Room",
   },
 
   structural_failure_diagnostic_canvas: {
@@ -224,8 +254,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Structural Failure Diagnostic Canvas",
     amount: 1900,
     displayPrice: "\u00a319",
-    stripeProductId: null, // TODO: Create in Stripe dashboard
-    stripePriceId: null, // TODO: Add Stripe price ID
+    stripeProductId: null,
+    stripePriceId: null,
     entitlementSlug: "structural-failure-diagnostic-canvas",
     tier: "decision-instrument",
     category: "decision_tools" as ProductCategory,
@@ -236,6 +266,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
+    shortDescription: "Identify whether the issue is strategic, operational, authority-based, or governance-based.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 8,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Intervention Path Selector",
   },
 
   execution_risk_index: {
@@ -243,8 +279,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Execution Risk Index",
     amount: 2900,
     displayPrice: "\u00a329",
-    stripeProductId: null, // TODO: Create in Stripe dashboard
-    stripePriceId: null, // TODO: Add Stripe price ID
+    stripeProductId: null,
+    stripePriceId: null,
     entitlementSlug: "execution-risk-index",
     tier: "decision-instrument",
     category: "decision_tools" as ProductCategory,
@@ -255,6 +291,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
+    shortDescription: "Measure whether a decision can survive execution reality across 8 factors.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 10,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Strategy Room or Executive Reporting",
   },
 
   team_alignment_gap_map: {
@@ -262,8 +304,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Team Alignment Gap Map",
     amount: 2900,
     displayPrice: "\u00a329",
-    stripeProductId: null, // TODO: Create in Stripe dashboard
-    stripePriceId: null, // TODO: Add Stripe price ID
+    stripeProductId: null,
+    stripePriceId: null,
     entitlementSlug: "team-alignment-gap-map",
     tier: "decision-instrument",
     category: "decision_tools" as ProductCategory,
@@ -274,6 +316,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
+    shortDescription: "Show where stated agreement and practical alignment diverge between leader and team.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 10,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Mandate Clarity Framework",
   },
 
   // ═══ TIER 1B — ALIGNMENT & AUTHORITY ═════════════════════════════════════
@@ -283,8 +331,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Governance Drift Detector",
     amount: 4900,
     displayPrice: "\u00a349",
-    stripeProductId: null, // TODO: Create in Stripe dashboard
-    stripePriceId: null, // TODO: Add Stripe price ID
+    stripeProductId: null,
+    stripePriceId: null,
     entitlementSlug: "governance-drift-detector",
     tier: "decision-instrument",
     category: "decision_tools" as ProductCategory,
@@ -295,6 +343,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
+    shortDescription: "Detect whether governance is drifting from declared standards across 6 dimensions.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 12,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Oversight Command or Retained Review",
   },
 
   strategic_priority_stack_builder: {
@@ -302,8 +356,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Strategic Priority Stack Builder",
     amount: 4900,
     displayPrice: "\u00a349",
-    stripeProductId: null, // TODO: Create in Stripe dashboard
-    stripePriceId: null, // TODO: Add Stripe price ID
+    stripeProductId: null,
+    stripePriceId: null,
     entitlementSlug: "strategic-priority-stack-builder",
     tier: "decision-instrument",
     category: "decision_tools" as ProductCategory,
@@ -314,6 +368,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
+    shortDescription: "Convert competing priorities into a governed ranked stack with conflict detection.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 15,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Executive Reporting or Board Brief Builder",
   },
 
   // ═══ TIER 1C — BOARD & EXECUTION GRADE ══════════════════════════════════
@@ -323,8 +383,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Board Brief Builder",
     amount: 12900,
     displayPrice: "\u00a3129",
-    stripeProductId: null, // TODO: Create in Stripe dashboard
-    stripePriceId: null, // TODO: Add Stripe price ID
+    stripeProductId: null,
+    stripePriceId: null,
     entitlementSlug: "board-brief-builder",
     tier: "decision-instrument-premium",
     category: "decision_tools" as ProductCategory,
@@ -335,6 +395,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
+    shortDescription: "Turn a decision record into a board-ready structured brief with objection handling.",
+    deliveryFormat: "interactive_instrument",
+    estimatedCompletionMinutes: 20,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Boardroom or Proof Pack",
   },
 
   // ═══ PACKS ══════════════════════════════════════════════════════════════
