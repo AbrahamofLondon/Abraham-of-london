@@ -156,11 +156,11 @@ export default function DecisionInstrumentsPage() {
   return (
     <Layout
       title="Decision Instruments | Abraham of London"
-      description="Three instruments used under pressure to quantify exposure, define authority, and determine action."
+      description="Ten governed instruments that score, classify, and map decision conditions. Each writes to institutional memory."
       canonicalUrl="/decision-instruments"
     >
       <Head>
-        <meta name="description" content="Decision instruments: structured tools used under pressure to quantify exposure, define authority, and determine action." />
+        <meta name="description" content="Ten governed decision instruments that score, classify, and map decision conditions. Each writes to institutional memory and earns the next step." />
       </Head>
 
       <div style={{ backgroundColor: VOID }}>
@@ -189,7 +189,7 @@ export default function DecisionInstrumentsPage() {
                 color: "rgba(255,255,255,0.45)",
                 maxWidth: "56ch",
               }}>
-                Three instruments used under pressure to quantify exposure, define authority, and determine action.
+                Ten governed instruments that score exposure, classify authority, detect drift, rank priorities, and prepare board-ready briefs. Each writes to institutional memory.
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-4">
                 <a
@@ -211,10 +211,16 @@ export default function DecisionInstrumentsPage() {
                   <ArrowRight style={{ width: 10, height: 10 }} />
                 </a>
                 <Link
-                  href="/diagnostics/executive-reporting"
+                  href="/decision-instruments/signal"
                   style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
                 >
-                  Go to Executive Reporting ({getProductDisplayPrice("executive_reporting")})
+                  Free Decision Signal
+                </Link>
+                <Link
+                  href="/decision-instruments/history"
+                  style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
+                >
+                  Your instrument history
                 </Link>
               </div>
             </div>
