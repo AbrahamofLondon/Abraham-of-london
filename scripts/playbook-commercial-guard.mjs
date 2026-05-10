@@ -129,14 +129,14 @@ function checkCatalogHasEntry(slug, tier) {
   return true;
 }
 
-function checkUpgradePath(fm, slug) {
+function checkContinuationPath(fm, slug) {
   if (fm.contentClass !== "public_method_brief") return true;
-  if (!fm.upgradePath) {
-    errors.push(`Public method brief "${slug}" missing upgradePath in frontmatter`);
+  if (!fm.continuationPath) {
+    errors.push(`Public method brief "${slug}" missing continuationPath in frontmatter`);
     return false;
   }
-  if (!fm.upgradePath.label || !fm.upgradePath.href) {
-    errors.push(`Public method brief "${slug}" upgradePath missing label or href`);
+  if (!fm.continuationPath.label || !fm.continuationPath.href) {
+    errors.push(`Public method brief "${slug}" continuationPath missing label or href`);
     return false;
   }
   return true;
@@ -172,7 +172,6 @@ function checkNoPaywallLanguage(content, slug) {
 
 function checkSuccessPath(fm, slug) {
   if (fm.tier === "public" || fm.tier === "architect") return true;
-  // Premium playbooks should have a successPath in catalog
   const catalog = fs.readFileSync(CATALOG_PATH, "utf8");
   const slugToCode = {
     "execution-integrity-protocol": "execution_integrity_protocol",
@@ -185,6 +184,29 @@ function checkSuccessPath(fm, slug) {
   const section = catalog.slice(codeIndex, codeIndex + 1000);
   if (!section.includes("successPath:")) {
     errors.push(`Catalog entry "${code}" missing successPath`);
+    return false;
+  }
+  return true;
+}
+
+function checkCheckoutDisabled(fm, slug) {
+  if (fm.tier === "public" || fm.tier === "architect") return true;
+  const catalog = fs.readFileSync(CATALOG_PATH, "utf8");
+  const slugToCode = {
+    "execution-integrity-protocol": "execution_integrity_protocol",
+    "the-alignment-audit-playbook": "alignment_audit_playbook",
+    "the-drift-detection-framework": "drift_detection_framework",
+  };
+  const code = slugToCode[slug];
+  if (!code) return true;
+  const codeIndex = catalog.indexOf(`code: "${code}"`);
+  const section = catalog.slice(codeIndex, codeIndex + 1000);
+
+  const hasStripeId = section.includes("stripeProductId: \"prod_") || section.includes("stripePriceId: \"price_");
+  const hasCheckoutDisabled = section.includes("requiresCheckout: false");
+
+  if (!hasStripeId && !hasCheckoutDisabled) {
+    errors.push(`Catalog entry "${code}" has no Stripe ID and no requiresCheckout: false — checkout state is ambiguous`);
     return false;
   }
   return true;
@@ -212,8 +234,8 @@ for (const file of files) {
   // Check 2: Premium playbooks have catalog entries
   checkCatalogHasEntry(slug, fm.tier);
 
-  // Check 3: Public method briefs have upgradePath
-  checkUpgradePath(fm, slug);
+  // Check 3: Public method briefs have continuationPath
+  checkContinuationPath(fm, slug);
 
   // Check 4: Architect playbooks have access explanation
   checkAccessExplanation(fm, slug);
@@ -223,21 +245,27 @@ for (const file of files) {
 
   // Check 6: Paid playbooks have successPath
   checkSuccessPath(fm, slug);
+
+  // Check 7: Paid playbooks without Stripe IDs must have checkout explicitly disabled
+  checkCheckoutDisabled(fm, slug);
 }
 
 // Report
+console.log(`\nVIOLATIONS: ${errors.length}`);
+console.log(`WARNINGS: ${warnings.length}\n`);
+
 if (errors.length > 0) {
-  console.error("\n❌ COMMERCIAL VIOLATIONS:");
+  console.error("❌ COMMERCIAL VIOLATIONS:");
   errors.forEach((e) => console.error(`  - ${e}`));
-  console.error(`\n${errors.length} violation(s) found.`);
+  console.error(`\nResult: FAIL`);
   process.exit(1);
-} else {
-  console.log("\n✅ All playbooks pass commercial guard.");
 }
 
 if (warnings.length > 0) {
-  console.log("\n⚠️  ADVISORY WARNINGS:");
+  console.log("⚠️  WARNINGS:");
   warnings.forEach((w) => console.log(`  - ${w}`));
+  console.log(`\nResult: PASS_WITH_WARNINGS`);
+  process.exit(0);
 }
 
-console.log("\n=== GUARD PASSED ===\n");
+console.log("Result: PASS\n");
