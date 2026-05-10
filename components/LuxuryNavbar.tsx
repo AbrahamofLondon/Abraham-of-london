@@ -10,7 +10,7 @@ import {
   Menu, X, ArrowRight, Vault, Shield, Compass, Briefcase, 
   Terminal, Crown, LayoutDashboard, Brain, Activity, LogOut, User 
 } from "lucide-react";
-import { hasAccess, normalizeUserTier } from "@/lib/access/tier-policy";
+import { hasAccess, normalizeUserTier } from "@/lib/access/public";
 
 const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" ");
 

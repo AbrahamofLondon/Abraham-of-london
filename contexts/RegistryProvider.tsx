@@ -10,7 +10,7 @@ import React, {
   useEffect,
 } from "react";
 import { useAccess } from "@/hooks/useAccess";
-import type { AccessTier } from "@/lib/access/tier-policy";
+import type { AccessTier } from "@/lib/access/public";
 
 /**
  * REGISTRY CONTEXT SCHEMA

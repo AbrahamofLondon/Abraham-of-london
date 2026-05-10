@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { hasAccess, normalizeUserTier } from '@/lib/access/tier-policy';
+import { hasAccess, normalizeUserTier } from '@/lib/access/public';
 
 export type AccessTier =
   | 'public'

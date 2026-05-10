@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import AccessGate from "@/components/AccessGate";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
-import type { AccessTier } from "@/lib/access/tier-policy";
+import type { AccessTier } from "@/lib/access/public";
 
 type ClientUnlockRendererProps = {
   initialCode: string | null;

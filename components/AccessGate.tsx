@@ -20,7 +20,7 @@ import {
   hasAccess,
   TIER_LABELS,
   type AccessTier,
-} from "@/lib/access/tier-policy";
+} from "@/lib/access/public";
 import { clearAccessCache } from "@/lib/inner-circle/access.client";
 
 interface AccessGateProps {

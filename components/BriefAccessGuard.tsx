@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { 
-  type AccessTier, 
-  normalizeRequiredTier, 
-  getTierLabel 
-} from "@/lib/access/tier-policy";
+  type AccessTier,
+  normalizeRequiredTier,
+  getTierLabel
+} from "@/lib/access/public";
 import { useFortifiedAccess } from "@/hooks/useFortifiedAccess";
 
 interface GuardProps {
