@@ -68,6 +68,14 @@ function StatusBadge({ state }: { state: SurfaceState }) {
   );
 }
 
+type PaidMeta = {
+  price: string;
+  time: string;
+  deliveryNote: string;
+  writesToMemory?: boolean;
+  dossierIncluded?: boolean;
+};
+
 function SurfaceCard({
   title,
   state,
@@ -75,6 +83,7 @@ function SurfaceCard({
   why,
   href,
   cta,
+  paidMeta,
 }: {
   title: string;
   state: SurfaceState;
@@ -82,6 +91,7 @@ function SurfaceCard({
   why: string;
   href?: string;
   cta?: string;
+  paidMeta?: PaidMeta;
 }) {
   return (
     <div className="border border-white/[0.08] bg-white/[0.02] p-5">
@@ -101,6 +111,29 @@ function SurfaceCard({
       </div>
       <p className="mt-4 text-[14px] leading-[1.8] text-white/60">{detail}</p>
       <p className="mt-3 text-[13px] leading-[1.75] text-white/42">{why}</p>
+      {paidMeta && (
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+            {paidMeta.price}
+          </span>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            {paidMeta.time}
+          </span>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            {paidMeta.deliveryNote}
+          </span>
+          {paidMeta.writesToMemory && (
+            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+              Writes to memory
+            </span>
+          )}
+          {paidMeta.dossierIncluded && (
+            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+              Dossier included
+            </span>
+          )}
+        </div>
+      )}
       {href && cta ? (
         <div className="mt-5">
           <Link
@@ -207,12 +240,19 @@ export default function DiagnosticsIndexPage() {
                 cta="Test a Decision"
               />
               <SurfaceCard
-                title="Personal Decision Audit / Purpose Alignment"
+                title="Personal Decision Audit"
                 state="OPEN"
-                detail="Use this when the issue appears personal, mandate-related, or bound up with competing obligation."
-                why="This is still an entry surface, but it is for cases where the personal layer needs to be tested before the institutional one."
+                detail="Tests whether your decisions, obligations, authority, and execution behaviour are aligned. Returns a mandate reading, obligation conflict map, and decision behaviour pattern."
+                why="Use this when the issue appears personal — mandate-related, bound up with competing obligation, or when the avoided decision is not institutional but is blocking everything else."
                 href="/diagnostics/purpose-alignment"
-                cta="Take Purpose Alignment"
+                cta="Start Personal Decision Audit"
+                paidMeta={{
+                  price: "£49",
+                  time: "12 min",
+                  deliveryNote: "Free reading included · Paid dossier gated",
+                  writesToMemory: true,
+                  dossierIncluded: true,
+                }}
               />
             </div>
           </div>
