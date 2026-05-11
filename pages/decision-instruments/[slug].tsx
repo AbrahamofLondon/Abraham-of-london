@@ -1062,7 +1062,7 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
                   className="flex items-center justify-between w-full"
                   style={{ padding: "14px 18px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase" }}
                 >
-                  Run interactive instrument
+                  Run decision instrument
                   <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
                 {instrument.pdfHref && (

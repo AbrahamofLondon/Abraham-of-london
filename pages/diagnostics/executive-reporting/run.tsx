@@ -2330,6 +2330,33 @@ export default function ExecutiveReportingRunPage({
                   />
                   <Eyebrow>Executive Report · Generated</Eyebrow>
                 </div>
+                <div style={{ borderTop: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "16px 0 20px" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
+                    This report produced
+                  </p>
+                  <div style={{ display: "grid", gap: "6px" }}>
+                    {[
+                      { label: "Executive diagnosis", value: result.result.summary.headline || "Structural decision failure identified" },
+                      { label: "Consequence estimate", value: "Cost of inaction priced from stated inputs — scenario only" },
+                      { label: "Boardroom qualification", value: result.result.summary.boardroomReadinessLabel || "Boardroom qualification assessed" },
+                      { label: "Intervention posture", value: result.result.summary.priorityStack?.[0] || "Priority stack generated" },
+                      { label: "Evidence posture", value: "Source-labelled — user-reported, system-inferred, and estimated evidence distinguished" },
+                      { label: "Next admissible move", value: result.result.summary.nextAdmittedStep || "Review priority stack and schedule checkpoint" },
+                    ].map((item) => (
+                      <div key={item.label} style={{ display: "flex", gap: "16px" }}>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "160px", paddingTop: "1px", flexShrink: 0 }}>
+                          {item.label}
+                        </span>
+                        <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "12px" }}>
+                    Report saved · Governed record written · Self-reported inputs only
+                  </p>
+                </div>
               </div>
             </section>
 

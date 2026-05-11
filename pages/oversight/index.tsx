@@ -109,6 +109,30 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
             <p className="mt-4 text-xs uppercase tracking-[0.2em] text-white/35" style={mono}>
               Product role: {role ?? "UNRESOLVED"}
             </p>
+            <div style={{ marginTop: "20px", borderTop: "1px solid rgba(201,169,110,0.15)", paddingTop: "16px" }}>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,169,110,0.70)", marginBottom: "10px" }}>
+                Retained oversight currently preserves
+              </p>
+              <div style={{ display: "grid", gap: "6px" }}>
+                {([
+                  { label: "Cadence posture", value: cadencePosture?.status ?? "Cadence posture tracked across retained cycles" },
+                  { label: "Recurrence memory", value: `${summary?.retainedMemory?.oversightCycles ?? "—"} oversight cycles retained` },
+                  { label: "Boardroom archive", value: `${summary?.retainedMemory?.boardroomDossiers ?? "—"} board-level dossier records` },
+                  { label: "Counsel history", value: `${summary?.retainedMemory?.counselCases ?? "—"} governed counsel events` },
+                  { label: "Active cases", value: `${summary?.retainedMemory?.activeCases ?? "—"} cases in retained oversight` },
+                  { label: "Continuity signal", value: "Outcome history and portfolio signal carried across cycles" },
+                ] as { label: string; value: string | number }[]).map((item) => (
+                  <div key={item.label} style={{ display: "flex", gap: "16px" }}>
+                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.55)", minWidth: "140px", paddingTop: "1px", flexShrink: 0 }}>
+                      {item.label}
+                    </span>
+                    <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.45)" }}>
+                      {item.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </header>
 
           {institutionalCaseSummary && institutionalCaseSummary.totalInstitutionalCases > 0 && (

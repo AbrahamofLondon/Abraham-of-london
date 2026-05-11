@@ -215,7 +215,7 @@ export default function PurposeAlignmentPage() {
                   display: "inline-flex", alignItems: "center", gap: "6px",
                 }}
               >
-                Upgrade to paid
+                Continue to the governed assessment
                 <ArrowRight style={{ width: "10px", height: "10px" }} />
               </Link>
             </div>

@@ -2286,6 +2286,36 @@ export default function StrategyRoomPage({
               <CaseActiveBanner caseReference={executionSessionId ?? `SR-${Date.now().toString(36).toUpperCase()}`} committed assessmentType="strategy" />
             </div>
 
+            <div className="mx-auto max-w-7xl px-6 lg:px-12 pt-4 pb-2">
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "16px 20px" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
+                  This session governs
+                </p>
+                <div style={{ display: "grid", gap: "6px" }}>
+                  {[
+                    { label: "Intervention path", value: "Governed intervention path determined from intake evidence" },
+                    { label: "Execution conditions", value: enforcement?.directive || "Execution conditions set — directive active" },
+                    { label: "Checkpoint requirement", value: enforcement?.checkpoint?.dueAt ? `Checkpoint due ${new Date(enforcement.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : "Checkpoint requirement recorded" },
+                    { label: "Signal pressure", value: "Recurrence and pattern signals carried from diagnostic evidence" },
+                    { label: "Return brief continuity", value: "Return brief will reference this session as the governing record" },
+                    { label: "Counsel / boardroom trigger", value: "Escalation triggers active — qualification conditions monitored" },
+                  ].map((item) => (
+                    <div key={item.label} style={{ display: "flex", gap: "16px" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "160px", paddingTop: "1px", flexShrink: 0 }}>
+                        {item.label}
+                      </span>
+                      <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+                        {item.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "12px" }}>
+                  Session governed · Execution record written
+                </p>
+              </div>
+            </div>
+
             <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
 
             {/* ── INSTITUTIONAL CORRIDOR PANEL ── */}

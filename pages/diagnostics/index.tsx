@@ -285,7 +285,7 @@ export default function DiagnosticsIndexPage() {
                 why={
                   hasConstitutionalEvidence
                     ? "Prior diagnostic context is present, so this surface can sharpen the record."
-                    : "Without prior diagnostic context, this should not be treated as a casual standalone quiz. Start with Fast or Constitutional first."
+                    : "Without prior diagnostic context, this instrument should not be run in isolation. Start with Fast or Constitutional first."
                 }
                 href={hasConstitutionalEvidence ? "/diagnostics/team-assessment" : "/diagnostics/constitutional-diagnostic"}
                 cta={hasConstitutionalEvidence ? "Open Team Assessment" : "Start with Constitutional"}
