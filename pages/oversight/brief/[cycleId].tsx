@@ -471,6 +471,42 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 </Section>
               )}
 
+              {brief.sovereignSignalRecurrence && brief.sovereignSignalRecurrence.currentCycleSignals.length > 0 && (
+                <Section title="Signal Pattern Recurrence">
+                  <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.sovereignSignalRecurrence.recurrenceSummary}</p>
+                  {brief.sovereignSignalRecurrence.hasCriticalRecurrence && (
+                    <p className="mt-3" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>
+                      Critical pattern has recurred across oversight cycles
+                    </p>
+                  )}
+                  <div className="mt-4 space-y-4">
+                    {brief.sovereignSignalRecurrence.currentCycleSignals.map((signal) => (
+                      <div key={signal.signalId} style={{ borderLeft: "1px solid rgba(255,255,255,0.10)", paddingLeft: "14px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: signal.severityBand === "CRITICAL" ? "rgba(252,165,165,0.80)" : signal.severityBand === "ALERT" ? "#C9A96E" : "rgba(255,255,255,0.50)" }}>
+                            {signal.severityBand}
+                          </p>
+                          {signal.isRecurrence && (
+                            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", border: "1px solid rgba(255,255,255,0.10)", padding: "1px 5px" }}>
+                              Recurring · {signal.cycleCount} cycle{signal.cycleCount !== 1 ? "s" : ""}
+                            </p>
+                          )}
+                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: signal.movement === "INCREASING" ? "rgba(252,165,165,0.55)" : signal.movement === "REDUCING" ? "rgba(110,231,183,0.55)" : "rgba(255,255,255,0.28)" }}>
+                            {signal.movement.replace(/_/g, " ").toLowerCase()}
+                          </p>
+                        </div>
+                        <p className="mt-1" style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.5, color: "rgba(255,255,255,0.74)" }}>{signal.signalName}</p>
+                        <p className="mt-1" style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.48)" }}>{signal.retainedImplication}</p>
+                        <p className="mt-1" style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.28)" }}>Next cycle: {signal.nextReviewObligation}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-4" style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                    Evidence posture: {brief.sovereignSignalRecurrence.evidencePosture.replace(/_/g, " ").toLowerCase()} · {brief.sovereignSignalRecurrence.totalDistinctSignals} distinct signal pattern{brief.sovereignSignalRecurrence.totalDistinctSignals !== 1 ? "s" : ""} observed
+                  </p>
+                </Section>
+              )}
+
               {suppressions.length > 0 && (
                 <Section title="Suppression Notice">
                   <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>

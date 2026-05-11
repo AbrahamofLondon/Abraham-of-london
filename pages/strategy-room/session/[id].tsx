@@ -16,6 +16,7 @@ import ReturnBriefInterruptionBar from "@/components/strategy-room/ReturnBriefIn
 import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
 import DecisionTimeline, { type DecisionTimelineItem } from "@/components/strategy-room/DecisionTimeline";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import SignalPressurePanel from "@/components/strategy-room/SignalPressurePanel";
 import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
@@ -31,6 +32,8 @@ import {
   selectStrategySessionMemory,
 } from "@/lib/product/governed-memory-presenter";
 import { computeIrreversibilityIndex } from "@/lib/product/irreversibility-index";
+import { deriveSignalPressure } from "@/lib/strategy-room/room-state-contract";
+import type { SovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -124,6 +127,7 @@ type PageProps = {
   error?: string;
   composerStakeholder?: ComposerStakeholder | null;
   composerSuppression?: string | null;
+  sovereignSignalAssessment?: SovereignSignalAssessment | null;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -204,7 +208,7 @@ function daysSince(value: string): number | null {
 // PAGE COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function StrategyRoomSessionPage({ session: initial, error, composerStakeholder, composerSuppression }: PageProps) {
+export default function StrategyRoomSessionPage({ session: initial, error, composerStakeholder, composerSuppression, sovereignSignalAssessment }: PageProps) {
   const [session, setSession] = React.useState(initial);
   const [newDecision, setNewDecision] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
@@ -937,6 +941,26 @@ export default function StrategyRoomSessionPage({ session: initial, error, compo
             </section>
           )}
 
+          {/* ── SIGNAL PRESSURE ── */}
+          {(() => {
+            if (!sovereignSignalAssessment || sovereignSignalAssessment.status !== "ASSESSED" || sovereignSignalAssessment.signals.length === 0) return null;
+            const pressure = deriveSignalPressure(sovereignSignalAssessment.signals);
+            if (!pressure) return null;
+            return (
+              <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                {pressure.postureLocked && (
+                  <div style={{ borderLeft: "2px solid rgba(252,165,165,0.55)", backgroundColor: "rgba(252,165,165,0.04)", padding: "10px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Lock style={{ width: 10, height: 10, color: "rgba(252,165,165,0.70)", flexShrink: 0 }} />
+                    <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>
+                      Execution conditions must be met before recording a decision
+                    </span>
+                  </div>
+                )}
+                <SignalPressurePanel signalPressure={pressure} />
+              </section>
+            );
+          })()}
+
           <DecisionTimeline items={timelineItems} />
 
           {/* ── 6. DECISION LOG ── */}
@@ -1254,7 +1278,40 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       }
     } catch { /* degrade */ }
 
-    return { props: { session, composerStakeholder, composerSuppression } };
+    // Sovereign signal assessment — derived from session evidence (server-side only)
+    let sovereignSignalAssessment: SovereignSignalAssessment | null = null;
+    try {
+      const { detectIntelligenceSignals } = await import("@/lib/sovereign/intelligence-signals");
+      const { buildSovereignSignalAssessment, buildInsufficientEvidenceAssessment } = await import("@/lib/sovereign/sovereign-signal-public-dto");
+      const blockedDecisions = session.decisions.filter((d) => d.status === "blocked").length;
+      const totalDecisions = session.decisions.length;
+      const directive = session.directive ?? "allow";
+      const escalation = session.escalationLevel ?? "standard";
+      const hasUnresolvedTension = Boolean(composerStakeholder?.unresolvedAuthorityTension);
+      const isThinState = composerStakeholder?.thinState ?? false;
+
+      const signalInput = {
+        posture: (directive === "block" ? "MISALIGNED" : directive === "restrict" ? "DRIFTING" : "ALIGNED") as "SOVEREIGN" | "ALIGNED" | "DRIFTING" | "MISALIGNED" | "DISORDERED",
+        authorityType: (hasUnresolvedTension ? "CONTESTED" : isThinState ? "UNCLEAR" : "DELEGATED") as "DIRECT" | "DELEGATED" | "CONTESTED" | "UNCLEAR",
+        readinessTier: (blockedDecisions > 0 ? "FRAGILE" : "ADVISORY") as "SOVEREIGN" | "ADVISORY" | "EXECUTION" | "FRAGILE",
+        trajectory: (escalation === "critical" || directive === "block" ? "DETERIORATING" : blockedDecisions > 0 ? "STABLE" : "IMPROVING") as "IMPROVING" | "STABLE" | "DETERIORATING" | "COLLAPSING",
+        failureModeCount: blockedDecisions,
+        narrativeCoherence: Math.max(20, 65 - blockedDecisions * 12),
+        interventionReadiness: blockedDecisions > 0 ? 30 : directive === "restrict" ? 42 : 58,
+        sessionCount: totalDecisions,
+      };
+
+      if (totalDecisions >= 1 || blockedDecisions >= 1 || directive !== "allow") {
+        const rawSignals = detectIntelligenceSignals(signalInput);
+        if (rawSignals.length > 0) {
+          sovereignSignalAssessment = buildSovereignSignalAssessment(rawSignals, "SINGLE_SOURCE_INDICATED", 3);
+        } else {
+          sovereignSignalAssessment = buildInsufficientEvidenceAssessment();
+        }
+      }
+    } catch { /* degrade gracefully — sovereign signals are advisory */ }
+
+    return { props: { session, composerStakeholder, composerSuppression, sovereignSignalAssessment } };
   } catch (err) {
     console.error("[strategy-room-session]", err);
     return { props: { session: null, error: "Failed to load session" } };

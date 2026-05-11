@@ -22,13 +22,19 @@ const PATTERNS = [
   { pattern: /fully automated retained oversight/gi, label: "Premature claim: fully automated retained oversight" },
   { pattern: /enterprise-ready £50k/gi, label: "Premature claim: enterprise-ready £50k" },
   { pattern: /guaranteed governance/gi, label: "Premature claim: guaranteed governance" },
+  { pattern: /fully autonomous/gi, label: "Forbidden: fully autonomous (use governed automation with human boundary)" },
+  { pattern: /secret intelligence/gi, label: "Forbidden: secret intelligence (use institutional signal)" },
+  { pattern: /Sovereign AI/gi, label: "Forbidden: Sovereign AI (use institutional signal or observed pattern)" },
+  { pattern: /predictive certainty/gi, label: "Forbidden: predictive certainty (use qualified outcome framing)" },
+  { pattern: /algorithmic truth/gi, label: "Forbidden: algorithmic truth (prohibited claim language)" },
+  { pattern: /guaranteed outcome/gi, label: "Forbidden: guaranteed outcome (use structured analysis framing)" },
 ];
 
 const WHITELIST_PREFIXES = [
   "docs/product/",
   "docs\\product\\",
-  "lib/diagnostics/",
-  "lib\\diagnostics\\",
+  "scripts/",
+  "scripts\\",
 ];
 
 /** Lines containing these phrases are negations/disclaimers, not claims. */
@@ -38,6 +44,15 @@ const NEGATION_PHRASES = [
   "not claimed",
   "what is not claimed",
   "unless actual verified outcome exists",
+  "not guaranteed outcomes",
+  "no guaranteed outcomes",
+  "structured analysis, not guaranteed",
+  "structured analysis — not guaranteed",
+  "do not guarantee",
+  "// not",
+  "// forbidden",
+  "// prohibited",
+  "what not to expect",
 ];
 
 function isWhitelisted(file) {

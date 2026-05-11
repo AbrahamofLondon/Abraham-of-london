@@ -35,7 +35,7 @@ const INTERVENTIONS: AIIntervention[] = [
   {
     id: "auto_contradiction_scan",
     category: "AUTOMATE",
-    description: "Automate contradiction detection — deploy continuous monitoring for structural contradictions across decision domains.",
+    description: "Automate contradiction detection — activate governed cadence scanning for structural contradictions across decision domains.",
     expectedImpact: "Contradictions surfaced 3-5x earlier than manual review. Prevents embedding.",
     timeframe: "21 days",
     prerequisite: "Requires active evidence graph with >10 nodes.",
@@ -44,7 +44,7 @@ const INTERVENTIONS: AIIntervention[] = [
   {
     id: "auto_stakeholder_alignment",
     category: "AUTOMATE",
-    description: "Automate stakeholder alignment tracking — continuous divergence monitoring replaces periodic manual surveys.",
+    description: "Automate stakeholder alignment tracking — operator-governed cadence scanning replaces periodic manual surveys.",
     expectedImpact: "Real-time visibility into authority disagreement. Prevents decision paralysis from hidden divergence.",
     timeframe: "30 days",
     prerequisite: "Requires multi-stakeholder campaign data.",
@@ -147,7 +147,7 @@ export function suggestInterventions(inputs: SuggestInputs): InterventionSuggest
     if (intervention.category === "AUTOMATE") {
       if (velocityGapPercent > 50) { score += 30; reason = "Decision velocity gap exceeds 50%. Automation closes the gap."; }
       if (contradictionCount > 2) { score += 20; reason = reason || "Multiple active contradictions. Automated detection prevents persistence."; }
-      if (intervention.id === "auto_stakeholder_alignment" && hasMultiStakeholder) { score += 25; reason = "Multi-stakeholder divergence present. Continuous monitoring required."; }
+      if (intervention.id === "auto_stakeholder_alignment" && hasMultiStakeholder) { score += 25; reason = "Multi-stakeholder divergence present. Operator-governed cadence review required."; }
       if (aiExposureLevel === "CRITICAL" || aiExposureLevel === "HIGH") score += 15;
     }
 

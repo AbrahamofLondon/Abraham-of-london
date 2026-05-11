@@ -65,7 +65,7 @@ const TrustPage: NextPage = () => (
               <li>Comfortable language — the system names problems directly</li>
               <li>Multiple options — one move, not a decision menu</li>
               <li>Generic assistant output — the result you receive has governed review before release</li>
-              <li>Guaranteed outcomes — the system identifies and enforces, it does not predict</li>
+              <li>No guaranteed outcomes — the system identifies and enforces, it does not predict</li>
               <li>Privacy from your own data — the system uses your inputs against your framing</li>
             </ul>
           </section>

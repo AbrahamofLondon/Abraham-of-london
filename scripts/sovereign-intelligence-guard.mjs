@@ -192,12 +192,26 @@ for (const file of claimScanFiles) {
 }
 
 // ─── Check 4: detectIntelligenceSignals / SIGNAL_LIBRARY on public surfaces ───
-// Only flag runtime references — not type annotations stripped at compile time
+// Only flag runtime references — not type annotations stripped at compile time.
+// Exception: Pages Router pages using dynamic import inside getServerSideProps/
+// getStaticProps are server-side only — the dynamic import never bundles to client.
+
+function isGsspDynamicEngineImport(text) {
+  // File exports GSSP/GSP and uses engine only via await import(), not static import
+  const hasGssp = /export\s+(const|async function)\s+getServerSideProps|export\s+(const|async function)\s+getStaticProps/.test(text);
+  const hasStaticEngineImport = /^import\s+(?!type\s)[^'"]*from\s+['"]@\/lib\/sovereign\/intelligence-signals['"]$/m.test(text);
+  const hasDynamicEngineImport = /await\s+import\s*\(\s*['"]@\/lib\/sovereign\/intelligence-signals['"]/.test(text);
+  return hasGssp && hasDynamicEngineImport && !hasStaticEngineImport;
+}
 
 for (const file of publicFiles) {
   if (isServerOnlyFile(file)) continue;
 
   const text = fs.readFileSync(file, "utf8");
+
+  // Pages Router files: allow detectIntelligenceSignals if used only via dynamic import in GSSP
+  if (rel(file).startsWith("pages/") && isGsspDynamicEngineImport(text)) continue;
+
   // Filter out type-only lines before checking
   const runtimeLines = text
     .split("\n")
@@ -209,6 +223,93 @@ for (const file of publicFiles) {
   }
   if (/\bSIGNAL_LIBRARY\s*[\[.]/.test(runtimeLines)) {
     fail(file, "SIGNAL_LIBRARY accessed from public surface — must be server-side only");
+  }
+}
+
+// ─── Check 5: No raw prevalencePercent on public surfaces ─────────────────────
+// The DTO converts this to a non-numeric label. Any raw number in this context
+// would be a DTO boundary violation.
+
+for (const file of publicFiles) {
+  if (isServerOnlyFile(file)) continue;
+  const text = fs.readFileSync(file, "utf8");
+  if (/prevalencePercent/.test(text)) {
+    fail(file, "raw prevalencePercent on public surface — use prevalenceLabel from public DTO only");
+  }
+}
+
+// ─── Check 6: No outcome distribution raw percentages on public surfaces ───────
+// outcomeDistributionSummary is text — raw outcomePercent or outcomeDistributionPercent
+// must never appear on a public surface.
+
+for (const file of publicFiles) {
+  if (isServerOnlyFile(file)) continue;
+  const text = fs.readFileSync(file, "utf8");
+  if (/outcomePercent|outcomeDistributionPercent/.test(text)) {
+    fail(file, "raw outcome distribution percentage on public surface — use outcomeDistributionSummary text from public DTO only");
+  }
+}
+
+// ─── Check 7: Forbidden automation claim language in public component/page code ─
+// Checks JSX string literals and template literals for claim phrases that imply
+// functionality the system does not provide or has not been claimed.
+
+const AUTOMATION_CLAIM_PATTERNS = [
+  { pattern: /continuous monitoring/i, reason: "\"continuous monitoring\" — use operator-governed cadence language" },
+  { pattern: /always-on governance/i, reason: "\"always-on governance\" — use governed automation with human boundary" },
+  { pattern: /fully autonomous/i, reason: "\"fully autonomous\" — prohibited; use governed automation" },
+  { pattern: /secret intelligence/i, reason: "\"secret intelligence\" — prohibited product copy" },
+  { pattern: /quantum signal/i, reason: "\"quantum signal\" — prohibited product copy" },
+];
+
+const AUTOMATION_CLAIM_NEGATIONS = [
+  /not\s+/i, /never\s+/i, /without\s+/i, /avoid\s+/i, /not\s+claimed/i,
+  /what\s+is\s+not/i, /must\s+not/i, /forbidden/i, /unless/i,
+];
+
+const automationScanFiles = [
+  ...walk(path.join(root, "components")),
+  ...walk(path.join(root, "pages")),
+  ...walk(path.join(root, "app")),
+].filter((f) => !isApiRoute(f));
+
+for (const file of automationScanFiles) {
+  const r = rel(file);
+  // Skip guard scripts themselves and docs
+  if (r.startsWith("scripts/") || r.includes("docs/")) continue;
+
+  const text = fs.readFileSync(file, "utf8");
+  const lines = text.split("\n");
+
+  for (const { pattern, reason } of AUTOMATION_CLAIM_PATTERNS) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!pattern.test(line)) continue;
+      // Allow comments
+      if (/^\s*(\/\/|\/\*|\*)/.test(line.trim())) continue;
+      // Allow negation context
+      if (AUTOMATION_CLAIM_NEGATIONS.some((neg) => neg.test(line))) continue;
+      fail(file, `forbidden automation claim language (line ${i + 1}): ${reason}`);
+    }
+  }
+}
+
+// ─── Check 8: No raw IntelligenceSignal value in API route JSON payloads ────────
+// Specifically check for the type name being used as a property key or spread.
+
+const allApiFiles = publicFiles.filter(isApiRoute);
+
+for (const file of allApiFiles) {
+  const text = fs.readFileSync(file, "utf8");
+  // Detect spreading or returning a raw IntelligenceSignal object
+  if (/signals:\s*rawSignals|IntelligenceSignal\[\]/.test(text)) {
+    // Allow if it's a type annotation only line
+    const valueLines = text.split("\n").filter(
+      (l) => !/^\s*\/\//.test(l) && !/^\s*import\s+type\b/.test(l) && !/:\s*IntelligenceSignal\[\]/.test(l),
+    );
+    if (valueLines.some((l) => /signals:\s*rawSignals/.test(l))) {
+      fail(file, "raw IntelligenceSignal[] assigned to 'signals' key in API response — use public DTO instead");
+    }
   }
 }
 

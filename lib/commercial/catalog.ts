@@ -140,10 +140,15 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cookieName: "aol_paid_personal_decision_audit",
     includes: [],
     shortDescription: "Expose contradiction between stated mandate, behaviour, and competing obligation.",
-    userPromise: "Contradiction map, competing obligation diagnosis, correction command, 7-day checkpoint.",
-    pricingNote: "Inactive until Stripe product and price IDs are created.",
+    userPromise: "Mandate clarity reading, obligation conflict map, decision behaviour pattern, alignment drift warning, execution integrity implication, personal decision constitution, next admissible move, Decision Centre memory, PDF dossier, and corridor bridge.",
+    pricingNote: "Active. Stripe product and price IDs are configured.",
     primaryCta: "Start Personal Decision Audit",
     upgradePath: ["executive_reporting", "strategy_room", "retainer_core"],
+    deliveryFormat: "combined",
+    estimatedCompletionMinutes: 12,
+    writesToDecisionMemory: true,
+    dossierEligible: true,
+    nextAdmissibleMove: "Executive Reporting or Strategy Room",
   },
 
   // ═══ A. DECISION LAYER ═══════════════════════════════════════════════════

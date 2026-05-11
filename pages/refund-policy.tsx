@@ -90,8 +90,7 @@ export default function RefundPolicyPage() {
               <li>Digital reports that have been fully delivered and accessed.</li>
               <li>Advisory sessions that have been completed.</li>
               <li>Dissatisfaction with findings or conclusions, where the service was
-                delivered as described. Our instruments provide structured analysis, not
-                guaranteed outcomes.</li>
+                delivered as described. Our instruments provide structured analysis — not guaranteed outcomes.</li>
             </ul>
           </section>
 

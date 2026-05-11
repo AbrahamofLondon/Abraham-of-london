@@ -23,6 +23,9 @@ import {
   requireMethod,
   requireSameOrigin,
 } from "@/lib/server/security/app-route-guards";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { buildPaidResult, validatePaidResult, PAID_RESULT_CONTRACT } from "@/lib/alignment/purpose-alignment-paid-contract";
+import type { PurposeAlignmentPaidResult } from "@/lib/alignment/purpose-alignment-paid-contract";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -233,6 +236,71 @@ export async function POST(req: NextRequest) {
       // Non-fatal: anchor enrichment failed
     }
 
+    // ── ENTITLEMENT CHECK & PAID RESULT ENRICHMENT ──────────────────────
+    let isPaid = false;
+    let paidResult: PurposeAlignmentPaidResult | null = null;
+    let paidResultValidation: Array<{ field: string; message: string }> = [];
+
+    try {
+      const entitlement = await resolveCanonicalEntitlement({
+        userId: sessionKey ?? null,
+        email: null,
+        slug: PAID_RESULT_CONTRACT.productCode,
+      });
+      isPaid = entitlement.granted;
+    } catch {
+      // Entitlement check failure is non-fatal — fall back to free result
+    }
+
+    if (isPaid) {
+      try {
+        const contextAnswers = {
+          avoidedDecision: parsed.data.reflections?.avoidedDecision ?? "",
+          competingObligation: parsed.data.reflections?.competingObligation ?? "",
+          consequence: parsed.data.reflections?.consequence ?? "",
+        };
+
+        paidResult = buildPaidResult({
+          freeResult: result,
+          resultId: assessmentId,
+          userEmail: null,
+          contextAnswers,
+          pdfRequested: false,
+          writeMemory: true,
+        });
+
+        paidResultValidation = validatePaidResult(paidResult);
+
+        // ── DECISION CENTRE MEMORY WRITE ──────────────────────────────
+        if (paidResult.decisionCentreMemory.written) {
+          try {
+            const { createCheckpointForCommand } = await import("@/lib/product/checkpoint-service");
+            const { buildExecutiveReportingCommand } = await import("@/lib/product/efficacy-contract");
+            const command = buildExecutiveReportingCommand({
+              topPriority: result.firstAction ?? "Address the governing condition.",
+              decisionText: contextAnswers.avoidedDecision || "",
+              constraintText: contextAnswers.competingObligation || "",
+              hasVerificationCriteria: Boolean(contextAnswers.consequence),
+            });
+            const cp = await createCheckpointForCommand({
+              command,
+              email: undefined,
+              caseId: assessmentId,
+              executiveRunId: undefined,
+            });
+            paidResult.decisionCentreMemory.memoryId = cp?.checkpointId ?? undefined;
+            paidResult.decisionCentreMemory.status = cp?.checkpointId ? "ACTIVE" : "PENDING";
+          } catch {
+            paidResult.decisionCentreMemory.status = "FAILED";
+          }
+        }
+      } catch {
+        // Paid result enrichment failure is non-fatal — fall back to free result
+        isPaid = false;
+        paidResult = null;
+      }
+    }
+
     return noStoreJson({
       ok: true,
       assessmentId,
@@ -241,6 +309,9 @@ export async function POST(req: NextRequest) {
       anchorNarrative,
       socialProof: framePurposeSocialProof(result),
       isPreview: true,
+      isPaid,
+      paidResult: isPaid ? paidResult : undefined,
+      paidResultValidation: isPaid ? paidResultValidation : undefined,
       nextSteps: {
         exploreStrategyRoom: "/strategy-room",
         viewFullProduct: "/product",

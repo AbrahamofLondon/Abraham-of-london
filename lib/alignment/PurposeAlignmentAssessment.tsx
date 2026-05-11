@@ -28,6 +28,8 @@ import { detectDualAxisIntegrityChallenge } from "@/lib/client/assessment-integr
 
 type Props = {
   onScored?: (result: PurposeProfileResult, answers: Record<string, DualAxisAnswer>) => void;
+  /** Pre-assessment entitlement flag — set true when user has paid entitlement before starting */
+  isPaidEntitled?: boolean;
 };
 
 type Phase = "context" | "signal" | "result";
@@ -131,7 +133,7 @@ function toneClassForStep(active: boolean) {
     : "translate-y-2 opacity-0 duration-300";
 }
 
-export default function PurposeAlignmentAssessment({ onScored }: Props) {
+export default function PurposeAlignmentAssessment({ onScored, isPaidEntitled }: Props) {
   const [phase, setPhase] = React.useState<Phase>("context");
   const [contextStep, setContextStep] = React.useState(0);
   const [contextAnswers, setContextAnswers] = React.useState<ContextAnswers>(INITIAL_CONTEXT);
@@ -154,6 +156,8 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
   const [startedAt] = React.useState(() => new Date().toISOString());
   const startedAtMs = React.useRef(Date.now());
   const pendingAdvanceRef = React.useRef<null | (() => void)>(null);
+  const [isPaid, setIsPaid] = React.useState(Boolean(isPaidEntitled));
+  const [paidResult, setPaidResult] = React.useState<import("@/lib/alignment/purpose-alignment-paid-contract").PurposeAlignmentPaidResult | null>(null);
 
   React.useEffect(() => {
     trackLaunch("purpose_alignment_started", "purpose_alignment");
@@ -319,6 +323,8 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
         anchorNarrative?: AnchorNarrativeShape;
         result?: PurposeProfileResult;
         socialProof?: string;
+        isPaid?: boolean;
+        paidResult?: import("@/lib/alignment/purpose-alignment-paid-contract").PurposeAlignmentPaidResult;
       };
 
       if (json.result) {
@@ -328,6 +334,10 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
       if (json.anchorNarrative) setAnchorNarrative(json.anchorNarrative);
       if (json.socialProof) setSocialProof(json.socialProof);
       if (json.assessmentId) setAssessmentId(json.assessmentId);
+      if (json.isPaid) {
+        setIsPaid(true);
+        if (json.paidResult) setPaidResult(json.paidResult);
+      }
       trackLaunch("purpose_alignment_completed", "purpose_alignment", { caseId: json.assessmentId ?? undefined });
       clearAssessmentState();
     } catch (error) {
@@ -937,6 +947,39 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                   })()}
                 </section>
 
+                {isPaid && paidResult ? (
+                  <section className="mt-6 rounded-[24px] border border-emerald-200/30 bg-emerald-50/30 p-5">
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-emerald-700/50">
+                      Paid result — full dossier
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-neutral-700">
+                      Your £49 Personal Decision Audit includes the full dossier with mandate reading,
+                      obligation conflict map, decision behaviour pattern, alignment drift warning,
+                      execution integrity implication, personal decision constitution, and next admissible move.
+                    </p>
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-neutral-600">
+                      <span>✓ Mandate clarity reading</span>
+                      <span>✓ Obligation conflict map</span>
+                      <span>✓ Decision behaviour pattern</span>
+                      <span>✓ Alignment drift warning</span>
+                      <span>✓ Execution integrity implication</span>
+                      <span>✓ Personal decision constitution</span>
+                      <span>✓ Next admissible move</span>
+                      <span>✓ Decision Centre memory</span>
+                    </div>
+                    {paidResult.corridorBridge.bridgeJustified && (
+                      <div className="mt-3 rounded-[12px] border border-amber-200/30 bg-amber-50/30 p-3">
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-amber-700/60">
+                          Corridor bridge active
+                        </div>
+                        <p className="mt-1 text-xs leading-5 text-neutral-700">
+                          This result justifies escalation to {paidResult.corridorBridge.targetSurface.replace(/_/g, " ")}.
+                        </p>
+                      </div>
+                    )}
+                  </section>
+                ) : null}
+
                 <section className="mt-6">
                   <div className="flex flex-wrap gap-3">
                     <a
@@ -945,12 +988,21 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
                     >
                       Constitutional Diagnostic
                     </a>
-                    <a
-                      href={`/.netlify/functions/purpose-alignment-report?ts=${encodeURIComponent(result.createdAt)}`}
-                      className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700"
-                    >
-                      Download PDF report
-                    </a>
+                    {isPaid && assessmentId ? (
+                      <a
+                        href={`/.netlify/functions/purpose-alignment-paid-dossier?assessmentId=${encodeURIComponent(assessmentId)}`}
+                        className="rounded-full border border-emerald-600 px-5 py-2.5 text-sm font-medium text-emerald-800"
+                      >
+                        Download full dossier (PDF)
+                      </a>
+                    ) : (
+                      <a
+                        href={`/.netlify/functions/purpose-alignment-report?ts=${encodeURIComponent(result.createdAt)}`}
+                        className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700"
+                      >
+                        Download PDF report
+                      </a>
+                    )}
                   </div>
                   <div className="mt-4">
                     <ResultEmailCapture source="purpose_alignment" resultRef={result.createdAt} />

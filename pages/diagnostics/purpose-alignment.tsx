@@ -6,16 +6,22 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Lock, Unlock, ShieldCheck } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import PurposeAlignmentAssessment from "@/components/alignment/PurposeAlignmentAssessment";
 import { track } from "@/lib/analytics/track";
 
 const GOLD = "#C9A96E";
+const AMBER = "#F59E0B";
+const EMERALD = "#6EE7B7";
 const VOID = "rgb(3 3 5)";
 
+type EntitlementState = "loading" | "free" | "paid_unlocked" | "auth_required";
+
 export default function PurposeAlignmentPage() {
+  const [entitlementState, setEntitlementState] = React.useState<EntitlementState>("loading");
+
   React.useEffect(() => {
     track("purpose_alignment_viewed", {
       route: "/diagnostics/purpose-alignment",
@@ -25,7 +31,50 @@ export default function PurposeAlignmentPage() {
     } catch {
       // Origin marker is measurement-only.
     }
+
+    // Check entitlement on mount
+    fetch("/api/entitlements")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.authenticated) {
+          setEntitlementState("auth_required");
+          return;
+        }
+        const hasPaid = (data.entitlements ?? []).some(
+          (e: { slug: string }) => e.slug === "personal-decision-audit",
+        );
+        setEntitlementState(hasPaid ? "paid_unlocked" : "free");
+      })
+      .catch(() => {
+        setEntitlementState("free");
+      });
   }, []);
+
+  function stateLabel() {
+    switch (entitlementState) {
+      case "loading":
+        return { label: "Checking access...", color: "rgba(255,255,255,0.25)" };
+      case "free":
+        return { label: "Free assessment · 8 minutes · Upgrade available", color: `${GOLD}BB` };
+      case "paid_unlocked":
+        return { label: "Personal Decision Audit · Paid · Full dossier unlocked", color: `${EMERALD}BB` };
+      case "auth_required":
+        return { label: "Sign in to access paid features", color: `${AMBER}AA` };
+    }
+  }
+
+  function stateIcon() {
+    switch (entitlementState) {
+      case "paid_unlocked":
+        return <ShieldCheck style={{ width: 10, height: 10, color: EMERALD }} />;
+      case "auth_required":
+        return <Lock style={{ width: 10, height: 10, color: AMBER }} />;
+      default:
+        return null;
+    }
+  }
+
+  const currentLabel = stateLabel();
 
   return (
     <Layout
@@ -57,12 +106,13 @@ export default function PurposeAlignmentPage() {
             <div className="pt-28 pb-12 md:pt-36 md:pb-16">
               <div className="flex items-center gap-3 mb-6">
                 <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+                {stateIcon()}
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
-                  color: `${GOLD}BB`,
+                  color: currentLabel.color,
                 }}>
-                  Personal Decision Infrastructure · Free · 8 minutes
+                  Personal Decision Infrastructure · {currentLabel.label}
                 </span>
               </div>
 
@@ -125,9 +175,85 @@ export default function PurposeAlignmentPage() {
           </div>
         </section>
 
+        {/* Purchase CTA for free users */}
+        {entitlementState === "free" && (
+          <section className="mx-auto max-w-6xl px-6 lg:px-12 pb-4">
+            <div style={{
+              border: `1px solid ${GOLD}24`,
+              backgroundColor: `${GOLD}04`,
+              padding: "16px 20px",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              flexWrap: "wrap", gap: "12px",
+            }}>
+              <div>
+                <span style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase",
+                  color: `${GOLD}AA`,
+                }}>
+                  Personal Decision Audit · £49
+                </span>
+                <p style={{
+                  marginTop: "4px", fontSize: "12px", lineHeight: 1.5,
+                  color: "rgba(255,255,255,0.40)", maxWidth: "48ch",
+                }}>
+                  Full dossier with mandate reading, obligation conflict map, decision behaviour pattern,
+                  alignment drift warning, execution integrity implication, personal decision constitution,
+                  next admissible move, Decision Centre memory, and PDF download.
+                </p>
+              </div>
+              <Link
+                href="/checkout/personal-decision-audit"
+                style={{
+                  padding: "10px 18px",
+                  border: `1px solid ${GOLD}50`,
+                  backgroundColor: `${GOLD}18`,
+                  color: GOLD,
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase",
+                  textDecoration: "none", whiteSpace: "nowrap",
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}
+              >
+                Upgrade to paid
+                <ArrowRight style={{ width: "10px", height: "10px" }} />
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* Paid unlocked banner */}
+        {entitlementState === "paid_unlocked" && (
+          <section className="mx-auto max-w-6xl px-6 lg:px-12 pb-4">
+            <div style={{
+              border: `1px solid ${EMERALD}30`,
+              backgroundColor: `${EMERALD}08`,
+              padding: "16px 20px",
+              display: "flex", alignItems: "center", gap: "12px",
+            }}>
+              <ShieldCheck style={{ width: 16, height: 16, color: EMERALD, flexShrink: 0 }} />
+              <div>
+                <span style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase",
+                  color: `${EMERALD}CC`,
+                }}>
+                  Personal Decision Audit — unlocked
+                </span>
+                <p style={{
+                  marginTop: "2px", fontSize: "12px", lineHeight: 1.5,
+                  color: "rgba(255,255,255,0.45)",
+                }}>
+                  Complete the assessment to receive your full dossier with all 10 paid deliverables.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Assessment */}
         <section className="mx-auto max-w-6xl px-6 lg:px-12 pb-24">
-          <PurposeAlignmentAssessment />
+          <PurposeAlignmentAssessment isPaidEntitled={entitlementState === "paid_unlocked"} />
         </section>
 
         {/* Post-analysis context */}

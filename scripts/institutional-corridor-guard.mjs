@@ -281,6 +281,57 @@ checkPresent(
   "Contradiction graph presenter must export buildContradictionGraphSafeMetrics"
 );
 
+// 15. Strategy Room session must render SignalPressurePanel
+checkPresent(
+  "pages/strategy-room/session/[id].tsx",
+  /SignalPressurePanel/,
+  "Strategy Room session page must render SignalPressurePanel — sovereign signal pressure must be surfaced in the execution path"
+);
+
+// 16. Oversight Brief must render sovereignSignalRecurrence
+checkPresent(
+  "pages/oversight/brief/[cycleId].tsx",
+  /sovereignSignalRecurrence/,
+  "Oversight Brief page must render sovereignSignalRecurrence — signal pattern recurrence must be tracked across oversight cycles"
+);
+
+// 17. Boardroom session page must render BoardroomSignalExposure
+checkPresent(
+  "pages/boardroom/[sessionId].tsx",
+  /BoardroomSignalExposure/,
+  "Boardroom session page must render BoardroomSignalExposure — institutional signal exposure required at board level"
+);
+
+// 18. Key sovereign surfaces must not import raw IntelligenceSignal as a value.
+// Exception: Pages Router pages may use dynamic import inside getServerSideProps —
+// dynamic imports are server-side only and do not bundle to the client.
+const sovereignSurfaces = [
+  "pages/boardroom/[sessionId].tsx",
+  "pages/strategy-room/session/[id].tsx",
+  "pages/oversight/brief/[cycleId].tsx",
+  "pages/oversight/portfolio.tsx",
+  "components/sovereign/BoardroomSignalExposure.tsx",
+  "components/strategy-room/SignalPressurePanel.tsx",
+];
+
+for (const filePath of sovereignSurfaces) {
+  const abs = path.resolve(root, filePath);
+  if (!fs.existsSync(abs)) continue;
+  const content = fs.readFileSync(abs, "utf8");
+  const lines = content.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^\s*import\s+type\b/.test(line)) continue; // type-only, safe
+    // Allow dynamic imports inside GSSP (server-side only in Pages Router)
+    if (/await\s+import\s*\(/.test(line)) continue; // dynamic import, runs server-side
+    if (/intelligence-signals|cohort-intelligence|intelligence-commons|decision-forensics|institutional-memory/.test(line) &&
+        /^(?!.*\bimport\s+type\b).*\bimport\b/.test(line)) {
+      console.error(`VIOLATION in ${filePath}:${i + 1}: raw sovereign engine value import on public surface`);
+      violations++;
+    }
+  }
+}
+
 // Summary
 if (violations > 0) {
   console.error(`\nInstitutional corridor guard: ${violations} violation(s) found.`);
