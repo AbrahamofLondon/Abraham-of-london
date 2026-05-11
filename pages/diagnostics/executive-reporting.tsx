@@ -141,6 +141,17 @@ export default function ExecutiveReportingEntryPage() {
       <main style={{ backgroundColor: "#050505", minHeight: "100vh", color: "#F5F5F5" }}>
         <div style={{ maxWidth: "680px", margin: "0 auto", padding: "140px 24px 96px" }}>
 
+          {/* ─── Ladder orientation ─────────────────────────────────────────── */}
+          <div style={{ marginBottom: "40px" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+              Fast Diagnostic{" "}
+              <span style={{ color: `${GOLD}40`, margin: "0 4px" }}>→</span>
+              Constitutional Diagnostic{" "}
+              <span style={{ color: `${GOLD}40`, margin: "0 4px" }}>→</span>
+              <span style={{ color: `${GOLD}80` }}>Executive Reporting</span>
+            </p>
+          </div>
+
           {/* ═══ 1. OPENING VERDICT ═══ */}
           <section style={{ paddingBottom: "32px" }}>
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "28px" }}>

@@ -102,6 +102,15 @@ export default function PurposeAlignmentFreeResultSurface({
           <ResultEmailCapture source="purpose_alignment" resultRef={result.createdAt} />
         </div>
 
+        {/* Trust signals */}
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1">
+          {["No account required", "Self-reported inputs — source labelled", "No guaranteed outcome"].map((signal) => (
+            <span key={signal} className="text-[9px] uppercase tracking-[0.20em] text-neutral-400">
+              {signal}
+            </span>
+          ))}
+        </div>
+
         {/* Narrative */}
         {anchorNarrative ? (
           <>

@@ -1782,6 +1782,17 @@ export default function StrategyRoomPage({
                 </div>
               )}
 
+              {/* ── Ladder orientation ── */}
+              <div style={{ marginBottom: "28px" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+                  Fast Diagnostic{" "}
+                  <span style={{ color: `${GOLD}35`, margin: "0 4px" }}>→</span>
+                  Executive Reporting{" "}
+                  <span style={{ color: `${GOLD}35`, margin: "0 4px" }}>→</span>
+                  <span style={{ color: `${GOLD}70` }}>Strategy Room</span>
+                </p>
+              </div>
+
               {/* ── STATE 1: MINIMAL HARD GATE ── */}
               <Eyebrow>Execution Environment</Eyebrow>
               <h1 style={{
