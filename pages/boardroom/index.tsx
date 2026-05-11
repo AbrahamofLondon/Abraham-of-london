@@ -5,6 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import ValueReceipt from "@/components/product/ValueReceipt";
 import { resolvePageAccess } from "@/lib/access/server";
 import { loadBoardroomArchiveCommandSummary } from "@/lib/product/boardroom-archive-summary";
 
@@ -58,6 +59,18 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60">
               Boardroom is not a one-off PDF. This archive shows whether board-level dossiers exist, when they were generated, and whether the current record is boardroom-ready.
             </p>
+            <div className="mt-6 max-w-lg">
+              <ValueReceipt
+                price="Retained oversight"
+                deliveryFormat="Governed brief + board dossier"
+                includes={["Board-ready decision dossier", "Decision record with contradiction map", "Escalation history", "Qualification state"]}
+                memoryWrite={true}
+                dossierIncluded={true}
+                accessPosture="retained"
+                nextAdmissibleMove="Generate board dossier if qualified, or strengthen evidence to qualify"
+                compact
+              />
+            </div>
           </header>
 
           {authenticated && institutionalCase && (

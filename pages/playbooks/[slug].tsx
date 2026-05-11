@@ -31,6 +31,7 @@ import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 import NextStepCTA from "@/components/content/NextStepCTA";
+import ValueReceipt from "@/components/product/ValueReceipt";
 
 import { getRenderableBody } from "@/lib/content/render-body";
 import { requiredTierFromDoc } from "@/lib/access/tiers";
@@ -496,6 +497,19 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                 transition={{ duration: 0.75, delay: 0.14 }}
                 className="space-y-3"
               >
+                {/* Value receipt */}
+                <ValueReceipt
+                  price={!isPublic ? "Paid playbook" : "Free"}
+                  deliveryFormat={isArchitect ? "Restricted architect material" : "Governed methodology run"}
+                  includes={pbOutputs.length > 0 ? pbOutputs.slice(0, 4).map((o: any) => String(o)) : ["Structured methodology", "Checkpoint eligibility", "Decision Centre memory"]}
+                  memoryWrite={true}
+                  dossierIncluded={false}
+                  accessPosture={isArchitect ? "restricted" : isPublic ? "free" : "paid"}
+                  nextAdmissibleMove={isArchitect ? "Architect-tier material — not publicly accessible" : "Complete the playbook to qualify for the next instrument or corridor route"}
+                  estimatedTime={pbEstimatedTime || undefined}
+                  compact
+                />
+
                 {pbPhases.length > 0 && (
                   <div
                     style={{
