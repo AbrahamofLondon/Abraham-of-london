@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { buildInstitutionalMemoryReport, type SessionSnapshot } from "@/lib/sovereign/institutional-memory";
 import { detectIntelligenceSignals, type SignalInput } from "@/lib/sovereign/intelligence-signals";
+import { requireSovereignApiAccess } from "@/lib/sovereign/require-sovereign-api-access";
 
 function num(v: unknown, fallback = 0): number {
   const n = Number(v);
@@ -24,6 +25,9 @@ function str<T extends string>(v: unknown, allowed: T[], fallback: T): T {
  * historical tabs. It is this.
  */
 export async function POST(req: NextRequest) {
+  const denied = await requireSovereignApiAccess(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json().catch(() => ({}));
 

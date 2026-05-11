@@ -313,6 +313,66 @@ for (const file of allApiFiles) {
   }
 }
 
+// ─── Check 9: All sovereign computation API routes must import require-sovereign-api-access ──
+// Only applies to the 4 intelligence computation endpoints — not to auth/logout/report routes
+// which have their own gating mechanisms or are the auth mechanism itself.
+
+const SOVEREIGN_COMPUTATION_ROUTES = [
+  "app/api/sovereign/signals/route.ts",
+  "app/api/sovereign/cohort/route.ts",
+  "app/api/sovereign/forensics/route.ts",
+  "app/api/sovereign/memory/route.ts",
+];
+
+const sovereignApiRoutes = SOVEREIGN_COMPUTATION_ROUTES
+  .map((r) => path.join(root, r))
+  .filter((f) => fs.existsSync(f));
+
+const SOVEREIGN_ACCESS_GUARD_IMPORT = /require-sovereign-api-access/;
+
+for (const file of sovereignApiRoutes) {
+  const text = fs.readFileSync(file, "utf8");
+  if (!SOVEREIGN_ACCESS_GUARD_IMPORT.test(text)) {
+    fail(file, "sovereign API route missing require-sovereign-api-access import — all /api/sovereign/* routes must be access-gated");
+  }
+}
+
+// ─── Check 10: No sovereign API route returns raw IntelligenceSignal fields ────
+// Extends Check 8 specifically to sovereign routes.
+
+for (const file of sovereignApiRoutes) {
+  const text = fs.readFileSync(file, "utf8");
+  // Check that DTO boundary is maintained — raw signal arrays must not be key values
+  const lines = text.split("\n").filter((l) => !/^\s*\/\//.test(l) && !/import\s+type/.test(l));
+  for (const line of lines) {
+    // Flag if a field called 'signals' is assigned rawSignals directly
+    if (/\bsignals\s*:\s*rawSignals\b/.test(line)) {
+      fail(file, `sovereign API route returns raw signals without DTO conversion: ${rel(file)}`);
+    }
+    // Flag raw signal spread into response
+    if (/\.\.\.\s*rawSignals/.test(line)) {
+      fail(file, `sovereign API route spreads rawSignals into response — use buildSovereignSignalAssessment`);
+    }
+  }
+}
+
+// ─── Check 11: requireSovereignApiAccess must be called before body read ─────
+// Validates that the guard call precedes any data processing in the route body.
+
+for (const file of sovereignApiRoutes) {
+  const text = fs.readFileSync(file, "utf8");
+  if (!SOVEREIGN_ACCESS_GUARD_IMPORT.test(text)) continue; // already caught in check 9
+
+  const guardCallIndex = text.indexOf("requireSovereignApiAccess");
+  const bodyReadIndex = text.indexOf("req.json()");
+
+  if (guardCallIndex === -1) {
+    fail(file, "sovereign API route imports require-sovereign-api-access but never calls it");
+  } else if (bodyReadIndex !== -1 && bodyReadIndex < guardCallIndex) {
+    fail(file, "sovereign API route reads request body before calling requireSovereignApiAccess — guard must execute first");
+  }
+}
+
 // ─── Result ────────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {
@@ -323,4 +383,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`SOVEREIGN_INTELLIGENCE_GUARD: PASS (${publicFiles.length} files scanned)`);
+console.log(`SOVEREIGN_INTELLIGENCE_GUARD: PASS (${publicFiles.length} files scanned, ${sovereignApiRoutes.length} sovereign API routes verified)`);

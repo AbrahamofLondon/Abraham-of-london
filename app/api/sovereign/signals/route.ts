@@ -10,6 +10,7 @@ import {
 import {
   buildSovereignSignalAssessment,
 } from "@/lib/sovereign/sovereign-signal-public-dto";
+import { requireSovereignApiAccess } from "@/lib/sovereign/require-sovereign-api-access";
 
 function num(v: unknown, fallback = 0): number {
   if (typeof v === "number" && Number.isFinite(v)) return v;
@@ -31,6 +32,9 @@ function str<T extends string>(v: unknown, allowed: readonly T[], fallback: T): 
  * pattern-matched institutional observations connected to the content library.
  */
 export async function POST(req: NextRequest) {
+  const denied = await requireSovereignApiAccess(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json().catch(() => ({}));
 

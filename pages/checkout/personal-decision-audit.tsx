@@ -11,7 +11,6 @@
 import * as React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { loadStripe } from "@stripe/stripe-js";
 import { ArrowRight, Shield, FileText, CheckCircle } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -20,10 +19,6 @@ import { track } from "@/lib/analytics/track";
 const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
 const VOID = "rgb(3 3 5)";
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
-);
 
 const DELIVERABLES = [
   "Mandate clarity reading — what you say vs what your behaviour reveals",

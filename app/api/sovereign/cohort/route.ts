@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { matchCohort, type CohortInput } from "@/lib/sovereign/cohort-intelligence";
+import { requireSovereignApiAccess } from "@/lib/sovereign/require-sovereign-api-access";
 
 function str<T extends string>(v: unknown, allowed: T[], fallback: T): T {
   return allowed.includes(v as T) ? (v as T) : fallback;
@@ -17,6 +18,9 @@ function str<T extends string>(v: unknown, allowed: T[], fallback: T): T {
  * to organisations that share their structural characteristics.
  */
 export async function POST(req: NextRequest) {
+  const denied = await requireSovereignApiAccess(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json().catch(() => ({}));
 

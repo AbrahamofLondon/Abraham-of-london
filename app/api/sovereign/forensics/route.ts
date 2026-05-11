@@ -6,6 +6,7 @@ import {
   formatForensicNarrative,
   type DecisionContext,
 } from "@/lib/sovereign/decision-forensics";
+import { requireSovereignApiAccess } from "@/lib/sovereign/require-sovereign-api-access";
 
 const DECISION_TYPES = [
   "ESCALATE", "DELAY", "RESTRUCTURE", "DELEGATE",
@@ -24,6 +25,9 @@ function str<T extends string>(v: unknown, allowed: readonly T[], fallback: T): 
  * This is the replacement for template-string simulation.
  */
 export async function POST(req: NextRequest) {
+  const denied = await requireSovereignApiAccess(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json().catch(() => ({}));
 
