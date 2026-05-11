@@ -37,6 +37,13 @@ const ExecutionRiskRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=execution-risk-index"
       nextStepLabel={result?.riskBand === "CRITICAL" ? "Enter Strategy Room" : "Analyse institutional consequence"}
       nextStepHref={result?.riskBand === "CRITICAL" ? "/strategy-room" : nextHref}
+      valueReceipt={result ? [
+        { label: "Classification", value: `${result.riskBand} — ${result.riskIndex}/100` },
+        { label: "Decay projection", value: result.decayProjection },
+        { label: "Next admissible move", value: result.recommendation },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: "PDF dossier available" },
+      ] : undefined}
     >
       {!result ? (
         <ExecutionRiskIndexRunner onComplete={handleComplete} />

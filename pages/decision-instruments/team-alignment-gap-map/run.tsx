@@ -37,6 +37,13 @@ const TeamAlignmentRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=team-alignment-gap-map"
       nextStepLabel="Map mandate clarity"
       nextStepHref={nextHref}
+      valueReceipt={result ? [
+        { label: "Classification", value: `${result.alignmentBand} — ${result.overallAlignmentScore}/100` },
+        { label: "Divergence signal", value: result.divergenceSignal },
+        { label: "Next admissible move", value: result.recommendation },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: "PDF dossier available" },
+      ] : undefined}
     >
       {!result ? (
         <TeamAlignmentGapMapRunner onComplete={handleComplete} />

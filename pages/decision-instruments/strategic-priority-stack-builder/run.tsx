@@ -37,6 +37,13 @@ const PriorityStackRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=strategic-priority-stack-builder"
       nextStepLabel="Analyse institutional consequence"
       nextStepHref={nextHref}
+      valueReceipt={result ? [
+        { label: "Priorities ranked", value: `${result.stack.length} items · resource pressure: ${result.resourcePressureBand}` },
+        { label: "Conflicts detected", value: result.conflicts.length > 0 ? `${result.conflicts.length} conflict${result.conflicts.length !== 1 ? "s" : ""}` : "None" },
+        { label: "Next admissible move", value: result.recommendation },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: "PDF dossier available" },
+      ] : undefined}
     >
       {!result ? (
         <StrategicPriorityStackRunner onComplete={handleComplete} />

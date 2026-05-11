@@ -1,36 +1,54 @@
 /**
  * Decision Signal — free governed first reading.
  *
- * Not a lead magnet. A real first measurement.
- * Inputs: decision statement, delay cost band, confidence, consequence, urgency.
- * Output: exposure band, contradiction prompt, next action, earned escalation condition.
+ * Not a lead magnet. A real first measurement with a clear boundary.
+ *
+ * Free output:
+ *   1. Decision pressure band
+ *   2. One named signal
+ *   3. One consequence warning
+ *   4. One immediate correction question
+ *   5. One next admissible move
+ *   6. Boundary statement explaining what paid assessment adds
+ *
+ * Excluded from free version:
+ *   - Dossier
+ *   - Memory write
+ *   - Checkpoint
+ *   - Report
+ *   - Intervention path
+ *   - Escalation payload
  */
 
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Lock, ShieldCheck } from "lucide-react";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
 
 const GOLD = "#C9A96E";
+const AMBER = "#F59E0B";
+const EMERALD = "#6EE7B7";
+const VOID = "rgb(3 3 5)";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
 type SignalInput = {
   decisionStatement: string;
   delayCostBand: "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
-  confidenceLevel: number; // 0-10
+  confidenceLevel: number;
   consequenceIfWrong: "REVERSIBLE" | "COSTLY" | "STRUCTURAL" | "IRREVERSIBLE";
   urgencyBand: "LOW" | "MODERATE" | "HIGH" | "IMMEDIATE";
 };
 
 type SignalResult = {
-  exposureBand: "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
-  contradictionPrompt: string;
-  nextAction: string;
-  earnedEscalation: string;
+  pressureBand: "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
+  namedSignal: string;
+  consequenceWarning: string;
+  correctionQuestion: string;
+  nextAdmissibleMove: string;
   evidencePosture: string;
 };
 
@@ -39,38 +57,45 @@ function computeSignal(input: SignalInput): SignalResult {
   const consequenceScore = { REVERSIBLE: 1, COSTLY: 3, STRUCTURAL: 6, IRREVERSIBLE: 9 }[input.consequenceIfWrong];
   const urgencyScore = { LOW: 1, MODERATE: 3, HIGH: 6, IMMEDIATE: 9 }[input.urgencyBand];
   const invertedConfidence = 10 - input.confidenceLevel;
-
   const composite = Math.round((costScore * 0.3 + consequenceScore * 0.3 + urgencyScore * 0.2 + invertedConfidence * 0.2) * 10);
 
-  const exposureBand: SignalResult["exposureBand"] =
+  const pressureBand: SignalResult["pressureBand"] =
     composite >= 70 ? "CRITICAL" : composite >= 50 ? "HIGH" : composite >= 30 ? "MODERATE" : "LOW";
 
-  const contradictionPrompts: Record<SignalResult["exposureBand"], string> = {
-    LOW: "If the cost is low and the consequence is reversible, what makes this decision worth formal attention?",
-    MODERATE: "You report moderate pressure but measurable confidence. What would change if you waited another 30 days?",
-    HIGH: "High consequence with uncertainty. Who else needs to be involved before this becomes more expensive?",
-    CRITICAL: "This signal suggests the decision is already overdue. What has prevented action so far?",
+  const signalMap: Record<SignalResult["pressureBand"], string> = {
+    LOW: "Low pressure — the decision is not yet urgent but may become relevant",
+    MODERATE: "Moderate pressure — delay is measurable but not yet structural",
+    HIGH: "High pressure — the decision is approaching a threshold where cost compounds non-linearly",
+    CRITICAL: "Critical pressure — the decision appears overdue and delay is likely compounding daily",
   };
 
-  const nextActions: Record<SignalResult["exposureBand"], string> = {
+  const consequenceMap: Record<SignalResult["pressureBand"], string> = {
+    LOW: "At current levels, the primary risk is distraction rather than damage",
+    MODERATE: "If unresolved for 30 more days, the cost will be materially higher than it is today",
+    HIGH: "The consequence of delay is now entering structural territory — it will affect more than the original decision",
+    CRITICAL: "The consequence window is closing. What is at stake may no longer be recoverable if delayed further",
+  };
+
+  const correctionMap: Record<SignalResult["pressureBand"], string> = {
+    LOW: "What would need to change for this decision to become urgent?",
+    MODERATE: "What is the single constraint that, if removed, would allow this decision to resolve?",
+    HIGH: "Who else needs to be involved before this becomes more expensive than the decision itself?",
+    CRITICAL: "What has prevented action so far — and is that reason still valid today?",
+  };
+
+  const nextMoveMap: Record<SignalResult["pressureBand"], string> = {
     LOW: "Monitor. No formal instrument is warranted by this signal alone.",
     MODERATE: "Run the Decision Exposure Instrument to price the full consequence before it compounds.",
     HIGH: "Run the Escalation Readiness Scorecard. This decision may need executive-level attention.",
     CRITICAL: "Immediate Executive Reporting recommended. The delay cost is likely compounding daily.",
   };
 
-  const escalations: Record<SignalResult["exposureBand"], string> = {
-    LOW: "No escalation is earned by this signal. Additional evidence required.",
-    MODERATE: "Decision Exposure Instrument is the next admissible step.",
-    HIGH: "Escalation Readiness Scorecard or Executive Reporting is now admissible.",
-    CRITICAL: "Executive Reporting and Strategy Room entry are both admissible at this exposure level.",
-  };
-
   return {
-    exposureBand,
-    contradictionPrompt: contradictionPrompts[exposureBand],
-    nextAction: nextActions[exposureBand],
-    earnedEscalation: escalations[exposureBand],
+    pressureBand,
+    namedSignal: signalMap[pressureBand],
+    consequenceWarning: consequenceMap[pressureBand],
+    correctionQuestion: correctionMap[pressureBand],
+    nextAdmissibleMove: nextMoveMap[pressureBand],
     evidencePosture: "USER_REPORTED — this is a first signal, not a full diagnosis",
   };
 }
@@ -84,51 +109,33 @@ const DecisionSignalPage: NextPage = () => {
     urgencyBand: "MODERATE",
   });
   const [result, setResult] = React.useState<SignalResult | null>(null);
-  const [saved, setSaved] = React.useState(false);
 
   function handleSubmit() {
     if (!input.decisionStatement.trim()) return;
     const r = computeSignal(input);
     setResult(r);
-    track("decision_signal_completed", { exposureBand: r.exposureBand });
+    track("decision_signal_completed", { pressureBand: r.pressureBand });
   }
 
-  async function handleSave() {
-    try {
-      await fetch("/api/decision-instruments/results", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          instrumentSlug: "decision-signal",
-          version: "1.0",
-          scores: { delayCost: input.delayCostBand, confidence: input.confidenceLevel, consequence: input.consequenceIfWrong, urgency: input.urgencyBand },
-          result: { ...result, decisionStatement: input.decisionStatement },
-        }),
-      });
-      setSaved(true);
-    } catch { /* degrade */ }
-  }
-
-  const bandColor = result?.exposureBand === "CRITICAL" ? "rgba(252,165,165,0.70)" : result?.exposureBand === "HIGH" ? "rgba(253,186,116,0.70)" : result?.exposureBand === "MODERATE" ? `${GOLD}CC` : "rgba(110,231,183,0.60)";
+  const bandColor = result?.pressureBand === "CRITICAL" ? "rgba(252,165,165,0.70)" : result?.pressureBand === "HIGH" ? "rgba(253,186,116,0.70)" : result?.pressureBand === "MODERATE" ? `${GOLD}CC` : "rgba(110,231,183,0.60)";
 
   return (
-    <Layout title="Decision Signal | Abraham of London" description="Free governed first reading — detect whether a decision condition exists.">
+    <Layout title="Decision Signal | Abraham of London" description="Free governed first reading — detect whether a decision condition exists. Classifies pressure, names one signal, identifies next action.">
       <Head><meta name="robots" content="index,follow" /></Head>
-      <main className="min-h-screen px-6 py-16" style={{ backgroundColor: "rgb(3,3,5)" }}>
+      <main className="min-h-screen px-6 py-16" style={{ backgroundColor: VOID }}>
         <div className="mx-auto max-w-xl">
           <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>
-            Decision Signal · Free
+            Decision Signal · Free · 2 minutes
           </span>
           <h1 className="mt-4" style={{ ...serif, fontSize: "2.2rem", color: "white", lineHeight: 1.2 }}>
             Detect whether a decision condition exists.
           </h1>
           <p className="mt-3 text-sm leading-7 text-white/50">
-            This is a first signal, not a full diagnosis. It classifies exposure, prompts one contradiction, and identifies the next admissible action.
+            This is a first signal, not a full diagnosis. It classifies pressure, names one signal, and identifies the next admissible action. No account required.
           </p>
 
           {!result ? (
             <div className="mt-8 space-y-6">
-              {/* Decision statement */}
               <div>
                 <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>What decision is being delayed or avoided?</label>
                 <textarea
@@ -140,7 +147,6 @@ const DecisionSignalPage: NextPage = () => {
                 />
               </div>
 
-              {/* Delay cost band */}
               <div>
                 <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Estimated cost of delay</label>
                 <div className="mt-2 grid grid-cols-4 gap-2">
@@ -152,7 +158,6 @@ const DecisionSignalPage: NextPage = () => {
                 </div>
               </div>
 
-              {/* Confidence */}
               <div>
                 <div className="flex items-baseline justify-between mb-1">
                   <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Confidence in current path</label>
@@ -161,7 +166,6 @@ const DecisionSignalPage: NextPage = () => {
                 <input type="range" min={0} max={10} step={1} value={input.confidenceLevel} onChange={(e) => setInput((p) => ({ ...p, confidenceLevel: parseInt(e.target.value) }))} className="w-full" style={{ accentColor: GOLD }} />
               </div>
 
-              {/* Consequence if wrong */}
               <div>
                 <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Consequence if the decision is wrong</label>
                 <div className="mt-2 grid grid-cols-4 gap-2">
@@ -173,7 +177,6 @@ const DecisionSignalPage: NextPage = () => {
                 </div>
               </div>
 
-              {/* Urgency */}
               <div>
                 <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Urgency</label>
                 <div className="mt-2 grid grid-cols-4 gap-2">
@@ -195,52 +198,67 @@ const DecisionSignalPage: NextPage = () => {
             </div>
           ) : (
             <div className="mt-8 space-y-6">
-              {/* Exposure band */}
+              {/* 1. Pressure band */}
               <div className="flex items-baseline justify-between">
                 <div>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Exposure Signal</span>
-                  <div style={{ ...serif, fontSize: "2.5rem", color: bandColor }}>{result.exposureBand}</div>
+                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Decision pressure band</span>
+                  <div style={{ ...serif, fontSize: "2.5rem", color: bandColor }}>{result.pressureBand}</div>
                 </div>
               </div>
 
-              {/* Contradiction prompt */}
+              {/* 2. Named signal */}
               <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Contradiction prompt</span>
-                <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.70)", marginTop: "0.5rem" }}>{result.contradictionPrompt}</p>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Named signal</span>
+                <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.70)", marginTop: "0.5rem" }}>{result.namedSignal}</p>
               </div>
 
-              {/* Next action */}
+              {/* 3. Consequence warning */}
+              <div style={{ border: `1px solid ${AMBER}20`, backgroundColor: `${AMBER}04`, padding: "1rem" }}>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${AMBER}77` }}>Consequence warning</span>
+                <p style={{ fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.25rem" }}>{result.consequenceWarning}</p>
+              </div>
+
+              {/* 4. Correction question */}
               <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Next admissible action</span>
-                <p style={{ fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.25rem" }}>{result.nextAction}</p>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Immediate correction question</span>
+                <p style={{ ...serif, fontSize: "1.05rem", lineHeight: 1.6, color: "rgba(255,255,255,0.65)", marginTop: "0.25rem" }}>{result.correctionQuestion}</p>
               </div>
 
-              {/* Earned escalation */}
+              {/* 5. Next admissible move */}
+              <div style={{ border: `1px solid ${EMERALD}20`, backgroundColor: `${EMERALD}04`, padding: "1rem" }}>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${EMERALD}77` }}>Next admissible move</span>
+                <p style={{ fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.25rem" }}>{result.nextAdmissibleMove}</p>
+              </div>
+
+              {/* 6. Boundary statement — what this free signal does NOT include */}
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem" }}>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Earned escalation</span>
-                <p style={{ fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", marginTop: "0.25rem" }}>{result.earnedEscalation}</p>
+                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>What this signal does not include</span>
+                <p style={{ fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", marginTop: "0.25rem" }}>
+                  This is a first signal, not a full diagnosis. It classifies pressure, names one signal, and identifies the next admissible action. It does not produce a full dossier, write to governed memory, create a checkpoint, or generate a full intervention path. The paid assessment adds full domain analysis, contradiction mapping, pattern identification, obligation conflict map, execution integrity implication, personal decision constitution, dossier, memory, and escalation bridge where justified.
+                </p>
               </div>
 
-              {/* Save + next steps */}
-              <div className="space-y-3">
-                {!saved && (
-                  <button onClick={handleSave} style={{ width: "100%", padding: "12px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}>
-                    Save to decision memory
-                  </button>
-                )}
-                {saved && <p style={{ ...mono, fontSize: "7px", color: "rgba(110,231,183,0.50)", textAlign: "center" }}>Saved to decision record.</p>}
-
-                {result.exposureBand !== "LOW" && (
-                  <Link href={result.exposureBand === "CRITICAL" ? "/diagnostics/executive-reporting" : "/decision-instruments/decision-exposure-instrument"} className="flex items-center justify-between w-full" style={{ padding: "14px 18px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                    {result.exposureBand === "CRITICAL" ? "Enter Executive Reporting" : "Run Decision Exposure Instrument"}
-                    <ArrowRight style={{ width: 11, height: 11 }} />
+              {/* Paid continuation path — routes to relevant instrument */}
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Lock style={{ width: 12, height: 12, color: GOLD }} />
+                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                    Paid continuation
+                  </span>
+                </div>
+                <p className="text-sm leading-7 text-white/50">
+                  This signal is a first reading. To go deeper, use the appropriate instrument for your pressure level.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href={result.pressureBand === "CRITICAL" ? "/diagnostics/executive-reporting" : result.pressureBand === "HIGH" ? "/decision-instruments/escalation-readiness-scorecard" : result.pressureBand === "MODERATE" ? "/decision-instruments/decision-exposure-instrument" : "/diagnostics/purpose-alignment"}
+                    className="inline-flex items-center gap-1"
+                    style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: GOLD, textDecoration: "underline", textUnderlineOffset: 3 }}
+                  >
+                    {result.pressureBand === "CRITICAL" ? "Executive Reporting (£295)" : result.pressureBand === "HIGH" ? "Escalation Readiness Scorecard (£19)" : result.pressureBand === "MODERATE" ? "Decision Exposure Instrument (£29)" : "Purpose Alignment (free / £49)"}
+                    <ArrowRight style={{ width: 9, height: 9 }} />
                   </Link>
-                )}
-
-                <Link href="/diagnostics/fast" className="flex items-center justify-between w-full" style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)", ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
-                  Run full diagnostic instead
-                  <ArrowRight style={{ width: 10, height: 10 }} />
-                </Link>
+                </div>
               </div>
 
               {/* Caveat */}

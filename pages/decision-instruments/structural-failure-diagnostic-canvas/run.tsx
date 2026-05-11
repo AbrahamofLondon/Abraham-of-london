@@ -37,6 +37,13 @@ const StructuralFailureRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=structural-failure-diagnostic-canvas"
       nextStepLabel="Select intervention path"
       nextStepHref={nextHref}
+      valueReceipt={result ? [
+        { label: "Structural health", value: `${result.healthScore}/100` },
+        { label: "Failure pattern", value: result.failurePattern.replace(/_/g, " ").toLowerCase() },
+        { label: "Next admissible move", value: result.recommendation },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: "PDF dossier available" },
+      ] : undefined}
     >
       {!result ? (
         <StructuralFailureCanvasRunner onComplete={handleComplete} />

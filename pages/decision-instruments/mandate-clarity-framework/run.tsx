@@ -22,7 +22,15 @@ const MandateClarityRun: NextPage = () => {
   const nextHref = resultKey ? `/diagnostics/constitutional-diagnostic?instrumentResultId=${encodeURIComponent(resultKey)}` : "/diagnostics/constitutional-diagnostic";
 
   return (
-    <InstrumentShell title="Mandate Clarity Framework" slug="mandate-clarity-framework" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=mandate-clarity-framework" nextStepLabel="Test the organisational structure" nextStepHref={nextHref}>
+    <InstrumentShell title="Mandate Clarity Framework" slug="mandate-clarity-framework" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=mandate-clarity-framework" nextStepLabel="Test the organisational structure" nextStepHref={nextHref}
+      valueReceipt={result ? [
+        { label: "Authority type", value: `${result.authorityType} — ${result.clarityScore}/100` },
+        { label: "Decision risk", value: result.decisionRiskLevel.replace(/_/g, " ").toLowerCase() },
+        { label: "Next admissible move", value: result.recommendation },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: "PDF dossier available" },
+      ] : undefined}
+    >
       {!result ? <MandateClarityRunner onComplete={handleComplete} /> : (
         <div className="space-y-4">
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: result.authorityType === "DIRECT" ? "rgba(110,231,183,0.70)" : "#C9A96ECC" }}>

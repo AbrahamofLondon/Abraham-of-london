@@ -33,6 +33,13 @@ const GovernanceDriftRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=governance-drift-detector"
       nextStepLabel={result?.driftBand === "CRITICAL" ? "Review retained oversight" : "View oversight command"}
       nextStepHref={result?.driftBand === "CRITICAL" ? "/engagements/retained-oversight" : "/oversight"}
+      valueReceipt={result ? [
+        { label: "Classification", value: `${result.driftBand} — ${result.driftScore}/100` },
+        { label: "Drift pattern", value: result.driftPattern.replace(/_/g, " ").toLowerCase() },
+        { label: "Next admissible move", value: result.recommendation },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: "PDF dossier available" },
+      ] : undefined}
     >
       {!result ? (
         <GovernanceDriftDetectorRunner onComplete={handleComplete} />

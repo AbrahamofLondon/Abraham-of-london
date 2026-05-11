@@ -37,6 +37,13 @@ const EscalationReadinessRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=escalation-readiness-scorecard"
       nextStepLabel={result?.recommendedEscalation === "STRATEGY_ROOM" ? "Enter Strategy Room" : "Analyse institutional consequence"}
       nextStepHref={result?.recommendedEscalation === "STRATEGY_ROOM" ? "/strategy-room" : nextHref}
+      valueReceipt={result ? [
+        { label: "Classification", value: `${result.readinessBand.replace(/_/g, " ")} — ${result.readinessScore}/100` },
+        { label: "Escalation path", value: result.recommendedEscalation.replace(/_/g, " ").toLowerCase() },
+        { label: "Next admissible move", value: result.recommendation },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: "PDF dossier available" },
+      ] : undefined}
     >
       {!result ? (
         <EscalationReadinessRunner onComplete={handleComplete} />

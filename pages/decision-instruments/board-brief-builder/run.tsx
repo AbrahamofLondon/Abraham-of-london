@@ -33,6 +33,13 @@ const BoardBriefRun: NextPage = () => {
       pdfHref={resultKey ? `/api/pdf/decision-instrument-dossier?slug=board-brief-template&resultKey=${resultKey}` : undefined}
       nextStepLabel="View boardroom archive"
       nextStepHref="/boardroom"
+      valueReceipt={result ? [
+        { label: "Board readiness", value: `${result.briefReadiness.replace(/_/g, " ")} — ${result.readinessScore}/100` },
+        { label: "Decision posture", value: result.decisionPosture.replace(/_/g, " ").toLowerCase() },
+        { label: "Boardroom signal", value: result.boardroomReadinessSignal },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: resultKey ? "PDF dossier available" : "Complete to unlock dossier" },
+      ] : undefined}
     >
       {!result ? (
         <BoardBriefBuilderRunner onComplete={handleComplete} />

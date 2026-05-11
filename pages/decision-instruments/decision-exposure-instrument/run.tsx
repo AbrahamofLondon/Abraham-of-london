@@ -37,6 +37,13 @@ const DecisionExposureRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=decision-exposure-instrument"
       nextStepLabel="Analyse institutional consequence"
       nextStepHref={nextHref}
+      valueReceipt={result ? [
+        { label: "Classification", value: `${result.exposureBand} — ${result.exposureScore}/100` },
+        { label: "Weakest dimension", value: result.weakestDimension.replace(/_/g, " ").toLowerCase() },
+        { label: "Next admissible move", value: result.recommendation },
+        { label: "Memory entry", value: "Saved to governed memory" },
+        { label: "Dossier", value: "PDF dossier available" },
+      ] : undefined}
     >
       {!result ? (
         <DecisionExposureRunner onComplete={handleComplete} />

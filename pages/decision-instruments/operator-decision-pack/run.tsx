@@ -43,8 +43,16 @@ const OperatorPackRun: NextPage = () => {
   const complete = stage === "dossier";
   const nextHref = resultKey ? `/strategy-room?instrumentResultId=${encodeURIComponent(resultKey)}` : "/strategy-room";
 
+  const packReceipt = complete && exposure && mandate && intervention ? [
+    { label: "Exposure", value: `${exposure.exposureBand} — ${exposure.exposureScore}/100` },
+    { label: "Authority", value: `${mandate.authorityType} · clarity ${mandate.clarityScore}/100` },
+    { label: "Intervention path", value: intervention.recommendedPath.replace(/_/g, " ").toLowerCase() },
+    { label: "Escalation window", value: `${intervention.escalationWindow} days` },
+    { label: "Memory entry", value: "Saved to governed memory" },
+  ] : undefined;
+
   return (
-    <InstrumentShell title="Operator Decision Pack" slug="operator-decision-pack" completed={complete} nextStepLabel="Enter Strategy Room" nextStepHref={nextHref}>
+    <InstrumentShell title="Operator Decision Pack" slug="operator-decision-pack" completed={complete} nextStepLabel="Enter Strategy Room" nextStepHref={nextHref} valueReceipt={packReceipt}>
       {/* Progress */}
       <div className="flex gap-1 mb-6">
         {(["exposure", "mandate", "intervention", "dossier"] as Stage[]).map((s, i) => (
