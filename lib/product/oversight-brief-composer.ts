@@ -445,6 +445,61 @@ export async function composeOversightBrief(input: {
       };
     })(),
 
+    sovereignSignalRecurrence: (() => {
+      const sovereignSignalEvents = signals.filter(
+        (s) =>
+          s.type === "SOVEREIGN_SIGNAL_PATTERN_RECURRING" ||
+          s.type === "SOVEREIGN_SIGNAL_CRITICAL_ACTIVE" ||
+          s.type === "PATTERN_RECURRED",
+      );
+      if (sovereignSignalEvents.length === 0) return null;
+
+      const now = new Date().toISOString();
+      const currentCycleSignals = sovereignSignalEvents.map((s, i) => ({
+        signalId: s.id,
+        signalName: s.title,
+        severityBand: (
+          s.severity === "CRITICAL" ? "CRITICAL"
+          : s.severity === "HIGH" ? "ALERT"
+          : s.severity === "MEDIUM" ? "CONCERN"
+          : "WATCH"
+        ) as "CRITICAL" | "ALERT" | "CONCERN" | "WATCH",
+        evidencePosture: s.evidencePosture ?? "SYSTEM_INFERRED",
+        isRecurrence: s.type === "PATTERN_RECURRED",
+        firstObservedAt: s.createdAt ?? null,
+        lastObservedAt: s.createdAt ?? now,
+        cycleCount: s.type === "PATTERN_RECURRED" ? 2 : 1,
+        movement: (
+          s.type === "PATTERN_RECURRED" ? "INCREASING"
+          : s.severity === "CRITICAL" ? "UNRESOLVED"
+          : "FIRST_OCCURRENCE"
+        ) as "INCREASING" | "STABLE" | "REDUCING" | "UNRESOLVED" | "FIRST_OCCURRENCE",
+        retainedImplication: s.type === "PATTERN_RECURRED"
+          ? "This pattern has appeared across multiple retained oversight cycles. Structural root cause has not been addressed."
+          : "First observation in retained oversight record. Monitor across next cycle for movement confirmation.",
+        nextReviewObligation: s.type === "PATTERN_RECURRED"
+          ? `Verify whether the structural root for "${s.title}" has been addressed before the next oversight cycle closes.`
+          : `Track whether "${s.title}" recurs in the next cycle. If repeated, escalate to counsel review.`,
+      }));
+
+      const hasCriticalRecurrence = currentCycleSignals.some(
+        (s) => s.severityBand === "CRITICAL" && s.isRecurrence,
+      );
+
+      const recurringSummary = currentCycleSignals.filter((s) => s.isRecurrence);
+      const recurrenceSummary = recurringSummary.length > 0
+        ? `${recurringSummary.length} sovereign signal${recurringSummary.length !== 1 ? "s have" : " has"} recurred across oversight cycles. ${hasCriticalRecurrence ? "At least one critical recurrence is active and requires immediate review." : "Pattern movement is being tracked across retained cycles."}`
+        : `${currentCycleSignals.length} sovereign signal${currentCycleSignals.length !== 1 ? "s are" : " is"} active in this oversight cycle. First observation across retained oversight.`;
+
+      return {
+        totalDistinctSignals: currentCycleSignals.length,
+        currentCycleSignals,
+        recurrenceSummary,
+        hasCriticalRecurrence,
+        evidencePosture: "SYSTEM_INFERRED",
+      };
+    })(),
+
     // Decision losses — only from signals indicating realised loss
     decisionLosses: (() => {
       const lossSignals = signals.filter((s) => s.type === "OUTCOME_DETERIORATED" || s.type === "COMMITMENT_UNVERIFIED");

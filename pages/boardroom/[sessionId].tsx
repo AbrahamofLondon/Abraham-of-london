@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma.server";
 import { buildBoardroomDossier } from "@/lib/boardroom/dossier-builder";
 import type { BoardroomDossier } from "@/lib/boardroom/dossier-types";
 import { qualifiesForBoardroom } from "@/lib/constitution/boardroom-mode";
+import BoardroomSignalExposure from "@/components/sovereign/BoardroomSignalExposure";
 
 type PageProps = {
   qualified: boolean;
@@ -132,6 +133,13 @@ export default function BoardroomPage(props: PageProps) {
                     </p>
                   ))}
                 </section>
+
+                {/* Institutional Signal Exposure */}
+                {props.dossier.sovereignSignalAssessment && (
+                  <section style={{ marginTop: "4px" }}>
+                    <BoardroomSignalExposure assessment={props.dossier.sovereignSignalAssessment} />
+                  </section>
+                )}
               </div>
             </>
           )}

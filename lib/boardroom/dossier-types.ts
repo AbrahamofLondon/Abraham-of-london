@@ -5,6 +5,8 @@
  * Classification: RESTRICTED
  */
 
+import type { SovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
+
 export type DecisionPortfolioEntry = {
   decisionId: string;
   decisionText: string;
@@ -97,4 +99,6 @@ export type BoardroomDossier = {
   financialImpact: { totalCostOfDelay: number; totalRecovered: number; currency: string };
   recommendedBoardActions: BoardAction[];
   dataCompleteness: { score: number; missingFields: string[] };
+  /** Institutional signal exposure — public-safe sovereign signal assessment */
+  sovereignSignalAssessment?: SovereignSignalAssessment | null;
 };

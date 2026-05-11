@@ -19,6 +19,11 @@ import type {
   OutcomeEntry,
   BoardAction,
 } from "./dossier-types";
+import {
+  buildSovereignSignalAssessment,
+  buildInsufficientEvidenceAssessment,
+} from "@/lib/sovereign/sovereign-signal-public-dto";
+import { detectIntelligenceSignals } from "@/lib/sovereign/intelligence-signals";
 
 function defaultPeriod(): { from: Date; to: Date } {
   const to = new Date();
@@ -293,6 +298,34 @@ export async function buildBoardroomDossier(
     summaryParts.push(`${recommendedBoardActions.length} actions recommended for board attention.`);
   }
 
+  // 13. Sovereign signal assessment — derived from dossier evidence
+  // Input inference: breach count → failure modes, contradictions → narrative coherence,
+  // decisions → session count, critical actions → trajectory signal
+  const hasCriticalBreaches = riskContracts.some((c) => c.escalationLevel === "critical");
+  const hasAuthorityClearance = authorityMap.some((m) => m.isExecutive);
+  const sovereignSignalInput = {
+    posture: (hasCriticalBreaches ? "MISALIGNED" : contradictions.length > 3 ? "DRIFTING" : "ALIGNED") as "SOVEREIGN" | "ALIGNED" | "DRIFTING" | "MISALIGNED" | "DISORDERED",
+    authorityType: (hasCriticalBreaches && !hasAuthorityClearance ? "UNCLEAR" : "DELEGATED") as "DIRECT" | "DELEGATED" | "CONTESTED" | "UNCLEAR",
+    readinessTier: (hasCriticalBreaches ? "FRAGILE" : "ADVISORY") as "SOVEREIGN" | "ADVISORY" | "EXECUTION" | "FRAGILE",
+    trajectory: (hasCriticalBreaches ? "DETERIORATING" : openCommitments.length > 5 ? "STABLE" : "IMPROVING") as "IMPROVING" | "STABLE" | "DETERIORATING" | "COLLAPSING",
+    failureModeCount: breaches.length,
+    narrativeCoherence: contradictions.length === 0 ? 65 : Math.max(20, 65 - contradictions.length * 8),
+    interventionReadiness: hasCriticalBreaches ? 28 : openCommitments.length > 5 ? 40 : 55,
+    sessionCount: decisions.length,
+  };
+
+  let sovereignSignalAssessment = buildInsufficientEvidenceAssessment();
+  if (decisions.length >= 3 || breaches.length >= 1) {
+    const rawSignals = detectIntelligenceSignals(sovereignSignalInput);
+    if (rawSignals.length > 0) {
+      sovereignSignalAssessment = buildSovereignSignalAssessment(
+        rawSignals,
+        "SINGLE_SOURCE_INDICATED",
+        3,
+      );
+    }
+  }
+
   return {
     organisationId,
     generatedAt: new Date().toISOString(),
@@ -308,5 +341,6 @@ export async function buildBoardroomDossier(
     financialImpact: { totalCostOfDelay, totalRecovered, currency: "GBP" },
     recommendedBoardActions,
     dataCompleteness: { score: completenessScore, missingFields },
+    sovereignSignalAssessment,
   };
 }

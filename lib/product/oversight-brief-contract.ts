@@ -254,6 +254,42 @@ export type OversightBrief = {
     evidencePosture?: string;
   }>;
 
+  /**
+   * Sovereign signal recurrence tracking across oversight cycles.
+   * Null when no signals have been active or evidence is insufficient.
+   */
+  sovereignSignalRecurrence?: {
+    /** Total distinct sovereign signal patterns observed in this case's history */
+    totalDistinctSignals: number;
+    /** Signals observed in the current cycle */
+    currentCycleSignals: Array<{
+      signalId: string;
+      signalName: string;
+      severityBand: "CRITICAL" | "ALERT" | "CONCERN" | "WATCH";
+      evidencePosture: string;
+      /** Whether this signal has been observed in a prior cycle */
+      isRecurrence: boolean;
+      /** ISO date of first observation (or null if first time) */
+      firstObservedAt: string | null;
+      /** ISO date of most recent observation */
+      lastObservedAt: string;
+      /** Number of cycles in which this signal has appeared */
+      cycleCount: number;
+      /** Direction of recurrence across cycles */
+      movement: "INCREASING" | "STABLE" | "REDUCING" | "UNRESOLVED" | "FIRST_OCCURRENCE";
+      /** What recurrence means for retained engagement */
+      retainedImplication: string;
+      /** What the next oversight cycle must address regarding this signal */
+      nextReviewObligation: string;
+    }>;
+    /** Plain-language summary for the oversight brief */
+    recurrenceSummary: string;
+    /** Whether any critical signal has recurred across cycles */
+    hasCriticalRecurrence: boolean;
+    /** Evidence posture for the recurrence claim */
+    evidencePosture: string;
+  } | null;
+
   /** Required actions (string form for backward compatibility) */
   requiredActions: string[];
   /** Structured required actions with evidence basis, urgency, and owner */

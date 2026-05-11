@@ -13,6 +13,7 @@ import type { CrossOrgPatternIntelligence } from "@/lib/product/cross-org-patter
 import type { PortfolioScopeResolution } from "@/lib/product/portfolio-scope-resolver";
 import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
 import { recordSuppression } from "@/lib/product/suppression-ledger";
+import { portfolioPostureForPattern } from "@/lib/sovereign/sample-posture";
 
 export type PortfolioMemory = {
   generatedAt: string;
@@ -57,6 +58,14 @@ export type PortfolioMemory = {
     suppressedBelowThreshold: boolean;
     sourceLabel: string;
   } | null;
+
+  /** Sample posture for recurrence claims — governs what language is permitted */
+  recurrencePosture: {
+    permitted: boolean;
+    label: string;
+    caveat: string;
+    suppressionNotice: string | null;
+  };
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -262,14 +271,21 @@ export async function buildPortfolioMemory(input: {
   }
 
   // Only surface patterns with > 1 occurrence as "recurring"
-  const recurringPatterns = Array.from(patternMap.entries())
-    .filter(([, value]) => value.occurrences > 1)
-    .slice(0, 20)
-    .map(([key, value]) => ({
-      pattern: key,
-      occurrences: value.occurrences,
-      firstSeen: value.firstSeen,
-    }));
+  // Apply sample posture enforcement — recurrence claims require minimum evidence
+  const recurrencePosture = portfolioPostureForPattern({
+    totalRecords: diagnosticRecords.length,
+  });
+
+  const recurringPatterns = recurrencePosture.permitted
+    ? Array.from(patternMap.entries())
+        .filter(([, value]) => value.occurrences > 1)
+        .slice(0, 20)
+        .map(([key, value]) => ({
+          pattern: key,
+          occurrences: value.occurrences,
+          firstSeen: value.firstSeen,
+        }))
+    : [];
 
   const contradictionClasses = Array.from(contradictionMap.entries())
     .slice(0, 15)
@@ -523,5 +539,6 @@ export async function buildPortfolioMemory(input: {
     crossScopePatterns,
     portfolioScenarioPressure,
     portfolioStakeholderRecurrence,
+    recurrencePosture,
   };
 }

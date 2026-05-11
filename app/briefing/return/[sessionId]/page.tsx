@@ -40,6 +40,8 @@ import InstitutionalMemoryPanel from "@/components/sovereign/InstitutionalMemory
 import CohortIntelligencePanel from "@/components/sovereign/CohortIntelligencePanel";
 import SovereignPositionSummary from "@/components/sovereign/SovereignPositionSummary";
 import { BenchmarkReport } from "@/components/sovereign/BenchmarkStrip";
+import SignalPressurePanel from "@/components/strategy-room/SignalPressurePanel";
+import { deriveSignalPressure } from "@/lib/strategy-room/room-state-contract";
 import type { SovereignSignalPublicSummary } from "@/lib/sovereign/sovereign-signal-public-dto";
 import type { InstitutionalMemoryReport } from "@/lib/sovereign/institutional-memory";
 import type { CohortMatchResult } from "@/lib/sovereign/cohort-intelligence";
@@ -741,6 +743,17 @@ export default function ReturnBriefPage() {
                 />
               </div>
             )}
+
+            {/* Signal Pressure — how active signals govern the intervention posture */}
+            {(() => {
+              const pressure = deriveSignalPressure(sovereign.signals);
+              if (!pressure) return null;
+              return (
+                <div style={{ paddingBottom: "48px" }}>
+                  <SignalPressurePanel signalPressure={pressure} />
+                </div>
+              );
+            })()}
 
             {/* Benchmark Position */}
             {sovereign.benchmarks && (
