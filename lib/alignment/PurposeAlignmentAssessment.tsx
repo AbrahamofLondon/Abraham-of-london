@@ -5,14 +5,8 @@ import React from "react";
 import DualAxisInput from "@/components/diagnostics/DualAxisInput";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import ProgressIndicator from "@/components/diagnostics/ProgressIndicator";
-import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
-import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
-import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
-import NextLayerUnlockedPanel from "@/components/living/NextLayerUnlockedPanel";
-import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSummary";
-import GovernedActionPanel from "@/components/living/GovernedActionPanel";
-import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
-import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
+import PurposeAlignmentFreeResultSurface from "@/components/alignment/PurposeAlignmentFreeResultSurface";
+import PurposeAlignmentPaidResultSurface from "@/components/alignment/PurposeAlignmentPaidResultSurface";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import { PURPOSE_ALIGNMENT_QUESTIONS } from "@/lib/alignment/checklist";
 import { scorePurposeProfile } from "@/lib/alignment/scoring";
@@ -415,14 +409,6 @@ export default function PurposeAlignmentAssessment({ onScored, isPaidEntitled }:
   const currentPrompt = CONTEXT_STEPS[contextStep]!;
   const touchedCount = Object.values(touched).filter(Boolean).length;
   const allSignalTouched = touchedCount === PURPOSE_ALIGNMENT_QUESTIONS.length;
-  const contradictionEvidence =
-    result?.contradictions?.slice(0, 3).map((item) => item.evidence) ?? [];
-  const triggerInputs = [...(result?.rawResponses ?? [])]
-    .sort((a, b) => Math.abs(b.resonance - b.certainty) - Math.abs(a.resonance - a.certainty))
-    .slice(0, 3);
-  const strongestPressure = result?.domainProfiles
-    ? [...result.domainProfiles].sort((a, b) => a.percent - b.percent)[0]
-    : null;
 
   return (
     <div className="bg-[linear-gradient(180deg,#f7f3ec_0%,#fbfaf7_32%,#ffffff_100%)] px-4 py-8 sm:px-6 lg:px-8">
@@ -659,357 +645,33 @@ export default function PurposeAlignmentAssessment({ onScored, isPaidEntitled }:
 
         {phase === "result" && result ? (
           <section className={`grid gap-6 ${toneClassForStep(true)}`}>
-            <div className="rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
-              <div className="mx-auto max-w-[680px]">
-                <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">
-                  Personal decision audit
-                </div>
-                <h2 className="mt-4 font-serif text-4xl leading-tight text-neutral-950">
-                  {result.contradictions?.[0]
-                    ? `Your strongest contradiction is between ${result.contradictions[0].domains.join(" and ")}.`
-                    : `Your pattern: ${result.primaryPattern?.label ?? result.coherenceBand}`}
-                </h2>
-                <p className="mt-4 text-lg leading-8 text-neutral-800">
-                  This is not a personality result. It is a structural reading of the gap between what you say matters and what your behaviour actually serves.
-                </p>
-                {socialProof ? (
-                  <p className="mt-4 border-l-2 border-[#8a6a2f] pl-4 text-sm leading-7 text-neutral-700">
-                    {socialProof}
-                  </p>
-                ) : null}
-
-                <div className="mt-8">
-                  <ResultEmailCapture source="purpose_alignment" resultRef={result.createdAt} />
-                </div>
-
-                {anchorNarrative ? (
-                  <>
-                    <p className="mt-8 text-base leading-8 text-neutral-800">{anchorNarrative.opening}</p>
-                    <div className="mt-8 grid gap-6">
-                      <section>
-                        <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Condition</div>
-                        <p className="mt-2 text-base leading-8 text-neutral-800">{anchorNarrative.condition}</p>
-                      </section>
-                      <section>
-                        <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Why this was selected</div>
-                        <p className="mt-2 text-base leading-8 text-neutral-800">{anchorNarrative.whyItExists}</p>
-                      </section>
-                      <section>
-                        <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Pattern</div>
-                        <p className="mt-2 text-base leading-8 text-neutral-800">{anchorNarrative.pattern}</p>
-                      </section>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="mt-8 text-base leading-8 text-neutral-800">
-                      {result.reportNarrative?.classificationExplanation ?? result.narrative}
-                    </p>
-                    <p className="mt-4 text-base leading-8 text-neutral-800">
-                      {result.reportNarrative?.contradictionExplanation ??
-                        `The active tension is between "${contextAnswers.avoidedDecision}" and "${contextAnswers.competingObligation}".`}
-                    </p>
-                  </>
-                )}
-
-                <section className="mt-10">
-                  <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Cost of inaction</div>
-                  <div className="mt-4 grid gap-4">
-                    <p className="text-base leading-8 text-neutral-900">
-                      <span className="font-semibold">30 days</span> →{" "}
-                      {anchorNarrative?.costOfInaction.thirtyDays ?? "Friction compounds and the avoided decision begins governing your calendar."}
-                    </p>
-                    <p className="text-base leading-8 text-neutral-900">
-                      <span className="font-semibold">60 days</span> →{" "}
-                      {anchorNarrative?.costOfInaction.sixtyDays ?? "Identity drift appears because pressure keeps teaching the wrong operating rule."}
-                    </p>
-                    <p className="text-base leading-8 text-neutral-900">
-                      <span className="font-semibold">90 days</span> →{" "}
-                      {anchorNarrative?.costOfInaction.ninetyDays ?? "Structural damage settles in and the pattern becomes how decisions are made."}
-                    </p>
-                  </div>
-                </section>
-
-                {contextAnswers.competingObligation && (
-                  <section className="mt-10">
-                    <div className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Competing obligation</div>
-                    <p className="mt-2 text-base leading-8 text-neutral-800">
-                      You named this as the force pulling against your decision: &ldquo;{contextAnswers.competingObligation}&rdquo;
-                    </p>
-                    <p className="mt-2 text-sm leading-7 text-neutral-600">
-                      The system reads this as the likely reason your stated priority is not converting into action. Until this is renegotiated, removed, or directly confronted, the pattern will recur.
-                    </p>
-                  </section>
-                )}
-
-                <section className="mt-10">
-                  <div className="text-[11px] uppercase tracking-[0.24em] text-[#8a6a2f]">Your required correction</div>
-                  <p className="mt-2 text-base leading-8 text-neutral-900">
-                    {anchorNarrative?.requiredMove ?? result.firstAction ?? result.corrections[0]}
-                  </p>
-                </section>
-
-                <section className="mt-6 rounded-[20px] border border-emerald-200/30 bg-emerald-50/30 p-4">
-                  <div className="text-[10px] uppercase tracking-[0.22em] text-emerald-700/50">Checkpoint scheduled</div>
-                  <p className="mt-1 text-sm leading-6 text-neutral-700">
-                    In 7 days, the system will ask whether this correction happened. Your response will be recorded and will affect how the system governs this case.
-                  </p>
-                  <p className="mt-1 text-[9px] uppercase tracking-[0.18em] text-neutral-400">
-                    Visible in Decision Centre when due
-                  </p>
-                </section>
-
-                <section className="mt-6 rounded-[20px] border border-neutral-200 bg-neutral-50 p-4">
-                  <div className="text-[10px] uppercase tracking-[0.22em] text-neutral-500">The system will remember this</div>
-                  <p className="mt-1 text-sm leading-6 text-neutral-600">
-                    If this remains unresolved, your Return Brief will confront the gap between what you identified here and what actually changed. This is governed memory, not optional feedback.
-                  </p>
-                </section>
-
-                <details className="mt-10 rounded-[24px] border border-neutral-200 bg-[#fbfaf7] p-5">
-                  <summary className="cursor-pointer text-sm font-semibold text-neutral-900">
-                    How this was determined
-                  </summary>
-                  <div className="mt-5 grid gap-5 text-sm leading-7 text-neutral-700">
-                    <div>
-                      <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">You indicated</div>
-                      <ul className="mt-2 grid gap-2">
-                        <li>{contextAnswers.avoidedDecision}</li>
-                        <li>{contextAnswers.competingObligation}</li>
-                        <li>{contextAnswers.consequence}</li>
-                        {triggerInputs.map((item) => (
-                          <li key={item.questionId}>
-                            {item.statement} → resonance {item.resonance}/10, certainty {item.certainty}/10
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {contradictionEvidence.length > 0 ? (
-                      <div>
-                        <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">Contradiction mapping</div>
-                        <ul className="mt-2 grid gap-2">
-                          {contradictionEvidence.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : null}
-
-                    <div>
-                      <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">Pattern trigger explanation</div>
-                      <p className="mt-2">
-                        This combination typically produces {result.primaryPattern?.label ?? "the current pattern"} because{" "}
-                        {result.primaryPattern?.reasons.slice(0, 2).join(" ") ?? "the weakest domain and contradiction evidence align."}
-                      </p>
-                    </div>
-                  </div>
-                </details>
-
-                {analysisError ? (
-                  <div className="mt-10 rounded-[24px] border border-amber-300 bg-amber-50 p-5">
-                    <div className="text-[11px] uppercase tracking-[0.22em] text-amber-800">
-                      Analysis interrupted
-                    </div>
-                    <p className="mt-2 text-sm leading-7 text-neutral-800">
-                      We could not complete analysis. Your responses are saved. Retry?
-                    </p>
-                    <p className="mt-2 text-sm leading-7 text-neutral-700">{analysisError}</p>
-                    <button
-                      type="button"
-                      onClick={retryAnalysis}
-                      className="mt-4 rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white"
-                    >
-                      Retry analysis
-                    </button>
-                  </div>
-                ) : null}
-
-                <section className="mt-10 rounded-[24px] border border-neutral-200 bg-[#fbfaf7] p-5">
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-neutral-500">
-                    Save your result and track this pattern
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-neutral-700">
-                    Re-evaluate in 14 days after the first structural correction.
-                  </p>
-                  <div className="mt-4 grid gap-3">
-                    <input
-                      type="email"
-                      value={captureEmail}
-                      onChange={(event) => setCaptureEmail(event.target.value)}
-                      placeholder="Email for reassessment link"
-                      className="w-full rounded-full border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
-                    />
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        disabled={captureBusy || captureEmail.trim().length === 0}
-                        onClick={() => handleCapture(false)}
-                        className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-30"
-                      >
-                        Save with email
-                      </button>
-                      <button
-                        type="button"
-                        disabled={captureBusy}
-                        onClick={() => handleCapture(true)}
-                        className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700"
-                      >
-                        Continue anonymously
-                      </button>
-                    </div>
-                    {captureMessage ? (
-                      <p className="text-sm leading-7 text-neutral-700">{captureMessage}</p>
-                    ) : null}
-                  </div>
-                </section>
-
-                {/* ═══ LIVING INTELLIGENCE PANELS ═══ */}
-                <div className="mt-8 space-y-4">
-                  <IntelligenceGainPanel
-                    stage="Purpose Alignment"
-                    findings={[
-                      { label: "Pattern", value: result.primaryPattern?.label ?? "Pattern identified" },
-                      { label: "Coherence", value: result.coherenceBand ?? "—" },
-                      ...(result.firstAction ? [{ label: "First action", value: result.firstAction }] : []),
-                      ...(result.corrections?.length ? [{ label: "Corrections", value: `${result.corrections.length} identified` }] : []),
-                      ...(contextAnswers?.avoidedDecision ? [{ label: "Avoided", value: contextAnswers.avoidedDecision }] : []),
-                    ]}
-                  />
-
-                  <EvidenceStrengthMeter
-                    level="single_source"
-                    stagesCompleted={2}
-                    whatWouldStrengthen="Continue to Constitutional Diagnostic to reveal whether this internal conflict has structural consequences."
-                  />
-
-                  {result.firstAction && (
-                    <GovernedActionPanel
-                      requiredAction={result.firstAction}
-                      whyThisAction={result.primaryPattern?.reasons?.[0] ?? null}
-                      whatProvesProgress="Complete the first action within 14 days. The system tracks whether the alignment pattern improves or repeats."
-                      whatHappensNext="Constitutional Diagnostic reveals structural posture. Team Assessment reveals execution divergence."
-                    />
-                  )}
-
-                  <DecisionAdvantageSummary
-                    advantages={[
-                      ...(result.primaryPattern ? [{ label: "Internal authority conflict named", description: result.primaryPattern.label }] : []),
-                      ...(contextAnswers?.avoidedDecision ? [{ label: "Avoided decision surfaced", description: contextAnswers.avoidedDecision }] : []),
-                      ...(contextAnswers?.competingObligation ? [{ label: "Competing obligation identified", description: contextAnswers.competingObligation }] : []),
-                    ]}
-                    confidenceBand={result.coherenceBand === "SOVEREIGN" || result.coherenceBand === "ALIGNED" ? "high" : result.coherenceBand === "DRIFTING" ? "medium" : "low"}
-                    limitations={["Purpose alignment is self-assessed. Combine with team or constitutional assessment for structural validation."]}
-                  />
-
-                  <NextLayerUnlockedPanel
-                    currentStage="Purpose Alignment"
-                    nextStage={{
-                      name: "Constitutional Diagnostic",
-                      href: "/diagnostics/constitutional-diagnostic",
-                      whatItDetects: "Whether this internal conflict has structural consequences — governance posture, authority clarity, and institutional readiness.",
-                      whyContinue: "Purpose alignment reveals conviction vs obligation. Constitutional assessment reveals whether the structure supports or undermines your intent.",
-                    }}
-                    unresolvedItems={result.corrections?.slice(0, 2)}
-                  />
-
-                  <HumanReviewPrompt context="Purpose Alignment" />
-                  <GovernanceDisclosure context="purpose_alignment" compact />
-                </div>
-
-                {/* ═══ RECOMMENDED NEXT INSTRUMENT ═══ */}
-                <section className="mt-10">
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-[#8a6a2f]">Recommended next instrument</div>
-                  {(() => {
-                    const { recommendNextInstrument } = require("@/lib/commercial/recommendation-engine");
-                    const { ProductRecommendationCard } = require("@/components/commercial/ProductRecommendationCard");
-                    const weakest = result.weakestDomains?.[0] ?? null;
-                    const rec = recommendNextInstrument({
-                      sourceSurface: "personal_decision_audit" as const,
-                      weakestDomain: weakest,
-                      primaryPattern: result.primaryPattern?.id ?? null,
-                      competingObligationDominant: Boolean(contextAnswers.competingObligation && contextAnswers.competingObligation.length > 10),
-                      authorityGap: weakest === "identity" || weakest === "decision",
-                      interventionUnclear: weakest === "behaviour" || weakest === "environment",
-                      consequenceHigh: result.severity === "high" || result.severity === "critical",
-                      institutionalStakes: Boolean(contextAnswers.consequence && /(organisation|company|team|board|institution|staff|revenue)/i.test(contextAnswers.consequence)),
-                      evidenceInsufficient: result.percent < 30,
-                    });
-                    return rec ? (
-                      <div className="mt-3">
-                        <ProductRecommendationCard recommendation={rec} variant="compact" />
-                      </div>
-                    ) : (
-                      <p className="mt-2 text-base leading-8 text-neutral-800">
-                        The next move is to test this pattern against a wider operating system.
-                      </p>
-                    );
-                  })()}
-                </section>
-
-                {isPaid && paidResult ? (
-                  <section className="mt-6 rounded-[24px] border border-emerald-200/30 bg-emerald-50/30 p-5">
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-emerald-700/50">
-                      Paid result — full dossier
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-neutral-700">
-                      Your £49 Personal Decision Audit includes the full dossier with mandate reading,
-                      obligation conflict map, decision behaviour pattern, alignment drift warning,
-                      execution integrity implication, personal decision constitution, and next admissible move.
-                    </p>
-                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-neutral-600">
-                      <span>✓ Mandate clarity reading</span>
-                      <span>✓ Obligation conflict map</span>
-                      <span>✓ Decision behaviour pattern</span>
-                      <span>✓ Alignment drift warning</span>
-                      <span>✓ Execution integrity implication</span>
-                      <span>✓ Personal decision constitution</span>
-                      <span>✓ Next admissible move</span>
-                      <span>✓ Decision Centre memory</span>
-                    </div>
-                    {paidResult.corridorBridge.bridgeJustified && (
-                      <div className="mt-3 rounded-[12px] border border-amber-200/30 bg-amber-50/30 p-3">
-                        <div className="text-[10px] uppercase tracking-[0.18em] text-amber-700/60">
-                          Corridor bridge active
-                        </div>
-                        <p className="mt-1 text-xs leading-5 text-neutral-700">
-                          This result justifies escalation to {paidResult.corridorBridge.targetSurface.replace(/_/g, " ")}.
-                        </p>
-                      </div>
-                    )}
-                  </section>
-                ) : null}
-
-                <section className="mt-6">
-                  <div className="flex flex-wrap gap-3">
-                    <a
-                      href="/diagnostics/constitutional-diagnostic"
-                      className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white"
-                    >
-                      Constitutional Diagnostic
-                    </a>
-                    {isPaid && assessmentId ? (
-                      <a
-                        href={`/.netlify/functions/purpose-alignment-paid-dossier?assessmentId=${encodeURIComponent(assessmentId)}`}
-                        className="rounded-full border border-emerald-600 px-5 py-2.5 text-sm font-medium text-emerald-800"
-                      >
-                        Download full dossier (PDF)
-                      </a>
-                    ) : (
-                      <a
-                        href={`/.netlify/functions/purpose-alignment-report?ts=${encodeURIComponent(result.createdAt)}`}
-                        className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700"
-                      >
-                        Download PDF report
-                      </a>
-                    )}
-                  </div>
-                  <div className="mt-4">
-                    <ResultEmailCapture source="purpose_alignment" resultRef={result.createdAt} />
-                  </div>
-                </section>
-              </div>
-            </div>
+            {isPaid && paidResult ? (
+              <PurposeAlignmentPaidResultSurface
+                result={result}
+                paidResult={paidResult}
+                contextAnswers={contextAnswers}
+                anchorNarrative={anchorNarrative}
+                socialProof={socialProof}
+                assessmentId={assessmentId}
+                analysisError={analysisError}
+                retryAnalysis={retryAnalysis}
+              />
+            ) : (
+              <PurposeAlignmentFreeResultSurface
+                result={result}
+                contextAnswers={contextAnswers}
+                anchorNarrative={anchorNarrative}
+                socialProof={socialProof}
+                captureEmail={captureEmail}
+                onCaptureEmailChange={setCaptureEmail}
+                onCaptureWithEmail={() => handleCapture(false)}
+                onCaptureAnonymous={() => handleCapture(true)}
+                captureBusy={captureBusy}
+                captureMessage={captureMessage}
+                analysisError={analysisError}
+                retryAnalysis={retryAnalysis}
+              />
+            )}
           </section>
         ) : null}
       </div>

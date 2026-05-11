@@ -271,6 +271,8 @@ const paFiles = [
   "lib/alignment/PurposeAlignmentAssessment.tsx",
   "lib/commercial/catalog.ts",
   "app/api/purpose-alignment/assessments/route.ts",
+  "components/alignment/PurposeAlignmentFreeResultSurface.tsx",
+  "components/alignment/PurposeAlignmentPaidResultSurface.tsx",
 ];
 for (const pattern of forbiddenPatterns) {
   let found = false;
@@ -281,6 +283,91 @@ for (const pattern of forbiddenPatterns) {
     }
   }
   check(!found, `No "${pattern}" in PA files`, `Found forbidden language: ${pattern}`);
+}
+
+// 10. Free result surface
+console.log("\n🆓 Free Result Surface");
+check(
+  fileExists("components/alignment/PurposeAlignmentFreeResultSurface.tsx"),
+  "Free result surface component exists",
+  "Create components/alignment/PurposeAlignmentFreeResultSurface.tsx",
+);
+check(
+  fileContains("components/alignment/PurposeAlignmentFreeResultSurface.tsx", "checkout/personal-decision-audit"),
+  "Free result surface has paid continuation path",
+  "Paid CTA must link to /checkout/personal-decision-audit",
+);
+check(
+  fileContains("components/alignment/PurposeAlignmentFreeResultSurface.tsx", "Continue to the governed assessment"),
+  "Free result surface uses correct CTA language",
+  "CTA must say 'Continue to the governed assessment', not 'Upgrade'",
+);
+// Verify free surface does not reference paid-only identifiers
+const FREE_SURFACE_PAID_VIOLATIONS = [
+  "PurposeAlignmentPaidResult",
+  "paidResult.",
+  "mandateReading.",
+  "obligationConflictMap.",
+  "personalDecisionConstitution.",
+  "pdfDossier.",
+  "corridorBridge.",
+  "decisionCentreMemory.",
+];
+for (const identifier of FREE_SURFACE_PAID_VIOLATIONS) {
+  check(
+    !fileContains("components/alignment/PurposeAlignmentFreeResultSurface.tsx", identifier),
+    `Free surface does not render paid field: ${identifier}`,
+    `Found paid-only field "${identifier}" in free result surface — move to paid surface only`,
+  );
+}
+
+// 11. Paid result surface
+console.log("\n💎 Paid Result Surface");
+check(
+  fileExists("components/alignment/PurposeAlignmentPaidResultSurface.tsx"),
+  "Paid result surface component exists",
+  "Create components/alignment/PurposeAlignmentPaidResultSurface.tsx",
+);
+// All 10 deliverable fields must be rendered
+const PAID_DELIVERABLE_FIELDS = [
+  "mandateReading",
+  "obligationConflictMap",
+  "decisionBehaviourPattern",
+  "alignmentDriftWarning",
+  "executionIntegrityImplication",
+  "personalDecisionConstitution",
+  "nextAdmissibleMove",
+  "decisionCentreMemory",
+  "pdfDossier",
+  "corridorBridge",
+];
+for (const field of PAID_DELIVERABLE_FIELDS) {
+  check(
+    fileContains("components/alignment/PurposeAlignmentPaidResultSurface.tsx", field),
+    `Paid surface renders deliverable: ${field}`,
+    `${field} not found in paid result surface — all 10 deliverables must be rendered`,
+  );
+}
+check(
+  fileContains("components/alignment/PurposeAlignmentPaidResultSurface.tsx", "Evidence posture") ||
+  fileContains("components/alignment/PurposeAlignmentPaidResultSurface.tsx", "self-reported"),
+  "Paid surface has evidence caveat",
+  "Evidence posture/caveat section missing from paid result surface",
+);
+check(
+  fileContains("components/alignment/PurposeAlignmentPaidResultSurface.tsx", "Your paid assessment produced"),
+  "Paid surface shows value receipt",
+  "Value receipt ('Your paid assessment produced') not found in paid result surface",
+);
+// Verify no upgrade language in surface files
+const noUpgradeLanguage = ["Upgrade to", "Unlock premium", "Get full access", "Discover your purpose"];
+for (const phrase of noUpgradeLanguage) {
+  check(
+    !fileContains("components/alignment/PurposeAlignmentFreeResultSurface.tsx", phrase) &&
+    !fileContains("components/alignment/PurposeAlignmentPaidResultSurface.tsx", phrase),
+    `No "${phrase}" in surface files`,
+    `Found upgrade language "${phrase}" — use 'Continue to the governed assessment' instead`,
+  );
 }
 
 console.log(`\n${"=".repeat(50)}`);
