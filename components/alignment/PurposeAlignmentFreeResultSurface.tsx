@@ -64,6 +64,35 @@ export default function PurposeAlignmentFreeResultSurface({
   analysisError,
   retryAnalysis,
 }: Props) {
+  const [copied, setCopied] = React.useState(false);
+
+  function buildShareText() {
+    const band = result.coherenceBand ?? "—";
+    const pattern = result.primaryPattern?.label ?? "pattern identified";
+    const lines = [
+      `Personal Decision Audit — ${pattern} (${band})`,
+      "",
+      result.primaryPattern?.consequence ?? "",
+      "",
+      "Assessed at Abraham of London · abrahamoflondon.com/diagnostics/purpose-alignment",
+      "Self-reported inputs only — no guaranteed outcome",
+    ];
+    return lines.filter(Boolean).join("\n");
+  }
+
+  async function handleShare() {
+    const text = buildShareText();
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ text, title: "Personal Decision Audit", url: "https://abrahamoflondon.com/diagnostics/purpose-alignment" });
+        return;
+      } catch { /* fall through to clipboard */ }
+    }
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  }
+
   const contradictionEvidence =
     result.contradictions?.slice(0, 3).map((c) => c.evidence) ?? [];
   const triggerInputs = [...(result.rawResponses ?? [])]
@@ -293,6 +322,20 @@ export default function PurposeAlignmentFreeResultSurface({
             )}
           </div>
         </section>
+
+        {/* Share result */}
+        <div className="mt-6 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[10px] uppercase tracking-[0.20em] text-neutral-500 transition hover:border-neutral-300 hover:text-neutral-800"
+          >
+            {copied ? "Copied" : "Copy result summary"}
+          </button>
+          <span className="text-[9px] uppercase tracking-[0.16em] text-neutral-400">
+            Self-reported · No outcome guaranteed
+          </span>
+        </div>
 
         {/* Recommended next instrument */}
         <section className="mt-10">
