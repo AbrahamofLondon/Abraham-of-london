@@ -11,7 +11,7 @@
  */
 
 import * as React from "react";
-import type { IntelligenceSignal } from "@/lib/sovereign/intelligence-signals";
+import type { SovereignSignalPublicSummary } from "@/lib/sovereign/sovereign-signal-public-dto";
 import type { PercentileResult } from "@/lib/sovereign/intelligence-commons";
 import type { CohortMatchResult } from "@/lib/sovereign/cohort-intelligence";
 
@@ -63,16 +63,16 @@ const POSTURE_CONFIG = {
 type PostureKey = keyof typeof POSTURE_CONFIG;
 
 type Props = {
-  signals: IntelligenceSignal[];
+  signals: SovereignSignalPublicSummary[];
   benchmarks: Record<string, PercentileResult> | null;
   cohort: CohortMatchResult | null;
   trajectory: string;
   commonsSize: number;
 };
 
-function derivePosture(signals: IntelligenceSignal[], trajectory: string): PostureKey {
-  const hasCritical = signals.some((s) => s.severity === "CRITICAL");
-  const alertCount = signals.filter((s) => s.severity === "ALERT").length;
+function derivePosture(signals: SovereignSignalPublicSummary[], trajectory: string): PostureKey {
+  const hasCritical = signals.some((s) => s.severityBand === "CRITICAL");
+  const alertCount = signals.filter((s) => s.severityBand === "ALERT").length;
   const traj = trajectory.toUpperCase();
 
   if (hasCritical && traj === "DETERIORATING") return "DISORDERED";
@@ -85,7 +85,7 @@ function derivePosture(signals: IntelligenceSignal[], trajectory: string): Postu
 }
 
 function synthesisStatement(
-  signals: IntelligenceSignal[],
+  signals: SovereignSignalPublicSummary[],
   benchmarks: Record<string, PercentileResult> | null,
   cohort: CohortMatchResult | null,
   posture: PostureKey,
@@ -93,17 +93,17 @@ function synthesisStatement(
   const parts: string[] = [];
 
   // Signal synthesis
-  const criticals = signals.filter((s) => s.severity === "CRITICAL");
-  const alerts = signals.filter((s) => s.severity === "ALERT");
-  const concerns = signals.filter((s) => s.severity === "CONCERN");
+  const criticals = signals.filter((s) => s.severityBand === "CRITICAL");
+  const alerts = signals.filter((s) => s.severityBand === "ALERT");
+  const concerns = signals.filter((s) => s.severityBand === "CONCERN");
 
   if (criticals.length > 0) {
     parts.push(
-      `The diagnostic has identified ${criticals.length} critical pattern${criticals.length > 1 ? "s" : ""} — ${criticals.map((s) => s.name).join(" and ")}. These are configurations we track because they have consistent, documented trajectories. Left unaddressed, critical patterns narrow the window of intervention.`,
+      `The diagnostic has identified ${criticals.length} critical pattern${criticals.length > 1 ? "s" : ""} — ${criticals.map((s) => s.signalName).join(" and ")}. These are configurations we track because they have consistent, documented trajectories. Left unaddressed, critical patterns narrow the window of intervention.`,
     );
   } else if (alerts.length > 0) {
     parts.push(
-      `${alerts.length} alert-level pattern${alerts.length > 1 ? "s are" : " is"} active — ${alerts.map((s) => s.name).join(alerts.length > 2 ? ", " : " and ")}. Alert patterns are present in the dataset at a rate that makes them structurally significant rather than incidental.`,
+      `${alerts.length} alert-level pattern${alerts.length > 1 ? "s are" : " is"} active — ${alerts.map((s) => s.signalName).join(alerts.length > 2 ? ", " : " and ")}. Alert patterns are present in the dataset at a rate that makes them structurally significant rather than incidental.`,
     );
   } else if (concerns.length > 0) {
     parts.push(
@@ -251,7 +251,7 @@ export default function SovereignPositionSummary({
           }}
         >
           {(["CRITICAL", "ALERT", "CONCERN", "WATCH"] as const).map((sev) => {
-            const count = signals.filter((s) => s.severity === sev).length;
+            const count = signals.filter((s) => s.severityBand === sev).length;
             if (count === 0) return null;
             const colors = {
               CRITICAL: "rgba(252,165,165,0.65)",

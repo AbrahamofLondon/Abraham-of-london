@@ -7,6 +7,9 @@ import {
   summariseSignals,
   type SignalInput,
 } from "@/lib/sovereign/intelligence-signals";
+import {
+  buildSovereignSignalAssessment,
+} from "@/lib/sovereign/sovereign-signal-public-dto";
 
 function num(v: unknown, fallback = 0): number {
   if (typeof v === "number" && Number.isFinite(v)) return v;
@@ -46,18 +49,22 @@ export async function POST(req: NextRequest) {
       sessionCount: typeof body.sessionCount === "number" ? body.sessionCount : undefined,
     };
 
-    const signals = detectIntelligenceSignals(input);
+    const rawSignals = detectIntelligenceSignals(input);
     const primary = detectPrimarySignal(input);
-    const summary = summariseSignals(signals);
+    const summary = summariseSignals(rawSignals);
+
+    // Build public-safe DTO — raw signals must not cross the API boundary
+    const assessment = buildSovereignSignalAssessment(rawSignals, "SINGLE_SOURCE_INDICATED");
 
     return NextResponse.json({
       ok: true,
-      signals,
-      primarySignal: primary,
-      summary,
-      count: signals.length,
-      hasCritical: signals.some((s) => s.severity === "CRITICAL"),
-      hasAlert: signals.some((s) => s.severity === "ALERT"),
+      assessment,
+      signals: assessment.signals,  // public DTO shapes only
+      primarySignal: primary ? primary.id : null,
+      summary: assessment.executiveSummary || summary,
+      count: assessment.signals.length,
+      hasCritical: assessment.highestSeverity === "CRITICAL",
+      hasAlert: assessment.highestSeverity === "ALERT" || assessment.highestSeverity === "CRITICAL",
     });
   } catch (err) {
     return NextResponse.json(

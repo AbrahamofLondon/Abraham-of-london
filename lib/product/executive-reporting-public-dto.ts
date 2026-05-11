@@ -5,6 +5,7 @@ import { assessAdvantageTerrain } from "@/lib/diagnostics/advantage-terrain";
 import type { ConsequenceProjection } from "@/lib/diagnostics/predictive-consequence";
 import { projectConsequence } from "@/lib/diagnostics/predictive-consequence";
 import type { GovernedMemoryItem } from "@/lib/product/governed-memory-contract";
+import type { SovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
 import type { FieldProvenance } from "@/lib/product/field-provenance-contract";
 import {
   createFieldProvenance,
@@ -152,6 +153,13 @@ export type ExecutiveReportingPublicResult = {
     narrative: string[];
     caveat: string;
   } | null;
+  /**
+   * Public-safe sovereign signal assessment surfaced at the ER level.
+   * Null when evidence is insufficient or the signal layer was not invoked.
+   * Raw IntelligenceSignal data is never present — only the mapped DTO.
+   */
+  sovereignSignals: SovereignSignalAssessment | null;
+
   boardroom: {
     qualified: boolean;
     reason: string | null;
@@ -199,6 +207,8 @@ export type ExecutiveReportingPublicInput = {
     reason?: string | null;
     dossier?: AnyRecord | null;
   } | null;
+  /** Pre-computed public-safe sovereign signal assessment. Pass null when not available. */
+  sovereignSignals?: SovereignSignalAssessment | null;
 };
 
 function s(value: unknown, fallback = ""): string {
@@ -696,6 +706,7 @@ export function toExecutiveReportingPublicResult(
     consequenceProjection,
     advantagePath,
     aiConsequenceSummary: buildAiConsequenceSummary(aiAdjustedConsequence),
+    sovereignSignals: input.sovereignSignals ?? null,
     boardroom,
   };
 }

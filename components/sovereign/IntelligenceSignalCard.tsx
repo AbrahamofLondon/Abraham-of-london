@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import type { IntelligenceSignal } from "@/lib/sovereign/intelligence-signals";
+import type { SovereignSignalPublicSummary } from "@/lib/sovereign/sovereign-signal-public-dto";
 
 const SEVERITY_PALETTE = {
   CRITICAL: {
@@ -40,7 +40,7 @@ const SERIF: React.CSSProperties = {
 };
 
 type Props = {
-  signal: IntelligenceSignal;
+  signal: SovereignSignalPublicSummary;
   /** Show the full narrative. Default true. */
   expanded?: boolean;
   /** Show the outcomes table. Default true when expanded. */
@@ -53,7 +53,7 @@ export default function IntelligenceSignalCard({
   showOutcomes = true,
 }: Props) {
   const [open, setOpen] = React.useState(expanded);
-  const palette = SEVERITY_PALETTE[signal.severity];
+  const palette = SEVERITY_PALETTE[signal.severityBand];
 
   return (
     <div
@@ -95,7 +95,7 @@ export default function IntelligenceSignalCard({
                   flexShrink: 0,
                 }}
               />
-              {signal.severity}
+              {signal.severityBand}
             </span>
             <span
               style={{
@@ -106,7 +106,7 @@ export default function IntelligenceSignalCard({
                 color: "rgba(255,255,255,0.18)",
               }}
             >
-              · {signal.prevalencePercent}% prevalence
+              · {signal.prevalenceLabel}
             </span>
           </div>
 
@@ -120,7 +120,7 @@ export default function IntelligenceSignalCard({
               margin: 0,
             }}
           >
-            {signal.name}
+            {signal.signalName}
           </p>
 
           <p
@@ -131,7 +131,7 @@ export default function IntelligenceSignalCard({
               marginTop: "4px",
             }}
           >
-            {signal.tag}
+            {signal.confidenceBand === "CONFIRMED" ? "Confirmed pattern" : signal.confidenceBand === "INDICATED" ? "Indicated pattern" : signal.evidencePosture.replace(/_/g, " ").toLowerCase()}
           </p>
         </div>
 
@@ -159,45 +159,34 @@ export default function IntelligenceSignalCard({
               color: "rgba(255,255,255,0.62)",
             }}
           >
-            {signal.narrative}
+            {signal.narrativeSummary}
           </p>
 
-          {/* Outcomes table */}
-          {showOutcomes && signal.outcomes.length > 0 && (
-            <div style={{ marginTop: "18px", display: "grid", gap: "6px" }}>
-              {signal.outcomes.map((outcome, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: "12px",
-                    borderBottom: i < signal.outcomes.length - 1 ? "1px solid rgba(255,255,255,0.04)" : undefined,
-                    paddingBottom: i < signal.outcomes.length - 1 ? "6px" : undefined,
-                  }}
-                >
-                  <span style={{ fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
-                    {outcome.label}
-                    {outcome.condition && (
-                      <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "12px" }}>
-                        {" "}({outcome.condition})
-                      </span>
-                    )}
-                  </span>
-                  <span
-                    style={{
-                      ...MONO,
-                      fontSize: "11px",
-                      letterSpacing: "0.04em",
-                      color: palette.tag,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {outcome.displayValue ?? `${outcome.percentage}%`}
-                  </span>
-                </div>
-              ))}
+          {/* Outcome distribution */}
+          {showOutcomes && signal.outcomeDistributionSummary && (
+            <div
+              style={{
+                marginTop: "14px",
+                padding: "10px 12px",
+                background: "rgba(255,255,255,0.02)",
+                borderLeft: `1px solid rgba(255,255,255,0.06)`,
+              }}
+            >
+              <p
+                style={{
+                  ...MONO,
+                  fontSize: "8px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.22)",
+                  marginBottom: "6px",
+                }}
+              >
+                Observed institutional signal
+              </p>
+              <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
+                {signal.outcomeDistributionSummary}
+              </p>
             </div>
           )}
 
@@ -223,13 +212,54 @@ export default function IntelligenceSignalCard({
               Key differentiator
             </p>
             <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>
-              {signal.differentiator}
+              {signal.differentiatorSummary}
             </p>
           </div>
 
+          {/* Admissible next move */}
+          {signal.admissibleNextMove && (
+            <div
+              style={{
+                marginTop: "12px",
+                padding: "10px 12px",
+                background: "rgba(201,169,110,0.04)",
+                borderLeft: "1px solid rgba(201,169,110,0.18)",
+              }}
+            >
+              <p
+                style={{
+                  ...MONO,
+                  fontSize: "8px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "rgba(201,169,110,0.45)",
+                  marginBottom: "5px",
+                }}
+              >
+                Admissible next move
+              </p>
+              <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
+                {signal.admissibleNextMove}
+              </p>
+            </div>
+          )}
+
+          {/* Sample caveat */}
+          <p
+            style={{
+              ...MONO,
+              fontSize: "8px",
+              lineHeight: 1.55,
+              color: "rgba(255,255,255,0.18)",
+              marginTop: "14px",
+            }}
+          >
+            {signal.sampleCaveat}
+          </p>
+
           {/* Brief link */}
           {signal.briefSlug && (
-            <div style={{ marginTop: "14px" }}>
+            <div style={{ marginTop: "10px" }}>
               <Link
                 href={signal.briefSlug}
                 style={{

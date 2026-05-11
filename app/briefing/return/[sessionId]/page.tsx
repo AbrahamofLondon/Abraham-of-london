@@ -40,13 +40,13 @@ import InstitutionalMemoryPanel from "@/components/sovereign/InstitutionalMemory
 import CohortIntelligencePanel from "@/components/sovereign/CohortIntelligencePanel";
 import SovereignPositionSummary from "@/components/sovereign/SovereignPositionSummary";
 import { BenchmarkReport } from "@/components/sovereign/BenchmarkStrip";
-import type { IntelligenceSignal } from "@/lib/sovereign/intelligence-signals";
+import type { SovereignSignalPublicSummary } from "@/lib/sovereign/sovereign-signal-public-dto";
 import type { InstitutionalMemoryReport } from "@/lib/sovereign/institutional-memory";
 import type { CohortMatchResult } from "@/lib/sovereign/cohort-intelligence";
 import type { PercentileResult } from "@/lib/sovereign/intelligence-commons";
 
 type SovereignIntelligence = {
-  signals: IntelligenceSignal[];
+  signals: SovereignSignalPublicSummary[];
   signalSummary: string;
   memory: InstitutionalMemoryReport | null;
   cohort: CohortMatchResult | null;

@@ -4,6 +4,7 @@ import type { ControlRoomState } from "@/lib/product/control-room-contract";
 import type { OversightSignal } from "@/lib/product/retainer-oversight-contract";
 import type { BuyerVisibleCadencePosture } from "@/lib/product/retained-cadence-contract";
 import { summarizeAssessmentEvidenceText } from "@/lib/product/evidence-capture-contract";
+import type { SovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
 
 function severityFromCost(amount: number): OversightSignal["severity"] {
   if (amount >= 50000) return "CRITICAL";
@@ -44,6 +45,11 @@ export function buildOversightSignals(input: {
     deteriorationSignals: number;
   } | null;
   retainedCadence?: BuyerVisibleCadencePosture | null;
+  /**
+   * Public-safe sovereign signal assessment — pre-computed by the engine.
+   * Raw IntelligenceSignal objects must never be passed here.
+   */
+  sovereignSignals?: SovereignSignalAssessment | null;
   now?: Date | string;
 }): OversightSignal[] {
   const createdAt = new Date(input.now ?? new Date()).toISOString();
@@ -329,6 +335,53 @@ export function buildOversightSignals(input: {
         explanation: `${item.title} has ${item.unresolvedCommitments} unresolved commitment${(item.unresolvedCommitments ?? 0) === 1 ? "" : "s"} with verification criteria that have not been confirmed.`,
         recommendedAction: "Confirm whether committed actions were completed, blocked, or abandoned.",
         createdAt,
+      });
+    }
+  }
+
+  // ── SOVEREIGN SIGNAL OVERSIGHT TRACKING ──
+  const sovereignAssessment = input.sovereignSignals;
+  if (sovereignAssessment && sovereignAssessment.status === "ASSESSED") {
+    const criticalSignals = sovereignAssessment.signals.filter((s) => s.severityBand === "CRITICAL");
+    const alertSignals = sovereignAssessment.signals.filter((s) => s.severityBand === "ALERT");
+
+    if (criticalSignals.length > 0) {
+      signals.push({
+        id: "sovereign:critical-active",
+        type: "SOVEREIGN_SIGNAL_CRITICAL_ACTIVE",
+        severity: "CRITICAL",
+        title: `${criticalSignals.length} critical institutional signal${criticalSignals.length > 1 ? "s" : ""} active`,
+        explanation: `The sovereign intelligence layer has detected ${criticalSignals.length} critical pattern${criticalSignals.length > 1 ? "s" : ""}: ${criticalSignals.map((s) => s.signalName).join(", ")}. ${sovereignAssessment.executiveSummary}`,
+        recommendedAction: criticalSignals[0]?.admissibleNextMove ?? "Immediate structural review is warranted. Consult the Sovereign Intelligence brief.",
+        createdAt,
+        sourceLabel: "Sovereign Intelligence Layer",
+        evidencePosture: sovereignAssessment.assessmentEvidencePosture,
+      });
+    } else if (alertSignals.length >= 2) {
+      signals.push({
+        id: "sovereign:alert-pattern",
+        type: "SOVEREIGN_SIGNAL_PATTERN_RECURRING",
+        severity: "HIGH",
+        title: `${alertSignals.length} alert-level institutional patterns active`,
+        explanation: `${sovereignAssessment.executiveSummary} Patterns: ${alertSignals.map((s) => s.signalName).join(", ")}.`,
+        recommendedAction: alertSignals[0]?.admissibleNextMove ?? "Review the active alert-level institutional patterns with the diagnostic corridor.",
+        createdAt,
+        sourceLabel: "Sovereign Intelligence Layer",
+        evidencePosture: sovereignAssessment.assessmentEvidencePosture,
+      });
+    }
+
+    if (sovereignAssessment.withheldCount > 0) {
+      signals.push({
+        id: "sovereign:withheld-patterns",
+        type: "SOVEREIGN_SIGNAL_PATTERN_RECURRING",
+        severity: "MEDIUM",
+        title: `${sovereignAssessment.withheldCount} institutional pattern${sovereignAssessment.withheldCount > 1 ? "s" : ""} withheld from surface`,
+        explanation: `${sovereignAssessment.withheldCount} pattern${sovereignAssessment.withheldCount > 1 ? "s were" : " was"} detected but not surfaced due to evidence posture, role limits, or thin evidence. Review cadence should account for these withheld patterns.`,
+        recommendedAction: "Increase diagnostic evidence before the next oversight cycle. Withheld patterns require additional session data to surface.",
+        createdAt,
+        sourceLabel: "Sovereign Intelligence Layer",
+        evidencePosture: sovereignAssessment.assessmentEvidencePosture,
       });
     }
   }

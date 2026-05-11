@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { IntelligenceSignal } from "@/lib/sovereign/intelligence-signals";
+import type { SovereignSignalPublicSummary } from "@/lib/sovereign/sovereign-signal-public-dto";
 import IntelligenceSignalCard from "./IntelligenceSignalCard";
 
 const MONO: React.CSSProperties = {
@@ -9,7 +9,7 @@ const MONO: React.CSSProperties = {
 };
 
 type Props = {
-  signals: IntelligenceSignal[];
+  signals: SovereignSignalPublicSummary[];
   summary?: string;
   /** Expand the first (highest-severity) signal by default. */
   expandFirst?: boolean;
@@ -38,8 +38,8 @@ export default function IntelligenceSignalPanel({
     );
   }
 
-  const critical = signals.filter((s) => s.severity === "CRITICAL").length;
-  const alerts = signals.filter((s) => s.severity === "ALERT").length;
+  const critical = signals.filter((s) => s.severityBand === "CRITICAL").length;
+  const alerts = signals.filter((s) => s.severityBand === "ALERT").length;
 
   return (
     <div>
@@ -76,7 +76,7 @@ export default function IntelligenceSignalPanel({
       <div style={{ display: "grid", gap: "10px" }}>
         {signals.map((signal, i) => (
           <IntelligenceSignalCard
-            key={signal.id}
+            key={signal.signalId}
             signal={signal}
             expanded={expandFirst && i === 0}
           />

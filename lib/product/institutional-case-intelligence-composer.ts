@@ -16,6 +16,7 @@
 
 // Server-only module
 import type { DecisionRole } from "@/lib/access/role-contract";
+import type { SovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
 import type { KernelSafeSummary } from "@/lib/product/kernel-safe-summary";
 import type {
   StakeholderPressureSummary,
@@ -90,6 +91,14 @@ export type InstitutionalCaseIntelligence = {
   decisionRecordSummary: KernelSafeSummary | null;
   corridorStatus: CorridorSurfaceStatus;
   suppressionSummary: SuppressionSummaryView;
+
+  /**
+   * Public-safe sovereign signal assessment — pre-mapped by the engine.
+   * Raw IntelligenceSignal objects are never included here.
+   * Null when evidence is insufficient or signal engine was not invoked.
+   */
+  sovereignSignals: SovereignSignalAssessment | null;
+
   generatedAt: string;
   sourceLabels: string[];
 };
@@ -395,6 +404,7 @@ export async function composeInstitutionalCaseIntelligence(
     decisionRecordSummary,
     corridorStatus,
     suppressionSummary,
+    sovereignSignals: null, // Set by the calling route after engine invocation
     generatedAt: now,
     sourceLabels: [...new Set(sourceLabels)],
   };
@@ -449,6 +459,7 @@ function buildInsufficientResult(
       suppressionTypes: [],
       visibleToSponsor: false,
     },
+    sovereignSignals: null,
     generatedAt: now,
     sourceLabels: [],
   };
