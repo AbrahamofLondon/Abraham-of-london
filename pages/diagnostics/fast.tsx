@@ -83,6 +83,7 @@ const FastDiagnosticPage: NextPage = () => {
   const [committed, setCommitted] = React.useState(false);
   const [result, setResult] = React.useState<FastDiagnosticResult | null>(null);
   const [error, setError] = React.useState("");
+  const [source, setSource] = React.useState<string | null>(null);
   const startedAt = React.useRef<number>(Date.now());
   const [challenge, setChallenge] = React.useState<ChallengeResult | null>(null);
   const [challengeLoading, setChallengeLoading] = React.useState(false);
@@ -167,6 +168,12 @@ const FastDiagnosticPage: NextPage = () => {
       if (!raw) return;
       const stored = JSON.parse(raw) as FastDiagnosticResult;
       if (stored?.caseRef) { setResult(stored); setStage("result"); }
+    } catch { /* ignore */ }
+    // Detect source context from URL query params
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const src = params.get("source");
+      if (src === "operator-pilot") setSource("operator-pilot");
     } catch { /* ignore */ }
     return () => { cleanScroll(); cleanHesitation(); };
   }, []);
@@ -353,6 +360,19 @@ const FastDiagnosticPage: NextPage = () => {
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {stage === "hero" && (
           <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+            {source === "operator-pilot" && (
+              <div style={{ width: "100%", maxWidth: "640px", marginBottom: "2rem", border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}04`, padding: "1.25rem", textAlign: "left" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                  Operator Pilot Intake
+                </p>
+                <p style={{ marginTop: "0.5rem", fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
+                  This is the evidence gate for the Selective Operator Pilot. The diagnostic will determine whether your decision meets the threshold for a governed pilot review — testing evidence, authority, consequence, and execution reality.
+                </p>
+                <p style={{ marginTop: "0.5rem", fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
+                  After completion, you will receive a finding and a recommendation. If the case qualifies, you will be directed to the pilot pathway. If not, you will receive a specific explanation of what is required to proceed.
+                </p>
+              </div>
+            )}
             <h1 style={{ ...serif, fontSize: "clamp(2rem, 5vw, 3.8rem)", lineHeight: 1.05, letterSpacing: "-0.03em", color: "rgba(255,255,255,0.94)", maxWidth: "18ch" }}>
               You don&rsquo;t have an execution problem.
             </h1>

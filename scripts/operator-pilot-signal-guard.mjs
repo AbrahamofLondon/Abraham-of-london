@@ -89,6 +89,19 @@ for (const { pattern, label } of corridorRefs) {
   check(fileContains(operatorPilotPath, pattern), label, `Missing: ${label}`);
 }
 
+// ── 3b. Operator Pilot CTA must include source context ──
+console.log("\n📋 Operator Pilot — CTA Context");
+check(
+  operatorPilotContent.includes('source=operator-pilot'),
+  "CTA includes source=operator-pilot context",
+  "Primary CTA routes to generic page without source context",
+);
+check(
+  operatorPilotContent.includes('Submit a decision for pilot review'),
+  "CTA says 'Submit a decision for pilot review'",
+  "CTA does not match required copy",
+);
+
 // ── 4. Decision Signal — no paid deliverables exposed ──
 console.log("\n📋 Decision Signal — Paid Deliverable Boundary");
 const signalPath = "pages/decision-instruments/signal/index.tsx";

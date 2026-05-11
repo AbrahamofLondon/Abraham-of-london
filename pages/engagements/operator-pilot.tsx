@@ -156,7 +156,7 @@ const OperatorPilotPage: NextPage = () => {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-4">
               <Link
-                href="/diagnostics/fast"
+                href="/diagnostics/fast?source=operator-pilot"
                 style={{
                   padding: "14px 24px",
                   border: `1px solid ${GOLD}50`,
