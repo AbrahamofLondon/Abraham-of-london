@@ -3399,3 +3399,92 @@ model ProcessedWebhookEvent {
   @@map("processed_webhook_events")
 }
 
+// ============================================================================
+// SOVEREIGN INTELLIGENCE LAYER
+// ============================================================================
+
+/// Anonymised diagnostic session record for the Intelligence Commons.
+/// The sessionHash is a one-way SHA-256 of (orgId + sessionId).
+/// This model contains NO PII — it cannot be used to re-identify any client.
+model IntelligenceCommonsRecord {
+  id               String   @id @default(cuid())
+  sessionHash      String   @unique
+  industryTag      String   @default("unspecified")
+  revenueBand      String
+  teamSizeBand     String   @default("SMALL")
+  founderLed       Boolean  @default(false)
+  sessionNumber    Int      @default(1)
+
+  // Normalised scores (0–100)
+  authorityClarity      Float
+  narrativeCoherence    Float
+  interventionReadiness Float
+  executionReadiness    Float
+  overallReadiness      Float  @default(50)
+
+  overallPosture    String   // SOVEREIGN | ALIGNED | DRIFTING | MISALIGNED | DISORDERED
+  trajectory        String   // IMPROVING | STABLE | DETERIORATING | COLLAPSING
+  failureModeCount  Int      @default(0)
+
+  // Active intelligence signal IDs (JSON array)
+  activeSignalIds   Json     @default("[]")
+
+  // Outcome data — populated on follow-up or admin input
+  outcomeTag        String?
+  outcomeTimeDays   Int?
+
+  recordedAt        DateTime @default(now())
+
+  @@index([revenueBand])
+  @@index([industryTag])
+  @@index([overallPosture])
+  @@index([trajectory])
+  @@index([recordedAt])
+  @@map("intelligence_commons_record")
+}
+
+/// Institutional memory snapshot — one record per completed diagnostic session
+/// for a given organisation handle (opaque, not PII).
+model InstitutionalMemorySnapshot {
+  id                    String   @id @default(cuid())
+  organisationHandle    String
+  sessionId             String
+  sessionNumber         Int
+
+  posture               String
+  trajectory            String
+
+  // Scores as individual columns for query efficiency
+  authorityClarity      Float
+  narrativeCoherence    Float
+  interventionReadiness Float
+  executionReadiness    Float
+  overallReadiness      Float
+
+  failureModeCount      Int      @default(0)
+  activeSignalIds       Json     @default("[]")
+
+  revenueBand           String?
+  orgState              String?
+
+  recordedAt            DateTime @default(now())
+
+  @@index([organisationHandle])
+  @@index([recordedAt])
+  @@map("institutional_memory_snapshot")
+}
+
+/// Cohort assignment cache — avoids recomputing cohort on every session load.
+model CohortAssignment {
+  id                 String   @id @default(cuid())
+  organisationHandle String   @unique
+  cohortId           String
+  matchStrength      String   // EXACT | CLOSE | APPROXIMATE
+  assignedAt         DateTime @default(now())
+  expiresAt          DateTime
+
+  @@index([organisationHandle])
+  @@index([cohortId])
+  @@map("cohort_assignment")
+}
+

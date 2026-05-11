@@ -5,6 +5,9 @@ import {
   buildDecisionSurfacePayload,
   insufficientEvidenceContradiction,
 } from "@/lib/contracts/decision-surface";
+import { recordCommonsEntry } from "@/lib/sovereign/intelligence-commons";
+import { detectIntelligenceSignals } from "@/lib/sovereign/intelligence-signals";
+import crypto from "crypto";
 
 /**
  * GET /api/diagnostics/longitudinal?email=...&stage=constitutional
@@ -134,6 +137,63 @@ export async function GET(req: NextRequest) {
         recurrenceSummary: isRecurring ? { recurringPatterns: analysis.tensionPersistence } as any : undefined,
       },
     }).catch(() => {});
+
+    // ── Intelligence Commons instrumentation ─────────────────────────────────
+    // Record anonymised diagnostic session — one-way hash, no PII stored.
+    // This accumulates the cross-client dataset that powers signal prevalence,
+    // benchmark percentiles, and cohort intelligence.
+    try {
+      const sessionHash = crypto
+        .createHash("sha256")
+        .update(`${journeys[0]!.id}:${stage}`)
+        .digest("hex");
+
+      const latestSnapshot = ordered[ordered.length - 1];
+      const posture = classification === "deterioration" ? "MISALIGNED"
+        : classification === "recurring" ? "DRIFTING"
+        : classification === "recovery" ? "ALIGNED"
+        : "DRIFTING";
+
+      const trajectory = classification === "deterioration" ? "DETERIORATING"
+        : classification === "recovery" ? "IMPROVING"
+        : isRecurring ? "DETERIORATING"
+        : "STABLE";
+
+      const narrativeCoherence = latestSnapshot
+        ? Math.max(0, Math.min(100, 100 - (analysis.tensionPersistence.length * 15)))
+        : 50;
+
+      const activeSignals = detectIntelligenceSignals({
+        posture: posture as "SOVEREIGN" | "ALIGNED" | "DRIFTING" | "MISALIGNED" | "DISORDERED",
+        authorityType: "UNCLEAR",
+        readinessTier: classification === "deterioration" ? "FRAGILE" : "ADVISORY",
+        trajectory: trajectory as "IMPROVING" | "STABLE" | "DETERIORATING" | "COLLAPSING",
+        failureModeCount: persistingContradictions.length,
+        narrativeCoherence,
+        interventionReadiness: 50,
+        sessionCount: snapshots.length,
+      });
+
+      recordCommonsEntry({
+        sessionHash,
+        industryTag: "unspecified",
+        revenueBand: "SMB",
+        teamSizeBand: "SMALL",
+        founderLed: false,
+        sessionNumber: snapshots.length,
+        authorityClarity: 50,
+        narrativeCoherence,
+        interventionReadiness: 50,
+        executionReadiness: 50,
+        overallPosture: posture as "SOVEREIGN" | "ALIGNED" | "DRIFTING" | "MISALIGNED" | "DISORDERED",
+        trajectory: trajectory as "IMPROVING" | "STABLE" | "DETERIORATING" | "COLLAPSING",
+        failureModeCount: persistingContradictions.length,
+        activeSignalIds: activeSignals.map((s) => s.id),
+        recordedAt: new Date().toISOString(),
+      });
+    } catch {
+      // Commons recording is non-blocking — never fail a diagnostic for this
+    }
 
     // Authority contract: every diagnostic response includes these fields
     const highestSeverity = contradictions.reduce((s, c) =>

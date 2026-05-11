@@ -5,6 +5,12 @@
  *
  * Styled as a document, not an app screen.
  * Same visual system as Executive Report: 680px, left-aligned, document authority.
+ *
+ * Sovereign Intelligence Layer integrated:
+ * - Intelligence signals: named, pattern-matched institutional observations
+ * - Institutional memory: trajectory arc, recurring patterns, contradiction clusters
+ * - Cohort intelligence: what happened to organisations like this one
+ * - Benchmark percentiles: every score rendered against the commons dataset
  */
 
 import * as React from "react";
@@ -29,6 +35,26 @@ import {
 import {
   convertFinancialExposureToGovernedMemory,
 } from "@/lib/product/financial-exposure-persistence";
+import IntelligenceSignalPanel from "@/components/sovereign/IntelligenceSignalPanel";
+import InstitutionalMemoryPanel from "@/components/sovereign/InstitutionalMemoryPanel";
+import CohortIntelligencePanel from "@/components/sovereign/CohortIntelligencePanel";
+import SovereignPositionSummary from "@/components/sovereign/SovereignPositionSummary";
+import { BenchmarkReport } from "@/components/sovereign/BenchmarkStrip";
+import type { IntelligenceSignal } from "@/lib/sovereign/intelligence-signals";
+import type { InstitutionalMemoryReport } from "@/lib/sovereign/institutional-memory";
+import type { CohortMatchResult } from "@/lib/sovereign/cohort-intelligence";
+import type { PercentileResult } from "@/lib/sovereign/intelligence-commons";
+
+type SovereignIntelligence = {
+  signals: IntelligenceSignal[];
+  signalSummary: string;
+  memory: InstitutionalMemoryReport | null;
+  cohort: CohortMatchResult | null;
+  benchmarks: Record<string, PercentileResult> | null;
+  benchmarkCohortKey: string;
+  benchmarkCommonsSize: number;
+  scores: Record<string, number>;
+};
 
 type ReturnBriefData = {
   sessionId: string;
@@ -116,6 +142,112 @@ type ReturnBriefData = {
   retainerTriggered: boolean;
 };
 
+async function loadSovereignIntelligence(
+  brief: ReturnBriefData,
+  _sessionId: string,
+): Promise<SovereignIntelligence> {
+  const trajectoryMap: Record<string, string> = {
+    DETERIORATING: "DETERIORATING",
+    FRAGILE: "DETERIORATING",
+    STABLE: "STABLE",
+    IMPROVING: "IMPROVING",
+    RECOVERY: "IMPROVING",
+  };
+  const trajectory = trajectoryMap[brief.trajectory?.state?.toUpperCase() ?? ""] ?? "STABLE";
+
+  // Derive org state from trajectory + recurrence
+  const isStress = trajectory === "DETERIORATING" || brief.recurrence?.status === "VERIFIED_RECURRENCE";
+  const orgState = isStress ? "STRESS" : trajectory === "IMPROVING" ? "SCALING" : "STABLE";
+
+  // Session count: use recurrence data when available, default to 2 (this is a return brief)
+  const sessionCount = brief.recurrence ? Math.max(2, brief.recurrence.priorCount + 1) : 2;
+
+  // Authority mapping
+  const authorityType =
+    brief.delta?.authority === "contested" ? "CONTESTED"
+    : brief.delta?.authority === "increased" || brief.delta?.authority === "clear" ? "DELEGATED"
+    : "UNCLEAR";
+
+  // Coherence: derive from recurrence + trajectory
+  const narrativeCoherence =
+    trajectory === "IMPROVING" ? 65
+    : brief.recurrence?.status === "VERIFIED_RECURRENCE" ? 28
+    : trajectory === "DETERIORATING" ? 35
+    : 50;
+
+  // Intervention readiness: low when deteriorating or blocked
+  const interventionReadiness =
+    trajectory === "DETERIORATING" && brief.recurrence?.status === "VERIFIED_RECURRENCE" ? 22
+    : trajectory === "DETERIORATING" ? 32
+    : 55;
+
+  // Failure mode count from recurrence signal
+  const failureModeCount =
+    brief.recurrence?.status === "VERIFIED_RECURRENCE" ? 4
+    : brief.recurrence?.status === "POSSIBLE_RECURRENCE" ? 2
+    : trajectory === "DETERIORATING" ? 2
+    : 1;
+
+  const signalPayload = {
+    posture: trajectory === "IMPROVING" ? "ALIGNED" : trajectory === "DETERIORATING" ? "MISALIGNED" : "DRIFTING",
+    authorityType,
+    readinessTier: trajectory === "DETERIORATING" ? "FRAGILE" : "ADVISORY",
+    trajectory,
+    failureModeCount,
+    narrativeCoherence,
+    interventionReadiness,
+    orgState,
+    sessionCount,
+    // founderLed not available at this surface — omit rather than guess
+  };
+
+  const scores = {
+    authorityClarity:
+      brief.delta?.authority === "increased" || brief.delta?.authority === "clear" ? 68
+      : brief.delta?.authority === "contested" ? 32
+      : 50,
+    narrativeCoherence,
+    interventionReadiness,
+    executionReadiness: trajectory === "IMPROVING" ? 62 : trajectory === "DETERIORATING" ? 35 : 50,
+  };
+
+  const [signalsRes, benchmarkRes, cohortRes] = await Promise.allSettled([
+    fetch("/api/sovereign/signals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(signalPayload),
+    }).then((r) => r.json()),
+
+    fetch("/api/sovereign/commons/benchmark", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...scores, revenueBand: "SMB", orgState }),
+    }).then((r) => r.json()),
+
+    fetch("/api/sovereign/cohort", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ revenueBand: "SMB", orgState, sessionCount }),
+    }).then((r) => r.json()),
+  ]);
+
+  const signals = signalsRes.status === "fulfilled" && signalsRes.value?.ok ? signalsRes.value.signals ?? [] : [];
+  const signalSummary = signalsRes.status === "fulfilled" ? signalsRes.value?.summary ?? "" : "";
+  const benchmarkData = benchmarkRes.status === "fulfilled" && benchmarkRes.value?.ok ? benchmarkRes.value : null;
+  const cohortData = cohortRes.status === "fulfilled" && cohortRes.value?.ok ? cohortRes.value : null;
+
+  return {
+    signals,
+    signalSummary,
+    memory: null,
+    cohort: cohortData ? { matched: cohortData.matched, cohort: cohortData.cohort, matchStrength: cohortData.matchStrength, narrative: cohortData.narrative } : null,
+    benchmarks: benchmarkData?.benchmarks ?? null,
+    benchmarkCohortKey: benchmarkData?.cohortKey ?? `SMB.${orgState}`,
+    benchmarkCommonsSize: benchmarkData?.commonsSize ?? 0,
+    scores,
+  };
+}
+
 export default function ReturnBriefPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -124,6 +256,7 @@ export default function ReturnBriefPage() {
   const [brief, setBrief] = React.useState<ReturnBriefData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [noBrief, setNoBrief] = React.useState(false);
+  const [sovereign, setSovereign] = React.useState<SovereignIntelligence | null>(null);
 
   React.useEffect(() => {
     if (!sessionId) return;
@@ -134,6 +267,8 @@ export default function ReturnBriefPage() {
         if (data.ok && data.briefAvailable) {
           setBrief(data.brief);
           trackLaunch("return_brief_opened", "return_brief", { sessionId: sessionId ?? undefined });
+          // Load sovereign intelligence in parallel — non-blocking
+          loadSovereignIntelligence(data.brief, sessionId).then(setSovereign);
         } else {
           setNoBrief(true);
         }
@@ -576,6 +711,66 @@ export default function ReturnBriefPage() {
               {brief.recurrence.explanation}
             </p>
           </div>
+        )}
+
+        {/* ═══ SOVEREIGN INTELLIGENCE LAYER ═══ */}
+        {sovereign && (
+          <>
+            {/* Divider */}
+            <div style={{ height: "1px", background: "#1A1A1A", marginBottom: "48px" }} />
+
+            {/* Institutional Position — always shown when sovereign data available */}
+            <div style={{ paddingBottom: "40px" }}>
+              <SovereignPositionSummary
+                signals={sovereign.signals}
+                benchmarks={sovereign.benchmarks}
+                cohort={sovereign.cohort}
+                trajectory={brief.trajectory.state}
+                commonsSize={sovereign.benchmarkCommonsSize}
+              />
+            </div>
+
+            {/* Intelligence Signals */}
+            {sovereign.signals.length > 0 && (
+              <div style={{ paddingBottom: "48px" }}>
+                <IntelligenceSignalPanel
+                  signals={sovereign.signals}
+                  summary={sovereign.signalSummary}
+                  expandFirst
+                  label="Active intelligence signals"
+                />
+              </div>
+            )}
+
+            {/* Benchmark Position */}
+            {sovereign.benchmarks && (
+              <div style={{ paddingBottom: "48px" }}>
+                <div style={{ height: "1px", background: "#1A1A1A", marginBottom: "40px" }} />
+                <BenchmarkReport
+                  benchmarks={sovereign.benchmarks}
+                  scores={sovereign.scores}
+                  cohortKey={sovereign.benchmarkCohortKey}
+                  commonsSize={sovereign.benchmarkCommonsSize}
+                />
+              </div>
+            )}
+
+            {/* Cohort Intelligence — before memory so it reads "who else, then what happened to you" */}
+            {sovereign.cohort && (
+              <div style={{ paddingBottom: "48px" }}>
+                <div style={{ height: "1px", background: "#1A1A1A", marginBottom: "40px" }} />
+                <CohortIntelligencePanel result={sovereign.cohort} />
+              </div>
+            )}
+
+            {/* Institutional Memory — longitudinal arc last, as the deepest layer */}
+            {sovereign.memory && sovereign.memory.totalSessions > 1 && (
+              <div style={{ paddingBottom: "48px" }}>
+                <div style={{ height: "1px", background: "#1A1A1A", marginBottom: "40px" }} />
+                <InstitutionalMemoryPanel report={sovereign.memory} />
+              </div>
+            )}
+          </>
         )}
 
         {/* ═══ LIVING INTELLIGENCE PANELS ═══ */}

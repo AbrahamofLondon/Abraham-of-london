@@ -1,3 +1,19 @@
+/**
+ * @deprecated KILLED — Sovereign Intelligence Brief, Part Seven (Kill List).
+ *
+ * This engine optimised the client's self-assessment of contextual performance.
+ * The brief is explicit: do not build features that optimise self-assessment.
+ * The product's value is in telling clients what their organisation is actually
+ * doing, not validating their interpretation of their own click-through data.
+ *
+ * Replace all usages with:
+ * - Signal detection: @/lib/sovereign/intelligence-signals
+ * - Forensic accounts: @/lib/sovereign/decision-forensics
+ * - Benchmark percentiles: @/lib/sovereign/intelligence-commons
+ *
+ * This file is retained only for import-safety during the migration window.
+ * It will be removed in the next schema cleanup pass.
+ */
 // lib/decision/contextual-efficacy-engine.ts
 
 export interface ContextualPerformanceInput {
