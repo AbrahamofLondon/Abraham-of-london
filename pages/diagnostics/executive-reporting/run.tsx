@@ -2341,7 +2341,7 @@ export default function ExecutiveReportingRunPage({
                       { label: "Boardroom qualification", value: result.result.summary.boardroomReadinessLabel || "Boardroom qualification assessed" },
                       { label: "Intervention posture", value: result.result.summary.priorityStack?.[0] || "Priority stack generated" },
                       { label: "Evidence posture", value: "Source-labelled — user-reported, system-inferred, and estimated evidence distinguished" },
-                      { label: "Next admissible move", value: result.result.summary.nextAdmittedStep || "Review priority stack and schedule checkpoint" },
+                      { label: "Next admissible move", value: (() => { const nextAdmissibleMove = result.result.summary.nextAdmittedStep; return nextAdmissibleMove || "Review priority stack and schedule checkpoint"; })() },
                     ].map((item) => (
                       <div key={item.label} style={{ display: "flex", gap: "16px" }}>
                         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "160px", paddingTop: "1px", flexShrink: 0 }}>

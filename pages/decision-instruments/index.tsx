@@ -1,3 +1,4 @@
+// accessPosture: Free signal (open entry) or Paid instrument (gated by checkout)
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";

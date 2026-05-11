@@ -7,6 +7,7 @@ import { ArrowRight, CheckSquare, Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import CheckoutButton from "@/components/commercial/CheckoutButton";
+import ValueReceipt from "@/components/product/ValueReceipt";
 import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import {
   trackAssetComplete,
@@ -976,6 +977,21 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
               ) : (
                 <CheckoutPanel instrument={instrument} />
               )}
+            </div>
+
+            {/* Value receipt */}
+            <div className="mt-6" style={{ maxWidth: "65ch" }}>
+              <ValueReceipt
+                price={instrument.price}
+                deliveryFormat="Interactive instrument"
+                includes={instrument.whatItProduces.slice(0, 4)}
+                memoryWrite={true}
+                dossierIncluded={false}
+                accessPosture={hasAccess ? "paid" : "paid"}
+                nextAdmissibleMove={instrument.transition?.label ?? "Continue to Decision Centre for case memory"}
+                estimatedTime={instrument.timeExpectation}
+                compact
+              />
             </div>
           </div>
 

@@ -2,6 +2,7 @@
 // pages/strategy-room/index.tsx
 // Design: Institutional Monumentalism — the highest-consequence page on the platform
 // Three states: GATE (locked) -> ENTRY BRIEF (paid) -> EXECUTION CHAMBER (active)
+// accessPosture: Earned escalation — gated by diagnostic evidence
 // Typography: Cormorant Garamond display · JetBrains Mono data/labels
 // Palette: #060609 base · #C9A96E softGold · sharp panels throughout
 

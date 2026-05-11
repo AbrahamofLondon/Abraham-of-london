@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // pages/playbooks/index.tsx
+// accessPosture: Free signal (open) and Paid instrument (premium playbooks)
 // Institutional Monumentalism
 // Fixed properly:
 // - removes brittle generic-doc inference

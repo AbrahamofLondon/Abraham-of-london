@@ -1,5 +1,6 @@
 /* pages/diagnostics/purpose-alignment.tsx
    Purpose Alignment Analysis — the personal diagnostic entry point.
+   accessPosture: Free signal (free reading) | Paid instrument (£49 governed dossier)
    Positioned as the free public instrument that proves the platform's
    intelligence before the institutional ladder begins. */
 
