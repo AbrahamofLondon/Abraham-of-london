@@ -75,7 +75,7 @@ export default function RefusalDemo() {
       id="refusal-demo"
       eyebrow="Refusal demo"
       title="Refusal is not a dead end."
-      description="Ordinary tools assume the decision is ready to be helped. This system can stop the case, name what is missing, and preserve the correction path."
+      description="It is how the system protects the record from premature escalation. Ordinary tools assume the decision is ready to be helped. This system can stop the case, name what is missing, and preserve the correction path."
     >
       <div className="mx-auto max-w-[760px] space-y-3">
         {steps.map((step) => {
