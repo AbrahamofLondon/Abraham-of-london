@@ -1,14 +1,14 @@
 import { SectionShell, HOMEPAGE_GOLD, mono } from "@/components/homepage/homepagePrimitives";
 
 const spineSteps = [
-  { key: "Detect",     body: "A signal is identified against evidence, authority, consequence, and execution reality." },
-  { key: "Compare",   body: "The signal is compared against available records and the current comparison basis maturity." },
-  { key: "Consequence", body: "A consequence path is projected — 30, 60, and 90 days — labelled as estimate, not certainty." },
-  { key: "Recommend", body: "The next admissible move is named. If no admissible move exists, the system withholds one." },
-  { key: "Verify",    body: "A future review point is created. The system returns later to confirm whether the move was taken." },
-  { key: "Review",    body: "Material claims requiring operator review are routed for human confirmation before affecting memory." },
-  { key: "Remember",  body: "Evidence is written to institutional memory only when posture and operator review support it." },
-  { key: "Correct",   body: "If the system was wrong, the record can reflect it. Correction is built into the architecture." },
+  { key: "Detect",      body: "A signal is identified against evidence, authority, consequence, and execution reality." },
+  { key: "Compare",     body: "The signal is compared against the available record base, with the comparison basis clearly labelled." },
+  { key: "Consequence", body: "A consequence path is projected across 30, 60, and 90 days — labelled as estimate, not certainty." },
+  { key: "Recommend",   body: "The next admissible move is named. If no admissible move exists, the system withholds one." },
+  { key: "Verify",      body: "A future review point is created so the system can return to what happened next." },
+  { key: "Review",      body: "Consequential claims are routed for operator review where human confirmation is required." },
+  { key: "Remember",    body: "Evidence is written to institutional memory only when posture and review support it." },
+  { key: "Correct",     body: "If the system was wrong, the record can reflect it. Correction is built into the architecture." },
 ];
 
 export default function VerificationSpineBlock() {
@@ -17,7 +17,7 @@ export default function VerificationSpineBlock() {
       id="verification-spine"
       eyebrow="Verification spine"
       title="The system does not stop at recommendation."
-      description="It creates a future review point, accepts dispute, routes material claims through operator review where required, and updates memory only when the evidence supports it."
+      description="Every material output creates a future review point. Dispute is accepted as review input. Memory updates only when the evidence supports it."
     >
       {/* Chain label */}
       <div

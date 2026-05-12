@@ -3,19 +3,19 @@ import { SectionShell, HOMEPAGE_GOLD, mono } from "@/components/homepage/homepag
 const trustCards = [
   {
     title: "Source-labelled evidence",
-    body: "User-reported means user-reported. System-inferred means system-inferred. The homepage does not collapse them into one confidence story.",
+    body: "User-reported means user-reported. System-inferred means system-inferred. The system does not collapse them into one confidence story.",
   },
   {
     title: "No fabricated verification",
-    body: "The system will not call an outcome verified unless evidence is provided. Self-reported outcomes do not become independent proof by tone alone.",
+    body: "The system will not call an outcome verified unless the evidence supports it. Self-reported outcomes do not become independent proof by tone alone.",
   },
   {
     title: "Evidence posture and operator review",
-    body: "Material claims pass through evidence posture and operator review before they affect institutional memory. Self-report alone is not sufficient.",
+    body: "Material claims are weighed by evidence posture. Where the claim is consequential, operator review is required before it can affect institutional memory.",
   },
   {
     title: "Correction is part of the governance",
-    body: "If the system was wrong, the record can reflect it. Prior findings can be downgraded, reopened, or annotated without deleting what was recorded.",
+    body: "If the system was wrong, the record can reflect it. Prior findings can be reopened, downgraded, or annotated without deleting what was recorded.",
   },
   {
     title: "Refusal when evidence is weak",
@@ -23,11 +23,11 @@ const trustCards = [
   },
   {
     title: "Estimates are labelled",
-    body: "Estimated means estimated. Consequence language is marked as estimate until stronger evidence supports it.",
+    body: "Estimated means estimated. Consequence language remains labelled as estimate until stronger evidence supports a firmer claim.",
   },
   {
-    title: "Unsafe or private material is suppressed",
-    body: "Insufficient, unsafe, or private material is withheld rather than exposed. The public surface shows the finding, not the internal mechanics.",
+    title: "Suppression protects the record",
+    body: "Private or unsafe material is suppressed. Insufficient evidence is labelled as insufficient rather than dressed as certainty.",
   },
 ];
 

@@ -28,7 +28,7 @@ const steps = [
   {
     label: "Memory retained",
     detail:
-      "The contradiction and the required correction stay on the case record. The next surface will use them instead of starting from zero.",
+      "The contradiction and required correction remain on the case record. The next surface uses them instead of starting from zero.",
     tone: "memory",
   },
 ];
@@ -74,8 +74,8 @@ export default function RefusalDemo() {
     <SectionShell
       id="refusal-demo"
       eyebrow="Refusal demo"
-      title="How refusal works."
-      description="Ordinary tools assume the decision is ready to be helped. This system is willing to stop the case, name what is missing, and retain the correction path."
+      title="Refusal is not a dead end."
+      description="Ordinary tools assume the decision is ready to be helped. This system can stop the case, name what is missing, and preserve the correction path."
     >
       <div className="mx-auto max-w-[760px] space-y-3">
         {steps.map((step) => {
