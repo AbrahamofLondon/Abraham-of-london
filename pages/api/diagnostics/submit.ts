@@ -438,6 +438,25 @@ export default async function handler(
     });
   }
 
+  // Non-fatal verification record creation for all diagnostic submissions
+  try {
+    const { createMaterialOutputVerificationRecord } = await import(
+      "@/lib/product/signal-verification-record"
+    );
+    await createMaterialOutputVerificationRecord({
+      source: payload.kind === "purpose-alignment" ? "purpose-alignment" : "diagnostic-submission",
+      sourceId: diagnosticRef,
+      userEmail: safeString(payload.respondent?.email) || actor.email || null,
+      conditionName: payload.title || payload.kind,
+      severity: payload.summary.severity,
+      score: payload.summary.totalScore,
+      recommendedMove:
+        typeof payload.metadata?.nextRoute === "string" ? payload.metadata.nextRoute : null,
+    });
+  } catch {
+    // non-fatal — verification record must not block the diagnostic result
+  }
+
   return res.status(200).json({
     ...setCachedSubmissionResult(duplicateKey, {
       ok: true,

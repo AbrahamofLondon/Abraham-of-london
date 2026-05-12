@@ -19,6 +19,83 @@
 
 import { prisma } from "@/lib/prisma.server";
 
+// ─── Queue posture (P2) ───────────────────────────────────────────────────────
+
+export type ReviewQueuePosture = {
+  pendingCount: number;
+  /** Age of the oldest pending review in whole days */
+  oldestPendingAge: number;
+  criticalPendingCount: number;
+  /** Records past the 14-day review SLA */
+  overdueReviewCount: number;
+  reviewSlaBand: "GREEN" | "AMBER" | "RED" | "CRITICAL";
+};
+
+/**
+ * Computes the current operator review queue posture.
+ * GREEN  — queue healthy, nothing overdue
+ * AMBER  — queue growing or at least one record aging
+ * RED    — overdue records present or critical items queued
+ * CRITICAL — multiple overdue or critical items require immediate attention
+ */
+export async function getOperatorReviewQueuePosture(): Promise<ReviewQueuePosture> {
+  const REVIEW_SLA_DAYS = 14;
+  const now = Date.now();
+
+  const records = await prisma.diagnosticRecord.findMany({
+    where: {
+      diagnosticType: "outcome_verification",
+      OR: [{ severity: "high" }, { status: "completed" }],
+    },
+    orderBy: { createdAt: "asc" },
+    select: { severity: true, createdAt: true, responsesJson: true },
+  });
+
+  let pendingCount = 0;
+  let criticalPendingCount = 0;
+  let overdueReviewCount = 0;
+  let oldestPendingAge = 0;
+
+  for (const r of records) {
+    let payload: Record<string, unknown> = {};
+    try {
+      payload = JSON.parse(r.responsesJson ?? "{}") as Record<string, unknown>;
+    } catch {
+      continue;
+    }
+
+    const status = String(payload.status ?? "");
+    const classification = String(payload.outcomeClassification ?? "");
+    const evidencePosture = String(payload.evidencePosture ?? "");
+    const requiresReview =
+      status === "DISPUTED" ||
+      status === "BLOCKED" ||
+      classification === "SYSTEM_FINDING_DISPUTED" ||
+      (evidencePosture === "INSUFFICIENT_EVIDENCE" && payload.didAct === "YES");
+
+    if (!requiresReview) continue;
+
+    pendingCount++;
+    const ageDays = (now - r.createdAt.getTime()) / 86400000;
+    if (ageDays > oldestPendingAge) oldestPendingAge = ageDays;
+    if (ageDays > REVIEW_SLA_DAYS) overdueReviewCount++;
+    if (r.severity === "high" || r.severity === "critical") criticalPendingCount++;
+  }
+
+  const reviewSlaBand: ReviewQueuePosture["reviewSlaBand"] =
+    overdueReviewCount > 5 || criticalPendingCount > 3 ? "CRITICAL" :
+    overdueReviewCount > 2 || criticalPendingCount > 0 ? "RED" :
+    pendingCount > 5 ? "AMBER" : "GREEN";
+
+  return {
+    pendingCount,
+    oldestPendingAge: Math.round(oldestPendingAge),
+    criticalPendingCount,
+    overdueReviewCount,
+    reviewSlaBand,
+  };
+}
+
 export type OperatorReviewOutcome =
   | "ACCURACY_CONFIRMED"       // Operator confirms system diagnosis was accurate
   | "ACCURACY_DISPUTED"        // Operator confirms the diagnosis was inaccurate

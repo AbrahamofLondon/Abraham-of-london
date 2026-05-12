@@ -20,5 +20,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       submittedAt: new Date().toISOString(),
       userAgent: req.headers["user-agent"] || null,
     }),
+    afterCreate: async ({ score, severity, reference, userEmail }) => {
+      const { createMaterialOutputVerificationRecord } = await import(
+        "@/lib/product/signal-verification-record"
+      );
+      await createMaterialOutputVerificationRecord({
+        source: "executive-reporting",
+        sourceId: reference,
+        userEmail,
+        conditionName: "Executive Reporting Assessment",
+        severity,
+        score,
+        operatorReviewRequired: severity === "critical" || severity === "high",
+        dueDays: 14,
+      });
+    },
   });
 }

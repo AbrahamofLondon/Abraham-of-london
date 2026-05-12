@@ -34,6 +34,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const result = await deliverReturnBrief(parsed.data);
+
+    // Non-fatal: return brief delivery creates a signal recurrence verification record
+    try {
+      const { createMaterialOutputVerificationRecord } = await import(
+        "@/lib/product/signal-verification-record"
+      );
+      await createMaterialOutputVerificationRecord({
+        source: "return-brief",
+        sourceId: parsed.data.sessionId,
+        userEmail: parsed.data.recipientEmail,
+        conditionName: "Return Brief — unresolved signal recurrence",
+        severity: "ALERT",
+        recommendedMove: "Review signal recurrence and update comparison basis on next touchpoint",
+        operatorReviewRequired: true,
+        dueDays: 14,
+      });
+    } catch {
+      // non-fatal
+    }
+
     return res.status(200).json({
       ok: true,
       actorEmail: session.user?.email ?? null,

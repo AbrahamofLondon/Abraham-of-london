@@ -22,6 +22,8 @@ const FORBIDDEN = [
   { pattern: /Upgrade Now/g, label: "Upgrade Now (SaaS language)" },
   { pattern: /href="\/consulting(?:\/|")/g, label: "href to /consulting (stale route)" },
   { pattern: /book a call/gi, label: "book a call" },
+  { pattern: /\bAI-powered\b/gi, label: "AI-powered (unsupported marketing claim)" },
+  { pattern: /\bAI powered\b/gi, label: "AI powered (unsupported marketing claim)" },
 ];
 
 const files = globSync("{pages,components,app}/**/*.tsx");

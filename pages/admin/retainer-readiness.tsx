@@ -17,6 +17,7 @@ import { buildSponsorSafeCommandSummary } from "@/lib/product/sponsor-safe-comma
 import { buildPortfolioMemory } from "@/lib/product/portfolio-memory-surface";
 import { resolvePortfolioScopes } from "@/lib/product/portfolio-scope-resolver";
 import { getEmailTransportStatus } from "@/lib/email/transport";
+import { getOperatorReviewQueuePosture, type ReviewQueuePosture } from "@/lib/product/operator-outcome-review";
 
 export const getServerSideProps: GetServerSideProps<{
   classification: ReturnType<typeof classifyRetainerReadiness>;
@@ -52,6 +53,7 @@ export const getServerSideProps: GetServerSideProps<{
     boardroom: string;
     continuity: string;
   };
+  verificationQueuePosture: ReviewQueuePosture;
 }> = async (ctx) => {
   const guard = await requireAdminPage(ctx);
   if (!guard.authorized) return guard.redirect as any;
@@ -64,11 +66,12 @@ export const getServerSideProps: GetServerSideProps<{
   }).catch(() => null);
   const organisationId = scopedOrganisationId ?? fallbackContract?.organisationId ?? null;
 
-  const [queue, summaryResult] = await Promise.all([
+  const [queue, summaryResult, verificationQueuePosture] = await Promise.all([
     buildOperatorCadenceQueue(),
     buildSponsorSafeCommandSummary({
       organisationId,
     }),
+    getOperatorReviewQueuePosture(),
   ]);
   const resolution = await resolvePortfolioScopes({
     role: "ADMIN",
@@ -215,6 +218,7 @@ export const getServerSideProps: GetServerSideProps<{
         boardroom: summary.boardroomArchiveSummary.summary,
         continuity: summary.cancellationLossSummary.summary,
       },
+      verificationQueuePosture,
     },
   };
 };
@@ -336,6 +340,33 @@ export default function RetainerReadinessPage(
               <p>Not configured: {props.queueCounts.notConfigured}</p>
             </div>
           </section>
+        </section>
+
+        {/* ── Verification Queue Posture ─────────────────────────────────── */}
+        <section className="border border-white/10 bg-zinc-950/70 p-5">
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Verification Queue Posture</h2>
+          <div className="mt-4 grid gap-3 md:grid-cols-5 text-sm text-white/70">
+            <div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/30">SLA Band</p>
+              <p className="mt-1 font-mono text-xs text-white/80">{props.verificationQueuePosture.reviewSlaBand}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/30">Pending</p>
+              <p className="mt-1 font-mono text-xs text-white/80">{props.verificationQueuePosture.pendingCount}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/30">Critical</p>
+              <p className="mt-1 font-mono text-xs text-white/80">{props.verificationQueuePosture.criticalPendingCount}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/30">Overdue</p>
+              <p className="mt-1 font-mono text-xs text-white/80">{props.verificationQueuePosture.overdueReviewCount}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/30">Oldest (days)</p>
+              <p className="mt-1 font-mono text-xs text-white/80">{props.verificationQueuePosture.oldestPendingAge}</p>
+            </div>
+          </div>
         </section>
 
         <section className="border border-white/10 bg-zinc-950/70 p-5">

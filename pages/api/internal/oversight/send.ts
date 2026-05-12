@@ -37,6 +37,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const result = await deliverOversightBrief(parsed.data);
+
+    // Non-fatal: oversight brief delivery creates a governed review obligation for the cycle
+    try {
+      const { createGovernedReviewObligation } = await import(
+        "@/lib/product/signal-verification-record"
+      );
+      await createGovernedReviewObligation({
+        source: "oversight-brief",
+        sourceId: `oversight_${parsed.data.recipientEmail}_${Date.now()}`,
+        userEmail: parsed.data.recipientEmail,
+        summary: `Oversight cycle verification — retained signal recurrence check for ${parsed.data.recipientEmail}`,
+      });
+    } catch {
+      // non-fatal
+    }
+
     return res.status(200).json({
       ok: true,
       actorEmail: session.user?.email ?? null,

@@ -201,6 +201,129 @@ if (existsSync(join(ROOT, brIndex))) {
   );
 }
 
+// ── 11. Homepage category declaration ──────────────────────────────────────────
+console.log("\n📋 Homepage Category Declaration");
+const heroFile = "components/homepage/HomepageHero.tsx";
+check(
+  fileContains(heroFile, "Governed Decision Intelligence"),
+  "Homepage hero declares 'Governed Decision Intelligence'",
+  "Category phrase not found in HomepageHero.tsx",
+);
+check(
+  fileContains(heroFile, "Evidence first") || fileContains(heroFile, "No guaranteed outcomes"),
+  "Homepage hero includes evidence-first credibility line",
+  "Evidence-first credibility line not found",
+);
+check(
+  fileContains(heroFile, "Submit One Real Decision"),
+  "Homepage CTA is 'Submit One Real Decision'",
+  "Required CTA text not found in hero",
+);
+
+// ── 12. Homepage verification spine ────────────────────────────────────────────
+console.log("\n📋 Homepage Verification Spine");
+const spineFile = "components/homepage/VerificationSpineBlock.tsx";
+check(
+  existsSync(join(ROOT, spineFile)),
+  "VerificationSpineBlock component exists",
+  "components/homepage/VerificationSpineBlock.tsx not found",
+);
+check(
+  fileContains(spineFile, "Detect") && fileContains(spineFile, "Verify") && fileContains(spineFile, "Correct"),
+  "Verification spine contains Detect, Verify, and Correct steps",
+  "Spine steps incomplete",
+);
+check(
+  fileContains(spineFile, "future review point") || fileContains(spineFile, "operator review"),
+  "Verification spine references future review point or operator review",
+  "No future review/operator review copy found",
+);
+
+// ── 13. Homepage correction transparency ────────────────────────────────────────
+console.log("\n📋 Homepage Correction Transparency");
+const trustFile = "components/homepage/TrustArchitectureBlock.tsx";
+check(
+  fileContains(trustFile, "Correction is part of the governance") ||
+  fileContains(trustFile, "record can reflect it"),
+  "Trust block states correction is part of governance",
+  "Correction transparency language not found",
+);
+check(
+  fileContains(trustFile, "operator review") || fileContains(trustFile, "evidence posture"),
+  "Trust block references evidence posture / operator review",
+  "Evidence posture / operator review language missing from trust block",
+);
+
+// ── 14. Homepage forbidden copy terms ──────────────────────────────────────────
+console.log("\n📋 Homepage Forbidden Copy Terms");
+const homepageFiles = [
+  "components/homepage/HomepageHero.tsx",
+  "components/homepage/CategoryFrontDoor.tsx",
+  "components/homepage/VerificationSpineBlock.tsx",
+  "components/homepage/OperatorPilotBlock.tsx",
+  "components/homepage/HomepageFinalCTA.tsx",
+];
+const homepageForbidden = [
+  { pattern: /\bAI-powered\b/gi, label: "AI-powered" },
+  { pattern: /guaranteed outcome/gi, label: "guaranteed outcome (affirmative claim)" },
+  { pattern: /\bupgrade\b/gi, label: "upgrade (SaaS upsell language)" },
+];
+// Negation phrases that make a match acceptable (disclaimers, not claims)
+const homepageNegations = [
+  "no guaranteed outcomes",
+  "not guaranteed outcomes",
+  "no guaranteed outcome",
+  "not guaranteed outcome",
+  "no outcomes guaranteed",
+];
+for (const { pattern, label } of homepageForbidden) {
+  let found = false;
+  for (const file of homepageFiles) {
+    try {
+      const lines = readFileSync(join(ROOT, file), "utf-8").split("\n");
+      for (const line of lines) {
+        pattern.lastIndex = 0;
+        if (pattern.test(line)) {
+          const lower = line.toLowerCase();
+          const isNegation = homepageNegations.some((n) => lower.includes(n));
+          if (!isNegation) {
+            found = true;
+            console.error(`  ❌ FAIL: Homepage forbidden term '${label}' — found in ${file}: ${line.trim()}`);
+            violations++;
+            break;
+          }
+        }
+      }
+    } catch { /* file not found — other checks handle existence */ }
+    if (found) break;
+  }
+  if (!found) console.log(`  ✅ PASS: Homepage does not use '${label}'`);
+}
+
+// ── 15. Operator pilot block ────────────────────────────────────────────────────
+console.log("\n📋 Operator Pilot Block");
+const pilotFile = "components/homepage/OperatorPilotBlock.tsx";
+check(
+  existsSync(join(ROOT, pilotFile)),
+  "OperatorPilotBlock component exists",
+  "components/homepage/OperatorPilotBlock.tsx not found",
+);
+check(
+  fileContains(pilotFile, "controlled proof") || fileContains(pilotFile, "Selective Operator Pilot"),
+  "Pilot block uses controlled proof language",
+  "Controlled proof language not found in OperatorPilotBlock",
+);
+check(
+  fileContains(pilotFile, "Submit One Real Decision"),
+  "Pilot block CTA is 'Submit One Real Decision'",
+  "Required pilot CTA text not found",
+);
+check(
+  fileContains(pilotFile, "Read Pilot Terms"),
+  "Pilot block has 'Read Pilot Terms' secondary CTA",
+  "Secondary pilot CTA not found",
+);
+
 // Summary
 console.log(`\n${"=".repeat(50)}`);
 console.log(`RESULTS: ${violations} violations`);

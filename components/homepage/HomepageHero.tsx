@@ -19,7 +19,7 @@ export default function HomepageHero() {
             color: `${HOMEPAGE_GOLD}88`,
           }}
         >
-          Decision Infrastructure by Abraham of London
+          Governed Decision Intelligence by Abraham of London
         </p>
 
         <h1
@@ -33,26 +33,24 @@ export default function HomepageHero() {
             letterSpacing: "-0.02em",
           }}
         >
-          The decision system that can refuse to proceed.
+          Governed Decision Intelligence for decisions that carry consequence.
         </h1>
 
         <p
           className="mx-auto mt-6 max-w-[58ch] text-[16px] leading-[1.85]"
           style={{ color: "rgba(255,255,255,0.58)" }}
         >
-          Not generic AI advice. Not a dashboard. Not a consultancy brochure.
-          This system tests a serious decision against evidence, authority,
-          consequence, and execution reality. If the case is not ready, it does
-          not pretend.
+          Abraham of London tests serious decisions against evidence, authority,
+          consequence, and execution reality — then names the condition, controls
+          progression, remembers the record, and returns later to verify what
+          happened.
         </p>
 
         <p
           className="mx-auto mt-5 max-w-[48ch] text-[13px] leading-[1.75]"
-          style={{ color: "rgba(255,255,255,0.40)" }}
+          style={{ color: "rgba(255,255,255,0.36)" }}
         >
-          Submit one real decision under pressure. The system returns a finding,
-          a contradiction, a required move, and the next checkpoint. It also
-          remembers what entered the record.
+          No guaranteed outcomes. No hidden certainty. Evidence first.
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -69,11 +67,11 @@ export default function HomepageHero() {
               textTransform: "uppercase",
             }}
           >
-            Test a Decision
+            Submit One Real Decision
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
           <a
-            href="#refusal-demo"
+            href="#output-preview"
             className="inline-flex min-h-[44px] items-center"
             style={{
               ...mono,
@@ -83,7 +81,7 @@ export default function HomepageHero() {
               color: "rgba(255,255,255,0.36)",
             }}
           >
-            See how refusal works
+            See How the System Responds
           </a>
         </div>
 

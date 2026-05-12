@@ -3,7 +3,7 @@ import { ArrowRight, Lock } from "lucide-react";
 import { SectionShell, HOMEPAGE_GOLD, mono } from "@/components/homepage/homepagePrimitives";
 
 const stages = [
-  { label: "Test a Decision", state: "Open entry", detail: "The public start point. Submit one live decision under pressure.", href: "/diagnostics/fast", open: true },
+  { label: "Submit One Real Decision", state: "Open entry", detail: "The public start point. Submit one live decision under pressure.", href: "/diagnostics/fast", open: true },
   { label: "Personal Decision Audit", state: "Shown when earned", detail: "Used when the issue appears personal, mandate-related, or obligation-bound." },
   { label: "Constitutional Diagnostic", state: "Shown when earned", detail: "Used when governance readiness and authority structure must be tested." },
   { label: "Executive Reporting", state: "Shown when earned", detail: "Opens when the evidence supports a governed report." },
@@ -60,7 +60,7 @@ export default function EarnedProgressionBlock() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Test a Decision
+                    Submit One Real Decision
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>

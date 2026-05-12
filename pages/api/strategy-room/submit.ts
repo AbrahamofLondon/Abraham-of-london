@@ -84,6 +84,32 @@ export default async function handler(
       },
     });
 
+    // Non-fatal: strategy session → verification record + boardroom governed review obligation
+    try {
+      const { createMaterialOutputVerificationRecord, createGovernedReviewObligation } =
+        await import("@/lib/product/signal-verification-record");
+      await Promise.all([
+        createMaterialOutputVerificationRecord({
+          source: "strategy-room",
+          sourceId: intake.id,
+          userEmail: email || null,
+          conditionName: `Strategy Room session — ${organisation}`,
+          severity: null,
+          score: null,
+          operatorReviewRequired: false,
+          dueDays: 30,
+        }),
+        createGovernedReviewObligation({
+          source: "boardroom-session",
+          sourceId: intake.id,
+          userEmail: email || null,
+          summary: `Boardroom review obligation — ${organisation} strategy session`,
+        }),
+      ]);
+    } catch {
+      // non-fatal
+    }
+
     return res.status(201).json({
       success: true,
       intakeId: intake.id,

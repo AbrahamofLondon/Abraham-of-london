@@ -10,6 +10,14 @@ const trustCards = [
     body: "The system will not call an outcome verified unless evidence is provided. Self-reported outcomes do not become independent proof by tone alone.",
   },
   {
+    title: "Evidence posture and operator review",
+    body: "Material claims pass through evidence posture and operator review before they affect institutional memory. Self-report alone is not sufficient.",
+  },
+  {
+    title: "Correction is part of the governance",
+    body: "If the system was wrong, the record can reflect it. Prior findings can be downgraded, reopened, or annotated without deleting what was recorded.",
+  },
+  {
     title: "Refusal when evidence is weak",
     body: "If the case is not ready, escalation is not earned. The system can withhold progression instead of pretending the record is stronger than it is.",
   },
@@ -31,7 +39,7 @@ export default function TrustArchitectureBlock() {
       title="What the system will not pretend."
       description="Trust is created by rule discipline, not by slogans. These are public-facing constraints on what the system will say, label, verify, or suppress."
     >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {trustCards.map((card) => (
           <div key={card.title} className="border border-white/[0.08] bg-white/[0.02] p-5">
             <p

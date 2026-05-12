@@ -12,6 +12,13 @@ export type DiagnosticSubmitConfig = {
   diagnosticType: string;
   extractAnswers: (body: any) => Array<number | boolean | null | undefined>;
   buildPayload?: (body: any, req: NextApiRequest) => Record<string, any>;
+  /** Optional hook called after record creation. Non-fatal — errors are swallowed. */
+  afterCreate?: (data: {
+    score: number;
+    severity: string;
+    reference: string;
+    userEmail: string | null;
+  }) => Promise<void>;
 };
 
 export async function handleDiagnosticSubmit(
@@ -74,6 +81,19 @@ export async function handleDiagnosticSubmit(
       createdAt: record.createdAt,
       payload: record.payload,
     });
+
+    if (config.afterCreate) {
+      try {
+        await config.afterCreate({
+          score,
+          severity,
+          reference: record.reference,
+          userEmail: record.userEmail ?? null,
+        });
+      } catch {
+        // non-fatal — verification record creation must not block the result
+      }
+    }
 
     return res.status(200).json({
       ok: true,

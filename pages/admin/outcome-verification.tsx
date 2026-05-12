@@ -12,8 +12,9 @@ import Layout from "@/components/Layout";
 import { requireAdminPage } from "@/lib/access/server";
 import {
   getPendingOperatorReviews,
+  getOperatorReviewQueuePosture,
 } from "@/lib/product/operator-outcome-review";
-import type { PendingReviewItem, OperatorReviewOutcome } from "@/lib/product/operator-outcome-review";
+import type { PendingReviewItem, OperatorReviewOutcome, ReviewQueuePosture } from "@/lib/product/operator-outcome-review";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -22,9 +23,30 @@ type PageProps = {
   items: PendingReviewItem[];
   total: number;
   operatorEmail: string;
+  queuePosture: ReviewQueuePosture;
 };
 
-const Page: NextPage<PageProps> = ({ items, total, operatorEmail }) => {
+const SLA_BAND_COLOR: Record<ReviewQueuePosture["reviewSlaBand"], string> = {
+  GREEN:    "rgba(52,211,153,0.15)",
+  AMBER:    "rgba(251,191,36,0.15)",
+  RED:      "rgba(239,68,68,0.15)",
+  CRITICAL: "rgba(239,68,68,0.25)",
+};
+const SLA_BAND_BORDER: Record<ReviewQueuePosture["reviewSlaBand"], string> = {
+  GREEN:    "rgba(52,211,153,0.3)",
+  AMBER:    "rgba(251,191,36,0.3)",
+  RED:      "rgba(239,68,68,0.4)",
+  CRITICAL: "rgba(239,68,68,0.6)",
+};
+const SLA_BAND_TEXT: Record<ReviewQueuePosture["reviewSlaBand"], string> = {
+  GREEN:    "rgba(52,211,153,0.9)",
+  AMBER:    "rgba(251,191,36,0.9)",
+  RED:      "rgba(239,68,68,0.9)",
+  CRITICAL: "rgb(239,68,68)",
+};
+
+const Page: NextPage<PageProps> = ({ items, total, operatorEmail, queuePosture }) => {
+  const band = queuePosture.reviewSlaBand;
   return (
     <Layout title="Outcome Verification Review | Admin" description="Operator review queue for verification records.">
       <main className="min-h-screen px-6 py-14" style={{ backgroundColor: "rgb(3,3,5)" }}>
@@ -40,6 +62,31 @@ const Page: NextPage<PageProps> = ({ items, total, operatorEmail }) => {
               {total} record{total !== 1 ? "s" : ""} pending operator review.
               Reviewing as <span className="text-white/70">{operatorEmail}</span>.
             </p>
+          </div>
+
+          {/* ── Queue posture banner ──────────────────────────────── */}
+          <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5"
+               style={{ border: `1px solid ${SLA_BAND_BORDER[band]}`, background: SLA_BAND_COLOR[band], padding: "1rem 1.25rem" }}>
+            <div>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>SLA Band</p>
+              <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: SLA_BAND_TEXT[band], fontWeight: 600 }}>{band}</p>
+            </div>
+            <div>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Pending</p>
+              <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: "rgba(255,255,255,0.8)" }}>{queuePosture.pendingCount}</p>
+            </div>
+            <div>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Critical</p>
+              <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: queuePosture.criticalPendingCount > 0 ? "rgb(239,68,68)" : "rgba(255,255,255,0.8)" }}>{queuePosture.criticalPendingCount}</p>
+            </div>
+            <div>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Overdue</p>
+              <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: queuePosture.overdueReviewCount > 0 ? "rgba(251,191,36,0.9)" : "rgba(255,255,255,0.8)" }}>{queuePosture.overdueReviewCount}</p>
+            </div>
+            <div>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Oldest (days)</p>
+              <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: queuePosture.oldestPendingAge > 14 ? "rgba(251,191,36,0.9)" : "rgba(255,255,255,0.8)" }}>{queuePosture.oldestPendingAge}</p>
+            </div>
           </div>
 
           {items.length === 0 ? (
@@ -244,13 +291,17 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   if (!auth.authorized) return auth.redirect as unknown as ReturnType<GetServerSideProps<PageProps>>;
 
   const session = await getServerSession(ctx.req, ctx.res, authOptions);
-  const items = await getPendingOperatorReviews({ limit: 50, offset: 0 });
+  const [items, queuePosture] = await Promise.all([
+    getPendingOperatorReviews({ limit: 50, offset: 0 }),
+    getOperatorReviewQueuePosture(),
+  ]);
 
   return {
     props: {
       items,
       total: items.length,
       operatorEmail: session?.user?.email ?? "",
+      queuePosture,
     },
   };
 };

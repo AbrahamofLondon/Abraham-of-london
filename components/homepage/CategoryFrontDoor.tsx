@@ -1,11 +1,12 @@
 import HomepageHero from "@/components/homepage/HomepageHero";
 import MarketDefectBlock from "@/components/homepage/MarketDefectBlock";
-import RefusalDemo from "@/components/homepage/RefusalDemo";
 import OutputArtifactPreview from "@/components/homepage/OutputArtifactPreview";
-import MemoryContinuityPreview from "@/components/homepage/MemoryContinuityPreview";
-import EarnedProgressionBlock from "@/components/homepage/EarnedProgressionBlock";
 import TrustArchitectureBlock from "@/components/homepage/TrustArchitectureBlock";
-import BodyOfWorkBehindSystem from "@/components/homepage/BodyOfWorkBehindSystem";
+import VerificationSpineBlock from "@/components/homepage/VerificationSpineBlock";
+import RefusalDemo from "@/components/homepage/RefusalDemo";
+import EarnedProgressionBlock from "@/components/homepage/EarnedProgressionBlock";
+import MemoryContinuityPreview from "@/components/homepage/MemoryContinuityPreview";
+import OperatorPilotBlock from "@/components/homepage/OperatorPilotBlock";
 import HomepageFinalCTA from "@/components/homepage/HomepageFinalCTA";
 
 export default function CategoryFrontDoor() {
@@ -13,12 +14,13 @@ export default function CategoryFrontDoor() {
     <>
       <HomepageHero />
       <MarketDefectBlock />
-      <RefusalDemo />
       <OutputArtifactPreview />
-      <MemoryContinuityPreview />
-      <EarnedProgressionBlock />
       <TrustArchitectureBlock />
-      <BodyOfWorkBehindSystem />
+      <VerificationSpineBlock />
+      <RefusalDemo />
+      <EarnedProgressionBlock />
+      <MemoryContinuityPreview />
+      <OperatorPilotBlock />
       <HomepageFinalCTA />
     </>
   );

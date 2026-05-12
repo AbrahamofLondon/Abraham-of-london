@@ -33,6 +33,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
 
+      // Non-fatal verification record — instrument completion creates a future accountability point
+      try {
+        const { createMaterialOutputVerificationRecord } = await import(
+          "@/lib/product/signal-verification-record"
+        );
+        await createMaterialOutputVerificationRecord({
+          source: "decision-instrument",
+          sourceId: journeyKey,
+          userEmail: typeof email === "string" ? email : null,
+          conditionName: typeof instrumentSlug === "string" ? instrumentSlug : null,
+          severity: null,
+          score: null,
+          recommendedMove: null,
+          operatorReviewRequired: false,
+          dueDays: 30,
+        });
+      } catch {
+        // non-fatal
+      }
+
       return res.status(200).json({ ok: true, journeyKey });
     } catch (error) {
       console.error("[instrument-results] POST error:", error);
