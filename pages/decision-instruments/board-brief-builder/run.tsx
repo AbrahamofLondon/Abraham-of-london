@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import BoardBriefBuilderRunner from "@/components/instruments/BoardBriefBuilderRunner";
 import { track } from "@/lib/analytics/track";
 import type { BoardBriefResult } from "@/lib/instruments/board-brief-template/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const BoardBriefRun: NextPage = () => {
   const [result, setResult] = React.useState<BoardBriefResult | null>(null);
@@ -33,6 +34,7 @@ const BoardBriefRun: NextPage = () => {
       pdfHref={resultKey ? `/api/pdf/decision-instrument-dossier?slug=board-brief-template&resultKey=${resultKey}` : undefined}
       nextStepLabel="View boardroom archive"
       nextStepHref="/boardroom"
+      signalAuthority={result ? buildInstrumentSignalAuthority("board-brief-builder", result.readinessScore, result.briefReadiness, result.boardroomReadinessSignal) : undefined}
       valueReceipt={result ? [
         { label: "Board readiness", value: `${result.briefReadiness.replace(/_/g, " ")} — ${result.readinessScore}/100` },
         { label: "Decision posture", value: result.decisionPosture.replace(/_/g, " ").toLowerCase() },

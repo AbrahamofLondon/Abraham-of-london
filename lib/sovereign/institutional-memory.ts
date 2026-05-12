@@ -13,7 +13,11 @@
  * - Arc narration (the organisation's trajectory story)
  * - Improvement velocity tracking
  * - Unresolved signal tracking
+ *
+ * SERVER_ONLY — raw pattern detection and memory scoring must never reach the client bundle.
  */
+
+import "server-only";
 
 import type { IntelligenceSignal, SignalSeverity } from "./intelligence-signals";
 

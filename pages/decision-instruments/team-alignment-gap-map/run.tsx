@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import TeamAlignmentGapMapRunner from "@/components/instruments/TeamAlignmentGapMapRunner";
 import { track } from "@/lib/analytics/track";
 import type { AlignmentResult } from "@/lib/instruments/team-alignment-gap-map/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const TeamAlignmentRun: NextPage = () => {
   const [result, setResult] = React.useState<AlignmentResult | null>(null);
@@ -37,6 +38,7 @@ const TeamAlignmentRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=team-alignment-gap-map"
       nextStepLabel="Map mandate clarity"
       nextStepHref={nextHref}
+      signalAuthority={result ? buildInstrumentSignalAuthority("team-alignment-gap-map", result.overallAlignmentScore, result.alignmentBand, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Classification", value: `${result.alignmentBand} — ${result.overallAlignmentScore}/100` },
         { label: "Divergence signal", value: result.divergenceSignal },

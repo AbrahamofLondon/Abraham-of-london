@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import StructuralFailureCanvasRunner from "@/components/instruments/StructuralFailureCanvasRunner";
 import { track } from "@/lib/analytics/track";
 import type { FailureResult } from "@/lib/instruments/structural-failure-diagnostic-canvas/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const StructuralFailureRun: NextPage = () => {
   const [result, setResult] = React.useState<FailureResult | null>(null);
@@ -37,6 +38,7 @@ const StructuralFailureRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=structural-failure-diagnostic-canvas"
       nextStepLabel="Select intervention path"
       nextStepHref={nextHref}
+      signalAuthority={result ? buildInstrumentSignalAuthority("structural-failure-diagnostic-canvas", result.healthScore, result.failurePattern, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Structural health", value: `${result.healthScore}/100` },
         { label: "Failure pattern", value: result.failurePattern.replace(/_/g, " ").toLowerCase() },

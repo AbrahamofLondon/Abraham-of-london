@@ -32,6 +32,10 @@ import { extractAnchors } from "@/lib/server/decision/anchor-extractor.server";
 import { detectAnchorContradictions } from "@/lib/server/decision/contradiction-engine.server";
 import { composeAnchorNarrative } from "@/lib/server/decision/narrative-engine.server";
 import type { DecisionAnchors } from "@/lib/server/decision/anchor-types.server";
+import { detectIntelligenceSignals } from "@/lib/sovereign/intelligence-signals";
+import { buildSovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
+import { resolveComparisonPresentation } from "@/lib/product/comparison-basis-presenter";
+import type { SignalInput } from "@/lib/sovereign/intelligence-signals";
 
 const requestSchema = z.object({
   answers: z.record(z.string()),
@@ -422,6 +426,70 @@ export default async function handler(
       result.anchorNarrative = anchorNarrative;
     } catch {
       // Non-fatal: anchor narrative enrichment failed, static result still valid
+    }
+
+    // 11. SIGNAL SUPREMACY LAYER — named institutional signals + comparison band
+    try {
+      const signalInput: SignalInput = {
+        posture: publicState === "DISORDERED" ? "DISORDERED"
+          : publicState === "MISALIGNED" ? "MISALIGNED"
+          : publicState === "DRIFTING" ? "DRIFTING"
+          : "ALIGNED",
+        authorityType: condition === "authority" ? "CONTESTED"
+          : condition === "instability" ? "UNCLEAR"
+          : condition === "execution" ? "DELEGATED"
+          : "DIRECT",
+        readinessTier: c3.specificityScore >= 0.7 ? "ADVISORY"
+          : c3.specificityScore >= 0.5 ? "EXECUTION"
+          : "FRAGILE",
+        trajectory: (condition === "execution" || condition === "instability") ? "DETERIORATING" : "STABLE",
+        failureModeCount: [
+          condition === "authority",
+          condition === "execution",
+          result.costOfInaction?.exposureBand === "critical" || result.costOfInaction?.exposureBand === "high",
+        ].filter(Boolean).length,
+        narrativeCoherence: c3.specificityScore * 100,
+        interventionReadiness: committed ? 70 : 30,
+        sessionCount: result.memoryTrend?.totalDecisions ?? 0,
+      };
+
+      const rawSignals = detectIntelligenceSignals(signalInput);
+      const assessment = buildSovereignSignalAssessment(rawSignals, "SINGLE_SOURCE_INDICATED");
+      if (assessment.status === "ASSESSED" && assessment.signals.length > 0) {
+        result.detectedSignals = assessment.signals;
+        result.highestSignalSeverity = assessment.highestSeverity;
+        result.signalExecutiveSummary = assessment.executiveSummary;
+      }
+
+      const compPresentation = resolveComparisonPresentation("fast-diagnostic", c3.specificityScore * 100);
+      if (compPresentation.canSurface && compPresentation.band) {
+        result.comparisonBand = compPresentation.band;
+        result.comparisonBandCaveat = compPresentation.caveat;
+        result.comparisonBasisLabel = compPresentation.basisLabel;
+        result.comparisonMaturityLevel = compPresentation.basis.maturityLevel;
+      }
+
+      // P1 — Create durable signal verification record (future accountability)
+      try {
+        const { createSignalVerificationRecord } = await import("@/lib/product/signal-verification-record");
+        await createSignalVerificationRecord({
+          sourceSurface: "fast-diagnostic",
+          sourceId: result.caseRef,
+          originalSignal: result.detectedSignals?.[0]?.signalName ?? result.condition,
+          originalSeverity: result.highestSignalSeverity ?? null,
+          originalScore: Math.round(c3.specificityScore * 100),
+          comparisonBasis: compPresentation.basisLabel,
+          comparisonMaturityLevel: compPresentation.basis.maturityLevel,
+          recommendedMove: result.synthesis?.concreteMove ?? null,
+          operatorReviewRequired: result.highestSignalSeverity === "CRITICAL" || result.highestSignalSeverity === "ALERT",
+          userEmail: spine.email ?? null,
+          dueDays: 14,
+        });
+      } catch {
+        // Non-fatal: verification record creation must not block the result
+      }
+    } catch {
+      // Non-fatal: signal detection should never block a result
     }
 
     // Apply degradation if shield flagged this request

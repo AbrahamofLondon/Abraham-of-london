@@ -253,6 +253,56 @@ export default function DecisionInstrumentsPage() {
           </div>
         </section>
 
+        {/* ── P3: SIGNAL PRIMER — What this system names and recognises ─── */}
+        <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+          <div className="mx-auto max-w-6xl px-6 lg:px-12 py-8">
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "1rem" }}>
+              What this system names and acts on
+            </p>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+              {[
+                {
+                  severity: "CRITICAL",
+                  color: "rgba(239,68,68,0.70)",
+                  bg: "rgba(239,68,68,0.04)",
+                  condition: "Decision exposure compounding",
+                  tag: "Unresolved cost is accumulating faster than correction is being applied — the window is narrowing.",
+                },
+                {
+                  severity: "ALERT",
+                  color: "rgba(249,115,22,0.68)",
+                  bg: "rgba(249,115,22,0.04)",
+                  condition: "Authority misalignment detected",
+                  tag: "The mandate to act and the authority to act are not aligned — decisions made in this state carry delegation risk.",
+                },
+                {
+                  severity: "CONCERN",
+                  color: "rgba(251,191,36,0.65)",
+                  bg: "rgba(251,191,36,0.03)",
+                  condition: "Governance drift active",
+                  tag: "Decision processes have drifted outside their designed boundaries — correction is achievable but the window narrows.",
+                },
+                {
+                  severity: "WATCH",
+                  color: "rgba(110,231,183,0.55)",
+                  bg: "rgba(110,231,183,0.025)",
+                  condition: "Structural health confirmed",
+                  tag: "Fundamentals are within functional range — the instrument confirms trajectory and identifies the next maintenance requirement.",
+                },
+              ].map(({ severity, color, bg, condition, tag }) => (
+                <div key={severity} style={{ border: `1px solid ${color}20`, backgroundColor: bg, padding: "0.85rem 1rem" }}>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color, marginBottom: "0.4rem" }}>{severity}</p>
+                  <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.35, color: "rgba(255,255,255,0.78)", marginBottom: "0.4rem" }}>{condition}</p>
+                  <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>{tag}</p>
+                </div>
+              ))}
+            </div>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem" }}>
+              Each instrument returns a named condition, consequence path, and next admissible move — not a score alone.
+            </p>
+          </div>
+        </section>
+
         {/* ── 3. CORE GRID ────────────────────────────────────────────────── */}
         <section id="instruments">
           <div className="mx-auto max-w-6xl px-6 lg:px-12">

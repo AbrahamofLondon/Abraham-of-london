@@ -1,3 +1,5 @@
+import "server-only";
+
 import { listMandates } from "./mandate-store";
 
 export function calculateRevenue() {

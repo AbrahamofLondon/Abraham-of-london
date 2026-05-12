@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import StrategicPriorityStackRunner from "@/components/instruments/StrategicPriorityStackRunner";
 import { track } from "@/lib/analytics/track";
 import type { PriorityStackResult } from "@/lib/instruments/strategic-priority-stack-builder/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const PriorityStackRun: NextPage = () => {
   const [result, setResult] = React.useState<PriorityStackResult | null>(null);
@@ -37,6 +38,7 @@ const PriorityStackRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=strategic-priority-stack-builder"
       nextStepLabel="Analyse institutional consequence"
       nextStepHref={nextHref}
+      signalAuthority={result ? buildInstrumentSignalAuthority("strategic-priority-stack-builder", null, result.resourcePressureBand, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Priorities ranked", value: `${result.stack.length} items · resource pressure: ${result.resourcePressureBand}` },
         { label: "Conflicts detected", value: result.conflicts.length > 0 ? `${result.conflicts.length} conflict${result.conflicts.length !== 1 ? "s" : ""}` : "None" },

@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import ExecutionRiskIndexRunner from "@/components/instruments/ExecutionRiskIndexRunner";
 import { track } from "@/lib/analytics/track";
 import type { ExecutionRiskResult } from "@/lib/instruments/execution-risk-index/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const ExecutionRiskRun: NextPage = () => {
   const [result, setResult] = React.useState<ExecutionRiskResult | null>(null);
@@ -37,6 +38,7 @@ const ExecutionRiskRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=execution-risk-index"
       nextStepLabel={result?.riskBand === "CRITICAL" ? "Enter Strategy Room" : "Analyse institutional consequence"}
       nextStepHref={result?.riskBand === "CRITICAL" ? "/strategy-room" : nextHref}
+      signalAuthority={result ? buildInstrumentSignalAuthority("execution-risk-index", result.riskIndex, result.riskBand, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Classification", value: `${result.riskBand} — ${result.riskIndex}/100` },
         { label: "Decay projection", value: result.decayProjection },

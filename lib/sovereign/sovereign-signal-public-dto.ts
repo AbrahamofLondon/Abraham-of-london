@@ -67,6 +67,9 @@ export type SovereignSignalPublicSummary = {
   /** Signal display name */
   signalName: string;
 
+  /** Short UI tag — one phrase describing the pattern signature */
+  patternTag: string;
+
   /** Severity classification */
   severityBand: SignalSeverity;
 
@@ -251,6 +254,7 @@ export function toSovereignSignalPublicSummary(
   return {
     signalId: signal.id,
     signalName: signal.name,
+    patternTag: signal.tag,
     severityBand: signal.severity,
     confidenceBand,
     evidencePosture,

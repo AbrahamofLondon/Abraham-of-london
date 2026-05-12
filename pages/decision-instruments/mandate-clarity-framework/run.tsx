@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import MandateClarityRunner from "@/components/instruments/MandateClarityRunner";
 import { track } from "@/lib/analytics/track";
 import type { MandateResult } from "@/lib/instruments/mandate-clarity/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const MandateClarityRun: NextPage = () => {
   const [result, setResult] = React.useState<MandateResult | null>(null);
@@ -23,6 +24,7 @@ const MandateClarityRun: NextPage = () => {
 
   return (
     <InstrumentShell title="Mandate Clarity Framework" slug="mandate-clarity-framework" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=mandate-clarity-framework" nextStepLabel="Test the organisational structure" nextStepHref={nextHref}
+      signalAuthority={result ? buildInstrumentSignalAuthority("mandate-clarity-framework", result.clarityScore, result.authorityType, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Authority type", value: `${result.authorityType} — ${result.clarityScore}/100` },
         { label: "Decision risk", value: result.decisionRiskLevel.replace(/_/g, " ").toLowerCase() },

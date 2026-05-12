@@ -8,6 +8,7 @@ import { track } from "@/lib/analytics/track";
 import type { ExposureResult } from "@/lib/instruments/decision-exposure/engine";
 import type { MandateResult } from "@/lib/instruments/mandate-clarity/engine";
 import type { InterventionResult } from "@/lib/instruments/intervention-path/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -51,8 +52,19 @@ const OperatorPackRun: NextPage = () => {
     { label: "Memory entry", value: "Saved to governed memory" },
   ] : undefined;
 
+  const packSignalAuthority = (complete && exposure && intervention)
+    ? buildInstrumentSignalAuthority(
+        "operator-decision-pack",
+        exposure.exposureScore,
+        intervention.executionBlocked ? "BLOCKED" : intervention.recommendedPath,
+        intervention.executionBlocked
+          ? (intervention.blockReason ?? "Execution blocked — authority must be reconstituted.")
+          : (intervention.rationale[0] ?? intervention.recommendedPath),
+      )
+    : undefined;
+
   return (
-    <InstrumentShell title="Operator Decision Pack" slug="operator-decision-pack" completed={complete} nextStepLabel="Enter Strategy Room" nextStepHref={nextHref} valueReceipt={packReceipt}>
+    <InstrumentShell title="Operator Decision Pack" slug="operator-decision-pack" completed={complete} nextStepLabel="Enter Strategy Room" nextStepHref={nextHref} valueReceipt={packReceipt} signalAuthority={packSignalAuthority}>
       {/* Progress */}
       <div className="flex gap-1 mb-6">
         {(["exposure", "mandate", "intervention", "dossier"] as Stage[]).map((s, i) => (

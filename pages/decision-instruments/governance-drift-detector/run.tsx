@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import GovernanceDriftDetectorRunner from "@/components/instruments/GovernanceDriftDetectorRunner";
 import { track } from "@/lib/analytics/track";
 import type { DriftResult } from "@/lib/instruments/governance-drift-detector/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const GovernanceDriftRun: NextPage = () => {
   const [result, setResult] = React.useState<DriftResult | null>(null);
@@ -33,6 +34,7 @@ const GovernanceDriftRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=governance-drift-detector"
       nextStepLabel={result?.driftBand === "CRITICAL" ? "Review retained oversight" : "View oversight command"}
       nextStepHref={result?.driftBand === "CRITICAL" ? "/engagements/retained-oversight" : "/oversight"}
+      signalAuthority={result ? buildInstrumentSignalAuthority("governance-drift-detector", result.driftScore, result.driftBand, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Classification", value: `${result.driftBand} — ${result.driftScore}/100` },
         { label: "Drift pattern", value: result.driftPattern.replace(/_/g, " ").toLowerCase() },

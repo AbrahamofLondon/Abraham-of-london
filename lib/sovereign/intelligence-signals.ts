@@ -7,6 +7,9 @@
  *
  * Each signal is: a named pattern + diagnostic signature + prevalence + narrative
  * + statistical outcomes + content brief mapping.
+ *
+ * SERVER_ONLY — raw detection predicates, formula weights, and triggering thresholds
+ * are defined in this file. They must NEVER reach the client bundle.
  */
 
 // ─── Types ───────────────────────────────────────────────────────────────────

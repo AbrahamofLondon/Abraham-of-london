@@ -7,6 +7,8 @@
  * Types only.
  */
 
+import type { SovereignSignalPublicSummary } from "@/lib/sovereign/sovereign-signal-public-dto";
+
 export type FastDiagnosticRequest = {
   answers: Record<string, string>;
   committed: boolean;
@@ -121,4 +123,49 @@ export type FastDiagnosticResult = {
     requiredMove: string;
     cta: string;
   };
+
+  // ── SIGNAL SUPREMACY LAYER (v2) ───────────────────────────────────────
+
+  /**
+   * Named intelligence signals detected from the diagnostic inputs.
+   * Public-safe DTOs only — raw detection predicates never leave the server.
+   * Maximum 3 signals surfaced; ordered by severity (CRITICAL first).
+   */
+  detectedSignals?: SovereignSignalPublicSummary[];
+
+  /**
+   * Highest severity across all detected signals — null when none detected.
+   * Used for quick conditional rendering without iterating detectedSignals.
+   */
+  highestSignalSeverity?: "WATCH" | "CONCERN" | "ALERT" | "CRITICAL" | null;
+
+  /**
+   * Executive summary of the signal assessment — one sentence.
+   * Present when detectedSignals is non-empty.
+   */
+  signalExecutiveSummary?: string | null;
+
+  /**
+   * Comparison band for this case against the observed platform dataset.
+   * Present when the basis is sufficient (maturityLevel ≥ 1).
+   */
+  comparisonBand?: string | null;
+
+  /**
+   * Governance caveat for any comparison band claim surfaced.
+   * Always render below the band label if comparisonBand is present.
+   */
+  comparisonBandCaveat?: string | null;
+
+  /**
+   * Public-safe label describing the comparison basis type (P9 — distribution maturity).
+   * Example: "Compared against observed platform records."
+   */
+  comparisonBasisLabel?: string | null;
+
+  /**
+   * Distribution maturity level 0–5 for this comparison basis (P9).
+   * Surfaces the quality signal of the comparison claim.
+   */
+  comparisonMaturityLevel?: number | null;
 };

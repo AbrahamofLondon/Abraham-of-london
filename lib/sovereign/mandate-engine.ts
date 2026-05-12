@@ -1,3 +1,5 @@
+import "server-only";
+
 import { listOpenInterventions } from "@/lib/constitution/intervention-store";
 import { createMandate } from "./mandate-store";
 

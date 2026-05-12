@@ -7,6 +7,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
+import { buildInstrumentSignalAuthority, severityColor as instrSeverityColor, severityBg as instrSeverityBg } from "@/lib/product/instrument-signal-authority";
 import {
   mergeExecutiveFindingsIntoThread,
   readConstitutionalThread,
@@ -1149,6 +1150,66 @@ function ResultSurface({
             </section>
           </div>
         </div>
+
+        {/* ── SIGNAL AUTHORITY BLOCK (P5/P13) ── */}
+        {(() => {
+          const erAuthority = buildInstrumentSignalAuthority(
+            "executive-reporting",
+            clarityScore,
+            constitution.orgState || "DRIFTING",
+            summary.nextAdmittedStep || nextAction,
+          );
+          if (!erAuthority) return null;
+          const sv = instrSeverityColor(erAuthority.severity);
+          const bg = instrSeverityBg(erAuthority.severity);
+          const mono7: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase" as const };
+          const conseq = erAuthority.consequence;
+          return (
+            <div style={{ border: `1px solid ${sv}22`, backgroundColor: `${bg}`, padding: "20px 24px", marginBottom: "18px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                <span style={{ ...mono7, color: sv }}>{erAuthority.severity}</span>
+                {erAuthority.comparisonBand && <span style={{ ...mono7, color: "rgba(255,255,255,0.28)" }}>{erAuthority.comparisonBand}</span>}
+              </div>
+              <div style={{ borderTop: `1px solid ${sv}18`, paddingTop: "10px", marginBottom: "12px" }} />
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.45, color: "rgba(255,255,255,0.82)", marginBottom: "4px" }}>
+                {erAuthority.conditionName}
+              </p>
+              <p style={{ ...mono7, color: "rgba(255,255,255,0.28)", marginBottom: "14px" }}>{erAuthority.patternTag}</p>
+              {conseq && (
+                <div style={{ marginBottom: "14px" }}>
+                  <p style={{ ...mono7, color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>Consequence path — if unresolved</p>
+                  {[
+                    { label: "30d", text: conseq.thirtyDays, color: "rgba(253,186,116,0.70)" },
+                    { label: "60d", text: conseq.sixtyDays, color: "rgba(249,115,22,0.65)" },
+                    { label: "90d", text: conseq.ninetyDays, color: "rgba(239,68,68,0.60)" },
+                  ].map(({ label, text, color }) => (
+                    <div key={label} style={{ display: "flex", gap: "12px", alignItems: "flex-start", borderLeft: `2px solid ${color}`, paddingLeft: "10px", marginBottom: "6px" }}>
+                      <span style={{ ...mono7, color: "rgba(255,255,255,0.25)", minWidth: "24px", flexShrink: 0, paddingTop: "1px" }}>{label}</span>
+                      <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.48)" }}>{text}</p>
+                    </div>
+                  ))}
+                  <p style={{ ...mono7, color: "rgba(255,255,255,0.18)", marginTop: "8px", lineHeight: 1.6 }}>
+                    {erAuthority.caveat}
+                  </p>
+                </div>
+              )}
+              <div style={{ borderTop: `1px solid ${sv}12`, paddingTop: "10px", display: "grid", gap: "8px" }}>
+                {erAuthority.differentiator && (
+                  <div>
+                    <p style={{ ...mono7, color: "rgba(255,255,255,0.25)", marginBottom: "3px" }}>What changes the outcome</p>
+                    <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.48)" }}>{erAuthority.differentiator}</p>
+                  </div>
+                )}
+                {erAuthority.nextMove && (
+                  <div style={{ borderLeft: `2px solid ${GOLD}55`, paddingLeft: "10px" }}>
+                    <p style={{ ...mono7, color: `${GOLD}88`, marginBottom: "3px" }}>Next admissible move</p>
+                    <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.60)" }}>{erAuthority.nextMove}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── INSTITUTIONAL CASE CORRIDOR ── */}
         {(result as any).institutionalCase && (

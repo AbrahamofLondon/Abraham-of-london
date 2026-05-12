@@ -80,6 +80,7 @@ import {
   buildGovernedMemoryFromEvidenceCapture,
   selectStrategyEntryMemory,
 } from "@/lib/product/governed-memory-presenter";
+import { buildInstrumentSignalAuthority, severityColor as srSeverityColor, severityBg as srSeverityBg } from "@/lib/product/instrument-signal-authority";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION AUTHORITY GATE
@@ -2327,6 +2328,60 @@ export default function StrategyRoomPage({
                 </p>
               </div>
             </div>
+
+            {/* ── SIGNAL AUTHORITY — Governing condition made explicit ── */}
+            {(() => {
+              const srSummary = localSummary(canonical);
+              const srAuthority = buildInstrumentSignalAuthority(
+                "strategy-room",
+                srSummary.confidence,
+                srSummary.orgState || "DRIFTING",
+                srSummary.nextAction || "Execute the governed directive and record the checkpoint.",
+              );
+              const sv = srSeverityColor(srAuthority.severity);
+              const bg = srSeverityBg(srAuthority.severity);
+              const srMono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase" as const };
+              const conseq = srAuthority.consequence;
+              return (
+                <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
+                  <div style={{ border: `1px solid ${sv}22`, backgroundColor: bg, padding: "16px 20px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+                      <span style={{ ...srMono, color: sv }}>{srAuthority.severity} · GOVERNING CONDITION</span>
+                      {srAuthority.comparisonBand && <span style={{ ...srMono, color: "rgba(255,255,255,0.28)" }}>{srAuthority.comparisonBand}</span>}
+                    </div>
+                    <div style={{ borderTop: `1px solid ${sv}18`, paddingTop: "10px", marginBottom: "10px" }} />
+                    <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.45, color: "rgba(255,255,255,0.82)", marginBottom: "3px" }}>
+                      {srAuthority.conditionName}
+                    </p>
+                    <p style={{ ...srMono, color: "rgba(255,255,255,0.28)", marginBottom: "12px" }}>{srAuthority.patternTag}</p>
+                    <div style={{ marginBottom: "12px" }}>
+                      <p style={{ ...srMono, color: "rgba(255,255,255,0.26)", marginBottom: "7px" }}>Consequence if unresolved</p>
+                      {[
+                        { label: "30d", text: conseq.thirtyDays, color: "rgba(253,186,116,0.65)" },
+                        { label: "60d", text: conseq.sixtyDays, color: "rgba(249,115,22,0.60)" },
+                        { label: "90d", text: conseq.ninetyDays, color: "rgba(239,68,68,0.55)" },
+                      ].map(({ label, text, color }) => (
+                        <div key={label} style={{ display: "flex", gap: "12px", alignItems: "flex-start", borderLeft: `2px solid ${color}`, paddingLeft: "10px", marginBottom: "5px" }}>
+                          <span style={{ ...srMono, color: "rgba(255,255,255,0.24)", minWidth: "24px", flexShrink: 0, paddingTop: "1px" }}>{label}</span>
+                          <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>{text}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ borderTop: `1px solid ${sv}12`, paddingTop: "10px", display: "grid", gap: "7px" }}>
+                      <div>
+                        <p style={{ ...srMono, color: "rgba(255,255,255,0.24)", marginBottom: "3px" }}>What changes the outcome</p>
+                        <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>{srAuthority.differentiator}</p>
+                      </div>
+                      <div style={{ borderLeft: `2px solid ${GOLD}55`, paddingLeft: "10px" }}>
+                        <p style={{ ...srMono, color: `${GOLD}88`, marginBottom: "3px" }}>Next admissible move</p>
+                        <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.60)" }}>{srAuthority.nextMove}</p>
+                      </div>
+                    </div>
+                    <p style={{ ...srMono, color: "rgba(255,255,255,0.16)", marginTop: "10px", lineHeight: 1.6 }}>{srAuthority.caveat}</p>
+                  </div>
+                </div>
+              );
+            })()}
 
             <ExecutionEntryState thread={thread} canonical={canonical} checkoutConfirmed={checkoutConfirmed} />
 

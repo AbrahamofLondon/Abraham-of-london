@@ -12,9 +12,10 @@
  * - Thin states are returned honestly when evidence is insufficient.
  * - Every field is source-labelled.
  * - Suppression summary always present.
+ *
+ * SERVER_ONLY — must never be imported from client components or edge runtime.
  */
 
-// Server-only module
 import type { DecisionRole } from "@/lib/access/role-contract";
 import type { SovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
 import type { KernelSafeSummary } from "@/lib/product/kernel-safe-summary";

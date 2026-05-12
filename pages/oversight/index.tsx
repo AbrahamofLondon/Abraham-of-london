@@ -225,6 +225,113 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                 </section>
               </section>
 
+              {/* P6 — OVERSIGHT SIGNAL AUTHORITY: signal recurrence, cadence reliability, institutional signal tracking */}
+              <section style={{ border: "1px solid rgba(201,169,110,0.14)", background: "rgba(201,169,110,0.025)", padding: "1rem" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+                  Retained signal authority
+                </p>
+                <div className="mt-3 grid gap-3 md:grid-cols-3">
+                  <div>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Signal recurrence</p>
+                    <p className="text-sm text-white/60">
+                      {summary.retainedMemory.oversightCycles > 0
+                        ? `${summary.retainedMemory.oversightCycles} oversight cycle${summary.retainedMemory.oversightCycles !== 1 ? "s" : ""} retained. Signal patterns are tracked across cycles for recurrence and escalation.`
+                        : "No oversight cycles retained yet. Signal recurrence tracking begins after the first completed review cycle."}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Cadence reliability</p>
+                    <p className="text-sm text-white/60">
+                      {cadencePosture
+                        ? cadencePosture.reliability >= 0.8
+                          ? `${Math.round(cadencePosture.reliability * 100)}% — cadence is well-maintained. Signals are captured on a reliable review rhythm.`
+                          : cadencePosture.reliability >= 0.5
+                          ? `${Math.round(cadencePosture.reliability * 100)}% — cadence is partially maintained. Signal continuity may be disrupted by missed cycles.`
+                          : `${Math.round(cadencePosture.reliability * 100)}% — cadence reliability is low. Signal continuity is at risk. Operator attention required.`
+                        : "Cadence reliability data is not yet available for this scope."}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Active attention signal</p>
+                    <p className="text-sm text-white/60">
+                      {summary.attention.length === 0
+                        ? "No active attention items. No elevated signal is currently published from retained oversight."
+                        : (() => {
+                            const high = summary.attention.filter((a) => a.severity === "HIGH").length;
+                            const medium = summary.attention.filter((a) => a.severity === "MEDIUM").length;
+                            const highest = high > 0 ? "HIGH" : medium > 0 ? "MEDIUM" : "LOW";
+                            return `${summary.attention.length} attention item${summary.attention.length !== 1 ? "s" : ""} active. Highest severity: ${highest}. Signal authority is elevated.`;
+                          })()}
+                    </p>
+                  </div>
+                </div>
+                {cadencePosture && cadencePosture.cyclesOverdue > 0 && (
+                  <div className="mt-3">
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Cadence gap signal</p>
+                    <p className="text-sm text-white/50">
+                      {cadencePosture.cyclesOverdue} cycle{cadencePosture.cyclesOverdue !== 1 ? "s" : ""} overdue. Gaps in retained cadence reduce the continuity of signal detection. Unreviewed cycles may represent untracked escalation risk.
+                    </p>
+                  </div>
+                )}
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+                  Retained signal authority is derived from the oversight cycle record and cadence posture. Signal recurrence is a pattern estimate — not independently verified. Cadence reliability reflects the proportion of completed cycles against expected schedule.
+                </p>
+              </section>
+
+              {/* P7 — SIGNAL MOVEMENT + REVIEW OBLIGATION + OPERATOR REVIEW REQUIREMENT */}
+              <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>
+                  Signal movement and review obligation
+                </p>
+                <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <div>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Movement direction</p>
+                    <p className="text-sm text-white/60">
+                      {cadencePosture
+                        ? cadencePosture.cyclesOverdue > 1
+                          ? "Rising — multiple overdue cycles indicate escalating oversight risk."
+                          : cadencePosture.cyclesOverdue === 1
+                            ? "Elevated — one cycle is overdue. Immediate review will stabilise trajectory."
+                            : cadencePosture.reliability >= 0.8
+                              ? "Stable — cadence is well-maintained. Signal trajectory is confirmed."
+                              : "Drifting — cadence gaps are reducing the reliability of signal movement detection."
+                        : "Insufficient cadence data to determine movement direction."}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Review obligation</p>
+                    <p className="text-sm text-white/60">
+                      {summary.attention.filter((a) => a.severity === "HIGH").length > 0
+                        ? "Mandatory review — HIGH severity attention items are active. Operator review is required."
+                        : summary.retainedMemory.oversightCycles > 0 && cadencePosture && cadencePosture.reliability < 0.6
+                          ? "Review recommended — cadence reliability is below threshold. Operator attention warranted."
+                          : "No mandatory review obligation at this time. Continue scheduled cadence."}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Operator review requirement</p>
+                    <p className="text-sm text-white/60">
+                      {summary.attention.filter((a) => a.severity === "HIGH").length > 0
+                        ? "Required — HIGH severity signals are present and require human operator confirmation."
+                        : summary.outcomeVerificationSummary.thinState
+                          ? "Monitoring — outcome verification is thin; operator should schedule a structured review."
+                          : "Not required — no conditions currently mandate operator review."}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Memory update status</p>
+                    <p className="text-sm text-white/60">
+                      {summary.retainedMemory.checkpointResponses > 0
+                        ? `${summary.retainedMemory.checkpointResponses} checkpoint response${summary.retainedMemory.checkpointResponses !== 1 ? "s" : ""} recorded. Memory is active and updating with each review cycle.`
+                        : "No checkpoint responses recorded. Memory update begins after the first verified outcome or checkpoint completion."}
+                    </p>
+                  </div>
+                </div>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.14)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+                  Movement direction is derived from cadence posture and attention severity — not independently verified. Review obligation is a structural assessment, not a legal requirement.
+                </p>
+              </section>
+
               <section className="grid gap-6 xl:grid-cols-3">
                 <SectionCard
                   eyebrow="Active Attention Queue"

@@ -9,6 +9,20 @@ import ValueReceipt from "@/components/product/ValueReceipt";
 import { resolvePageAccess } from "@/lib/access/server";
 import { loadBoardroomArchiveCommandSummary } from "@/lib/product/boardroom-archive-summary";
 
+type BoardroomSignalExposure = {
+  highestSeverity: string | null;
+  executiveSummary: string;
+  signals: Array<{
+    signalName: string;
+    patternTag: string;
+    severityBand: string;
+    narrativeSummary: string;
+    differentiatorSummary: string;
+    admissibleNextMove: string;
+    sampleCaveat: string;
+  }>;
+};
+
 type InstitutionalCaseBoardroomContext = {
   caseId: string;
   qualificationState: string;
@@ -35,6 +49,12 @@ type InstitutionalCaseBoardroomContext = {
   decisionRecordPosture?: string | null;
   /** Contradiction pressure band */
   contradictionPressure?: string | null;
+  /** Named intelligence signals detected for this case (P7 — signal exposure) */
+  signalExposure?: BoardroomSignalExposure | null;
+  /** Outcome verification state for board-level tracking */
+  verificationStatus?: string | null;
+  /** What verified outcomes write into institutional memory */
+  memoryConsequence?: string | null;
 };
 
 type Props = {
@@ -125,6 +145,107 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
                 <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.30)", marginTop: "0.75rem" }}>
                   {institutionalCase.scenarioPressure.uncertaintyCaveat || "Scenario estimate based on current record. Not independently verified."}
                 </p>
+              </div>
+            </section>
+          )}
+
+          {/* P6 — BOARD SIGNAL AUTHORITY: board relevance, objections, signal recurrence */}
+          {authenticated && institutionalCase && (
+            <section style={{ border: "1px solid rgba(201,169,110,0.14)", background: "rgba(201,169,110,0.025)", padding: "1rem" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+                Board signal authority
+              </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <div>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Board relevance</p>
+                  <p className="text-sm text-white/60">
+                    {institutionalCase.boardroomEarned
+                      ? "Case has crossed the board-eligibility threshold. Evidence, consequence, and qualification conditions are satisfied."
+                      : "Board eligibility not yet confirmed. Evidence and qualification conditions must be satisfied before board presentation."}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Decision record posture</p>
+                  <p className="text-sm text-white/60">
+                    {institutionalCase.decisionRecordPosture
+                      ? institutionalCase.decisionRecordPosture.replace(/_/g, " ").toLowerCase()
+                      : "Decision record posture not yet assessed."}
+                  </p>
+                </div>
+              </div>
+              {institutionalCase.contradictionPressure && (
+                <div className="mt-3">
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Contradiction pressure</p>
+                  <p className="text-sm text-white/50">{institutionalCase.contradictionPressure.replace(/_/g, " ").toLowerCase()} — unresolved contradictions are the primary board objection risk.</p>
+                </div>
+              )}
+              {institutionalCase.stakeholderExposure && institutionalCase.stakeholderExposure.potentialBlockers.length > 0 && (
+                <div className="mt-3">
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Likely board objections</p>
+                  <p className="text-sm text-white/50">Potential blockers identified: {institutionalCase.stakeholderExposure.potentialBlockers.join(", ")}. These represent the objection surface the board brief must address.</p>
+                </div>
+              )}
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+                Board signal authority is derived from the institutional case record. Not independently verified. Board outcomes are scenario estimates.
+              </p>
+            </section>
+          )}
+
+          {/* P7 — SIGNAL EXPOSURE: named intelligence signals for board-level review */}
+          {authenticated && institutionalCase?.signalExposure && (
+            <section style={{ border: "1px solid rgba(239,68,68,0.18)", background: "rgba(239,68,68,0.03)", padding: "1rem" }}>
+              <div className="flex items-center gap-3 mb-3">
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(239,68,68,0.72)" }}>
+                  Signal exposure
+                </p>
+                {institutionalCase.signalExposure.highestSeverity && (
+                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(239,68,68,0.50)", border: "1px solid rgba(239,68,68,0.20)", padding: "2px 6px" }}>
+                    {institutionalCase.signalExposure.highestSeverity}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-white/65 mb-4">{institutionalCase.signalExposure.executiveSummary}</p>
+              <div className="space-y-3">
+                {institutionalCase.signalExposure.signals.map((signal) => (
+                  <div key={signal.signalName} style={{ borderLeft: "2px solid rgba(239,68,68,0.25)", paddingLeft: "0.85rem" }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(239,68,68,0.55)" }}>
+                        {signal.severityBand}
+                      </span>
+                      <span className="text-sm text-white/80">{signal.signalName}</span>
+                    </div>
+                    <p className="text-xs text-white/45 italic mb-1">{signal.patternTag}</p>
+                    <p className="text-xs text-white/55 leading-relaxed mb-2">{signal.narrativeSummary}</p>
+                    <div style={{ borderLeft: "1px solid rgba(201,169,110,0.20)", paddingLeft: "0.65rem" }}>
+                      <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.45)", marginBottom: "0.2rem" }}>Board admission move</p>
+                      <p className="text-xs text-white/50">{signal.admissibleNextMove}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.16)", marginTop: "0.75rem" }}>
+                {institutionalCase.signalExposure.signals[0]?.sampleCaveat ?? "Signal patterns represent observed tendencies, not determinate predictions."}
+              </p>
+            </section>
+          )}
+
+          {/* P7 — VERIFICATION STATUS + MEMORY CONSEQUENCE */}
+          {authenticated && institutionalCase?.verificationStatus && (
+            <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>
+                Verification state
+              </p>
+              <div className="mt-3 space-y-3">
+                <div>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.25rem" }}>Status</p>
+                  <p className="text-sm text-white/60">{institutionalCase.verificationStatus.replace(/_/g, " ")}</p>
+                </div>
+                {institutionalCase.memoryConsequence && (
+                  <div style={{ borderLeft: "2px solid rgba(201,169,110,0.20)", paddingLeft: "0.85rem" }}>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.45)", marginBottom: "0.25rem" }}>Memory consequence</p>
+                    <p className="text-xs text-white/50 leading-relaxed">{institutionalCase.memoryConsequence}</p>
+                  </div>
+                )}
               </div>
             </section>
           )}
@@ -232,6 +353,35 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           }
           if (intel.contradictionPressure) {
             institutionalCase.contradictionPressure = intel.contradictionPressure.pressureBand;
+          }
+          // P7 — signal exposure for boardroom
+          if (intel.sovereignSignals && intel.sovereignSignals.signals.length > 0) {
+            institutionalCase.signalExposure = {
+              highestSeverity: intel.sovereignSignals.highestSeverity ?? null,
+              executiveSummary: intel.sovereignSignals.executiveSummary,
+              signals: intel.sovereignSignals.signals.map((s) => ({
+                signalName: s.signalName,
+                patternTag: s.patternTag,
+                severityBand: s.severityBand,
+                narrativeSummary: s.narrativeSummary,
+                differentiatorSummary: s.differentiatorSummary,
+                admissibleNextMove: s.admissibleNextMove,
+                sampleCaveat: s.sampleCaveat,
+              })),
+            };
+          }
+          // P7 — verification status and memory consequence
+          if (intel.recommendationEffectiveness && !intel.recommendationEffectiveness.thinState) {
+            const { actedOn, blocked, disputed, totalOutcomeScore } = intel.recommendationEffectiveness;
+            institutionalCase.verificationStatus =
+              actedOn > 0 ? "verified_outcomes_present"
+              : blocked > 0 ? "action_blocked"
+              : disputed > 0 ? "disputed"
+              : "pending_verification";
+            institutionalCase.memoryConsequence =
+              actedOn > 0
+                ? `${actedOn} verified outcome${actedOn > 1 ? "s" : ""} on record. Outcome score: ${totalOutcomeScore.toFixed(1)}. These write into comparison basis maturity and signal recurrence for this case.`
+                : "No verified outcomes on record yet. Outcome verification will write into comparison basis maturity and institutional signal memory.";
           }
         }
       } catch { /* degrade gracefully */ }

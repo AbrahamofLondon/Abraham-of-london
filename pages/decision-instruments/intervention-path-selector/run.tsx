@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import InterventionPathRunner from "@/components/instruments/InterventionPathRunner";
 import { track } from "@/lib/analytics/track";
 import type { InterventionResult } from "@/lib/instruments/intervention-path/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const InterventionPathRun: NextPage = () => {
   const [result, setResult] = React.useState<InterventionResult | null>(null);
@@ -24,6 +25,7 @@ const InterventionPathRun: NextPage = () => {
 
   return (
     <InstrumentShell title="Intervention Path Selector" slug="intervention-path-selector" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=intervention-path-selector" nextStepLabel={result?.recommendedPath === "ESCALATE" ? "Enter governed execution" : "Analyse institutional consequence"} nextStepHref={nextHref}
+      signalAuthority={result ? buildInstrumentSignalAuthority("intervention-path-selector", null, result.executionBlocked ? "BLOCKED" : result.recommendedPath, result.rationale[0] ?? result.recommendedPath) : undefined}
       valueReceipt={result ? [
         { label: "Recommended path", value: result.recommendedPath.replace(/_/g, " ").toLowerCase() },
         { label: "Escalation window", value: `${result.escalationWindow} days` },

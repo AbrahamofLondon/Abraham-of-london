@@ -10,7 +10,11 @@
  * As the intelligence commons accumulates data, forensic accounts become
  * empirically grounded. Until then, they are theoretically grounded from
  * the content library's case knowledge.
+ *
+ * SERVER_ONLY — forensic account logic and decision predicates must never reach the client bundle.
  */
+
+import "server-only";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

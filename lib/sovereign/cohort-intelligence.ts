@@ -13,7 +13,11 @@
  * team size, leadership composition, primary constraint type). Clients never
  * see other organisations' data — they see what happened to organisations
  * like them.
+ *
+ * SERVER_ONLY — raw cohort scoring predicates must never reach the client bundle.
  */
+
+import "server-only";
 
 import type { CommonsRecord } from "./intelligence-commons";
 

@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import DecisionExposureRunner from "@/components/instruments/DecisionExposureRunner";
 import { track } from "@/lib/analytics/track";
 import type { ExposureResult } from "@/lib/instruments/decision-exposure/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const DecisionExposureRun: NextPage = () => {
   const [result, setResult] = React.useState<ExposureResult | null>(null);
@@ -37,6 +38,7 @@ const DecisionExposureRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=decision-exposure-instrument"
       nextStepLabel="Analyse institutional consequence"
       nextStepHref={nextHref}
+      signalAuthority={result ? buildInstrumentSignalAuthority("decision-exposure-instrument", result.exposureScore, result.exposureBand, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Classification", value: `${result.exposureBand} — ${result.exposureScore}/100` },
         { label: "Weakest dimension", value: result.weakestDimension.replace(/_/g, " ").toLowerCase() },

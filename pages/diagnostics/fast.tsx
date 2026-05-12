@@ -660,6 +660,49 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               )}
 
+              {/* SECTION 1c: NAMED SIGNAL — SIGNAL SUPREMACY institutional intelligence layer */}
+              {result.detectedSignals && result.detectedSignals.length > 0 && (() => {
+                const primary = result.detectedSignals[0]!;
+                const severityColors: Record<string, string> = {
+                  CRITICAL: "rgba(239,68,68,0.75)",
+                  ALERT: "rgba(249,115,22,0.72)",
+                  CONCERN: "rgba(251,191,36,0.70)",
+                  WATCH: "rgba(110,231,183,0.60)",
+                };
+                const severityBg: Record<string, string> = {
+                  CRITICAL: "rgba(239,68,68,0.05)",
+                  ALERT: "rgba(249,115,22,0.04)",
+                  CONCERN: "rgba(251,191,36,0.03)",
+                  WATCH: "rgba(110,231,183,0.03)",
+                };
+                const sc = severityColors[primary.severityBand] ?? `${GOLD}80`;
+                const sb = severityBg[primary.severityBand] ?? `${GOLD}04`;
+                return (
+                  <div style={{ border: `1px solid ${sc}30`, backgroundColor: sb, padding: "1.25rem 1.5rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: sc, flexShrink: 0 }}>
+                        {primary.severityBand}
+                      </span>
+                      <span style={{ height: "1px", flex: 1, backgroundColor: `${sc}25` }} />
+                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                        {primary.prevalenceLabel.split("—")[0]?.trim()}
+                      </span>
+                    </div>
+                    <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.3, color: "rgba(255,255,255,0.92)", marginBottom: "0.5rem" }}>
+                      {primary.signalName}
+                    </p>
+                    <p style={{ fontSize: "0.82rem", lineHeight: 1.55, color: "rgba(255,255,255,0.42)", fontStyle: "italic" }}>
+                      {primary.patternTag}
+                    </p>
+                    {result.detectedSignals.length > 1 && (
+                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginTop: "0.75rem" }}>
+                        {result.detectedSignals.length - 1} further signal{result.detectedSignals.length > 2 ? "s" : ""} detected
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* SECTION 2: THE PATTERN */}
               <ResultBlock label="What the system found">
                 {an?.whyItExists ?? result.synthesis?.whyPriorAttemptsFailed ?? result.synthesis?.primaryContradiction ?? "The decision exists, but it does not have clean authority. It cannot move in its current form."}
@@ -737,6 +780,62 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               )}
 
+              {/* SECTION 5d: SIGNAL NARRATIVE — full explanation when signal detected */}
+              {result.detectedSignals && result.detectedSignals.length > 0 && (() => {
+                const primary = result.detectedSignals[0]!;
+                return (
+                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.75rem" }}>
+                      Institutional pattern — {primary.signalName}
+                    </p>
+                    <p style={{ fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)" }}>
+                      {primary.narrativeSummary}
+                    </p>
+                    <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.4rem" }}>
+                        What changes the outcome
+                      </p>
+                      <p style={{ fontSize: "0.84rem", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>
+                        {primary.differentiatorSummary}
+                      </p>
+                    </div>
+                    <div style={{ marginTop: "0.75rem" }}>
+                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.4rem" }}>
+                        Next admissible move
+                      </p>
+                      <p style={{ fontSize: "0.84rem", lineHeight: 1.6, color: "rgba(255,255,255,0.65)" }}>
+                        {primary.admissibleNextMove}
+                      </p>
+                    </div>
+                    {result.comparisonBand && (
+                      <div style={{ marginTop: "0.75rem", paddingTop: "0.75rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                          <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                            Comparison band
+                          </p>
+                          {result.comparisonMaturityLevel != null && (
+                            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.15)" }}>
+                              Distribution maturity {result.comparisonMaturityLevel}/5
+                            </p>
+                          )}
+                        </div>
+                        <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.42)" }}>
+                          {result.comparisonBand}
+                        </p>
+                        {result.comparisonBasisLabel && (
+                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.18)", marginTop: "0.2rem", lineHeight: 1.5 }}>
+                            {result.comparisonBasisLabel}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+                      {primary.sampleCaveat}
+                    </p>
+                  </div>
+                );
+              })()}
+
               {/* SECTION 6: NEXT INSTRUMENT — from recommendation engine */}
               <div style={{ padding: "1.5rem 0", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.45)", marginBottom: "1rem" }}>
@@ -784,6 +883,8 @@ const FastDiagnosticPage: NextPage = () => {
                       ...(result.authorityIndex ? [{ label: "Authority", value: `${result.authorityIndex.band} — ${result.authorityIndex.label}` }] : []),
                       ...(result.costOfInaction ? [{ label: "Exposure", value: result.costOfInaction.exposureBand }] : []),
                       ...(result.executionFailure ? [{ label: "Failure mode", value: result.executionFailure.likelyFailureMode }] : []),
+                      ...(result.detectedSignals && result.detectedSignals.length > 0 ? [{ label: "Signal", value: `${result.detectedSignals[0]!.severityBand} — ${result.detectedSignals[0]!.signalName}` }] : []),
+                      ...(result.comparisonBand ? [{ label: "Comparison band", value: result.comparisonBand }] : []),
                     ]}
                   />
 

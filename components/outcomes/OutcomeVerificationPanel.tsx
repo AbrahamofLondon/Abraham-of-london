@@ -44,7 +44,7 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
     executiveRunId: context?.executiveRunId ?? null,
   });
   const [submitting, setSubmitting] = React.useState(false);
-  const [message, setMessage] = React.useState<string | null>(null);
+  const [recorded, setRecorded] = React.useState<{ calibration?: { accuracyScore?: number; predictionError?: number } | null; evidencePosture?: string } | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -63,7 +63,6 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
     event.preventDefault();
     setSubmitting(true);
     setError(null);
-    setMessage(null);
 
     try {
       const response = await fetch("/api/outcomes/verify", {
@@ -75,13 +74,53 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
       if (!response.ok || !data.ok) {
         throw new Error(data.error || "Outcome verification failed.");
       }
-      setMessage("Outcome verification recorded.");
+      setRecorded({ calibration: data.calibration ?? null, evidencePosture: data.evidencePosture ?? null });
       onRecorded?.(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Outcome verification failed.");
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (recorded) {
+    const accuracyScore = recorded.calibration?.accuracyScore;
+    const calibrationLabel = accuracyScore != null
+      ? accuracyScore >= 0.8 ? "High accuracy confirmed"
+        : accuracyScore >= 0.5 ? "Partial accuracy recorded"
+        : "Accuracy below threshold — finding logged for pattern calibration"
+      : null;
+    return (
+      <section style={{ border: "1px solid rgba(201,169,110,0.20)", background: "rgba(201,169,110,0.03)", padding: "1.1rem" }}>
+        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+          Outcome Verification — Recorded
+        </p>
+        <p className="mt-3 text-sm text-white/70">Verification written to institutional record. This evidence is now carried into Decision Centre, Return Brief, and Retained Oversight.</p>
+        <div className="mt-4 space-y-2">
+          {calibrationLabel && (
+            <div style={{ borderLeft: "2px solid rgba(110,231,183,0.40)", paddingLeft: "0.85rem" }}>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(110,231,183,0.60)", marginBottom: "0.25rem" }}>Signal calibration</p>
+              <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.55)" }}>{calibrationLabel}</p>
+            </div>
+          )}
+          {recorded.evidencePosture && (
+            <div style={{ borderLeft: "2px solid rgba(201,169,110,0.25)", paddingLeft: "0.85rem" }}>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "0.25rem" }}>Evidence posture</p>
+              <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.45)" }}>{recorded.evidencePosture.replace(/_/g, " ").toLowerCase()}</p>
+            </div>
+          )}
+          <div style={{ borderLeft: "2px solid rgba(255,255,255,0.10)", paddingLeft: "0.85rem" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.25rem" }}>What this contributes</p>
+            <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
+              Your verification feeds into signal accuracy tracking, pattern calibration, and the outcome loop that governs future recommendations. Where accuracy was confirmed, this strengthens the evidence posture for similar conditions. Where accuracy was disputed, the system records a correction signal.
+            </p>
+          </div>
+        </div>
+        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem" }}>
+          Governed · Outcome verification written · Evidence posture updated
+        </p>
+      </section>
+    );
   }
 
   return (
@@ -102,6 +141,12 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
             {context.dueAt ? <div className="mt-1">Checkpoint due {new Date(context.dueAt).toLocaleDateString("en-GB")}</div> : null}
           </div>
         ) : null}
+      </div>
+      <div style={{ borderLeft: "2px solid rgba(201,169,110,0.20)", paddingLeft: "0.85rem", marginTop: "1rem", marginBottom: "0.5rem" }}>
+        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "0.25rem" }}>What a verification contributes</p>
+        <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+          Accurate outcome data calibrates the system's signal accuracy, updates the institutional record, and strengthens the evidence posture for similar cases. Disputed findings are logged as correction signals and inform future recommendations.
+        </p>
       </div>
 
       <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
@@ -189,7 +234,6 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
         </Field>
 
         {error ? <p className="text-sm text-red-300">{error}</p> : null}
-        {message ? <p className="text-sm text-emerald-300">{message}</p> : null}
 
         <button
           type="submit"

@@ -207,6 +207,7 @@ const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
             <ModuleLink href="/admin/organisations" title="Organisations" description="Organisation management, dashboards, and linked campaigns." icon={Building2} color="text-teal-400" bg="bg-teal-500/10" />
             <ModuleLink href="/admin/pdf-dashboard" title="PDF & Reports" description="PDF intelligence registry, report status, and documents." icon={FileText} color="text-pink-400" bg="bg-pink-500/10" />
             <ModuleLink href="/admin/oversight-review" title="Oversight Review" description="Governed review bench for internal briefs, client-safe output, suppressions, and operator decisions." icon={ClipboardCheck} color="text-orange-400" bg="bg-orange-500/10" />
+            <ModuleLink href="/admin/outcome-verification" title="Outcome Verification" description="Operator review queue for disputed, blocked, and CRITICAL signal verification records. Memory approval gate." icon={ShieldCheck} color="text-red-400" bg="bg-red-500/10" />
           </div>
         </div>
 

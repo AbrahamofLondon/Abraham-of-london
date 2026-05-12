@@ -4,6 +4,7 @@ import InstrumentShell from "@/components/instruments/InstrumentShell";
 import EscalationReadinessRunner from "@/components/instruments/EscalationReadinessRunner";
 import { track } from "@/lib/analytics/track";
 import type { EscalationResult } from "@/lib/instruments/escalation-readiness-scorecard/engine";
+import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const EscalationReadinessRun: NextPage = () => {
   const [result, setResult] = React.useState<EscalationResult | null>(null);
@@ -37,6 +38,7 @@ const EscalationReadinessRun: NextPage = () => {
       pdfHref="/api/downloads/instrument-pdf?slug=escalation-readiness-scorecard"
       nextStepLabel={result?.recommendedEscalation === "STRATEGY_ROOM" ? "Enter Strategy Room" : "Analyse institutional consequence"}
       nextStepHref={result?.recommendedEscalation === "STRATEGY_ROOM" ? "/strategy-room" : nextHref}
+      signalAuthority={result ? buildInstrumentSignalAuthority("escalation-readiness-scorecard", result.readinessScore, result.readinessBand, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Classification", value: `${result.readinessBand.replace(/_/g, " ")} — ${result.readinessScore}/100` },
         { label: "Escalation path", value: result.recommendedEscalation.replace(/_/g, " ").toLowerCase() },

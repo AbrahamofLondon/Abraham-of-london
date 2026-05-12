@@ -1,3 +1,9 @@
+/**
+ * lib/product/outcome-verification-service.ts
+ *
+ * SERVER_ONLY — imports prisma directly. Never import from client components.
+ */
+
 import type { DiagnosticDecisionObject, DiagnosticJourney } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma.server";
