@@ -1,13 +1,1093 @@
 {
-  "generatedAt": "2026-05-09T02:03:07.282Z",
+  "generatedAt": "2026-05-13T21:40:57.460Z",
   "totals": {
-    "assetGroups": 0,
-    "resolved": 0,
+    "assetGroups": 83,
+    "resolved": 83,
     "unresolved": 0,
-    "canonical": 0,
+    "canonical": 83,
     "alias": 0,
     "duplicate": 0,
     "conflict": 0
   },
-  "decisions": []
+  "decisions": [
+    {
+      "slug": "audit-of-ease",
+      "canonicalPath": "/assets/downloads/audit-of-ease.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/audit-of-ease.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/audit-of-ease.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "canon-builders-rule-of-life",
+      "canonicalPath": "/assets/downloads/canon-builders-rule-of-life.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/canon-builders-rule-of-life.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/canon-builders-rule-of-life.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "canon-system-constitution",
+      "canonicalPath": "/assets/downloads/canon-system-constitution.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/canon-system-constitution.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/canon-system-constitution.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "conviction-vs-coercion",
+      "canonicalPath": "/assets/downloads/conviction-vs-coercion.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/conviction-vs-coercion.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/conviction-vs-coercion.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "extremism-shield",
+      "canonicalPath": "/assets/downloads/extremism-shield.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/extremism-shield.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/extremism-shield.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-01",
+      "canonicalPath": "/assets/downloads/frontier-resilience-01.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint /assets/downloads/frontier-resilience-01.pdf must be materialised from /assets/downloads/content-downloads/frontier-resilience-01.pdf; physical canonical binary is not represented in this candidate group.",
+      "sourcePaths": [
+        "/assets/downloads/content-downloads/frontier-resilience-01.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": true,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-beyond-survival-mode",
+      "canonicalPath": "/assets/downloads/frontier-resilience-beyond-survival-mode.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-beyond-survival-mode.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-beyond-survival-mode.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-crisis-loops-and-lost-judgment",
+      "canonicalPath": "/assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-crisis-loops-and-lost-judgment.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-decision-latency-as-hidden-risk",
+      "canonicalPath": "/assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-decision-latency-as-hidden-risk.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-drift-in-the-second-line",
+      "canonicalPath": "/assets/downloads/frontier-resilience-drift-in-the-second-line.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-drift-in-the-second-line.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-drift-in-the-second-line.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-drift-inside-the-winning-season",
+      "canonicalPath": "/assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-drift-inside-the-winning-season.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-fatigue-at-the-top",
+      "canonicalPath": "/assets/downloads/frontier-resilience-fatigue-at-the-top.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-fatigue-at-the-top.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-fatigue-at-the-top.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-founder-endurance-is-not-a-plan",
+      "canonicalPath": "/assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-founder-endurance-is-not-a-plan.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-fragility-of-unowned-decisions",
+      "canonicalPath": "/assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-fragility-of-unowned-decisions.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-holding-standard-when-cash-tightens",
+      "canonicalPath": "/assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-holding-standard-when-cash-tightens.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-institutions-that-cannot-say-no",
+      "canonicalPath": "/assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-institutions-that-cannot-say-no.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-operating-cadence-under-strain",
+      "canonicalPath": "/assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-operating-cadence-under-strain.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-pressure-tests-for-key-person-risk",
+      "canonicalPath": "/assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-pressure-tests-for-key-person-risk.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-resilience-before-expansion",
+      "canonicalPath": "/assets/downloads/frontier-resilience-resilience-before-expansion.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-resilience-before-expansion.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-resilience-before-expansion.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-restoring-command-after-confusion",
+      "canonicalPath": "/assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-restoring-command-after-confusion.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-stress-reveals-the-real-culture",
+      "canonicalPath": "/assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-stress-reveals-the-real-culture.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-surviving-bad-information",
+      "canonicalPath": "/assets/downloads/frontier-resilience-surviving-bad-information.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-surviving-bad-information.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-surviving-bad-information.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-the-cost-of-living-in-escalation",
+      "canonicalPath": "/assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-the-cost-of-living-in-escalation.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-the-discipline-of-bounded-adaptation",
+      "canonicalPath": "/assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-the-discipline-of-bounded-adaptation.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-the-false-order-of-busy-teams",
+      "canonicalPath": "/assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-the-false-order-of-busy-teams.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-the-fragility-of-heroic-leadership",
+      "canonicalPath": "/assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-the-fragility-of-heroic-leadership.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-the-tax-of-constant-reaction",
+      "canonicalPath": "/assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-the-tax-of-constant-reaction.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-when-clarity-has-no-owner",
+      "canonicalPath": "/assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-when-clarity-has-no-owner.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-when-growth-hides-breakdown",
+      "canonicalPath": "/assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-when-recovery-needs-governance",
+      "canonicalPath": "/assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "frontier-resilience-when-urgency-corrupts-sequencing",
+      "canonicalPath": "/assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "governance-diagnostic-toolkit",
+      "canonicalPath": "/assets/downloads/governance-diagnostic-toolkit.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/governance-diagnostic-toolkit.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/governance-diagnostic-toolkit.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-false-confidence-from-aggregated-metrics",
+      "canonicalPath": "/assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-intelligence-after-the-founder-myth",
+      "canonicalPath": "/assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-intelligence-debt-in-scaling-firms",
+      "canonicalPath": "/assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-intelligence-debt-in-scaling-firms.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-intelligence-drift-after-rapid-expansion",
+      "canonicalPath": "/assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-intelligence-drift-after-rapid-expansion.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-overinterpreting-motion-as-momentum",
+      "canonicalPath": "/assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-overinterpreting-motion-as-momentum.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-pattern-recognition-without-operating-truth",
+      "canonicalPath": "/assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-pattern-recognition-without-operating-truth.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-reporting-systems-that-reward-optimism",
+      "canonicalPath": "/assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-reporting-systems-that-reward-optimism.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-signal-decay-in-reporting-chains",
+      "canonicalPath": "/assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-signal-decay-in-reporting-chains.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-blindness-of-clean-narratives",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-blindness-of-clean-narratives.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-breakdown-of-field-intelligence",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-breakdown-of-field-intelligence.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-comfort-of-lagging-indicators",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-comfort-of-lagging-indicators.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-danger-of-unaudited-assumptions",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-danger-of-unaudited-assumptions.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-difference-between-insight-and-surveillance",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-difference-between-insight-and-surveillance.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-discipline-of-decision-grade-intelligence",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-discipline-of-decision-grade-intelligence.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-hidden-cost-of-flattering-data",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-hidden-cost-of-flattering-data.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-institutional-price-of-guesswork",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-institutional-price-of-guesswork.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-the-politics-of-suppressed-bad-news",
+      "canonicalPath": "/assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-the-politics-of-suppressed-bad-news.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-weak-signals-before-reputational-fracture",
+      "canonicalPath": "/assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-weak-signals-before-reputational-fracture.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-when-analysts-inherit-a-broken-mandate",
+      "canonicalPath": "/assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-when-analysts-inherit-a-broken-mandate.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-when-dashboards-outpace-judgment",
+      "canonicalPath": "/assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-when-dashboards-outpace-judgment.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-when-risk-travels-faster-than-reporting",
+      "canonicalPath": "/assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-when-risk-travels-faster-than-reporting.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-when-scenario-planning-becomes-theatre",
+      "canonicalPath": "/assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-when-scenario-planning-becomes-theatre.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-when-the-board-sees-a-different-company",
+      "canonicalPath": "/assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-when-the-board-sees-a-different-company.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-why-executive-summaries-mislead",
+      "canonicalPath": "/assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-why-executive-summaries-mislead.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-alpha-why-leaders-stop-hearing-reality",
+      "canonicalPath": "/assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-alpha-why-leaders-stop-hearing-reality.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "institutional-integrity-audit",
+      "canonicalPath": "/assets/downloads/institutional-integrity-audit.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-integrity-audit.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/institutional-integrity-audit.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-alignment-without-sovereignty",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-alignment-without-sovereignty.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-control-without-ownership",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-control-without-ownership.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-control-without-ownership.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-control-without-ownership.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-dependence-disguised-as-partnership",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-dependence-disguised-as-partnership.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-fragile-autonomy-in-capital-dependent-firms.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-identity-drift-in-institutions-under-external-pressure",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-identity-drift-in-institutions-under-external-pressure.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-internal-empires-and-the-loss-of-common-rule",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-internal-empires-and-the-loss-of-common-rule.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-pricing-power-as-a-test-of-institutional-freedom.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-sovereignty-at-the-edge-of-regulation",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-sovereignty-at-the-edge-of-regulation.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-strategic-ambition-without-sovereign-capacity",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-strategic-ambition-without-sovereign-capacity.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-strategic-exposure-without-red-lines",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-strategic-exposure-without-red-lines.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-cost-of-borrowed-legitimacy",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-cost-of-borrowed-legitimacy.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-discipline-of-institutional-self-government",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-discipline-of-institutional-self-government.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-false-safety-of-strategic-silence",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-false-safety-of-strategic-silence.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-geography-of-hidden-influence",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-geography-of-hidden-influence.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-governance-cost-of-permanent-exception",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-governance-cost-of-permanent-exception.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-illusion-of-neutral-platforms",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-illusion-of-neutral-platforms.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-price-of-letting-others-set-your-time-horizon.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-strategic-consequence-of-weak-exit-paths.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-strategic-risk-of-needing-everyone-to-like-you.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-tax-of-strategic-appeasement",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-tax-of-strategic-appeasement.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-vulnerability-of-narrative-capture",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-vulnerability-of-narrative-capture.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-the-weakness-of-outsourced-judgment",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-the-weakness-of-outsourced-judgment.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-when-institutions-become-too-easy-to-pressure",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-when-institutions-become-too-easy-to-pressure.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-when-optionality-quietly-dies",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-when-optionality-quietly-dies.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    },
+    {
+      "slug": "sovereign-intelligence-why-power-concentrates-around-the-decisive",
+      "canonicalPath": "/assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf",
+      "decision": "canonical",
+      "reason": "Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf.",
+      "sourcePaths": [
+        "/assets/downloads/sovereign-intelligence-why-power-concentrates-around-the-decisive.pdf"
+      ],
+      "resolved": true,
+      "aliasPaths": [],
+      "materialisationRequired": false,
+      "confidence": "high"
+    }
+  ]
 }
