@@ -253,6 +253,10 @@ export type OversightBrief = {
     sourceLabel?: string;
     evidencePosture?: string;
   }>;
+  /** Internal evidence routing note for behavioral corroboration freshness */
+  behavioralEvidenceStatus?: "live" | "snapshot" | "unavailable";
+  /** Cycle-over-cycle behavioral trend analysis, null when insufficient history */
+  behavioralTrends?: import("@/lib/behavioral/behavioral-trend-contract").BehavioralTrendSummary | null;
 
   /**
    * Sovereign signal recurrence tracking across oversight cycles.
@@ -299,6 +303,7 @@ export type OversightBrief = {
 export type OversightStructuredAction = {
   id: string;
   caseId?: string;
+  scopeType?: "CASE" | "ACCOUNT";
   decisionText?: string;
   actionType:
     | "VERIFY_COMMITMENT"
@@ -308,7 +313,8 @@ export type OversightStructuredAction = {
     | "PROTECT_OPTION"
     | "ADDRESS_IRREVERSIBILITY"
     | "REVIEW_LOSS"
-    | "RECHECK_PATTERN";
+    | "RECHECK_PATTERN"
+    | "REVIEW_OPERATING_CADENCE";
   action: string;
   evidenceBasis: string;
   deadline?: string;

@@ -91,6 +91,14 @@ function cloneBrief(input: OversightBrief): OversightBrief {
           lostVisibility: input.cancellationLoss.lostVisibility.map((item) => ({ ...item })),
         }
       : undefined,
+    behavioralEvidenceStatus: input.behavioralEvidenceStatus,
+    behavioralTrends: input.behavioralTrends
+      ? {
+          ...input.behavioralTrends,
+          metrics: input.behavioralTrends.metrics.map((item) => ({ ...item })),
+          insufficientDataKeys: [...input.behavioralTrends.insufficientDataKeys],
+        }
+      : input.behavioralTrends,
     indispensability: input.indispensability
       ? {
           ...input.indispensability,

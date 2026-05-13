@@ -11,6 +11,11 @@ import type { BehavioralDataSource } from "@/lib/alignment/enhanced-types";
 import { storeUserTokens, getAccessToken, listUserIntegrations, removeIntegration, getIntegrationStatus } from "./token-store";
 import { buildCalendarDataSource } from "./google-calendar-sync";
 import { buildSlackDataSource } from "./slack-sync";
+import {
+  hydrateBehavioralSourcesFromSnapshots,
+  loadLatestBehavioralSignalSnapshots,
+  persistBehavioralSignalSnapshots,
+} from "@/lib/behavioral/behavioral-signal-snapshot-store";
 import type { ProviderType } from "./token-store";
 export type {
   BehavioralEvidenceContract,
@@ -20,6 +25,8 @@ export type {
 } from "./behavioral-evidence-contract";
 
 export type { ProviderType } from "./token-store";
+
+const SNAPSHOT_FALLBACK_MAX_AGE_MINUTES = 24 * 60;
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -61,21 +68,52 @@ export function initiateOAuth(provider: ProviderType): void {
 export async function fetchUserBehavioralData(
   userId: string,
 ): Promise<BehavioralDataSource[]> {
-  const sources: BehavioralDataSource[] = [];
+  try {
+    const sources = (await Promise.all([
+      buildCalendarDataSource(userId),
+      buildSlackDataSource(userId),
+    ])).filter(Boolean) as BehavioralDataSource[];
 
-  // Try Google Calendar
-  const calendarSource = await buildCalendarDataSource(userId);
-  if (calendarSource) {
-    sources.push(calendarSource);
+    if (sources.length > 0) {
+      void persistBehavioralSignalSnapshots({
+        userId,
+        sources,
+      }).catch((error) => {
+        console.warn("[behavioral] snapshot persistence failed", {
+          userIdPresent: Boolean(userId),
+          sourceCount: sources.length,
+          errorName: error instanceof Error ? error.name : "UnknownError",
+        });
+      });
+
+      return sources;
+    }
+  } catch (error) {
+    console.warn("[behavioral] live fetch failed; attempting snapshot fallback", {
+      userIdPresent: Boolean(userId),
+      errorName: error instanceof Error ? error.name : "UnknownError",
+    });
   }
 
-  // Try Slack
-  const slackSource = await buildSlackDataSource(userId);
-  if (slackSource) {
-    sources.push(slackSource);
+  try {
+    const snapshots = await loadLatestBehavioralSignalSnapshots({
+      userId,
+      maxAgeMinutes: SNAPSHOT_FALLBACK_MAX_AGE_MINUTES,
+    });
+    if (snapshots.length > 0) {
+      return hydrateBehavioralSourcesFromSnapshots(userId, snapshots);
+    }
+  } catch (error) {
+    console.warn("[behavioral] snapshot fallback failed", {
+      userIdPresent: Boolean(userId),
+      errorName: error instanceof Error ? error.name : "UnknownError",
+    });
   }
 
-  return sources;
+  console.warn("[behavioral] no live or snapshot evidence available", {
+    userIdPresent: Boolean(userId),
+  });
+  return [];
 }
 
 /**

@@ -73,6 +73,7 @@ export type RetainerOversightAccount = {
   accountId: string;
   organisationId?: string;
   ownerUserId?: string;
+  ownerEmail?: string;
   tier: RetainerTier;
   status: RetainerStatus;
   activeCaseCount: number;

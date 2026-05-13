@@ -124,6 +124,11 @@ export interface BehavioralDataSource {
   status: "active" | "error" | "disconnected";
   sourceLabel?: string;
   evidencePosture?: string;
+  evidenceWindowStart?: string;
+  evidenceWindowEnd?: string;
+  integrationConnectedAt?: string;
+  rawCountBasis?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
   
   // Extracted signals
   signals: {

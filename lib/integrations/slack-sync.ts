@@ -5,7 +5,7 @@
  * for the Pattern-Breaker Contract verification system.
  */
 
-import { getAccessToken, touchIntegrationSync, expireIntegration } from "./token-store";
+import { getAccessToken, touchIntegrationSync, expireIntegration, getIntegrationStatus } from "./token-store";
 import { nowISO } from "@/utils/dates";
 import type { BehavioralDataSource } from "@/lib/alignment/enhanced-types";
 
@@ -138,6 +138,9 @@ export async function syncSlack(
 export async function buildSlackDataSource(
   userId: string,
 ): Promise<BehavioralDataSource | null> {
+  const integrationStatus = await getIntegrationStatus(userId, "slack");
+  if (!integrationStatus?.connected) return null;
+
   const result = await syncSlack(userId);
 
   if (!result.success) return null;
@@ -145,9 +148,21 @@ export async function buildSlackDataSource(
   return {
     type: "slack",
     connectionId: `slack_${userId}`,
-    connectedAt: nowISO(),
+    connectedAt: integrationStatus.connectedAt.toISOString(),
+    integrationConnectedAt: integrationStatus.connectedAt.toISOString(),
     lastSyncAt: result.syncTimestamp,
     status: "active",
+    sourceLabel: "Slack Integration",
+    evidencePosture: "integrated",
+    evidenceWindowEnd: result.syncTimestamp,
+    rawCountBasis: {
+      channelCount: result.channelCount,
+      messageCount: result.messageCount,
+      responseRate: result.responseRate,
+    },
+    metadata: {
+      freshness: "live",
+    },
     signals: result.signals,
   };
 }

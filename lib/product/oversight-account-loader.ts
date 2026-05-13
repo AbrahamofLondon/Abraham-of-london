@@ -388,6 +388,7 @@ export async function loadOversightAccount(input: {
         accountId: activeRetainer?.id || `oversight:${input.organisationId || email || input.userId || "unknown"}`,
         organisationId: input.organisationId,
         ownerUserId: input.userId,
+        ownerEmail: email ?? cases.find((item) => item.email)?.email ?? undefined,
         tier: activeRetainer ? mapRetainerTier(activeRetainer.tier) : "GOVERNED_CONTINUITY",
         status: accountStatus,
         activeCaseCount: cases.length,

@@ -1983,6 +1983,34 @@ model UserIntegration {
   @@map("user_integrations")
 }
 
+model BehavioralSignalSnapshot {
+  id                     String   @id @default(cuid())
+  userId                 String
+  organisationId         String?
+  accountId              String?
+  source                 String
+  sourceLabel            String?
+  evidencePosture        String?
+  signalKey              String
+  signalValueJson        Json
+  confidence             Float?
+  evidenceWindowStart    DateTime?
+  evidenceWindowEnd      DateTime?
+  generatedAt            DateTime @default(now())
+  integrationConnectedAt DateTime?
+  rawCountBasisJson      Json?
+  metadataJson           Json?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([userId, generatedAt])
+  @@index([userId, source, signalKey])
+  @@index([userId, source, signalKey, generatedAt])
+  @@index([organisationId, generatedAt])
+  @@index([accountId, generatedAt])
+  @@map("behavioral_signal_snapshots")
+}
+
 model StrategyInquiry {
   id        String             @id @default(cuid())
   name      String
@@ -3487,4 +3515,3 @@ model CohortAssignment {
   @@index([cohortId])
   @@map("cohort_assignment")
 }
-

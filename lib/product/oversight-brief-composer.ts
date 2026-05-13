@@ -13,6 +13,9 @@ import {
   loadPurposeAlignmentEvidence,
   buildOversightBriefPaAggregate,
 } from "@/lib/alignment/evidence-loader";
+import { loadLatestBehavioralSignalSnapshots } from "@/lib/behavioral/behavioral-signal-snapshot-store";
+import { buildBehavioralTrendSummaryFromSnapshots } from "@/lib/behavioral/behavioral-trend-engine";
+import type { BehavioralTrendDirection, BehavioralTrendSummary } from "@/lib/behavioral/behavioral-trend-contract";
 import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
 import { recordSuppression } from "@/lib/product/suppression-ledger";
 import { fetchUserBehavioralData } from "@/lib/integrations";
@@ -31,6 +34,103 @@ function periodDefaultStart(end: Date): string {
   const start = new Date(end);
   start.setDate(start.getDate() - 30);
   return start.toISOString();
+}
+
+function previousPeriodStart(currentStartIso: string, currentEndIso: string): string {
+  const currentStart = new Date(currentStartIso);
+  const currentEnd = new Date(currentEndIso);
+  const durationMs = Math.max(currentEnd.getTime() - currentStart.getTime(), 24 * 60 * 60 * 1000);
+  return new Date(currentStart.getTime() - durationMs).toISOString();
+}
+
+function behavioralTrendPriority(direction: BehavioralTrendDirection): number {
+  switch (direction) {
+    case "DETERIORATING": return 4;
+    case "RECURRING": return 3;
+    case "IMPROVING": return 2;
+    case "STABLE": return 1;
+    default: return 0;
+  }
+}
+
+function buildBehavioralTrendCopy(direction: BehavioralTrendDirection): string {
+  switch (direction) {
+    case "IMPROVING":
+      return "Behavioral signals are improving across the current review window. Recent operating patterns are moving in a healthier direction.";
+    case "DETERIORATING":
+      return "Behavioral signals are deteriorating across the current review window. Operating cadence appears to be weakening and should be reviewed.";
+    case "STABLE":
+      return "Behavioral signals are stable across the current review window. No material movement is visible from the current evidence.";
+    default:
+      return "Behavioral trend evidence is insufficient for a cycle-over-cycle reading.";
+  }
+}
+
+export function hasBehavioralTrendRecurrenceEvidence(
+  summary?: BehavioralTrendSummary | null,
+): boolean {
+  if (!summary || summary.overallDirection !== "DETERIORATING") {
+    return false;
+  }
+
+  return Boolean(
+    summary.hasRecurrence
+    || summary.metrics.some((metric) => metric.direction === "RECURRING")
+    || summary.repeatedDriftSignals?.length,
+  );
+}
+
+export function buildBehavioralTrendStructuredAction(
+  summary?: BehavioralTrendSummary | null,
+): NonNullable<OversightBrief["structuredActions"]>[number] | null {
+  if (!hasBehavioralTrendRecurrenceEvidence(summary)) {
+    return null;
+  }
+
+  return {
+    id: "act_behavioral_trend_deterioration",
+    scopeType: "ACCOUNT",
+    actionType: "REVIEW_OPERATING_CADENCE",
+    action: "Recurring behavioral deterioration is visible across oversight windows. Review operating cadence and unresolved commitments before the next oversight cycle.",
+    evidenceBasis: summary!.summary,
+    severity: "HIGH",
+    continuitySourceLabel: "Derived from persisted behavioral snapshot comparison",
+    continuityConfidenceLabel: "AGGREGATED",
+  };
+}
+
+export function aggregateBehavioralTrendSummaries(
+  userId: string,
+  summaries: BehavioralTrendSummary[],
+): BehavioralTrendSummary | null {
+  if (summaries.length === 0) return null;
+
+  const sorted = [...summaries].sort((a, b) =>
+    behavioralTrendPriority(b.overallDirection) - behavioralTrendPriority(a.overallDirection)
+    || b.metrics.length - a.metrics.length,
+  );
+  const representative = sorted[0]!;
+  const allMetrics = summaries.flatMap((summary) => summary.metrics);
+  const hasDeterioration = summaries.some((summary) => summary.hasDeterioration);
+  const hasRecurrence = summaries.some((summary) => summary.hasRecurrence)
+    || summaries.some((summary) => summary.metrics.some((metric) => metric.direction === "RECURRING"));
+  const repeatedDriftSignals = [...new Set(
+    summaries.flatMap((summary) => summary.repeatedDriftSignals ?? []),
+  )];
+  const insufficientDataKeys = [...new Set(summaries.flatMap((summary) => summary.insufficientDataKeys))];
+
+  return {
+    userId,
+    source: summaries.length === 1 ? representative.source : "behavioral",
+    computedAt: new Date().toISOString(),
+    metrics: allMetrics,
+    overallDirection: representative.overallDirection,
+    summary: buildBehavioralTrendCopy(representative.overallDirection),
+    hasDeterioration,
+    hasRecurrence,
+    repeatedDriftSignals,
+    insufficientDataKeys,
+  };
 }
 
 function buildExecutiveSummary(input: {
@@ -223,21 +323,85 @@ export async function composeOversightBrief(input: {
 
   // ── BEHAVIORAL DATA — calendar and communication corroboration ──
   let behavioralSources: Parameters<typeof buildOversightSignals>[0]["behavioralSources"] = null;
-  if (input.userId) {
+  let behavioralEvidenceStatus: OversightBrief["behavioralEvidenceStatus"] = "unavailable";
+  let behavioralTrends: OversightBrief["behavioralTrends"] = null;
+  let behavioralUserId: string | null = input.userId ?? null;
+  if (!behavioralUserId && loaded.account.ownerEmail) {
     try {
-      behavioralSources = await fetchUserBehavioralData(input.userId);
+      const resolvedUser = await prisma.user.findFirst({
+        where: { email: loaded.account.ownerEmail.trim().toLowerCase() },
+        select: { id: true },
+      });
+      behavioralUserId = resolvedUser?.id ?? null;
+      if (!behavioralUserId) {
+        console.warn("[oversight-brief] behavioral user resolution skipped fetch", {
+          userIdPresent: Boolean(input.userId),
+          emailPresent: Boolean(loaded.account.ownerEmail),
+        });
+      }
+    } catch (error) {
+      console.warn("[oversight-brief] behavioral user resolution failed", {
+        userIdPresent: Boolean(input.userId),
+        emailPresent: Boolean(loaded.account.ownerEmail),
+        errorName: error instanceof Error ? error.name : "UnknownError",
+        errorMessage: error instanceof Error ? error.message : "Unknown behavioral user resolution failure",
+      });
+    }
+  }
+
+  if (behavioralUserId) {
+    try {
+      behavioralSources = await fetchUserBehavioralData(behavioralUserId);
+      behavioralEvidenceStatus = behavioralSources.length === 0
+        ? "unavailable"
+        : behavioralSources.every((source) => source.evidencePosture === "persisted")
+          ? "snapshot"
+          : "live";
     } catch (error) {
       // Behavioral data is corroborative, not blocking — the brief still proceeds.
       // Log safe degradation metadata only. Never log tokens, attendee data, or event content.
       console.warn("[oversight-brief] behavioral data fetch failed", {
-        userIdPresent: true,
+        userIdPresent: Boolean(behavioralUserId),
+        emailPresent: Boolean(loaded.account.ownerEmail),
         errorName: error instanceof Error ? error.name : "UnknownError",
         errorMessage: error instanceof Error ? error.message : "Unknown behavioral data fetch failure",
       });
       behavioralSources = null;
+      behavioralEvidenceStatus = "unavailable";
+    }
+
+    try {
+      const snapshots = await loadLatestBehavioralSignalSnapshots({
+        userId: behavioralUserId,
+        maxAgeMinutes: 90 * 24 * 60,
+        limit: 500,
+      });
+      const snapshotSources = [...new Set(snapshots.map((snapshot) => snapshot.source))];
+      const summaries = snapshotSources
+        .map((source) => buildBehavioralTrendSummaryFromSnapshots(
+          behavioralUserId!,
+          source,
+          snapshots.filter((snapshot) => snapshot.source === source),
+          periodStart,
+          periodEnd,
+          previousPeriodStart(periodStart, periodEnd),
+        ))
+        .filter((summary): summary is BehavioralTrendSummary => Boolean(summary));
+      behavioralTrends = aggregateBehavioralTrendSummaries(behavioralUserId, summaries);
+      if (behavioralTrends) {
+        behavioralTrends.summary = buildBehavioralTrendCopy(behavioralTrends.overallDirection);
+      }
+    } catch (error) {
+      warnings.push("Behavioral trend summary could not be constructed from persisted snapshots. Historical behavior comparison remains unavailable for this cycle.");
+      console.warn("[oversight-brief] behavioral trend summary failed", {
+        userIdPresent: Boolean(behavioralUserId),
+        emailPresent: Boolean(loaded.account.ownerEmail),
+        errorName: error instanceof Error ? error.name : "UnknownError",
+      });
     }
   }
 
+  // Sovereign signals are caller-supplied in v0; composeOversightBrief does not invoke the sovereign engine directly.
   const signals = buildOversightSignals({
     cases: loaded.cases,
     creditProfile,
@@ -420,6 +584,8 @@ export async function composeOversightBrief(input: {
           interpretation: creditGovernance?.explanation,
         }
       : undefined,
+    // Deliberately narrowed client-facing signal panel.
+    // `account.oversightSignals` retains the full internal signal set for downstream oversight workflows.
     oversightSignals: signals
       .filter((s) =>
         s.type === "TEAM_DIVERGENCE_REPORTED" ||
@@ -449,6 +615,8 @@ export async function composeOversightBrief(input: {
           : s.type === "ENTERPRISE_STRAIN_REPORTED" ? "system-inferred"
           : "system-inferred",
       })),
+    behavioralEvidenceStatus,
+    behavioralTrends,
     requiredActions: [...new Set(requiredActions)].slice(0, 6),
 
     // ── Premium intelligence primitives (evidence-only, no fabrication) ──
@@ -715,6 +883,7 @@ export async function composeOversightBrief(input: {
       structuredActions.push({
         id: `act_verify_${signal.caseId}`,
         caseId: signal.caseId,
+        scopeType: "CASE",
         actionType: "VERIFY_COMMITMENT",
         action: `Confirm whether the commitment for "${signal.title}" has been executed. If not, classify the blocker as authority, resource, or avoidance before the next cycle.`,
         evidenceBasis: signal.explanation,
@@ -727,6 +896,7 @@ export async function composeOversightBrief(input: {
       structuredActions.push({
         id: `act_counsel_${signal.caseId}`,
         caseId: signal.caseId,
+        scopeType: "CASE",
         actionType: "ESCALATE_COUNSEL",
         action: `Counsel review triggered for this case. Schedule governance review before execution proceeds.`,
         evidenceBasis: signal.explanation,
@@ -740,6 +910,7 @@ export async function composeOversightBrief(input: {
       structuredActions.push({
         id: `act_boardroom_${signal.caseId}`,
         caseId: signal.caseId,
+        scopeType: "CASE",
         actionType: "GENERATE_BOARDROOM_DOSSIER",
         action: `Generate Boardroom Dossier for board-level presentation.`,
         evidenceBasis: signal.explanation,
@@ -753,6 +924,7 @@ export async function composeOversightBrief(input: {
       structuredActions.push({
         id: `act_pattern_${signal.caseId}`,
         caseId: signal.caseId,
+        scopeType: "CASE",
         actionType: "RECHECK_PATTERN",
         action: `Pattern recurrence detected. Investigate whether the structural root has been addressed or whether intervention is treating symptoms.`,
         evidenceBasis: signal.explanation,
@@ -765,6 +937,7 @@ export async function composeOversightBrief(input: {
       structuredActions.push({
         id: `act_failure_logic_${signal.caseId}`,
         caseId: signal.caseId,
+        scopeType: "CASE",
         actionType: "REVIEW_LOSS",
         action: `Review whether the current intervention path is repeating earlier reported failure logic before further execution is committed.`,
         evidenceBasis: signal.explanation,
@@ -777,6 +950,7 @@ export async function composeOversightBrief(input: {
       structuredActions.push({
         id: `act_dependency_${signal.caseId}`,
         caseId: signal.caseId,
+        scopeType: "CASE",
         actionType: "RESOLVE_DEPENDENCY",
         action: `Resolve the blocking dependency before treating this case as execution-ready.`,
         evidenceBasis: signal.explanation,
@@ -789,8 +963,20 @@ export async function composeOversightBrief(input: {
       structuredActions.push({
         id: `act_drift_${signal.caseId}`,
         caseId: signal.caseId,
+        scopeType: "CASE",
         actionType: "VERIFY_COMMITMENT",
         action: `Verify whether the stop condition has actually ceased before current execution is treated as holding.`,
+        evidenceBasis: signal.explanation,
+        severity: signal.severity === "HIGH" ? "HIGH" : "MEDIUM",
+        continuitySourceLabel: continuity.sourceLabel,
+        continuityConfidenceLabel: continuity.confidenceLabel,
+      });
+    } else if (signal.type === "EXECUTION_DRIFT") {
+      structuredActions.push({
+        id: "act_drift_account",
+        scopeType: "ACCOUNT",
+        actionType: "REVIEW_OPERATING_CADENCE",
+        action: "Review operating cadence against unresolved commitments before the next oversight cycle.",
         evidenceBasis: signal.explanation,
         severity: signal.severity === "HIGH" ? "HIGH" : "MEDIUM",
         continuitySourceLabel: continuity.sourceLabel,
@@ -801,6 +987,7 @@ export async function composeOversightBrief(input: {
       structuredActions.push({
         id: `act_escalation_threshold_${signal.caseId}`,
         caseId: signal.caseId,
+        scopeType: "CASE",
         actionType: "ESCALATE_COUNSEL",
         action: `Review whether the captured escalation threshold now requires counsel or board-level handling.`,
         evidenceBasis: signal.explanation,
@@ -814,6 +1001,7 @@ export async function composeOversightBrief(input: {
   if (brief.irreversibility && brief.irreversibility.score >= 60) {
     structuredActions.push({
       id: "act_irreversibility_global",
+      scopeType: "ACCOUNT",
       actionType: "ADDRESS_IRREVERSIBILITY",
       action: `Irreversibility index is ${brief.irreversibility.score}/100. Prioritise the highest-weight driver before the situation becomes unrecoverable.`,
       evidenceBasis: brief.irreversibility.explanation,
@@ -821,6 +1009,10 @@ export async function composeOversightBrief(input: {
       continuitySourceLabel: "Captured in oversight consequence analysis",
       continuityConfidenceLabel: "CAPTURED",
     });
+  }
+  const behavioralTrendAction = buildBehavioralTrendStructuredAction(brief.behavioralTrends);
+  if (behavioralTrendAction) {
+    structuredActions.push(behavioralTrendAction);
   }
   if (structuredActions.length > 0) {
     brief.structuredActions = structuredActions;
@@ -854,20 +1046,21 @@ export async function composeOversightBrief(input: {
       const { getDiagnosticJourney } = await import("@/lib/diagnostics/journey-store");
       const frictionPatterns: string[] = [];
       let sampleCount = 0;
-      for (const caseItem of loaded.cases.slice(0, 10)) {
+      const sponsorEmail = input.email ?? loaded.account.ownerEmail ?? loaded.cases.find((item) => item.email)?.email ?? undefined;
+
+      if (sponsorEmail) {
         try {
-          const journey = await getDiagnosticJourney({ email: input.email ?? undefined });
+          const journey = await getDiagnosticJourney({ email: sponsorEmail });
           const caseObj = journey.decisionObjects?.slice(-1)?.[0];
           if (caseObj && (caseObj as any).blocker) {
-            sampleCount++;
+            sampleCount = 1;
             const { buildStakeholderMapFromCase } = await import("@/lib/decision/stakeholder-map");
             const map = buildStakeholderMapFromCase(caseObj as any);
             if (map.blockers.length > 0) {
               frictionPatterns.push(`Authority tension: ${map.blockers[0]}`);
             }
           }
-        } catch { /* skip individual case */ }
-        break; // one journey per email — stakeholder friction is cross-cycle, not cross-case
+        } catch { /* degrade gracefully for the single sponsor-safe journey sample */ }
       }
 
       if (frictionPatterns.length > 0 && sampleCount >= 1) {

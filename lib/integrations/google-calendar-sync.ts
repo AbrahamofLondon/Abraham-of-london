@@ -234,8 +234,21 @@ export async function buildCalendarDataSource(
     type: "calendar",
     connectionId: `google_calendar_${userId}`,
     connectedAt: integrationStatus.connectedAt.toISOString(),
+    integrationConnectedAt: integrationStatus.connectedAt.toISOString(),
     lastSyncAt: result.syncTimestamp,
     status: "active",
+    sourceLabel: "Google Calendar Integration",
+    evidencePosture: "integrated",
+    evidenceWindowStart: daysAgoISO(30),
+    evidenceWindowEnd: result.syncTimestamp,
+    rawCountBasis: {
+      eventCount: result.eventCount,
+      completedCount: result.completedCount,
+      cancelledCount: result.cancelledCount,
+    },
+    metadata: {
+      freshness: "live",
+    },
     signals: result.signals,
   };
 }
