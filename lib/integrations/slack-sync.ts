@@ -6,6 +6,7 @@
  */
 
 import { getAccessToken, touchIntegrationSync, expireIntegration } from "./token-store";
+import { nowISO } from "@/utils/dates";
 import type { BehavioralDataSource } from "@/lib/alignment/enhanced-types";
 
 export interface SlackSyncResult {
@@ -32,7 +33,7 @@ export async function syncSlack(
       channelCount: 0,
       messageCount: 0,
       responseRate: 0,
-      syncTimestamp: new Date().toISOString(),
+      syncTimestamp: nowISO(),
       error: "No active Slack connection. Reconnect via Settings > Integrations.",
     };
   }
@@ -49,7 +50,7 @@ export async function syncSlack(
         channelCount: 0,
         messageCount: 0,
         responseRate: 0,
-        syncTimestamp: new Date().toISOString(),
+        syncTimestamp: nowISO(),
         error: "Could not resolve Slack user identity.",
       };
     }
@@ -116,7 +117,7 @@ export async function syncSlack(
       channelCount: channels.length,
       messageCount: totalMessages,
       responseRate,
-      syncTimestamp: new Date().toISOString(),
+      syncTimestamp: nowISO(),
     };
   } catch (error) {
     return {
@@ -125,7 +126,7 @@ export async function syncSlack(
       channelCount: 0,
       messageCount: 0,
       responseRate: 0,
-      syncTimestamp: new Date().toISOString(),
+      syncTimestamp: nowISO(),
       error: error instanceof Error ? error.message : "Unknown Slack sync error",
     };
   }
@@ -144,7 +145,7 @@ export async function buildSlackDataSource(
   return {
     type: "slack",
     connectionId: `slack_${userId}`,
-    connectedAt: new Date().toISOString(),
+    connectedAt: nowISO(),
     lastSyncAt: result.syncTimestamp,
     status: "active",
     signals: result.signals,

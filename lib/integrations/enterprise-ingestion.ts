@@ -1,3 +1,5 @@
+import { parseObservedAt } from "@/utils/dates";
+
 export type EnterpriseSignalCategory =
   | "headcount_movement"
   | "attrition"
@@ -36,7 +38,7 @@ export function parseCsvEnterpriseSignals(csv: string, source = "csv_upload"): E
       label: row.label || row.category || "Enterprise signal",
       value: Number(row.value) || 0,
       unit: row.unit || undefined,
-      observedAt: row.observedAt || undefined,
+      observedAt: parseObservedAt(row.observedAt),
       metadata: row,
     };
   });
@@ -69,7 +71,7 @@ export function parseManualKpiImport(
     label: String(item.label || item.category || "Manual KPI"),
     value: Number(item.value) || 0,
     unit: item.unit,
-    observedAt: item.observedAt,
+    observedAt: parseObservedAt(item.observedAt),
     metadata: item.metadata || {},
   }));
 }

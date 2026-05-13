@@ -5,6 +5,7 @@ import type { OversightSignal } from "@/lib/product/retainer-oversight-contract"
 import type { BuyerVisibleCadencePosture } from "@/lib/product/retained-cadence-contract";
 import { summarizeAssessmentEvidenceText } from "@/lib/product/evidence-capture-contract";
 import type { SovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
+import type { BehavioralDataSource } from "@/lib/alignment/enhanced-types";
 
 function severityFromCost(amount: number): OversightSignal["severity"] {
   if (amount >= 50000) return "CRITICAL";
@@ -15,6 +16,14 @@ function severityFromCost(amount: number): OversightSignal["severity"] {
 
 function dedupe<T>(values: T[]): T[] {
   return [...new Set(values)];
+}
+
+function behavioralSourceLabel(source: BehavioralDataSource): string {
+  return source.sourceLabel ?? "Google Calendar Integration";
+}
+
+function behavioralEvidencePosture(source: BehavioralDataSource): string {
+  return source.evidencePosture ?? "integrated";
 }
 
 export type TeamAggregateSignalInput = {
@@ -50,6 +59,11 @@ export function buildOversightSignals(input: {
    * Raw IntelligenceSignal objects must never be passed here.
    */
   sovereignSignals?: SovereignSignalAssessment | null;
+  /**
+   * Live behavioral data from integrated calendar and communication sources.
+   * Used to corroborate or challenge commitment execution evidence.
+   */
+  behavioralSources?: BehavioralDataSource[] | null;
   now?: Date | string;
 }): OversightSignal[] {
   const createdAt = new Date(input.now ?? new Date()).toISOString();
@@ -383,6 +397,85 @@ export function buildOversightSignals(input: {
         sourceLabel: "Sovereign Intelligence Layer",
         evidencePosture: sovereignAssessment.assessmentEvidencePosture,
       });
+    }
+  }
+
+  // ── BEHAVIORAL SIGNAL CORROBORATION ──
+  // Calendar and communication data corroborates or challenges commitment execution.
+  // Only emit when there is active case evidence to reason against.
+  const hasActiveCases = input.cases.length > 0;
+  const hasUnresolvedCommitments = input.cases.some((c) => (c.unresolvedCommitments ?? 0) > 0);
+
+  for (const source of input.behavioralSources ?? []) {
+    if (source.type === "calendar" && source.status === "active") {
+      const { meetingCompletion, meetingCancellationRate, meetingAttendanceRate, recurringMeetingStability } = source.signals;
+      const sourceLabel = behavioralSourceLabel(source);
+      const evidencePosture = behavioralEvidencePosture(source);
+
+      // Strong calendar cadence — corroborates checkpoint rhythm, not delivery.
+      if (hasActiveCases && meetingCompletion !== undefined && meetingCompletion >= 0.75) {
+        signals.push({
+          id: "behavioral:calendar:checkpoint-confirmed",
+          type: "CHECKPOINT_CONFIRMED",
+          severity: "LOW",
+          title: "Calendar activity corroborates checkpoint cadence",
+          explanation: `Meeting completion rate is ${Math.round(meetingCompletion * 100)}% over the recent period. Calendar activity corroborates scheduled checkpoint cadence across the review window. Meeting completion patterns support the presence of operating cadence, but do not independently prove work delivery.`,
+          recommendedAction: "Use this as supporting evidence when reviewing checkpoint discipline. Do not treat it as standalone proof of delivery.",
+          createdAt,
+          sourceLabel,
+          evidencePosture,
+        });
+      }
+
+      const calendarDriftReasons: string[] = [];
+      let calendarDriftSeverity: OversightSignal["severity"] = "MEDIUM";
+
+      if (hasUnresolvedCommitments && meetingCancellationRate !== undefined && meetingCancellationRate >= 0.40) {
+        calendarDriftReasons.push(
+          `${Math.round(meetingCancellationRate * 100)}% of calendar events were cancelled in the recent period while unresolved commitments remain active`,
+        );
+        if (meetingCancellationRate >= 0.60) {
+          calendarDriftSeverity = "HIGH";
+        }
+      }
+
+      if (hasUnresolvedCommitments && recurringMeetingStability !== undefined && recurringMeetingStability < 0.50) {
+        calendarDriftReasons.push(
+          `recurring meeting stability is ${Math.round(recurringMeetingStability * 100)}%, below the expected operating threshold`,
+        );
+        if (recurringMeetingStability < 0.30) {
+          calendarDriftSeverity = "HIGH";
+        }
+      }
+
+      if (calendarDriftReasons.length > 0) {
+        signals.push({
+          id: "behavioral:calendar:execution-drift",
+          type: "EXECUTION_DRIFT",
+          severity: calendarDriftReasons.length > 1 ? "HIGH" : calendarDriftSeverity,
+          title: "Calendar patterns indicate possible execution drift",
+          explanation: `Detected: ${calendarDriftReasons.join("; ")}. This is a drift signal against operating cadence, not standalone proof that delivery failed.`,
+          recommendedAction: "Review whether scheduled operating cadence still supports the unresolved commitments. Treat this as a drift signal, not a final judgement.",
+          createdAt,
+          sourceLabel,
+          evidencePosture,
+        });
+      }
+
+      // Very low attendance against accepted meetings — behavioural non-appearance
+      if (hasUnresolvedCommitments && meetingAttendanceRate !== undefined && meetingAttendanceRate < 0.35) {
+        signals.push({
+          id: "behavioral:calendar:checkpoint-abandoned",
+          type: "CHECKPOINT_ABANDONED",
+          severity: meetingAttendanceRate < 0.20 ? "HIGH" : "MEDIUM",
+          title: "Meeting attendance pattern indicates behavioural non-appearance",
+          explanation: `Attendance rate on accepted calendar invites is ${Math.round(meetingAttendanceRate * 100)}%. With active unresolved commitments, this pattern is consistent with commitment abandonment. Source: Google Calendar.`,
+          recommendedAction: "Confirm whether unresolved checkpoints involve parties or sessions where attendance has been absent.",
+          createdAt,
+          sourceLabel,
+          evidencePosture,
+        });
+      }
     }
   }
 

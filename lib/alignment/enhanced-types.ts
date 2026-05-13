@@ -122,16 +122,32 @@ export interface BehavioralDataSource {
   connectedAt: string;
   lastSyncAt: string;
   status: "active" | "error" | "disconnected";
+  sourceLabel?: string;
+  evidencePosture?: string;
   
   // Extracted signals
   signals: {
-    meetingCompletion?: number;      // % of scheduled strategic meetings attended
-    emailResponsiveness?: number;     // Avg response time to key stakeholders (hours)
-    taskClosureRate?: number;         // % of tasks closed vs created
-    codeMergeFrequency?: number;      // PRs merged per week
-    jiraTicketVelocity?: number;      // Tickets moved to done per week
-    slackResponsiveness?: number;     // Response time in key channels
-    documentActivity?: number;        // Edits/views in key docs
+    // Calendar (Google Calendar)
+    meetingCompletion?: number;        // % of events with status "confirmed" vs total
+    meetingAttendanceRate?: number;    // % of meetings where self.responseStatus === "accepted"
+    meetingCancellationRate?: number;  // % of events with status "cancelled" vs total
+    recurringMeetingStability?: number; // % of recurring events that are confirmed
+
+    // Email
+    emailResponsiveness?: number;      // Avg response time to key stakeholders (hours)
+
+    // Task management (Jira, Linear)
+    taskClosureRate?: number;          // % of tasks closed vs created
+    jiraTicketVelocity?: number;       // Tickets moved to done per week
+
+    // Code (GitHub)
+    codeMergeFrequency?: number;       // PRs merged per week
+
+    // Slack
+    slackResponsiveness?: number;      // Avg response time in key channels (hours)
+
+    // Notion / docs
+    documentActivity?: number;         // Edits/views in key docs
   };
 }
 

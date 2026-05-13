@@ -1,5 +1,6 @@
 import React from "react";
 import { Audio, Composition, Sequence, staticFile } from "remotion";
+import { GDI_CINEMATIC_META } from "./GDI_CinematicBrandFilm";
 
 import { Scene01_Opening } from "./scenes/Scene01_Opening";
 import { Scene02_CategoryProblem } from "./scenes/Scene02_CategoryProblem";
@@ -193,6 +194,14 @@ export function RemotionRoot() {
         fps={FPS}
         width={1920}
         height={1080}
+      />
+      <Composition
+        id={GDI_CINEMATIC_META.id}
+        component={GDI_CINEMATIC_META.component}
+        durationInFrames={GDI_CINEMATIC_META.durationInFrames}
+        fps={GDI_CINEMATIC_META.fps}
+        width={GDI_CINEMATIC_META.width}
+        height={GDI_CINEMATIC_META.height}
       />
     </>
   );

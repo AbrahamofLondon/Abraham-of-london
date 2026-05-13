@@ -7,6 +7,317 @@ import { BehavioralDataSource } from "./enhanced-types";
 
 const BEHAVIORAL_CONNECTIONS_KEY = "aol_behavioral_connections";
 
+// ─── Commitment Classification ────────────────────────────────────────────────
+
+export type CommitmentCategory =
+  | "MEETING_ATTENDANCE"
+  | "MEETING_REDUCTION"
+  | "RECURRING_CADENCE_STABILITY"
+  | "RESPONSE_DISCIPLINE"
+  | "EXECUTION_FOLLOW_THROUGH"
+  | "UNKNOWN";
+
+export type VerificationStatus =
+  | "verified"
+  | "partially_verified"
+  | "contradicted"
+  | "insufficient_evidence"
+  | "not_applicable";
+
+const CATEGORY_PATTERNS: Array<{ category: CommitmentCategory; keywords: string[] }> = [
+  // Checked before MEETING_ATTENDANCE — "reduce meetings" is a different commitment
+  // from "attend meetings" and must not be misclassified.
+  {
+    category: "MEETING_REDUCTION",
+    keywords: [
+      "reduce meetings",
+      "reduce calls",
+      "reduce reviews",
+      "reduce sessions",
+      "fewer meetings",
+      "cut meetings",
+      "less meetings",
+      "cancel meetings",
+      "cancel calls",
+      "cancel reviews",
+      "cancel sessions",
+      "cancel meeting overload",
+      "eliminate meetings",
+      "reduce cadence",
+      "reduce recurring meetings",
+    ],
+  },
+  // Checked before RECURRING_CADENCE_STABILITY — "weekly call" is meeting attendance,
+  // not cadence management. MEETING_ATTENDANCE must win on attendance verbs first.
+  {
+    category: "MEETING_ATTENDANCE",
+    keywords: [
+      "attend meeting",
+      "attend call",
+      "attend review",
+      "attend session",
+      "show up meeting",
+      "turn up meeting",
+      "be present meeting",
+      "join meeting",
+      "join call",
+      "join review",
+      "join session",
+      "weekly call",
+      "weekly meeting",
+      "board meeting",
+      "one-on-one",
+      "1:1 session",
+      "check-in",
+    ],
+  },
+  {
+    category: "RECURRING_CADENCE_STABILITY",
+    keywords: [
+      "maintain cadence",
+      "keep cadence",
+      "consistent cadence",
+      "recurring review",
+      "recurring reviews",
+      "weekly review cadence",
+      "daily standup",
+      "daily standups",
+      "monthly check-in",
+      "every week",
+      "every day",
+      "routine",
+      "stop cancelling recurring",
+      "fortnightly checkpoint",
+    ],
+  },
+  {
+    category: "RESPONSE_DISCIPLINE",
+    keywords: ["respond", "reply", "answer", "get back", "communication", "email", "message", "slack", "inbox", "follow up"],
+  },
+  {
+    category: "EXECUTION_FOLLOW_THROUGH",
+    keywords: ["complete", "deliver", "ship", "finish", "execute", "follow through", "action", "done", "close", "resolve", "implement", "launch"],
+  },
+];
+
+/**
+ * Match a keyword phrase against text using word-boundary-aware regex.
+ *
+ * Single words use `\bword` to prevent substring collisions — e.g. "call"
+ * must not match inside "strategically". Multi-word phrases allow up to 25
+ * characters of intervening text per gap so "reduce my meetings" matches
+ * the "reduce meeting" pattern without requiring exact adjacency.
+ */
+function matchesKeyword(text: string, keyword: string): boolean {
+  const words = keyword.split(" ");
+  const pattern = words
+    .map((word) => `(?<!\\w)${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!\\w)`)
+    .join("(?:\\W+\\w+){0,3}\\W+");
+  return new RegExp(pattern, "i").test(text);
+}
+
+/**
+ * Classify a commitment text into a deterministic category.
+ * Evaluates patterns in priority order — more specific patterns first.
+ * Returns UNKNOWN when no pattern matches; this is honest, not a failure.
+ */
+export function classifyCommitment(commitment: string): CommitmentCategory {
+  for (const { category, keywords } of CATEGORY_PATTERNS) {
+    if (keywords.some((kw) => matchesKeyword(commitment, kw))) {
+      return category;
+    }
+  }
+  return "UNKNOWN";
+}
+
+// ─── Signal-Based Verification ────────────────────────────────────────────────
+
+interface CategoryVerificationResult {
+  verificationStatus: VerificationStatus;
+  evidenceNotes: string[];
+}
+
+function verifyByCategory(
+  category: CommitmentCategory,
+  calendarData: BehavioralDataSource | undefined,
+  taskData: BehavioralDataSource | undefined,
+  slackData: BehavioralDataSource | undefined,
+  emailData: BehavioralDataSource | undefined,
+): CategoryVerificationResult {
+  const notes: string[] = [];
+
+  switch (category) {
+    case "MEETING_ATTENDANCE": {
+      const cal = calendarData?.signals;
+      if (!cal) {
+        return { verificationStatus: "insufficient_evidence", evidenceNotes: ["No calendar integration connected. Connect Google Calendar to verify meeting attendance commitments."] };
+      }
+      const attendanceRate = cal.meetingAttendanceRate;
+      const cancellationRate = cal.meetingCancellationRate;
+
+      if (attendanceRate === undefined) {
+        return { verificationStatus: "insufficient_evidence", evidenceNotes: ["Calendar connected but no self-attendance data available for the period."] };
+      }
+
+      if (attendanceRate >= 0.75) {
+        notes.push(`Meeting attendance rate is ${Math.round(attendanceRate * 100)}% — strong execution signal.`);
+      } else if (attendanceRate >= 0.50) {
+        notes.push(`Meeting attendance rate is ${Math.round(attendanceRate * 100)}% — moderate. Below the 75% threshold for full verification.`);
+      } else {
+        notes.push(`Meeting attendance rate is ${Math.round(attendanceRate * 100)}% — below the threshold expected for this commitment.`);
+      }
+
+      if (cancellationRate !== undefined && cancellationRate >= 0.40) {
+        notes.push(`Cancellation rate is ${Math.round(cancellationRate * 100)}% — this challenges claimed attendance commitment even where confirmed meetings show good attendance.`);
+      }
+
+      const status =
+        attendanceRate >= 0.75 && (cancellationRate === undefined || cancellationRate < 0.40) ? "verified"
+        : attendanceRate >= 0.75 ? "partially_verified"
+        : attendanceRate >= 0.50 ? "partially_verified"
+        : "contradicted";
+
+      return { verificationStatus: status, evidenceNotes: notes };
+    }
+
+    case "MEETING_REDUCTION": {
+      const cal = calendarData?.signals;
+      if (!cal || cal.meetingCancellationRate === undefined) {
+        return { verificationStatus: "insufficient_evidence", evidenceNotes: ["No calendar data available to assess meeting reduction commitment."] };
+      }
+      const rate = cal.meetingCancellationRate;
+      // High cancellation rate supports this commitment — the user is actively reducing meetings.
+      if (rate >= 0.30) {
+        notes.push(`Cancellation rate is ${Math.round(rate * 100)}% — consistent with an active meeting reduction commitment.`);
+        return { verificationStatus: "partially_verified", evidenceNotes: notes };
+      }
+      if (rate < 0.10) {
+        notes.push(`Cancellation rate is ${Math.round(rate * 100)}% — very few meetings are being cancelled. This contradicts a stated reduction commitment.`);
+        return { verificationStatus: "contradicted", evidenceNotes: notes };
+      }
+      notes.push(`Cancellation rate is ${Math.round(rate * 100)}% — some reduction activity, but below the threshold to confirm a systematic commitment.`);
+      return { verificationStatus: "insufficient_evidence", evidenceNotes: notes };
+    }
+
+    case "RECURRING_CADENCE_STABILITY": {
+      const cal = calendarData?.signals;
+      if (!cal || cal.recurringMeetingStability === undefined) {
+        return { verificationStatus: "insufficient_evidence", evidenceNotes: ["No recurring meeting data available. Calendar may not have recurring events in the period, or Google Calendar is not connected."] };
+      }
+      const stability = cal.recurringMeetingStability;
+      if (stability >= 0.75) {
+        notes.push(`Recurring meeting stability is ${Math.round(stability * 100)}% — commitment to cadence is well-supported.`);
+        return { verificationStatus: "verified", evidenceNotes: notes };
+      }
+      if (stability >= 0.50) {
+        notes.push(`Recurring meeting stability is ${Math.round(stability * 100)}% — moderate. Below the 75% threshold for full verification.`);
+        return { verificationStatus: "partially_verified", evidenceNotes: notes };
+      }
+      notes.push(`Recurring meeting stability is ${Math.round(stability * 100)}% — cadence has collapsed below the level expected for this commitment.`);
+      return { verificationStatus: "contradicted", evidenceNotes: notes };
+    }
+
+    case "RESPONSE_DISCIPLINE": {
+      const slack = slackData?.signals?.slackResponsiveness;
+      const email = emailData?.signals?.emailResponsiveness;
+
+      if (slack === undefined && email === undefined) {
+        return { verificationStatus: "insufficient_evidence", evidenceNotes: ["No communication platform data available. Connect Slack to verify response discipline commitments."] };
+      }
+
+      if (slack !== undefined) {
+        if (slack < 4) {
+          notes.push(`Slack response time is ${slack} hours — within the threshold for responsive communication.`);
+          return { verificationStatus: "verified", evidenceNotes: notes };
+        }
+        if (slack < 24) {
+          notes.push(`Slack response time is ${slack} hours — moderate response time. Commitment partially supported.`);
+          if (email !== undefined && email < 24) {
+            notes.push(`Email response time is ${email} hours — also within daily threshold.`);
+          }
+          return { verificationStatus: "partially_verified", evidenceNotes: notes };
+        }
+        notes.push(`Slack response time is ${slack} hours — exceeds 24-hour threshold. Contradicts a response discipline commitment.`);
+        return { verificationStatus: "contradicted", evidenceNotes: notes };
+      }
+
+      // Slack not available — fall back to email only
+      if (email !== undefined) {
+        if (email < 24) {
+          notes.push(`Email response time is ${email} hours. Partial corroboration (Slack data unavailable).`);
+          return { verificationStatus: "partially_verified", evidenceNotes: notes };
+        }
+        notes.push(`Email response time is ${email} hours — exceeds daily threshold.`);
+        return { verificationStatus: "contradicted", evidenceNotes: notes };
+      }
+
+      return { verificationStatus: "insufficient_evidence", evidenceNotes: notes };
+    }
+
+    case "EXECUTION_FOLLOW_THROUGH": {
+      const task = taskData?.signals;
+      const cal = calendarData?.signals;
+
+      if (!task && !cal) {
+        return { verificationStatus: "insufficient_evidence", evidenceNotes: ["No task management or calendar data available to verify execution follow-through."] };
+      }
+
+      if (task?.taskClosureRate !== undefined) {
+        const rate = task.taskClosureRate;
+        if (rate >= 0.60) {
+          notes.push(`Task closure rate is ${Math.round(rate * 100)}% — strong execution signal.`);
+          return { verificationStatus: "verified", evidenceNotes: notes };
+        }
+        if (rate >= 0.30) {
+          notes.push(`Task closure rate is ${Math.round(rate * 100)}% — partial execution evidence.`);
+          return { verificationStatus: "partially_verified", evidenceNotes: notes };
+        }
+        notes.push(`Task closure rate is ${Math.round(rate * 100)}% — below threshold. Contradicts execution follow-through commitment.`);
+        return { verificationStatus: "contradicted", evidenceNotes: notes };
+      }
+
+      // Fall back to calendar completion as a proxy for execution follow-through
+      if (cal?.meetingCompletion !== undefined) {
+        const completion = cal.meetingCompletion;
+        notes.push(`Task management data unavailable. Using calendar completion (${Math.round(completion * 100)}%) as a weak proxy for execution follow-through.`);
+        if (completion >= 0.75) {
+          return { verificationStatus: "partially_verified", evidenceNotes: notes };
+        }
+        return { verificationStatus: "insufficient_evidence", evidenceNotes: notes };
+      }
+
+      return { verificationStatus: "insufficient_evidence", evidenceNotes: ["Signal coverage is insufficient to verify this execution commitment."] };
+    }
+
+    case "UNKNOWN":
+      return {
+        verificationStatus: "insufficient_evidence",
+        evidenceNotes: ["Commitment could not be classified into a verifiable category. Behavioral signals require a recognisable commitment type to apply evidence rules."],
+      };
+  }
+}
+
+// ─── Legacy confidence/status mapping ─────────────────────────────────────────
+// Preserves the existing return shape for callers that depend on it.
+
+function toLegacyConfidence(status: VerificationStatus): "high" | "medium" | "low" {
+  switch (status) {
+    case "verified": return "high";
+    case "partially_verified": return "medium";
+    case "contradicted": return "high";
+    default: return "low";
+  }
+}
+
+function toLegacyStatus(status: VerificationStatus): "likely_completed" | "likely_not_completed" | "inconclusive" {
+  switch (status) {
+    case "verified": return "likely_completed";
+    case "partially_verified": return "likely_completed";
+    case "contradicted": return "likely_not_completed";
+    default: return "inconclusive";
+  }
+}
+
 // ─── OAuth Initiation ─────────────────────────────────────────────────────────
 
 /**
@@ -70,14 +381,12 @@ export function getBehavioralConnections(): BehavioralDataSource[] {
  */
 export async function getBehavioralData(subjectId: string): Promise<BehavioralDataSource[]> {
   try {
-    // Primary: fetch from server with real OAuth data
     const response = await fetch(`/api/integrations/signals?subjectId=${encodeURIComponent(subjectId)}`, {
       credentials: "include",
     });
 
     if (response.ok) {
       const data: BehavioralDataSource[] = await response.json();
-      // Cache in localStorage for quick access
       if (data.length > 0) {
         for (const source of data) {
           saveBehavioralConnection(source);
@@ -86,7 +395,6 @@ export async function getBehavioralData(subjectId: string): Promise<BehavioralDa
       return data;
     }
 
-    // If server returns 401 (not authenticated), fall back to cached connections
     if (response.status === 401) {
       console.warn("[BEHAVIORAL_INTEGRATION] User not authenticated, using cached data");
       return getBehavioralConnections().filter(c => c.connectionId === subjectId);
@@ -95,7 +403,6 @@ export async function getBehavioralData(subjectId: string): Promise<BehavioralDa
     console.warn(`[BEHAVIORAL_INTEGRATION] Server returned ${response.status}, using cached data`);
     return getBehavioralConnections().filter(c => c.connectionId === subjectId);
   } catch {
-    // Fallback: return stored connections from localStorage
     console.warn("[BEHAVIORAL_INTEGRATION] Network error, using cached data");
     return getBehavioralConnections().filter(c => c.connectionId === subjectId);
   }
@@ -106,108 +413,60 @@ export async function getBehavioralData(subjectId: string): Promise<BehavioralDa
 /**
  * Verify contract completion using behavioral signals from connected data sources.
  *
- * This is the core function that the Pattern-Breaker Contract system uses to
- * verify whether a commitment has been fulfilled, using real data from
- * Google Calendar, Slack, and other integrated providers.
+ * Classifies the commitment text into a deterministic category, then applies
+ * evidence rules specific to that category. Evidence is matched to the signal
+ * type that is actually relevant — not via keyword scoring, which conflates
+ * surface text with behavioral reality.
+ *
+ * The existing confidence/status fields are preserved for backward compatibility.
+ * Callers that want structured output should use verificationStatus and evidenceNotes.
  */
 export async function verifyWithBehavioralData(
   contractId: string,
   subjectId: string,
-  commitment: string
-): Promise<{ confidence: "high" | "medium" | "low"; status: "likely_completed" | "likely_not_completed" | "inconclusive"; evidence: string }> {
+  commitment: string,
+): Promise<{
+  confidence: "high" | "medium" | "low";
+  status: "likely_completed" | "likely_not_completed" | "inconclusive";
+  evidence: string;
+  verificationStatus: VerificationStatus;
+  evidenceNotes: string[];
+  category: CommitmentCategory;
+}> {
   const behavioralData = await getBehavioralData(subjectId);
 
   if (behavioralData.length === 0) {
     return {
       confidence: "low",
       status: "inconclusive",
-      evidence: "No behavioral data sources connected. Connect Google Calendar or Slack in Settings > Integrations to enable behavioral verification."
+      evidence: "No behavioral data sources connected. Connect Google Calendar or Slack in Settings > Integrations to enable behavioral verification.",
+      verificationStatus: "insufficient_evidence",
+      evidenceNotes: ["No behavioral data sources connected."],
+      category: "UNKNOWN",
     };
   }
 
-  const signals = behavioralData.flatMap(d => Object.entries(d.signals));
-  let confidenceScore = 0;
-  const evidence: string[] = [];
+  const category = classifyCommitment(commitment);
 
-  // Calendar integration: check meeting completion
-  if (commitment.toLowerCase().includes("meeting") || commitment.toLowerCase().includes("call")) {
-    const calendarData = behavioralData.find(d => d.type === "calendar");
-    if (calendarData?.signals.meetingCompletion !== undefined) {
-      const completion = calendarData.signals.meetingCompletion;
-      if (completion > 0.7) {
-        confidenceScore += 30;
-        evidence.push(`Calendar shows ${Math.round(completion * 100)}% meeting completion rate`);
-      } else if (completion < 0.3) {
-        confidenceScore -= 20;
-        evidence.push(`Calendar shows low meeting completion (${Math.round(completion * 100)}%)`);
-      } else {
-        confidenceScore += 10;
-        evidence.push(`Calendar shows moderate meeting completion (${Math.round(completion * 100)}%)`);
-      }
-    }
-  }
+  const calendarData = behavioralData.find((d) => d.type === "calendar");
+  const taskData = behavioralData.find((d) => d.type === "jira" || d.type === "linear");
+  const slackData = behavioralData.find((d) => d.type === "slack");
+  const emailData = behavioralData.find((d) => d.type === "email");
 
-  // Task management: check task closure
-  if (commitment.toLowerCase().includes("task") || commitment.toLowerCase().includes("complete")) {
-    const taskData = behavioralData.find(d => d.type === "jira" || d.type === "linear");
-    if (taskData?.signals.taskClosureRate !== undefined) {
-      if (taskData.signals.taskClosureRate > 0.6) {
-        confidenceScore += 25;
-        evidence.push(`Task closure rate: ${Math.round(taskData.signals.taskClosureRate * 100)}%`);
-      } else if (taskData.signals.taskClosureRate > 0.3) {
-        confidenceScore += 10;
-        evidence.push(`Task closure rate: ${Math.round(taskData.signals.taskClosureRate * 100)}% (moderate)`);
-      } else {
-        confidenceScore -= 15;
-        evidence.push(`Task closure rate: ${Math.round(taskData.signals.taskClosureRate * 100)}% (low)`);
-      }
-    }
-  }
-
-  // Communication: check responsiveness
-  if (commitment.toLowerCase().includes("respond") || commitment.toLowerCase().includes("answer")) {
-    const emailData = behavioralData.find(d => d.type === "email");
-    if (emailData?.signals.emailResponsiveness !== undefined && emailData.signals.emailResponsiveness < 24) {
-      confidenceScore += 15;
-      evidence.push(`Email response time: ${emailData.signals.emailResponsiveness} hours (within threshold)`);
-    }
-
-    const slackData = behavioralData.find(d => d.type === "slack");
-    if (slackData?.signals.slackResponsiveness !== undefined) {
-      const resp = slackData.signals.slackResponsiveness;
-      if (resp < 4) {
-        confidenceScore += 20;
-        evidence.push(`Slack response time: ${resp} hours (responsive)`);
-      } else if (resp < 24) {
-        confidenceScore += 10;
-        evidence.push(`Slack response time: ${resp} hours (moderate)`);
-      } else {
-        confidenceScore -= 10;
-        evidence.push(`Slack response time: ${resp} hours (slow)`);
-      }
-    }
-  }
-
-  let status: "likely_completed" | "likely_not_completed" | "inconclusive";
-  let confidence: "high" | "medium" | "low";
-
-  if (confidenceScore >= 50) {
-    status = "likely_completed";
-    confidence = "high";
-  } else if (confidenceScore <= -20) {
-    status = "likely_not_completed";
-    confidence = "high";
-  } else if (confidenceScore > 0) {
-    status = "likely_completed";
-    confidence = "medium";
-  } else {
-    status = "inconclusive";
-    confidence = "low";
-  }
+  const { verificationStatus, evidenceNotes } = verifyByCategory(
+    category,
+    calendarData,
+    taskData,
+    slackData,
+    emailData,
+  );
 
   return {
-    confidence,
-    status,
-    evidence: evidence.join("; ") || "Insufficient behavioral signals from connected data sources"
+    confidence: toLegacyConfidence(verificationStatus),
+    status: toLegacyStatus(verificationStatus),
+    evidence: evidenceNotes.join(" ") || "Insufficient behavioral signals from connected data sources.",
+    verificationStatus,
+    evidenceNotes,
+    category,
   };
 }

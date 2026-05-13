@@ -6,6 +6,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { encrypt, decrypt } from "./encryption";
+import { fromNowSeconds, isExpired } from "@/utils/dates";
 
 export type ProviderType = "google" | "slack" | "jira" | "linear" | "github" | "notion";
 
@@ -58,7 +59,7 @@ export async function storeUserTokens(input: StoreTokenInput): Promise<StoredTok
       provider: input.provider,
       accessToken: encryptedAccess,
       refreshToken: encryptedRefresh,
-      tokenExpiry: new Date(Date.now() + input.expiresIn * 1000),
+      tokenExpiry: fromNowSeconds(input.expiresIn),
       scopes: input.scopes || "",
       status: "active",
       lastSyncAt: new Date(),
@@ -66,7 +67,7 @@ export async function storeUserTokens(input: StoreTokenInput): Promise<StoredTok
     update: {
       accessToken: encryptedAccess,
       refreshToken: encryptedRefresh,
-      tokenExpiry: new Date(Date.now() + input.expiresIn * 1000),
+      tokenExpiry: fromNowSeconds(input.expiresIn),
       scopes: input.scopes || "",
       status: "active",
       lastSyncAt: new Date(),
@@ -100,7 +101,7 @@ export async function getAccessToken(
   if (integration.status !== "active") return null;
 
   // Check if token is expired and attempt refresh
-  if (integration.tokenExpiry < new Date()) {
+  if (isExpired(integration.tokenExpiry)) {
     return refreshAndGetToken(userId, provider, integration);
   }
 
@@ -128,6 +129,7 @@ export async function getIntegrationStatus(
   scopes: string;
   lastSyncAt: Date | null;
   tokenExpiry: Date | null;
+  connectedAt: Date;
 } | null> {
   const integration = await prisma.userIntegration.findUnique({
     where: {
@@ -143,6 +145,7 @@ export async function getIntegrationStatus(
     scopes: integration.scopes,
     lastSyncAt: integration.lastSyncAt,
     tokenExpiry: integration.tokenExpiry,
+    connectedAt: integration.createdAt,
   };
 }
 

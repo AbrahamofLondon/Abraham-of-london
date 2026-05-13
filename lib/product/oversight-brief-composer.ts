@@ -15,6 +15,7 @@ import {
 } from "@/lib/alignment/evidence-loader";
 import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
 import { recordSuppression } from "@/lib/product/suppression-ledger";
+import { fetchUserBehavioralData } from "@/lib/integrations";
 
 function sum(values: number[]): number {
   return values.reduce((total, value) => total + value, 0);
@@ -220,6 +221,23 @@ export async function composeOversightBrief(input: {
     checkpointSignalCount = overdue.length + blocked.length + abandoned.length;
   } catch { /* degrade gracefully */ }
 
+  // ── BEHAVIORAL DATA — calendar and communication corroboration ──
+  let behavioralSources: Parameters<typeof buildOversightSignals>[0]["behavioralSources"] = null;
+  if (input.userId) {
+    try {
+      behavioralSources = await fetchUserBehavioralData(input.userId);
+    } catch (error) {
+      // Behavioral data is corroborative, not blocking — the brief still proceeds.
+      // Log safe degradation metadata only. Never log tokens, attendee data, or event content.
+      console.warn("[oversight-brief] behavioral data fetch failed", {
+        userIdPresent: true,
+        errorName: error instanceof Error ? error.name : "UnknownError",
+        errorMessage: error instanceof Error ? error.message : "Unknown behavioral data fetch failure",
+      });
+      behavioralSources = null;
+    }
+  }
+
   const signals = buildOversightSignals({
     cases: loaded.cases,
     creditProfile,
@@ -228,6 +246,7 @@ export async function composeOversightBrief(input: {
     enterpriseStrain,
     retainedEnforcement: loaded.retainedEnforcement ?? null,
     retainedCadence,
+    behavioralSources,
   });
 
   // Inject checkpoint-level signals from the efficacy system
@@ -409,7 +428,10 @@ export async function composeOversightBrief(input: {
         s.type === "OUTCOME_DETERIORATED" ||
         s.type === "COST_OF_INACTION_ACCUMULATING" ||
         s.type === "COMMITMENT_UNVERIFIED" ||
-        s.type === "RETAINED_REVIEW_OVERDUE"
+        s.type === "RETAINED_REVIEW_OVERDUE" ||
+        s.type === "EXECUTION_DRIFT" ||
+        s.type === "CHECKPOINT_CONFIRMED" ||
+        s.type === "CHECKPOINT_ABANDONED"
       )
       .map((s) => ({
         id: s.id,
