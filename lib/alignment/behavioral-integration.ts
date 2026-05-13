@@ -103,10 +103,10 @@ const CATEGORY_PATTERNS: Array<{ category: CommitmentCategory; keywords: string[
 /**
  * Match a keyword phrase against text using word-boundary-aware regex.
  *
- * Single words use `\bword` to prevent substring collisions — e.g. "call"
- * must not match inside "strategically". Multi-word phrases allow up to 25
- * characters of intervening text per gap so "reduce my meetings" matches
- * the "reduce meeting" pattern without requiring exact adjacency.
+ * Each token is matched as a whole token via lookarounds so substring collisions
+ * like "call" inside "recall" are excluded. Multi-word phrases allow up to
+ * three intervening filler words so variants like "reduce my meetings" still
+ * match without treating distant, loosely related words as equivalent.
  */
 function matchesKeyword(text: string, keyword: string): boolean {
   const words = keyword.split(" ");
