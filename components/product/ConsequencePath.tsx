@@ -70,7 +70,7 @@ function PathStep({ label, labelColor, text, borderColor }: StepProps) {
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "8px",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: labelColor ?? "rgba(255,255,255,0.28)",

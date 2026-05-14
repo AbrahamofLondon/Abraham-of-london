@@ -110,7 +110,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
               Product role: {role ?? "UNRESOLVED"}
             </p>
             <div style={{ marginTop: "20px", borderTop: "1px solid rgba(201,169,110,0.15)", paddingTop: "16px" }}>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,169,110,0.70)", marginBottom: "10px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,169,110,0.70)", marginBottom: "10px" }}>
                 Retained oversight currently preserves
               </p>
               <div style={{ display: "grid", gap: "6px" }}>
@@ -123,7 +123,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                   { label: "Continuity signal", value: "Outcome history and portfolio signal carried across cycles" },
                 ] as { label: string; value: string | number }[]).map((item) => (
                   <div key={item.label} style={{ display: "flex", gap: "16px" }}>
-                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.55)", minWidth: "140px", paddingTop: "1px", flexShrink: 0 }}>
+                    <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.55)", minWidth: "140px", paddingTop: "1px", flexShrink: 0 }}>
                       {item.label}
                     </span>
                     <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.45)" }}>
@@ -232,7 +232,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                 </p>
                 <div className="mt-3 grid gap-3 md:grid-cols-3">
                   <div>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Signal recurrence</p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Signal recurrence</p>
                     <p className="text-sm text-white/60">
                       {summary.retainedMemory.oversightCycles > 0
                         ? `${summary.retainedMemory.oversightCycles} oversight cycle${summary.retainedMemory.oversightCycles !== 1 ? "s" : ""} retained. Signal patterns are tracked across cycles for recurrence and escalation.`
@@ -240,7 +240,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                     </p>
                   </div>
                   <div>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Cadence reliability</p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Cadence reliability</p>
                     <p className="text-sm text-white/60">
                       {cadencePosture
                         ? cadencePosture.reliability >= 0.8
@@ -252,7 +252,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                     </p>
                   </div>
                   <div>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Active attention signal</p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Active attention signal</p>
                     <p className="text-sm text-white/60">
                       {summary.attention.length === 0
                         ? "No active attention items. No elevated signal is currently published from retained oversight."
@@ -267,7 +267,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                 </div>
                 {cadencePosture && cadencePosture.cyclesOverdue > 0 && (
                   <div className="mt-3">
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Cadence gap signal</p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Cadence gap signal</p>
                     <p className="text-sm text-white/50">
                       {cadencePosture.cyclesOverdue} cycle{cadencePosture.cyclesOverdue !== 1 ? "s" : ""} overdue. Gaps in retained cadence reduce the continuity of signal detection. Unreviewed cycles may represent untracked escalation risk.
                     </p>
@@ -285,7 +285,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                 </p>
                 <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <div>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Movement direction</p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Movement direction</p>
                     <p className="text-sm text-white/60">
                       {cadencePosture
                         ? cadencePosture.cyclesOverdue > 1
@@ -299,7 +299,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                     </p>
                   </div>
                   <div>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Review obligation</p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Review obligation</p>
                     <p className="text-sm text-white/60">
                       {summary.attention.filter((a) => a.severity === "HIGH").length > 0
                         ? "Mandatory review — HIGH severity attention items are active. Operator review is required."
@@ -309,7 +309,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                     </p>
                   </div>
                   <div>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Operator review requirement</p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Operator review requirement</p>
                     <p className="text-sm text-white/60">
                       {summary.attention.filter((a) => a.severity === "HIGH").length > 0
                         ? "Required — HIGH severity signals are present and require human operator confirmation."
@@ -319,7 +319,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                     </p>
                   </div>
                   <div>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Memory update status</p>
+                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Memory update status</p>
                     <p className="text-sm text-white/60">
                       {summary.retainedMemory.checkpointResponses > 0
                         ? `${summary.retainedMemory.checkpointResponses} checkpoint response${summary.retainedMemory.checkpointResponses !== 1 ? "s" : ""} recorded. Memory is active and updating with each review cycle.`
