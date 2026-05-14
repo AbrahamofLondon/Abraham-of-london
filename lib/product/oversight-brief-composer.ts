@@ -98,9 +98,40 @@ export function buildBehavioralTrendStructuredAction(
     return null;
   }
 
+  const targetedMetrics = summary.metrics.filter((metric) =>
+    Boolean(metric.source)
+    && (
+      metric.direction === "RECURRING"
+      || Boolean(summary.repeatedDriftSignals?.includes(metric.signalKey))
+    ),
+  );
+  const uniqueTargets = [...new Map(
+    targetedMetrics.map((metric) => [`${metric.source}::${metric.signalKey}`, metric] as const),
+  ).values()];
+
+  if (uniqueTargets.length === 1) {
+    const metric = uniqueTargets[0]!;
+    return {
+      id: `act_behavioral_trend_${metric.source}_${metric.signalKey}`,
+      scopeType: "ACCOUNT",
+      targetScope: "SOURCE_SIGNAL",
+      targetSource: metric.source ?? null,
+      targetSignalKey: metric.signalKey,
+      actionType: "REVIEW_OPERATING_CADENCE",
+      action: `Recurring behavioral deterioration is visible for ${metric.signalKey}. Review operating cadence and unresolved commitments before the next oversight cycle.`,
+      evidenceBasis: metric.explanation,
+      severity: "HIGH",
+      continuitySourceLabel: "Derived from persisted behavioral snapshot comparison",
+      continuityConfidenceLabel: "AGGREGATED",
+    };
+  }
+
   return {
     id: "act_behavioral_trend_deterioration",
     scopeType: "ACCOUNT",
+    targetScope: "ACCOUNT",
+    targetSource: null,
+    targetSignalKey: null,
     actionType: "REVIEW_OPERATING_CADENCE",
     action: "Recurring behavioral deterioration is visible across oversight windows. Review operating cadence and unresolved commitments before the next oversight cycle.",
     evidenceBasis: summary!.summary,
@@ -521,23 +552,17 @@ export async function composeOversightBrief(input: {
         behavioralTrends: internalBrief?.behavioralTrends ?? null,
         behavioralEvidenceStatus: internalBrief?.behavioralEvidenceStatus ?? "unavailable",
       }));
-      const priorStructuredActions = priorArchives.flatMap(({ record, internalBrief }) => {
-        const trendSummary = internalBrief?.behavioralTrends;
-        const hasCadenceWarning = internalBrief?.structuredActions?.some(
-          (action) => action.actionType === "REVIEW_OPERATING_CADENCE",
-        );
-        if (!trendSummary || !hasCadenceWarning) {
-          return [];
-        }
-        return trendSummary.metrics
-          .filter((metric) => metric.direction === "DETERIORATING" || metric.direction === "RECURRING")
-          .map((metric) => ({
+      const priorStructuredActions = priorArchives.flatMap(({ record, internalBrief }) =>
+        (internalBrief?.structuredActions ?? [])
+          .filter((action) => action.actionType === "REVIEW_OPERATING_CADENCE")
+          .map((action) => ({
             actionType: "REVIEW_OPERATING_CADENCE" as const,
-            source: trendSummary.source,
-            signalKey: metric.signalKey,
+            targetScope: action.targetScope ?? null,
+            source: action.targetSource ?? null,
+            signalKey: action.targetSignalKey ?? null,
             createdAt: record.periodEnd,
-          }));
-      });
+          }))
+      );
       const retainedEnforcementCycles = (await listRetainedReviewCycles())
         .filter((cycle) => matchesRetainedCycleScope(cycle, {
           accountId: loaded.account?.accountId,
