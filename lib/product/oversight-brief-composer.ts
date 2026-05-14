@@ -94,7 +94,7 @@ export function hasBehavioralTrendRecurrenceEvidence(
 export function buildBehavioralTrendStructuredAction(
   summary?: BehavioralTrendSummary | null,
 ): NonNullable<OversightBrief["structuredActions"]>[number] | null {
-  if (!hasBehavioralTrendRecurrenceEvidence(summary)) {
+  if (!summary || !hasBehavioralTrendRecurrenceEvidence(summary)) {
     return null;
   }
 
@@ -134,7 +134,7 @@ export function buildBehavioralTrendStructuredAction(
     targetSignalKey: null,
     actionType: "REVIEW_OPERATING_CADENCE",
     action: "Recurring behavioral deterioration is visible across oversight windows. Review operating cadence and unresolved commitments before the next oversight cycle.",
-    evidenceBasis: summary!.summary,
+    evidenceBasis: summary.summary,
     severity: "HIGH",
     continuitySourceLabel: "Derived from persisted behavioral snapshot comparison",
     continuityConfidenceLabel: "AGGREGATED",

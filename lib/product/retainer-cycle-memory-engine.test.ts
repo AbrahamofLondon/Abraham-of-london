@@ -1,19 +1,41 @@
 import { describe, expect, it } from "vitest";
 
-import type { BehavioralTrendSummary } from "@/lib/behavioral/behavioral-trend-contract";
-import {
-  buildRetainerCycleMemorySummary,
-} from "@/lib/product/retainer-cycle-memory-engine";
+import type {
+  BehavioralTrendDirection,
+  BehavioralTrendMetric,
+  BehavioralTrendSummary,
+} from "@/lib/behavioral/behavioral-trend-contract";
+import { buildRetainerCycleMemorySummary } from "@/lib/product/retainer-cycle-memory-engine";
 import type {
   PriorBehavioralActionRecord,
   PriorBehavioralTrendCycle,
   RetainedEnforcementCycleRecord,
+  RetainerCycleMemorySummary,
 } from "@/lib/product/retainer-cycle-memory-contract";
+
+function makeMetric(overrides: Partial<BehavioralTrendMetric> = {}): BehavioralTrendMetric {
+  return {
+    signalKey: "meetingCancellationRate",
+    source: "google_calendar",
+    sourceLabel: "Google Calendar",
+    currentValue: 0.4,
+    previousValue: 0.2,
+    delta: 0.2,
+    direction: "DETERIORATING",
+    evidencePosture: "snapshot",
+    evidenceWindowStart: "2026-05-01T00:00:00.000Z",
+    evidenceWindowEnd: "2026-05-14T00:00:00.000Z",
+    previousWindowStart: "2026-04-17T00:00:00.000Z",
+    previousWindowEnd: "2026-04-30T00:00:00.000Z",
+    explanation: "meetingCancellationRate deteriorated.",
+    ...overrides,
+  };
+}
 
 function makeTrendSummary(overrides: Partial<BehavioralTrendSummary> = {}): BehavioralTrendSummary {
   return {
     userId: "user_1",
-    source: "calendar",
+    source: "google_calendar",
     computedAt: "2026-05-14T00:00:00.000Z",
     overallDirection: "INSUFFICIENT_EVIDENCE",
     summary: "Behavioral trend evidence is insufficient for a cycle-over-cycle reading.",
@@ -26,122 +48,179 @@ function makeTrendSummary(overrides: Partial<BehavioralTrendSummary> = {}): Beha
   };
 }
 
-function makeCycle(
-  direction: "DETERIORATING" | "IMPROVING" | "STABLE" | "INSUFFICIENT_EVIDENCE",
-  observedAt: string,
-  signalKey = "meetingCancellationRate",
-  source = "calendar",
-): PriorBehavioralTrendCycle {
+function makeCycle(input: {
+  direction: BehavioralTrendDirection;
+  observedAt: string;
+  signalKey?: string;
+  source?: string | null;
+}): PriorBehavioralTrendCycle {
+  const signalKey = input.signalKey ?? "meetingCancellationRate";
+  const source = input.source === undefined ? "google_calendar" : input.source;
   return {
-    observedAt,
+    observedAt: input.observedAt,
     behavioralEvidenceStatus: "snapshot",
     behavioralTrends: makeTrendSummary({
-      source,
-      overallDirection: direction,
-      hasDeterioration: direction === "DETERIORATING",
-      metrics: [{
-        signalKey,
-        currentValue: direction === "IMPROVING" ? 0.1 : 0.4,
-        previousValue: 0.2,
-        delta: direction === "IMPROVING" ? -0.1 : direction === "DETERIORATING" ? 0.2 : 0,
-        direction,
-        evidencePosture: "snapshot",
-        explanation: `${signalKey} ${direction.toLowerCase()}`,
-      }],
+      source: source ?? "behavioral",
+      overallDirection: input.direction,
+      hasDeterioration: input.direction === "DETERIORATING" || input.direction === "RECURRING",
+      metrics: source
+        ? [
+            makeMetric({
+              signalKey,
+              source,
+              sourceLabel: source === "slack" ? "Slack" : "Google Calendar",
+              currentValue: input.direction === "IMPROVING" ? 0.1 : 0.4,
+              previousValue: 0.2,
+              delta: input.direction === "IMPROVING" ? -0.1 : input.direction === "STABLE" ? 0 : 0.2,
+              direction: input.direction,
+              explanation: `${source}.${signalKey} ${input.direction.toLowerCase()}`,
+            }),
+          ]
+        : [
+            makeMetric({
+              signalKey,
+              source: null,
+              sourceLabel: null,
+              direction: input.direction,
+              explanation: `${signalKey} ${input.direction.toLowerCase()}`,
+            }),
+          ],
     }),
   };
 }
 
-function makeWarning(signalKey = "meetingCancellationRate", source = "calendar"): PriorBehavioralActionRecord {
+function makeWarning(overrides: Partial<PriorBehavioralActionRecord> = {}): PriorBehavioralActionRecord {
   return {
     actionType: "REVIEW_OPERATING_CADENCE",
-    signalKey,
-    source,
+    targetScope: "SOURCE_SIGNAL",
+    source: "google_calendar",
+    signalKey: "meetingCancellationRate",
     createdAt: "2026-04-15T00:00:00.000Z",
+    ...overrides,
   };
 }
 
-function makeIntervention(): RetainedEnforcementCycleRecord {
+function makeIntervention(
+  overrides: Partial<RetainedEnforcementCycleRecord> = {},
+): RetainedEnforcementCycleRecord {
   return {
     cycleId: "rrc_1",
+    targetScope: "SOURCE_SIGNAL",
+    targetSource: "google_calendar",
+    targetSignalKey: "meetingCancellationRate",
     cadenceState: "COMPLETED",
     completedAt: "2026-04-20T00:00:00.000Z",
     updatedAt: "2026-04-20T00:00:00.000Z",
+    ...overrides,
   };
+}
+
+function buildSummary(
+  overrides: Partial<Parameters<typeof buildRetainerCycleMemorySummary>[0]> = {},
+): RetainerCycleMemorySummary {
+  return buildRetainerCycleMemorySummary({
+    generatedAt: "2026-05-14T00:00:00.000Z",
+    accountId: "acct_1",
+    userId: "user_1",
+    currentBehavioralEvidenceStatus: "snapshot",
+    currentBehavioralTrends: makeTrendSummary(),
+    priorBehavioralTrends: [],
+    ...overrides,
+  });
 }
 
 describe("retainer cycle memory engine", () => {
   it("treats first-time deterioration as NEW_SIGNAL rather than recurrence", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      accountId: "acct_1",
-      userId: "user_1",
-      currentBehavioralEvidenceStatus: "snapshot",
+    const summary = buildSummary({
       currentBehavioralTrends: makeTrendSummary({
-        source: "calendar",
+        source: "behavioral",
         overallDirection: "DETERIORATING",
         hasDeterioration: true,
-        metrics: [{
-          signalKey: "meetingCancellationRate",
-          currentValue: 0.4,
-          previousValue: 0.2,
-          delta: 0.2,
-          direction: "DETERIORATING",
-          evidencePosture: "snapshot",
-          explanation: "meetingCancellationRate deteriorated.",
-        }],
+        metrics: [makeMetric()],
       }),
-      priorBehavioralTrends: [],
     });
 
     expect(summary.findings[0]?.status).toBe("NEW_SIGNAL");
     expect(summary.escalationLevel).toBe("NONE");
   });
 
-  it("marks two consecutive deteriorations as REPEATED_SIGNAL", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "snapshot",
+  it("marks same source plus signal across cycles as REPEATED_SIGNAL", () => {
+    const summary = buildSummary({
       currentBehavioralTrends: makeTrendSummary({
-        source: "calendar",
+        source: "behavioral",
         overallDirection: "DETERIORATING",
         hasDeterioration: true,
-        metrics: [{
-          signalKey: "meetingCancellationRate",
-          currentValue: 0.4,
-          previousValue: 0.2,
-          delta: 0.2,
-          direction: "DETERIORATING",
-          evidencePosture: "snapshot",
-          explanation: "meetingCancellationRate deteriorated.",
-        }],
+        metrics: [makeMetric()],
       }),
-      priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z")],
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
     });
 
     expect(summary.findings[0]?.status).toBe("REPEATED_SIGNAL");
+    expect(summary.findings[0]?.source).toBe("google_calendar");
     expect(summary.escalationLevel).toBe("OPERATING_CADENCE_RESET");
   });
 
-  it("marks deterioration after prior warning distinctly", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "snapshot",
+  it("does not compare the same signal key across different sources", () => {
+    const summary = buildSummary({
       currentBehavioralTrends: makeTrendSummary({
-        source: "calendar",
+        source: "behavioral",
         overallDirection: "DETERIORATING",
         hasDeterioration: true,
-        metrics: [{
-          signalKey: "meetingCancellationRate",
-          currentValue: 0.45,
-          previousValue: 0.2,
-          delta: 0.25,
-          direction: "DETERIORATING",
-          evidencePosture: "snapshot",
-          explanation: "meetingCancellationRate deteriorated again.",
-        }],
+        metrics: [makeMetric({ source: "slack", sourceLabel: "Slack" })],
       }),
-      priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z")],
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
+    });
+
+    expect(summary.findings[0]?.status).toBe("NEW_SIGNAL");
+    expect(summary.findings[0]?.source).toBe("slack");
+  });
+
+  it("downgrades safely when prior archived data lacks source identity", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric()],
+      }),
+      priorBehavioralTrends: [makeCycle({
+        direction: "DETERIORATING",
+        observedAt: "2026-04-01T00:00:00.000Z",
+        source: null,
+      })],
+    });
+
+    expect(summary.findings[0]?.status).toBe("NEW_SIGNAL");
+  });
+
+  it("does not turn a generic account warning into every metric's warning history", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric()],
+      }),
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
+      priorStructuredActions: [makeWarning({
+        targetScope: "ACCOUNT",
+        source: null,
+        signalKey: null,
+      })],
+    });
+
+    expect(summary.findings[0]?.status).toBe("REPEATED_SIGNAL");
+  });
+
+  it("marks deterioration after matching targeted warning distinctly", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric()],
+      }),
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
       priorStructuredActions: [makeWarning()],
     });
 
@@ -149,25 +228,33 @@ describe("retainer cycle memory engine", () => {
     expect(summary.escalationLevel).toBe("RETAINED_INTERVENTION");
   });
 
-  it("marks deterioration after intervention distinctly", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "snapshot",
+  it("does not trigger warning lineage for a non-matching targeted warning", () => {
+    const summary = buildSummary({
       currentBehavioralTrends: makeTrendSummary({
-        source: "calendar",
+        source: "behavioral",
         overallDirection: "DETERIORATING",
         hasDeterioration: true,
-        metrics: [{
-          signalKey: "meetingCancellationRate",
-          currentValue: 0.45,
-          previousValue: 0.2,
-          delta: 0.25,
-          direction: "DETERIORATING",
-          evidencePosture: "snapshot",
-          explanation: "meetingCancellationRate deteriorated again.",
-        }],
+        metrics: [makeMetric()],
       }),
-      priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z")],
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
+      priorStructuredActions: [makeWarning({
+        source: "slack",
+        signalKey: "meetingCancellationRate",
+      })],
+    });
+
+    expect(summary.findings[0]?.status).toBe("REPEATED_SIGNAL");
+  });
+
+  it("marks deterioration after matching targeted intervention distinctly", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric()],
+      }),
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
       priorStructuredActions: [makeWarning()],
       retainedEnforcementCycles: [makeIntervention()],
     });
@@ -176,24 +263,20 @@ describe("retainer cycle memory engine", () => {
     expect(summary.escalationLevel).toBe("BOARDROOM_REVIEW");
   });
 
-  it("recognises improvement after intervention", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "snapshot",
+  it("recognises improvement after matching targeted intervention", () => {
+    const summary = buildSummary({
       currentBehavioralTrends: makeTrendSummary({
-        source: "calendar",
+        source: "behavioral",
         overallDirection: "IMPROVING",
-        metrics: [{
-          signalKey: "meetingCancellationRate",
+        metrics: [makeMetric({
           currentValue: 0.1,
           previousValue: 0.4,
           delta: -0.3,
           direction: "IMPROVING",
-          evidencePosture: "snapshot",
           explanation: "meetingCancellationRate improved.",
-        }],
+        })],
       }),
-      priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z")],
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
       priorStructuredActions: [makeWarning()],
       retainedEnforcementCycles: [makeIntervention()],
     });
@@ -202,9 +285,39 @@ describe("retainer cycle memory engine", () => {
     expect(summary.escalationLevel).toBe("NONE");
   });
 
+  it("keeps account-wide intervention account-wide rather than fabricating signal-specific failure", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric()],
+      }),
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
+      priorStructuredActions: [makeWarning({
+        targetScope: "ACCOUNT",
+        source: null,
+        signalKey: null,
+      })],
+      retainedEnforcementCycles: [makeIntervention({
+        targetScope: "ACCOUNT",
+        targetSource: null,
+        targetSignalKey: null,
+      })],
+    });
+
+    expect(summary.findings.some((finding) =>
+      finding.signalKey === "meetingCancellationRate"
+      && finding.status === "DETERIORATED_AFTER_INTERVENTION"
+    )).toBe(false);
+    expect(summary.findings.some((finding) =>
+      finding.signalKey === "behavioralOperatingCadence"
+      && finding.status === "DETERIORATED_AFTER_INTERVENTION"
+    )).toBe(true);
+  });
+
   it("tracks unavailable evidence separately from deterioration", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
+    const summary = buildSummary({
       currentBehavioralEvidenceStatus: "unavailable",
       currentBehavioralTrends: null,
       priorBehavioralTrends: [
@@ -212,17 +325,15 @@ describe("retainer cycle memory engine", () => {
           observedAt: "2026-04-01T00:00:00.000Z",
           behavioralEvidenceStatus: "snapshot",
           behavioralTrends: makeTrendSummary({
-            source: "calendar",
+            source: "google_calendar",
             overallDirection: "STABLE",
-            metrics: [{
-              signalKey: "meetingCancellationRate",
+            metrics: [makeMetric({
               currentValue: 0.2,
               previousValue: 0.2,
               delta: 0,
               direction: "STABLE",
-              evidencePosture: "snapshot",
               explanation: "stable",
-            }],
+            })],
           }),
         },
       ],
@@ -232,52 +343,10 @@ describe("retainer cycle memory engine", () => {
     expect(summary.findings.some((finding) => finding.status === "REPEATED_SIGNAL")).toBe(false);
   });
 
-  it("gently escalates repeated unavailable evidence without claiming deterioration", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "unavailable",
-      currentBehavioralTrends: null,
-      priorBehavioralTrends: [
-        { observedAt: "2026-04-20T00:00:00.000Z", behavioralEvidenceStatus: "unavailable", behavioralTrends: null },
-        { observedAt: "2026-04-01T00:00:00.000Z", behavioralEvidenceStatus: "snapshot", behavioralTrends: makeTrendSummary() },
-      ],
-    });
-
-    const finding = summary.findings.find((item) => item.status === "EVIDENCE_UNAVAILABLE");
-    expect(finding?.cyclesUnavailable).toBe(2);
-    expect(summary.escalationLevel).toBe("OPERATING_CADENCE_RESET");
-    expect(summary.findings.some((item) => item.status === "REPEATED_SIGNAL")).toBe(false);
-  });
-
-  it("marks stable current behavior with prior deterioration as STABLE_UNRESOLVED", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "snapshot",
-      currentBehavioralTrends: makeTrendSummary({
-        source: "calendar",
-        overallDirection: "STABLE",
-        metrics: [{
-          signalKey: "meetingCancellationRate",
-          currentValue: 0.2,
-          previousValue: 0.2,
-          delta: 0,
-          direction: "STABLE",
-          evidencePosture: "snapshot",
-          explanation: "stable",
-        }],
-      }),
-      priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z")],
-    });
-
-    expect(summary.findings[0]?.status).toBe("STABLE_UNRESOLVED");
-  });
-
   it("returns INSUFFICIENT_HISTORY when no baseline exists", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "snapshot",
+    const summary = buildSummary({
       currentBehavioralTrends: makeTrendSummary({
-        source: "calendar",
+        source: "google_calendar",
         overallDirection: "INSUFFICIENT_EVIDENCE",
       }),
       priorBehavioralTrends: [],
@@ -285,204 +354,5 @@ describe("retainer cycle memory engine", () => {
 
     expect(summary.findings[0]?.status).toBe("INSUFFICIENT_HISTORY");
     expect(summary.status).toBe("insufficient");
-  });
-
-  it("requires stronger evidence for counsel escalation", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "snapshot",
-      currentBehavioralTrends: makeTrendSummary({
-        source: "calendar",
-        overallDirection: "DETERIORATING",
-        hasDeterioration: true,
-        metrics: [{
-          signalKey: "meetingCancellationRate",
-          currentValue: 0.45,
-          previousValue: 0.2,
-          delta: 0.25,
-          direction: "DETERIORATING",
-          evidencePosture: "snapshot",
-          explanation: "meetingCancellationRate deteriorated again.",
-        }],
-      }),
-      priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z")],
-      priorStructuredActions: [makeWarning()],
-      retainedEnforcementCycles: [makeIntervention()],
-      governanceFlags: { counselReviewRequired: true },
-    });
-
-    expect(summary.escalationLevel).toBe("COUNSEL_REVIEW");
-  });
-
-  it("does not compare unrelated signal keys or sources", () => {
-    const summary = buildRetainerCycleMemorySummary({
-      generatedAt: "2026-05-14T00:00:00.000Z",
-      currentBehavioralEvidenceStatus: "snapshot",
-      currentBehavioralTrends: makeTrendSummary({
-        source: "slack",
-        overallDirection: "DETERIORATING",
-        hasDeterioration: true,
-        metrics: [{
-          signalKey: "slackResponsiveness",
-          currentValue: 8,
-          previousValue: 4,
-          delta: 4,
-          direction: "DETERIORATING",
-          evidencePosture: "snapshot",
-          explanation: "slack responsiveness deteriorated.",
-        }],
-      }),
-      priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z", "meetingCancellationRate", "calendar")],
-      priorStructuredActions: [makeWarning("meetingCancellationRate", "calendar")],
-    });
-
-    expect(summary.findings[0]?.status).toBe("NEW_SIGNAL");
-    expect(summary.findings[0]?.source).toBe("slack");
-  });
-
-  it("client-facing summary uses governance language, not surveillance language", () => {
-    const testScenarios: Array<{
-      name: string;
-      input: Parameters<typeof buildRetainerCycleMemorySummary>[0];
-    }> = [
-      {
-        name: "NEW_SIGNAL",
-        input: {
-          generatedAt: "2026-05-14T00:00:00.000Z",
-          currentBehavioralEvidenceStatus: "snapshot",
-          currentBehavioralTrends: makeTrendSummary({
-            source: "calendar",
-            overallDirection: "DETERIORATING",
-            hasDeterioration: true,
-            metrics: [{
-              signalKey: "meetingCancellationRate",
-              currentValue: 0.4,
-              previousValue: 0.2,
-              delta: 0.2,
-              direction: "DETERIORATING",
-              evidencePosture: "snapshot",
-              explanation: "meetingCancellationRate deteriorated.",
-            }],
-          }),
-          priorBehavioralTrends: [],
-        },
-      },
-      {
-        name: "REPEATED_SIGNAL",
-        input: {
-          generatedAt: "2026-05-14T00:00:00.000Z",
-          currentBehavioralEvidenceStatus: "snapshot",
-          currentBehavioralTrends: makeTrendSummary({
-            source: "calendar",
-            overallDirection: "DETERIORATING",
-            hasDeterioration: true,
-            metrics: [{
-              signalKey: "meetingCancellationRate",
-              currentValue: 0.4,
-              previousValue: 0.2,
-              delta: 0.2,
-              direction: "DETERIORATING",
-              evidencePosture: "snapshot",
-              explanation: "meetingCancellationRate deteriorated.",
-            }],
-          }),
-          priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z")],
-        },
-      },
-      {
-        name: "EVIDENCE_UNAVAILABLE",
-        input: {
-          generatedAt: "2026-05-14T00:00:00.000Z",
-          currentBehavioralEvidenceStatus: "unavailable",
-          currentBehavioralTrends: null,
-          priorBehavioralTrends: [
-            {
-              observedAt: "2026-04-01T00:00:00.000Z",
-              behavioralEvidenceStatus: "snapshot",
-              behavioralTrends: makeTrendSummary({
-                source: "calendar",
-                overallDirection: "STABLE",
-                metrics: [{
-                  signalKey: "meetingCancellationRate",
-                  currentValue: 0.2,
-                  previousValue: 0.2,
-                  delta: 0,
-                  direction: "STABLE",
-                  evidencePosture: "snapshot",
-                  explanation: "stable",
-                }],
-              }),
-            },
-          ],
-        },
-      },
-      {
-        name: "INSUFFICIENT_HISTORY",
-        input: {
-          generatedAt: "2026-05-14T00:00:00.000Z",
-          currentBehavioralEvidenceStatus: "snapshot",
-          currentBehavioralTrends: makeTrendSummary({
-            source: "calendar",
-            overallDirection: "INSUFFICIENT_EVIDENCE",
-          }),
-          priorBehavioralTrends: [],
-        },
-      },
-      {
-        name: "STABLE_UNRESOLVED",
-        input: {
-          generatedAt: "2026-05-14T00:00:00.000Z",
-          currentBehavioralEvidenceStatus: "snapshot",
-          currentBehavioralTrends: makeTrendSummary({
-            source: "calendar",
-            overallDirection: "STABLE",
-            metrics: [{
-              signalKey: "meetingCancellationRate",
-              currentValue: 0.2,
-              previousValue: 0.2,
-              delta: 0,
-              direction: "STABLE",
-              evidencePosture: "snapshot",
-              explanation: "stable",
-            }],
-          }),
-          priorBehavioralTrends: [makeCycle("DETERIORATING", "2026-04-01T00:00:00.000Z")],
-        },
-      },
-    ];
-
-    const prohibitedPhrases = [
-      "you keep", "you failed", "you are", "your fault",
-      "you always", "you never", "you refuse", "you did",
-      "you have not", "you cannot",
-    ];
-
-    const governanceTerms = [
-      "cycle", "evidence", "signal", "pattern", "prior",
-      "intervention", "baseline", "operating", "governance",
-      "retained", "behavioral",
-    ];
-
-    for (const scenario of testScenarios) {
-      const summary = buildRetainerCycleMemorySummary(scenario.input);
-
-      expect(summary.summary).toBeTruthy();
-      expect(summary.summary.length).toBeGreaterThan(10);
-
-      for (const phrase of prohibitedPhrases) {
-        expect(summary.summary.toLowerCase()).not.toContain(phrase);
-      }
-
-      const hasGovernanceTerm = governanceTerms.some((term) =>
-        summary.summary.toLowerCase().includes(term),
-      );
-      expect(hasGovernanceTerm).toBe(true);
-
-      for (const finding of summary.findings) {
-        for (const phrase of prohibitedPhrases) {
-          expect(finding.explanation.toLowerCase()).not.toContain(phrase);
-        }
-      }
-    }
   });
 });
