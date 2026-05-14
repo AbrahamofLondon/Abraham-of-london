@@ -76,6 +76,8 @@ export type OutcomeVerificationRecord = OutcomeVerificationContext & {
   verificationId: string;
   userEmail: string;
   userId?: string | null;
+  subjectType?: string | null;
+  subjectId?: string | null;
   status: OutcomeVerificationStatus;
   outcomeClassification: OutcomeVerificationClassification;
   evidencePosture: OutcomeVerificationEvidencePosture;

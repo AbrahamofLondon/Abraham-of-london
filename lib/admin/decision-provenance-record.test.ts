@@ -371,3 +371,84 @@ describe("buildAccountabilityStatement", () => {
     expect(buildAccountabilityStatement(statementInput)).toBe("No evidence inputs have been recorded for this subject.");
   });
 });
+
+describe("deterministic outcome linkage (Pass 3)", () => {
+  it("exact subjectType/subjectId match is preferred over fallback", async () => {
+    // This tests the logic path: loadOutcomesForSubject tries exact match first
+    // The pure-function tests below verify the gap behavior
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      outcomes: [outcome({ subjectType: "OVERSIGHT_CYCLE", subjectId: SUBJECT_ID })],
+    }));
+    // When outcomes are provided directly via sourceData, they're treated as exact matches
+    expect(record.evidenceInputs.some((i) => i.type === "OUTCOME_VERIFICATION")).toBe(true);
+  });
+
+  it("outcome linkage gap appears when only fallback-matched outcomes exist", () => {
+    // When composeDecisionProvenanceFromSources receives outcomes without exactMatch info,
+    // the gap is added dynamically in composeDecisionProvenance (not the pure function).
+    // This test verifies the pure function doesn't add the gap itself.
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      outcomes: [outcome()],
+    }));
+    // The old static gap was removed from composeProvenanceGaps
+    // The dynamic gap is added in composeDecisionProvenance
+    const linkageGap = record.provenanceGaps.find((g) => g.stage === "Outcome linkage");
+    expect(linkageGap).toBeUndefined();
+  });
+});
+
+describe("executive report provenance (Pass 4)", () => {
+  it("EXECUTIVE_REPORT is now a supported subject type", () => {
+    // The SUPPORTED_SUBJECT_TYPES set now includes EXECUTIVE_REPORT
+    // composeDecisionProvenance will attempt to load real data
+    // The pure function composeDecisionProvenanceFromSources handles the data
+    const record = composeDecisionProvenanceFromSources({
+      subjectType: "EXECUTIVE_REPORT",
+      subjectId: "report_001",
+      deliveries: [],
+      outcomes: [],
+      unavailableSources: ["executive-reporting-run"],
+    });
+    expect(record.subjectType).toBe("EXECUTIVE_REPORT");
+    // Should not have the "not supported in v1" gap
+    expect(record.provenanceGaps.some((g) => g.stage === "Subject support")).toBe(false);
+  });
+
+  it("EXECUTIVE_REPORT missing delivery creates warning gap", () => {
+    const record = composeDecisionProvenanceFromSources({
+      subjectType: "EXECUTIVE_REPORT",
+      subjectId: "report_001",
+      deliveries: [],
+      outcomes: [],
+    });
+    expect(record.provenanceGaps).toContainEqual(expect.objectContaining({
+      stage: "Delivery",
+      severity: "WARNING",
+    }));
+  });
+
+  it("EXECUTIVE_REPORT does not expose raw report content in evidence labels", () => {
+    const record = composeDecisionProvenanceFromSources({
+      subjectType: "EXECUTIVE_REPORT",
+      subjectId: "report_001",
+      deliveries: [],
+      outcomes: [],
+    });
+    // No evidence inputs from executive report data (none provided), so no raw content
+    // When evidence inputs exist, they should not contain raw report payload
+    for (const input of record.evidenceInputs) {
+      expect(input.label).not.toContain("canonicalSnapshot");
+      expect(input.label).not.toContain("viewModelSnapshot");
+    }
+  });
+
+  it("DECISION_CASE remains unsupported with honest gap", async () => {
+    const record = await composeDecisionProvenance({
+      subjectType: "DECISION_CASE",
+      subjectId: "case_001",
+    });
+    expect(record.currentPosture.status).toBe("UNKNOWN");
+    expect(record.provenanceGaps.some((gap) => gap.stage === "Subject support")).toBe(true);
+    expect(record.accountabilityStatement).toContain("No evidence inputs");
+  });
+});

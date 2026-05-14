@@ -2488,6 +2488,8 @@ model OutcomeVerificationRecord {
   decisionObjectId          String?
   sessionId                 String?
   organisationKey           String?
+  subjectType               String?
+  subjectId                 String?
   outcomeClassification     String
   magnitudeOfChange         Float
   effectivenessScore        Float
@@ -2505,6 +2507,9 @@ model OutcomeVerificationRecord {
   @@index([decisionObjectId])
   @@index([sessionId])
   @@index([organisationKey])
+  @@index([subjectType])
+  @@index([subjectId])
+  @@index([subjectType, subjectId])
   @@index([outcomeClassification])
   @@index([createdAt])
 }

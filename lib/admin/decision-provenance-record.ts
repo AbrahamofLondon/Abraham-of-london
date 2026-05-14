@@ -211,16 +211,27 @@ export const DECISION_PROVENANCE_SOURCE_INVENTORY: DecisionProvenanceSourceInven
     deferredReason: "v1 avoids duplicating the event log and uses domain records directly.",
   },
   {
-    sourceName: "Executive reports and Decision Centre cases",
-    modelOrHelper: "executive reporting / decision-centre case helpers",
-    evidenceProvided: "Decision case context and report signals.",
+    sourceName: "Executive reports",
+    modelOrHelper: "executive-reporting-run (Prisma)",
+    evidenceProvided: "Report identity, route, status, and timestamp. Raw report content is not exposed.",
+    eventTypes: ["SIGNAL_DETECTED", "OUTCOME_RECORDED"],
+    confidence: "SYSTEM_INFERRED",
+    hasActor: false,
+    hasTimestamp: true,
+    safeToExpose: true,
+    v1Status: "USED",
+  },
+  {
+    sourceName: "Decision Centre cases",
+    modelOrHelper: "decision-centre case helpers",
+    evidenceProvided: "Decision case context and signals.",
     eventTypes: ["SIGNAL_DETECTED", "OUTCOME_RECORDED"],
     confidence: "SYSTEM_INFERRED",
     hasActor: false,
     hasTimestamp: true,
     safeToExpose: false,
     v1Status: "DEFERRED",
-    deferredReason: "Not wired until a safe summary boundary exists for report and case payloads.",
+    deferredReason: "Not wired until a stable data source with deterministic subject linkage exists for decision cases.",
   },
   {
     sourceName: "Access diagnostics",
@@ -258,6 +269,7 @@ type StatementInput = Omit<DecisionProvenanceRecord, "accountabilityStatement" |
 
 const SUPPORTED_SUBJECT_TYPES = new Set<DecisionProvenanceRecord["subjectType"]>([
   "OVERSIGHT_CYCLE",
+  "EXECUTIVE_REPORT",
   "RETAINER_ACCOUNT",
   "DELIVERY_ITEM",
 ]);
@@ -682,15 +694,6 @@ export function composeProvenanceGaps(
     });
   }
 
-  if (data.subjectType === "OVERSIGHT_CYCLE" && !hasOutcome) {
-    gaps.push({
-      stage: "Outcome linkage",
-      description: "Outcome verification records do not expose a direct cycleId link; only directly linked outcomes can be included in this v1 record.",
-      severity: "INFO",
-      href: "/admin/outcome-verification",
-    });
-  }
-
   for (const decision of data.decisionRecords ?? []) {
     if (decision.decision === "ESCALATE_TO_COUNSEL" && !hasCounsel) {
       gaps.push({
@@ -979,10 +982,26 @@ async function loadOutcomesForSubject(input: {
   subjectType: DecisionProvenanceRecord["subjectType"];
   subjectId: string;
   cycle?: RetainedReviewCycle | null;
-}): Promise<OutcomeVerificationRecord[]> {
+}): Promise<{ outcomes: OutcomeVerificationRecord[]; exactMatch: boolean }> {
   try {
     const { prisma } = await import("@/lib/prisma.server");
-    const rows = await prisma.outcomeVerificationRecord.findMany({
+
+    // Prefer exact subjectType + subjectId match
+    const exactRows = await prisma.outcomeVerificationRecord.findMany({
+      where: {
+        subjectType: input.subjectType,
+        subjectId: input.subjectId,
+      },
+      orderBy: { createdAt: "asc" },
+      take: 20,
+    });
+
+    if (exactRows.length > 0) {
+      return { outcomes: mapOutcomeRows(exactRows), exactMatch: true };
+    }
+
+    // Fall back to best-effort OR query for records without direct linkage
+    const fallbackRows = await prisma.outcomeVerificationRecord.findMany({
       where: {
         OR: [
           { sessionId: input.subjectId },
@@ -993,47 +1012,60 @@ async function loadOutcomesForSubject(input: {
       orderBy: { createdAt: "asc" },
       take: 20,
     });
-    return rows.map((row) => {
-      const payload = row.payload && typeof row.payload === "object" && !Array.isArray(row.payload)
-        ? row.payload as Record<string, unknown>
-        : {};
-      return {
-        verificationId: row.id,
-        userEmail: typeof payload.userEmail === "string" ? payload.userEmail : "",
-        userId: typeof payload.userId === "string" ? payload.userId : null,
-        checkpointId: typeof payload.checkpointId === "string" ? payload.checkpointId : null,
-        caseId: typeof payload.caseId === "string" ? payload.caseId : null,
-        journeyId: typeof payload.journeyId === "string" ? payload.journeyId : null,
-        strategyRoomSessionId: row.sessionId ?? null,
-        executiveRunId: typeof payload.executiveRunId === "string" ? payload.executiveRunId : null,
-        checkpointTitle: typeof payload.checkpointTitle === "string" ? payload.checkpointTitle : null,
-        sourceSurface: typeof payload.sourceSurface === "string" ? payload.sourceSurface : null,
-        sourceLabel: typeof payload.sourceLabel === "string" ? payload.sourceLabel : null,
-        dueAt: typeof payload.dueAt === "string" ? payload.dueAt : null,
-        status: typeof payload.status === "string" ? payload.status as OutcomeVerificationRecord["status"] : "COMPLETED",
-        outcomeClassification: row.outcomeClassification as OutcomeVerificationRecord["outcomeClassification"],
-        evidencePosture: typeof payload.evidencePosture === "string"
-          ? payload.evidencePosture as OutcomeVerificationRecord["evidencePosture"]
-          : "SYSTEM_INFERRED",
-        didAct: typeof payload.didAct === "string" ? payload.didAct as OutcomeVerificationRecord["didAct"] : "PARTIAL",
-        changedState: typeof payload.changedState === "string" ? payload.changedState as OutcomeVerificationRecord["changedState"] : "UNKNOWN",
-        systemDiagnosisAccuracy: typeof payload.systemDiagnosisAccuracy === "string"
-          ? payload.systemDiagnosisAccuracy as OutcomeVerificationRecord["systemDiagnosisAccuracy"]
-          : "PARTIAL",
-        requiredMoveUsefulness: typeof payload.requiredMoveUsefulness === "string"
-          ? payload.requiredMoveUsefulness as OutcomeVerificationRecord["requiredMoveUsefulness"]
-          : "PARTIAL",
-        whatChanged: "",
-        evidenceSummary: null,
-        rememberNote: null,
-        createdAt: row.createdAt.toISOString(),
-        checkpointResponseStatus: typeof payload.checkpointResponseStatus === "string" ? payload.checkpointResponseStatus : null,
-        proofLabels: [],
-      };
-    });
+
+    return { outcomes: mapOutcomeRows(fallbackRows), exactMatch: false };
   } catch {
-    return [];
+    return { outcomes: [], exactMatch: false };
   }
+}
+
+function mapOutcomeRows(rows: Array<{
+  id: string;
+  sessionId: string | null;
+  outcomeClassification: string;
+  createdAt: Date;
+  payload: unknown;
+}>): OutcomeVerificationRecord[] {
+  return rows.map((row) => {
+    const payload = row.payload && typeof row.payload === "object" && !Array.isArray(row.payload)
+      ? row.payload as Record<string, unknown>
+      : {};
+    return {
+      verificationId: row.id,
+      userEmail: typeof payload.userEmail === "string" ? payload.userEmail : "",
+      userId: typeof payload.userId === "string" ? payload.userId : null,
+      subjectType: typeof payload.subjectType === "string" ? payload.subjectType : null,
+      subjectId: typeof payload.subjectId === "string" ? payload.subjectId : null,
+      checkpointId: typeof payload.checkpointId === "string" ? payload.checkpointId : null,
+      caseId: typeof payload.caseId === "string" ? payload.caseId : null,
+      journeyId: typeof payload.journeyId === "string" ? payload.journeyId : null,
+      strategyRoomSessionId: row.sessionId ?? null,
+      executiveRunId: typeof payload.executiveRunId === "string" ? payload.executiveRunId : null,
+      checkpointTitle: typeof payload.checkpointTitle === "string" ? payload.checkpointTitle : null,
+      sourceSurface: typeof payload.sourceSurface === "string" ? payload.sourceSurface : null,
+      sourceLabel: typeof payload.sourceLabel === "string" ? payload.sourceLabel : null,
+      dueAt: typeof payload.dueAt === "string" ? payload.dueAt : null,
+      status: typeof payload.status === "string" ? payload.status as OutcomeVerificationRecord["status"] : "COMPLETED",
+      outcomeClassification: row.outcomeClassification as OutcomeVerificationRecord["outcomeClassification"],
+      evidencePosture: typeof payload.evidencePosture === "string"
+        ? payload.evidencePosture as OutcomeVerificationRecord["evidencePosture"]
+        : "SYSTEM_INFERRED",
+      didAct: typeof payload.didAct === "string" ? payload.didAct as OutcomeVerificationRecord["didAct"] : "PARTIAL",
+      changedState: typeof payload.changedState === "string" ? payload.changedState as OutcomeVerificationRecord["changedState"] : "UNKNOWN",
+      systemDiagnosisAccuracy: typeof payload.systemDiagnosisAccuracy === "string"
+        ? payload.systemDiagnosisAccuracy as OutcomeVerificationRecord["systemDiagnosisAccuracy"]
+        : "PARTIAL",
+      requiredMoveUsefulness: typeof payload.requiredMoveUsefulness === "string"
+        ? payload.requiredMoveUsefulness as OutcomeVerificationRecord["requiredMoveUsefulness"]
+        : "PARTIAL",
+      whatChanged: "",
+      evidenceSummary: null,
+      rememberNote: null,
+      createdAt: row.createdAt.toISOString(),
+      checkpointResponseStatus: typeof payload.checkpointResponseStatus === "string" ? payload.checkpointResponseStatus : null,
+      proofLabels: [],
+    };
+  });
 }
 
 export async function composeDecisionProvenance(input: {
@@ -1051,6 +1083,11 @@ export async function composeDecisionProvenance(input: {
 
   if (!SUPPORTED_SUBJECT_TYPES.has(input.subjectType)) {
     return unsupportedRecord(input);
+  }
+
+  // ── EXECUTIVE_REPORT: load from ExecutiveReportingRun ──
+  if (input.subjectType === "EXECUTIVE_REPORT") {
+    return composeExecutiveReportProvenance(subjectId);
   }
 
   const [
@@ -1165,23 +1202,156 @@ export async function composeDecisionProvenance(input: {
     }
   }
 
-  const outcomes = await loadOutcomesForSubject({
+  const outcomeResult = await loadOutcomesForSubject({
     subjectType: input.subjectType,
     subjectId,
     cycle: primaryCycle,
   });
 
-  return composeDecisionProvenanceFromSources({
+  const record = composeDecisionProvenanceFromSources({
     subjectType: input.subjectType,
     subjectId,
     cycles,
     cadenceHistory,
     suppressions,
     deliveries,
-    outcomes,
+    outcomes: outcomeResult.outcomes,
     counselEntries,
     boardroomEntries,
     decisionRecords,
     unavailableSources,
   });
+
+  // Update outcome linkage gap based on match quality
+  if (outcomeResult.outcomes.length > 0 && !outcomeResult.exactMatch) {
+    record.provenanceGaps.push({
+      stage: "Outcome linkage",
+      description: "Outcome records were matched via fallback query (sessionId/decisionObjectId/organisationKey) rather than direct subjectType/subjectId. Consider adding subject linkage to outcome creation paths for deterministic matching.",
+      severity: "INFO",
+      href: "/admin/outcome-verification",
+    });
+  }
+
+  return record;
+}
+
+type ExecutiveReportRunRecord = {
+  id: string;
+  runKey: string;
+  email: string;
+  status: string;
+  route: string | null;
+  createdAt: Date;
+};
+
+async function composeExecutiveReportProvenance(
+  subjectId: string,
+): Promise<DecisionProvenanceRecord> {
+  const unavailableSources: string[] = [];
+  let run: ExecutiveReportRunRecord | null = null;
+
+  try {
+    const { prisma } = await import("@/lib/prisma.server");
+    const result = await (prisma as any).executiveReportingRun.findFirst({
+      where: {
+        OR: [
+          { runKey: subjectId },
+          { id: subjectId },
+        ],
+      },
+      select: { id: true, runKey: true, email: true, status: true, route: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    });
+    if (result) {
+      run = {
+        id: result.id,
+        runKey: result.runKey,
+        email: result.email,
+        status: result.status,
+        route: result.route ?? null,
+        createdAt: result.createdAt instanceof Date ? result.createdAt : new Date(result.createdAt),
+      };
+    }
+  } catch {
+    unavailableSources.push("executive-reporting-run");
+  }
+
+  if (!run) {
+    return composeDecisionProvenanceFromSources({
+      subjectType: "EXECUTIVE_REPORT",
+      subjectId,
+      unsupportedReason: "No executive report record found for this subject ID.",
+      unavailableSources,
+    });
+  }
+
+  // Load deliveries matching this report
+  let deliveries: DeliveryRecord[] = [];
+  try {
+    const { listAllDeliveries } = await import("@/lib/product/oversight-delivery-service");
+    const allDeliveries = await listAllDeliveries();
+    deliveries = allDeliveries.filter((d) => d.artifactId === run.id || d.artifactId === run.runKey);
+  } catch {
+    unavailableSources.push("delivery-queue");
+  }
+
+  // Load outcomes with exact subject match
+  const outcomeResult = await loadOutcomesForSubject({
+    subjectType: "EXECUTIVE_REPORT",
+    subjectId: run.id,
+  });
+
+  const sourceData: DecisionProvenanceSourceData = {
+    subjectType: "EXECUTIVE_REPORT",
+    subjectId,
+    deliveries,
+    outcomes: outcomeResult.outcomes,
+    unavailableSources,
+  };
+
+  // Add evidence input from the report record itself
+  const evidenceInputs = composeEvidenceInputs(sourceData);
+  evidenceInputs.push({
+    type: "EXECUTIVE_REPORT",
+    label: `Executive report: ${run.runKey}`,
+    evidencePosture: run.route ? `route:${run.route}` : run.status,
+    source: "executive-reporting-run",
+    createdAt: run.createdAt.toISOString(),
+    confidence: "SYSTEM_INFERRED",
+  });
+
+  const governanceEvents = composeGovernanceEvents(sourceData);
+  const provenanceGaps = composeProvenanceGaps(sourceData, evidenceInputs, governanceEvents);
+  const timeline = composeTimeline(evidenceInputs, governanceEvents);
+
+  // Add outcome linkage gap if fallback was used
+  if (outcomeResult.outcomes.length > 0 && !outcomeResult.exactMatch) {
+    provenanceGaps.push({
+      stage: "Outcome linkage",
+      description: "Outcome records were matched via fallback query rather than direct subjectType/subjectId.",
+      severity: "INFO",
+      href: "/admin/outcome-verification",
+    });
+  }
+
+  const recordWithoutStatement = {
+    version: 1 as const,
+    id: `decision-provenance:v1:EXECUTIVE_REPORT:${subjectId}`,
+    subjectType: "EXECUTIVE_REPORT" as const,
+    subjectId,
+    evidenceInputs,
+    governanceEvents,
+    timeline,
+    currentPosture: deriveCurrentPosture({ evidenceInputs, governanceEvents, provenanceGaps }),
+    provenanceGaps,
+    unavailableSources: [...unavailableSources].sort(),
+  };
+
+  const accountabilityStatement = buildAccountabilityStatement(recordWithoutStatement);
+  const recordWithoutHash = { ...recordWithoutStatement, accountabilityStatement };
+
+  return {
+    ...recordWithoutHash,
+    provenanceHash: buildDecisionProvenanceHash(recordWithoutHash),
+  };
 }
