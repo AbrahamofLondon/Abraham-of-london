@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatShortHash, shortenAnchorHash } from "./provenance-chain";
+import { formatShortHash, shortenAnchorHash } from "@/pages/admin/provenance-chain";
 
 describe("formatShortHash", () => {
   it("uses 12-character prefix by default", () => {

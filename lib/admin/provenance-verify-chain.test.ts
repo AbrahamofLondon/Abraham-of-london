@@ -26,7 +26,7 @@ vi.mock("@/lib/admin/provenance-operation-audit", () => ({
   createProvenanceRequestId: () => "prv_test_stubbed",
 }));
 
-import handler from "./verify-chain";
+import handler from "@/pages/api/admin/provenance/verify-chain";
 
 function req(query: Record<string, string> = {}, method = "GET") {
   return {

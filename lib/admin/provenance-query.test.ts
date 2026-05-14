@@ -18,7 +18,7 @@ vi.mock("@/lib/prisma.server", () => ({
   },
 }));
 
-import handler from "./query";
+import handler from "@/pages/api/admin/provenance/query";
 
 function req(query: Record<string, string> = {}, method = "GET") {
   return {

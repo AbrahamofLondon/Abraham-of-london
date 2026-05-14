@@ -20,7 +20,7 @@ vi.mock("@/lib/admin/provenance-operation-audit", () => ({
   createProvenanceRequestId: () => "prv_test_stubbed",
 }));
 
-import handler from "./create-anchor";
+import handler from "@/pages/api/admin/provenance/create-anchor";
 
 function req(body: Record<string, unknown> = {}, method = "POST") {
   return {

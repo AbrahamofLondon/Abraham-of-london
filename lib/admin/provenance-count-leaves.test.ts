@@ -14,7 +14,7 @@ vi.mock("@/lib/admin/provenance-anchor-runner", () => ({
   countOversightProvenanceLeaves: mocks.countOversightProvenanceLeaves,
 }));
 
-import handler from "./count-leaves";
+import handler from "@/pages/api/admin/provenance/count-leaves";
 
 function req(query: Record<string, string> = {}, method = "GET") {
   return { method, query } as unknown as NextApiRequest;
