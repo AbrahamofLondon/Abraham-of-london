@@ -1,15 +1,10 @@
 {
-  "generatedAt": "2026-05-13T21:42:06.945Z",
+  "generatedAt": "2026-05-14T11:04:51.114Z",
   "totals": {
-    "failures": 1,
+    "failures": 0,
     "warnings": 2
   },
   "findings": [
-    {
-      "rule": "canonical_binary_exists",
-      "severity": "fail",
-      "message": "frontier-resilience-01 is missing physical canonical binary /assets/downloads/frontier-resilience-01.pdf."
-    },
     {
       "rule": "generated_pdf_inventory_outside_canonical_path",
       "severity": "warn",
@@ -18,7 +13,7 @@
     {
       "rule": "generated_reports_committed",
       "severity": "warn",
-      "message": "Generated PDF reports changed during audit regeneration: reports/pdf-canonical-decisions.json, reports/pdf-asset-registry.json."
+      "message": "Generated PDF reports changed during audit regeneration: reports/pdf-canonical-decisions.json, reports/pdf-asset-registry.json, reports/pdf-duplicate-report.json."
     }
   ]
 }

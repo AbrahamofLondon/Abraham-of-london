@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-05-13T21:40:11.822Z",
+  "generatedAt": "2026-05-14T11:04:26.161Z",
   "canonicalBinaryTarget": "/assets/downloads/{slug}.pdf",
   "totals": {
-    "pdfs": 83,
-    "duplicateFilenameGroups": 0,
-    "duplicateAssets": 0
+    "pdfs": 84,
+    "duplicateFilenameGroups": 1,
+    "duplicateAssets": 2
   },
   "byFolderClass": {
-    "canonical_download": 82,
+    "canonical_download": 83,
     "generated_download": 1
   },
   "byCanonicalityStatus": {
-    "candidate_canonical": 82,
+    "candidate_canonical": 83,
     "generated": 1
   },
   "assets": [
@@ -57,7 +57,7 @@
       "fileSizeBytes": 77084,
       "sha256": "3e4f4d7f679ae75c5a73fe0164fe125242dbadc1c08fd103d6be3a51f7ff0e77",
       "canonicalityStatus": "generated",
-      "duplicateGroupId": null
+      "duplicateGroupId": "filename:frontier-resilience-01.pdf"
     },
     {
       "relativePath": "public/assets/downloads/conviction-vs-coercion.pdf",
@@ -80,6 +80,17 @@
       "sha256": "ecb2cb0f5bf976c11864c4b967d94dfa30847778d5099b82df23b93e9eede0e2",
       "canonicalityStatus": "candidate_canonical",
       "duplicateGroupId": null
+    },
+    {
+      "relativePath": "public/assets/downloads/frontier-resilience-01.pdf",
+      "publicUrl": "/assets/downloads/frontier-resilience-01.pdf",
+      "filename": "frontier-resilience-01.pdf",
+      "slugCandidate": "frontier-resilience-01",
+      "folderClass": "canonical_download",
+      "fileSizeBytes": 77084,
+      "sha256": "3e4f4d7f679ae75c5a73fe0164fe125242dbadc1c08fd103d6be3a51f7ff0e77",
+      "canonicalityStatus": "candidate_canonical",
+      "duplicateGroupId": "filename:frontier-resilience-01.pdf"
     },
     {
       "relativePath": "public/assets/downloads/frontier-resilience-beyond-survival-mode.pdf",

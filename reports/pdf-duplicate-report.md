@@ -1,11 +1,11 @@
 # PDF Duplicate Report
 
-Generated: 2026-05-13T21:40:43.030Z
+Generated: 2026-05-14T11:04:31.587Z
 
 ## Summary
 
-- Duplicate filename groups: 0
-- Identical duplicate groups: 0
+- Duplicate filename groups: 1
+- Identical duplicate groups: 1
 - Divergent duplicate groups: 0
 - Generated/static conflict groups: 0
 

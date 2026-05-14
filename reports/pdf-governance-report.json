@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T21:41:37.161Z",
+  "generatedAt": "2026-05-14T11:04:42.051Z",
   "rules": {
     "noNewPdfOutsideCanonicalPath": {
       "canonicalPrefix": "public/assets/downloads/",
@@ -7,13 +7,20 @@
       "addedPdfs": []
     },
     "duplicateAlertThreshold": {
-      "duplicateFilenameGroups": 0
+      "duplicateFilenameGroups": 1
     }
   },
   "totals": {
-    "findings": 0,
+    "findings": 1,
     "failures": 0,
-    "warnings": 0
+    "warnings": 1
   },
-  "findings": []
+  "findings": [
+    {
+      "rule": "duplicate_filename_threshold",
+      "severity": "warn",
+      "path": "public/**/*.pdf",
+      "message": "1 duplicate filename groups currently exist; resolve via docs/program/pdf-manual-resolution.md."
+    }
+  ]
 }
