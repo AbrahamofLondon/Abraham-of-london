@@ -4,6 +4,8 @@ import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-cre
 import { loadOversightAccount } from "@/lib/product/oversight-account-loader";
 import { buildOversightSignals } from "@/lib/product/oversight-signal-builder";
 import { buildBuyerVisibleCadencePosture, loadLatestRetainedReviewCycleForAccount } from "@/lib/product/retained-cadence-service";
+import { listRetainedReviewCycles } from "@/lib/product/retained-cadence-service";
+import type { RetainedReviewCycle } from "@/lib/product/retained-cadence-contract";
 import { loadControlRoomState } from "@/lib/product/control-room-state-loader";
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
 import { projectOversightCycleConsequence } from "@/lib/product/oversight-cycle-consequence-projection";
@@ -16,6 +18,9 @@ import {
 import { loadLatestBehavioralSignalSnapshots } from "@/lib/behavioral/behavioral-signal-snapshot-store";
 import { buildBehavioralTrendSummaryFromSnapshots } from "@/lib/behavioral/behavioral-trend-engine";
 import type { BehavioralTrendDirection, BehavioralTrendSummary } from "@/lib/behavioral/behavioral-trend-contract";
+import { loadPriorArchivedOversightCycles } from "@/lib/product/oversight-cycle-archive";
+import { buildRetainerCycleMemorySummary } from "@/lib/product/retainer-cycle-memory-engine";
+import type { RetainerCycleMemorySummary } from "@/lib/product/retainer-cycle-memory-contract";
 import { createSuppressionInput } from "@/lib/product/suppression-event-helpers";
 import { recordSuppression } from "@/lib/product/suppression-ledger";
 import { fetchUserBehavioralData } from "@/lib/integrations";
@@ -41,6 +46,12 @@ function previousPeriodStart(currentStartIso: string, currentEndIso: string): st
   const currentEnd = new Date(currentEndIso);
   const durationMs = Math.max(currentEnd.getTime() - currentStart.getTime(), 24 * 60 * 60 * 1000);
   return new Date(currentStart.getTime() - durationMs).toISOString();
+}
+
+function normalizeEmail(value?: string | null) {
+  return typeof value === "string" && value.trim()
+    ? value.trim().toLowerCase()
+    : null;
 }
 
 function behavioralTrendPriority(direction: BehavioralTrendDirection): number {
@@ -97,6 +108,89 @@ export function buildBehavioralTrendStructuredAction(
     continuitySourceLabel: "Derived from persisted behavioral snapshot comparison",
     continuityConfidenceLabel: "AGGREGATED",
   };
+}
+
+function retainerCycleMemoryActionSeverity(
+  summary: RetainerCycleMemorySummary,
+): NonNullable<OversightBrief["structuredActions"]>[number]["severity"] {
+  if (summary.findings.some((finding) => finding.severity === "CRITICAL")) return "CRITICAL";
+  if (summary.findings.some((finding) => finding.severity === "HIGH")) return "HIGH";
+  if (summary.findings.some((finding) => finding.severity === "MEDIUM")) return "MEDIUM";
+  return "LOW";
+}
+
+export function buildRetainerCycleMemoryStructuredAction(
+  summary?: RetainerCycleMemorySummary | null,
+): NonNullable<OversightBrief["structuredActions"]>[number] | null {
+  if (!summary?.escalationRequired || summary.escalationLevel === "NONE") {
+    return null;
+  }
+
+  const severity = retainerCycleMemoryActionSeverity(summary);
+  switch (summary.escalationLevel) {
+    case "OPERATING_CADENCE_RESET":
+      return {
+        id: "act_retainer_cycle_memory_cadence",
+        scopeType: "ACCOUNT",
+        actionType: "REVIEW_OPERATING_CADENCE",
+        action: "Retained cycle memory shows repeated behavioral deterioration or evidence continuity failure. Review operating cadence before the next oversight cycle.",
+        evidenceBasis: summary.summary,
+        severity,
+        continuitySourceLabel: "Retained cycle memory across archived oversight cycles",
+        continuityConfidenceLabel: "AGGREGATED",
+      };
+    case "RETAINED_INTERVENTION":
+      return {
+        id: "act_retainer_cycle_memory_intervention",
+        scopeType: "ACCOUNT",
+        actionType: "REVIEW_OPERATING_CADENCE",
+        action: "Behavioral deterioration persisted after a prior warning. Move from warning to retained intervention before the next cycle.",
+        evidenceBasis: summary.summary,
+        severity,
+        continuitySourceLabel: "Retained cycle memory across archived oversight cycles",
+        continuityConfidenceLabel: "AGGREGATED",
+      };
+    case "BOARDROOM_REVIEW":
+      return {
+        id: "act_retainer_cycle_memory_boardroom",
+        scopeType: "ACCOUNT",
+        actionType: "GENERATE_BOARDROOM_DOSSIER",
+        action: "Behavioral deterioration persisted after intervention. Prepare board-level retained review of operating cadence and enforcement history.",
+        evidenceBasis: summary.summary,
+        severity,
+        continuitySourceLabel: "Retained cycle memory across archived oversight cycles",
+        continuityConfidenceLabel: "AGGREGATED",
+      };
+    case "COUNSEL_REVIEW":
+      return {
+        id: "act_retainer_cycle_memory_counsel",
+        scopeType: "ACCOUNT",
+        actionType: "ESCALATE_COUNSEL",
+        action: "Behavioral deterioration persisted after intervention alongside governance pressure. Escalate to counsel review.",
+        evidenceBasis: summary.summary,
+        ownerRole: "COUNSEL",
+        severity,
+        continuitySourceLabel: "Retained cycle memory across archived oversight cycles",
+        continuityConfidenceLabel: "AGGREGATED",
+      };
+    default:
+      return null;
+  }
+}
+
+function matchesRetainedCycleScope(cycle: RetainedReviewCycle, input: {
+  accountId?: string | null;
+  organisationId?: string | null;
+  sponsorUserId?: string | null;
+  sponsorEmail?: string | null;
+}) {
+  const sponsorEmail = normalizeEmail(input.sponsorEmail);
+  return (
+    (!input.accountId || cycle.accountId === input.accountId)
+    && (!input.organisationId || cycle.organisationId === input.organisationId)
+    && (!input.sponsorUserId || cycle.sponsorUserId === input.sponsorUserId)
+    && (!sponsorEmail || normalizeEmail(cycle.sponsorEmail) === sponsorEmail)
+  );
 }
 
 export function aggregateBehavioralTrendSummaries(
@@ -325,6 +419,7 @@ export async function composeOversightBrief(input: {
   let behavioralSources: Parameters<typeof buildOversightSignals>[0]["behavioralSources"] = null;
   let behavioralEvidenceStatus: OversightBrief["behavioralEvidenceStatus"] = "unavailable";
   let behavioralTrends: OversightBrief["behavioralTrends"] = null;
+  let retainerCycleMemory: OversightBrief["retainerCycleMemory"] = null;
   let behavioralUserId: string | null = input.userId ?? null;
   if (!behavioralUserId && loaded.account.ownerEmail) {
     try {
@@ -412,6 +507,83 @@ export async function composeOversightBrief(input: {
     retainedCadence,
     behavioralSources,
   });
+
+  if (loaded.account.accountId) {
+    try {
+      const priorArchives = await loadPriorArchivedOversightCycles({
+        accountId: loaded.account.accountId,
+        beforePeriodStart: periodStart,
+        limit: 6,
+      });
+      const priorBehavioralTrends = priorArchives.map(({ record, internalBrief }) => ({
+        cycleId: record.cycleId,
+        observedAt: record.periodEnd,
+        behavioralTrends: internalBrief?.behavioralTrends ?? null,
+        behavioralEvidenceStatus: internalBrief?.behavioralEvidenceStatus ?? "unavailable",
+      }));
+      const priorStructuredActions = priorArchives.flatMap(({ record, internalBrief }) => {
+        const trendSummary = internalBrief?.behavioralTrends;
+        const hasCadenceWarning = internalBrief?.structuredActions?.some(
+          (action) => action.actionType === "REVIEW_OPERATING_CADENCE",
+        );
+        if (!trendSummary || !hasCadenceWarning) {
+          return [];
+        }
+        return trendSummary.metrics
+          .filter((metric) => metric.direction === "DETERIORATING" || metric.direction === "RECURRING")
+          .map((metric) => ({
+            actionType: "REVIEW_OPERATING_CADENCE" as const,
+            source: trendSummary.source,
+            signalKey: metric.signalKey,
+            createdAt: record.periodEnd,
+          }));
+      });
+      const retainedEnforcementCycles = (await listRetainedReviewCycles())
+        .filter((cycle) => matchesRetainedCycleScope(cycle, {
+          accountId: loaded.account?.accountId,
+          organisationId: loaded.account?.organisationId,
+          sponsorUserId: behavioralUserId ?? loaded.account?.ownerUserId ?? null,
+          sponsorEmail: loaded.account?.ownerEmail ?? input.email ?? null,
+        }))
+        .slice(0, 12)
+        .map((cycle) => ({
+          cycleId: cycle.cycleId,
+          cadenceState: cycle.cadenceState,
+          completedAt: cycle.completedAt ?? null,
+          skippedAt: cycle.skippedAt ?? null,
+          escalatedAt: cycle.escalationReason ? cycle.updatedAt : null,
+          escalationReason: cycle.escalationReason ?? null,
+          updatedAt: cycle.updatedAt ?? null,
+        }));
+      retainerCycleMemory = buildRetainerCycleMemorySummary({
+        generatedAt: new Date().toISOString(),
+        accountId: loaded.account.accountId,
+        userId: behavioralUserId ?? loaded.account.ownerUserId ?? null,
+        currentBehavioralTrends: behavioralTrends,
+        currentBehavioralEvidenceStatus: behavioralEvidenceStatus,
+        priorBehavioralTrends,
+        priorStructuredActions,
+        retainedEnforcementCycles,
+        governanceFlags: {
+          counselReviewRequired: signals.some((signal) =>
+            signal.type === "COUNSEL_REVIEW_TRIGGERED"
+            || signal.type === "COUNSEL_OR_BOARDROOM_REVIEW",
+          ),
+          boardroomReviewRequired: signals.some((signal) =>
+            signal.type === "BOARDROOM_THRESHOLD_MET",
+          ),
+        },
+      });
+    } catch (error) {
+      warnings.push("Retained cycle memory could not be assembled from prior oversight cycles. This cycle proceeds without recurrence memory.");
+      console.warn("[oversight-brief] retainer cycle memory failed", {
+        accountIdPresent: Boolean(loaded.account.accountId),
+        userIdPresent: Boolean(behavioralUserId ?? loaded.account.ownerUserId),
+        emailPresent: Boolean(loaded.account.ownerEmail ?? input.email),
+        errorName: error instanceof Error ? error.name : "UnknownError",
+      });
+    }
+  }
 
   // Inject checkpoint-level signals from the efficacy system
   if (checkpointSignalCount > 0) {
@@ -617,6 +789,7 @@ export async function composeOversightBrief(input: {
       })),
     behavioralEvidenceStatus,
     behavioralTrends,
+    retainerCycleMemory,
     requiredActions: [...new Set(requiredActions)].slice(0, 6),
 
     // ── Premium intelligence primitives (evidence-only, no fabrication) ──
@@ -1013,6 +1186,10 @@ export async function composeOversightBrief(input: {
   const behavioralTrendAction = buildBehavioralTrendStructuredAction(brief.behavioralTrends);
   if (behavioralTrendAction) {
     structuredActions.push(behavioralTrendAction);
+  }
+  const retainerCycleMemoryAction = buildRetainerCycleMemoryStructuredAction(brief.retainerCycleMemory);
+  if (retainerCycleMemoryAction) {
+    structuredActions.push(retainerCycleMemoryAction);
   }
   if (structuredActions.length > 0) {
     brief.structuredActions = structuredActions;

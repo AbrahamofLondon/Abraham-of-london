@@ -247,6 +247,59 @@ export async function loadPreviousArchivedOversightCycle(input: {
   return candidates[0] ?? null;
 }
 
+export async function loadPriorArchivedOversightCycles(input: {
+  accountId: string;
+  beforePeriodStart: string;
+  limit?: number;
+}): Promise<Array<{
+  id: string;
+  record: OversightCycleArchiveRecord;
+  clientSafeBrief: OversightBrief | null;
+  internalBrief: OversightBrief | null;
+}>> {
+  const rows = await prisma.auditEvent.findMany({
+    where: {
+      objectType: "OVERSIGHT_CYCLE_ARCHIVE",
+    },
+    orderBy: { createdAt: "desc" },
+    take: 300,
+    select: {
+      id: true,
+      metadata: true,
+    },
+  });
+
+  const candidates = rows
+    .map((row): {
+      id: string;
+      record: OversightCycleArchiveRecord;
+      clientSafeBrief: OversightBrief | null;
+      internalBrief: OversightBrief | null;
+    } | null => {
+      const metadata = asRecord(row.metadata);
+      const record = archiveMetadataToRecord(metadata);
+      if (!record) return null;
+      if (record.accountId !== input.accountId) return null;
+      if (record.periodStart >= input.beforePeriodStart) return null;
+      if (!["APPROVED_FOR_DELIVERY", "CLIENT_VIEW_READY", "DELIVERED"].includes(record.deliveryStatus)) return null;
+      return {
+        id: row.id,
+        record,
+        clientSafeBrief: asRecord(metadata.clientSafeBrief) as unknown as OversightBrief,
+        internalBrief: asRecord(metadata.internalBrief) as unknown as OversightBrief,
+      };
+    })
+    .filter((item): item is {
+      id: string;
+      record: OversightCycleArchiveRecord;
+      clientSafeBrief: OversightBrief | null;
+      internalBrief: OversightBrief | null;
+    } => Boolean(item))
+    .slice(0, input.limit ?? 6);
+
+  return candidates;
+}
+
 export async function updateOversightCycleArchiveDeliveryState(input: {
   cycleId: string;
   deliveryIntent: OversightDeliveryIntent;

@@ -99,6 +99,15 @@ function cloneBrief(input: OversightBrief): OversightBrief {
           insufficientDataKeys: [...input.behavioralTrends.insufficientDataKeys],
         }
       : input.behavioralTrends,
+    retainerCycleMemory: input.retainerCycleMemory
+      ? {
+          ...input.retainerCycleMemory,
+          findings: input.retainerCycleMemory.findings.map((item) => ({
+            ...item,
+            priorDirections: item.priorDirections ? [...item.priorDirections] : undefined,
+          })),
+        }
+      : input.retainerCycleMemory,
     indispensability: input.indispensability
       ? {
           ...input.indispensability,

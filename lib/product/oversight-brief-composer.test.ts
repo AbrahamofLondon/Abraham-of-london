@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { BehavioralTrendSummary } from "@/lib/behavioral/behavioral-trend-contract";
+import type { RetainerCycleMemorySummary } from "@/lib/product/retainer-cycle-memory-contract";
 import {
   aggregateBehavioralTrendSummaries,
   buildBehavioralTrendStructuredAction,
+  buildRetainerCycleMemoryStructuredAction,
   hasBehavioralTrendRecurrenceEvidence,
 } from "./oversight-brief-composer";
 
@@ -20,6 +22,22 @@ function makeSummary(
     hasRecurrence: false,
     repeatedDriftSignals: [],
     insufficientDataKeys: [],
+    ...overrides,
+  };
+}
+
+function makeCycleMemorySummary(
+  overrides: Partial<RetainerCycleMemorySummary> = {},
+): RetainerCycleMemorySummary {
+  return {
+    status: "available",
+    generatedAt: "2026-05-14T00:00:00.000Z",
+    accountId: "acct_1",
+    userId: "user_1",
+    findings: [],
+    escalationRequired: false,
+    escalationLevel: "NONE",
+    summary: "Retained cycle memory is available but does not yet support stronger recurrence claims.",
     ...overrides,
   };
 }
@@ -144,5 +162,32 @@ describe("behavioral trend recurrence action gate", () => {
     expect(aggregate?.hasRecurrence).toBe(false);
     expect(aggregate?.repeatedDriftSignals).toEqual([]);
     expect(buildBehavioralTrendStructuredAction(aggregate)).toBeNull();
+  });
+
+  it("builds an account-scoped retained memory action without a fake caseId", () => {
+    const action = buildRetainerCycleMemoryStructuredAction(makeCycleMemorySummary({
+      findings: [{
+        id: "retainer_memory_calendar_meetingCancellationRate_repeated_signal",
+        signalKey: "meetingCancellationRate",
+        source: "calendar",
+        status: "REPEATED_SIGNAL",
+        severity: "HIGH",
+        currentDirection: "DETERIORATING",
+        priorDirections: ["DETERIORATING"],
+        cyclesObserved: 2,
+        cyclesDeteriorating: 2,
+        cyclesUnavailable: 0,
+        explanation: "calendar.meetingCancellationRate has deteriorated across 2 retained cycles.",
+        recommendedAction: "Review operating cadence and unresolved commitments before the next retained cycle closes.",
+      }],
+      escalationRequired: true,
+      escalationLevel: "OPERATING_CADENCE_RESET",
+      summary: "1 behavioral signal shows repeated deterioration across retained oversight cycles.",
+    }));
+
+    expect(action).not.toBeNull();
+    expect(action?.scopeType).toBe("ACCOUNT");
+    expect(action?.caseId).toBeUndefined();
+    expect(action?.actionType).toBe("REVIEW_OPERATING_CADENCE");
   });
 });

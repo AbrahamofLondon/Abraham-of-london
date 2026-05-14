@@ -1,0 +1,2 @@
+-- Empty migration: directory existed without SQL content.
+-- Resolved as already-applied baseline marker.

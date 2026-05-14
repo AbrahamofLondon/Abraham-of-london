@@ -257,6 +257,8 @@ export type OversightBrief = {
   behavioralEvidenceStatus?: "live" | "snapshot" | "unavailable";
   /** Cycle-over-cycle behavioral trend analysis, null when insufficient history */
   behavioralTrends?: import("@/lib/behavioral/behavioral-trend-contract").BehavioralTrendSummary | null;
+  /** Retained memory of behavioral movement and escalation across prior oversight cycles */
+  retainerCycleMemory?: import("@/lib/product/retainer-cycle-memory-contract").RetainerCycleMemorySummary | null;
 
   /**
    * Sovereign signal recurrence tracking across oversight cycles.
