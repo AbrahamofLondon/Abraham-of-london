@@ -243,6 +243,11 @@ ehthumbs.db
 *.directory
 
 # ------------------------------
+# Video build outputs (large files — use LFS or external storage)
+# ------------------------------
+video/
+
+# ------------------------------
 # Keep institutional assets tracked
 # ------------------------------
 !public/assets/
@@ -270,3 +275,5 @@ bucket-*.txt
 changed-*.txt
 
 .vercel
+
+
