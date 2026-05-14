@@ -119,7 +119,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     items: [
       { id: "assets", label: "Asset Registry", href: "/admin/assets", router: "pages", visibility: "admin", status: "rough", description: "PDF sync dashboard — rough, labels may overstate sensitivity" },
       { id: "inner-circle", label: "Inner Circle", href: "/admin/inner-circle", router: "pages", visibility: "admin", status: "active", description: "Inner circle member management — key issuance and status updates" },
-      { id: "snapshot", label: "Snapshot", href: "/admin/snapshot", router: "app", visibility: "admin", status: "rough", description: "Alignment snapshot — currently renders hardcoded mock data, not wired to live API" },
+      { id: "snapshot", label: "Snapshot", href: "/admin/snapshot", router: "app", visibility: "admin", status: "active", description: "Executive alignment snapshot — live from OrganisationAssessmentSnapshot, TeamAssessmentSnapshot, and LeadershipGapSnapshot" },
     ],
   },
   {
