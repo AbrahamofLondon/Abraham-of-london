@@ -145,6 +145,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     items: [
       { id: "access-keys", label: "Access Keys", href: "/admin/access-keys", router: "pages", visibility: "admin", status: "active", description: "Issue and revoke access keys" },
       { id: "audit", label: "Audit Log", href: "/admin/audit", router: "app", visibility: "admin", status: "active", description: "System forensic ledger — Prisma systemAuditLog with graceful fallback" },
+      { id: "events", label: "Event Log", href: "/admin/events", router: "pages", visibility: "admin", status: "active", description: "Unified operational event log across system audit, governance, access, and delivery sources. Webhook events not yet connected." },
     ],
   },
 ];
