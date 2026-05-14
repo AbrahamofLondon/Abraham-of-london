@@ -1,42 +1,45 @@
-import { describe, it, expect } from "vitest";
-import {
-  composeGovernanceEvents,
-  composeEvidenceInputs,
-  classifyPosture,
-  buildAccountabilityStatement,
-  composeDecisionProvenanceRecord,
-  type ProvenanceSourceData,
-} from "./decision-provenance-record";
+import { describe, expect, it } from "vitest";
+
+import type { DeliveryRecord } from "@/lib/product/delivery-audit-contract";
+import type { OutcomeVerificationRecord } from "@/lib/product/outcome-verification-contract";
+import type { OversightReviewDecisionRecord } from "@/lib/product/oversight-review-decision-contract";
 import type { RetainedReviewCycle } from "@/lib/product/retained-cadence-contract";
 import type { SuppressionEvent } from "@/lib/product/suppression-ledger-contract";
-import type { DeliveryRecord } from "@/lib/product/delivery-audit-contract";
-import type { CounselHistoryEntry } from "@/lib/product/counsel-history-contract";
-import type { BoardroomArchiveEntry } from "@/lib/product/boardroom-archive-contract";
-import type { OversightReviewDecisionRecord } from "@/lib/product/oversight-review-decision-contract";
 
-// ─── Fixtures ────────────────────────────────────────────────────────────────
+import {
+  buildAccountabilityStatement,
+  buildDecisionProvenanceHash,
+  composeDecisionProvenance,
+  composeDecisionProvenanceFromSources,
+  composeEvidenceInputs,
+  composeGovernanceEvents,
+  composeTimeline,
+  deriveCurrentPosture,
+  type DecisionProvenanceRecord,
+  type DecisionProvenanceSourceData,
+} from "./decision-provenance-record";
 
-const CYCLE_ID = "cycle_test_001";
+const SUBJECT_ID = "cycle_001";
 
 function cycle(overrides: Partial<RetainedReviewCycle> = {}): RetainedReviewCycle {
   return {
-    cycleId: CYCLE_ID,
+    cycleId: SUBJECT_ID,
     accountId: "acct_001",
-    organisationId: null,
+    organisationId: "org_001",
     sponsorUserId: null,
     sponsorEmail: null,
     cadenceState: "REVIEW_IN_PROGRESS",
     cadenceSource: "manual",
     cadenceType: "quarterly",
-    scheduledFor: "2025-06-01T00:00:00Z",
+    scheduledFor: "2026-05-01T09:00:00.000Z",
     completedAt: null,
     skippedAt: null,
     skippedReason: null,
     escalationReason: null,
     operatorId: "op_001",
-    evidencePosture: "OPERATOR_RECORDED",
-    createdAt: "2025-05-01T10:00:00Z",
-    updatedAt: "2025-05-15T12:00:00Z",
+    evidencePosture: "SYSTEM_INFERRED",
+    createdAt: "2026-05-01T09:00:00.000Z",
+    updatedAt: "2026-05-01T09:00:00.000Z",
     ...overrides,
   };
 }
@@ -44,426 +47,327 @@ function cycle(overrides: Partial<RetainedReviewCycle> = {}): RetainedReviewCycl
 function suppression(overrides: Partial<SuppressionEvent> = {}): SuppressionEvent {
   return {
     eventId: "sup_001",
-    scopeId: CYCLE_ID,
+    scopeId: SUBJECT_ID,
     scopeType: "CYCLE",
     surface: "oversight-brief",
-    fieldName: "costExposure",
-    suppressionReason: "Commercially sensitive",
-    suppressionRule: "COMMERCIAL_SENSITIVITY",
-    suppressedAt: "2025-05-10T09:00:00Z",
-    suppressedBySystem: true,
-    reviewedByOperator: null,
-    reviewedAt: null,
-    overrideStatus: "NONE",
-    overrideReason: null,
+    fieldName: "commercialExposure",
     evidenceSource: "system",
     originalPosture: "SYSTEM_INFERRED",
+    evidencePosture: "SYSTEM_INFERRED",
+    suppressionReason: "Commercial sensitivity",
+    suppressionRule: "COMMERCIAL_SENSITIVITY",
+    operatorReviewAvailable: true,
+    suppressedAt: "2026-05-02T09:00:00.000Z",
+    suppressedBySystem: true,
+    reviewedByOperator: "op_001",
+    reviewedAt: "2026-05-02T10:00:00.000Z",
+    overrideStatus: "NONE",
+    overrideReason: null,
     ...overrides,
   };
-}
-
-function highRiskSuppression(): SuppressionEvent {
-  return suppression({
-    eventId: "sup_risk_001",
-    suppressionRule: "LEGAL_RISK",
-    suppressionReason: "Legal exposure — counsel review required",
-  });
 }
 
 function delivery(overrides: Partial<DeliveryRecord> = {}): DeliveryRecord {
   return {
     id: "del_001",
     artifactType: "OVERSIGHT_BRIEF",
-    artifactId: CYCLE_ID,
-    recipientEmail: "sponsor@client.com",
+    artifactId: SUBJECT_ID,
+    recipientEmail: "sponsor@example.com",
     recipientRole: "SPONSOR",
     approvedBy: "op_001",
     deliveredBy: "system",
-    deliveredAt: "2025-05-20T14:00:00Z",
+    deliveredAt: "2026-05-04T09:00:00.000Z",
     deliveryMethod: "EMAIL",
     status: "DELIVERED",
     suppressionSummary: "1 field suppressed",
     clientSafe: true,
-    createdAt: "2025-05-18T10:00:00Z",
+    createdAt: "2026-05-03T09:00:00.000Z",
     ...overrides,
   };
 }
 
-function failedDelivery(): DeliveryRecord {
-  return delivery({
-    id: "del_fail_001",
-    status: "FAILED",
-    deliveredAt: null,
-    deliveredBy: null,
-    failureReason: "SMTP timeout",
-    latestAttemptAt: "2025-05-20T14:05:00Z",
-  });
-}
-
-function counselEntry(overrides: Partial<CounselHistoryEntry> = {}): CounselHistoryEntry {
+function outcome(overrides: Partial<OutcomeVerificationRecord> = {}): OutcomeVerificationRecord {
   return {
-    id: "counsel_001",
-    cycleId: CYCLE_ID,
-    caseId: "case_001",
-    triggeredAt: "2025-05-12T11:00:00Z",
-    triggerReason: "Legal exposure flagged in brief",
-    status: "OPEN",
-    evidenceNodeIds: [],
-    operatorDisposition: "PENDING",
+    verificationId: "out_001",
+    userEmail: "sponsor@example.com",
+    userId: null,
+    checkpointId: null,
+    caseId: null,
+    journeyId: null,
+    strategyRoomSessionId: SUBJECT_ID,
+    executiveRunId: null,
+    checkpointTitle: "Outcome verification",
+    sourceSurface: "outcome-verification",
+    sourceLabel: "Outcome verification",
+    dueAt: null,
+    status: "COMPLETED",
+    outcomeClassification: "ACTION_CONFIRMED",
+    evidencePosture: "USER_REPORTED",
+    didAct: "YES",
+    changedState: "IMPROVED",
+    systemDiagnosisAccuracy: "ACCURATE",
+    requiredMoveUsefulness: "USEFUL",
+    whatChanged: "",
+    evidenceSummary: null,
+    rememberNote: null,
+    createdAt: "2026-05-05T09:00:00.000Z",
+    checkpointResponseStatus: "COMPLETED",
+    proofLabels: ["USER_REPORTED"],
     ...overrides,
   };
 }
 
-function boardroomEntry(overrides: Partial<BoardroomArchiveEntry> = {}): BoardroomArchiveEntry {
+function decision(overrides: Partial<OversightReviewDecisionRecord> = {}): OversightReviewDecisionRecord {
   return {
-    id: "br_001",
-    cycleId: CYCLE_ID,
-    caseId: "case_001",
-    qualifiedAt: "2025-05-13T09:00:00Z",
-    dossierSummary: "Board-level cost exposure identified",
-    triggerReason: "Cost threshold exceeded",
-    objectionsGenerated: 2,
-    exportStatus: "NOT_EXPORTED",
-    ...overrides,
-  };
-}
-
-function decisionRecord(overrides: Partial<OversightReviewDecisionRecord> = {}): OversightReviewDecisionRecord {
-  return {
-    id: "dec_001",
+    id: "decision_001",
     accountId: "acct_001",
-    cycleId: CYCLE_ID,
+    organisationId: "org_001",
+    cycleId: SUBJECT_ID,
     decision: "APPROVE_FOR_CLIENT",
-    reasons: [],
+    reasons: ["OPERATOR_APPROVED"],
     operatorId: "op_001",
+    operatorNote: null,
     efficacyGrade: "A",
-    efficacyScore: 85,
+    efficacyScore: 88,
     clientSafe: true,
     deliveryAllowed: true,
-    createdAt: "2025-05-19T10:00:00Z",
+    createdAt: "2026-05-03T08:00:00.000Z",
     ...overrides,
   };
 }
 
-function emptyData(overrides: Partial<ProvenanceSourceData> = {}): ProvenanceSourceData {
+function sourceData(overrides: Partial<DecisionProvenanceSourceData> = {}): DecisionProvenanceSourceData {
   return {
-    cycleId: CYCLE_ID,
-    cycle: null,
+    subjectType: "OVERSIGHT_CYCLE",
+    subjectId: SUBJECT_ID,
+    cycles: [],
     cadenceHistory: [],
     suppressions: [],
     deliveries: [],
+    outcomes: [],
     counselEntries: [],
     boardroomEntries: [],
-    decisionRecord: null,
+    decisionRecords: [],
+    archiveRecords: [],
+    memorySummary: null,
     unavailableSources: [],
     ...overrides,
   };
 }
 
-// ─── composeEvidenceInputs ───────────────────────────────────────────────────
-
-describe("composeEvidenceInputs", () => {
-  it("returns empty array when no data", () => {
-    expect(composeEvidenceInputs(emptyData())).toHaveLength(0);
+describe("composeDecisionProvenance", () => {
+  it("composer returns version 1", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({ cycles: [cycle()] }));
+    expect(record.version).toBe(1);
   });
 
-  it("includes cycle when present", () => {
-    const inputs = composeEvidenceInputs(emptyData({ cycle: cycle() }));
-    expect(inputs.some((i) => i.type === "CADENCE_CYCLE")).toBe(true);
-  });
-
-  it("includes suppression for each suppression event", () => {
-    const data = emptyData({ suppressions: [suppression(), suppression({ eventId: "sup_002", fieldName: "other" })] });
-    const suppressionInputs = composeEvidenceInputs(data).filter((i) => i.type === "SUPPRESSION");
-    expect(suppressionInputs).toHaveLength(2);
-  });
-
-  it("includes delivery when delivery record present", () => {
-    const data = emptyData({ deliveries: [delivery()] });
-    expect(composeEvidenceInputs(data).some((i) => i.type === "DELIVERY")).toBe(true);
-  });
-
-  it("delivery NOT included when deliveries array is empty", () => {
-    const data = emptyData({ deliveries: [] });
-    expect(composeEvidenceInputs(data).some((i) => i.type === "DELIVERY")).toBe(false);
-  });
-
-  it("includes operator decision when present", () => {
-    const data = emptyData({ decisionRecord: decisionRecord() });
-    expect(composeEvidenceInputs(data).some((i) => i.type === "OPERATOR_DECISION")).toBe(true);
-  });
-});
-
-// ─── composeGovernanceEvents ─────────────────────────────────────────────────
-
-describe("composeGovernanceEvents — suppression", () => {
-  it("suppression appears in governance events when present", () => {
-    const data = emptyData({ suppressions: [suppression()] });
-    const events = composeGovernanceEvents(data);
-    expect(events.some((e) => e.type === "SUPPRESSION_APPLIED")).toBe(true);
-  });
-
-  it("suppression does NOT appear when suppressions is empty", () => {
-    const events = composeGovernanceEvents(emptyData());
-    expect(events.some((e) => e.type === "SUPPRESSION_APPLIED")).toBe(false);
-  });
-
-  it("high-risk suppression gets HIGH severity", () => {
-    const data = emptyData({ suppressions: [highRiskSuppression()] });
-    const events = composeGovernanceEvents(data);
-    const supEvent = events.find((e) => e.type === "SUPPRESSION_APPLIED");
-    expect(supEvent?.severity).toBe("HIGH");
-  });
-
-  it("standard suppression gets MEDIUM severity", () => {
-    const data = emptyData({ suppressions: [suppression()] });
-    const events = composeGovernanceEvents(data);
-    const supEvent = events.find((e) => e.type === "SUPPRESSION_APPLIED");
-    expect(supEvent?.severity).toBe("MEDIUM");
-  });
-});
-
-describe("composeGovernanceEvents — delivery", () => {
-  it("DELIVERY_SENT appears when delivery status is DELIVERED", () => {
-    const data = emptyData({ deliveries: [delivery()] });
-    expect(composeGovernanceEvents(data).some((e) => e.type === "DELIVERY_SENT")).toBe(true);
-  });
-
-  it("delivery does NOT appear when deliveries is empty", () => {
-    const events = composeGovernanceEvents(emptyData({ deliveries: [] }));
-    expect(events.some((e) => e.type === "DELIVERY_SENT")).toBe(false);
-  });
-
-  it("failed delivery creates HIGH severity DELIVERY_SENT event", () => {
-    const data = emptyData({ deliveries: [failedDelivery()] });
-    const events = composeGovernanceEvents(data);
-    const failEvent = events.find((e) => e.type === "DELIVERY_SENT");
-    expect(failEvent?.severity).toBe("HIGH");
-    expect(failEvent?.label).toContain("failed");
-  });
-
-  it("DELIVERY_APPROVED appears when approvedBy is set", () => {
-    const data = emptyData({ deliveries: [delivery({ approvedBy: "op_001" })] });
-    expect(composeGovernanceEvents(data).some((e) => e.type === "DELIVERY_APPROVED")).toBe(true);
-  });
-});
-
-describe("composeGovernanceEvents — counsel vs boardroom distinction", () => {
-  it("counsel escalation creates COUNSEL_ESCALATED event", () => {
-    const data = emptyData({ counselEntries: [counselEntry()] });
-    const events = composeGovernanceEvents(data);
-    expect(events.some((e) => e.type === "COUNSEL_ESCALATED")).toBe(true);
-    expect(events.some((e) => e.type === "BOARDROOM_ESCALATED")).toBe(false);
-  });
-
-  it("boardroom escalation creates BOARDROOM_ESCALATED event", () => {
-    const data = emptyData({ boardroomEntries: [boardroomEntry()] });
-    const events = composeGovernanceEvents(data);
-    expect(events.some((e) => e.type === "BOARDROOM_ESCALATED")).toBe(true);
-    expect(events.some((e) => e.type === "COUNSEL_ESCALATED")).toBe(false);
-  });
-
-  it("counsel and boardroom escalation are independently preserved", () => {
-    const data = emptyData({
-      counselEntries: [counselEntry()],
-      boardroomEntries: [boardroomEntry()],
+  it("unsupported subject returns UNKNOWN with provenance gap", async () => {
+    const record = await composeDecisionProvenance({
+      subjectType: "EXECUTIVE_REPORT",
+      subjectId: "report_001",
     });
-    const events = composeGovernanceEvents(data);
-    expect(events.some((e) => e.type === "COUNSEL_ESCALATED")).toBe(true);
-    expect(events.some((e) => e.type === "BOARDROOM_ESCALATED")).toBe(true);
-  });
-
-  it("boardroom escalation always has CRITICAL severity", () => {
-    const data = emptyData({ boardroomEntries: [boardroomEntry()] });
-    const brEvent = composeGovernanceEvents(data).find((e) => e.type === "BOARDROOM_ESCALATED");
-    expect(brEvent?.severity).toBe("CRITICAL");
-  });
-
-  it("counsel disposition adds OPERATOR_REVIEWED event when resolved", () => {
-    const data = emptyData({ counselEntries: [counselEntry({ operatorDisposition: "ACCEPTED" })] });
-    const events = composeGovernanceEvents(data);
-    expect(events.some((e) => e.type === "OPERATOR_REVIEWED")).toBe(true);
-  });
-
-  it("counsel with PENDING disposition does NOT add OPERATOR_REVIEWED event", () => {
-    const data = emptyData({ counselEntries: [counselEntry({ operatorDisposition: "PENDING" })] });
-    const events = composeGovernanceEvents(data).filter((e) => e.type === "OPERATOR_REVIEWED");
-    // No decision record, only pending counsel — no OPERATOR_REVIEWED event
-    expect(events).toHaveLength(0);
+    expect(record.currentPosture.status).toBe("UNKNOWN");
+    expect(record.provenanceGaps.some((gap) => gap.stage === "Subject support")).toBe(true);
+    expect(record.accountabilityStatement).toContain("No evidence inputs");
   });
 });
 
-describe("composeGovernanceEvents — operator decision", () => {
-  it("OPERATOR_REVIEWED event appears when decision record present", () => {
-    const data = emptyData({ decisionRecord: decisionRecord() });
-    expect(composeGovernanceEvents(data).some((e) => e.type === "OPERATOR_REVIEWED")).toBe(true);
-  });
-
-  it("decision NOT in events when decisionRecord is null", () => {
-    const data = emptyData({ decisionRecord: null });
-    expect(composeGovernanceEvents(data).some((e) => e.type === "OPERATOR_REVIEWED")).toBe(false);
-  });
-});
-
-describe("composeGovernanceEvents — ordering", () => {
-  it("events sorted chronologically", () => {
-    const data = emptyData({
-      suppressions: [suppression({ suppressedAt: "2025-05-10T09:00:00Z" })],
-      deliveries: [delivery({ createdAt: "2025-05-18T10:00:00Z" })],
-    });
-    const events = composeGovernanceEvents(data);
-    const timestamps = events
-      .filter((e) => e.occurredAt)
-      .map((e) => new Date(e.occurredAt!).getTime());
-    for (let i = 1; i < timestamps.length; i++) {
-      expect(timestamps[i]!).toBeGreaterThanOrEqual(timestamps[i - 1]!);
-    }
-  });
-});
-
-// ─── classifyPosture ─────────────────────────────────────────────────────────
-
-describe("classifyPosture — no cycle", () => {
-  it("UNKNOWN posture when no cycle", () => {
-    const { status } = classifyPosture(null, [], 0);
-    expect(status).toBe("UNKNOWN");
-  });
-
-  it("UNKNOWN posture mentions unavailable sources", () => {
-    const { summary } = classifyPosture(null, [], 2);
-    expect(summary).toContain("unavailable");
-  });
-});
-
-describe("classifyPosture — missing evidence creates UNKNOWN, not completion", () => {
-  it("unavailable sources with null cycle → UNKNOWN, not COMPLETE", () => {
-    const { status } = classifyPosture(null, [], 3);
-    expect(status).toBe("UNKNOWN");
-    expect(status).not.toBe("COMPLETE");
-  });
-});
-
-describe("classifyPosture — cycle states", () => {
-  it("OVERDUE cadence → BLOCKED posture", () => {
-    const { status } = classifyPosture(cycle({ cadenceState: "OVERDUE" }), [], 0);
-    expect(status).toBe("BLOCKED");
-  });
-
-  it("REVIEW_IN_PROGRESS → IN_REVIEW posture", () => {
-    const { status } = classifyPosture(cycle({ cadenceState: "REVIEW_IN_PROGRESS" }), [], 0);
-    expect(status).toBe("IN_REVIEW");
-  });
-
-  it("REVIEW_COMPLETED with delivery event → DELIVERED posture", () => {
-    const events = composeGovernanceEvents(emptyData({ deliveries: [delivery()] }));
-    const { status } = classifyPosture(cycle({ cadenceState: "REVIEW_COMPLETED" }), events, 0);
-    expect(status).toBe("DELIVERED");
-  });
-
-  it("ESCALATED state → ESCALATED posture", () => {
-    const { status } = classifyPosture(cycle({ cadenceState: "ESCALATED" }), [], 0);
-    expect(status).toBe("ESCALATED");
-  });
-
-  it("counsel escalation event → ESCALATED posture regardless of cadence state", () => {
-    const events = composeGovernanceEvents(emptyData({ counselEntries: [counselEntry()] }));
-    const { status } = classifyPosture(cycle({ cadenceState: "REVIEW_IN_PROGRESS" }), events, 0);
-    expect(status).toBe("ESCALATED");
-  });
-});
-
-// ─── buildAccountabilityStatement ───────────────────────────────────────────
-
-describe("buildAccountabilityStatement — restrained claims", () => {
-  it("includes delivery count when delivery exists", () => {
-    const events = composeGovernanceEvents(emptyData({ deliveries: [delivery()] }));
-    const statement = buildAccountabilityStatement(CYCLE_ID, cycle(), events, []);
-    expect(statement).toContain("delivery record");
-  });
-
-  it("explicitly states no confirmed delivery when none present", () => {
-    const events = composeGovernanceEvents(emptyData());
-    const statement = buildAccountabilityStatement(CYCLE_ID, cycle(), events, []);
-    expect(statement).toContain("No confirmed delivery");
-  });
-
-  it("mentions suppression count when suppressions present", () => {
-    const events = composeGovernanceEvents(emptyData({ suppressions: [suppression()] }));
-    const statement = buildAccountabilityStatement(CYCLE_ID, cycle(), events, []);
-    expect(statement).toContain("suppression event");
-  });
-
-  it("does NOT claim delivery when none exists — no overclaiming", () => {
-    const events = composeGovernanceEvents(emptyData({ deliveries: [] }));
-    const statement = buildAccountabilityStatement(CYCLE_ID, cycle(), events, []);
-    expect(statement).not.toContain("Brief delivered");
-  });
-
-  it("mentions unavailable sources caveat when sources missing", () => {
-    const statement = buildAccountabilityStatement(CYCLE_ID, cycle(), [], ["suppression-ledger"]);
-    expect(statement).toContain("unavailable");
-  });
-
-  it("cannot establish accountability when no cycle and no sources", () => {
-    const statement = buildAccountabilityStatement(CYCLE_ID, null, [], []);
-    expect(statement).toContain("cannot be established");
-  });
-
-  it("includes counsel escalation count when counsel events present", () => {
-    const events = composeGovernanceEvents(emptyData({ counselEntries: [counselEntry()] }));
-    const statement = buildAccountabilityStatement(CYCLE_ID, cycle(), events, []);
-    expect(statement).toContain("counsel");
-  });
-
-  it("distinguishes boardroom from counsel in statement", () => {
-    const events = composeGovernanceEvents(emptyData({
-      counselEntries: [counselEntry()],
-      boardroomEntries: [boardroomEntry()],
+describe("evidence confidence", () => {
+  it("evidence input confidence is preserved", () => {
+    const inputs = composeEvidenceInputs(sourceData({
+      outcomes: [outcome({ evidencePosture: "USER_REPORTED" })],
     }));
-    const statement = buildAccountabilityStatement(CYCLE_ID, cycle(), events, []);
-    expect(statement).toContain("counsel");
-    expect(statement).toContain("boardroom");
+    expect(inputs[0]?.confidence).toBe("USER_REPORTED");
+  });
+
+  it("user-reported evidence is not upgraded to verified", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      outcomes: [outcome({ evidencePosture: "USER_REPORTED" })],
+    }));
+    expect(record.evidenceInputs[0]?.confidence).toBe("USER_REPORTED");
+    expect(record.accountabilityStatement.toLowerCase()).not.toContain("verified");
   });
 });
 
-// ─── composeDecisionProvenanceRecord ─────────────────────────────────────────
-
-describe("composeDecisionProvenanceRecord", () => {
-  it("returns a record with required fields", () => {
-    const record = composeDecisionProvenanceRecord(emptyData({ cycle: cycle() }));
-    expect(record.id).toContain(CYCLE_ID);
-    expect(record.subjectType).toBe("OVERSIGHT_CYCLE");
-    expect(record.subjectId).toBe(CYCLE_ID);
-    expect(Array.isArray(record.governanceEvents)).toBe(true);
-    expect(Array.isArray(record.evidenceInputs)).toBe(true);
-    expect(typeof record.accountabilityStatement).toBe("string");
-    expect(typeof record.currentPosture.status).toBe("string");
+describe("governance events", () => {
+  it("suppression event appears only when suppression record exists", () => {
+    expect(composeGovernanceEvents(sourceData()).some((event) => event.type === "SUPPRESSION_APPLIED")).toBe(false);
+    expect(composeGovernanceEvents(sourceData({ suppressions: [suppression()] })).some((event) => event.type === "SUPPRESSION_APPLIED")).toBe(true);
   });
 
-  it("unavailableSources propagated to record", () => {
-    const data = emptyData({ unavailableSources: ["suppression-ledger", "delivery-queue"] });
-    const record = composeDecisionProvenanceRecord(data);
-    expect(record.unavailableSources).toHaveLength(2);
+  it("delivery event appears only when delivery record exists", () => {
+    expect(composeGovernanceEvents(sourceData()).some((event) => event.type === "DELIVERY_SENT")).toBe(false);
+    expect(composeGovernanceEvents(sourceData({ deliveries: [delivery()] })).some((event) => event.type === "DELIVERY_SENT")).toBe(true);
   });
 
-  it("full chain: cycle + suppression + delivery + counsel + boardroom + decision", () => {
-    const data: ProvenanceSourceData = {
-      cycleId: CYCLE_ID,
-      cycle: cycle({ cadenceState: "REVIEW_COMPLETED" }),
-      cadenceHistory: [],
+  it("outcome event appears only when outcome record exists", () => {
+    expect(composeGovernanceEvents(sourceData()).some((event) => event.type === "OUTCOME_RECORDED")).toBe(false);
+    expect(composeGovernanceEvents(sourceData({ outcomes: [outcome()] })).some((event) => event.type === "OUTCOME_RECORDED")).toBe(true);
+  });
+});
+
+describe("provenance gaps", () => {
+  it("missing delivery creates WARNING gap", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+      decisionRecords: [decision()],
+    }));
+    expect(record.provenanceGaps).toContainEqual(expect.objectContaining({
+      stage: "Delivery",
+      severity: "WARNING",
+    }));
+  });
+
+  it("suppression override without reason creates CRITICAL gap if detectable", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      suppressions: [suppression({
+        overrideStatus: "APPROVED_FOR_RELEASE",
+        overrideReason: null,
+      })],
+    }));
+    expect(record.provenanceGaps).toContainEqual(expect.objectContaining({
+      stage: "Suppression",
+      severity: "CRITICAL",
+    }));
+  });
+});
+
+describe("timeline", () => {
+  it("timeline sorts dated events chronologically", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle({ createdAt: "2026-05-03T09:00:00.000Z" })],
+      suppressions: [suppression({ suppressedAt: "2026-05-01T09:00:00.000Z" })],
+      deliveries: [delivery({ createdAt: "2026-05-02T09:00:00.000Z", deliveredAt: "2026-05-04T09:00:00.000Z" })],
+    }));
+    expect(record.timeline.map((item) => item.date)).toEqual([...record.timeline.map((item) => item.date)].sort());
+  });
+
+  it("undated events do not receive fake dates", () => {
+    const events = composeGovernanceEvents(sourceData({
+      suppressions: [suppression({ suppressedAt: null as unknown as string })],
+    }));
+    expect(events[0]?.occurredAt).toBeNull();
+    expect(composeTimeline([], events)).toHaveLength(0);
+  });
+});
+
+describe("accountability statement", () => {
+  it("accountability statement counts evidence inputs", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
       suppressions: [suppression()],
       deliveries: [delivery()],
-      counselEntries: [counselEntry({ operatorDisposition: "ACCEPTED" })],
-      boardroomEntries: [boardroomEntry()],
-      decisionRecord: decisionRecord(),
-      unavailableSources: [],
+      outcomes: [outcome()],
+    }));
+    expect(record.accountabilityStatement).toContain("4 evidence inputs captured");
+  });
+
+  it("accountability statement mentions operator review only when present", () => {
+    const withoutReview = composeDecisionProvenanceFromSources(sourceData({ cycles: [cycle()] }));
+    const withReview = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+      decisionRecords: [decision()],
+    }));
+    expect(withoutReview.accountabilityStatement).not.toContain("operator review");
+    expect(withReview.accountabilityStatement).toContain("1 operator review completed");
+  });
+
+  it("accountability statement does not claim verification without verified evidence", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      outcomes: [outcome({ evidencePosture: "USER_REPORTED" })],
+    }));
+    expect(record.accountabilityStatement.toLowerCase()).not.toContain("verified");
+  });
+});
+
+describe("provenance hash", () => {
+  function hashable(overrides: Partial<Omit<DecisionProvenanceRecord, "provenanceHash">> = {}) {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+      decisionRecords: [decision()],
+      deliveries: [delivery()],
+      outcomes: [outcome()],
+    }));
+    const { provenanceHash: _provenanceHash, ...withoutHash } = record;
+    return {
+      ...withoutHash,
+      ...overrides,
     };
-    const record = composeDecisionProvenanceRecord(data);
-    const eventTypes = record.governanceEvents.map((e) => e.type);
-    expect(eventTypes).toContain("SUPPRESSION_APPLIED");
-    expect(eventTypes).toContain("DELIVERY_SENT");
-    expect(eventTypes).toContain("COUNSEL_ESCALATED");
-    expect(eventTypes).toContain("BOARDROOM_ESCALATED");
-    expect(eventTypes).toContain("OPERATOR_REVIEWED");
+  }
+
+  it("provenance hash is deterministic", () => {
+    const record = hashable();
+    expect(buildDecisionProvenanceHash(record)).toBe(buildDecisionProvenanceHash(record));
+  });
+
+  it("provenance hash changes when governance event changes", () => {
+    const record = hashable();
+    const changed = hashable({
+      governanceEvents: [
+        ...record.governanceEvents,
+        {
+          type: "MEMORY_UPDATED",
+          label: "Memory changed",
+          occurredAt: "2026-05-06T09:00:00.000Z",
+        },
+      ],
+    });
+    expect(buildDecisionProvenanceHash(record)).not.toBe(buildDecisionProvenanceHash(changed));
+  });
+
+  it("provenance hash ignores object key order", () => {
+    const record = hashable();
+    const reordered = {
+      unavailableSources: record.unavailableSources,
+      accountabilityStatement: record.accountabilityStatement,
+      provenanceGaps: record.provenanceGaps,
+      currentPosture: record.currentPosture,
+      timeline: record.timeline,
+      governanceEvents: record.governanceEvents,
+      evidenceInputs: record.evidenceInputs,
+      subjectId: record.subjectId,
+      subjectType: record.subjectType,
+      id: record.id,
+      version: record.version,
+    } as Omit<DecisionProvenanceRecord, "provenanceHash">;
+    expect(buildDecisionProvenanceHash(record)).toBe(buildDecisionProvenanceHash(reordered));
+  });
+});
+
+describe("current posture", () => {
+  it("current posture is BLOCKED when critical gap exists", () => {
+    const posture = deriveCurrentPosture({
+      evidenceInputs: [],
+      governanceEvents: [],
+      provenanceGaps: [{ stage: "Suppression", description: "Missing reason", severity: "CRITICAL" }],
+    });
+    expect(posture.status).toBe("BLOCKED");
+  });
+
+  it("current posture is UNVERIFIED when delivery exists without outcome", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+      decisionRecords: [decision()],
+      deliveries: [delivery()],
+    }));
+    expect(record.currentPosture.status).toBe("UNVERIFIED");
+  });
+
+  it("current posture is COMPLETE when delivery and outcome exist", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+      decisionRecords: [decision()],
+      deliveries: [delivery()],
+      outcomes: [outcome()],
+    }));
+    expect(record.currentPosture.status).toBe("COMPLETE");
+  });
+});
+
+describe("buildAccountabilityStatement", () => {
+  it("returns no evidence statement for empty input", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData());
+    const { accountabilityStatement: _statement, provenanceHash: _hash, ...statementInput } = record;
+    expect(buildAccountabilityStatement(statementInput)).toBe("No evidence inputs have been recorded for this subject.");
   });
 });
