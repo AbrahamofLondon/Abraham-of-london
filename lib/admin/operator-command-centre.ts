@@ -45,6 +45,16 @@ export type OperatorCommandCentreSummary = {
   generatedAt: string;
   headlines: OperatorHeadline[];
   cards: OperatorQueueCard[];
+  actionGroups: OperatorActionGroup[];
+};
+
+export type OperatorActionGroupId = "do-first" | "watch" | "healthy" | "unavailable";
+
+export type OperatorActionGroup = {
+  id: OperatorActionGroupId;
+  title: string;
+  description: string;
+  cards: OperatorQueueCard[];
 };
 
 export type OperatorCommandCentreLoaders = {
@@ -341,6 +351,35 @@ function buildHeadlines(cards: OperatorQueueCard[]): OperatorHeadline[] {
   ];
 }
 
+export function groupOperatorQueueCards(cards: OperatorQueueCard[]): OperatorActionGroup[] {
+  return [
+    {
+      id: "do-first",
+      title: "Do first",
+      description: "Risk-state queues with overdue, failed, critical, or escalation-pressure work.",
+      cards: cards.filter((card) => card.status === "available" && card.priority === "risk"),
+    },
+    {
+      id: "watch",
+      title: "Watch",
+      description: "Connected queues with pending work or warning pressure, but no current risk state.",
+      cards: cards.filter((card) => card.status === "available" && card.priority === "attention"),
+    },
+    {
+      id: "healthy",
+      title: "Healthy",
+      description: "Connected queues with no immediate action indicated by current data.",
+      cards: cards.filter((card) => card.status === "available" && card.priority === "normal"),
+    },
+    {
+      id: "unavailable",
+      title: "Unavailable",
+      description: "Queues whose source could not be loaded. Treat these as unknown, not zero.",
+      cards: cards.filter((card) => card.status === "unavailable"),
+    },
+  ];
+}
+
 export async function buildOperatorCommandCentreSummary(
   loaders: OperatorCommandCentreLoaders = {},
 ): Promise<OperatorCommandCentreSummary> {
@@ -365,5 +404,6 @@ export async function buildOperatorCommandCentreSummary(
     generatedAt: now.toISOString(),
     headlines: buildHeadlines(cards),
     cards,
+    actionGroups: groupOperatorQueueCards(cards),
   };
 }

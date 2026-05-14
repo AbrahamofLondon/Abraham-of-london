@@ -3,6 +3,7 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 
 import AdminLayout from "@/components/admin/AdminLayout";
+import BackToOperatorCommandCentre from "@/components/admin/BackToOperatorCommandCentre";
 import { requireAdminPage } from "@/lib/access/server";
 import type { OversightReviewDecision } from "@/lib/product/oversight-review-decision-contract";
 import type { OversightCycleAudience } from "@/lib/product/oversight-cycle-ledger-contract";
@@ -212,26 +213,31 @@ export default function OversightReviewPage(
       </Head>
 
       <div className="space-y-6">
+        <BackToOperatorCommandCentre />
+
         <section className="border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-6">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-amber-500/60">Oversight Review Bench</p>
           <h1 className="mt-3 font-serif text-3xl text-white">Governed brief review</h1>
           <p className="mt-2 max-w-3xl text-sm text-white/55">
             Review, suppress, archive, compare, hand off to counsel, and prepare controlled client delivery without pretending automation exists where it does not.
           </p>
+          <p className="mt-2 max-w-3xl text-sm text-white/60">
+            Use this page when a retained cycle needs an operator decision before client-safe delivery, counsel handoff, or boardroom escalation.
+          </p>
         </section>
 
         <Panel title="Review Scope">
           <div className="grid gap-4 md:grid-cols-3">
             <label className="block text-sm text-white/70">
-              <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Account / Contract</span>
+              <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Account / Contract</span>
               <input value={accountId} onChange={(e) => setAccountId(e.target.value)} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white" placeholder="Retainer account id" />
             </label>
             <label className="block text-sm text-white/70">
-              <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Organisation</span>
+              <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Organisation</span>
               <input value={organisationId} onChange={(e) => setOrganisationId(e.target.value)} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white" placeholder="Organisation id" />
             </label>
             <label className="block text-sm text-white/70">
-              <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Subject Email</span>
+              <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Subject Email</span>
               <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white" placeholder="client@example.com" />
             </label>
           </div>
@@ -249,7 +255,7 @@ export default function OversightReviewPage(
 
           <div className="mt-5 flex flex-wrap gap-3">
             <button onClick={() => void refreshPreview(false)} disabled={loading} className="border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-200 disabled:opacity-50">
-              {loading ? "Loading..." : "Generate Review Cycle"}
+              {loading ? "Loading..." : "Generate review cycle preview"}
             </button>
           </div>
 
@@ -271,7 +277,7 @@ export default function OversightReviewPage(
 
                 <div className="mt-5 grid gap-4 md:grid-cols-[1fr_1fr]">
                   <label className="block text-sm text-white/70">
-                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Review Decision</span>
+                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Review Decision</span>
                     <select value={operatorDecision} onChange={(e) => setOperatorDecision(e.target.value as OversightReviewDecision | "")} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white">
                       <option value="">Choose decision</option>
                       {DECISION_OPTIONS.map((option) => (
@@ -280,7 +286,7 @@ export default function OversightReviewPage(
                     </select>
                   </label>
                   <label className="block text-sm text-white/70">
-                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Audience Selector</span>
+                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Audience Selector</span>
                     <select value={selectedAudience} onChange={(e) => setSelectedAudience(e.target.value as OversightCycleAudience)} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white">
                       {AUDIENCES.map((audience) => (
                         <option key={audience} value={audience}>{audience}</option>
@@ -290,13 +296,13 @@ export default function OversightReviewPage(
                 </div>
 
                 <label className="mt-4 block text-sm text-white/70">
-                  <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Operator Note</span>
+                  <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Operator Note</span>
                   <textarea value={operatorNote} onChange={(e) => setOperatorNote(e.target.value)} rows={4} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white" placeholder="Required for overrides, escalation, withhold, and first-cycle exceptions." />
                 </label>
 
                 <div className="mt-4 flex flex-wrap gap-3">
-                  <button onClick={() => void refreshPreview(true)} disabled={loading || !operatorDecision || (override && !operatorNote.trim())} className="border border-white/15 bg-white/5 px-4 py-2 text-sm text-white disabled:opacity-50">
-                    Record Review Decision
+                  <button onClick={() => void refreshPreview(true)} disabled={loading || !operatorDecision || (override && !operatorNote.trim())} className="border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-sm text-amber-100 disabled:opacity-50">
+                    Record operator review
                   </button>
                 </div>
 
@@ -319,14 +325,14 @@ export default function OversightReviewPage(
                       <option key={action.value} value={action.value}>{action.label}</option>
                     ))}
                   </select>
-                  <button onClick={() => void runDeliveryAction()} disabled={loading || !deliveryAction} className="border border-white/15 bg-white/5 px-4 py-2 text-sm text-white disabled:opacity-50">
-                    Apply
+                  <button onClick={() => void runDeliveryAction()} disabled={loading || !deliveryAction} className="border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-100 disabled:opacity-50">
+                    Run delivery action
                   </button>
                 </div>
 
                 {preview.nextCycleIntent && (
                   <div className="mt-6 border-t border-white/10 pt-4">
-                    <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Next Cycle Intent</p>
+                    <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Next Cycle Intent</p>
                     <p className="mt-2 text-sm text-white">Cadence: {preview.nextCycleIntent.cadence}</p>
                     <p className="mt-1 text-sm text-white/60">Recommended date: {new Date(preview.nextCycleIntent.nextCycleRecommendedDate).toLocaleDateString("en-GB")}</p>
                     <p className="mt-2 text-sm text-white/45">{preview.nextCycleIntent.reason}</p>
@@ -353,7 +359,7 @@ export default function OversightReviewPage(
                     <div className="mt-4 space-y-3">
                       {safeArray(preview.internalBrief.counselHistory.entries).slice(0, 4).map((item: any) => (
                         <div key={item.id} className="border border-white/10 bg-black/20 p-3">
-                          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">{item.status}</p>
+                          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/45">{item.status}</p>
                           <p className="mt-2 text-sm text-white/75">{item.triggerReason}</p>
                           {item.resultingAction ? <p className="mt-2 text-sm text-white/45">{item.resultingAction}</p> : null}
                         </div>
@@ -390,7 +396,7 @@ export default function OversightReviewPage(
                     <div className="mt-4 space-y-3">
                       {safeArray(preview.internalBrief.organisationDivergence.items).map((item: any) => (
                         <div key={`${item.type}-${item.affectedDomain}`} className="border border-white/10 bg-black/20 p-3">
-                          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">{item.type} · {item.confidence}</p>
+                          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/45">{item.type} · {item.confidence}</p>
                           <p className="mt-2 text-sm text-white/75">{item.sponsorSafeSummary}</p>
                           <p className="mt-2 text-sm text-white/45">{item.recommendedNextAction}</p>
                         </div>
@@ -408,7 +414,7 @@ export default function OversightReviewPage(
                     <DataLine label="Dependency Level" value={preview.internalBrief.indispensability.currentDependencyLevel} />
                     <p className="mt-4 text-sm text-white/75">{preview.internalBrief.indispensability.headline}</p>
                     <div className="mt-4">
-                      <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Preserved Visibility</p>
+                      <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/45">Preserved Visibility</p>
                       <ul className="mt-2 space-y-2 text-sm text-white/60">
                         {(preview.internalBrief.indispensability.preservedVisibility as string[]).map((item) => (
                           <li key={item}>{item}</li>
@@ -416,7 +422,7 @@ export default function OversightReviewPage(
                       </ul>
                     </div>
                     <div className="mt-4">
-                      <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Would Be Lost</p>
+                      <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/45">Would Be Lost</p>
                       <ul className="mt-2 space-y-2 text-sm text-white/60">
                         {(preview.internalBrief.indispensability.wouldLose as string[]).map((item) => (
                           <li key={item}>{item}</li>
@@ -538,19 +544,19 @@ export default function OversightReviewPage(
                     <p className="text-[9px] font-mono uppercase tracking-[0.22em] text-amber-500/50">Source: Retainer Intake &middot; Evidence posture: client-reported</p>
                     {preview.internalBrief.retainerIntake.mandate && (
                       <div>
-                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/35 mb-1">Mandate</p>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/45 mb-1">Mandate</p>
                         <p className="text-sm text-white/70">{preview.internalBrief.retainerIntake.mandate}</p>
                       </div>
                     )}
                     {preview.internalBrief.retainerIntake.refusalBoundary && (
                       <div>
-                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/35 mb-1">Refusal boundary</p>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/45 mb-1">Refusal boundary</p>
                         <p className="text-sm text-white/70">{preview.internalBrief.retainerIntake.refusalBoundary}</p>
                       </div>
                     )}
                     {preview.internalBrief.retainerIntake.clientSafeSummary && preview.internalBrief.retainerIntake.clientSafeSummary.length > 0 && (
                       <div>
-                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/35 mb-1">Client-safe summary</p>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/45 mb-1">Client-safe summary</p>
                         {preview.internalBrief.retainerIntake.clientSafeSummary.map((item: string, i: number) => (
                           <p key={i} className="text-sm text-white/60">{item}</p>
                         ))}
@@ -565,13 +571,13 @@ export default function OversightReviewPage(
                       </div>
                     )}
                     {preview.internalBrief.retainerIntake.capturedAt && (
-                      <p className="text-[8px] font-mono text-white/20">Captured: {new Date(preview.internalBrief.retainerIntake.capturedAt).toLocaleDateString("en-GB")}</p>
+                      <p className="text-[8px] font-mono text-white/45">Captured: {new Date(preview.internalBrief.retainerIntake.capturedAt).toLocaleDateString("en-GB")}</p>
                     )}
                   </div>
                 ) : (
                   <div>
                     <p className="text-sm text-amber-200/50">No retainer intake found.</p>
-                    <p className="text-xs text-white/30 mt-1">Operator should not approve first retained oversight cycle until intake is captured or absence is justified.</p>
+                    <p className="text-xs text-white/55 mt-1">Operator should not approve first retained oversight cycle until intake is captured or absence is justified.</p>
                   </div>
                 )}
               </Panel>
@@ -579,15 +585,15 @@ export default function OversightReviewPage(
               <Panel title="Counsel Handoff">
                 <div className="space-y-4">
                   <label className="block text-sm text-white/70">
-                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Case Id</span>
+                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Case Id</span>
                     <input value={counselCaseId} onChange={(e) => setCounselCaseId(e.target.value)} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white" placeholder="Case id" />
                   </label>
                   <label className="block text-sm text-white/70">
-                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Counsel Reason</span>
+                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Counsel Reason</span>
                     <input value={counselReason} onChange={(e) => setCounselReason(e.target.value)} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white" placeholder="Why counsel is required" />
                   </label>
                   <label className="block text-sm text-white/70">
-                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Review Question</span>
+                    <span className="mb-1 block text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Review Question</span>
                     <textarea value={counselQuestion} onChange={(e) => setCounselQuestion(e.target.value)} rows={3} className="w-full border border-white/10 bg-black/40 px-3 py-2 text-white" placeholder="What must counsel review?" />
                   </label>
                   <button onClick={() => void createCounselWorkflow()} disabled={loading || !counselCaseId || !counselReason} className="border border-white/15 bg-white/5 px-4 py-2 text-sm text-white disabled:opacity-50">

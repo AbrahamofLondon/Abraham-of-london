@@ -14,6 +14,7 @@ import {
 import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 import type {
+  OperatorActionGroup,
   OperatorCommandCentreSummary,
   OperatorMetricTone,
   OperatorQueueCard,
@@ -53,6 +54,21 @@ function priorityBorder(priority: OperatorQueueCard["priority"], status: Operato
   return "border-white/10";
 }
 
+function groupAccent(groupId: OperatorActionGroup["id"]): string {
+  switch (groupId) {
+    case "do-first":
+      return "border-rose-500/20 bg-rose-500/[0.04]";
+    case "watch":
+      return "border-amber-500/20 bg-amber-500/[0.04]";
+    case "healthy":
+      return "border-emerald-500/15 bg-emerald-500/[0.03]";
+    case "unavailable":
+      return "border-white/10 bg-white/[0.02]";
+    default:
+      return "border-white/10 bg-white/[0.02]";
+  }
+}
+
 function MetricValue({ value }: { value: number | null }) {
   return <>{typeof value === "number" ? value : "Unavailable"}</>;
 }
@@ -85,7 +101,9 @@ function QueueCard({ card }: { card: OperatorQueueCard }) {
           <h2 className="mt-2 font-serif text-xl text-white">{card.title}</h2>
           <p className="mt-2 max-w-xl text-sm text-white/50">{card.description}</p>
         </div>
-        {card.priority === "risk" ? (
+        {card.status === "unavailable" ? (
+          <AlertTriangle className="h-5 w-5 shrink-0 text-white/35" />
+        ) : card.priority === "risk" ? (
           <ShieldAlert className="h-5 w-5 shrink-0 text-rose-300/70" />
         ) : card.priority === "attention" ? (
           <AlertTriangle className="h-5 w-5 shrink-0 text-amber-300/70" />
@@ -115,6 +133,34 @@ function QueueCard({ card }: { card: OperatorQueueCard }) {
         Open surface
         <ArrowRight className="h-3 w-3" />
       </Link>
+    </section>
+  );
+}
+
+function QueueGroup({ group }: { group: OperatorActionGroup }) {
+  return (
+    <section className={`border p-5 ${groupAccent(group.id)}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">
+            {group.title}
+          </h2>
+          <p className="mt-1 max-w-3xl text-xs text-white/45">{group.description}</p>
+        </div>
+        <span className="shrink-0 font-mono text-sm text-white/45">{group.cards.length}</span>
+      </div>
+
+      {group.cards.length === 0 ? (
+        <div className="mt-4 border border-dashed border-white/10 bg-black/20 p-4 text-sm text-white/35">
+          No queues in this group.
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+          {group.cards.map((card) => (
+            <QueueCard key={card.id} card={card} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -164,9 +210,9 @@ export default function OperatorCommandCentrePage({
           ))}
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-2">
-          {summary.cards.map((card) => (
-            <QueueCard key={card.id} card={card} />
+        <section className="space-y-4">
+          {summary.actionGroups.map((group) => (
+            <QueueGroup key={group.id} group={group} />
           ))}
         </section>
       </div>

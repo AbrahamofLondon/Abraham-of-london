@@ -3,6 +3,7 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 
 import AdminLayout from "@/components/admin/AdminLayout";
+import BackToOperatorCommandCentre from "@/components/admin/BackToOperatorCommandCentre";
 import { requireAdminPage } from "@/lib/access/server";
 import { prisma } from "@/lib/prisma.server";
 import { buildOperatorCadenceQueue } from "@/lib/product/retained-cadence-service";
@@ -304,6 +305,8 @@ export default function RetainerReadinessPage(
       </Head>
 
       <div className="space-y-6">
+        <BackToOperatorCommandCentre />
+
         <section className="border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-6">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-amber-500/60">Retainer discipline</p>
           <h1 className="mt-3 font-serif text-3xl text-white">Runtime readiness view</h1>

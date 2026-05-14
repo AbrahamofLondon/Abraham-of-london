@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildOperatorCommandCentreSummary } from "@/lib/admin/operator-command-centre";
+import { buildOperatorCommandCentreSummary, groupOperatorQueueCards } from "@/lib/admin/operator-command-centre";
 import type { DeliveryRecord } from "@/lib/product/delivery-audit-contract";
 import type { ReviewQueuePosture } from "@/lib/product/operator-outcome-review";
 import type { SuppressionEvent } from "@/lib/product/suppression-ledger-contract";
@@ -124,6 +124,9 @@ describe("operator command centre summary", () => {
         expect.objectContaining({ label: "Blocked", value: 2 }),
       ]),
     );
+    expect(summary.actionGroups.find((group) => group.id === "do-first")?.cards.map((card) => card.id)).toEqual(
+      expect.arrayContaining(["retained-cadence", "delivery-queue", "outcome-verification"]),
+    );
   });
 
   it("marks failed queue loaders unavailable instead of returning fake zeroes", async () => {
@@ -151,6 +154,7 @@ describe("operator command centre summary", () => {
       ]),
     );
     expect(summary.cards.find((card) => card.id === "outcome-verification")?.status).toBe("available");
+    expect(summary.actionGroups.find((group) => group.id === "unavailable")?.cards.map((card) => card.id)).toContain("delivery-queue");
   });
 
   it("does not expose raw queue records in the page summary contract", async () => {
@@ -164,5 +168,53 @@ describe("operator command centre summary", () => {
     expect(JSON.stringify(summary)).not.toContain("client@example.com");
     expect(JSON.stringify(summary)).not.toContain("respondentText");
     expect(JSON.stringify(summary)).not.toContain("responsesJson");
+  });
+
+  it("groups queues into do first, watch, healthy, and unavailable without inventing state", () => {
+    const cards: Parameters<typeof groupOperatorQueueCards>[0] = [
+      {
+        id: "retained-cadence",
+        title: "Retained cadence",
+        href: "/admin/retained-cadence",
+        description: "Cadence",
+        status: "available",
+        metrics: [],
+        priority: "risk",
+      },
+      {
+        id: "delivery-queue",
+        title: "Delivery queue",
+        href: "/admin/delivery-queue",
+        description: "Delivery",
+        status: "available",
+        metrics: [],
+        priority: "attention",
+      },
+      {
+        id: "retainer-readiness",
+        title: "Retainer readiness",
+        href: "/admin/retainer-readiness",
+        description: "Readiness",
+        status: "available",
+        metrics: [],
+        priority: "normal",
+      },
+      {
+        id: "outcome-verification",
+        title: "Outcome verification",
+        href: "/admin/outcome-verification",
+        description: "Outcome",
+        status: "unavailable",
+        metrics: [],
+        priority: "normal",
+      },
+    ];
+    const groups = groupOperatorQueueCards(cards);
+
+    expect(groups.map((group) => group.id)).toEqual(["do-first", "watch", "healthy", "unavailable"]);
+    expect(groups.find((group) => group.id === "do-first")?.cards.map((card) => card.id)).toEqual(["retained-cadence"]);
+    expect(groups.find((group) => group.id === "watch")?.cards.map((card) => card.id)).toEqual(["delivery-queue"]);
+    expect(groups.find((group) => group.id === "healthy")?.cards.map((card) => card.id)).toEqual(["retainer-readiness"]);
+    expect(groups.find((group) => group.id === "unavailable")?.cards.map((card) => card.id)).toEqual(["outcome-verification"]);
   });
 });

@@ -27,12 +27,22 @@ import {
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
+import type { OperatorCommandCentreSummary, OperatorQueueCard } from "@/lib/admin/operator-command-centre";
 
 export async function getServerSideProps(context: any) {
   const guard = await requireAdminPage(context);
   if (!guard.authorized) return guard.redirect;
-  return { props: { isAuthorized: true } };
+
+  const { buildOperatorCommandCentreSummary } = await import("@/lib/admin/operator-command-centre");
+  const operatorSummary = await buildOperatorCommandCentreSummary();
+
+  return { props: { isAuthorized: true, operatorSummary } };
 }
+
+type PageProps = {
+  isAuthorized: true;
+  operatorSummary: OperatorCommandCentreSummary;
+};
 
 /* ─── Status card ─────────────────────────────────────── */
 function StatusCard({ label, value, sub, color = "text-white" }: {
@@ -80,11 +90,86 @@ function ModuleLink({ href, title, description, icon: Icon, color, bg }: {
   );
 }
 
+function findOperatorCard(summary: OperatorCommandCentreSummary, id: OperatorQueueCard["id"]) {
+  return summary.cards.find((card) => card.id === id) ?? null;
+}
+
+function findMetric(card: OperatorQueueCard | null, label: string): number | null {
+  return card?.metrics.find((item) => item.label === label)?.value ?? null;
+}
+
+function metricText(value: number | null, suffix = "") {
+  return typeof value === "number" ? `${value}${suffix}` : "Unavailable";
+}
+
+function OperatorStartCard({ summary }: { summary: OperatorCommandCentreSummary }) {
+  const doFirst = summary.actionGroups.find((group) => group.id === "do-first")?.cards.length ?? 0;
+  const watch = summary.actionGroups.find((group) => group.id === "watch")?.cards.length ?? 0;
+  const unavailable = summary.actionGroups.find((group) => group.id === "unavailable")?.cards.length ?? 0;
+  const cadence = findOperatorCard(summary, "retained-cadence");
+  const delivery = findOperatorCard(summary, "delivery-queue");
+  const outcome = findOperatorCard(summary, "outcome-verification");
+  const cadenceOverdue = findMetric(cadence, "Overdue");
+  const cadenceDue = findMetric(cadence, "Due this week");
+  const deliveryFailed = findMetric(delivery, "Failed");
+  const deliveryPending = findMetric(delivery, "Pending approval/send");
+  const outcomePending = findMetric(outcome, "Pending");
+  const outcomeOverdue = findMetric(outcome, "Overdue");
+
+  return (
+    <section className="border border-amber-500/20 bg-amber-500/[0.06] p-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <ClipboardCheck className="h-4 w-4 text-amber-400/80" />
+            <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-400/70">
+              Daily operator start
+            </p>
+          </div>
+          <h3 className="mt-3 font-serif text-2xl text-white">Start with Operator Command Centre</h3>
+          <p className="mt-2 max-w-3xl text-sm text-white/55">
+            Use this first for overdue work, cadence pressure, delivery failures, and outcome review posture. The command dashboard remains available for admin and owner-level oversight.
+          </p>
+        </div>
+        <Link
+          href="/admin/operator"
+          className="inline-flex shrink-0 items-center gap-2 border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-amber-100 transition-colors hover:border-amber-400/50 hover:bg-amber-500/15"
+        >
+          Open operator centre
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="border border-white/10 bg-black/25 p-4">
+          <p className="text-[8px] font-mono uppercase tracking-[0.22em] text-white/35">Action items</p>
+          <p className="mt-2 text-xl font-light text-white">{doFirst} do first / {watch} watch</p>
+          <p className="mt-1 text-xs text-white/35">{unavailable > 0 ? `${unavailable} source unavailable` : "All sources connected"}</p>
+        </div>
+        <div className="border border-white/10 bg-black/25 p-4">
+          <p className="text-[8px] font-mono uppercase tracking-[0.22em] text-white/35">Cadence pressure</p>
+          <p className="mt-2 text-xl font-light text-white">{metricText(cadenceOverdue, " overdue")}</p>
+          <p className="mt-1 text-xs text-white/35">Due this week: {metricText(cadenceDue)}</p>
+        </div>
+        <div className="border border-white/10 bg-black/25 p-4">
+          <p className="text-[8px] font-mono uppercase tracking-[0.22em] text-white/35">Delivery / outcome posture</p>
+          <p className="mt-2 text-xl font-light text-white">
+            Failed: {metricText(deliveryFailed)}
+          </p>
+          <p className="mt-1 text-xs text-white/35">
+            Delivery pending: {metricText(deliveryPending)} · Outcome pending: {metricText(outcomePending)} · Outcome overdue: {metricText(outcomeOverdue)}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════ */
 /* PAGE                                                    */
 /* ═══════════════════════════════════════════════════════ */
 
-const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
+const AdminIndexPage: NextPage<PageProps> = ({ operatorSummary }) => {
   const { data: session } = useSession();
   const [stats, setStats] = React.useState<any>(null);
   const [proofStats, setProofStats] = React.useState<any>(null);
@@ -180,6 +265,8 @@ const AdminIndexPage: NextPage<{ isAuthorized: boolean }> = () => {
             ))}
           </div>
         )}
+
+        <OperatorStartCard summary={operatorSummary} />
 
         {/* ── OVERVIEW CARDS ──────────────────────────────── */}
         <div>

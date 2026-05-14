@@ -3,6 +3,7 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 
 import AdminLayout from "@/components/admin/AdminLayout";
+import BackToOperatorCommandCentre from "@/components/admin/BackToOperatorCommandCentre";
 import { requireAdminPage } from "@/lib/access/server";
 import { buildOperatorCadenceQueue } from "@/lib/product/retained-cadence-service";
 import {
@@ -59,18 +60,18 @@ function Row({
             )}
             {(isInProgress || isDueOrOverdue) && (
               <button onClick={() => onAction(item.cycleId!, "MARK_COMPLETED")} disabled={busy} className="border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200 disabled:opacity-50">
-                Complete
+                Complete review
               </button>
             )}
             <button onClick={() => onAction(item.cycleId!, "SKIP_WITH_REASON")} disabled={busy} className="border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs text-amber-100 disabled:opacity-50">
               Skip with reason
             </button>
             <button onClick={() => onAction(item.cycleId!, "ESCALATE")} disabled={busy} className="border border-rose-500/25 bg-rose-500/10 px-3 py-1 text-xs text-rose-200 disabled:opacity-50">
-              Escalate
+              Escalate cycle
             </button>
           </div>
         ) : (
-          <span className="text-white/35">No cycle record yet</span>
+          <span className="text-white/50">No cycle record yet</span>
         )}
       </td>
     </tr>
@@ -143,7 +144,7 @@ const TIMELINE_STATUS_STYLE: Record<RetainedCadenceTimelineItem["status"], strin
   SKIPPED:   "bg-amber-950/40 border border-amber-700/25 text-amber-400",
   UPCOMING:  "bg-blue-950/40 border border-blue-800/25 text-blue-400",
   COMPLETED: "bg-emerald-950/40 border border-emerald-800/25 text-emerald-400",
-  UNKNOWN:   "bg-white/5 border border-white/10 text-white/30",
+  UNKNOWN:   "bg-white/5 border border-white/10 text-white/45",
 };
 
 const TIMELINE_SEVERITY_DOT: Record<RetainedCadenceTimelineItem["severity"], string> = {
@@ -171,7 +172,7 @@ function TimelineItem({ item }: { item: RetainedCadenceTimelineItem }) {
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-white">{item.label}</p>
         {(item.accountId || item.organisationId) && (
-          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-white/25">
+          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-white/45">
             {item.accountId ?? item.organisationId}
           </p>
         )}
@@ -182,10 +183,10 @@ function TimelineItem({ item }: { item: RetainedCadenceTimelineItem }) {
             {new Date(item.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           </p>
         ) : (
-          <p className="text-sm text-white/25">Unscheduled</p>
+          <p className="text-sm text-white/50">Unscheduled</p>
         )}
         {offsetLabel && (
-          <p className={`mt-0.5 font-mono text-[9px] uppercase tracking-wider ${item.daysOffset != null && item.daysOffset < 0 ? "text-red-400" : "text-white/30"}`}>
+          <p className={`mt-0.5 font-mono text-[9px] uppercase tracking-wider ${item.daysOffset != null && item.daysOffset < 0 ? "text-red-400" : "text-white/45"}`}>
             {offsetLabel}
           </p>
         )}
@@ -201,7 +202,7 @@ function TimelineGroupSection({ group }: { group: RetainedCadenceTimelineGroup }
   return (
     <div>
       <div className="mb-2 flex items-center gap-3">
-        <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-white/30">{group.band}</span>
+        <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-white/45">{group.band}</span>
         <span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/40">{group.items.length}</span>
       </div>
       <div className="space-y-1">
@@ -331,11 +332,16 @@ export default function RetainedCadencePage({
       </Head>
 
       <div className="space-y-6">
+        <BackToOperatorCommandCentre />
+
         <section className="border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-6">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-amber-500/60">Retained oversight cadence</p>
           <h1 className="mt-3 font-serif text-3xl text-white">Operator cadence queue</h1>
           <p className="mt-2 max-w-3xl text-sm text-white/55">
             This queue shows due, in-progress, overdue, skipped, escalated, broken, and unconfigured retained review cycles. Actions are operator-only and do not publish internal notes to buyer-facing surfaces.
+          </p>
+          <p className="mt-2 max-w-3xl text-sm text-white/60">
+            Use this page when retained oversight cadence is overdue, unscheduled, or ready to move into review.
           </p>
         </section>
 
@@ -368,23 +374,23 @@ export default function RetainedCadencePage({
             </div>
             <div className="flex shrink-0 gap-4 text-right">
               <div>
-                <p className="text-[9px] font-mono uppercase tracking-wider text-white/25">Overdue</p>
+                <p className="text-[9px] font-mono uppercase tracking-wider text-white/45">Overdue</p>
                 <p className="mt-1 font-mono text-lg text-red-400">{queue.overdue.length}</p>
               </div>
               <div>
-                <p className="text-[9px] font-mono uppercase tracking-wider text-white/25">Due now</p>
+                <p className="text-[9px] font-mono uppercase tracking-wider text-white/45">Due now</p>
                 <p className="mt-1 font-mono text-lg text-orange-400">{queue.due.length}</p>
               </div>
               <div>
-                <p className="text-[9px] font-mono uppercase tracking-wider text-white/25">Total</p>
+                <p className="text-[9px] font-mono uppercase tracking-wider text-white/45">Total</p>
                 <p className="mt-1 font-mono text-lg text-white/60">{queue.all.length}</p>
               </div>
             </div>
           </div>
 
           {timelineGroups.length === 0 ? (
-            <div className="mt-4 border border-white/5 bg-black/25 px-4 py-5 text-sm text-white/30">
-              No retained cadence records found.
+            <div className="mt-4 border border-dashed border-white/10 bg-black/25 px-4 py-5 text-sm text-white/50">
+              No retained cadence records found. Create a review cycle above when a retained account is ready for scheduled oversight.
             </div>
           ) : (
             <div className="mt-5 space-y-5">
@@ -403,11 +409,11 @@ export default function RetainedCadencePage({
             </div>
 
             {items.length === 0 ? (
-              <p className="mt-4 text-sm text-white/45">No records in this state.</p>
+              <p className="mt-4 text-sm text-white/50">No records in this state. Check the timeline above for the next due or overdue cycle.</p>
             ) : (
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full min-w-[1100px] text-left">
-                  <thead className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">
+                  <thead className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/45">
                     <tr>
                       <th className="pb-3 pr-4">Account / Organisation</th>
                       <th className="pb-3 pr-4">Reference</th>

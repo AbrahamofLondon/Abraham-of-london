@@ -9,6 +9,7 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import AdminLayout from "@/components/admin/AdminLayout";
+import BackToOperatorCommandCentre from "@/components/admin/BackToOperatorCommandCentre";
 import { requireAdminPage } from "@/lib/access/server";
 import {
   getPendingOperatorReviews,
@@ -51,8 +52,12 @@ const Page: NextPage<PageProps> = ({ items, total, operatorEmail, queuePosture }
     <AdminLayout>
       <main className="min-h-screen px-6 py-14" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-4xl">
+          <div className="mb-6">
+            <BackToOperatorCommandCentre />
+          </div>
+
           <div className="mb-8">
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
               Admin · Operator Review Queue
             </p>
             <h1 className="mt-2 text-2xl text-white" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 }}>
@@ -62,40 +67,43 @@ const Page: NextPage<PageProps> = ({ items, total, operatorEmail, queuePosture }
               {total} record{total !== 1 ? "s" : ""} pending operator review.
               Reviewing as <span className="text-white/70">{operatorEmail}</span>.
             </p>
+            <p className="mt-2 text-sm text-white/60">
+              Use this page when a disputed, blocked, or insufficient-evidence outcome needs a human review before it can influence institutional memory.
+            </p>
           </div>
 
           {/* ── Queue posture banner ──────────────────────────────── */}
           <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5"
                style={{ border: `1px solid ${SLA_BAND_BORDER[band]}`, background: SLA_BAND_COLOR[band], padding: "1rem 1.25rem" }}>
             <div>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>SLA Band</p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>SLA Band</p>
               <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: SLA_BAND_TEXT[band], fontWeight: 600 }}>{band}</p>
             </div>
             <div>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Pending</p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Pending</p>
               <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: "rgba(255,255,255,0.8)" }}>{queuePosture.pendingCount}</p>
             </div>
             <div>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Critical</p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Critical</p>
               <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: queuePosture.criticalPendingCount > 0 ? "rgb(239,68,68)" : "rgba(255,255,255,0.8)" }}>{queuePosture.criticalPendingCount}</p>
             </div>
             <div>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Overdue</p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Overdue</p>
               <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: queuePosture.overdueReviewCount > 0 ? "rgba(251,191,36,0.9)" : "rgba(255,255,255,0.8)" }}>{queuePosture.overdueReviewCount}</p>
             </div>
             <div>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Oldest (days)</p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Oldest (days)</p>
               <p style={{ ...mono, fontSize: "11px", marginTop: "4px", color: queuePosture.oldestPendingAge > 14 ? "rgba(251,191,36,0.9)" : "rgba(255,255,255,0.8)" }}>{queuePosture.oldestPendingAge}</p>
             </div>
           </div>
 
           {items.length === 0 ? (
             <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "2rem 1.5rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
                 No records pending review
               </p>
-              <p className="mt-2 text-sm text-white/40">
-                All disputed, blocked, and insufficient-evidence verifications have been reviewed.
+              <p className="mt-2 text-sm text-white/55">
+                All disputed, blocked, and insufficient-evidence verifications have been reviewed. Return to the Operator Command Centre to check cadence and delivery pressure.
               </p>
             </div>
           ) : (
@@ -158,7 +166,7 @@ function ReviewCard({ item }: { item: PendingReviewItem }) {
   if (done) {
     return (
       <div style={{ border: `1px solid rgba(110,231,183,0.25)`, background: "rgba(110,231,183,0.03)", padding: "1.1rem" }}>
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(110,231,183,0.60)" }}>
+        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(110,231,183,0.70)" }}>
           Review recorded — {done.reviewId}
         </p>
         <p className="mt-2 text-sm text-white/60">
@@ -181,11 +189,11 @@ function ReviewCard({ item }: { item: PendingReviewItem }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: statusColor }}>
+              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: statusColor }}>
                 {item.status}
               </span>
               {item.sourceSurface && (
-                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.30)" }}>
+                <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.45)" }}>
                   {item.sourceSurface}
                 </span>
               )}
@@ -193,7 +201,7 @@ function ReviewCard({ item }: { item: PendingReviewItem }) {
             <p className="mt-1 text-sm text-white/80">{item.userEmail}</p>
             <p className="mt-0.5 text-xs text-white/40">{item.reviewReason}</p>
           </div>
-          <div style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.28)", textAlign: "right", flexShrink: 0 }}>
+          <div style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.45)", textAlign: "right", flexShrink: 0 }}>
             <div>{new Date(item.createdAt).toLocaleDateString("en-GB")}</div>
             <div className="mt-0.5">{item.outcomeClassification.replace(/_/g, " ")}</div>
           </div>
@@ -214,7 +222,7 @@ function ReviewCard({ item }: { item: PendingReviewItem }) {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
+              <label style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
                 Review outcome
               </label>
               <select
@@ -232,8 +240,8 @@ function ReviewCard({ item }: { item: PendingReviewItem }) {
             </div>
 
             <div>
-              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
-                Operator note <span style={{ color: "rgba(255,255,255,0.20)" }}>(required — min 10 chars)</span>
+              <label style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+                Operator note <span style={{ color: "rgba(255,255,255,0.45)" }}>(required — min 10 chars)</span>
               </label>
               <textarea
                 value={note}
@@ -251,7 +259,7 @@ function ReviewCard({ item }: { item: PendingReviewItem }) {
                 onChange={(e) => setMemoryApproved(e.target.checked)}
                 className="h-3 w-3"
               />
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>
+              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.60)" }}>
                 Approve memory update — this will increment comparison basis maturity for this surface
               </span>
             </label>
@@ -261,7 +269,7 @@ function ReviewCard({ item }: { item: PendingReviewItem }) {
             <button
               type="submit"
               disabled={submitting}
-              style={{ ...mono, border: `1px solid ${GOLD}45`, background: `${GOLD}10`, color: `${GOLD}CC`, padding: "10px 18px", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+              style={{ ...mono, border: `1px solid ${GOLD}45`, background: `${GOLD}10`, color: `${GOLD}CC`, padding: "10px 18px", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
               className="disabled:opacity-60"
             >
               {submitting ? "Recording..." : "Record Operator Review"}
@@ -276,7 +284,7 @@ function ReviewCard({ item }: { item: PendingReviewItem }) {
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start gap-4">
-      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", minWidth: "110px", paddingTop: "2px" }}>
+      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", minWidth: "110px", paddingTop: "2px" }}>
         {label}
       </span>
       <span className="text-xs text-white/60 leading-relaxed">{value}</span>

@@ -3,6 +3,7 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 
 import AdminLayout from "@/components/admin/AdminLayout";
+import BackToOperatorCommandCentre from "@/components/admin/BackToOperatorCommandCentre";
 import { requireAdminPage } from "@/lib/access/server";
 import type { DeliveryRecord } from "@/lib/product/delivery-audit-contract";
 
@@ -96,6 +97,8 @@ export default function DeliveryQueuePage({
         <meta name="robots" content="noindex,nofollow" />
       </Head>
       <div className="space-y-6 text-white">
+        <BackToOperatorCommandCentre />
+
         <section className="border border-white/10 bg-white/5 p-6">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-amber-500/70">
             Oversight Delivery
@@ -103,6 +106,9 @@ export default function DeliveryQueuePage({
           <h1 className="mt-3 font-serif text-3xl">Delivery Queue</h1>
           <p className="mt-2 text-sm text-white/50">
             Manage pending and completed artifact deliveries. Approve before dispatch.
+          </p>
+          <p className="mt-2 max-w-3xl text-sm text-white/60">
+            Use this page when a client-safe artifact needs approval, dispatch, failure review, or PDF inspection before delivery is treated as complete.
           </p>
           <button
             onClick={refresh}
@@ -132,8 +138,9 @@ export default function DeliveryQueuePage({
             <tbody>
               {deliveries.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-4 py-6 text-center text-white/30">
-                    No delivery records found.
+                  <td colSpan={11} className="px-4 py-8 text-center">
+                    <p className="text-sm text-white/55">No delivery records found.</p>
+                    <p className="mt-1 text-xs text-white/40">Return to Report State Dashboard or Operator Command Centre to check whether a report is waiting upstream.</p>
                   </td>
                 </tr>
               )}
@@ -149,27 +156,27 @@ export default function DeliveryQueuePage({
                   <td className="px-4 py-3" style={{ ...mono, fontSize: "10px", color: statusColour(d.status) }}>
                     {d.status}
                   </td>
-                  <td className="px-4 py-3 text-white/50" style={{ ...mono, fontSize: "10px" }}>{d.providerStatus ?? "TRANSPORT_PENDING"}</td>
-                  <td className="px-4 py-3 text-white/50">{d.clientSafe ? "Yes" : "No"}</td>
-                  <td className="px-4 py-3 text-white/40" style={{ ...mono, fontSize: "9px" }}>
+                  <td className="px-4 py-3 text-white/60" style={{ ...mono, fontSize: "10px" }}>{d.providerStatus ?? "TRANSPORT_PENDING"}</td>
+                  <td className="px-4 py-3 text-white/60">{d.clientSafe ? "Yes" : "No"}</td>
+                  <td className="px-4 py-3 text-white/55" style={{ ...mono, fontSize: "9px" }}>
                     {(d as any).institutionalCaseId ? (d as any).institutionalCaseId.slice(0, 8) + "..." : "—"}
                   </td>
                   <td className="px-4 py-3 text-white/50">{d.approvedBy ?? "—"}</td>
-                  <td className="px-4 py-3 text-white/40" style={{ ...mono, fontSize: "10px" }}>
+                  <td className="px-4 py-3 text-white/55" style={{ ...mono, fontSize: "10px" }}>
                     {new Date(d.createdAt).toLocaleDateString("en-GB")}
                   </td>
-                  <td className="px-4 py-3 text-white/40" style={{ ...mono, fontSize: "10px" }}>
+                  <td className="px-4 py-3 text-white/55" style={{ ...mono, fontSize: "10px" }}>
                     {d.deliveredAt ? new Date(d.deliveredAt).toLocaleDateString("en-GB") : "—"}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {(d.status === "QUEUED" || d.status === "TRANSPORT_PENDING") && (
                         <button
                           onClick={() => handleAction(d.id, "approve")}
                           disabled={loading === d.id}
                           className="border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-200 disabled:opacity-40"
                         >
-                          {loading === d.id ? "..." : "Approve"}
+                          {loading === d.id ? "..." : "Approve delivery"}
                         </button>
                       )}
                       {d.clientSafe && (d.status === "APPROVED" || d.status === "TRANSPORT_PENDING") && (
@@ -178,7 +185,7 @@ export default function DeliveryQueuePage({
                           disabled={loading === d.id}
                           className="border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200 disabled:opacity-40"
                         >
-                          {loading === d.id ? "..." : "Send"}
+                          {loading === d.id ? "..." : "Send now"}
                         </button>
                       )}
                       {(d.status === "APPROVED" || d.status === "TRANSPORT_PENDING" || d.status === "FAILED") && (
@@ -187,7 +194,7 @@ export default function DeliveryQueuePage({
                           disabled={loading === d.id}
                           className="border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs text-red-200 disabled:opacity-40"
                         >
-                          {loading === d.id ? "..." : "Mark failed"}
+                          {loading === d.id ? "..." : "Record failure"}
                         </button>
                       )}
                       {d.artifactType === "OVERSIGHT_BRIEF" && (
@@ -219,7 +226,7 @@ export default function DeliveryQueuePage({
                           <input type="hidden" name="email" value={d.recipientEmail} />
                           <button
                             type="submit"
-                            className="border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/50"
+                            className="border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/65"
                           >
                             Download PDF
                           </button>
@@ -243,7 +250,7 @@ export default function DeliveryQueuePage({
                                 URL.revokeObjectURL(url);
                               });
                           }}
-                          className="border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/50"
+                          className="border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/65"
                         >
                           Download PDF
                         </button>
