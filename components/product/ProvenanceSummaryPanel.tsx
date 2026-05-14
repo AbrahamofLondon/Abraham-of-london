@@ -7,6 +7,7 @@ import type {
   ClientSafeGapSeverity,
   ClientSafeTimelineEntry,
 } from "@/lib/product/client-safe-provenance-contract";
+import ProvenanceBadge from "./ProvenanceBadge";
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
@@ -134,6 +135,8 @@ export default function ProvenanceSummaryPanel({
 
   return (
     <div className="space-y-5">
+      <ProvenanceBadge summary={provenance} />
+
       <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.65 }}>
         {model.accountabilityStatement}
       </p>

@@ -17,6 +17,7 @@ import { verifyRetainerAccess } from "@/lib/retainers/retainer-service";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import RetainerCycleMemoryPanel from "@/components/product/RetainerCycleMemoryPanel";
 import ProvenanceSummaryPanel from "@/components/product/ProvenanceSummaryPanel";
+import ProvenanceBadge from "@/components/product/ProvenanceBadge";
 import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
@@ -110,6 +111,9 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 </div>
               </div>
             ) : null}
+            <div className="mt-4">
+              <ProvenanceBadge summary={provenance} />
+            </div>
           </header>
 
           {blockedReason ? (
