@@ -1,7 +1,15 @@
 # Admin Surface Inventory — 2026-05-14
 
-Audit performed by read-first agent. Auth files untouched. No product logic changed.
-Navigation metadata corrections applied to `lib/admin/admin-navigation.ts` only.
+**Pass 1** (original): Read-first audit. Nav metadata corrections applied to `lib/admin/admin-navigation.ts`.
+
+**Pass 2** (2026-05-14 hardening): Navigation Reality Hardening pass. Files changed:
+- `lib/admin/admin-navigation.ts` — status type extended to include `"broken"`, visibility type extended to include `"owner"`, `snapshot` corrected to `rough`, descriptions added to all items, `outcome-verification` added (operator/active), `reporting-executive` now active (page created), `getNavItemsForRole` roleOrder map includes `owner`
+- `app/admin/reporting/executive/page.tsx` — CREATED. Fixes the broken nav href. No longer a 404.
+- `pages/admin/redis.tsx` — admin guard added to `getServerSideProps` via `requireAdminPage` from `@/lib/auth/require-admin-page`
+- `app/api/decision/metadata-audit/route.ts` — auth rationale comment added (public-safe content metadata; no admin guard needed)
+- `components/admin/AdminLayout.tsx` — `broken` and `deprecated` status badges added to nav item rendering; broken/deprecated items now visually dimmed
+- `lib/admin/admin-navigation.test.ts` — CREATED. Nav reality tests added (vitest).
+- `docs/admin/admin-surface-inventory-2026-05-14.md` — this file updated.
 
 ---
 
@@ -113,34 +121,56 @@ Navigation metadata corrections applied to `lib/admin/admin-navigation.ts` only.
 
 ---
 
-## Safe Changes Made to `lib/admin/admin-navigation.ts`
+## Changes Applied — Pass 1
 
 | Change | Detail |
 |--------|--------|
-| `reporting-executive` status: `active` → `broken` | No page.tsx exists at `/app/admin/reporting/executive/`. Description added explaining the gap. |
+| `reporting-executive` status: `active` → `broken` (Pass 1 planned, Pass 2 fixed) | Page.tsx created at `app/admin/reporting/executive/page.tsx`. Nav restored to `active`. |
 | `snapshot` status: `active` → `rough` | Page renders hardcoded mock data. Description added. |
 | `metadata-audit` description added | Notes that API call is to non-admin route `/api/decision/metadata-audit`. |
-| `outcome-verification` added as `internal` item | ACTIVE page at `/admin/outcome-verification` was entirely absent from nav. Registered as `internal` visibility in the "Delivery & Proof" section. |
+| `outcome-verification` added to nav | Registered as `operator`/`active` in "Delivery & Proof" section. |
+
+## Changes Applied — Pass 2 (Hardening)
+
+| File | Change |
+|------|--------|
+| `lib/admin/admin-navigation.ts` | Status type: added `"broken"`. Visibility type: added `"owner"`. `snapshot` → `rough`. All items now have descriptions. `outcome-verification` added as operator/active. `reporting-executive` → active (page created). `getNavItemsForRole` roleOrder includes `owner`. |
+| `app/admin/reporting/executive/page.tsx` | CREATED — governance hub page. Fixes broken nav href. No longer 404s. |
+| `pages/admin/redis.tsx` | Admin guard added: `requireAdminPage(ctx)` from `@/lib/auth/require-admin-page` in `getServerSideProps`. |
+| `app/api/decision/metadata-audit/route.ts` | Auth rationale comment added. Confirmed public-safe: only content asset metadata (no user/session/decision data). |
+| `components/admin/AdminLayout.tsx` | Added `broken` badge (red-tinted) and `deprecated` badge to nav item rendering. Broken/deprecated items now visually dimmed. |
+| `lib/admin/admin-navigation.test.ts` | CREATED — 9 vitest tests for nav reality invariants. |
+
+---
+
+## Guard Status — Confirmed
+
+| Route | Guard | Source | Status |
+|-------|-------|--------|--------|
+| All `app/admin/*` | `requireAdminServer()` in `app/admin/layout.tsx` | `@/lib/auth/requireAdminServer` | CONFIRMED |
+| `/admin/redis` | `requireAdminPage(ctx)` in `getServerSideProps` | `@/lib/auth/require-admin-page` | ADDED (Pass 2) |
+| `/admin/outcome-verification` | `requireAdminPage(ctx)` in `getServerSideProps` | `@/lib/access/server` | CONFIRMED |
+| `/api/decision/metadata-audit` | None — public-safe content metadata only | — | DOCUMENTED |
 
 ---
 
 ## Remaining Recommendations
 
-1. **Create an index page for `/admin/reporting/executive`** or update the nav href to point to `/admin/reports`. The current nav item is a dead link. This is the highest-priority fix.
+1. **DONE** — `/admin/reporting/executive` page.tsx created. Nav no longer a dead link.
 
-2. **Promote `/admin/outcome-verification` to `operator` visibility** once its UX placement is agreed. It is a fully implemented, meaningful operator surface currently invisible in the nav.
+2. **DONE** — `/admin/outcome-verification` added as `operator`/`active` in nav.
 
 3. **Fix `/admin/pdf-status` layout import**: Change `@/components/AdminLayout` to `@/components/admin/AdminLayout` to match the rest of the admin surface.
 
-4. **Add auth guard to `/admin/redis`**: `getServerSideProps` currently returns `{ props: {} }` with no auth check. Should call `requireAdminPage` before returning props.
+4. **DONE** — `/admin/redis` guard added via `requireAdminPage`.
 
-5. **Verify auth on `/api/decision/metadata-audit`**: This route is called from an admin page but sits outside `/api/admin/`. Confirm it has independent auth enforcement.
+5. **DONE** — `/api/decision/metadata-audit` confirmed public-safe; auth rationale documented in source.
 
 6. **Normalise Layout usage**: `/admin/outcome-ledger`, `/admin/enterprise-pipeline`, `/admin/enterprise-foundation`, `/admin/conversion-dashboard` use `@/components/Layout` instead of `AdminLayout`. This causes visual inconsistency — these pages lack the admin sidebar.
 
-7. **Verify `/admin/pdf-dashboard` auth path**: It uses `@/lib/auth/require-admin-page` while the SSOT is `@/lib/access/server#requireAdminPage`. Confirm both resolve to the same auth logic (auth agent should verify).
+7. **Verify `/admin/pdf-dashboard` auth path**: It uses `@/lib/auth/require-admin-page` while many other pages use `@/lib/access/server#requireAdminPage`. Both modules call `canAccessAdmin` from the same checks module — they are functionally equivalent but the import paths differ. Low risk; normalisation is cosmetic.
 
-8. **Wire `/admin/snapshot` to live data**: Currently all data is hardcoded (GLOBAL_DATA, TEAM_SNAPSHOTS). Not usable operationally.
+8. **Wire `/admin/snapshot` to live data**: Currently all data is hardcoded (GLOBAL_DATA, TEAM_SNAPSHOTS). Status corrected to `rough`. Not usable operationally.
 
 9. **`/admin/boardroom-archive` parameter requirement**: The page requires `?organisationId=` query param and shows empty state without it. Consider adding a picker UI or adjusting the nav to surface-link from org dashboards only.
 

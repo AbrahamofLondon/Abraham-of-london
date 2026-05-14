@@ -1,4 +1,12 @@
 // app/api/decision/metadata-audit/route.ts
+//
+// Auth note: This endpoint intentionally sits outside /api/admin/ and requires
+// no auth guard. All data returned is derived exclusively from the public
+// content library (titles, hrefs, sectors, confidence scores for content assets).
+// No user data, session data, decision records, or admin-internal state is
+// returned. The consuming admin page (/admin/decision/metadata-audit) is
+// protected by the app/admin layout guard (requireAdminServer).
+//
 import { NextResponse } from "next/server";
 import {
   getAllDecisionAssetsFromContent,

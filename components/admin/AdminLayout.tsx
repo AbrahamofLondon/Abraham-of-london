@@ -72,7 +72,7 @@ function NavSection({
                 className={`flex items-center gap-2 rounded px-3 py-1.5 text-xs transition-colors ${
                   isActive
                     ? "bg-amber-500/10 text-amber-400"
-                    : item.status === "stub" || item.status === "rough"
+                    : item.status === "stub" || item.status === "rough" || item.status === "broken" || item.status === "deprecated"
                       ? "text-white/20 hover:text-white/40 hover:bg-white/5"
                       : "text-white/45 hover:text-white/80 hover:bg-white/5"
                 }`}
@@ -83,6 +83,12 @@ function NavSection({
                 )}
                 {item.status === "rough" && (
                   <span className="rounded bg-white/5 px-1 py-0.5 text-[7px] font-mono text-white/15">rough</span>
+                )}
+                {item.status === "broken" && (
+                  <span className="rounded bg-red-950/40 px-1 py-0.5 text-[7px] font-mono text-red-500/50">broken</span>
+                )}
+                {item.status === "deprecated" && (
+                  <span className="rounded bg-white/5 px-1 py-0.5 text-[7px] font-mono text-white/10">deprecated</span>
                 )}
               </Link>
             );

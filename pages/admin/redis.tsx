@@ -2,9 +2,12 @@
 import type { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import type { NextPage } from "next";
+import { requireAdminPage } from "@/lib/auth/require-admin-page";
 
-// SSR to avoid prerender failure (module not found during static generation).
-export const getServerSideProps: GetServerSideProps = async () => {
+// SSR: enforces admin auth before rendering.
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const auth = await requireAdminPage(ctx);
+  if (!auth.ok) return { redirect: { ...auth.redirect, permanent: false } };
   return { props: {} };
 };
 
