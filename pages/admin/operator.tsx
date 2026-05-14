@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import AdminLayout from "@/components/admin/AdminLayout";
+import { AdminStatusBadge } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
 import type {
   OperatorActionGroup,
@@ -95,9 +96,10 @@ function QueueCard({ card }: { card: OperatorQueueCard }) {
     <section className={`border ${priorityBorder(card.priority, card.status)} bg-zinc-950/70 p-5`}>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[8px] font-mono uppercase tracking-[0.24em] text-white/35">
-            {card.status === "available" ? "Connected" : "Not yet connected"}
-          </p>
+          <AdminStatusBadge
+            label={card.status === "available" ? "Connected" : "Not connected"}
+            tone={card.status === "available" ? "success" : "muted"}
+          />
           <h2 className="mt-2 font-serif text-xl text-white">{card.title}</h2>
           <p className="mt-2 max-w-xl text-sm text-white/50">{card.description}</p>
         </div>

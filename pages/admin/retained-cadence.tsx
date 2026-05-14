@@ -12,6 +12,7 @@ import {
   type RetainedCadenceTimelineItem,
   type RetainedCadenceTimelineGroup,
 } from "@/lib/admin/retained-cadence-timeline";
+import { AdminStatusBadge, toneForStatus } from "@/components/admin/AdminStatusBadge";
 
 type QueueResponse = Awaited<ReturnType<typeof buildOperatorCadenceQueue>>;
 type Action = "MARK_IN_PROGRESS" | "MARK_COMPLETED" | "SKIP_WITH_REASON" | "ESCALATE";
@@ -137,15 +138,6 @@ function CreateCycleForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
-const TIMELINE_STATUS_STYLE: Record<RetainedCadenceTimelineItem["status"], string> = {
-  OVERDUE:   "bg-red-950/60 border border-red-700/40 text-red-400",
-  DUE:       "bg-orange-950/50 border border-orange-700/35 text-orange-400",
-  ESCALATED: "bg-red-950/50 border border-red-800/30 text-rose-400",
-  SKIPPED:   "bg-amber-950/40 border border-amber-700/25 text-amber-400",
-  UPCOMING:  "bg-blue-950/40 border border-blue-800/25 text-blue-400",
-  COMPLETED: "bg-emerald-950/40 border border-emerald-800/25 text-emerald-400",
-  UNKNOWN:   "bg-white/5 border border-white/10 text-white/45",
-};
 
 const TIMELINE_SEVERITY_DOT: Record<RetainedCadenceTimelineItem["severity"], string> = {
   CRITICAL: "bg-red-500",
@@ -162,7 +154,6 @@ function formatDaysOffset(offset: number | null | undefined): string | null {
 }
 
 function TimelineItem({ item }: { item: RetainedCadenceTimelineItem }) {
-  const statusStyle = TIMELINE_STATUS_STYLE[item.status];
   const dotStyle = TIMELINE_SEVERITY_DOT[item.severity];
   const offsetLabel = formatDaysOffset(item.daysOffset);
 
@@ -191,9 +182,7 @@ function TimelineItem({ item }: { item: RetainedCadenceTimelineItem }) {
           </p>
         )}
       </div>
-      <span className={`shrink-0 rounded px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider ${statusStyle}`}>
-        {item.status}
-      </span>
+      <AdminStatusBadge label={item.status} tone={toneForStatus(item.status)} size="md" />
     </div>
   );
 }

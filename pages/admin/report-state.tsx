@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 
 import AdminLayout from "@/components/admin/AdminLayout";
+import { AdminStatusBadge } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
 import type {
   ReportStateDashboard,
@@ -114,11 +115,7 @@ function SectionCard({ section }: { section: ReportStateSection }) {
             <div className="flex items-center gap-2">
               <h2 className="font-serif text-xl text-white">{section.title}</h2>
               {isUnavailable && (
-                <span
-                  className="rounded border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[8px] font-mono uppercase tracking-wider text-amber-400"
-                >
-                  Unavailable
-                </span>
+                <AdminStatusBadge label="Unavailable" tone="warning" />
               )}
             </div>
             <p className="mt-1 max-w-2xl text-sm text-white/50">{section.description}</p>

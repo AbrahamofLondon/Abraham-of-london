@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 
 import AdminLayout from "@/components/admin/AdminLayout";
+import { AdminStatusBadge, toneForStatus } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
 import {
   PRODUCT_SURFACE_REGISTRY,
@@ -89,13 +90,6 @@ const STATUS_LABELS: Record<ProductSurfaceStatus, string> = {
   deprecated: "Deprecated",
 };
 
-const STATUS_COLORS: Record<ProductSurfaceStatus, string> = {
-  live: "text-emerald-300 border-emerald-500/20 bg-emerald-500/10",
-  rough: "text-amber-300 border-amber-500/20 bg-amber-500/10",
-  internal: "text-blue-300 border-blue-500/20 bg-blue-500/10",
-  experimental: "text-purple-300 border-purple-500/20 bg-purple-500/10",
-  deprecated: "text-white/40 border-white/10 bg-white/5",
-};
 
 const PRIORITY_COLORS: Record<ProductSurfaceMonitoringPriority, string> = {
   low: "text-white/40",
@@ -121,11 +115,10 @@ function SurfaceCard({ surface }: { surface: AdminProductSurface }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="font-serif text-base text-white">{surface.label}</h3>
-            <span
-              className={`rounded border px-2 py-0.5 text-[8px] font-mono uppercase tracking-wider ${STATUS_COLORS[surface.status]}`}
-            >
-              {STATUS_LABELS[surface.status]}
-            </span>
+            <AdminStatusBadge
+              label={STATUS_LABELS[surface.status]}
+              tone={toneForStatus(surface.status)}
+            />
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-white/55 line-clamp-2">
             {surface.description}

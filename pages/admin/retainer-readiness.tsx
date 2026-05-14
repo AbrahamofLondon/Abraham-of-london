@@ -18,6 +18,12 @@ import {
   buildRetainerReadinessRemediation,
   type RetainerReadinessRemediation,
 } from "@/lib/admin/retainer-readiness-remediation";
+import {
+  AdminStatusBadge,
+  toneForSeverity,
+  toneForStatus,
+  normaliseAdminStatusLabel,
+} from "@/components/admin/AdminStatusBadge";
 import { buildSponsorSafeCommandSummary } from "@/lib/product/sponsor-safe-command-summary";
 import { buildPortfolioMemory } from "@/lib/product/portfolio-memory-surface";
 import { resolvePortfolioScopes } from "@/lib/product/portfolio-scope-resolver";
@@ -230,33 +236,21 @@ export const getServerSideProps: GetServerSideProps<{
 
 const AREA_SCORECARD = classifyRetainerReadinessAreas();
 
-const SEVERITY_STYLE: Record<RetainerReadinessRemediation["severity"], { badge: string; label: string }> = {
-  CRITICAL: { badge: "bg-red-950/60 border border-red-700/40 text-red-400", label: "Critical" },
-  HIGH:     { badge: "bg-orange-950/60 border border-orange-700/40 text-orange-400", label: "High" },
-  MEDIUM:   { badge: "bg-amber-950/50 border border-amber-700/30 text-amber-400", label: "Medium" },
-  LOW:      { badge: "bg-white/5 border border-white/10 text-white/40", label: "Low" },
-};
-
-const STATUS_STYLE: Record<RetainerReadinessRemediation["status"], string> = {
-  FAIL:        "text-red-400",
-  WATCH:       "text-amber-400",
-  PASS:        "text-emerald-400",
-  UNAVAILABLE: "text-white/30",
-};
-
 function RemediationRow({ item }: { item: RetainerReadinessRemediation }) {
-  const sev = SEVERITY_STYLE[item.severity];
   return (
     <div className="border border-white/8 bg-zinc-900/60 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className={`rounded px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider ${sev.badge}`}>
-            {sev.label}
-          </span>
+          <AdminStatusBadge
+            label={normaliseAdminStatusLabel(item.severity)}
+            tone={toneForSeverity(item.severity)}
+            size="md"
+          />
           <span className="text-sm font-medium text-white">{item.dimension}</span>
-          <span className={`font-mono text-[9px] uppercase tracking-wider ${STATUS_STYLE[item.status]}`}>
-            {item.status}
-          </span>
+          <AdminStatusBadge
+            label={normaliseAdminStatusLabel(item.status)}
+            tone={toneForStatus(item.status)}
+          />
         </div>
         <span className="text-[9px] font-mono uppercase tracking-wider text-white/25">
           Owner: {item.owner}
