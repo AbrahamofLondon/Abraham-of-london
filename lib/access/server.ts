@@ -4,7 +4,7 @@ import type { Session } from "next-auth";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma.server";
-import { canAccessArtifact, canAccessProduct, canAccessTier } from "./checks";
+import { canAccessAdmin, canAccessArtifact, canAccessProduct, canAccessTier } from "./checks";
 import { getUserAccess } from "./get-user-access";
 import type { AccessTier, EffectiveAccess } from "./types";
 
@@ -47,7 +47,7 @@ export async function requireAdminApi(
   const resolved = await requireAuthenticatedApi(req, res);
   if (!resolved) return null;
 
-  if (!resolved.access.permissions.isAdmin) {
+  if (!canAccessAdmin(resolved.access)) {
     res.status(403).json({ ok: false, error: "Administrative access required" });
     return null;
   }
@@ -145,9 +145,7 @@ export async function requireAdminPage<T = Record<string, never>>(
     };
   }
 
-  // Enforce canonical admin authority: email + role, not role alone
-  const { isAdminEmail } = require("@/lib/auth/admin-authority");
-  if (!access.permissions.isAdmin || !isAdminEmail(session?.user?.email)) {
+  if (!canAccessAdmin(access)) {
     return {
       authorized: false,
       redirect: {

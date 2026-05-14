@@ -1,7 +1,7 @@
 import type { EntitlementStatus, EntitlementType, PrismaClient, UserRole } from "@prisma/client";
 import type { AccessTier, EffectiveAccess } from "./types";
 import { maxTier, normalizeTier } from "./tier";
-import { BOOTSTRAP_ADMIN_EMAILS } from "./admin-emails";
+import { isBootstrapAdminEmail, normalizeAdminEmail } from "./admin-emails";
 
 type MinimalPrisma = Pick<PrismaClient, "user" | "entitlement">;
 
@@ -115,11 +115,10 @@ export async function getUserAccess(
 
   // Hard override: bootstrap admin emails always get admin access
   // regardless of database role state (prevents lockout from role sync issues)
-  const emailOverride = user.email
-    ? BOOTSTRAP_ADMIN_EMAILS.has(user.email)
-    : false;
+  const normalizedEmail = normalizeAdminEmail(user.email);
+  const emailOverride = isBootstrapAdminEmail(normalizedEmail);
   const effectiveAdmin = adminRole || ownerRole || emailOverride;
-  const effectiveOwner = ownerRole || (emailOverride && user.email === "info@abrahamoflondon.org");
+  const effectiveOwner = ownerRole || (emailOverride && normalizedEmail === "info@abrahamoflondon.org");
 
   return {
     userId: user.id,

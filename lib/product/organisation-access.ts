@@ -11,6 +11,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
+import { isAdminEmail } from "@/lib/access/admin-emails";
 import {
   type OrganisationAccessDecision,
   type OrganisationAccessRole,
@@ -18,20 +19,6 @@ import {
   ROLE_SCOPES,
   ROLE_PRIVACY,
 } from "@/lib/product/organisation-access-contract";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ADMIN EMAIL CHECK
-// ─────────────────────────────────────────────────────────────────────────────
-
-const ADMIN_EMAILS = (process.env.BOOTSTRAP_ADMIN_EMAILS || "")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
-
-function isAdminEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROLE DERIVATION

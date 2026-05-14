@@ -1,7 +1,10 @@
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/config";
-import { isAuthorizedAdminSession, isAdminEmail, extractSessionRole } from "@/lib/auth/admin-authority";
+import { prisma } from "@/lib/prisma.server";
+import { canAccessAdmin } from "@/lib/access/checks";
+import { getUserAccess } from "@/lib/access/get-user-access";
+import { isAdminEmail, extractSessionRole } from "@/lib/auth/admin-authority";
 
 export type RequireAdminPageResult =
   | { ok: true; session: Awaited<ReturnType<typeof getServerSession>>; adminEmail: string }
@@ -20,7 +23,8 @@ export async function requireAdminPage(ctx: GetServerSidePropsContext): Promise<
     return { ok: false, redirect: { destination: `/admin/login?returnTo=${encodeReturnTo(ctx)}`, permanent: false } };
   }
 
-  if (!isAuthorizedAdminSession(session)) {
+  const access = await getUserAccess(prisma, (session.user as any)?.id ?? null);
+  if (!canAccessAdmin(access)) {
     return { ok: false, redirect: { destination: "/auth/access-denied", permanent: false } };
   }
 

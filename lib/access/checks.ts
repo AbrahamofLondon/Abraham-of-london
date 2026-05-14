@@ -8,6 +8,10 @@ export function canAccessTier(
   return hasTier(access.tier, required);
 }
 
+export function canAccessAdmin(access: EffectiveAccess): boolean {
+  return access.permissions.isAdmin;
+}
+
 export function canAccessProduct(
   access: EffectiveAccess,
   key: string,

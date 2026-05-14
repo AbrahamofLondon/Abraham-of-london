@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma.server";
+import { canAccessAdmin } from "./checks";
 import { getUserAccess } from "./get-user-access";
 import type { EffectiveAccess } from "./types";
 
@@ -30,7 +31,7 @@ export async function requireAdminAppRoute(): Promise<AdminResolution> {
     };
   }
 
-  if (!access.permissions.isAdmin) {
+  if (!canAccessAdmin(access)) {
     return {
       authorized: false,
       response: NextResponse.json(

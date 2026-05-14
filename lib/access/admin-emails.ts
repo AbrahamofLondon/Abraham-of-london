@@ -15,3 +15,22 @@ export const BOOTSTRAP_ADMIN_EMAILS = new Set([
   "seunadaramola@gmail.com",
   "abrahamadaramola@outlook.com",
 ]);
+
+export function normalizeAdminEmail(email: unknown): string {
+  return typeof email === "string" ? email.trim().toLowerCase() : "";
+}
+
+export function getBootstrapAdminEmails(): readonly string[] {
+  return Array.from(BOOTSTRAP_ADMIN_EMAILS);
+}
+
+export function isBootstrapAdminEmail(email: unknown): boolean {
+  const normalized = normalizeAdminEmail(email);
+  return Boolean(normalized) && BOOTSTRAP_ADMIN_EMAILS.has(normalized);
+}
+
+export const ADMIN_EMAILS = getBootstrapAdminEmails();
+
+export function isAdminEmail(email: unknown): boolean {
+  return isBootstrapAdminEmail(email);
+}

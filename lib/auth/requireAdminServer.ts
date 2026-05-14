@@ -4,7 +4,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import type { Session } from "next-auth";
 
 import { authOptions } from "@/lib/auth/config";
-import { isAuthorizedAdminSession } from "@/lib/auth/admin-authority";
+import { prisma } from "@/lib/prisma.server";
+import { canAccessAdmin } from "@/lib/access/checks";
+import { getUserAccess } from "@/lib/access/get-user-access";
 import { writeSecurityAudit } from "@/lib/security/audit-log";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
@@ -82,7 +84,8 @@ export async function requireAdminServer(
       return null;
     }
 
-    if (!isAuthorizedAdminSession(session)) {
+    const access = await getUserAccess(prisma, (session.user as any)?.id ?? null);
+    if (!canAccessAdmin(access)) {
       await writeSecurityAudit({
         action: "forbidden_object_access",
         severity: "warn",
@@ -131,7 +134,8 @@ export async function requireAdminServer(
     redirect("/admin/login");
   }
 
-  if (!isAuthorizedAdminSession(session)) {
+  const access = await getUserAccess(prisma, (session.user as any)?.id ?? null);
+  if (!canAccessAdmin(access)) {
     redirect("/auth/access-denied");
   }
 

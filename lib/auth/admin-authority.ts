@@ -1,32 +1,26 @@
 /**
- * Admin Authority — canonical admin identity enforcement.
+ * Admin Authority — session/edge admin identity helpers.
  *
- * SINGLE SOURCE OF TRUTH for all admin access control.
- * Used by: proxy, middleware, server guards, client nav, API routes.
- *
- * Access requires BOTH:
- * 1. Email in ADMIN_EMAILS
- * 2. Role is admin/owner/root
+ * The canonical bootstrap email source lives in lib/access/admin-emails.
+ * Runtime page/API guards should prefer getUserAccess().permissions.isAdmin.
  */
 
 import type { Session } from "next-auth";
+import {
+  ADMIN_EMAILS,
+  isAdminEmail,
+  isBootstrapAdminEmail,
+  normalizeAdminEmail,
+} from "@/lib/access/admin-emails";
 
-export const ADMIN_EMAILS = [
-  "info@abrahamoflondon.org",
-  "seunadaramola@gmail.com",
-  "abrahamadaramola@outlook.com",
-] as const;
+export {
+  ADMIN_EMAILS,
+  isAdminEmail,
+  isBootstrapAdminEmail,
+  normalizeAdminEmail,
+};
 
 export type AdminRole = "owner" | "admin" | "root";
-
-export function normalizeAdminEmail(email: unknown): string {
-  return typeof email === "string" ? email.trim().toLowerCase() : "";
-}
-
-export function isAdminEmail(email: unknown): boolean {
-  const normalized = normalizeAdminEmail(email);
-  return (ADMIN_EMAILS as readonly string[]).includes(normalized);
-}
 
 export function normalizeAdminRole(role: unknown): string {
   return typeof role === "string" ? role.trim().toLowerCase() : "";
@@ -50,10 +44,15 @@ export function isAuthorizedAdminSubject(subject: {
   email?: unknown;
   role?: unknown;
 }): boolean {
-  return isAdminEmail(subject.email) && isAdminRole(subject.role);
+  return isAdminRole(subject.role) || isBootstrapAdminEmail(subject.email);
 }
 
 export function isAuthorizedAdminSession(session: Session | null | undefined): boolean {
+  const accessAdmin = (session?.user as any)?.access?.permissions?.isAdmin;
+  if (typeof accessAdmin === "boolean") {
+    return accessAdmin;
+  }
+
   return isAuthorizedAdminSubject({
     email: session?.user?.email,
     role: extractSessionRole(session),
