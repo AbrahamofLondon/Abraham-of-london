@@ -13,6 +13,7 @@ import type {
   AdminUser,
 } from "@/types/pdf-dashboard";
 
+import AdminLayout from "@/components/admin/AdminLayout";
 import DashboardHeader from "@/components/DashboardHeader";
 import PDFViewerPanel from "@/components/PDFViewerPanel";
 import StatusMessage from "@/components/StatusMessage";
@@ -217,16 +218,19 @@ const PDFDashboardPage: NextPage<PDFDashboardProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <LoadingSpinner message="Decrypting Vault Contents..." />
-      </div>
+      <AdminLayout title="PDF Analytics">
+        <div className="flex min-h-[480px] items-center justify-center bg-black">
+          <LoadingSpinner message="Decrypting Vault Contents..." />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <ErrorBoundary fallback={<DashboardError onRetry={refreshPDFList} />}>
-      <div className="min-h-screen bg-zinc-950 text-white">
-        <div className="mx-auto max-w-[1600px] p-6 md:p-10">
+    <AdminLayout title="PDF Analytics">
+      <ErrorBoundary fallback={<DashboardError onRetry={refreshPDFList} />}>
+        <div className="min-h-screen bg-zinc-950 text-white">
+          <div className="mx-auto max-w-[1600px] p-6 md:p-10">
           <DashboardHeader
             title="Intelligence Registry"
             subtitle="Restricted portfolio oversight and archival command"
@@ -426,9 +430,10 @@ const PDFDashboardPage: NextPage<PDFDashboardProps> = ({
               onPDFSelect={handleSelectPDF}
             />
           </div>
+          </div>
         </div>
-      </div>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </AdminLayout>
   );
 };
 
