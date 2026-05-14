@@ -68,7 +68,7 @@ export function CampaignActions({
       <button 
         onClick={handleNudge}
         disabled={!!loading}
-        className="px-6 py-2.5 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#8A6A2F] disabled:opacity-50 transition-all flex items-center gap-2 border border-black shadow-sm active:scale-95 group"
+        className="px-6 py-2.5 border border-white/10 bg-white/5 text-white/75 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white disabled:opacity-50 transition-all flex items-center gap-2 active:scale-95 group"
       >
         {loading === 'nudge' ? (
           <Loader2 className="w-3 h-3 animate-spin" />
@@ -87,7 +87,7 @@ export function CampaignActions({
       className={`w-full py-4 border text-[10px] font-black uppercase tracking-[0.2em] transition-all flex justify-center items-center gap-3
         ${disabled 
           ? 'border-white/10 text-white/20 cursor-not-allowed bg-transparent' 
-          : 'border-[#8A6A2F] text-[#8A6A2F] hover:bg-[#8A6A2F] hover:text-white bg-white/5 shadow-inner'
+          : 'border-amber-500/30 text-amber-300 hover:bg-amber-500/10 hover:text-amber-200 bg-white/5'
         }
       `}
     >

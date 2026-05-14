@@ -118,37 +118,37 @@ export function AuditInvite({ campaignId, organisationId }: AuditInviteProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-6 py-2.5 border border-neutral-200 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-neutral-50 transition-all flex items-center gap-2 shadow-sm active:scale-95"
+        className="px-6 py-2.5 border border-white/10 bg-white/5 text-white/75 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all flex items-center gap-2 active:scale-95"
       >
         <UserPlus className="w-3.5 h-3.5" />
         Invite Node
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-end bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-md h-full bg-white shadow-2xl p-10 flex flex-col animate-in slide-in-from-right duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-end bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md h-full border-l border-white/10 bg-zinc-950 p-10 flex flex-col animate-in slide-in-from-right duration-300">
             <div className="flex justify-between items-start mb-12">
               <div>
-                <span className="text-[10px] font-black text-[#8A6A2F] uppercase tracking-[0.3em] block mb-2">Protocol Expansion</span>
-                <h2 className="text-3xl font-black uppercase tracking-tighter">
+                <span className="text-[10px] font-black text-amber-500/70 uppercase tracking-[0.3em] block mb-2">Protocol Expansion</span>
+                <h2 className="text-3xl font-black uppercase tracking-tighter text-white">
                   {batchMode ? 'Batch Integration' : 'Add Participant'}
                 </h2>
               </div>
-              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
-                <X className="w-5 h-5 text-neutral-400" />
+              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 transition-colors">
+                <X className="w-5 h-5 text-white/45" />
               </button>
             </div>
 
-            <div className="flex gap-2 mb-10 border-b border-neutral-100 pb-4">
+            <div className="flex gap-2 mb-10 border-b border-white/10 pb-4">
               <button 
                 onClick={() => setBatchMode(false)}
-                className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 ${!batchMode ? 'bg-black text-white' : 'text-neutral-400'}`}
+                className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 ${!batchMode ? 'bg-white text-black' : 'text-white/45 hover:text-white/70'}`}
               >
                 Individual
               </button>
               <button 
                 onClick={() => setBatchMode(true)}
-                className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 ${batchMode ? 'bg-black text-white' : 'text-neutral-400'}`}
+                className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 ${batchMode ? 'bg-white text-black' : 'text-white/45 hover:text-white/70'}`}
               >
                 CSV Batch
               </button>
@@ -156,10 +156,10 @@ export function AuditInvite({ campaignId, organisationId }: AuditInviteProps) {
 
             {batchMode ? (
               <div className="flex-1 flex flex-col">
-                <div className="flex-1 flex flex-col justify-center items-center border-2 border-dashed border-neutral-100 p-10 text-center mb-6">
-                  <FileUp className="w-12 h-12 text-neutral-200 mb-4" />
-                  <h3 className="text-sm font-black uppercase tracking-tight mb-2">Upload Roster</h3>
-                  <p className="text-[10px] text-neutral-400 uppercase leading-relaxed mb-8 max-w-[200px]">
+                <div className="flex-1 flex flex-col justify-center items-center border border-dashed border-white/10 bg-white/[0.03] p-10 text-center mb-6">
+                  <FileUp className="w-12 h-12 text-white/30 mb-4" />
+                  <h3 className="text-sm font-black uppercase tracking-tight text-white mb-2">Upload Roster</h3>
+                  <p className="text-[10px] text-white/45 uppercase leading-relaxed mb-8 max-w-[200px]">
                     Format: name,email,team,isExecutive
                   </p>
                   
@@ -174,7 +174,7 @@ export function AuditInvite({ campaignId, organisationId }: AuditInviteProps) {
                   <button
                     disabled={loading}
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full py-4 bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#8A6A2F] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                    className="w-full py-4 bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all disabled:opacity-50 flex justify-center items-center gap-2"
                   >
                     {loading ? (
                       <>
@@ -187,7 +187,7 @@ export function AuditInvite({ campaignId, organisationId }: AuditInviteProps) {
 
                 <button 
                   onClick={downloadTemplate}
-                  className="w-full py-3 border border-neutral-200 text-neutral-400 text-[9px] font-black uppercase tracking-widest hover:bg-neutral-50 flex items-center justify-center gap-2 transition-colors"
+                  className="w-full py-3 border border-white/10 bg-white/5 text-white/55 text-[9px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-white/75 flex items-center justify-center gap-2 transition-colors"
                 >
                   <Download className="w-3 h-3" />
                   Download Template
@@ -196,32 +196,32 @@ export function AuditInvite({ campaignId, organisationId }: AuditInviteProps) {
             ) : (
               <div className="flex-1 space-y-6">
                 <div>
-                  <label className="block text-[9px] font-black uppercase tracking-widest text-neutral-500 mb-2">Full Name</label>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-white/55 mb-2">Full Name</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full border border-neutral-200 p-3 text-sm focus:outline-none focus:border-black"
+                    className="w-full border border-white/10 bg-black/30 p-3 text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-amber-500/40"
                     placeholder="Alexander Hamilton"
                   />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black uppercase tracking-widest text-neutral-500 mb-2">Email Address</label>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-white/55 mb-2">Email Address</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full border border-neutral-200 p-3 text-sm focus:outline-none focus:border-black"
+                    className="w-full border border-white/10 bg-black/30 p-3 text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-amber-500/40"
                     placeholder="hamilton@treasury.gov"
                   />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black uppercase tracking-widest text-neutral-500 mb-2">Team</label>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-white/55 mb-2">Team</label>
                   <input
                     type="text"
                     value={formData.team}
                     onChange={(e) => setFormData({ ...formData, team: e.target.value })}
-                    className="w-full border border-neutral-200 p-3 text-sm focus:outline-none focus:border-black"
+                    className="w-full border border-white/10 bg-black/30 p-3 text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-amber-500/40"
                     placeholder="Finance"
                   />
                 </div>
@@ -230,9 +230,9 @@ export function AuditInvite({ campaignId, organisationId }: AuditInviteProps) {
                     type="checkbox"
                     checked={formData.isExecutive}
                     onChange={(e) => setFormData({ ...formData, isExecutive: e.target.checked })}
-                    className="w-4 h-4 accent-black"
+                    className="w-4 h-4 accent-amber-500"
                   />
-                  <label className="text-[9px] font-black uppercase tracking-widest text-neutral-500">Executive Leadership</label>
+                  <label className="text-[9px] font-black uppercase tracking-widest text-white/55">Executive Leadership</label>
                 </div>
                 
                 <button
@@ -253,7 +253,7 @@ export function AuditInvite({ campaignId, organisationId }: AuditInviteProps) {
                     }
                   }}
                   disabled={loading}
-                  className="w-full py-4 bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#8A6A2F] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                  className="w-full py-4 bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all disabled:opacity-50 flex justify-center items-center gap-2"
                 >
                   {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShieldCheck className="w-3 h-3" />}
                   {loading ? "Sending..." : "Send Invitation"}
@@ -261,7 +261,7 @@ export function AuditInvite({ campaignId, organisationId }: AuditInviteProps) {
               </div>
             )}
             
-            <p className="mt-8 text-[9px] text-neutral-400 uppercase leading-relaxed tracking-widest italic border-t border-neutral-50 pt-8">
+            <p className="mt-8 text-[9px] text-white/45 uppercase leading-relaxed tracking-widest italic border-t border-white/10 pt-8">
               Authorized expansion will trigger automated resonance requests.
             </p>
           </div>

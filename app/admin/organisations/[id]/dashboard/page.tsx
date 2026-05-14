@@ -67,18 +67,18 @@ function EmptyState({
   cta: string;
 }) {
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-8">
-      <div className="w-full max-w-xl rounded-3xl border border-neutral-200 bg-white p-10 shadow-sm text-center">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100">
-          <AlertTriangle className="h-7 w-7 text-neutral-500" />
+    <div className="flex items-center justify-center p-8">
+      <div className="w-full max-w-xl border border-white/10 bg-zinc-950/70 p-10 text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
+          <AlertTriangle className="h-7 w-7 text-white/40" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+        <h1 className="font-serif text-2xl tracking-tight text-white/80">
           {title}
         </h1>
-        <p className="mt-3 text-sm leading-7 text-neutral-600">{message}</p>
+        <p className="mt-3 text-sm leading-7 text-white/55">{message}</p>
         <Link
           href={href}
-          className="mt-8 inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-black"
+          className="mt-8 inline-flex items-center gap-2 border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
         >
           {cta}
           <ArrowRight className="h-4 w-4" />
@@ -352,14 +352,14 @@ export default async function OrganisationDashboardPage({
 
           <div className="px-8 py-8">
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50">
-                <Shield className="h-5 w-5 text-[#8A6A2F]" />
+              <div className="flex h-10 w-10 items-center justify-center border border-amber-500/20 bg-amber-500/10">
+                <Shield className="h-5 w-5 text-amber-400/70" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold tracking-tight text-neutral-900">
+                <h2 className="font-serif text-xl tracking-tight text-white">
                   OGR Interactive View
                 </h2>
-                <p className="mt-1 text-sm text-neutral-600">
+                <p className="mt-1 text-sm text-white/60">
                   Live organisational posture, campaign health, response patterning,
                   and intervention indicator.
                 </p>
@@ -370,20 +370,20 @@ export default async function OrganisationDashboardPage({
           </div>
         </div>
 
-        <div className="mt-10 rounded-[28px] border border-neutral-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-neutral-200 px-8 py-6">
+        <div className="mt-10 border border-white/10 bg-zinc-950/70">
+          <div className="flex items-center justify-between border-b border-white/10 bg-black/30 px-8 py-6">
             <div>
-              <h3 className="text-xl font-semibold tracking-tight text-neutral-900">
+              <h3 className="font-serif text-xl tracking-tight text-white">
                 Campaign Registry
               </h3>
-              <p className="mt-1 text-sm text-neutral-600">
+              <p className="mt-1 text-sm text-white/60">
                 Latest campaign nodes linked to this organisation.
               </p>
             </div>
 
             <Link
               href={`/admin/organisations/${organisation.id}`}
-              className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 px-4 py-2 text-sm text-neutral-700 transition hover:bg-neutral-50"
+              className="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/65 transition hover:bg-white/10 hover:text-white"
             >
               Open Organisation Profile
               <ArrowRight className="h-4 w-4" />
@@ -392,12 +392,12 @@ export default async function OrganisationDashboardPage({
 
           <div className="px-8 py-6">
             {ogrData.campaigns.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 px-6 py-10 text-center">
-                <Target className="mx-auto h-8 w-8 text-neutral-400" />
-                <p className="mt-4 text-sm font-medium text-neutral-700">
+              <div className="border border-dashed border-white/10 bg-white/[0.03] px-6 py-10 text-center">
+                <Target className="mx-auto h-8 w-8 text-white/35" />
+                <p className="mt-4 text-sm font-medium text-white/70">
                   No campaigns found for this organisation.
                 </p>
-                <p className="mt-2 text-sm text-neutral-500">
+                <p className="mt-2 text-sm text-white/50">
                   Once campaign nodes are created, they will appear here.
                 </p>
               </div>
@@ -407,36 +407,36 @@ export default async function OrganisationDashboardPage({
                   <Link
                     key={campaign.id}
                     href={`/admin/campaigns/${campaign.id}`}
-                    className="group rounded-2xl border border-neutral-200 bg-white px-5 py-5 transition hover:border-neutral-300 hover:bg-neutral-50"
+                    className="group border border-white/10 bg-zinc-950/70 px-5 py-5 transition hover:border-white/20 hover:bg-white/[0.05]"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                       <div className="min-w-0">
-                        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-amber-500/70">
                           Campaign Node
                         </div>
-                        <h4 className="mt-2 truncate text-lg font-semibold tracking-tight text-neutral-900 group-hover:text-black">
+                        <h4 className="mt-2 truncate text-lg font-semibold tracking-tight text-white group-hover:text-white">
                           {campaign.title}
                         </h4>
-                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-neutral-500">
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-white/50">
                           <span>Status: {campaign.status}</span>
-                          <span className="text-neutral-300">•</span>
+                          <span className="text-white/20">•</span>
                           <span>Participants: {campaign.participantCount}</span>
-                          <span className="text-neutral-300">•</span>
+                          <span className="text-white/20">•</span>
                           <span>Completed: {campaign.completedCount}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <div className="rounded-xl bg-neutral-100 px-3 py-2 text-right">
-                          <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-neutral-500">
+                        <div className="border border-white/10 bg-white/[0.04] px-3 py-2 text-right">
+                          <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/45">
                             Completion
                           </div>
-                          <div className="mt-1 text-sm font-semibold text-neutral-900">
+                          <div className="mt-1 text-sm font-semibold text-white">
                             {campaign.completionRate}%
                           </div>
                         </div>
 
-                        <ArrowRight className="h-4 w-4 text-neutral-400 transition group-hover:text-neutral-700" />
+                        <ArrowRight className="h-4 w-4 text-white/35 transition group-hover:text-white/70" />
                       </div>
                     </div>
                   </Link>

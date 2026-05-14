@@ -50,10 +50,10 @@ function EmptyState({
         <h1 className="text-2xl font-serif tracking-tight text-white/80">
           {title}
         </h1>
-        <p className="mt-3 text-sm leading-7 text-neutral-600">{message}</p>
+        <p className="mt-3 text-sm leading-7 text-white/55">{message}</p>
         <Link
           href={href}
-          className="mt-8 inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-black"
+          className="mt-8 inline-flex items-center gap-2 border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
         >
           {cta}
           <ArrowRight className="h-4 w-4" />
@@ -75,10 +75,10 @@ function StatCard({
   tone?: "neutral" | "gold" | "green" | "blue";
 }) {
   const toneMap = {
-    neutral: "border-neutral-200 bg-white text-neutral-900",
-    gold: "border-amber-200 bg-amber-50 text-[#8A6A2F]",
-    green: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    blue: "border-blue-200 bg-blue-50 text-blue-700",
+    neutral: "border-white/10 bg-white/[0.03] text-white",
+    gold: "border-amber-500/20 bg-amber-500/[0.08] text-amber-300",
+    green: "border-emerald-500/20 bg-emerald-500/[0.08] text-emerald-300",
+    blue: "border-blue-500/20 bg-blue-500/[0.08] text-blue-300",
   } as const;
 
   return (
@@ -219,27 +219,27 @@ export default async function OrganisationPage({ params }: PageProps) {
     id;
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="mx-auto max-w-7xl px-6 py-10">
+    <div className="p-6">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-between">
           <Link
             href="/admin/organisations"
-            className="inline-flex items-center gap-2 text-sm text-neutral-500 transition hover:text-neutral-900"
+            className="inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white/80"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to Organisations
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5">
+          <div className="inline-flex items-center gap-2 border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5">
             <div className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-700">
+            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-300">
               Enterprise Registry Online
             </span>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white shadow-sm">
-          <div className="border-b border-neutral-200 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-800 px-8 py-8 text-white">
+        <div className="overflow-hidden border border-white/10 bg-zinc-950/70">
+          <div className="border-b border-white/10 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-800 px-8 py-8 text-white">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="mb-4 flex items-center gap-3">
@@ -363,14 +363,14 @@ export default async function OrganisationPage({ params }: PageProps) {
               />
             </div>
 
-            <div className="mt-10 rounded-3xl border border-neutral-200 bg-neutral-50 p-6">
+            <div className="mt-10 border border-white/10 bg-white/[0.03] p-6">
               <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-[#8A6A2F]" />
+                <Shield className="h-5 w-5 text-amber-400/70" />
                 <div>
-                  <h2 className="text-xl font-semibold tracking-tight text-neutral-900">
+                  <h2 className="font-serif text-xl tracking-tight text-white">
                     Dashboard Actions
                   </h2>
-                  <p className="mt-1 text-sm text-neutral-600">
+                  <p className="mt-1 text-sm text-white/60">
                     Open deeper operational surfaces for this organisation.
                   </p>
                 </div>
@@ -379,47 +379,47 @@ export default async function OrganisationPage({ params }: PageProps) {
               <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <Link
                   href={`/admin/organisations/${organisationId}/dashboard`}
-                  className="rounded-2xl border border-neutral-200 bg-white p-5 transition hover:border-neutral-300 hover:bg-neutral-50"
+                  className="border border-white/10 bg-zinc-950/70 p-5 transition hover:border-white/20 hover:bg-white/[0.05]"
                 >
                   <div className="flex items-center justify-between">
-                    <BarChart3 className="h-5 w-5 text-[#8A6A2F]" />
-                    <ArrowRight className="h-4 w-4 text-neutral-400" />
+                    <BarChart3 className="h-5 w-5 text-amber-400/70" />
+                    <ArrowRight className="h-4 w-4 text-white/35" />
                   </div>
-                  <h3 className="mt-4 text-base font-semibold text-neutral-900">
+                  <h3 className="mt-4 text-base font-semibold text-white">
                     OGR Dashboard
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-neutral-600">
+                  <p className="mt-2 text-sm leading-6 text-white/60">
                     Open the interactive dashboard, campaign posture, and intervention surfaces.
                   </p>
                 </Link>
 
                 <Link
                   href="/admin/organisations"
-                  className="rounded-2xl border border-neutral-200 bg-white p-5 transition hover:border-neutral-300 hover:bg-neutral-50"
+                  className="border border-white/10 bg-zinc-950/70 p-5 transition hover:border-white/20 hover:bg-white/[0.05]"
                 >
                   <div className="flex items-center justify-between">
-                    <Building2 className="h-5 w-5 text-[#8A6A2F]" />
-                    <ArrowRight className="h-4 w-4 text-neutral-400" />
+                    <Building2 className="h-5 w-5 text-amber-400/70" />
+                    <ArrowRight className="h-4 w-4 text-white/35" />
                   </div>
-                  <h3 className="mt-4 text-base font-semibold text-neutral-900">
+                  <h3 className="mt-4 text-base font-semibold text-white">
                     Registry Index
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-neutral-600">
+                  <p className="mt-2 text-sm leading-6 text-white/60">
                     Return to the enterprise organisations registry and inspect adjacent nodes.
                   </p>
                 </Link>
 
-                <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+                <div className="border border-white/10 bg-zinc-950/70 p-5">
                   <div className="flex items-center justify-between">
-                    <Users className="h-5 w-5 text-[#8A6A2F]" />
-                    <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.14em] text-neutral-500">
+                    <Users className="h-5 w-5 text-amber-400/70" />
+                    <span className="border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.14em] text-white/45">
                       Snapshot
                     </span>
                   </div>
-                  <h3 className="mt-4 text-base font-semibold text-neutral-900">
+                  <h3 className="mt-4 text-base font-semibold text-white">
                     Campaign Footprint
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-neutral-600">
+                  <p className="mt-2 text-sm leading-6 text-white/60">
                     {totalCampaigns} campaign node{totalCampaigns === 1 ? "" : "s"} and{" "}
                     {participantsTotal} total participant{participantsTotal === 1 ? "" : "s"} linked to this organisation.
                   </p>
@@ -427,26 +427,26 @@ export default async function OrganisationPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="mt-10 rounded-3xl border border-neutral-200 bg-white p-6">
+            <div className="mt-10 border border-white/10 bg-white/[0.03] p-6">
               <div className="mb-5 flex items-center gap-3">
-                <Target className="h-5 w-5 text-[#8A6A2F]" />
+                <Target className="h-5 w-5 text-amber-400/70" />
                 <div>
-                  <h2 className="text-xl font-semibold tracking-tight text-neutral-900">
+                  <h2 className="font-serif text-xl tracking-tight text-white">
                     Campaign Registry
                   </h2>
-                  <p className="mt-1 text-sm text-neutral-600">
+                  <p className="mt-1 text-sm text-white/60">
                     Latest campaign nodes linked to this organisation.
                   </p>
                 </div>
               </div>
 
               {campaigns.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 px-6 py-10 text-center">
-                  <AlertTriangle className="mx-auto h-8 w-8 text-neutral-400" />
-                  <p className="mt-4 text-sm font-medium text-neutral-700">
+                <div className="border border-dashed border-white/10 bg-white/[0.03] px-6 py-10 text-center">
+                  <AlertTriangle className="mx-auto h-8 w-8 text-white/35" />
+                  <p className="mt-4 text-sm font-medium text-white/70">
                     No campaigns found for this organisation.
                   </p>
-                  <p className="mt-2 text-sm text-neutral-500">
+                  <p className="mt-2 text-sm text-white/50">
                     Once campaign nodes are created, they will appear here.
                   </p>
                 </div>
@@ -474,36 +474,36 @@ export default async function OrganisationPage({ params }: PageProps) {
                       <Link
                         key={campaign.id}
                         href={`/admin/campaigns/${campaign.id}`}
-                        className="group rounded-2xl border border-neutral-200 bg-white px-5 py-5 transition hover:border-neutral-300 hover:bg-neutral-50"
+                        className="group border border-white/10 bg-zinc-950/70 px-5 py-5 transition hover:border-white/20 hover:bg-white/[0.05]"
                       >
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                           <div className="min-w-0">
-                            <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                            <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-amber-500/70">
                               Campaign Node
                             </div>
-                            <h4 className="mt-2 truncate text-lg font-semibold tracking-tight text-neutral-900 group-hover:text-black">
+                            <h4 className="mt-2 truncate text-lg font-semibold tracking-tight text-white group-hover:text-white">
                               {campaign.title || "Untitled Campaign"}
                             </h4>
-                            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-neutral-500">
+                            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-white/50">
                               <span>Status: {campaign.status || "Unknown"}</span>
-                              <span className="text-neutral-300">•</span>
+                              <span className="text-white/20">•</span>
                               <span>Participants: {participantCount}</span>
-                              <span className="text-neutral-300">•</span>
+                              <span className="text-white/20">•</span>
                               <span>Completed: {completedCount}</span>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-4">
-                            <div className="rounded-xl bg-neutral-100 px-3 py-2 text-right">
-                              <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-neutral-500">
+                            <div className="border border-white/10 bg-white/[0.04] px-3 py-2 text-right">
+                              <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/45">
                                 Completion
                               </div>
-                              <div className="mt-1 text-sm font-semibold text-neutral-900">
+                              <div className="mt-1 text-sm font-semibold text-white">
                                 {completionRate}%
                               </div>
                             </div>
 
-                            <ArrowRight className="h-4 w-4 text-neutral-400 transition group-hover:text-neutral-700" />
+                            <ArrowRight className="h-4 w-4 text-white/35 transition group-hover:text-white/70" />
                           </div>
                         </div>
                       </Link>

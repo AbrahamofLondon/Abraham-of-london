@@ -54,9 +54,9 @@ export function DissonanceMatrix({
     STRATEGIC: {
       title: "Strategic Dissonance",
       icon: <Zap className="w-3.5 h-3.5" />,
-      iconColor: "text-neutral-500",
+      iconColor: "text-white/50",
       accent: "#8A6A2F",
-      accentLight: "bg-[#8A6A2F]/10",
+      accentLight: "bg-amber-500/10",
       intentLabel: "Intent",
       realityLabel: "Reality",
       deltaLabel: "Delta",
@@ -67,7 +67,7 @@ export function DissonanceMatrix({
       icon: <Heart className="w-3.5 h-3.5" />,
       iconColor: "text-blue-500",
       accent: "#3B82F6",
-      accentLight: "bg-blue-50",
+      accentLight: "bg-blue-500/10",
       intentLabel: "Potential",
       realityLabel: "Extraction",
       deltaLabel: "Burnout Index",
@@ -78,7 +78,7 @@ export function DissonanceMatrix({
       icon: <Briefcase className="w-3.5 h-3.5" />,
       iconColor: "text-emerald-500",
       accent: "#10B981",
-      accentLight: "bg-emerald-50",
+      accentLight: "bg-emerald-500/10",
       intentLabel: "Budget",
       realityLabel: "Actual",
       deltaLabel: "Variance",
@@ -89,7 +89,7 @@ export function DissonanceMatrix({
       icon: <Gauge className="w-3.5 h-3.5" />,
       iconColor: "text-amber-500",
       accent: "#F59E0B",
-      accentLight: "bg-amber-50",
+      accentLight: "bg-amber-500/10",
       intentLabel: "Capacity",
       realityLabel: "Throughput",
       deltaLabel: "Friction",
@@ -100,7 +100,7 @@ export function DissonanceMatrix({
       icon: <Brain className="w-3.5 h-3.5" />,
       iconColor: "text-purple-500",
       accent: "#8B5CF6",
-      accentLight: "bg-purple-50",
+      accentLight: "bg-purple-500/10",
       intentLabel: "Policy",
       realityLabel: "Compliance",
       deltaLabel: "Gap",
@@ -110,9 +110,9 @@ export function DissonanceMatrix({
 
   if (!metrics || metrics.length === 0) {
     return (
-      <div className="p-12 border border-neutral-100 text-center bg-neutral-50/30">
-        <Activity className="w-6 h-6 text-neutral-300 mx-auto mb-3" />
-        <p className="text-[9px] font-mono uppercase tracking-wider text-neutral-400">
+      <div className="border border-dashed border-white/10 bg-white/[0.03] p-12 text-center">
+        <Activity className="w-6 h-6 text-white/35 mx-auto mb-3" />
+        <p className="text-[9px] font-mono uppercase tracking-wider text-white/45">
           Telemetry Offline: No {mode.toLowerCase()} metrics found.
         </p>
       </div>
@@ -126,34 +126,34 @@ export function DissonanceMatrix({
   const isCritical = avgDelta > 20;
 
   return (
-    <div className="bg-white border border-neutral-100 overflow-hidden">
+    <div className="border border-white/10 bg-zinc-950/70 overflow-hidden">
       {/* HEADER: SYSTEM STATUS */}
-      <div className="p-6 border-b border-neutral-100 bg-neutral-50/20 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+      <div className="p-6 border-b border-white/10 bg-black/30 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <div className="flex items-center gap-2 mb-3">
             <div className={`p-1 rounded ${config.accentLight}`}>
               {config.icon}
             </div>
-            <span className="text-[7px] font-mono uppercase tracking-wider text-neutral-500">
+            <span className="text-[7px] font-mono uppercase tracking-wider text-amber-500/70">
               {mode.replace('_', ' ')}
             </span>
-            <span className="text-[6px] font-mono text-neutral-300">v2.1</span>
+            <span className="text-[6px] font-mono text-white/25">v2.1</span>
           </div>
-          <h3 className="text-lg font-light tracking-tight text-neutral-800">
+          <h3 className="text-lg font-light tracking-tight text-white">
             {config.title}
           </h3>
-          <p className="text-[8px] text-neutral-400 mt-1 max-w-md">
+          <p className="text-[8px] text-white/45 mt-1 max-w-md">
             {config.description}
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-[6px] font-mono uppercase tracking-wider text-neutral-400 mb-1">Cohort</p>
-            <p className="text-sm font-light text-neutral-700">N={cohortSize}</p>
+            <p className="text-[6px] font-mono uppercase tracking-wider text-white/40 mb-1">Cohort</p>
+            <p className="text-sm font-light text-white/70">N={cohortSize}</p>
           </div>
-          <div className={`px-3 py-1.5 border-l-2 ${isCritical ? 'border-red-500 bg-red-50/30' : 'border-neutral-300 bg-neutral-50/50'}`}>
-            <p className="text-[6px] font-mono uppercase tracking-wider text-neutral-400 mb-0.5">Composite Delta</p>
-            <p className={`text-sm font-light ${isCritical ? 'text-red-600' : 'text-neutral-600'}`}>
+          <div className={`px-3 py-1.5 border-l-2 ${isCritical ? 'border-red-500 bg-red-500/10' : 'border-white/20 bg-white/[0.04]'}`}>
+            <p className="text-[6px] font-mono uppercase tracking-wider text-white/40 mb-0.5">Composite Delta</p>
+            <p className={`text-sm font-light ${isCritical ? 'text-red-300' : 'text-white/65'}`}>
               {avgDelta > 0 ? `-${avgDelta}%` : `+${Math.abs(avgDelta)}%`}
             </p>
           </div>
@@ -161,7 +161,7 @@ export function DissonanceMatrix({
       </div>
 
       {/* MATRIX TABLE */}
-      <div className="divide-y divide-neutral-50">
+      <div className="divide-y divide-white/10">
         {metrics.map((m, idx) => {
           const delta = Math.round(m.intent - m.reality);
           const isCriticalDelta = delta > 20;
@@ -172,19 +172,19 @@ export function DissonanceMatrix({
           const wellbeing = m.wellbeing || Math.max(0, 100 - burnoutIndex);
           
           return (
-            <div key={m.label} className="grid grid-cols-12 group hover:bg-neutral-50/30 transition-colors duration-300">
+            <div key={m.label} className="grid grid-cols-12 group hover:bg-white/5 transition-colors duration-300">
               
               {/* DOMAIN IDENTIFIER */}
-              <div className="col-span-12 md:col-span-4 p-6 flex flex-col justify-center border-b md:border-b-0 md:border-r border-neutral-100">
+              <div className="col-span-12 md:col-span-4 p-6 flex flex-col justify-center border-b md:border-b-0 md:border-r border-white/10">
                 <div className="flex items-center gap-2 mb-2">
                   {isCriticalDelta ? (
                     <AlertTriangle className="w-3 h-3 text-red-500" />
                   ) : (
                     <div className={`w-1.5 h-1.5 rounded-full ${config.iconColor}`} />
                   )}
-                  <span className="text-[7px] font-mono uppercase tracking-wider text-neutral-400">Domain</span>
+                  <span className="text-[7px] font-mono uppercase tracking-wider text-white/40">Domain</span>
                 </div>
-                <h4 className="text-sm font-medium tracking-tight text-neutral-800 group-hover:translate-x-0.5 transition-transform">
+                <h4 className="text-sm font-medium tracking-tight text-white group-hover:translate-x-0.5 transition-transform">
                   {m.label.replace(/_/g, ' ')}
                 </h4>
                 
@@ -192,12 +192,12 @@ export function DissonanceMatrix({
                 {mode === 'HUMAN_CAPITAL' && m.burnoutIndex !== undefined && (
                   <div className="mt-3 flex items-center gap-3">
                     <div className="flex items-center gap-1">
-                      <Heart className="w-2 h-2 text-neutral-400" />
-                      <span className="text-[6px] font-mono text-neutral-500">
+                      <Heart className="w-2 h-2 text-white/45" />
+                      <span className="text-[6px] font-mono text-white/50">
                         Wellbeing: {wellbeing}%
                       </span>
                     </div>
-                    <div className="w-12 h-1 bg-neutral-100 rounded-full overflow-hidden">
+                    <div className="w-12 h-1 bg-white/10 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-400" style={{ width: `${wellbeing}%` }} />
                     </div>
                   </div>
@@ -207,22 +207,22 @@ export function DissonanceMatrix({
               {/* VISUALIZATION */}
               <div className="col-span-12 md:col-span-8 p-6 flex flex-col justify-center">
                 <div className="flex justify-between text-[8px] font-mono uppercase tracking-wider mb-3">
-                  <span className="text-neutral-500 flex items-center gap-1.5">
+                  <span className="text-white/55 flex items-center gap-1.5">
                     <Target className="w-2.5 h-2.5" /> 
                     {config.intentLabel} ({m.intent}%)
                   </span>
-                  <span className="text-neutral-500 flex items-center gap-1.5">
+                  <span className="text-white/55 flex items-center gap-1.5">
                     {config.realityLabel} ({m.reality}%) 
                     <ChevronRight className="w-2.5 h-2.5" />
                   </span>
                 </div>
 
                 {/* BARS */}
-                <div className="relative w-full h-6 bg-neutral-100 overflow-hidden">
+                <div className="relative w-full h-6 bg-white/10 overflow-hidden">
                   {/* Intent marker */}
                   <div 
-                    className="absolute top-0 bottom-0 w-px bg-neutral-500 z-30 opacity-40" 
-                    style={{ left: `${m.intent}%` }} 
+                    className="absolute top-0 bottom-0 w-px bg-white z-30 opacity-50"
+                    style={{ left: `${m.intent}%` }}
                   />
                   
                   {/* Reality bar */}
@@ -238,15 +238,15 @@ export function DissonanceMatrix({
                   {/* Delta gap */}
                   {m.intent > m.reality && (
                     <div 
-                      className="absolute top-0 bottom-0 bg-neutral-300/40 z-10" 
-                      style={{ left: `${m.reality}%`, width: `${m.intent - m.reality}%` }} 
+                      className="absolute top-0 bottom-0 bg-white/20 z-10"
+                      style={{ left: `${m.reality}%`, width: `${m.intent - m.reality}%` }}
                     />
                   )}
                 </div>
 
                 {/* SUBTEXT AND METRICS */}
                 <div className="flex justify-between items-center mt-3">
-                  <p className="text-[7px] text-neutral-500 leading-relaxed max-w-md">
+                  <p className="text-[7px] text-white/50 leading-relaxed max-w-md">
                     {m.subtext || (
                       isCriticalDelta 
                         ? `${Math.round(delta)}% gap detected — intervention required`
@@ -257,9 +257,9 @@ export function DissonanceMatrix({
                   </p>
                   
                   <div className={`flex items-baseline gap-1 px-2 py-0.5 text-[7px] font-mono ${
-                    isCriticalDelta ? 'bg-red-50 text-red-600' : 
-                    isPositiveDelta ? 'bg-emerald-50 text-emerald-600' : 
-                    'bg-neutral-100 text-neutral-600'
+                    isCriticalDelta ? 'bg-red-500/10 text-red-300' :
+                    isPositiveDelta ? 'bg-emerald-500/10 text-emerald-300' :
+                    'bg-white/[0.04] text-white/60'
                   }`}>
                     <span className="uppercase tracking-wider opacity-60">{config.deltaLabel}</span>
                     <span className="font-medium">
@@ -274,22 +274,22 @@ export function DissonanceMatrix({
       </div>
 
       {/* SYSTEM FOOTER */}
-      <div className="px-6 py-4 bg-neutral-50/50 border-t border-neutral-100 flex flex-col md:flex-row justify-between items-center gap-3">
+      <div className="px-6 py-4 bg-black/30 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-3">
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: config.accent }} />
-          <span className="text-[6px] font-mono uppercase tracking-wider text-neutral-400">
+          <span className="text-[6px] font-mono uppercase tracking-wider text-white/45">
             {criticalCount > 0 ? `${criticalCount} critical variance(s) detected` : "All domains within tolerance"}
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-[5px] font-mono text-neutral-300 uppercase tracking-wider">
+          <span className="text-[5px] font-mono text-white/30 uppercase tracking-wider">
             Polymorphic Telemetry • {mode} Mode
           </span>
           {onModeChange && (
             <select 
               value={mode}
               onChange={(e) => onModeChange(e.target.value as MatrixMode)}
-              className="text-[6px] font-mono bg-transparent border border-neutral-200 rounded px-2 py-1 text-neutral-500 focus:outline-none"
+              className="text-[6px] font-mono bg-black/30 border border-white/10 px-2 py-1 text-white/65 focus:outline-none focus:border-amber-500/40"
             >
               <option value="STRATEGIC">Strategic</option>
               <option value="HUMAN_CAPITAL">Human Capital</option>

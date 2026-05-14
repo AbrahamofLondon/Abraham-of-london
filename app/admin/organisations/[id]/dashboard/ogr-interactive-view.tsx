@@ -61,11 +61,11 @@ function MetricCard({
   tone?: "neutral" | "gold" | "green" | "blue" | "red";
 }) {
   const tones = {
-    neutral: "border-neutral-200 bg-white text-neutral-900",
-    gold: "border-amber-200 bg-amber-50 text-[#8A6A2F]",
-    green: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    blue: "border-blue-200 bg-blue-50 text-blue-700",
-    red: "border-red-200 bg-red-50 text-red-700",
+    neutral: "border-white/10 bg-white/[0.03] text-white",
+    gold: "border-amber-500/20 bg-amber-500/[0.08] text-amber-300",
+    green: "border-emerald-500/20 bg-emerald-500/[0.08] text-emerald-300",
+    blue: "border-blue-500/20 bg-blue-500/[0.08] text-blue-300",
+    red: "border-red-500/20 bg-red-500/[0.08] text-red-300",
   } as const;
 
   return (
@@ -78,7 +78,7 @@ function MetricCard({
       </div>
       <div className="mt-3 text-3xl font-semibold tracking-tight">{value}</div>
       {subtext ? (
-        <p className="mt-2 text-xs leading-6 text-neutral-500">{subtext}</p>
+        <p className="mt-2 text-xs leading-6 text-white/50">{subtext}</p>
       ) : null}
     </div>
   );
@@ -98,10 +98,10 @@ function ProgressBar({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-[11px] font-medium text-neutral-700">{label}</span>
-        <span className="text-[11px] font-mono text-neutral-500">{safeValue}%</span>
+        <span className="text-[11px] font-medium text-white/70">{label}</span>
+        <span className="text-[11px] font-mono text-white/45">{safeValue}%</span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
         <div
           className={cx("h-full rounded-full transition-all duration-500", colorClass)}
           style={{ width: `${safeValue}%` }}
@@ -163,10 +163,10 @@ export function OGRInteractiveView({ data }: OGRInteractiveViewProps) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+        <div className="border border-white/10 bg-white/[0.03] p-6">
           <div className="mb-5 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-[#8A6A2F]" />
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-neutral-800">
+            <Activity className="h-4 w-4 text-amber-400/70" />
+            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
               Organisational Indicator
             </h3>
           </div>
@@ -200,64 +200,64 @@ export function OGRInteractiveView({ data }: OGRInteractiveViewProps) {
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+            <div className="border border-white/10 bg-zinc-950/70 p-4">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/45">
                   Strongest Campaigns
                 </span>
               </div>
               <div className="mt-4 space-y-3">
                 {strongestCampaigns.length ? (
                   strongestCampaigns.map((campaign) => (
-                    <div key={campaign.id} className="rounded-xl bg-white p-3 border border-neutral-200">
-                      <div className="text-sm font-medium text-neutral-900">
+                    <div key={campaign.id} className="border border-white/10 bg-white/[0.03] p-3">
+                      <div className="text-sm font-medium text-white">
                         {campaign.title || "Untitled Campaign"}
                       </div>
-                      <div className="mt-1 text-xs text-neutral-500">
+                      <div className="mt-1 text-xs text-white/50">
                         {campaign.completionRate}% completion • {campaign.completedCount}/
                         {campaign.participantCount} completed
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-neutral-500">No campaign data available.</p>
+                  <p className="text-sm text-white/50">No campaign data available.</p>
                 )}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+            <div className="border border-white/10 bg-zinc-950/70 p-4">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                <AlertTriangle className="h-4 w-4 text-amber-300" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/45">
                   Weakest Campaigns
                 </span>
               </div>
               <div className="mt-4 space-y-3">
                 {weakestCampaigns.length ? (
                   weakestCampaigns.map((campaign) => (
-                    <div key={campaign.id} className="rounded-xl bg-white p-3 border border-neutral-200">
-                      <div className="text-sm font-medium text-neutral-900">
+                    <div key={campaign.id} className="border border-white/10 bg-white/[0.03] p-3">
+                      <div className="text-sm font-medium text-white">
                         {campaign.title || "Untitled Campaign"}
                       </div>
-                      <div className="mt-1 text-xs text-neutral-500">
+                      <div className="mt-1 text-xs text-white/50">
                         {campaign.completionRate}% completion • {campaign.completedCount}/
                         {campaign.participantCount} completed
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-neutral-500">No campaign data available.</p>
+                  <p className="text-sm text-white/50">No campaign data available.</p>
                 )}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+        <div className="border border-white/10 bg-white/[0.03] p-6">
           <div className="mb-5 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-[#8A6A2F]" />
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-neutral-800">
+            <TrendingUp className="h-4 w-4 text-amber-400/70" />
+            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
               Campaign Registry Snapshot
             </h3>
           </div>
@@ -267,23 +267,23 @@ export function OGRInteractiveView({ data }: OGRInteractiveViewProps) {
               campaigns.slice(0, 8).map((campaign) => (
                 <div
                   key={campaign.id}
-                  className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4"
+                  className="border border-white/10 bg-zinc-950/70 px-4 py-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="truncate text-sm font-medium text-neutral-900">
+                      <div className="truncate text-sm font-medium text-white">
                         {campaign.title || "Untitled Campaign"}
                       </div>
-                      <div className="mt-1 text-[11px] text-neutral-500">
+                      <div className="mt-1 text-[11px] text-white/50">
                         Status: {campaign.status || "unknown"}
                       </div>
                     </div>
-                    <div className="rounded-full bg-white px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.12em] text-neutral-600 border border-neutral-200">
+                    <div className="border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.12em] text-white/60">
                       {campaign.completionRate}%
                     </div>
                   </div>
 
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white border border-neutral-200">
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full border border-white/10 bg-white/10">
                     <div
                       className={cx(
                         "h-full rounded-full",
@@ -297,15 +297,15 @@ export function OGRInteractiveView({ data }: OGRInteractiveViewProps) {
                     />
                   </div>
 
-                  <div className="mt-2 text-[11px] text-neutral-500">
+                  <div className="mt-2 text-[11px] text-white/50">
                     {campaign.completedCount}/{campaign.participantCount} completed
                   </div>
                 </div>
               ))
             ) : (
-              <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-8 text-center">
-                <Target className="mx-auto h-6 w-6 text-neutral-400" />
-                <p className="mt-3 text-sm text-neutral-600">
+              <div className="border border-dashed border-white/10 bg-white/[0.03] px-4 py-8 text-center">
+                <Target className="mx-auto h-6 w-6 text-white/35" />
+                <p className="mt-3 text-sm text-white/55">
                   No campaign activity available yet.
                 </p>
               </div>

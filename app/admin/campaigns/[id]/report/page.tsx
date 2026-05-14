@@ -80,7 +80,7 @@ function AnonymityReviewPanel({
         </p>
         <Link
           href={`/admin/campaigns/${id}`}
-          className="mt-8 inline-block rounded-xl bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-black"
+          className="mt-8 inline-block border border-white/10 bg-white/5 px-6 py-3 text-sm font-mono text-white/70 transition hover:bg-white/10"
         >
           Return to Campaign
         </Link>
@@ -261,29 +261,29 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
               </div>
 
               <div className="text-right">
-                <div className="font-mono text-xs uppercase tracking-widest text-neutral-500">
+                <div className="font-mono text-xs uppercase tracking-widest text-white/40">
                   Status
                 </div>
-                <div className="mt-1 inline-block rounded-full bg-emerald-100 px-4 py-1 text-sm font-medium text-emerald-700">
+                <div className="mt-1 inline-block border border-emerald-500/20 bg-emerald-500/10 px-4 py-1 text-sm font-medium text-emerald-300">
                   {report.state || constitution.orgState || "GENERATED"}
                 </div>
               </div>
             </div>
 
-            <div className="mb-12 rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-5">
+            <div className="mb-12 border border-white/10 bg-white/[0.03] px-6 py-5">
               <div className="mb-3 flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-neutral-500" />
-                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-neutral-500">
+                <ShieldCheck className="h-4 w-4 text-amber-400/70" />
+                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-amber-500/70">
                   Constitutional Posture
                 </span>
               </div>
-              <p className="text-lg leading-relaxed text-neutral-800">
+              <p className="text-lg leading-relaxed text-white/75">
                 {report?.narrative?.headline ||
                   constitution.narrativeSummary ||
                   "Executive review generated."}
               </p>
               {report?.narrative?.summary ? (
-                <p className="mt-3 text-sm leading-7 text-neutral-600">
+                <p className="mt-3 text-sm leading-7 text-white/60">
                   {report.narrative.summary}
                 </p>
               ) : null}
@@ -326,12 +326,12 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-neutral-200 bg-white p-5"
+                  className="border border-white/10 bg-white/[0.03] p-5"
                 >
-                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-500/70">
                     {item.label}
                   </div>
-                  <div className="mt-3 text-3xl font-light tracking-tight text-neutral-900">
+                  <div className="mt-3 text-3xl font-light tracking-tight text-white">
                     {item.value}
                   </div>
                 </div>

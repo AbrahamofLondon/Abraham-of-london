@@ -40,18 +40,18 @@ function EmptyState({
   cta: string;
 }) {
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-8">
-      <div className="w-full max-w-xl rounded-3xl border border-neutral-200 bg-white p-10 shadow-sm text-center">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100">
-          <AlertTriangle className="h-7 w-7 text-neutral-500" />
+    <div className="flex items-center justify-center p-8">
+      <div className="w-full max-w-xl border border-white/10 bg-zinc-950/70 p-10 text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
+          <AlertTriangle className="h-7 w-7 text-white/40" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+        <h1 className="font-serif text-2xl tracking-tight text-white/80">
           {title}
         </h1>
-        <p className="mt-3 text-sm leading-7 text-neutral-600">{message}</p>
+        <p className="mt-3 text-sm leading-7 text-white/55">{message}</p>
         <Link
           href={href}
-          className="mt-8 inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-black"
+          className="mt-8 inline-flex items-center gap-2 border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
         >
           {cta}
           <ArrowRight className="h-4 w-4" />
@@ -71,12 +71,12 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+    <section className="border border-white/10 bg-white/[0.03] p-6">
       <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50">
-          <Icon className="h-5 w-5 text-[#8A6A2F]" />
+        <div className="flex h-10 w-10 items-center justify-center border border-amber-500/20 bg-amber-500/10">
+          <Icon className="h-5 w-5 text-amber-400/70" />
         </div>
-        <h2 className="text-lg font-semibold tracking-tight text-neutral-900">
+        <h2 className="font-serif text-lg tracking-tight text-white">
           {title}
         </h2>
       </div>
@@ -97,11 +97,11 @@ function MetricCard({
   tone?: "neutral" | "gold" | "green" | "blue" | "red";
 }) {
   const tones = {
-    neutral: "border-neutral-200 bg-white text-neutral-900",
-    gold: "border-amber-200 bg-amber-50 text-[#8A6A2F]",
-    green: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    blue: "border-blue-200 bg-blue-50 text-blue-700",
-    red: "border-red-200 bg-red-50 text-red-700",
+    neutral: "border-white/10 bg-white/[0.03] text-white",
+    gold: "border-amber-500/20 bg-amber-500/[0.08] text-amber-300",
+    green: "border-emerald-500/20 bg-emerald-500/[0.08] text-emerald-300",
+    blue: "border-blue-500/20 bg-blue-500/[0.08] text-blue-300",
+    red: "border-red-500/20 bg-red-500/[0.08] text-red-300",
   } as const;
 
   return (
@@ -111,7 +111,7 @@ function MetricCard({
       </div>
       <div className="mt-3 text-3xl font-semibold tracking-tight">{value}</div>
       {subtext ? (
-        <p className="mt-2 text-xs leading-6 text-neutral-500">{subtext}</p>
+        <p className="mt-2 text-xs leading-6 text-white/50">{subtext}</p>
       ) : null}
     </div>
   );
@@ -397,14 +397,14 @@ export default async function OrganisationReportPage({ params }: PageProps) {
 
             <div className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
               <SectionCard title="Executive Summary" icon={Shield}>
-                <div className="space-y-4 text-sm leading-7 text-neutral-700">
+                <div className="space-y-4 text-sm leading-7 text-white/65">
                   <p>
                     This report consolidates enterprise posture across campaign activity,
                     participation quality, structural indicators, and intervention readiness.
                   </p>
                   <p>
                     The present snapshot indicates{" "}
-                    <span className="font-semibold text-neutral-900">
+                    <span className="font-semibold text-white">
                       {responseRate >= 70
                         ? "a stable and responsive organisation"
                         : responseRate >= 45
@@ -412,11 +412,11 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                         : "a fragile participation and execution posture"}
                     </span>
                     , with{" "}
-                    <span className="font-semibold text-neutral-900">
+                    <span className="font-semibold text-white">
                       {activeCampaigns}
                     </span>{" "}
                     active campaign node{activeCampaigns === 1 ? "" : "s"} and{" "}
-                    <span className="font-semibold text-neutral-900">
+                    <span className="font-semibold text-white">
                       {completedParticipants}
                     </span>{" "}
                     completed participant submission
@@ -429,14 +429,14 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                 <div className="space-y-4">
                   <div>
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[11px] font-medium text-neutral-700">
+                      <span className="text-[11px] font-medium text-white/70">
                         Response Health
                       </span>
-                      <span className="text-[11px] font-mono text-neutral-500">
+                      <span className="text-[11px] font-mono text-white/45">
                         {responseRate}%
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
+                    <div className="h-2 overflow-hidden rounded-full bg-white/10">
                       <div
                         className={cx(
                           "h-full rounded-full",
@@ -453,17 +453,17 @@ export default async function OrganisationReportPage({ params }: PageProps) {
 
                   <div>
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[11px] font-medium text-neutral-700">
+                      <span className="text-[11px] font-medium text-white/70">
                         Campaign Activation
                       </span>
-                      <span className="text-[11px] font-mono text-neutral-500">
+                      <span className="text-[11px] font-mono text-white/45">
                         {totalCampaigns > 0
                           ? Math.round((activeCampaigns / totalCampaigns) * 100)
                           : 0}
                         %
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
+                    <div className="h-2 overflow-hidden rounded-full bg-white/10">
                       <div
                         className="h-full rounded-full bg-blue-500"
                         style={{
@@ -487,14 +487,14 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                     {strengths.map((item: any, idx: number) => (
                       <div
                         key={`${idx}-${String(item)}`}
-                        className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+                        className="border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-3 text-sm text-emerald-200"
                       >
                         {String(item)}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-white/50">
                     No explicit strengths were surfaced in the current repository view.
                   </p>
                 )}
@@ -506,14 +506,14 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                     {risks.map((item: any, idx: number) => (
                       <div
                         key={`${idx}-${String(item)}`}
-                        className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+                        className="border border-amber-500/20 bg-amber-500/[0.08] px-4 py-3 text-sm text-amber-200"
                       >
                         {String(item)}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-white/50">
                     No explicit risk notes were surfaced in the current repository view.
                   </p>
                 )}
@@ -527,13 +527,13 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                     {domains.slice(0, 8).map((domain: any, idx: number) => (
                       <div
                         key={`${idx}-${domain?.label ?? domain?.name ?? "domain"}`}
-                        className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4"
+                        className="border border-white/10 bg-zinc-950/70 px-4 py-4"
                       >
-                        <div className="text-sm font-medium text-neutral-900">
+                        <div className="text-sm font-medium text-white">
                           {domain?.label ?? domain?.name ?? `Domain ${idx + 1}`}
                         </div>
                         {(domain?.summary || domain?.description) && (
-                          <p className="mt-1 text-sm leading-6 text-neutral-600">
+                          <p className="mt-1 text-sm leading-6 text-white/60">
                             {domain.summary ?? domain.description}
                           </p>
                         )}
@@ -541,7 +541,7 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-white/50">
                     No domain-level indicator map was available in the current enterprise snapshot.
                   </p>
                 )}
@@ -565,13 +565,13 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                       return (
                         <div
                           key={`${idx}-${title}`}
-                          className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4"
+                          className="border border-white/10 bg-zinc-950/70 px-4 py-4"
                         >
-                          <div className="text-sm font-medium text-neutral-900">
+                          <div className="text-sm font-medium text-white">
                             {title}
                           </div>
                           {summary ? (
-                            <p className="mt-1 text-sm leading-6 text-neutral-600">
+                            <p className="mt-1 text-sm leading-6 text-white/60">
                               {String(summary)}
                             </p>
                           ) : null}
@@ -580,7 +580,7 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                     })}
                   </div>
                 ) : (
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-white/50">
                     No strategic interventions were returned for this organisation.
                   </p>
                 )}
@@ -594,18 +594,18 @@ export default async function OrganisationReportPage({ params }: PageProps) {
                     {scorecards.slice(0, 6).map((card: any, idx: number) => (
                       <div
                         key={`${idx}-${card?.label ?? card?.title ?? "scorecard"}`}
-                        className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5"
+                        className="border border-white/10 bg-zinc-950/70 p-5"
                       >
-                        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-amber-500/70">
                           {card?.label ?? card?.title ?? `Scorecard ${idx + 1}`}
                         </div>
                         {card?.value !== undefined ? (
-                          <div className="mt-3 text-3xl font-semibold tracking-tight text-neutral-900">
+                          <div className="mt-3 text-3xl font-semibold tracking-tight text-white">
                             {String(card.value)}
                           </div>
                         ) : null}
                         {(card?.summary || card?.description) && (
-                          <p className="mt-2 text-xs leading-6 text-neutral-500">
+                          <p className="mt-2 text-xs leading-6 text-white/50">
                             {card.summary ?? card.description}
                           </p>
                         )}

@@ -19,13 +19,13 @@ export function ConstitutionalRecommendationPanel({
       <ConstitutionalNarrativeBlock
         constitution={constitution}
         nextAction={nextAction}
-        variant="light"
+        variant="dark"
       />
 
-      <section className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-sm">
+      <section className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
         <UnifiedRecommendationList
           items={recommendations}
-          variant="light"
+          variant="dark"
           title="Governed Recommendations"
           emptyText="No constitutionally suitable recommendations available."
         />

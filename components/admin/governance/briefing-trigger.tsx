@@ -86,14 +86,14 @@ export function BriefingTrigger({ campaignId }: { campaignId: string }) {
       <button
         onClick={handleGenerate}
         disabled={isPending}
-        className="group relative flex items-center gap-2 px-4 py-2 border border-neutral-200 bg-white hover:border-neutral-800 hover:bg-neutral-50 transition-all duration-300 disabled:opacity-50"
+        className="group relative flex items-center gap-2 px-4 py-2 border border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-300 disabled:opacity-50"
       >
         {isPending ? (
-          <Loader2 className="w-3 h-3 animate-spin text-neutral-400" />
+          <Loader2 className="w-3 h-3 animate-spin text-white/45" />
         ) : (
-          <FileText className="w-3 h-3 text-neutral-400 group-hover:text-neutral-900 transition-colors" />
+          <FileText className="w-3 h-3 text-white/45 group-hover:text-white/75 transition-colors" />
         )}
-        <span className="text-[8px] font-mono uppercase tracking-widest font-medium text-neutral-500 group-hover:text-neutral-900">
+        <span className="text-[8px] font-mono uppercase tracking-widest font-medium text-white/55 group-hover:text-white/80">
           {isPending ? "Compiling..." : "Intelligence Brief"}
         </span>
       </button>
@@ -101,10 +101,10 @@ export function BriefingTrigger({ campaignId }: { campaignId: string }) {
       {/* Error Feedback */}
       {error && (
         <div className="fixed bottom-6 right-6 z-[200] animate-in slide-in-from-bottom-2 fade-in">
-          <div className="flex items-center gap-3 bg-white border border-red-100 shadow-xl p-4">
+          <div className="flex items-center gap-3 bg-zinc-950 border border-red-500/20 p-4">
             <AlertCircle className="w-4 h-4 text-red-500" />
-            <p className="text-[10px] font-mono uppercase text-neutral-600 flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-neutral-300 hover:text-neutral-500">
+            <p className="text-[10px] font-mono uppercase text-red-200 flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-white/35 hover:text-white/60">
               <X className="w-3 h-3" />
             </button>
           </div>
