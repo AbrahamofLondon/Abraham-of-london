@@ -29,6 +29,7 @@ import DecisionVelocityCard from "@/components/Intelligence/public/DecisionVeloc
 import WhatChangedPanel from "@/components/Intelligence/public/WhatChangedPanel";
 import CrossAssessmentInsight from "@/components/Intelligence/public/CrossAssessmentInsight";
 import ContradictionMapPreview from "@/components/Intelligence/public/ContradictionMapPreview";
+import RetainerMemoryPreview from "@/components/decision-centre/RetainerMemoryPreview";
 import type {
   DecisionCentreCase,
   DecisionCentreResponse,
@@ -644,6 +645,10 @@ export default function DecisionCentrePage() {
 
           {/* First-visit orientation */}
           <DecisionCentreOrientation />
+
+          {!loading && data?.retainerMemoryPreview && (
+            <RetainerMemoryPreview preview={data.retainerMemoryPreview} />
+          )}
 
           {/* Loading */}
           {loading && (

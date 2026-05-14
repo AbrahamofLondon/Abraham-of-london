@@ -34,6 +34,7 @@ import { calculateCostOfInactionClock } from "@/lib/product/cost-of-inaction-clo
 import { deriveOversightCadenceState } from "@/lib/product/oversight-cadence-engine";
 import { loadPreviousArchivedOversightCycle } from "@/lib/product/oversight-cycle-archive";
 import { loadBoardroomArchiveSummary } from "@/lib/product/boardroom-archive";
+import { toDecisionCentreRetainerMemoryPreview } from "@/lib/product/decision-centre-retainer-memory";
 import { computeIrreversibilityIndex } from "@/lib/product/irreversibility-index";
 import { extractAssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
 import {
@@ -610,6 +611,7 @@ async function resolveRetainerContext(input: {
     contractId: contract?.id ?? null,
     cadence,
     boardroomHistoryCount: boardroomArchive?.totalDossiers ?? 0,
+    retainerMemoryPreview: toDecisionCentreRetainerMemoryPreview(previousCycle?.clientSafeBrief?.retainerCycleMemory ?? null),
   };
 }
 
@@ -658,11 +660,12 @@ export default async function handler(
           scopeType: "ACCOUNT",
         },
         provenance: [],
-        emptyState: {
-          reason: "No decision memory has been created yet.",
-          nextAction: "Start with Fast Diagnostic.",
-        },
-        cases: [],
+      emptyState: {
+        reason: "No decision memory has been created yet.",
+        nextAction: "Start with Fast Diagnostic.",
+      },
+      retainerMemoryPreview: null,
+      cases: [],
         mostUrgentCase: null,
         checkpoints: {
           requiresResponse: [],
@@ -1116,6 +1119,7 @@ export default async function handler(
         reason: "No case-bound intelligence could be matched to this scope.",
         nextAction: "Open the original case surface or complete another governed stage.",
       } : undefined,
+      retainerMemoryPreview: retainerContext.retainerMemoryPreview,
       cases,
       mostUrgentCase,
       checkpoints: checkpointSections,

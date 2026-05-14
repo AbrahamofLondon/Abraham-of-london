@@ -19,6 +19,11 @@ import type { CrossAssessmentIntelligence } from "@/lib/analytics/cross-assessme
 import type { ContradictionMapView } from "@/lib/analytics/contradiction-graph-presenter";
 import type { IntelligenceDataQuality, IntelligenceEmptyState, IntelligenceScope } from "@/lib/product/intelligence-contract";
 import type { FieldProvenance } from "@/lib/product/field-provenance-contract";
+import type {
+  RetainerCycleMemoryEscalationLevel,
+  RetainerCycleMemorySeverity,
+  RetainerCycleMemoryStatus,
+} from "@/lib/product/retainer-cycle-memory-contract";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COGNITIVE STATE
@@ -139,6 +144,22 @@ export type DecisionCentreIrreversibility = {
   nextAction?: string | null;
 };
 
+export type DecisionCentreRetainerMemoryPreview = {
+  status: "available" | "partial" | "insufficient" | "unavailable";
+  escalationLevel: RetainerCycleMemoryEscalationLevel;
+  escalationRequired: boolean;
+  summary: string;
+  findings: Array<{
+    status: RetainerCycleMemoryStatus;
+    severity: RetainerCycleMemorySeverity;
+    signalKey: string;
+    source?: string | null;
+    sourceLabel?: string | null;
+    explanation: string;
+    recommendedAction: string;
+  }>;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION CENTRE CASE — the primary card model
 // ─────────────────────────────────────────────────────────────────────────────
@@ -241,6 +262,7 @@ export type DecisionCentreResponse = {
   scope?: IntelligenceScope;
   provenance?: FieldProvenance[];
   emptyState?: IntelligenceEmptyState;
+  retainerMemoryPreview?: DecisionCentreRetainerMemoryPreview | null;
   cases: DecisionCentreCase[];
   mostUrgentCase?: {
     caseId: string;
