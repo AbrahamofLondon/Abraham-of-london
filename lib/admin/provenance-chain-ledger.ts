@@ -5,6 +5,7 @@ import {
   buildProvenanceMerkleRoot,
   type ProvenanceChainLeaf,
 } from "@/lib/admin/provenance-chain-anchor";
+import { recordProvenanceAuditEvent } from "@/lib/admin/provenance-audit-events";
 
 export type CreateProvenanceChainAnchorInput = {
   scope: "DAILY" | "ACCOUNT" | "ORGANISATION" | "CYCLE_BATCH";
@@ -176,6 +177,14 @@ export async function createProvenanceChainAnchor(
       toTimestamp: toDate(toTimestamp),
       metadata: buildSafeMetadata(input) as never,
     },
+  });
+
+  await recordProvenanceAuditEvent({
+    action: "PROVENANCE_ANCHOR_CREATED",
+    scope: input.scope,
+    scopeId: input.scopeId,
+    merkleRoot,
+    chainHash,
   });
 
   return mapAnchor(row);

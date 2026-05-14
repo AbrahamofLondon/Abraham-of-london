@@ -6,6 +6,7 @@ import {
 } from "@/lib/admin/provenance-access-policy";
 import type { DecisionProvenanceRecord } from "@/lib/admin/decision-provenance-record";
 import type { IntegrityStatus } from "@/lib/admin/provenance-integrity";
+import { recordProvenanceAuditEvent } from "@/lib/admin/provenance-audit-events";
 
 type VerificationResponse = {
   version: 1;
@@ -75,38 +76,6 @@ async function loadArchivedHash(input: {
   return archive?.record.provenanceHash ?? null;
 }
 
-async function logVerificationEvent(input: {
-  status: IntegrityStatus;
-  subjectType: string;
-  subjectId: string;
-  expectedHash: string;
-  recomputedHash: string | null;
-  archivedHash: string | null;
-  actorId?: string | null;
-}) {
-  try {
-    const { logAuditEvent } = await import("@/lib/server/audit");
-    await logAuditEvent({
-      action: input.status === "MISMATCH" ? "PROVENANCE_HASH_MISMATCH" : "PROVENANCE_VERIFIED",
-      resourceType: "provenance",
-      status: input.status === "MISMATCH" ? "warning" : "success",
-      severity: input.status === "MISMATCH" ? "warn" : "low",
-      actorId: input.actorId ?? undefined,
-      actorType: "admin",
-      resourceId: input.subjectId,
-      resourceName: input.subjectType,
-      metadata: {
-        expectedHash: input.expectedHash,
-        recomputedHash: input.recomputedHash,
-        archivedHash: input.archivedHash,
-        status: input.status,
-      },
-    });
-  } catch {
-    // Verification must not fail because audit logging is unavailable.
-  }
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<VerificationResponse | { ok: false; error: string }>,
@@ -157,13 +126,12 @@ export default async function handler(
     archivedHash,
   });
 
-  await logVerificationEvent({
-    status,
+  await recordProvenanceAuditEvent({
+    action: status === "MISMATCH" ? "PROVENANCE_HASH_MISMATCH" : "PROVENANCE_VERIFIED",
+    status: status === "MISMATCH" ? "warning" : "success",
     subjectType,
     subjectId,
-    expectedHash,
-    recomputedHash,
-    archivedHash,
+    hash: recomputedHash ?? expectedHash,
     actorId: admin.access.userId,
   });
 

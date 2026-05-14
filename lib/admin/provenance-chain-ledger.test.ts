@@ -8,8 +8,16 @@ const prismaMock = vi.hoisted(() => ({
   },
 }));
 
+const auditMock = vi.hoisted(() => ({
+  recordProvenanceAuditEvent: vi.fn(),
+}));
+
 vi.mock("@/lib/prisma.server", () => ({
   prisma: prismaMock,
+}));
+
+vi.mock("@/lib/admin/provenance-audit-events", () => ({
+  recordProvenanceAuditEvent: auditMock.recordProvenanceAuditEvent,
 }));
 
 import type { ProvenanceChainLeaf } from "./provenance-chain-anchor";
@@ -71,6 +79,7 @@ beforeEach(() => {
   prismaMock.provenanceChainAnchor.findFirst.mockReset();
   prismaMock.provenanceChainAnchor.create.mockReset();
   prismaMock.provenanceChainAnchor.findMany.mockReset();
+  auditMock.recordProvenanceAuditEvent.mockReset();
   prismaMock.provenanceChainAnchor.create.mockImplementation(async ({ data }) => ({
     id: "anchor_created",
     version: data.version,
@@ -170,6 +179,22 @@ describe("createProvenanceChainAnchor", () => {
     expect(JSON.stringify(metadata)).not.toContain("governanceEvents");
     expect(JSON.stringify(metadata)).not.toContain("provenanceHash");
     expect(JSON.stringify(metadata)).not.toContain("cycle_001");
+  });
+
+  it("records a safe anchor-created audit event", async () => {
+    prismaMock.provenanceChainAnchor.findFirst.mockResolvedValueOnce(null);
+    const created = await createProvenanceChainAnchor({
+      scope: "DAILY",
+      scopeId: "2026-05-14",
+      leaves: [leaf()],
+    });
+    expect(auditMock.recordProvenanceAuditEvent).toHaveBeenCalledWith({
+      action: "PROVENANCE_ANCHOR_CREATED",
+      scope: "DAILY",
+      scopeId: "2026-05-14",
+      merkleRoot: created.merkleRoot,
+      chainHash: created.chainHash,
+    });
   });
 });
 

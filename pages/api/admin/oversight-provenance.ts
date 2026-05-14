@@ -8,6 +8,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdminPage } from "@/lib/access/server";
+import { recordProvenanceAuditEvent } from "@/lib/admin/provenance-audit-events";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
@@ -31,6 +32,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const record = await composeDecisionProvenance({
       subjectType: "OVERSIGHT_CYCLE",
       subjectId: cycleId,
+    });
+    await recordProvenanceAuditEvent({
+      action: "FULL_PROVENANCE_VIEWED",
+      subjectType: "OVERSIGHT_CYCLE",
+      subjectId: cycleId,
+      hash: record.provenanceHash,
+      actorId: guard.userId,
     });
     return res.status(200).json({ ok: true, record });
   } catch (err) {
