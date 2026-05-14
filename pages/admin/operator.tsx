@@ -23,10 +23,12 @@ import type {
   OperatorQueueCard,
 } from "@/lib/admin/operator-command-centre";
 import type { AdminActionDoctrineRecommendation } from "@/lib/admin/admin-action-doctrine";
+import type { ProvenanceGapMonitorSummary } from "@/lib/admin/provenance-gap-monitor";
 
 type PageProps = {
   summary: OperatorCommandCentreSummary;
   doctrine: AdminActionDoctrineRecommendation[];
+  provenanceGaps: ProvenanceGapMonitorSummary;
 };
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => {
@@ -35,11 +37,15 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
 
   const { buildOperatorCommandCentreSummary } = await import("@/lib/admin/operator-command-centre");
   const { buildOperatorDoctrine } = await import("@/lib/admin/admin-action-doctrine");
+  const { loadProvenanceGapMonitor } = await import("@/lib/admin/provenance-gap-monitor");
 
-  const summary = await buildOperatorCommandCentreSummary();
+  const [summary, provenanceGaps] = await Promise.all([
+    buildOperatorCommandCentreSummary(),
+    loadProvenanceGapMonitor({ limit: 20 }),
+  ]);
   const doctrine = buildOperatorDoctrine(summary.cards);
 
-  return { props: { summary, doctrine } };
+  return { props: { summary, doctrine, provenanceGaps } };
 };
 
 function operatorTone(tone?: OperatorMetricTone): AdminBadgeTone {
@@ -204,6 +210,104 @@ function DoctrinePanel({ recommendations }: { recommendations: AdminActionDoctri
   );
 }
 
+const GAP_SEVERITY_STYLE: Record<"INFO" | "WARNING" | "CRITICAL", { dot: string; label: string }> = {
+  CRITICAL: { dot: "bg-rose-500",   label: "Critical" },
+  WARNING:  { dot: "bg-amber-400",  label: "Warning" },
+  INFO:     { dot: "bg-white/30",   label: "Info" },
+};
+
+function ProvenanceGapsPanel({ monitor }: { monitor: ProvenanceGapMonitorSummary }) {
+  const topGaps = monitor.items.filter((item) => item.gapCount > 0).slice(0, 3);
+
+  return (
+    <section className="border border-white/10 bg-zinc-950/70 p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">
+            Provenance Gap Monitor
+          </p>
+          <p className="mt-1 text-xs text-white/40">
+            Gap status across the {monitor.totalSubjects} most recent oversight cycles. Not a decision — a posture signal.
+          </p>
+        </div>
+        <Link
+          href="/admin/oversight-review"
+          className="shrink-0 border border-white/10 bg-white/5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.18em] text-white/45 hover:border-amber-500/25 hover:text-amber-200"
+        >
+          Open review
+        </Link>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <AdminMetricCard
+          label="Critical"
+          value={monitor.critical}
+          tone={monitor.critical > 0 ? "danger" : "neutral"}
+          variant="inner"
+        />
+        <AdminMetricCard
+          label="Warning"
+          value={monitor.warning}
+          tone={monitor.warning > 0 ? "warning" : "neutral"}
+          variant="inner"
+        />
+        <AdminMetricCard
+          label="Complete"
+          value={monitor.complete}
+          tone={monitor.complete > 0 ? "success" : "neutral"}
+          variant="inner"
+        />
+        <AdminMetricCard
+          label="Unavailable"
+          value={monitor.unavailable}
+          tone={monitor.unavailable > 0 ? "warning" : "neutral"}
+          variant="inner"
+        />
+      </div>
+
+      {topGaps.length > 0 && (
+        <div className="mt-4 space-y-2">
+          {topGaps.map((item) => {
+            const topGap = item.gaps[0];
+            if (!topGap) return null;
+            const style = GAP_SEVERITY_STYLE[topGap.severity];
+            return (
+              <div
+                key={item.subjectId}
+                className="flex items-start gap-3 border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+              >
+                <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${style.dot}`} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] text-white/35">{item.subjectId}</span>
+                    <AdminStatusBadge label={style.label} tone={topGap.severity === "CRITICAL" ? "critical" : topGap.severity === "WARNING" ? "warning" : "muted"} size="md" />
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-white/55">{topGap.description}</p>
+                </div>
+                {item.nextActionHref && (
+                  <Link
+                    href={item.nextActionHref}
+                    className="shrink-0 text-[9px] font-mono uppercase tracking-[0.16em] text-white/30 hover:text-amber-200"
+                  >
+                    {item.nextAction ?? "Review"}
+                  </Link>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {monitor.withGaps === 0 && monitor.totalSubjects > 0 && (
+        <div className="mt-4 flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400/60" />
+          <p className="text-sm text-emerald-300/70">No provenance gaps detected across loaded cycles.</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function QueueGroup({ group }: { group: OperatorActionGroup }) {
   return (
     <section className={`border p-5 ${groupAccent(group.id)}`}>
@@ -235,6 +339,7 @@ function QueueGroup({ group }: { group: OperatorActionGroup }) {
 export default function OperatorCommandCentrePage({
   summary,
   doctrine,
+  provenanceGaps,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const generatedAt = new Date(summary.generatedAt).toLocaleString("en-GB", {
     dateStyle: "medium",
@@ -285,6 +390,8 @@ export default function OperatorCommandCentrePage({
         </section>
 
         <DoctrinePanel recommendations={doctrine} />
+
+        <ProvenanceGapsPanel monitor={provenanceGaps} />
 
         <section className="space-y-4">
           {summary.actionGroups.map((group) => (
