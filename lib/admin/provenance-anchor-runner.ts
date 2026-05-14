@@ -7,6 +7,16 @@ import type { ProvenanceChainLeaf } from "@/lib/admin/provenance-chain-anchor";
 import { listRetainedReviewCycles } from "@/lib/product/retained-cadence-service";
 import type { RetainedReviewCycle } from "@/lib/product/retained-cadence-contract";
 
+export type CountOversightProvenanceLeavesResult = {
+  version: 1;
+  scope: CreateOversightProvenanceAnchorInput["scope"];
+  scopeId: string;
+  validLeafCount: number;
+  unavailableCount: number;
+  canCreateAnchor: boolean;
+  message: string;
+};
+
 export type CreateOversightProvenanceAnchorInput = {
   scope: "DAILY" | "ACCOUNT" | "ORGANISATION" | "CYCLE_BATCH";
   scopeId: string;
@@ -179,5 +189,51 @@ export async function createOversightProvenanceAnchor(
     leafCount: leaves.length,
     unavailableCount,
     anchor,
+  };
+}
+
+export async function countOversightProvenanceLeaves(
+  input: CreateOversightProvenanceAnchorInput,
+): Promise<CountOversightProvenanceLeavesResult> {
+  const scopeId = input.scopeId.trim();
+  if (!scopeId) {
+    throw new Error("scopeId is required to count provenance leaves.");
+  }
+
+  const cycles = filterCycles(await listRetainedReviewCycles(), { ...input, scopeId });
+  let validLeafCount = 0;
+  let unavailableCount = 0;
+
+  for (const cycle of cycles) {
+    try {
+      const record = await composeDecisionProvenance({
+        subjectType: "OVERSIGHT_CYCLE",
+        subjectId: cycle.cycleId,
+      });
+      if (record.provenanceHash) {
+        validLeafCount += 1;
+      } else {
+        unavailableCount += 1;
+      }
+    } catch {
+      unavailableCount += 1;
+    }
+  }
+
+  const canCreateAnchor = validLeafCount > 0;
+  const message = cycles.length === 0
+    ? "No retained oversight cycles matched this scope."
+    : canCreateAnchor
+      ? `${validLeafCount} valid provenance record${validLeafCount === 1 ? "" : "s"} found. Anchor can be created.`
+      : "No valid provenance records found for this scope/scopeId. Anchor creation would be unavailable.";
+
+  return {
+    version: 1,
+    scope: input.scope,
+    scopeId,
+    validLeafCount,
+    unavailableCount,
+    canCreateAnchor,
+    message,
   };
 }

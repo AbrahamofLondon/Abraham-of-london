@@ -22,6 +22,7 @@ vi.mock("@/lib/product/oversight-cycle-archive", () => ({
 
 vi.mock("@/lib/admin/provenance-operation-audit", () => ({
   recordProvenanceOperationAudit: mocks.recordProvenanceOperationAudit,
+  createProvenanceRequestId: () => "prv_test_stubbed",
 }));
 
 import handler from "./verify";
@@ -127,15 +128,18 @@ describe("/api/admin/provenance/verify", () => {
       recomputedHash: "hash_match",
       archivedHash: "hash_match",
     });
-    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith({
-      eventType: "PROVENANCE_HASH_VERIFIED",
-      status: "SUCCESS",
-      subjectType: "OVERSIGHT_CYCLE",
-      subjectId: "cycle_1",
-      provenanceHash: "hash_match",
-      actorId: "admin_1",
-      actorEmail: "admin@example.com",
-    });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: "PROVENANCE_HASH_VERIFIED",
+        source: "PROVENANCE_VERIFY_API",
+        status: "SUCCESS",
+        subjectType: "OVERSIGHT_CYCLE",
+        subjectId: "cycle_1",
+        provenanceHash: "hash_match",
+        actorId: "admin_1",
+        actorEmail: "admin@example.com",
+      }),
+    );
   });
 
   it("mismatched expected hash returns MISMATCH", async () => {

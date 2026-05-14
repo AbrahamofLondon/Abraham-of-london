@@ -23,6 +23,7 @@ vi.mock("@/lib/prisma.server", () => ({
 
 vi.mock("@/lib/admin/provenance-operation-audit", () => ({
   recordProvenanceOperationAudit: mocks.recordProvenanceOperationAudit,
+  createProvenanceRequestId: () => "prv_test_stubbed",
 }));
 
 import handler from "./verify-chain";
@@ -136,16 +137,19 @@ describe("/api/admin/provenance/verify-chain", () => {
       checkedAt: "2026-05-14T14:00:00.000Z",
       failures: [],
     });
-    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith({
-      eventType: "PROVENANCE_CHAIN_VERIFIED",
-      scope: "DAILY",
-      scopeId: "2026-05-14",
-      merkleRoot: null,
-      chainHash: null,
-      status: "UNAVAILABLE",
-      actorId: "admin_1",
-      actorEmail: "admin@example.com",
-    });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: "PROVENANCE_CHAIN_VERIFIED",
+        source: "PROVENANCE_VERIFY_CHAIN_API",
+        scope: "DAILY",
+        scopeId: "2026-05-14",
+        merkleRoot: null,
+        chainHash: null,
+        status: "UNAVAILABLE",
+        actorId: "admin_1",
+        actorEmail: "admin@example.com",
+      }),
+    );
   });
 
   it("returns CONTINUOUS for a valid chain", async () => {

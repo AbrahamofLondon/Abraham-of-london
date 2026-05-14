@@ -17,6 +17,7 @@ vi.mock("@/lib/admin/provenance-anchor-runner", () => ({
 
 vi.mock("@/lib/admin/provenance-operation-audit", () => ({
   recordProvenanceOperationAudit: mocks.recordProvenanceOperationAudit,
+  createProvenanceRequestId: () => "prv_test_stubbed",
 }));
 
 import handler from "./create-anchor";
@@ -107,16 +108,21 @@ describe("/api/admin/provenance/create-anchor", () => {
       anchor: null,
       reason: "No retained oversight cycles matched the requested anchor scope.",
     });
-    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith({
-      eventType: "PROVENANCE_ANCHOR_CREATED",
-      scope: "DAILY",
-      scopeId: "2026-05-14",
-      merkleRoot: null,
-      chainHash: null,
-      status: "UNAVAILABLE",
-      actorId: "admin_1",
-      actorEmail: "admin@example.com",
-    });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: "PROVENANCE_ANCHOR_CREATED",
+        source: "PROVENANCE_CREATE_ANCHOR_API",
+        scope: "DAILY",
+        scopeId: "2026-05-14",
+        merkleRoot: null,
+        chainHash: null,
+        status: "UNAVAILABLE",
+        actorId: "admin_1",
+        actorEmail: "admin@example.com",
+      }),
+    );
+    const firstCall = mocks.recordProvenanceOperationAudit.mock.calls[0] as [{ requestId: unknown }] | undefined;
+    expect(typeof firstCall?.[0]?.requestId).toBe("string");
   });
 
   it("returns anchor summary only when anchor is created", async () => {
@@ -157,16 +163,19 @@ describe("/api/admin/provenance/create-anchor", () => {
       fromTimestamp: undefined,
       toTimestamp: undefined,
     });
-    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith({
-      eventType: "PROVENANCE_ANCHOR_CREATED",
-      scope: "ACCOUNT",
-      scopeId: "acct_001",
-      merkleRoot: "root_hash",
-      chainHash: "chain_hash",
-      status: "SUCCESS",
-      actorId: "admin_1",
-      actorEmail: "admin@example.com",
-    });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: "PROVENANCE_ANCHOR_CREATED",
+        source: "PROVENANCE_CREATE_ANCHOR_API",
+        scope: "ACCOUNT",
+        scopeId: "acct_001",
+        merkleRoot: "root_hash",
+        chainHash: "chain_hash",
+        status: "SUCCESS",
+        actorId: "admin_1",
+        actorEmail: "admin@example.com",
+      }),
+    );
     expect(response.body).toEqual({
       version: 1,
       status: "ANCHORED",

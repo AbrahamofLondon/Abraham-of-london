@@ -6,7 +6,10 @@ import {
   createOversightProvenanceAnchor,
   type CreateOversightProvenanceAnchorInput,
 } from "@/lib/admin/provenance-anchor-runner";
-import { recordProvenanceOperationAudit } from "@/lib/admin/provenance-operation-audit";
+import {
+  createProvenanceRequestId,
+  recordProvenanceOperationAudit,
+} from "@/lib/admin/provenance-operation-audit";
 
 type CreateAnchorResponse = {
   version: 1;
@@ -79,6 +82,7 @@ export default async function handler(
     });
   }
 
+  const requestId = createProvenanceRequestId("anchor");
   const result = await createOversightProvenanceAnchor({
     scope,
     scopeId,
@@ -88,6 +92,8 @@ export default async function handler(
   });
   const audit = await recordProvenanceOperationAudit({
     eventType: "PROVENANCE_ANCHOR_CREATED",
+    requestId,
+    source: "PROVENANCE_CREATE_ANCHOR_API",
     scope: result.scope,
     scopeId: result.scopeId,
     merkleRoot: result.anchor?.merkleRoot ?? null,

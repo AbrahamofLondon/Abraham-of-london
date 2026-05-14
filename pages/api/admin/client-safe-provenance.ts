@@ -9,6 +9,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdminPage } from "@/lib/access/server";
 import { recordProvenanceAuditEvent } from "@/lib/admin/provenance-audit-events";
+import { createProvenanceRequestId } from "@/lib/admin/provenance-operation-audit";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
@@ -26,6 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const requestId = createProvenanceRequestId("clientsafe");
     const { loadClientSafeProvenance } = await import(
       "@/lib/admin/client-safe-provenance-composer"
     );
@@ -35,6 +37,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     await recordProvenanceAuditEvent({
       action: "CLIENT_SAFE_PROVENANCE_GENERATED",
+      requestId,
+      source: "CLIENT_SAFE_PROVENANCE_API",
       subjectType: "OVERSIGHT_CYCLE",
       subjectId: cycleId,
       hash: summary.provenanceHash,

@@ -15,6 +15,8 @@ export type ProvenanceAuditAction =
 
 export type ProvenanceAuditInput = {
   action: ProvenanceAuditAction;
+  requestId?: string | null;
+  source?: string | null;
   subjectType?: string | null;
   subjectId?: string | null;
   scope?: string | null;
@@ -57,6 +59,8 @@ function toOperationStatus(input: ProvenanceAuditInput): ProvenanceOperationStat
 export async function recordProvenanceAuditEvent(input: ProvenanceAuditInput): Promise<void> {
   await recordProvenanceOperationAudit({
     eventType: toOperationEventType(input.action),
+    requestId: input.requestId,
+    source: input.source,
     subjectType: input.subjectType,
     subjectId: input.subjectId,
     scope: input.scope,

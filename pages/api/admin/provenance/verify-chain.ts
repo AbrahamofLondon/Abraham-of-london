@@ -6,7 +6,10 @@ import {
   verifyProvenanceChainSequence,
   type ProvenanceChainAnchorRecord,
 } from "@/lib/admin/provenance-chain-ledger";
-import { recordProvenanceOperationAudit } from "@/lib/admin/provenance-operation-audit";
+import {
+  createProvenanceRequestId,
+  recordProvenanceOperationAudit,
+} from "@/lib/admin/provenance-operation-audit";
 import { prisma } from "@/lib/prisma.server";
 
 type ChainContinuityStatus = "CONTINUOUS" | "BROKEN" | "UNAVAILABLE";
@@ -117,6 +120,7 @@ export default async function handler(
     },
   });
 
+  const requestId = createProvenanceRequestId("chain");
   const anchors = rows.map(mapAnchor);
   const latest = anchors.at(-1);
   const verification = anchors.length > 0
@@ -125,6 +129,8 @@ export default async function handler(
   const status = anchors.length === 0 ? "UNAVAILABLE" : verification.valid ? "CONTINUOUS" : "BROKEN";
   const audit = await recordProvenanceOperationAudit({
     eventType: "PROVENANCE_CHAIN_VERIFIED",
+    requestId,
+    source: "PROVENANCE_VERIFY_CHAIN_API",
     scope,
     scopeId,
     merkleRoot: latest?.merkleRoot ?? null,

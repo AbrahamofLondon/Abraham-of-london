@@ -6,7 +6,10 @@ import {
 } from "@/lib/admin/provenance-access-policy";
 import type { DecisionProvenanceRecord } from "@/lib/admin/decision-provenance-record";
 import type { IntegrityStatus } from "@/lib/admin/provenance-integrity";
-import { recordProvenanceOperationAudit } from "@/lib/admin/provenance-operation-audit";
+import {
+  createProvenanceRequestId,
+  recordProvenanceOperationAudit,
+} from "@/lib/admin/provenance-operation-audit";
 
 type VerificationResponse = {
   version: 1;
@@ -107,6 +110,7 @@ export default async function handler(
     });
   }
 
+  const requestId = createProvenanceRequestId("verify");
   const checkedAt = new Date().toISOString();
   let recomputedHash: string | null = null;
   let archivedHash: string | null = null;
@@ -129,6 +133,8 @@ export default async function handler(
 
   const audit = await recordProvenanceOperationAudit({
     eventType: status === "MISMATCH" ? "PROVENANCE_HASH_MISMATCH" : "PROVENANCE_HASH_VERIFIED",
+    requestId,
+    source: "PROVENANCE_VERIFY_API",
     status: status === "MISMATCH" ? "MISMATCH" : status === "UNAVAILABLE" ? "UNAVAILABLE" : "SUCCESS",
     subjectType,
     subjectId,
