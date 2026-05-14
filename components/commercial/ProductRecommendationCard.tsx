@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { metadataLabelStyle, microLabelStyle } from "@/lib/design/typography";
 import type { EarnedProgression } from "@/lib/commercial/recommendation-engine";
 import { getCommercialDisplayPrice, isCheckoutAvailable, isContractedProduct } from "@/lib/commercial/catalog";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
@@ -67,7 +68,7 @@ export function ProductAdmissionCard({
 
       {evidenceThreshold.length > 0 && (
         <div style={{ marginBottom: "8px" }}>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: textMuted, marginBottom: "4px" }}>
+          <p style={{ ...microLabelStyle, color: textMuted, marginBottom: "4px" }}>
             Evidence threshold met because:
           </p>
           {evidenceThreshold.map((t, i) => (
@@ -102,7 +103,7 @@ export function ProductAdmissionCard({
         ) : null}
       </div>
 
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: textMuted, marginTop: "10px" }}>
+      <p style={{ ...metadataLabelStyle, color: textMuted, marginTop: "10px" }}>
         {whatHappensIfYouStop}
       </p>
     </div>

@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { metadataLabelStyle } from "@/lib/design/typography";
 import type { VisibilityRetainedSummary } from "@/lib/product/visibility-retained";
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -26,7 +27,7 @@ export default function VisibilityRetainedPanel({
       <div style={{ display: "grid", gap: "10px", marginTop: "12px" }}>
         {summary.items.map((item) => (
           <div key={item.category} style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "10px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+            <p style={{ ...metadataLabelStyle, color: "rgba(255,255,255,0.32)" }}>
               {item.label} · {item.confidence}
             </p>
             <p style={{ ...serif, fontSize: compact ? "0.84rem" : "0.9rem", lineHeight: 1.55, color: "rgba(255,255,255,0.72)", marginTop: "4px" }}>

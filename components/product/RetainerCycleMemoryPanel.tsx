@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { metadataLabelStyle } from "@/lib/design/typography";
 import type {
   RetainerCycleMemoryFinding,
   RetainerCycleMemorySummary,
@@ -124,7 +125,7 @@ export default function RetainerCycleMemoryPanel(input: {
     <div className="space-y-4">
       <div className="grid gap-3 md:grid-cols-3">
         <div>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+          <p style={{ ...metadataLabelStyle, color: "rgba(255,255,255,0.30)" }}>
             Record status
           </p>
           <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.78)", lineHeight: 1.5 }}>
@@ -132,7 +133,7 @@ export default function RetainerCycleMemoryPanel(input: {
           </p>
         </div>
         <div>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+          <p style={{ ...metadataLabelStyle, color: "rgba(255,255,255,0.30)" }}>
             Escalation
           </p>
           <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.78)", lineHeight: 1.5 }}>
@@ -140,7 +141,7 @@ export default function RetainerCycleMemoryPanel(input: {
           </p>
         </div>
         <div>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+          <p style={{ ...metadataLabelStyle, color: "rgba(255,255,255,0.30)" }}>
             Escalation required
           </p>
           <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.78)", lineHeight: 1.5 }}>

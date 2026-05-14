@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { metadataLabelStyle } from "@/lib/design/typography";
 import type { EfficacyCommand } from "@/lib/product/efficacy-contract";
 
 const GOLD = "#C9A96E";
@@ -44,7 +45,7 @@ export function EfficacyCommandBlock({
 
       {command.checkpoint && (
         <div style={{ padding: "10px 14px", border: `1px solid ${isDark ? "rgba(110,231,183,0.15)" : "rgba(110,231,183,0.30)"}`, backgroundColor: isDark ? "rgba(110,231,183,0.03)" : "rgba(110,231,183,0.05)", marginBottom: "12px" }}>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
+          <p style={{ ...metadataLabelStyle, letterSpacing: "0.20em", color: "rgba(110,231,183,0.55)" }}>
             Checkpoint: {command.checkpoint.type.replace(/_/g, " ").toLowerCase()}
           </p>
           <p style={{ fontSize: "12px", lineHeight: 1.5, color: textSecondary, marginTop: "4px" }}>
@@ -57,7 +58,7 @@ export function EfficacyCommandBlock({
       )}
 
       {command.escalationIfIgnored && (
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)" }}>
+        <p style={{ ...metadataLabelStyle, letterSpacing: "0.16em", color: "rgba(252,165,165,0.40)" }}>
           If ignored: {command.escalationIfIgnored.consequence}
         </p>
       )}
@@ -82,7 +83,7 @@ export function EfficacyCommandBlock({
         </div>
       )}
 
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: textMuted, marginTop: "10px" }}>
+      <p style={{ ...metadataLabelStyle, letterSpacing: "0.16em", color: textMuted, marginTop: "10px" }}>
         Source: {command.surface.replace(/_/g, " ")} &middot; Evidence posture: {command.sourceEvidence[0]?.posture?.toLowerCase() ?? "system-inferred"}
       </p>
     </div>

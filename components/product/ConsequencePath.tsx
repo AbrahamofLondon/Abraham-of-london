@@ -13,6 +13,8 @@
 
 import * as React from "react";
 
+import { metadataLabelStyle } from "@/lib/design/typography";
+
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -69,10 +71,8 @@ function PathStep({ label, labelColor, text, borderColor }: StepProps) {
     >
       <p
         style={{
-          ...mono,
-          fontSize: "8px",
+          ...metadataLabelStyle,
           letterSpacing: "0.22em",
-          textTransform: "uppercase",
           color: labelColor ?? "rgba(255,255,255,0.28)",
           marginBottom: "0.3rem",
         }}

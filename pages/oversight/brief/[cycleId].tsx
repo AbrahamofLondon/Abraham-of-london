@@ -4,6 +4,7 @@ import Head from "next/head";
 
 import Layout from "@/components/Layout";
 import { resolvePageAccess } from "@/lib/access/server";
+import { metadataLabelStyle, microLabelStyle } from "@/lib/design/typography";
 import { prisma } from "@/lib/prisma.server";
 import { loadOversightCycleArchive } from "@/lib/product/oversight-cycle-archive";
 import type { OversightBrief } from "@/lib/product/oversight-brief-contract";
@@ -80,25 +81,25 @@ const OversightBriefPage: NextPage<PageProps> = ({
             {cycle ? (
               <div className="mt-4 grid gap-3 md:grid-cols-4">
                 <div>
-                  <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Cycle identity</div>
+                  <div style={{ ...microLabelStyle, color: "rgba(255,255,255,0.28)" }}>Cycle identity</div>
                   <div className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.68)" }}>{cycle.cycleId}</div>
                 </div>
                 <div>
-                  <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Oversight period</div>
+                  <div style={{ ...microLabelStyle, color: "rgba(255,255,255,0.28)" }}>Oversight period</div>
                   <div className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.68)" }}>
                     {new Date(cycle.periodStart).toLocaleDateString("en-GB")} to {new Date(cycle.periodEnd).toLocaleDateString("en-GB")}
                   </div>
                 </div>
                 <div>
-                  <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Delivery state</div>
+                  <div style={{ ...microLabelStyle, color: "rgba(255,255,255,0.28)" }}>Delivery state</div>
                   <div className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.68)" }}>{cycle.deliveryStatus}</div>
                 </div>
                 <div>
-                  <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Audience</div>
+                  <div style={{ ...microLabelStyle, color: "rgba(255,255,255,0.28)" }}>Audience</div>
                   <div className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.68)" }}>{audience}</div>
                 </div>
                 <div>
-                  <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence boundary</div>
+                  <div style={{ ...microLabelStyle, color: "rgba(255,255,255,0.28)" }}>Evidence boundary</div>
                   <div className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.68)" }}>
                     {audience === "BOARD_LEVEL" ? "Board-safe consequence view" : "Sponsor-safe governed view"}
                   </div>
@@ -223,15 +224,15 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 <Section title="Cycle Projection">
                   <div className="space-y-3">
                     <div>
-                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>What became harder</p>
+                      <p style={{ ...metadataLabelStyle, color: "rgba(255,255,255,0.30)" }}>What became harder</p>
                       <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{(brief as any).cycleProjection.whatBecameHarder}</p>
                     </div>
                     <div>
-                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>What may become more expensive</p>
+                      <p style={{ ...metadataLabelStyle, color: "rgba(255,255,255,0.30)" }}>What may become more expensive</p>
                       <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{(brief as any).cycleProjection.whatMayBecomeMoreExpensive}</p>
                     </div>
                     <div>
-                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>What needs review before next cycle</p>
+                      <p style={{ ...metadataLabelStyle, color: "rgba(255,255,255,0.30)" }}>What needs review before next cycle</p>
                       <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{(brief as any).cycleProjection.whatNeedsReviewBeforeNextCycle}</p>
                     </div>
                     <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.5rem" }}>
