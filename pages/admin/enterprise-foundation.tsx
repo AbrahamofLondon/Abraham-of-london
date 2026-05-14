@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 import {
   getExecutiveRiskSnapshot,
@@ -27,7 +27,7 @@ function Metric({ label, value, tone }: { label: string; value: string | number;
 
 const EnterpriseFoundationPage: NextPage<PageProps> = ({ snapshot, telemetry }) => {
   return (
-    <Layout title="Enterprise Foundation" description="Decision authority substrate review" fullWidth>
+    <AdminLayout>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-7xl">
           <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
@@ -91,7 +91,7 @@ const EnterpriseFoundationPage: NextPage<PageProps> = ({ snapshot, telemetry }) 
           </section>
         </div>
       </main>
-    </Layout>
+    </AdminLayout>
   );
 };
 

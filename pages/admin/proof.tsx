@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 import { listProofEvidence, type ProofEvidenceRecord } from "@/lib/proof/evidence";
 import { track } from "@/lib/analytics/track";
@@ -208,7 +208,7 @@ const AdminProofPage: NextPage<PageProps> = ({ initialItems, error }) => {
 
   if (error) {
     return (
-      <Layout title="Proof Review" description="Admin proof evidence review" fullWidth>
+      <AdminLayout>
         <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "var(--ds-background)" }}>
           <div className="mx-auto max-w-4xl">
             <AdminErrorState
@@ -218,12 +218,12 @@ const AdminProofPage: NextPage<PageProps> = ({ initialItems, error }) => {
             />
           </div>
         </main>
-      </Layout>
+      </AdminLayout>
     );
   }
 
   return (
-    <Layout title="Proof Review" description="Admin proof evidence review" fullWidth>
+    <AdminLayout>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "var(--ds-background)" }}>
         <div className="mx-auto max-w-6xl">
           <p className="font-mono text-[10px] uppercase" style={{ color: "var(--ds-accent)" }}>
@@ -292,7 +292,7 @@ const AdminProofPage: NextPage<PageProps> = ({ initialItems, error }) => {
           </div>
         </div>
       </main>
-    </Layout>
+    </AdminLayout>
   );
 };
 

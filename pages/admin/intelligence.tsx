@@ -1,7 +1,7 @@
 /* pages/admin/intelligence.tsx — REAL-TIME AUDIT & INTELLIGENCE VIEW */
 import * as React from "react";
 import type { NextPage, GetServerSideProps } from "next";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { prisma } from "@/lib/db";
 import { requireAdminPage } from "@/lib/access/server";
 import {
@@ -500,7 +500,7 @@ const IntelligenceView: NextPage<IntelligenceProps> = ({
   canonicalEfficacy = [],
 }) => {
   return (
-    <Layout title="Intelligence Command Center">
+    <AdminLayout>
       <main className="min-h-screen bg-[#020202] px-8 pb-20 pt-32 text-white">
         <div className="mx-auto max-w-[1600px]">
           <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -542,7 +542,7 @@ const IntelligenceView: NextPage<IntelligenceProps> = ({
           <DealFlowBlock initialData={dealFlowStats} />
         </div>
       </main>
-    </Layout>
+    </AdminLayout>
   );
 };
 

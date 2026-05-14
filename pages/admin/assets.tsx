@@ -9,7 +9,7 @@
 import React from "react";
 import Head from "next/head";
 import type { GetServerSideProps, NextPage } from "next";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import PdfSyncDashboard from "@/components/admin/PdfSyncDashboard";
 import { requireAdminPage } from "@/lib/access/server";
 
@@ -22,7 +22,7 @@ interface Props {
 
 const AdminAssetsPage: NextPage<Props> = ({ admin }) => {
   return (
-    <Layout title="Asset Registry | Control Center" className="bg-black min-h-screen">
+    <AdminLayout>
       <Head>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
@@ -74,7 +74,7 @@ const AdminAssetsPage: NextPage<Props> = ({ admin }) => {
           </div>
         </footer>
       </main>
-    </Layout>
+    </AdminLayout>
   );
 };
 

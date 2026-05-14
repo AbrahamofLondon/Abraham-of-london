@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 import { prisma } from "@/lib/prisma.server";
 
@@ -82,7 +82,7 @@ function StatusBadge({ status }: { status: string | null }) {
 
 const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
   return (
-    <Layout title="Outcome Ledger" description="Decision authority track record" fullWidth>
+    <AdminLayout>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-7xl">
           <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
@@ -197,7 +197,7 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
           </div>
         </div>
       </main>
-    </Layout>
+    </AdminLayout>
   );
 };
 

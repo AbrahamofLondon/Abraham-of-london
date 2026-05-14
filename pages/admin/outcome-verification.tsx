@@ -8,7 +8,7 @@
 
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 import {
   getPendingOperatorReviews,
@@ -48,7 +48,7 @@ const SLA_BAND_TEXT: Record<ReviewQueuePosture["reviewSlaBand"], string> = {
 const Page: NextPage<PageProps> = ({ items, total, operatorEmail, queuePosture }) => {
   const band = queuePosture.reviewSlaBand;
   return (
-    <Layout title="Outcome Verification Review | Admin" description="Operator review queue for verification records.">
+    <AdminLayout>
       <main className="min-h-screen px-6 py-14" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-4xl">
           <div className="mb-8">
@@ -107,7 +107,7 @@ const Page: NextPage<PageProps> = ({ items, total, operatorEmail, queuePosture }
           )}
         </div>
       </main>
-    </Layout>
+    </AdminLayout>
   );
 };
 

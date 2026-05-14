@@ -5,23 +5,19 @@ import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 
-// ⚠️ Do NOT import Layout here until Layout is audited.
-// Layout is a frequent source of router usage during prerender.
-const USE_LAYOUT = false as const;
+import type { GetServerSidePropsContext } from "next";
+import { requireAdminPage } from "@/lib/auth/require-admin-page";
 
-let Layout: any = null;
-if (USE_LAYOUT) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  Layout = require("@/components/Layout").default;
-}
-
+// Page has its own full-page UI — no outer layout wrapper needed.
 function Shell({ children }: { children: React.ReactNode }) {
-  if (!USE_LAYOUT) return <>{children}</>;
-  return <Layout title="Inner Circle Admin">{children}</Layout>;
+  return <>{children}</>;
 }
 
 // ✅ HARD REQUIREMENT: Admin must NOT be statically exported.
-export async function getServerSideProps() {
+// Guard: requireAdminPage enforces auth before HTML is served.
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const auth = await requireAdminPage(ctx);
+  if (!auth.ok) return { redirect: { ...auth.redirect, permanent: false } };
   return { props: {} };
 }
 

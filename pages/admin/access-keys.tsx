@@ -2,7 +2,7 @@ import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { Loader2 } from "lucide-react";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 import { prisma } from "@/lib/prisma.server";
 import type { EntitlementGrant } from "@/lib/access/types";
@@ -312,7 +312,7 @@ const AccessKeysPage: NextPage<PageProps> = ({ initialKeys, initialInvites }) =>
   }
 
   return (
-    <Layout title="Access Control | Admin" fullWidth>
+    <AdminLayout>
       <Head>
         <title>Access Control | Abraham of London</title>
         <meta name="robots" content="noindex, nofollow" />
@@ -657,7 +657,7 @@ const AccessKeysPage: NextPage<PageProps> = ({ initialKeys, initialInvites }) =>
           </section>
         </div>
       </main>
-    </Layout>
+    </AdminLayout>
   );
 };
 

@@ -152,26 +152,68 @@
 | `/admin/outcome-verification` | `requireAdminPage(ctx)` in `getServerSideProps` | `@/lib/access/server` | CONFIRMED |
 | `/api/decision/metadata-audit` | None — public-safe content metadata only | — | DOCUMENTED |
 
+## Changes Applied — Pass 3 (Layout Shell Hygiene)
+
+### Pages-Router Layout Normalisation
+
+All pages-router admin pages now use `@/components/admin/AdminLayout` instead of the public `@/components/Layout`. This eliminates the public site header/footer from admin surfaces.
+
+| File | Change |
+|------|--------|
+| `pages/admin/access-keys.tsx` | Layout → AdminLayout |
+| `pages/admin/assets.tsx` | Layout → AdminLayout |
+| `pages/admin/conversion-dashboard.tsx` | Layout → AdminLayout |
+| `pages/admin/enterprise-foundation.tsx` | Layout → AdminLayout |
+| `pages/admin/enterprise-pipeline.tsx` | Layout → AdminLayout |
+| `pages/admin/intelligence.tsx` | Layout → AdminLayout |
+| `pages/admin/outcome-ledger.tsx` | Layout → AdminLayout |
+| `pages/admin/outcome-verification.tsx` | Layout → AdminLayout |
+| `pages/admin/proof.tsx` | Layout → AdminLayout (×2 — error + main render path) |
+| `pages/admin/pdf-status.tsx` | Fixed import `@/components/AdminLayout` → `@/components/admin/AdminLayout` |
+| `pages/admin/inner-circle/index.tsx` | Removed dead `USE_LAYOUT = false` Layout block. Added `requireAdminPage` guard to `getServerSideProps` (was entirely unguarded). |
+
+All touched pages were already guarded via `requireAdminPage` in `getServerSideProps`, except `inner-circle` which had no guard — that gap is now closed.
+
+### App-Router Admin Shell
+
+**Before:** `app/admin/layout.tsx` called `requireAdminServer()` but rendered `<>{children}</>` — no visual shell, no sidebar, no header. App-router admin pages were visually naked and inconsistent (some dark, some light, some with their own custom UI headers).
+
+**After:** `app/admin/layout.tsx` now wraps all app-router admin pages in `AppAdminShell`.
+
+| File | Change |
+|------|--------|
+| `components/admin/AppAdminShell.tsx` | CREATED — App Router compatible admin shell. Mirrors `AdminLayout.tsx` visually but uses `usePathname`/`useRouter` from `next/navigation` instead of `next/router`. Provides the institutional dark sidebar + header for all app-router admin surfaces. |
+| `app/admin/layout.tsx` | Updated to import and render `<AppAdminShell>` around children. Guard unchanged. |
+
+### Admin Layout Consistency — Final State
+
+| Router | Shell | Guard | Status |
+|--------|-------|-------|--------|
+| Pages Router | `@/components/admin/AdminLayout` | `requireAdminPage` in `getServerSideProps` | Normalised |
+| App Router | `AppAdminShell` via `app/admin/layout.tsx` | `requireAdminServer()` in layout | Normalised |
+
+### Note on Auth SSOT Closure
+
+Pass 2 notes referenced "Dual admin email lists remain unresolved." This is resolved. Commit `136a36c61` ("Auth: consolidate admin authority source") consolidated the admin email SSOT. `lib/access/admin-emails.ts` is now the single source. `lib/auth/admin-authority.ts` re-exports from it. `lib/product/organisation-access.ts` no longer maintains its own email list.
+
 ---
 
 ## Remaining Recommendations
 
-1. **DONE** — `/admin/reporting/executive` page.tsx created. Nav no longer a dead link.
+1. **DONE** — `/admin/reporting/executive` page.tsx created (Pass 2). Nav no longer a dead link.
+2. **DONE** — `/admin/outcome-verification` added as `operator`/`active` in nav (Pass 2).
+3. **DONE** — `/admin/pdf-status` layout import fixed (Pass 3).
+4. **DONE** — `/admin/redis` guard added via `requireAdminPage` (Pass 2).
+5. **DONE** — `/api/decision/metadata-audit` confirmed public-safe; auth rationale documented (Pass 2).
+6. **DONE** — All pages-router admin pages migrated from `@/components/Layout` to `AdminLayout` (Pass 3).
+7. **DONE** — App-router admin pages now wrapped in `AppAdminShell` (Pass 3).
+8. **DONE** — `/admin/inner-circle` dead Layout code removed; `requireAdminPage` guard added (Pass 3).
+9. **DONE** — Dual admin email lists resolved by auth SSOT commit `136a36c61` (external pass).
 
-2. **DONE** — `/admin/outcome-verification` added as `operator`/`active` in nav.
+### Open Items
 
-3. **Fix `/admin/pdf-status` layout import**: Change `@/components/AdminLayout` to `@/components/admin/AdminLayout` to match the rest of the admin surface.
-
-4. **DONE** — `/admin/redis` guard added via `requireAdminPage`.
-
-5. **DONE** — `/api/decision/metadata-audit` confirmed public-safe; auth rationale documented in source.
-
-6. **Normalise Layout usage**: `/admin/outcome-ledger`, `/admin/enterprise-pipeline`, `/admin/enterprise-foundation`, `/admin/conversion-dashboard` use `@/components/Layout` instead of `AdminLayout`. This causes visual inconsistency — these pages lack the admin sidebar.
-
-7. **Verify `/admin/pdf-dashboard` auth path**: It uses `@/lib/auth/require-admin-page` while many other pages use `@/lib/access/server#requireAdminPage`. Both modules call `canAccessAdmin` from the same checks module — they are functionally equivalent but the import paths differ. Low risk; normalisation is cosmetic.
-
-8. **Wire `/admin/snapshot` to live data**: Currently all data is hardcoded (GLOBAL_DATA, TEAM_SNAPSHOTS). Status corrected to `rough`. Not usable operationally.
-
-9. **`/admin/boardroom-archive` parameter requirement**: The page requires `?organisationId=` query param and shows empty state without it. Consider adding a picker UI or adjusting the nav to surface-link from org dashboards only.
-
-10. **`/admin/inner-circle` Layout guard cleanup**: The `USE_LAYOUT = false` conditional require pattern is non-standard and may cause issues with static analysis tooling.
+- **Wire `/admin/snapshot` to live data**: All data is hardcoded (GLOBAL_DATA, TEAM_SNAPSHOTS). Status is `rough`. Not usable operationally until wired to live API.
+- **`/admin/pdf-dashboard` auth import**: Uses `@/lib/auth/require-admin-page` while most peers use `@/lib/access/server`. Both are functionally equivalent (both call `canAccessAdmin`). Low risk; cosmetic normalisation only.
+- **`/admin/boardroom-archive` parameter requirement**: Page requires `?organisationId=` query param. Empty state shown without it. Consider picker UI or org-dashboard-only surface linking.
+- **Future `/admin/product-surfaces`**: Inventory of all client-facing assessment/product surfaces with preview links, monitoring priority, and operational owner. Noted in `app/admin/reporting/executive/page.tsx`.
+- **App-router page top padding**: Some app-router pages use `py-24` or `pt-32` designed for the public site's fixed header. Inside AppAdminShell these produce extra top space. Visual cleanup is a separate normalisation pass.

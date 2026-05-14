@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Head from 'next/head';
 import fs from 'fs/promises';
 import path from 'path';
-import AdminLayout from '@/components/AdminLayout';
+import AdminLayout from '@/components/admin/AdminLayout';
 import { ShieldCheck, ShieldAlert, HardDrive, FileSearch, RefreshCcw } from 'lucide-react';
 
 interface PDFStatus {

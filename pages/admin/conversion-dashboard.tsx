@@ -2,7 +2,7 @@
 import * as React from "react";
 import type { GetServerSideProps } from "next";
 import Head from "next/head";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 import { getConversionIntelligenceMetrics } from "@/lib/analytics/decision-journey";
 
@@ -49,7 +49,7 @@ function duration(ms: number): string {
 
 export default function ConversionDashboard({ conversionIntelligence }: ConversionDashboardProps) {
   return (
-    <Layout title="Conversion Dashboard | Admin" fullWidth>
+    <AdminLayout>
       <Head><meta name="robots" content="noindex,nofollow" /></Head>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "var(--ds-background)" }}>
         <div className="mx-auto max-w-5xl">
@@ -155,7 +155,7 @@ export default function ConversionDashboard({ conversionIntelligence }: Conversi
           </div>
         </div>
       </main>
-    </Layout>
+    </AdminLayout>
   );
 }
 
