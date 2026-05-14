@@ -16,9 +16,11 @@ import { canViewSponsorCommandSummary, deriveRetainedProductRole } from "@/lib/p
 import { verifyRetainerAccess } from "@/lib/retainers/retainer-service";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import RetainerCycleMemoryPanel from "@/components/product/RetainerCycleMemoryPanel";
+import ProvenanceSummaryPanel from "@/components/product/ProvenanceSummaryPanel";
 import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
+import type { ClientSafeProvenanceSummary } from "@/lib/product/client-safe-provenance-contract";
 
 type ComposerIntelligence = {
   contradictionPressureBand: string | null;
@@ -38,6 +40,7 @@ type PageProps = {
   audience: OversightCycleAudience;
   cadencePosture: BuyerVisibleCadencePosture | null;
   composerIntelligence: ComposerIntelligence | null;
+  provenance: ClientSafeProvenanceSummary | null;
 };
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -63,6 +66,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
   audience,
   cadencePosture,
   composerIntelligence,
+  provenance,
 }) => {
   return (
     <Layout title="Oversight Brief" description="Governed monthly oversight brief" fullWidth>
@@ -532,6 +536,10 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 </Section>
               )}
 
+              <Section title="Provenance Summary">
+                <ProvenanceSummaryPanel provenance={provenance} />
+              </Section>
+
               {/* ── PDF Download ── */}
               <section className="border border-white/[0.08] bg-white/[0.02] p-5">
                 <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#C9A96E]">
@@ -601,12 +609,12 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const cycleId = typeof ctx.query.cycleId === "string" ? ctx.query.cycleId : null;
   const audience = ctx.query.audience === "BOARD_LEVEL" ? "BOARD_LEVEL" : "CLIENT_SPONSOR";
   if (!cycleId) {
-    return { props: { blockedReason: "No oversight cycle was specified. Navigate to Retained Oversight Command to view available cycles. A cycle is created when a retained review period is completed.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
+    return { props: { blockedReason: "No oversight cycle was specified. Navigate to Retained Oversight Command to view available cycles. A cycle is created when a retained review period is completed.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null, provenance: null } };
   }
 
   const archive = await loadOversightCycleArchive({ cycleId });
   if (!archive) {
-    return { props: { blockedReason: "This oversight cycle could not be found. It may not have been archived yet, or the cycle reference may be incorrect. Oversight briefs become available after a retained review cycle is completed and archived by the system.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
+    return { props: { blockedReason: "This oversight cycle could not be found. It may not have been archived yet, or the cycle reference may be incorrect. Oversight briefs become available after a retained review cycle is completed and archived by the system.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null, provenance: null } };
   }
 
   const email = session.user.email.toLowerCase();
@@ -628,7 +636,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   });
 
   if (!isAdmin && !canViewSponsorCommandSummary(role)) {
-    return { props: { blockedReason: "This sponsor-safe oversight brief is not available to the current role.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
+    return { props: { blockedReason: "This sponsor-safe oversight brief is not available to the current role.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null, provenance: null } };
   }
 
   if (!isAdmin && archive.record.organisationId) {
@@ -641,7 +649,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       select: { id: true },
     });
     if (!membershipGate) {
-      return { props: { blockedReason: "Organisation access is required for this oversight brief.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
+      return { props: { blockedReason: "Organisation access is required for this oversight brief.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null, provenance: null } };
     }
   }
 
@@ -651,7 +659,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     email,
   });
   if (!retainerAccess.ok && !isAdmin) {
-    return { props: { blockedReason: "Retainer access is not active for this account.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null } };
+    return { props: { blockedReason: "Retainer access is not active for this account.", cycle: null, brief: null, suppressions: [], nextCycleIntent: null, cycleComparison: null, audience, cadencePosture: null, composerIntelligence: null, provenance: null } };
   }
 
   const retainedCycle = await loadLatestRetainedReviewCycleForAccount({
@@ -679,6 +687,12 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     };
   } catch { /* degrade */ }
 
+  let provenance: ClientSafeProvenanceSummary | null = null;
+  try {
+    const { loadClientSafeProvenance } = await import("@/lib/admin/client-safe-provenance-composer");
+    provenance = await loadClientSafeProvenance({ subjectType: "OVERSIGHT_CYCLE", subjectId: cycleId });
+  } catch { /* degrade — brief renders without provenance panel */ }
+
   return {
     props: {
       blockedReason: null,
@@ -690,6 +704,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       audience,
       cadencePosture,
       composerIntelligence,
+      provenance,
     },
   };
 };
