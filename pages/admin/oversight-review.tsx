@@ -468,6 +468,13 @@ function ProvenancePanel({ cycleId }: { cycleId: string }) {
                   size="md"
                 />
               )}
+              {record.provenanceGaps.length > 0 && (
+                <AdminStatusBadge
+                  label={`${record.provenanceGaps.length} gap${record.provenanceGaps.length !== 1 ? "s" : ""}`}
+                  tone={record.provenanceGaps.some((gap) => gap.severity === "CRITICAL") ? "danger" : "warning"}
+                  size="md"
+                />
+              )}
             </div>
             <p className="mt-1 text-[11px] text-white/45">{record.currentPosture.summary}</p>
           </div>
@@ -477,6 +484,24 @@ function ProvenancePanel({ cycleId }: { cycleId: string }) {
             <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/35">Accountability statement</p>
             <p className="mt-1 text-[11px] text-white/60">{record.accountabilityStatement}</p>
           </div>
+
+          {record.provenanceGaps.length > 0 && (
+            <div>
+              <p className="mb-2 text-[9px] font-mono uppercase tracking-[0.2em] text-white/35">
+                Provenance gaps ({record.provenanceGaps.length})
+              </p>
+              <div className="space-y-1">
+                {record.provenanceGaps.map((gap, i) => (
+                  <div key={i} className="border border-white/5 bg-black/20 px-3 py-2">
+                    <span className="font-mono text-[9px] uppercase tracking-wider text-white/35 mr-2">
+                      {gap.severity}
+                    </span>
+                    <span className="text-[11px] text-white/65">{gap.stage}: {gap.description}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Governance events */}
           {record.governanceEvents.length > 0 && (

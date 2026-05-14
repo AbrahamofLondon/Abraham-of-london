@@ -682,6 +682,15 @@ export function composeProvenanceGaps(
     });
   }
 
+  if (data.subjectType === "OVERSIGHT_CYCLE" && !hasOutcome) {
+    gaps.push({
+      stage: "Outcome linkage",
+      description: "Outcome verification records do not expose a direct cycleId link; only directly linked outcomes can be included in this v1 record.",
+      severity: "INFO",
+      href: "/admin/outcome-verification",
+    });
+  }
+
   for (const decision of data.decisionRecords ?? []) {
     if (decision.decision === "ESCALATE_TO_COUNSEL" && !hasCounsel) {
       gaps.push({
@@ -1174,12 +1183,5 @@ export async function composeDecisionProvenance(input: {
     boardroomEntries,
     decisionRecords,
     unavailableSources,
-  });
-}
-
-export async function loadDecisionProvenanceRecord(cycleId: string): Promise<DecisionProvenanceRecord> {
-  return composeDecisionProvenance({
-    subjectType: "OVERSIGHT_CYCLE",
-    subjectId: cycleId,
   });
 }

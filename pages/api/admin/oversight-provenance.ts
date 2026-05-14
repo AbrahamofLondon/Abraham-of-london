@@ -25,10 +25,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { loadDecisionProvenanceRecord } = await import(
+    const { composeDecisionProvenance } = await import(
       "@/lib/admin/decision-provenance-record"
     );
-    const record = await loadDecisionProvenanceRecord(cycleId);
+    const record = await composeDecisionProvenance({
+      subjectType: "OVERSIGHT_CYCLE",
+      subjectId: cycleId,
+    });
     return res.status(200).json({ ok: true, record });
   } catch (err) {
     console.error("[oversight-provenance] load error", err);
