@@ -614,6 +614,29 @@ export default function DecisionDelayExposurePage() {
             </p>
           </section>
 
+          <GoldDivider />
+
+          {/* ─── Related surfaces ──────────────────────────────────────────── */}
+          <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+              Next steps
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/diagnostics/fast"
+                style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}
+              >
+                Run the Fast Diagnostic
+              </Link>
+              <Link
+                href="/provenance/sample-export"
+                style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}
+              >
+                View sample provenance summary
+              </Link>
+            </div>
+          </section>
+
         </div>
       </main>
     </Layout>

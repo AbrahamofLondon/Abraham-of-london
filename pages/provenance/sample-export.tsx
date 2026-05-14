@@ -15,6 +15,7 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { Shield, Hash, Clock, Layers, AlertTriangle, CheckCircle2, FileText } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -237,6 +238,24 @@ const SampleExportPage: NextPage = () => {
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>WORM storage</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", marginTop: "0.2rem" }}>Not configured</p>
               </div>
+            </div>
+          </section>
+
+          {/* ── RELATED SURFACES ────────────────────────────────────── */}
+          <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+              Related surfaces
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/provenance/anchor-log" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+                View public anchor log
+              </Link>
+              <Link href="/tools/decision-delay-exposure" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+                Estimate decision delay exposure
+              </Link>
+              <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+                Run the Fast Diagnostic
+              </Link>
             </div>
           </section>
 

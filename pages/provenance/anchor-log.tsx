@@ -14,6 +14,7 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { Shield, Clock, Hash, Layers } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -216,6 +217,11 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, generatedAt }) => {
             <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
               These anchors disclose cryptographic roots only. They do not reveal client data, evidence, decisions, or internal review material. External WORM or public anchoring is not yet configured. Until then, these roots are stored in the platform database and are not independently anchored to an external immutable store.
             </p>
+            <div className="mt-4">
+              <Link href="/provenance/sample-export" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+                View sample provenance summary
+              </Link>
+            </div>
           </section>
         </div>
       </main>
