@@ -8,6 +8,8 @@ import { requireAdminPage } from "@/lib/access/server";
 import type { OversightReviewDecision } from "@/lib/product/oversight-review-decision-contract";
 import type { OversightCycleAudience } from "@/lib/product/oversight-cycle-ledger-contract";
 import type { OversightDeliveryAction } from "@/lib/product/oversight-delivery-contract";
+import { AdminStatusBadge, toneForStatus } from "@/components/admin/AdminStatusBadge";
+import type { OversightBatchItem, OversightBatchAction, OversightBatchResult } from "@/lib/admin/oversight-batch";
 
 type SafeOutput = {
   brief: any;
@@ -83,15 +85,309 @@ function DataLine({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const guard = await requireAdminPage(ctx);
-  if (!guard.authorized) return guard.redirect;
-  return { props: {} };
+type PageProps = {
+  batchQueue: OversightBatchItem[];
 };
 
-export default function OversightReviewPage(
-  _props: InferGetServerSidePropsType<typeof getServerSideProps>,
-) {
+export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => {
+  const guard = await requireAdminPage<PageProps>(ctx);
+  if (!guard.authorized) return guard.redirect as never;
+
+  const { buildOversightBatchQueue } = await import("@/lib/admin/oversight-batch");
+  const batchQueue = await buildOversightBatchQueue().catch(() => []);
+
+  return { props: { batchQueue } };
+};
+
+// ─── Batch panel ──────────────────────────────────────────────────────────────
+
+function BatchPanel({ items }: { items: OversightBatchItem[] }) {
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [pendingAction, setPendingAction] = React.useState<OversightBatchAction | null>(null);
+  const [skipReason, setSkipReason] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [result, setResult] = React.useState<(OversightBatchResult & { ok: boolean }) | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const selectedItems = items.filter((item) => selectedIds.has(item.cycleId));
+  const selectedCount = selectedItems.length;
+
+  const eligibleForAction = (action: OversightBatchAction) =>
+    selectedItems.filter((item) => item.eligibleActions.includes(action));
+
+  function toggleAll() {
+    if (selectedIds.size === items.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(items.map((i) => i.cycleId)));
+    }
+  }
+
+  function toggleId(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function runBatch(action: OversightBatchAction) {
+    const eligible = eligibleForAction(action);
+    if (eligible.length === 0) return;
+
+    if (action === "SKIP_WITH_REASON" && !skipReason.trim()) {
+      setError("A reason is required to skip cycles.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const res = await fetch("/api/admin/oversight-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          cycleIds: eligible.map((i) => i.cycleId),
+          reason: action === "SKIP_WITH_REASON" ? skipReason.trim() : undefined,
+        }),
+      });
+      const data = await res.json() as OversightBatchResult & { ok: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Batch action failed");
+      setResult(data);
+      setSelectedIds(new Set());
+      setPendingAction(null);
+      setSkipReason("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Batch action failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (items.length === 0) {
+    return (
+      <section className="border border-white/10 bg-zinc-950/70 p-5">
+        <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">
+          Batch Queue
+        </p>
+        <p className="mt-3 text-sm text-white/40">
+          No active cadence cycles available for batch operations.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="border border-white/10 bg-zinc-950/70 p-5">
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <div>
+          <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">
+            Batch Queue
+          </p>
+          <p className="mt-1 text-xs text-white/40">
+            {items.length} active cycle{items.length !== 1 ? "s" : ""} — select to run safe bulk actions.
+            Eligibility is verified server-side before execution.
+          </p>
+        </div>
+        {selectedCount > 0 && (
+          <span className="shrink-0 rounded border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-amber-300">
+            {selectedCount} selected
+          </span>
+        )}
+      </div>
+
+      {/* Error / result feedback */}
+      {error && (
+        <div className="mb-4 flex items-start gap-2 border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+          <span>{error}</span>
+        </div>
+      )}
+      {result && (
+        <div className="mb-4 border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
+          <p className="text-sm text-emerald-300">
+            {result.successCount} succeeded, {result.failCount} failed.
+          </p>
+          {result.failCount > 0 && (
+            <ul className="mt-2 space-y-1">
+              {result.results
+                .filter((r) => !r.success)
+                .map((r) => (
+                  <li key={r.cycleId} className="font-mono text-[10px] text-rose-300">
+                    {r.cycleId}: {r.error}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Cycle table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/10">
+              <th className="pb-2 pr-4">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.size === items.length && items.length > 0}
+                  onChange={toggleAll}
+                  className="rounded border-white/20 bg-black/30 accent-amber-500"
+                  title="Select all"
+                />
+              </th>
+              <th className="pb-2 pr-4 text-[9px] font-mono uppercase tracking-[0.18em] text-white/35">Organisation</th>
+              <th className="pb-2 pr-4 text-[9px] font-mono uppercase tracking-[0.18em] text-white/35">State</th>
+              <th className="pb-2 pr-4 text-[9px] font-mono uppercase tracking-[0.18em] text-white/35">Scheduled</th>
+              <th className="pb-2 text-[9px] font-mono uppercase tracking-[0.18em] text-white/35">Eligible actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item) => {
+              const checked = selectedIds.has(item.cycleId);
+              const hasActions = item.eligibleActions.length > 0;
+              return (
+                <tr
+                  key={item.cycleId}
+                  className={`border-t border-white/5 align-top transition-colors ${checked ? "bg-amber-500/[0.03]" : ""} ${!hasActions ? "opacity-40" : ""}`}
+                >
+                  <td className="py-3 pr-4">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={!hasActions}
+                      onChange={() => toggleId(item.cycleId)}
+                      className="rounded border-white/20 bg-black/30 accent-amber-500 disabled:cursor-not-allowed"
+                    />
+                  </td>
+                  <td className="py-3 pr-4 text-white/80">{item.organisationLabel}</td>
+                  <td className="py-3 pr-4">
+                    <AdminStatusBadge
+                      label={item.cadenceState}
+                      tone={toneForStatus(item.cadenceState)}
+                      size="md"
+                    />
+                  </td>
+                  <td className="py-3 pr-4 font-mono text-[10px] text-white/40">
+                    {item.scheduledFor
+                      ? new Date(item.scheduledFor).toLocaleDateString("en-GB")
+                      : "—"}
+                  </td>
+                  <td className="py-3">
+                    {item.eligibleActions.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {item.eligibleActions.map((a) => (
+                          <span
+                            key={a}
+                            className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider text-white/40"
+                          >
+                            {a.replace(/_/g, " ")}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="font-mono text-[9px] text-white/25">
+                        {item.ineligibleReasons[0] ?? "No actions"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Batch action bar */}
+      {selectedCount > 0 && (
+        <div className="mt-5 space-y-3 border-t border-white/10 pt-5">
+          <p className="text-[10px] font-mono uppercase tracking-wider text-white/35">
+            Batch actions — {selectedCount} cycle{selectedCount !== 1 ? "s" : ""} selected
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              disabled={loading || eligibleForAction("MARK_IN_PROGRESS").length === 0}
+              onClick={() => setPendingAction("MARK_IN_PROGRESS")}
+              className="border border-blue-500/25 bg-blue-500/10 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-blue-300 transition-colors hover:bg-blue-500/15 disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              Start review ({eligibleForAction("MARK_IN_PROGRESS").length})
+            </button>
+
+            <button
+              disabled={loading || eligibleForAction("MARK_COMPLETED").length === 0}
+              onClick={() => setPendingAction("MARK_COMPLETED")}
+              className="border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-emerald-300 transition-colors hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              Complete review ({eligibleForAction("MARK_COMPLETED").length})
+            </button>
+
+            <button
+              disabled={loading || eligibleForAction("SKIP_WITH_REASON").length === 0}
+              onClick={() => setPendingAction("SKIP_WITH_REASON")}
+              className="border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-amber-300 transition-colors hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              Skip with reason ({eligibleForAction("SKIP_WITH_REASON").length})
+            </button>
+          </div>
+
+          {/* Confirmation zone */}
+          {pendingAction && (
+            <div className="border border-white/10 bg-black/30 p-4">
+              <p className="mb-3 text-sm text-white/70">
+                Confirm:{" "}
+                <span className="font-mono text-amber-300">{pendingAction}</span> for{" "}
+                <span className="font-mono text-white">{eligibleForAction(pendingAction).length}</span>{" "}
+                eligible cycle{eligibleForAction(pendingAction).length !== 1 ? "s" : ""}.
+                Ineligible selections will be skipped automatically.
+              </p>
+
+              {pendingAction === "SKIP_WITH_REASON" && (
+                <div className="mb-3">
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.18em] text-white/40 mb-1">
+                    Skip reason (required)
+                  </label>
+                  <input
+                    value={skipReason}
+                    onChange={(e) => setSkipReason(e.target.value)}
+                    placeholder="e.g. Client requested deferral, rescheduled to next quarter"
+                    className="w-full border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder:text-white/25 focus:border-amber-500/30 focus:outline-none"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <button
+                  disabled={loading || (pendingAction === "SKIP_WITH_REASON" && !skipReason.trim())}
+                  onClick={() => void runBatch(pendingAction)}
+                  className="border border-amber-500/30 bg-amber-500/15 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-amber-300 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-35"
+                >
+                  {loading ? "Running…" : "Confirm & run"}
+                </button>
+                <button
+                  disabled={loading}
+                  onClick={() => { setPendingAction(null); setSkipReason(""); }}
+                  className="text-[10px] font-mono uppercase tracking-widest text-white/35 hover:text-white/60 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function OversightReviewPage({
+  batchQueue,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [accountId, setAccountId] = React.useState("");
   const [organisationId, setOrganisationId] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -214,6 +510,8 @@ export default function OversightReviewPage(
 
       <div className="space-y-6">
         <BackToOperatorCommandCentre />
+
+        <BatchPanel items={batchQueue} />
 
         <section className="border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-6">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-amber-500/60">Oversight Review Bench</p>
