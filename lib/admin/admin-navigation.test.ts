@@ -78,6 +78,15 @@ describe("admin navigation registry", () => {
     expect(item?.status).toBe("active");
   });
 
+  it("/admin/provenance-chain is registered under Security & Audit as admin-only", () => {
+    const security = ADMIN_NAVIGATION.find((section) => section.id === "security");
+    const item = security?.items.find((i) => i.href === "/admin/provenance-chain");
+    expect(item, "/admin/provenance-chain must be in Security & Audit").toBeDefined();
+    expect(item?.id).toBe("provenance-chain");
+    expect(item?.visibility).toBe("admin");
+    expect(item?.status).toBe("active");
+  });
+
   it("broken items are not visible to operator role via getNavItemsForRole", () => {
     const operatorSections = getNavItemsForRole("operator");
     const operatorItems = operatorSections.flatMap((s) => s.items);

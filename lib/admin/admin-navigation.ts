@@ -146,6 +146,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
       { id: "access-keys", label: "Access Keys", href: "/admin/access-keys", router: "pages", visibility: "admin", status: "active", description: "Issue and revoke access keys" },
       { id: "audit", label: "Audit Log", href: "/admin/audit", router: "app", visibility: "admin", status: "active", description: "System forensic ledger — Prisma systemAuditLog with graceful fallback" },
       { id: "events", label: "Event Log", href: "/admin/events", router: "pages", visibility: "admin", status: "active", description: "Unified operational event log across system audit, governance, access, and delivery sources. Webhook events not yet connected." },
+      { id: "provenance-chain", label: "Provenance Chain", href: "/admin/provenance-chain", router: "pages", visibility: "admin", status: "active", description: "Internal append-only chain anchor ledger operations console for anchor review, continuity checks, and controlled manual anchoring." },
       { id: "access-diagnostics", label: "Access Diagnostics", href: "/admin/access-diagnostics", router: "pages", visibility: "admin", status: "active", description: "Read-only view-as diagnostic — loads user role, entitlements, permissions, and surface visibility without impersonation or data mutation." },
     ],
   },
