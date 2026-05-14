@@ -14,6 +14,7 @@ import { loadLatestRetainedReviewCycleForAccount, buildBuyerVisibleCadencePostur
 import { canViewSponsorCommandSummary, deriveRetainedProductRole } from "@/lib/product/retained-role-contract";
 import { verifyRetainerAccess } from "@/lib/retainers/retainer-service";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
+import RetainerCycleMemoryPanel from "@/components/product/RetainerCycleMemoryPanel";
 import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
@@ -186,6 +187,10 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   </p>
                 </Section>
               </div>
+
+              <Section title="Retainer Cycle Memory">
+                <RetainerCycleMemoryPanel retainerCycleMemory={brief.retainerCycleMemory ?? null} />
+              </Section>
 
               <div className="grid gap-6 md:grid-cols-2">
                 <Section title="What Became Harder To Reverse">
