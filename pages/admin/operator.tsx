@@ -22,9 +22,11 @@ import type {
   OperatorMetricTone,
   OperatorQueueCard,
 } from "@/lib/admin/operator-command-centre";
+import type { AdminActionDoctrineRecommendation } from "@/lib/admin/admin-action-doctrine";
 
 type PageProps = {
   summary: OperatorCommandCentreSummary;
+  doctrine: AdminActionDoctrineRecommendation[];
 };
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => {
@@ -32,9 +34,12 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   if (!guard.authorized) return guard.redirect as never;
 
   const { buildOperatorCommandCentreSummary } = await import("@/lib/admin/operator-command-centre");
-  const summary = await buildOperatorCommandCentreSummary();
+  const { buildOperatorDoctrine } = await import("@/lib/admin/admin-action-doctrine");
 
-  return { props: { summary } };
+  const summary = await buildOperatorCommandCentreSummary();
+  const doctrine = buildOperatorDoctrine(summary.cards);
+
+  return { props: { summary, doctrine } };
 };
 
 function operatorTone(tone?: OperatorMetricTone): AdminBadgeTone {
@@ -119,6 +124,86 @@ function QueueCard({ card }: { card: OperatorQueueCard }) {
   );
 }
 
+const DOCTRINE_PRIORITY_STYLE: Record<AdminActionDoctrineRecommendation["priority"], { border: string; label: string; tone: AdminBadgeTone }> = {
+  CRITICAL: { border: "border-l-rose-500/60",   label: "Critical", tone: "critical" },
+  HIGH:     { border: "border-l-rose-500/30",   label: "High",     tone: "danger" },
+  MEDIUM:   { border: "border-l-amber-500/40",  label: "Medium",   tone: "warning" },
+  LOW:      { border: "border-l-white/15",       label: "Low",      tone: "muted" },
+};
+
+function DoctrineCard({ rec }: { rec: AdminActionDoctrineRecommendation }) {
+  const style = DOCTRINE_PRIORITY_STYLE[rec.priority];
+  return (
+    <div className={`border-l-2 pl-4 ${style.border}`}>
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-medium text-white">{rec.title}</span>
+            <AdminStatusBadge label={style.label} tone={style.tone} size="md" />
+          </div>
+          <p className="mt-1 text-[11px] text-white/45">{rec.rationale}</p>
+          <p className="mt-2 text-[11px] text-white/65">{rec.recommendedAction}</p>
+          {rec.blockers && rec.blockers.length > 0 && (
+            <ul className="mt-2 space-y-0.5">
+              {rec.blockers.map((b) => (
+                <li key={b} className="flex items-start gap-1.5 text-[10px] text-amber-400/80">
+                  <span className="mt-px shrink-0">⚠</span>
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {rec.href && (
+          <Link
+            href={rec.href}
+            className="shrink-0 border border-white/10 bg-white/5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.18em] text-white/45 hover:border-amber-500/25 hover:text-amber-200"
+          >
+            {rec.actionLabel ?? "Open"}
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DoctrinePanel({ recommendations }: { recommendations: AdminActionDoctrineRecommendation[] }) {
+  if (recommendations.length === 0) {
+    return (
+      <section className="border border-emerald-500/15 bg-emerald-500/[0.03] p-5">
+        <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">
+          Action Doctrine
+        </p>
+        <div className="mt-3 flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400/60" />
+          <p className="text-sm text-emerald-300/70">
+            No recommended actions — all connected queues are clear.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="border border-white/10 bg-zinc-950/70 p-5">
+      <div className="mb-4">
+        <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">
+          Action Doctrine
+        </p>
+        <p className="mt-1 text-xs text-white/40">
+          Rule-governed recommendations derived from live queue signals. Not AI. Not advisory.
+          These reflect the current state of connected queues only.
+        </p>
+      </div>
+      <div className="space-y-5">
+        {recommendations.map((rec) => (
+          <DoctrineCard key={rec.id} rec={rec} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function QueueGroup({ group }: { group: OperatorActionGroup }) {
   return (
     <section className={`border p-5 ${groupAccent(group.id)}`}>
@@ -149,6 +234,7 @@ function QueueGroup({ group }: { group: OperatorActionGroup }) {
 
 export default function OperatorCommandCentrePage({
   summary,
+  doctrine,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const generatedAt = new Date(summary.generatedAt).toLocaleString("en-GB", {
     dateStyle: "medium",
@@ -197,6 +283,8 @@ export default function OperatorCommandCentrePage({
             />
           ))}
         </section>
+
+        <DoctrinePanel recommendations={doctrine} />
 
         <section className="space-y-4">
           {summary.actionGroups.map((group) => (
