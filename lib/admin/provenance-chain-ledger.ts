@@ -13,6 +13,7 @@ export type CreateProvenanceChainAnchorInput = {
   leaves: ProvenanceChainLeaf[];
   fromTimestamp?: string | null;
   toTimestamp?: string | null;
+  unavailableCount?: number;
 };
 
 export type ProvenanceChainAnchorRecord = {
@@ -117,6 +118,7 @@ function buildSafeMetadata(input: CreateProvenanceChainAnchorInput) {
   return {
     subjectCount: input.leaves.length,
     subjectTypes,
+    unavailableCount: input.unavailableCount ?? 0,
     hasRawPayloads: false,
   };
 }

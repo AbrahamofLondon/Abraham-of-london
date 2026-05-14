@@ -174,6 +174,7 @@ describe("createProvenanceChainAnchor", () => {
     expect(metadata).toEqual({
       subjectCount: 1,
       subjectTypes: ["OVERSIGHT_CYCLE"],
+      unavailableCount: 0,
       hasRawPayloads: false,
     });
     expect(JSON.stringify(metadata)).not.toContain("governanceEvents");
