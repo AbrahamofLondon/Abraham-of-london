@@ -13,6 +13,10 @@ import {
   classifyRetainerReadinessAreas,
   type General50KRuntimeInput,
 } from "@/lib/product/retainer-readiness-classifier";
+import {
+  buildRetainerReadinessRemediation,
+  type RetainerReadinessRemediation,
+} from "@/lib/admin/retainer-readiness-remediation";
 import { buildSponsorSafeCommandSummary } from "@/lib/product/sponsor-safe-command-summary";
 import { buildPortfolioMemory } from "@/lib/product/portfolio-memory-surface";
 import { resolvePortfolioScopes } from "@/lib/product/portfolio-scope-resolver";
@@ -225,6 +229,54 @@ export const getServerSideProps: GetServerSideProps<{
 
 const AREA_SCORECARD = classifyRetainerReadinessAreas();
 
+const SEVERITY_STYLE: Record<RetainerReadinessRemediation["severity"], { badge: string; label: string }> = {
+  CRITICAL: { badge: "bg-red-950/60 border border-red-700/40 text-red-400", label: "Critical" },
+  HIGH:     { badge: "bg-orange-950/60 border border-orange-700/40 text-orange-400", label: "High" },
+  MEDIUM:   { badge: "bg-amber-950/50 border border-amber-700/30 text-amber-400", label: "Medium" },
+  LOW:      { badge: "bg-white/5 border border-white/10 text-white/40", label: "Low" },
+};
+
+const STATUS_STYLE: Record<RetainerReadinessRemediation["status"], string> = {
+  FAIL:        "text-red-400",
+  WATCH:       "text-amber-400",
+  PASS:        "text-emerald-400",
+  UNAVAILABLE: "text-white/30",
+};
+
+function RemediationRow({ item }: { item: RetainerReadinessRemediation }) {
+  const sev = SEVERITY_STYLE[item.severity];
+  return (
+    <div className="border border-white/8 bg-zinc-900/60 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className={`rounded px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider ${sev.badge}`}>
+            {sev.label}
+          </span>
+          <span className="text-sm font-medium text-white">{item.dimension}</span>
+          <span className={`font-mono text-[9px] uppercase tracking-wider ${STATUS_STYLE[item.status]}`}>
+            {item.status}
+          </span>
+        </div>
+        <span className="text-[9px] font-mono uppercase tracking-wider text-white/25">
+          Owner: {item.owner}
+        </span>
+      </div>
+      <p className="mt-2 text-sm text-white/60">{item.issue}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-4">
+        <p className="text-sm text-white/80">{item.recommendedAction}</p>
+        {item.actionHref && item.actionLabel && (
+          <a
+            href={item.actionHref}
+            className="shrink-0 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-amber-400 transition hover:bg-amber-500/20"
+          >
+            {item.actionLabel} →
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const STATUS_COLOUR: Record<string, string> = {
   NOT_READY: "text-red-400",
   FOUNDATION_READY: "text-orange-400",
@@ -236,6 +288,14 @@ const STATUS_COLOUR: Record<string, string> = {
 export default function RetainerReadinessPage(
   props: InferGetServerSidePropsType<typeof getServerSideProps>,
 ) {
+  const remediation = buildRetainerReadinessRemediation({
+    readiness: props.readiness,
+    queueCounts: props.queueCounts,
+    runtime: props.runtime,
+    verificationQueuePosture: props.verificationQueuePosture,
+  });
+  const actionableItems = remediation.filter((r) => r.status === "FAIL" || r.status === "WATCH");
+
   return (
     <AdminLayout title="Retainer Readiness">
       <Head>
@@ -313,6 +373,27 @@ export default function RetainerReadinessPage(
             </ul>
           </section>
         )}
+
+        {/* ── Readiness Remediation ──────────────────────────────────────── */}
+        <section className="border border-white/10 bg-zinc-950/70 p-5">
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Readiness Remediation</h2>
+          <p className="mt-1 text-xs text-white/40">
+            Failing and watch-state dimensions with recommended next actions. Passing dimensions are omitted.
+          </p>
+          <div className="mt-4 space-y-3">
+            {actionableItems.length === 0 ? (
+              <div className="border border-white/8 bg-zinc-900/60 p-4">
+                <p className="text-sm text-emerald-400/80">
+                  No immediate remediation required. Continue cadence monitoring and review the next retained cycle on schedule.
+                </p>
+              </div>
+            ) : (
+              actionableItems.map((item) => (
+                <RemediationRow key={item.dimension} item={item} />
+              ))
+            )}
+          </div>
+        </section>
 
         <section className="grid gap-6 xl:grid-cols-2">
           <section className="border border-white/10 bg-zinc-950/70 p-5">
