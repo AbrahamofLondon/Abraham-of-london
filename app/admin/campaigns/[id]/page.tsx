@@ -115,20 +115,20 @@ function toNonEmptyString(value: unknown, defaultValue: string): string {
 
 function CampaignNotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F9F9F7] p-8">
-      <div className="max-w-md w-full bg-white p-12 shadow-sm border border-neutral-100 text-center">
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-neutral-50 flex items-center justify-center">
-          <ShieldCheck className="w-8 h-8 text-neutral-400" />
+    <div className="flex items-center justify-center p-12">
+      <div className="max-w-md w-full border border-white/10 bg-zinc-950/70 p-10 text-center">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center">
+          <ShieldCheck className="w-8 h-8 text-white/30" />
         </div>
-        <h1 className="text-xl font-medium text-neutral-900 mb-2">
+        <h1 className="text-xl font-serif text-white/80 mb-2">
           Campaign Not Found
         </h1>
-        <p className="text-sm text-neutral-500 leading-relaxed mb-8">
+        <p className="text-sm text-white/50 leading-relaxed mb-8">
           The requested campaign could not be found.
         </p>
         <Link
           href="/admin/campaigns"
-          className="inline-block px-6 py-3 bg-neutral-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-colors"
+          className="inline-block px-6 py-3 border border-white/10 bg-white/5 text-white/70 text-[10px] font-mono uppercase tracking-widest hover:bg-white/10 transition-colors"
         >
           Return to campaigns
         </Link>
@@ -231,22 +231,22 @@ export default async function CampaignManagementPage({ params }: PageProps) {
   );
 
   return (
-    <div className="min-h-screen bg-[#F9F9F7] p-8 font-sans selection:bg-[#8A6A2F] selection:text-white">
-      <div className="max-w-7xl mx-auto mb-10 flex justify-between items-center">
-        <nav className="flex items-center gap-4">
+    <div className="p-6">
+      <div className="max-w-7xl mx-auto mb-6 flex justify-between items-center">
+        <nav className="flex items-center gap-3">
           <Link
             href={`/admin/organisations/${campaign.organisationId}`}
-            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-black transition-colors"
+            className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-white/40 hover:text-white/70 transition-colors"
           >
             <ArrowLeft className="w-3 h-3" /> {campaign.organisation.name}
           </Link>
-          <span className="text-neutral-200">/</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-black">
+          <span className="text-white/15">/</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-amber-500/70">
             Campaign
           </span>
         </nav>
 
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <AuditInvite
             campaignId={campaign.id}
             organisationId={campaign.organisationId}
@@ -255,60 +255,60 @@ export default async function CampaignManagementPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8">
-        <div className="col-span-12 bg-white border border-neutral-200 p-10 flex flex-col md:flex-row justify-between items-center relative overflow-hidden shadow-sm">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6">
+        <div className="col-span-12 border border-white/10 bg-zinc-950/70 p-8 flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
-              <span className="px-2 py-0.5 bg-[#8A6A2F] text-white text-[8px] font-black uppercase tracking-[0.2em]">
+              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[8px] font-mono uppercase tracking-[0.2em]">
                 Active Audit
               </span>
-              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest italic">
+              <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
                 Ref: {campaign.id.slice(0, 8).toUpperCase()}
               </p>
             </div>
 
-            <h1 className="text-5xl font-black uppercase tracking-tighter leading-none mb-2">
+            <h1 className="font-serif text-3xl text-white mb-2">
               {campaign.title}
             </h1>
 
             <div className="flex items-center gap-4 flex-wrap">
-              <p className="text-[11px] font-medium text-neutral-500 uppercase tracking-widest">
+              <p className="text-[11px] font-mono text-white/50 uppercase tracking-widest">
                 Team assessment campaign for{" "}
-                <span className="text-black font-black">
+                <span className="text-white/80">
                   {campaign.organisation.name}
                 </span>
               </p>
 
-              <div className="flex items-center gap-2 px-3 py-1 bg-neutral-50 border border-neutral-100 rounded-full">
+              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10">
                 <Lock
                   className={`w-2.5 h-2.5 ${
-                    isSafeToReport ? "text-green-600" : "text-amber-500"
+                    isSafeToReport ? "text-emerald-400" : "text-amber-400"
                   }`}
                 />
-                <span className="text-[8px] font-black uppercase tracking-widest">
+                <span className="text-[8px] font-mono uppercase tracking-widest text-white/50">
                   Anonymity: {isSafeToReport ? "Secure" : "Buffering"}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-16 relative z-10 mt-6 md:mt-0">
+          <div className="flex gap-12 relative z-10 mt-6 md:mt-0">
             <div className="text-right">
-              <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">
+              <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-1">
                 Response Velocity
               </p>
               <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-black text-[#8A6A2F] tracking-tighter">
+                <span className="text-4xl font-serif text-amber-400/80 tracking-tighter">
                   {completionRate}%
                 </span>
               </div>
             </div>
 
-            <div className="text-right border-l border-neutral-100 pl-16">
-              <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">
+            <div className="text-right border-l border-white/10 pl-12">
+              <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-1">
                 Invited Cohort
               </p>
-              <p className="text-5xl font-black tracking-tighter text-black">
+              <p className="text-4xl font-serif text-white">
                 {totalInvited}
               </p>
             </div>
@@ -318,26 +318,26 @@ export default async function CampaignManagementPage({ params }: PageProps) {
         <div className="col-span-12">
           <Link
             href={`/admin/campaigns/${campaign.id}/report`}
-            className={`group block bg-gradient-to-r from-neutral-900 to-neutral-800 p-6 shadow-sm transition-all hover:shadow-md ${
+            className={`group block border border-white/10 bg-zinc-950/70 p-6 transition-all hover:border-white/20 ${
               !isSafeToReport ? "opacity-50 pointer-events-none" : ""
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-white/10 group-hover:bg-[#8A6A2F]/20 transition-colors">
-                  <FileText className="w-6 h-6 text-white" />
+                <div className="p-3 bg-white/5 group-hover:bg-amber-500/10 transition-colors">
+                  <FileText className="w-6 h-6 text-white/70" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                  <h3 className="text-sm font-mono uppercase tracking-wider text-white/80">
                     Executive Intelligence Brief
                   </h3>
-                  <p className="text-[9px] text-white/50 mt-1">
+                  <p className="text-[9px] text-white/40 mt-1">
                     Executive report · Team evidence · Constitutional guidance
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-white/60 group-hover:text-white transition-colors">
+              <div className="flex items-center gap-2 text-white/40 group-hover:text-white/70 transition-colors">
                 <span className="text-[10px] font-mono uppercase tracking-wider">
                   View Brief
                 </span>
@@ -347,7 +347,7 @@ export default async function CampaignManagementPage({ params }: PageProps) {
 
             {!isSafeToReport && (
               <div className="mt-4 pt-4 border-t border-white/10">
-                <p className="text-[8px] text-amber-400/80 flex items-center gap-2">
+                <p className="text-[8px] text-amber-400/70 flex items-center gap-2">
                   <Lock className="w-3 h-3" />
                   Executive snapshot requires {5 - completedCount} more responses
                   to reach the anonymity review point
@@ -357,15 +357,15 @@ export default async function CampaignManagementPage({ params }: PageProps) {
           </Link>
         </div>
 
-        <div className="col-span-12 lg:col-span-8 bg-white border border-neutral-200 shadow-sm">
-          <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50/30">
+        <div className="col-span-12 lg:col-span-8 border border-white/10 bg-zinc-950/70">
+          <div className="p-5 border-b border-white/10 flex justify-between items-center bg-black/30">
             <div className="flex items-center gap-3">
-              <ShieldCheck className="w-5 h-5 text-[#8A6A2F]" />
-              <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">
+              <ShieldCheck className="w-5 h-5 text-amber-400/60" />
+              <h3 className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/60">
                 Participant Integrity Roster
               </h3>
             </div>
-            <div className="flex items-center gap-2 text-[8px] text-neutral-500">
+            <div className="flex items-center gap-2 text-[8px] text-white/40">
               <Users className="w-3 h-3" />
               <span>
                 {completedCount} / {totalInvited} completed
@@ -376,57 +376,57 @@ export default async function CampaignManagementPage({ params }: PageProps) {
           <ParticipantTable participants={participantsForTable} />
         </div>
 
-        <div className="col-span-12 lg:col-span-4 space-y-8">
-          <div className="bg-white border border-neutral-200 p-8 shadow-sm">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#8A6A2F]" /> Temporal Window
+        <div className="col-span-12 lg:col-span-4 space-y-6">
+          <div className="border border-white/10 bg-zinc-950/70 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/60 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-400/60" /> Temporal Window
               </h3>
-              <span className="text-[9px] font-black bg-neutral-100 px-2 py-1 uppercase tracking-widest">
+              <span className="text-[9px] font-mono bg-white/5 px-2 py-1 uppercase tracking-widest text-white/50">
                 Day {daysActive + 1}
               </span>
             </div>
 
-            <div className="space-y-5">
-              <div className="flex justify-between items-end border-b border-neutral-50 pb-3">
-                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+            <div className="space-y-4">
+              <div className="flex justify-between items-end border-b border-white/5 pb-3">
+                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
                   Status
                 </span>
                 <span
-                  className={`text-[11px] font-black uppercase ${
+                  className={`text-[11px] font-mono uppercase ${
                     isSafeToReport
-                      ? "text-green-600"
-                      : "text-amber-600 animate-pulse"
+                      ? "text-emerald-400"
+                      : "text-amber-400 animate-pulse"
                   }`}
                 >
                   {isSafeToReport ? "Live Tracking" : "Review Point Pending"}
                 </span>
               </div>
 
-              <div className="flex justify-between items-end border-b border-neutral-50 pb-3">
-                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+              <div className="flex justify-between items-end border-b border-white/5 pb-3">
+                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
                   Completion Rate
                 </span>
-                <span className="text-[11px] font-black text-neutral-800">
+                <span className="text-[11px] font-mono text-white/70">
                   {completionRate}%
                 </span>
               </div>
 
               <div className="flex justify-between items-end">
-                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
                   Active Participants
                 </span>
-                <span className="text-[11px] font-black text-neutral-800">
+                <span className="text-[11px] font-mono text-white/70">
                   {completedCount}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="bg-black text-white p-8 shadow-xl">
-            <div className="flex items-center gap-2 mb-8">
-              <Activity className="w-4 h-4 text-[#8A6A2F]" />
-              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#8A6A2F]">
+          <div className="border border-white/10 bg-zinc-950/70 p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Activity className="w-4 h-4 text-amber-400/60" />
+              <h3 className="text-[11px] font-mono uppercase tracking-[0.2em] text-amber-400/70">
                 Live Resonance
               </h3>
             </div>
@@ -438,7 +438,7 @@ export default async function CampaignManagementPage({ params }: PageProps) {
             />
 
             {!isSafeToReport && (
-              <p className="mt-6 text-[9px] text-neutral-500 italic leading-relaxed uppercase tracking-tighter">
+              <p className="mt-6 text-[9px] text-white/40 leading-relaxed">
                 Executive Snapshots are locked until the anonymity review point
                 (n=5) is achieved.
               </p>

@@ -261,27 +261,27 @@ export default async function OrganisationReportPage({ params }: PageProps) {
     responseRate >= 70 ? "green" : responseRate >= 45 ? "gold" : "red";
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="mx-auto max-w-7xl px-6 py-10">
+    <div className="p-6">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-between">
           <Link
             href={`/admin/organisations/${organisationId}`}
-            className="inline-flex items-center gap-2 text-sm text-neutral-500 transition hover:text-neutral-900"
+            className="inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white/80"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to Organisation
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5">
+          <div className="inline-flex items-center gap-2 border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5">
             <div className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-700">
+            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-300">
               Report Generated
             </span>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white shadow-sm">
-          <div className="border-b border-neutral-200 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-800 px-8 py-8 text-white">
+        <div className="overflow-hidden border border-white/10 bg-zinc-950/70">
+          <div className="border-b border-white/10 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-800 px-8 py-8 text-white">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="mb-4 flex items-center gap-3">

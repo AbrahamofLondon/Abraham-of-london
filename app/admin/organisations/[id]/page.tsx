@@ -42,12 +42,12 @@ function EmptyState({
   cta: string;
 }) {
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-8">
-      <div className="w-full max-w-xl rounded-3xl border border-neutral-200 bg-white p-10 shadow-sm text-center">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100">
-          <AlertTriangle className="h-7 w-7 text-neutral-500" />
+    <div className="flex items-center justify-center p-12">
+      <div className="w-full max-w-xl border border-white/10 bg-zinc-950/70 p-10 text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
+          <AlertTriangle className="h-7 w-7 text-white/40" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+        <h1 className="text-2xl font-serif tracking-tight text-white/80">
           {title}
         </h1>
         <p className="mt-3 text-sm leading-7 text-neutral-600">{message}</p>

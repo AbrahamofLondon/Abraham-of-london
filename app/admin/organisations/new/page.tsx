@@ -141,36 +141,36 @@ export default function NewOrganisationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="mx-auto max-w-4xl px-6 py-10">
+    <div className="p-6">
+      <div className="mx-auto max-w-4xl">
         <div className="mb-8 flex items-center justify-between">
           <Link
             href="/admin/organisations"
-            className="inline-flex items-center gap-2 text-sm text-neutral-500 transition hover:text-neutral-900"
+            className="inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white/80"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Organisations
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5">
-            <Shield className="h-3.5 w-3.5 text-emerald-700" />
-            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-700">
+          <div className="inline-flex items-center gap-2 border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5">
+            <Shield className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-300">
               Admin Surface
             </span>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white shadow-sm">
-          <div className="border-b border-neutral-200 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-800 px-8 py-8 text-white">
+        <div className="overflow-hidden border border-white/10 bg-zinc-950/70">
+          <div className="border-b border-white/10 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-800 px-8 py-8 text-white">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+              <div className="flex h-12 w-12 items-center justify-center rounded bg-white/10">
                 <Building2 className="h-6 w-6 text-white" />
               </div>
               <div>
                 <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/60">
                   Enterprise Registry
                 </div>
-                <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+                <h1 className="mt-2 font-serif text-3xl tracking-tight">
                   New Organisation
                 </h1>
                 <p className="mt-2 text-sm text-white/70">
@@ -184,7 +184,7 @@ export default function NewOrganisationPage() {
           <form onSubmit={handleSubmit} className="px-8 py-8">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-white/40">
                   Organisation Name
                 </label>
                 <input
@@ -192,12 +192,12 @@ export default function NewOrganisationPage() {
                   value={form.name}
                   onChange={handleChange}
                   placeholder="Alomarada Ltd"
-                  className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-500"
+                  className="w-full border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-500/30 placeholder:text-white/30"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-white/40">
                   Slug
                 </label>
                 <input
@@ -205,16 +205,15 @@ export default function NewOrganisationPage() {
                   value={form.slug}
                   onChange={handleChange}
                   placeholder="alomarada-ltd"
-                  className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-500"
+                  className="w-full border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-500/30 placeholder:text-white/30"
                 />
-                <p className="mt-2 text-xs text-neutral-500">
-                  Lowercase URL-safe identifier. Auto-derived from the name unless
-                  overridden.
+                <p className="mt-2 text-xs text-white/40">
+                  Lowercase URL-safe identifier. Auto-derived from the name unless overridden.
                 </p>
               </div>
 
               <div>
-                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-white/40">
                   Sector
                 </label>
                 <input
@@ -222,12 +221,12 @@ export default function NewOrganisationPage() {
                   value={form.sector}
                   onChange={handleChange}
                   placeholder="Advisory, infrastructure, governance..."
-                  className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-500"
+                  className="w-full border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-500/30 placeholder:text-white/30"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-white/40">
                   Description
                 </label>
                 <textarea
@@ -236,33 +235,33 @@ export default function NewOrganisationPage() {
                   onChange={handleChange}
                   rows={6}
                   placeholder="Provide a concise but real description of the organisation, its mandate, and its operating profile."
-                  className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm leading-7 text-neutral-900 outline-none transition focus:border-neutral-500"
+                  className="w-full border border-white/10 bg-black/40 px-4 py-3 text-sm leading-7 text-white outline-none transition focus:border-amber-500/30 placeholder:text-white/30"
                 />
               </div>
             </div>
 
             {serverError ? (
-              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-4">
+              <div className="mt-6 border border-red-500/20 bg-red-500/10 px-4 py-4">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 text-red-600" />
-                  <p className="text-sm text-red-700">{serverError}</p>
+                  <AlertTriangle className="mt-0.5 h-4 w-4 text-red-400" />
+                  <p className="text-sm text-red-300">{serverError}</p>
                 </div>
               </div>
             ) : null}
 
             {successMessage ? (
-              <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+              <div className="mt-6 border border-emerald-500/20 bg-emerald-500/10 px-4 py-4">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
-                  <p className="text-sm text-emerald-700">{successMessage}</p>
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-400" />
+                  <p className="text-sm text-emerald-300">{successMessage}</p>
                 </div>
               </div>
             ) : null}
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs leading-6 text-neutral-500">
+              <p className="text-xs leading-6 text-white/40">
                 This route is for creating an organisation node. If you meant
-                “create campaign for a specific organisation,” that belongs under a
+                &ldquo;create campaign for a specific organisation,&rdquo; that belongs under a
                 dynamic organisation route, not here.
               </p>
 
@@ -270,10 +269,10 @@ export default function NewOrganisationPage() {
                 type="submit"
                 disabled={isSubmitting}
                 className={cx(
-                  "inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-medium transition",
+                  "inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-mono transition",
                   isSubmitting
-                    ? "cursor-not-allowed bg-neutral-300 text-white"
-                    : "bg-neutral-900 text-white hover:bg-black"
+                    ? "cursor-not-allowed bg-white/10 text-white/40"
+                    : "border border-amber-500/20 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
                 )}
               >
                 {isSubmitting ? "Creating..." : "Create Organisation"}

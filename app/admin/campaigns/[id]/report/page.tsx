@@ -38,18 +38,18 @@ type CampaignRecord = {
 
 function ReportNotFound({ id }: { id: string }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-8">
-      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-12 text-center shadow-sm">
-        <AlertTriangle className="mx-auto mb-6 h-10 w-10 text-amber-500" />
-        <h2 className="mb-3 text-2xl font-medium text-neutral-900">
+    <div className="flex items-center justify-center p-12">
+      <div className="w-full max-w-md border border-white/10 bg-zinc-950/70 p-10 text-center">
+        <AlertTriangle className="mx-auto mb-6 h-10 w-10 text-amber-400" />
+        <h2 className="mb-3 text-xl font-serif text-white/80">
           Report not available
         </h2>
-        <p className="leading-relaxed text-neutral-600">
+        <p className="leading-relaxed text-white/50">
           The executive report could not be generated for this campaign.
         </p>
         <Link
           href={`/admin/campaigns/${id}`}
-          className="mt-8 inline-block rounded-xl bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-black"
+          className="mt-8 inline-block border border-white/10 bg-white/5 px-6 py-3 text-sm font-mono text-white/70 transition hover:bg-white/10"
         >
           Return to Campaign
         </Link>
@@ -68,13 +68,13 @@ function AnonymityReviewPanel({
   participantCount: number;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-8">
-      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-12 text-center shadow-sm">
-        <AlertTriangle className="mx-auto mb-6 h-10 w-10 text-amber-500" />
-        <h2 className="mb-3 text-2xl font-medium text-neutral-900">
+    <div className="flex items-center justify-center p-12">
+      <div className="w-full max-w-md border border-white/10 bg-zinc-950/70 p-10 text-center">
+        <AlertTriangle className="mx-auto mb-6 h-10 w-10 text-amber-400" />
+        <h2 className="mb-3 text-xl font-serif text-white/80">
           Anonymity Review Point Not Met
         </h2>
-        <p className="leading-relaxed text-neutral-600">
+        <p className="leading-relaxed text-white/50">
           Executive reports require a minimum of {minimumResponses} completed responses.
           This campaign currently has {participantCount}.
         </p>
@@ -203,12 +203,12 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-sans print:bg-white">
-      <div className="mx-auto max-w-7xl px-6 py-10 print:px-4 print:py-6">
-        <div className="mb-10 flex items-center justify-between print:hidden">
+    <div className="p-6 print:p-0">
+      <div className="mx-auto max-w-7xl print:max-w-full">
+        <div className="mb-6 flex items-center justify-between print:hidden">
           <Link
             href={`/admin/campaigns/${id}`}
-            className="flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-700"
+            className="flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-white/80"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to Registry
@@ -217,14 +217,14 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
           <div className="flex items-center gap-3">
             <a
               href={`/api/admin/campaigns/${id}/report/json`}
-              className="flex items-center gap-2 rounded-xl border border-neutral-300 px-4 py-2 font-mono text-xs uppercase tracking-wider text-neutral-600 transition hover:bg-neutral-100"
+              className="flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 font-mono text-xs uppercase tracking-wider text-white/50 transition hover:bg-white/10"
             >
               <Download className="h-3.5 w-3.5" />
               Export JSON
             </a>
             <a
               href={`/api/admin/campaigns/${id}/report/pdf`}
-              className="flex items-center gap-2 rounded-xl border border-neutral-300 px-4 py-2 font-mono text-xs uppercase tracking-wider text-neutral-600 transition hover:bg-neutral-100"
+              className="flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 font-mono text-xs uppercase tracking-wider text-white/50 transition hover:bg-white/10"
             >
               <Download className="h-3.5 w-3.5" />
               Export PDF
@@ -234,20 +234,20 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm">
-          <div className="p-10 md:p-16 print:p-8">
-            <div className="mb-14 flex items-start justify-between">
+        <div className="overflow-hidden border border-white/10 bg-zinc-950/70">
+          <div className="p-8 md:p-12 print:p-6">
+            <div className="mb-10 flex items-start justify-between">
               <div>
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="h-px w-12 bg-neutral-400" />
-                  <span className="font-mono text-xs uppercase tracking-[0.3em] text-neutral-500">
+                <div className="mb-4 flex items-center gap-4">
+                  <div className="h-px w-12 bg-white/20" />
+                  <span className="font-mono text-xs uppercase tracking-[0.3em] text-white/40">
                     Sovereign Alignment Registry
                   </span>
                 </div>
-                <h1 className="text-5xl font-light tracking-tighter text-neutral-900 md:text-6xl">
+                <h1 className="font-serif text-4xl tracking-tighter text-white md:text-5xl">
                   Executive Intelligence Brief
                 </h1>
-                <p className="mt-4 text-neutral-600">
+                <p className="mt-4 text-white/60">
                   {campaignPayload.organisationName || "Unknown Organisation"} •{" "}
                   {new Date().toLocaleDateString("en-GB", {
                     day: "numeric",
@@ -255,7 +255,7 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
                     year: "numeric",
                   })}
                 </p>
-                <p className="mt-2 text-xs text-neutral-400">
+                <p className="mt-2 text-xs text-white/40">
                   {participantCount} completed participants
                 </p>
               </div>
