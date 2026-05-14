@@ -28,7 +28,7 @@ import type { ProvenanceGapMonitorSummary } from "@/lib/admin/provenance-gap-mon
 type PageProps = {
   summary: OperatorCommandCentreSummary;
   doctrine: AdminActionDoctrineRecommendation[];
-  provenanceGaps: ProvenanceGapMonitorSummary;
+  provenanceGaps: ProvenanceGapMonitorSummary | null;
 };
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => {
@@ -39,11 +39,15 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const { buildOperatorDoctrine } = await import("@/lib/admin/admin-action-doctrine");
   const { loadProvenanceGapMonitor } = await import("@/lib/admin/provenance-gap-monitor");
 
-  const [summary, provenanceGaps] = await Promise.all([
-    buildOperatorCommandCentreSummary(),
-    loadProvenanceGapMonitor({ limit: 20 }),
-  ]);
+  const summary = await buildOperatorCommandCentreSummary();
   const doctrine = buildOperatorDoctrine(summary.cards);
+
+  let provenanceGaps: ProvenanceGapMonitorSummary | null = null;
+  try {
+    provenanceGaps = await loadProvenanceGapMonitor({ limit: 20 });
+  } catch {
+    // degrades to null — operator page renders without the gap panel
+  }
 
   return { props: { summary, doctrine, provenanceGaps } };
 };
@@ -216,7 +220,29 @@ const GAP_SEVERITY_STYLE: Record<"INFO" | "WARNING" | "CRITICAL", { dot: string;
   INFO:     { dot: "bg-white/30",   label: "Info" },
 };
 
-function ProvenanceGapsPanel({ monitor }: { monitor: ProvenanceGapMonitorSummary }) {
+function ProvenanceGapsPanel({ monitor }: { monitor: ProvenanceGapMonitorSummary | null }) {
+  if (!monitor) {
+    return (
+      <section className="border border-white/10 bg-zinc-950/70 p-5">
+        <div className="flex items-start justify-between gap-4">
+          <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">
+            Provenance Gap Monitor
+          </p>
+          <Link
+            href="/admin/oversight-review"
+            className="shrink-0 border border-white/10 bg-white/5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.18em] text-white/45 hover:border-amber-500/25 hover:text-amber-200"
+          >
+            Open review
+          </Link>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-white/25" />
+          <p className="text-sm text-white/35">Provenance gaps unavailable — composition failed or no cycles loaded.</p>
+        </div>
+      </section>
+    );
+  }
+
   const topGaps = monitor.items.filter((item) => item.gapCount > 0).slice(0, 3);
 
   return (
@@ -280,7 +306,11 @@ function ProvenanceGapsPanel({ monitor }: { monitor: ProvenanceGapMonitorSummary
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[10px] text-white/35">{item.subjectId}</span>
-                    <AdminStatusBadge label={style.label} tone={topGap.severity === "CRITICAL" ? "critical" : topGap.severity === "WARNING" ? "warning" : "muted"} size="md" />
+                    <AdminStatusBadge
+                      label={style.label}
+                      tone={topGap.severity === "CRITICAL" ? "critical" : topGap.severity === "WARNING" ? "warning" : "muted"}
+                      size="md"
+                    />
                   </div>
                   <p className="mt-0.5 text-[11px] text-white/55">{topGap.description}</p>
                 </div>
