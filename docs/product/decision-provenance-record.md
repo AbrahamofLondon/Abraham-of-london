@@ -62,6 +62,24 @@ The `provenanceHash` field is a SHA-256 digest computed over the canonicalized r
 
 The hash serves as a tamper-evident seal. If the underlying record changes after hash computation, the hash no longer matches. The hash is included in the client-safe summary so that sponsors can request verification against the platform record at any time.
 
+### 5a. Hash Mismatch Protocol
+
+When a stored provenance hash (from AuditEvent metadata) is compared against a freshly recomputed hash, three outcomes are possible:
+
+- **MATCH** — The stored hash equals the recomputed hash. Record integrity is consistent. No action required.
+- **UNAVAILABLE** — No stored hash exists (e.g., pre-provenance archive records). The recomputed hash is available for initial storage. Not a defect.
+- **MISMATCH** — The stored hash differs from the recomputed hash. This means the source data has changed since the hash was stored. This is expected when new evidence, deliveries, or outcomes are added to a cycle. It is NOT expected when no changes have occurred.
+
+**Mismatch response (do not silently overwrite):**
+
+1. Preserve both `storedHash` and `recomputedHash` for forensic comparison
+2. Surface the mismatch as a CRITICAL provenance gap
+3. Require operator/admin review before any automated resolution
+4. The operator must confirm whether the source data change is legitimate (new delivery, updated outcome) or indicates a data integrity issue
+5. Only after operator confirmation should the stored hash be updated to the recomputed value
+
+The mismatch protocol exists to prevent silent hash overwrites from masking data corruption. It is not a tamper-detection system — the hash proves composition consistency, not data immutability.
+
 ---
 
 ## 6. Gap Model
