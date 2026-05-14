@@ -1,4 +1,5 @@
 import HomepageHero from "@/components/homepage/HomepageHero";
+import WhatYouCanUseTodaySection from "@/components/homepage/WhatYouCanUseTodaySection";
 import MarketDefectBlock from "@/components/homepage/MarketDefectBlock";
 import OutputArtifactPreview from "@/components/homepage/OutputArtifactPreview";
 import TrustArchitectureBlock from "@/components/homepage/TrustArchitectureBlock";
@@ -18,6 +19,7 @@ export default function CategoryFrontDoor() {
   return (
     <>
       <HomepageHero />
+      <WhatYouCanUseTodaySection />
       <MarketDefectBlock />
       <OutputArtifactPreview />
       <TrustArchitectureBlock />

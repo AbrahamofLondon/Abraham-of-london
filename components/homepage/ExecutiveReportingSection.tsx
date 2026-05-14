@@ -38,7 +38,7 @@ export default function ExecutiveReportingSection() {
                 >
                   {field.label}
                 </p>
-                <p className="mt-3 text-[13px] leading-[1.75] text-white/58">{field.value}</p>
+                <p className="mt-3 text-[14px] leading-[1.75] text-white/62">{field.value}</p>
               </div>
             ))}
           </div>

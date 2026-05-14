@@ -57,7 +57,7 @@ export default function ProvenanceThesisSection() {
                 >
                   {claim.label}
                 </p>
-                <p className="mt-3 text-[14px] leading-[1.8] text-white/60">{claim.value}</p>
+                <p className="mt-3 text-[15px] leading-[1.8] text-white/62">{claim.value}</p>
               </div>
             </div>
           ))}
@@ -79,7 +79,7 @@ export default function ProvenanceThesisSection() {
           >
             Boundary note
           </p>
-          <p className="text-[13px] leading-[1.75] text-white/45">
+          <p className="text-[14px] leading-[1.75] text-white/48">
             External WORM and third-party anchoring are architected but not yet live. The internal
             chain-of-custody record is active. No claim of external immutability is made.
           </p>
