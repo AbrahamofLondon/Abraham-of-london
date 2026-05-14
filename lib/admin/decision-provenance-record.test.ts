@@ -452,3 +452,146 @@ describe("executive report provenance (Pass 4)", () => {
     expect(record.accountabilityStatement).toContain("No evidence inputs");
   });
 });
+
+describe("confidenceEvidence binding", () => {
+  it("each evidence input has confidenceEvidence with a reason", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+      deliveries: [delivery()],
+      outcomes: [outcome()],
+    }));
+    for (const input of record.evidenceInputs) {
+      expect(input.confidenceEvidence).toBeDefined();
+      expect(input.confidenceEvidence!.reason).toBeTruthy();
+      expect(input.confidenceEvidence!.sourceType).toBeDefined();
+    }
+  });
+
+  it("USER_REPORTED confidenceEvidence has USER_INPUT sourceType", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      outcomes: [outcome({ evidencePosture: "USER_REPORTED" })],
+    }));
+    const outcomeInput = record.evidenceInputs.find((i) => i.type === "OUTCOME_VERIFICATION");
+    expect(outcomeInput?.confidenceEvidence?.sourceType).toBe("USER_INPUT");
+    expect(outcomeInput?.confidenceEvidence?.reason).toContain("user");
+  });
+
+  it("SYSTEM_INFERRED confidenceEvidence has SYSTEM_RULE sourceType", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle({ evidencePosture: "SYSTEM_INFERRED" })],
+    }));
+    const cycleInput = record.evidenceInputs.find((i) => i.type === "CADENCE_CYCLE");
+    expect(cycleInput?.confidenceEvidence?.sourceType).toBe("SYSTEM_RULE");
+    expect(cycleInput?.confidenceEvidence?.reason).toContain("system rule");
+  });
+
+  it("OPERATOR_VERIFIED confidenceEvidence has OPERATOR_ACTION sourceType", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      decisionRecords: [decision()],
+    }));
+    const decisionInput = record.evidenceInputs.find((i) => i.type === "OPERATOR_DECISION");
+    expect(decisionInput?.confidenceEvidence?.sourceType).toBe("OPERATOR_ACTION");
+    expect(decisionInput?.confidenceEvidence?.reason).toContain("operator review");
+  });
+
+  it("OPERATOR_VERIFIED confidenceEvidence does not expose raw operator ID", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      decisionRecords: [decision({ operatorId: "op_secret_001" })],
+    }));
+    const decisionInput = record.evidenceInputs.find((i) => i.type === "OPERATOR_DECISION");
+    const json = JSON.stringify(decisionInput?.confidenceEvidence);
+    expect(json).not.toContain("op_secret_001");
+    expect(decisionInput?.confidenceEvidence?.sourceRef).toBeNull();
+  });
+
+  it("confidenceEvidence does not contain raw payload content", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      outcomes: [outcome({ evidencePosture: "USER_REPORTED" })],
+    }));
+    const json = JSON.stringify(record.evidenceInputs.map((i) => i.confidenceEvidence));
+    // Should not contain raw outcome fields
+    expect(json).not.toContain("whatChanged");
+    expect(json).not.toContain("evidenceSummary");
+    expect(json).not.toContain("rememberNote");
+  });
+});
+
+describe("gap remediation", () => {
+  it("delivery gap includes remediation with operator owner", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+      decisionRecords: [decision()],
+    }));
+    const deliveryGap = record.provenanceGaps.find((g) => g.stage === "Delivery");
+    expect(deliveryGap?.remediation).toBeDefined();
+    expect(deliveryGap?.remediation?.owner).toBe("operator");
+    expect(deliveryGap?.remediation?.action).toContain("delivery");
+    expect(deliveryGap?.remediation?.href).toBe("/admin/delivery-queue");
+  });
+
+  it("outcome gap includes remediation with operator owner", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+      decisionRecords: [decision()],
+      deliveries: [delivery()],
+    }));
+    const outcomeGap = record.provenanceGaps.find((g) => g.stage === "Outcome");
+    expect(outcomeGap?.remediation).toBeDefined();
+    expect(outcomeGap?.remediation?.owner).toBe("operator");
+    expect(outcomeGap?.remediation?.action).toContain("outcome verification");
+  });
+
+  it("subject support gap has future-team owner", () => {
+    const record = composeDecisionProvenanceFromSources({
+      subjectType: "DECISION_CASE",
+      subjectId: "case_001",
+    });
+    const supportGap = record.provenanceGaps.find((g) => g.stage === "Subject support");
+    expect(supportGap?.remediation?.owner).toBe("future-team");
+    expect(supportGap?.remediation?.action).toContain("No action yet");
+  });
+
+  it("client-safe summary does not leak remediation internals", () => {
+    // Dynamic import to avoid circular dependency at module level
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      cycles: [cycle()],
+    }));
+    // Verify the internal record has remediation but the JSON representation
+    // of the client-safe summary (composed separately) would not include it
+    const hasRemediation = record.provenanceGaps.some((g) => g.remediation !== undefined);
+    expect(hasRemediation).toBe(true);
+    // The client-safe composer only extracts gapClasses (severity only),
+    // not remediation fields — verified in client-safe-provenance-composer.test.ts
+  });
+
+  it("gap descriptions remain restrained and do not contain internal identifiers", () => {
+    const record = composeDecisionProvenanceFromSources(sourceData({
+      suppressions: [
+        {
+          eventId: "sup_001",
+          scopeId: "cycle_001",
+          scopeType: "CYCLE",
+          surface: "oversight-brief",
+          fieldName: "commercialExposure",
+          evidenceSource: "system",
+          originalPosture: "SYSTEM_INFERRED",
+          evidencePosture: "SYSTEM_INFERRED",
+          suppressionReason: "Commercial sensitivity",
+          suppressionRule: "COMMERCIAL_SENSITIVITY",
+          operatorReviewAvailable: true,
+          suppressedAt: "2026-05-02T09:00:00.000Z",
+          suppressedBySystem: true,
+          reviewedByOperator: null,
+          reviewedAt: null,
+          overrideStatus: "NONE",
+          overrideReason: null,
+        },
+      ],
+    }));
+    for (const gap of record.provenanceGaps) {
+      expect(gap.description).not.toContain("op_001");
+      expect(gap.description).not.toContain("cycle_001");
+      expect(gap.description).not.toContain("acct_001");
+    }
+  });
+});

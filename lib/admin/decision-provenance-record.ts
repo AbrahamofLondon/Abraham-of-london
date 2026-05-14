@@ -49,6 +49,19 @@ export type DecisionProvenanceRecord = {
   unavailableSources: string[];
 };
 
+export type DecisionProvenanceConfidenceEvidence = {
+  reason: string;
+  sourceType?:
+    | "USER_INPUT"
+    | "SYSTEM_RULE"
+    | "OPERATOR_ACTION"
+    | "THIRD_PARTY_RECORD"
+    | "INTEGRATION"
+    | "UNKNOWN";
+  sourceRef?: string | null;
+  observedAt?: string | null;
+};
+
 export type DecisionProvenanceEvidenceInput = {
   type: string;
   label: string;
@@ -60,6 +73,7 @@ export type DecisionProvenanceEvidenceInput = {
     | "SYSTEM_INFERRED"
     | "OPERATOR_VERIFIED"
     | "THIRD_PARTY";
+  confidenceEvidence?: DecisionProvenanceConfidenceEvidence;
 };
 
 export type DecisionProvenanceEvent = {
@@ -94,6 +108,11 @@ export type DecisionProvenanceGap = {
   description: string;
   severity: "INFO" | "WARNING" | "CRITICAL";
   href?: string;
+  remediation?: {
+    action: string;
+    owner: "operator" | "admin" | "founder" | "future-team";
+    href?: string;
+  };
 };
 
 export type DecisionProvenanceSourceInventoryItem = {
@@ -341,19 +360,58 @@ function evidenceLabelWithoutSensitivePayload(input: {
   return value ? `${input.prefix}: ${value}` : input.fallback;
 }
 
+function buildConfidenceEvidence(
+  confidence: DecisionProvenanceEvidenceInput["confidence"],
+  source?: string | null,
+  observedAt?: string | null,
+): DecisionProvenanceConfidenceEvidence {
+  switch (confidence) {
+    case "USER_REPORTED":
+      return {
+        reason: "Provided by user during diagnostic or intake.",
+        sourceType: "USER_INPUT",
+        sourceRef: source ?? null,
+        observedAt: observedAt ?? null,
+      };
+    case "SYSTEM_INFERRED":
+      return {
+        reason: "Derived by deterministic system rule.",
+        sourceType: "SYSTEM_RULE",
+        sourceRef: source ?? null,
+        observedAt: observedAt ?? null,
+      };
+    case "OPERATOR_VERIFIED":
+      return {
+        reason: "Recorded through operator review workflow.",
+        sourceType: "OPERATOR_ACTION",
+        sourceRef: null,
+        observedAt: observedAt ?? null,
+      };
+    case "THIRD_PARTY":
+      return {
+        reason: "Derived from third-party or integration source.",
+        sourceType: "THIRD_PARTY_RECORD",
+        sourceRef: source ?? null,
+        observedAt: observedAt ?? null,
+      };
+  }
+}
+
 export function composeEvidenceInputs(
   data: DecisionProvenanceSourceData,
 ): DecisionProvenanceEvidenceInput[] {
   const inputs: DecisionProvenanceEvidenceInput[] = [];
 
   for (const cycle of data.cycles ?? []) {
+    const confidence = normalizeEvidenceConfidence(cycle.evidencePosture, "retained-cadence-service");
     inputs.push({
       type: "CADENCE_CYCLE",
       label: `Retained review cycle (${cycle.cadenceType})`,
       evidencePosture: cycle.evidencePosture,
       source: "retained-cadence-service",
       createdAt: isoOrNull(cycle.createdAt),
-      confidence: normalizeEvidenceConfidence(cycle.evidencePosture, "retained-cadence-service"),
+      confidence,
+      confidenceEvidence: buildConfidenceEvidence(confidence, "retained-cadence-service", isoOrNull(cycle.createdAt)),
     });
   }
 
@@ -365,29 +423,34 @@ export function composeEvidenceInputs(
       source: "oversight-cycle-archive",
       createdAt: isoOrNull(archive.createdAt),
       confidence: "SYSTEM_INFERRED",
+      confidenceEvidence: buildConfidenceEvidence("SYSTEM_INFERRED", "oversight-cycle-archive", isoOrNull(archive.createdAt)),
     });
   }
 
   for (const suppression of data.suppressions ?? []) {
     const posture = suppression.evidencePosture ?? suppression.originalPosture ?? null;
+    const confidence = normalizeEvidenceConfidence(posture, suppression.evidenceSource);
     inputs.push({
       type: "SUPPRESSION",
       label: `Suppression: ${suppression.fieldName} on ${suppression.surface}`,
       evidencePosture: posture,
       source: "suppression-ledger",
       createdAt: isoOrNull(suppression.suppressedAt),
-      confidence: normalizeEvidenceConfidence(posture, suppression.evidenceSource),
+      confidence,
+      confidenceEvidence: buildConfidenceEvidence(confidence, suppression.evidenceSource, isoOrNull(suppression.suppressedAt)),
     });
   }
 
   for (const delivery of data.deliveries ?? []) {
+    const confidence = normalizeEvidenceConfidence(delivery.evidencePosture, "operator delivery audit");
     inputs.push({
       type: "DELIVERY",
       label: `Delivery record: ${delivery.artifactType} for ${delivery.recipientRole}`,
       evidencePosture: delivery.evidencePosture ?? delivery.status,
       source: delivery.sourceLabel ?? "oversight-delivery-service",
       createdAt: isoOrNull(delivery.createdAt),
-      confidence: normalizeEvidenceConfidence(delivery.evidencePosture, "operator delivery audit"),
+      confidence,
+      confidenceEvidence: buildConfidenceEvidence(confidence, delivery.sourceLabel ?? "oversight-delivery-service", isoOrNull(delivery.createdAt)),
     });
   }
 
@@ -399,17 +462,20 @@ export function composeEvidenceInputs(
       source: "oversight-review-decision-ledger",
       createdAt: isoOrNull(decision.createdAt),
       confidence: "OPERATOR_VERIFIED",
+      confidenceEvidence: buildConfidenceEvidence("OPERATOR_VERIFIED", "oversight-review-decision-ledger", isoOrNull(decision.createdAt)),
     });
   }
 
   for (const outcome of data.outcomes ?? []) {
+    const confidence = normalizeEvidenceConfidence(outcome.evidencePosture, "outcome-verification-service");
     inputs.push({
       type: "OUTCOME_VERIFICATION",
       label: `Outcome verification: ${outcome.outcomeClassification}`,
       evidencePosture: outcome.evidencePosture,
       source: outcome.sourceLabel ?? "outcome-verification-service",
       createdAt: isoOrNull(outcome.createdAt),
-      confidence: normalizeEvidenceConfidence(outcome.evidencePosture, "outcome-verification-service"),
+      confidence,
+      confidenceEvidence: buildConfidenceEvidence(confidence, outcome.sourceLabel ?? "outcome-verification-service", isoOrNull(outcome.createdAt)),
     });
   }
 
@@ -421,6 +487,7 @@ export function composeEvidenceInputs(
       source: "retainer-cycle-memory",
       createdAt: isoOrNull(data.memorySummary.generatedAt),
       confidence: "SYSTEM_INFERRED",
+      confidenceEvidence: buildConfidenceEvidence("SYSTEM_INFERRED", "retainer-cycle-memory", isoOrNull(data.memorySummary.generatedAt)),
     });
   }
 
@@ -592,6 +659,61 @@ export function composeGovernanceEvents(
   return sortGovernanceEvents(events);
 }
 
+function gapRemediation(stage: string, severity: DecisionProvenanceGap["severity"]): DecisionProvenanceGap["remediation"] {
+  switch (stage) {
+    case "Delivery":
+      return {
+        action: severity === "CRITICAL" ? "Investigate delivery failure" : "Review delivery queue and approve pending items",
+        owner: "operator",
+        href: "/admin/delivery-queue",
+      };
+    case "Outcome":
+      return {
+        action: "Complete outcome verification for this subject",
+        owner: "operator",
+        href: "/admin/outcome-verification",
+      };
+    case "Suppression":
+      return severity === "CRITICAL"
+        ? { action: "Review suppression override and record reason", owner: "operator", href: "/admin/suppression-ledger" }
+        : { action: "Review suppression ledger for unreviewed items", owner: "operator", href: "/admin/suppression-ledger" };
+    case "Operator review":
+      return {
+        action: "Open oversight review and record operator decision",
+        owner: "operator",
+        href: "/admin/oversight-review",
+      };
+    case "Evidence":
+      return {
+        action: "Capture evidence before making provenance claims",
+        owner: "operator",
+      };
+    case "Source availability":
+      return {
+        action: "Re-run or inspect the unavailable data source",
+        owner: "admin",
+      };
+    case "Subject support":
+      return {
+        action: "No action yet — subject type not supported in current version",
+        owner: "future-team",
+      };
+    case "Escalation":
+      return {
+        action: "Verify escalation record exists in counsel or boardroom surface",
+        owner: "operator",
+        href: severity === "CRITICAL" ? "/admin/counsel-review" : "/admin/boardroom-archive",
+      };
+    case "Memory":
+      return {
+        action: "Allow additional oversight cycles to accumulate before retainer cycle memory becomes available",
+        owner: "future-team",
+      };
+    default:
+      return undefined;
+  }
+}
+
 export function composeProvenanceGaps(
   data: DecisionProvenanceSourceData,
   evidenceInputs: DecisionProvenanceEvidenceInput[],
@@ -606,120 +728,69 @@ export function composeProvenanceGaps(
   const hasCounsel = governanceEvents.some((event) => event.type === "COUNSEL_ESCALATED");
   const hasBoardroom = governanceEvents.some((event) => event.type === "BOARDROOM_ESCALATED");
 
-  if (!SUPPORTED_SUBJECT_TYPES.has(data.subjectType)) {
+  function addGap(stage: string, description: string, severity: DecisionProvenanceGap["severity"], href?: string) {
     gaps.push({
-      stage: "Subject support",
-      description: `${data.subjectType} provenance composition is not supported in v1.`,
-      severity: "INFO",
+      stage,
+      description,
+      severity,
+      href,
+      remediation: gapRemediation(stage, severity),
     });
+  }
+
+  if (!SUPPORTED_SUBJECT_TYPES.has(data.subjectType)) {
+    addGap("Subject support", `${data.subjectType} provenance composition is not supported in v1.`, "INFO");
   }
 
   for (const source of data.unavailableSources ?? []) {
-    gaps.push({
-      stage: "Source availability",
-      description: `${source} could not be loaded for this provenance record.`,
-      severity: "WARNING",
-    });
+    addGap("Source availability", `${source} could not be loaded for this provenance record.`, "WARNING");
   }
 
   if (data.unsupportedReason) {
-    gaps.push({
-      stage: "Subject support",
-      description: data.unsupportedReason,
-      severity: "INFO",
-    });
+    addGap("Subject support", data.unsupportedReason, "INFO");
   }
 
   if (evidenceInputs.length === 0) {
-    gaps.push({
-      stage: "Evidence",
-      description: "No evidence inputs recorded for this subject.",
-      severity: "WARNING",
-    });
+    addGap("Evidence", "No evidence inputs recorded for this subject.", "WARNING");
   }
 
   if (SUPPORTED_SUBJECT_TYPES.has(data.subjectType) && data.subjectType !== "DELIVERY_ITEM" && !hasOperatorReview) {
-    gaps.push({
-      stage: "Operator review",
-      description: "No operator review event recorded.",
-      severity: "WARNING",
-      href: "/admin/oversight-review",
-    });
+    addGap("Operator review", "No operator review event recorded.", "WARNING", "/admin/oversight-review");
   }
 
   for (const suppression of data.suppressions ?? []) {
     if (suppression.overrideStatus !== "NONE" && !suppression.overrideReason) {
-      gaps.push({
-        stage: "Suppression",
-        description: `Suppression override for ${suppression.fieldName} has no recorded reason.`,
-        severity: "CRITICAL",
-        href: "/admin/suppression-ledger",
-      });
+      addGap("Suppression", `Suppression override for ${suppression.fieldName} has no recorded reason.`, "CRITICAL", "/admin/suppression-ledger");
     }
   }
 
   if (hasSuppression && !data.suppressions?.some((suppression) => suppression.reviewedByOperator || suppression.reviewedAt)) {
-    gaps.push({
-      stage: "Suppression",
-      description: "Suppression exists without an operator review record.",
-      severity: "WARNING",
-      href: "/admin/suppression-ledger",
-    });
+    addGap("Suppression", "Suppression exists without an operator review record.", "WARNING", "/admin/suppression-ledger");
   }
 
   if (data.subjectType !== "DELIVERY_ITEM" && !hasDeliveryApproval && !hasDeliverySent) {
-    gaps.push({
-      stage: "Delivery",
-      description: "No delivery record exists for this subject.",
-      severity: "WARNING",
-      href: "/admin/delivery-queue",
-    });
+    addGap("Delivery", "No delivery record exists for this subject.", "WARNING", "/admin/delivery-queue");
   }
 
   if (hasDeliveryApproval && !hasDeliverySent) {
-    gaps.push({
-      stage: "Delivery",
-      description: "Delivery was approved but no sent record exists.",
-      severity: "WARNING",
-      href: "/admin/delivery-queue",
-    });
+    addGap("Delivery", "Delivery was approved but no sent record exists.", "WARNING", "/admin/delivery-queue");
   }
 
   if (hasDeliverySent && !hasOutcome) {
-    gaps.push({
-      stage: "Outcome",
-      description: "Delivery was sent but no outcome verification has been recorded.",
-      severity: "WARNING",
-      href: "/admin/outcome-verification",
-    });
+    addGap("Outcome", "Delivery was sent but no outcome verification has been recorded.", "WARNING", "/admin/outcome-verification");
   }
 
   for (const decision of data.decisionRecords ?? []) {
     if (decision.decision === "ESCALATE_TO_COUNSEL" && !hasCounsel) {
-      gaps.push({
-        stage: "Escalation",
-        description: "Counsel escalation was selected but no counsel review record exists.",
-        severity: "CRITICAL",
-        href: "/admin/counsel-review",
-      });
+      addGap("Escalation", "Counsel escalation was selected but no counsel review record exists.", "CRITICAL", "/admin/counsel-review");
     }
     if (decision.decision === "ESCALATE_TO_BOARDROOM" && !hasBoardroom) {
-      gaps.push({
-        stage: "Escalation",
-        description: "Boardroom escalation was selected but no boardroom archive record exists.",
-        severity: "CRITICAL",
-        href: "/admin/boardroom-archive",
-      });
+      addGap("Escalation", "Boardroom escalation was selected but no boardroom archive record exists.", "CRITICAL", "/admin/boardroom-archive");
     }
   }
 
   if (data.memorySummary?.status === "insufficient") {
-    gaps.push({
-      stage: "Memory",
-      description: "Retainer cycle memory is insufficient for this subject.",
-      severity: "INFO",
-      href: "/admin/retained-cadence",
-    });
+    addGap("Memory", "Retainer cycle memory is insufficient for this subject.", "INFO", "/admin/retained-cadence");
   }
 
   return sortGaps(gaps);
