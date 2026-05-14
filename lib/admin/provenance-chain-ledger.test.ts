@@ -23,6 +23,7 @@ vi.mock("@/lib/admin/provenance-audit-events", () => ({
 import type { ProvenanceChainLeaf } from "./provenance-chain-anchor";
 import {
   buildProvenanceChainHash,
+  buildProvenanceChainTimelineNodes,
   createProvenanceChainAnchor,
   listProvenanceChainAnchors,
   verifyProvenanceChainSequence,
@@ -219,6 +220,69 @@ describe("listProvenanceChainAnchors", () => {
     const anchors = await listProvenanceChainAnchors({ scope: "DAILY", scopeId: "2026-05-14" });
     expect(anchors).toHaveLength(1);
     expect(anchors[0]?.computedAt).toBe("2026-05-14T12:00:00.000Z");
+  });
+});
+
+describe("buildProvenanceChainTimelineNodes", () => {
+  it("marks the first anchor as FIRST when previousRoot is null", () => {
+    const nodes = buildProvenanceChainTimelineNodes([anchor()]);
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0]?.status).toBe("FIRST");
+    expect(nodes[0]?.failureReason).toBeNull();
+  });
+
+  it("marks the second anchor as LINKED when previousRoot matches previous merkleRoot", () => {
+    const first = anchor({ id: "anchor_001", merkleRoot: "root_001", computedAt: "2026-05-14T12:00:00.000Z" });
+    const second = anchor({
+      id: "anchor_002",
+      merkleRoot: "root_002",
+      previousRoot: "root_001",
+      computedAt: "2026-05-14T13:00:00.000Z",
+    });
+    const nodes = buildProvenanceChainTimelineNodes([first, second]);
+    expect(nodes[1]?.status).toBe("LINKED");
+    expect(nodes[1]?.failureReason).toBeNull();
+  });
+
+  it("marks an anchor as BROKEN when previousRoot does not match the previous merkleRoot", () => {
+    const first = anchor({ id: "anchor_001", merkleRoot: "root_001", computedAt: "2026-05-14T12:00:00.000Z" });
+    const second = anchor({
+      id: "anchor_002",
+      merkleRoot: "root_002",
+      previousRoot: "wrong_root",
+      computedAt: "2026-05-14T13:00:00.000Z",
+    });
+    const nodes = buildProvenanceChainTimelineNodes([first, second]);
+    expect(nodes[1]?.status).toBe("BROKEN");
+    expect(nodes[1]?.failureReason).toBeTruthy();
+  });
+
+  it("marks an anchor as BROKEN when the stored chainHash does not match recomputed", () => {
+    const nodes = buildProvenanceChainTimelineNodes([anchor({ chainHash: "tampered_hash" })]);
+    expect(nodes[0]?.status).toBe("BROKEN");
+    expect(nodes[0]?.failureReason).toContain("chainHash");
+  });
+
+  it("produces short hashes of at most 12+…+6 characters", () => {
+    const longRoot = "a".repeat(64);
+    const a = anchor({ merkleRoot: longRoot });
+    const nodes = buildProvenanceChainTimelineNodes([a]);
+    expect(nodes[0]?.merkleRootShort).toMatch(/^.{12}….{6}$/);
+  });
+
+  it("exposes anchorId for modal targeting", () => {
+    const a = anchor({ id: "anchor_xyz" });
+    const nodes = buildProvenanceChainTimelineNodes([a]);
+    expect(nodes[0]?.anchorId).toBe("anchor_xyz");
+  });
+
+  it("does not expose raw payload fields", () => {
+    const nodes = buildProvenanceChainTimelineNodes([anchor()]);
+    const serialized = JSON.stringify(nodes);
+    expect(serialized).not.toContain("governanceEvents");
+    expect(serialized).not.toContain("actorNotes");
+    expect(serialized).not.toContain("suppression");
+    expect(serialized).not.toContain("clientEvidence");
   });
 });
 

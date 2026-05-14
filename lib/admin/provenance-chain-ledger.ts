@@ -192,6 +192,91 @@ export async function createProvenanceChainAnchor(
   return mapAnchor(row);
 }
 
+// ─── Timeline types ────────────────────────────────────────────────────────────
+
+export type ProvenanceChainTimelineNode = {
+  anchorId: string;
+  scope: string;
+  scopeId: string;
+  merkleRoot: string;
+  merkleRootShort: string;
+  previousRoot: string | null;
+  previousRootShort: string | null;
+  chainHash: string;
+  chainHashShort: string;
+  computedAt: string;
+  status: "FIRST" | "LINKED" | "BROKEN" | "UNKNOWN";
+  failureReason: string | null;
+};
+
+function shortHash(hash: string | null | undefined, length = 12): string {
+  if (!hash) return "—";
+  if (hash.length <= length + 6) return hash;
+  return `${hash.slice(0, length)}…${hash.slice(-6)}`;
+}
+
+export function buildProvenanceChainTimelineNodes(
+  anchors: ProvenanceChainAnchorRecord[],
+): ProvenanceChainTimelineNode[] {
+  const sorted = [...anchors].sort((a, b) => {
+    if (a.computedAt !== b.computedAt) return a.computedAt < b.computedAt ? -1 : 1;
+    return a.id < b.id ? -1 : 1;
+  });
+
+  return sorted.map((anchor, index) => {
+    const previous = sorted[index - 1];
+    let status: ProvenanceChainTimelineNode["status"] = "UNKNOWN";
+    let failureReason: string | null = null;
+
+    const recomputed = buildProvenanceChainHash({
+      version: 1,
+      scope: anchor.scope,
+      scopeId: anchor.scopeId,
+      merkleRoot: anchor.merkleRoot,
+      previousRoot: anchor.previousRoot,
+      computedAt: anchor.computedAt,
+      fromTimestamp: anchor.fromTimestamp ?? null,
+      toTimestamp: anchor.toTimestamp ?? null,
+    });
+
+    if (recomputed !== anchor.chainHash) {
+      status = "BROKEN";
+      failureReason = "chainHash does not match recomputed value.";
+    } else if (index === 0) {
+      if (anchor.previousRoot !== null) {
+        status = "BROKEN";
+        failureReason = "First anchor has a non-null previousRoot.";
+      } else {
+        status = "FIRST";
+      }
+    } else if (!previous) {
+      status = "UNKNOWN";
+    } else if (anchor.previousRoot !== previous.merkleRoot) {
+      status = "BROKEN";
+      failureReason = "previousRoot does not match previous anchor merkleRoot.";
+    } else {
+      status = "LINKED";
+    }
+
+    return {
+      anchorId: anchor.id,
+      scope: anchor.scope,
+      scopeId: anchor.scopeId,
+      merkleRoot: anchor.merkleRoot,
+      merkleRootShort: shortHash(anchor.merkleRoot),
+      previousRoot: anchor.previousRoot ?? null,
+      previousRootShort: shortHash(anchor.previousRoot),
+      chainHash: anchor.chainHash,
+      chainHashShort: shortHash(anchor.chainHash),
+      computedAt: anchor.computedAt,
+      status,
+      failureReason,
+    };
+  });
+}
+
+// ─── List / Verify ─────────────────────────────────────────────────────────────
+
 export async function listProvenanceChainAnchors(input: {
   scope: string;
   scopeId: string;
