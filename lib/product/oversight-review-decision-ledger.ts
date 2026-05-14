@@ -1,5 +1,3 @@
-import "server-only";
-
 import { createHash, randomUUID } from "crypto";
 
 import { prisma } from "@/lib/prisma.server";

@@ -17,8 +17,6 @@
  * SERVER_ONLY — imports prisma directly.
  */
 
-import "server-only";
-
 import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma.server";
 

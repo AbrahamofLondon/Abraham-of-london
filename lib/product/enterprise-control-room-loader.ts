@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/lib/prisma.server";
 import { evaluateOrganisationAccess } from "@/lib/product/organisation-access";
 import { buildClientSafeOversightBrief } from "@/lib/product/client-safe-oversight-brief";

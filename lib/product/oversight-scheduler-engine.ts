@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/lib/prisma.server";
 import { composeOversightReviewCycle } from "@/lib/product/oversight-review-cycle-composer";
 import type { OversightSchedulerEvent, OversightSchedulerRunResult } from "@/lib/product/oversight-scheduler-contract";
