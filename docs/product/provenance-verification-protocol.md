@@ -1,0 +1,316 @@
+# Provenance Verification Protocol
+
+**Internal Design Document — Third-Party Verification Specification**
+
+---
+
+## Status: Draft v1 — Design/Spec Only
+
+This document defines what third parties can verify about Decision Provenance records today, what they cannot verify yet, and the target architecture for a formal verification protocol. No code changes are required to adopt this document.
+
+---
+
+## 1. What a Third Party Can Verify Today
+
+### 1.1 Client-Safe Summary Hash
+
+Any party in possession of a `ClientSafeProvenanceSummary` can verify that the hash is internally consistent:
+
+```
+1. Take the client-safe summary JSON
+2. The provenanceHash field is a SHA-256 hex string
+3. This hash is the same hash that was computed over the full internal
+   DecisionProvenanceRecord at composition time
+4. The hash can be presented to the platform operator for verification
+```
+
+**Limitation:** The third party cannot independently recompute the hash because they do not have access to the full internal record. They can only verify that the hash is well-formed and consistent with the summary they hold.
+
+### 1.2 Internal Record Hash (If Disclosed)
+
+If the platform operator discloses the full `DecisionProvenanceRecord` to a third party (e.g., during an audit or legal proceeding), the third party can independently verify:
+
+```
+1. Take the full record JSON
+2. Canonicalize it (sort all keys alphabetically, sort all arrays)
+3. Compute SHA-256 over the canonicalized JSON
+4. Compare to the provenanceHash field in the record
+5. If match: the record has not been modified since hash computation
+6. The same hash should match the client-safe summary the party holds
+```
+
+**Limitation:** The third party needs access to the full internal record, which is not normally disclosed.
+
+### 1.3 Archived Hash (If Accessible)
+
+If the third party has access to the oversight cycle archive (via platform API or export), they can verify:
+
+```
+1. Load the archive record for the cycle
+2. Extract provenanceHash from the archive metadata
+3. Compare to the provenanceHash from the client-safe summary
+4. If match: the hash persisted at archive time matches the current record
+```
+
+**Limitation:** The archive hash is stored in the same database as the record. A database administrator with write access could modify both.
+
+---
+
+## 2. What They Cannot Verify Yet
+
+| Capability | Why Not | Prerequisite |
+|---|---|---|
+| **WORM storage proof** | Hashes are stored in a mutable database, not write-once-read-many storage | Phase 5 of immutability roadmap (S3 Object Lock or equivalent) |
+| **Merkle root anchoring** | Batch Merkle roots are not yet computed or stored | Phase 4 of immutability roadmap (daily Merkle roots) |
+| **External timestamping** | No trusted timestamp authority is involved | Integration with RFC 3161 TSA or blockchain timestamping |
+| **Independent hash recomputation** | Third parties do not have access to the full internal record | Future verification API (see Section 4) |
+| **Chain continuity proof** | Per-subject hash chains are not yet implemented | Phase 3 of immutability roadmap |
+| **Deletion detection** | No cross-record chain exists — deletion of a record is invisible | Phase 3+ of immutability roadmap |
+
+---
+
+## 3. Future Verification Receipt
+
+When the verification API is implemented, it should produce a structured receipt:
+
+```typescript
+type ProvenanceVerificationReceipt = {
+  version: 1;
+  subjectType: string;
+  subjectId: string;
+  provenanceHash: string;
+  clientSafeHash?: string;
+  archiveHash?: string;
+  verifiedAt: string;
+  verificationStatus: "MATCH" | "MISMATCH" | "UNAVAILABLE";
+  signedBy?: string;
+};
+```
+
+### 3.1 Receipt Generation
+
+```
+1. Load the DecisionProvenanceRecord for the requested subject
+2. Load the ClientSafeProvenanceSummary (if provided by requester)
+3. Load the archive record (if available)
+4. Compare hashes:
+   a. Recompute record hash from canonicalized record
+   b. Compare to stored provenanceHash
+   c. Compare to clientSafeHash (if provided)
+   d. Compare to archiveHash (if available)
+5. Generate receipt with verificationStatus:
+   - "MATCH" if all provided hashes match the recomputed hash
+   - "MISMATCH" if any hash differs
+   - "UNAVAILABLE" if the record cannot be loaded
+6. Optionally sign the receipt with a platform key
+```
+
+### 3.2 Receipt Fields
+
+| Field | Required | Description |
+|---|---|---|
+| `version` | Always | Schema version (currently 1) |
+| `subjectType` | Always | Type of the verified subject |
+| `subjectId` | Always | ID of the verified subject |
+| `provenanceHash` | Always | The hash from the internal record |
+| `clientSafeHash` | Optional | The hash from the client-safe summary, if provided by requester |
+| `archiveHash` | Optional | The hash from the archive metadata, if available |
+| `verifiedAt` | Always | ISO timestamp of verification |
+| `verificationStatus` | Always | MATCH, MISMATCH, or UNAVAILABLE |
+| `signedBy` | Optional | Platform key identifier, if signed |
+
+### 3.3 Receipt Verification
+
+A third party in possession of a signed receipt can verify:
+
+```
+1. Verify the receipt signature using the platform's public key
+2. Confirm the provenanceHash matches the hash in their client-safe summary
+3. Confirm the verifiedAt timestamp is within an acceptable window
+4. The receipt proves that the platform confirmed hash consistency at a
+   specific point in time
+```
+
+---
+
+## 4. External Verifier (Future)
+
+### 4.1 API Design
+
+```
+GET /api/provenance/verify/{subjectType}/{subjectId}
+```
+
+**Authentication:** API key or signed request from authorised party (client, regulator, auditor).
+
+**Request (optional body):**
+```json
+{
+  "clientSafeHash": "abc123...",
+  "archiveHash": "def456..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "ok": true,
+  "receipt": {
+    "version": 1,
+    "subjectType": "OVERSIGHT_CYCLE",
+    "subjectId": "cycle_001",
+    "provenanceHash": "abc123...",
+    "clientSafeHash": "abc123...",
+    "archiveHash": "def456...",
+    "verifiedAt": "2026-05-14T12:00:00.000Z",
+    "verificationStatus": "MATCH",
+    "signedBy": "platform-key-001"
+  }
+}
+```
+
+**Response (404):**
+```json
+{
+  "ok": false,
+  "error": "No provenance record found for this subject.",
+  "receipt": {
+    "version": 1,
+    "subjectType": "OVERSIGHT_CYCLE",
+    "subjectId": "unknown_cycle",
+    "provenanceHash": "",
+    "verifiedAt": "2026-05-14T12:00:00.000Z",
+    "verificationStatus": "UNAVAILABLE"
+  }
+}
+```
+
+### 4.2 Verification Logic
+
+```
+function verifyProvenance(input: {
+  subjectType: string;
+  subjectId: string;
+  clientSafeHash?: string;
+  archiveHash?: string;
+}): ProvenanceVerificationReceipt {
+  const record = loadProvenanceRecord(input.subjectType, input.subjectId);
+  if (!record) {
+    return unavailableReceipt(input.subjectType, input.subjectId);
+  }
+
+  const recomputedHash = buildDecisionProvenanceHash(record);
+  const internalMatch = recomputedHash === record.provenanceHash;
+  const clientSafeMatch = input.clientSafeHash
+    ? recomputedHash === input.clientSafeHash
+    : true; // not provided — not a mismatch
+  const archiveMatch = input.archiveHash
+    ? recomputedHash === input.archiveHash
+    : true; // not provided — not a mismatch
+
+  const allMatch = internalMatch && clientSafeMatch && archiveMatch;
+
+  return {
+    version: 1,
+    subjectType: input.subjectType,
+    subjectId: input.subjectId,
+    provenanceHash: record.provenanceHash,
+    clientSafeHash: input.clientSafeHash,
+    archiveHash: input.archiveHash,
+    verifiedAt: new Date().toISOString(),
+    verificationStatus: allMatch ? "MATCH" : "MISMATCH",
+    signedBy: "platform-key-001",
+  };
+}
+```
+
+### 4.3 Access Control
+
+| Role | Can Verify | Can See Full Record |
+|---|---|---|
+| Client (via client-safe summary) | Hash match only | No |
+| Operator | Hash match + full record | Yes |
+| Admin | Hash match + full record | Yes |
+| Regulator (with authorisation) | Hash match + full record | Conditional |
+| Anonymous | Nothing | No |
+
+### 4.4 Rate Limiting
+
+The verification endpoint should be rate-limited to prevent automated scraping of hash state:
+
+- 10 requests per minute per API key
+- 100 requests per minute per authenticated session
+- 1 request per second for unauthenticated requests (if allowed)
+
+---
+
+## 5. Non-Goals
+
+The following are explicitly out of scope for v1 of the verification protocol:
+
+| Non-Goal | Rationale |
+|---|---|
+| **Public record access** | Provenance records contain operational metadata not appropriate for public disclosure. All verification requires authentication. |
+| **Raw suppression disclosure** | Suppression field names, reasons, and override details are internal operational data. The client-safe summary exposes only gap severity classes, not suppression internals. |
+| **Anonymous external scraping** | The verification API is rate-limited and authenticated. There is no public endpoint for bulk hash retrieval. |
+| **Real-time verification** | Verification is point-in-time. The receipt confirms hash consistency at the time of verification, not continuously. |
+| **Blockchain anchoring** | No blockchain timestamping or anchoring is implemented. The verification protocol works with the existing hash model. |
+| **Full record disclosure** | The verification API returns a receipt, not the full provenance record. Full record access requires separate authorisation. |
+
+---
+
+## 6. Verification Workflow Examples
+
+### 6.1 Client Verifies Their Summary
+
+```
+1. Client receives oversight brief with embedded provenance summary
+2. Client notes the provenanceHash: "abc123..."
+3. Client contacts operator: "Please verify hash abc123..."
+4. Operator runs verification via internal tool or future API
+5. Operator confirms: "Hash abc123... matches the internal record for
+   cycle_001 as of 2026-05-14T12:00:00.000Z"
+6. Client has independent confirmation that their summary corresponds
+   to the actual governed record
+```
+
+### 6.2 Auditor Verifies Batch Integrity (Future)
+
+```
+1. Auditor requests provenance records for Q2 2026
+2. Platform provides: full records + daily Merkle roots + verification receipts
+3. Auditor independently recomputes record hashes from canonicalized records
+4. Auditor verifies each record hash matches the stored provenanceHash
+5. Auditor verifies each record is included in the daily Merkle root
+6. Auditor verifies the daily Merkle root against the stored anchor
+7. Auditor has cryptographic proof that no records were modified or deleted
+```
+
+### 6.3 Regulator Requests Proof of Process (Future)
+
+```
+1. Regulator requests provenance for a specific oversight cycle
+2. Platform provides: full DecisionProvenanceRecord + verification receipt
+3. Regulator verifies:
+   a. provenanceHash matches recomputed hash from canonicalized record
+   b. accountability statement accurately reflects the governance events
+   c. gap classes match the regulator's expectations for completeness
+4. Regulator has deterministic, verifiable proof of the governance process
+```
+
+---
+
+## 7. Summary
+
+| Capability | Current (v1) | Target (v2/v3) |
+|---|---|---|
+| Client-safe hash verification | Manual — operator confirms match | Automated — API returns signed receipt |
+| Internal record hash verification | Manual — requires full record disclosure | Automated — API verifies without full disclosure |
+| Archive hash verification | Manual — requires archive access | Automated — API checks archive linkage |
+| Merkle root verification | Not available | Daily batch roots with inclusion proofs |
+| WORM storage proof | Not available | S3 Object Lock or equivalent |
+| External timestamping | Not available | RFC 3161 TSA or blockchain |
+| Signed receipts | Not available | Platform-signed verification receipts |
+| Public API | Not available | Authenticated, rate-limited verification endpoint |
+
+The current manual verification path (operator confirms hash match on request) is sufficient for v1. The automated verification API should be implemented when external parties regularly request hash verification, or when a regulatory or client audit requires it.
