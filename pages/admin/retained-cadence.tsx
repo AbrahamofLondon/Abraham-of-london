@@ -5,6 +5,12 @@ import Head from "next/head";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
 import { buildOperatorCadenceQueue } from "@/lib/product/retained-cadence-service";
+import {
+  buildCadenceTimeline,
+  groupCadenceTimeline,
+  type RetainedCadenceTimelineItem,
+  type RetainedCadenceTimelineGroup,
+} from "@/lib/admin/retained-cadence-timeline";
 
 type QueueResponse = Awaited<ReturnType<typeof buildOperatorCadenceQueue>>;
 type Action = "MARK_IN_PROGRESS" | "MARK_COMPLETED" | "SKIP_WITH_REASON" | "ESCALATE";
@@ -130,6 +136,83 @@ function CreateCycleForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
+const TIMELINE_STATUS_STYLE: Record<RetainedCadenceTimelineItem["status"], string> = {
+  OVERDUE:   "bg-red-950/60 border border-red-700/40 text-red-400",
+  DUE:       "bg-orange-950/50 border border-orange-700/35 text-orange-400",
+  ESCALATED: "bg-red-950/50 border border-red-800/30 text-rose-400",
+  SKIPPED:   "bg-amber-950/40 border border-amber-700/25 text-amber-400",
+  UPCOMING:  "bg-blue-950/40 border border-blue-800/25 text-blue-400",
+  COMPLETED: "bg-emerald-950/40 border border-emerald-800/25 text-emerald-400",
+  UNKNOWN:   "bg-white/5 border border-white/10 text-white/30",
+};
+
+const TIMELINE_SEVERITY_DOT: Record<RetainedCadenceTimelineItem["severity"], string> = {
+  CRITICAL: "bg-red-500",
+  HIGH:     "bg-orange-400",
+  MEDIUM:   "bg-amber-400",
+  LOW:      "bg-white/20",
+};
+
+function formatDaysOffset(offset: number | null | undefined): string | null {
+  if (offset == null) return null;
+  if (offset < 0) return `${Math.abs(offset)}d overdue`;
+  if (offset === 0) return "due today";
+  return `in ${offset}d`;
+}
+
+function TimelineItem({ item }: { item: RetainedCadenceTimelineItem }) {
+  const statusStyle = TIMELINE_STATUS_STYLE[item.status];
+  const dotStyle = TIMELINE_SEVERITY_DOT[item.severity];
+  const offsetLabel = formatDaysOffset(item.daysOffset);
+
+  return (
+    <div className="flex items-center gap-3 border border-white/5 bg-black/25 px-4 py-3">
+      <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${dotStyle}`} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-white">{item.label}</p>
+        {(item.accountId || item.organisationId) && (
+          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-white/25">
+            {item.accountId ?? item.organisationId}
+          </p>
+        )}
+      </div>
+      <div className="shrink-0 text-right">
+        {item.dueAt ? (
+          <p className="text-sm text-white/55">
+            {new Date(item.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          </p>
+        ) : (
+          <p className="text-sm text-white/25">Unscheduled</p>
+        )}
+        {offsetLabel && (
+          <p className={`mt-0.5 font-mono text-[9px] uppercase tracking-wider ${item.daysOffset != null && item.daysOffset < 0 ? "text-red-400" : "text-white/30"}`}>
+            {offsetLabel}
+          </p>
+        )}
+      </div>
+      <span className={`shrink-0 rounded px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider ${statusStyle}`}>
+        {item.status}
+      </span>
+    </div>
+  );
+}
+
+function TimelineGroupSection({ group }: { group: RetainedCadenceTimelineGroup }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center gap-3">
+        <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-white/30">{group.band}</span>
+        <span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/40">{group.items.length}</span>
+      </div>
+      <div className="space-y-1">
+        {group.items.map((item) => (
+          <TimelineItem key={item.id} item={item} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function RetainedCadencePage({
   initialQueue,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -227,6 +310,9 @@ export default function RetainedCadencePage({
     }
   }
 
+  const timelineItems = buildCadenceTimeline(queue.all);
+  const timelineGroups = groupCadenceTimeline(timelineItems);
+
   const sections: Array<[string, QueueResponse["all"]]> = [
     ["Overdue cycles", queue.overdue],
     ["In progress", queue.inProgress],
@@ -270,6 +356,44 @@ export default function RetainedCadencePage({
         </section>
 
         {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+
+        {/* ── Cadence Timeline ───────────────────────────────────────────── */}
+        <section className="border border-white/10 bg-zinc-950/70 p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Cadence Timeline</h2>
+              <p className="mt-1 text-xs text-white/40">
+                Operational pressure view — overdue, active, upcoming, and completed cycles at a glance.
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-4 text-right">
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-wider text-white/25">Overdue</p>
+                <p className="mt-1 font-mono text-lg text-red-400">{queue.overdue.length}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-wider text-white/25">Due now</p>
+                <p className="mt-1 font-mono text-lg text-orange-400">{queue.due.length}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-wider text-white/25">Total</p>
+                <p className="mt-1 font-mono text-lg text-white/60">{queue.all.length}</p>
+              </div>
+            </div>
+          </div>
+
+          {timelineGroups.length === 0 ? (
+            <div className="mt-4 border border-white/5 bg-black/25 px-4 py-5 text-sm text-white/30">
+              No retained cadence records found.
+            </div>
+          ) : (
+            <div className="mt-5 space-y-5">
+              {timelineGroups.map((group) => (
+                <TimelineGroupSection key={group.band} group={group} />
+              ))}
+            </div>
+          )}
+        </section>
 
         {sections.map(([title, items]) => (
           <section key={title} className="border border-white/10 bg-zinc-950/70 p-5">
