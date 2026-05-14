@@ -13,6 +13,8 @@ import {
 
 import AdminLayout from "@/components/admin/AdminLayout";
 import { AdminStatusBadge } from "@/components/admin/AdminStatusBadge";
+import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
+import type { AdminBadgeTone } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
 import type {
   OperatorActionGroup,
@@ -35,17 +37,11 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   return { props: { summary } };
 };
 
-function toneClass(tone?: OperatorMetricTone): string {
-  switch (tone) {
-    case "risk":
-      return "text-rose-300";
-    case "attention":
-      return "text-amber-300";
-    case "good":
-      return "text-emerald-300";
-    default:
-      return "text-white";
-  }
+function operatorTone(tone?: OperatorMetricTone): AdminBadgeTone {
+  if (tone === "risk") return "danger";
+  if (tone === "attention") return "warning";
+  if (tone === "good") return "success";
+  return "neutral";
 }
 
 function priorityBorder(priority: OperatorQueueCard["priority"], status: OperatorQueueCard["status"]): string {
@@ -70,25 +66,8 @@ function groupAccent(groupId: OperatorActionGroup["id"]): string {
   }
 }
 
-function MetricValue({ value }: { value: number | null }) {
-  return <>{typeof value === "number" ? value : "Unavailable"}</>;
-}
-
-function HeadlineCard({
-  label,
-  value,
-  detail,
-  tone,
-}: OperatorCommandCentreSummary["headlines"][number]) {
-  return (
-    <section className="border border-white/10 bg-zinc-950/70 p-4">
-      <p className="text-[8px] font-mono uppercase tracking-[0.24em] text-white/35">{label}</p>
-      <p className={`mt-3 text-2xl font-light ${toneClass(tone)}`}>
-        <MetricValue value={value} />
-      </p>
-      <p className="mt-1 text-[10px] text-white/35">{detail}</p>
-    </section>
-  );
+function metricValue(value: number | null): string | number {
+  return typeof value === "number" ? value : "Unavailable";
 }
 
 function QueueCard({ card }: { card: OperatorQueueCard }) {
@@ -116,13 +95,14 @@ function QueueCard({ card }: { card: OperatorQueueCard }) {
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
         {card.metrics.map((item) => (
-          <div key={`${card.id}-${item.label}`} className="border border-white/5 bg-black/20 p-3">
-            <p className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">{item.label}</p>
-            <p className={`mt-2 text-lg font-light ${toneClass(item.tone)}`}>
-              <MetricValue value={item.value} />
-            </p>
-            {item.detail ? <p className="mt-1 text-[10px] text-white/30">{item.detail}</p> : null}
-          </div>
+          <AdminMetricCard
+            key={`${card.id}-${item.label}`}
+            label={item.label}
+            value={metricValue(item.value)}
+            detail={item.detail ?? undefined}
+            tone={operatorTone(item.tone)}
+            variant="inner"
+          />
         ))}
       </div>
 
@@ -208,7 +188,13 @@ export default function OperatorCommandCentrePage({
 
         <section className="grid gap-3 md:grid-cols-4">
           {summary.headlines.map((item) => (
-            <HeadlineCard key={item.label} {...item} />
+            <AdminMetricCard
+              key={item.label}
+              label={item.label}
+              value={metricValue(item.value)}
+              detail={item.detail}
+              tone={operatorTone(item.tone)}
+            />
           ))}
         </section>
 

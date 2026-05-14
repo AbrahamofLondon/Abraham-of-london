@@ -29,6 +29,8 @@ import {
 
 import AdminLayout from "@/components/admin/AdminLayout";
 import { AdminStatusBadge } from "@/components/admin/AdminStatusBadge";
+import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
+import type { AdminBadgeTone } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
 import type {
   ReportStateDashboard,
@@ -58,21 +60,15 @@ const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia,
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
-function toneClass(tone?: ReportStateMetricTone): string {
-  switch (tone) {
-    case "risk":
-      return "text-rose-300";
-    case "attention":
-      return "text-amber-300";
-    case "good":
-      return "text-emerald-300";
-    default:
-      return "text-white";
-  }
+function reportTone(tone?: ReportStateMetricTone): AdminBadgeTone {
+  if (tone === "risk") return "danger";
+  if (tone === "attention") return "warning";
+  if (tone === "good") return "success";
+  return "neutral";
 }
 
-function MetricValue({ value }: { value: number | null }) {
-  return <>{typeof value === "number" ? value : "Unavailable"}</>;
+function metricValue(value: number | null): string | number {
+  return typeof value === "number" ? value : "Unavailable";
 }
 
 function sectionIcon(id: string) {
@@ -126,20 +122,14 @@ function SectionCard({ section }: { section: ReportStateSection }) {
       {/* Metrics grid */}
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {section.metrics.map((metric) => (
-          <div
+          <AdminMetricCard
             key={`${section.id}-${metric.label}`}
-            className="border border-white/5 bg-black/20 p-3"
-          >
-            <p className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">
-              {metric.label}
-            </p>
-            <p className={`mt-2 text-lg font-light ${toneClass(metric.tone)}`}>
-              <MetricValue value={metric.value} />
-            </p>
-            {metric.detail ? (
-              <p className="mt-1 text-[10px] text-white/30">{metric.detail}</p>
-            ) : null}
-          </div>
+            label={metric.label}
+            value={metricValue(metric.value)}
+            detail={metric.detail ?? undefined}
+            tone={reportTone(metric.tone)}
+            variant="inner"
+          />
         ))}
       </div>
 
