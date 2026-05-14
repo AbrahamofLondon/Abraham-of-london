@@ -2307,6 +2307,28 @@ model AuditEvent {
   @@index([createdAt])
 }
 
+model ProvenanceChainAnchor {
+  id            String   @id @default(cuid())
+  version       Int      @default(1)
+  scope         String
+  scopeId       String
+  anchorType    String   @default("MERKLE_ROOT")
+  leafCount     Int
+  merkleRoot    String
+  previousRoot  String?
+  chainHash     String
+  computedAt    DateTime @default(now())
+  fromTimestamp DateTime?
+  toTimestamp   DateTime?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  @@index([scope, scopeId])
+  @@index([scope, scopeId, computedAt])
+  @@index([merkleRoot])
+  @@index([chainHash])
+}
+
 model EnforcementPlaybook {
   id              String   @id @default(cuid())
   name            String
