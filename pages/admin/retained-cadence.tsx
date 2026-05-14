@@ -12,6 +12,10 @@ import {
   type RetainedCadenceTimelineItem,
   type RetainedCadenceTimelineGroup,
 } from "@/lib/admin/retained-cadence-timeline";
+import {
+  buildCadenceCalendar,
+  type CalendarBand,
+} from "@/lib/admin/retained-cadence-calendar";
 import { AdminStatusBadge, toneForStatus } from "@/components/admin/AdminStatusBadge";
 
 type QueueResponse = Awaited<ReturnType<typeof buildOperatorCadenceQueue>>;
@@ -203,6 +207,68 @@ function TimelineGroupSection({ group }: { group: RetainedCadenceTimelineGroup }
   );
 }
 
+// ─── Calendar severity dot ────────────────────────────────────────────────────
+
+const CALENDAR_SEVERITY_DOT: Record<RetainedCadenceTimelineItem["severity"], string> = {
+  CRITICAL: "bg-red-500",
+  HIGH:     "bg-orange-400",
+  MEDIUM:   "bg-amber-400",
+  LOW:      "bg-white/20",
+};
+
+const CALENDAR_LANE_ACCENT: Record<string, string> = {
+  OVERDUE:          "border-l-rose-500/50",
+  THIS_WEEK:        "border-l-amber-500/40",
+  NEXT_WEEK:        "border-l-blue-500/30",
+  LATER:            "border-l-white/10",
+  UNSCHEDULED:      "border-l-white/10",
+  COMPLETED_RECENT: "border-l-emerald-500/30",
+};
+
+function CalendarItem({ item }: { item: RetainedCadenceTimelineItem }) {
+  const dot = CALENDAR_SEVERITY_DOT[item.severity];
+  return (
+    <div className="flex items-center gap-3 border border-white/5 bg-black/20 px-3 py-2.5">
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm text-white/80">{item.label}</p>
+        {(item.accountId || item.organisationId) && (
+          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-white/35">
+            {item.accountId ?? item.organisationId}
+          </p>
+        )}
+      </div>
+      {item.dueAt ? (
+        <p className="shrink-0 font-mono text-[10px] text-white/40">
+          {new Date(item.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+        </p>
+      ) : null}
+      <AdminStatusBadge label={item.status} tone={toneForStatus(item.status)} size="md" />
+    </div>
+  );
+}
+
+function CalendarBandSection({ band }: { band: CalendarBand }) {
+  const accent = CALENDAR_LANE_ACCENT[band.lane] ?? "border-l-white/10";
+  return (
+    <div className={`border-l-2 pl-4 ${accent}`}>
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-white/45">
+          {band.label}
+        </span>
+        <span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/40">
+          {band.items.length}
+        </span>
+      </div>
+      <div className="space-y-1">
+        {band.items.map((item) => (
+          <CalendarItem key={item.id} item={item} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function RetainedCadencePage({
   initialQueue,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -302,6 +368,7 @@ export default function RetainedCadencePage({
 
   const timelineItems = buildCadenceTimeline(queue.all);
   const timelineGroups = groupCadenceTimeline(timelineItems);
+  const calendarBands = buildCadenceCalendar(timelineItems);
 
   const sections: Array<[string, QueueResponse["all"]]> = [
     ["Overdue cycles", queue.overdue],
@@ -385,6 +452,28 @@ export default function RetainedCadencePage({
             <div className="mt-5 space-y-5">
               {timelineGroups.map((group) => (
                 <TimelineGroupSection key={group.band} group={group} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── Cadence Calendar ───────────────────────────────────────────── */}
+        <section className="border border-white/10 bg-zinc-950/70 p-5">
+          <div className="mb-4">
+            <h2 className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-500/70">Cadence Calendar</h2>
+            <p className="mt-1 text-xs text-white/40">
+              Week-banded review pressure — overdue, this week, next week, later, and unscheduled.
+            </p>
+          </div>
+
+          {calendarBands.length === 0 ? (
+            <div className="border border-dashed border-white/10 bg-black/25 px-4 py-5 text-sm text-white/50">
+              No upcoming cadence cycles. Create a review cycle above when a retained account is ready.
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {calendarBands.map((band) => (
+                <CalendarBandSection key={band.lane} band={band} />
               ))}
             </div>
           )}
