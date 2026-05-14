@@ -49,14 +49,14 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className={`rounded-3xl border p-6 transition-all ${accent ? "border-amber-200 bg-amber-50/50" : "border-neutral-200 bg-white"}`}>
-      <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-neutral-500">
+    <div className={`rounded border p-5 transition-all ${accent ? "border-amber-500/20 bg-amber-500/5" : "border-white/10 bg-zinc-950/70"}`}>
+      <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/40">
         {label}
       </div>
-      <div className={`mt-3 text-4xl font-light tracking-tighter ${accent ? "text-amber-700" : "text-neutral-950"}`}>
+      <div className={`mt-3 text-4xl font-light tracking-tighter ${accent ? "text-amber-300" : "text-white"}`}>
         {value}
       </div>
-      {subtext && <div className="mt-2 text-sm text-neutral-500 leading-relaxed">{subtext}</div>}
+      {subtext && <div className="mt-2 text-sm text-white/50 leading-relaxed">{subtext}</div>}
     </div>
   );
 }
@@ -73,11 +73,11 @@ export default async function DecisionEfficacyPage() {
 
   if (error || !efficacyData) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
+      <div className="flex items-center justify-center p-12">
         <div className="max-w-md text-center">
-          <ShieldCheck className="mx-auto h-12 w-12 text-red-500 mb-6" />
-          <h2 className="text-2xl font-semibold text-neutral-900 mb-3">Unable to Load Efficacy Data</h2>
-          <p className="text-neutral-600">{error}</p>
+          <ShieldCheck className="mx-auto h-12 w-12 text-red-400 mb-6" />
+          <h2 className="text-2xl font-light text-white/80 mb-3">Unable to Load Efficacy Data</h2>
+          <p className="text-white/50">{error}</p>
           <RebuildEfficacyButton className="mt-8" />
         </div>
       </div>
@@ -94,19 +94,19 @@ export default async function DecisionEfficacyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-6 py-10">
+    <div className="p-6">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1 text-xs font-mono tracking-[0.3em] text-amber-700">
+            <div className="inline-flex items-center gap-2 rounded border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-mono tracking-[0.3em] text-amber-300">
               <Crown className="h-3.5 w-3.5" />
               GOVERNED INTELLIGENCE
             </div>
-            <h1 className="mt-4 text-5xl font-semibold tracking-tight text-neutral-950">
+            <h1 className="mt-4 font-serif text-3xl text-white">
               Constitutional Decision Efficacy
             </h1>
-            <p className="mt-4 max-w-2xl text-lg text-neutral-600">
+            <p className="mt-3 max-w-2xl text-sm text-white/50">
               All metrics now derive from the constitutional spine. 
               Route improvements, readiness deltas, and decision usefulness are measured against fixed governing principles — not reconstructed heuristics.
             </p>
@@ -118,7 +118,7 @@ export default async function DecisionEfficacyPage() {
         </div>
 
         {/* Summary Stats */}
-        <div className="mb-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label="Tracked Assets"
             value={summary.totalAssets ?? 0}
@@ -142,7 +142,7 @@ export default async function DecisionEfficacyPage() {
           />
         </div>
 
-        <div className="mb-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label="Context Rows"
             value={contextualSummary.totalRows}

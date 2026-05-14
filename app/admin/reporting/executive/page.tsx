@@ -23,18 +23,18 @@ function NavCard({ href, icon, category, label, description, external }: CardPro
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="group flex flex-col gap-3 border border-neutral-200 bg-white p-6 transition-colors hover:border-neutral-400 hover:bg-neutral-50"
+      className="group flex flex-col gap-3 border border-white/10 bg-zinc-950/70 p-6 transition-colors hover:border-white/20 hover:bg-zinc-900/70"
     >
       <div className="flex items-center justify-between">
-        <span className="text-neutral-400 group-hover:text-neutral-700">{icon}</span>
+        <span className="text-white/40 group-hover:text-white/60">{icon}</span>
         {external
-          ? <ExternalLink className="h-3.5 w-3.5 text-neutral-300 group-hover:text-neutral-500" />
-          : <ArrowRight className="h-4 w-4 text-neutral-300 transition-transform group-hover:translate-x-0.5 group-hover:text-neutral-600" />}
+          ? <ExternalLink className="h-3.5 w-3.5 text-white/20 group-hover:text-white/40" />
+          : <ArrowRight className="h-4 w-4 text-white/20 transition-transform group-hover:translate-x-0.5 group-hover:text-amber-400/60" />}
       </div>
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">{category}</p>
-        <p className="mt-1 text-sm font-medium text-neutral-800">{label}</p>
-        <p className="mt-1.5 text-xs text-neutral-500">{description}</p>
+        <p className="font-mono text-[10px] uppercase tracking-wider text-white/35">{category}</p>
+        <p className="mt-1 text-sm font-medium text-white/80">{label}</p>
+        <p className="mt-1.5 text-xs text-white/45">{description}</p>
       </div>
     </Link>
   );
@@ -42,18 +42,18 @@ function NavCard({ href, icon, category, label, description, external }: CardPro
 
 export default function ExecutiveReportingAdminPage() {
   return (
-    <div className="min-h-screen bg-neutral-50 p-8">
-      <div className="mx-auto max-w-5xl space-y-12">
+    <div className="p-6">
+      <div className="mx-auto max-w-5xl space-y-10">
 
         {/* Header */}
         <div>
-          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-neutral-400">
+          <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-amber-500/70">
             Admin · Reporting
           </p>
-          <h1 className="mt-2 text-3xl font-light tracking-tight text-neutral-900">
+          <h1 className="mt-2 font-serif text-2xl text-white">
             Executive Reporting
           </h1>
-          <p className="mt-3 max-w-2xl text-sm text-neutral-500">
+          <p className="mt-3 max-w-2xl text-sm text-white/50">
             Operational index for the Executive Reporting surface. Use this page to
             preview the client-facing assessment flow, monitor generated report state,
             track delivery and export issues, and continue escalation posture where
@@ -63,11 +63,11 @@ export default function ExecutiveReportingAdminPage() {
 
         {/* Section 1 — Product Surface Preview */}
         <section>
-          <div className="mb-4 border-b border-neutral-200 pb-2">
-            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-neutral-400">
+          <div className="mb-4 border-b border-white/10 pb-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/40">
               Product Surface Preview
             </p>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="mt-1 text-xs text-white/40">
               Client-facing routes. Use to inspect the user experience and verify
               assessment flow integrity. Opens as the product — not an admin view.
             </p>
@@ -94,11 +94,11 @@ export default function ExecutiveReportingAdminPage() {
 
         {/* Section 2 — Operational Monitoring */}
         <section>
-          <div className="mb-4 border-b border-neutral-200 pb-2">
-            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-neutral-400">
+          <div className="mb-4 border-b border-white/10 pb-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/40">
               Operational Monitoring
             </p>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="mt-1 text-xs text-white/40">
               Admin surfaces for report state, delivery, export issues, and
               escalation. This is where operational work happens.
             </p>
@@ -136,10 +136,10 @@ export default function ExecutiveReportingAdminPage() {
         </section>
 
         {/* Future note */}
-        <div className="border border-neutral-100 bg-white px-5 py-4 text-xs text-neutral-400">
+        <div className="border border-white/10 bg-zinc-950/70 px-5 py-4 text-xs text-white/35">
           <span className="font-mono uppercase tracking-wider">Future: </span>
-          A <code className="rounded bg-neutral-100 px-1 font-mono text-[10px]">/admin/product-surfaces</code> index
-          should inventory all client-facing assessment and product surfaces with preview links, monitoring priority,
+          The <code className="rounded bg-white/5 px-1 font-mono text-[10px] text-white/50">/admin/product-surfaces</code> index
+          inventories all client-facing assessment and product surfaces with preview links, monitoring priority,
           delivery posture, and operational owner — so admin navigation distinguishes product preview from
           operational monitoring across the full surface estate.
         </div>

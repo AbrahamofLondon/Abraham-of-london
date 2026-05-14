@@ -113,17 +113,17 @@ export default function AdminContextualEfficacyPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#F6F4EF] px-6 py-8 md:px-8">
+    <main className="p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-neutral-500">
+            <p className="font-mono text-[8px] uppercase tracking-[0.24em] text-amber-500/70">
               Admin Decision Intelligence
-            </div>
-            <h1 className="mt-2 text-4xl font-light tracking-tight text-neutral-900">
+            </p>
+            <h1 className="mt-2 font-serif text-2xl text-white">
               Contextual Efficacy
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600">
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/50">
               This surface evaluates asset performance against the full canonical
               context the user actually saw — dominant domains, failure modes,
               interventions, sponsor types, and recommendation rationale included.
@@ -133,7 +133,7 @@ export default function AdminContextualEfficacyPage() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => void loadRows()}
-              className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-4 py-2 text-[11px] font-mono uppercase tracking-[0.16em] text-neutral-700 hover:bg-neutral-50"
+              className="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-mono uppercase tracking-[0.16em] text-white/60 hover:bg-white/10"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               Refresh
@@ -142,7 +142,7 @@ export default function AdminContextualEfficacyPage() {
             <button
               onClick={() => void rebuild()}
               disabled={rebuilding}
-              className="inline-flex items-center gap-2 rounded-full border border-[#C9A96A]/30 bg-[#C9A96A]/10 px-4 py-2 text-[11px] font-mono uppercase tracking-[0.16em] text-[#8A6A2F] hover:bg-[#C9A96A]/15 disabled:opacity-50"
+              className="inline-flex items-center gap-2 border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-[11px] font-mono uppercase tracking-[0.16em] text-amber-300 hover:bg-amber-500/15 disabled:opacity-50"
             >
               <Database className="h-3.5 w-3.5" />
               {rebuilding ? "Rebuilding..." : "Rebuild Efficacy"}
@@ -151,17 +151,17 @@ export default function AdminContextualEfficacyPage() {
         </div>
 
         {error ? (
-          <div className="mb-6 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+          <div className="mb-6 border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-300">
             {error}
           </div>
         ) : null}
 
         {loading ? (
-          <div className="rounded-[32px] border border-neutral-200 bg-white px-6 py-12 text-center text-neutral-500 shadow-sm">
+          <div className="rounded border border-white/10 bg-zinc-950/70 px-6 py-12 text-center text-white/40">
             Loading canonical efficacy surface...
           </div>
         ) : rows.length === 0 ? (
-          <div className="rounded-[32px] border border-neutral-200 bg-white px-6 py-12 text-center text-neutral-500 shadow-sm">
+          <div className="rounded border border-white/10 bg-zinc-950/70 px-6 py-12 text-center text-white/40">
             No rebuilt contextual efficacy rows available.
           </div>
         ) : (

@@ -54,10 +54,10 @@ type CampaignWithRelations = {
 
 function StatusBadge({ status }: { status: string }) {
   const config = {
-    active: { label: "ACTIVE", color: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
-    completed: { label: "COMPLETED", color: "bg-neutral-500/10 text-neutral-600 border-neutral-200" },
-    paused: { label: "PAUSED", color: "bg-amber-500/10 text-amber-600 border-amber-200" },
-    draft: { label: "DRAFT", color: "bg-blue-500/10 text-blue-600 border-blue-200" }
+    active: { label: "ACTIVE", color: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" },
+    completed: { label: "COMPLETED", color: "bg-white/5 text-white/40 border-white/10" },
+    paused: { label: "PAUSED", color: "bg-amber-500/10 text-amber-300 border-amber-500/20" },
+    draft: { label: "DRAFT", color: "bg-blue-500/10 text-blue-300 border-blue-500/20" }
   };
 
   const { label, color } = config[status as keyof typeof config] || config.draft;
@@ -70,17 +70,17 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function CompletionRate({ rate }: { rate: number }) {
-  const color = rate >= 75 ? "bg-emerald-500" : rate >= 50 ? "bg-amber-500" : "bg-neutral-500";
+  const color = rate >= 75 ? "bg-emerald-500" : rate >= 50 ? "bg-amber-500" : "bg-white/20";
   
   return (
     <div className="flex items-center gap-2">
-      <div className="w-16 h-1 bg-neutral-100 rounded-full overflow-hidden">
+      <div className="w-16 h-1 bg-white/10 rounded-full overflow-hidden">
         <div 
           className={`h-full ${color} transition-all duration-500`}
           style={{ width: `${rate}%` }}
         />
       </div>
-      <span className="text-[9px] font-mono text-neutral-600">{rate}%</span>
+      <span className="text-[9px] font-mono text-white/50">{rate}%</span>
     </div>
   );
 }
@@ -94,12 +94,12 @@ export default async function CampaignsPage() {
   const session = await getServerSession(authOptions);
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+      <div className="flex items-center justify-center p-12">
         <div className="text-center">
-          <ShieldCheck className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-          <h1 className="text-xl font-light text-neutral-800 mb-2">Access Denied</h1>
-          <p className="text-sm text-neutral-500">Authentication required</p>
-          <Link href="/admin/login" className="inline-block mt-4 px-6 py-2 bg-neutral-900 text-white text-xs uppercase tracking-wider">
+          <ShieldCheck className="w-12 h-12 text-white/30 mx-auto mb-4" />
+          <h1 className="text-xl font-light text-white/80 mb-2">Access Denied</h1>
+          <p className="text-sm text-white/50">Authentication required</p>
+          <Link href="/admin/login" className="inline-block mt-4 px-6 py-2 bg-white/10 text-white/80 text-xs uppercase tracking-wider border border-white/10">
             Return to Login
           </Link>
         </div>
@@ -145,14 +145,14 @@ export default async function CampaignsPage() {
   } catch (error) {
     console.error("Failed to fetch campaigns:", error);
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+      <div className="flex items-center justify-center p-12">
         <div className="text-center">
-          <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-          <h1 className="text-xl font-light text-neutral-800 mb-2">Database Error</h1>
-          <p className="text-sm text-neutral-500">Unable to connect to the registry</p>
+          <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+          <h1 className="text-xl font-light text-white/80 mb-2">Database Error</h1>
+          <p className="text-sm text-white/50">Unable to connect to the registry</p>
           <button 
             onClick={() => window.location.reload()}
-            className="inline-block mt-4 px-6 py-2 bg-neutral-900 text-white text-xs uppercase tracking-wider hover:bg-black transition-colors"
+            className="inline-block mt-4 px-6 py-2 bg-white/10 text-white/80 text-xs uppercase tracking-wider border border-white/10 hover:bg-white/20 transition-colors"
           >
             Retry
           </button>
@@ -168,71 +168,68 @@ export default async function CampaignsPage() {
   const activeRate = totalCampaigns > 0 ? Math.round((activeCampaigns / totalCampaigns) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-sans">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="p-6">
+      <div className="max-w-7xl mx-auto">
         
         {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="h-px w-12 bg-neutral-400" />
-            <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-neutral-500 font-semibold">
-              Sovereign Registry
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-light tracking-tight text-neutral-900 mb-4">
+        <div className="mb-8">
+          <p className="font-mono text-[8px] uppercase tracking-[0.24em] text-amber-500/70">
+            Campaign Registry
+          </p>
+          <h1 className="mt-2 font-serif text-2xl text-white">
             Campaign Registry
           </h1>
-          <p className="text-sm text-neutral-500 max-w-2xl">
+          <p className="mt-1 text-sm text-white/50 max-w-2xl">
             Manage sovereign alignment campaigns, track participation, and access executive intelligence briefs.
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white border border-neutral-200 p-6 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="border border-white/10 bg-zinc-950/70 p-5">
             <div className="flex items-center justify-between mb-3">
-              <TrendingUp className="w-5 h-5 text-neutral-500" />
-              <span className="text-[10px] font-mono text-neutral-400">Total</span>
+              <TrendingUp className="w-5 h-5 text-white/40" />
+              <span className="text-[10px] font-mono text-white/30">Total</span>
             </div>
-            <p className="text-3xl font-light tracking-tight text-neutral-900">{totalCampaigns}</p>
-            <p className="text-xs text-neutral-500 mt-1">Active Campaigns</p>
-            <div className="mt-3 pt-3 border-t border-neutral-100">
+            <p className="text-3xl font-light text-white">{totalCampaigns}</p>
+            <p className="text-xs text-white/50 mt-1">Active Campaigns</p>
+            <div className="mt-3 pt-3 border-t border-white/10">
               <div className="flex justify-between text-[9px]">
-                <span className="text-neutral-500">Active</span>
-                <span className="font-mono text-neutral-700">{activeCampaigns}</span>
+                <span className="text-white/40">Active</span>
+                <span className="font-mono text-white/70">{activeCampaigns}</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white border border-neutral-200 p-6 shadow-sm">
+          <div className="border border-white/10 bg-zinc-950/70 p-5">
             <div className="flex items-center justify-between mb-3">
-              <Users className="w-5 h-5 text-neutral-500" />
-              <span className="text-[10px] font-mono text-neutral-400">Participants</span>
+              <Users className="w-5 h-5 text-white/40" />
+              <span className="text-[10px] font-mono text-white/30">Participants</span>
             </div>
-            <p className="text-3xl font-light tracking-tight text-neutral-900">{totalParticipants}</p>
-            <p className="text-xs text-neutral-500 mt-1">Across all campaigns</p>
+            <p className="text-3xl font-light text-white">{totalParticipants}</p>
+            <p className="text-xs text-white/50 mt-1">Across all campaigns</p>
           </div>
 
-          <div className="bg-white border border-neutral-200 p-6 shadow-sm">
+          <div className="border border-white/10 bg-zinc-950/70 p-5">
             <div className="flex items-center justify-between mb-3">
-              <Activity className="w-5 h-5 text-neutral-500" />
-              <span className="text-[10px] font-mono text-neutral-400">Completion</span>
+              <Activity className="w-5 h-5 text-white/40" />
+              <span className="text-[10px] font-mono text-white/30">Completion</span>
             </div>
-            <p className="text-3xl font-light tracking-tight text-neutral-900">{activeRate}%</p>
-            <p className="text-xs text-neutral-500 mt-1">Active rate</p>
+            <p className="text-3xl font-light text-white">{activeRate}%</p>
+            <p className="text-xs text-white/50 mt-1">Active rate</p>
           </div>
         </div>
 
         {/* Campaigns Table */}
-        <div className="bg-white border border-neutral-200 overflow-hidden shadow-sm">
-          <div className="border-b border-neutral-200 bg-neutral-50 px-6 py-4">
+        <div className="border border-white/10 bg-zinc-950/70 overflow-hidden">
+          <div className="border-b border-white/10 bg-black/30 px-5 py-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-semibold">
+              <h2 className="text-[10px] font-mono uppercase tracking-wider text-white/40">
                 Campaign Registry
               </h2>
               <Link
                 href="/admin/campaigns/new"
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-neutral-900 text-white text-[9px] font-mono uppercase tracking-wider hover:bg-black transition-colors"
+                className="inline-flex items-center gap-2 px-3 py-1.5 border border-white/10 bg-white/5 text-[9px] font-mono uppercase tracking-wider text-white/60 hover:bg-white/10 transition-colors"
               >
                 New Campaign
               </Link>
@@ -242,26 +239,26 @@ export default async function CampaignsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-neutral-100 bg-white">
-                  <th className="text-left py-3 px-6 text-[8px] font-mono uppercase tracking-wider text-neutral-500 font-medium">
+                <tr className="border-b border-white/10 bg-black/20">
+                  <th className="text-left py-3 px-5 text-[8px] font-mono uppercase tracking-wider text-white/35 font-medium">
                     Campaign
                   </th>
-                  <th className="text-left py-3 px-6 text-[8px] font-mono uppercase tracking-wider text-neutral-500 font-medium">
+                  <th className="text-left py-3 px-5 text-[8px] font-mono uppercase tracking-wider text-white/35 font-medium">
                     Organisation
                   </th>
-                  <th className="text-left py-3 px-6 text-[8px] font-mono uppercase tracking-wider text-neutral-500 font-medium">
+                  <th className="text-left py-3 px-5 text-[8px] font-mono uppercase tracking-wider text-white/35 font-medium">
                     Status
                   </th>
-                  <th className="text-left py-3 px-6 text-[8px] font-mono uppercase tracking-wider text-neutral-500 font-medium">
+                  <th className="text-left py-3 px-5 text-[8px] font-mono uppercase tracking-wider text-white/35 font-medium">
                     Participants
                   </th>
-                  <th className="text-left py-3 px-6 text-[8px] font-mono uppercase tracking-wider text-neutral-500 font-medium">
+                  <th className="text-left py-3 px-5 text-[8px] font-mono uppercase tracking-wider text-white/35 font-medium">
                     Completion
                   </th>
-                  <th className="text-left py-3 px-6 text-[8px] font-mono uppercase tracking-wider text-neutral-500 font-medium">
+                  <th className="text-left py-3 px-5 text-[8px] font-mono uppercase tracking-wider text-white/35 font-medium">
                     Created
                   </th>
-                  <th className="text-right py-3 px-6 text-[8px] font-mono uppercase tracking-wider text-neutral-500 font-medium">
+                  <th className="text-right py-3 px-5 text-[8px] font-mono uppercase tracking-wider text-white/35 font-medium">
                     Actions
                   </th>
                  </tr>
@@ -273,74 +270,71 @@ export default async function CampaignsPage() {
                   const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
                   
                   return (
-                    <tr key={campaign.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
-                      <td className="py-3 px-6">
+                    <tr key={campaign.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="py-3 px-5">
                         <div>
-                          <p className="text-sm font-medium text-neutral-800">{campaign.title || "Unnamed Campaign"}</p>
-                          <p className="text-[9px] font-mono text-neutral-400 mt-0.5">
+                          <p className="text-sm text-white/80">{campaign.title || "Unnamed Campaign"}</p>
+                          <p className="text-[9px] font-mono text-white/30 mt-0.5">
                             {campaign.id.slice(0, 8).toUpperCase()}
                           </p>
                         </div>
                       </td>
-                      <td className="py-3 px-6">
+                      <td className="py-3 px-5">
                         {campaign.organisation ? (
                           <Link 
                             href={`/admin/organisations/${campaign.organisationId}`}
-                            className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                            className="text-sm text-white/50 hover:text-white/80 transition-colors"
                           >
                             {campaign.organisation.name || "Unknown"}
                           </Link>
                         ) : (
-                          <span className="text-sm text-neutral-400">Unknown</span>
+                          <span className="text-sm text-white/30">Unknown</span>
                         )}
                       </td>
-                      <td className="py-3 px-6">
+                      <td className="py-3 px-5">
                         <StatusBadge status={campaign.status} />
                       </td>
-                      <td className="py-3 px-6">
+                      <td className="py-3 px-5">
                         <div>
-                          <p className="text-sm text-neutral-700">{completedCount} / {totalCount}</p>
-                          <p className="text-[8px] font-mono text-neutral-400 mt-0.5">
+                          <p className="text-sm text-white/70">{completedCount} / {totalCount}</p>
+                          <p className="text-[8px] font-mono text-white/30 mt-0.5">
                             {campaign._count.correctionNodes} corrections
                           </p>
                         </div>
                       </td>
-                      <td className="py-3 px-6">
+                      <td className="py-3 px-5">
                         <CompletionRate rate={completionRate} />
                       </td>
-                      <td className="py-3 px-6">
-                        <div className="flex items-center gap-1 text-[10px] text-neutral-500">
+                      <td className="py-3 px-5">
+                        <div className="flex items-center gap-1 text-[10px] text-white/40">
                           <Clock className="w-3 h-3" />
                           <span>{new Date(campaign.createdAt).toLocaleDateString()}</span>
                         </div>
                       </td>
-                      <td className="py-3 px-6 text-right">
+                      <td className="py-3 px-5 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* View Report Button - Executive Intelligence Brief */}
                           <Link
                             href={`/admin/campaigns/${campaign.id}/report`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider border border-neutral-300 text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all rounded"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider border border-white/10 text-white/50 hover:bg-white/5 hover:text-white/70 transition-all"
                             title="Executive Intelligence Brief"
                           >
                             <FileText className="w-3 h-3" />
                             Brief
                           </Link>
                           
-                          {/* View Campaign Details */}
                           <Link
                             href={`/admin/campaigns/${campaign.id}`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider border border-neutral-300 text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all rounded"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider border border-white/10 text-white/50 hover:bg-white/5 hover:text-white/70 transition-all"
                             title="Campaign Details"
                           >
                             <Eye className="w-3 h-3" />
                             Details
                           </Link>
                           
-                          {/* Live Analytics (if completed participants) */}
                           {completedCount > 0 && (
                             <Link
                               href={`/admin?campaign=${campaign.id}`}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider border border-neutral-300 text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all rounded"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider border border-white/10 text-white/50 hover:bg-white/5 hover:text-white/70 transition-all"
                               title="Live Analytics"
                             >
                               <BarChart3 className="w-3 h-3" />
@@ -358,16 +352,16 @@ export default async function CampaignsPage() {
 
           {campaigns.length === 0 && (
             <div className="text-center py-16">
-              <div className="inline-flex p-4 bg-neutral-100 rounded-full mb-4">
-                <TrendingUp className="w-8 h-8 text-neutral-400" />
+              <div className="inline-flex p-4 bg-white/5 rounded-full mb-4">
+                <TrendingUp className="w-8 h-8 text-white/30" />
               </div>
-              <h3 className="text-base font-light text-neutral-700 mb-2">No campaigns yet</h3>
-              <p className="text-sm text-neutral-500 max-w-md mx-auto mb-6">
+              <h3 className="text-base font-light text-white/70 mb-2">No campaigns yet</h3>
+              <p className="text-sm text-white/50 max-w-md mx-auto mb-6">
                 Create your first sovereign alignment campaign to begin tracking institutional resonance.
               </p>
               <Link
                 href="/admin/campaigns/new"
-                className="inline-block px-6 py-3 bg-neutral-900 text-white text-[10px] font-mono uppercase tracking-wider hover:bg-black transition-colors"
+                className="inline-block px-6 py-3 border border-white/10 bg-white/5 text-white/70 text-[10px] font-mono uppercase tracking-wider hover:bg-white/10 transition-colors"
               >
                 Create Campaign
               </Link>
@@ -376,15 +370,15 @@ export default async function CampaignsPage() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-12 pt-8 border-t border-neutral-200">
+        <footer className="mt-8 pt-6 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-[8px] text-neutral-400 font-mono">
+            <p className="text-[8px] text-white/30 font-mono">
               Sovereign Alignment Registry • OGR-IV Protocol
             </p>
             <div className="flex items-center gap-4">
-              <span className="text-[7px] text-neutral-400">{totalCampaigns} campaigns</span>
-              <span className="text-[7px] text-neutral-400">{totalParticipants} participants</span>
-              <span className="text-[7px] text-neutral-400">Canary Wharf Node</span>
+              <span className="text-[7px] text-white/30">{totalCampaigns} campaigns</span>
+              <span className="text-[7px] text-white/30">{totalParticipants} participants</span>
+              <span className="text-[7px] text-white/30">Canary Wharf Node</span>
             </div>
           </div>
         </footer>

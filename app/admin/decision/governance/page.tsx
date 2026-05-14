@@ -30,12 +30,12 @@ function StatCard({
   subtext?: string;
 }) {
   return (
-    <div className="rounded-3xl border border-neutral-200 bg-white p-6">
-      <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-neutral-500">
+    <div className="rounded border border-white/10 bg-zinc-950/70 p-5">
+      <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/40">
         {label}
       </div>
-      <div className="mt-3 text-4xl tracking-tight text-neutral-950">{value}</div>
-      {subtext ? <div className="mt-2 text-sm text-neutral-500">{subtext}</div> : null}
+      <div className="mt-3 text-4xl tracking-tight text-white">{value}</div>
+      {subtext ? <div className="mt-2 text-sm text-white/50">{subtext}</div> : null}
     </div>
   );
 }
@@ -44,16 +44,16 @@ export default async function DecisionGovernancePage() {
   const data = await getGovernanceData();
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-6 py-10">
+    <div className="p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <div className="text-[10px] font-mono uppercase tracking-[0.26em] text-neutral-500">
+        <div className="mb-6">
+          <p className="font-mono text-[8px] uppercase tracking-[0.26em] text-amber-500/70">
             Admin Surface
-          </div>
-          <h1 className="mt-3 text-4xl font-semibold tracking-tight text-neutral-950">
+          </p>
+          <h1 className="mt-2 font-serif text-2xl text-white">
             Recommendation Governance
           </h1>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-600">
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-white/50">
             This surface governs recommendation quality, confidence review points,
             suppression rules, and drift alerts. It exists to prevent the analysis layer
             from becoming noisy, unstable, or overly concentrated around a few assets.

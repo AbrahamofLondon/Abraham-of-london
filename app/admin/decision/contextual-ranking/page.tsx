@@ -96,16 +96,16 @@ export default function AdminContextualRankingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F6F4EF] px-6 py-8 md:px-8">
+    <main className="p-6">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-neutral-500">
+        <div className="mb-6">
+          <p className="font-mono text-[8px] uppercase tracking-[0.24em] text-amber-500/70">
             Admin Decision Intelligence
-          </div>
-          <h1 className="mt-2 text-4xl font-light tracking-tight text-neutral-900">
+          </p>
+          <h1 className="mt-2 font-serif text-2xl text-white">
             Session Contextual Ranking
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600">
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-white/50">
             This surface resolves ranking from the canonical snapshot stored for a
             specific session, not from legacy posture fragments. The ranked assets
             are judged inside the exact narrative and intervention context shown to
@@ -113,22 +113,22 @@ export default function AdminContextualRankingPage() {
           </p>
         </div>
 
-        <div className="rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm">
+        <div className="rounded border border-white/10 bg-zinc-950/70 p-5">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
             <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
               <input
                 value={sessionKey}
                 onChange={(e) => setSessionKey(e.target.value)}
                 placeholder="Enter strategy room session key..."
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-11 py-3 text-sm text-neutral-900 outline-none focus:border-[#C9A96A]/35"
+                className="w-full border border-white/10 bg-black/40 px-11 py-3 text-sm text-white outline-none focus:border-amber-500/30 placeholder:text-white/30"
               />
             </div>
 
             <button
               onClick={() => void loadRanking()}
               disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-[#C9A96A]/30 bg-[#C9A96A]/10 px-5 py-3 text-[11px] font-mono uppercase tracking-[0.16em] text-[#8A6A2F] hover:bg-[#C9A96A]/15 disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 border border-amber-500/20 bg-amber-500/10 px-5 py-3 text-[11px] font-mono uppercase tracking-[0.16em] text-amber-300 hover:bg-amber-500/15 disabled:opacity-50"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
               {loading ? "Loading..." : "Load Ranking"}
@@ -137,26 +137,26 @@ export default function AdminContextualRankingPage() {
         </div>
 
         {error ? (
-          <div className="mt-6 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+          <div className="mt-6 border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-300">
             {error}
           </div>
         ) : null}
 
         {data ? (
           <div className="mt-8 space-y-6">
-            <div className="rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm">
+            <div className="rounded border border-white/10 bg-zinc-950/70 p-5">
               <div className="grid gap-4 xl:grid-cols-3">
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">
                     Session Key
                   </div>
-                  <div className="mt-2 text-sm font-mono break-all text-neutral-800">
+                  <div className="mt-2 text-sm font-mono break-all text-white/70">
                     {data.sessionKey}
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">
                     Join Key
                   </div>
                   <div className="mt-2 text-sm font-mono break-all text-neutral-800">

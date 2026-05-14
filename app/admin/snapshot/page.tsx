@@ -67,26 +67,26 @@ const TEAM_SNAPSHOTS = [
 
 export default function ExecutiveSnapshotPage() {
   return (
-    <div className="min-h-screen bg-[#F9F9F7] p-8 lg:p-16 font-sans text-neutral-900">
+    <div className="p-6 font-sans">
       
       {/* 1. TOP NAVIGATION & SYSTEM STATUS */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-6">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 bg-black flex items-center justify-center">
-              <Zap className="w-4 h-4 text-[#8A6A2F] fill-current" />
+            <div className="w-8 h-8 bg-zinc-900 flex items-center justify-center border border-white/10">
+              <Zap className="w-4 h-4 text-amber-500/70 fill-current" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-400">Sovereign Intelligence v2.0</span>
+            <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/30">Sovereign Intelligence v2.0</span>
           </div>
-          <h1 className="text-5xl font-black uppercase tracking-tighter leading-none">Executive Command</h1>
+          <h1 className="font-serif text-3xl text-white">Executive Command</h1>
         </div>
 
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-neutral-200 text-[10px] font-black uppercase tracking-widest hover:border-black transition-all">
+          <button className="flex items-center gap-2 px-5 py-2.5 border border-white/10 bg-white/5 text-[10px] font-mono uppercase tracking-widest text-white/60 hover:border-white/20 hover:text-white/80 transition-all">
             <Download className="w-3.5 h-3.5" /> Export Audit
           </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-neutral-800 transition-all">
-            <Share2 className="w-3.5 h-3.5 text-[#8A6A2F]" /> Share Briefing
+          <button className="flex items-center gap-2 px-5 py-2.5 border border-amber-500/20 bg-amber-500/10 text-[10px] font-mono uppercase tracking-widest text-amber-300 hover:bg-amber-500/20 transition-all">
+            <Share2 className="w-3.5 h-3.5 text-amber-400/70" /> Share Briefing
           </button>
         </div>
       </header>
@@ -98,16 +98,16 @@ export default function ExecutiveSnapshotPage() {
           
           <section>
             <div className="flex items-center gap-4 mb-6">
-              <div className="h-[1px] flex-1 bg-neutral-200" />
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 italic">Dissonance & Drill-Down</h2>
+              <div className="h-[1px] flex-1 bg-white/10" />
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">Dissonance & Drill-Down</h2>
             </div>
             <DrillDownMatrix globalData={GLOBAL_DATA} teamSnapshots={TEAM_SNAPSHOTS} />
           </section>
 
           <section>
             <div className="flex items-center gap-4 mb-6">
-              <div className="h-[1px] flex-1 bg-neutral-200" />
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 italic">Deployment Command</h2>
+              <div className="h-[1px] flex-1 bg-white/10" />
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">Deployment Command</h2>
             </div>
             <InterventionScheduler 
               targetTeam="Marketing Core" 
@@ -122,25 +122,25 @@ export default function ExecutiveSnapshotPage() {
           
           <section>
              <div className="flex items-center gap-4 mb-6">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 italic whitespace-nowrap">Institutional Risk Map</h2>
-              <div className="h-[1px] flex-1 bg-neutral-200" />
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40 whitespace-nowrap">Institutional Risk Map</h2>
+              <div className="h-[1px] flex-1 bg-white/10" />
             </div>
             <FragilityHeatmap teams={TEAM_SNAPSHOTS} />
           </section>
 
-          <section className="bg-white border border-neutral-200 p-8 shadow-sm">
+          <section className="border border-white/10 bg-zinc-950/70 p-6">
             <div className="flex items-center gap-3 mb-6">
-              <FileText className="w-4 h-4 text-[#8A6A2F]" />
-              <h3 className="text-[10px] font-black uppercase tracking-widest">System Memo</h3>
+              <FileText className="w-4 h-4 text-amber-500/60" />
+              <h3 className="font-mono text-[10px] uppercase tracking-widest text-white/50">System Memo</h3>
             </div>
-            <p className="text-[12px] leading-relaxed text-neutral-500 italic mb-6">
+            <p className="text-[12px] leading-relaxed text-white/50 italic mb-6">
               "The current delta in Marketing Core suggests a structural collapse in operational intent. 
               The 'Fractured' condition indicates that the team is moving in opposing directions, 
               rendering traditional top-down directives ineffective."
             </p>
-            <div className="pt-6 border-t border-neutral-100 flex items-center gap-3">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400">Governance Verified Protocol</span>
+            <div className="pt-6 border-t border-white/10 flex items-center gap-3">
+              <ShieldCheck className="w-4 h-4 text-emerald-500/60" />
+              <span className="font-mono text-[8px] uppercase tracking-widest text-white/30">Governance Verified Protocol</span>
             </div>
           </section>
 
