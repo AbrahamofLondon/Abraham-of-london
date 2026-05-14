@@ -64,7 +64,15 @@ export function getRetainerCycleMemoryEscalationLabel(level: string): string {
 }
 
 function formatFindingSource(finding: RetainerCycleMemoryFinding): string | null {
-  return finding.source ?? null;
+  if (!finding.source) {
+    return null;
+  }
+
+  return finding.source
+    .split(/[_\s]+/g)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 export function buildRetainerCycleMemoryPanelModel(

@@ -7,16 +7,15 @@ import {
 } from "@/components/product/RetainerCycleMemoryPanel";
 
 describe("RetainerCycleMemoryPanel helpers", () => {
-  it("renders NEW_SIGNAL as a first-cycle label rather than recurrence", () => {
+  it("maps all cycle-memory statuses to restrained governance labels", () => {
     expect(getRetainerCycleMemoryStatusLabel("NEW_SIGNAL")).toBe("New operating signal");
-  });
-
-  it("renders repeated-signal language with prior-cycle framing", () => {
     expect(getRetainerCycleMemoryStatusLabel("REPEATED_SIGNAL")).toBe("Repeated operating pattern");
-  });
-
-  it("renders warning deterioration only from provided data", () => {
     expect(getRetainerCycleMemoryStatusLabel("DETERIORATED_AFTER_WARNING")).toBe("Deteriorated after prior warning");
+    expect(getRetainerCycleMemoryStatusLabel("DETERIORATED_AFTER_INTERVENTION")).toBe("Deteriorated after intervention");
+    expect(getRetainerCycleMemoryStatusLabel("IMPROVED_AFTER_INTERVENTION")).toBe("Improved after intervention");
+    expect(getRetainerCycleMemoryStatusLabel("STABLE_UNRESOLVED")).toBe("Stable but unresolved");
+    expect(getRetainerCycleMemoryStatusLabel("EVIDENCE_UNAVAILABLE")).toBe("Evidence unavailable");
+    expect(getRetainerCycleMemoryStatusLabel("INSUFFICIENT_HISTORY")).toBe("Insufficient history");
   });
 
   it("builds a restrained empty state for null memory", () => {
@@ -52,6 +51,7 @@ describe("RetainerCycleMemoryPanel helpers", () => {
 
     expect(model.empty).toBe(false);
     expect(model.findings[0]?.statusLabel).toBe("Deteriorated after prior warning");
+    expect(model.findings[0]?.sourceLabel).toBe("Google Calendar");
     expect(model.findings[0]).not.toHaveProperty("rawCountBasis");
     expect(model.findings[0]).not.toHaveProperty("metadata");
     expect(model.findings[0]).not.toHaveProperty("payload");
