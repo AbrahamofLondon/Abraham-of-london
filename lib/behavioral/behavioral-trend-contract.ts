@@ -15,6 +15,8 @@ export type BehavioralTrendMetricKey =
 
 export type BehavioralTrendMetric = {
   signalKey: BehavioralTrendMetricKey;
+  source?: string | null;
+  sourceLabel?: string | null;
   currentValue: number | null;
   previousValue: number | null;
   delta: number | null;

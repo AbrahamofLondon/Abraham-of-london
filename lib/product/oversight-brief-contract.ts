@@ -306,6 +306,9 @@ export type OversightStructuredAction = {
   id: string;
   caseId?: string;
   scopeType?: "CASE" | "ACCOUNT";
+  targetScope?: "ACCOUNT" | "SOURCE_SIGNAL" | "CASE" | "ORGANISATION";
+  targetSource?: string | null;
+  targetSignalKey?: string | null;
   decisionText?: string;
   actionType:
     | "VERIFY_COMMITMENT"

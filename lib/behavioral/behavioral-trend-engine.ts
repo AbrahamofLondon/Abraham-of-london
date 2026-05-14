@@ -114,6 +114,7 @@ function resolveEvidencePosture(
 }
 
 function computeMetric(
+  source: string,
   signalKey: string,
   currentRecords: BehavioralSignalSnapshotRecord[],
   previousRecords: BehavioralSignalSnapshotRecord[],
@@ -131,6 +132,8 @@ function computeMetric(
     const allRecords = [...currentRecords, ...previousRecords];
     return {
       signalKey,
+      source,
+      sourceLabel: source,
       currentValue,
       previousValue,
       delta: null,
@@ -153,6 +156,8 @@ function computeMetric(
 
   return {
     signalKey,
+    source,
+    sourceLabel: source,
     currentValue,
     previousValue,
     delta,
@@ -245,6 +250,7 @@ export async function buildBehavioralTrendSummary(
   for (const key of allKeys) {
     metrics.push(
       computeMetric(
+        input.source,
         key,
         current.get(key) ?? [],
         previous.get(key) ?? [],
@@ -298,6 +304,7 @@ export function buildBehavioralTrendSummaryFromSnapshots(
   for (const key of allKeys) {
     metrics.push(
       computeMetric(
+        source,
         key,
         current.get(key) ?? [],
         previous.get(key) ?? [],

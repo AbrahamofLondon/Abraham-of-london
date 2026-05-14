@@ -12,6 +12,12 @@ type OversightStructuredActionType =
   | "RECHECK_PATTERN"
   | "REVIEW_OPERATING_CADENCE";
 
+export type RetainerCycleMemoryTargetScope =
+  | "ACCOUNT"
+  | "SOURCE_SIGNAL"
+  | "CASE"
+  | "ORGANISATION";
+
 export type RetainerCycleMemoryStatus =
   | "NEW_SIGNAL"
   | "REPEATED_SIGNAL"
@@ -73,6 +79,7 @@ export type PriorBehavioralTrendCycle = {
 
 export type PriorBehavioralActionRecord = {
   actionType: OversightStructuredActionType;
+  targetScope?: RetainerCycleMemoryTargetScope | null;
   source?: string | null;
   signalKey?: string | null;
   createdAt?: string | null;
@@ -80,6 +87,9 @@ export type PriorBehavioralActionRecord = {
 
 export type RetainedEnforcementCycleRecord = {
   cycleId?: string | null;
+  targetScope?: RetainerCycleMemoryTargetScope | null;
+  targetSource?: string | null;
+  targetSignalKey?: string | null;
   cadenceState?: string | null;
   completedAt?: string | null;
   skippedAt?: string | null;

@@ -13,12 +13,23 @@ import type {
 
 type CurrentMetricContext = {
   metric: BehavioralTrendMetric;
-  source: string;
+  source: string | null;
+  sourceLabel: string | null;
 };
 
 type PriorMetricHistory = {
   direction: BehavioralTrendDirection;
   observedAt: string;
+};
+
+type LineageActionIndex = {
+  targeted: Map<string, string>;
+  accountWide: string | null;
+};
+
+type LineageInterventionIndex = {
+  targeted: Map<string, string[]>;
+  accountWide: string[];
 };
 
 function compareIsoDescending(left: string, right: string) {
@@ -151,11 +162,29 @@ function buildMetricKey(source: string, signalKey: string) {
   return `${source}::${signalKey}`;
 }
 
+function resolveMetricSource(metric: BehavioralTrendMetric, summarySource?: string | null) {
+  if (metric.source && metric.source.trim()) {
+    return metric.source.trim();
+  }
+  if (summarySource && summarySource !== "behavioral") {
+    return summarySource;
+  }
+  return null;
+}
+
+function resolveMetricSourceLabel(metric: BehavioralTrendMetric, source: string | null) {
+  return metric.sourceLabel ?? source;
+}
+
 function collectCurrentMetrics(input: RetainerCycleMemoryBuildInput): CurrentMetricContext[] {
   if (!input.currentBehavioralTrends) return [];
   return input.currentBehavioralTrends.metrics.map((metric) => ({
     metric,
-    source: input.currentBehavioralTrends?.source ?? "behavioral",
+    source: resolveMetricSource(metric, input.currentBehavioralTrends?.source ?? null),
+    sourceLabel: resolveMetricSourceLabel(
+      metric,
+      resolveMetricSource(metric, input.currentBehavioralTrends?.source ?? null),
+    ),
   }));
 }
 
@@ -164,9 +193,10 @@ function collectPriorMetricHistory(
 ): Map<string, PriorMetricHistory[]> {
   const history = new Map<string, PriorMetricHistory[]>();
   for (const cycle of priorCycles) {
-    const source = cycle.behavioralTrends?.source;
-    if (!source || !cycle.behavioralTrends) continue;
+    if (!cycle.behavioralTrends) continue;
     for (const metric of cycle.behavioralTrends.metrics) {
+      const source = resolveMetricSource(metric, cycle.behavioralTrends.source);
+      if (!source) continue;
       const key = buildMetricKey(source, metric.signalKey);
       if (!history.has(key)) {
         history.set(key, []);
@@ -183,28 +213,61 @@ function collectPriorMetricHistory(
   return history;
 }
 
-function collectPriorWarnings(actions: PriorBehavioralActionRecord[]): Map<string, string> {
-  const warnings = new Map<string, string>();
+function collectPriorWarnings(actions: PriorBehavioralActionRecord[]): LineageActionIndex {
+  const warnings: LineageActionIndex = {
+    targeted: new Map<string, string>(),
+    accountWide: null,
+  };
   for (const action of actions) {
-    if (action.actionType !== "REVIEW_OPERATING_CADENCE" || !action.source || !action.signalKey) {
+    if (action.actionType !== "REVIEW_OPERATING_CADENCE") {
       continue;
     }
-    const key = buildMetricKey(action.source, action.signalKey);
     const createdAt = toIsoOrNull(action.createdAt);
     if (!createdAt) continue;
-    const existing = warnings.get(key);
-    if (!existing || createdAt > existing) {
-      warnings.set(key, createdAt);
+    if (action.targetScope === "SOURCE_SIGNAL" && action.source && action.signalKey) {
+      const key = buildMetricKey(action.source, action.signalKey);
+      const existing = warnings.targeted.get(key);
+      if (!existing || createdAt > existing) {
+        warnings.targeted.set(key, createdAt);
+      }
+      continue;
+    }
+    if (action.targetScope === "ACCOUNT") {
+      if (!warnings.accountWide || createdAt > warnings.accountWide) {
+        warnings.accountWide = createdAt;
+      }
     }
   }
   return warnings;
 }
 
-function collectInterventions(cycles: RetainedEnforcementCycleRecord[]): string[] {
-  return cycles
-    .map((cycle) => toIsoOrNull(cycle.completedAt ?? cycle.updatedAt ?? null))
-    .filter((value): value is string => Boolean(value))
-    .sort(compareIsoDescending);
+function collectInterventions(cycles: RetainedEnforcementCycleRecord[]): LineageInterventionIndex {
+  const interventions: LineageInterventionIndex = {
+    targeted: new Map<string, string[]>(),
+    accountWide: [],
+  };
+
+  for (const cycle of cycles) {
+    const timestamp = toIsoOrNull(cycle.completedAt ?? cycle.updatedAt ?? null);
+    if (!timestamp) continue;
+    if (cycle.targetScope === "SOURCE_SIGNAL" && cycle.targetSource && cycle.targetSignalKey) {
+      const key = buildMetricKey(cycle.targetSource, cycle.targetSignalKey);
+      const entries = interventions.targeted.get(key) ?? [];
+      entries.push(timestamp);
+      interventions.targeted.set(key, entries);
+      continue;
+    }
+    if (cycle.targetScope === "ACCOUNT") {
+      interventions.accountWide.push(timestamp);
+    }
+  }
+
+  interventions.accountWide.sort(compareIsoDescending);
+  for (const entries of interventions.targeted.values()) {
+    entries.sort(compareIsoDescending);
+  }
+
+  return interventions;
 }
 
 function latestInterventionAfterWarning(
@@ -224,6 +287,9 @@ function buildCurrentMetricFindings(input: RetainerCycleMemoryBuildInput): Retai
   const findings: RetainerCycleMemoryFinding[] = [];
 
   for (const current of currentMetrics) {
+    if (!current.source) {
+      continue;
+    }
     const key = buildMetricKey(current.source, current.metric.signalKey);
     const history = priorHistory.get(key) ?? [];
     const priorDirections = history
@@ -232,8 +298,11 @@ function buildCurrentMetricFindings(input: RetainerCycleMemoryBuildInput): Retai
     const priorDetCount = priorDirections.filter(isDeterioratingDirection).length;
     const cyclesObserved = history.length + (isMeaningfulDirection(current.metric.direction) ? 1 : 0);
     const lastObservedAt = history[0]?.observedAt ?? null;
-    const lastWarningAt = priorWarnings.get(key) ?? null;
-    const lastInterventionAt = latestInterventionAfterWarning(interventions, lastWarningAt);
+    const lastWarningAt = priorWarnings.targeted.get(key) ?? null;
+    const lastInterventionAt = latestInterventionAfterWarning(
+      interventions.targeted.get(key) ?? [],
+      lastWarningAt,
+    );
 
     let status: RetainerCycleMemoryStatus | null = null;
     if (current.metric.direction === "DETERIORATING" || current.metric.direction === "RECURRING") {
@@ -276,6 +345,56 @@ function buildCurrentMetricFindings(input: RetainerCycleMemoryBuildInput): Retai
   }
 
   return findings;
+}
+
+function buildAccountWideCadenceFinding(input: RetainerCycleMemoryBuildInput): RetainerCycleMemoryFinding | null {
+  const currentSummary = input.currentBehavioralTrends;
+  if (!currentSummary) {
+    return null;
+  }
+
+  const warnings = collectPriorWarnings(input.priorStructuredActions ?? []);
+  const accountWideWarningAt = warnings.accountWide;
+  if (!accountWideWarningAt) {
+    return null;
+  }
+
+  const interventions = collectInterventions(input.retainedEnforcementCycles ?? []);
+  const accountWideInterventionAt = latestInterventionAfterWarning(
+    interventions.accountWide,
+    accountWideWarningAt,
+  );
+
+  const deteriorating = currentSummary.metrics.filter((metric) =>
+    metric.direction === "DETERIORATING" || metric.direction === "RECURRING",
+  );
+  const improving = currentSummary.metrics.filter((metric) => metric.direction === "IMPROVING");
+
+  let status: RetainerCycleMemoryStatus | null = null;
+  if (deteriorating.length > 0) {
+    status = accountWideInterventionAt
+      ? "DETERIORATED_AFTER_INTERVENTION"
+      : "DETERIORATED_AFTER_WARNING";
+  } else if (improving.length > 0 && accountWideInterventionAt) {
+    status = "IMPROVED_AFTER_INTERVENTION";
+  }
+
+  if (!status) {
+    return null;
+  }
+
+  return buildFinding({
+    signalKey: "behavioralOperatingCadence",
+    source: "behavioral",
+    status,
+    currentDirection: deteriorating.length > 0 ? "DETERIORATING" : "IMPROVING",
+    priorDirections: [],
+    cyclesObserved: 1,
+    cyclesDeteriorating: deteriorating.length > 0 ? 1 : 0,
+    cyclesUnavailable: 0,
+    lastWarningAt: accountWideWarningAt,
+    lastInterventionAt: accountWideInterventionAt,
+  });
 }
 
 function buildEvidenceAvailabilityFinding(input: RetainerCycleMemoryBuildInput): RetainerCycleMemoryFinding | null {
@@ -434,6 +553,10 @@ export function buildRetainerCycleMemorySummary(
 ): RetainerCycleMemorySummary {
   const findings = dedupeFindings([
     ...buildCurrentMetricFindings(input),
+    ...(() => {
+      const accountWide = buildAccountWideCadenceFinding(input);
+      return accountWide ? [accountWide] : [];
+    })(),
     ...(() => {
       const evidenceGap = buildEvidenceAvailabilityFinding(input);
       return evidenceGap ? [evidenceGap] : [];
