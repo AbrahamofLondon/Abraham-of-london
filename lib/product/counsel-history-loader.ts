@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/lib/prisma.server";
 import type { CounselHistory, CounselHistoryEntry } from "@/lib/product/counsel-history-contract";
 import type { CounselReviewAction } from "@/lib/product/counsel-review-workflow-contract";
