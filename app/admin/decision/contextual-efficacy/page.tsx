@@ -168,51 +168,51 @@ export default function AdminContextualEfficacyPage() {
           <div className="space-y-10">
             {rows.map((row) => (
               <section key={row.id} className="space-y-5">
-                <div className="rounded-[32px] border border-neutral-200 bg-white p-6 shadow-sm">
+                <div className="border border-white/10 bg-zinc-950/70 p-5">
                   <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                     <div>
-                      <div className="text-[10px] font-mono uppercase tracking-[0.20em] text-neutral-500">
+                      <div className="text-[10px] font-mono uppercase tracking-[0.20em] text-white/35">
                         Context Join Key
                       </div>
-                      <div className="mt-2 text-sm font-mono text-neutral-700 break-all">
+                      <div className="mt-2 break-all font-mono text-sm text-white/70">
                         {row.joinKey}
                       </div>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-4">
-                      <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-                        <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-neutral-500">
+                      <div className="border border-white/8 bg-black/30 px-4 py-3">
+                        <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/35">
                           Sessions
                         </div>
-                        <div className="mt-1 text-lg font-light text-neutral-900">
+                        <div className="mt-1 text-lg font-light text-white">
                           {row.totalSessions}
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-                        <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-neutral-500">
+                      <div className="border border-white/8 bg-black/30 px-4 py-3">
+                        <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/35">
                           Impressions
                         </div>
-                        <div className="mt-1 text-lg font-light text-neutral-900">
+                        <div className="mt-1 text-lg font-light text-white">
                           {row.impressionCount}
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-                        <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-neutral-500">
+                      <div className="border border-white/8 bg-black/30 px-4 py-3">
+                        <div className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/35">
                           Conversions
                         </div>
-                        <div className="mt-1 text-lg font-light text-neutral-900">
+                        <div className="mt-1 text-lg font-light text-white">
                           {row.conversionCount}
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-                        <div className="flex items-center gap-2 text-[9px] font-mono uppercase tracking-[0.15em] text-neutral-500">
+                      <div className="border border-white/8 bg-black/30 px-4 py-3">
+                        <div className="flex items-center gap-2 text-[9px] font-mono uppercase tracking-[0.15em] text-white/35">
                           <BarChart3 className="h-3 w-3" />
                           Conversion Rate
                         </div>
-                        <div className="mt-1 text-lg font-light text-neutral-900">
+                        <div className="mt-1 text-lg font-light text-white">
                           {(row.contextualConversionRate * 100).toFixed(1)}%
                         </div>
                       </div>
