@@ -27,6 +27,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     label: "Command Centre",
     items: [
       { id: "dashboard", label: "Dashboard", href: "/admin", router: "pages", visibility: "admin", status: "active", description: "Command centre overview with deal flow and system status" },
+      { id: "operator", label: "Operator Command Centre", href: "/admin/operator", router: "pages", visibility: "operator", status: "active", description: "Operational queue cockpit for overdue, blocked, approval, and escalation work" },
       { id: "command-wall", label: "Command Wall", href: "/admin/command-wall", router: "pages", visibility: "admin", status: "active", description: "System control surface with live context registry" },
       { id: "command", label: "Command (App)", href: "/admin/command", router: "app", visibility: "admin", status: "active", description: "App router command surface" },
       { id: "authority-center", label: "Authority Center", href: "/admin/authority-center", router: "pages", visibility: "admin", status: "active", description: "Decision authority hub with contradiction and stakeholder audit" },
