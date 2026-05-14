@@ -2,15 +2,58 @@ import Link from "next/link";
 import { ArrowRight, Lock } from "lucide-react";
 import { SectionShell, HOMEPAGE_GOLD, mono } from "@/components/homepage/homepagePrimitives";
 
-const stages = [
-  { label: "Submit One Real Decision", state: "Open entry", detail: "The public start point. Submit one live decision under pressure.", href: "/diagnostics/fast", open: true },
-  { label: "Personal Decision Audit", state: "Shown when earned", detail: "Used when the issue appears personal, mandate-related, or obligation-bound." },
-  { label: "Constitutional Diagnostic", state: "Shown when earned", detail: "Used when governance readiness and authority structure must be tested." },
-  { label: "Executive Reporting", state: "Shown when earned", detail: "Opens when the evidence supports a governed report." },
-  { label: "Strategy Room", state: "Not a starting point", detail: "Execution intervention, available only when escalation is warranted." },
-  { label: "Return Brief", state: "Triggered by record", detail: "Used when commitments are missed, delayed, or unresolved." },
-  { label: "Counsel Review", state: "Qualified escalation", detail: "Reserved for conditions the system cannot responsibly model alone." },
-  { label: "Boardroom and Oversight", state: "Institutional cases only", detail: "Later-stage governed surfaces for qualified institutional records." },
+const stages: {
+  label: string;
+  state: string;
+  detail: string;
+  href?: string;
+  open?: boolean;
+  ctaLabel?: string;
+}[] = [
+  {
+    label: "Fast Diagnostic",
+    state: "Open entry",
+    detail: "The public start point. Submit one live decision under pressure. The system names the condition, tests evidence and authority, and returns a structured finding.",
+    href: "/diagnostics/fast",
+    open: true,
+    ctaLabel: "Run the Fast Diagnostic",
+  },
+  {
+    label: "Executive Reporting",
+    state: "Earned by evidence",
+    detail: "Opens when the Fast Diagnostic reaches evidential threshold. A governed report with a named condition, seriousness rating, governance risk score, and a required sequence of moves.",
+    href: "/diagnostics/executive-reporting",
+    ctaLabel: "See executive reporting format",
+  },
+  {
+    label: "Strategy Room",
+    state: "Earned through escalation",
+    detail: "A structured intervention session, available only when the evidence record supports escalation. Not a starting point. Produces a binding session record with named authority and dissenting positions retained.",
+  },
+  {
+    label: "Retained Oversight",
+    state: "Institutional cases",
+    detail: "An ongoing governed return cycle. The system returns at agreed intervals, compares what was committed against what happened, and names what remains unresolved.",
+    href: "/oversight",
+    ctaLabel: "View oversight surface",
+  },
+  {
+    label: "Provenance",
+    state: "Always present",
+    detail: "Every governed decision produces a chain-anchored record: merkle root, chain hash, prior root linkage. If any field is altered after the fact, the hash breaks. The break is visible.",
+    href: "/provenance/sample-export",
+    ctaLabel: "View provenance sample",
+  },
+  {
+    label: "Return Brief",
+    state: "Triggered by record",
+    detail: "When commitments made under a governed decision are missed, delayed, or unresolved, the system issues a Return Brief. The record does not wait to be asked.",
+  },
+  {
+    label: "Counsel Review",
+    state: "Qualified escalation",
+    detail: "Reserved for conditions the system cannot responsibly model alone — where human professional judgement is required and the evidence record supports referral.",
+  },
 ];
 
 export default function EarnedProgressionBlock() {
@@ -24,7 +67,15 @@ export default function EarnedProgressionBlock() {
       <div className="mx-auto max-w-[900px] space-y-3">
         {stages.map((stage, index) => (
           <div key={stage.label} className="flex gap-4 border border-white/[0.08] bg-white/[0.02] p-5">
-            <span style={{ ...mono, fontSize: "10px", color: index === 0 ? `${HOMEPAGE_GOLD}CC` : "rgba(255,255,255,0.30)", width: "22px", flexShrink: 0 }}>
+            <span
+              style={{
+                ...mono,
+                fontSize: "10px",
+                color: index === 0 ? `${HOMEPAGE_GOLD}CC` : "rgba(255,255,255,0.28)",
+                width: "22px",
+                flexShrink: 0,
+              }}
+            >
               {String(index + 1).padStart(2, "0")}
             </span>
             <div className="min-w-0 flex-1">
@@ -37,31 +88,31 @@ export default function EarnedProgressionBlock() {
                     fontSize: "9px",
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
-                    color: stage.open ? `${HOMEPAGE_GOLD}CC` : "rgba(255,255,255,0.42)",
+                    color: stage.open ? `${HOMEPAGE_GOLD}CC` : "rgba(255,255,255,0.38)",
                   }}
                 >
                   {stage.open ? null : <Lock className="h-3 w-3" />}
                   {stage.state}
                 </span>
               </div>
-              <p className="mt-3 text-[14px] leading-[1.8] text-white/58">{stage.detail}</p>
-              {stage.open && stage.href ? (
+              <p className="mt-3 text-[14px] leading-[1.8] text-white/55">{stage.detail}</p>
+              {stage.href ? (
                 <div className="mt-4">
                   <Link
                     href={stage.href}
                     className="group inline-flex min-h-[44px] items-center gap-2 border px-5 py-3 transition-all duration-200 hover:-translate-y-0.5"
                     style={{
-                      borderColor: `${HOMEPAGE_GOLD}40`,
-                      backgroundColor: `${HOMEPAGE_GOLD}10`,
-                      color: "#F5F5F5",
+                      borderColor: `${HOMEPAGE_GOLD}38`,
+                      backgroundColor: stage.open ? `${HOMEPAGE_GOLD}10` : "transparent",
+                      color: stage.open ? "#F5F5F5" : "rgba(255,255,255,0.48)",
                       ...mono,
-                      fontSize: "10px",
+                      fontSize: "9px",
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
                     }}
                   >
-                    Submit One Real Decision
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                    {stage.ctaLabel}
+                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>
               ) : null}
