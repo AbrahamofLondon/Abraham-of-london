@@ -26,6 +26,7 @@ import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSumma
 import GovernedActionPanel from "@/components/living/GovernedActionPanel";
 import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
 import OutcomeMemoryPreview from "@/components/living/OutcomeMemoryPreview";
+import BoardSummaryPreview, { buildBoardSummaryFromFastDiagnostic } from "@/components/diagnostics/BoardSummaryPreview";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 import {
   clearVersionedAssessmentState,
@@ -634,6 +635,9 @@ const FastDiagnosticPage: NextPage = () => {
                   </span>
                 )}
               </div>
+
+              {/* SECTION 1a: BOARD SUMMARY PREVIEW */}
+              <BoardSummaryPreview data={buildBoardSummaryFromFastDiagnostic(result, answers)} />
 
               {/* SECTION 1b: CONTRADICTION MIRROR — your own words */}
               {result.synthesis?.primaryContradiction && (
