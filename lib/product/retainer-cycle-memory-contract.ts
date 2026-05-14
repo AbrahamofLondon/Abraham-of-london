@@ -45,6 +45,7 @@ export type RetainerCycleMemoryFinding = {
   id: string;
   signalKey: string;
   source?: string | null;
+  sourceLabel?: string | null;
   status: RetainerCycleMemoryStatus;
   severity: RetainerCycleMemorySeverity;
   currentDirection?: BehavioralTrendDirection | "UNAVAILABLE" | null;

@@ -355,4 +355,59 @@ describe("retainer cycle memory engine", () => {
     expect(summary.findings[0]?.status).toBe("INSUFFICIENT_HISTORY");
     expect(summary.status).toBe("insufficient");
   });
+
+  it("propagates sourceLabel from BehavioralTrendMetric onto RetainerCycleMemoryFinding", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric({ source: "google_calendar", sourceLabel: "Google Calendar" })],
+      }),
+    });
+
+    expect(summary.findings[0]?.sourceLabel).toBe("Google Calendar");
+  });
+
+  it("keeps source as the lineage key independent of sourceLabel", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric({ source: "google_calendar", sourceLabel: "Google Calendar" })],
+      }),
+    });
+
+    expect(summary.findings[0]?.source).toBe("google_calendar");
+    expect(summary.findings[0]?.sourceLabel).toBe("Google Calendar");
+  });
+
+  it("allows sourceLabel to differ from source without affecting recurrence logic", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric({ source: "google_calendar", sourceLabel: "Calendar" })],
+      }),
+      priorBehavioralTrends: [makeCycle({ direction: "DETERIORATING", observedAt: "2026-04-01T00:00:00.000Z" })],
+    });
+
+    expect(summary.findings[0]?.status).toBe("REPEATED_SIGNAL");
+    expect(summary.findings[0]?.sourceLabel).toBe("Calendar");
+  });
+
+  it("sets sourceLabel to null when BehavioralTrendMetric provides no sourceLabel", () => {
+    const summary = buildSummary({
+      currentBehavioralTrends: makeTrendSummary({
+        source: "behavioral",
+        overallDirection: "DETERIORATING",
+        hasDeterioration: true,
+        metrics: [makeMetric({ source: "google_calendar", sourceLabel: undefined })],
+      }),
+    });
+
+    expect(summary.findings[0]?.sourceLabel).toBeNull();
+  });
 });

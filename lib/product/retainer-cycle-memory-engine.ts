@@ -122,6 +122,7 @@ function statusExplanation(input: {
 function buildFinding(input: {
   signalKey: string;
   source?: string | null;
+  sourceLabel?: string | null;
   status: RetainerCycleMemoryStatus;
   currentDirection?: BehavioralTrendDirection | "UNAVAILABLE" | null;
   priorDirections: BehavioralTrendDirection[];
@@ -136,6 +137,7 @@ function buildFinding(input: {
     id: `retainer_memory_${input.source ?? "behavioral"}_${input.signalKey}_${input.status.toLowerCase()}`,
     signalKey: input.signalKey,
     source: input.source ?? null,
+    sourceLabel: input.sourceLabel ?? null,
     status: input.status,
     severity: findingSeverity(input.status),
     currentDirection: input.currentDirection ?? null,
@@ -332,6 +334,7 @@ function buildCurrentMetricFindings(input: RetainerCycleMemoryBuildInput): Retai
     findings.push(buildFinding({
       signalKey: current.metric.signalKey,
       source: current.source,
+      sourceLabel: current.metric.sourceLabel ?? null,
       status,
       currentDirection: current.metric.direction,
       priorDirections,
