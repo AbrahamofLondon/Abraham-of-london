@@ -10,6 +10,7 @@ import type { OversightCycleAudience } from "@/lib/product/oversight-cycle-ledge
 import type { OversightDeliveryAction } from "@/lib/product/oversight-delivery-contract";
 import { AdminStatusBadge, toneForStatus } from "@/components/admin/AdminStatusBadge";
 import type { OversightBatchItem, OversightBatchAction, OversightBatchResult } from "@/lib/admin/oversight-batch";
+import type { DecisionProvenanceRecord } from "@/lib/admin/decision-provenance-record";
 
 type SafeOutput = {
   brief: any;
@@ -383,6 +384,139 @@ function BatchPanel({ items }: { items: OversightBatchItem[] }) {
   );
 }
 
+// ─── Provenance panel ─────────────────────────────────────────────────────────
+
+const POSTURE_TONE: Record<string, string> = {
+  COMPLETE:    "text-emerald-400",
+  DELIVERED:   "text-emerald-300",
+  IN_REVIEW:   "text-blue-300",
+  UNVERIFIED:  "text-amber-300",
+  BLOCKED:     "text-rose-400",
+  ESCALATED:   "text-rose-300",
+  UNKNOWN:     "text-white/35",
+};
+
+const EVENT_TYPE_LABEL: Record<string, string> = {
+  SIGNAL_DETECTED:     "Signal",
+  OPERATOR_REVIEWED:   "Reviewed",
+  SUPPRESSION_APPLIED: "Suppressed",
+  COUNSEL_ESCALATED:   "Counsel",
+  BOARDROOM_ESCALATED: "Boardroom",
+  DELIVERY_APPROVED:   "Approved",
+  DELIVERY_SENT:       "Delivered",
+  OUTCOME_RECORDED:    "Outcome",
+  MEMORY_UPDATED:      "Memory",
+};
+
+const SEVERITY_DOT: Record<string, string> = {
+  CRITICAL: "bg-red-500",
+  HIGH:     "bg-rose-400",
+  MEDIUM:   "bg-amber-400",
+  LOW:      "bg-white/20",
+};
+
+function ProvenancePanel({ cycleId }: { cycleId: string }) {
+  const [record, setRecord] = React.useState<DecisionProvenanceRecord | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    setRecord(null);
+
+    fetch(`/api/admin/oversight-provenance?cycleId=${encodeURIComponent(cycleId)}`)
+      .then((r) => r.json() as Promise<{ ok: boolean; record?: DecisionProvenanceRecord; error?: string }>)
+      .then((data) => {
+        if (cancelled) return;
+        if (data.ok && data.record) setRecord(data.record);
+        else setError(data.error ?? "Failed to load provenance");
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load provenance");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [cycleId]);
+
+  return (
+    <Panel title="Decision Provenance">
+      {loading && (
+        <p className="text-sm text-white/40">Loading provenance chain…</p>
+      )}
+
+      {error && (
+        <p className="text-sm text-rose-300">{error}</p>
+      )}
+
+      {record && (
+        <div className="space-y-4">
+          {/* Posture */}
+          <div className="border border-white/5 bg-black/25 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <span className={`text-sm font-medium ${POSTURE_TONE[record.currentPosture.status] ?? "text-white/40"}`}>
+                {record.currentPosture.status.replace(/_/g, " ")}
+              </span>
+              {record.unavailableSources.length > 0 && (
+                <AdminStatusBadge
+                  label={`${record.unavailableSources.length} source${record.unavailableSources.length !== 1 ? "s" : ""} unavailable`}
+                  tone="warning"
+                  size="md"
+                />
+              )}
+            </div>
+            <p className="mt-1 text-[11px] text-white/45">{record.currentPosture.summary}</p>
+          </div>
+
+          {/* Accountability statement */}
+          <div className="border-l-2 border-amber-500/25 pl-4">
+            <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/35">Accountability statement</p>
+            <p className="mt-1 text-[11px] text-white/60">{record.accountabilityStatement}</p>
+          </div>
+
+          {/* Governance events */}
+          {record.governanceEvents.length > 0 && (
+            <div>
+              <p className="mb-2 text-[9px] font-mono uppercase tracking-[0.2em] text-white/35">
+                Governance events ({record.governanceEvents.length})
+              </p>
+              <div className="space-y-1">
+                {record.governanceEvents.map((event, i) => (
+                  <div key={i} className="flex items-start gap-3 border border-white/5 bg-black/20 px-3 py-2 text-sm">
+                    <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${SEVERITY_DOT[event.severity ?? "LOW"]}`} />
+                    <div className="min-w-0 flex-1">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-white/35 mr-2">
+                        {EVENT_TYPE_LABEL[event.type] ?? event.type}
+                      </span>
+                      <span className="text-[11px] text-white/65">{event.label}</span>
+                      {event.actor && (
+                        <span className="ml-2 font-mono text-[9px] text-white/30">{event.actor}</span>
+                      )}
+                    </div>
+                    {event.occurredAt && (
+                      <span className="shrink-0 font-mono text-[9px] text-white/25">
+                        {new Date(event.occurredAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {record.governanceEvents.length === 0 && (
+            <p className="text-[11px] text-white/30">No governance events recorded for this cycle.</p>
+          )}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function OversightReviewPage({
@@ -559,6 +693,10 @@ export default function OversightReviewPage({
 
           {error && <p className="mt-4 text-sm text-rose-300">{error}</p>}
         </Panel>
+
+        {preview && preview.cycle?.cycleId && (
+          <ProvenancePanel cycleId={preview.cycle.cycleId} />
+        )}
 
         {preview && (
           <>
