@@ -6,6 +6,7 @@ import {
   verifyProvenanceChainSequence,
   type ProvenanceChainAnchorRecord,
 } from "@/lib/admin/provenance-chain-ledger";
+import { recordProvenanceOperationAudit } from "@/lib/admin/provenance-operation-audit";
 import { prisma } from "@/lib/prisma.server";
 
 type ChainContinuityStatus = "CONTINUOUS" | "BROKEN" | "UNAVAILABLE";
@@ -23,6 +24,7 @@ type ChainContinuityResponse = {
     anchorId?: string;
     reason: string;
   }>;
+  auditWarning?: string;
 };
 
 function single(value: string | string[] | undefined): string {
@@ -120,10 +122,21 @@ export default async function handler(
   const verification = anchors.length > 0
     ? verifyProvenanceChainSequence(anchors)
     : { valid: false, failures: [] };
+  const status = anchors.length === 0 ? "UNAVAILABLE" : verification.valid ? "CONTINUOUS" : "BROKEN";
+  const audit = await recordProvenanceOperationAudit({
+    eventType: "PROVENANCE_CHAIN_VERIFIED",
+    scope,
+    scopeId,
+    merkleRoot: latest?.merkleRoot ?? null,
+    chainHash: latest?.chainHash ?? null,
+    status: status === "CONTINUOUS" ? "SUCCESS" : status === "BROKEN" ? "FAILED" : "UNAVAILABLE",
+    actorId: admin.session?.user?.id ?? null,
+    actorEmail: admin.session?.user?.email ?? null,
+  });
 
   return res.status(200).json({
     version: 1,
-    status: anchors.length === 0 ? "UNAVAILABLE" : verification.valid ? "CONTINUOUS" : "BROKEN",
+    status,
     scope,
     scopeId,
     anchorCount: anchors.length,
@@ -131,5 +144,6 @@ export default async function handler(
     latestChainHash: latest?.chainHash ?? null,
     checkedAt: new Date().toISOString(),
     failures: verification.failures,
+    ...(!audit.ok ? { auditWarning: audit.warning } : {}),
   });
 }

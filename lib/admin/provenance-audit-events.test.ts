@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  logAuditEvent: vi.fn(),
+  recordProvenanceOperationAudit: vi.fn(),
 }));
 
-vi.mock("@/lib/server/audit", () => ({
-  logAuditEvent: mocks.logAuditEvent,
+vi.mock("@/lib/admin/provenance-operation-audit", () => ({
+  recordProvenanceOperationAudit: mocks.recordProvenanceOperationAudit,
 }));
 
 import {
@@ -14,7 +14,8 @@ import {
 } from "./provenance-audit-events";
 
 beforeEach(() => {
-  mocks.logAuditEvent.mockReset();
+  mocks.recordProvenanceOperationAudit.mockReset();
+  mocks.recordProvenanceOperationAudit.mockResolvedValue({ ok: true });
 });
 
 describe("buildProvenanceAuditMetadata", () => {
@@ -50,22 +51,21 @@ describe("recordProvenanceAuditEvent", () => {
       hash: "hash_value_123456789",
       actorId: "admin_1",
     });
-    expect(mocks.logAuditEvent).toHaveBeenCalledWith(expect.objectContaining({
-      action: "PROVENANCE_HASH_MISMATCH",
-      actorType: "admin",
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith(expect.objectContaining({
+      eventType: "PROVENANCE_HASH_MISMATCH",
+      status: "MISMATCH",
       actorId: "admin_1",
-      resourceType: "provenance",
-      resourceId: "cycle_001",
-      status: "warning",
-      severity: "warn",
-      metadata: expect.objectContaining({
-        hashPrefix: "hash_value_12345",
-      }),
+      subjectType: "OVERSIGHT_CYCLE",
+      subjectId: "cycle_001",
+      provenanceHash: "hash_value_123456789",
     }));
   });
 
   it("fails open when audit logging is unavailable", async () => {
-    mocks.logAuditEvent.mockRejectedValueOnce(new Error("audit unavailable"));
+    mocks.recordProvenanceOperationAudit.mockResolvedValueOnce({
+      ok: false,
+      warning: "Provenance operation completed but audit event could not be recorded.",
+    });
     await expect(recordProvenanceAuditEvent({
       action: "FULL_PROVENANCE_VIEWED",
       subjectType: "OVERSIGHT_CYCLE",

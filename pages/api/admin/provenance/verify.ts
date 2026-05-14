@@ -6,7 +6,7 @@ import {
 } from "@/lib/admin/provenance-access-policy";
 import type { DecisionProvenanceRecord } from "@/lib/admin/decision-provenance-record";
 import type { IntegrityStatus } from "@/lib/admin/provenance-integrity";
-import { recordProvenanceAuditEvent } from "@/lib/admin/provenance-audit-events";
+import { recordProvenanceOperationAudit } from "@/lib/admin/provenance-operation-audit";
 
 type VerificationResponse = {
   version: 1;
@@ -18,6 +18,7 @@ type VerificationResponse = {
   archivedHash: string | null;
   checkedAt: string;
   message: string;
+  auditWarning?: string;
 };
 
 const SUBJECT_TYPES = new Set<DecisionProvenanceRecord["subjectType"]>([
@@ -126,13 +127,14 @@ export default async function handler(
     archivedHash,
   });
 
-  await recordProvenanceAuditEvent({
-    action: status === "MISMATCH" ? "PROVENANCE_HASH_MISMATCH" : "PROVENANCE_VERIFIED",
-    status: status === "MISMATCH" ? "warning" : "success",
+  const audit = await recordProvenanceOperationAudit({
+    eventType: status === "MISMATCH" ? "PROVENANCE_HASH_MISMATCH" : "PROVENANCE_HASH_VERIFIED",
+    status: status === "MISMATCH" ? "MISMATCH" : status === "UNAVAILABLE" ? "UNAVAILABLE" : "SUCCESS",
     subjectType,
     subjectId,
-    hash: recomputedHash ?? expectedHash,
-    actorId: admin.access.userId,
+    provenanceHash: recomputedHash ?? expectedHash,
+    actorId: admin.session?.user?.id ?? null,
+    actorEmail: admin.session?.user?.email ?? null,
   });
 
   return res.status(200).json({
@@ -145,5 +147,6 @@ export default async function handler(
     archivedHash,
     checkedAt,
     message,
+    ...(!audit.ok ? { auditWarning: audit.warning } : {}),
   });
 }

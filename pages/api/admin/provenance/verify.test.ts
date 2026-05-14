@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   requireAdminApi: vi.fn(),
   composeDecisionProvenance: vi.fn(),
   loadOversightCycleArchive: vi.fn(),
-  logAuditEvent: vi.fn(),
+  recordProvenanceOperationAudit: vi.fn(),
 }));
 
 vi.mock("@/lib/access/server", () => ({
@@ -20,8 +20,8 @@ vi.mock("@/lib/product/oversight-cycle-archive", () => ({
   loadOversightCycleArchive: mocks.loadOversightCycleArchive,
 }));
 
-vi.mock("@/lib/server/audit", () => ({
-  logAuditEvent: mocks.logAuditEvent,
+vi.mock("@/lib/admin/provenance-operation-audit", () => ({
+  recordProvenanceOperationAudit: mocks.recordProvenanceOperationAudit,
 }));
 
 import handler from "./verify";
@@ -55,8 +55,15 @@ beforeEach(() => {
   mocks.requireAdminApi.mockReset();
   mocks.composeDecisionProvenance.mockReset();
   mocks.loadOversightCycleArchive.mockReset();
-  mocks.logAuditEvent.mockReset();
+  mocks.recordProvenanceOperationAudit.mockReset();
+  mocks.recordProvenanceOperationAudit.mockResolvedValue({ ok: true });
   mocks.requireAdminApi.mockResolvedValue({
+    session: {
+      user: {
+        id: "admin_1",
+        email: "admin@example.com",
+      },
+    },
     access: {
       userId: "admin_1",
       role: "ADMIN",
@@ -120,6 +127,15 @@ describe("/api/admin/provenance/verify", () => {
       recomputedHash: "hash_match",
       archivedHash: "hash_match",
     });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith({
+      eventType: "PROVENANCE_HASH_VERIFIED",
+      status: "SUCCESS",
+      subjectType: "OVERSIGHT_CYCLE",
+      subjectId: "cycle_1",
+      provenanceHash: "hash_match",
+      actorId: "admin_1",
+      actorEmail: "admin@example.com",
+    });
   });
 
   it("mismatched expected hash returns MISMATCH", async () => {
@@ -134,6 +150,13 @@ describe("/api/admin/provenance/verify", () => {
       recomputedHash: "hash_match",
       archivedHash: "hash_match",
     });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith(expect.objectContaining({
+      eventType: "PROVENANCE_HASH_MISMATCH",
+      status: "MISMATCH",
+      subjectType: "OVERSIGHT_CYCLE",
+      subjectId: "cycle_1",
+      provenanceHash: "hash_match",
+    }));
   });
 
   it("does not return raw provenance event labels", async () => {

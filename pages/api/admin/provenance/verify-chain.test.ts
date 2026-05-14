@@ -6,6 +6,7 @@ import { buildProvenanceChainHash } from "@/lib/admin/provenance-chain-ledger";
 const mocks = vi.hoisted(() => ({
   requireAdminApi: vi.fn(),
   findMany: vi.fn(),
+  recordProvenanceOperationAudit: vi.fn(),
 }));
 
 vi.mock("@/lib/access/server", () => ({
@@ -18,6 +19,10 @@ vi.mock("@/lib/prisma.server", () => ({
       findMany: mocks.findMany,
     },
   },
+}));
+
+vi.mock("@/lib/admin/provenance-operation-audit", () => ({
+  recordProvenanceOperationAudit: mocks.recordProvenanceOperationAudit,
 }));
 
 import handler from "./verify-chain";
@@ -84,7 +89,15 @@ beforeEach(() => {
   vi.setSystemTime(new Date("2026-05-14T14:00:00.000Z"));
   mocks.requireAdminApi.mockReset();
   mocks.findMany.mockReset();
+  mocks.recordProvenanceOperationAudit.mockReset();
+  mocks.recordProvenanceOperationAudit.mockResolvedValue({ ok: true });
   mocks.requireAdminApi.mockResolvedValue({
+    session: {
+      user: {
+        id: "admin_1",
+        email: "admin@example.com",
+      },
+    },
     access: {
       permissions: {
         isAuthenticated: true,
@@ -123,6 +136,16 @@ describe("/api/admin/provenance/verify-chain", () => {
       checkedAt: "2026-05-14T14:00:00.000Z",
       failures: [],
     });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith({
+      eventType: "PROVENANCE_CHAIN_VERIFIED",
+      scope: "DAILY",
+      scopeId: "2026-05-14",
+      merkleRoot: null,
+      chainHash: null,
+      status: "UNAVAILABLE",
+      actorId: "admin_1",
+      actorEmail: "admin@example.com",
+    });
   });
 
   it("returns CONTINUOUS for a valid chain", async () => {
@@ -151,6 +174,14 @@ describe("/api/admin/provenance/verify-chain", () => {
       latestChainHash: second.chainHash,
       failures: [],
     });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith(expect.objectContaining({
+      eventType: "PROVENANCE_CHAIN_VERIFIED",
+      scope: "DAILY",
+      scopeId: "2026-05-14",
+      merkleRoot: "root_002",
+      chainHash: second.chainHash,
+      status: "SUCCESS",
+    }));
   });
 
   it("returns BROKEN when previousRoot linkage is broken", async () => {
@@ -175,6 +206,10 @@ describe("/api/admin/provenance/verify-chain", () => {
       status: "BROKEN",
       anchorCount: 2,
     });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith(expect.objectContaining({
+      eventType: "PROVENANCE_CHAIN_VERIFIED",
+      status: "FAILED",
+    }));
     expect(JSON.stringify(response.body)).toContain("previousRoot");
   });
 

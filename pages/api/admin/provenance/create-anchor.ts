@@ -6,6 +6,7 @@ import {
   createOversightProvenanceAnchor,
   type CreateOversightProvenanceAnchorInput,
 } from "@/lib/admin/provenance-anchor-runner";
+import { recordProvenanceOperationAudit } from "@/lib/admin/provenance-operation-audit";
 
 type CreateAnchorResponse = {
   version: 1;
@@ -29,6 +30,7 @@ type CreateAnchorResponse = {
     toTimestamp?: string | null;
   } | null;
   reason?: string;
+  auditWarning?: string;
 };
 
 const SCOPES = new Set<CreateOversightProvenanceAnchorInput["scope"]>([
@@ -84,6 +86,16 @@ export default async function handler(
     fromTimestamp: bodyString(body.fromTimestamp) || undefined,
     toTimestamp: bodyString(body.toTimestamp) || undefined,
   });
+  const audit = await recordProvenanceOperationAudit({
+    eventType: "PROVENANCE_ANCHOR_CREATED",
+    scope: result.scope,
+    scopeId: result.scopeId,
+    merkleRoot: result.anchor?.merkleRoot ?? null,
+    chainHash: result.anchor?.chainHash ?? null,
+    status: result.status === "ANCHORED" ? "SUCCESS" : "UNAVAILABLE",
+    actorId: admin.session?.user?.id ?? null,
+    actorEmail: admin.session?.user?.email ?? null,
+  });
 
   return res.status(200).json({
     version: 1,
@@ -95,5 +107,6 @@ export default async function handler(
     unavailableCount: result.unavailableCount,
     anchor: result.anchor,
     ...(result.status === "UNAVAILABLE" ? { reason: result.reason } : {}),
+    ...(!audit.ok ? { auditWarning: audit.warning } : {}),
   });
 }

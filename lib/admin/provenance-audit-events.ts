@@ -1,7 +1,13 @@
-import { logAuditEvent } from "@/lib/server/audit";
+import {
+  recordProvenanceOperationAudit,
+  type ProvenanceOperationEventType,
+  type ProvenanceOperationStatus,
+} from "@/lib/admin/provenance-operation-audit";
 
 export type ProvenanceAuditAction =
   | "PROVENANCE_VERIFIED"
+  | "PROVENANCE_HASH_VERIFIED"
+  | "PROVENANCE_CHAIN_VERIFIED"
   | "PROVENANCE_ANCHOR_CREATED"
   | "PROVENANCE_HASH_MISMATCH"
   | "CLIENT_SAFE_PROVENANCE_GENERATED"
@@ -37,21 +43,29 @@ export function buildProvenanceAuditMetadata(input: ProvenanceAuditInput): Recor
   };
 }
 
+function toOperationEventType(action: ProvenanceAuditAction): ProvenanceOperationEventType {
+  return action === "PROVENANCE_VERIFIED" ? "PROVENANCE_HASH_VERIFIED" : action;
+}
+
+function toOperationStatus(input: ProvenanceAuditInput): ProvenanceOperationStatus {
+  if (input.action === "PROVENANCE_HASH_MISMATCH") return "MISMATCH";
+  if (input.status === "failed") return "FAILED";
+  if (input.status === "warning") return "UNAVAILABLE";
+  return "SUCCESS";
+}
+
 export async function recordProvenanceAuditEvent(input: ProvenanceAuditInput): Promise<void> {
-  try {
-    await logAuditEvent({
-      action: input.action,
-      actorType: input.actorId || input.actorEmail ? "admin" : "system",
-      actorId: input.actorId ?? undefined,
-      actorEmail: input.actorEmail ?? undefined,
-      resourceType: "provenance",
-      resourceId: input.subjectId ?? input.scopeId ?? undefined,
-      resourceName: input.subjectType ?? input.scope ?? undefined,
-      status: input.status ?? (input.action === "PROVENANCE_HASH_MISMATCH" ? "warning" : "success"),
-      severity: input.action === "PROVENANCE_HASH_MISMATCH" ? "warn" : "low",
-      metadata: buildProvenanceAuditMetadata(input),
-    });
-  } catch {
-    // Provenance operations fail open if audit logging is unavailable.
-  }
+  await recordProvenanceOperationAudit({
+    eventType: toOperationEventType(input.action),
+    subjectType: input.subjectType,
+    subjectId: input.subjectId,
+    scope: input.scope,
+    scopeId: input.scopeId,
+    provenanceHash: input.hash,
+    merkleRoot: input.merkleRoot,
+    chainHash: input.chainHash,
+    actorId: input.actorId,
+    actorEmail: input.actorEmail,
+    status: toOperationStatus(input),
+  });
 }

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   requireAdminApi: vi.fn(),
   createOversightProvenanceAnchor: vi.fn(),
+  recordProvenanceOperationAudit: vi.fn(),
 }));
 
 vi.mock("@/lib/access/server", () => ({
@@ -12,6 +13,10 @@ vi.mock("@/lib/access/server", () => ({
 
 vi.mock("@/lib/admin/provenance-anchor-runner", () => ({
   createOversightProvenanceAnchor: mocks.createOversightProvenanceAnchor,
+}));
+
+vi.mock("@/lib/admin/provenance-operation-audit", () => ({
+  recordProvenanceOperationAudit: mocks.recordProvenanceOperationAudit,
 }));
 
 import handler from "./create-anchor";
@@ -42,7 +47,15 @@ function res() {
 beforeEach(() => {
   mocks.requireAdminApi.mockReset();
   mocks.createOversightProvenanceAnchor.mockReset();
+  mocks.recordProvenanceOperationAudit.mockReset();
+  mocks.recordProvenanceOperationAudit.mockResolvedValue({ ok: true });
   mocks.requireAdminApi.mockResolvedValue({
+    session: {
+      user: {
+        id: "admin_1",
+        email: "admin@example.com",
+      },
+    },
     access: {
       permissions: {
         isAuthenticated: true,
@@ -94,6 +107,16 @@ describe("/api/admin/provenance/create-anchor", () => {
       anchor: null,
       reason: "No retained oversight cycles matched the requested anchor scope.",
     });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith({
+      eventType: "PROVENANCE_ANCHOR_CREATED",
+      scope: "DAILY",
+      scopeId: "2026-05-14",
+      merkleRoot: null,
+      chainHash: null,
+      status: "UNAVAILABLE",
+      actorId: "admin_1",
+      actorEmail: "admin@example.com",
+    });
   });
 
   it("returns anchor summary only when anchor is created", async () => {
@@ -133,6 +156,16 @@ describe("/api/admin/provenance/create-anchor", () => {
       limit: 25,
       fromTimestamp: undefined,
       toTimestamp: undefined,
+    });
+    expect(mocks.recordProvenanceOperationAudit).toHaveBeenCalledWith({
+      eventType: "PROVENANCE_ANCHOR_CREATED",
+      scope: "ACCOUNT",
+      scopeId: "acct_001",
+      merkleRoot: "root_hash",
+      chainHash: "chain_hash",
+      status: "SUCCESS",
+      actorId: "admin_1",
+      actorEmail: "admin@example.com",
     });
     expect(response.body).toEqual({
       version: 1,
