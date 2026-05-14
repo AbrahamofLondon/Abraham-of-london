@@ -10,6 +10,17 @@ export type ExternalAnchorProvider = "NONE" | "RFC3161" | "WORM_OBJECT_STORAGE" 
 
 export type ExternalAnchorStatus = "NOT_CONFIGURED" | "SUBMITTED" | "CONFIRMED" | "FAILED";
 
+export type ExternalAnchorCapabilities = {
+  internalChainAnchoringAvailable: boolean;
+  externalAnchoringConfigured: boolean;
+  rfc3161TimestampingAvailable: boolean;
+  wormObjectStorageAvailable: boolean;
+  blockchainAnchoringAvailable: boolean;
+  canSubmitExternalAnchor: boolean;
+  canConfirmExternalAnchor: boolean;
+  publicVerificationAvailable: boolean;
+};
+
 export type ExternalAnchorReceipt = {
   version: 1;
   provider: ExternalAnchorProvider;
@@ -20,11 +31,28 @@ export type ExternalAnchorReceipt = {
   confirmedAt?: string | null;
   receiptId?: string | null;
   receiptPayloadHash?: string | null;
+  capabilities: ExternalAnchorCapabilities;
   message: string;
 };
 
 export function getConfiguredExternalAnchorProvider(): ExternalAnchorProvider {
   return "NONE";
+}
+
+export function getExternalAnchorCapabilities(
+  provider: ExternalAnchorProvider = getConfiguredExternalAnchorProvider(),
+): ExternalAnchorCapabilities {
+  const externalAnchoringConfigured = provider !== "NONE";
+  return {
+    internalChainAnchoringAvailable: true,
+    externalAnchoringConfigured,
+    rfc3161TimestampingAvailable: provider === "RFC3161",
+    wormObjectStorageAvailable: provider === "WORM_OBJECT_STORAGE",
+    blockchainAnchoringAvailable: provider === "BLOCKCHAIN",
+    canSubmitExternalAnchor: externalAnchoringConfigured,
+    canConfirmExternalAnchor: externalAnchoringConfigured,
+    publicVerificationAvailable: false,
+  };
 }
 
 function clean(value?: string | null): string | null {
@@ -54,6 +82,7 @@ export function buildNotConfiguredExternalAnchorReceipt(input: {
     confirmedAt: null,
     receiptId: null,
     receiptPayloadHash: null,
+    capabilities: getExternalAnchorCapabilities("NONE"),
     message: "External anchoring is not configured. Internal chain anchoring remains available.",
   };
 }
@@ -90,6 +119,7 @@ export function buildExternalAnchorReceipt(input: {
       confirmedAt: null,
       receiptId: null,
       receiptPayloadHash: null,
+      capabilities: getExternalAnchorCapabilities(provider),
       message: "External anchor confirmation cannot be recorded without receipt evidence.",
     };
   }
@@ -104,6 +134,7 @@ export function buildExternalAnchorReceipt(input: {
     confirmedAt: requestedStatus === "CONFIRMED" ? confirmedAt : null,
     receiptId: receiptId,
     receiptPayloadHash: receiptPayloadHash,
+    capabilities: getExternalAnchorCapabilities(provider),
     message: requestedStatus === "CONFIRMED"
       ? "External anchor confirmation recorded from supplied receipt evidence."
       : "External anchor receipt prepared. No external immutability claim is made by this interface.",

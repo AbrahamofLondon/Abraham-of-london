@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildExternalAnchorReceipt,
   buildNotConfiguredExternalAnchorReceipt,
+  getExternalAnchorCapabilities,
   getConfiguredExternalAnchorProvider,
 } from "@/lib/admin/provenance-external-anchor";
 
@@ -15,6 +16,42 @@ describe("provenance external anchor interface", () => {
     expect(getConfiguredExternalAnchorProvider()).toBe("NONE");
     expect(receipt.provider).toBe("NONE");
     expect(receipt.status).toBe("NOT_CONFIGURED");
+    expect(receipt.capabilities).toEqual({
+      internalChainAnchoringAvailable: true,
+      externalAnchoringConfigured: false,
+      rfc3161TimestampingAvailable: false,
+      wormObjectStorageAvailable: false,
+      blockchainAnchoringAvailable: false,
+      canSubmitExternalAnchor: false,
+      canConfirmExternalAnchor: false,
+      publicVerificationAvailable: false,
+    });
+  });
+
+  it("exposes current capability flags without enabling external anchoring", () => {
+    expect(getExternalAnchorCapabilities()).toEqual({
+      internalChainAnchoringAvailable: true,
+      externalAnchoringConfigured: false,
+      rfc3161TimestampingAvailable: false,
+      wormObjectStorageAvailable: false,
+      blockchainAnchoringAvailable: false,
+      canSubmitExternalAnchor: false,
+      canConfirmExternalAnchor: false,
+      publicVerificationAvailable: false,
+    });
+  });
+
+  it("maps future provider capabilities without claiming public verification", () => {
+    expect(getExternalAnchorCapabilities("RFC3161")).toEqual({
+      internalChainAnchoringAvailable: true,
+      externalAnchoringConfigured: true,
+      rfc3161TimestampingAvailable: true,
+      wormObjectStorageAvailable: false,
+      blockchainAnchoringAvailable: false,
+      canSubmitExternalAnchor: true,
+      canConfirmExternalAnchor: true,
+      publicVerificationAvailable: false,
+    });
   });
 
   it("preserves the Merkle root", () => {
@@ -79,6 +116,8 @@ describe("provenance external anchor interface", () => {
     expect(receipt.status).toBe("CONFIRMED");
     expect(receipt.receiptPayloadHash).toBe("payload-hash");
     expect(receipt.confirmedAt).toBe("2026-05-14T12:01:00.000Z");
+    expect(receipt.capabilities.rfc3161TimestampingAvailable).toBe(true);
+    expect(receipt.capabilities.publicVerificationAvailable).toBe(false);
   });
 
   it("rejects invalid or empty merkleRoot", () => {
