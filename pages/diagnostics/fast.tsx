@@ -26,7 +26,8 @@ import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSumma
 import GovernedActionPanel from "@/components/living/GovernedActionPanel";
 import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
 import OutcomeMemoryPreview from "@/components/living/OutcomeMemoryPreview";
-import BoardSummaryPreview, { buildBoardSummaryFromFastDiagnostic } from "@/components/diagnostics/BoardSummaryPreview";
+import BoardSummaryPreview from "@/components/diagnostics/BoardSummaryPreview";
+import { buildBoardSummaryFromFastDiagnostic } from "@/lib/diagnostics/board-summary";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 import {
   clearVersionedAssessmentState,
