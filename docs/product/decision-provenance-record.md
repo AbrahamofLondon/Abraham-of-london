@@ -8,6 +8,8 @@ AI makes advice cheap. Provenance makes consequential advice trustworthy.
 
 The Decision Provenance Record is the accountability layer beneath every governed decision the platform produces. It does not replace judgment. It makes judgment auditable.
 
+Current integrity boundary: the platform provides hash-verifiable Decision Provenance Records, client-safe hash continuity, persisted archive hashes, internal chain-anchored provenance, and a database-enforced append-only anchor ledger. This is tamper-evident within the application database boundary. It is designed for WORM/external anchoring, but external WORM retention and third-party anchoring are not live.
+
 ---
 
 ## 1. Strategic Thesis
@@ -60,7 +62,9 @@ Confidence tiers propagate to the client-safe summary as bands, not labels. Spon
 
 The `provenanceHash` field is a SHA-256 digest computed over the canonicalized record. Canonicalization is deterministic: all keys are sorted alphabetically, all arrays are sorted by a stable natural key before serialization. The hash covers the full internal record, not the client-safe summary.
 
-The hash serves as a tamper-evident seal. If the underlying record changes after hash computation, the hash no longer matches. The hash is included in the client-safe summary so that sponsors can request verification against the platform record at any time.
+The hash serves as a tamper-evident seal within the application database boundary. If the underlying record changes after hash computation, the hash no longer matches. The hash is included in the client-safe summary so that authorised parties can request verification against the platform record without exposing raw internal review material.
+
+Record hashes can be linked into scoped Merkle roots stored in the `ProvenanceChainAnchor` ledger. Anchor rows are append-only at the database layer through a trigger that blocks ordinary `UPDATE` and `DELETE` operations while allowing new `INSERT` operations. This strengthens internal tamper evidence, but it is not WORM storage and not external immutability.
 
 ### 5a. Hash Mismatch Protocol
 
@@ -128,7 +132,9 @@ This boundary is a structural whitelist, not a case-by-case editorial judgment.
 
 The record schema is designed to support structured regulatory export without redesign. Subject types active in v1 are `OVERSIGHT_CYCLE`, `RETAINER_ACCOUNT`, and `DELIVERY_ITEM`. `EXECUTIVE_REPORT` and `DECISION_CASE` are defined in the schema and deferred.
 
-When export is required — by a regulator, acquirer, or institutional counterparty — the record produces a deterministic artifact from the existing structure. No reconstruction is required. The hash provides continuity between the live record and any exported copy.
+When export is required — by a regulator, acquirer, or institutional counterparty — the record produces a deterministic artifact from the existing structure. No reconstruction is required. The hash provides continuity between the live record and any exported copy, and chain anchors can provide internal continuity evidence where a scoped anchor exists.
+
+External verifier receipts, WORM object storage, and RFC3161 timestamping remain designed next steps. They must not be described as active controls until implemented.
 
 ---
 

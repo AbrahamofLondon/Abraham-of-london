@@ -10,6 +10,8 @@
 
 The platform does not compete on AI quality alone. AI quality is a commodity that improves across the industry every quarter. The platform competes on **accountability** — the durable, verifiable record of what happened to a governed decision, who touched it, what was suppressed, what was delivered, and what outcome was recorded.
 
+Current claim boundary: the platform maintains internal chain-anchored provenance with a database-enforced append-only anchor ledger. Decision records are hash-verifiable, client-safe summaries preserve hash continuity, and admin endpoints can verify record hashes and anchor-chain continuity. External WORM retention, RFC3161 timestamping, blockchain anchoring, public verification, and third-party verification receipts are designed next steps, not live capabilities.
+
 This thesis applies across all buyer segments:
 
 - **Institutional buyers** do not need better AI. They need proof that the AI-driven process is governed, auditable, and defensible.
@@ -56,7 +58,7 @@ Provenance is not a replacement for process automation or decision intelligence.
 | "Can I prove who reviewed this decision?" | Each operator review is recorded as a governance event with timestamp and decision outcome. The accountability statement counts reviews explicitly. |
 | "Can I show what was suppressed and why?" | The suppression ledger records every withheld field, the reason, and whether an operator reviewed it. The client-safe summary confirms suppression count and severity class. |
 | "Can I demonstrate delivery and outcome?" | Delivery approval and sent events are recorded with method and timestamp. Outcome verification is linked by subjectType/subjectId. Gaps are surfaced when either is missing. |
-| "Can I defend this process to a board, client, regulator, or court?" | The accountability statement is a deterministic, restrained attestation of what the record covers. It does not overclaim. The hash enables independent verification. |
+| "Can I defend this process to a board, client, regulator, or court?" | The accountability statement is a deterministic, restrained attestation of what the record covers. It does not overclaim. The hash enables authorised verification against the internal record. |
 
 ### 4.2 Operator (Head of Operations, Senior Operator)
 
@@ -70,7 +72,7 @@ Provenance is not a replacement for process automation or decision intelligence.
 
 | Anxiety | Provenance Answer |
 |---|---|
-| "Is this process defensible?" | The provenance record provides a deterministic, hash-verifiable chain of evidence inputs, governance events, and delivery proof. |
+| "Is this process defensible?" | The provenance record provides deterministic, hash-verifiable accountability over evidence inputs, governance events, and delivery proof. Chain anchors add internal continuity evidence where anchors exist. |
 | "Can we see the full record, not just the summary?" | The internal DecisionProvenanceRecord is available to authorised operators. The client-safe summary is a structural subset with the same hash. |
 | "What happens if we are audited?" | The provenance record can be produced for any governed cycle. The hash provides continuity between the live record and any exported copy. |
 
@@ -84,13 +86,14 @@ Provenance is not a replacement for process automation or decision intelligence.
 |---|---|---|
 | **Logging** | Governance events record every operator review, suppression, delivery, and outcome. Events include type, timestamp, and actor. | ✅ Implemented |
 | **Records of processing** | The full DecisionProvenanceRecord is a structured record of what happened to a governed decision, from evidence inputs through delivery and outcome. | ✅ Implemented |
-| **Audit trail** | The provenance hash provides tamper-evident integrity. The gap monitor surfaces incomplete chains. The integrity helper detects hash mismatches. | ✅ Implemented |
+| **Audit trail** | The provenance hash provides tamper-evident integrity within the application database boundary. The gap monitor surfaces incomplete chains. Integrity helpers and admin endpoints detect hash mismatches and broken anchor continuity. | ✅ Implemented |
 | **Access control** | The admin shell guards all provenance surfaces via `requireAdminServer` or `requireAdminPage`. The client-safe summary is a structural subset. | ✅ Implemented |
 | **Evidence weighting** | Each evidence input carries a confidence tier (USER_REPORTED through THIRD_PARTY) with a deterministic reason and source type. | ✅ Implemented |
 | **Retention** | Retention periods are defined by record class. Pseudonymisation strategy is documented. Legal hold and deletion workflows are specified. | 📋 Designed (not implemented) |
 | **Human review** | Operator review events are recorded with decision outcome and timestamp. Gaps are surfaced when operator review is missing. | ✅ Implemented |
 | **Outcome verification** | Outcome records are linked to subjects via subjectType/subjectId. Delivery-sent-without-outcome is surfaced as a WARNING gap. | ✅ Implemented |
-| **Immutability** | Current: hash stored in AuditEvent metadata. Target: content-addressed storage + per-subject hash chain + daily Merkle roots + WORM storage. | 📋 Phased roadmap |
+| **Append-only anchors** | ProvenanceChainAnchor stores scoped Merkle roots with previous-root linkage. A database trigger blocks ordinary updates and deletes while allowing inserts. | ✅ Implemented |
+| **External anchoring** | WORM object storage, RFC3161 timestamping, public verification, and third-party receipts are designed but not live. | 📋 Designed / next |
 
 ---
 
@@ -128,11 +131,11 @@ The client-safe summary carries the same `provenanceHash` as the full internal r
 
 **Why it matters:** The hash is the proof link between internal operations and client-facing output. Without it, the client has no way to verify that the summary corresponds to the actual record.
 
-### 6.6 Future Immutable Chain
+### 6.6 Internal Chain-Anchored Provenance
 
-The design specification defines a path to per-subject hash chains, daily Merkle roots, and WORM storage. These are not implemented yet, but the architecture is designed to support them without breaking existing records.
+The platform stores scoped Merkle-root anchors with previous-root linkage in Postgres. Anchor rows are database-enforced append-only: ordinary updates and deletes are blocked, while inserts remain allowed. Admin verification can check chain continuity and chainHash recomputation.
 
-**Why it matters:** The roadmap demonstrates that the provenance layer is designed for the future, not just for current needs. Buyers evaluating the platform for multi-year engagements can see the trajectory.
+**Why it matters:** This provides internal tamper-evidence across anchored batches without exposing raw governance events, suppression details, or actor identifiers. It is not WORM storage or external immutability, and the architecture remains designed for WORM/external anchoring when needed.
 
 ---
 
@@ -140,7 +143,7 @@ The design specification defines a path to per-subject hash chains, daily Merkle
 
 ### 7.1 Institutional
 
-> "Verifiable chain-of-custody for governed decisions. Every oversight cycle produces a deterministic record of what evidence was used, who reviewed it, what was suppressed, what was delivered, and what outcome was recorded. The record is hash-verifiable and client-safe by structural design."
+> "Hash-verifiable accountability for governed decisions. Every oversight cycle produces a deterministic record of what evidence was used, who reviewed it, what was suppressed, what was delivered, and what outcome was recorded. Internal chain anchors preserve continuity without exposing protected review material."
 
 ### 7.2 Operator
 
@@ -148,7 +151,7 @@ The design specification defines a path to per-subject hash chains, daily Merkle
 
 ### 7.3 Board / Counsel
 
-> "Review the accountable record, not just the final output. The provenance record provides a deterministic, hash-verifiable chain from evidence through delivery and outcome. The client-safe summary carries the same hash as the internal record, enabling independent verification."
+> "Review the accountable record, not just the final output. The provenance record provides deterministic, hash-verifiable accountability from evidence through delivery and outcome. The client-safe summary carries the same hash as the internal record, enabling authorised verification without exposing protected internal detail."
 
 ### 7.4 Short Form
 
@@ -163,10 +166,10 @@ The following claims must never be made in buyer-facing materials unless indepen
 | Claim | Why It Is a Red Line |
 |---|---|
 | "Guarantees compliance" | Compliance is determined by regulatory bodies, not by platform architecture. No single feature guarantees compliance with any regulation. |
-| "Immutable" | The current implementation stores hashes in a database that can be modified by administrators with sufficient access. True immutability requires WORM storage or blockchain anchoring, which are not yet implemented. |
+| "Externally immutable" or "WORM retained" | Current anchors are database-enforced append-only inside Postgres. True external immutability requires WORM storage or external anchoring, which are not yet implemented. |
 | "Verified" | Evidence confidence tiers are assigned by the system based on source type, not by independent verification. Only `THIRD_PARTY` confidence represents external verification. |
 | "Regulator-approved" | No regulatory body has reviewed or approved the provenance architecture. |
-| "Tamper-proof" | The hash provides tamper *evidence*, not tamper *prevention*. A determined attacker with database access could modify both the record and the hash. |
+| "Tamper-proof" | The hash and anchor chain provide tamper *evidence*, not absolute tamper *prevention*. Database superuser access remains outside the application-layer guarantee. |
 | "Blockchain-secured" | No blockchain anchoring is implemented. The roadmap includes it as a future option, not a current capability. |
 
 ### Safe Alternatives
@@ -174,9 +177,9 @@ The following claims must never be made in buyer-facing materials unless indepen
 | Instead of | Say |
 |---|---|
 | "Guarantees compliance" | "Supports audit readiness by maintaining a deterministic record of governance events." |
-| "Immutable" | "Hash-verifiable. Any change to the record produces a different hash, enabling detection." |
+| "Immutable" | "Database-enforced append-only anchors and hash-verifiable records within the application database boundary." |
 | "Verified" | "Confidence-weighted. Each evidence input is classified by source type, from user-reported through operator-verified." |
-| "Tamper-proof" | "Tamper-evident. The hash changes when the record changes, enabling integrity checks." |
+| "Tamper-proof" | "Tamper-evident. The hash changes when the record changes, and anchor-chain continuity checks detect broken internal linkage." |
 
 ---
 

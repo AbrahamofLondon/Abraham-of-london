@@ -4,9 +4,11 @@
 
 ---
 
-## Status: Draft v1 — Design/Spec Only
+## Status: Current Admin Verification + Future External Verification Design
 
-This document defines what third parties can verify about Decision Provenance records today, what they cannot verify yet, and the target architecture for a formal verification protocol. No code changes are required to adopt this document.
+This document defines what authorised users can verify today, what third parties cannot verify yet without authorised disclosure, and the target architecture for a formal external verification protocol.
+
+Current implementation includes record hash verification, client-safe/internal hash continuity, persisted archive hash comparison, internal chain-anchored provenance, a database-enforced append-only anchor ledger, and an admin chain continuity verification endpoint. External WORM retention, RFC3161 timestamping, public verification, and third-party verification receipts are not live.
 
 ---
 
@@ -24,7 +26,7 @@ Any party in possession of a `ClientSafeProvenanceSummary` can verify that the h
 4. The hash can be presented to the platform operator for verification
 ```
 
-**Limitation:** The third party cannot independently recompute the hash because they do not have access to the full internal record. They can only verify that the hash is well-formed and consistent with the summary they hold.
+**Limitation:** The third party cannot independently recompute the hash without authorised access to the full internal record. They can only verify that the hash is well-formed and can request platform verification.
 
 ### 1.2 Internal Record Hash (If Disclosed)
 
@@ -52,7 +54,20 @@ If the third party has access to the oversight cycle archive (via platform API o
 4. If match: the hash persisted at archive time matches the current record
 ```
 
-**Limitation:** The archive hash is stored in the same database as the record. A database administrator with write access could modify both.
+**Limitation:** The archive hash is stored in the same application database boundary as the source records. A database administrator with sufficient privilege remains outside the guarantee.
+
+### 1.4 Anchor Chain Continuity (Admin)
+
+An authorised admin can verify the internal anchor ledger for a scope/scopeId:
+
+```
+1. Load ProvenanceChainAnchor rows ordered by computedAt and id
+2. Recompute each anchor chainHash
+3. Verify each anchor previousRoot equals the prior anchor merkleRoot
+4. Return CONTINUOUS, BROKEN, or UNAVAILABLE
+```
+
+**Limitation:** This verifies internal chain continuity over stored anchors. It does not prove external immutability, WORM retention, or third-party timestamping.
 
 ---
 
@@ -60,12 +75,12 @@ If the third party has access to the oversight cycle archive (via platform API o
 
 | Capability | Why Not | Prerequisite |
 |---|---|---|
-| **WORM storage proof** | Hashes are stored in a mutable database, not write-once-read-many storage | Phase 5 of immutability roadmap (S3 Object Lock or equivalent) |
-| **Merkle root anchoring** | Batch Merkle roots are not yet computed or stored | Phase 4 of immutability roadmap (daily Merkle roots) |
+| **WORM storage proof** | Anchor rows are database-enforced append-only, not write-once-read-many storage | WORM object storage such as S3 Object Lock or equivalent |
+| **External Merkle root anchoring** | Batch Merkle roots are stored internally, not anchored to an external timestamping or storage provider | RFC3161, WORM storage, or external anchor provider |
 | **External timestamping** | No trusted timestamp authority is involved | Integration with RFC 3161 TSA or blockchain timestamping |
 | **Independent hash recomputation** | Third parties do not have access to the full internal record | Future verification API (see Section 4) |
-| **Chain continuity proof** | Per-subject hash chains are not yet implemented | Phase 3 of immutability roadmap |
-| **Deletion detection** | No cross-record chain exists — deletion of a record is invisible | Phase 3+ of immutability roadmap |
+| **Third-party independent verification without disclosure** | Third parties cannot recompute internal hashes without access to the underlying internal record or a future receipt | External verifier and receipt model |
+| **Public chain continuity proof** | Admin chain continuity verification exists, but no public verifier exists | Authenticated/public verification endpoint design |
 
 ---
 
@@ -134,6 +149,8 @@ A third party in possession of a signed receipt can verify:
 ---
 
 ## 4. External Verifier (Future)
+
+The current verification endpoints are admin-only. A public or third-party endpoint must not expose raw provenance, governance events, suppression details, actor IDs, or leaf payloads. It should issue a bounded receipt only after the external anchoring model is implemented.
 
 ### 4.1 API Design
 
@@ -283,7 +300,7 @@ The following are explicitly out of scope for v1 of the verification protocol:
 4. Auditor verifies each record hash matches the stored provenanceHash
 5. Auditor verifies each record is included in the daily Merkle root
 6. Auditor verifies the daily Merkle root against the stored anchor
-7. Auditor has cryptographic proof that no records were modified or deleted
+7. Auditor has hash-verifiable evidence of record and batch consistency within the disclosed material
 ```
 
 ### 6.3 Regulator Requests Proof of Process (Future)
@@ -302,15 +319,17 @@ The following are explicitly out of scope for v1 of the verification protocol:
 
 ## 7. Summary
 
-| Capability | Current (v1) | Target (v2/v3) |
+| Capability | Current | Designed / next |
 |---|---|---|
-| Client-safe hash verification | Manual — operator confirms match | Automated — API returns signed receipt |
-| Internal record hash verification | Manual — requires full record disclosure | Automated — API verifies without full disclosure |
-| Archive hash verification | Manual — requires archive access | Automated — API checks archive linkage |
-| Merkle root verification | Not available | Daily batch roots with inclusion proofs |
-| WORM storage proof | Not available | S3 Object Lock or equivalent |
-| External timestamping | Not available | RFC 3161 TSA or blockchain |
-| Signed receipts | Not available | Platform-signed verification receipts |
-| Public API | Not available | Authenticated, rate-limited verification endpoint |
+| Client-safe hash verification | Admin endpoint can compare expected/recomputed/archive hashes | Signed receipt for authorised external parties |
+| Internal record hash verification | Admin endpoint recomputes canonical provenance hash | External verifier without raw disclosure where possible |
+| Archive hash verification | Admin endpoint compares archived hash when available | Formal receipt field |
+| Merkle root verification | Internal anchor ledger stores scoped Merkle roots | Inclusion proofs over disclosed records |
+| Chain continuity verification | Admin endpoint verifies previous-root linkage and chainHash recomputation | External receipt over chain state |
+| Database-enforced append-only anchors | Postgres trigger blocks ordinary anchor update/delete | WORM/external anchoring |
+| WORM storage proof | Not live | S3 Object Lock or equivalent |
+| External timestamping | Not live | RFC3161 TSA or blockchain |
+| Signed receipts | Not live | Platform-signed verification receipts |
+| Public API | Not live | Authenticated, rate-limited verification endpoint |
 
-The current manual verification path (operator confirms hash match on request) is sufficient for v1. The automated verification API should be implemented when external parties regularly request hash verification, or when a regulatory or client audit requires it.
+The current admin verification path is sufficient for internal operations and authorised operator review. Public or third-party verification should be implemented only when external anchoring, receipt signing, and disclosure controls are ready.

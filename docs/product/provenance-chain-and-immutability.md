@@ -4,36 +4,60 @@
 
 ---
 
-## Status: Draft v1 — Design/Spec Only
+## Status: Current Internal Chain Ledger + Future External Anchoring Design
 
-This document defines the target architecture for tamper-evident provenance chain anchoring and immutable storage. It is a design specification, not an implementation plan. No code changes are required to adopt this document.
+This document defines the current internal chain-anchored provenance boundary and the target architecture for stronger external anchoring. The current platform has a Merkle-root anchor ledger in Postgres, previous-root chain linkage, an admin chain continuity verification endpoint, and database-enforced append-only anchors. It does not have WORM retention, external timestamping, public verification, or third-party verification receipts.
+
+Use the precise current claim: **database-enforced append-only anchor ledger for internal chain-anchored provenance, tamper-evident within the application database boundary**.
 
 ---
 
 ## 1. Threat Model
 
-The Decision Provenance Record currently stores a single SHA-256 hash per oversight cycle in AuditEvent metadata. This protects against accidental modification of a single record but does not protect against:
+The Decision Provenance Record now combines record-level SHA-256 hashes, persisted archive hashes, client-safe hash continuity, and a scoped Merkle-root anchor ledger. This protects against accidental record drift and makes anchor deletion, replacement, or reordering detectable within the application database boundary when anchors exist.
 
 | Threat | Description | Current Protection | Gap |
 |---|---|---|---|
 | **Record modification** | An operator or process changes the provenance data after the hash was stored | Hash mismatch detection (see integrity helper) | ✅ Covered |
-| **Record deletion** | An entire AuditEvent row is deleted | No cross-record chain — deletion is invisible | ❌ Not covered |
-| **Record replacement** | An old record is deleted and a new one created with different data but the same subjectId | No chain of previous hashes | ❌ Not covered |
-| **Backdating** | A new record is created with a fabricated earlier timestamp | No temporal chain linking records | ❌ Not covered |
+| **Record deletion** | An entire AuditEvent row is deleted | Archive hash plus anchor continuity where the record hash was anchored | Partial |
+| **Record replacement** | An old record is deleted and a new one created with different data but the same subjectId | Hash mismatch and Merkle-root mismatch where anchored | Partial |
+| **Backdating** | A new record is created with a fabricated earlier timestamp | Anchor `computedAt` and previous-root linkage provide an internal continuity check | Partial |
 | **Summary/internal mismatch** | Client-safe summary hash is replaced to match a modified internal record | Hash integrity check compares both | ✅ Covered |
 | **Archive metadata tampering** | The AuditEvent metadata JSON is edited in-place | Hash stored in same metadata — both could be edited together | ❌ Not covered |
-| **Reordering** | Records within a batch are reordered to change apparent sequence | No batch root hash | ❌ Not covered |
+| **Reordering** | Records within a batch are reordered to change apparent sequence | Deterministic Merkle-root anchor plus previous-root chain continuity where anchored | ✅ Covered inside anchored scopes |
 
 ### Risk Acceptance for v1
 
-The current architecture (single hash per record in AuditEvent metadata) is acceptable for v1 because:
+The current internal architecture is acceptable for v1 because:
 
-1. AuditEvent is append-only by convention — records are created, not updated in place
+1. ProvenanceChainAnchor is append-only through a database trigger that blocks ordinary `UPDATE` and `DELETE`
 2. The hash is computed from the full provenance record, not from the metadata that contains it
-3. The client-safe summary carries the same hash, enabling external verification
-4. No production deployment has been targeted at adversaries with database access
+3. The client-safe summary carries the same hash, preserving client-safe hash continuity
+4. Scoped Merkle roots and previous-root linkage support admin chain continuity verification
+5. No external WORM retention or third-party anchoring is active yet
 
-The chain and immutability model defined below is the target for v2+.
+The external anchoring and WORM model defined below remains the target for later phases.
+
+---
+
+## Current Capability Boundary
+
+| Capability | Status | Boundary |
+|---|---|---|
+| SHA-256 record hash | Current | Deterministic hash over canonical DecisionProvenanceRecord |
+| Client-safe/internal hash continuity | Current | Client-safe summary carries the same hash without raw internal events |
+| Persisted archive hash | Current | Archive metadata stores the provenance hash for later comparison |
+| Merkle-root anchor ledger | Current | Scoped roots stored in `ProvenanceChainAnchor`; raw provenance payloads are not stored |
+| Previous-root chain linkage | Current | Each anchor links to the prior anchor root for the same scope/scopeId |
+| Database-enforced append-only anchors | Current | Postgres trigger blocks ordinary `UPDATE` and `DELETE`; `INSERT` remains allowed |
+| Admin chain continuity verification | Current | Admin endpoint verifies previous-root linkage and chainHash recomputation |
+| WORM object storage | Designed / next | Not live |
+| RFC3161 timestamping | Designed / next | Not live |
+| External verifier | Designed / next | Not live |
+| Public verification endpoint | Designed / next | Not live |
+| Third-party verification receipt | Designed / next | Not live |
+
+Allowed claim: internal chain-anchored provenance with a database-enforced append-only anchor ledger. Do not claim WORM retention, external immutability, blockchain anchoring, regulator certification, or independent third-party verification without authorised disclosure.
 
 ---
 
@@ -122,11 +146,11 @@ Compute a Merkle root over all records within a single oversight cycle. The root
 **Pros:** Natural batch boundary. Root is stored with the data it protects.
 **Cons:** Does not protect against deletion of the entire cycle archive.
 
-### Recommended v1 Extension
+### Implemented v1 Anchor Path
 
-**Use per-subject hash chain (Option A) for all new records.** This is a small change to the existing record composer — add `previousRecordHash` field and populate it by querying the most recent record for the same `subjectType + subjectId`.
+**Use scoped Merkle-root anchors with previous-root linkage.** Each created anchor stores the root over included provenance hashes, the previous anchor root for the same scope/scopeId, and a deterministic `chainHash` over the anchor fields. The chain can be verified by recomputing each anchor hash and checking previous-root continuity.
 
-**Defer batch roots to v2** when a daily or cycle-batch computation schedule can be implemented.
+**Defer automatic scheduling and external anchoring** until anchor timing, retention, and disclosure requirements are stable.
 
 ---
 
@@ -174,13 +198,13 @@ Use a dedicated database table or log file that is append-only by application co
 - Not truly immutable at the storage layer (database admin could modify)
 - Better than current co-located storage but not best-in-class
 
-### 4.4 Recommended v1 Storage Path
+### 4.4 Current Storage Path
 
-**Continue storing the hash in AuditEvent metadata for v1.** This is already implemented and sufficient for current operational needs.
+**Continue storing record hashes in AuditEvent/archive metadata and store batch anchor summaries in `ProvenanceChainAnchor`.** The anchor ledger stores safe metadata only: counts, subject types, roots, previous roots, and chain hashes. It does not store raw DecisionProvenanceRecord payloads, governance event labels, suppression details, or actor identifiers.
 
-**Add a `StoredProvenanceRecord` model (or use existing AuditEvent with a new `objectType`) to store the full canonical record JSON keyed by hash.** This separates the provenance record from the oversight cycle metadata and enables content-addressed retrieval.
+**Enforce append-only anchor behaviour in Postgres.** A trigger prevents ordinary updates and deletes against the anchor table while allowing inserts. This is database-enforced append-only behaviour, not WORM retention.
 
-**Do not add S3/Azure/GCP dependencies in v1.** The append log approach using existing database infrastructure is sufficient until batch roots and external anchoring are required.
+**Do not add S3/Azure/GCP dependencies in this phase.** WORM object storage, RFC3161 timestamping, and external verifier receipts remain designed next steps.
 
 ---
 
@@ -196,16 +220,16 @@ Use a dedicated database table or log file that is append-only by application co
 5. If mismatch: integrity failure — see mismatch protocol (doctrine doc section 5a)
 ```
 
-### 5.2 Chain Verification
+### 5.2 Anchor Chain Verification
 
 ```
-1. Load all records for a subject scope, ordered by createdAt
-2. For each record N (starting from the oldest):
-   a. Recompute recordHash_N
-   b. Verify recordHash_N matches stored provenanceHash
-   c. Verify record N includes previousRecordHash matching recordHash_(N-1)
-3. If all links verify: chain integrity confirmed
-4. If any link fails: chain break detected
+1. Load all ProvenanceChainAnchor rows for a scope/scopeId, ordered by computedAt and id
+2. For each anchor N:
+   a. Recompute chainHash_N from version, scope, scopeId, merkleRoot, previousRoot, timestamps
+   b. Verify recomputed chainHash_N matches stored chainHash
+   c. Verify previousRoot_N matches merkleRoot_(N-1)
+3. If all links verify: anchor chain continuity is confirmed
+4. If any link fails: anchor chain break detected
 ```
 
 ### 5.3 Batch Root Verification
@@ -301,27 +325,25 @@ The following are explicitly out of scope for v1 and this design document:
 
 **Status:** Complete. Shipped in `481aeb7a2`.
 
-### Phase 2: Stored Full Provenance Object Keyed by Hash
+### Phase 2: Internal Chain Anchor Ledger ✅ (Complete)
 
-- Store the full canonical provenance record JSON in storage, keyed by its SHA-256 hash
-- Use existing database infrastructure (new AuditEvent `objectType` or dedicated table)
-- Enable content-addressed retrieval: load by hash, verify integrity automatically
-- Include `provenanceVersion`, `computedAt`, `storedAt` metadata
+- Store scoped Merkle roots in `ProvenanceChainAnchor`
+- Link anchors with `previousRoot`
+- Compute deterministic `chainHash`
+- Query anchors through an admin-only endpoint
+- Verify chain continuity through an admin-only endpoint
 
-**Estimated effort:** 2-3 days
-**Dependencies:** None
+**Status:** Complete.
 
-### Phase 3: Per-Subject Hash Chain
+### Phase 3: Database-Enforced Append-Only Anchors ✅ (Complete)
 
-- Add `previousRecordHash` field to `DecisionProvenanceRecord`
-- On composition, query the most recent record for the same `subjectType + subjectId`
-- Include its hash as `previousRecordHash` in the new record
-- Update hash computation to include `previousRecordHash`
+- Add Postgres trigger to block ordinary `UPDATE` and `DELETE` operations on `ProvenanceChainAnchor`
+- Allow `INSERT` so anchors remain append-only
+- Keep raw provenance payloads out of the anchor table
 
-**Estimated effort:** 1-2 days
-**Dependencies:** Phase 2 (storage must support loading previous records by subject scope)
+**Status:** Complete locally. Deployment depends on valid database credentials and migration rollout.
 
-### Phase 4: Daily Merkle Roots
+### Phase 4: Anchor Generation from Existing Records
 
 - Implement daily batch computation: collect all provenance records created in a UTC day
 - Build Merkle tree from record hashes
@@ -329,7 +351,7 @@ The following are explicitly out of scope for v1 and this design document:
 - Implement batch root verification
 
 **Estimated effort:** 3-5 days
-**Dependencies:** Phase 2 (all records must be retrievable by createdAt range)
+**Dependencies:** stable anchor timing and operator workflow
 
 ### Phase 5: WORM Storage
 
@@ -364,14 +386,14 @@ The following are explicitly out of scope for v1 and this design document:
 
 ## 9. Summary
 
-| Component | Current (v1) | Target (v2/v3) |
+| Component | Current | Designed / next |
 |---|---|---|
-| Record hash | ✅ SHA-256 per record | ✅ Same + chain link |
-| Hash storage | AuditEvent metadata | Content-addressed object store |
-| Chain | None | Per-subject hash chain |
-| Batch root | None | Daily or cycle-batch Merkle root |
-| Storage immutability | Database-level (convention) | S3 Object Lock or append log |
-| External verification | Manual hash comparison | Signed verification receipts + API |
+| Record hash | SHA-256 per record | Same + external receipt support |
+| Hash storage | AuditEvent/archive metadata | Content-addressed object store |
+| Chain | Scoped Merkle roots with previous-root linkage | Scheduled daily/account/cycle anchoring |
+| Batch root | Manual/internal anchor creation available | Automated anchor generation |
+| Anchor mutation control | Database-enforced append-only trigger | WORM/external anchoring |
+| External verification | Admin verification endpoints only | Signed verification receipts + authorised API |
 | GDPR compliance | Manual | Pseudonymisation + legal hold + anonymised deletion |
 
-The current v1 implementation (Phase 1) is operational and sufficient for current needs. The next priority is Phase 2 (stored full provenance object) followed by Phase 3 (per-subject hash chain). Phases 4-7 should be deferred until external verification is a customer requirement.
+The current implementation supports the claim: database-enforced append-only provenance anchor ledger with internal chain continuity verification. The next priorities are operational anchor generation, WORM object storage or RFC3161 timestamping, and authorised external verification receipts when customer assurance requirements justify them.
