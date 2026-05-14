@@ -65,4 +65,7 @@ export type OversightCycleArchiveRecord = {
   createdAt: string;
   approvedAt?: string | null;
   deliveredAt?: string | null;
+  provenanceHash?: string | null;
+  provenanceVersion?: number | null;
+  provenanceComputedAt?: string | null;
 };

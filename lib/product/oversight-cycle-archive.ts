@@ -61,7 +61,28 @@ function archiveMetadataToRecord(metadata: Record<string, unknown>): OversightCy
     createdAt: typeof metadata.createdAt === "string" ? metadata.createdAt : new Date().toISOString(),
     approvedAt: typeof metadata.approvedAt === "string" ? metadata.approvedAt : null,
     deliveredAt: typeof metadata.deliveredAt === "string" ? metadata.deliveredAt : null,
+    provenanceHash: typeof metadata.provenanceHash === "string" ? metadata.provenanceHash : null,
+    provenanceVersion: typeof metadata.provenanceVersion === "number" ? metadata.provenanceVersion : null,
+    provenanceComputedAt: typeof metadata.provenanceComputedAt === "string" ? metadata.provenanceComputedAt : null,
   };
+}
+
+async function computeProvenanceHash(cycleId: string): Promise<{
+  provenanceHash: string | null;
+  provenanceComputedAt: string | null;
+  provenanceVersion: number;
+}> {
+  try {
+    const { composeDecisionProvenance } = await import("@/lib/admin/decision-provenance-record");
+    const record = await composeDecisionProvenance({ subjectType: "OVERSIGHT_CYCLE", subjectId: cycleId });
+    return {
+      provenanceHash: record.provenanceHash,
+      provenanceComputedAt: new Date().toISOString(),
+      provenanceVersion: 1,
+    };
+  } catch {
+    return { provenanceHash: null, provenanceComputedAt: null, provenanceVersion: 1 };
+  }
 }
 
 export async function persistOversightCycleArchive(input: {
@@ -93,6 +114,9 @@ export async function persistOversightCycleArchive(input: {
       .map(([audience, safe]) => [audience, hashPayload(safe.brief)])
   ) as Partial<Record<OversightCycleAudience, string>>;
 
+  const { provenanceHash, provenanceComputedAt, provenanceVersion } =
+    await computeProvenanceHash(input.cycle.cycleId);
+
   const metadata = {
     cycleId: input.cycle.cycleId,
     accountId: input.accountId,
@@ -122,6 +146,9 @@ export async function persistOversightCycleArchive(input: {
     deliveryUrl: input.deliveryIntent.state === "CLIENT_VIEW_READY" || input.deliveryIntent.state === "DELIVERED"
       ? `/oversight/brief/${input.cycle.cycleId}`
       : null,
+    provenanceHash,
+    provenanceVersion,
+    provenanceComputedAt,
   };
 
   const existing = await prisma.auditEvent.findFirst({
@@ -326,6 +353,15 @@ export async function updateOversightCycleArchiveDeliveryState(input: {
   metadata.deliveryUrl = input.deliveryIntent.state === "CLIENT_VIEW_READY" || input.deliveryIntent.state === "DELIVERED"
     ? `/oversight/brief/${input.cycleId}`
     : null;
+
+  if (input.deliveryIntent.state === "DELIVERED" || input.deliveryIntent.state === "CLIENT_VIEW_READY") {
+    const updated = await computeProvenanceHash(input.cycleId);
+    if (updated.provenanceHash) {
+      metadata.provenanceHash = updated.provenanceHash;
+      metadata.provenanceComputedAt = updated.provenanceComputedAt;
+      metadata.provenanceVersion = updated.provenanceVersion;
+    }
+  }
 
   await prisma.auditEvent.update({
     where: { id: archive.id },
