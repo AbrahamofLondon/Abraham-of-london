@@ -31,6 +31,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
       { id: "command-wall", label: "Command Wall", href: "/admin/command-wall", router: "pages", visibility: "admin", status: "active", description: "System control surface with live context registry" },
       { id: "command", label: "Command (App)", href: "/admin/command", router: "app", visibility: "admin", status: "active", description: "App router command surface" },
       { id: "authority-center", label: "Authority Center", href: "/admin/authority-center", router: "pages", visibility: "admin", status: "active", description: "Decision authority hub with contradiction and stakeholder audit" },
+      { id: "product-surfaces", label: "Product Surfaces", href: "/admin/product-surfaces", router: "pages", visibility: "admin", status: "active", description: "Canonical estate map of all client-facing diagnostics, assessments, reports, escalations, and retained oversight surfaces" },
     ],
   },
   {
@@ -92,6 +93,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     id: "delivery",
     label: "Delivery & Proof",
     items: [
+      { id: "report-state", label: "Report State Dashboard", href: "/admin/report-state", router: "pages", visibility: "operator", status: "active", description: "Unified report state — production, delivery, PDF health, and executive reports at a glance" },
       { id: "delivery-queue", label: "Delivery Queue", href: "/admin/delivery-queue", router: "pages", visibility: "operator", status: "active", description: "Delivery item approve/fail queue" },
       { id: "proof", label: "Proof Queue", href: "/admin/proof", router: "pages", visibility: "admin", status: "active", description: "Evidence review, approve, anonymise" },
       { id: "outcome-verification", label: "Outcome Verification", href: "/admin/outcome-verification", router: "pages", visibility: "operator", status: "active", description: "Operator review queue for disputed, blocked, or insufficient-evidence outcome verification records." },
