@@ -1,6 +1,8 @@
 // app/api/decision/guidance/route.ts
 
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/config";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
 import {
@@ -10,6 +12,14 @@ import {
 import { normalisePurposeAlignmentEvidence } from "@/lib/product/field-provenance-normaliser";
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json(
+      { ok: false, error: "Authentication required" },
+      { status: 401 },
+    );
+  }
+
   try {
     const body = await request.json();
     const intake = body?.intake;

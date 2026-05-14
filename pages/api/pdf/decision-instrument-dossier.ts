@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { requireAdminApi } from "@/lib/access/server";
 
 /**
  * GET /api/pdf/decision-instrument-dossier?slug=...&resultKey=...
@@ -7,6 +8,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
  * Returns a structured JSON summary (PDF rendering is handled by the PDF pipeline).
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const resolved = await requireAdminApi(req, res);
+  if (!resolved) return;
+
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   const slug = typeof req.query.slug === "string" ? req.query.slug : null;
