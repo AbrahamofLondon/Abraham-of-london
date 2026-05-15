@@ -53,3 +53,12 @@ export type ClientSafeProvenanceSummary = {
   timelineSummary: ClientSafeTimelineEntry[];
   composedAt: string;
 };
+
+export const CLIENT_SAFE_PROVENANCE_SAMPLE_ROUTE = "/provenance/sample-export";
+
+export function buildClientSafeProvenanceCaseHref(input: {
+  subjectType: string;
+  subjectId: string;
+}): string {
+  return `/provenance/case/${encodeURIComponent(input.subjectType)}/${encodeURIComponent(input.subjectId)}`;
+}

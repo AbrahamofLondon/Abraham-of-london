@@ -286,12 +286,25 @@ export type DecisionProvenanceSourceData = {
 type HashableDecisionProvenanceRecord = Omit<DecisionProvenanceRecord, "provenanceHash">;
 type StatementInput = Omit<DecisionProvenanceRecord, "accountabilityStatement" | "provenanceHash">;
 
-const SUPPORTED_SUBJECT_TYPES = new Set<DecisionProvenanceRecord["subjectType"]>([
+export const SUPPORTED_DECISION_PROVENANCE_SUBJECT_TYPES = [
   "OVERSIGHT_CYCLE",
   "EXECUTIVE_REPORT",
   "RETAINER_ACCOUNT",
   "DELIVERY_ITEM",
-]);
+] as const satisfies readonly DecisionProvenanceRecord["subjectType"][];
+
+const SUPPORTED_SUBJECT_TYPES = new Set<DecisionProvenanceRecord["subjectType"]>(
+  SUPPORTED_DECISION_PROVENANCE_SUBJECT_TYPES,
+);
+
+export type SupportedDecisionProvenanceSubjectType =
+  (typeof SUPPORTED_DECISION_PROVENANCE_SUBJECT_TYPES)[number];
+
+export function isSupportedDecisionProvenanceSubjectType(
+  subjectType: string,
+): subjectType is SupportedDecisionProvenanceSubjectType {
+  return SUPPORTED_SUBJECT_TYPES.has(subjectType as DecisionProvenanceRecord["subjectType"]);
+}
 
 function isoOrNull(value?: string | Date | null): string | null {
   if (!value) return null;
