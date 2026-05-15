@@ -133,6 +133,31 @@ const DEFAULT_FORM: FormState = {
   estimateConfidence: "rough",
 };
 
+const CALCULATOR_STORAGE_KEY = "aol_decision_delay_exposure";
+
+type CalculatorPersisted = {
+  weeklyCost: number;
+  delayWeeks: number;
+  exposureType: ExposureType;
+  estimateConfidence: EstimateConfidence;
+  calculatedAt: string;
+};
+
+function persistCalculatorResult(weeklyCost: number, delayWeeks: number, exposureType: ExposureType, estimateConfidence: EstimateConfidence): void {
+  try {
+    const data: CalculatorPersisted = {
+      weeklyCost,
+      delayWeeks,
+      exposureType,
+      estimateConfidence,
+      calculatedAt: new Date().toISOString(),
+    };
+    sessionStorage.setItem(CALCULATOR_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // sessionStorage unavailable
+  }
+}
+
 export default function DecisionDelayExposurePage() {
   const [form, setForm] = React.useState<FormState>(DEFAULT_FORM);
   const [result, setResult] = React.useState<DecisionDelayExposureResult | null>(null);
@@ -140,6 +165,24 @@ export default function DecisionDelayExposurePage() {
 
   React.useEffect(() => {
     track("decision_delay_exposure_page_view");
+    // Restore persisted calculator values on mount
+    try {
+      const raw = sessionStorage.getItem(CALCULATOR_STORAGE_KEY);
+      if (raw) {
+        const persisted: CalculatorPersisted = JSON.parse(raw);
+        if (persisted && typeof persisted.weeklyCost === "number") {
+          setForm((prev) => ({
+            ...prev,
+            weeklyCostRaw: String(persisted.weeklyCost),
+            delayWeeksRaw: String(persisted.delayWeeks),
+            exposureType: persisted.exposureType,
+            estimateConfidence: persisted.estimateConfidence,
+          }));
+        }
+      }
+    } catch {
+      // ignore
+    }
   }, []);
 
   function handleChange(
@@ -160,6 +203,9 @@ export default function DecisionDelayExposurePage() {
       estimateConfidence: form.estimateConfidence,
     });
 
+    // Persist calculator inputs for carry-forward
+    persistCalculatorResult(weeklyCost, delayWeeks, form.exposureType, form.estimateConfidence);
+
     // Track without raw user text
     track("decision_delay_exposure_calculated", {
       exposure_type: form.exposureType,
@@ -176,6 +222,11 @@ export default function DecisionDelayExposurePage() {
     setForm(DEFAULT_FORM);
     setResult(null);
     setSubmitted(false);
+    try {
+      sessionStorage.removeItem(CALCULATOR_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
   }
 
   const isValid =
@@ -592,6 +643,39 @@ export default function DecisionDelayExposurePage() {
               >
                 Run another calculation
               </button>
+
+              {/* Record boundary */}
+              <section
+                style={{
+                  marginTop: "32px",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  backgroundColor: "rgba(255,255,255,0.015)",
+                  padding: "16px 20px",
+                }}
+              >
+                <p
+                  style={{
+                    ...mono,
+                    fontSize: "7px",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.28)",
+                    marginBottom: "6px",
+                  }}
+                >
+                  Record boundary
+                </p>
+                <p
+                  style={{
+                    ...serif,
+                    fontSize: "14px",
+                    lineHeight: 1.65,
+                    color: "rgba(255,255,255,0.40)",
+                  }}
+                >
+                  This calculation does not create a governed case or retained decision record. To carry this decision forward, run the Fast Diagnostic.
+                </p>
+              </section>
             </div>
           )}
 

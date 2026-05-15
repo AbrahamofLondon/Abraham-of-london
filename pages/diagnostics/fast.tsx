@@ -837,6 +837,41 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               )}
 
+              {/* SECTION 5c: WHAT WAS CREATED */}
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem 1.25rem" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.6rem" }}>
+                  What was created
+                </p>
+                <div style={{ display: "grid", gap: "0.5rem" }}>
+                  <div style={{ borderLeft: `2px solid ${GOLD}30`, paddingLeft: "10px" }}>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
+                      Diagnostic record
+                    </p>
+                    <p style={{ fontSize: "0.8rem", lineHeight: 1.5, color: "rgba(255,255,255,0.45)" }}>
+                      The finding, condition, authority index, comparison band, and recommended governance move.
+                    </p>
+                  </div>
+                  <div style={{ borderLeft: `2px solid ${GOLD}30`, paddingLeft: "10px" }}>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
+                      Governed case
+                    </p>
+                    <p style={{ fontSize: "0.8rem", lineHeight: 1.5, color: "rgba(255,255,255,0.45)" }}>
+                      The case continues in Decision Centre.
+                    </p>
+                  </div>
+                  {committed && (
+                    <div style={{ borderLeft: `2px solid ${GOLD}30`, paddingLeft: "10px" }}>
+                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
+                        Checkpoint
+                      </p>
+                      <p style={{ fontSize: "0.8rem", lineHeight: 1.5, color: "rgba(255,255,255,0.45)" }}>
+                        Created only if you accepted a commitment or review trigger.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <ClientIntelligenceStack
                 scope={{
                   caseId: result.caseRef ?? null,
@@ -848,7 +883,7 @@ const FastDiagnosticPage: NextPage = () => {
                 fallbackVelocitySummary={fallbackVelocitySummary}
               />
 
-              {/* SECTION 5c: RETURN BRIEF PROMISE */}
+              {/* SECTION 5e: RETURN BRIEF PROMISE */}
               {committed && (
                 <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem 1.25rem" }}>
                   <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
@@ -860,7 +895,7 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               )}
 
-              {/* SECTION 5d: SIGNAL NARRATIVE — full explanation when signal detected */}
+              {/* SECTION 5f: SIGNAL NARRATIVE — full explanation when signal detected */}
               {result.detectedSignals && result.detectedSignals.length > 0 && (() => {
                 const primary = result.detectedSignals[0]!;
                 return (
@@ -951,12 +986,17 @@ const FastDiagnosticPage: NextPage = () => {
                   >
                     Board Summary
                   </Link>
-                  <Link
-                    href="/strategy-room"
-                    style={{ display: "inline-flex", alignItems: "center", padding: "13px 26px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgba(255,255,255,0.36)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-                  >
-                    Strategy Room
-                  </Link>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <Link
+                      href="/strategy-room"
+                      style={{ display: "inline-flex", alignItems: "center", padding: "13px 26px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgba(255,255,255,0.36)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+                    >
+                      Strategy Room — evidence-gated
+                    </Link>
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", paddingLeft: "26px" }}>
+                      Opens only when evidence supports intervention. If this case is not admitted, the room will show the repair path.
+                    </p>
+                  </div>
                 </div>
               </div>
 

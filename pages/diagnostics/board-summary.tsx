@@ -128,6 +128,54 @@ export default function BoardSummaryPage() {
             >
               Diagnostics · Board Summary
             </p>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px",
+                marginBottom: "16px",
+              }}
+            >
+              <span
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: `${GOLD}99`,
+                  border: `1px solid ${GOLD}30`,
+                  padding: "2px 8px",
+                }}
+              >
+                Free preview
+              </span>
+              <span
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.30)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  padding: "2px 8px",
+                }}
+              >
+                Session-derived
+              </span>
+              <span
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.30)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  padding: "2px 8px",
+                }}
+              >
+                Not a retained governed record
+              </span>
+            </div>
             <h1
               style={{
                 ...serif,
@@ -139,6 +187,17 @@ export default function BoardSummaryPage() {
             >
               Board summary preview
             </h1>
+            <p
+              style={{
+                ...serif,
+                fontSize: "15px",
+                lineHeight: 1.65,
+                color: "rgba(255,255,255,0.40)",
+                marginBottom: "12px",
+              }}
+            >
+              This board summary is generated from available diagnostic evidence in this browser session. It does not create a new governed record; the live case continues in the Decision Centre.
+            </p>
             <p
               style={{
                 ...mono,
@@ -201,20 +260,41 @@ export default function BoardSummaryPage() {
               margin: "48px 0 32px",
             }}
           />
-          <nav data-no-print style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <nav data-no-print style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <Link
               href="/decision-centre"
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "9px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 color: "#C9A96E",
                 textDecoration: "none",
                 fontWeight: 600,
+                border: `1px solid ${GOLD}40`,
+                backgroundColor: `${GOLD}08`,
+                padding: "10px 18px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                alignSelf: "flex-start",
               }}
             >
               → Continue in Decision Centre
+            </Link>
+            <Link
+              href="/diagnostics/executive-reporting"
+              style={{
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.40)",
+                textDecoration: "none",
+                padding: "6px 0",
+              }}
+            >
+              Review Executive Reporting →
             </Link>
             <Link
               href="/diagnostics"
@@ -223,8 +303,9 @@ export default function BoardSummaryPage() {
                 fontSize: "8px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.30)",
+                color: "rgba(255,255,255,0.25)",
                 textDecoration: "none",
+                padding: "6px 0",
               }}
             >
               ← Return to diagnostic ladder
