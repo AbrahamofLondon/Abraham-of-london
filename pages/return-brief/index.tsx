@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import * as React from "react";
 
 import Layout from "@/components/Layout";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -30,6 +31,10 @@ const RETURN_BRIEF_FIELDS = [
 ];
 
 const ReturnBriefPage: NextPage = () => {
+  React.useEffect(() => {
+    trackLaunch("return_brief_viewed", "return_brief_explainer");
+  }, []);
+
   return (
     <Layout
       title="Return Brief | Abraham of London"

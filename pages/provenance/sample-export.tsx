@@ -19,6 +19,7 @@ import Link from "next/link";
 import { Shield, Hash, Clock, Layers, AlertTriangle, CheckCircle2, FileText } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 
@@ -48,6 +49,10 @@ const SAMPLE_GAP_CLASSES = ["WARNING"];
 // ─── Page ──────────────────────────────────────────────────────────────────
 
 const SampleExportPage: NextPage = () => {
+  React.useEffect(() => {
+    trackLaunch("provenance_sample_viewed", "provenance_sample_export");
+  }, []);
+
   return (
     <Layout
       title="Provenance Sample Export | Abraham of London"

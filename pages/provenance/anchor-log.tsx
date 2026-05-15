@@ -18,6 +18,7 @@ import Link from "next/link";
 import { Shield, Clock, Hash, Layers } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import {
   buildPublicAnchorLogState,
   toPublicAnchorEntries,
@@ -108,6 +109,10 @@ function internalAnchoringLabel(value: PublicAnchorLogState["internalAnchoringAv
 }
 
 const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => {
+  React.useEffect(() => {
+    trackLaunch("anchor_log_viewed", "public_anchor_log");
+  }, [anchors.length]);
+
   return (
     <Layout
       title="Provenance Anchor Log | Abraham of London"

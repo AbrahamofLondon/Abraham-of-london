@@ -677,6 +677,7 @@ export default function DecisionCentrePage() {
 
       if (response.ok && json.ok) {
         clearPendingSessionCase();
+        trackLaunch("account_continuity_started", "decision_centre");
         setContinuityMessage("Saved session case carried into Decision Centre.");
         window.history.replaceState({}, "", "/decision-centre");
       } else if (json.reason !== "AUTH_REQUIRED") {

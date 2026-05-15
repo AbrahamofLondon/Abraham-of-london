@@ -5,6 +5,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
 import { track } from "@/lib/analytics/track";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import BoardSummaryPreview, {
   buildBoardSummaryFromSessionStorage,
   type BoardSummaryData,
@@ -216,7 +217,10 @@ export default function BoardSummaryPage() {
           <div data-no-print style={{ marginBottom: "40px" }}>
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => {
+                trackLaunch("board_summary_printed", "board_summary");
+                window.print();
+              }}
               style={{
                 ...mono,
                 fontSize: "8px",

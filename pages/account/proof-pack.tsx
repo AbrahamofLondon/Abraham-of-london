@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import OutcomeVerificationPanel from "@/components/outcomes/OutcomeVerificationPanel";
 import { resolvePageAccess } from "@/lib/access/server";
 import type { OutcomeVerificationContext } from "@/lib/product/outcome-verification-contract";
@@ -21,6 +22,10 @@ type Props = {
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
 const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, outcomeToken }) => {
+  React.useEffect(() => {
+    trackLaunch("proof_pack_viewed", "proof_pack");
+  }, [authenticated, pack]);
+
   if (!authenticated) {
     return (
       <Layout title="Proof Pack" description="Account proof pack" fullWidth>

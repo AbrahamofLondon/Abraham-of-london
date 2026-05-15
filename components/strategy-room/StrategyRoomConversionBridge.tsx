@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { track } from "@/lib/analytics/track";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import { getProductAmountGbp } from "@/lib/commercial/catalog";
 
 type StrategyRoomConversionBridgeProps = {
@@ -92,6 +93,7 @@ export default function StrategyRoomConversionBridge({
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem("aol_strategy_room_checkout_email", email);
     }
+    trackLaunch("strategy_room_payment_clicked", "strategy_room_conversion_bridge");
     const hesitation_ms = Date.now() - bridgeMountTime.current;
     track("strategy_room_checkout_clicked", {
       price_code: selectedTier.productCode,

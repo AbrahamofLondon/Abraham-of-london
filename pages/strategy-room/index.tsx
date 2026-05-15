@@ -1897,7 +1897,11 @@ export default function StrategyRoomPage({
                   {!showExecutionFlow ? (
                     <button
                       type="button"
-                      onClick={() => { setShowExecutionFlow(true); track("strategy_room_execution_flow_started"); }}
+                      onClick={() => {
+                        setShowExecutionFlow(true);
+                        trackLaunch("strategy_room_admission_attempted", "strategy_room");
+                        track("strategy_room_execution_flow_started");
+                      }}
                       style={{
                         padding: "14px 28px",
                         border: `1px solid ${GOLD}50`,

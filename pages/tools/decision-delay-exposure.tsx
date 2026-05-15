@@ -5,6 +5,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
 import { track } from "@/lib/analytics/track";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import {
   computeDecisionDelayExposure,
   type ExposureType,
@@ -207,6 +208,13 @@ export default function DecisionDelayExposurePage() {
 
     // Persist calculator inputs for carry-forward
     persistCalculatorResult(weeklyCost, delayWeeks, form.exposureType, form.estimateConfidence);
+
+    // Adoption instrumentation
+    trackLaunch("calculator_completed", "decision_delay_calculator");
+    track("calculator_completed", {
+      exposure_type: form.exposureType,
+      estimate_confidence: form.estimateConfidence,
+    });
 
     // Track without raw user text
     track("decision_delay_exposure_calculated", {

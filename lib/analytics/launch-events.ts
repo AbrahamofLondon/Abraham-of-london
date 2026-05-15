@@ -27,7 +27,20 @@ export type LaunchEventName =
   | "strategy_room_decision_recorded"
   | "counsel_room_viewed"
   | "counsel_intake_started"
-  | "counsel_intake_submitted";
+  | "counsel_intake_submitted"
+  // ── Adoption instrumentation ──
+  | "calculator_completed"
+  | "save_case_clicked"
+  | "account_continuity_started"
+  | "board_summary_printed"
+  | "executive_reporting_clicked"
+  | "strategy_room_admission_attempted"
+  | "strategy_room_payment_clicked"
+  | "return_brief_viewed"
+  | "return_brief_generated"
+  | "provenance_sample_viewed"
+  | "anchor_log_viewed"
+  | "proof_pack_viewed";
 
 // ─── Event payload ──────────────────────────────────────────────────────────
 

@@ -1,6 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import {
   storePendingSessionCase,
   type SessionCaseCarryForwardPayload,
@@ -26,6 +27,7 @@ export default function SaveSessionCasePanel({
   const [state, setState] = React.useState<SaveState>({ status: "idle" });
 
   async function saveCase() {
+    trackLaunch("save_case_clicked", "save_session_case_panel");
     setState({ status: "saving" });
     try {
       const response = await fetch("/api/decision-centre/save-session-case", {
