@@ -290,8 +290,8 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       )}
 
       {/* Return Briefs */}
-      {c.returnBriefs.length > 0 && (
-        <div style={{ marginBottom: "16px" }}>
+      {c.returnBriefs.length > 0 ? (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
           <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
             Return Briefs
           </span>
@@ -301,16 +301,24 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
               href={`/briefing/return/${rb.sessionId}`}
               style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", border: "1px solid rgba(255,255,255,0.06)", marginBottom: "4px", textDecoration: "none" }}
             >
-              <span style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.40)" }}>
-                {rb.sessionKey.slice(0, 12)}
-              </span>
-              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: rb.trajectory === "DETERIORATING" ? "rgba(252,165,165,0.50)" : rb.trajectory === "FRAGILE" ? "rgba(251,191,36,0.50)" : "rgba(110,231,183,0.50)" }}>
+              <div>
+                <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}BB`, display: "block" }}>
+                  View Return Brief
+                </span>
+                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.25)", marginTop: "1px", display: "block" }}>
+                  {rb.sessionKey.slice(0, 16)} · {new Date(rb.generatedAt).toLocaleDateString("en-GB")}
+                </span>
+              </div>
+              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: rb.trajectory === "DETERIORATING" ? "rgba(252,165,165,0.55)" : rb.trajectory === "FRAGILE" ? "rgba(251,191,36,0.55)" : "rgba(110,231,183,0.55)", flexShrink: 0 }}>
                 {rb.trajectory}
               </span>
             </Link>
           ))}
+          <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.22)", marginTop: "8px" }}>
+            A generated client-safe Return Brief appears here when the governed record contains enough return-cycle evidence to reopen the condition safely.
+          </p>
         </div>
-      )}
+      ) : null}
 
       {/* Outcome status */}
       {c.outcomeStatus && (

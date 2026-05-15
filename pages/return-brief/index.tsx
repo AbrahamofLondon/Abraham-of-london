@@ -45,14 +45,22 @@ const ReturnBriefPage: NextPage = () => {
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-4xl space-y-8">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-              Return Brief
-            </p>
+            <div style={{ display: "flex", gap: "12px", alignItems: "baseline", marginBottom: "4px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                Return Brief
+              </p>
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                Public explainer
+              </span>
+            </div>
             <h1 className="mt-4" style={{ ...serif, fontSize: "clamp(2rem, 4vw, 3rem)", lineHeight: 1.05, color: "rgba(255,255,255,0.92)" }}>
               The governed record reopened when the condition remains active.
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/62">
               A Return Brief reopens the governed record when the condition remains active. It records what changed, what did not, what commitment was missed or completed, and what is now required.
+            </p>
+            <p className="mt-3 max-w-3xl text-sm leading-7" style={{ color: "rgba(255,255,255,0.38)" }}>
+              The governed case itself continues in the Decision Centre. A Return Brief is issued only when the existing record contains enough return-cycle evidence to reopen the condition safely.
             </p>
           </header>
 
@@ -78,28 +86,33 @@ const ReturnBriefPage: NextPage = () => {
 
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-              Related paths
+              Where governed cases live
+            </p>
+            <p className="mt-3 text-sm leading-7" style={{ color: "rgba(255,255,255,0.40)", maxWidth: "52ch" }}>
+              If you have an existing governed case, the Decision Centre is where it continues. A Return Brief is part of that record — not a standalone document.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link
-                href="/diagnostics/fast"
-                className="inline-flex items-center gap-2 border px-4 py-3"
-                style={{ borderColor: `${GOLD}40`, backgroundColor: `${GOLD}10`, color: "#F5F5F5", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
-              >
-                Run the Fast Diagnostic
-                <ArrowRight className="h-3 w-3" />
-              </Link>
+              {/* Primary: Decision Centre */}
               <Link
                 href="/decision-centre"
                 className="inline-flex items-center gap-2 border px-4 py-3"
-                style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.60)", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                style={{ borderColor: `${GOLD}45`, backgroundColor: `${GOLD}10`, color: "#F5F5F5", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
               >
                 Open Decision Centre
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+              {/* Secondary */}
+              <Link
+                href="/diagnostics/fast"
+                className="inline-flex items-center gap-2 border px-4 py-3"
+                style={{ borderColor: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+              >
+                Run Fast Diagnostic
               </Link>
               <Link
                 href="/provenance/sample-export"
                 className="inline-flex items-center gap-2 border px-4 py-3"
-                style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.60)", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                style={{ borderColor: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
               >
                 View Provenance Sample
               </Link>
