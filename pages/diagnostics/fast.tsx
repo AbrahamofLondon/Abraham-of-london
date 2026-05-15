@@ -36,6 +36,9 @@ import {
   loadVersionedAssessmentState,
   saveVersionedAssessmentState,
 } from "@/lib/client/assessment-state";
+import AssessmentResultSurface from "@/components/diagnostics/AssessmentResultSurface";
+import { mapFastDiagnosticToAssessmentResult } from "@/lib/diagnostics/assessment-result-mappers";
+import { generateCaseReference } from "@/lib/product/case-reference";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -645,11 +648,58 @@ const FastDiagnosticPage: NextPage = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* RESULT SCREEN — £10K FEEL                                          */}
+        {/* RESULT SCREEN — Shared Assessment Result Surface                    */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {stage === "result" && result && (
           <div className="px-6 py-20">
             <div className="mx-auto max-w-2xl" style={{ display: "grid", gap: "1.5rem" }}>
+
+              {/* ── What this reads ──────────────────────────────────────── */}
+              <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                  What this reads
+                </p>
+                <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)" }}>
+                  Your decision description, claimed authority, stated consequence, and optional evidence strengthener fields. It reads what you say — not what the system assumes.
+                </p>
+              </div>
+
+              {/* ── What this detects ────────────────────────────────────── */}
+              <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                  What this detects
+                </p>
+                <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)" }}>
+                  Decision condition classification, authority posture, structural contradiction, cost-of-inaction projection, and institutional signal detection.
+                </p>
+              </div>
+
+              {/* ── Shared AssessmentResultSurface ───────────────────────── */}
+              <AssessmentResultSurface
+                result={mapFastDiagnosticToAssessmentResult(result, answers.decision)}
+                canSave={true}
+                sendToSelfSlot={
+                  <SendToSelfFastDiagnostic
+                    condition={result.conditionLabel || result.condition}
+                    requiredMove={result.authorityIndex?.nextGovernanceMove ?? result.synthesis?.concreteMove ?? ""}
+                    caseRef={result.caseRef}
+                  />
+                }
+              />
+
+              {/* ── Record boundary ──────────────────────────────────────── */}
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.85rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.3rem" }}>
+                  Record boundary
+                </p>
+                <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
+                  This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre.
+                </p>
+              </div>
+
+              {/* ══════════════════════════════════════════════════════════ */}
+              {/* BESPOKE CONTENT BELOW — preserved for backward compatibility */}
+              {/* ══════════════════════════════════════════════════════════ */}
 
               {/* SECTION 1: THE FINDING — one sentence */}
               <div style={{ paddingBottom: "1.5rem", borderBottom: `1px solid ${GOLD}18` }}>
