@@ -107,6 +107,23 @@ export type PatternRecurrenceSummary = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// STRATEGY ROOM SESSION RECORD REFERENCE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Client-safe reference to a persisted Strategy Room execution session.
+ * The session is SERVER_PERSISTED in StrategyRoomExecutionSession.
+ * The full record is accessible at the href route.
+ * Case-specific provenance is not yet available for this record type.
+ */
+export type StrategyRoomSessionRef = {
+  sessionId: string;
+  href: string;
+  /** "not_available" until DECISION_CASE provenance composition is supported */
+  provenanceStatus: "not_available";
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RETURN BRIEF REFERENCE
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -242,6 +259,11 @@ export type DecisionCentreCase = {
   irreversibility?: DecisionCentreIrreversibility | null;
   /** Available Return Briefs */
   returnBriefs: ReturnBriefReference[];
+  /**
+   * Latest Strategy Room execution session for this case, if any.
+   * Persisted server-side — the full record is at strategyRoomRecord.href.
+   */
+  strategyRoomRecord?: StrategyRoomSessionRef | null;
   /** Governed memory carried with explicit source, date, and evidence posture */
   governedMemory?: GovernedMemoryItem[] | null;
   /** Last activity timestamp */

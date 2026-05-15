@@ -1158,14 +1158,46 @@ export default function StrategyRoomSessionPage({ session: initial, error, compo
             )}
           </section>
 
-          {/* Footer */}
-          <div style={{ paddingTop: "1.5rem" }}>
-            <Link
-              href="/strategy-room"
-              style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.22)", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}
-            >
-              Back to Strategy Room
-            </Link>
+          {/* ── After-session nav ── */}
+          <div style={{ paddingTop: "1.5rem", borderTop: "1px solid rgba(255,255,255,0.04)", display: "grid", gap: "0.75rem" }}>
+
+            {/* Record persistence notice */}
+            <div style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "0.75rem 0.95rem" }}>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "4px" }}>
+                Record status
+              </p>
+              <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.38)" }}>
+                This session is persisted and retrievable at this URL. Decision Centre shows this record as active for your case.
+              </p>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "6px" }}>
+                Provenance status: case-specific provenance is not yet available for Strategy Room records.
+                Provenance will appear when this session is composed into the supported provenance model.
+              </p>
+            </div>
+
+            {/* Navigation */}
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+              <Link
+                href="/decision-centre"
+                style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}35`, padding: "8px 14px", display: "inline-flex", alignItems: "center", gap: "6px" }}
+              >
+                Return to Decision Centre
+                <ArrowRight style={{ width: 10, height: 10 }} />
+              </Link>
+              <Link
+                href="/strategy-room"
+                style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.30)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.08)", padding: "8px 12px" }}
+              >
+                Back to Strategy Room
+              </Link>
+              <Link
+                href="/provenance/sample-export"
+                style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", textDecoration: "none" }}
+              >
+                View client-safe provenance sample
+              </Link>
+            </div>
+
           </div>
         </div>
       </div>

@@ -35,6 +35,7 @@ import type {
   DecisionCentreResponse,
   DecisionCreditSummary,
   CognitiveState,
+  StrategyRoomSessionRef,
 } from "@/lib/product/decision-centre-contract";
 import {
   formatMemorySourceLabel,
@@ -324,6 +325,11 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
         </div>
       ) : null}
 
+      {/* Strategy Room Record */}
+      {c.strategyRoomRecord && (
+        <StrategyRoomRecordRow record={c.strategyRoomRecord} />
+      )}
+
       {/* Outcome status */}
       {c.outcomeStatus && (
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "16px" }}>
@@ -435,6 +441,32 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function StrategyRoomRecordRow({ record }: { record: StrategyRoomSessionRef }) {
+  return (
+    <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
+      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
+        Strategy Room Record
+      </span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+        <div>
+          <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(110,231,183,0.60)" }}>
+            Recorded
+          </span>
+          <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.28)", marginTop: "3px" }}>
+            Case-specific provenance is not yet available for this record. Provenance will appear when this session is composed into the supported provenance model.
+          </p>
+        </div>
+        <Link
+          href={record.href}
+          style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}BB`, textDecoration: "none", border: `1px solid ${GOLD}25`, padding: "4px 9px", flexShrink: 0 }}
+        >
+          View record
+        </Link>
+      </div>
     </div>
   );
 }
@@ -828,6 +860,13 @@ export default function DecisionCentrePage() {
                 >
                   View diagnostic records archive
                 </Link>
+              </div>
+
+              {/* Persistence boundary */}
+              <div style={{ marginTop: "32px", padding: "14px 18px", border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.18)", lineHeight: 1.6 }}>
+                  Authenticated Decision Centre records are reconstructed from available account and diagnostic evidence. Session-only previews must be saved before they become account-bound governed cases.
+                </p>
               </div>
             </div>
           )}

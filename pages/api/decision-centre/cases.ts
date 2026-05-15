@@ -24,6 +24,7 @@ import {
   type DecisionCreditSummary,
   type RetainerReadiness,
   type PatternRecurrenceSummary,
+  type StrategyRoomSessionRef,
 } from "@/lib/product/decision-centre-contract";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
 import { qualifiesForBoardroom } from "@/lib/constitution/boardroom-mode";
@@ -820,6 +821,13 @@ export default async function handler(
         historyCount: 0,
       },
       strategyRoomActive: Boolean(latestExecutionRecord?.sessionId),
+      strategyRoomRecord: latestExecutionRecord?.sessionId
+        ? ({
+            sessionId: latestExecutionRecord.sessionId,
+            href: `/strategy-room/session/${latestExecutionRecord.sessionId}`,
+            provenanceStatus: "not_available",
+          } satisfies StrategyRoomSessionRef)
+        : null,
       counselWarranted: counselTriggered,
       returnBriefTriggered: false,
       urgencyReasons: [],
