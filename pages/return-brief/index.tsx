@@ -60,7 +60,7 @@ const ReturnBriefPage: NextPage = () => {
               A Return Brief reopens the governed record when the condition remains active. It records what changed, what did not, what commitment was missed or completed, and what is now required.
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-7" style={{ color: "rgba(255,255,255,0.38)" }}>
-              The governed case itself continues in the Decision Centre. A Return Brief is issued only when the existing record contains enough return-cycle evidence to reopen the condition safely.
+              This page explains the mechanism. Generated Return Briefs are case-specific and appear when the governed record has enough return-cycle evidence to reopen the condition safely.
             </p>
           </header>
 
@@ -89,7 +89,7 @@ const ReturnBriefPage: NextPage = () => {
               Where governed cases live
             </p>
             <p className="mt-3 text-sm leading-7" style={{ color: "rgba(255,255,255,0.40)", maxWidth: "52ch" }}>
-              If you have an existing governed case, the Decision Centre is where it continues. A Return Brief is part of that record — not a standalone document.
+              If you have an existing governed case, the Decision Centre is where it continues. A generated Return Brief is part of that record — not a standalone document.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               {/* Primary: Decision Centre */}

@@ -5,77 +5,24 @@ import * as React from "react";
 
 import Layout from "@/components/Layout";
 import { resolvePageAccess } from "@/lib/access/server";
-
-// ─── Client-safe display type ─────────────────────────────────────────────────
-// Derived from ReturnBrief (server-only) — only the fields safe to display
-// in a client-facing, authenticated view. No respondent text, no operator
-// notes, no internal trigger mechanics exposed.
-
-type ReturnBriefDisplay = {
-  sessionId: string;
-  sessionKey: string;
-  generatedAt: string;
-  opening: string;
-  trajectory: {
-    state: string;
-    reason: string;
-  };
-  kernel: {
-    blocked: boolean;
-    reason: string | null;
-    activeContradictions: number;
-  } | null;
-  contradiction: {
-    decision: string;
-    constraint: string;
-    status: string;
-  } | null;
-  delta: {
-    clarity: string;
-    authority: string;
-    readiness: string;
-  } | null;
-  costOfInaction: {
-    accumulatedCost: number;
-    daysElapsed: number;
-    basis: string;
-    explanation: string;
-  } | null;
-  verification: {
-    commitmentId: string;
-    label: string;
-    status: string;
-    dueAt?: string;
-  }[] | null;
-  challenge: string;
-};
+import { composeReturnBriefV1 } from "@/lib/product/return-brief-composer";
+import type { ReturnBriefV1 } from "@/lib/product/return-brief-contract";
 
 type Props =
   | { state: "unauthenticated" }
   | { state: "not_found"; sessionKey: string }
-  | { state: "ok"; brief: ReturnBriefDisplay; sessionKey: string };
+  | { state: "ok"; brief: ReturnBriefV1 };
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
-const TRAJECTORY_COLOR: Record<string, string> = {
-  ASCENDING:    "rgba(110,231,183,0.65)",
-  STAGNANT:     "rgba(255,255,255,0.35)",
-  FRAGILE:      "rgba(251,191,36,0.60)",
-  DETERIORATING:"rgba(252,165,165,0.65)",
+const STATUS_COLOR: Record<ReturnBriefV1["status"], string> = {
+  ACTIVE: "rgba(252,165,165,0.64)",
+  RESOLVED: "rgba(110,231,183,0.64)",
+  INSUFFICIENT_EVIDENCE: "rgba(251,191,36,0.60)",
+  UNKNOWN: "rgba(255,255,255,0.34)",
 };
-
-const VERIFICATION_COLOR: Record<string, string> = {
-  VERIFIED_EXECUTED: "rgba(110,231,183,0.60)",
-  NOT_DUE:           "rgba(255,255,255,0.25)",
-  DUE:               `${GOLD}AA`,
-  OVERDUE:           "rgba(252,165,165,0.60)",
-  VERIFIED_BLOCKED:  "rgba(252,165,165,0.60)",
-  UNVERIFIED:        "rgba(255,255,255,0.25)",
-};
-
-// ─── Unauthenticated ──────────────────────────────────────────────────────────
 
 function Unauthenticated() {
   return (
@@ -89,10 +36,7 @@ function Unauthenticated() {
           <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", marginTop: "12px" }}>
             This Return Brief is part of a governed case record. Sign in to view it.
           </p>
-          <Link
-            href="/decision-centre"
-            style={{ display: "inline-block", marginTop: "20px", ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}CC`, border: `1px solid ${GOLD}40`, padding: "10px 20px", textDecoration: "none" }}
-          >
+          <Link href="/decision-centre" style={{ display: "inline-block", marginTop: "20px", ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}CC`, border: `1px solid ${GOLD}40`, padding: "10px 20px", textDecoration: "none" }}>
             Open Decision Centre
           </Link>
         </div>
@@ -100,8 +44,6 @@ function Unauthenticated() {
     </Layout>
   );
 }
-
-// ─── Not found ────────────────────────────────────────────────────────────────
 
 function NotFound() {
   return (
@@ -113,17 +55,9 @@ function NotFound() {
             Brief not available
           </p>
           <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", marginTop: "12px" }}>
-            A Return Brief could not be generated for this record. Either the session does not exist,
-            or the governed record does not yet contain enough return-cycle evidence to produce a brief.
+            No governed case record could be found for this reference.
           </p>
-          <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.28)", marginTop: "8px" }}>
-            Return Briefs are generated automatically when the record shows a FRAGILE or DETERIORATING
-            trajectory, blocked execution, or repeated unresolved conditions.
-          </p>
-          <Link
-            href="/decision-centre"
-            style={{ display: "inline-block", marginTop: "20px", ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}CC`, border: `1px solid ${GOLD}40`, padding: "10px 20px", textDecoration: "none" }}
-          >
+          <Link href="/decision-centre" style={{ display: "inline-block", marginTop: "20px", ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}CC`, border: `1px solid ${GOLD}40`, padding: "10px 20px", textDecoration: "none" }}>
             Return to Decision Centre
           </Link>
         </div>
@@ -132,209 +66,142 @@ function NotFound() {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 const ReturnBriefPage: NextPage<Props> = (props) => {
   if (props.state === "unauthenticated") return <Unauthenticated />;
   if (props.state === "not_found") return <NotFound />;
 
   const { brief } = props;
-  const trajectoryColor = TRAJECTORY_COLOR[brief.trajectory.state] ?? "rgba(255,255,255,0.40)";
-
   return (
     <Layout
       title="Return Brief | Abraham of London"
-      description="Governed case continuation — the record reopened because the condition remains active."
+      description="Governed Return Brief — the case-specific record reopened when the condition remains active."
       fullWidth
     >
       <Head><meta name="robots" content="noindex,nofollow" /></Head>
       <main style={{ backgroundColor: "rgb(3,3,5)", minHeight: "100vh", color: "white", padding: "80px 24px" }}>
-        <div style={{ maxWidth: "680px", margin: "0 auto" }}>
-
-          {/* ── Header ── */}
-          <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem", marginBottom: "1.5rem" }}>
+        <div style={{ maxWidth: "720px", margin: "0 auto" }}>
+          <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem", marginBottom: "1rem" }}>
             <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}99` }}>
-              Return Brief — governed case continuation
+              Governed Return Brief
             </p>
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "6px" }}>
-              Session {brief.sessionKey} · Generated {new Date(brief.generatedAt).toLocaleString("en-GB")}
+              Case reference {brief.caseRef}
             </p>
-            <p style={{ fontSize: "12px", lineHeight: 1.65, color: "rgba(255,255,255,0.30)", marginTop: "10px" }}>
-              This brief was generated because the governed case contains evidence of an unresolved condition.
-              It is a client-safe view of the execution record only. It does not replace operator review,
-              counsel assessment, or retained oversight.
+            <h1 style={{ ...serif, fontSize: "1.45rem", lineHeight: 1.3, color: "rgba(255,255,255,0.90)", marginTop: "12px" }}>
+              A Return Brief reopens the governed record when the condition remains active.
+            </h1>
+            <p style={{ fontSize: "12px", lineHeight: 1.65, color: "rgba(255,255,255,0.34)", marginTop: "10px" }}>
+              It is not a fresh assessment or a generic follow-up email.
             </p>
           </header>
 
-          {/* ── Section 1: Case status ── */}
-          <section style={{ border: `1px solid ${GOLD}25`, background: `${GOLD}05`, padding: "1.25rem", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
-              Case status
+          <section style={{ border: `1px solid ${GOLD}25`, background: `${GOLD}05`, padding: "1rem", marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
+              Status
             </p>
-            <p style={{ ...serif, fontSize: "1.15rem", lineHeight: 1.55, color: "rgba(255,255,255,0.85)" }}>
-              {brief.opening}
+            <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: STATUS_COLOR[brief.status], marginTop: "8px" }}>
+              {brief.status.replace(/_/g, " ")}
             </p>
+            {brief.elapsedTimeLabel && (
+              <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginTop: "6px" }}>
+                {brief.elapsedTimeLabel}
+              </p>
+            )}
           </section>
 
-          {/* ── Section 2: Trajectory ── */}
-          <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.5rem" }}>
-              Trajectory
-            </p>
-            <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "6px" }}>
-              <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: trajectoryColor }}>
-                {brief.trajectory.state}
-              </span>
-              {brief.kernel && brief.kernel.activeContradictions > 0 && (
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
-                  {brief.kernel.activeContradictions} active contradiction{brief.kernel.activeContradictions !== 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-            <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>
-              {brief.trajectory.reason}
-            </p>
-          </section>
-
-          {/* ── Section 3: Condition still active / resolved / unknown ── */}
-          {brief.contradiction ? (
-            <section style={{ border: "1px solid rgba(252,165,165,0.12)", background: "rgba(252,165,165,0.025)", padding: "1rem", marginBottom: "1rem" }}>
-              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.5rem" }}>
-                Condition still active
-              </p>
-              <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.62)", marginBottom: "6px" }}>
-                {brief.contradiction.decision}
-              </p>
-              <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
-                {brief.contradiction.constraint}
-              </p>
-              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)", marginTop: "8px" }}>
-                {brief.contradiction.status}
-              </p>
-            </section>
-          ) : (
-            <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem", marginBottom: "1rem" }}>
-              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "4px" }}>
-                Condition status
-              </p>
-              <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.32)" }}>
-                Condition state could not be determined from the current record.
-              </p>
-            </section>
-          )}
-
-          {/* ── Section 4: Commitment gap ── */}
-          {(brief.kernel?.blocked || (brief.verification && brief.verification.length > 0)) && (
-            <section style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.015)", padding: "1rem", marginBottom: "1rem" }}>
-              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.5rem" }}>
-                Commitment gap
-              </p>
-              {brief.kernel?.blocked && (
-                <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.50)", marginBottom: "6px" }}>
-                  Execution has been blocked. The decision cannot proceed in its current state.
+          <section style={{ display: "grid", gap: "1rem", marginBottom: "1rem" }}>
+            {brief.originalCondition && (
+              <article style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                  Original condition
                 </p>
-              )}
-              {brief.verification && brief.verification.length > 0 && (
-                <div style={{ display: "grid", gap: "6px" }}>
-                  {brief.verification.map((v) => (
-                    <div key={v.commitmentId} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderLeft: "2px solid rgba(255,255,255,0.08)", paddingLeft: "10px" }}>
-                      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.38)" }}>
-                        {v.label}
-                      </span>
-                      <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.10em", textTransform: "uppercase", color: VERIFICATION_COLOR[v.status] ?? "rgba(255,255,255,0.28)" }}>
-                        {v.status.replace(/_/g, " ")}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          )}
+                <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.62)", marginTop: "8px" }}>
+                  {brief.originalCondition}
+                </p>
+              </article>
+            )}
+            {brief.originalCommitment && (
+              <article style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
+                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                  Original commitment
+                </p>
+                <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.62)", marginTop: "8px" }}>
+                  {brief.originalCommitment}
+                </p>
+              </article>
+            )}
+          </section>
 
-          {/* ── Section 5: What changed / What did not ── */}
-          {brief.delta && (
-            <section style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.015)", padding: "1rem", marginBottom: "1rem" }}>
-              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.75rem" }}>
-                What changed
-              </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
-                {([
-                  { label: "Clarity", value: brief.delta.clarity },
-                  { label: "Authority", value: brief.delta.authority },
-                  { label: "Readiness", value: brief.delta.readiness },
-                ] as const).map((row) => {
-                  const isPositive = row.value === "+1" || row.value === "increased";
-                  const isNegative = row.value === "contested" || row.value === "decreased";
-                  return (
-                    <div key={row.label}>
-                      <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
-                        {row.label}
-                      </p>
-                      <p style={{ ...mono, fontSize: "9.5px", letterSpacing: "0.10em", color: isPositive ? "rgba(110,231,183,0.65)" : isNegative ? "rgba(252,165,165,0.55)" : "rgba(255,255,255,0.40)", marginTop: "3px" }}>
-                        {row.value}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-              <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
-                What did not change: conditions with no execution activity remain unresolved in the record.
-              </p>
-            </section>
-          )}
+          <BriefListSection title="What changed" items={brief.whatChanged} emptyLabel="No completed change has been verified from the current record." />
+          <BriefListSection title="What did not change" items={brief.whatDidNotChange} emptyLabel="No unchanged condition could be stated safely from the current record." />
+          <BriefListSection title="What is now required" items={brief.nowRequired} emptyLabel="No next move is available from the current record." emphasis />
 
-          {/* ── Cost of inaction ── */}
-          {brief.costOfInaction && brief.costOfInaction.accumulatedCost > 0 && (
-            <section style={{ border: "1px solid rgba(252,165,165,0.10)", background: "rgba(252,165,165,0.02)", padding: "1rem", marginBottom: "1rem" }}>
-              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.4rem" }}>
-                Cost of inaction
-              </p>
-              <p style={{ ...serif, fontSize: "1.4rem", color: `${GOLD}CC` }}>
-                £{brief.costOfInaction.accumulatedCost.toLocaleString()}
-              </p>
-              <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.30)", marginTop: "4px" }}>
-                Estimated over {brief.costOfInaction.daysElapsed} day{brief.costOfInaction.daysElapsed !== 1 ? "s" : ""} since this session was created. Delay is not neutral.
-              </p>
-            </section>
-          )}
-
-          {/* ── Section 6: What is now required ── */}
-          <section style={{ border: `1px solid ${GOLD}22`, background: `${GOLD}04`, padding: "1.25rem", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
-              What is now required
+          <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem", marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+              Escalation status
             </p>
-            <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.78)" }}>
-              {brief.challenge}
+            <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, marginTop: "8px" }}>
+              {brief.escalationStatus?.replace(/_/g, " ") ?? "UNKNOWN"}
             </p>
           </section>
 
-          {/* ── Boundary note ── */}
+          <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem", marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+              Provenance status
+            </p>
+            <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.42)", marginTop: "8px" }}>
+              {brief.provenanceStatus === "AVAILABLE"
+                ? "Case-specific provenance is available."
+                : brief.provenanceStatus === "PENDING"
+                  ? "Case-specific provenance is pending."
+                  : "Case-specific provenance is not available on this brief."}
+            </p>
+          </section>
+
           <section style={{ border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)", padding: "1rem", marginBottom: "1.5rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "6px" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               Boundary
             </p>
-            <p style={{ fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.28)" }}>
-              This Return Brief is a client-safe view of the governed case record. It does not expose respondent text,
-              operator notes, or internal trigger mechanics. The governed case itself continues in the Decision Centre.
-              This brief does not replace verification, counsel review, or retained oversight.
+            <p style={{ fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.28)", marginTop: "8px" }}>
+              {brief.boundaryNote}
             </p>
           </section>
 
-          {/* ── Back to Decision Centre ── */}
-          <Link
-            href="/decision-centre"
-            style={{ display: "inline-flex", alignItems: "center", gap: "6px", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}BB`, border: `1px solid ${GOLD}35`, padding: "10px 18px", textDecoration: "none" }}
-          >
+          <Link href={brief.decisionCentreHref} style={{ display: "inline-flex", alignItems: "center", gap: "6px", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}BB`, border: `1px solid ${GOLD}35`, padding: "10px 18px", textDecoration: "none" }}>
             Return to Decision Centre
           </Link>
-
         </div>
       </main>
     </Layout>
   );
 };
 
-// ─── Server-side data loading ─────────────────────────────────────────────────
+function BriefListSection({
+  title,
+  items,
+  emptyLabel,
+  emphasis = false,
+}: {
+  title: string;
+  items: string[];
+  emptyLabel: string;
+  emphasis?: boolean;
+}) {
+  return (
+    <section style={{ border: emphasis ? `1px solid ${GOLD}22` : "1px solid rgba(255,255,255,0.08)", background: emphasis ? `${GOLD}04` : "rgba(255,255,255,0.015)", padding: "1rem", marginBottom: "1rem" }}>
+      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: emphasis ? `${GOLD}88` : "rgba(255,255,255,0.28)" }}>
+        {title}
+      </p>
+      <div style={{ display: "grid", gap: "8px", marginTop: "10px" }}>
+        {(items.length > 0 ? items : [emptyLabel]).map((item) => (
+          <p key={item} style={{ fontSize: emphasis ? "13px" : "12px", lineHeight: 1.6, color: emphasis ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.48)" }}>
+            {item}
+          </p>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const sessionKey = typeof ctx.params?.sessionKey === "string" ? ctx.params.sessionKey : null;
@@ -342,78 +209,53 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const { session, access } = await resolvePageAccess(ctx);
   const email = typeof session?.user?.email === "string" ? session.user.email.toLowerCase() : null;
-
   if (!access.permissions.isAuthenticated || !email) {
     return { props: { state: "unauthenticated" } };
   }
 
-  const { generateReturnBrief } = await import(
-    "@/lib/server/strategy-room/return-brief.server"
-  );
+  const [{ prisma }, { generateReturnBrief }] = await Promise.all([
+    import("@/lib/prisma.server"),
+    import("@/lib/server/strategy-room/return-brief.server"),
+  ]);
 
-  let brief: ReturnBriefDisplay | null = null;
-  try {
-    const raw = await generateReturnBrief(sessionKey);
-    if (raw) {
-      // Shape into client-safe display type — only expose fields this page renders.
-      brief = {
-        sessionId: raw.sessionId,
-        sessionKey: raw.sessionKey,
-        generatedAt: raw.generatedAt,
-        opening: raw.opening,
-        trajectory: {
-          state: raw.trajectory.state,
-          reason: raw.trajectory.reason,
-        },
-        kernel: raw.kernel
-          ? {
-              blocked: raw.kernel.blocked,
-              reason: raw.kernel.reason,
-              activeContradictions: raw.kernel.activeContradictions,
-            }
-          : null,
-        contradiction: raw.contradiction
-          ? {
-              decision: raw.contradiction.decision,
-              constraint: raw.contradiction.constraint,
-              status: raw.contradiction.status,
-            }
-          : null,
-        delta: raw.delta
-          ? {
-              clarity: raw.delta.clarity,
-              authority: raw.delta.authority,
-              readiness: raw.delta.readiness,
-            }
-          : null,
-        costOfInaction: raw.costOfInaction && raw.costOfInaction.basis !== "UNAVAILABLE"
-          ? {
-              accumulatedCost: raw.costOfInaction.accumulatedCost,
-              daysElapsed: raw.costOfInaction.daysElapsed,
-              basis: raw.costOfInaction.basis,
-              explanation: raw.costOfInaction.explanation,
-            }
-          : null,
-        verification: raw.verification
-          ? raw.verification.map((v) => ({
-              commitmentId: v.commitmentId,
-              label: v.label,
-              status: v.status,
-              dueAt: v.dueAt,
-            }))
-          : null,
-        challenge: raw.challenge,
-      };
-    }
-  } catch {
-    // generateReturnBrief failed — treat as not found
-  }
+  const sessionRecord = await prisma.strategyRoomExecutionSession.findFirst({
+    where: {
+      email,
+      OR: [{ id: sessionKey }, { sessionKey }],
+    },
+    select: {
+      id: true,
+      sessionKey: true,
+    },
+  });
 
-  if (!brief) {
+  if (!sessionRecord) {
     return { props: { state: "not_found", sessionKey } };
   }
 
-  return { props: { state: "ok", brief, sessionKey } };
+  const raw = await generateReturnBrief(sessionRecord.id);
+  const brief = composeReturnBriefV1(
+    raw
+      ? {
+          sessionKey: raw.sessionKey,
+          trigger: raw.trigger,
+          trajectory: raw.trajectory,
+          contradiction: raw.contradiction,
+          delta: raw.delta,
+          costOfInaction: raw.costOfInaction
+            ? { daysElapsed: raw.costOfInaction.daysElapsed }
+            : null,
+          verification: raw.verification?.map((item) => ({
+            label: item.label,
+            status: item.status,
+          })) ?? null,
+          challenge: raw.challenge,
+        }
+      : null,
+    sessionRecord.sessionKey,
+  );
+
+  return { props: { state: "ok", brief } };
 };
 
 export default ReturnBriefPage;
