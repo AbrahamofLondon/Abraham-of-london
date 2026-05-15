@@ -288,6 +288,47 @@ export default function ExecutiveReportingEntryPage() {
             </div>
           </section>
 
+          {/* ═══ 4b. GOVERNED CASE LINKAGE ═══ */}
+          <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: "rgba(255,255,255,0.015)", padding: "28px", marginBottom: "24px" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "20px" }}>
+              Governed case linkage
+            </p>
+            <div style={{ display: "grid", gap: "10px" }}>
+              <div style={{ display: "flex", gap: "14px" }}>
+                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                  Case ID
+                </span>
+                <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+                  Assigned on report generation — the report run key serves as the case reference.
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: "14px" }}>
+                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                  Originating assessments
+                </span>
+                <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+                  {ladder.filter((l) => l.completed).map((l) => l.label).join(", ") || "None yet — complete at least one diagnostic before generating."}
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: "14px" }}>
+                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                  Provenance hash
+                </span>
+                <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+                  Generated on report creation — viewable in the report detail.
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: "14px" }}>
+                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                  Decision Centre
+                </span>
+                <Link href="/decision-centre" style={{ fontSize: "12px", lineHeight: 1.55, color: `${GOLD}AA`, textDecoration: "none", borderBottom: `1px solid ${GOLD}30` }}>
+                  View all cases →
+                </Link>
+              </div>
+            </div>
+          </section>
+
           {/* ═══ 5. EXECUTIVE REPORTING BOUNDARY ═══ */}
           <section style={{ padding: "64px 0" }}>
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "28px" }}>
