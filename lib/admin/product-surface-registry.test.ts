@@ -14,6 +14,11 @@ import {
   getProductSurfaceById,
   getProductSurfacesByAudience,
 } from "@/lib/admin/product-surface-registry";
+import {
+  SURFACE_PERSISTENCE_MAP,
+  getSurfacePersistenceLevel,
+  type RecordPersistenceLevel,
+} from "@/lib/product/record-persistence-contract";
 
 describe("product surface registry", () => {
   it("contains at least one surface", () => {
@@ -249,5 +254,73 @@ describe("product surface registry", () => {
         `${surface.id} has invalid clientRoute: ${surface.clientRoute}`,
       ).toBe(true);
     }
+  });
+
+  // ─── Persistence enforcement ─────────────────────────────────────────────
+
+  it("every registry surface has a persistence level defined in the persistence contract", () => {
+    for (const surface of PRODUCT_SURFACE_REGISTRY) {
+      const level = getSurfacePersistenceLevel(surface.id);
+      expect(
+        level,
+        `Surface "${surface.id}" (${surface.label}) has no persistence level defined. Add it to SURFACE_PERSISTENCE_MAP.`,
+      ).toBeDefined();
+    }
+  });
+
+  it("Decision Centre is described as a governed case, not a session preview", () => {
+    const dc = getProductSurfaceById("decision-centre");
+    expect(dc).toBeDefined();
+    const level = getSurfacePersistenceLevel("decision-centre");
+    expect(level).toBe("GOVERNED_CASE");
+  });
+
+  it("sample/preview pages are marked SESSION_PREVIEW or NONE", () => {
+    const previewIds = [
+      "decision-delay-exposure-calculator",
+      "board-summary-preview",
+      "provenance-sample-export",
+      "public-anchor-log",
+    ];
+    const allowedLevels: RecordPersistenceLevel[] = ["SESSION_PREVIEW", "NONE"];
+    for (const id of previewIds) {
+      const level = getSurfacePersistenceLevel(id);
+      expect(
+        allowedLevels.includes(level!),
+        `${id} has persistence level "${level}" but should be SESSION_PREVIEW or NONE`,
+      ).toBe(true);
+    }
+  });
+
+  it("Provenance Sample is NONE, not a live record", () => {
+    const level = getSurfacePersistenceLevel("provenance-sample-export");
+    expect(level).toBe("NONE");
+  });
+
+  it("Public Anchor Log is NONE, not a live record", () => {
+    const level = getSurfacePersistenceLevel("public-anchor-log");
+    expect(level).toBe("NONE");
+  });
+
+  it("Return Brief explainer surface is GOVERNED_CASE (route exists as /return-brief)", () => {
+    const level = getSurfacePersistenceLevel("return-brief");
+    expect(level).toBe("GOVERNED_CASE");
+  });
+
+  it("Strategy Room is not labelled PROVENANCE_BACKED unless provenance exists", () => {
+    const level = getSurfacePersistenceLevel("strategy-room");
+    expect(level).toBe("GOVERNED_CASE");
+    // Strategy Room is GOVERNED_CASE, not PROVENANCE_BACKED, because
+    // provenance chain anchoring is not yet configured for all cases.
+  });
+
+  it("Oversight Brief is PROVENANCE_BACKED (has chain-of-custody provenance)", () => {
+    const level = getSurfacePersistenceLevel("oversight-brief");
+    expect(level).toBe("PROVENANCE_BACKED");
+  });
+
+  it("Proof Pack is PROVENANCE_BACKED (has chain-of-custody provenance)", () => {
+    const level = getSurfacePersistenceLevel("proof-pack");
+    expect(level).toBe("PROVENANCE_BACKED");
   });
 });
