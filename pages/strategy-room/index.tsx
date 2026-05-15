@@ -1830,6 +1830,67 @@ export default function StrategyRoomPage({
                 ))}
               </div>
 
+              {/* ── Activation corridor — what qualifies, what is carried, what is produced ── */}
+              <div className="mt-8 space-y-3" style={{ maxWidth: "40rem" }}>
+                <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}05`, padding: "1.15rem 1.25rem" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.65rem" }}>
+                    What qualifies a case for entry
+                  </p>
+                  <div className="space-y-2">
+                    {[
+                      "The Fast Diagnostic has named an unresolved condition.",
+                      "The executive report has confirmed structural escalation risk.",
+                      "A decision owner is identified and the consequence is measurable.",
+                    ].map((line, i) => (
+                      <div key={i} style={{ display: "flex", gap: "0.65rem", alignItems: "flex-start" }}>
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: `${GOLD}60`, flexShrink: 0, marginTop: "2px" }}>
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.6, color: "rgba(255,255,255,0.52)" }}>{line}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.15rem 1.25rem" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.65rem" }}>
+                    What this session produces
+                  </p>
+                  <div className="grid gap-px grid-cols-2" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
+                    {[
+                      ["Decision record", "The decision taken and the authority who took it — locked."],
+                      ["Dissent record", "Dissenting positions retained in the session record."],
+                      ["Review trigger", "The condition under which the record returns for review."],
+                      ["Provenance chain", "Chain-anchored record linked to prior diagnostic evidence."],
+                    ].map(([label, value]) => (
+                      <div key={label} style={{ backgroundColor: VOID, padding: "0.75rem 0.85rem" }}>
+                        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.3rem" }}>{label}</p>
+                        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(255,255,255,0.42)" }}>{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.85rem 1.1rem", display: "flex", flexWrap: "wrap", gap: "1.25rem", alignItems: "center" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                    After the session:
+                  </p>
+                  {[
+                    { label: "Decision Centre", href: "/decision-centre" },
+                    { label: "Return Brief", href: "/oversight" },
+                    { label: "Executive Reporting", href: "/diagnostics/executive-reporting" },
+                  ].map(({ label, href }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88`, textDecoration: "none" }}
+                    >
+                      {label} →
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
               {/* ── ExecutionFlow qualification gate (pre-payment) ── */}
               {!executionFlowComplete && (
                 <div className="mt-8" style={{ maxWidth: "36rem" }}>
@@ -2688,6 +2749,35 @@ export default function StrategyRoomPage({
             </div>
 
             <ExitStates />
+
+            {/* ── After-session navigation — Decision Centre / Return Brief ── */}
+            <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingTop: "0.5rem", paddingBottom: "2rem" }}>
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.25rem", display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+                  Continue in:
+                </span>
+                <Link
+                  href="/decision-centre"
+                  className="inline-flex items-center gap-2"
+                  style={{ padding: "9px 18px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}0E`, color: "#F5F5F5", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                >
+                  Decision Centre
+                  <ArrowRight style={{ width: 11, height: 11 }} />
+                </Link>
+                <Link
+                  href="/oversight"
+                  style={{ padding: "9px 18px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.38)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                >
+                  Return Brief
+                </Link>
+                <Link
+                  href="/provenance/sample-export"
+                  style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70`, textDecoration: "none" }}
+                >
+                  View provenance record →
+                </Link>
+              </div>
+            </div>
           </>
         )}
 

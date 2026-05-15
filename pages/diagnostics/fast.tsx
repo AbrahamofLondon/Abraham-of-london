@@ -721,6 +721,81 @@ const FastDiagnosticPage: NextPage = () => {
                 </p>
               </div>
 
+              {/* SECTION 3b: GOVERNANCE MOVE — elevated from collapsible, shown when authorityIndex present */}
+              {result.authorityIndex && (
+                <div style={{ border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}07`, padding: "1.5rem" }}>
+                  <div style={{ ...mono, fontSize: "9px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.75rem" }}>
+                    Governance move
+                  </div>
+
+                  {/* Next governance move — primary field */}
+                  <p style={{ ...serif, fontSize: "1.05rem", lineHeight: 1.7, color: "rgba(255,255,255,0.88)" }}>
+                    {result.authorityIndex.nextGovernanceMove}
+                  </p>
+
+                  {/* Authority band + label */}
+                  <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: `1px solid ${GOLD}18`, display: "flex", flexWrap: "wrap", gap: "1.5rem" }}>
+                    <div>
+                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.25rem" }}>Authority band</p>
+                      <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", color: `${GOLD}CC` }}>{result.authorityIndex.band}</p>
+                    </div>
+                    <div>
+                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.25rem" }}>Classification</p>
+                      <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.58)" }}>{result.authorityIndex.label}</p>
+                    </div>
+                    {result.comparisonBand && (
+                      <div>
+                        <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.25rem" }}>
+                          Comparison band{result.comparisonMaturityLevel != null ? ` — maturity ${result.comparisonMaturityLevel}/5` : ""}
+                        </p>
+                        <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.52)" }}>{result.comparisonBand}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Repeated conditions — structural memory signal */}
+                  {result.memoryTrend && result.memoryTrend.repeatedConditions.length > 0 && (
+                    <div style={{ marginTop: "0.85rem", paddingTop: "0.85rem", borderTop: `1px solid ${GOLD}18` }}>
+                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.4rem" }}>
+                        Repeated conditions — structural memory
+                      </p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                        {result.memoryTrend.repeatedConditions.map((c, i) => (
+                          <span key={i} style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(252,165,165,0.65)", backgroundColor: "rgba(252,165,165,0.04)", border: "1px solid rgba(252,165,165,0.12)", padding: "0.2rem 0.55rem" }}>
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Board meaning — if present */}
+                  {result.authorityIndex.boardMeaning && (
+                    <div style={{ marginTop: "0.85rem", paddingTop: "0.85rem", borderTop: `1px solid ${GOLD}18` }}>
+                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.35rem" }}>Board implication</p>
+                      <p style={{ fontSize: "0.84rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>{result.authorityIndex.boardMeaning}</p>
+                    </div>
+                  )}
+
+                  {/* CTAs — Decision Centre (primary) + Board Summary */}
+                  <div style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: `1px solid ${GOLD}18`, display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                    <Link
+                      href="/decision-centre"
+                      style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "12px 24px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: "#F5F5F5", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+                    >
+                      Continue in Decision Centre
+                      <ArrowRight style={{ width: 12, height: 12 }} />
+                    </Link>
+                    <Link
+                      href="/diagnostics/board-summary"
+                      style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "12px 24px", border: `1px solid ${GOLD}28`, backgroundColor: "transparent", color: `${GOLD}BB`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+                    >
+                      Generate Board Summary
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               {/* SECTION 4: COST OF INACTION */}
               <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem 1.5rem" }}>
                 <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80` }}>Cost of inaction — if unresolved</div>
@@ -862,9 +937,25 @@ const FastDiagnosticPage: NextPage = () => {
                     <ProductRecommendationCard recommendation={rec} variant="dark" />
                   ) : null;
                 })()}
-                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem" }}>
-                  <Link href="/decision-centre" style={{ padding: "14px 28px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
-                    Decision Centre
+                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1.25rem" }}>
+                  <Link
+                    href="/decision-centre"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "13px 26px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: "#F5F5F5", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+                  >
+                    Open Decision Centre
+                    <ArrowRight style={{ width: 12, height: 12 }} />
+                  </Link>
+                  <Link
+                    href="/diagnostics/board-summary"
+                    style={{ display: "inline-flex", alignItems: "center", padding: "13px 26px", border: `1px solid ${GOLD}28`, backgroundColor: "transparent", color: `${GOLD}BB`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+                  >
+                    Board Summary
+                  </Link>
+                  <Link
+                    href="/strategy-room"
+                    style={{ display: "inline-flex", alignItems: "center", padding: "13px 26px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgba(255,255,255,0.36)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+                  >
+                    Strategy Room
                   </Link>
                 </div>
               </div>

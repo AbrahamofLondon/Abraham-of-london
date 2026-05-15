@@ -635,12 +635,34 @@ export default function DecisionCentrePage() {
             <h1 style={{ ...serif, fontSize: "clamp(1.8rem, 5vw, 2.6rem)", lineHeight: 1.05, color: "rgba(255,255,255,0.90)", fontStyle: "italic" }}>
               Decision Centre
             </h1>
-            <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.38)", marginTop: "8px", maxWidth: "56ch" }}>
-              Your active cases, evidence state, admissibility, interventions, and outcome memory.
+            <p style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.62)", marginTop: "10px", maxWidth: "58ch" }}>
+              The operating console for governed cases. Evidence state, admissibility, intervention eligibility, and outcome memory — across every decision in the record.
             </p>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)", marginTop: "6px" }}>
-              You are not viewing reports. You are viewing the state of decisions under governance.
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginTop: "8px", maxWidth: "58ch", lineHeight: 1.6 }}>
+              This is not a report viewer. It is the live state of decisions under governance — from diagnostic through to intervention and oversight.
             </p>
+
+            {/* Progression ladder — compact inline */}
+            <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", flexWrap: "wrap", gap: "0" }}>
+              {[
+                { label: "Fast Diagnostic", href: "/diagnostics/fast" },
+                { label: "Executive Reporting", href: "/diagnostics/executive-reporting" },
+                { label: "Strategy Room", href: "/strategy-room" },
+                { label: "Retained Oversight", href: "/oversight" },
+              ].map((step, i, arr) => (
+                <React.Fragment key={step.label}>
+                  <Link
+                    href={step.href}
+                    style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: i === 0 ? `${GOLD}BB` : "rgba(255,255,255,0.28)", textDecoration: "none" }}
+                  >
+                    {step.label}
+                  </Link>
+                  {i < arr.length - 1 && (
+                    <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.14)", margin: "0 0.5rem" }}>→</span>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
 
           {/* First-visit orientation */}
@@ -714,6 +736,31 @@ export default function DecisionCentrePage() {
               {data.credit && (
                 <CreditPanel credit={data.credit} />
               )}
+
+              {/* Strategy Room escalation corridor */}
+              <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "16px 20px" }}>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>
+                  Intervention escalation
+                </p>
+                <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)" }}>
+                  If the executive report has confirmed structural escalation risk, the Strategy Room is the next governed surface. It is not a starting point — entry requires a prior evidence record.
+                </p>
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "12px", alignItems: "center" }}>
+                  <Link
+                    href="/strategy-room"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "10px 20px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}0E`, color: "#F5F5F5", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                  >
+                    Strategy Room
+                    <ArrowRight style={{ width: 11, height: 11 }} />
+                  </Link>
+                  <Link
+                    href="/diagnostics/executive-reporting"
+                    style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}
+                  >
+                    Executive Reporting required first →
+                  </Link>
+                </div>
+              </div>
 
               {/* Archive link */}
               <div style={{ paddingTop: "24px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
