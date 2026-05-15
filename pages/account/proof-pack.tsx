@@ -43,11 +43,33 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
               Proof Pack
             </p>
-            <h1 className="mt-3 text-3xl text-white">Durable proof, not performance theatre.</h1>
+            <h1 className="mt-3 text-3xl text-white">Portable governed-chain record.</h1>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60">
-              This pack records what the system captured, what you answered, what outcomes were later reported, and what was reviewed by human operators.
+              A portable, client-safe record of the governed chain where the case has sufficient history: evidence posture, review state, delivery and outcome record, and internal chain anchor where available.
             </p>
-            {pack ? <p className="mt-4 text-sm text-white/40">Generated {new Date(pack.generatedAt).toLocaleString("en-GB")} for {pack.ownerEmail}.</p> : null}
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/40">
+              Use this when a board, sponsor, counterparty, or reviewer needs a client-safe record of what was evidenced, reviewed, delivered, and carried forward. This pack does not replace verification, counsel review, or retained oversight.
+            </p>
+            {pack ? <p className="mt-4 text-sm text-white/30">Generated {new Date(pack.generatedAt).toLocaleString("en-GB")} for {pack.ownerEmail}.</p> : null}
+
+            {/* Chain cues — source labels and export boundary */}
+            <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "grid", gap: "6px" }}>
+              {[
+                { label: "Record type", value: "Governed chain record — client-safe view" },
+                { label: "Evidence posture", value: pack?.retainedOutcomeHistory?.evidencePosture ?? "Establishing" },
+                { label: "Export boundary", value: "This pack does not expose respondent text, operator notes, or internal trigger mechanics." },
+                { label: "Provenance status", value: (pack?.oversightCycles?.count ?? 0) > 0 ? "Chain anchor available — view provenance sample for record detail" : "Provenance status will appear when this case has a chain-anchored record." },
+              ].map((row) => (
+                <div key={row.label} style={{ display: "flex", gap: "14px" }}>
+                  <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.55)", minWidth: "120px", flexShrink: 0, paddingTop: "1px" }}>
+                    {row.label}
+                  </span>
+                  <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+                    {row.value}
+                  </span>
+                </div>
+              ))}
+            </div>
           </header>
 
           {outcomeToken ? (

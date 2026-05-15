@@ -101,15 +101,30 @@ export default function BoardroomPage(props: PageProps) {
                   </p>
                 </section>
 
-                <section style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "18px 20px" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
-                    Recommended board actions
+                <section style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "18px 20px" }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                    Board actions — accountability required
                   </p>
-                  {props.dossier.recommendedBoardActions.length > 0 ? props.dossier.recommendedBoardActions.map((action) => (
-                    <p key={`${action.category}-${action.relatedEntityId ?? "none"}`} style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.46)", marginTop: "8px" }}>
-                      {action.priority.toUpperCase()}: {action.description}
-                    </p>
-                  )) : (
+                  <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.40)", marginTop: "8px" }}>
+                    Board actions should not remain recommendations. Where the record supports it, each action should be assigned an owner, authority path, due point, or review trigger before it is treated as an accepted board commitment.
+                  </p>
+                  {props.dossier.recommendedBoardActions.length > 0 ? (
+                    <div style={{ marginTop: "12px", display: "grid", gap: "8px" }}>
+                      {props.dossier.recommendedBoardActions.map((action) => (
+                        <div key={`${action.category}-${action.relatedEntityId ?? "none"}`} style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.015)", padding: "12px 14px" }}>
+                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "4px" }}>
+                            {action.priority.toUpperCase()} · {action.category}
+                          </p>
+                          <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
+                            {action.description}
+                          </p>
+                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginTop: "8px" }}>
+                            Owner, authority path, and review trigger should be recorded before this action is treated as an accepted board commitment.
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
                     <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.34)", marginTop: "8px" }}>
                       No board-level action has been published for this period.
                     </p>

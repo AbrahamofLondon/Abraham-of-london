@@ -103,13 +103,29 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
               Retained Oversight Command
             </p>
-            <h1 className="mt-3 text-3xl text-white">Sponsor-safe oversight visibility.</h1>
+            <h1 className="mt-3 text-3xl text-white">Retained governance — cadence, delivery, and outcome memory.</h1>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60">
-              This surface shows retained cadence posture, brief status, memory, active attention, and continuity loss without exposing respondent text, operator notes, counsel notes, or internal trigger mechanics.
+              Use this when retained governance must preserve cadence, delivery control, outcome verification, and memory across cycles. This surface shows retained cadence posture, brief status, active attention, and continuity signal — without exposing respondent text, operator notes, counsel notes, or internal trigger mechanics.
             </p>
             <p className="mt-4 text-xs uppercase tracking-[0.2em] text-white/35" style={mono}>
               Product role: {role ?? "UNRESOLVED"}
             </p>
+
+            {/* Current required action — top orientation for senior operators */}
+            <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(201,169,110,0.12)" }}>
+              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,169,110,0.70)", marginBottom: "8px" }}>
+                Current required action
+              </p>
+              <p style={{ fontSize: "14px", lineHeight: 1.65, color: "rgba(255,255,255,0.68)" }}>
+                {cadencePosture && cadencePosture.cyclesOverdue > 0
+                  ? `${cadencePosture.cyclesOverdue} retained review cycle${cadencePosture.cyclesOverdue === 1 ? "" : "s"} overdue. Complete the outstanding review before the next retained cycle advances.`
+                  : cadencePosture?.nextDueDate && new Date(cadencePosture.nextDueDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                    ? `Retained review due ${new Date(cadencePosture.nextDueDate).toLocaleDateString("en-GB")}. Confirm readiness and confirm review posture before the cycle closes.`
+                    : (summary?.attention ?? []).filter((a) => a.severity === "HIGH").length > 0
+                      ? "HIGH severity attention items are active. Operator review is required before the next retained cycle advances."
+                      : "Review cadence posture and resolve any mandatory review obligations before the next retained cycle advances."}
+              </p>
+            </div>
             <div style={{ marginTop: "20px", borderTop: "1px solid rgba(201,169,110,0.15)", paddingTop: "16px" }}>
               <p style={{ ...metadataLabelStyle, letterSpacing: "0.22em", color: "rgba(201,169,110,0.70)", marginBottom: "10px" }}>
                 Retained oversight currently preserves

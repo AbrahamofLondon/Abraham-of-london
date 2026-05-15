@@ -81,7 +81,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
               Governed Oversight Brief
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3rem)", color: "rgba(255,255,255,0.92)" }}>
-              Reviewed cycle artifact
+              Governed oversight brief
             </h1>
             {cycle ? (
               <div className="mt-4 grid gap-3 md:grid-cols-4">

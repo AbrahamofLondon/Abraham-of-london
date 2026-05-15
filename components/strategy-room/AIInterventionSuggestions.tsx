@@ -1,9 +1,9 @@
 /**
- * AIInterventionSuggestions — auto-suggested AI leverage interventions.
+ * AIInterventionSuggestions — governed intervention options derived from admitted evidence.
  *
- * Maps AI risk → intervention options.
- * Shows top 2-3 interventions with category, impact, timeframe.
- * Attached to Strategy Room execution.
+ * Maps evidence-bound conditions → candidate intervention moves.
+ * Shows top 2-3 options with category, impact, and timeframe.
+ * Attached to Strategy Room execution — operator judgment required before acceptance.
  */
 
 import * as React from "react";
@@ -25,11 +25,14 @@ export default function AIInterventionSuggestions({ suggestions }: { suggestions
 
   return (
     <div style={{ border: "1px solid rgba(110,231,183,0.10)", backgroundColor: "rgba(110,231,183,0.02)", padding: "1.25rem", marginBottom: "1rem" }}>
-      <div className="mb-3">
+      <div className="mb-1">
         <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(110,231,183,0.50)" }}>
-          AI leverage interventions
+          Governed intervention options
         </span>
       </div>
+      <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.22)", lineHeight: 1.6, marginBottom: "0.75rem" }}>
+        These options do not replace operator judgment. They are candidate moves derived from the admitted evidence record and must be accepted, rejected, or amended before becoming part of the governed record.
+      </p>
 
       {suggestions.map((s, i) => {
         const color = CATEGORY_COLOR[s.intervention.category] ?? `${GOLD}80`;
