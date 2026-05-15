@@ -1,5 +1,3 @@
-import "server-only";
-
 /**
  * Return Brief Generator — creates "return moments" that make inaction visible.
  *
