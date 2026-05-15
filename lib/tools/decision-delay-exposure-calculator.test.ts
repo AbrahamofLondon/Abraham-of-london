@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildDecisionDelaySendToSelfPayload,
+  classifyDecisionState,
+  classifyGovernancePressure,
   computeDecisionDelayExposure,
   formatGbp,
   CTA_HREF,
@@ -15,6 +18,7 @@ describe("computeDecisionDelayExposure — calculation", () => {
       delayWeeks: 2,
       exposureType: "revenue",
       estimateConfidence: "known",
+      decisionState: "not_yet_decided",
     });
     expect(result.sevenDayExposure).toBe(700);
   });
@@ -25,6 +29,7 @@ describe("computeDecisionDelayExposure — calculation", () => {
       delayWeeks: 0,
       exposureType: "revenue",
       estimateConfidence: "known",
+      decisionState: "not_yet_decided",
     });
     // 700 / 7 * 30 = 3000 exactly
     expect(result.thirtyDayExposure).toBe(3000);
@@ -36,6 +41,7 @@ describe("computeDecisionDelayExposure — calculation", () => {
       delayWeeks: 0,
       exposureType: "revenue",
       estimateConfidence: "known",
+      decisionState: "not_yet_decided",
     });
     // 700 / 7 * 90 = 9000 exactly
     expect(result.ninetyDayExposure).toBe(9000);
@@ -47,6 +53,7 @@ describe("computeDecisionDelayExposure — calculation", () => {
       delayWeeks: 1,
       exposureType: "operating_cost",
       estimateConfidence: "board_estimate",
+      decisionState: "not_yet_decided",
     });
     expect(result.sevenDayExposure).toBeLessThan(result.thirtyDayExposure);
     expect(result.thirtyDayExposure).toBeLessThan(result.ninetyDayExposure);
@@ -58,12 +65,14 @@ describe("computeDecisionDelayExposure — calculation", () => {
       delayWeeks: 4,
       exposureType: "compliance",
       estimateConfidence: "rough",
+      decisionState: "not_yet_decided",
     });
     const noDelay = computeDecisionDelayExposure({
       weeklyCost: 1000,
       delayWeeks: 0,
       exposureType: "compliance",
       estimateConfidence: "rough",
+      decisionState: "not_yet_decided",
     });
     expect(withDelay.sevenDayExposure).toBe(noDelay.sevenDayExposure);
     expect(withDelay.thirtyDayExposure).toBe(noDelay.thirtyDayExposure);
@@ -82,6 +91,7 @@ describe("computeDecisionDelayExposure — zero and negative handling", () => {
       delayWeeks: 0,
       exposureType: "revenue",
       estimateConfidence: "rough",
+      decisionState: "not_yet_decided",
     });
     expect(result.sevenDayExposure).toBe(0);
     expect(result.thirtyDayExposure).toBe(0);
@@ -94,6 +104,7 @@ describe("computeDecisionDelayExposure — zero and negative handling", () => {
       delayWeeks: 3,
       exposureType: "opportunity",
       estimateConfidence: "known",
+      decisionState: "not_yet_decided",
     });
     expect(result.sevenDayExposure).toBe(0);
     expect(result.thirtyDayExposure).toBe(0);
@@ -107,6 +118,7 @@ describe("computeDecisionDelayExposure — zero and negative handling", () => {
         delayWeeks: -5,
         exposureType: "execution",
         estimateConfidence: "rough",
+        decisionState: "not_yet_decided",
       }),
     ).not.toThrow();
   });
@@ -137,6 +149,7 @@ describe("formatGbp — large values", () => {
       delayWeeks: 1,
       exposureType: "revenue",
       estimateConfidence: "board_estimate",
+      decisionState: "not_yet_decided",
     });
     expect(result.sevenDayFormatted).toBe("£100,000");
     // 100000 / 7 * 30 = 428,571
@@ -154,19 +167,22 @@ describe("computeDecisionDelayExposure — disclaimer and CTA", () => {
       delayWeeks: 1,
       exposureType: "reputation",
       estimateConfidence: "rough",
+      decisionState: "not_yet_decided",
     });
     expect(result.disclaimer).toBeTruthy();
     expect(result.disclaimer.length).toBeGreaterThan(20);
   });
 
-  it("disclaimer mentions scenario or estimate (not financial advice)", () => {
+  it("disclaimer preserves the scenario estimate and no-financial-advice boundary", () => {
     const result = computeDecisionDelayExposure({
       weeklyCost: 2000,
       delayWeeks: 1,
       exposureType: "reputation",
       estimateConfidence: "rough",
+      decisionState: "not_yet_decided",
     });
     expect(result.disclaimer.toLowerCase()).toContain("scenario");
+    expect(result.disclaimer.toLowerCase()).toContain("not be treated as financial advice");
   });
 
   it("disclaimer does not make exaggerated claims", () => {
@@ -175,6 +191,7 @@ describe("computeDecisionDelayExposure — disclaimer and CTA", () => {
       delayWeeks: 1,
       exposureType: "reputation",
       estimateConfidence: "rough",
+      decisionState: "not_yet_decided",
     });
     const lower = result.disclaimer.toLowerCase();
     expect(lower).not.toContain("guaranteed");
@@ -188,6 +205,7 @@ describe("computeDecisionDelayExposure — disclaimer and CTA", () => {
       delayWeeks: 0,
       exposureType: "execution",
       estimateConfidence: "known",
+      decisionState: "not_yet_decided",
     });
     expect(result.ctaHref).toBe("/diagnostics/fast");
   });
@@ -208,6 +226,7 @@ describe("computeDecisionDelayExposure — all exposure types produce output", (
         delayWeeks: 2,
         exposureType,
         estimateConfidence: "known",
+        decisionState: "not_yet_decided",
       });
       expect(result.structuralConsequence).toBeTruthy();
       expect(result.structuralConsequence.length).toBeGreaterThan(20);
@@ -224,6 +243,7 @@ describe("computeDecisionDelayExposure — confidence qualifier in statement", (
       delayWeeks: 0,
       exposureType: "revenue",
       estimateConfidence: "rough",
+      decisionState: "not_yet_decided",
     });
     expect(result.exposureStatement).toContain("rough estimate");
   });
@@ -234,7 +254,88 @@ describe("computeDecisionDelayExposure — confidence qualifier in statement", (
       delayWeeks: 0,
       exposureType: "revenue",
       estimateConfidence: "board_estimate",
+      decisionState: "not_yet_decided",
     });
     expect(result.exposureStatement).toContain("board estimate");
+  });
+});
+
+// ─── Decision state and governance pressure ───────────────────────────────────
+
+describe("decision state classification", () => {
+  it("classifies an authority block as Authority-blocked", () => {
+    expect(classifyDecisionState("blocked_by_authority")).toBe("Authority-blocked");
+  });
+
+  it("classifies a decided-but-unexecuted decision as Execution-stalled", () => {
+    expect(classifyDecisionState("decided_not_executed")).toBe("Execution-stalled");
+  });
+});
+
+describe("governance pressure band", () => {
+  it("keeps a low-cost new deferral in LOW", () => {
+    expect(
+      classifyGovernancePressure({
+        thirtyDayExposure: 1000,
+        delayWeeks: 0,
+        decisionState: "not_yet_decided",
+      }),
+    ).toBe("LOW");
+  });
+
+  it("elevates a costly, long-running authority block to CRITICAL", () => {
+    expect(
+      classifyGovernancePressure({
+        thirtyDayExposure: 150000,
+        delayWeeks: 10,
+        decisionState: "blocked_by_authority",
+      }),
+    ).toBe("CRITICAL");
+  });
+
+  it("returns a governed reading with visible state and record status", () => {
+    const result = computeDecisionDelayExposure({
+      weeklyCost: 3000,
+      delayWeeks: 4,
+      exposureType: "execution",
+      estimateConfidence: "known",
+      decisionState: "blocked_by_authority",
+    });
+
+    expect(result.decisionStateLabel).toBe("Authority-blocked");
+    expect(result.governancePressureBand).toBe("PRESSURE");
+    expect(result.recordStatus).toBe("Not yet governed");
+  });
+});
+
+// ─── Send-to-self payload safety ──────────────────────────────────────────────
+
+describe("buildDecisionDelaySendToSelfPayload", () => {
+  it("keeps send-to-self available from the result model without raw or internal fields", () => {
+    const result = computeDecisionDelayExposure({
+      weeklyCost: 5000,
+      delayWeeks: 3,
+      exposureType: "revenue",
+      estimateConfidence: "rough",
+      decisionState: "repeatedly_revisited",
+    });
+
+    const payload = buildDecisionDelaySendToSelfPayload({
+      weeklyCost: 5000,
+      delayWeeks: 3,
+      exposureType: "revenue",
+      result,
+    });
+
+    expect(Object.keys(payload).sort()).toEqual([
+      "exposureSummary",
+      "nextMove",
+      "summary",
+      "title",
+    ]);
+    expect(payload.exposureSummary).toContain("Decision state:");
+    expect(payload).not.toHaveProperty("decisionLabel");
+    expect(payload).not.toHaveProperty("rawDecisionText");
+    expect(payload).not.toHaveProperty("internalNotes");
   });
 });

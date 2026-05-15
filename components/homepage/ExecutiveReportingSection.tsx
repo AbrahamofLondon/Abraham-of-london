@@ -15,9 +15,9 @@ export default function ExecutiveReportingSection() {
   return (
     <SectionShell
       id="executive-reporting"
-      eyebrow="Executive Reporting"
+      eyebrow="Paid report layer · Evidence-gated"
       title="A governed report. Not a summary."
-      description="When the Fast Diagnostic evidence reaches threshold, the system generates a structured executive report — a record with a named condition, a seriousness rating, and a required sequence of moves. It opens when earned, not on request."
+      description="When diagnostic evidence reaches threshold, Executive Reporting converts it into a board-readable priority stack, seriousness rating, governance risk score, correction sequence, and next checkpoint. It opens when earned, not on request."
     >
       <div className="mx-auto max-w-[900px]">
         <div
@@ -55,7 +55,7 @@ export default function ExecutiveReportingSection() {
                 maxWidth: "44ch",
               }}
             >
-              The report is generated from your diagnostic evidence. It does not begin with a brief.
+              The system must have enough diagnostic evidence to generate a responsible report. Afterward, the case can continue into the next earned layer.
             </p>
             <Link
               href="/diagnostics/executive-reporting"

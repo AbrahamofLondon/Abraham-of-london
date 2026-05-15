@@ -378,17 +378,45 @@ const FastDiagnosticPage: NextPage = () => {
               </div>
             )}
             <h1 style={{ ...serif, fontSize: "clamp(2rem, 5vw, 3.8rem)", lineHeight: 1.05, letterSpacing: "-0.03em", color: "rgba(255,255,255,0.94)", maxWidth: "18ch" }}>
-              You don&rsquo;t have an execution problem.
+              Bring one stuck decision. Leave with the governance move.
             </h1>
-            <p style={{ ...serif, fontSize: "clamp(1.6rem, 3.5vw, 2.8rem)", lineHeight: 1.1, color: "rgba(255,255,255,0.45)", marginTop: "0.5rem", maxWidth: "22ch" }}>
-              You have a decision structure problem.
+            <p style={{ marginTop: "1.5rem", maxWidth: "44ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.52)" }}>
+              The system reads the decision state, evidence posture, authority pressure, cost exposure, and next admissible move.
             </p>
-            <p style={{ marginTop: "2.5rem", maxWidth: "36ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.48)" }}>
-              Most decisions don&rsquo;t fail because they&rsquo;re wrong. They fail because no one actually owns them &mdash; or the structure can&rsquo;t carry them.
+            <p style={{ marginTop: "0.5rem", maxWidth: "36ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.38)" }}>
+              Takes 2 minutes. No account required to receive the first reading.
             </p>
-            <p style={{ marginTop: "0.5rem", maxWidth: "36ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.48)" }}>
-              This will show you where yours is breaking. Takes 2 minutes.
-            </p>
+            <div style={{ width: "100%", maxWidth: "640px", marginTop: "2rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem", textAlign: "left" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.9rem" }}>
+                What this creates
+              </p>
+              <div style={{ display: "grid", gap: "0.8rem" }}>
+                <div style={{ borderLeft: `2px solid ${GOLD}30`, paddingLeft: "12px" }}>
+                  <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99` }}>
+                    Diagnostic record
+                  </p>
+                  <p style={{ marginTop: "0.25rem", fontSize: "0.86rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+                    The finding, condition, authority index, comparison posture, and governance move.
+                  </p>
+                </div>
+                <div style={{ borderLeft: `2px solid ${GOLD}30`, paddingLeft: "12px" }}>
+                  <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99` }}>
+                    Governed case
+                  </p>
+                  <p style={{ marginTop: "0.25rem", fontSize: "0.86rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+                    Created when you save or continue into Decision Centre.
+                  </p>
+                </div>
+                <div style={{ borderLeft: `2px solid ${GOLD}30`, paddingLeft: "12px" }}>
+                  <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99` }}>
+                    Checkpoint
+                  </p>
+                  <p style={{ marginTop: "0.25rem", fontSize: "0.86rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+                    Created only if you accept a commitment or review trigger.
+                  </p>
+                </div>
+              </div>
+            </div>
             {showResume ? (
               <div style={{ marginTop: "2.5rem", display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
                 <button type="button" onClick={() => { resumeDraft(); startedAt.current = Date.now(); }} style={{ padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
@@ -400,11 +428,11 @@ const FastDiagnosticPage: NextPage = () => {
               </div>
             ) : (
               <button type="button" onClick={() => { setStage("decision"); startedAt.current = Date.now(); track("fast_diagnostic_started"); trackLaunch("fast_started", "fast_diagnostic"); }} style={{ marginTop: "2.5rem", padding: "16px 36px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: GOLD, ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
-                Find the break
+                Begin Fast Diagnostic
               </button>
             )}
             <p style={{ marginTop: "1.25rem", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
-              No signup. No theory. You will either recognise it &mdash; or you won&rsquo;t.
+              Entry surface only. The governed case begins when the reading is saved.
             </p>
           </div>
         )}
@@ -639,10 +667,75 @@ const FastDiagnosticPage: NextPage = () => {
                 )}
               </div>
 
-              {/* SECTION 1a: BOARD SUMMARY PREVIEW */}
+              {/* SECTION 1a: OPERATING HANDOFF — the first readable case posture */}
+              <div style={{ border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}06`, padding: "1.35rem 1.5rem" }}>
+                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "1rem" }}>
+                  Operating handoff
+                </p>
+                <div style={{ display: "grid", gap: "0.9rem" }}>
+                  <div>
+                    <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>
+                      Governance move
+                    </p>
+                    <p style={{ ...serif, fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(255,255,255,0.88)" }}>
+                      {result.authorityIndex?.nextGovernanceMove ?? an?.requiredMove ?? result.synthesis?.concreteMove ?? "Name one accountable owner and set the next admissible move."}
+                    </p>
+                  </div>
+                  <div style={{ display: "grid", gap: "0.75rem", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+                    <OperatingHandoffField
+                      label="Decision state / condition"
+                      value={result.conditionLabel || result.condition || "Condition not yet established"}
+                    />
+                    <OperatingHandoffField
+                      label="Authority index"
+                      value={result.authorityIndex ? `${result.authorityIndex.band} — ${result.authorityIndex.label}` : "Not yet established"}
+                    />
+                    <OperatingHandoffField
+                      label="Comparison band"
+                      value={result.comparisonBand || "Not yet available — more evidence required"}
+                    />
+                    <OperatingHandoffField
+                      label="Cost of inaction"
+                      value={result.costOfInaction
+                        ? `${result.costOfInaction.exposureBand} exposure — ${result.costOfInaction.horizon30}`
+                        : "Scenario exposure not yet established"}
+                    />
+                    <OperatingHandoffField
+                      label="Record status"
+                      value={committed && result.checkpointId
+                        ? "Diagnostic record created · checkpoint created · governed case begins on save"
+                        : "Diagnostic record created · governed case begins on save"}
+                    />
+                    <OperatingHandoffField
+                      label="Next earned layer"
+                      value="Save this as a governed case in Decision Centre."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "1.25rem 1.5rem" }}>
+                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                  Save this as a governed case
+                </p>
+                <p style={{ marginTop: "0.45rem", ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.58)" }}>
+                  Preserve the governance move, comparison posture, cost exposure, and next action.
+                </p>
+                <div style={{ marginTop: "0.85rem" }}>
+                  <SaveSessionCasePanel
+                    payload={buildFastDiagnosticCarryForwardPayload({
+                      result,
+                      decisionLabel: answers.decision,
+                    })}
+                    copy="Saving this diagnostic opens the governed case in Decision Centre and preserves the reading instead of leaving it as a session-only result."
+                  />
+                </div>
+              </div>
+
+              {/* SECTION 1b: BOARD SUMMARY PREVIEW */}
               <BoardSummaryPreview data={buildBoardSummaryFromFastDiagnostic(result, answers)} />
 
-              {/* SECTION 1b: CONTRADICTION MIRROR — your own words */}
+              {/* SECTION 1c: CONTRADICTION MIRROR — your own words */}
               {result.synthesis?.primaryContradiction && (
                 <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
                   <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.5rem" }}>The contradiction</p>
@@ -667,7 +760,7 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               )}
 
-              {/* SECTION 1c: NAMED SIGNAL — SIGNAL SUPREMACY institutional intelligence layer */}
+              {/* SECTION 1d: NAMED SIGNAL — SIGNAL SUPREMACY institutional intelligence layer */}
               {result.detectedSignals && result.detectedSignals.length > 0 && (() => {
                 const primary = result.detectedSignals[0]!;
                 const severityColors: Record<string, string> = {
@@ -858,7 +951,7 @@ const FastDiagnosticPage: NextPage = () => {
                       Governed case
                     </p>
                     <p style={{ fontSize: "0.8rem", lineHeight: 1.5, color: "rgba(255,255,255,0.45)" }}>
-                      The case continues in Decision Centre.
+                      Created when you save this reading into Decision Centre.
                     </p>
                   </div>
                   {committed && (
@@ -873,14 +966,6 @@ const FastDiagnosticPage: NextPage = () => {
                   )}
                 </div>
               </div>
-
-              <SaveSessionCasePanel
-                payload={buildFastDiagnosticCarryForwardPayload({
-                  result,
-                  decisionLabel: answers.decision,
-                })}
-                copy="This diagnostic can become a governed case in Decision Centre. Saving it preserves the case reference, governance move, comparison posture, and next action."
-              />
 
               <ClientIntelligenceStack
                 scope={{
@@ -997,14 +1082,17 @@ const FastDiagnosticPage: NextPage = () => {
                     Board Summary
                   </Link>
                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", paddingLeft: "26px" }}>
+                      Evidence-gated escalation
+                    </p>
                     <Link
                       href="/strategy-room"
                       style={{ display: "inline-flex", alignItems: "center", padding: "13px 26px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgba(255,255,255,0.36)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
                     >
-                      Strategy Room — evidence-gated
+                      Strategy Room
                     </Link>
                     <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", paddingLeft: "26px" }}>
-                      Opens only when evidence supports intervention. If this case is not admitted, the room will show the repair path.
+                      Strategy Room opens only when the evidence record supports intervention. If this case is not admitted, the room will show the repair path.
                     </p>
                   </div>
                 </div>
@@ -1124,6 +1212,19 @@ function ResultBlock({ label, children }: { label: string; children: React.React
       </div>
       <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>
         {children}
+      </p>
+    </div>
+  );
+}
+
+function OperatingHandoffField({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "0.7rem" }}>
+      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>
+        {label}
+      </p>
+      <p style={{ fontSize: "0.84rem", lineHeight: 1.55, color: "rgba(255,255,255,0.62)" }}>
+        {value}
       </p>
     </div>
   );

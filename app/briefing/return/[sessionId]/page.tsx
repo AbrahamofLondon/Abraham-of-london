@@ -16,6 +16,7 @@
 import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import SendToSelfForm from "@/components/tools/SendToSelfForm";
 import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
 import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
 import GovernedActionPanel from "@/components/living/GovernedActionPanel";
@@ -330,6 +331,10 @@ export default function ReturnBriefPage() {
     );
   }
 
+  const caseProvenanceHref = brief.sessionId
+    ? `/provenance/case/STRATEGY_ROOM_RECORD/${encodeURIComponent(brief.sessionId)}`
+    : null;
+
   return (
     <main style={{ backgroundColor: "#0B0B0B", minHeight: "100vh", color: "#F5F5F5" }}>
       <div style={{ maxWidth: "680px", margin: "0 auto", padding: "96px 24px 96px" }}>
@@ -338,6 +343,9 @@ export default function ReturnBriefPage() {
         <div style={{ paddingBottom: "32px", borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: "32px" }}>
           <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "8px" }}>
             Decision Infrastructure by Abraham of London
+          </p>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+            Generated Return Brief · Case-specific · Account-bound where authenticated
           </p>
           <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
             You are not starting again. The system remembers this case.
@@ -358,7 +366,7 @@ export default function ReturnBriefPage() {
         {/* ═══ 1. OPENING ═══ */}
         <div style={{ paddingBottom: "64px" }}>
           <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "24px" }}>
-            Return Brief
+            Generated Return Brief
           </p>
           <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "clamp(28px, 4vw, 40px)", lineHeight: 1.15, color: "#F5F5F5" }}>
             {brief.opening}
@@ -847,13 +855,49 @@ export default function ReturnBriefPage() {
         {/* ═══ 7. CHECKPOINT RESPONSE ═══ */}
         <CheckpointResponsePanel checkpointReference={brief.checkpointReference ?? { checkpointId: null, strategyRoomSessionId: brief.sessionKey, lookupMode: "STRATEGY_ROOM_SESSION", available: false }} />
 
-        {/* ═══ CTA ═══ */}
-        <Link
-          href={`/strategy-room/session/${brief.sessionKey}`}
-          style={{ display: "block", width: "100%", padding: "18px 0", textAlign: "center", backgroundColor: "#F5F5F5", color: "#0B0B0B", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", fontWeight: 500 }}
-        >
-          Return to Strategy Room
-        </Link>
+        {/* ═══ CONTINUATION ═══ */}
+        <section style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "20px", marginBottom: "48px" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "10px" }}>
+            Case continuity
+          </p>
+          <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.46)", marginBottom: "18px" }}>
+            The governed case itself continues in Decision Centre. This generated Return Brief reopens the case-specific record; it is not a public sample or a standalone report.
+          </p>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <Link
+              href="/decision-centre"
+              style={{ padding: "12px 16px", backgroundColor: "#F5F5F5", color: "#0B0B0B", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", fontWeight: 500 }}
+            >
+              Return to Decision Centre
+            </Link>
+            <Link
+              href={`/strategy-room/session/${brief.sessionKey}`}
+              style={{ padding: "12px 16px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.48)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}
+            >
+              Return to Strategy Room
+            </Link>
+            {caseProvenanceHref && (
+              <Link
+                href={caseProvenanceHref}
+                style={{ padding: "12px 16px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.48)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}
+              >
+                View case provenance
+              </Link>
+            )}
+          </div>
+          <SendToSelfForm
+            source="return_brief"
+            isLiveRecord
+            label="Send to self"
+            content={{
+              title: `Generated Return Brief — ${brief.sessionKey}`,
+              summary: brief.opening,
+              nextMove: brief.challenge,
+              subjectType: "STRATEGY_ROOM_RECORD",
+              subjectId: brief.sessionId,
+            }}
+          />
+        </section>
 
         {/* ═══ RETAINER TRIGGER ═══ */}
         {brief.retainerTriggered && (

@@ -928,7 +928,18 @@ export default makeSource({
   },
 
   onSuccess: async (importData) => {
-    const data = await importData();
+    let data: Record<string, unknown> = {};
+    try {
+      data = (await importData()) as Record<string, unknown>;
+    } catch (error) {
+      if (ENV.IS_WINDOWS) {
+        console.warn(
+          "[CONTENTLAYER] Generated barrel unavailable during onSuccess on Windows; continuing with generated JSON indexes.",
+        );
+      } else {
+        throw error;
+      }
+    }
 
     const buckets = [
       (data as any)?.allDocuments,

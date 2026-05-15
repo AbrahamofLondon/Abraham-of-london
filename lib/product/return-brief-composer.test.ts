@@ -71,5 +71,20 @@ describe("composeReturnBriefV1", () => {
 
     expect(explainer).toContain("This page explains the mechanism.");
     expect(explainer).toContain("Generated Return Briefs are case-specific");
+    expect(explainer).toContain("The governed case itself continues in Decision Centre.");
+    expect(explainer).toContain("Create a governed case");
+  });
+
+  it("labels generated briefs as live case-specific records with continuation actions", () => {
+    const generatedBriefPage = readFileSync(
+      path.join(process.cwd(), "app", "briefing", "return", "[sessionId]", "page.tsx"),
+      "utf8",
+    );
+
+    expect(generatedBriefPage).toContain("Generated Return Brief · Case-specific · Account-bound where authenticated");
+    expect(generatedBriefPage).toContain("Return to Decision Centre");
+    expect(generatedBriefPage).toContain('label="Send to self"');
+    expect(generatedBriefPage).toContain("View case provenance");
+    expect(generatedBriefPage).not.toContain("/provenance/sample-export");
   });
 });

@@ -4,7 +4,7 @@ import type {
 } from "./return-brief-contract";
 
 const BOUNDARY_NOTE =
-  "This is a client-safe continuation of the governed record. It does not expose respondent text, operator notes, raw evidence, suppression details, or internal trigger mechanics.";
+  "This is a client-safe continuation of the governed record. The governed case itself continues in Decision Centre; a Return Brief reopens the record when the condition remains active. It does not expose respondent text, operator notes, raw evidence, suppression details, or internal trigger mechanics.";
 
 export function composeReturnBriefV1(
   source: ReturnBriefComposerSource | null,

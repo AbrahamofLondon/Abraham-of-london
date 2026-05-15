@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
 import ExecutiveReportingPaywall from "@/components/diagnostics/ExecutiveReportingPaywall";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
 import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
@@ -157,6 +158,9 @@ export default function ExecutiveReportingEntryPage() {
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "28px" }}>
               Executive Reporting
             </p>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}65`, marginBottom: "18px" }}>
+              Paid report layer · Evidence-gated
+            </p>
             <h1 style={{ ...serif, fontWeight: 400, fontSize: "clamp(34px, 5.5vw, 52px)", lineHeight: 1.08, letterSpacing: "-0.025em", color: "#F5F5F5" }}>
               This is not an execution problem.
             </h1>
@@ -167,6 +171,18 @@ export default function ExecutiveReportingEntryPage() {
               Current condition: {evidence.condition || "unresolved decision exposure"}
             </p>
           </section>
+
+          <SurfaceBoundaryPanel
+            surfaceType="PAID_LAYER"
+            recordCreated="A paid governed report is created only when evidence threshold and access conditions are met."
+            systemReads={[
+              "Accumulated diagnostic evidence",
+              "Authority, consequence, and comparison posture",
+              "Whether escalation is earned",
+            ]}
+            nextAction={{ label: "Generate executive report", href: "/diagnostics/executive-reporting/run" }}
+            secondaryAction={{ label: "Return to diagnostic ladder", href: "/diagnostics" }}
+          />
 
           <GoldDivider />
 
@@ -272,27 +288,36 @@ export default function ExecutiveReportingEntryPage() {
             </div>
           </section>
 
-          {/* ═══ 5. WHAT EXECUTIVE REPORTING ADDS ═══ */}
+          {/* ═══ 5. EXECUTIVE REPORTING BOUNDARY ═══ */}
           <section style={{ padding: "64px 0" }}>
-            <p style={{ ...serif, fontSize: "17px", lineHeight: 1.8, color: "rgba(255,255,255,0.55)" }}>
-              The free ladder identifies the structure of the problem.
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "28px" }}>
+              Paid report layer · Evidence-gated
             </p>
-            <p style={{ ...serif, fontSize: "17px", lineHeight: 1.8, color: "rgba(255,255,255,0.55)", marginTop: "16px" }}>
-              Executive Reporting goes further:
-            </p>
-            <ul style={{ listStyle: "none", padding: 0, margin: "20px 0 0 0" }}>
+            <div style={{ display: "grid", gap: "22px" }}>
               {[
-                "prices the cost of delay",
-                "identifies the governance correction",
-                "sequences the first intervention",
-                "prepares a board-ready decision object",
+                {
+                  label: "What you receive",
+                  copy: "A board-readable priority stack, seriousness rating, governance risk score, correction sequence, and next checkpoint.",
+                },
+                {
+                  label: "What must be true",
+                  copy: "The system must have enough diagnostic evidence to generate a responsible report.",
+                },
+                {
+                  label: "What happens after",
+                  copy: "The report can move the case into Decision Centre, Strategy Room qualification, retained oversight, or proof packaging depending on the evidence.",
+                },
               ].map((item) => (
-                <li key={item} style={{ ...serif, fontSize: "16px", lineHeight: 2.0, color: `${GOLD}BB`, paddingLeft: "20px", position: "relative" }}>
-                  <span style={{ position: "absolute", left: 0, color: `${GOLD}60` }}>&bull;</span>
-                  {item}
-                </li>
+                <div key={item.label} style={{ borderLeft: `2px solid ${GOLD}28`, paddingLeft: "20px" }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                    {item.label}
+                  </p>
+                  <p style={{ ...serif, fontSize: "16px", lineHeight: 1.8, color: "rgba(255,255,255,0.58)", marginTop: "8px" }}>
+                    {item.copy}
+                  </p>
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
 
           {/* ═══ 6. PERSONALISED REPORT PREVIEW ═══ */}

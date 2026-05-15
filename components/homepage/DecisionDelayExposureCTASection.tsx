@@ -26,7 +26,7 @@ export default function DecisionDelayExposureCTASection() {
                   marginBottom: "16px",
                 }}
               >
-                Decision delay exposure
+                Decision Delay Exposure Instrument
               </p>
               <h2
                 style={{
@@ -41,9 +41,9 @@ export default function DecisionDelayExposureCTASection() {
                 How much is the deferred decision costing?
               </h2>
               <p className="mt-4 text-[14px] leading-[1.85] text-white/50">
-                Enter a weekly cost estimate and delay window. The calculator returns a GBP
-                exposure range at 7, 30, and 90 days — with a structural consequence statement
-                and a recommended next move.
+                Enter a weekly cost estimate, delay window, and decision state. The instrument returns
+                a governed exposure reading across financial drag, structural consequence, governance
+                pressure, and the required next move.
               </p>
               <p className="mt-3 text-[12px] leading-[1.75] text-white/30">
                 No login. No data captured. Scenario only.
@@ -65,7 +65,7 @@ export default function DecisionDelayExposureCTASection() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Estimate decision delay exposure
+                Open the exposure instrument
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </Link>
               <p

@@ -1,6 +1,7 @@
 import type { BoardSummaryData } from "@/lib/diagnostics/board-summary";
 import type { FastDiagnosticResult } from "@/lib/diagnostics/fast-diagnostic-dto";
 import type {
+  DecisionState,
   EstimateConfidence,
   ExposureType,
 } from "@/lib/tools/decision-delay-exposure-calculator";
@@ -22,6 +23,7 @@ export type SaveCasePayload = {
   comparisonMaturityLevel?: string | null;
   weeklyCost?: number | null;
   delayWeeks?: number | null;
+  decisionState?: DecisionState | null;
   exposureType?: ExposureType | null;
   estimateConfidence?: EstimateConfidence | null;
   createdAt?: string | null;
@@ -72,6 +74,7 @@ export function buildBoardSummarySaveCasePayload(
 export function buildDecisionDelaySaveCasePayload(input: {
   weeklyCost: number;
   delayWeeks: number;
+  decisionState?: DecisionState | null;
   exposureType: ExposureType;
   estimateConfidence: EstimateConfidence;
   calculatedAt?: string | null;
@@ -81,6 +84,7 @@ export function buildDecisionDelaySaveCasePayload(input: {
     // Deliberately no decisionLabel here. Calculator free text is display-only.
     weeklyCost: finiteOrNull(input.weeklyCost),
     delayWeeks: finiteOrNull(input.delayWeeks),
+    decisionState: input.decisionState ?? null,
     exposureType: input.exposureType,
     estimateConfidence: input.estimateConfidence,
     createdAt: input.calculatedAt ?? new Date().toISOString(),

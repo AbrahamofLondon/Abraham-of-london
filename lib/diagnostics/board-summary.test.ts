@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
 
 import {
   buildBoardSummaryFromFastDiagnostic,
@@ -326,5 +327,41 @@ describe("scenario disclaimer always present", () => {
   it("Executive builder includes scenarioOnly flag", () => {
     const data = buildBoardSummaryFromExecutiveReport(execReport());
     expect(data.scenarioOnly).toBe(true);
+  });
+});
+
+// ─── Entry surface boundary copy ──────────────────────────────────────────────
+
+describe("Board Summary entry surface boundary copy", () => {
+  const boardSummaryPage = readFileSync(
+    new URL("../../pages/diagnostics/board-summary.tsx", import.meta.url),
+    "utf8",
+  );
+  const boardSummaryPreview = readFileSync(
+    new URL("../../components/diagnostics/BoardSummaryPreview.tsx", import.meta.url),
+    "utf8",
+  );
+
+  it("states the preview is session-derived and not a retained governed record", () => {
+    expect(boardSummaryPage).toContain("Session-derived");
+    expect(boardSummaryPage).toContain("Not a retained governed record");
+    expect(boardSummaryPage).toContain("does not create a new governed record");
+  });
+
+  it("keeps the board-facing demonstration model visible", () => {
+    expect(boardSummaryPreview).toContain("What this demonstrates");
+    expect(boardSummaryPreview).toContain("Board finding");
+    expect(boardSummaryPreview).toContain("Governance move");
+    expect(boardSummaryPreview).toContain("Consequence exposure");
+    expect(boardSummaryPreview).toContain("Evidence surface");
+  });
+
+  it("keeps preview-only send wording and continuation CTAs explicit", () => {
+    expect(boardSummaryPage).toContain(
+      "This sends a copy of the preview. It does not create or alter a governed record.",
+    );
+    expect(boardSummaryPage).toContain("Save / Continue in Decision Centre");
+    expect(boardSummaryPage).toContain("Review Executive Reporting");
+    expect(boardSummaryPage).toContain("Return to diagnostics");
   });
 });

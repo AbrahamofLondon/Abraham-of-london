@@ -4,10 +4,12 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
+import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
 import SendToSelfForm from "@/components/tools/SendToSelfForm";
 import { track } from "@/lib/analytics/track";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import BoardSummaryPreview, {
+  BoardSummaryDemonstrationPanel,
   buildBoardSummaryFromSessionStorage,
   type BoardSummaryData,
 } from "@/components/diagnostics/BoardSummaryPreview";
@@ -189,7 +191,7 @@ export default function BoardSummaryPage() {
                 marginBottom: "12px",
               }}
             >
-              Board summary preview
+              Board Summary Preview
             </h1>
             <p
               style={{
@@ -200,7 +202,7 @@ export default function BoardSummaryPage() {
                 marginBottom: "12px",
               }}
             >
-              This board summary is generated from available diagnostic evidence in this browser session. It does not create a new governed record; the live case continues in the Decision Centre.
+              This summary is generated from available diagnostic evidence in this browser session. It does not create a new governed record; the live case continues in Decision Centre.
             </p>
             <p
               style={{
@@ -212,6 +214,20 @@ export default function BoardSummaryPage() {
             >
               Prepared: {today}
             </p>
+          </div>
+
+          <div style={{ marginBottom: "28px" }}>
+            <SurfaceBoundaryPanel
+              surfaceType="SESSION_PREVIEW"
+              recordCreated="No new governed record is created by this preview."
+              systemReads={[
+                "Session-available diagnostic evidence",
+                "Current board finding and consequence posture",
+                "The next admissible governance move",
+              ]}
+              nextAction={{ label: "Save / Continue in Decision Centre", href: "/decision-centre" }}
+              secondaryAction={{ label: "Review Executive Reporting", href: "/diagnostics/executive-reporting" }}
+            />
           </div>
 
           {/* ─── Print button ────────────────────────────────────────────── */}
@@ -256,7 +272,12 @@ export default function BoardSummaryPage() {
 
           {loaded && !data && <NoDataState />}
 
-          {loaded && data && <BoardSummaryPreview data={data} />}
+          {loaded && data && (
+            <>
+              <BoardSummaryDemonstrationPanel />
+              <BoardSummaryPreview data={data} />
+            </>
+          )}
 
           {loaded && data && (
             <div data-no-print style={{ marginTop: "20px" }}>
@@ -269,9 +290,21 @@ export default function BoardSummaryPage() {
 
           {loaded && data && (
             <div data-no-print style={{ marginTop: "12px" }}>
+              <p
+                style={{
+                  ...serif,
+                  fontSize: "13px",
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.40)",
+                  marginBottom: "8px",
+                }}
+              >
+                This sends a copy of the preview. It does not create or alter a governed record.
+              </p>
               <SendToSelfForm
                 source="board_summary_preview"
                 isLiveRecord={false}
+                label="Send preview to self"
                 content={{
                   title: `Board Summary — ${data.title}`,
                   summary: `Primary contradiction: ${data.primaryContradiction}. Required move: ${data.requiredMove}.`,
@@ -310,7 +343,7 @@ export default function BoardSummaryPage() {
                 alignSelf: "flex-start",
               }}
             >
-              → Continue in Decision Centre
+              Save / Continue in Decision Centre
             </Link>
             <Link
               href="/diagnostics/executive-reporting"
@@ -338,7 +371,7 @@ export default function BoardSummaryPage() {
                 padding: "6px 0",
               }}
             >
-              ← Return to diagnostic ladder
+              Return to diagnostics
             </Link>
           </nav>
 

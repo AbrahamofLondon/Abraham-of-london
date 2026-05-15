@@ -4,10 +4,13 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
+import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
 import { track } from "@/lib/analytics/track";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import {
+  buildDecisionDelaySendToSelfPayload,
   computeDecisionDelayExposure,
+  type DecisionState,
   type ExposureType,
   type EstimateConfidence,
   type DecisionDelayExposureResult,
@@ -118,10 +121,69 @@ function ExposureBand({
   );
 }
 
+function ReadingField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p
+        style={{
+          ...mono,
+          fontSize: "7px",
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.30)",
+          marginBottom: "6px",
+        }}
+      >
+        {label}
+      </p>
+      <p
+        style={{
+          ...mono,
+          fontSize: "14px",
+          letterSpacing: "0.05em",
+          color: "#F5F5F5",
+        }}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function ReadingParagraph({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginTop: "16px" }}>
+      <p
+        style={{
+          ...mono,
+          fontSize: "7px",
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.30)",
+          marginBottom: "6px",
+        }}
+      >
+        {label}
+      </p>
+      <p
+        style={{
+          ...serif,
+          fontSize: "16px",
+          lineHeight: 1.7,
+          color: "rgba(255,255,255,0.68)",
+        }}
+      >
+        {children}
+      </p>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 type FormState = {
   decisionLabel: string;
+  decisionState: DecisionState;
   weeklyCostRaw: string;
   delayWeeksRaw: string;
   exposureType: ExposureType;
@@ -130,6 +192,7 @@ type FormState = {
 
 const DEFAULT_FORM: FormState = {
   decisionLabel: "",
+  decisionState: "not_yet_decided",
   weeklyCostRaw: "",
   delayWeeksRaw: "",
   exposureType: "revenue",
@@ -141,16 +204,24 @@ const CALCULATOR_STORAGE_KEY = "aol_decision_delay_exposure";
 type CalculatorPersisted = {
   weeklyCost: number;
   delayWeeks: number;
+  decisionState: DecisionState;
   exposureType: ExposureType;
   estimateConfidence: EstimateConfidence;
   calculatedAt: string;
 };
 
-function persistCalculatorResult(weeklyCost: number, delayWeeks: number, exposureType: ExposureType, estimateConfidence: EstimateConfidence): void {
+function persistCalculatorResult(
+  weeklyCost: number,
+  delayWeeks: number,
+  decisionState: DecisionState,
+  exposureType: ExposureType,
+  estimateConfidence: EstimateConfidence,
+): void {
   try {
     const data: CalculatorPersisted = {
       weeklyCost,
       delayWeeks,
+      decisionState,
       exposureType,
       estimateConfidence,
       calculatedAt: new Date().toISOString(),
@@ -178,6 +249,7 @@ export default function DecisionDelayExposurePage() {
             ...prev,
             weeklyCostRaw: String(persisted.weeklyCost),
             delayWeeksRaw: String(persisted.delayWeeks),
+            decisionState: persisted.decisionState ?? "not_yet_decided",
             exposureType: persisted.exposureType,
             estimateConfidence: persisted.estimateConfidence,
           }));
@@ -202,18 +274,26 @@ export default function DecisionDelayExposurePage() {
     const calculated = computeDecisionDelayExposure({
       weeklyCost,
       delayWeeks,
+      decisionState: form.decisionState,
       exposureType: form.exposureType,
       estimateConfidence: form.estimateConfidence,
     });
 
     // Persist calculator inputs for carry-forward
-    persistCalculatorResult(weeklyCost, delayWeeks, form.exposureType, form.estimateConfidence);
+    persistCalculatorResult(
+      weeklyCost,
+      delayWeeks,
+      form.decisionState,
+      form.exposureType,
+      form.estimateConfidence,
+    );
 
     // Adoption instrumentation
     trackLaunch("calculator_completed", "decision_delay_calculator");
     track("calculator_completed", {
       exposure_type: form.exposureType,
       estimate_confidence: form.estimateConfidence,
+      decision_state: form.decisionState,
     });
 
     // Track without raw user text
@@ -245,8 +325,8 @@ export default function DecisionDelayExposurePage() {
 
   return (
     <Layout
-      title="Decision Delay Exposure Calculator"
-      description="Estimate the financial and structural cost of a deferred decision. No sign-up required. Scenario estimates only."
+      title="Decision Delay Exposure Instrument"
+      description="Estimate the financial drag, structural consequence, and governance pressure created by a deferred decision. Scenario estimates only — not financial advice."
       canonicalUrl="/tools/decision-delay-exposure"
     >
       <Head>
@@ -287,7 +367,7 @@ export default function DecisionDelayExposurePage() {
               marginBottom: "16px",
             }}
           >
-            Decision delay exposure calculator
+            Decision Delay Exposure Instrument
           </h1>
 
           <p
@@ -299,9 +379,21 @@ export default function DecisionDelayExposurePage() {
               marginBottom: "40px",
             }}
           >
-            Convert decision delay into estimated financial and structural exposure.
-            No account required. Scenario estimates only — not financial advice.
+            Estimate the financial drag, structural consequence, and governance pressure created by a deferred decision.
+            Scenario estimates only — not financial advice.
           </p>
+
+          <SurfaceBoundaryPanel
+            surfaceType="PUBLIC_INSTRUMENT"
+            recordCreated="No governed case or retained decision record is created by this estimate."
+            systemReads={[
+              "Stated financial exposure",
+              "Decision state",
+              "Delay duration and governance pressure",
+            ]}
+            nextAction={{ label: "Run the Fast Diagnostic", href: "/diagnostics/fast" }}
+            secondaryAction={{ label: "Open Decision Centre", href: "/decision-centre" }}
+          />
 
           <GoldDivider />
 
@@ -332,6 +424,23 @@ export default function DecisionDelayExposurePage() {
                   >
                     Used for display only. Not stored or transmitted.
                   </p>
+                </div>
+
+                <div>
+                  <FieldLabel>What best describes the decision?</FieldLabel>
+                  <select
+                    name="decisionState"
+                    value={form.decisionState}
+                    onChange={handleChange}
+                    style={selectStyle}
+                  >
+                    <option value="not_yet_decided">Not yet decided</option>
+                    <option value="decided_not_executed">Decided but not executed</option>
+                    <option value="repeatedly_revisited">Repeatedly revisited</option>
+                    <option value="blocked_by_authority">Blocked by authority</option>
+                    <option value="blocked_by_evidence">Blocked by evidence</option>
+                    <option value="blocked_by_stakeholder_alignment">Blocked by stakeholder alignment</option>
+                  </select>
                 </div>
 
                 <div>
@@ -424,7 +533,7 @@ export default function DecisionDelayExposurePage() {
                     alignSelf: "flex-start",
                   }}
                 >
-                  Calculate exposure
+                  Generate exposure reading
                 </button>
               </div>
             </form>
@@ -467,34 +576,13 @@ export default function DecisionDelayExposurePage() {
                 </div>
               )}
 
-              {/* Exposure bands */}
-              <section style={{ marginBottom: "40px" }}>
-                <p
-                  style={{
-                    ...mono,
-                    fontSize: "7px",
-                    letterSpacing: "0.26em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.28)",
-                    marginBottom: "24px",
-                  }}
-                >
-                  Scenario exposure — at current weekly rate
-                </p>
-                <div style={{ display: "grid", gap: "20px" }}>
-                  <ExposureBand period="7 days" formatted={result.sevenDayFormatted} intensity={0.45} />
-                  <ExposureBand period="30 days" formatted={result.thirtyDayFormatted} intensity={0.65} />
-                  <ExposureBand period="90 days" formatted={result.ninetyDayFormatted} intensity={0.90} />
-                </div>
-              </section>
-
-              {/* Exposure statement */}
+              {/* Governed reading */}
               <section
                 style={{
-                  border: `1px solid ${GOLD}18`,
-                  backgroundColor: `${GOLD}05`,
+                  border: `1px solid ${GOLD}30`,
+                  backgroundColor: `${GOLD}07`,
                   padding: "24px",
-                  marginBottom: "32px",
+                  marginBottom: "40px",
                 }}
               >
                 <p
@@ -507,53 +595,77 @@ export default function DecisionDelayExposurePage() {
                     marginBottom: "12px",
                   }}
                 >
-                  Exposure assessment
+                  Decision Exposure Reading
                 </p>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                    gap: "18px",
+                    marginBottom: "24px",
+                  }}
+                >
+                  <ReadingField label="Decision State" value={result.decisionStateLabel} />
+                  <ReadingField label="30-day exposure" value={result.thirtyDayFormatted} />
+                  <ReadingField label="Governance Pressure" value={result.governancePressureBand} />
+                  <ReadingField label="Record status" value={result.recordStatus} />
+                </div>
+                <ReadingParagraph label="Financial exposure">
+                  {result.financialExposure}
+                </ReadingParagraph>
+                <ReadingParagraph label="Structural exposure">
+                  {result.structuralExposure}
+                </ReadingParagraph>
+                <ReadingParagraph label="Governance exposure">
+                  {result.governanceExposure}
+                </ReadingParagraph>
+                <ReadingParagraph label="Required next move">
+                  {result.requiredNextMove}
+                </ReadingParagraph>
                 <p
                   style={{
                     ...serif,
                     fontSize: "16px",
                     lineHeight: 1.75,
                     color: "rgba(255,255,255,0.72)",
+                    marginTop: "20px",
                   }}
                 >
-                  {result.exposureStatement}
+                  <span style={{ color: "#F5F5F5" }}>
+                    Governance Pressure: {result.governancePressureBand}.
+                  </span>{" "}
+                  {result.governancePressureExplanation}
                 </p>
               </section>
 
-              {/* Structural consequence */}
-              <section style={{ marginBottom: "32px" }}>
+              {/* Exposure bands */}
+              <section style={{ marginBottom: "40px" }}>
                 <p
                   style={{
                     ...mono,
                     fontSize: "7px",
-                    letterSpacing: "0.22em",
+                    letterSpacing: "0.26em",
                     textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.30)",
-                    marginBottom: "12px",
+                    color: "rgba(255,255,255,0.28)",
+                    marginBottom: "24px",
                   }}
                 >
-                  Structural consequence
+                  Scenario exposure timeline — at current weekly rate
                 </p>
-                <p
-                  style={{
-                    ...serif,
-                    fontSize: "16px",
-                    lineHeight: 1.75,
-                    color: "rgba(255,255,255,0.65)",
-                  }}
-                >
-                  {result.structuralConsequence}
-                </p>
+                <div style={{ display: "grid", gap: "20px" }}>
+                  <ExposureBand period="7 days" formatted={result.sevenDayFormatted} intensity={0.45} />
+                  <ExposureBand period="30 days" formatted={result.thirtyDayFormatted} intensity={0.65} />
+                  <ExposureBand period="90 days" formatted={result.ninetyDayFormatted} intensity={0.90} />
+                </div>
               </section>
 
-              {/* Recommended next move */}
+              {/* What the system sees */}
               <section
                 style={{
                   border: "1px solid rgba(255,255,255,0.10)",
                   backgroundColor: "rgba(255,255,255,0.02)",
                   padding: "24px",
-                  marginBottom: "40px",
+                  marginBottom: "32px",
                 }}
               >
                 <p
@@ -566,40 +678,98 @@ export default function DecisionDelayExposurePage() {
                     marginBottom: "12px",
                   }}
                 >
-                  Recommended next move
+                  What the system sees
+                </p>
+                <ReadingParagraph label="Signal">{result.whatSystemSees.signal}</ReadingParagraph>
+                <ReadingParagraph label="Likely pressure point">
+                  {result.whatSystemSees.likelyPressurePoint}
+                </ReadingParagraph>
+                <ReadingParagraph label="Governance move">
+                  {result.whatSystemSees.governanceMove}
+                </ReadingParagraph>
+              </section>
+
+              {/* Exposure statement */}
+              <section style={{ marginBottom: "32px" }}>
+                <p
+                  style={{
+                    ...mono,
+                    fontSize: "7px",
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.30)",
+                    marginBottom: "12px",
+                  }}
+                >
+                  Scenario estimate
                 </p>
                 <p
                   style={{
                     ...serif,
                     fontSize: "16px",
                     lineHeight: 1.75,
-                    color: "rgba(255,255,255,0.72)",
+                    color: "rgba(255,255,255,0.65)",
                   }}
                 >
-                  {result.recommendedNextMove}
+                  {result.exposureStatement}
                 </p>
               </section>
 
               {/* CTA */}
               <section style={{ marginBottom: "40px" }}>
-                <Link
-                  href={result.ctaHref}
-                  style={{
-                    display: "inline-block",
-                    padding: "14px 28px",
-                    backgroundColor: GOLD,
-                    color: "#0B0B0B",
-                    textDecoration: "none",
-                    ...mono,
-                    fontSize: "9px",
-                    letterSpacing: "0.20em",
-                    textTransform: "uppercase",
-                    fontWeight: 600,
-                    minHeight: "44px",
-                  }}
-                >
-                  Identify what is blocking the decision →
-                </Link>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
+                  <Link
+                    href={result.ctaHref}
+                    style={{
+                      display: "inline-block",
+                      padding: "14px 28px",
+                      backgroundColor: GOLD,
+                      color: "#0B0B0B",
+                      textDecoration: "none",
+                      ...mono,
+                      fontSize: "9px",
+                      letterSpacing: "0.20em",
+                      textTransform: "uppercase",
+                      fontWeight: 600,
+                      minHeight: "44px",
+                    }}
+                  >
+                    Run the Fast Diagnostic
+                  </Link>
+                  <a
+                    href="#save-exposure-estimate"
+                    style={{
+                      display: "inline-block",
+                      padding: "13px 20px",
+                      border: `1px solid ${GOLD}45`,
+                      color: `${GOLD}DD`,
+                      textDecoration: "none",
+                      ...mono,
+                      fontSize: "8px",
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      minHeight: "44px",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    Save this exposure estimate
+                  </a>
+                  <a
+                    href="#send-to-self"
+                    style={{
+                      display: "inline-block",
+                      padding: "13px 0",
+                      color: "rgba(255,255,255,0.42)",
+                      textDecoration: "none",
+                      ...mono,
+                      fontSize: "8px",
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Send to self
+                  </a>
+                </div>
                 <p
                   style={{
                     ...mono,
@@ -609,7 +779,7 @@ export default function DecisionDelayExposurePage() {
                     marginTop: "10px",
                   }}
                 >
-                  Fast Diagnostic · No sign-up required
+                  Preserve continuity only when it is earned: diagnose first, save when you need the case retained.
                 </p>
               </section>
 
@@ -673,7 +843,7 @@ export default function DecisionDelayExposurePage() {
                     marginBottom: "6px",
                   }}
                 >
-                  Record boundary
+                  Record status: {result.recordStatus}
                 </p>
                 <p
                   style={{
@@ -683,27 +853,30 @@ export default function DecisionDelayExposurePage() {
                     color: "rgba(255,255,255,0.40)",
                   }}
                 >
-                  This calculation has not created a governed case. Save it to carry the exposure estimate into Decision Centre, or run the Fast Diagnostic to create the governed record.
+                  {result.recordBoundary}
                 </p>
               </section>
 
               {/* Send to self */}
-              <SendToSelfCalculator
-                weeklyCost={parseFloat(form.weeklyCostRaw) || 0}
-                delayWeeks={parseFloat(form.delayWeeksRaw) || 0}
-                exposureType={form.exposureType}
-                result={result}
-              />
+              <div id="send-to-self">
+                <SendToSelfCalculator
+                  weeklyCost={parseFloat(form.weeklyCostRaw) || 0}
+                  delayWeeks={parseFloat(form.delayWeeksRaw) || 0}
+                  exposureType={form.exposureType}
+                  result={result}
+                />
+              </div>
 
-              <div style={{ marginTop: "16px" }}>
+              <div id="save-exposure-estimate" style={{ marginTop: "16px" }}>
                 <SaveSessionCasePanel
                   payload={buildDelayCalculatorCarryForwardPayload({
                     weeklyCost: parseFloat(form.weeklyCostRaw) || 0,
                     delayWeeks: parseFloat(form.delayWeeksRaw) || 0,
+                    decisionState: form.decisionState,
                     exposureType: form.exposureType,
                     estimateConfidence: form.estimateConfidence,
                   })}
-                  copy="Create a free account to preserve the exposure estimate in Decision Centre. The optional decision label remains display-only and is not carried forward."
+                  copy="Save this estimate after sign-in to preserve the exposure reading in Decision Centre. The optional decision label remains display-only and is not carried forward."
                 />
               </div>
             </div>
@@ -722,8 +895,8 @@ export default function DecisionDelayExposurePage() {
                 fontStyle: "italic",
               }}
             >
-              This calculator is a public entry surface within the Abraham of London decision-governance system.
-              It does not require an account, does not store your inputs, and does not produce financial advice.
+              This instrument is a public entry surface within the Abraham of London decision-governance system.
+              It does not require an account, does not store your optional decision text, and does not produce financial advice.
               All figures are scenario estimates derived from your stated inputs.
             </p>
           </section>
@@ -765,7 +938,7 @@ function SendToSelfCalculator({
 }: {
   weeklyCost: number;
   delayWeeks: number;
-  exposureType: string;
+  exposureType: ExposureType;
   result: DecisionDelayExposureResult;
 }) {
   const [email, setEmail] = React.useState("");
@@ -774,6 +947,12 @@ function SendToSelfCalculator({
   async function handleSend() {
     const trimmed = email.trim();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
+    const payload = buildDecisionDelaySendToSelfPayload({
+      weeklyCost,
+      delayWeeks,
+      exposureType,
+      result,
+    });
     setStatus("sending");
     try {
       const response = await fetch("/api/tools/send-to-self", {
@@ -782,12 +961,7 @@ function SendToSelfCalculator({
         body: JSON.stringify({
           email: trimmed,
           source: "decision_delay_calculator",
-          content: {
-            title: `Decision delay exposure — ${exposureType.replace(/_/g, " ")}`,
-            summary: `Estimated weekly cost: £${weeklyCost.toLocaleString()} · Delay: ${delayWeeks} week${delayWeeks !== 1 ? "s" : ""}`,
-            exposureSummary: `7-day exposure: ${result.sevenDayFormatted} · 30-day: ${result.thirtyDayFormatted} · 90-day: ${result.ninetyDayFormatted}`,
-            nextMove: result.recommendedNextMove,
-          },
+          content: payload,
         }),
       });
       const json = await response.json();
@@ -817,7 +991,7 @@ function SendToSelfCalculator({
   return (
     <section style={{ marginTop: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "14px 18px" }}>
       <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
-        Send this to my email
+        Send to self
       </p>
       <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginBottom: "10px" }}>
         We will send this result to the email you provide. This does not create a governed case unless you create an account.

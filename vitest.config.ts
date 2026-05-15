@@ -7,11 +7,13 @@ export default defineConfig({
     environment: 'node',
     globals: true,
 
-    // Exclude Playwright e2e tests and build output duplicates
+    // Exclude Playwright e2e tests, build output, and sub-package node_modules
     exclude: [
       'tests/e2e/**',
       '.next/**',
       'node_modules/**',
+      '**/node_modules/**',
+      '_tests_/components/**',
     ],
 
     // Path Aliasing for clean imports

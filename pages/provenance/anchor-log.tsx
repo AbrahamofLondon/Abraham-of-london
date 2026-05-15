@@ -18,6 +18,7 @@ import Link from "next/link";
 import { Shield, Clock, Hash, Layers } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import {
   buildPublicAnchorLogState,
@@ -147,6 +148,51 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
               Generated: {formatDate(generatedAt)}
             </p>
           </header>
+
+          <SurfaceBoundaryPanel
+            surfaceType="PUBLIC_SAMPLE"
+            recordCreated="No case record is created by viewing this public status surface."
+            systemReads={[
+              "Whether public roots have been deliberately published",
+              "Observed internal chain-anchor availability",
+              "Whether external anchoring is configured",
+            ]}
+            nextAction={{ label: "View client-safe provenance sample", href: "/provenance/sample-export" }}
+            secondaryAction={{ label: "Run Fast Diagnostic", href: "/diagnostics/fast" }}
+          />
+
+          {/* How to read this page */}
+          <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+              How to read this page
+            </p>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                  Internal chain anchor
+                </p>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                  Created inside the platform for supported governed records.
+                </p>
+              </div>
+              <div>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                  Public root
+                </p>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                  A deliberately published non-sensitive cryptographic root.
+                </p>
+              </div>
+              <div>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                  External anchoring
+                </p>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                  WORM or public blockchain anchoring is not configured yet.
+                </p>
+              </div>
+            </div>
+          </section>
 
           {/* Anchoring status */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
@@ -278,9 +324,12 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
             <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
               These anchors disclose cryptographic roots only. They do not reveal client data, evidence, decisions, or internal review material. External WORM or public anchoring is not yet configured. Until then, these roots are stored in the platform database and are not independently anchored to an external immutable store.
             </p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-3">
               <Link href="/provenance/sample-export" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
-                View sample provenance summary
+                View client-safe provenance sample
+              </Link>
+              <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+                Run Fast Diagnostic
               </Link>
             </div>
           </section>

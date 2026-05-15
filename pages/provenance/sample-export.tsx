@@ -19,6 +19,7 @@ import Link from "next/link";
 import { Shield, Hash, Clock, Layers, AlertTriangle, CheckCircle2, FileText } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
@@ -83,12 +84,12 @@ const SampleExportPage: NextPage = () => {
                 marginBottom: "0.85rem",
               }}
             >
-              Sample / no live client data
+              Demonstration only · Not generated from your account or case
             </div>
             <div className="flex items-center gap-2 mb-4">
               <Shield className="h-5 w-5" style={{ color: GOLD }} />
               <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                Client-Safe Provenance Summary
+                Client-safe provenance sample
               </p>
             </div>
             <h1 style={{ ...serif, fontSize: "clamp(1.5rem, 3vw, 2.2rem)", lineHeight: 1.1, color: "rgba(255,255,255,0.92)" }}>
@@ -104,6 +105,42 @@ const SampleExportPage: NextPage = () => {
               Sample data for demonstration purposes. Not connected to your account, case, or governed record.
             </p>
           </header>
+
+          <SurfaceBoundaryPanel
+            surfaceType="PUBLIC_SAMPLE"
+            recordCreated="No account record or governed case is created by viewing this sample."
+            systemReads={[
+              "Client-safe proof structure",
+              "Evidence posture and gap classes",
+              "Hash and anchor status where available",
+            ]}
+            nextAction={{ label: "Create a governed case", href: "/diagnostics/fast" }}
+            secondaryAction={{ label: "View public anchor log status", href: "/provenance/anchor-log" }}
+          />
+
+          {/* ── LIVE CASE VERSION ──────────────────────────────────── */}
+          <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}03`, padding: "1rem" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+              Your live case version would show
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {[
+                "Accountability statement",
+                "Confidence bands",
+                "Gap classes",
+                "Milestone timeline",
+                "Provenance hash",
+                "Anchor status where available",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-2">
+                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: `${GOLD}AA` }} />
+                  <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.68)" }}>
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
 
           {/* ── ACCOUNTABILITY STATEMENT ────────────────────────────── */}
           <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}03`, padding: "1rem" }}>
@@ -266,20 +303,20 @@ const SampleExportPage: NextPage = () => {
             </div>
           </section>
 
-          {/* ── RELATED SURFACES ────────────────────────────────────── */}
+          {/* ── PROOF PATH ─────────────────────────────────────────── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
-              Related surfaces
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
+              Proof path
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/provenance/anchor-log" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+            <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.48)", maxWidth: "52ch" }}>
+              This sample shows the client-safe proof surface. A governed case is where the live decision record, evidence posture, and provenance trail are created.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgb(3,3,5)", backgroundColor: GOLD, border: `1px solid ${GOLD}`, padding: "0.5rem 0.9rem", textDecoration: "none" }}>
+                Create a governed case
+              </Link>
+              <Link href="/provenance/anchor-log" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.5rem 0.9rem", textDecoration: "none" }}>
                 View public anchor log status
-              </Link>
-              <Link href="/tools/decision-delay-exposure" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
-                Estimate decision delay exposure
-              </Link>
-              <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
-                Run the Fast Diagnostic
               </Link>
             </div>
           </section>
@@ -290,7 +327,7 @@ const SampleExportPage: NextPage = () => {
               Chain boundary
             </p>
             <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
-              This provenance record is hash-verified against the internal Decision Provenance Record. The hash is stored in the oversight cycle archive and can be independently verified by the platform operator upon request. External WORM storage or public blockchain anchoring is not yet configured. Until then, the hash provides tamper evidence rather than tamper prevention — any change to the record produces a different hash, enabling detection.
+              This sample shows hash verification against an internal Decision Provenance Record format. In a live case, the hash is stored in the oversight cycle archive and can be checked by the platform operator upon request. External WORM storage or public blockchain anchoring is not yet configured. Until then, the hash provides tamper evidence rather than tamper prevention — any change to the record produces a different hash, enabling detection.
             </p>
           </section>
 

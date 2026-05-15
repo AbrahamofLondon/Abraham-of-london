@@ -119,6 +119,83 @@ function ProvenanceHashRow({ hash }: { hash: string }) {
   );
 }
 
+// ─── Demonstration boundary panel ─────────────────────────────────────────────
+
+export function BoardSummaryDemonstrationPanel() {
+  const demonstrations = [
+    {
+      label: "Board finding",
+      text: "The decision condition and seriousness band.",
+    },
+    {
+      label: "Governance move",
+      text: "The next admissible action.",
+    },
+    {
+      label: "Consequence exposure",
+      text: "The projected effect of delay or unresolved authority.",
+    },
+    {
+      label: "Evidence surface",
+      text: "The diagnostic evidence currently available.",
+    },
+  ];
+
+  return (
+    <section
+      aria-label="What this demonstrates"
+      style={{
+        border: `1px solid ${GOLD}18`,
+        backgroundColor: `${GOLD}03`,
+        padding: "1.25rem",
+        marginBottom: "20px",
+      }}
+    >
+      <p
+        style={{
+          ...mono,
+          fontSize: "7px",
+          letterSpacing: "0.30em",
+          textTransform: "uppercase",
+          color: `${GOLD}88`,
+          marginBottom: "16px",
+        }}
+      >
+        What this demonstrates
+      </p>
+
+      <div style={{ display: "grid", gap: "12px" }}>
+        {demonstrations.map((item) => (
+          <div key={item.label} style={{ borderLeft: `1px solid ${GOLD}20`, paddingLeft: "12px" }}>
+            <p
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: `${GOLD}70`,
+                marginBottom: "4px",
+              }}
+            >
+              {item.label}
+            </p>
+            <p
+              style={{
+                ...serif,
+                fontSize: "0.92rem",
+                lineHeight: 1.5,
+                color: "rgba(255,255,255,0.68)",
+              }}
+            >
+              {item.text}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ─── BoardSummaryPreview ──────────────────────────────────────────────────────
 
 export default function BoardSummaryPreview({ data }: { data: BoardSummaryData | null }) {
