@@ -88,6 +88,9 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
     return status.toLowerCase().replace(/_/g, " ");
   }
 
+  const sourceLabel = c.sourceType ? c.sourceType.replace(/_/g, " ").toLowerCase() : null;
+  const lastActivity = formatDisplayDate(c.updatedAt);
+
   return (
     <div style={{ border: isMostUrgent ? `1px solid ${GOLD}30` : `1px solid rgba(255,255,255,0.07)`, backgroundColor: isMostUrgent ? "rgba(201,169,110,0.04)" : "rgba(255,255,255,0.02)", padding: "24px 28px" }}>
       {/* Header */}
@@ -108,9 +111,19 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
             <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               Evidence: {c.evidenceTier.replace("_", " ")}
             </span>
+            {sourceLabel && (
+              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}77` }}>
+                {sourceLabel}
+              </span>
+            )}
             {c.unresolvedContradictions > 0 && (
               <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
                 {c.unresolvedContradictions} contradiction{c.unresolvedContradictions !== 1 ? "s" : ""}
+              </span>
+            )}
+            {lastActivity && (
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.18)" }}>
+                Last activity: {lastActivity}
               </span>
             )}
           </div>
@@ -125,6 +138,30 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
         <div style={{ borderLeft: `2px solid ${GOLD}30`, paddingLeft: "14px", marginBottom: "20px" }}>
           <p style={{ fontSize: "14px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>
             &ldquo;{c.decisionText.length > 200 ? c.decisionText.slice(0, 197) + "..." : c.decisionText}&rdquo;
+          </p>
+        </div>
+      )}
+
+      {/* Primary finding */}
+      {c.primaryFinding && (
+        <div style={{ borderLeft: `2px solid ${GOLD}40`, paddingLeft: "14px", marginBottom: "12px" }}>
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "4px" }}>
+            Primary finding
+          </p>
+          <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
+            {c.primaryFinding}
+          </p>
+        </div>
+      )}
+
+      {/* Governance implication */}
+      {c.governanceImplication && (
+        <div style={{ border: "1px solid rgba(255,200,100,0.10)", backgroundColor: "rgba(255,200,100,0.03)", padding: "10px 14px", marginBottom: "16px" }}>
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "4px" }}>
+            Governance implication
+          </p>
+          <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.42)" }}>
+            {c.governanceImplication}
           </p>
         </div>
       )}
@@ -661,6 +698,30 @@ export default function DecisionCentrePage() {
   const [data, setData] = React.useState<DecisionCentreResponse | null>(null);
   const [authRequired, setAuthRequired] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
+  const [activeFilter, setActiveFilter] = React.useState("all");
+
+  const filteredCases = React.useMemo(() => {
+    if (!data) return [];
+    if (activeFilter === "all") return data.cases;
+    return data.cases.filter((c) => {
+      switch (activeFilter) {
+        case "diagnostics":
+          return c.sourceType === "FAST_DIAGNOSTIC" || c.sourceType === "PURPOSE_ALIGNMENT" || c.sourceType === "CONSTITUTIONAL_DIAGNOSTIC";
+        case "assessments":
+          return c.sourceType === "TEAM_ASSESSMENT" || c.sourceType === "ENTERPRISE_ASSESSMENT";
+        case "strategy_room":
+          return c.sourceType === "STRATEGY_ROOM_RECORD" || Boolean(c.strategyRoomRecord);
+        case "return_briefs":
+          return c.returnBriefs.length > 0;
+        case "proof":
+          return c.sourceType === "PROOF_PACK" || Boolean(c.strategyRoomRecord?.provenanceStatus === "available");
+        case "needs_action":
+          return Boolean(c.nextRequiredAction) || c.unresolvedContradictions > 0;
+        default:
+          return true;
+      }
+    });
+  }, [data, activeFilter]);
   const [continuityMessage, setContinuityMessage] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -824,6 +885,48 @@ export default function DecisionCentrePage() {
 
           {/* Cases */}
           {!loading && data && data.cases.length > 0 && (
+            <>
+              {/* ── Filter bar ── */}
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "16px", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                {[
+                  { key: "all", label: "All" },
+                  { key: "diagnostics", label: "Diagnostics" },
+                  { key: "assessments", label: "Assessments" },
+                  { key: "strategy_room", label: "Strategy Room" },
+                  { key: "return_briefs", label: "Return Briefs" },
+                  { key: "proof", label: "Proof/Provenance" },
+                  { key: "needs_action", label: "Needs action" },
+                ].map((f) => {
+                  const active = activeFilter === f.key;
+                  return (
+                    <button
+                      key={f.key}
+                      type="button"
+                      onClick={() => setActiveFilter(f.key)}
+                      style={{
+                        ...mono,
+                        fontSize: "7.5px",
+                        letterSpacing: "0.16em",
+                        textTransform: "uppercase",
+                        color: active ? `${GOLD}CC` : "rgba(255,255,255,0.25)",
+                        border: active ? `1px solid ${GOLD}40` : "1px solid rgba(255,255,255,0.06)",
+                        backgroundColor: active ? `${GOLD}0A` : "transparent",
+                        padding: "6px 12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {f.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {filteredCases.length === 0 && (
+                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", padding: "20px 0", textAlign: "center" }}>
+                  No cases match the selected filter.
+                </p>
+              )}
+
             <div style={{ display: "grid", gap: "16px" }}>
               {data.mostUrgentCase && (
                 <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}05`, padding: "16px 20px" }}>
@@ -837,7 +940,7 @@ export default function DecisionCentrePage() {
                   ))}
                 </div>
               )}
-              {data.cases.map((c) => (
+              {filteredCases.map((c) => (
                 <CaseCard key={c.caseId} c={c} isMostUrgent={data.mostUrgentCase?.caseId === c.caseId} />
               ))}
 
@@ -888,6 +991,7 @@ export default function DecisionCentrePage() {
                 </p>
               </div>
             </div>
+            </>
           )}
         </div>
       </div>

@@ -392,6 +392,59 @@ function deriveNextAction(livingCase: LivingCase): string | null {
   return null;
 }
 
+/**
+ * Derives the originating product surface for a Living Case.
+ */
+function deriveCaseSourceType(livingCase: LivingCase): string | null {
+  const stages = livingCase.completedStages;
+  if (stages.includes("strategy_room")) return "STRATEGY_ROOM_RECORD";
+  if (stages.includes("executive_reporting")) return "EXECUTIVE_REPORT";
+  if (stages.includes("enterprise")) return "ENTERPRISE_ASSESSMENT";
+  if (stages.includes("team")) return "TEAM_ASSESSMENT";
+  if (stages.includes("constitutional")) return "CONSTITUTIONAL_DIAGNOSTIC";
+  if (stages.includes("purpose_alignment")) return "PURPOSE_ALIGNMENT";
+  if (stages.length > 0) return "FAST_DIAGNOSTIC";
+  return null;
+}
+
+/**
+ * Derives the primary finding from a Living Case's contradictions or decisions.
+ */
+function derivePrimaryFinding(livingCase: LivingCase): string | null {
+  if (livingCase.contradictions.length > 0) {
+    const sorted = [...livingCase.contradictions].sort(
+      (a, b) => severityRank(b.severity) - severityRank(a.severity),
+    );
+    return sorted[0]?.summary ?? null;
+  }
+  if (livingCase.primaryDecision?.constraintText) {
+    return livingCase.primaryDecision.constraintText;
+  }
+  if (livingCase.latestDirective) {
+    return livingCase.latestDirective;
+  }
+  return null;
+}
+
+/**
+ * Derives a governance implication summary from the Living Case state.
+ */
+function deriveGovernanceImplication(livingCase: LivingCase): string | null {
+  if (livingCase.contradictions.length >= 3) {
+    return "Multiple unresolved contradictions indicate a persistent governance gap requiring structured intervention.";
+  }
+  if (livingCase.contradictions.length > 0) {
+    return "Unresolved contradictions are accumulating. Without governance action, the pattern will compound.";
+  }
+  if (livingCase.unresolvedTensions.length > 0) {
+    return "Unresolved structural tensions are present. Monitor and re-assess after next evidence cycle.";
+  }
+  if (livingCase.evidenceTier === "single_source") {
+    return "Evidence is single-source. Strengthen with additional assessments before governance escalation.";
+  }
+  return null;
+}
+
 function deriveRetainerReadiness(input: {
   livingCase: LivingCase;
   recurrence: PatternRecurrenceSummary | null;
@@ -838,6 +891,9 @@ export default async function handler(
       },
       title: buildCaseTitle(livingCase),
       decisionText: livingCase.primaryDecision?.decisionText || null,
+      sourceType: deriveCaseSourceType(livingCase),
+      primaryFinding: derivePrimaryFinding(livingCase),
+      governanceImplication: deriveGovernanceImplication(livingCase),
       cognitiveState: deriveCognitiveState(livingCase),
       evidenceTier: livingCase.evidenceTier,
       completedStages: buildStageChecklist(livingCase),

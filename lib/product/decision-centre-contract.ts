@@ -194,6 +194,12 @@ export type DecisionCentreCase = {
   title: string;
   /** Full decision text from canonical decision object */
   decisionText?: string | null;
+  /** Which product surface originated this case */
+  sourceType?: string | null;
+  /** Primary finding or condition classification */
+  primaryFinding?: string | null;
+  /** Governance implication summary */
+  governanceImplication?: string | null;
   /** Current cognitive state */
   cognitiveState: CognitiveState;
   /** Evidence tier */

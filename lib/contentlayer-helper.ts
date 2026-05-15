@@ -126,6 +126,7 @@ export const documentKinds: DocKind[] = [
 
 let cache: ContentDoc[] | null = null;
 const kindCache = new Map<DocKind, ContentDoc[]>();
+let warnedAboutGeneratedIndexLoad = false;
 
 // Maps each DocKind to the contentlayer generated index directory name(s).
 // Used by per-kind loaders so workers that only touch one collection do not
@@ -319,30 +320,63 @@ function parseIndexJson(jsonPath: string): ContentDoc[] {
   }
 }
 
+function warnGeneratedIndexLoadOnce(error?: unknown): void {
+  if (warnedAboutGeneratedIndexLoad) return;
+
+  warnedAboutGeneratedIndexLoad = true;
+  console.warn(
+    "[CONTENTLAYER_HELPER] generated content indexes unavailable; continuing with an empty registry.",
+    error,
+  );
+}
+
+function hasGeneratedIndexDirectory(fs: NodeFs, generatedRoot: string): boolean {
+  try {
+    const stats = fs.statSync(generatedRoot);
+    if (stats.isDirectory()) return true;
+
+    warnGeneratedIndexLoadOnce(
+      new Error(`Expected generated content directory at ${generatedRoot}`),
+    );
+    return false;
+  } catch (error) {
+    warnGeneratedIndexLoadOnce(error);
+    return false;
+  }
+}
+
 function loadAllFromGeneratedIndexes(): ContentDoc[] {
   const { fs, path, generatedRoot } = getNodeModules();
 
-  if (!fs.existsSync(generatedRoot)) return [];
+  if (!hasGeneratedIndexDirectory(fs, generatedRoot)) return [];
 
-  const dirs = fs
-    .readdirSync(generatedRoot, { withFileTypes: true })
-    .filter((entry: { isDirectory: () => boolean }) => entry.isDirectory());
+  try {
+    const dirs = fs
+      .readdirSync(generatedRoot, { withFileTypes: true })
+      .filter((entry: { isDirectory: () => boolean }) => entry.isDirectory());
 
-  const docs: ContentDoc[] = [];
+    const docs: ContentDoc[] = [];
 
-  for (const dir of dirs) {
-    const indexPath = path.join(generatedRoot, dir.name, "_index.json");
-    if (fs.existsSync(indexPath)) {
-      docs.push(...parseIndexJson(indexPath));
+    for (const dir of dirs) {
+      const indexPath = path.join(generatedRoot, dir.name, "_index.json");
+      if (fs.existsSync(indexPath)) {
+        docs.push(...parseIndexJson(indexPath));
+      }
     }
-  }
 
-  return docs;
+    return docs;
+  } catch (error) {
+    // Netlify deployments can occasionally omit or misplace traced generated
+    // assets. Registry consumers must degrade to "no content" rather than
+    // turning a public request into a 500.
+    warnGeneratedIndexLoadOnce(error);
+    return [];
+  }
 }
 
 function loadDirsFromGeneratedIndexes(dirNames: string[]): ContentDoc[] {
   const { fs, path, generatedRoot } = getNodeModules();
-  if (!fs.existsSync(generatedRoot)) return [];
+  if (!hasGeneratedIndexDirectory(fs, generatedRoot)) return [];
 
   const docs: ContentDoc[] = [];
   for (const name of dirNames) {

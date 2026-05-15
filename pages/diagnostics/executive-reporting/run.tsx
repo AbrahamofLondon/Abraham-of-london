@@ -1077,6 +1077,34 @@ function ResultSurface({
       <div className="mx-auto max-w-6xl px-6 py-14 lg:px-12">
 
         <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "20px 24px", marginBottom: "18px" }}>
+          {/* ── Governed case linkage ── */}
+          <div style={{ display: "grid", gap: "8px", marginBottom: "18px", paddingBottom: "16px", borderBottom: `1px solid ${GOLD}15` }}>
+            <div style={{ display: "flex", gap: "14px" }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                Case ID
+              </span>
+              <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+                {result.result.header?.reportId ?? "Assigned on generation"}
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: "14px" }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                Provenance hash
+              </span>
+              <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+                {result.result.meta?.provenanceLine ?? "Available in report metadata"}
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: "14px" }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                Decision Centre
+              </span>
+              <Link href="/decision-centre" style={{ fontSize: "12px", lineHeight: 1.55, color: `${GOLD}AA`, textDecoration: "none", borderBottom: `1px solid ${GOLD}30` }}>
+                View all cases →
+              </Link>
+            </div>
+          </div>
+
           <div style={{ display: "grid", gap: "14px" }}>
             <section>
               <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Dominant finding</span>
