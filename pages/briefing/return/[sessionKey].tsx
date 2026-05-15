@@ -213,10 +213,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     return { props: { state: "unauthenticated" } };
   }
 
-  const [{ prisma }, { generateReturnBrief }] = await Promise.all([
-    import("@/lib/prisma.server"),
-    import("@/lib/server/strategy-room/return-brief.server"),
-  ]);
+  // Dynamic import of prisma only — avoids server-only module guard which is
+  // incompatible with Pages Router even when used inside getServerSideProps.
+  const { prisma } = await import("@/lib/prisma.server");
 
   const sessionRecord = await prisma.strategyRoomExecutionSession.findFirst({
     where: {
@@ -226,6 +225,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     select: {
       id: true,
       sessionKey: true,
+      createdAt: true,
+      canonicalSnapshot: true,
+      decisions: {
+        select: { decision: true, status: true, createdAt: true },
+      },
     },
   });
 
@@ -233,28 +237,43 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     return { props: { state: "not_found", sessionKey } };
   }
 
-  const raw = await generateReturnBrief(sessionRecord.id);
-  const brief = composeReturnBriefV1(
-    raw
-      ? {
-          sessionKey: raw.sessionKey,
-          trigger: raw.trigger,
-          trajectory: raw.trajectory,
-          contradiction: raw.contradiction,
-          delta: raw.delta,
-          costOfInaction: raw.costOfInaction
-            ? { daysElapsed: raw.costOfInaction.daysElapsed }
-            : null,
-          verification: raw.verification?.map((item) => ({
-            label: item.label,
-            status: item.status,
-          })) ?? null,
-          challenge: raw.challenge,
-        }
-      : null,
-    sessionRecord.sessionKey,
-  );
+  // Build a composer source from persisted session data (no server-only module needed).
+  // Complex trigger evaluation lives in return-brief.server.ts; here we use a lighter
+  // heuristic sufficient for the governed brief display.
+  let source: import("@/lib/product/return-brief-contract").ReturnBriefComposerSource | null = null;
+  try {
+    const snapshot = typeof sessionRecord.canonicalSnapshot === "string"
+      ? JSON.parse(sessionRecord.canonicalSnapshot)
+      : (sessionRecord.canonicalSnapshot ?? null);
+    const blocked = sessionRecord.decisions.filter((d) => d.status === "blocked");
+    const pending = sessionRecord.decisions.filter((d) => d.status === "pending");
+    const daysElapsed = Math.floor(
+      (Date.now() - sessionRecord.createdAt.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const hasTrigger = blocked.length > 0 || pending.length > 0 || daysElapsed > 14;
+    if (hasTrigger) {
+      source = {
+        sessionKey: sessionRecord.sessionKey,
+        trigger: blocked.length > 0
+          ? "contradiction_persistence"
+          : pending.length > 0
+            ? "no_activity_after_commitment"
+            : "fragile_trajectory",
+        trajectory: snapshot?.trajectory
+          ? { state: snapshot.trajectory as "ASCENDING" | "STAGNANT" | "FRAGILE" | "DETERIORATING" }
+          : null,
+        costOfInaction: daysElapsed > 0 ? { daysElapsed } : null,
+        verification: sessionRecord.decisions
+          .filter((d) => d.status !== "executed")
+          .slice(0, 4)
+          .map((d) => ({ label: d.decision ?? undefined, status: d.status })),
+      };
+    }
+  } catch {
+    // Snapshot parse failed — surface INSUFFICIENT_EVIDENCE state
+  }
 
+  const brief = composeReturnBriefV1(source, sessionRecord.sessionKey);
   return { props: { state: "ok", brief } };
 };
 
