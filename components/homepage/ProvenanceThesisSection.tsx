@@ -63,6 +63,88 @@ export default function ProvenanceThesisSection() {
           ))}
         </div>
 
+        {/* ── Static sample preview ─────────────────────────────────────── */}
+        <div
+          className="mt-6 border border-white/[0.07] bg-white/[0.01] p-5"
+        >
+          <p
+            style={{
+              ...mono,
+              fontSize: "8px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.25)",
+              marginBottom: "14px",
+            }}
+          >
+            Sample provenance record
+          </p>
+
+          {/* Status + hash row */}
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <span
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "rgba(110,231,183,0.72)",
+                backgroundColor: "rgba(110,231,183,0.05)",
+                border: "1px solid rgba(110,231,183,0.15)",
+                padding: "0.2rem 0.55rem",
+              }}
+            >
+              Chain intact
+            </span>
+            <span
+              style={{
+                ...mono,
+                fontSize: "10px",
+                letterSpacing: "0.08em",
+                color: `${HOMEPAGE_GOLD}AA`,
+              }}
+            >
+              aef3c2b7d12e…b7d91e
+            </span>
+          </div>
+
+          {/* Field grid */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+            {[
+              { label: "Merkle root", value: "9f2a4c…e31d87" },
+              { label: "Prior root", value: "8a14bc…f20c53" },
+              { label: "Chain status", value: "LINKED" },
+              { label: "Scope", value: "OVERSIGHT_CYCLE" },
+              { label: "Computed", value: "14 May 2026" },
+              { label: "Anchor", value: "VERIFIED" },
+            ].map((row) => (
+              <div key={row.label}>
+                <p
+                  style={{
+                    ...mono,
+                    fontSize: "7px",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.22)",
+                  }}
+                >
+                  {row.label}
+                </p>
+                <p
+                  style={{
+                    ...mono,
+                    fontSize: "10px",
+                    color: "rgba(255,255,255,0.58)",
+                    marginTop: "3px",
+                  }}
+                >
+                  {row.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div
           className="mt-6 border-l-2 px-5 py-4"
           style={{ borderColor: `${HOMEPAGE_GOLD}30`, backgroundColor: `${HOMEPAGE_GOLD}04` }}

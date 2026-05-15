@@ -95,7 +95,7 @@ export default function EarnedProgressionBlock() {
                   {stage.state}
                 </span>
               </div>
-              <p className="mt-3 text-[14px] leading-[1.8] text-white/55">{stage.detail}</p>
+              <p className="mt-3 text-[15px] leading-[1.8] text-white/62">{stage.detail}</p>
               {stage.href ? (
                 <div className="mt-4">
                   <Link

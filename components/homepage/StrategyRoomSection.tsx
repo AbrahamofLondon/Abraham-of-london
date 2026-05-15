@@ -1,5 +1,5 @@
 import { Lock } from "lucide-react";
-import { SectionShell, HOMEPAGE_GOLD, mono, serif } from "@/components/homepage/homepagePrimitives";
+import { SectionShell, HOMEPAGE_GOLD, mono } from "@/components/homepage/homepagePrimitives";
 
 const conditions = [
   {
@@ -47,7 +47,7 @@ export default function StrategyRoomSection() {
                 >
                   {item.label}
                 </p>
-                <p className="mt-3 text-[14px] leading-[1.8] text-white/62">{item.value}</p>
+                <p className="mt-3 text-[15px] leading-[1.8] text-white/68">{item.value}</p>
               </div>
             </div>
           ))}

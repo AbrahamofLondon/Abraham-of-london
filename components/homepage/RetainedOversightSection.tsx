@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { SectionShell, HOMEPAGE_GOLD, mono, serif } from "@/components/homepage/homepagePrimitives";
+import { SectionShell, HOMEPAGE_GOLD, mono } from "@/components/homepage/homepagePrimitives";
 
 const features = [
   {
@@ -47,7 +47,7 @@ export default function RetainedOversightSection() {
               >
                 {feature.label}
               </p>
-              <p className="mt-3 text-[14px] leading-[1.8] text-white/60">{feature.value}</p>
+              <p className="mt-3 text-[15px] leading-[1.8] text-white/68">{feature.value}</p>
             </div>
           ))}
         </div>
