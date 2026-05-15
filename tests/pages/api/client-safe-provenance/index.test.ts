@@ -24,7 +24,7 @@ vi.mock("@/lib/admin/provenance-audit-events", () => ({
   recordProvenanceAuditEvent: mocks.recordProvenanceAuditEvent,
 }));
 
-import handler from "./index";
+import handler from "@/pages/api/client-safe-provenance";
 
 function req(query: Record<string, string> = {}, method = "GET") {
   return {

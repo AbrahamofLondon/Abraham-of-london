@@ -1724,11 +1724,11 @@ async function composeStrategyRoomRecordProvenance(
   let returnBriefStatus: StrategyRoomProvenanceBackingRecord["returnBriefStatus"] = null;
   let returnBriefObservedAt: string | null = null;
   try {
-    const { generateReturnBrief } = await import("@/lib/server/strategy-room/return-brief.server");
-    const returnBrief = await generateReturnBrief(session.id);
-    if (returnBrief) {
+    const { queryReturnBriefStatus } = await import("@/lib/product/return-brief-query");
+    const briefStatus = await queryReturnBriefStatus(session.id);
+    if (briefStatus.available) {
       returnBriefStatus = "AVAILABLE";
-      returnBriefObservedAt = returnBrief.generatedAt;
+      returnBriefObservedAt = briefStatus.generatedAt;
     }
   } catch {
     unavailableSources.push("strategy-room-return-brief");

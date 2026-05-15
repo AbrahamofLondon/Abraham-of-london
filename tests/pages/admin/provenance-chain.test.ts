@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatRunnerStatusLabel } from "./provenance-chain";
+import { formatRunnerStatusLabel } from "@/pages/admin/provenance-chain";
 
 describe("formatRunnerStatusLabel", () => {
   it("renders observed activity as active", () => {

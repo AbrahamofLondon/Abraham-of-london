@@ -34,7 +34,7 @@ vi.mock("@/lib/security/audit-log", () => ({
   writeSecurityAudit: mocks.writeSecurityAudit,
 }));
 
-import handler from "./send-to-self";
+import handler from "@/pages/api/tools/send-to-self";
 
 function req(
   body: Record<string, unknown> = {},

@@ -28,7 +28,7 @@ vi.mock("@/lib/diagnostics/evidence-graph", () => ({
   })),
 }));
 
-import handler from "./save-session-case";
+import handler from "@/pages/api/decision-centre/save-session-case";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 
