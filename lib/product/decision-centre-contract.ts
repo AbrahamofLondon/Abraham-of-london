@@ -130,8 +130,13 @@ export type StrategyRoomSessionRef = {
 export type ReturnBriefReference = {
   sessionId: string;
   sessionKey: string;
+  /** Derived from the SR session's decision state at query time */
+  status: "ACTIVE" | "RESOLVED" | "INSUFFICIENT_EVIDENCE" | "UNKNOWN";
   trajectory: string;
+  /** ISO timestamp of the SR session that produced this brief (createdAt or updatedAt) */
   generatedAt: string;
+  /** Canonical link: /briefing/return/[sessionKey] */
+  href: string;
   outcomeClassification?: string | null;
 };
 

@@ -24,6 +24,7 @@ import {
   type DecisionCreditSummary,
   type RetainerReadiness,
   type PatternRecurrenceSummary,
+  type ReturnBriefReference,
   type StrategyRoomSessionRef,
 } from "@/lib/product/decision-centre-contract";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
@@ -728,6 +729,75 @@ export default async function handler(
       && (latestDecisionLog?.status === "blocked" || livingCase.contradictions.length >= 2);
     const blockedDecisionCount = latestDecisionLog?.status === "blocked" ? 1 : 0;
 
+    // ── Return Brief entries ────────────────────────────────────────────────
+    // Query SR execution sessions that have trigger conditions (blocked/pending
+    // decisions, or sessions old enough that trajectory re-evaluation is due).
+    // Each qualifying session surfaces as a client-safe Return Brief entry with
+    // a direct link to /briefing/return/[sessionKey].  We do NOT call
+    // generateReturnBrief() here — that runs lazily when the user opens the
+    // brief page.  This query just determines visibility.
+    const returnBriefs: ReturnBriefReference[] = await (async () => {
+      try {
+        const srSessions = await prisma.strategyRoomExecutionSession.findMany({
+          where: { email },
+          orderBy: { updatedAt: "desc" },
+          take: 5,
+          select: {
+            id: true,
+            sessionKey: true,
+            updatedAt: true,
+            canonicalSnapshot: true,
+            decisions: {
+              select: { status: true },
+            },
+          },
+        });
+
+        const entries: ReturnBriefReference[] = [];
+        for (const s of srSessions) {
+          const blocked = s.decisions.filter((d) => d.status === "blocked").length;
+          const pending  = s.decisions.filter((d) => d.status === "pending").length;
+          const daysElapsed = Math.floor(
+            (Date.now() - s.updatedAt.getTime()) / (1000 * 60 * 60 * 24),
+          );
+          // Qualify: any unresolved decision, or session dormant > 14 days
+          const qualifies = blocked > 0 || pending > 0 || daysElapsed > 14;
+          if (!qualifies) continue;
+
+          const snapshot = (() => {
+            try {
+              return typeof s.canonicalSnapshot === "string"
+                ? JSON.parse(s.canonicalSnapshot)
+                : s.canonicalSnapshot ?? null;
+            } catch { return null; }
+          })();
+
+          const trajectoryRaw: string =
+            (typeof snapshot?.trajectory === "string" && snapshot.trajectory)
+              ? snapshot.trajectory
+              : blocked > 0 ? "DETERIORATING" : "FRAGILE";
+
+          const status: ReturnBriefReference["status"] =
+            blocked > 0 ? "ACTIVE"
+            : pending > 0 ? "ACTIVE"
+            : "UNKNOWN";
+
+          entries.push({
+            sessionId: s.id,
+            sessionKey: s.sessionKey,
+            status,
+            trajectory: trajectoryRaw,
+            generatedAt: s.updatedAt.toISOString(),
+            href: `/briefing/return/${s.sessionKey}`,
+          });
+        }
+        return entries;
+      } catch {
+        // Best-effort — return empty so the rest of the card still renders
+        return [];
+      }
+    })();
+
     let credit: DecisionCreditSummary | null = null;
     let creditGovernanceExplanation: string | null = null;
     try {
@@ -837,7 +907,7 @@ export default async function handler(
       crossAssessmentIntelligence: null,
       contradictionMap: null,
       irreversibility: null,
-      returnBriefs: [],
+      returnBriefs,
       governedMemory: null,
       updatedAt: livingCase.createdAt || generatedAt,
       lastEvidenceAt: livingCase.createdAt || generatedAt,
