@@ -42,6 +42,10 @@ import {
   type GovernedMemoryItem,
 } from "@/lib/product/governed-memory-contract";
 import { groupDecisionCentreMemory } from "@/lib/product/governed-memory-presenter";
+import {
+  clearPendingSessionCase,
+  readPendingSessionCase,
+} from "@/lib/product/session-case-continuity";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -607,20 +611,58 @@ export default function DecisionCentrePage() {
   const [data, setData] = React.useState<DecisionCentreResponse | null>(null);
   const [authRequired, setAuthRequired] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
+  const [continuityMessage, setContinuityMessage] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    fetch("/api/decision-centre/cases")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.ok) {
-          setData(json);
-          trackLaunch("decision_centre_opened", "decision_centre");
-        } else if (json.reason === "AUTH_REQUIRED") {
-          setAuthRequired(true);
-        }
-      })
+    let cancelled = false;
+
+    async function loadCases() {
+      const response = await fetch("/api/decision-centre/cases");
+      const json = await response.json();
+      if (cancelled) return;
+      if (json.ok) {
+        setData(json);
+        setAuthRequired(false);
+        trackLaunch("decision_centre_opened", "decision_centre");
+      } else if (json.reason === "AUTH_REQUIRED") {
+        setAuthRequired(true);
+      }
+    }
+
+    async function continuePendingCaseIfRequested() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("continueCase") !== "1") return;
+      const pending = readPendingSessionCase();
+      if (!pending) return;
+
+      const response = await fetch("/api/decision-centre/save-session-case", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pending),
+      });
+      const json = await response.json() as { ok?: boolean; reason?: string };
+      if (cancelled) return;
+
+      if (response.ok && json.ok) {
+        clearPendingSessionCase();
+        setContinuityMessage("Saved session case carried into Decision Centre.");
+        window.history.replaceState({}, "", "/decision-centre");
+      } else if (json.reason !== "AUTH_REQUIRED") {
+        setContinuityMessage("The session case could not be carried forward automatically.");
+      }
+    }
+
+    Promise.resolve()
+      .then(continuePendingCaseIfRequested)
+      .then(loadCases)
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -675,6 +717,14 @@ export default function DecisionCentrePage() {
 
           {/* First-visit orientation */}
           <DecisionCentreOrientation />
+
+          {continuityMessage && (
+            <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}05`, padding: "12px 16px", marginBottom: "16px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                {continuityMessage}
+              </p>
+            </div>
+          )}
 
           {!loading && data?.retainerMemoryPreview && (
             <RetainerMemoryPreview preview={data.retainerMemoryPreview} />

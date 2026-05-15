@@ -3,11 +3,13 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
 import { track } from "@/lib/analytics/track";
 import BoardSummaryPreview, {
   buildBoardSummaryFromSessionStorage,
   type BoardSummaryData,
 } from "@/components/diagnostics/BoardSummaryPreview";
+import { buildBoardSummaryCarryForwardPayload } from "@/lib/product/session-case-continuity";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -250,6 +252,15 @@ export default function BoardSummaryPage() {
           {loaded && !data && <NoDataState />}
 
           {loaded && data && <BoardSummaryPreview data={data} />}
+
+          {loaded && data && (
+            <div data-no-print style={{ marginTop: "20px" }}>
+              <SaveSessionCasePanel
+                payload={buildBoardSummaryCarryForwardPayload(data)}
+                copy="This is a session-derived preview. Save or continue in Decision Centre to preserve the case record."
+              />
+            </div>
+          )}
 
           {/* ─── Navigation ─────────────────────────────────────────────── */}
           <div

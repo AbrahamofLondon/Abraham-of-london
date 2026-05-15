@@ -1,9 +1,13 @@
 // pages/auth/signin.tsx — BUILD-SAFE (NextAuth v4), SSR guarded
 import type { GetServerSideProps } from "next";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 
 export default function SignIn() {
+  const router = useRouter();
+  const callbackUrl = normaliseCallbackUrl(router.query.callbackUrl);
+
   return (
     <Layout title="Sign In">
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -26,7 +30,7 @@ export default function SignIn() {
               void signIn("credentials", {
                 email: formData.get("email"),
                 password: formData.get("password"),
-                callbackUrl: "/",
+                callbackUrl,
               });
             }}
           >
@@ -88,7 +92,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const session = await getServerSession(context.req, context.res, authOptions);
 
     if (session) {
-      return { redirect: { destination: "/", permanent: false } };
+      return {
+        redirect: {
+          destination: normaliseCallbackUrl(context.query.callbackUrl),
+          permanent: false,
+        },
+      };
     }
   } catch {
     // If auth env isn’t ready at build time, we still render the sign-in page
@@ -97,3 +106,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return { props: {} };
 
 };
+
+function normaliseCallbackUrl(value: string | string[] | undefined): string {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  if (!candidate || !candidate.startsWith("/") || candidate.startsWith("//")) return "/";
+  return candidate;
+}

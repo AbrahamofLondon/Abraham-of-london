@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
 import { track } from "@/lib/analytics/track";
 import {
   computeDecisionDelayExposure,
@@ -10,6 +11,7 @@ import {
   type EstimateConfidence,
   type DecisionDelayExposureResult,
 } from "@/lib/tools/decision-delay-exposure-calculator";
+import { buildDelayCalculatorCarryForwardPayload } from "@/lib/product/session-case-continuity";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -673,9 +675,22 @@ export default function DecisionDelayExposurePage() {
                     color: "rgba(255,255,255,0.40)",
                   }}
                 >
-                  This calculation does not create a governed case or retained decision record. To carry this decision forward, run the Fast Diagnostic.
+                  This calculation has not created a governed case. Save it to carry the exposure estimate into Decision Centre, or run the Fast Diagnostic to create the governed record.
                 </p>
               </section>
+
+              <div style={{ marginTop: "16px" }}>
+                <SaveSessionCasePanel
+                  payload={buildDelayCalculatorCarryForwardPayload({
+                    weeklyCost: parseFloat(form.weeklyCostRaw) || 0,
+                    delayWeeks: parseFloat(form.delayWeeksRaw) || 0,
+                    exposureType: form.exposureType,
+                    estimateConfidence: form.estimateConfidence,
+                    result,
+                  })}
+                  copy="Create a free account to preserve the exposure estimate in Decision Centre. The optional decision label remains display-only and is not carried forward."
+                />
+              </div>
             </div>
           )}
 

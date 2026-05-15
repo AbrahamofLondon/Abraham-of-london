@@ -17,6 +17,7 @@ import { defaultIntelligenceMeta } from "@/lib/product/intelligence-contract";
 import ExecutiveDecisionAuthorityBlock from "@/components/diagnostics/results/ExecutiveDecisionAuthorityBlock";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import DiagnosticStandardPanel from "@/components/trust/DiagnosticStandardPanel";
 import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
@@ -29,6 +30,7 @@ import OutcomeMemoryPreview from "@/components/living/OutcomeMemoryPreview";
 import BoardSummaryPreview from "@/components/diagnostics/BoardSummaryPreview";
 import { buildBoardSummaryFromFastDiagnostic } from "@/lib/diagnostics/board-summary";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
+import { buildFastDiagnosticCarryForwardPayload } from "@/lib/product/session-case-continuity";
 import {
   clearVersionedAssessmentState,
   loadVersionedAssessmentState,
@@ -871,6 +873,14 @@ const FastDiagnosticPage: NextPage = () => {
                   )}
                 </div>
               </div>
+
+              <SaveSessionCasePanel
+                payload={buildFastDiagnosticCarryForwardPayload({
+                  result,
+                  decisionLabel: answers.decision,
+                })}
+                copy="This diagnostic can become a governed case in Decision Centre. Saving it preserves the case reference, governance move, comparison posture, and next action."
+              />
 
               <ClientIntelligenceStack
                 scope={{
