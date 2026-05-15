@@ -19,7 +19,7 @@ export default function HomepageFinalCTA() {
             color: `${HOMEPAGE_GOLD}88`,
           }}
         >
-          Final entry
+          Start here
         </p>
         <h2
           className="mt-4"
@@ -31,11 +31,10 @@ export default function HomepageFinalCTA() {
             fontStyle: "italic",
           }}
         >
-          Bring one decision the organisation cannot afford to get wrong.
+          Start with one real decision.
         </h2>
-        <p className="mx-auto mt-5 max-w-[46ch] text-[15px] leading-[1.85] text-white/50">
-          Start with evidence. If escalation is not earned, the system will say
-          so. If the case is real, it will not disappear after the first pass.
+        <p className="mx-auto mt-5 max-w-[52ch] text-[15px] leading-[1.85] text-white/50">
+          If the evidence supports escalation, the system can progress into reporting, intervention, oversight, and provenance-backed accountability.
         </p>
         <div className="mt-8">
           <Link
@@ -51,7 +50,7 @@ export default function HomepageFinalCTA() {
               textTransform: "uppercase",
             }}
           >
-            Submit One Real Decision
+            Run the Fast Diagnostic
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>

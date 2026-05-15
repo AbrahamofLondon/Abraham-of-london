@@ -89,7 +89,7 @@ export default function OperatorPilotBlock() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Submit One Real Decision
+                Start with an admissible decision
                 <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link

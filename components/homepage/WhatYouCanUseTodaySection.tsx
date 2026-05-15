@@ -4,7 +4,7 @@ import { HOMEPAGE_GOLD, mono } from "@/components/homepage/homepagePrimitives";
 
 const surfaces = [
   {
-    status: "Open now",
+    status: "Free entry",
     label: "Fast Diagnostic",
     summary: "Submit one live decision. Receive a named condition, consequence path, and required move.",
     href: "/diagnostics/fast",
@@ -25,10 +25,17 @@ const surfaces = [
     primary: false,
   },
   {
-    status: "View format",
+    status: "Paid report layer",
     label: "Executive Reporting",
-    summary: "See the structure of a governed executive report before the diagnostic opens it.",
+    summary: "A governed report with named condition, seriousness rating, and required sequence of moves. Opens when earned.",
     href: "/diagnostics/executive-reporting",
+    primary: false,
+  },
+  {
+    status: "Returning users",
+    label: "Decision Centre",
+    summary: "Active cases, checkpoints, retained memory, and next actions carried forward from prior sessions.",
+    href: "/decision-centre",
     primary: false,
   },
 ];
@@ -54,7 +61,7 @@ export default function WhatYouCanUseTodaySection() {
           What you can use today
         </p>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {surfaces.map((surface) => (
             <Link
               key={surface.label}
@@ -96,6 +103,22 @@ export default function WhatYouCanUseTodaySection() {
               </div>
             </Link>
           ))}
+        </div>
+
+        <div
+          className="mx-auto mt-6 max-w-[760px] border border-white/[0.06] bg-white/[0.01] px-5 py-3 text-center"
+        >
+          <p
+            style={{
+              ...mono,
+              fontSize: "8px",
+              letterSpacing: "0.14em",
+              color: "rgba(255,255,255,0.30)",
+              lineHeight: 1.7,
+            }}
+          >
+            Entry diagnostics and public tools are available without a consultation. Executive reporting, intervention, and retained oversight are paid or qualification-gated layers.
+          </p>
         </div>
       </div>
     </section>
