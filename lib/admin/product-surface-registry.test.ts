@@ -39,8 +39,13 @@ describe("product surface registry", () => {
       expect(Array.isArray(surface.downstream), `downstream not array for ${surface.id}`).toBe(true);
       expect(surface.monitoringPriority, `monitoringPriority blank for ${surface.id}`).toBeTruthy();
       expect(surface.operationalOwner, `operationalOwner blank for ${surface.id}`).toBeTruthy();
-      expect(typeof surface.previewAvailable, `previewAvailable not boolean for ${surface.id}`).toBe("boolean");
-      expect(surface.description, `description blank for ${surface.id}`).toBeTruthy();
+      expect(typeof surface.previewAvailable, "previewAvailable not boolean for " + surface.id).toBe("boolean");
+      expect(surface.recordPolicy, "recordPolicy missing for " + surface.id).toBeDefined();
+      expect(typeof surface.recordPolicy.createsRecord, "recordPolicy.createsRecord not boolean for " + surface.id).toBe("boolean");
+      expect(surface.recordPolicy.recordType, "recordPolicy.recordType missing for " + surface.id).toBeTruthy();
+      expect(surface.recordPolicy.systemOfRecord, "recordPolicy.systemOfRecord missing for " + surface.id).toBeTruthy();
+      expect(typeof surface.recordPolicy.provenanceCapable, "recordPolicy.provenanceCapable not boolean for " + surface.id).toBe("boolean");
+      expect(surface.description, "description blank for " + surface.id).toBeTruthy();
     }
   });
 

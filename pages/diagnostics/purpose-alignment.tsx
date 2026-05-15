@@ -280,7 +280,7 @@ export default function PurposeAlignmentPage() {
                 Record boundary
               </p>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
-                This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre.
+                This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre with a record status and next earned action.
               </p>
             </div>
           </div>

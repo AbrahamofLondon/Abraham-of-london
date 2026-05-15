@@ -7,6 +7,11 @@
  * - what the surface is
  * - what it does / does not create
  * - where the decision goes next
+ *
+ * v2: Also checks core surfaces for governed case language:
+ *   case ID, record status, Decision Centre, governance implication,
+ *   next earned action, scenario estimate (where applicable),
+ *   not financial advice (where applicable).
  */
 
 import { readFile } from "node:fs/promises";
@@ -36,6 +41,47 @@ const checks = [
       ["Decision Centre", "Fast Diagnostic must point to Decision Centre."],
       ["checkpoint", "Fast Diagnostic must explain checkpoint behavior."],
       ["governed case", "Fast Diagnostic must explain governed case creation."],
+      ["case ID", "Fast Diagnostic must reference case ID or record identifier."],
+      ["record status", "Fast Diagnostic must reference record status or persistence level."],
+      ["governance implication", "Fast Diagnostic must reference governance implication."],
+      ["next earned action", "Fast Diagnostic must reference next earned action or required move."],
+    ],
+  },
+  {
+    label: "Purpose Alignment",
+    file: "pages/diagnostics/purpose-alignment.tsx",
+    requirements: [
+      ["Decision Centre", "Purpose Alignment must point to Decision Centre."],
+      ["governed case", "Purpose Alignment must explain governed case creation."],
+      ["record status", "Purpose Alignment must reference record status."],
+      ["next earned action", "Purpose Alignment must reference next earned action."],
+    ],
+  },
+  {
+    label: "Constitutional Diagnostic",
+    file: "pages/diagnostics/constitutional-diagnostic.tsx",
+    requirements: [
+      ["Decision Centre", "Constitutional Diagnostic must point to Decision Centre."],
+      ["governed case", "Constitutional Diagnostic must explain governed case creation."],
+      ["next earned action", "Constitutional Diagnostic must reference next earned action."],
+    ],
+  },
+  {
+    label: "Team Assessment",
+    file: "pages/diagnostics/team-assessment.tsx",
+    requirements: [
+      ["Decision Centre", "Team Assessment must point to Decision Centre."],
+      ["governed case", "Team Assessment must explain governed case creation."],
+      ["next earned action", "Team Assessment must reference next earned action."],
+    ],
+  },
+  {
+    label: "Enterprise Assessment",
+    file: "pages/diagnostics/enterprise-assessment.tsx",
+    requirements: [
+      ["Decision Centre", "Enterprise Assessment must point to Decision Centre."],
+      ["governed case", "Enterprise Assessment must explain governed case creation."],
+      ["next earned action", "Enterprise Assessment must reference next earned action."],
     ],
   },
   {
@@ -82,6 +128,47 @@ const checks = [
       ["paid report layer", "Executive Reporting must identify itself as a paid report layer."],
       ["evidence-gated", "Executive Reporting must state it is evidence-gated."],
       ["priority stack", "Executive Reporting must explain the governed priority stack."],
+      ["case ID", "Executive Reporting must reference case ID or report identifier."],
+      ["governance implication", "Executive Reporting must reference governance implication."],
+      ["Decision Centre", "Executive Reporting must point to Decision Centre."],
+    ],
+  },
+  {
+    label: "Strategy Room Session",
+    file: "pages/strategy-room/session/[id].tsx",
+    requirements: [
+      ["Decision Centre", "Strategy Room must point to Decision Centre."],
+      ["provenance", "Strategy Room must reference provenance status."],
+      ["record status", "Strategy Room must reference record status."],
+    ],
+  },
+  {
+    label: "Return Brief",
+    file: "pages/briefing/return/[sessionKey].tsx",
+    requirements: [
+      ["Decision Centre", "Return Brief must point to Decision Centre."],
+      ["provenance", "Return Brief must reference provenance status."],
+      ["case", "Return Brief must reference case or session."],
+    ],
+  },
+  {
+    label: "Proof Pack",
+    file: "pages/account/proof-pack.tsx",
+    requirements: [
+      ["provenance", "Proof Pack must reference provenance status."],
+      ["evidence", "Proof Pack must reference evidence posture."],
+      ["export boundary", "Proof Pack must reference export boundary."],
+      ["Decision Centre", "Proof Pack must point to Decision Centre."],
+    ],
+  },
+  {
+    label: "Decision Centre",
+    file: "pages/decision-centre.tsx",
+    requirements: [
+      ["case ID", "Decision Centre must reference case ID."],
+      ["governance implication", "Decision Centre must reference governance implication."],
+      ["next required action", "Decision Centre must reference next required action."],
+      ["provenance", "Decision Centre must reference provenance status."],
     ],
   },
 ];

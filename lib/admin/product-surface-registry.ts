@@ -43,6 +43,24 @@ export type ProductSurfaceMonitoringPriority = "low" | "medium" | "high" | "crit
 
 export type ProductSurfaceOperationalOwner = "admin" | "operator" | "founder" | "future-team";
 
+export type RecordPolicy = {
+  createsRecord: boolean;
+  recordType:
+    | "NONE"
+    | "SESSION_RESULT"
+    | "GOVERNED_CASE"
+    | "STRATEGY_ROOM_RECORD"
+    | "RETURN_BRIEF"
+    | "PROOF_PACK"
+    | "PROVENANCE_SUMMARY";
+  systemOfRecord:
+    | "NONE"
+    | "DECISION_CENTRE"
+    | "STRATEGY_ROOM"
+    | "OVERSIGHT";
+  provenanceCapable: boolean;
+};
+
 export type AdminProductSurface = {
   id: string;
   label: string;
@@ -59,6 +77,7 @@ export type AdminProductSurface = {
   operationalOwner: ProductSurfaceOperationalOwner;
   previewAvailable: boolean;
   description: string;
+  recordPolicy: RecordPolicy;
 };
 
 // ─── Registry ──────────────────────────────────────────────────────────────
@@ -97,6 +116,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "high",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Public entry point. Three-step interrogation (decision → authority → consequence) with live typing hints, challenge engine, and optional evidence strengthener. Produces a condition classification, cost projection, and checkpoint commitment.",
   },
   {
@@ -125,6 +150,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "medium",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Assesses alignment between personal purpose and organisational mandate. Feeds into Executive Reporting and Strategy Room evidence carry-forward.",
   },
   {
@@ -152,6 +183,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "medium",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Tests governance readiness and authority structure before pricing consequences. Intermediate step between Fast Diagnostic and Executive Reporting.",
   },
 
@@ -184,6 +221,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "medium",
     operationalOwner: "operator",
     previewAvailable: false,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Multi-respondent team assessment. Captures alignment across domains, produces aggregate scores with leader deltas. Feeds into organisation-level intelligence.",
   },
   {
@@ -212,6 +255,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "medium",
     operationalOwner: "operator",
     previewAvailable: false,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Enterprise-wide diagnostic assessing organisational fragility, domain health, and systemic risk. Requires multiple respondents for meaningful output.",
   },
 
@@ -245,6 +294,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "high",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Consequence interpretation layer. Prices cost of delay, identifies governance correction, sequences first intervention, and prepares board-ready decision object. Paid product.",
   },
   {
@@ -271,6 +326,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "high",
     operationalOwner: "admin",
     previewAvailable: false,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Post-purchase intake and report generation pipeline. Assembles constitutional guidance, canonical report contract, and produces the final executive report.",
   },
 
@@ -306,6 +367,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "critical",
     operationalOwner: "operator",
     previewAvailable: false,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "STRATEGY_ROOM_RECORD",
+      systemOfRecord: "STRATEGY_ROOM",
+      provenanceCapable: true,
+    },
     description: "Execution intervention environment. Forces the decision, assigns ownership, tracks whether it happens. Three states: GATE (locked) → ENTRY BRIEF (paid) → EXECUTION CHAMBER (active). Highest-consequence surface on the platform.",
   },
   {
@@ -337,6 +404,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "medium",
     operationalOwner: "operator",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: false,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "The operating console where a governed decision lives after it enters the system: active case state, checkpoints, memory, cost of delay, escalation readiness, and next actions.",
   },
 
@@ -368,6 +441,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "high",
     operationalOwner: "operator",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "OVERSIGHT",
+      provenanceCapable: true,
+    },
     description: "Sponsor-safe retained oversight command visibility. Shows cadence posture, cycle history, institutional case summary, and portfolio memory.",
   },
   {
@@ -398,6 +477,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "high",
     operationalOwner: "operator",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "OVERSIGHT",
+      provenanceCapable: true,
+    },
     description: "Full governed oversight brief. Includes executive summary, cadence posture, retainer cycle memory, pattern recurrence, cost of inaction, irreversibility, strategic options, value protected, and structured actions. The richest client-facing document.",
   },
 
@@ -428,6 +513,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "critical",
     operationalOwner: "admin",
     previewAvailable: false,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Qualified escalation surface for conditions the system cannot responsibly model alone. Access state machine: NO_EVIDENCE → ELIGIBLE → ACTIVE → RESOLVED. Reserved for counsel-level handling.",
   },
   {
@@ -455,6 +546,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "high",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "Board-level strategic memory. Not a one-off PDF — shows whether board-level dossiers exist, when generated, and whether current record is boardroom-ready. Institutional cases only.",
   },
 
@@ -485,6 +582,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "medium",
     operationalOwner: "operator",
     previewAvailable: false,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "RETURN_BRIEF",
+      systemOfRecord: "STRATEGY_ROOM",
+      provenanceCapable: true,
+    },
     description: "Reopens the governed record when the condition remains active and records what changed, what did not, and what is now required.",
   },
   {
@@ -511,6 +614,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "medium",
     operationalOwner: "operator",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: false,
+      recordType: "GOVERNED_CASE",
+      systemOfRecord: "OVERSIGHT",
+      provenanceCapable: true,
+    },
     description: "Portfolio-level view across multiple oversight cycles. Shows trends, cross-cycle comparisons, and accumulated institutional memory.",
   },
 
@@ -539,6 +648,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "low",
     operationalOwner: "admin",
     previewAvailable: false,
+    recordPolicy: {
+      createsRecord: true,
+      recordType: "PROOF_PACK",
+      systemOfRecord: "DECISION_CENTRE",
+      provenanceCapable: true,
+    },
     description: "A portable, client-safe record of the governed chain where the case has sufficient history: evidence posture, review state, delivery/outcome record, and provenance cues.",
   },
 
@@ -568,6 +683,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "low",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: false,
+      recordType: "SESSION_RESULT",
+      systemOfRecord: "NONE",
+      provenanceCapable: false,
+    },
     description: "Public entry surface estimating 7/30/90-day scenario exposure from a delayed decision. Scenario-only, not financial advice.",
   },
   {
@@ -595,6 +716,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "low",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: false,
+      recordType: "SESSION_RESULT",
+      systemOfRecord: "NONE",
+      provenanceCapable: false,
+    },
     description: "Board-readable summary generated from diagnostic state; preserves scenario boundaries and routes the user toward the next earned layer.",
   },
   {
@@ -618,6 +745,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "low",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: false,
+      recordType: "NONE",
+      systemOfRecord: "NONE",
+      provenanceCapable: false,
+    },
     description: "Client-safe provenance sample showing accountability statement, hash continuity, confidence bands, milestone timeline, and boundary notes.",
   },
   {
@@ -638,6 +771,12 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     monitoringPriority: "low",
     operationalOwner: "admin",
     previewAvailable: true,
+    recordPolicy: {
+      createsRecord: false,
+      recordType: "NONE",
+      systemOfRecord: "NONE",
+      provenanceCapable: false,
+    },
     description: "Public non-sensitive anchor root log showing cryptographic roots without exposing client data, decisions, evidence, or internal review material.",
   },
 ];

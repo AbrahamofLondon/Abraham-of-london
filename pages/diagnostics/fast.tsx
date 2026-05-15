@@ -693,7 +693,7 @@ const FastDiagnosticPage: NextPage = () => {
                   Record boundary
                 </p>
                 <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
-                  This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre.
+                  This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre with a case ID, governance implication, and next earned action.
                 </p>
               </div>
 

@@ -510,7 +510,7 @@ export default function ConstitutionalDiagnosticPage() {
                   href={assessmentResult?.earnedRoute.href ?? "/diagnostics/team-assessment"}
                   className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
                   style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
-                  {assessmentResult?.earnedRoute.label ?? "Team Assessment"} <ChevronRight style={{ width: "10px", height: "10px" }} />
+                  {assessmentResult?.earnedRoute.label ?? "Team Assessment — next earned action"} <ChevronRight style={{ width: "10px", height: "10px" }} />
                 </Link>
               </div>
             </div>

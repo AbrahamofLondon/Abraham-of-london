@@ -798,7 +798,7 @@ export default function DecisionCentrePage() {
               Decision Centre
             </h1>
             <p style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.62)", marginTop: "10px", maxWidth: "58ch" }}>
-              The operating console for governed cases. Evidence state, admissibility, intervention eligibility, and outcome memory — across every decision in the record.
+              The operating console for governed cases. Each case has a case ID, evidence state, admissibility, intervention eligibility, and outcome memory — across every decision in the record.
             </p>
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginTop: "8px", maxWidth: "58ch", lineHeight: 1.6 }}>
               This is not a report viewer. It is the live state of decisions under governance — from diagnostic through to intervention and oversight.

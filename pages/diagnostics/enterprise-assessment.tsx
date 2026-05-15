@@ -1555,6 +1555,9 @@ export default function EnterpriseAssessmentPage() {
                       <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "2rem" }}>
                         <AssessmentResultSurface result={mappedEnterpriseResult} />
                       </div>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "8px", textAlign: "center" }}>
+                        Next earned action is determined by the assessment result. Save to Decision Centre to preserve this record.
+                      </p>
                     </div>
                   )}
 
