@@ -114,13 +114,12 @@ export type PatternRecurrenceSummary = {
  * Client-safe reference to a persisted Strategy Room execution session.
  * The session is SERVER_PERSISTED in StrategyRoomExecutionSession.
  * The full record is accessible at the href route.
- * Case-specific provenance is not yet available for this record type.
  */
 export type StrategyRoomSessionRef = {
   sessionId: string;
   href: string;
-  /** "not_available" until DECISION_CASE provenance composition is supported */
-  provenanceStatus: "not_available";
+  provenanceStatus: "available" | "not_available";
+  provenanceHref?: string | null;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

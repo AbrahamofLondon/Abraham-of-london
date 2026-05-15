@@ -25,7 +25,8 @@ export type DecisionProvenanceRecord = {
     | "EXECUTIVE_REPORT"
     | "DECISION_CASE"
     | "RETAINER_ACCOUNT"
-    | "DELIVERY_ITEM";
+    | "DELIVERY_ITEM"
+    | "STRATEGY_ROOM_RECORD";
   subjectId: string;
   evidenceInputs: DecisionProvenanceEvidenceInput[];
   governanceEvents: DecisionProvenanceEvent[];
@@ -89,7 +90,14 @@ export type DecisionProvenanceEvent = {
     | "OUTCOME_RECORDED"
     | "MEMORY_UPDATED"
     | "ACCESS_REVIEWED"
-    | "BATCH_ACTION_RECORDED";
+    | "BATCH_ACTION_RECORDED"
+    | "EVIDENCE_ADMITTED"
+    | "DECISION_RECORDED"
+    | "AUTHORITY_ASSIGNED"
+    | "CONSTRAINT_RETAINED"
+    | "REVIEW_TRIGGER_SET"
+    | "CHECKPOINT_CREATED"
+    | "RETURN_BRIEF_STATUS_RECORDED";
   label: string;
   actor?: string | null;
   occurredAt?: string | null;
@@ -283,6 +291,26 @@ export type DecisionProvenanceSourceData = {
   unsupportedReason?: string;
 };
 
+export type StrategyRoomProvenanceBackingRecord = {
+  sessionId: string;
+  sessionKey: string;
+  sessionStatus: string;
+  createdAt: string;
+  updatedAt: string;
+  admittedEvidenceAt?: string | null;
+  decisionEvents: Array<{
+    status: string;
+    createdAt: string;
+  }>;
+  authorityAssignedAt?: string | null;
+  constraintRetainedAt?: string | null;
+  reviewTriggerAt?: string | null;
+  checkpointCreatedAt?: string | null;
+  returnBriefStatus?: "AVAILABLE" | "PENDING" | "UNAVAILABLE" | null;
+  returnBriefObservedAt?: string | null;
+  unavailableSources?: string[];
+};
+
 type HashableDecisionProvenanceRecord = Omit<DecisionProvenanceRecord, "provenanceHash">;
 type StatementInput = Omit<DecisionProvenanceRecord, "accountabilityStatement" | "provenanceHash">;
 
@@ -291,6 +319,7 @@ export const SUPPORTED_DECISION_PROVENANCE_SUBJECT_TYPES = [
   "EXECUTIVE_REPORT",
   "RETAINER_ACCOUNT",
   "DELIVERY_ITEM",
+  "STRATEGY_ROOM_RECORD",
 ] as const satisfies readonly DecisionProvenanceRecord["subjectType"][];
 
 const SUPPORTED_SUBJECT_TYPES = new Set<DecisionProvenanceRecord["subjectType"]>(
@@ -811,6 +840,7 @@ export function composeProvenanceGaps(
 
 function eventTimelineType(event: DecisionProvenanceEvent): DecisionProvenanceTimelineItem["type"] {
   if (event.type === "OPERATOR_REVIEWED") return "REVIEW";
+  if (event.type === "REVIEW_TRIGGER_SET") return "REVIEW";
   if (event.type === "OUTCOME_RECORDED") return "OUTCOME";
   if (event.type === "MEMORY_UPDATED") return "MEMORY";
   return "ACTION";
@@ -1050,6 +1080,244 @@ export function composeDecisionProvenanceFromSources(
 
 export const composeDecisionProvenanceRecord = composeDecisionProvenanceFromSources;
 
+function composeStrategyRoomRecordPosture(input: {
+  sessionStatus: string;
+  decisionEvents: StrategyRoomProvenanceBackingRecord["decisionEvents"];
+  checkpointCreatedAt?: string | null;
+  provenanceGaps: DecisionProvenanceGap[];
+}): DecisionProvenanceRecord["currentPosture"] {
+  if (input.provenanceGaps.some((gap) => gap.severity === "CRITICAL")) {
+    return {
+      status: "BLOCKED",
+      summary: "A critical Strategy Room provenance gap blocks completion.",
+      nextAction: "Resolve the missing governed record component",
+    };
+  }
+
+  if (input.decisionEvents.some((event) => event.status === "blocked")) {
+    return {
+      status: "BLOCKED",
+      summary: "A recorded Strategy Room decision remains blocked.",
+      nextAction: "Review the blocked decision in Strategy Room",
+    };
+  }
+
+  if (input.sessionStatus === "completed") {
+    return {
+      status: "COMPLETE",
+      summary: "The Strategy Room execution record is completed.",
+    };
+  }
+
+  if (input.checkpointCreatedAt || input.decisionEvents.length > 0) {
+    return {
+      status: "IN_REVIEW",
+      summary: "The Strategy Room record is live with governed execution activity recorded.",
+      nextAction: input.checkpointCreatedAt ? "Respond to the checkpoint when due" : "Record the next governed move",
+    };
+  }
+
+  return {
+    status: "UNKNOWN",
+    summary: "The Strategy Room record exists, but governed execution activity is still thin.",
+    nextAction: "Record the first governed move",
+  };
+}
+
+function composeStrategyRoomRecordGaps(
+  record: StrategyRoomProvenanceBackingRecord,
+): DecisionProvenanceGap[] {
+  const gaps: DecisionProvenanceGap[] = [];
+
+  function addGap(stage: string, description: string, severity: DecisionProvenanceGap["severity"]) {
+    gaps.push({ stage, description, severity });
+  }
+
+  for (const source of record.unavailableSources ?? []) {
+    addGap("Source availability", `${source} could not be loaded for this provenance record.`, "WARNING");
+  }
+
+  if (!record.admittedEvidenceAt) {
+    addGap("Admitted evidence", "No admitted evidence record is linked to this Strategy Room record.", "WARNING");
+  }
+  if (record.decisionEvents.length === 0) {
+    addGap("Decision record", "No governed decision event has been recorded yet.", "WARNING");
+  }
+  if (!record.authorityAssignedAt) {
+    addGap("Authority", "No authority assignment is recorded on the Strategy Room record yet.", "WARNING");
+  }
+  if (!record.constraintRetainedAt) {
+    addGap("Constraint retention", "No retained constraint or dissent marker is recorded yet.", "INFO");
+  }
+  if (!record.reviewTriggerAt) {
+    addGap("Review trigger", "No review trigger is recorded yet.", "INFO");
+  }
+  if (!record.checkpointCreatedAt) {
+    addGap("Checkpoint", "No checkpoint has been created for this Strategy Room record yet.", "WARNING");
+  }
+
+  return sortGaps(gaps);
+}
+
+function buildStrategyRoomRecordAccountabilityStatement(input: {
+  evidenceInputs: DecisionProvenanceEvidenceInput[];
+  governanceEvents: DecisionProvenanceEvent[];
+  provenanceGaps: DecisionProvenanceGap[];
+}): string {
+  if (input.evidenceInputs.length === 0) {
+    return "No evidence inputs have been recorded for this Strategy Room record.";
+  }
+
+  const parts: string[] = [];
+  parts.push(`${input.evidenceInputs.length} evidence input${input.evidenceInputs.length === 1 ? "" : "s"} captured`);
+
+  const decisions = input.governanceEvents.filter((event) => event.type === "DECISION_RECORDED").length;
+  if (decisions > 0) {
+    parts.push(`${decisions} decision${decisions === 1 ? "" : "s"} recorded`);
+  }
+  if (input.governanceEvents.some((event) => event.type === "AUTHORITY_ASSIGNED")) {
+    parts.push("authority assignment recorded");
+  }
+  if (input.governanceEvents.some((event) => event.type === "CONSTRAINT_RETAINED")) {
+    parts.push("constraint or dissent retained");
+  }
+  if (input.governanceEvents.some((event) => event.type === "REVIEW_TRIGGER_SET")) {
+    parts.push("review trigger recorded");
+  }
+  if (input.governanceEvents.some((event) => event.type === "CHECKPOINT_CREATED")) {
+    parts.push("checkpoint created");
+  }
+  if (input.governanceEvents.some((event) => event.type === "RETURN_BRIEF_STATUS_RECORDED")) {
+    parts.push("return brief status recorded");
+  }
+  if (input.provenanceGaps.length > 0) {
+    parts.push(`${input.provenanceGaps.length} provenance gap${input.provenanceGaps.length === 1 ? "" : "s"} remain`);
+  }
+
+  return `${parts.join("; ")}.`;
+}
+
+export function composeStrategyRoomRecordProvenanceFromBackingRecord(
+  record: StrategyRoomProvenanceBackingRecord,
+): DecisionProvenanceRecord {
+  const evidenceInputs = sortEvidenceInputs([
+    ...(record.admittedEvidenceAt
+      ? [{
+          type: "STRATEGY_ROOM_ADMISSION",
+          label: "Admitted evidence record",
+          evidencePosture: "SYSTEM_INFERRED",
+          source: "strategy-room-execution-session",
+          createdAt: record.admittedEvidenceAt,
+          confidence: "SYSTEM_INFERRED" as const,
+          confidenceEvidence: buildConfidenceEvidence("SYSTEM_INFERRED", "strategy-room-execution-session", record.admittedEvidenceAt),
+        }]
+      : []),
+    {
+      type: "STRATEGY_ROOM_RECORD",
+      label: "Persisted Strategy Room record",
+      evidencePosture: "SYSTEM_INFERRED",
+      source: "strategy-room-execution-session",
+      createdAt: record.createdAt,
+      confidence: "SYSTEM_INFERRED" as const,
+      confidenceEvidence: buildConfidenceEvidence("SYSTEM_INFERRED", "strategy-room-execution-session", record.createdAt),
+    },
+  ]);
+
+  const governanceEvents = sortGovernanceEvents([
+    ...(record.admittedEvidenceAt
+      ? [{
+          type: "EVIDENCE_ADMITTED" as const,
+          label: "Evidence admitted to Strategy Room",
+          occurredAt: record.admittedEvidenceAt,
+          severity: "LOW" as const,
+        }]
+      : []),
+    ...record.decisionEvents.map((decision) => ({
+      type: "DECISION_RECORDED" as const,
+      label: "Decision recorded",
+      occurredAt: decision.createdAt,
+      severity: decision.status === "blocked" ? "HIGH" as const : "LOW" as const,
+    })),
+    ...(record.authorityAssignedAt
+      ? [{
+          type: "AUTHORITY_ASSIGNED" as const,
+          label: "Authority assignment recorded",
+          occurredAt: record.authorityAssignedAt,
+          severity: "LOW" as const,
+        }]
+      : []),
+    ...(record.constraintRetainedAt
+      ? [{
+          type: "CONSTRAINT_RETAINED" as const,
+          label: "Constraint or dissent retained",
+          occurredAt: record.constraintRetainedAt,
+          severity: "LOW" as const,
+        }]
+      : []),
+    ...(record.reviewTriggerAt
+      ? [{
+          type: "REVIEW_TRIGGER_SET" as const,
+          label: "Review trigger recorded",
+          occurredAt: record.reviewTriggerAt,
+          severity: "LOW" as const,
+        }]
+      : []),
+    ...(record.checkpointCreatedAt
+      ? [{
+          type: "CHECKPOINT_CREATED" as const,
+          label: "Checkpoint created",
+          occurredAt: record.checkpointCreatedAt,
+          severity: "LOW" as const,
+        }]
+      : []),
+    ...(record.returnBriefStatus && record.returnBriefObservedAt
+      ? [{
+          type: "RETURN_BRIEF_STATUS_RECORDED" as const,
+          label: `Return brief status: ${record.returnBriefStatus.toLowerCase()}`,
+          occurredAt: record.returnBriefObservedAt,
+          severity: "LOW" as const,
+        }]
+      : []),
+  ]);
+
+  const provenanceGaps = composeStrategyRoomRecordGaps(record);
+  const timeline = composeTimeline(evidenceInputs, governanceEvents);
+  const unavailableSources = [...(record.unavailableSources ?? [])].sort();
+  const currentPosture = composeStrategyRoomRecordPosture({
+    sessionStatus: record.sessionStatus,
+    decisionEvents: record.decisionEvents,
+    checkpointCreatedAt: record.checkpointCreatedAt,
+    provenanceGaps,
+  });
+
+  const recordWithoutStatement = {
+    version: 1 as const,
+    id: `decision-provenance:v1:STRATEGY_ROOM_RECORD:${record.sessionId}`,
+    subjectType: "STRATEGY_ROOM_RECORD" as const,
+    subjectId: record.sessionId,
+    evidenceInputs,
+    governanceEvents,
+    timeline,
+    currentPosture,
+    provenanceGaps,
+    unavailableSources,
+  };
+  const accountabilityStatement = buildStrategyRoomRecordAccountabilityStatement({
+    evidenceInputs,
+    governanceEvents,
+    provenanceGaps,
+  });
+  const recordWithoutHash: HashableDecisionProvenanceRecord = {
+    ...recordWithoutStatement,
+    accountabilityStatement,
+  };
+
+  return {
+    ...recordWithoutHash,
+    provenanceHash: buildDecisionProvenanceHash(recordWithoutHash),
+  };
+}
+
 function unsupportedRecord(input: {
   subjectType: DecisionProvenanceRecord["subjectType"];
   subjectId: string;
@@ -1172,6 +1440,10 @@ export async function composeDecisionProvenance(input: {
   // ── EXECUTIVE_REPORT: load from ExecutiveReportingRun ──
   if (input.subjectType === "EXECUTIVE_REPORT") {
     return composeExecutiveReportProvenance(subjectId);
+  }
+
+  if (input.subjectType === "STRATEGY_ROOM_RECORD") {
+    return composeStrategyRoomRecordProvenance(subjectId);
   }
 
   const [
@@ -1317,6 +1589,176 @@ export async function composeDecisionProvenance(input: {
   }
 
   return record;
+}
+
+type StrategyRoomExecutionSessionRow = {
+  id: string;
+  sessionKey: string;
+  strategyRoomSessionId: string | null;
+  email: string | null;
+  status: string;
+  constraints: string | null;
+  constraintMap: string | null;
+  canonicalSnapshot: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  decisions: Array<{
+    status: string;
+    createdAt: Date;
+  }>;
+};
+
+function parseObject(value: string | null): Record<string, unknown> | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function hasPersistedConstraint(input: {
+  constraints: string | null;
+  constraintMap: string | null;
+  executionConstraint?: string | null;
+}): boolean {
+  return Boolean(
+    input.executionConstraint?.trim()
+    || input.constraints?.trim()
+    || input.constraintMap?.trim(),
+  );
+}
+
+async function composeStrategyRoomRecordProvenance(
+  subjectId: string,
+): Promise<DecisionProvenanceRecord> {
+  const unavailableSources: string[] = [];
+  let session: StrategyRoomExecutionSessionRow | null = null;
+
+  try {
+    const { prisma } = await import("@/lib/prisma.server");
+    const result = await prisma.strategyRoomExecutionSession.findUnique({
+      where: { id: subjectId },
+      select: {
+        id: true,
+        sessionKey: true,
+        strategyRoomSessionId: true,
+        email: true,
+        status: true,
+        constraints: true,
+        constraintMap: true,
+        canonicalSnapshot: true,
+        createdAt: true,
+        updatedAt: true,
+        decisions: {
+          orderBy: { createdAt: "asc" },
+          select: {
+            status: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+    session = result
+      ? {
+          ...result,
+          createdAt: result.createdAt instanceof Date ? result.createdAt : new Date(result.createdAt),
+          updatedAt: result.updatedAt instanceof Date ? result.updatedAt : new Date(result.updatedAt),
+          decisions: result.decisions.map((decision) => ({
+            status: decision.status,
+            createdAt: decision.createdAt instanceof Date ? decision.createdAt : new Date(decision.createdAt),
+          })),
+        }
+      : null;
+  } catch {
+    unavailableSources.push("strategy-room-execution-session");
+  }
+
+  if (!session) {
+    return unsupportedRecord({
+      subjectType: "STRATEGY_ROOM_RECORD",
+      subjectId,
+      reason: "No persisted Strategy Room record was found for this subject ID.",
+    });
+  }
+
+  const canonicalSnapshot = parseObject(session.canonicalSnapshot);
+  const admission = canonicalSnapshot?.admission;
+  const admittedEvidenceAt = admission && typeof admission === "object"
+    ? session.createdAt.toISOString()
+    : null;
+
+  let authorityAssignedAt: string | null = null;
+  let executionConstraint: string | null = null;
+  try {
+    const { findLatestStrategyExecutionRecord } = await import("@/lib/strategy-room/execution-record");
+    const executionRecord = await findLatestStrategyExecutionRecord({
+      sessionId: session.id,
+      email: session.email,
+    });
+    authorityAssignedAt = executionRecord?.authority ? executionRecord.createdAt : null;
+    executionConstraint = executionRecord?.conflictResolved ?? null;
+  } catch {
+    unavailableSources.push("strategy-room-execution-record");
+  }
+
+  let reviewTriggerAt: string | null = null;
+  let checkpointCreatedAt: string | null = null;
+  try {
+    const { resolveCheckpointForResponse } = await import("@/lib/product/checkpoint-service");
+    const checkpoint = await resolveCheckpointForResponse({
+      strategyRoomSessionId: session.strategyRoomSessionId ?? session.sessionKey,
+      email: session.email,
+    });
+    if (checkpoint) {
+      checkpointCreatedAt = checkpoint.record.createdAt.toISOString();
+      reviewTriggerAt = checkpoint.payload.dueAt ?? checkpoint.record.createdAt.toISOString();
+    }
+  } catch {
+    unavailableSources.push("checkpoint-service");
+  }
+
+  let returnBriefStatus: StrategyRoomProvenanceBackingRecord["returnBriefStatus"] = null;
+  let returnBriefObservedAt: string | null = null;
+  try {
+    const { generateReturnBrief } = await import("@/lib/server/strategy-room/return-brief.server");
+    const returnBrief = await generateReturnBrief(session.id);
+    if (returnBrief) {
+      returnBriefStatus = "AVAILABLE";
+      returnBriefObservedAt = returnBrief.generatedAt;
+    }
+  } catch {
+    unavailableSources.push("strategy-room-return-brief");
+  }
+
+  return composeStrategyRoomRecordProvenanceFromBackingRecord({
+    sessionId: session.id,
+    sessionKey: session.sessionKey,
+    sessionStatus: session.status,
+    createdAt: session.createdAt.toISOString(),
+    updatedAt: session.updatedAt.toISOString(),
+    admittedEvidenceAt,
+    decisionEvents: session.decisions.map((decision) => ({
+      status: decision.status,
+      createdAt: decision.createdAt.toISOString(),
+    })),
+    authorityAssignedAt,
+    constraintRetainedAt: hasPersistedConstraint({
+      constraints: session.constraints,
+      constraintMap: session.constraintMap,
+      executionConstraint,
+    })
+      ? authorityAssignedAt ?? session.createdAt.toISOString()
+      : null,
+    reviewTriggerAt,
+    checkpointCreatedAt,
+    returnBriefStatus,
+    returnBriefObservedAt,
+    unavailableSources,
+  });
 }
 
 type ExecutiveReportRunRecord = {

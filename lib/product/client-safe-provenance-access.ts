@@ -150,6 +150,23 @@ export async function authorizeClientSafeProvenanceSubject(input: {
     return { ok: false, status: 403, reason: "SUBJECT_ACCESS_REQUIRED" };
   }
 
+  if (input.subjectType === "STRATEGY_ROOM_RECORD") {
+    const session = await prisma.strategyRoomExecutionSession.findUnique({
+      where: { id: subjectId },
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+    if (!session) {
+      return { ok: false, status: 404, reason: "SUBJECT_NOT_FOUND" };
+    }
+    if (input.viewerIsAdmin || normaliseEmail(session.email) === viewerEmail) {
+      return { ok: true, subjectType: input.subjectType, subjectId };
+    }
+    return { ok: false, status: 403, reason: "SUBJECT_ACCESS_REQUIRED" };
+  }
+
   const deliveries = await listAllDeliveries();
   const matchingDeliveries = deliveries.filter((delivery) =>
     delivery.id === subjectId || delivery.artifactId === subjectId,

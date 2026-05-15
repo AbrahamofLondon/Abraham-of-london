@@ -13,8 +13,10 @@ import {
   composeDecisionProvenanceFromSources,
   composeEvidenceInputs,
   composeGovernanceEvents,
+  composeStrategyRoomRecordProvenanceFromBackingRecord,
   composeTimeline,
   deriveCurrentPosture,
+  isSupportedDecisionProvenanceSubjectType,
   type DecisionProvenanceRecord,
   type DecisionProvenanceSourceData,
 } from "./decision-provenance-record";
@@ -450,6 +452,72 @@ describe("executive report provenance (Pass 4)", () => {
     expect(record.currentPosture.status).toBe("UNKNOWN");
     expect(record.provenanceGaps.some((gap) => gap.stage === "Subject support")).toBe(true);
     expect(record.accountabilityStatement).toContain("No evidence inputs");
+  });
+});
+
+describe("strategy room record provenance", () => {
+  function strategyRoomRecord() {
+    return composeStrategyRoomRecordProvenanceFromBackingRecord({
+      sessionId: "sr_exec_001",
+      sessionKey: "exec_public_001",
+      sessionStatus: "active",
+      createdAt: "2026-05-10T09:00:00.000Z",
+      updatedAt: "2026-05-10T10:00:00.000Z",
+      admittedEvidenceAt: "2026-05-10T09:00:00.000Z",
+      decisionEvents: [
+        { status: "pending", createdAt: "2026-05-10T09:30:00.000Z" },
+      ],
+      authorityAssignedAt: "2026-05-10T09:35:00.000Z",
+      constraintRetainedAt: "2026-05-10T09:36:00.000Z",
+      reviewTriggerAt: "2026-05-11T09:00:00.000Z",
+      checkpointCreatedAt: "2026-05-10T09:40:00.000Z",
+      returnBriefStatus: "AVAILABLE",
+      returnBriefObservedAt: "2026-05-12T09:00:00.000Z",
+    });
+  }
+
+  it("supports persisted Strategy Room records as their own subject type", () => {
+    expect(isSupportedDecisionProvenanceSubjectType("STRATEGY_ROOM_RECORD")).toBe(true);
+    expect(isSupportedDecisionProvenanceSubjectType("STRATEGY_ROOM_SESSION")).toBe(false);
+  });
+
+  it("composes the safe Strategy Room event chain without raw payload leakage", () => {
+    const record = strategyRoomRecord();
+    expect(record.subjectType).toBe("STRATEGY_ROOM_RECORD");
+    expect(record.governanceEvents.map((event) => event.type)).toEqual(expect.arrayContaining([
+      "EVIDENCE_ADMITTED",
+      "DECISION_RECORDED",
+      "AUTHORITY_ASSIGNED",
+      "CONSTRAINT_RETAINED",
+      "REVIEW_TRIGGER_SET",
+      "CHECKPOINT_CREATED",
+      "RETURN_BRIEF_STATUS_RECORDED",
+    ]));
+
+    const json = JSON.stringify(record);
+    expect(json).not.toContain("conflictResolved");
+    expect(json).not.toContain("operator notes");
+    expect(json).not.toContain("suppression");
+    expect(json).not.toContain("raw evidence");
+  });
+
+  it("degrades honestly when a Strategy Room record is too thin", () => {
+    const record = composeStrategyRoomRecordProvenanceFromBackingRecord({
+      sessionId: "sr_exec_thin",
+      sessionKey: "exec_public_thin",
+      sessionStatus: "active",
+      createdAt: "2026-05-10T09:00:00.000Z",
+      updatedAt: "2026-05-10T10:00:00.000Z",
+      decisionEvents: [],
+    });
+
+    expect(record.currentPosture.status).toBe("UNKNOWN");
+    expect(record.provenanceGaps).toEqual(expect.arrayContaining([
+      expect.objectContaining({ stage: "Admitted evidence" }),
+      expect.objectContaining({ stage: "Decision record" }),
+      expect.objectContaining({ stage: "Authority" }),
+      expect.objectContaining({ stage: "Checkpoint" }),
+    ]));
   });
 });
 

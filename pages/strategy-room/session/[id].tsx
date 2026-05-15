@@ -31,6 +31,7 @@ import {
   buildGovernedMemoryFromEvidenceCapture,
   selectStrategySessionMemory,
 } from "@/lib/product/governed-memory-presenter";
+import { buildClientSafeProvenanceCaseHref } from "@/lib/product/client-safe-provenance-contract";
 import { computeIrreversibilityIndex } from "@/lib/product/irreversibility-index";
 import { deriveSignalPressure } from "@/lib/strategy-room/room-state-contract";
 import type { SovereignSignalAssessment } from "@/lib/sovereign/sovereign-signal-public-dto";
@@ -128,6 +129,10 @@ type PageProps = {
   composerStakeholder?: ComposerStakeholder | null;
   composerSuppression?: string | null;
   sovereignSignalAssessment?: SovereignSignalAssessment | null;
+  provenanceState?: {
+    status: "AVAILABLE" | "PENDING" | "UNAVAILABLE";
+    href?: string | null;
+  };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -208,7 +213,14 @@ function daysSince(value: string): number | null {
 // PAGE COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function StrategyRoomSessionPage({ session: initial, error, composerStakeholder, composerSuppression, sovereignSignalAssessment }: PageProps) {
+export default function StrategyRoomSessionPage({
+  session: initial,
+  error,
+  composerStakeholder,
+  composerSuppression,
+  sovereignSignalAssessment,
+  provenanceState,
+}: PageProps) {
   const [session, setSession] = React.useState(initial);
   const [newDecision, setNewDecision] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
@@ -1170,8 +1182,11 @@ export default function StrategyRoomSessionPage({ session: initial, error, compo
                 This session is persisted and retrievable at this URL. Decision Centre shows this record as active for your case.
               </p>
               <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "6px" }}>
-                Provenance status: case-specific provenance is not yet available for Strategy Room records.
-                Provenance will appear when this session is composed into the supported provenance model.
+                {provenanceState?.status === "AVAILABLE"
+                  ? "Provenance status: live client-safe provenance is available for this Strategy Room record."
+                  : provenanceState?.status === "PENDING"
+                    ? "Provenance status: pending until the persisted record has enough governed activity to compose safely."
+                    : "Provenance status: case-specific provenance is not available for this Strategy Room record."}
               </p>
             </div>
 
@@ -1190,12 +1205,21 @@ export default function StrategyRoomSessionPage({ session: initial, error, compo
               >
                 Back to Strategy Room
               </Link>
-              <Link
-                href="/provenance/sample-export"
-                style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", textDecoration: "none" }}
-              >
-                View client-safe provenance sample
-              </Link>
+              {provenanceState?.status === "AVAILABLE" && provenanceState.href ? (
+                <Link
+                  href={provenanceState.href}
+                  style={{ ...mono, fontSize: "7px", color: `${GOLD}AA`, textDecoration: "none" }}
+                >
+                  View live client-safe provenance
+                </Link>
+              ) : (
+                <Link
+                  href="/provenance/sample-export"
+                  style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", textDecoration: "none" }}
+                >
+                  View client-safe provenance sample
+                </Link>
+              )}
             </div>
 
           </div>
@@ -1349,7 +1373,15 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       }
     } catch { /* degrade gracefully — sovereign signals are advisory */ }
 
-    return { props: { session, composerStakeholder, composerSuppression, sovereignSignalAssessment } };
+    const provenanceState = {
+      status: "AVAILABLE" as const,
+      href: buildClientSafeProvenanceCaseHref({
+        subjectType: "STRATEGY_ROOM_RECORD",
+        subjectId: session.id,
+      }),
+    };
+
+    return { props: { session, composerStakeholder, composerSuppression, sovereignSignalAssessment, provenanceState } };
   } catch (err) {
     console.error("[strategy-room-session]", err);
     return { props: { session: null, error: "Failed to load session" } };

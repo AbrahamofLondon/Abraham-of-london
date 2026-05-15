@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { DecisionProvenanceRecord } from "./decision-provenance-record";
 import { composeClientSafeProvenance } from "./client-safe-provenance-composer";
+import { composeStrategyRoomRecordProvenanceFromBackingRecord } from "./decision-provenance-record";
 
 function record(overrides: Partial<DecisionProvenanceRecord> = {}): DecisionProvenanceRecord {
   return {
@@ -264,5 +265,34 @@ describe("composeClientSafeProvenance — integrity fields", () => {
   it("composedAt can be injected for deterministic testing", () => {
     const fixed = "2026-05-14T12:00:00.000Z";
     expect(composeClientSafeProvenance(record(), { composedAt: fixed }).composedAt).toBe(fixed);
+  });
+});
+
+describe("composeClientSafeProvenance — strategy room records", () => {
+  it("projects a client-safe Strategy Room summary without exposing internal event labels", () => {
+    const record = composeStrategyRoomRecordProvenanceFromBackingRecord({
+      sessionId: "sr_exec_001",
+      sessionKey: "exec_public_001",
+      sessionStatus: "active",
+      createdAt: "2026-05-10T09:00:00.000Z",
+      updatedAt: "2026-05-10T10:00:00.000Z",
+      admittedEvidenceAt: "2026-05-10T09:00:00.000Z",
+      decisionEvents: [
+        { status: "pending", createdAt: "2026-05-10T09:30:00.000Z" },
+      ],
+      authorityAssignedAt: "2026-05-10T09:35:00.000Z",
+      constraintRetainedAt: "2026-05-10T09:36:00.000Z",
+      reviewTriggerAt: "2026-05-11T09:00:00.000Z",
+      checkpointCreatedAt: "2026-05-10T09:40:00.000Z",
+    });
+
+    const summary = composeClientSafeProvenance(record, { composedAt: "2026-05-15T09:00:00.000Z" });
+    const json = JSON.stringify(summary);
+
+    expect(summary.subjectId).toBe("sr_exec_001");
+    expect(summary.timelineSummary[0]?.milestone).toBe("EVIDENCE_CAPTURED");
+    expect(json).not.toContain("AUTHORITY_ASSIGNED");
+    expect(json).not.toContain("CHECKPOINT_CREATED");
+    expect(json).not.toContain("Constraint or dissent retained");
   });
 });

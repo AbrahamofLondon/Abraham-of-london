@@ -463,15 +463,27 @@ function StrategyRoomRecordRow({ record }: { record: StrategyRoomSessionRef }) {
             Recorded
           </span>
           <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.28)", marginTop: "3px" }}>
-            Case-specific provenance is not yet available for this record. Provenance will appear when this session is composed into the supported provenance model.
+            {record.provenanceStatus === "available"
+              ? "Live client-safe provenance is available for this persisted Strategy Room record."
+              : "Case-specific provenance is not yet available for this record."}
           </p>
         </div>
-        <Link
-          href={record.href}
-          style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}BB`, textDecoration: "none", border: `1px solid ${GOLD}25`, padding: "4px 9px", flexShrink: 0 }}
-        >
-          View record
-        </Link>
+        <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+          <Link
+            href={record.href}
+            style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}BB`, textDecoration: "none", border: `1px solid ${GOLD}25`, padding: "4px 9px" }}
+          >
+            View record
+          </Link>
+          {record.provenanceStatus === "available" && record.provenanceHref && (
+            <Link
+              href={record.provenanceHref}
+              style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}BB`, textDecoration: "none", border: `1px solid ${GOLD}25`, padding: "4px 9px" }}
+            >
+              View provenance
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

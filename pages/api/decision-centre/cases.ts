@@ -39,6 +39,7 @@ import { loadBoardroomArchiveSummary } from "@/lib/product/boardroom-archive";
 import { toDecisionCentreRetainerMemoryPreview } from "@/lib/product/decision-centre-retainer-memory";
 import { computeIrreversibilityIndex } from "@/lib/product/irreversibility-index";
 import { extractAssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
+import { buildClientSafeProvenanceCaseHref } from "@/lib/product/client-safe-provenance-contract";
 import {
   buildGovernedMemoryFromEvidenceStages,
   buildPatternRecurrenceMemory,
@@ -895,7 +896,11 @@ export default async function handler(
         ? ({
             sessionId: latestExecutionRecord.sessionId,
             href: `/strategy-room/session/${latestExecutionRecord.sessionId}`,
-            provenanceStatus: "not_available",
+            provenanceStatus: "available",
+            provenanceHref: buildClientSafeProvenanceCaseHref({
+              subjectType: "STRATEGY_ROOM_RECORD",
+              subjectId: latestExecutionRecord.sessionId,
+            }),
           } satisfies StrategyRoomSessionRef)
         : null,
       counselWarranted: counselTriggered,
