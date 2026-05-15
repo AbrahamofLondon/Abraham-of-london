@@ -4,20 +4,20 @@ import { SectionShell, HOMEPAGE_GOLD, mono, serif } from "@/components/homepage/
 
 const claims = [
   {
-    label: "Chain-anchored record",
-    value: "Each governed decision produces a merkle root. Subsequent records reference the prior root — forming a tamper-evident chain.",
+    label: "Chain carried forward",
+    value: "Provenance travels with the decision — not added later as paperwork. Evidence posture, review state, delivery status, and outcome record are carried forward as part of the decision's operating memory.",
   },
   {
-    label: "Provenance hash",
-    value: "A chain hash is derived from the record contents and the prior root. If any field is altered, the hash breaks. The break is visible.",
-  },
-  {
-    label: "What it is not",
-    value: "Not a blockchain claim. Not a third-party timestamp. The internal chain is live. External WORM anchoring is architected but not yet active.",
+    label: "Hash-verifiable accountability",
+    value: "Each governed decision produces a merkle root linked to the prior root. A chain hash is derived from record contents. If any field is altered after the fact, the hash breaks — and the break is visible.",
   },
   {
     label: "What it establishes",
     value: "A durable, inspectable record of what was decided, under what evidence, by whom, and when — in sequence. The record does not depend on the operator's continued assurance.",
+  },
+  {
+    label: "Honest boundary",
+    value: "Not a blockchain claim. Not a third-party timestamp. The internal chain is live. External WORM anchoring is architected but not yet active.",
   },
 ];
 
@@ -26,8 +26,8 @@ export default function ProvenanceThesisSection() {
     <SectionShell
       id="provenance-thesis"
       eyebrow="Provenance"
-      title="Every governed decision leaves a chain-anchored record."
-      description="The provenance layer is not a feature. It is the condition under which a decision can be said to have a governed record at all — one that cannot be revised after the fact without the revision being visible."
+      title="Provenance travels with the decision."
+      description="The chain is not appended after the fact. It is carried forward as the decision moves through evidence, reporting, intervention, and oversight. Every governed decision has an accountable chain — inspectable, hash-verifiable, and not dependent on the operator's continued assurance."
     >
       <div className="mx-auto max-w-[900px]">
         <div className="space-y-3">

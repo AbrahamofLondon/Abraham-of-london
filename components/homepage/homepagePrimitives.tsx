@@ -27,7 +27,7 @@ export function SectionShell({
   return (
     <section
       id={id}
-      className="scroll-mt-24 border-t border-white/[0.05] px-6 py-16 md:py-20"
+      className="scroll-mt-28 border-t border-white/[0.05] px-6 py-16 md:py-20"
       style={{ backgroundColor: "rgb(3,3,5)" }}
     >
       <div className="mx-auto max-w-[1100px]">

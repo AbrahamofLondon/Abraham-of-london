@@ -39,8 +39,8 @@ const stages: {
   },
   {
     label: "Provenance",
-    state: "Always present",
-    detail: "Every governed decision produces a chain-anchored record: merkle root, chain hash, prior root linkage. If any field is altered after the fact, the hash breaks. The break is visible.",
+    state: "Chain carried forward",
+    detail: "Every governed decision carries its accountable chain forward: evidence posture, review state, delivery status, outcome record, and internal chain anchor. Provenance is not added later as paperwork; it travels with the decision.",
     href: "/provenance/sample-export",
     ctaLabel: "View provenance sample",
   },

@@ -157,10 +157,10 @@ export default function Header({
       <header
         suppressHydrationWarning
         className={cn(
-          "fixed inset-x-0 top-0 z-[100] w-full transition-all duration-500",
+          "fixed inset-x-0 top-0 z-[100] w-full backdrop-blur-sm transition-all duration-500",
           elevated
-            ? "border-b border-white/[0.12] bg-[#060609]/95 py-3.5"
-            : "border-b border-white/[0.10] bg-[#060609]/90 py-4",
+            ? "border-b border-white/[0.12] bg-[#060609] py-3.5"
+            : "border-b border-white/[0.08] bg-[#060609]/90 py-4",
         )}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12">
