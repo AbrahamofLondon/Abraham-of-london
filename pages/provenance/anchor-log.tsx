@@ -145,35 +145,51 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, generatedAt }) => {
             </p>
           </header>
 
-          {/* Publication distinction */}
+          {/* Anchoring status */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
-              Anchor boundary
+              Anchoring status
             </p>
             <div className="grid gap-px md:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
-              {[
-                {
-                  label: "Internal chain anchor",
-                  value: "Stored inside the platform",
-                },
-                {
-                  label: "Public anchor log",
-                  value: "Publishes non-sensitive roots when available",
-                },
-                {
-                  label: "External WORM / public anchoring",
-                  value: "Not configured",
-                },
-              ].map((item) => (
-                <div key={item.label} style={{ backgroundColor: "rgb(3,3,5)", padding: "0.85rem 0.95rem" }}>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
-                    {item.label}
+              <div style={{ backgroundColor: "rgb(3,3,5)", padding: "0.85rem 0.95rem" }}>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                  Internal chain anchoring
+                </p>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(110,231,183,0.65)" }}>
+                  Available inside governed records
+                </p>
+                <p style={{ marginTop: "0.25rem", ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.28)" }}>
+                  Not visible publicly
+                </p>
+              </div>
+
+              <div style={{ backgroundColor: "rgb(3,3,5)", padding: "0.85rem 0.95rem" }}>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                  Public anchor publication
+                </p>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: anchors.length > 0 ? "rgba(110,231,183,0.65)" : "rgba(255,255,255,0.38)" }}>
+                  {anchors.length === 0
+                    ? "No public roots published yet"
+                    : `${anchors.length} public root${anchors.length !== 1 ? "s" : ""} visible`}
+                </p>
+                {anchors.length > 0 && (
+                  <p style={{ marginTop: "0.25rem", ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.28)" }}>
+                    Latest: {formatDate(anchors[0]?.computedAt ?? "")}
                   </p>
-                  <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
-                    {item.value}
-                  </p>
-                </div>
-              ))}
+                )}
+              </div>
+
+              <div style={{ backgroundColor: "rgb(3,3,5)", padding: "0.85rem 0.95rem" }}>
+                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                  External anchoring
+                </p>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+                  Not configured
+                </p>
+                <p style={{ marginTop: "0.25rem", ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.22)" }}>
+                  External WORM and public anchoring are not yet active
+                </p>
+              </div>
             </div>
           </section>
 
