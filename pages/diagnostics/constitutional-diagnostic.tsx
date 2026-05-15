@@ -20,6 +20,9 @@ import {
 
 import Layout from "@/components/Layout";
 import ConstitutionalDiagnosticSuite from "@/components/assessments/ConstitutionalDiagnosticSuite";
+import AssessmentResultSurface from "@/components/diagnostics/AssessmentResultSurface";
+import { mapConstitutionalToAssessmentResult, type ConstitutionalBundle } from "@/lib/diagnostics/assessment-result-mappers";
+import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 import { getOrCreateSubjectId } from "@/lib/diagnostics/subject-id";
 import { trackFunnelEntry, trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
@@ -70,6 +73,7 @@ export default function ConstitutionalDiagnosticPage() {
   const router = useRouter();
   const [spine, setSpine] = React.useState<IntelligenceSpine | null>(null);
   const [inheritedContext, setInheritedContext] = React.useState<ReturnType<typeof getInheritedContext> | null>(null);
+  const [assessmentResult, setAssessmentResult] = React.useState<AssessmentResult | null>(null);
 
   React.useEffect(() => {
     getOrCreateSubjectId();
@@ -435,10 +439,57 @@ export default function ConstitutionalDiagnosticPage() {
           </section>
         )}
 
+        {/* ── INSTRUMENT CONTEXT ───────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE }}>
+          <div className="mx-auto max-w-7xl px-6 lg:px-12 pb-6">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                  What this reads
+                </p>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                  Your stated authority, posture across nine constitutional domains, readiness tier, mandate fit, and failure mode density.
+                </p>
+              </div>
+              <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                  What this detects
+                </p>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                  Authority finding, accountability gap, admissibility to escalation, and required constitutional repair before the next layer can proceed.
+                </p>
+              </div>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
+                  Record boundary
+                </p>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
+                  This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── INSTRUMENT ────────────────────────────────────────────────── */}
         <section id="instrument" className="scroll-mt-0" style={{ backgroundColor: BASE }}>
-          <ConstitutionalDiagnosticSuite />
+          <ConstitutionalDiagnosticSuite
+            onComplete={(bundle) =>
+              setAssessmentResult(mapConstitutionalToAssessmentResult(bundle as ConstitutionalBundle))
+            }
+          />
         </section>
+
+        {/* ── SHARED RESULT SURFACE (appears after instrument completes) ─── */}
+        {assessmentResult && (
+          <section style={{ backgroundColor: BASE }}>
+            <div className="mx-auto max-w-2xl px-6 lg:px-12 pb-16">
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "2rem" }}>
+                <AssessmentResultSurface result={assessmentResult} />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── CLOSE ─────────────────────────────────────────────────────── */}
         <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
@@ -455,10 +506,11 @@ export default function ConstitutionalDiagnosticPage() {
                   style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                   Diagnostic ladder
                 </Link>
-                <Link href="/diagnostics/team-assessment"
+                <Link
+                  href={assessmentResult?.earnedRoute.href ?? "/diagnostics/team-assessment"}
                   className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
                   style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
-                  Team Assessment <ChevronRight style={{ width: "10px", height: "10px" }} />
+                  {assessmentResult?.earnedRoute.label ?? "Team Assessment"} <ChevronRight style={{ width: "10px", height: "10px" }} />
                 </Link>
               </div>
             </div>

@@ -11,7 +11,10 @@ import { ArrowRight, Lock, Unlock, ShieldCheck } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import PurposeAlignmentAssessment from "@/components/alignment/PurposeAlignmentAssessment";
+import AssessmentResultSurface from "@/components/diagnostics/AssessmentResultSurface";
 import { track } from "@/lib/analytics/track";
+import { mapPurposeAlignmentToAssessmentResult } from "@/lib/diagnostics/assessment-result-mappers";
+import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 
 const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
@@ -22,6 +25,7 @@ type EntitlementState = "loading" | "free" | "paid_unlocked" | "auth_required";
 
 export default function PurposeAlignmentPage() {
   const [entitlementState, setEntitlementState] = React.useState<EntitlementState>("loading");
+  const [assessmentResult, setAssessmentResult] = React.useState<AssessmentResult | null>(null);
 
   React.useEffect(() => {
     track("purpose_alignment_viewed", {
@@ -252,10 +256,52 @@ export default function PurposeAlignmentPage() {
           </section>
         )}
 
+        {/* ── What this reads / detects / record boundary ────────────────── */}
+        <section className="mx-auto max-w-6xl px-6 lg:px-12 pb-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                What this reads
+              </p>
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                Your avoided decision, stated obligation, chosen consequence, and personal context across six structural domains.
+              </p>
+            </div>
+            <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                What this detects
+              </p>
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                Purpose alignment posture, primary contradiction between values and behaviour, governance implication, and the next structural move.
+              </p>
+            </div>
+            <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
+                Record boundary
+              </p>
+              <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
+                This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Assessment */}
         <section className="mx-auto max-w-6xl px-6 lg:px-12 pb-24">
-          <PurposeAlignmentAssessment isPaidEntitled={entitlementState === "paid_unlocked"} />
+          <PurposeAlignmentAssessment
+            isPaidEntitled={entitlementState === "paid_unlocked"}
+            onScored={(result) => setAssessmentResult(mapPurposeAlignmentToAssessmentResult(result))}
+          />
         </section>
+
+        {/* ── Shared result surface — appears when assessment completes ─────── */}
+        {assessmentResult && (
+          <section className="mx-auto max-w-2xl px-6 pb-24">
+            <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "2rem" }}>
+              <AssessmentResultSurface result={assessmentResult} />
+            </div>
+          </section>
+        )}
 
         {/* Post-analysis context */}
         <section className="border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
@@ -279,7 +325,7 @@ export default function PurposeAlignmentPage() {
                 This analysis reads you personally. The Constitutional Diagnostic reads your organisation structurally. Together they form one decision system: personal direction informing institutional order.
               </p>
               <Link
-                href="/diagnostics/constitutional-diagnostic"
+                href={assessmentResult?.earnedRoute.href ?? "/diagnostics/constitutional-diagnostic"}
                 className="inline-flex items-center gap-2 mt-6 transition-all"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -287,7 +333,7 @@ export default function PurposeAlignmentPage() {
                   color: `${GOLD}`,
                 }}
               >
-                Test the organisational structure
+                {assessmentResult?.earnedRoute.label ?? "Test the organisational structure"}
                 <ArrowRight style={{ width: "11px", height: "11px" }} />
               </Link>
             </div>

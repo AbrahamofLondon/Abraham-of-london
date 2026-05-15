@@ -254,7 +254,11 @@ function RatingRail({
   );
 }
 
-export default function ConstitutionalDiagnostic() {
+type ConstitutionalDiagnosticProps = {
+  onComplete?: (bundle: ApiSuccess["bundle"]) => void;
+};
+
+export default function ConstitutionalDiagnostic({ onComplete }: ConstitutionalDiagnosticProps = {}) {
   const [answers, setAnswers] = React.useState<DiagnosticAnswers>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [phase, setPhase] = React.useState<EvaluationPhase>("idle");
@@ -468,6 +472,7 @@ export default function ConstitutionalDiagnostic() {
       setPhase("complete");
       setShowResults(true);
       clearVersionedAssessmentState(STORAGE_KEY);
+      onComplete?.(json.bundle);
 
       timingRef.current = {};
     } catch (error) {

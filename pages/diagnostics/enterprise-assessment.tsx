@@ -103,6 +103,9 @@ import {
   type AssessmentEvidenceCapture,
   type AssessmentEvidenceCaptureField,
 } from "@/lib/product/evidence-capture-contract";
+import AssessmentResultSurface from "@/components/diagnostics/AssessmentResultSurface";
+import { mapEnterpriseDecisionToAssessmentResult } from "@/lib/diagnostics/assessment-result-mappers";
+import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOKENS
@@ -786,6 +789,7 @@ type PagePhase = "identity" | "instrument" | "result";
 
 export default function EnterpriseAssessmentPage() {
   const [phase,       setPhase]       = React.useState<PagePhase>("identity");
+  const [assessmentResult, setAssessmentResult] = React.useState<AssessmentResult | null>(null);
   const [answers,     setAnswers]     = React.useState<EnterpriseAxisAnswers>({});
   const [identity,    setIdentity]    = React.useState({ name: "", email: "", organisation: "", role: "", recentDecision: "", notes: "" });
   const [submitResult,setSubmitResult]= React.useState<DiagnosticSubmitResponse | null>(null);
@@ -954,6 +958,14 @@ export default function EnterpriseAssessmentPage() {
   const visibleBlocks = BLOCKS.slice(instrumentPage * 2, instrumentPage * 2 + 2);
   const instrumentGroupComplete = visibleBlocks.every((block) =>
     [0, 1, 2].every((idx) => isAnswered(answers[`${block.id}-${idx}`])),
+  );
+
+  const mappedEnterpriseResult = React.useMemo<AssessmentResult | null>(
+    () =>
+      reading
+        ? mapEnterpriseDecisionToAssessmentResult(reading, totalPct, sections)
+        : null,
+    [reading, totalPct, sections],
   );
 
   function resumeDraft() {
@@ -1243,6 +1255,34 @@ export default function EnterpriseAssessmentPage() {
                   <Eyebrow>Step 1 — Identity</Eyebrow>
                   <h2 style={{ marginTop: "1.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.6rem, 2.5vw, 2.2rem)", lineHeight: 1.0, letterSpacing: "-0.020em", color: "rgba(255,255,255,0.88)" }}>Tell us about the institution.</h2>
 
+                  {/* ── What this reads / detects / record boundary ────────── */}
+                  <div className="grid gap-3 sm:grid-cols-3 mt-6">
+                    <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                        What this reads
+                      </p>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                        Your institution's operating posture across leadership, governance, execution, and risk — rated through four assessment blocks.
+                      </p>
+                    </div>
+                    <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                        What this detects
+                      </p>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                        Enterprise posture band, structural failure pattern, decision infrastructure gap, commercial consequence exposure, and next governance move.
+                      </p>
+                    </div>
+                    <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
+                        Record boundary
+                      </p>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
+                        This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre.
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="grid gap-4 mt-8 sm:grid-cols-2">
                     {[
                       { label: "Role",            key: "role",         type: "text",  placeholder: "Board chair, CEO, Director…" },
@@ -1508,6 +1548,17 @@ export default function EnterpriseAssessmentPage() {
             {phase === "result" && reading && (
               <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
                 <div className="py-14">
+
+                  {/* ── Shared Assessment Result Surface ──────────────────── */}
+                  {mappedEnterpriseResult && (
+                    <div className="mx-auto max-w-2xl mb-10 px-6">
+                      <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "2rem" }}>
+                        <AssessmentResultSurface result={mappedEnterpriseResult} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── Detailed bespoke result (secondary) ───────────────── */}
                   <ResultSurface
                     reading={reading}
                     sections={sections}
@@ -1585,7 +1636,11 @@ export default function EnterpriseAssessmentPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Diagnostic ladder</Link>
-                  <Link href="/diagnostics/executive-reporting" className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                  <Link
+                    href="/diagnostics/executive-reporting"
+                    className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
+                    style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}
+                  >
                     Executive Reporting <ChevronRight style={{ width: "10px", height: "10px" }} />
                   </Link>
                 </div>

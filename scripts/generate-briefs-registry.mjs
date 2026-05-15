@@ -64,12 +64,13 @@ function extractBriefMeta(raw) {
 
 function main() {
   if (!fs.existsSync(GENERATED_ROOT)) {
-    console.warn("[generate-briefs-registry] .contentlayer/generated/ not found. Skipping.");
-    fs.writeFileSync(OUTPUT_PATH, JSON.stringify([], null, 2), "utf-8");
-    return;
+    throw new Error(
+      "[generate-briefs-registry] .contentlayer/generated/ not found. Refusing to overwrite the brief registry with an empty result.",
+    );
   }
 
   const allBriefs = [];
+  let loadedCollections = 0;
 
   for (const collection of COLLECTIONS) {
     const indexPath = path.join(GENERATED_ROOT, collection, "_index.json");
@@ -83,6 +84,7 @@ function main() {
       const docs = JSON.parse(raw);
 
       const items = Array.isArray(docs) ? docs : Array.isArray(docs.documents) ? docs.documents : Array.isArray(docs.allDocuments) ? docs.allDocuments : [];
+      loadedCollections += 1;
 
       for (const item of items) {
         const meta = extractBriefMeta(item);
@@ -102,6 +104,18 @@ function main() {
     seen.add(b.flattenedPath);
     return true;
   });
+
+  if (loadedCollections === 0) {
+    throw new Error(
+      "[generate-briefs-registry] No brief collections were available. Refusing to overwrite the brief registry.",
+    );
+  }
+
+  if (unique.length === 0) {
+    throw new Error(
+      "[generate-briefs-registry] Generated brief collections were empty. Refusing to overwrite the brief registry.",
+    );
+  }
 
   // Ensure output directory exists
   const outDir = path.dirname(OUTPUT_PATH);

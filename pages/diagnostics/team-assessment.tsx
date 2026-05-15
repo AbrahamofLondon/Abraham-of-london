@@ -97,6 +97,9 @@ import {
   type AssessmentEvidenceCapture,
   type AssessmentEvidenceCaptureField,
 } from "@/lib/product/evidence-capture-contract";
+import AssessmentResultSurface from "@/components/diagnostics/AssessmentResultSurface";
+import { mapTeamAssessmentToAssessmentResult } from "@/lib/diagnostics/assessment-result-mappers";
+import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -702,6 +705,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
 
 export default function TeamAssessmentPage() {
   const [phase, setPhase]       = React.useState<Phase>("identity");
+  const [assessmentResult, setAssessmentResult] = React.useState<AssessmentResult | null>(null);
   const [identity, setIdentity] = React.useState<IdentityForm>({ respondentName: "", respondentEmail: "", respondentRole: "", organisation: "", teamName: "", teamSize: "", notes: "" });
   const [leaderScores, setLeaderScores]   = React.useState<ScoreMap>({});
   const [realityScores, setRealityScores] = React.useState<ScoreMap>({});
@@ -907,6 +911,11 @@ export default function TeamAssessmentPage() {
   );
   const leaderDomains = DOMAINS.slice(leaderPage * 2, leaderPage * 2 + 2);
   const realityDomains = DOMAINS.slice(realityPage * 2, realityPage * 2 + 2);
+
+  const mappedTeamResult = React.useMemo(
+    () => mapTeamAssessmentToAssessmentResult(reading, overallLeader, overallReality, fragility),
+    [reading, overallLeader, overallReality, fragility],
+  );
 
   function doAdvance(to: Phase) {
     setChallenge(null);
@@ -1241,8 +1250,36 @@ export default function TeamAssessmentPage() {
                     </details>
                   </div>
 
+                  {/* ── What this reads / detects / record boundary ────────── */}
+                  <div className="grid gap-3 sm:grid-cols-3" style={{ marginTop: "2rem" }}>
+                    <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                        What this reads
+                      </p>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                        Your rated view of the team across four domains, then your estimate of how the team would rate itself. The gap between these two is the diagnostic finding.
+                      </p>
+                    </div>
+                    <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                        What this detects
+                      </p>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+                        Team operating posture, primary team drag, decision risk, leadership implication, and fragility classification across trust, authority, execution, and clarity.
+                      </p>
+                    </div>
+                    <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
+                        Record boundary
+                      </p>
+                      <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
+                        This creates a session result until saved. Saving creates an account-bound governed case in Decision Centre.
+                      </p>
+                    </div>
+                  </div>
+
                   {/* Mode selection */}
-                  <div style={{ marginTop: "2rem" }}>
+                  <div style={{ marginTop: "1.5rem" }}>
                     <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.75rem" }}>Assessment mode</div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div style={{ padding: "1.25rem", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}08` }}>
@@ -1445,6 +1482,15 @@ export default function TeamAssessmentPage() {
             {phase === "result" && (
               <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
                 <div className="py-14">
+
+                  {/* ── Shared Assessment Result Surface ──────────────────── */}
+                  <div className="mx-auto max-w-2xl mb-10 px-6">
+                    <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "2rem" }}>
+                      <AssessmentResultSurface result={mappedTeamResult} />
+                    </div>
+                  </div>
+
+                  {/* ── Detailed bespoke result (secondary) ───────────────── */}
                   <ResultSurface
                     gaps={gaps}
                     reading={reading}
@@ -1525,7 +1571,11 @@ export default function TeamAssessmentPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Diagnostic ladder</Link>
-                  <Link href="/diagnostics/enterprise-assessment" className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                  <Link
+                    href="/diagnostics/enterprise-assessment"
+                    className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
+                    style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}
+                  >
                     Enterprise Assessment <ChevronRight style={{ width: "10px", height: "10px" }} />
                   </Link>
                 </div>
