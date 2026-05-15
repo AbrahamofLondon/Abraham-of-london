@@ -30,6 +30,8 @@ const SCAN_TARGETS = [
   "pages/provenance",
   "pages/account/proof-pack.tsx",
   "pages/boardroom",
+  "pages/briefing",
+  "pages/return-brief",
 ];
 
 // ── Extensions to read ─────────────────────────────────────────────────────
@@ -115,6 +117,46 @@ const RULES = [
   {
     pattern: /state:\s*["']Always present["']/g,
     label: "Provenance stage state 'Always present' — use 'Chain carried forward'",
+    severity: "WARN",
+  },
+
+  // ── Record persistence doctrine: live/sample/preview confusion ────────────
+  // Prevent phrases that imply live governed records when the destination is a
+  // sample, explainer, or preview-only route.
+
+  // "View provenance record" should not link to the sample export page.
+  // The sample page is an explainer — not a live per-case record.
+  {
+    pattern: /View\s+provenance\s+record/gi,
+    label: "WARN: 'View provenance record' — ensure this links to a live per-case record, not /provenance/sample-export (the sample is an explainer, not a governed record)",
+    severity: "WARN",
+  },
+  {
+    pattern: /View\s+case\s+provenance/gi,
+    label: "WARN: 'View case provenance' — ensure this links to a live per-case provenance route, not the sample export",
+    severity: "WARN",
+  },
+
+  // "Open Return Brief" should not link to /return-brief (the public explainer).
+  // The route /return-brief is a public explainer page, not a generated brief.
+  // Generated briefs are at /briefing/return/[sessionKey].
+  {
+    pattern: /Open\s+Return\s+Brief/gi,
+    label: "ERROR: 'Open Return Brief' — this phrasing implies a live generated brief; link to /briefing/return/[sessionKey], not /return-brief (the public explainer)",
+    severity: "ERROR",
+  },
+
+  // "live record" should not appear on preview/sample pages
+  {
+    pattern: /\blive\s+record\b/gi,
+    label: "WARN: 'live record' — verify this is on a page with a live governed record, not a preview or sample surface",
+    severity: "WARN",
+  },
+
+  // Avoid implying the sample provenance export is a governed record
+  {
+    pattern: /sample[- ]export.*governed\s+record|governed\s+record.*sample[- ]export/gi,
+    label: "WARN: 'sample-export' paired with 'governed record' language — sample-export is an explainer, not a live case record",
     severity: "WARN",
   },
 ];
