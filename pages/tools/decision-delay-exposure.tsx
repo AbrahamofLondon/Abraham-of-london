@@ -686,7 +686,6 @@ export default function DecisionDelayExposurePage() {
                     delayWeeks: parseFloat(form.delayWeeksRaw) || 0,
                     exposureType: form.exposureType,
                     estimateConfidence: form.estimateConfidence,
-                    result,
                   })}
                   copy="Create a free account to preserve the exposure estimate in Decision Centre. The optional decision label remains display-only and is not carried forward."
                 />

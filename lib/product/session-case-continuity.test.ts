@@ -14,24 +14,14 @@ describe("session case continuity payloads", () => {
       delayWeeks: 3,
       exposureType: "revenue",
       estimateConfidence: "rough",
-      result: {
-        sevenDayExposure: 5000,
-        thirtyDayExposure: 21429,
-        ninetyDayExposure: 64286,
-        sevenDayFormatted: "£5,000",
-        thirtyDayFormatted: "£21,429",
-        ninetyDayFormatted: "£64,286",
-        exposureStatement: "Scenario estimate.",
-        structuralConsequence: "Delay compounds.",
-        recommendedNextMove: "Run the Fast Diagnostic.",
-        disclaimer: "Scenario only.",
-        ctaHref: "/diagnostics/fast",
-      },
     });
 
-    expect(payload.source).toBe("DELAY_CALCULATOR");
+    expect(payload.source).toBe("DECISION_DELAY_CALCULATOR");
+    // decisionLabel is intentionally absent — calculator free text is display-only
     expect(payload.decisionLabel).toBeUndefined();
-    expect(payload.costOfDelay?.thirtyDayExposure).toBe(21429);
+    // exposure figures are stored as raw inputs, not computed output
+    expect(payload.weeklyCost).toBe(5000);
+    expect(payload.delayWeeks).toBe(3);
   });
 
   it("carries fast diagnostic case reference and governance fields", () => {
