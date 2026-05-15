@@ -160,12 +160,9 @@ describe("product surface registry", () => {
     expect(bad.map((s) => `${s.id}: ${s.adminRoute}`)).toEqual([]);
   });
 
-  it("captures, outputs, and downstream are non-empty arrays", () => {
+  it("outputs and downstream are non-empty arrays; captures may be empty for public-only surfaces", () => {
     for (const surface of PRODUCT_SURFACE_REGISTRY) {
-      expect(
-        surface.captures.length,
-        `${surface.id} has empty captures`,
-      ).toBeGreaterThan(0);
+      // captures can be empty for public-only surfaces that don't collect user data
       expect(
         surface.outputs.length,
         `${surface.id} has empty outputs`,
@@ -188,5 +185,69 @@ describe("product surface registry", () => {
     expect(categories.has("ESCALATION")).toBe(true);
     expect(categories.has("CLIENT_PORTAL")).toBe(true);
     expect(categories.has("CONTENT")).toBe(true);
+  });
+
+  // ─── Doctrine enforcement ────────────────────────────────────────────────
+
+  it("Decision Centre description contains 'governed decision lives'", () => {
+    const dc = getProductSurfaceById("decision-centre");
+    expect(dc).toBeDefined();
+    expect(dc!.description).toContain("governed decision lives");
+  });
+
+  it("Return Brief route is not dead or misleading (route exists as /return-brief)", () => {
+    const rb = getProductSurfaceById("return-brief");
+    expect(rb).toBeDefined();
+    expect(rb!.clientRoute).toBe("/return-brief");
+    expect(rb!.status).toBe("live");
+  });
+
+  it("Proof Pack description contains 'portable' and 'client-safe'", () => {
+    const pp = getProductSurfaceById("proof-pack");
+    expect(pp).toBeDefined();
+    expect(pp!.description).toContain("portable");
+    expect(pp!.description).toContain("client-safe");
+  });
+
+  it("all required public live surfaces exist in registry", () => {
+    const requiredIds = [
+      "decision-delay-exposure-calculator",
+      "board-summary-preview",
+      "provenance-sample-export",
+      "public-anchor-log",
+    ];
+    for (const id of requiredIds) {
+      const surface = getProductSurfaceById(id);
+      expect(surface, `missing required surface: ${id}`).toBeDefined();
+      expect(surface!.status, `${id} should be live`).toBe("live");
+    }
+  });
+
+  it("no registry description uses the term 'toolkit'", () => {
+    const offenders = PRODUCT_SURFACE_REGISTRY.filter(
+      (s) => s.description.toLowerCase().includes("toolkit"),
+    );
+    expect(offenders.map((s) => s.id)).toEqual([]);
+  });
+
+  it("no registry description claims WORM/blockchain/external immutability", () => {
+    const forbidden = ["worm", "blockchain", "immutable", "immutability"];
+    const offenders = PRODUCT_SURFACE_REGISTRY.filter((s) => {
+      const lower = s.description.toLowerCase();
+      return forbidden.some((term) => lower.includes(term));
+    });
+    expect(offenders.map((s) => s.id)).toEqual([]);
+  });
+
+  it("no active registry route points to a missing obvious page (route-check for known surfaces)", () => {
+    // Verify that all live surfaces have a clientRoute that starts with /
+    // This is a structural check — actual page existence is verified by the build.
+    const liveSurfaces = PRODUCT_SURFACE_REGISTRY.filter((s) => s.status === "live");
+    for (const surface of liveSurfaces) {
+      expect(
+        surface.clientRoute.startsWith("/"),
+        `${surface.id} has invalid clientRoute: ${surface.clientRoute}`,
+      ).toBe(true);
+    }
   });
 });

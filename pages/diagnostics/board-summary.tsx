@@ -201,7 +201,21 @@ export default function BoardSummaryPage() {
               margin: "48px 0 32px",
             }}
           />
-          <nav data-no-print>
+          <nav data-no-print style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <Link
+              href="/decision-centre"
+              style={{
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "#C9A96E",
+                textDecoration: "none",
+                fontWeight: 600,
+              }}
+            >
+              → Continue in Decision Centre
+            </Link>
             <Link
               href="/diagnostics"
               style={{

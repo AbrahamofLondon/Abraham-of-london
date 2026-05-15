@@ -608,7 +608,7 @@ export default function DecisionDelayExposurePage() {
                 fontStyle: "italic",
               }}
             >
-              This tool is part of the Abraham of London decision governance toolkit.
+              This calculator is a public entry surface within the Abraham of London decision-governance system.
               It does not require an account, does not store your inputs, and does not produce financial advice.
               All figures are scenario estimates derived from your stated inputs.
             </p>
