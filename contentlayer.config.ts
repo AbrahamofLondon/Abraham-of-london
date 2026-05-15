@@ -676,6 +676,11 @@ const Resource = defineDocumentType(() => ({
       required: false,
     },
     pageCount: { type: "number", required: false },
+    summary: { type: "string", required: false },
+    canonical: { type: "list", of: { type: "string" }, required: false },
+    products: { type: "list", of: { type: "string" }, required: false },
+    linkedToolkit: { type: "string", required: false },
+    linkedProducts: { type: "list", of: { type: "string" }, required: false },
   },
   computedFields: createComputedFields("resources/", "resources"),
 }));
@@ -697,6 +702,7 @@ const Lexicon = defineDocumentType(() => ({
     title: { type: "string", required: true },
     description: { type: "string", required: false },
     subtitle: { type: "string", required: false },
+    summary: { type: "string", required: false },
     
     // Classification
     category: { type: "string", required: false },
@@ -715,6 +721,11 @@ const Lexicon = defineDocumentType(() => ({
     
     // Status
     draft: { type: "boolean", required: false, default: false },
+    status: {
+      type: "enum",
+      options: ["draft", "published", "archived"],
+      required: false,
+    },
   },
   computedFields: createComputedFields("lexicon/", "lexicon"),
 }));
@@ -740,7 +751,7 @@ const Playbook = defineDocumentType(() => ({
     ...baseFields,
     playbookType: {
       type: "enum",
-      options: ["diagnostic", "execution", "correction", "strategic", "operational"],
+      options: ["diagnostic", "execution", "correction", "strategic", "operational", "leadership"],
       required: false,
       default: "strategic",
     },
@@ -756,6 +767,10 @@ const Playbook = defineDocumentType(() => ({
       default: "intermediate",
     },
     prerequisites: { type: "list", of: { type: "string" }, required: false },
+    contentClass: { type: "string", required: false },
+    accessModel: { type: "string", required: false },
+    checkpointEligible: { type: "boolean", required: false },
+    continuationPath: { type: "json", required: false },
   },
   computedFields: {
     ...createComputedFields("playbooks/", "playbook"),

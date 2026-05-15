@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import SendToSelfForm from "@/components/tools/SendToSelfForm";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import OutcomeVerificationPanel from "@/components/outcomes/OutcomeVerificationPanel";
 import { resolvePageAccess } from "@/lib/access/server";
@@ -211,6 +212,20 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
                 >
                   Download PDF
                 </button>
+              </section>
+
+              {/* ── Send to self ── */}
+              <section className="border border-white/[0.08] bg-white/[0.02] p-5">
+                <SendToSelfForm
+                  source="proof_pack"
+                  isLiveRecord={true}
+                  content={{
+                    title: `Proof Pack — ${pack.ownerEmail}`,
+                    summary: pack.summary,
+                    subjectType: "PROOF_PACK",
+                    subjectId: pack.ownerEmail,
+                  }}
+                />
               </section>
             </>
           ) : (

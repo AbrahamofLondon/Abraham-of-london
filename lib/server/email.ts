@@ -45,6 +45,17 @@ function uniqueNonEmpty(list: string[]): string[] {
   return Array.from(set);
 }
 
+/**
+ * Checks whether send-to-self is enabled.
+ * Controlled by SEND_TO_SELF_ENABLED env var (defaults to "true").
+ * When false, the API returns 503 and UI shows unavailable state.
+ */
+export function isSendToSelfEnabled(): boolean {
+  const raw = process.env.SEND_TO_SELF_ENABLED;
+  // Default to enabled if not explicitly set to "false"
+  return raw === undefined || raw === "" || raw.toLowerCase() !== "false";
+}
+
 async function deliverEmail(
   to: string[],
   sender: string,
@@ -68,10 +79,33 @@ async function deliverEmail(
       return { success: true, messageId: `mock-${Date.now()}` };
     }
 
-    // TODO: implement real providers
-    // - Resend
-    // - SendGrid
-    // - SMTP (nodemailer)
+    if (provider === "resend") {
+      const apiKey = process.env.RESEND_API_KEY;
+      if (!apiKey || !apiKey.startsWith("re_")) {
+        console.error("❌ [EMAIL] Resend provider selected but RESEND_API_KEY is missing or invalid.");
+        return { success: false, error: "Resend API key is not configured" };
+      }
+
+      const { Resend } = await import("resend");
+      const resend = new Resend(apiKey);
+
+      const response = await resend.emails.send({
+        from: sender,
+        to,
+        subject,
+        html,
+        text,
+      });
+
+      if (response.error) {
+        console.error("❌ [EMAIL] Resend delivery failed:", response.error);
+        return { success: false, error: response.error.message ?? "Resend delivery failed" };
+      }
+
+      const messageId = response.data?.id ?? `resend-${Date.now()}`;
+      console.log("📧 [EMAIL] Delivered via Resend:", { to, subject, messageId });
+      return { success: true, messageId };
+    }
 
     console.warn("⚠️ [EMAIL] Provider not implemented, falling back to console-like success:", provider);
     return { success: true, messageId: `provider-${provider}-${Date.now()}` };

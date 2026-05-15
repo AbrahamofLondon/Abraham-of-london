@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import SendToSelfForm from "@/components/tools/SendToSelfForm";
 import { resolvePageAccess } from "@/lib/access/server";
 import { loadClientSafeProvenance } from "@/lib/admin/client-safe-provenance-composer";
 import { authorizeClientSafeProvenanceSubject } from "@/lib/product/client-safe-provenance-access";
@@ -160,6 +161,20 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
                 <p style={{ ...mono, marginTop: "0.7rem", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
                   Composed {new Date(summary.composedAt).toLocaleString("en-GB")}
                 </p>
+              </section>
+
+              <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
+                <SendToSelfForm
+                  source="client_safe_provenance"
+                  isLiveRecord={true}
+                  content={{
+                    title: `Provenance summary — ${subjectType} · ${subjectId}`,
+                    summary: summary.accountabilityStatement,
+                    nextMove: "",
+                    subjectType,
+                    subjectId,
+                  }}
+                />
               </section>
             </>
           )}

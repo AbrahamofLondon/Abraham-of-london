@@ -147,10 +147,12 @@ const RULES = [
   },
 
   // "live record" should not appear on preview/sample pages
+  // Allowed when negated: "not a live record", "not generated from", "sample only", "demonstration sample"
   {
     pattern: /\blive\s+record\b/gi,
     label: "WARN: 'live record' — verify this is on a page with a live governed record, not a preview or sample surface",
     severity: "WARN",
+    skipIfNegated: true,
   },
 
   // Avoid implying the sample provenance export is a governed record
@@ -221,6 +223,20 @@ async function main() {
       for (let i = 0; i < lines.length; i++) {
         rule.pattern.lastIndex = 0;
         if (rule.pattern.test(lines[i])) {
+          // Skip if rule has skipIfNegated and line contains negation
+          if (rule.skipIfNegated) {
+            const lineLower = lines[i].toLowerCase();
+            const negationPatterns = [
+              "not a live record",
+              "not generated from",
+              "sample only",
+              "demonstration sample",
+              "not connected to your",
+            ];
+            const isNegated = negationPatterns.some((np) => lineLower.includes(np));
+            if (isNegated) continue;
+          }
+
           violations.push({
             severity: rule.severity,
             label: rule.label,

@@ -1,19 +1,14 @@
 {
-  "generatedAt": "2026-05-14T11:04:51.114Z",
+  "generatedAt": "2026-05-15T14:13:11.888Z",
   "totals": {
     "failures": 0,
-    "warnings": 2
+    "warnings": 1
   },
   "findings": [
     {
       "rule": "generated_pdf_inventory_outside_canonical_path",
       "severity": "warn",
       "message": "1 generated PDF artifacts remain outside /assets/downloads/{slug}.pdf. Legacy inventory should be normalized, but it is not blocking release."
-    },
-    {
-      "rule": "generated_reports_committed",
-      "severity": "warn",
-      "message": "Generated PDF reports changed during audit regeneration: reports/pdf-canonical-decisions.json, reports/pdf-asset-registry.json, reports/pdf-duplicate-report.json."
     }
   ]
 }

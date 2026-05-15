@@ -98,10 +98,10 @@ const SampleExportPage: NextPage = () => {
               This is a client-safe provenance summary. It does not expose internal review notes, suppression details, or raw governance events.
             </p>
             <p style={{ marginTop: "0.4rem", ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
-              This page demonstrates the client-safe provenance format. It is not a live record for the current visitor.
+              This page demonstrates the client-safe provenance format. It is not generated from the current visitor's account or case.
             </p>
             <p style={{ marginTop: "0.4rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
-              Sample data for demonstration purposes. Not a live record.
+              Sample data for demonstration purposes. Not connected to your account, case, or governed record.
             </p>
           </header>
 
@@ -303,7 +303,7 @@ const SampleExportPage: NextPage = () => {
               </p>
             </div>
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.18)", lineHeight: 1.6 }}>
-              This is a client-safe provenance summary. It does not expose internal review notes, suppression details, or raw governance events. Sample data for demonstration purposes. Not a live record.
+              This is a client-safe provenance summary. It does not expose internal review notes, suppression details, or raw governance events. Sample data for demonstration purposes. Not connected to your account, case, or governed record.
             </p>
             <p style={{ marginTop: "0.3rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.14)" }}>
               External anchoring is not yet configured.

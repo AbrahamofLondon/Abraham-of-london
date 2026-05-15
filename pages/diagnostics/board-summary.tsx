@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
+import SendToSelfForm from "@/components/tools/SendToSelfForm";
 import { track } from "@/lib/analytics/track";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import BoardSummaryPreview, {
@@ -262,6 +263,20 @@ export default function BoardSummaryPage() {
               <SaveSessionCasePanel
                 payload={buildBoardSummaryCarryForwardPayload(data)}
                 copy="This is a session-derived preview. Save or continue in Decision Centre to preserve the case record."
+              />
+            </div>
+          )}
+
+          {loaded && data && (
+            <div data-no-print style={{ marginTop: "12px" }}>
+              <SendToSelfForm
+                source="board_summary_preview"
+                isLiveRecord={false}
+                content={{
+                  title: `Board Summary — ${data.title}`,
+                  summary: `Primary contradiction: ${data.primaryContradiction}. Required move: ${data.requiredMove}.`,
+                  nextMove: data.requiredMove,
+                }}
               />
             </div>
           )}
