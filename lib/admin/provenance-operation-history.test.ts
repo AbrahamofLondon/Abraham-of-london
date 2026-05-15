@@ -83,6 +83,8 @@ describe("getProvenanceOperationHistory", () => {
     expect(result.recent).toHaveLength(0);
     expect(result.latestAnchorCreatedAt).toBeNull();
     expect(result.latestChainVerifiedAt).toBeNull();
+    expect(result.manualRunnerStatus).toBe("NOT_OBSERVED");
+    expect(result.scheduledRunnerStatus).toBe("NOT_OBSERVED");
   });
 
   it("returns unavailable when the audit log query throws", async () => {
@@ -91,6 +93,8 @@ describe("getProvenanceOperationHistory", () => {
     expect(result.unavailable).toBe(true);
     expect(result.unavailableReason).toBeTruthy();
     expect(result.recent).toHaveLength(0);
+    expect(result.manualRunnerStatus).toBe("NOT_OBSERVED");
+    expect(result.scheduledRunnerStatus).toBe("NOT_OBSERVED");
   });
 
   it("derives latestAnchorCreatedAt from the most recent PROVENANCE_ANCHOR_CREATED event", async () => {
@@ -118,6 +122,38 @@ describe("getProvenanceOperationHistory", () => {
     ]);
     const result = await getProvenanceOperationHistory();
     expect(result.latestHashMismatchAt).toBe("2026-05-14T11:00:00.000Z");
+  });
+
+  it("marks manual runner activity active when a non-scheduled anchor event is observed", async () => {
+    mocks.findMany.mockResolvedValueOnce([
+      row({
+        action: "PROVENANCE_ANCHOR_CREATED",
+        metadata: {
+          eventType: "PROVENANCE_ANCHOR_CREATED",
+          source: "PROVENANCE_CREATE_ANCHOR_API",
+        },
+      }),
+    ]);
+
+    const result = await getProvenanceOperationHistory();
+    expect(result.manualRunnerStatus).toBe("ACTIVE");
+    expect(result.scheduledRunnerStatus).toBe("NOT_OBSERVED");
+  });
+
+  it("marks scheduled runner activity active only when scheduled-source events are observed", async () => {
+    mocks.findMany.mockResolvedValueOnce([
+      row({
+        action: "PROVENANCE_ANCHOR_CREATED",
+        metadata: {
+          eventType: "PROVENANCE_ANCHOR_CREATED",
+          source: "PROVENANCE_SCHEDULED_ANCHOR_RUNNER",
+        },
+      }),
+    ]);
+
+    const result = await getProvenanceOperationHistory();
+    expect(result.manualRunnerStatus).toBe("NOT_OBSERVED");
+    expect(result.scheduledRunnerStatus).toBe("ACTIVE");
   });
 
   it("does not expose raw governance events, suppression details, or _ext internal fields", async () => {

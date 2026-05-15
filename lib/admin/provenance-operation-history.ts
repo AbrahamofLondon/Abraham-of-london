@@ -33,6 +33,8 @@ export type ProvenanceOperationHistorySummary = {
   latestAnchorCreatedAt?: string | null;
   latestChainVerifiedAt?: string | null;
   latestHashMismatchAt?: string | null;
+  manualRunnerStatus: "ACTIVE" | "NOT_OBSERVED";
+  scheduledRunnerStatus: "ACTIVE" | "NOT_OBSERVED" | "NOT_CONFIGURED";
   recent: ProvenanceOperationHistoryItem[];
   unavailable?: boolean;
   unavailableReason?: string;
@@ -125,6 +127,8 @@ export async function getProvenanceOperationHistory(
     return {
       unavailable: true,
       unavailableReason: "Provenance audit log could not be queried.",
+      manualRunnerStatus: "NOT_OBSERVED",
+      scheduledRunnerStatus: "NOT_OBSERVED",
       recent: [],
     };
   }
@@ -133,6 +137,15 @@ export async function getProvenanceOperationHistory(
     .map(extractItem)
     .filter((item): item is ProvenanceOperationHistoryItem => item !== null);
 
+  const hasScheduledRunnerEvent = items.some((item) =>
+    typeof item.source === "string" && item.source.toLowerCase().includes("scheduled"),
+  );
+  const hasManualRunnerEvent = items.some((item) =>
+    item.eventType === "PROVENANCE_ANCHOR_CREATED"
+      && typeof item.source === "string"
+      && !item.source.toLowerCase().includes("scheduled"),
+  );
+
   return {
     latestAnchorCreatedAt:
       items.find((i) => i.eventType === "PROVENANCE_ANCHOR_CREATED")?.occurredAt ?? null,
@@ -140,6 +153,8 @@ export async function getProvenanceOperationHistory(
       items.find((i) => i.eventType === "PROVENANCE_CHAIN_VERIFIED")?.occurredAt ?? null,
     latestHashMismatchAt:
       items.find((i) => i.eventType === "PROVENANCE_HASH_MISMATCH")?.occurredAt ?? null,
+    manualRunnerStatus: hasManualRunnerEvent ? "ACTIVE" : "NOT_OBSERVED",
+    scheduledRunnerStatus: hasScheduledRunnerEvent ? "ACTIVE" : "NOT_OBSERVED",
     recent: items,
   };
 }

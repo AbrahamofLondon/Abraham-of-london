@@ -18,19 +18,16 @@ import Link from "next/link";
 import { Shield, Clock, Hash, Layers } from "lucide-react";
 
 import Layout from "@/components/Layout";
-
-// ─── Types ─────────────────────────────────────────────────────────────────
-
-type PublicAnchorEntry = {
-  version: number;
-  scope: string;
-  merkleRoot: string;
-  leafCount: number;
-  computedAt: string;
-};
+import {
+  buildPublicAnchorLogState,
+  toPublicAnchorEntries,
+  type PublicAnchorEntry,
+  type PublicAnchorLogState,
+} from "@/lib/admin/public-anchor-log-state";
 
 type PageProps = {
   anchors: PublicAnchorEntry[];
+  state: PublicAnchorLogState;
   generatedAt: string;
 };
 
@@ -44,36 +41,26 @@ const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia,
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
   let anchors: PublicAnchorEntry[] = [];
+  let internalAnchoringAvailable: boolean | null = null;
 
   try {
     // Attempt to load persisted anchors from AuditEvent metadata
     const { prisma } = await import("@/lib/prisma.server");
-    const rows = await (prisma as any).auditEvent.findMany({
-      where: { objectType: "PROVENANCE_ANCHOR" },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      select: { metadata: true, createdAt: true },
-    });
+    const [rows, internalAnchor] = await Promise.all([
+      (prisma as any).auditEvent.findMany({
+        where: { objectType: "PROVENANCE_ANCHOR" },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: { metadata: true, createdAt: true },
+      }),
+      prisma.provenanceChainAnchor.findFirst({
+        select: { id: true },
+      }),
+    ]);
 
-    anchors = rows
-      .map((row: { metadata: unknown; createdAt: Date }) => {
-        const meta = row.metadata && typeof row.metadata === "object"
-          ? (row.metadata as Record<string, unknown>)
-          : {};
-        const merkleRoot = typeof meta.merkleRoot === "string" ? meta.merkleRoot : null;
-        if (!merkleRoot) return null;
+    internalAnchoringAvailable = Boolean(internalAnchor);
 
-        return {
-          version: typeof meta.version === "number" ? meta.version : 1,
-          scope: typeof meta.scope === "string" ? meta.scope : "UNKNOWN",
-          merkleRoot,
-          leafCount: typeof meta.leafCount === "number" ? meta.leafCount : 0,
-          computedAt: typeof meta.computedAt === "string"
-            ? meta.computedAt
-            : row.createdAt.toISOString(),
-        };
-      })
-      .filter((entry: PublicAnchorEntry | null): entry is PublicAnchorEntry => entry !== null);
+    anchors = toPublicAnchorEntries(rows);
   } catch {
     // No anchors persisted yet — show empty state
   }
@@ -81,6 +68,11 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
   return {
     props: {
       anchors,
+      state: buildPublicAnchorLogState({
+        publicRootsCount: anchors.length,
+        latestPublicRootAt: anchors[0]?.computedAt ?? null,
+        internalAnchoringAvailable,
+      }),
       generatedAt: new Date().toISOString(),
     },
   };
@@ -109,7 +101,13 @@ function truncateHash(hash: string): string {
 
 // ─── Page ──────────────────────────────────────────────────────────────────
 
-const AnchorLogPage: NextPage<PageProps> = ({ anchors, generatedAt }) => {
+function internalAnchoringLabel(value: PublicAnchorLogState["internalAnchoringAvailable"]): string {
+  if (value === true) return "Observed in internal ledger";
+  if (value === false) return "No internal anchors observed";
+  return "Not observable from this page";
+}
+
+const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => {
   return (
     <Layout
       title="Provenance Anchor Log | Abraham of London"
@@ -155,8 +153,18 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, generatedAt }) => {
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Internal chain anchoring
                 </p>
-                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(110,231,183,0.65)" }}>
-                  Available inside governed records
+                <p
+                  style={{
+                    marginTop: "0.35rem",
+                    ...serif,
+                    fontSize: "0.88rem",
+                    lineHeight: 1.55,
+                    color: state.internalAnchoringAvailable === true
+                      ? "rgba(110,231,183,0.65)"
+                      : "rgba(255,255,255,0.38)",
+                  }}
+                >
+                  {internalAnchoringLabel(state.internalAnchoringAvailable)}
                 </p>
                 <p style={{ marginTop: "0.25rem", ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.28)" }}>
                   Not visible publicly
@@ -167,14 +175,14 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, generatedAt }) => {
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Public anchor publication
                 </p>
-                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: anchors.length > 0 ? "rgba(110,231,183,0.65)" : "rgba(255,255,255,0.38)" }}>
-                  {anchors.length === 0
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: state.publicRootsCount > 0 ? "rgba(110,231,183,0.65)" : "rgba(255,255,255,0.38)" }}>
+                  {state.publicRootsCount === 0
                     ? "No public roots published yet"
-                    : `${anchors.length} public root${anchors.length !== 1 ? "s" : ""} visible`}
+                    : `${state.publicRootsCount} public root${state.publicRootsCount !== 1 ? "s" : ""} visible`}
                 </p>
-                {anchors.length > 0 && (
+                {state.latestPublicRootAt && (
                   <p style={{ marginTop: "0.25rem", ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.28)" }}>
-                    Latest: {formatDate(anchors[0]?.computedAt ?? "")}
+                    Latest: {formatDate(state.latestPublicRootAt)}
                   </p>
                 )}
               </div>
@@ -201,7 +209,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, generatedAt }) => {
                 No public anchor roots are currently available.
               </p>
               <p style={{ marginTop: "0.5rem", ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
-                Internal chain anchoring may still exist for governed records; this page only shows roots deliberately published to the public anchor log.
+                This does not mean a governed case lacks an internal chain anchor. This page only shows roots deliberately published to the public anchor log. External WORM or public blockchain anchoring is not configured.
               </p>
             </section>
           ) : (
