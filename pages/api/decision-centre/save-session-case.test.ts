@@ -53,18 +53,25 @@ function createRes() {
 }
 
 function createReq(body: unknown): NextApiRequest {
-  return {
-    method: "POST",
-    body,
-  } as NextApiRequest;
+  return { method: "POST", body } as NextApiRequest;
 }
+
+const AUTHED_IDENTITY = {
+  authenticated: true,
+  subjectId: "user_1",
+  email: "user@example.com",
+} as never;
+
+const JOURNEY_RESULT = { journeyKey: "journey_user_1" } as never;
 
 describe("POST /api/decision-centre/save-session-case", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("rejects unauthenticated requests with a useful auth-required response", async () => {
+  // ── Auth gate ───────────────────────────────────────────────────────────────
+
+  it("returns AUTH_REQUIRED with account-creation copy for unauthenticated requests", async () => {
     vi.mocked(resolveIdentity).mockResolvedValue({
       authenticated: false,
       subjectId: null,
@@ -78,46 +85,121 @@ describe("POST /api/decision-centre/save-session-case", () => {
     expect(res.body).toEqual({
       ok: false,
       reason: "AUTH_REQUIRED",
-      message: "Sign in to save this case in Decision Centre.",
+      message: "Create a free account to keep this decision live.",
     });
   });
 
-  it("accepts authenticated client-safe payloads and returns an account case reference", async () => {
-    vi.mocked(resolveIdentity).mockResolvedValue({
-      authenticated: true,
-      subjectId: "user_1",
-      email: "user@example.com",
-    } as never);
-    vi.mocked(persistDiagnosticStage).mockResolvedValue({
-      journeyKey: "journey_user_1",
-    } as never);
+  // ── FAST_DIAGNOSTIC ─────────────────────────────────────────────────────────
+
+  it("persists a FAST_DIAGNOSTIC case and returns the account case reference", async () => {
+    vi.mocked(resolveIdentity).mockResolvedValue(AUTHED_IDENTITY);
+    vi.mocked(persistDiagnosticStage).mockResolvedValue(JOURNEY_RESULT);
 
     const res = createRes();
-    await handler(createReq({
-      source: "FAST_DIAGNOSTIC",
-      caseRef: "case_fast_1",
-      decisionLabel: "Whether to proceed",
-      nextGovernanceMove: "Assign one owner.",
-    }), res);
+    await handler(
+      createReq({
+        source: "FAST_DIAGNOSTIC",
+        caseRef: "case_fast_1",
+        decisionLabel: "Whether to proceed",
+        condition: "Authority unclear",
+        nextGovernanceMove: "Assign one owner.",
+        comparisonBand: "Above observed median",
+        comparisonMaturityLevel: "3",
+      }),
+      res,
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ ok: true, caseRef: "journey_user_1" });
     expect(persistDiagnosticStage).toHaveBeenCalledTimes(1);
+
+    const call = vi.mocked(persistDiagnosticStage).mock.calls[0]![0];
+    expect(call.stage).toBe("purpose_alignment");
+    expect(call.payload).toMatchObject({
+      _type: "session_case_carry_forward",
+      source: "FAST_DIAGNOSTIC",
+      sourceCaseRef: "case_fast_1",
+      decisionLabel: "Whether to proceed",
+      condition: "Authority unclear",
+      nextGovernanceMove: "Assign one owner.",
+      comparisonBand: "Above observed median",
+      comparisonMaturityLevel: "3",
+    });
+    // Governed decision object is passed so DC title is derivable
+    expect(call.decisionObject).not.toBeNull();
   });
 
-  it("rejects raw internal fields outside the accepted client-safe contract", async () => {
-    vi.mocked(resolveIdentity).mockResolvedValue({
-      authenticated: true,
-      subjectId: "user_1",
-      email: "user@example.com",
-    } as never);
+  // ── DECISION_DELAY_CALCULATOR ───────────────────────────────────────────────
+
+  it("persists a DECISION_DELAY_CALCULATOR case with flat raw inputs", async () => {
+    vi.mocked(resolveIdentity).mockResolvedValue(AUTHED_IDENTITY);
+    vi.mocked(persistDiagnosticStage).mockResolvedValue(JOURNEY_RESULT);
 
     const res = createRes();
-    await handler(createReq({
-      source: "FAST_DIAGNOSTIC",
-      decisionLabel: "Whether to proceed",
-      provenanceHash: "should-not-be-accepted",
-    }), res);
+    await handler(
+      createReq({
+        source: "DECISION_DELAY_CALCULATOR",
+        weeklyCost: 5000,
+        delayWeeks: 3,
+        exposureType: "revenue",
+        estimateConfidence: "rough",
+        createdAt: "2026-05-15T00:00:00.000Z",
+      }),
+      res,
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ ok: true, caseRef: "journey_user_1" });
+
+    const call = vi.mocked(persistDiagnosticStage).mock.calls[0]![0];
+    expect(call.stage).toBe("purpose_alignment");
+    expect(call.payload).toMatchObject({
+      _type: "session_case_carry_forward",
+      source: "DECISION_DELAY_CALCULATOR",
+      // decisionLabel is intentionally omitted for calculator cases
+      decisionLabel: null,
+      weeklyCost: 5000,
+      delayWeeks: 3,
+      exposureType: "revenue",
+      estimateConfidence: "rough",
+    });
+  });
+
+  // Computed exposure outputs are display-only — not stored in the governed record
+  it("rejects DECISION_DELAY_CALCULATOR payloads that include computed outputs", async () => {
+    vi.mocked(resolveIdentity).mockResolvedValue(AUTHED_IDENTITY);
+
+    const res = createRes();
+    await handler(
+      createReq({
+        source: "DECISION_DELAY_CALCULATOR",
+        weeklyCost: 5000,
+        delayWeeks: 3,
+        // thirtyDayExposure is a computed output, not part of the schema
+        thirtyDayExposure: 21429,
+      }),
+      res,
+    );
+
+    expect(res.statusCode).toBe(400);
+    expect((res.body as { reason: string }).reason).toBe("INVALID_REQUEST");
+    expect(persistDiagnosticStage).not.toHaveBeenCalled();
+  });
+
+  // ── Schema guard ────────────────────────────────────────────────────────────
+
+  it("rejects raw internal fields outside the accepted client-safe contract", async () => {
+    vi.mocked(resolveIdentity).mockResolvedValue(AUTHED_IDENTITY);
+
+    const res = createRes();
+    await handler(
+      createReq({
+        source: "FAST_DIAGNOSTIC",
+        decisionLabel: "Whether to proceed",
+        provenanceHash: "should-not-be-accepted",
+      }),
+      res,
+    );
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -126,5 +208,49 @@ describe("POST /api/decision-centre/save-session-case", () => {
       message: "Only client-safe session case fields may be saved.",
     });
     expect(persistDiagnosticStage).not.toHaveBeenCalled();
+  });
+
+  // ── Decision Centre visibility ──────────────────────────────────────────────
+  //
+  // Verifies that a successful save calls persistDiagnosticStage with the
+  // shape required for Decision Centre to show the case:
+  //   - stage: "purpose_alignment"     (DC reads this stage to build the case)
+  //   - _type: "session_case_carry_forward"
+  //   - decisionObject present         (DC derives case title from this)
+  //   - email and subjectId threaded   (DC filters cases by email)
+
+  it("saves with the payload shape Decision Centre needs to surface the case", async () => {
+    vi.mocked(resolveIdentity).mockResolvedValue(AUTHED_IDENTITY);
+    vi.mocked(persistDiagnosticStage).mockResolvedValue({
+      journeyKey: "journey_user_1",
+    } as never);
+
+    const res = createRes();
+    await handler(
+      createReq({
+        source: "FAST_DIAGNOSTIC",
+        caseRef: "case_fast_1",
+        decisionLabel: "Whether to restructure",
+        condition: "No binding owner",
+        nextGovernanceMove: "Assign one accountable owner.",
+      }),
+      res,
+    );
+
+    expect(res.statusCode).toBe(200);
+
+    const call = vi.mocked(persistDiagnosticStage).mock.calls[0]![0];
+
+    // DC queries journey by email — must be threaded through
+    expect(call.email).toBe("user@example.com");
+    expect(call.subjectId).toBe("user_1");
+
+    // DC reads purpose_alignment stage to build a LivingCase
+    expect(call.stage).toBe("purpose_alignment");
+    expect((call.payload as { _type: string })._type).toBe("session_case_carry_forward");
+
+    // DC derives case title from decisionObject.decisionText
+    expect(call.decisionObject).toBeDefined();
+    expect(call.decisionObject).not.toBeNull();
   });
 });

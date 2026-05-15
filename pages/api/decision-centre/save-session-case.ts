@@ -5,34 +5,70 @@ import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { extractCanonicalDecisionObject } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 
-const payloadSchema = z.object({
-  source: z.enum(["FAST_DIAGNOSTIC", "BOARD_SUMMARY", "DELAY_CALCULATOR"]),
-  caseRef: z.string().trim().max(200).optional(),
-  decisionLabel: z.string().trim().max(420).optional(),
-  condition: z.string().trim().max(180).optional(),
-  authorityIndex: z.object({
-    band: z.string().trim().max(80),
-    label: z.string().trim().max(180),
-    boardMeaning: z.string().trim().max(420),
-    nextGovernanceMove: z.string().trim().max(420),
-  }).strict().optional(),
-  comparisonBand: z.string().trim().max(180).optional(),
-  costOfDelay: z.object({
-    weeklyCost: z.number().finite().nonnegative(),
-    delayWeeks: z.number().finite().nonnegative(),
-    exposureType: z.enum(["revenue", "operating_cost", "compliance", "opportunity", "reputation", "execution"]),
-    estimateConfidence: z.enum(["rough", "known", "board_estimate"]),
-    sevenDayExposure: z.number().finite().nonnegative(),
-    thirtyDayExposure: z.number().finite().nonnegative(),
-    ninetyDayExposure: z.number().finite().nonnegative(),
-  }).strict().optional(),
-  nextGovernanceMove: z.string().trim().max(420).optional(),
-  createdAt: z.string().datetime().optional(),
-}).strict();
+// ── Request schema ────────────────────────────────────────────────────────────
+//
+// Mirrors SaveCasePayload from lib/product/save-case-continuity.ts exactly.
+// .strict() ensures no internal or unrecognised fields are accepted.
+
+const EXPOSURE_TYPES = [
+  "revenue",
+  "operating_cost",
+  "compliance",
+  "opportunity",
+  "reputation",
+  "execution",
+] as const;
+
+const ESTIMATE_CONFIDENCES = ["rough", "known", "board_estimate"] as const;
+
+const payloadSchema = z
+  .object({
+    source: z.enum(["FAST_DIAGNOSTIC", "BOARD_SUMMARY", "DECISION_DELAY_CALCULATOR"]),
+    caseRef: z.string().trim().max(200).optional().nullable(),
+    decisionLabel: z.string().trim().max(420).optional().nullable(),
+    condition: z.string().trim().max(180).optional().nullable(),
+    nextGovernanceMove: z.string().trim().max(420).optional().nullable(),
+    comparisonBand: z.string().trim().max(180).optional().nullable(),
+    comparisonMaturityLevel: z.string().trim().max(180).optional().nullable(),
+    // Delay-calculator inputs (stored as raw inputs, not computed outputs)
+    weeklyCost: z.number().finite().nonnegative().optional().nullable(),
+    delayWeeks: z.number().finite().nonnegative().optional().nullable(),
+    exposureType: z.enum(EXPOSURE_TYPES).optional().nullable(),
+    estimateConfidence: z.enum(ESTIMATE_CONFIDENCES).optional().nullable(),
+    createdAt: z.string().datetime().optional().nullable(),
+  })
+  .strict();
+
+type SavePayload = z.infer<typeof payloadSchema>;
 
 type SaveSessionCaseResponse =
   | { ok: true; caseRef: string }
-  | { ok: false; reason: "AUTH_REQUIRED" | "INVALID_REQUEST" | "METHOD_NOT_ALLOWED" | "INTERNAL_ERROR"; message: string };
+  | {
+      ok: false;
+      reason: "AUTH_REQUIRED" | "INVALID_REQUEST" | "METHOD_NOT_ALLOWED" | "INTERNAL_ERROR";
+      message: string;
+    };
+
+// ── Cost text helper ─────────────────────────────────────────────────────────
+//
+// Derives a plain-English cost-of-delay string from raw inputs so the
+// canonical decision object carries a human-readable exposure figure.
+// Uses the same 30-day approximation as computeDecisionDelayExposure.
+
+function buildCostOfDelayText(payload: SavePayload): string | null {
+  if (
+    payload.source !== "DECISION_DELAY_CALCULATOR" ||
+    payload.weeklyCost == null ||
+    payload.delayWeeks == null
+  ) {
+    return null;
+  }
+  const thirtyDay = Math.round(payload.weeklyCost * (30 / 7));
+  if (thirtyDay <= 0) return null;
+  return `£${thirtyDay.toLocaleString("en-GB")} estimated at 30 days`;
+}
+
+// ── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(
   req: NextApiRequest,
@@ -61,23 +97,23 @@ export default async function handler(
     return res.status(401).json({
       ok: false,
       reason: "AUTH_REQUIRED",
-      message: "Sign in to save this case in Decision Centre.",
+      message: "Create a free account to keep this decision live.",
     });
   }
 
   try {
     const payload = parsed.data;
-    const fallbackDecision = payload.source === "DELAY_CALCULATOR"
+    const isDelayCalc = payload.source === "DECISION_DELAY_CALCULATOR";
+
+    const fallbackDecision = isDelayCalc
       ? "Deferred decision exposure estimate"
       : "Saved session case";
-    const costOfDelayText = payload.costOfDelay
-      ? `£${payload.costOfDelay.thirtyDayExposure.toLocaleString("en-GB")} estimated at 30 days`
-      : null;
+
     const decisionObject = extractCanonicalDecisionObject({
       sourceStage: "purpose_alignment",
-      decisionText: payload.source === "DELAY_CALCULATOR" ? null : payload.decisionLabel ?? null,
+      decisionText: isDelayCalc ? null : (payload.decisionLabel ?? null),
       constraintText: payload.condition ?? null,
-      costOfDelayText,
+      costOfDelayText: buildCostOfDelayText(payload),
       fallbackDecision,
     });
 
@@ -89,12 +125,16 @@ export default async function handler(
         _type: "session_case_carry_forward",
         source: payload.source,
         sourceCaseRef: payload.caseRef ?? null,
-        decisionLabel: payload.source === "DELAY_CALCULATOR" ? null : payload.decisionLabel ?? null,
+        decisionLabel: isDelayCalc ? null : (payload.decisionLabel ?? null),
         condition: payload.condition ?? null,
-        authorityIndex: payload.authorityIndex ?? null,
         comparisonBand: payload.comparisonBand ?? null,
-        costOfDelay: payload.costOfDelay ?? null,
-        nextGovernanceMove: payload.nextGovernanceMove ?? payload.authorityIndex?.nextGovernanceMove ?? null,
+        comparisonMaturityLevel: payload.comparisonMaturityLevel ?? null,
+        nextGovernanceMove: payload.nextGovernanceMove ?? null,
+        // Calculator inputs stored as raw values — not computed outputs
+        weeklyCost: payload.weeklyCost ?? null,
+        delayWeeks: payload.delayWeeks ?? null,
+        exposureType: payload.exposureType ?? null,
+        estimateConfidence: payload.estimateConfidence ?? null,
         carriedForwardAt: new Date().toISOString(),
         sourceCreatedAt: payload.createdAt ?? null,
       },
