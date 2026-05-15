@@ -65,16 +65,31 @@ Created `lib/product/record-persistence-contract.ts` with:
 export type RecordPersistenceLevel =
   | "NONE"
   | "SESSION_PREVIEW"
+  | "LOCAL_PREVIEW"
   | "ACCOUNT_RECORD"
   | "GOVERNED_CASE"
   | "PROVENANCE_BACKED"
-  | "ANCHORED";
+  | "ANCHORED"
+  | "PUBLIC_ROOT_PUBLISHED";
 ```
 
-With helper:
+With helpers:
 - `assertLiveRecordClaimAllowed(surface, persistenceLevel)` — throws if a surface claims a persistence level it doesn't have
 - `getSurfacePersistenceLevel(surfaceId)` — returns the expected persistence level from the registry
 - `describePersistenceLevel(level)` — human-readable description
+- `isLiveRecord(level)` — returns true for ACCOUNT_RECORD and above
+- `requiresBoundaryCopy(level)` — returns true for NONE/SESSION_PREVIEW/LOCAL_PREVIEW/PUBLIC_ROOT_PUBLISHED
+- `getRecordBoundaryLabel(level)` — human-readable label for UI display
+- `SurfaceRecordBoundary` type — full boundary specification for a surface
+
+### Subsequent enhancements (Agent 1):
+- Added `LOCAL_PREVIEW` and `PUBLIC_ROOT_PUBLISHED` levels
+- Added `SurfaceRecordBoundary` type with `createsRecord`, `systemOfRecord`, `boundaryCopy` fields
+- Added `isLiveRecord()`, `requiresBoundaryCopy()`, `getRecordBoundaryLabel()` helpers
+- `public-anchor-log` updated from `NONE` to `PUBLIC_ROOT_PUBLISHED`
+- `StrategyRoomSessionRef` type added to `decision-centre-contract.ts` with `provenanceStatus: "not_available"`
+- `strategyRoomRecord` populated in API response and rendered in Decision Centre case cards
+- `save-case-continuity.ts` created; `session-case-continuity.ts` refactored as compatibility shim
 
 ---
 
@@ -84,7 +99,10 @@ Added to **Decision Centre page** (`pages/decision-centre.tsx`) — a footer not
 
 > Authenticated Decision Centre records are reconstructed from available account and diagnostic evidence. Session-only previews must be saved before they become account-bound governed cases.
 
-This is placed in the page footer area, below the case cards, to ensure users understand the record boundary.
+Also added to **Strategy Room session page** (`pages/strategy-room/session/[id].tsx`) by Agent 1:
+
+> This session is persisted and retrievable at this URL. Decision Centre shows this record as active for your case.
+> Provenance status: case-specific provenance is not yet available for Strategy Room records.
 
 ---
 
@@ -93,10 +111,14 @@ This is placed in the page footer area, below the case cards, to ensure users un
 Added to `lib/admin/product-surface-registry.test.ts`:
 
 1. **Decision Centre is not described as system of record unless backed by account/server data** — verifies the registry description does not overclaim
-2. **Sample/preview pages are marked SESSION_PREVIEW or NONE** — verifies Board Summary, Calculator, Provenance Sample have correct persistence levels
-3. **Provenance Sample is SAMPLE/NONE, not live record** — explicit check
-4. **Return Brief explainer is NONE unless generated route exists** — the explanatory page is NONE
-5. **Strategy Room live output is not labelled PROVENANCE_BACKED unless provenance exists** — checks the registry entry
+2. **Sample/preview pages are marked SESSION_PREVIEW, NONE, or PUBLIC_ROOT_PUBLISHED** — verifies Board Summary, Calculator, Provenance Sample, Anchor Log have correct persistence levels
+3. **Provenance Sample is NONE, not live record** — explicit check
+4. **Public Anchor Log is PUBLIC_ROOT_PUBLISHED, not a live governed record** — explicit check
+5. **Return Brief explainer is GOVERNED_CASE (route exists)** — the page has a live route
+6. **Strategy Room is not labelled PROVENANCE_BACKED unless provenance exists** — checks the registry entry
+7. **Oversight Brief is PROVENANCE_BACKED** — has chain-of-custody provenance
+8. **Proof Pack is PROVENANCE_BACKED** — has chain-of-custody provenance
+9. **Every registry surface has a persistence level defined** — all 22 surfaces mapped
 
 ---
 
@@ -109,6 +131,8 @@ Added to `lib/admin/product-surface-registry.test.ts`:
 | **Fast Diagnostic draft uses localStorage** | Low | Draft recovery only. Final result is server-persisted. |
 | **No external anchoring for provenance** | Medium | Both provenance pages note "not yet configured". This is transparent but may concern evaluators. |
 | **Decision Centre requires authentication** | Medium | AuthRequired state has no sign-up flow. Users who aren't authenticated see an empty state. |
+| **Strategy Room provenance not yet available** | Low | `provenanceStatus: "not_available"` until DECISION_CASE provenance composition is supported. |
+| **session-case-continuity.test.ts out of date** | Low | Test references old API after `save-case-continuity.ts` refactor. Not in Agent 2 scope. |
 
 ---
 
@@ -116,6 +140,6 @@ Added to `lib/admin/product-surface-registry.test.ts`:
 
 | Check | Result |
 |---|---|
-| `pnpm typecheck` | ✅ Passes |
-| `pnpm vitest run lib/admin/product-surface-registry.test.ts` | ✅ 26/26 pass |
+| `pnpm typecheck` | ⚠️ 2 errors in `session-case-continuity.test.ts` (out of Agent 2 scope — test references old API after Agent 1's `save-case-continuity.ts` refactor) |
+| `pnpm vitest run lib/admin/product-surface-registry.test.ts` | ✅ 35/35 pass |
 | `git diff --check` | ✅ Clean |

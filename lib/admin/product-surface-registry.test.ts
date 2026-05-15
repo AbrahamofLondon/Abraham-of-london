@@ -275,19 +275,19 @@ describe("product surface registry", () => {
     expect(level).toBe("GOVERNED_CASE");
   });
 
-  it("sample/preview pages are marked SESSION_PREVIEW or NONE", () => {
+  it("sample/preview pages are marked SESSION_PREVIEW, NONE, or PUBLIC_ROOT_PUBLISHED", () => {
     const previewIds = [
       "decision-delay-exposure-calculator",
       "board-summary-preview",
       "provenance-sample-export",
       "public-anchor-log",
     ];
-    const allowedLevels: RecordPersistenceLevel[] = ["SESSION_PREVIEW", "NONE"];
+    const allowedLevels: RecordPersistenceLevel[] = ["SESSION_PREVIEW", "NONE", "PUBLIC_ROOT_PUBLISHED"];
     for (const id of previewIds) {
       const level = getSurfacePersistenceLevel(id);
       expect(
         allowedLevels.includes(level!),
-        `${id} has persistence level "${level}" but should be SESSION_PREVIEW or NONE`,
+        `${id} has persistence level "${level}" but should be SESSION_PREVIEW, NONE, or PUBLIC_ROOT_PUBLISHED`,
       ).toBe(true);
     }
   });
@@ -297,9 +297,9 @@ describe("product surface registry", () => {
     expect(level).toBe("NONE");
   });
 
-  it("Public Anchor Log is NONE, not a live record", () => {
+  it("Public Anchor Log is PUBLIC_ROOT_PUBLISHED, not a live governed record", () => {
     const level = getSurfacePersistenceLevel("public-anchor-log");
-    expect(level).toBe("NONE");
+    expect(level).toBe("PUBLIC_ROOT_PUBLISHED");
   });
 
   it("Return Brief explainer surface is GOVERNED_CASE (route exists as /return-brief)", () => {
