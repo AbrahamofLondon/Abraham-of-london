@@ -48,6 +48,7 @@ describe("buildPublicAnchorLogState", () => {
         merkleRoot: "root_001",
         leafCount: 3,
         computedAt: "2026-05-14T12:00:00.000Z",
+        chainHash: null,
       },
     ]);
     expect(JSON.stringify(entries)).not.toContain("scopeId");

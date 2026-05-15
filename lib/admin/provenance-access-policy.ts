@@ -5,7 +5,8 @@ export type ProvenancePolicyAction =
   | "VIEW_CLIENT_SAFE_PROVENANCE"
   | "VERIFY_PROVENANCE_HASH"
   | "CREATE_PROVENANCE_ANCHOR"
-  | "EXPORT_PROVENANCE";
+  | "EXPORT_PROVENANCE"
+  | "PUBLISH_PUBLIC_ROOT";
 
 export type ProvenanceAccessSubject = {
   access?: Pick<EffectiveAccess, "permissions" | "role"> | null;
@@ -26,6 +27,7 @@ const KNOWN_ACTIONS = new Set<ProvenancePolicyAction>([
   "VERIFY_PROVENANCE_HASH",
   "CREATE_PROVENANCE_ANCHOR",
   "EXPORT_PROVENANCE",
+  "PUBLISH_PUBLIC_ROOT",
 ]);
 
 export function canAccessProvenanceOperation(

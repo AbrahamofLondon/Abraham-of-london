@@ -13,7 +13,8 @@ export type ProvenanceOperationEventType =
   | "PROVENANCE_HASH_VERIFIED"
   | "PROVENANCE_HASH_MISMATCH"
   | "CLIENT_SAFE_PROVENANCE_GENERATED"
-  | "FULL_PROVENANCE_VIEWED";
+  | "FULL_PROVENANCE_VIEWED"
+  | "PROVENANCE_PUBLIC_ROOT_PUBLISHED";
 
 export type ProvenanceOperationStatus =
   | "SUCCESS"

@@ -12,6 +12,8 @@ export type PublicAnchorEntry = {
   merkleRoot: string;
   leafCount: number;
   computedAt: string;
+  /** Chain hash (sha256 commitment over safe chain fields). Safe to publish — does not contain subject IDs. */
+  chainHash?: string | null;
 };
 
 export type PublicAnchorPublicationRow = {
@@ -51,7 +53,8 @@ export function toPublicAnchorEntries(rows: PublicAnchorPublicationRow[]): Publi
         computedAt: typeof meta.computedAt === "string"
           ? meta.computedAt
           : row.createdAt.toISOString(),
+        chainHash: typeof meta.chainHash === "string" ? meta.chainHash : null,
       };
     })
-    .filter((entry): entry is PublicAnchorEntry => entry !== null);
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== null) as PublicAnchorEntry[];
 }

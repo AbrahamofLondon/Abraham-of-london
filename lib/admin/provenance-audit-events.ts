@@ -11,7 +11,8 @@ export type ProvenanceAuditAction =
   | "PROVENANCE_ANCHOR_CREATED"
   | "PROVENANCE_HASH_MISMATCH"
   | "CLIENT_SAFE_PROVENANCE_GENERATED"
-  | "FULL_PROVENANCE_VIEWED";
+  | "FULL_PROVENANCE_VIEWED"
+  | "PROVENANCE_PUBLIC_ROOT_PUBLISHED";
 
 export type ProvenanceAuditInput = {
   action: ProvenanceAuditAction;
@@ -46,7 +47,8 @@ export function buildProvenanceAuditMetadata(input: ProvenanceAuditInput): Recor
 }
 
 function toOperationEventType(action: ProvenanceAuditAction): ProvenanceOperationEventType {
-  return action === "PROVENANCE_VERIFIED" ? "PROVENANCE_HASH_VERIFIED" : action;
+  if (action === "PROVENANCE_VERIFIED") return "PROVENANCE_HASH_VERIFIED";
+  return action;
 }
 
 function toOperationStatus(input: ProvenanceAuditInput): ProvenanceOperationStatus {
