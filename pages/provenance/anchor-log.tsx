@@ -145,15 +145,47 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, generatedAt }) => {
             </p>
           </header>
 
+          {/* Publication distinction */}
+          <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+              Anchor boundary
+            </p>
+            <div className="grid gap-px md:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
+              {[
+                {
+                  label: "Internal chain anchor",
+                  value: "Stored inside the platform",
+                },
+                {
+                  label: "Public anchor log",
+                  value: "Publishes non-sensitive roots when available",
+                },
+                {
+                  label: "External WORM / public anchoring",
+                  value: "Not configured",
+                },
+              ].map((item) => (
+                <div key={item.label} style={{ backgroundColor: "rgb(3,3,5)", padding: "0.85rem 0.95rem" }}>
+                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                    {item.label}
+                  </p>
+                  <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {/* Anchors */}
           {anchors.length === 0 ? (
             <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "2rem", textAlign: "center" }}>
               <Layers className="mx-auto h-8 w-8" style={{ color: `${GOLD}60` }} />
               <p style={{ marginTop: "1rem", ...serif, fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
-                No provenance anchors have been published yet.
+                No public anchor roots are currently available.
               </p>
               <p style={{ marginTop: "0.5rem", ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
-                Anchors will appear here once batch Merkle root computation is active.
+                Internal chain anchoring may still exist for governed records; this page only shows roots deliberately published to the public anchor log.
               </p>
             </section>
           ) : (

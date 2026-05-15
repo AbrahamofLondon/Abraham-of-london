@@ -63,6 +63,23 @@ const SampleExportPage: NextPage = () => {
 
           {/* ── HEADER ──────────────────────────────────────────────── */}
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                border: `1px solid ${GOLD}30`,
+                backgroundColor: `${GOLD}08`,
+                color: `${GOLD}BB`,
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                padding: "0.25rem 0.55rem",
+                marginBottom: "0.85rem",
+              }}
+            >
+              Sample / no live client data
+            </div>
             <div className="flex items-center gap-2 mb-4">
               <Shield className="h-5 w-5" style={{ color: GOLD }} />
               <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
@@ -74,6 +91,9 @@ const SampleExportPage: NextPage = () => {
             </h1>
             <p style={{ marginTop: "0.75rem", ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
               This is a client-safe provenance summary. It does not expose internal review notes, suppression details, or raw governance events.
+            </p>
+            <p style={{ marginTop: "0.4rem", ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+              This page demonstrates the client-safe provenance format. It is not a live record for the current visitor.
             </p>
             <p style={{ marginTop: "0.4rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
               Sample data for demonstration purposes. Not a live record.
@@ -248,7 +268,7 @@ const SampleExportPage: NextPage = () => {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/provenance/anchor-log" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
-                View public anchor log
+                View public anchor log status
               </Link>
               <Link href="/tools/decision-delay-exposure" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
                 Estimate decision delay exposure

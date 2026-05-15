@@ -2774,9 +2774,12 @@ export default function StrategyRoomPage({
                   href="/provenance/sample-export"
                   style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70`, textDecoration: "none" }}
                 >
-                  View provenance record →
+                  View client-safe provenance sample →
                 </Link>
               </div>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+                Live case provenance appears when a case-bound record has been composed. The sample shows the client-safe format.
+              </p>
             </div>
           </>
         )}
