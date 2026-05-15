@@ -9,7 +9,7 @@ const claims = [
   },
   {
     label: "Hash-verifiable accountability",
-    value: "Each governed decision produces a merkle root linked to the prior root. A chain hash is derived from record contents. If any field is altered after the fact, the hash breaks — and the break is visible.",
+    value: "Each governed decision carries forward a hash-verifiable accountability chain: evidence posture, review state, delivery status, outcome record, and internal chain anchor remain linked as the case moves. If the recorded chain changes, the hash evidence changes with it.",
   },
   {
     label: "What it establishes",

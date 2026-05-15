@@ -1877,7 +1877,7 @@ export default function StrategyRoomPage({
                   </p>
                   {[
                     { label: "Decision Centre", href: "/decision-centre" },
-                    { label: "Return Brief", href: "/oversight" },
+                    { label: "Understand Return Brief", href: "/return-brief" },
                     { label: "Executive Reporting", href: "/diagnostics/executive-reporting" },
                   ].map(({ label, href }) => (
                     <Link
@@ -2765,10 +2765,10 @@ export default function StrategyRoomPage({
                   <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
                 <Link
-                  href="/oversight"
+                  href="/return-brief"
                   style={{ padding: "9px 18px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.38)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
                 >
-                  Return Brief
+                  Understand Return Brief
                 </Link>
                 <Link
                   href="/provenance/sample-export"

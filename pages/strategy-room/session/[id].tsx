@@ -523,7 +523,13 @@ export default function StrategyRoomSessionPage({ session: initial, error, compo
 
           {/* ── Session authority line ── */}
           <div style={{ padding: "1rem 0 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.04)", marginBottom: "1rem" }}>
-            <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.5rem" }}>
+              Strategy Room execution session
+            </p>
+            <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.55)" }}>
+              A Strategy Room session works from an admitted evidence record and produces a governed intervention record.
+            </p>
+            <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", marginTop: "0.35rem" }}>
               This session is now active. Your decision is in scope.
             </p>
             <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)", marginTop: "0.25rem" }}>
@@ -587,8 +593,8 @@ export default function StrategyRoomSessionPage({ session: initial, error, compo
                   <Link href="/decision-centre" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none" }}>
                     Respond in Decision Centre
                   </Link>
-                  <Link href={`/briefing/return/${session.sessionKey}`} style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none" }}>
-                    Use Return Brief response
+                  <Link href="/return-brief" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none" }}>
+                    Understand Return Brief
                   </Link>
                 </div>
               )}

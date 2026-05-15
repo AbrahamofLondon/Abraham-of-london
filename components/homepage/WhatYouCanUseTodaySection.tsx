@@ -32,7 +32,7 @@ const surfaces = [
     primary: false,
   },
   {
-    status: "Returning users",
+    status: "Governed case console",
     label: "Decision Centre",
     summary: "Active cases, checkpoints, retained memory, and next actions carried forward from prior sessions.",
     href: "/decision-centre",

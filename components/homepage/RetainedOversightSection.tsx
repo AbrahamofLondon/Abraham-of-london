@@ -4,20 +4,20 @@ import { SectionShell, HOMEPAGE_GOLD, mono } from "@/components/homepage/homepag
 
 const features = [
   {
-    label: "The system returns",
-    value: "After a governed decision is recorded, the system issues a Return Brief at agreed intervals. Commitments are checked against the record.",
+    label: "Governance cadence",
+    value: "Retained Oversight preserves governance cadence across cycles so live cases, review windows, and escalation posture remain visible instead of resetting each period.",
   },
   {
-    label: "The record is not discarded",
-    value: "Every named condition, required move, and dissenting position is retained. If a commitment is missed or delayed, the record surfaces it.",
+    label: "Sponsor-safe visibility",
+    value: "Sponsors receive role-safe visibility into cadence posture, active attention, brief status, and continuity without exposing raw respondent text or operator notes.",
   },
   {
-    label: "Oversight brief",
-    value: "Each return cycle produces a structured brief: what was committed, what has changed, what remains unresolved, and whether escalation is now warranted.",
+    label: "Outcome verification",
+    value: "Each cycle preserves delivery control, outcome posture, and the review trail needed to distinguish what was completed, blocked, or still unresolved.",
   },
   {
-    label: "Institutional cases",
-    value: "Retained oversight is the appropriate layer when a decision has consequence that extends beyond the immediate principals — board, regulator, or counterparty.",
+    label: "Institutional memory",
+    value: "Named conditions, required moves, dissenting positions, and missed commitments remain in memory so later reviews inherit the accountable record.",
   },
 ];
 
@@ -26,8 +26,8 @@ export default function RetainedOversightSection() {
     <SectionShell
       id="retained-oversight"
       eyebrow="Retained Oversight"
-      title="The system returns. Commitments are checked against the record."
-      description="Retained oversight is not ongoing advice. It is a governed return cycle: the system comes back, compares what was committed against what happened, and names what is still unresolved."
+      title="Governance cadence remains live across cycles."
+      description="Retained Oversight preserves governance cadence across cycles: sponsor-safe visibility, delivery control, outcome verification, and institutional memory."
     >
       <div className="mx-auto max-w-[900px]">
         <div className="grid gap-3 sm:grid-cols-2">

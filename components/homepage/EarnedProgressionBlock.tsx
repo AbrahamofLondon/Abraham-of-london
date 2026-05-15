@@ -47,7 +47,9 @@ const stages: {
   {
     label: "Return Brief",
     state: "Triggered by record",
-    detail: "When commitments made under a governed decision are missed, delayed, or unresolved, the system issues a Return Brief. The record does not wait to be asked.",
+    detail: "A Return Brief reopens the governed record when the condition remains active. It records what changed, what did not, what commitment was missed or completed, and what is now required.",
+    href: "/return-brief",
+    ctaLabel: "Understand Return Brief",
   },
   {
     label: "Counsel Review",
