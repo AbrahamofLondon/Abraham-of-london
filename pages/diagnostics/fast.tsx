@@ -1101,6 +1101,13 @@ const FastDiagnosticPage: NextPage = () => {
               {/* Email capture — below the fold, after value is proven */}
               <ResultEmailCapture source="fast_diagnostic" resultRef={result.caseRef} />
 
+              {/* Send-to-self bridge — for users who do not want to create an account */}
+              <SendToSelfFastDiagnostic
+                condition={result.conditionLabel || result.condition || ""}
+                requiredMove={result.anchorNarrative?.requiredMove || result.synthesis?.concreteMove || ""}
+                caseRef={result.caseRef || ""}
+              />
+
             </div>
           </div>
         )}
@@ -1146,6 +1153,121 @@ function CostLine({ label, text }: { label: string; text: string }) {
     <div>
       <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginRight: "0.75rem" }}>{label}:</span>
       <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.68)" }}>{text}</span>
+    </div>
+  );
+}
+
+function SendToSelfFastDiagnostic({
+  condition,
+  requiredMove,
+  caseRef,
+}: {
+  condition: string;
+  requiredMove: string;
+  caseRef: string;
+}) {
+  const [email, setEmail] = React.useState("");
+  const [status, setStatus] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  async function handleSend() {
+    const trimmed = email.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
+    setStatus("sending");
+    try {
+      const response = await fetch("/api/tools/send-to-self", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: trimmed,
+          source: "fast_diagnostic",
+          content: {
+            title: `Diagnostic finding: ${condition}`,
+            summary: `Case reference: ${caseRef}. The system identified a ${condition} condition with the recommended governance move below.`,
+            nextMove: requiredMove,
+          },
+        }),
+      });
+      const json = await response.json();
+      if (json.ok) {
+        setStatus("sent");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  if (status === "sent") {
+    return (
+      <div style={{ marginTop: "16px", borderLeft: `2px solid rgba(110,231,183,0.25)`, backgroundColor: "rgba(110,231,183,0.02)", padding: "12px 16px" }}>
+        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
+          Sent. Check your inbox.
+        </p>
+        <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
+          This does not create a governed case. To carry this forward, save it in Decision Centre or return when ready.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "14px 18px" }}>
+      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+        Send this governance move to my email
+      </p>
+      <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginBottom: "10px" }}>
+        We will send this result to the email you provide. This does not create a governed case unless you create an account.
+      </p>
+      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
+          placeholder="your@email.com"
+          autoComplete="email"
+          style={{
+            flex: 1,
+            padding: "10px 12px",
+            border: "1px solid rgba(255,255,255,0.10)",
+            backgroundColor: "transparent",
+            color: "rgba(255,255,255,0.80)",
+            ...mono,
+            fontSize: "12px",
+            outline: "none",
+          }}
+        />
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={status === "sending" || !email.trim()}
+          style={{
+            padding: "10px 16px",
+            border: `1px solid ${GOLD}40`,
+            backgroundColor: `${GOLD}10`,
+            color: `${GOLD}CC`,
+            ...mono,
+            fontSize: "8px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            cursor: status === "sending" ? "wait" : "pointer",
+            opacity: status === "sending" ? 0.7 : 1,
+            flexShrink: 0,
+            minHeight: "40px",
+          }}
+        >
+          {status === "sending" ? "Sending..." : "Send"}
+        </button>
+      </div>
+      {status === "error" && (
+        <p style={{ marginTop: "8px", fontSize: "12px", color: "rgba(252,165,165,0.55)" }}>
+          Could not send. Try again later.
+        </p>
+      )}
+      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "8px" }}>
+        No marketing. No account created. One email only.
+      </p>
     </div>
   );
 }

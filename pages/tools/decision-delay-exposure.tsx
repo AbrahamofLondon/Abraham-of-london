@@ -679,6 +679,14 @@ export default function DecisionDelayExposurePage() {
                 </p>
               </section>
 
+              {/* Send to self */}
+              <SendToSelfCalculator
+                weeklyCost={parseFloat(form.weeklyCostRaw) || 0}
+                delayWeeks={parseFloat(form.delayWeeksRaw) || 0}
+                exposureType={form.exposureType}
+                result={result}
+              />
+
               <div style={{ marginTop: "16px" }}>
                 <SaveSessionCasePanel
                   payload={buildDelayCalculatorCarryForwardPayload({
@@ -738,5 +746,123 @@ export default function DecisionDelayExposurePage() {
         </div>
       </main>
     </Layout>
+  );
+}
+
+function SendToSelfCalculator({
+  weeklyCost,
+  delayWeeks,
+  exposureType,
+  result,
+}: {
+  weeklyCost: number;
+  delayWeeks: number;
+  exposureType: string;
+  result: DecisionDelayExposureResult;
+}) {
+  const [email, setEmail] = React.useState("");
+  const [status, setStatus] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  async function handleSend() {
+    const trimmed = email.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
+    setStatus("sending");
+    try {
+      const response = await fetch("/api/tools/send-to-self", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: trimmed,
+          source: "decision_delay_calculator",
+          content: {
+            title: `Decision delay exposure — ${exposureType.replace(/_/g, " ")}`,
+            summary: `Estimated weekly cost: £${weeklyCost.toLocaleString()} · Delay: ${delayWeeks} week${delayWeeks !== 1 ? "s" : ""}`,
+            exposureSummary: `7-day exposure: ${result.sevenDayFormatted} · 30-day: ${result.thirtyDayFormatted} · 90-day: ${result.ninetyDayFormatted}`,
+            nextMove: result.recommendedNextMove,
+          },
+        }),
+      });
+      const json = await response.json();
+      if (json.ok) {
+        setStatus("sent");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  if (status === "sent") {
+    return (
+      <section style={{ marginTop: "16px", borderLeft: `2px solid rgba(110,231,183,0.25)`, backgroundColor: "rgba(110,231,183,0.02)", padding: "12px 16px" }}>
+        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
+          Sent. Check your inbox.
+        </p>
+        <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
+          This does not create a governed case. To carry this forward, run the Fast Diagnostic.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section style={{ marginTop: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "14px 18px" }}>
+      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+        Send this to my email
+      </p>
+      <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginBottom: "10px" }}>
+        We will send this result to the email you provide. This does not create a governed case unless you create an account.
+      </p>
+      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
+          placeholder="your@email.com"
+          autoComplete="email"
+          style={{
+            flex: 1,
+            padding: "10px 12px",
+            border: "1px solid rgba(255,255,255,0.10)",
+            backgroundColor: "transparent",
+            color: "rgba(255,255,255,0.80)",
+            ...mono,
+            fontSize: "12px",
+            outline: "none",
+          }}
+        />
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={status === "sending" || !email.trim()}
+          style={{
+            padding: "10px 16px",
+            border: `1px solid ${GOLD}40`,
+            backgroundColor: `${GOLD}10`,
+            color: `${GOLD}CC`,
+            ...mono,
+            fontSize: "8px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            cursor: status === "sending" ? "wait" : "pointer",
+            opacity: status === "sending" ? 0.7 : 1,
+            flexShrink: 0,
+            minHeight: "40px",
+          }}
+        >
+          {status === "sending" ? "Sending..." : "Send"}
+        </button>
+      </div>
+      {status === "error" && (
+        <p style={{ marginTop: "8px", fontSize: "12px", color: "rgba(252,165,165,0.55)" }}>
+          Could not send. Try again later.
+        </p>
+      )}
+      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "8px" }}>
+        No marketing. No account created. One email only.
+      </p>
+    </section>
   );
 }
