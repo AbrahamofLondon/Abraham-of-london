@@ -24,6 +24,9 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: vi.fn(),
       upsert: vi.fn(),
     },
+    rateLimitEvent: {
+      upsert: vi.fn().mockResolvedValue({ count: 1, limit: 30 }),
+    },
   },
 }));
 
@@ -94,7 +97,7 @@ function makeReq(
   method: string = "GET",
   query: Record<string, string> = {},
 ) {
-  return { method, query } as unknown as import("next").NextApiRequest;
+  return { method, query, headers: {}, socket: {} } as unknown as import("next").NextApiRequest;
 }
 
 function makeRes() {

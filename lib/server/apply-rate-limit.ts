@@ -18,7 +18,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { checkRateLimit, rateLimitHeaders, type RateLimitScope } from "@/lib/server/rate-limit";
 
 export function getClientIp(req: NextApiRequest): string {
-  const forwarded = req.headers["x-forwarded-for"];
+  const headers = req.headers ?? {};
+  const forwarded = headers["x-forwarded-for"];
   const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
   return raw?.split(",")[0]?.trim() ?? req.socket?.remoteAddress ?? "unknown";
 }
