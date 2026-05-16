@@ -47,6 +47,8 @@ import {
   clearPendingSessionCase,
   readPendingSessionCase,
 } from "@/lib/product/session-case-continuity";
+import StaleCaseAlert from "@/components/product/StaleCaseAlert";
+import { detectStaleCases } from "@/lib/product/stale-governed-case-detector";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -936,6 +938,26 @@ export default function DecisionCentrePage() {
                   No cases match the selected filter.
                 </p>
               )}
+
+            {/* ── STALE CASE ALERT ────────────────────────────────── */}
+            {(() => {
+              const staleCases = detectStaleCases(
+                data.cases.map((c) => ({
+                  caseId: c.caseId,
+                  title: c.title,
+                  lastActivityAt: c.lastEvidenceAt ?? c.updatedAt,
+                  status: "active",
+                  returnBriefTriggered: c.returnBriefTriggered ?? false,
+                  counselWarranted: c.counselWarranted ?? false,
+                })),
+              );
+              if (staleCases.length === 0) return null;
+              return (
+                <div style={{ marginBottom: "24px" }}>
+                  <StaleCaseAlert cases={staleCases} />
+                </div>
+              );
+            })()}
 
             <div style={{ display: "grid", gap: "16px" }}>
               {data.mostUrgentCase && (
