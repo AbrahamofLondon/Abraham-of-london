@@ -883,6 +883,38 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cookieName: null,
     includes: [],
   },
+
+  // ═══ PROFESSIONAL TIER ══════════════════════════════════════════════════
+
+  professional: {
+    code: "professional",
+    displayName: "Professional",
+    marketName: "Professional",
+    publicLabel: "Professional",
+    amount: 0,
+    displayPrice: "TBC",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "tier.professional",
+    tier: "professional",
+    category: "membership",
+    accessType: "subscription",
+    duration: "monthly",
+    active: true,
+    commercialStatus: "free_controlled",
+    requiresCheckout: false,
+    requiresContract: false,
+    futurePaidCandidate: true,
+    successPath: "/decision-centre",
+    cancelPath: "/pricing",
+    cookieName: null,
+    includes: [],
+    shortDescription: "Unlimited active governed cases, Return Brief generation, client-safe evidence export, case sharing, advanced timelines, and organisation workspace.",
+    userPromise: "Keep governing new active cases without limits. Unlock Return Brief generation, client-safe evidence export, case sharing, advanced chain-of-custody timelines, and organisation collaboration.",
+    pricingNote: "Professional tier — pricing to be confirmed during controlled market entry.",
+    primaryCta: "Upgrade to Professional",
+    upgradePath: [],
+  },
 };
 
 // ───────────────��───────────────────────────────��─────────────────────────────

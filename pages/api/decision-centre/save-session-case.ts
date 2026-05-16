@@ -4,6 +4,9 @@ import { z } from "zod";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { extractCanonicalDecisionObject } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
+import { checkCaseEntitlement, countActiveCases } from "@/lib/product/case-entitlement-check";
+import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { CATALOG } from "@/lib/commercial/catalog";
 
 // ── Request schema ────────────────────────────────────────────────────────────
 //
@@ -45,7 +48,7 @@ type SaveSessionCaseResponse =
   | { ok: true; caseRef: string }
   | {
       ok: false;
-      reason: "AUTH_REQUIRED" | "INVALID_REQUEST" | "METHOD_NOT_ALLOWED" | "INTERNAL_ERROR";
+      reason: "AUTH_REQUIRED" | "INVALID_REQUEST" | "METHOD_NOT_ALLOWED" | "INTERNAL_ERROR" | "FREE_TIER_LIMIT_REACHED";
       message: string;
     };
 
@@ -99,6 +102,40 @@ export default async function handler(
       reason: "AUTH_REQUIRED",
       message: "Create a free account to keep this decision live.",
     });
+  }
+
+  // ── Free tier active case limit check ──────────────────────────────────────
+  try {
+    const entitlement = await resolveCanonicalEntitlement({
+      email: identity.email,
+      slug: CATALOG.professional!.entitlementSlug,
+    });
+    const isProfessional = entitlement.granted;
+
+    // Count existing active cases for this user
+    const { prisma } = await import("@/lib/prisma.server");
+    const existingCases = await prisma.diagnosticJourney.findMany({
+      where: { email: identity.email.toLowerCase() },
+      select: { status: true },
+    });
+    const activeCount = countActiveCases(
+      existingCases.map((c: { status: string | null }) => ({
+        outcomeStatus: c.status === "resolved" ? "RESOLVED" : null,
+        cognitiveState: c.status === "institutional_intelligence" ? "INSTITUTIONAL_INTELLIGENCE" : ("ACTIVE" as const),
+      })),
+    );
+
+    const entitlementCheck = checkCaseEntitlement(activeCount, isProfessional);
+    if (!entitlementCheck.allowed) {
+      return res.status(403).json({
+        ok: false,
+        reason: "FREE_TIER_LIMIT_REACHED" as const,
+        message: `You have reached the free active case limit of ${entitlementCheck.maxActiveCases}. Upgrade to Professional to continue governing new cases.`,
+      });
+    }
+  } catch {
+    // If entitlement check fails, allow the save (degrade gracefully)
+    console.warn("[decision-centre/save-session-case] Entitlement check failed, allowing save.");
   }
 
   try {

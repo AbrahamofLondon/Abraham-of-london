@@ -3582,3 +3582,80 @@ model BenchmarkAggregate {
   @@index([computedAt])
   @@map("benchmark_aggregates")
 }
+
+// ============================================================================
+// RATE LIMIT EVENTS — Postgres-authoritative, scope-keyed, identifier-hashed
+// ============================================================================
+
+/// Scoped rate-limit counter for governance endpoints.
+/// Identifier is HMAC-hashed before storage; raw IP/email is never persisted.
+/// Compound unique enforces one row per (scope, identifierHash, windowStart).
+/// Cleanup job: DELETE WHERE windowStart < now() - interval '14 days'.
+model RateLimitEvent {
+  id             String   @id @default(cuid())
+  scope          String
+  identifierHash String
+  windowStart    DateTime
+  windowSeconds  Int
+  count          Int      @default(1)
+  limit          Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([scope, identifierHash, windowStart, windowSeconds], name: "scope_identifier_window")
+  @@index([windowStart], name: "rate_limit_event_cleanup_idx")
+  @@map("rate_limit_events")
+}
+
+// ============================================================================
+// TERMS ACCEPTANCE — versioned, first-authenticated-use tracking
+// ============================================================================
+
+/// Records which version of Terms and Privacy a user has accepted.
+/// One row per (userId, docType). Upserted on each new acceptance.
+/// docType: "TERMS" | "PRIVACY"
+model TermsAcceptance {
+  id          String   @id @default(cuid())
+  userId      String
+  email       String
+  docType     String
+  version     String
+  acceptedAt  DateTime @default(now())
+  ipHash      String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, docType], name: "terms_acceptance_user_doc")
+  @@index([userId])
+  @@index([email])
+  @@index([docType, version])
+  @@map("terms_acceptances")
+}
+
+// ============================================================================
+// STALE CASE NOTIFICATIONS — duplicate-send protection
+// ============================================================================
+
+/// Tracks sent stale-case alert emails per (caseId, band) window.
+/// Prevents duplicate sends within the same notification period.
+/// muted: user has requested no further alerts for this case.
+/// extendedUntil: user has snoozed alerts until this date.
+model StaleCaseNotification {
+  id            String    @id @default(cuid())
+  caseId        String
+  userEmail     String
+  band          String
+  sentAt        DateTime  @default(now())
+  returnLinkToken String?
+  muted         Boolean   @default(false)
+  extendedUntil DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([caseId, userEmail, band], name: "stale_case_notification_window")
+  @@index([caseId])
+  @@index([userEmail])
+  @@index([sentAt])
+  @@map("stale_case_notifications")
+}

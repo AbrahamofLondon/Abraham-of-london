@@ -31,6 +31,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { applyRateLimit, getClientIp } from "@/lib/server/apply-rate-limit";
 import type { BenchmarkContext } from "@/lib/product/outcome-contribution-contract";
 import {
   normaliseAggregateRow,
@@ -151,6 +152,14 @@ export default async function handler(
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const ok = await applyRateLimit(req, res, {
+    scope: "BENCHMARK_CONTEXT",
+    identifier: getClientIp(req),
+    limit: 30,
+    windowSeconds: 60,
+  });
+  if (!ok) return;
 
   const assessmentKind = sanitiseAssessmentKind(req.query.assessmentKind);
   const key = cacheKey(assessmentKind);

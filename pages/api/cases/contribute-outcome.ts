@@ -26,6 +26,7 @@ import { Prisma } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { prisma } from "@/lib/prisma";
+import { applyRateLimit } from "@/lib/server/apply-rate-limit";
 import type {
   OutcomeContributionRequest,
   OutcomeContributionResponse,
@@ -73,6 +74,14 @@ export default async function handler(
   if (!identity?.email) {
     return res.status(401).json({ error: "Authentication required" });
   }
+
+  const ok = await applyRateLimit(req, res, {
+    scope: "OUTCOME_CONTRIBUTION",
+    identifier: identity.email,
+    limit: 20,
+    windowSeconds: 3600,
+  });
+  if (!ok) return;
 
   let body: Partial<OutcomeContributionRequest>;
   try {

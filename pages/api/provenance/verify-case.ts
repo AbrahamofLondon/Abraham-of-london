@@ -15,6 +15,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { prisma } from "@/lib/prisma";
 import { buildGovernedCaseHash } from "@/lib/product/governed-case-hash";
+import { applyRateLimit } from "@/lib/server/apply-rate-limit";
 
 // ─── Response type ───────────────────────────────────────────────────────────
 
@@ -56,6 +57,14 @@ export default async function handler(
   if (!identity?.email) {
     return res.status(401).json({ error: "Authentication required" });
   }
+
+  const ok = await applyRateLimit(req, res, {
+    scope: "PROVENANCE_VERIFY_CASE",
+    identifier: identity.email,
+    limit: 30,
+    windowSeconds: 60,
+  });
+  if (!ok) return;
 
   const { subjectType, subjectId } = req.query;
   const checkedAt = new Date().toISOString();

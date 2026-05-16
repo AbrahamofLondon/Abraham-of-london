@@ -32,7 +32,8 @@ export type FeatureSlug =
   | "benchmark_context"
   | "retainer_oversight"
   | "counsel_review"
-  | "boardroom";
+  | "boardroom"
+  | "professional_tier";
 
 // ─── Feature definition ───────────────────────────────────────────────────────
 
@@ -224,6 +225,21 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     primaryProductCode: null,
     upgradeHref: "/strategy-room",
     upgradeLabel: "Enquire about boardroom access",
+  },
+
+  professional_tier: {
+    slug: "professional_tier",
+    displayName: "Professional",
+    description:
+      "Unlimited active governed cases, Return Brief generation, client-safe evidence export, case sharing, advanced timelines, and organisation workspace.",
+    accessLevel: "paid",
+    requiredEntitlementSlugs: [
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      CATALOG.professional!.entitlementSlug,
+    ],
+    primaryProductCode: "professional",
+    upgradeHref: "/pricing",
+    upgradeLabel: "Upgrade to Professional",
   },
 };
 

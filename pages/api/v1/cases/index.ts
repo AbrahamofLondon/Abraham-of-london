@@ -26,6 +26,7 @@ import { createId } from "@paralleldrive/cuid2";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { resolveV1ApiKey, v1CallerLabel } from "@/lib/api/v1-auth";
 import { prisma } from "@/lib/prisma";
+import { applyRateLimit } from "@/lib/server/apply-rate-limit";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -83,6 +84,15 @@ export default async function handler(
   if (!auth.ok) {
     return res.status(auth.status).json({ error: auth.error });
   }
+
+  // Rate limit: 1000 requests per day per API key
+  const rlOk = await applyRateLimit(req, res, {
+    scope: "API_V1",
+    identifier: auth.keyId ?? auth.memberId ?? "anon",
+    limit: 1000,
+    windowSeconds: 86400,
+  });
+  if (!rlOk) return;
 
   // Parse body
   let body: unknown;

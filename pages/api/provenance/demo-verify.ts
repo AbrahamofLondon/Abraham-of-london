@@ -15,30 +15,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyDemoProvenance } from "@/lib/product/public-provenance-demo-verify";
 import type { PublicDemoVerifyResult } from "@/lib/product/public-provenance-demo-verify";
-
-// ─── Rate limiting ──────────────────────────────────────────────────────────
-
-const requests = new Map<string, { count: number; windowStart: number }>();
-const MAX_REQUESTS = 30;
-const WINDOW_MS = 60_000;
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = requests.get(ip);
-
-  if (!entry || now - entry.windowStart > WINDOW_MS) {
-    requests.set(ip, { count: 1, windowStart: now });
-    return false;
-  }
-
-  if (entry.count >= MAX_REQUESTS) return true;
-  entry.count++;
-  return false;
-}
+import { applyRateLimit, getClientIp } from "@/lib/server/apply-rate-limit";
 
 // ─── Handler ────────────────────────────────────────────────────────────────
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<PublicDemoVerifyResult | { error: string }>,
 ) {
@@ -47,16 +28,13 @@ export default function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const ip =
-    (Array.isArray(req.headers["x-forwarded-for"])
-      ? req.headers["x-forwarded-for"][0]
-      : req.headers["x-forwarded-for"]) ||
-    req.socket.remoteAddress ||
-    "unknown";
-
-  if (isRateLimited(ip)) {
-    return res.status(429).json({ error: "Too many requests. Please wait before verifying again." });
-  }
+  const ok = await applyRateLimit(req, res, {
+    scope: "PROVENANCE_DEMO_VERIFY",
+    identifier: getClientIp(req),
+    limit: 10,
+    windowSeconds: 60,
+  });
+  if (!ok) return;
 
   const result = verifyDemoProvenance();
 

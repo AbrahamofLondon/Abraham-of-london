@@ -21,6 +21,7 @@ import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { prisma } from "@/lib/prisma";
 import { composeReturnBriefV1 } from "@/lib/product/return-brief-composer";
 import type { ReturnBriefV1, ReturnBriefComposerSource } from "@/lib/product/return-brief-contract";
+import { applyRateLimit } from "@/lib/server/apply-rate-limit";
 
 // ─── Response types ───────────────────────────────────────────────────────────
 
@@ -110,6 +111,13 @@ export default async function handler(
   }
 
   if (req.method === "POST") {
+    const ok = await applyRateLimit(req, res, {
+      scope: "RETURN_BRIEF_GENERATION",
+      identifier: identity.email,
+      limit: 5,
+      windowSeconds: 3600,
+    });
+    if (!ok) return;
     return handlePost(req, res, identity.email);
   }
 
