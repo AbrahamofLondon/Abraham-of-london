@@ -5,8 +5,6 @@ import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { extractCanonicalDecisionObject } from "@/lib/diagnostics/evidence-graph";
 import { persistDiagnosticStage } from "@/lib/diagnostics/journey-store";
 import { checkCaseEntitlement, countActiveCases } from "@/lib/product/case-entitlement-check";
-import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
-import { CATALOG } from "@/lib/commercial/catalog";
 
 // ── Request schema ────────────────────────────────────────────────────────────
 //
@@ -106,11 +104,8 @@ export default async function handler(
 
   // ── Free tier active case limit check ──────────────────────────────────────
   try {
-    const entitlement = await resolveCanonicalEntitlement({
-      email: identity.email,
-      slug: CATALOG.professional!.entitlementSlug,
-    });
-    const isProfessional = entitlement.granted;
+    const { hasProfessionalAccess } = await import("@/lib/product/professional-trial");
+    const isProfessional = await hasProfessionalAccess(identity.email);
 
     // Count existing active cases for this user
     const { prisma } = await import("@/lib/prisma.server");

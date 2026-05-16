@@ -5,7 +5,8 @@
  * a new active governed case beyond the free tier limit.
  *
  * Does not destroy data. Does not block access to prior records.
- * Does not shame the user. Shows continuity upgrade modal.
+ * Does not shame the user. Shows continuity upgrade modal with
+ * trial option.
  */
 
 import * as React from "react";
@@ -13,8 +14,6 @@ import Link from "next/link";
 
 import {
   FREE_TIER_MAX_ACTIVE_CASES,
-  UPGRADE_MODAL_TITLE,
-  UPGRADE_MODAL_BODY,
   PROFESSIONAL_FEATURE_LIST,
   describeTierFeature,
 } from "@/lib/product/free-tier-limits";
@@ -33,14 +32,36 @@ type FreeTierUpgradeModalProps = {
   onDismiss: () => void;
   /** Current active case count */
   activeCaseCount: number;
+  /** Called when trial is started successfully */
+  onTrialStarted?: () => void;
 };
 
 export default function FreeTierUpgradeModal({
   onDismiss,
   activeCaseCount,
+  onTrialStarted,
 }: FreeTierUpgradeModalProps) {
-  // Track whether the user has acknowledged
-  const [acknowledged, setAcknowledged] = React.useState(false);
+  const [trialState, setTrialState] = React.useState<"idle" | "starting" | "started" | "error">("idle");
+  const [trialError, setTrialError] = React.useState("");
+
+  async function handleStartTrial() {
+    setTrialState("starting");
+    setTrialError("");
+    try {
+      const response = await fetch("/api/trial/start", { method: "POST" });
+      const data = await response.json() as { ok: boolean; reason?: string };
+      if (data.ok) {
+        setTrialState("started");
+        onTrialStarted?.();
+      } else {
+        setTrialState("error");
+        setTrialError(data.reason ?? "Failed to start trial.");
+      }
+    } catch {
+      setTrialState("error");
+      setTrialError("Network error. Please try again.");
+    }
+  }
 
   return (
     <div
@@ -87,7 +108,7 @@ export default function FreeTierUpgradeModal({
             marginBottom: "16px",
           }}
         >
-          {UPGRADE_MODAL_TITLE}
+          You have reached the free active case limit.
         </h2>
 
         <p
@@ -98,8 +119,9 @@ export default function FreeTierUpgradeModal({
             marginBottom: "20px",
           }}
         >
-          You have {activeCaseCount} active case{activeCaseCount !== 1 ? "s" : ""}.{" "}
-          {UPGRADE_MODAL_BODY}
+          You have {activeCaseCount} active case{activeCaseCount !== 1 ? "s" : ""}.
+          Your existing records remain readable. To keep governing new active cases,
+          upgrade to Professional or start a 7-day trial.
         </p>
 
         {/* Feature list */}
@@ -121,7 +143,17 @@ export default function FreeTierUpgradeModal({
               marginBottom: "12px",
             }}
           >
-            Professional unlocks
+            Try Professional for 7 days
+          </p>
+          <p
+            style={{
+              fontSize: "12px",
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.40)",
+              marginBottom: "12px",
+            }}
+          >
+            Use the full continuity layer before deciding:
           </p>
           <div style={{ display: "grid", gap: "8px" }}>
             {PROFESSIONAL_FEATURE_LIST.map((feature) => (
@@ -146,6 +178,17 @@ export default function FreeTierUpgradeModal({
               </div>
             ))}
           </div>
+          <p
+            style={{
+              marginTop: "12px",
+              fontSize: "11px",
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.30)",
+              fontStyle: "italic",
+            }}
+          >
+            If you do not continue, your records remain readable. You can choose which cases stay active.
+          </p>
         </div>
 
         {/* Actions */}
@@ -156,29 +199,66 @@ export default function FreeTierUpgradeModal({
             flexWrap: "wrap",
           }}
         >
+          {/* Trial CTA */}
+          {trialState === "started" ? (
+            <span
+              style={{
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "rgba(110,231,183,0.80)",
+                border: "1px solid rgba(110,231,183,0.20)",
+                padding: "12px 24px",
+                display: "inline-block",
+              }}
+            >
+              Trial started — you can now create new cases
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleStartTrial}
+              disabled={trialState === "starting"}
+              style={{
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: trialState === "starting" ? "rgba(255,255,255,0.30)" : "#0A0A0A",
+                backgroundColor: trialState === "starting" ? "rgba(255,255,255,0.10)" : GOLD,
+                padding: "12px 24px",
+                border: "none",
+                cursor: trialState === "starting" ? "not-allowed" : "pointer",
+              }}
+            >
+              {trialState === "starting" ? "Starting trial..." : "Start 7-day Professional trial"}
+            </button>
+          )}
+
+          {/* Upgrade link */}
           <Link
             href="/pricing"
             style={{
               ...mono,
               fontSize: "8px",
-              letterSpacing: "0.18em",
+              letterSpacing: "0.16em",
               textTransform: "uppercase",
-              color: "#0A0A0A",
-              backgroundColor: GOLD,
-              padding: "12px 24px",
+              color: `${GOLD}AA`,
+              border: `1px solid ${GOLD}30`,
+              backgroundColor: "transparent",
+              padding: "12px 20px",
               textDecoration: "none",
               display: "inline-block",
             }}
           >
-            Upgrade to Professional
+            View pricing
           </Link>
 
+          {/* Dismiss */}
           <button
             type="button"
-            onClick={() => {
-              setAcknowledged(true);
-              onDismiss();
-            }}
+            onClick={onDismiss}
             style={{
               ...mono,
               fontSize: "8px",
@@ -191,9 +271,23 @@ export default function FreeTierUpgradeModal({
               cursor: "pointer",
             }}
           >
-            {acknowledged ? "Dismissed" : "Continue with free tier"}
+            Continue with free tier
           </button>
         </div>
+
+        {/* Error state */}
+        {trialState === "error" && (
+          <p
+            style={{
+              marginTop: "12px",
+              fontSize: "11px",
+              lineHeight: 1.5,
+              color: "rgba(252,165,165,0.70)",
+            }}
+          >
+            {trialError}
+          </p>
+        )}
 
         {/* Reassurance */}
         <p
