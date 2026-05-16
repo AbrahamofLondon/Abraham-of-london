@@ -29,6 +29,7 @@ import {
   storePendingSessionCase,
   type SessionCaseCarryForwardPayload,
 } from "@/lib/product/session-case-continuity";
+import FreeTierUpgradeModal from "./FreeTierUpgradeModal";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -126,6 +127,12 @@ export default function SaveCaseConversionPanel({
         return;
       }
 
+      // Free tier limit reached — show upgrade modal
+      if (json.reason === "FREE_TIER_LIMIT_REACHED") {
+        setSaveState({ status: "error", message: "Free tier limit reached" });
+        return;
+      }
+
       if (!response.ok || !json.ok || !json.caseRef) {
         setSaveState({
           status: "error",
@@ -198,6 +205,16 @@ export default function SaveCaseConversionPanel({
           <ArrowRight className="h-3 w-3" />
         </Link>
       </section>
+    );
+  }
+
+  // Free tier limit reached — show upgrade modal
+  if (saveState.status === "error" && saveState.message === "Free tier limit reached") {
+    return (
+      <FreeTierUpgradeModal
+        activeCaseCount={3}
+        onDismiss={() => setSaveState({ status: "idle" })}
+      />
     );
   }
 
