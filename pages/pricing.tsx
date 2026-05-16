@@ -533,7 +533,8 @@ export default function PricingPage() {
               }}
             >
               7-day trial available. Professional unlocks more active cases, Return Brief
-              generation, client-safe evidence export, and organisation workspace.
+              generation, client-safe evidence export, client-safe case sharing for reviewers
+              and auditors, and organisation workspace.
               Existing records always remain readable.
             </p>
 

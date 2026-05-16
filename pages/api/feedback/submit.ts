@@ -8,6 +8,9 @@
  *
  * Stored in SystemAuditLog with category=feedback for operator review.
  * Free-text comment is stored only if provided; never required.
+ * Privacy warning: Do not include confidential, legal, personal, or
+ * client-identifying information in feedback comments.
+ * Feedback comments never feed public benchmarks or aggregates.
  * No user email, session ID, or case ID is stored without explicit inclusion.
  *
  * Rate-limited: 10 submissions per hour per IP.

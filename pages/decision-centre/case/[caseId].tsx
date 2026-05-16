@@ -43,6 +43,7 @@ import DecisionOutcomeCapture from "@/components/product/DecisionOutcomeCapture"
 import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
 import OutcomeContributionPanel from "@/components/product/OutcomeContributionPanel";
 import ContextualUpgradePrompt from "@/components/product/ContextualUpgradePrompt";
+import CaseSharePanel from "@/components/product/CaseSharePanel";
 import type { DecisionCentreCase } from "@/lib/product/decision-centre-contract";
 import type { CaseVerifyResult } from "@/pages/api/provenance/verify-case";
 
@@ -734,6 +735,9 @@ const CaseDetailPage: NextPage = () => {
 
           {/* ── OUTCOME CONTRIBUTION ────────────────────────────────── */}
           <OutcomeContributionPanel caseId={c.caseId} />
+
+          {/* ── CASE SHARING ─────────────────────────────────────────── */}
+          <CaseSharePanel caseId={c.caseId} />
 
           {/* ── FOOTER ACTIONS ──────────────────────────────────────── */}
           <div className="flex flex-wrap gap-3 pt-2">

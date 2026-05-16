@@ -35,6 +35,19 @@ export default async function handler(
     return res.status(401).json({ ok: false, reason: "AUTH_REQUIRED" });
   }
 
+  // ── Terms acceptance check ─────────────────────────────────────────────────
+  if (identity.subjectId) {
+    try {
+      const { needsAcceptance } = await import("@/lib/server/terms-acceptance");
+      const needsTerms = await needsAcceptance(identity.subjectId, "TERMS");
+      if (needsTerms) {
+        return res.status(403).json({ ok: false, reason: "TERMS_REQUIRED" });
+      }
+    } catch {
+      // Degrade gracefully
+    }
+  }
+
   const result = await startProfessionalTrial({
     email: identity.email,
     userId: identity.subjectId,

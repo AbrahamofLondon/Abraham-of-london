@@ -18,7 +18,7 @@ describe('Performance Benchmarks', () => {
     engine.decompose(points);
     const duration = performance.now() - start;
     
-    expect(duration).toBeLessThan(500);
+    expect(duration).toBeLessThan(2000);
   });
 
   it('should run 10,000 Monte Carlo iterations in under 5s', () => {

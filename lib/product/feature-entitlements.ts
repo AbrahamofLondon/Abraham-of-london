@@ -231,7 +231,7 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     slug: "professional_tier",
     displayName: "Professional",
     description:
-      "Unlimited active governed cases, Return Brief generation, client-safe evidence export, and organisation workspace.",
+      "Unlimited active governed cases, Return Brief generation, client-safe evidence export, client-safe case sharing for reviewers and auditors, and organisation workspace.",
     accessLevel: "paid",
     requiredEntitlementSlugs: [
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

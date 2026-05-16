@@ -46,7 +46,7 @@ type SaveSessionCaseResponse =
   | { ok: true; caseRef: string }
   | {
       ok: false;
-      reason: "AUTH_REQUIRED" | "INVALID_REQUEST" | "METHOD_NOT_ALLOWED" | "INTERNAL_ERROR" | "FREE_TIER_LIMIT_REACHED";
+      reason: "AUTH_REQUIRED" | "INVALID_REQUEST" | "METHOD_NOT_ALLOWED" | "INTERNAL_ERROR" | "FREE_TIER_LIMIT_REACHED" | "TERMS_REQUIRED";
       message: string;
     };
 
@@ -100,6 +100,21 @@ export default async function handler(
       reason: "AUTH_REQUIRED",
       message: "Create a free account to keep this decision live.",
     });
+  }
+
+  // ── Terms acceptance check ─────────────────────────────────────────────────
+  try {
+    const { needsAcceptance } = await import("@/lib/server/terms-acceptance");
+    const needsTerms = await needsAcceptance(identity.subjectId, "TERMS");
+    if (needsTerms) {
+      return res.status(403).json({
+        ok: false,
+        reason: "TERMS_REQUIRED" as const,
+        message: "Please accept the latest Terms of Service before saving a governed case.",
+      });
+    }
+  } catch {
+    // Degrade gracefully — allow save if terms check fails
   }
 
   // ── Free tier active case limit check ──────────────────────────────────────

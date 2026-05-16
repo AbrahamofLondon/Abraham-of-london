@@ -17,6 +17,7 @@ export type TierFeature =
   | "active_case_limit"
   | "return_brief_generation"
   | "client_safe_evidence_export"
+  | "case_sharing"
   | "strategy_room_eligibility"
   | "executive_reporting_eligibility"
   | "organisation_workspace";
@@ -32,6 +33,7 @@ export const TIER_FEATURES: Record<TierPlan, TierFeature[]> = {
     "active_case_limit", // unlimited
     "return_brief_generation",
     "client_safe_evidence_export",
+    "case_sharing",
     "strategy_room_eligibility",
     "executive_reporting_eligibility",
     "organisation_workspace",
@@ -49,6 +51,8 @@ export function describeTierFeature(feature: TierFeature): string {
       return "Return Brief generation";
     case "client_safe_evidence_export":
       return "Client-safe evidence export";
+    case "case_sharing":
+      return "Client-safe case sharing";
     case "strategy_room_eligibility":
       return "Strategy Room eligibility";
     case "executive_reporting_eligibility":
@@ -70,5 +74,6 @@ export const PROFESSIONAL_FEATURE_LIST: TierFeature[] = [
   "active_case_limit",
   "return_brief_generation",
   "client_safe_evidence_export",
+  "case_sharing",
   "organisation_workspace",
 ];

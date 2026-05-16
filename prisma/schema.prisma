@@ -2309,6 +2309,25 @@ model AuditEvent {
   @@index([createdAt])
 }
 
+model CaseShareInvite {
+  id             String   @id @default(cuid())
+  caseId         String
+  ownerEmail     String
+  recipientEmail String?
+  role           String
+  tokenHash      String   @unique
+  status         String   @default("ACTIVE")
+  allowExport    Boolean  @default(false)
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  revokedAt      DateTime?
+
+  @@index([caseId])
+  @@index([ownerEmail])
+  @@index([status, expiresAt])
+  @@map("case_share_invites")
+}
+
 model ProvenanceChainAnchor {
   id            String   @id @default(cuid())
   version       Int      @default(1)
