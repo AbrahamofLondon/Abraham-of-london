@@ -3542,3 +3542,42 @@ model CohortAssignment {
   @@index([cohortId])
   @@map("cohort_assignment")
 }
+
+// ============================================================================
+// BENCHMARK AGGREGATE CACHE
+// ============================================================================
+
+/// Materialised benchmark aggregate — write-through cache updated by the
+/// benchmark-context API route when stale (>1 hour). NOT the source of truth.
+/// Source of truth: AuditEvent (objectType=OUTCOME_CONTRIBUTION, actionType=CONTRIBUTED).
+///
+/// key = assessmentKind value, or "__ALL__" for the global (unfiltered) aggregate.
+/// One row per key. Upserted on each request that finds a stale or missing row.
+model BenchmarkAggregate {
+  id                        String   @id @default(cuid())
+  /// assessmentKind value, or "__ALL__" for the global aggregate
+  key                       String   @unique
+  assessmentKind            String?
+  n                         Int      @default(0)
+  improved                  Int      @default(0)
+  resolved                  Int      @default(0)
+  unchanged                 Int      @default(0)
+  worsened                  Int      @default(0)
+  abandoned                 Int      @default(0)
+  timeImmediate             Int      @default(0)
+  timeShort                 Int      @default(0)
+  timeMedium                Int      @default(0)
+  timeLong                  Int      @default(0)
+  timeDidNotAct             Int      @default(0)
+  findingAccurateTotal      Int      @default(0)
+  findingAccurateTrue       Int      @default(0)
+  recommendationUsefulTotal Int      @default(0)
+  recommendationUsefulTrue  Int      @default(0)
+  computedAt                DateTime @default(now())
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  @@index([assessmentKind])
+  @@index([computedAt])
+  @@map("benchmark_aggregates")
+}
