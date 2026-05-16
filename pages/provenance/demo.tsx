@@ -27,6 +27,7 @@ import {
 
 import Layout from "@/components/Layout";
 import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import { PUBLIC_PROVENANCE_DEMO_RECORD } from "@/lib/product/public-provenance-demo-record";
 import type { PublicDemoVerifyResult } from "@/lib/product/public-provenance-demo-verify";
 
@@ -74,6 +75,7 @@ const ProvenanceDemoPage: NextPage = () => {
       }
       const data: PublicDemoVerifyResult = await res.json();
       setVerifyResult(data);
+      trackLaunch("provenance_demo_verified", "provenance_demo");
     } catch {
       setVerifyError("Network error — could not reach verification endpoint.");
     } finally {

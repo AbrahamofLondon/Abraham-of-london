@@ -85,6 +85,11 @@ export default function SaveCaseConversionPanel({
   const [saveState, setSaveState] = React.useState<SaveState>({ status: "idle" });
   const [dismissed, setDismissed] = React.useState(false);
 
+  // Track panel impression once
+  React.useEffect(() => {
+    trackLaunch("save_case_prompt_seen", "save_case_conversion_panel");
+  }, []);
+
   async function handleSave() {
     trackLaunch("save_case_clicked", "save_case_conversion_panel");
 
