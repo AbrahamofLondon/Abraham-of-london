@@ -39,6 +39,7 @@ import Layout from "@/components/Layout";
 import ChainOfCustodyTimeline, {
   buildChainOfCustodyFromCase,
 } from "@/components/product/ChainOfCustodyTimeline";
+import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
 import type { DecisionCentreCase } from "@/lib/product/decision-centre-contract";
 import type { CaseVerifyResult } from "@/pages/api/provenance/verify-case";
 
@@ -380,6 +381,11 @@ const CaseDetailPage: NextPage = () => {
                 {c.governanceImplication}
               </p>
             </section>
+          )}
+
+          {/* ── COMMERCIAL EXPOSURE ─────────────────────────────────── */}
+          {c.commercialExposure && (
+            <CommercialExposurePanel exposure={c.commercialExposure} />
           )}
 
           {/* ── NEXT EARNED ACTION ──────────────────────────────────── */}

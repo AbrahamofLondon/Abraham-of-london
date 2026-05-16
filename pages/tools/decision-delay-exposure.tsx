@@ -16,6 +16,8 @@ import {
   type DecisionDelayExposureResult,
 } from "@/lib/tools/decision-delay-exposure-calculator";
 import { buildDelayCalculatorCarryForwardPayload } from "@/lib/product/session-case-continuity";
+import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
+import type { CommercialExposure } from "@/components/diagnostics/CommercialExposurePanel";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -658,6 +660,29 @@ export default function DecisionDelayExposurePage() {
                   <ExposureBand period="90 days" formatted={result.ninetyDayFormatted} intensity={0.90} />
                 </div>
               </section>
+
+              {/* Commercial exposure — user-reported basis since user supplied weekly cost */}
+              {(() => {
+                const weeklyCost = parseFloat(form.weeklyCostRaw) || 0;
+                const delayWeeks = parseFloat(form.delayWeeksRaw) || 0;
+                const hasUserCost = weeklyCost > 0;
+                if (!hasUserCost) return null;
+                const costToDate =
+                  delayWeeks > 0
+                    ? `£${(weeklyCost * delayWeeks).toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
+                    : null;
+                const exposure: CommercialExposure = {
+                  costToDate,
+                  avoidableThirtyDayExposure: result.thirtyDayFormatted,
+                  basis: "USER_REPORTED",
+                  disclaimer: result.disclaimer,
+                };
+                return (
+                  <div style={{ marginBottom: "40px" }}>
+                    <CommercialExposurePanel exposure={exposure} />
+                  </div>
+                );
+              })()}
 
               {/* What the system sees */}
               <section

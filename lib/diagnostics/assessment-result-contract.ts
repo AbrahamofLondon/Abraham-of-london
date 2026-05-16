@@ -84,6 +84,17 @@ export type AssessmentResult = {
     label: string;
     caseId?: string | null;
   };
+  /**
+   * Commercial exposure estimate.
+   * Basis must be honest — do not fabricate currency figures.
+   * If no cost basis exists, render structural consequence only.
+   */
+  commercialExposure?: {
+    costToDate?: string | null;
+    avoidableThirtyDayExposure?: string | null;
+    basis: "USER_REPORTED" | "SYSTEM_ESTIMATED" | "NOT_AVAILABLE";
+    disclaimer: string;
+  } | null;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

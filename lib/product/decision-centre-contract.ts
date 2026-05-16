@@ -276,6 +276,17 @@ export type DecisionCentreCase = {
   strategyRoomRecord?: StrategyRoomSessionRef | null;
   /** Governed memory carried with explicit source, date, and evidence posture */
   governedMemory?: GovernedMemoryItem[] | null;
+  /**
+   * Commercial exposure estimate — only present when a basis exists.
+   * Basis must be USER_REPORTED, SYSTEM_ESTIMATED, or NOT_AVAILABLE.
+   * Never render currency figures without a valid basis.
+   */
+  commercialExposure?: {
+    costToDate?: string | null;
+    avoidableThirtyDayExposure?: string | null;
+    basis: "USER_REPORTED" | "SYSTEM_ESTIMATED" | "NOT_AVAILABLE";
+    disclaimer: string;
+  } | null;
   /** Last activity timestamp */
   updatedAt: string;
   /** Latest evidence timestamp used for freshness/provenance */

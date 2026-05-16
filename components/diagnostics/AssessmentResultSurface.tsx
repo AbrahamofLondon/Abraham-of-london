@@ -22,6 +22,7 @@ import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contr
 import { describeEvidencePosture, recordStatusLabel } from "@/lib/diagnostics/assessment-result-contract";
 import SaveCaseConversionPanel from "@/components/product/SaveCaseConversionPanel";
 import { buildAssessmentResultSaveCasePayload } from "@/lib/product/save-case-continuity";
+import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
@@ -346,6 +347,13 @@ export default function AssessmentResultSurface({
           ))}
         </div>
       </section>
+
+      {/* ── 6b. Commercial exposure — only when basis present ─────────── */}
+      {result.commercialExposure && (
+        <div style={{ marginBottom: "24px" }}>
+          <CommercialExposurePanel exposure={result.commercialExposure} />
+        </div>
+      )}
 
       {/* ── 7. Recommended next move ───────────────────────────────────── */}
       <section
