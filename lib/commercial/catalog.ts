@@ -979,6 +979,38 @@ export const CATALOG: Record<string, CatalogProduct> = {
     primaryCta: "Contact for Enterprise pricing",
     upgradePath: [],
   },
+
+  // ═══ ADDITIONAL COLLABORATOR SEAT ═════════════════════════════════════
+
+  additional_collaborator: {
+    code: "additional_collaborator",
+    displayName: "Additional Collaborator",
+    marketName: "Additional Collaborator",
+    publicLabel: "Additional Collaborator",
+    amount: 1500,
+    displayPrice: "£15/month",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "seat.additional",
+    tier: "professional",
+    category: "membership",
+    accessType: "subscription",
+    duration: "monthly",
+    active: true,
+    commercialStatus: "free_controlled",
+    requiresCheckout: false,
+    requiresContract: false,
+    futurePaidCandidate: true,
+    successPath: "/decision-centre",
+    cancelPath: "/pricing",
+    cookieName: null,
+    includes: [],
+    shortDescription: "Additional collaborator seat for Professional organisation workspace.",
+    userPromise: "Add collaborators as your governed case load grows. £15/month per additional seat.",
+    pricingNote: "Additional collaborator: £15/month. Professional includes 5 seats.",
+    primaryCta: "Add collaborator seat",
+    upgradePath: [],
+  },
 };
 
 // ───────────────��───────────────────────────────��─────────────────────────────
