@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
+import SaveCaseConversionPanel from "@/components/product/SaveCaseConversionPanel";
 import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
 import { track } from "@/lib/analytics/track";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
@@ -868,7 +868,7 @@ export default function DecisionDelayExposurePage() {
               </div>
 
               <div id="save-exposure-estimate" style={{ marginTop: "16px" }}>
-                <SaveSessionCasePanel
+                <SaveCaseConversionPanel
                   payload={buildDelayCalculatorCarryForwardPayload({
                     weeklyCost: parseFloat(form.weeklyCostRaw) || 0,
                     delayWeeks: parseFloat(form.delayWeeksRaw) || 0,
@@ -876,7 +876,6 @@ export default function DecisionDelayExposurePage() {
                     exposureType: form.exposureType,
                     estimateConfidence: form.estimateConfidence,
                   })}
-                  copy="Save this estimate after sign-in to preserve the exposure reading in Decision Centre. The optional decision label remains display-only and is not carried forward."
                 />
               </div>
             </div>

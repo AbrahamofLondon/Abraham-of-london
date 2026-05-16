@@ -8,6 +8,7 @@
 
 export {
   SAVE_CASE_CARRY_FORWARD_KEY as SESSION_CASE_CARRY_FORWARD_KEY,
+  buildAssessmentResultSaveCasePayload,
   buildBoardSummarySaveCasePayload as buildBoardSummaryCarryForwardPayload,
   buildDecisionDelaySaveCasePayload as buildDelayCalculatorCarryForwardPayload,
   buildFastDiagnosticSaveCasePayload as buildFastDiagnosticCarryForwardPayload,

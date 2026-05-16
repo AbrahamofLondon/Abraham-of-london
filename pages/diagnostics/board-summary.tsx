@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
+import SaveCaseConversionPanel from "@/components/product/SaveCaseConversionPanel";
 import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
 import SendToSelfForm from "@/components/tools/SendToSelfForm";
 import { track } from "@/lib/analytics/track";
@@ -281,9 +281,8 @@ export default function BoardSummaryPage() {
 
           {loaded && data && (
             <div data-no-print style={{ marginTop: "20px" }}>
-              <SaveSessionCasePanel
+              <SaveCaseConversionPanel
                 payload={buildBoardSummaryCarryForwardPayload(data)}
-                copy="This is a session-derived preview. Save or continue in Decision Centre to preserve the case record."
               />
             </div>
           )}

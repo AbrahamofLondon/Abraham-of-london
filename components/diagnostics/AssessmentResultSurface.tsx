@@ -20,6 +20,8 @@ import Link from "next/link";
 
 import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 import { describeEvidencePosture, recordStatusLabel } from "@/lib/diagnostics/assessment-result-contract";
+import SaveCaseConversionPanel from "@/components/product/SaveCaseConversionPanel";
+import { buildAssessmentResultSaveCasePayload } from "@/lib/product/save-case-continuity";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
@@ -98,6 +100,12 @@ export type AssessmentResultSurfaceProps = {
   canSave?: boolean;
   /** Optional secondary node: send-to-self form */
   sendToSelfSlot?: React.ReactNode;
+  /**
+   * When true, renders a SaveCaseConversionPanel automatically at the bottom
+   * of the result surface when the record is session-based. Defaults to true
+   * for SESSION_PREVIEW records.
+   */
+  showConversionPanel?: boolean;
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -107,6 +115,7 @@ export default function AssessmentResultSurface({
   onSave,
   canSave,
   sendToSelfSlot,
+  showConversionPanel = true,
 }: AssessmentResultSurfaceProps) {
   const {
     title,
@@ -430,6 +439,15 @@ export default function AssessmentResultSurface({
           )}
           {sendToSelfSlot}
         </section>
+      )}
+
+      {/* ── 10. Conversion panel — session-based results only ─────────── */}
+      {showConversionPanel && result.recordStatus.level === "SESSION_PREVIEW" && (
+        <div style={{ marginTop: "24px" }}>
+          <SaveCaseConversionPanel
+            payload={buildAssessmentResultSaveCasePayload(result)}
+          />
+        </div>
       )}
     </div>
   );

@@ -40,7 +40,13 @@ export type LaunchEventName =
   | "return_brief_generated"
   | "provenance_sample_viewed"
   | "anchor_log_viewed"
-  | "proof_pack_viewed";
+  | "proof_pack_viewed"
+  | "case_saved"
+  | "send_to_self_clicked"
+  | "diagnostic_completed"
+  | "save_case_prompt_seen"
+  | "account_created_from_save"
+  | "provenance_demo_verified";
 
 // ─── Event payload ──────────────────────────────────────────────────────────
 

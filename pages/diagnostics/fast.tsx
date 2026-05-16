@@ -17,7 +17,7 @@ import { defaultIntelligenceMeta } from "@/lib/product/intelligence-contract";
 import ExecutiveDecisionAuthorityBlock from "@/components/diagnostics/results/ExecutiveDecisionAuthorityBlock";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
-import SaveSessionCasePanel from "@/components/product/SaveSessionCasePanel";
+import SaveCaseConversionPanel from "@/components/product/SaveCaseConversionPanel";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import DiagnosticStandardPanel from "@/components/trust/DiagnosticStandardPanel";
 import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
@@ -764,23 +764,12 @@ const FastDiagnosticPage: NextPage = () => {
                 </div>
               </div>
 
-              <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "1.25rem 1.5rem" }}>
-                <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}AA` }}>
-                  Save this as a governed case
-                </p>
-                <p style={{ marginTop: "0.45rem", ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.58)" }}>
-                  Preserve the governance move, comparison posture, cost exposure, and next action.
-                </p>
-                <div style={{ marginTop: "0.85rem" }}>
-                  <SaveSessionCasePanel
-                    payload={buildFastDiagnosticCarryForwardPayload({
-                      result,
-                      decisionLabel: answers.decision,
-                    })}
-                    copy="Saving this diagnostic opens the governed case in Decision Centre and preserves the reading instead of leaving it as a session-only result."
-                  />
-                </div>
-              </div>
+              <SaveCaseConversionPanel
+                payload={buildFastDiagnosticCarryForwardPayload({
+                  result,
+                  decisionLabel: answers.decision,
+                })}
+              />
 
               {/* SECTION 1b: BOARD SUMMARY PREVIEW */}
               <BoardSummaryPreview data={buildBoardSummaryFromFastDiagnostic(result, answers)} />

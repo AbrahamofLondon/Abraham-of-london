@@ -5,13 +5,19 @@ import type {
   EstimateConfidence,
   ExposureType,
 } from "@/lib/tools/decision-delay-exposure-calculator";
+import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 
 export const SAVE_CASE_CARRY_FORWARD_KEY = "aol_pending_session_case_v1";
 
 export type SaveCaseSource =
   | "DECISION_DELAY_CALCULATOR"
   | "FAST_DIAGNOSTIC"
-  | "BOARD_SUMMARY";
+  | "BOARD_SUMMARY"
+  | "PURPOSE_ALIGNMENT"
+  | "CONSTITUTIONAL_DIAGNOSTIC"
+  | "TEAM_ASSESSMENT"
+  | "ENTERPRISE_ASSESSMENT"
+  | "GENERIC_ASSESSMENT";
 
 export type SaveCasePayload = {
   source: SaveCaseSource;
@@ -88,6 +94,26 @@ export function buildDecisionDelaySaveCasePayload(input: {
     exposureType: input.exposureType,
     estimateConfidence: input.estimateConfidence,
     createdAt: input.calculatedAt ?? new Date().toISOString(),
+  };
+}
+
+/**
+ * Builds a generic SaveCasePayload from a canonical AssessmentResult.
+ * Used by all governed assessment surfaces (purpose-alignment,
+ * constitutional-diagnostic, team-assessment, enterprise-assessment) to
+ * carry forward structured result data for governed case saving.
+ */
+export function buildAssessmentResultSaveCasePayload(
+  result: AssessmentResult,
+  source: SaveCaseSource = "GENERIC_ASSESSMENT",
+): SaveCasePayload {
+  return {
+    source,
+    decisionLabel: clean(result.title),
+    condition: clean(result.primaryFinding || result.failurePattern),
+    nextGovernanceMove: clean(result.recommendedNextMove),
+    comparisonBand: clean(result.band),
+    createdAt: new Date().toISOString(),
   };
 }
 

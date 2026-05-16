@@ -117,6 +117,13 @@ export function mapSaveSourceToGovernedType(source: SaveCaseSource): GovernedCas
       return "FAST_DIAGNOSTIC";
     case "BOARD_SUMMARY":
       return "FAST_DIAGNOSTIC";
+    case "PURPOSE_ALIGNMENT":
+    case "CONSTITUTIONAL_DIAGNOSTIC":
+    case "TEAM_ASSESSMENT":
+    case "ENTERPRISE_ASSESSMENT":
+    case "GENERIC_ASSESSMENT":
+    default:
+      return "FAST_DIAGNOSTIC";
   }
 }
 
