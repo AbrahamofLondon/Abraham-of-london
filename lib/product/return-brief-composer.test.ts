@@ -75,16 +75,18 @@ describe("composeReturnBriefV1", () => {
     expect(explainer).toContain("Create a governed case");
   });
 
-  it("labels generated briefs as live case-specific records with continuation actions", () => {
-    const generatedBriefPage = readFileSync(
-      path.join(process.cwd(), "app", "briefing", "return", "[sessionId]", "page.tsx"),
+  it("labels governed brief page as authenticated, Decision-Centre-linked, with no provenance sample", () => {
+    // Verify the Pages Router governed Return Brief page (pages/briefing/return/[sessionKey].tsx)
+    // This is the established SSR-authenticated implementation. The App Router variant
+    // was removed (commit 3526fe0c0) because it conflicted with this slug at the same URL.
+    const governedBriefPage = readFileSync(
+      path.join(process.cwd(), "pages", "briefing", "return", "[sessionKey].tsx"),
       "utf8",
     );
 
-    expect(generatedBriefPage).toContain("Generated Return Brief · Case-specific · Account-bound where authenticated");
-    expect(generatedBriefPage).toContain("Return to Decision Centre");
-    expect(generatedBriefPage).toContain('label="Send to self"');
-    expect(generatedBriefPage).toContain("View case provenance");
-    expect(generatedBriefPage).not.toContain("/provenance/sample-export");
+    expect(governedBriefPage).toContain("Governed Return Brief");
+    expect(governedBriefPage).toContain("Return to Decision Centre");
+    expect(governedBriefPage).toContain("decision-centre");
+    expect(governedBriefPage).not.toContain("/provenance/sample-export");
   });
 });
