@@ -23,6 +23,7 @@ import { describeEvidencePosture, recordStatusLabel } from "@/lib/diagnostics/as
 import SaveCaseConversionPanel from "@/components/product/SaveCaseConversionPanel";
 import { buildAssessmentResultSaveCasePayload } from "@/lib/product/save-case-continuity";
 import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
+import BenchmarkContextPanel from "@/components/product/BenchmarkContextPanel";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
@@ -448,6 +449,11 @@ export default function AssessmentResultSurface({
           {sendToSelfSlot}
         </section>
       )}
+
+      {/* ── 9b. Benchmark context — pool-gated, n≥50 ─────────────────── */}
+      <div style={{ marginTop: "16px" }}>
+        <BenchmarkContextPanel assessmentKind={result.kind} />
+      </div>
 
       {/* ── 10. Conversion panel — session-based results only ─────────── */}
       {showConversionPanel && result.recordStatus.level === "SESSION_PREVIEW" && (
