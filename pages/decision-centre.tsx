@@ -49,6 +49,7 @@ import {
 } from "@/lib/product/session-case-continuity";
 import StaleCaseAlert from "@/components/product/StaleCaseAlert";
 import { detectStaleCases } from "@/lib/product/stale-governed-case-detector";
+import DecisionCentreChecklist from "@/components/onboarding/DecisionCentreChecklist";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -861,6 +862,11 @@ export default function DecisionCentrePage() {
 
           {/* Auth required */}
           {!loading && authRequired && <AuthRequired />}
+
+          {/* Onboarding checklist — shown when user has no cases yet */}
+          {!loading && !authRequired && (
+            <DecisionCentreChecklist hasExistingCases={!!(data && data.cases.length > 0)} />
+          )}
 
           {/* Empty state */}
           {!loading && data && data.cases.length === 0 && <EmptyState />}

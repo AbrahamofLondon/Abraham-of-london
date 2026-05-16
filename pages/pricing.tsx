@@ -506,6 +506,186 @@ export default function PricingPage() {
           <GoldDivider />
 
           {/* ══════════════════════════════════════════════════════════════ */}
+          {/* TIER 1B — PROFESSIONAL SUBSCRIPTION                          */}
+          {/* ══════════════════════════════════════════════════════════════ */}
+          <section style={{ marginBottom: "48px" }}>
+            <SectionLabel>Tier 1B — Professional subscription</SectionLabel>
+            <h2
+              style={{
+                ...serif,
+                fontSize: "22px",
+                color: "rgba(255,255,255,0.80)",
+                marginBottom: "6px",
+              }}
+            >
+              Unlimited governed case management
+            </h2>
+            <p
+              style={{
+                ...mono,
+                fontSize: "9px",
+                color: "rgba(255,255,255,0.32)",
+                lineHeight: 1.6,
+                marginBottom: "24px",
+                maxWidth: "500px",
+              }}
+            >
+              Monthly or annual. Cancel anytime. No lock-in.
+            </p>
+
+            <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
+              {/* Professional Monthly */}
+              {CATALOG.professional && (
+                <div
+                  style={{
+                    border: `1px solid ${GOLD}25`,
+                    backgroundColor: `${GOLD}04`,
+                    padding: "24px",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
+                    Professional
+                  </p>
+                  <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.90)", marginBottom: "4px" }}>
+                    {CATALOG.professional.displayPrice}
+                  </p>
+                  <p style={{ ...mono, fontSize: "7.5px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
+                    per month · cancel anytime
+                  </p>
+                  <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
+                    {CATALOG.professional.shortDescription}
+                  </p>
+                  <Link
+                    href={CATALOG.professional.successPath}
+                    style={{
+                      ...mono,
+                      fontSize: "8px",
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "#0A0A0A",
+                      backgroundColor: GOLD,
+                      padding: "12px 20px",
+                      textDecoration: "none",
+                      display: "inline-block",
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    {CATALOG.professional.primaryCta}
+                  </Link>
+                </div>
+              )}
+
+              {/* Professional Annual */}
+              {CATALOG.professional_annual && (
+                <div
+                  style={{
+                    border: `1px solid ${GOLD}40`,
+                    backgroundColor: `${GOLD}08`,
+                    padding: "24px",
+                    display: "flex",
+                    flexDirection: "column",
+                    position: "relative",
+                  }}
+                >
+                  <span
+                    style={{
+                      ...mono,
+                      fontSize: "6.5px",
+                      letterSpacing: "0.20em",
+                      textTransform: "uppercase",
+                      color: "#0A0A0A",
+                      backgroundColor: GOLD,
+                      padding: "3px 10px",
+                      position: "absolute",
+                      top: "-8px",
+                      right: "16px",
+                    }}
+                  >
+                    Best value
+                  </span>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
+                    Professional Annual
+                  </p>
+                  <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.90)", marginBottom: "4px" }}>
+                    {CATALOG.professional_annual.displayPrice}
+                  </p>
+                  <p style={{ ...mono, fontSize: "7.5px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
+                    per year · two months free
+                  </p>
+                  <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
+                    {CATALOG.professional_annual.shortDescription}
+                  </p>
+                  <Link
+                    href={CATALOG.professional_annual.successPath}
+                    style={{
+                      ...mono,
+                      fontSize: "8px",
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "#0A0A0A",
+                      backgroundColor: GOLD,
+                      padding: "12px 20px",
+                      textDecoration: "none",
+                      display: "inline-block",
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    {CATALOG.professional_annual.primaryCta}
+                  </Link>
+                </div>
+              )}
+
+              {/* Enterprise */}
+              {CATALOG.enterprise && (
+                <div
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    backgroundColor: "rgba(255,255,255,0.02)",
+                    padding: "24px",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
+                    Enterprise
+                  </p>
+                  <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.90)", marginBottom: "4px" }}>
+                    {CATALOG.enterprise.displayPrice}
+                  </p>
+                  <p style={{ ...mono, fontSize: "7.5px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
+                    annual · custom pricing
+                  </p>
+                  <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
+                    {CATALOG.enterprise.shortDescription}
+                  </p>
+                  <Link
+                    href={CATALOG.enterprise.successPath}
+                    style={{
+                      ...mono,
+                      fontSize: "8px",
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: `${GOLD}CC`,
+                      border: `1px solid ${GOLD}30`,
+                      backgroundColor: "transparent",
+                      padding: "12px 20px",
+                      textDecoration: "none",
+                      display: "inline-block",
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    {CATALOG.enterprise.primaryCta}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <GoldDivider />
+
+          {/* ══════════════════════════════════════════════════════════════ */}
           {/* TIER 2A — PAID ONE-TIME: REPORTING & EXECUTION                */}
           {/* ══════════════════════════════════════════════════════════════ */}
           <section style={{ marginBottom: "48px" }}>
