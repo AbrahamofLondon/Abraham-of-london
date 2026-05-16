@@ -12,7 +12,7 @@ import { inviteMember, type OrgLiteRole } from "@/lib/product/organisation-lite"
 
 type Response =
   | { ok: true; inviteId: string; token: string }
-  | { ok: false; error: string };
+  | { ok: false; error: string; code?: string };
 
 export default async function handler(
   req: NextApiRequest,
@@ -41,6 +41,13 @@ export default async function handler(
   const validRoles: OrgLiteRole[] = ["OWNER", "ADMIN", "CONTRIBUTOR", "VIEWER", "AUDITOR"];
   if (!validRoles.includes(role)) {
     return res.status(400).json({ ok: false, error: "Invalid role" });
+  }
+
+  // Professional entitlement check for organisation invites
+  const { checkActionEntitlement } = await import("@/lib/product/action-entitlement");
+  const entitlement = await checkActionEntitlement(identity.email, "organisation_invite");
+  if (!entitlement.allowed) {
+    return res.status(403).json({ ok: false, error: entitlement.message, code: "PROFESSIONAL_REQUIRED" });
   }
 
   try {

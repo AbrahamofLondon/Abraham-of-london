@@ -111,6 +111,13 @@ export default async function handler(
   }
 
   if (req.method === "POST") {
+    // Professional entitlement check
+    const { checkActionEntitlement } = await import("@/lib/product/action-entitlement");
+    const entitlement = await checkActionEntitlement(identity.email, "return_brief_generation");
+    if (!entitlement.allowed) {
+      return res.status(403).json({ error: entitlement.message, code: "PROFESSIONAL_REQUIRED" });
+    }
+
     const ok = await applyRateLimit(req, res, {
       scope: "RETURN_BRIEF_GENERATION",
       identifier: identity.email,

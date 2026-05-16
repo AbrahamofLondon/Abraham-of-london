@@ -11,6 +11,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const resolved = await requireAdminApi(req, res);
   if (!resolved) return;
 
+  // Professional entitlement check for evidence export
+  const { checkActionEntitlement } = await import("@/lib/product/action-entitlement");
+  const entitlement = await checkActionEntitlement(
+    resolved.session?.user?.email ?? "",
+    "evidence_export",
+  );
+  if (!entitlement.allowed) {
+    return res.status(403).json({ ok: false, error: entitlement.message, code: "PROFESSIONAL_REQUIRED" });
+  }
+
   try {
     const { email, userId } = req.body as {
       email?: string;
