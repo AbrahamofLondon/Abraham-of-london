@@ -79,4 +79,16 @@ describe("countActiveCases", () => {
     ];
     expect(countActiveCases(cases)).toBe(1);
   });
+
+  it("uses canonical persisted statuses when available", () => {
+    const cases = [
+      { status: "active" },
+      { status: "watching" },
+      { status: "resolved" },
+      { status: "archived" },
+      { status: "read_only" },
+      { status: "institutional_memory" },
+    ];
+    expect(countActiveCases(cases)).toBe(2);
+  });
 });

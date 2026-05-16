@@ -42,6 +42,7 @@ import ChainOfCustodyTimeline, {
 import DecisionOutcomeCapture from "@/components/product/DecisionOutcomeCapture";
 import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
 import OutcomeContributionPanel from "@/components/product/OutcomeContributionPanel";
+import ContextualUpgradePrompt from "@/components/product/ContextualUpgradePrompt";
 import type { DecisionCentreCase } from "@/lib/product/decision-centre-contract";
 import type { CaseVerifyResult } from "@/pages/api/provenance/verify-case";
 
@@ -67,6 +68,9 @@ const CaseDetailPage: NextPage = () => {
   const [verifyResult, setVerifyResult] = React.useState<CaseVerifyResult | null>(null);
   const [verifying, setVerifying] = React.useState(false);
   const [verifyError, setVerifyError] = React.useState<string | null>(null);
+  const [generatingReturnBrief, setGeneratingReturnBrief] = React.useState(false);
+  const [returnBriefError, setReturnBriefError] = React.useState<string | null>(null);
+  const [showReturnBriefUpgradePrompt, setShowReturnBriefUpgradePrompt] = React.useState(false);
 
   // Load case
   React.useEffect(() => {
@@ -122,6 +126,41 @@ const CaseDetailPage: NextPage = () => {
       setVerifyError("Network error — could not reach verification endpoint.");
     } finally {
       setVerifying(false);
+    }
+  }
+
+  async function handleGenerateReturnBrief() {
+    if (!caseId || typeof caseId !== "string") return;
+    setGeneratingReturnBrief(true);
+    setReturnBriefError(null);
+
+    try {
+      const res = await fetch("/api/cases/return-brief", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caseId }),
+      });
+      const data = await res.json().catch(() => ({})) as {
+        ok?: boolean;
+        href?: string;
+        code?: string;
+        error?: string;
+      };
+
+      if (res.status === 403 && data.code === "PROFESSIONAL_REQUIRED") {
+        setShowReturnBriefUpgradePrompt(true);
+        return;
+      }
+      if (!res.ok || !data.ok || !data.href) {
+        setReturnBriefError(data.error ?? "Return Brief could not be generated.");
+        return;
+      }
+
+      void router.push(data.href);
+    } catch {
+      setReturnBriefError("Network error — could not generate Return Brief.");
+    } finally {
+      setGeneratingReturnBrief(false);
     }
   }
 
@@ -602,11 +641,37 @@ const CaseDetailPage: NextPage = () => {
                 )}
               </div>
             ) : (
-              <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)" }}>
-                {c.counselWarranted
-                  ? "Escalation review suggested. A Return Brief may be warranted."
-                  : "No Return Brief has been generated yet. Return Briefs are generated after significant inactivity or on request."}
-              </p>
+              <>
+                <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)" }}>
+                  {c.counselWarranted
+                    ? "Escalation review suggested. A Return Brief may be warranted."
+                    : "No Return Brief has been generated yet. Return Briefs are generated after significant inactivity or on request."}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleGenerateReturnBrief}
+                  disabled={generatingReturnBrief}
+                  style={{
+                    ...mono,
+                    marginTop: "0.75rem",
+                    fontSize: "8px",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: generatingReturnBrief ? "rgba(255,255,255,0.24)" : `${GOLD}BB`,
+                    border: `1px solid ${GOLD}33`,
+                    backgroundColor: `${GOLD}08`,
+                    padding: "0.55rem 0.9rem",
+                    cursor: generatingReturnBrief ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {generatingReturnBrief ? "Generating…" : "Generate Return Brief"}
+                </button>
+                {returnBriefError && (
+                  <p style={{ marginTop: "0.5rem", fontSize: "11px", lineHeight: 1.5, color: "rgba(252,165,165,0.72)" }}>
+                    {returnBriefError}
+                  </p>
+                )}
+              </>
             )}
           </section>
 
@@ -725,6 +790,12 @@ const CaseDetailPage: NextPage = () => {
 
         </div>
       </main>
+      {showReturnBriefUpgradePrompt && (
+        <ContextualUpgradePrompt
+          action="request_return_brief"
+          onDismiss={() => setShowReturnBriefUpgradePrompt(false)}
+        />
+      )}
     </Layout>
   );
 };

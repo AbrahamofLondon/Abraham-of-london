@@ -25,7 +25,7 @@ import type {
   RetainerCycleMemoryStatus,
 } from "@/lib/product/retainer-cycle-memory-contract";
 import type { TrialInfo } from "@/lib/product/professional-trial";
-import type { TrialExpiryResolutionState } from "@/lib/product/trial-expiry-service";
+import type { TrialExpiryResolutionState } from "@/lib/product/trial-expiry-contract";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COGNITIVE STATE

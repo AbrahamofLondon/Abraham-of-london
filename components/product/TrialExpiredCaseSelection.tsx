@@ -7,7 +7,7 @@
 import * as React from "react";
 import Link from "next/link";
 
-import type { TrialExpiryResolutionState } from "@/lib/product/trial-expiry-service";
+import type { TrialExpiryResolutionState } from "@/lib/product/trial-expiry-contract";
 import { trackCommercialEvent } from "@/lib/product/commercial-analytics";
 
 const GOLD = "#C9A96E";

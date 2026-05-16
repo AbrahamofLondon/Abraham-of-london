@@ -21,6 +21,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { CATALOG, type CatalogProduct } from "@/lib/commercial/catalog";
 import { FEATURES, paidFeatures, retainerFeatures } from "@/lib/product/feature-entitlements";
+import { trackCommercialEvent } from "@/lib/product/commercial-analytics";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
@@ -562,6 +563,7 @@ export default function PricingPage() {
                   </p>
                   <Link
                     href={CATALOG.professional.successPath}
+                    onClick={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
                     style={{
                       ...mono,
                       fontSize: "8px",
@@ -622,6 +624,7 @@ export default function PricingPage() {
                   </p>
                   <Link
                     href={CATALOG.professional_annual.successPath}
+                    onClick={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
                     style={{
                       ...mono,
                       fontSize: "8px",

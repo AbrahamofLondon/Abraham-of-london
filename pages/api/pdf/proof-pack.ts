@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { requireAdminApi } from "@/lib/access/server";
+import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { generateProofPackPdfBuffer } from "@/lib/pdf/runtime-verification";
 import { prisma } from "@/lib/prisma.server";
 
@@ -8,13 +8,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
-  const resolved = await requireAdminApi(req, res);
-  if (!resolved) return;
+  const identity = await resolveIdentity(req);
+  if (!identity.authenticated || !identity.email) {
+    return res.status(401).json({ ok: false, error: "Authentication required" });
+  }
 
   // Professional entitlement check for evidence export
   const { checkActionEntitlement } = await import("@/lib/product/action-entitlement");
   const entitlement = await checkActionEntitlement(
-    resolved.session?.user?.email ?? "",
+    identity.email,
     "evidence_export",
   );
   if (!entitlement.allowed) {
@@ -30,21 +32,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!email) {
       return res.status(400).json({ ok: false, error: "email is required" });
     }
+    if (email.toLowerCase() !== identity.email.toLowerCase()) {
+      return res.status(403).json({ ok: false, error: "You can only export your own proof pack." });
+    }
 
     const generated = await generateProofPackPdfBuffer({ email, userId });
 
     // Log to audit
     await prisma.auditEvent.create({
       data: {
-        actorType: "ADMIN",
-        actorId: resolved.session?.user?.id ?? null,
+        actorType: "USER",
+        actorId: identity.subjectId ?? identity.email,
         objectType: "PDF_EXPORT",
         objectId: `proof-pack-${email}`,
         actionType: "CREATED",
         summary: `Proof pack PDF exported for ${email}`,
         metadata: {
-          email,
-          userId: userId ?? null,
+          email: identity.email,
+          userId: userId ?? identity.subjectId ?? null,
           generatedAt: generated.generatedAt,
         },
       },
