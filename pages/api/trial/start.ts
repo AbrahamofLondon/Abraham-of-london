@@ -12,17 +12,12 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
-import { startProfessionalTrial } from "@/lib/product/professional-trial";
+import { startProfessionalTrial, type TrialInfo } from "@/lib/product/professional-trial";
 
 type Response =
   | {
       ok: true;
-      trial: {
-        status: string;
-        startedAt: string;
-        endsAt: string;
-        daysRemaining: number;
-      };
+      trial: TrialInfo;
     }
   | { ok: false; reason: string };
 

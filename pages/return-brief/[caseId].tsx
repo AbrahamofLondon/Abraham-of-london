@@ -22,6 +22,7 @@ import { ArrowLeft, FileText, AlertTriangle, CheckCircle2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import type { ReturnBriefApiResponse } from "@/pages/api/cases/return-brief";
 import type { ReturnBriefV1 } from "@/lib/product/return-brief-contract";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -455,6 +456,9 @@ const ReturnBriefPage: NextPage = () => {
               Run new assessment
             </Link>
           </div>
+
+          {/* Feedback widget */}
+          <FeedbackWidget surface="return-brief" subjectId={typeof router.query.caseId === "string" ? router.query.caseId : undefined} />
 
           {/* Mandatory boundary note */}
           <section
