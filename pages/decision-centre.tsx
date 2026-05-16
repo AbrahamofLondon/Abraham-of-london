@@ -484,6 +484,16 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
           ))}
         </div>
       )}
+
+      {/* Case detail link */}
+      <div style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <Link
+          href={`/decision-centre/case/${encodeURIComponent(c.caseId)}`}
+          style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}66`, textDecoration: "none" }}
+        >
+          View full case →
+        </Link>
+      </div>
     </div>
   );
 }
