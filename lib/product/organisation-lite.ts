@@ -94,6 +94,7 @@ export async function createOrganisation(input: {
       userId: input.ownerUserId ?? null,
       email: input.ownerEmail.toLowerCase(),
       fullName: input.name,
+      role: "OWNER",
       status: "active",
     },
   });
@@ -126,7 +127,7 @@ export async function getOrganisationSummary(
     organisationName: org.name,
     email: m.email,
     fullName: m.fullName,
-    role: "CONTRIBUTOR" as OrgLiteRole,
+    role: (m as any).role as OrgLiteRole || "CONTRIBUTOR",
     status: m.status,
     joinedAt: m.createdAt.toISOString(),
   }));
@@ -200,11 +201,24 @@ export async function acceptInvite(input: {
     return { ok: false, reason: "SEAT_LIMIT_REACHED" };
   }
 
+  // Parse role from invite metadata
+  let role: OrgLiteRole = "CONTRIBUTOR";
+  try {
+    const metadata = typeof invite.metadata === "string" ? JSON.parse(invite.metadata) : invite.metadata ?? {};
+    if (metadata && typeof metadata === "object" && "role" in metadata) {
+      const parsedRole = String(metadata.role) as OrgLiteRole;
+      if (["OWNER", "ADMIN", "CONTRIBUTOR", "VIEWER", "AUDITOR"].includes(parsedRole)) {
+        role = parsedRole;
+      }
+    }
+  } catch { /* use default */ }
+
   await prisma.organisationMembership.create({
     data: {
       organisationId: invite.organisationId,
       userId: input.userId ?? null,
       email: input.email.toLowerCase(),
+      role,
       status: "active",
     },
   });
