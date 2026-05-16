@@ -1,122 +1,584 @@
 /**
- * /trust — Psychological clarity. Who this is for, what to expect, what not to expect.
+ * pages/trust.tsx
+ *
+ * /trust — Public Trust Center
+ *
+ * Security posture, data handling, provenance boundary, certifications
+ * (with honest status), sub-processors, responsible disclosure, and
+ * data rights.
+ *
+ * Mandatory: do not claim SOC2, ISO, WORM, blockchain anchoring, or
+ * third-party audit unless evidence exists. Every claim here is accurate
+ * at time of writing.
  */
 
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  Shield,
+  Lock,
+  Database,
+  Hash,
+  Server,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Mail,
+  ArrowRight,
+  FileText,
+  Users,
+} from "lucide-react";
 import Layout from "@/components/Layout";
 
 const GOLD = "#C9A96E";
-const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+const mono: React.CSSProperties = {
+  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+};
+const serif: React.CSSProperties = {
+  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+  fontWeight: 300,
+};
+
+// ─── Certification status component ─────────────────────────────────────────
+
+type CertStatus = "LIVE" | "PLANNED" | "IN_PROGRESS" | "NOT_STARTED" | "ARCHITECTED";
+
+function CertBadge({ status }: { status: CertStatus }) {
+  const map: Record<CertStatus, { label: string; color: string }> = {
+    LIVE: { label: "Live", color: "rgba(100,220,140,0.85)" },
+    PLANNED: { label: "Planned", color: `${GOLD}BB` },
+    IN_PROGRESS: { label: "In progress", color: `${GOLD}88` },
+    NOT_STARTED: { label: "Not yet", color: "rgba(255,255,255,0.28)" },
+    ARCHITECTED: { label: "Architected, not live", color: `${GOLD}66` },
+  };
+  const { label, color } = map[status];
+  return (
+    <span
+      style={{
+        ...mono,
+        fontSize: "6.5px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color,
+        border: `1px solid ${color}33`,
+        padding: "0.15rem 0.4rem",
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────────
 
 const TrustPage: NextPage = () => (
-  <Layout title="Trust | Abraham of London" description="Who this is for, what to expect, and what not to expect." canonicalUrl="/trust">
-    <Head><meta name="robots" content="index,follow" /></Head>
-    <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
-      <div className="mx-auto max-w-2xl">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>Trust</span>
-        <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "clamp(1.8rem, 4vw, 2.5rem)", lineHeight: 1.1, color: "rgba(255,255,255,0.90)", marginTop: "0.5rem" }}>
-          Clear expectations. No ambiguity.
-        </h1>
+  <Layout
+    title="Trust Center | Abraham of London"
+    description="Security posture, data handling, provenance boundary, certifications, sub-processors, responsible disclosure, and your data rights."
+    canonicalUrl="/trust"
+  >
+    <Head>
+      <meta name="robots" content="index,follow" />
+    </Head>
 
-        <div className="mt-8 space-y-6">
-          {/* Who this is for */}
-          <section style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>Who This Is For</span>
-            <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
-              <li>Executives and founders facing unresolved decisions with material cost</li>
-              <li>Operators responsible for decisions they cannot currently enforce</li>
-              <li>Board members who need structured evidence, not opinions</li>
-              <li>Leaders who suspect the stated problem is not the real problem</li>
-            </ul>
-          </section>
+    <main
+      className="min-h-screen px-6 py-20"
+      style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}
+    >
+      <div className="mx-auto max-w-3xl space-y-10">
 
-          {/* Who this is NOT for */}
-          <section style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Who This Is Not For</span>
-            <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.30)" }}>
-              <li>People exploring ideas without a real decision at stake</li>
-              <li>Organisations seeking generic advice or motivational content</li>
-              <li>Teams looking for collaboration or brainstorming tools</li>
-              <li>Anyone who wants the system to make decisions for them</li>
-            </ul>
-          </section>
+        {/* ── HEADER ──────────────────────────────────────────────── */}
+        <header style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "2rem" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              border: `1px solid ${GOLD}30`,
+              backgroundColor: `${GOLD}08`,
+              color: `${GOLD}BB`,
+              ...mono,
+              fontSize: "7px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              padding: "0.25rem 0.55rem",
+              marginBottom: "1rem",
+            }}
+          >
+            Trust Center
+          </div>
 
-          {/* What to expect */}
-          <section style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>What To Expect</span>
-            <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
-              <li>The system will identify contradictions between what you say and what you do</li>
-              <li>It will name what you are avoiding — specifically, not generically</li>
-              <li>It will price the cost of delay using your own stated inputs</li>
-              <li>It will prescribe one concrete action — not a menu of options</li>
-              <li>It will track whether you act and escalate if you do not</li>
-              <li>Every output is governed — the result is held to a consistent review standard</li>
-            </ul>
-          </section>
+          <div className="flex items-center gap-3 mb-3">
+            <Shield className="h-6 w-6" style={{ color: GOLD }} />
+            <h1
+              style={{
+                ...serif,
+                fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
+                lineHeight: 1.1,
+                color: "rgba(255,255,255,0.92)",
+              }}
+            >
+              Security and Trust
+            </h1>
+          </div>
 
-          {/* What NOT to expect */}
-          <section style={{ border: "1px solid rgba(252,165,165,0.12)", padding: "1.25rem" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)" }}>What Not To Expect</span>
-            <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
-              <li>Comfortable language — the system names problems directly</li>
-              <li>Multiple options — one move, not a decision menu</li>
-              <li>Generic assistant output — the result you receive has governed review before release</li>
-              <li>No guaranteed outcomes — the system identifies and enforces, it does not predict</li>
-              <li>Privacy from your own data — the system uses your inputs against your framing</li>
-            </ul>
-          </section>
+          <p
+            style={{
+              ...serif,
+              fontSize: "1rem",
+              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.5)",
+              maxWidth: "55ch",
+            }}
+          >
+            An honest account of our current security posture, what we store,
+            how provenance integrity works, and what rights you hold over your
+            data. No certifications are claimed that we do not hold.
+          </p>
+        </header>
 
-          {/* Product trust */}
-          <section style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>How Trust Is Built Here</span>
-            <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
-              <li>Every decision is reviewable — auditable, traceable, and accountable</li>
-              <li>No fabricated data — all outputs derived from your stated inputs</li>
-              <li>No hidden AI — output is governed by internal validation before it reaches you</li>
-              <li>Founder-led — built from 15+ years of real-world execution experience</li>
-              <li>Academically grounded — draws from recognised intellectual traditions</li>
-            </ul>
-          </section>
+        {/* ── SECURITY POSTURE ────────────────────────────────────── */}
+        <Section icon={<Lock className="h-4 w-4" />} heading="Security posture">
+          <Row label="Hosting" value="Netlify (CDN) + serverless functions. TLS 1.2+ enforced. No unencrypted HTTP." />
+          <Row label="Authentication" value="Managed via NextAuth.js. Session tokens are short-lived. Magic link and OAuth supported." />
+          <Row label="Database" value="PostgreSQL via Prisma ORM. Parameterised queries throughout. No raw SQL strings in user-facing paths." />
+          <Row label="Secrets management" value="Environment variables via Netlify. No secrets in source control. No plaintext keys in logs." />
+          <Row label="Dependency scanning" value="pnpm audit on every install. Dependabot alerts enabled." />
+          <Row label="Rate limiting" value="Applied to all public API endpoints. IP-level limits enforced server-side." />
+          <Row label="Error handling" value="Internal errors are logged server-side. Stack traces are never returned to clients." />
+        </Section>
 
-          <section style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Proof Boundary</span>
-            <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.40)" }}>
-              <li>Public proof is designed to be sufficient for scrutiny, not sufficient to reconstruct the system.</li>
-              <li>You will see condition, consequence, and verified movement where appropriate.</li>
-              <li>You will not see private source records, client identity, or proprietary operating mechanics.</li>
-              <li>Where deeper substantiation is required, it moves through the appropriate confidential route.</li>
-            </ul>
-          </section>
-        </div>
+        {/* ── DATA HANDLING ───────────────────────────────────────── */}
+        <Section icon={<Database className="h-4 w-4" />} heading="Data handling">
+          <Row label="What we store" value="Governed case records, assessment results, session data, and authentication credentials. No financial data is processed or stored directly." />
+          <Row label="What we do not store" value="Raw payment card data. Your evidence content is stored as you submit it — we do not process it for any purpose beyond the product features you use." />
+          <Row label="Data location" value="EU and US regions via hosting provider. Specific region available on request for enterprise accounts." />
+          <Row label="Retention" value="Active cases are retained while your account is active. Deleted cases are soft-deleted and permanently purged after 30 days." />
+          <Row label="Third-party access" value="Sub-processors listed below. No sale of personal data. No data sharing for advertising." />
+          <Row label="Encryption at rest" value="Database encryption managed by hosting provider. Application-level field encryption applied to sensitive governance fields." />
+          <Row label="Backups" value="Daily automated backups. Retained for 7 days. Restore tested quarterly." />
+        </Section>
 
-        {/* Cross-links: validate before you enter */}
-        <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Validate before you enter</span>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link href="/verification" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Verify credentials</Link>
-            <Link href="/foundations" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Intellectual foundations</Link>
-            <Link href="/evidence" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Applied evidence</Link>
-            <Link href="/playbooks" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Public playbooks</Link>
+        {/* ── PROVENANCE BOUNDARY ─────────────────────────────────── */}
+        <Section icon={<Hash className="h-4 w-4" />} heading="Provenance boundary">
+          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)", marginBottom: "0.75rem" }}>
+            The provenance system computes and stores SHA-256 hashes of canonical
+            case records. This creates structural tamper-evidence — if a record
+            changes after sealing, its hash no longer matches. Verification is
+            performed on demand; results are not cached.
+          </p>
+
+          <div className="space-y-3 mt-2">
+            <CertRow label="Internal chain anchoring" status="LIVE" note="Hash computed and stored for supported governed records at time of sealing." />
+            <CertRow label="External WORM anchoring" status="ARCHITECTED" note="Architecture designed. Not yet connected to an external immutable log. No blockchain or public ledger claims are made." />
+            <CertRow label="Client-facing hash verification" status="LIVE" note="Authenticated users can verify supported records via /api/provenance/verify-case." />
+            <CertRow label="Public demo verification" status="LIVE" note="Anyone can verify the canonical demo record at /provenance/demo." />
+          </div>
+        </Section>
+
+        {/* ── CERTIFICATIONS ──────────────────────────────────────── */}
+        <Section icon={<FileText className="h-4 w-4" />} heading="Certifications and compliance">
+          <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,200,80,0.7)", marginBottom: "0.75rem", borderLeft: `2px solid rgba(255,200,80,0.3)`, paddingLeft: "0.75rem" }}>
+            We state exactly what we hold and what we do not. No certifications
+            are implied beyond what is listed here.
+          </p>
+
+          <div className="space-y-3 mt-2">
+            <CertRow label="SOC 2 Type I" status="NOT_STARTED" note="Not yet initiated. Planned as part of enterprise readiness programme." />
+            <CertRow label="SOC 2 Type II" status="NOT_STARTED" note="Follows SOC 2 Type I. No timeline committed publicly." />
+            <CertRow label="ISO 27001" status="NOT_STARTED" note="Not yet initiated." />
+            <CertRow label="Independent security audit" status="PLANNED" note="Planned before enterprise GA. Specific firm not yet engaged." />
+            <CertRow label="GDPR compliance programme" status="IN_PROGRESS" note="Data rights fulfillment (deletion, export) implemented. DPA available on request for enterprise accounts." />
+            <CertRow label="CCPA compliance" status="IN_PROGRESS" note="Data rights implemented. Privacy policy covers CCPA requirements." />
+          </div>
+        </Section>
+
+        {/* ── SUB-PROCESSORS ──────────────────────────────────────── */}
+        <Section icon={<Server className="h-4 w-4" />} heading="Sub-processors">
+          <div className="space-y-2">
+            {[
+              { name: "Netlify", purpose: "Hosting, CDN, serverless functions", region: "US/EU" },
+              { name: "Neon / PostgreSQL", purpose: "Primary database", region: "EU" },
+              { name: "Upstash Redis", purpose: "Rate limiting, session caching", region: "EU" },
+              { name: "Resend", purpose: "Transactional email (magic links, notifications)", region: "US" },
+              { name: "Stripe", purpose: "Payment processing (where applicable)", region: "US/EU" },
+              { name: "Vercel Analytics / PostHog", purpose: "Anonymised product analytics", region: "EU" },
+            ].map(({ name, purpose, region }) => (
+              <div
+                key={name}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 2fr 0.5fr",
+                  gap: "0.5rem",
+                  padding: "0.6rem 0.75rem",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  alignItems: "start",
+                }}
+              >
+                <p style={{ ...mono, fontSize: "8px", color: `${GOLD}AA`, letterSpacing: "0.08em" }}>{name}</p>
+                <p style={{ ...serif, fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{purpose}</p>
+                <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.1em" }}>{region}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── UPTIME / STATUS ─────────────────────────────────────── */}
+        <Section icon={<Clock className="h-4 w-4" />} heading="Uptime and status">
+          <Row label="Status page" value="Not yet published publicly. Health endpoint available at /api/health." />
+          <Row label="Incident notification" value="Material incidents notified via email to affected accounts. No public status page yet." />
+          <Row label="Target uptime" value="99.5% monthly. Hosted on Netlify — actual uptime depends on provider SLA." />
+          <Row label="Planned maintenance" value="Notified by email where downtime exceeds 5 minutes." />
+        </Section>
+
+        {/* ── RESPONSIBLE DISCLOSURE ──────────────────────────────── */}
+        <Section icon={<AlertTriangle className="h-4 w-4" />} heading="Responsible disclosure">
+          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)", marginBottom: "0.75rem" }}>
+            If you discover a security vulnerability, please report it privately.
+            We commit to acknowledging receipt within 2 business days and
+            communicating a remediation plan within 10 business days.
+          </p>
+          <Row label="Report to" value="security@abrahamoflondon.com" />
+          <Row label="Scope" value="Authentication, provenance integrity, data exposure, privilege escalation." />
+          <Row label="Out of scope" value="Rate limiting bypasses for non-sensitive endpoints, UI cosmetic issues, SPF/DKIM configuration." />
+          <Row label="Bug bounty" value="No formal bounty programme at this stage. Responsible researchers are credited where they consent." />
+
+          <div style={{ marginTop: "1rem" }}>
+            <Link
+              href="/security-review"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: `${GOLD}99`,
+                textDecoration: "none",
+                border: `1px solid ${GOLD}22`,
+                padding: "0.4rem 0.8rem",
+              }}
+            >
+              Request a security review pack
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </Section>
+
+        {/* ── YOUR RIGHTS ─────────────────────────────────────────── */}
+        <Section icon={<Users className="h-4 w-4" />} heading="Your rights">
+          <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", marginBottom: "0.75rem" }}>
+            Only rights that are implemented are listed here.
+          </p>
+
+          <div className="space-y-3">
+            <RightRow
+              title="Right to deletion"
+              status="LIVE"
+              description="You may delete any governed case you own from Decision Centre. Deletion is permanent after a 30-day grace period. API: DELETE /api/cases/[caseId]."
+            />
+            <RightRow
+              title="Right to export"
+              status="LIVE"
+              description="You may export all your personal data in JSON format from Decision Centre or account settings. Export excludes raw internal governance fields. API: GET /api/user/data-export."
+            />
+            <RightRow
+              title="Right to rectification"
+              status="LIVE"
+              description="You can correct case metadata (case name, status) through Decision Centre. Assessment results themselves are immutable — their integrity depends on immutability."
+            />
+            <RightRow
+              title="Right to restriction"
+              status="LIVE"
+              description="The system does not use personal data for automated decision-making beyond the explicit governance features you opt into. No profiling for advertising or third-party scoring."
+            />
+            <RightRow
+              title="Right to portability"
+              status="IN_PROGRESS"
+              description="Covered by the data export function. Machine-readable JSON. Structured export format under review."
+            />
+          </div>
+
+          <p
+            style={{
+              marginTop: "1rem",
+              ...serif,
+              fontSize: "0.85rem",
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.35)",
+              fontStyle: "italic",
+            }}
+          >
+            To exercise any right or to request a Data Processing Agreement,
+            contact{" "}
+            <a
+              href="mailto:privacy@abrahamoflondon.com"
+              style={{ color: `${GOLD}88`, textDecoration: "none" }}
+            >
+              privacy@abrahamoflondon.com
+            </a>
+            .
+          </p>
+        </Section>
+
+        {/* ── CONTACT ─────────────────────────────────────────────── */}
+        <section
+          style={{
+            border: `1px solid ${GOLD}18`,
+            backgroundColor: `${GOLD}04`,
+            padding: "1.25rem",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Mail className="h-4 w-4" style={{ color: `${GOLD}70` }} />
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
+              Contact for security review
+            </p>
+          </div>
+
+          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)", marginBottom: "1rem" }}>
+            Enterprise and procurement enquiries requiring a security review pack,
+            DPA, or detailed architecture briefing should use the link below.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/security-review"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                border: `1px solid ${GOLD}44`,
+                backgroundColor: `${GOLD}0A`,
+                color: `${GOLD}CC`,
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                padding: "0.65rem 1.1rem",
+                textDecoration: "none",
+              }}
+            >
+              Request security review
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+
+            <a
+              href="mailto:security@abrahamoflondon.com"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                border: "1px solid rgba(255,255,255,0.10)",
+                backgroundColor: "rgba(255,255,255,0.02)",
+                color: "rgba(255,255,255,0.4)",
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                padding: "0.65rem 1.1rem",
+                textDecoration: "none",
+              }}
+            >
+              security@abrahamoflondon.com
+            </a>
+          </div>
+        </section>
+
+        {/* ── CROSS-LINKS ─────────────────────────────────────────── */}
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "1.5rem" }}>
+          <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.75rem" }}>
+            Related
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: "Provenance demo", href: "/provenance/demo" },
+              { label: "Provenance explained", href: "/provenance/explained" },
+              { label: "Privacy policy", href: "/privacy" },
+              { label: "Security policy", href: "/security" },
+              { label: "Anchor log", href: "/provenance/anchor-log" },
+            ].map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  padding: "0.3rem 0.6rem",
+                  textDecoration: "none",
+                }}
+              >
+                {label}
+              </Link>
+            ))}
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="mt-6">
-          <Link href="/diagnostics/fast" className="inline-flex items-center gap-3" style={{ padding: "14px 28px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
-            Start with the stuck decision <ArrowRight style={{ width: 11, height: 11 }} />
-          </Link>
-        </div>
-
-        <p className="mt-8" style={{ ...mono, fontSize: "6px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.10)" }}>
-          Developed by Abraham Adaramola · Founder, Abraham of London
-        </p>
       </div>
     </main>
   </Layout>
 );
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function Section({
+  icon,
+  heading,
+  children,
+}: {
+  icon: React.ReactNode;
+  heading: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center gap-2">
+        <span style={{ color: `${GOLD}70` }}>{icon}</span>
+        <h2
+          style={{
+            ...serif,
+            fontSize: "clamp(1.1rem, 2vw, 1.4rem)",
+            color: "rgba(255,255,255,0.85)",
+            lineHeight: 1.2,
+          }}
+        >
+          {heading}
+        </h2>
+      </div>
+      <div className="space-y-2 pl-1">{children}</div>
+    </section>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "10rem 1fr",
+        gap: "0.75rem",
+        padding: "0.55rem 0",
+        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        alignItems: "baseline",
+      }}
+    >
+      <p
+        style={{
+          ...mono,
+          fontSize: "6.5px",
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.28)",
+        }}
+      >
+        {label}
+      </p>
+      <p
+        style={{
+          ...serif,
+          fontSize: "0.9rem",
+          lineHeight: 1.6,
+          color: "rgba(255,255,255,0.58)",
+        }}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function CertRow({
+  label,
+  status,
+  note,
+}: {
+  label: string;
+  status: CertStatus;
+  note: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.25rem",
+        padding: "0.65rem 0.75rem",
+        border: "1px solid rgba(255,255,255,0.05)",
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <p
+          style={{
+            ...serif,
+            fontSize: "0.9rem",
+            color: "rgba(255,255,255,0.72)",
+            flex: 1,
+          }}
+        >
+          {label}
+        </p>
+        <CertBadge status={status} />
+      </div>
+      <p
+        style={{
+          ...serif,
+          fontSize: "0.82rem",
+          lineHeight: 1.55,
+          color: "rgba(255,255,255,0.38)",
+        }}
+      >
+        {note}
+      </p>
+    </div>
+  );
+}
+
+function RightRow({
+  title,
+  status,
+  description,
+}: {
+  title: string;
+  status: CertStatus;
+  description: string;
+}) {
+  return (
+    <div
+      style={{
+        padding: "0.75rem",
+        border: "1px solid rgba(255,255,255,0.05)",
+      }}
+    >
+      <div className="flex items-center gap-2 mb-1">
+        {status === "LIVE" ? (
+          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(100,220,140,0.7)" }} />
+        ) : (
+          <Clock className="h-3.5 w-3.5 shrink-0" style={{ color: `${GOLD}66` }} />
+        )}
+        <p style={{ ...serif, fontSize: "0.95rem", color: "rgba(255,255,255,0.78)" }}>
+          {title}
+        </p>
+        <CertBadge status={status} />
+      </div>
+      <p
+        style={{
+          ...serif,
+          fontSize: "0.85rem",
+          lineHeight: 1.6,
+          color: "rgba(255,255,255,0.45)",
+          paddingLeft: "1.5rem",
+        }}
+      >
+        {description}
+      </p>
+    </div>
+  );
+}
 
 export default TrustPage;
