@@ -287,6 +287,12 @@ export type DecisionCentreCase = {
     basis: "USER_REPORTED" | "SYSTEM_ESTIMATED" | "NOT_AVAILABLE";
     disclaimer: string;
   } | null;
+  /** Completion risk assessment */
+  completionRisk?: {
+    band: "LOW" | "MEDIUM" | "HIGH" | "SEVERE";
+    reason: string;
+    suggestedIntervention: string;
+  } | null;
   /** Last activity timestamp */
   updatedAt: string;
   /** Latest evidence timestamp used for freshness/provenance */

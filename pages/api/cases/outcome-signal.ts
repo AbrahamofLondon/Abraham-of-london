@@ -78,10 +78,12 @@ export default async function handler(
     // v2: migrate to a dedicated OutcomeSignal table
     await prisma.auditEvent.create({
       data: {
-        email: identity.email.toLowerCase(),
-        action: "outcome_signal",
-        targetType: "case",
-        targetId: caseId,
+        actorType: "USER",
+        actorId: identity.subjectId ?? identity.email,
+        objectType: "OUTCOME",
+        objectId: caseId,
+        actionType: signal,
+        summary: `Outcome signal: ${signal}${blocker ? ` (blocker: ${blocker})` : ""}`,
         metadata: {
           source,
           signal,

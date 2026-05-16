@@ -39,6 +39,7 @@ import Layout from "@/components/Layout";
 import ChainOfCustodyTimeline, {
   buildChainOfCustodyFromCase,
 } from "@/components/product/ChainOfCustodyTimeline";
+import DecisionOutcomeCapture from "@/components/product/DecisionOutcomeCapture";
 import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
 import OutcomeContributionPanel from "@/components/product/OutcomeContributionPanel";
 import type { DecisionCentreCase } from "@/lib/product/decision-centre-contract";
@@ -712,6 +713,14 @@ const CaseDetailPage: NextPage = () => {
                 <ArrowRight className="h-3 w-3" />
               </Link>
             )}
+          </div>
+
+          {/* ── OUTCOME CAPTURE ──────────────────────────────────────────── */}
+          <div style={{ marginTop: "24px" }}>
+            <DecisionOutcomeCapture
+              caseId={c.caseId}
+              source="case_detail"
+            />
           </div>
 
         </div>

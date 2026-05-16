@@ -1171,6 +1171,30 @@ export default async function handler(
     });
     caseCard.updatedAt = caseCard.lastEvidenceAt;
 
+    // ── Completion risk ───────────────────────────────────────────────────────
+    try {
+      const { evaluateCompletionRisk } = await import("@/lib/product/decision-completion-risk");
+      const createdAt = livingCase.createdAt ? new Date(livingCase.createdAt) : new Date();
+      const caseAgeDays = Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24)));
+      const staleStatus = caseAgeDays > 30 && livingCase.completedStages.length === livingCase.stageCount;
+      const hasReturnBrief = caseCard.returnBriefs.length > 0;
+
+      caseCard.completionRisk = evaluateCompletionRisk({
+        caseAgeDays,
+        caseType: caseCard.sourceType ?? "FAST_DIAGNOSTIC",
+        authorityGap: livingCase.contradictions.some((c) => c.summary.toLowerCase().includes("authority")),
+        evidenceGap: livingCase.evidenceTier === "single_source",
+        recurrence: patternRecurrence?.status === "VERIFIED_RECURRENCE" || patternRecurrence?.status === "POSSIBLE_RECURRENCE",
+        staleStatus,
+        commercialExposureBand: null,
+        priorOutcomeSignal: null,
+        returnBriefGenerated: hasReturnBrief,
+        strategyRoomHistory: Boolean(latestExecutionRecord?.sessionId),
+      });
+    } catch {
+      // degrade gracefully
+    }
+
     const executiveRunMatch = requestedExecutiveRunId
       ? await prisma.executiveReportingRun.findFirst({
           where: {

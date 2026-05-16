@@ -169,6 +169,25 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
         </div>
       )}
 
+      {/* Completion risk */}
+      {c.completionRisk && c.completionRisk.band !== "LOW" && (
+        <div style={{
+          border: c.completionRisk.band === "SEVERE" ? "1px solid rgba(252,165,165,0.25)" : c.completionRisk.band === "HIGH" ? "1px solid rgba(251,191,36,0.20)" : "1px solid rgba(255,255,255,0.06)",
+          backgroundColor: c.completionRisk.band === "SEVERE" ? "rgba(252,165,165,0.04)" : c.completionRisk.band === "HIGH" ? "rgba(251,191,36,0.03)" : "rgba(255,255,255,0.01)",
+          padding: "10px 14px", marginBottom: "16px"
+        }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.completionRisk.band === "SEVERE" ? "rgba(252,165,165,0.62)" : c.completionRisk.band === "HIGH" ? "rgba(251,191,36,0.60)" : "rgba(255,255,255,0.30)" }}>
+            Completion risk: {c.completionRisk.band}
+          </span>
+          <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)", marginTop: "4px" }}>
+            {c.completionRisk.reason}
+          </p>
+          <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}77`, marginTop: "6px" }}>
+            Suggested: {c.completionRisk.suggestedIntervention.replace(/_/g, " ")}
+          </p>
+        </div>
+      )}
+
       {c.urgencyReasons && c.urgencyReasons.length > 0 && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "rgba(252,165,165,0.03)", padding: "10px 14px" }}>
           <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.62)" }}>
