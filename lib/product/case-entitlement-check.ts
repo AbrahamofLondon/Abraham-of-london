@@ -11,6 +11,10 @@
  */
 
 import { FREE_TIER_MAX_ACTIVE_CASES } from "./free-tier-limits";
+import {
+  isCountedActiveCaseStatus,
+  normaliseGovernedCaseStatus,
+} from "./case-status";
 
 export type CaseEntitlementResult =
   | { allowed: true }
@@ -56,10 +60,14 @@ export function checkCaseEntitlement(
  * @returns Count of active cases.
  */
 export function countActiveCases(
-  cases: Array<{ cognitiveState?: string; outcomeStatus?: string | null }>,
+  cases: Array<{ status?: string | null; cognitiveState?: string; outcomeStatus?: string | null }>,
 ): number {
   return cases.filter((c) => {
-    // Cases that are resolved or in institutional intelligence are not "active"
+    if (c.status) {
+      return isCountedActiveCaseStatus(normaliseGovernedCaseStatus(c.status));
+    }
+
+    // Legacy fallback for call sites that have not yet adopted canonical status.
     if (c.outcomeStatus === "RESOLVED") return false;
     if (c.cognitiveState === "INSTITUTIONAL_INTELLIGENCE") return false;
     return true;

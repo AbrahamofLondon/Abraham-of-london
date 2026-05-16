@@ -18,8 +18,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
+import ContextualUpgradePrompt from "@/components/product/ContextualUpgradePrompt";
 import type { OrgLiteSummary, OrgLiteMember, OrgLiteRole } from "@/lib/product/organisation-lite";
-import { PROFESSIONAL_SEAT_ALLOWANCE, ADDITIONAL_SEAT_PRICE_LABEL } from "@/lib/product/organisation-lite";
+import { PROFESSIONAL_SEAT_ALLOWANCE } from "@/lib/product/organisation-lite";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -46,6 +47,7 @@ const OrganisationPage: NextPage = () => {
   const [newOrgName, setNewOrgName] = React.useState("");
   const [newOrgSlug, setNewOrgSlug] = React.useState("");
   const [creating, setCreating] = React.useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = React.useState(false);
 
   async function loadOrgs() {
     setLoading(true);
@@ -93,7 +95,11 @@ const OrganisationPage: NextPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ organisationId: orgId, recipientEmail: inviteEmail, role: inviteRole }),
       });
-      const data = await res.json() as { ok: boolean; token?: string; error?: string };
+      const data = await res.json() as { ok: boolean; token?: string; error?: string; code?: string };
+      if (res.status === 403 && data.code === "PROFESSIONAL_REQUIRED") {
+        setShowUpgradePrompt(true);
+        return;
+      }
       if (data.ok && data.token) {
         setInviteResult(`Invite sent! Share this link: ${window.location.origin}/invite?token=${data.token}`);
         setInviteEmail("");
@@ -206,7 +212,7 @@ const OrganisationPage: NextPage = () => {
                   </h2>
                   <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: org.overageCount > 0 ? "rgba(252,165,165,0.55)" : "rgba(255,255,255,0.25)" }}>
                     {org.seatsUsed} of {org.seatAllowance} seats used
-                    {org.overageCount > 0 ? ` · ${org.overageCount} overage (${ADDITIONAL_SEAT_PRICE_LABEL}/seat)` : ""}
+                    {org.overageCount > 0 ? ` · ${org.overageCount} overage` : ""}
                   </p>
                 </div>
               </div>
@@ -282,11 +288,17 @@ const OrganisationPage: NextPage = () => {
               Seats
             </p>
             <p style={{ fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.30)" }}>
-              Professional includes {PROFESSIONAL_SEAT_ALLOWANCE} seats. Additional collaborators are {ADDITIONAL_SEAT_PRICE_LABEL} per seat.
+              Professional includes {PROFESSIONAL_SEAT_ALLOWANCE} seats. Additional collaborators currently require a plan upgrade or billing contact until automated seat billing is enabled.
             </p>
           </div>
         </div>
       </main>
+      {showUpgradePrompt && (
+        <ContextualUpgradePrompt
+          action="invite_organisation_member"
+          onDismiss={() => setShowUpgradePrompt(false)}
+        />
+      )}
     </Layout>
   );
 };

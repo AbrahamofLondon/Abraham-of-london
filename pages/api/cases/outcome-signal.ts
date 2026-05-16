@@ -9,7 +9,7 @@
  *   { caseId: string; source: string; signal: OutcomeSignal; blocker?: string; freeText?: string }
  *
  * Privacy:
- *   - Free text is stored but never exposed in aggregates
+ *   - Optional free text is not persisted in v1
  *   - No raw decision text is stored with the signal
  *   - Signals are anonymised for pattern detection
  */
@@ -89,6 +89,7 @@ export default async function handler(
           signal,
           blocker: blocker ?? null,
           hasFreeText: Boolean(freeText),
+          freeTextStored: false,
           capturedAt: new Date().toISOString(),
         },
       },

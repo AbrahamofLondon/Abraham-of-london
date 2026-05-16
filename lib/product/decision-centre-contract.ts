@@ -24,6 +24,8 @@ import type {
   RetainerCycleMemorySeverity,
   RetainerCycleMemoryStatus,
 } from "@/lib/product/retainer-cycle-memory-contract";
+import type { TrialInfo } from "@/lib/product/professional-trial";
+import type { TrialExpiryResolutionState } from "@/lib/product/trial-expiry-service";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COGNITIVE STATE
@@ -292,6 +294,7 @@ export type DecisionCentreCase = {
     band: "LOW" | "MEDIUM" | "HIGH" | "SEVERE";
     reason: string;
     suggestedIntervention: string;
+    evidenceBasis: "RULE_BASED" | "AGGREGATE_SUPPORTED" | "INSUFFICIENT_DATA";
   } | null;
   /** Last activity timestamp */
   updatedAt: string;
@@ -325,6 +328,9 @@ export type DecisionCentreResponse = {
     ownedProducts: string[];
     eligibleProducts: string[];
     restrictedProducts: string[];
+  };
+  trial?: TrialInfo & {
+    expiryResolution?: TrialExpiryResolutionState | null;
   };
   credit: DecisionCreditSummary | null;
 };

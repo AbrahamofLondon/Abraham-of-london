@@ -26,8 +26,6 @@ describe("TIER_FEATURES", () => {
       "active_case_limit",
       "return_brief_generation",
       "client_safe_evidence_export",
-      "case_sharing",
-      "advanced_timelines",
       "strategy_room_eligibility",
       "executive_reporting_eligibility",
       "organisation_workspace",
@@ -51,14 +49,6 @@ describe("PROFESSIONAL_FEATURE_LIST", () => {
     expect(PROFESSIONAL_FEATURE_LIST).toContain("client_safe_evidence_export");
   });
 
-  it("includes case_sharing", () => {
-    expect(PROFESSIONAL_FEATURE_LIST).toContain("case_sharing");
-  });
-
-  it("includes advanced_timelines", () => {
-    expect(PROFESSIONAL_FEATURE_LIST).toContain("advanced_timelines");
-  });
-
   it("includes organisation_workspace", () => {
     expect(PROFESSIONAL_FEATURE_LIST).toContain("organisation_workspace");
   });
@@ -78,8 +68,6 @@ describe("describeTierFeature", () => {
       "active_case_limit",
       "return_brief_generation",
       "client_safe_evidence_export",
-      "case_sharing",
-      "advanced_timelines",
       "strategy_room_eligibility",
       "executive_reporting_eligibility",
       "organisation_workspace",

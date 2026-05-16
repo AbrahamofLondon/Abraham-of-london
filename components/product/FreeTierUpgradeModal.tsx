@@ -17,6 +17,7 @@ import {
   PROFESSIONAL_FEATURE_LIST,
   describeTierFeature,
 } from "@/lib/product/free-tier-limits";
+import { trackCommercialEvent } from "@/lib/product/commercial-analytics";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -44,6 +45,11 @@ export default function FreeTierUpgradeModal({
   const [trialState, setTrialState] = React.useState<"idle" | "starting" | "started" | "error">("idle");
   const [trialError, setTrialError] = React.useState("");
 
+  React.useEffect(() => {
+    trackCommercialEvent("upgrade_prompt_seen", "free_tier_upgrade_modal", { actionType: "free_case_limit" });
+    trackCommercialEvent("free_limit_reached", "free_tier_upgrade_modal", { actionType: "free_case_limit" });
+  }, []);
+
   async function handleStartTrial() {
     setTrialState("starting");
     setTrialError("");
@@ -52,6 +58,7 @@ export default function FreeTierUpgradeModal({
       const data = await response.json() as { ok: boolean; reason?: string };
       if (data.ok) {
         setTrialState("started");
+        trackCommercialEvent("trial_started", "free_tier_upgrade_modal", { actionType: "free_case_limit" });
         onTrialStarted?.();
       } else {
         setTrialState("error");
@@ -239,6 +246,7 @@ export default function FreeTierUpgradeModal({
           {/* Upgrade link */}
           <Link
             href="/pricing"
+            onClick={() => trackCommercialEvent("pricing_viewed_from_prompt", "free_tier_upgrade_modal", { actionType: "free_case_limit" })}
             style={{
               ...mono,
               fontSize: "8px",
@@ -258,7 +266,10 @@ export default function FreeTierUpgradeModal({
           {/* Dismiss */}
           <button
             type="button"
-            onClick={onDismiss}
+            onClick={() => {
+              trackCommercialEvent("trial_declined", "free_tier_upgrade_modal", { actionType: "free_case_limit" });
+              onDismiss();
+            }}
             style={{
               ...mono,
               fontSize: "8px",

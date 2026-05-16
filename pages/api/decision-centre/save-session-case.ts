@@ -115,8 +115,7 @@ export default async function handler(
     });
     const activeCount = countActiveCases(
       existingCases.map((c: { status: string | null }) => ({
-        outcomeStatus: c.status === "resolved" ? "RESOLVED" : null,
-        cognitiveState: c.status === "institutional_intelligence" ? "INSTITUTIONAL_INTELLIGENCE" : ("ACTIVE" as const),
+        status: c.status,
       })),
     );
 

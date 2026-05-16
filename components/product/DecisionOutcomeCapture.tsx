@@ -288,7 +288,7 @@ export default function DecisionOutcomeCapture({
       <textarea
         value={freeText}
         onChange={(e) => setFreeText(e.target.value)}
-        placeholder="Optional — your answer helps improve the system."
+        placeholder="Optional improvement feedback only. Do not include names, confidential client details, or sensitive personal information."
         rows={2}
         style={{
           width: "100%",
@@ -347,7 +347,7 @@ export default function DecisionOutcomeCapture({
           color: "rgba(255,255,255,0.20)",
         }}
       >
-        This signal is anonymised and used to improve pattern recognition across governed cases. No raw decision text is stored with the signal.
+        Structured outcome signals are anonymised and used to improve pattern recognition across governed cases. Optional feedback is not attached to benchmark context or decision-vector logic.
       </p>
     </div>
   );

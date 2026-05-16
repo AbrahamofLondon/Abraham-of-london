@@ -50,6 +50,7 @@ import {
 import StaleCaseAlert from "@/components/product/StaleCaseAlert";
 import { detectStaleCases } from "@/lib/product/stale-governed-case-detector";
 import DecisionCentreChecklist from "@/components/onboarding/DecisionCentreChecklist";
+import TrialExpiredCaseSelection from "@/components/product/TrialExpiredCaseSelection";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -184,6 +185,9 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
           </p>
           <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}77`, marginTop: "6px" }}>
             Suggested: {c.completionRisk.suggestedIntervention.replace(/_/g, " ")}
+          </p>
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+            Basis: {c.completionRisk.evidenceBasis.replace(/_/g, " ").toLowerCase()}
           </p>
         </div>
       )}
@@ -885,6 +889,25 @@ export default function DecisionCentrePage() {
           {/* Onboarding checklist — shown when user has no cases yet */}
           {!loading && !authRequired && (
             <DecisionCentreChecklist hasExistingCases={!!(data && data.cases.length > 0)} />
+          )}
+
+          {!loading && !authRequired && data?.trial?.status === "EXPIRED" && data.trial.expiryResolution && data.trial.expiryResolution.cases.length > 0 && (
+            <TrialExpiredCaseSelection
+              state={data.trial.expiryResolution}
+              onResolved={(state) => {
+                setData((current) => current
+                  ? {
+                      ...current,
+                      trial: current.trial
+                        ? {
+                            ...current.trial,
+                            expiryResolution: state,
+                          }
+                        : current.trial,
+                    }
+                  : current);
+              }}
+            />
           )}
 
           {/* Empty state */}

@@ -16,6 +16,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { trackCommercialEvent } from "@/lib/product/commercial-analytics";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -70,12 +71,12 @@ const ACTION_CONFIG: Record<UpgradeAction, ActionConfig> = {
   access_advanced_benchmark: {
     title: "Advanced benchmark context",
     body: "Accessing advanced benchmark comparisons is a Professional intelligence feature. Basic benchmark context remains available on the free tier. Upgrade only if you need deeper comparative analysis.",
-    professionalFeature: "Advanced chain-of-custody timeline",
+    professionalFeature: "Advanced benchmark context",
   },
   create_api_key: {
     title: "API key creation",
-    body: "Creating API keys is a Professional integration feature. Your existing integrations continue to work. Upgrade only if you need to create new API keys for automated access.",
-    professionalFeature: "Organisation workspace",
+    body: "Self-serve API key creation is currently available only through Professional / Enterprise pilot access.",
+    professionalFeature: "Professional / Enterprise API pilot access",
   },
 };
 
@@ -97,6 +98,10 @@ export default function ContextualUpgradePrompt({
   const [trialState, setTrialState] = React.useState<"idle" | "starting" | "started" | "error">("idle");
   const [trialError, setTrialError] = React.useState("");
 
+  React.useEffect(() => {
+    trackCommercialEvent("upgrade_prompt_seen", "contextual_upgrade_prompt", { actionType: action });
+  }, [action]);
+
   async function handleStartTrial() {
     setTrialState("starting");
     setTrialError("");
@@ -105,6 +110,7 @@ export default function ContextualUpgradePrompt({
       const data = await response.json() as { ok: boolean; reason?: string };
       if (data.ok) {
         setTrialState("started");
+        trackCommercialEvent("trial_started", "contextual_upgrade_prompt", { actionType: action });
         onTrialStarted?.();
       } else {
         setTrialState("error");
@@ -251,6 +257,7 @@ export default function ContextualUpgradePrompt({
 
           <Link
             href="/pricing"
+            onClick={() => trackCommercialEvent("pricing_viewed_from_prompt", "contextual_upgrade_prompt", { actionType: action })}
             style={{
               ...mono,
               fontSize: "7.5px",
@@ -269,7 +276,10 @@ export default function ContextualUpgradePrompt({
 
           <button
             type="button"
-            onClick={onDismiss}
+            onClick={() => {
+              trackCommercialEvent("trial_declined", "contextual_upgrade_prompt", { actionType: action });
+              onDismiss();
+            }}
             style={{
               ...mono,
               fontSize: "7.5px",

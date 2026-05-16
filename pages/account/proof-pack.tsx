@@ -12,6 +12,7 @@ import { resolvePageAccess } from "@/lib/access/server";
 import type { OutcomeVerificationContext } from "@/lib/product/outcome-verification-contract";
 import { generateProofPack, type ProofPack } from "@/lib/product/proof-pack-generator";
 import { loadOutcomeVerificationContext } from "@/lib/product/outcome-verification-service";
+import ContextualUpgradePrompt from "@/components/product/ContextualUpgradePrompt";
 
 type Props = {
   authenticated: boolean;
@@ -23,6 +24,7 @@ type Props = {
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
 const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, outcomeToken }) => {
+  const [showUpgradePrompt, setShowUpgradePrompt] = React.useState(false);
   React.useEffect(() => {
     trackLaunch("proof_pack_viewed", "proof_pack");
   }, [authenticated, pack]);
@@ -187,27 +189,31 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
                 </p>
                 <button
                   className="mt-4 border border-amber-500/30 bg-amber-500/10 px-5 py-2 text-sm text-amber-200 transition-colors hover:bg-amber-500/20"
-                  onClick={() => {
-                    fetch("/api/pdf/proof-pack", {
+                  onClick={async () => {
+                    try {
+                      const response = await fetch("/api/pdf/proof-pack", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ email: pack.ownerEmail }),
-                    })
-                      .then((r) => {
-                        if (!r.ok) throw new Error("PDF generation failed");
-                        return r.blob();
-                      })
-                      .then((blob) => {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = `proof-pack-${pack.ownerEmail.replace(/[^a-zA-Z0-9]/g, "-")}.pdf`;
-                        a.click();
-                        URL.revokeObjectURL(url);
-                      })
-                      .catch(() => {
-                        alert("PDF generation failed. Admin access may be required.");
                       });
+                      if (response.status === 403) {
+                        const data = await response.json().catch(() => ({})) as { code?: string };
+                        if (data.code === "PROFESSIONAL_REQUIRED") {
+                          setShowUpgradePrompt(true);
+                          return;
+                        }
+                      }
+                      if (!response.ok) throw new Error("PDF generation failed");
+                      const blob = await response.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `proof-pack-${pack.ownerEmail.replace(/[^a-zA-Z0-9]/g, "-")}.pdf`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    } catch {
+                      alert("PDF generation failed. Please try again.");
+                    }
                   }}
                 >
                   Download PDF
@@ -235,6 +241,12 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
           )}
         </div>
       </main>
+      {showUpgradePrompt && (
+        <ContextualUpgradePrompt
+          action="export_evidence"
+          onDismiss={() => setShowUpgradePrompt(false)}
+        />
+      )}
     </Layout>
   );
 };

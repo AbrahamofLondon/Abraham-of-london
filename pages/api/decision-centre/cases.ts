@@ -63,6 +63,8 @@ import { buildCrossAssessmentIntelligence } from "@/lib/analytics/cross-assessme
 import { buildContradictionMapView } from "@/lib/analytics/contradiction-graph-presenter";
 import type { IntelligenceDataQuality, IntelligenceScope } from "@/lib/product/intelligence-contract";
 import { createFieldProvenance } from "@/lib/product/field-provenance-contract";
+import { getTrialInfo } from "@/lib/product/professional-trial";
+import { getExpiredTrialResolutionState } from "@/lib/product/trial-expiry-service";
 
 function parseMoney(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -698,6 +700,10 @@ export default async function handler(
     }
 
     const email = identity.email;
+    const [trial, expiryResolution] = await Promise.all([
+      getTrialInfo(email),
+      getExpiredTrialResolutionState(email),
+    ]);
 
     // ── Derive Living Case (server-authoritative) ──
     const livingCase = await deriveLivingCase({ email });
@@ -728,6 +734,10 @@ export default async function handler(
           recentResponses: [],
         },
         commercial: { ownedProducts: [], eligibleProducts: [], restrictedProducts: [] },
+        trial: {
+          ...trial,
+          expiryResolution,
+        },
         credit: null,
       } satisfies DecisionCentreResponse);
     }
@@ -1290,6 +1300,10 @@ export default async function handler(
         ownedProducts: owned,
         eligibleProducts: eligible,
         restrictedProducts: restricted,
+      },
+      trial: {
+        ...trial,
+        expiryResolution,
       },
       credit,
     } as any);

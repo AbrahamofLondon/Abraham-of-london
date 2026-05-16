@@ -426,7 +426,8 @@ export default function PricingPage() {
               }}
             >
               Anonymous, session-based. No signup. The governed finding is produced
-              immediately. Results are not stored unless you create a free account.
+              immediately. Create a free account to keep up to 3 active governed cases.
+              Existing records remain readable even when cases later move out of active governance.
             </p>
             <div
               style={{
@@ -530,7 +531,9 @@ export default function PricingPage() {
                 maxWidth: "500px",
               }}
             >
-              Monthly or annual. Cancel anytime. No lock-in.
+              7-day trial available. Professional unlocks more active cases, Return Brief
+              generation, client-safe evidence export, and organisation workspace.
+              Existing records always remain readable.
             </p>
 
             <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>

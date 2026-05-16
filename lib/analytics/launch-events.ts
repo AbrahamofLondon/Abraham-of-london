@@ -46,7 +46,17 @@ export type LaunchEventName =
   | "diagnostic_completed"
   | "save_case_prompt_seen"
   | "account_created_from_save"
-  | "provenance_demo_verified";
+  | "provenance_demo_verified"
+  // ── Commercial instrumentation ──
+  | "upgrade_prompt_seen"
+  | "trial_started"
+  | "trial_expired"
+  | "trial_converted"
+  | "trial_declined"
+  | "free_limit_reached"
+  | "case_archived_after_trial"
+  | "professional_upgrade_clicked"
+  | "pricing_viewed_from_prompt";
 
 // ─── Event payload ──────────────────────────────────────────────────────────
 
@@ -62,6 +72,7 @@ export interface LaunchEventPayload {
   sourceSurface?: string | null;
   productCode?: string | null;
   route?: string | null;
+  actionType?: string | null;
   timestamp: string;
   userEmailHash?: string | null;
 }
