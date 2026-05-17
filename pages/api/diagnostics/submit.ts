@@ -334,6 +334,21 @@ export default async function handler(
   const diagnosticRef = generateDiagnosticRef(payload.kind);
 
   const actor = await resolveActorContext(req);
+
+  // For authenticated users, require current terms acceptance before persisting
+  // a governed case. Degrades gracefully — infrastructure failures do not block.
+  if (actor.authenticated && actor.userId) {
+    try {
+      const { needsAcceptance } = await import("@/lib/server/terms-acceptance");
+      const needsTerms = await needsAcceptance(actor.userId, "TERMS");
+      if (needsTerms) {
+        return res.status(403).json({ ok: false, error: "TERMS_REQUIRED" });
+      }
+    } catch {
+      // Non-fatal: proceed on infrastructure failure
+    }
+  }
+
   const dashboardHref = getDashboardHrefForTier(actor.tier);
   const nextStepHref = getNextStepHref(payload.kind);
 

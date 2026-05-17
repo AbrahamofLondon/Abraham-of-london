@@ -136,6 +136,9 @@ export default function FeedbackWidget({ surface, subjectId }: Props) {
               lineHeight: 1.6,
             }}
           />
+          <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.18)", marginTop: "5px", lineHeight: 1.6 }}>
+            Do not include confidential, legal, personal, or client-identifying information.
+          </p>
           <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
             <button
               type="submit"

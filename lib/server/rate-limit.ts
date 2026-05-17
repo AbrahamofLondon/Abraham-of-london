@@ -118,6 +118,11 @@ export async function checkRateLimit(input: {
     };
   }
 
+  // Opportunistic cleanup: fire-and-forget, ~1% of requests
+  if (Math.random() < 0.01) {
+    void pruneExpiredRateLimitEvents();
+  }
+
   const allowed = count <= effectiveLimit;
 
   return {
@@ -128,6 +133,27 @@ export async function checkRateLimit(input: {
     remaining: Math.max(effectiveLimit - count, 0),
     resetAt: resetAt.toISOString(),
   };
+}
+
+// ─── Cleanup (opportunistic + cron-safe) ─────────────────────────────────────
+
+/**
+ * Delete all rate_limit_events rows where the window has expired.
+ * Window expiry = windowStart + windowSeconds seconds.
+ * Safe to call concurrently; uses a single bulk DELETE.
+ * Returns the number of rows deleted.
+ */
+export async function pruneExpiredRateLimitEvents(): Promise<number> {
+  try {
+    const result = await prisma.$executeRaw`
+      DELETE FROM rate_limit_events
+      WHERE "windowStart" + ("windowSeconds" * INTERVAL '1 second') < NOW()
+    `;
+    return result;
+  } catch (err) {
+    console.error("[rate-limit] prune failed", err);
+    return 0;
+  }
 }
 
 // ─── Standard response headers ────────────────────────────────────────────────
