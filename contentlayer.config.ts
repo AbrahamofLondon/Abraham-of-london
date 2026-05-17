@@ -259,6 +259,7 @@ const seoFields = {
 const baseFields = {
   title: { type: "string", required: false },
   subtitle: { type: "string", required: false },
+  summary: { type: "string", required: false },
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
   slug: { type: "string", required: false },
@@ -271,8 +272,10 @@ const baseFields = {
   status: { type: "string", required: false },
   aliases: { type: "list", of: { type: "string" }, required: false },
   docKind: { type: "string", required: false },
+  type: { type: "string", required: false },
   layout: { type: "string", required: false },
   density: { type: "string", required: false },
+  section: { type: "string", required: false },
   author: { type: "string", required: false },
   authorTitle: { type: "string", required: false },
   authorNote: { type: "string", required: false },
@@ -285,11 +288,19 @@ const baseFields = {
   coverPosition: { type: "string", required: false },
   socialCaption: { type: "string", required: false },
   readTime: { type: "string", required: false },
+
+  // Access metadata. Keep both legacy and newer frontmatter keys supported.
+  access: {
+    type: "enum",
+    options: ["public", "member", "restricted", "paid"],
+    required: false,
+  },
   accessLevel: { type: "string", required: false },
+  accessTier: { type: "string", required: false },
   requiresAuth: { type: "boolean", required: false, default: false },
   tier: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
-  accessTier: { type: "string", required: false },
+
   resources: { type: "json", required: false },
   downloads: { type: "json", required: false },
   relatedDownloads: { type: "list", of: { type: "string" }, required: false },
@@ -301,6 +312,7 @@ const baseFields = {
   contentOnly: { type: "boolean", required: false, default: false },
   version: { type: "string", required: false },
   institutionalId: { type: "string", required: false },
+
   ...seoFields,
   ...decisionMetadataFields,
 } as const;
@@ -536,6 +548,16 @@ const Intelligence = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
+
+    // Collection/index metadata used by content/intelligence/index.mdx
+    summary: { type: "string", required: false },
+    access: {
+      type: "enum",
+      options: ["public", "member", "restricted", "paid"],
+      required: false,
+    },
+    section: { type: "string", required: false },
+
     series: { type: "string", required: false },
     seriesOrder: { type: "number", required: false },
     classification: {
