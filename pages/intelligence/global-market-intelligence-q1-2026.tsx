@@ -29,7 +29,6 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTES
@@ -161,10 +160,10 @@ const EDITIONS = [
   },
   {
     eyebrow: "Institutional Edition",
-    title:   "Full intelligence briefing",
-    body:    `The ${getProductDisplayPrice("gmi_q1_2026")} decision-support intelligence brief for operators navigating structural fragmentation. Full country analysis, scenarios, board actions, and case evidence.`,
+    title:   "Archived intelligence briefing",
+    body:    "The Q1 2026 institutional edition is retained as an archive reference. It is not currently offered as a live paid unlock.",
     href:    ROUTES.institutionalEdition,
-    cta:     "Unlock decision brief",
+    cta:     "View archive reference",
     icon:    Lock,
     primary: false,
     gold:    true,
@@ -348,7 +347,7 @@ function HeroSection() {
                 onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}45`; el.style.backgroundColor = `${GOLD}0E`; }}
               >
                 <Lock style={{ width: "12px", height: "12px" }} />
-                Unlock decision brief — {getProductDisplayPrice("gmi_q1_2026")}
+                View archive reference
               </Link>
 
               <Link href={ROUTES.boardDeck}
@@ -788,7 +787,7 @@ function DecisionUseSection() {
               color: "rgba(255,255,255,0.58)",
               maxWidth: "48ch",
             }}>
-              Free = tension. Paid = resolution. The institutional brief converts the market condition into board-level operating moves.
+              The public brief remains available as a current reference surface. The institutional edition is retained as an archive reference rather than a live paid unlock.
             </p>
             <Link href={ROUTES.institutionalEdition}
               className="mt-8 inline-flex items-center gap-3 transition-all duration-300"
@@ -804,7 +803,7 @@ function DecisionUseSection() {
               }}
             >
               <Lock style={{ width: "12px", height: "12px" }} />
-              Unlock decision advantage — {getProductDisplayPrice("gmi_q1_2026")}
+              View archive reference
             </Link>
           </motion.div>
 

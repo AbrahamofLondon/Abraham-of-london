@@ -89,7 +89,7 @@ function GovernedPlaybookCard({ title, price, time, href, description }: { title
       </div>
       <p className="mt-1.5 text-xs text-white/40">{description}</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Governed playbook</span>
+        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Controlled release</span>
         <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)" }}>{time}</span>
         <span style={{ ...mono, fontSize: "7px", color: "rgba(110,231,183,0.40)" }}>Checkpoint eligible</span>
         <span style={{ ...mono, fontSize: "7px", color: "rgba(110,231,183,0.40)" }}>Writes to memory</span>

@@ -40,6 +40,17 @@ export type CommercialStatus =
   | "retired"
   | "internal_only";
 
+export type PricingFamily =
+  | "free_entry"
+  | "professional_subscription"
+  | "governed_instruments"
+  | "governance_playbooks"
+  | "executive_reporting"
+  | "strategy_room"
+  | "intelligence_reports"
+  | "enterprise_retainer"
+  | "inactive_archive";
+
 export type CatalogProduct = {
   code: string;
   displayName: string;
@@ -71,6 +82,9 @@ export type CatalogProduct = {
   requiresCheckout?: boolean;
   requiresContract?: boolean;
   futurePaidCandidate?: boolean;
+  hiddenFromPricing?: boolean;
+  hiddenReason?: string;
+  pricingFamily?: PricingFamily;
   // Delivery specs (decision instruments)
   deliveryFormat?: "interactive_instrument" | "pdf_dossier" | "combined" | "bundle" | "governed_methodology_run";
   estimatedCompletionMinutes?: number;
@@ -445,13 +459,14 @@ export const CATALOG: Record<string, CatalogProduct> = {
     accessType: "one_time" as AccessType,
     duration: "lifetime" as Duration,
     active: true,
-    commercialStatus: "paid" as CommercialStatus,
+    commercialStatus: "manual_billing" as CommercialStatus,
     successPath: "/playbooks/execution-integrity-protocol/run",
     cancelPath: "/playbooks",
     cookieName: "aol_paid_execution_integrity_protocol",
     requiresCheckout: false,
     includes: [],
-    shortDescription: "Restore execution discipline without rewriting strategy. A diagnostic and correction framework for teams that keep missing the finish line.",
+    shortDescription: "Restore execution discipline without rewriting strategy. Controlled-release governed methodology run; request access while self-serve checkout is not enabled.",
+    primaryCta: "Request access",
     deliveryFormat: "governed_methodology_run",
     estimatedCompletionMinutes: 15,
     writesToDecisionMemory: true,
@@ -472,13 +487,14 @@ export const CATALOG: Record<string, CatalogProduct> = {
     accessType: "one_time" as AccessType,
     duration: "lifetime" as Duration,
     active: true,
-    commercialStatus: "paid" as CommercialStatus,
+    commercialStatus: "manual_billing" as CommercialStatus,
     successPath: "/playbooks/the-alignment-audit-playbook/run",
     cancelPath: "/playbooks",
     cookieName: "aol_paid_alignment_audit_playbook",
     requiresCheckout: false,
     includes: [],
-    shortDescription: "Diagnose organisational misalignment before intervention. Surfaces where stated intent has diverged from operational reality.",
+    shortDescription: "Diagnose organisational misalignment before intervention. Controlled-release governed methodology run; request access while self-serve checkout is not enabled.",
+    primaryCta: "Request access",
     deliveryFormat: "governed_methodology_run",
     estimatedCompletionMinutes: 20,
     writesToDecisionMemory: true,
@@ -499,13 +515,14 @@ export const CATALOG: Record<string, CatalogProduct> = {
     accessType: "one_time" as AccessType,
     duration: "lifetime" as Duration,
     active: true,
-    commercialStatus: "paid" as CommercialStatus,
+    commercialStatus: "manual_billing" as CommercialStatus,
     successPath: "/playbooks/the-drift-detection-framework/run",
     cancelPath: "/playbooks",
     cookieName: "aol_paid_drift_detection_framework",
     requiresCheckout: false,
     includes: [],
-    shortDescription: "Identify silent organisational decay before it becomes structural failure. A continuous early-warning system for leaders.",
+    shortDescription: "Identify silent organisational decay before it becomes structural failure. Controlled-release governed methodology run; request access while self-serve checkout is not enabled.",
+    primaryCta: "Request access",
     deliveryFormat: "governed_methodology_run",
     estimatedCompletionMinutes: 12,
     writesToDecisionMemory: true,
@@ -645,6 +662,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     duration: "lifetime",
     active: true,
     commercialStatus: "free_controlled",
+    hiddenFromPricing: true,
+    hiddenReason: "free_evidence_dossier",
     successPath: "/evidence/tariff-shock-growth-break",
     cancelPath: "/evidence",
     cookieName: null,
@@ -665,6 +684,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     duration: "lifetime",
     active: true,
     commercialStatus: "free_controlled",
+    hiddenFromPricing: true,
+    hiddenReason: "free_evidence_dossier",
     successPath: "/evidence/team-alignment-illusion",
     cancelPath: "/evidence",
     cookieName: null,
@@ -685,6 +706,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     duration: "lifetime",
     active: true,
     commercialStatus: "free_controlled",
+    hiddenFromPricing: true,
+    hiddenReason: "free_evidence_dossier",
     successPath: "/evidence/escalation-denied-case",
     cancelPath: "/evidence",
     cookieName: null,
@@ -707,6 +730,9 @@ export const CATALOG: Record<string, CatalogProduct> = {
     duration: "lifetime",
     active: false,
     commercialStatus: "inactive",
+    requiresCheckout: false,
+    hiddenFromPricing: true,
+    hiddenReason: "stale_report_archive",
     successPath: "/artifacts/global-market-intelligence-report-q1-2026",
     cancelPath: "/artifacts/global-market-intelligence-report-q1-2026",
     cookieName: null,
@@ -720,8 +746,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Executive Reporting",
     amount: 29500,
     displayPrice: "\u00a3295",
-    stripeProductId: "prod_SQGrT5cFHJ3MFH",
-    stripePriceId: "price_1TP22XQFpelVFMXJ4IWRIaqb",
+    stripeProductId: "prod_UWxIps4rApNxcx",
+    stripePriceId: "price_1TXtNlQFpelVFMXJtn73BFTl",
     entitlementSlug: "assessment.executive_reporting",
     tier: "one-time-executive-reporting",
     category: "reporting",
@@ -781,8 +807,8 @@ export const CATALOG: Record<string, CatalogProduct> = {
     displayName: "Executive Reporting \u2014 Advanced",
     amount: 29500,
     displayPrice: "\u00a3295",
-    stripeProductId: "prod_SQGrT5cFHJ3MFH",
-    stripePriceId: "price_1TP22XQFpelVFMXJ4IWRIaqb",
+    stripeProductId: "prod_UWxIps4rApNxcx",
+    stripePriceId: "price_1TXtNlQFpelVFMXJtn73BFTl",
     entitlementSlug: "executive-reporting-priority",
     tier: "one-time-reporting-priority",
     category: "reporting_premium",
@@ -958,9 +984,9 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/pricing",
     cookieName: null,
     includes: [],
-    shortDescription: "Unlimited active governed cases, Return Brief generation, client-safe evidence export, client-safe case sharing for reviewers and auditors, and organisation workspace.",
-    userPromise: "Keep governing new active cases without limits. Unlock Return Brief generation, client-safe evidence export, client-safe reviewer links, and organisation collaboration.",
-    pricingNote: "Professional tier — pricing to be confirmed during controlled market entry.",
+    shortDescription: "The continuity layer: unlimited active governed cases, Return Brief generation, client-safe evidence export, client-safe reviewer links, and organisation workspace.",
+    userPromise: "Preserve continuity across governed cases. Keep new active cases moving and unlock Return Brief generation, client-safe evidence export, reviewer links, and organisation collaboration.",
+    pricingNote: "Professional is the continuity layer for ongoing governed case work.",
     primaryCta: "Upgrade to Professional",
     upgradePath: [],
   },
@@ -982,10 +1008,10 @@ export const CATALOG: Record<string, CatalogProduct> = {
     accessType: "subscription",
     duration: "annual",
     active: true,
-    commercialStatus: "manual_billing",
-    requiresCheckout: false,
+    commercialStatus: "paid",
+    requiresCheckout: true,
     requiresContract: false,
-    futurePaidCandidate: true,
+    futurePaidCandidate: false,
     successPath: "/decision-centre",
     cancelPath: "/pricing",
     cookieName: null,
@@ -1018,14 +1044,14 @@ export const CATALOG: Record<string, CatalogProduct> = {
     requiresCheckout: false,
     requiresContract: true,
     futurePaidCandidate: true,
-    successPath: "/decision-centre",
+    successPath: "/contact",
     cancelPath: "/pricing",
     cookieName: null,
     includes: [],
     shortDescription: "Annual custom plan for organisations. Includes organisation workspace, seat management, and dedicated support.",
     userPromise: "Enterprise-grade governed decision infrastructure. Annual custom plan with organisation workspace, seat management, and dedicated support.",
     pricingNote: "Enterprise — annual / custom pricing. Contact for details.",
-    primaryCta: "Contact for Enterprise pricing",
+    primaryCta: "Request Enterprise access",
     upgradePath: [],
   },
 
@@ -1046,7 +1072,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     accessType: "subscription",
     duration: "monthly",
     active: true,
-    commercialStatus: "free_controlled",
+    commercialStatus: "manual_billing",
     requiresCheckout: false,
     requiresContract: false,
     futurePaidCandidate: true,
@@ -1056,7 +1082,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     includes: [],
     shortDescription: "Additional collaborator support for Professional organisation workspace.",
     userPromise: "Add collaborators as your governed case load grows. Additional collaborator billing is currently handled manually.",
-    pricingNote: "Additional collaborators currently require plan upgrade or billing contact until automated seat billing is enabled.",
+    pricingNote: "Additional collaborators: £15/month each after included seats. Added through account billing support until automated seat billing is enabled.",
     primaryCta: "Add collaborator seat",
     upgradePath: [],
   },
@@ -1114,6 +1140,62 @@ export function getProductByEntitlementSlug(slug: string): CatalogProduct | null
   return getAllProducts().find((p) => p.entitlementSlug === slug) ?? null;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Pricing Family — canonical membership for the /pricing page
+// Every active, non-hidden product must appear here.
+// Inactive products are mapped to inactive_archive for completeness.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const PRICING_FAMILIES: Record<string, PricingFamily> = {
+  // Free entry
+  fast_diagnostic: "free_entry",
+  // Professional subscription
+  professional: "professional_subscription",
+  professional_annual: "professional_subscription",
+  additional_collaborator: "professional_subscription",
+  // Governed instruments (paid one-time decision tools + bundle)
+  personal_decision_audit: "governed_instruments",
+  decision_exposure_instrument: "governed_instruments",
+  mandate_clarity_framework: "governed_instruments",
+  intervention_path_selector: "governed_instruments",
+  escalation_readiness_scorecard: "governed_instruments",
+  structural_failure_diagnostic_canvas: "governed_instruments",
+  execution_risk_index: "governed_instruments",
+  team_alignment_gap_map: "governed_instruments",
+  governance_drift_detector: "governed_instruments",
+  strategic_priority_stack_builder: "governed_instruments",
+  board_brief_builder: "governed_instruments",
+  operator_decision_pack: "governed_instruments",
+  // Governance playbooks (manual billing, request access)
+  execution_integrity_protocol: "governance_playbooks",
+  alignment_audit_playbook: "governance_playbooks",
+  drift_detection_framework: "governance_playbooks",
+  // Executive reporting
+  executive_reporting: "executive_reporting",
+  // Strategy Room
+  strategy_room: "strategy_room",
+  strategy_room_extended: "strategy_room",
+  // Intelligence reports (none currently active — gmi_q1_2026 is inactive_archive)
+  gmi_q1_2026: "inactive_archive",
+  // Enterprise retainer
+  enterprise: "enterprise_retainer",
+  retainer_core: "enterprise_retainer",
+  retainer_operational: "enterprise_retainer",
+  retainer_institutional: "enterprise_retainer",
+  // Inactive archive — products not publicly priced
+  operator_essentials_pack: "inactive_archive",
+  command_pack: "inactive_archive",
+  governance_suite: "inactive_archive",
+  diagnostic_report_basic: "inactive_archive",
+  diagnostic_report_pro: "inactive_archive",
+  executive_reporting_priority: "inactive_archive",
+  inner_circle: "inactive_archive",
+};
+
+export function getProductPricingFamily(code: string): PricingFamily | null {
+  return PRICING_FAMILIES[code] ?? null;
+}
+
 export function isValidProductCode(code: string): boolean {
   return code in CATALOG;
 }
@@ -1159,9 +1241,27 @@ export type CheckoutEligibility =
 export function checkCheckoutEligibility(code: string): CheckoutEligibility {
   const product = getProduct(code);
   if (!product) return { eligible: false, reason: "UNKNOWN_PRODUCT" };
-  if (!product.active) return { eligible: false, reason: "PRODUCT_INACTIVE" };
-  if (product.accessType === "free") return { eligible: false, reason: "FREE_PRODUCT_NOT_PURCHASABLE" };
-  if (product.amount <= 0) return { eligible: false, reason: "ZERO_AMOUNT" };
+  if (!product.active || product.commercialStatus === "inactive" || product.commercialStatus === "retired") {
+    return { eligible: false, reason: "PRODUCT_INACTIVE" };
+  }
+  if (product.commercialStatus === "contracted") {
+    return { eligible: false, reason: "PRODUCT_CONTRACTED" };
+  }
+  if (product.commercialStatus === "manual_billing") {
+    return { eligible: false, reason: "MANUAL_BILLING_REQUIRED" };
+  }
+  if (product.requiresCheckout !== true) {
+    return { eligible: false, reason: "CHECKOUT_NOT_AVAILABLE" };
+  }
+  if (!product.stripePriceId) {
+    return { eligible: false, reason: "STRIPE_PRICE_MISSING" };
+  }
+  if (product.commercialStatus !== "paid") {
+    return { eligible: false, reason: "INVALID_PRODUCT_STATE" };
+  }
+  if (product.amount <= 0 || product.accessType === "free") {
+    return { eligible: false, reason: "INVALID_PRODUCT_STATE" };
+  }
   return { eligible: true, product };
 }
 
@@ -1183,11 +1283,11 @@ export function resolveProductCode(codeOrSlug: string): CatalogProduct | null {
 
 export type CatalogIntegrityError = { code: string; message: string };
 
-/** Assert all active products have Stripe price IDs. */
+/** Assert all active self-serve checkout products have Stripe price IDs. */
 export function assertActiveProductsHavePriceIds(): CatalogIntegrityError[] {
   return getActiveProducts()
-    .filter((p) => p.amount > 0 && !p.stripePriceId)
-    .map((p) => ({ code: p.code, message: `Active paid product "${p.code}" has no stripePriceId` }));
+    .filter((p) => p.commercialStatus === "paid" && p.requiresCheckout === true && !p.stripePriceId)
+    .map((p) => ({ code: p.code, message: `Active checkout product "${p.code}" has no stripePriceId` }));
 }
 
 /** Assert no duplicate product codes exist. */
@@ -1213,7 +1313,8 @@ export function assertNoDeadCheckoutProducts(): CatalogIntegrityError[] {
 export function isCheckoutAvailable(product: CatalogProduct): boolean {
   return Boolean(
     product.active &&
-      product.requiresCheckout !== false &&
+      product.commercialStatus === "paid" &&
+      product.requiresCheckout === true &&
       product.amount > 0 &&
       product.stripePriceId
   );

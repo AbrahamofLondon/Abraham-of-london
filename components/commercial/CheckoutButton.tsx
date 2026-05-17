@@ -67,6 +67,10 @@ export default function CheckoutButton({
           reason === "EMAIL_REQUIRED" ? "A valid email is required."
           : reason === "STRIPE_CHECKOUT_CREATE_FAILED" ? "Pricing could not be resolved. Please try again."
           : reason === "PRODUCT_INACTIVE" || reason === "NOT_FOUND" ? "This product is not currently available."
+          : reason === "PRODUCT_CONTRACTED" ? "This product is available by agreement only."
+          : reason === "MANUAL_BILLING_REQUIRED" ? "This product currently requires assisted billing."
+          : reason === "CHECKOUT_NOT_AVAILABLE" ? "Self-serve checkout is not currently available for this product."
+          : reason === "STRIPE_PRICE_MISSING" || reason === "INVALID_PRODUCT_STATE" ? "This product is not configured for checkout."
           : "Checkout could not be prepared. Please try again."
         );
       }

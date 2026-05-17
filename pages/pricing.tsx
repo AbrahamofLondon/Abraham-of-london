@@ -19,7 +19,9 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import CheckoutButton from "@/components/commercial/CheckoutButton";
 import { CATALOG, type CatalogProduct } from "@/lib/commercial/catalog";
+import { resolvePricingAction } from "@/lib/commercial/pricing-actions";
 import { FEATURES, paidFeatures, retainerFeatures } from "@/lib/product/feature-entitlements";
 import { trackCommercialEvent } from "@/lib/product/commercial-analytics";
 
@@ -147,9 +149,7 @@ function FreePill() {
 }
 
 function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.ReactNode }) {
-  const href = product.active && product.amount > 0
-    ? product.cancelPath   // landing / product page
-    : product.successPath;
+  const action = resolvePricingAction(product);
   return (
     <div
       style={{
@@ -194,6 +194,34 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         </p>
       )}
 
+      {action.type === "request_access" && (
+        <p
+          style={{
+            ...mono,
+            fontSize: "7.5px",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "rgba(253,186,116,0.55)",
+          }}
+        >
+          Controlled release · assisted access
+        </p>
+      )}
+
+      {action.type === "contact_sales" && (
+        <p
+          style={{
+            ...mono,
+            fontSize: "7.5px",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.28)",
+          }}
+        >
+          Contracted access
+        </p>
+      )}
+
       {/* Delivery metadata */}
       {product.estimatedCompletionMinutes && (
         <p
@@ -214,7 +242,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
       {cta ?? (
         product.active && (
           <Link
-            href={href}
+            href={action.href}
             style={{
               ...mono,
               fontSize: "8px",
@@ -228,7 +256,15 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
               paddingBottom: "1px",
             }}
           >
-            {product.amount > 0 ? "View & access →" : "Start free →"}
+            {action.type === "checkout"
+              ? "View & access →"
+              : action.type === "request_access"
+                ? "Request access →"
+                : action.type === "contact_sales"
+                  ? "Discuss access →"
+                  : action.type === "archive_reference_only"
+                    ? "Archive reference →"
+                    : "Start free →"}
           </Link>
         )
       )}
@@ -533,9 +569,10 @@ export default function PricingPage() {
                 maxWidth: "500px",
               }}
             >
-              7-day trial available. Professional unlocks more active cases, Return Brief
-              generation, client-safe evidence export, client-safe case sharing for reviewers
-              and auditors, and organisation workspace.
+              7-day trial available. Professional is the continuity layer: it keeps
+              governed cases active over time and unlocks Return Brief generation,
+              client-safe evidence export, client-safe case sharing for reviewers and
+              auditors, and organisation workspace.
               Existing records always remain readable.
             </p>
 
@@ -563,9 +600,10 @@ export default function PricingPage() {
                   <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
                     {CATALOG.professional.shortDescription}
                   </p>
-                  <Link
-                    href={CATALOG.professional.successPath}
-                    onClick={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
+                  <CheckoutButton
+                    productCode="professional"
+                    originPath="/pricing"
+                    onCheckoutStart={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
                     style={{
                       ...mono,
                       fontSize: "8px",
@@ -577,10 +615,12 @@ export default function PricingPage() {
                       textDecoration: "none",
                       display: "inline-block",
                       alignSelf: "flex-start",
+                      border: "none",
+                      cursor: "pointer",
                     }}
                   >
                     {CATALOG.professional.primaryCta}
-                  </Link>
+                  </CheckoutButton>
                 </div>
               )}
 
@@ -624,9 +664,10 @@ export default function PricingPage() {
                   <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
                     {CATALOG.professional_annual.shortDescription}
                   </p>
-                  <Link
-                    href={CATALOG.professional_annual.successPath}
-                    onClick={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
+                  <CheckoutButton
+                    productCode="professional_annual"
+                    originPath="/pricing"
+                    onCheckoutStart={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
                     style={{
                       ...mono,
                       fontSize: "8px",
@@ -638,10 +679,12 @@ export default function PricingPage() {
                       textDecoration: "none",
                       display: "inline-block",
                       alignSelf: "flex-start",
+                      border: "none",
+                      cursor: "pointer",
                     }}
                   >
                     {CATALOG.professional_annual.primaryCta}
-                  </Link>
+                  </CheckoutButton>
                 </div>
               )}
 
@@ -702,7 +745,7 @@ export default function PricingPage() {
                   Additional collaborators
                 </p>
                 <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
-                  Professional includes 5 seats. Additional collaborators are {CATALOG.additional_collaborator?.displayPrice ?? "£15/month"} per seat. Contact us to add seats.
+                  Additional collaborators: {CATALOG.additional_collaborator?.displayPrice ?? "£15/month"} each after included seats. Added through account billing support until automated seat billing is enabled.
                 </p>
               </div>
             </div>
@@ -826,6 +869,7 @@ export default function PricingPage() {
               >
                 Facilitated decision frameworks. Each run produces a governed
                 commitment record and writes conclusions to Decision Centre.
+                Controlled-release access is assisted while self-serve checkout is not enabled.
               </p>
               <div
                 style={{

@@ -29,7 +29,8 @@ export type FeatureSlug =
   | "strategy_room_extended"
   | "governed_case_detail"
   | "return_brief"
-  | "benchmark_context"
+  | "benchmark_context_basic"
+  | "benchmark_context_advanced"
   | "retainer_oversight"
   | "counsel_review"
   | "boardroom"
@@ -164,17 +165,20 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     slug: "return_brief",
     displayName: "Return Brief",
     description:
-      "Structured case re-engagement document. Generated when inactivity exceeds threshold.",
-    accessLevel: "free",
-    requiredEntitlementSlugs: [],
-    primaryProductCode: null,
-    upgradeHref: "/decision-centre",
-    upgradeLabel: "Access from Decision Centre",
+      "Structured case re-engagement document generation for governed cases that need continuity.",
+    accessLevel: "paid",
+    requiredEntitlementSlugs: [
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      CATALOG.professional!.entitlementSlug,
+    ],
+    primaryProductCode: "professional",
+    upgradeHref: "/pricing",
+    upgradeLabel: "Upgrade to Professional",
   },
 
-  benchmark_context: {
-    slug: "benchmark_context",
-    displayName: "Benchmark Context",
+  benchmark_context_basic: {
+    slug: "benchmark_context_basic",
+    displayName: "Basic Benchmark Context",
     description:
       "Aggregate outcome data from opted-in governed cases. Available at n ≥ 50.",
     accessLevel: "free",
@@ -182,6 +186,21 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     primaryProductCode: null,
     upgradeHref: "/decision-centre",
     upgradeLabel: "Contribute your outcome",
+  },
+
+  benchmark_context_advanced: {
+    slug: "benchmark_context_advanced",
+    displayName: "Advanced Benchmark Context",
+    description:
+      "Advanced benchmark comparisons across opted-in governed cases.",
+    accessLevel: "paid",
+    requiredEntitlementSlugs: [
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      CATALOG.professional!.entitlementSlug,
+    ],
+    primaryProductCode: "professional",
+    upgradeHref: "/pricing",
+    upgradeLabel: "Upgrade to Professional",
   },
 
   retainer_oversight: {

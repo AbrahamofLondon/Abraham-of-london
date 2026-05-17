@@ -20,6 +20,7 @@ import NextStepCTA from "@/components/content/NextStepCTA";
 import DownloadButton from "@/components/premium/DownloadButton";
 import PremiumAssetLaunchButton from "@/components/premium/PremiumAssetLaunchButton";
 import PremiumAssetCard from "@/components/premium/PremiumAssetCard";
+import { resolveByContentId } from "@/lib/commercial/product-identity";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
 import {
@@ -300,6 +301,8 @@ export default function ArtifactDetailPage({
   const formatLabel = getFormatLabel(item);
   const assetType = getAssetType(item);
   const isMarket = isMarketIntelligenceItem(item);
+  const productIdentity = resolveByContentId(item.id);
+  const isInactiveCommercialArchive = productIdentity?.active === false;
 
   const tierLabel = item.metadata?.watermarkRequired
     ? "Traceable distribution"
@@ -517,6 +520,10 @@ export default function ArtifactDetailPage({
                       >
                         {accessState === "HAS_ACCESS" ? "Resume current edition" : "Open current edition"}
                       </PremiumAssetLaunchButton>
+                    ) : isInactiveCommercialArchive ? (
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 text-sm leading-7 text-white/60">
+                        This edition is retained as an archive reference and is not currently offered as a live paid unlock.
+                      </div>
                     ) : (
                       <ArtifactCheckout item={item} />
                     )}

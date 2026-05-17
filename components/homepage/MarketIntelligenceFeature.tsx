@@ -35,9 +35,9 @@ const EDITIONS = [
   {
     icon: Lock,
     tag:  "Institutional Edition",
-    body: "The restricted document for strategic operators. Stronger framing, deeper implications, board-grade decision utility.",
+    body: "Archived institutional edition retained for reference. It is not currently offered as a live paid unlock.",
     href: "/artifacts/global-market-intelligence-report-q1-2026",
-    cta:  "Open institutional edition",
+    cta:  "View archive reference",
     gold: true,
   },
   {
