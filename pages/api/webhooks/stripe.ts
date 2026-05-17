@@ -7,6 +7,18 @@ import { auditLogger } from "@/lib/audit/audit-logger";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
+import { revokeCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
+import { CATALOG } from "@/lib/commercial/catalog";
+
+// Professional subscription price IDs — derived from catalog SSOT.
+// Used to detect cancellation of a Professional subscription without requiring
+// checkout session metadata (which is not present on subscription.deleted events).
+const PROFESSIONAL_PRICE_IDS = new Set([
+  CATALOG.professional?.stripePriceId,
+  CATALOG.professional_annual?.stripePriceId,
+].filter(Boolean) as string[]);
+
+const PROFESSIONAL_ENTITLEMENT_SLUG = CATALOG.professional!.entitlementSlug;
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
@@ -115,7 +127,9 @@ export default async function handler(
         return res.status(400).json({ error: "Missing identity metadata — neither userId nor email available" });
       }
 
+      // Read metadata.tier first (set by modern checkout), then legacy fields.
       const membershipTierRaw =
+        session.metadata?.tier ||
         session.metadata?.membershipTier ||
         session.metadata?.plan ||
         "premium";
@@ -197,6 +211,14 @@ export default async function handler(
       const subscription = event.data.object as Stripe.Subscription;
       const targetCustomerId =
         typeof subscription.customer === "string" ? subscription.customer : null;
+      const subscriptionId = subscription.id;
+      const subscriptionPriceId = subscription.items.data[0]?.price.id ?? null;
+
+      // Determine if this is a Professional subscription by price ID.
+      // subscription.deleted does not carry checkout session metadata, so we
+      // resolve via the known catalog price IDs for professional/professional_annual.
+      const isProfessionalSubscription =
+        subscriptionPriceId != null && PROFESSIONAL_PRICE_IDS.has(subscriptionPriceId);
 
       // Engineering workaround for C3: InnerCircleMember.metadata is `String?`
       // (not `Json?`), so Prisma's JSON `path` filter is unsupported on this
@@ -218,6 +240,7 @@ export default async function handler(
         : null;
 
       if (user) {
+        // 1. Downgrade runtime tier.
         await prisma.innerCircleMember.update({
           where: { id: user.id },
           data: {
@@ -225,14 +248,43 @@ export default async function handler(
             status: "active",
             metadata: JSON.stringify(mergeMetadata(user.metadata, {
               subscriptionCancelledAt: new Date().toISOString(),
+              cancelledSubscriptionId: subscriptionId,
             })),
           },
         });
 
+        // 2. Revoke canonical entitlement.
+        // If price ID confirms Professional, revoke by slug directly.
+        // If price ID is absent/unknown but user holds an active Professional
+        // entitlement (i.e. tier was professional), also revoke — catches
+        // subscription metadata gaps.
+        const shouldRevokeEntitlement =
+          isProfessionalSubscription ||
+          user.tier === "professional" ||
+          user.tier === "inner_circle";
+
+        let entitlementRevoked = false;
+        if (shouldRevokeEntitlement) {
+          const { revoked } = await revokeCanonicalEntitlement({
+            userId: user.id,
+            email: user.email ?? null,
+            slug: PROFESSIONAL_ENTITLEMENT_SLUG,
+            reason: "stripe_subscription_cancelled",
+            stripeSubscriptionId: subscriptionId,
+          });
+          entitlementRevoked = revoked;
+        }
+
         await auditLogger.log({
           action: "membership_revoked_expiry",
           actorId: user.id,
-          details: { customerId: subscription.customer },
+          details: {
+            customerId: subscription.customer,
+            subscriptionId,
+            priceId: subscriptionPriceId,
+            isProfessionalSubscription,
+            entitlementRevoked,
+          },
           severity: "warn",
         });
       }

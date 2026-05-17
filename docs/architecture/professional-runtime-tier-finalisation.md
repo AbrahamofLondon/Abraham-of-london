@@ -1,7 +1,7 @@
 # Professional Runtime Tier Finalisation
 
 **Date:** 2026-05-17  
-**Status:** Implemented  
+**Status:** Implemented (updated 2026-05-17 — subscription cancellation hardening)  
 **Scope:** `lib/access/`, `prisma/schema.prisma`, `pages/api/webhooks/stripe.ts`, `lib/commercial/`
 
 ---
@@ -102,6 +102,62 @@ top_secret (8)
 
 - `lib/access/professional-tier.test.ts` — backward compat + gate logic (37 tests)
 - `lib/commercial/professional-tier-invariants.test.ts` — catalogue invariants (14 tests)
+- `lib/commercial/professional-subscription-lifecycle.test.ts` — lifecycle tests (33 tests)
+
+---
+
+## Professional Access: Two-Part Grant Model
+
+**Both must be granted on successful payment. Both must be revoked on cancellation. Runtime downgrade alone is insufficient.**
+
+### Grant path (`checkout.session.completed`)
+
+1. `InnerCircleMember.tier` is set to `"professional"` via `mapStripeTierToAccessTier(rawTier)`.
+2. `ClientEntitlement` row is created/updated: `productCode = "tier.professional"`, `status = "active"`, `endsAt = null` via `ensureEntitlementAfterPayment`.
+
+Metadata resolution order (most specific first):
+```
+session.metadata.tier          // "professional" from modern checkout
+session.metadata.membershipTier // legacy
+session.metadata.plan           // legacy
+"premium"                       // fallback for very old Stripe sessions
+```
+
+### Revocation path (`customer.subscription.deleted`)
+
+1. `InnerCircleMember.tier` is downgraded to `"member"`.
+2. `revokeCanonicalEntitlement({ slug: "tier.professional", ... })` is called, setting `ClientEntitlement.status = "cancelled"` and `endsAt = now()`.
+
+A subscription is identified as Professional by price ID (derived from `CATALOG.professional.stripePriceId` and `CATALOG.professional_annual.stripePriceId`). Fallback: if the member's current tier is `professional` or `inner_circle`, also revoke — guards against metadata gaps.
+
+### Why runtime downgrade alone is insufficient
+
+`resolveCanonicalEntitlement` reads `ClientEntitlement` rows with `status: "active"` and `endsAt: null OR endsAt > now()`. A cancelled user with `InnerCircleMember.tier = "member"` but an active `ClientEntitlement` row for `tier.professional` would still be granted Professional features by any code that calls `resolveCanonicalEntitlement` without also checking the member's tier field.
+
+### Trial
+
+Professional trial uses `ClientEntitlement.status = "trial"`. `resolveCanonicalEntitlement` queries only `status: "active"` — expired trials are already blocked at the DB query level. `hasProfessionalAccess()` additionally checks `getTrialInfo().status === "ACTIVE"`, which returns `false` once `endsAt` has passed.
+
+---
+
+## Subscription Cancellation Changes (2026-05-17 update)
+
+### `pages/api/webhooks/stripe.ts`
+
+- Added `PROFESSIONAL_PRICE_IDS` set (derived from `CATALOG.professional.stripePriceId` and `CATALOG.professional_annual.stripePriceId`)
+- Added `PROFESSIONAL_ENTITLEMENT_SLUG` constant (`= CATALOG.professional.entitlementSlug`)
+- `customer.subscription.deleted`: now calls `revokeCanonicalEntitlement` after runtime tier downgrade
+- Revocation applies when: price ID matches Professional, OR member's current tier is `professional`/`inner_circle`
+- Audit log includes `priceId`, `isProfessionalSubscription`, `entitlementRevoked`
+
+### `lib/commercial/entitlement-authority.ts`
+
+- Added `revokeCanonicalEntitlement(input)`: exported function
+  - `updateMany` where `email = key`, `productCode = slug`, `status = "active"`
+  - Sets `status = "cancelled"`, `endsAt = now()`
+  - Clears in-memory cache entry
+  - Returns `{ revoked: boolean, count: number }`
+  - Safe on DB failure (logs error, returns `{ revoked: false, count: 0 }`)
 
 ---
 

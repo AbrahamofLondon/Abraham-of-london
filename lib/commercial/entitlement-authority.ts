@@ -354,6 +354,76 @@ export async function grantCanonicalEntitlement(input: {
   return entitlement;
 }
 
+/**
+ * Revokes all active canonical entitlements for the given user+slug.
+ * Sets status="cancelled" and endsAt=now on every matching active ClientEntitlement row.
+ * Preserves the historical record — no rows are deleted.
+ */
+export async function revokeCanonicalEntitlement(input: {
+  userId?: string | null;
+  email?: string | null;
+  slug: string;
+  reason: string;
+  stripeSubscriptionId?: string | null;
+}): Promise<{ revoked: boolean; count: number }> {
+  const slug = normalizeSlug(input.slug);
+  const userId = normalizeUserId(input.userId);
+  const email = normalizeEmail(input.email);
+  const key = canonicalEmailKey({ userId, email });
+
+  if (!slug || !key) {
+    console.warn("[CANONICAL_ENTITLEMENT_REVOKE] Missing slug or identity", {
+      slug,
+      userId,
+      email,
+    });
+    return { revoked: false, count: 0 };
+  }
+
+  const now = new Date();
+
+  try {
+    const result = await prisma.clientEntitlement.updateMany({
+      where: {
+        email: key,
+        productCode: slug,
+        status: "active",
+      },
+      data: {
+        status: "cancelled",
+        endsAt: now,
+      },
+    });
+
+    if (result.count > 0) {
+      console.info("[CANONICAL_ENTITLEMENT_REVOKED]", {
+        key,
+        slug,
+        count: result.count,
+        reason: input.reason,
+        stripeSubscriptionId: input.stripeSubscriptionId ?? null,
+      });
+    } else {
+      console.warn("[CANONICAL_ENTITLEMENT_REVOKE_NOT_FOUND]", {
+        key,
+        slug,
+        reason: input.reason,
+      });
+    }
+
+    canonicalMemory.delete(`${key}:${slug}`);
+    return { revoked: result.count > 0, count: result.count };
+  } catch (error) {
+    console.error("[CANONICAL_ENTITLEMENT_REVOKE_FAILED]", {
+      slug,
+      key,
+      reason: input.reason,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { revoked: false, count: 0 };
+  }
+}
+
 export function resetCanonicalEntitlementsForTests(): void {
   canonicalMemory.clear();
 }
