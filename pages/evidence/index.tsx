@@ -1,5 +1,4 @@
-import * as React from "react";
-import Head from "next/head";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -13,12 +12,12 @@ const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
 const VOID = "rgb(3 3 5)";
 
-const mono: React.CSSProperties = {
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+const mono: CSSProperties = {
+  fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
 };
 
-const serif: React.CSSProperties = {
-  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+const serif: CSSProperties = {
+  fontFamily: "'Cormorant Garamond', Georgia, Cambria, 'Times New Roman', serif",
   fontWeight: 300,
 };
 
@@ -54,7 +53,7 @@ const EVIDENCE = [
 // PRIMITIVES
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+function Eyebrow({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
@@ -70,7 +69,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function EvidencePage() {
-  React.useEffect(() => {
+  useEffect(() => {
     const { trackScrollDepth, trackHesitation, advanceConviction } = require("@/lib/analytics/hesitation");
     const { emitJourneyEvent } = require("@/lib/analytics/journey-client");
     emitJourneyEvent("evidence_viewed", { entryPath: "/evidence" });
@@ -86,10 +85,6 @@ export default function EvidencePage() {
       description="Structured readings of conditions that required decisions. Not opinions. Applied analysis under real conditions."
       canonicalUrl="/evidence"
     >
-      <Head>
-        <meta name="description" content="Case evidence: structured readings of conditions that required decisions. Observed under real conditions." />
-      </Head>
-
       <div style={{ backgroundColor: VOID }}>
 
         {/* ── 1. HERO ─────────────────────────────────────────────────────── */}
@@ -287,6 +282,26 @@ export default function EvidencePage() {
             </div>
           </div>
         </section>
+
+        {/* ── Legal disclaimer ── */}
+        <div className="mx-auto max-w-6xl px-6 lg:px-12">
+          <p
+            className="py-6"
+            style={{
+              ...mono,
+              fontSize: "6.5px",
+              lineHeight: 1.8,
+              letterSpacing: "0.1em",
+              color: "rgba(255,255,255,0.18)",
+            }}
+          >
+            Abraham of London provides governed decision instruments and structured advisory frameworks.
+            Nothing on this page constitutes legal, financial, investment, tax, medical, immigration,
+            accounting, or other regulated professional advice. Access fees, where applicable, are charged
+            for methodology access, software-enabled records, structured outputs, and session facilitation,
+            not for guaranteed outcomes.
+          </p>
+        </div>
 
       </div>
     </Layout>

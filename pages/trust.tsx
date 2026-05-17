@@ -12,9 +12,8 @@
  * at time of writing.
  */
 
-import * as React from "react";
+import type { CSSProperties } from "react";
 import type { NextPage } from "next";
-import Head from "next/head";
 import Link from "next/link";
 import {
   Shield,
@@ -33,11 +32,13 @@ import {
 import Layout from "@/components/Layout";
 
 const GOLD = "#C9A96E";
-const mono: React.CSSProperties = {
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+
+const mono: CSSProperties = {
+  fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
 };
-const serif: React.CSSProperties = {
-  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+
+const serif: CSSProperties = {
+  fontFamily: "'Cormorant Garamond', Georgia, Cambria, 'Times New Roman', serif",
   fontWeight: 300,
 };
 
@@ -79,10 +80,6 @@ const TrustPage: NextPage = () => (
     description="Security posture, data handling, provenance boundary, certifications, sub-processors, responsible disclosure, and your data rights."
     canonicalUrl="/trust"
   >
-    <Head>
-      <meta name="robots" content="index,follow" />
-    </Head>
-
     <main
       className="min-h-screen px-6 py-20"
       style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}
@@ -489,8 +486,25 @@ const TrustPage: NextPage = () => (
               </Link>
             ))}
           </div>
-        </div>
 
+          {/* ── Legal disclaimer ── */}
+          <p
+            className="mt-12 max-w-3xl"
+            style={{
+              ...mono,
+              fontSize: "6.5px",
+              lineHeight: 1.8,
+              letterSpacing: "0.1em",
+              color: "rgba(255,255,255,0.18)",
+            }}
+          >
+            Abraham of London provides governed decision instruments and structured advisory frameworks.
+            Nothing on this page constitutes legal, financial, investment, tax, medical, immigration,
+            accounting, or other regulated professional advice. Access fees, where applicable, are charged
+            for methodology access, software-enabled records, structured outputs, and session facilitation,
+            not for guaranteed outcomes.
+          </p>
+        </div>
       </div>
     </main>
   </Layout>
