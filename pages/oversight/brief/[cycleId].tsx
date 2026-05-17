@@ -20,7 +20,7 @@ import ProvenanceSummaryPanel from "@/components/product/ProvenanceSummaryPanel"
 import ProvenanceBadge from "@/components/product/ProvenanceBadge";
 import {
   convertPurposeAlignmentToGovernedMemory,
-} from "@/lib/alignment/evidence-loader";
+} from "@/lib/alignment/evidence-memory";
 import type { ClientSafeProvenanceSummary } from "@/lib/product/client-safe-provenance-contract";
 
 type ComposerIntelligence = {

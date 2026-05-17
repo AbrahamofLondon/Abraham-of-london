@@ -1,7 +1,6 @@
 "use server";
 // app/actions/deploy-intervention.ts
 
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { evaluateConstitutionalRoute, type ConstitutionInput } from "@/lib/constitution/rules";
 
@@ -38,6 +37,8 @@ export async function deployIntervention(params: DeployInterventionParams) {
   } = params;
 
   try {
+    const { prisma } = await import("@/lib/prisma");
+
     // === Constitutional Gate – Zero or minimal error margin ===
     const constitutionInput: ConstitutionInput = {
       clarityScore,

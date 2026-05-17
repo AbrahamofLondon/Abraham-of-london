@@ -39,10 +39,10 @@ import StrategyRoomConversionBridge from "@/components/strategy-room/StrategyRoo
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import {
   convertPurposeAlignmentToGovernedMemory,
-} from "@/lib/alignment/evidence-loader";
+} from "@/lib/alignment/evidence-memory";
 import {
   convertFinancialExposureToGovernedMemory,
-} from "@/lib/product/financial-exposure-persistence";
+} from "@/lib/product/financial-exposure-memory";
 import DecisionStateBanner from "@/components/strategy-room/DecisionStateBanner";
 import DynamicConsequencePanel from "@/components/strategy-room/DynamicConsequencePanel";
 import EscalationTriggerPanel from "@/components/strategy-room/EscalationTriggerPanel";

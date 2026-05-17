@@ -8,8 +8,8 @@
  */
 
 import * as React from "react";
-import { initiateOAuth } from "@/lib/integrations";
-import type { ProviderType } from "@/lib/integrations";
+import { initiateOAuth } from "@/lib/integrations/client";
+import type { ProviderType } from "@/lib/integrations/client";
 import { formatRelative } from "@/utils/dates";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

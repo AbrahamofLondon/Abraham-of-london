@@ -21,6 +21,7 @@
     "mdx:integrity": "node scripts/mdx-integrity-check.mjs",
     "doctrine:audit": "node scripts/audit-product-doctrine.mjs",
     "surfaces:audit": "node scripts/audit-entry-surfaces.mjs",
+    "boundaries:audit": "node scripts/audit-import-boundaries.mjs",
     "generate:epubs": "tsx scripts/generate-all-epubs.ts",
     "build": "pnpm generate:epubs && next build --webpack",
     "build:ci": "pnpm prebuild:ci && pnpm build",

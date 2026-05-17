@@ -1,12 +1,13 @@
 "use server";
 
-import path from "path";
-import { spawn } from "child_process";
-
 export async function runPdfOpsAction(args: string[] = []) {
   // HARD GATE (you must wire your auth): do not expose to public.
   // Example: if (!session?.user?.isAdmin) throw new Error("Forbidden");
 
+  const [{ default: path }, { spawn }] = await Promise.all([
+    import("path"),
+    import("child_process"),
+  ]);
   const ROOT = process.cwd();
   const tsx = process.platform === "win32"
     ? path.join(ROOT, "node_modules", ".bin", "tsx.cmd")

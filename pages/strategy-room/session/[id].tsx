@@ -19,10 +19,10 @@ import GovernanceEvidenceCarryForward from "@/components/strategy-room/Governanc
 import SignalPressurePanel from "@/components/strategy-room/SignalPressurePanel";
 import {
   convertPurposeAlignmentToGovernedMemory,
-} from "@/lib/alignment/evidence-loader";
+} from "@/lib/alignment/evidence-memory";
 import {
   convertFinancialExposureToGovernedMemory,
-} from "@/lib/product/financial-exposure-persistence";
+} from "@/lib/product/financial-exposure-memory";
 import {
   extractAssessmentEvidenceCapture,
   type AssessmentEvidenceCapture,

@@ -27,8 +27,8 @@ import {
 } from "@/lib/product/governed-memory-presenter";
 import {
   convertPurposeAlignmentToGovernedMemory,
-  type PurposeAlignmentEvidenceCarryForward,
-} from "@/lib/alignment/evidence-loader";
+} from "@/lib/alignment/evidence-memory";
+import type { PurposeAlignmentEvidenceCarryForward } from "@/lib/alignment/evidence-loader";
 import {
   extractAssessmentEvidenceCapture,
   mergeAssessmentEvidenceCapture,

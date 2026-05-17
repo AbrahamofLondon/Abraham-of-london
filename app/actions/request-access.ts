@@ -1,8 +1,5 @@
 'use server';
 
-import { getPrisma } from '@/lib/prisma.server';
-import { sendAccessRequestEmail } from '@/lib/mail';
-
 function normalizeEmail(input: unknown): string {
   return String(input ?? '').trim().toLowerCase();
 }
@@ -28,6 +25,7 @@ export async function requestAccessAction(formData: FormData) {
     throw new Error('Missing resource identifier.');
   }
 
+  const { getPrisma } = await import('@/lib/prisma.server');
   const prisma = getPrisma();
   if (!prisma) {
     throw new Error('Database connection unavailable');
@@ -50,6 +48,7 @@ export async function requestAccessAction(formData: FormData) {
     },
   });
 
+  const { sendAccessRequestEmail } = await import('@/lib/mail');
   const mailResult = await sendAccessRequestEmail({ userEmail: email, assetTitle: title, slug });
 
   if (mailResult?.ok) {

@@ -106,15 +106,20 @@ export async function closeRedis(): Promise<void> {
 }
 
 /**
- * NAMED EXPORT: redis
- * This satisfies the most common import pattern.
+ * Import-safe Redis facade.
+ *
+ * Some legacy callers still import `redis`/`redisClient` directly. A Proxy
+ * preserves that API without constructing a Redis client merely because the
+ * module was traced during a build.
  */
-export const redis = getRedis();
+export const redis = new Proxy({} as Redis, {
+  get(_target, property, receiver) {
+    const client = getRedis();
+    const value = Reflect.get(client, property, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});
 
-/**
- * ALIAS EXPORT: redisClient
- * Specifically added to resolve the "Property does not exist" Type Error in keys.server.ts.
- */
 export const redisClient = redis;
 
 /**

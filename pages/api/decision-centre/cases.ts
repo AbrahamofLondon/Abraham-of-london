@@ -47,8 +47,8 @@ import {
 } from "@/lib/product/governed-memory-presenter";
 import {
   loadPurposeAlignmentEvidence,
-  convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-loader";
+import { convertPurposeAlignmentToGovernedMemory } from "@/lib/alignment/evidence-memory";
 import {
   buildDecisionVelocitySnapshot,
   buildDecisionVelocitySummary,

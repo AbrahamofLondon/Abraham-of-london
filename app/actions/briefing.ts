@@ -1,13 +1,5 @@
 'use server';
 
-import { db } from "@/lib/db";
-import { 
-  generateIntelligenceBrief, 
-  analyzeContagionRisk, 
-  checkProtocolExpiry 
-} from "@/lib/alignment/governance-logic";
-import { revalidatePath } from "next/cache";
-
 // Type definitions
 interface CorrectionNode {
   id: string;
@@ -37,9 +29,16 @@ interface CampaignData {
  */
 export async function generateExecutiveBrief(campaignId: string) {
   try {
+    const { db } = await import("@/lib/db");
+    const {
+      generateIntelligenceBrief,
+      analyzeContagionRisk,
+      checkProtocolExpiry,
+    } = await import("@/lib/alignment/governance-logic");
+
     // Ensure database client is ready
-    const prisma = typeof (db as any)?.getPrismaClient === "function" 
-      ? await (db as any).getPrismaClient() 
+    const prisma = typeof (db as any)?.getPrismaClient === "function"
+      ? await (db as any).getPrismaClient()
       : db;
 
     if (!prisma) throw new Error("Database connection unavailable");

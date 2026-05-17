@@ -1,13 +1,12 @@
 'use server'
 
-import { getDashboardStats, getAllDashboardPDFs } from "@/utils/pdf-stats-converter";
-
 /**
  * This stays 100% on the server. 
  * The browser only receives the raw JSON result.
  */
 export async function fetchInstitutionalStats() {
   try {
+    const { getDashboardStats, getAllDashboardPDFs } = await import("@/utils/pdf-stats-converter");
     const stats = await getDashboardStats();
     const pdfs = await getAllDashboardPDFs();
     

@@ -14,10 +14,10 @@ import Layout from "@/components/Layout";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import {
   convertPurposeAlignmentToGovernedMemory,
-} from "@/lib/alignment/evidence-loader";
+} from "@/lib/alignment/evidence-memory";
 import {
   convertFinancialExposureToGovernedMemory,
-} from "@/lib/product/financial-exposure-persistence";
+} from "@/lib/product/financial-exposure-memory";
 import { resolvePageAccess } from "@/lib/access/server";
 import type { CounselRoomState } from "@/lib/product/counsel-room-contract";
 import { COUNSEL_ACCESS_LABELS } from "@/lib/product/counsel-room-contract";

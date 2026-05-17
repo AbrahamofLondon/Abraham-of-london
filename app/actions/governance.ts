@@ -1,6 +1,5 @@
 "use server";
 
-import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 // ============================================================================
@@ -42,6 +41,7 @@ export type CorrectionNode = {
 // ============================================================================
 
 async function getPrisma() {
+  const { db } = await import("@/lib/db");
   if (typeof (db as any)?.getPrismaClient === "function") {
     return await (db as any).getPrismaClient();
   }

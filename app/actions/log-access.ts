@@ -1,6 +1,5 @@
 "use server";
 
-import { neon } from '@neondatabase/serverless';
 import { headers } from 'next/headers';
 
 /**
@@ -8,6 +7,7 @@ import { headers } from 'next/headers';
  * Ensures the 'access_logs' table exists before insertion.
  */
 export async function logBriefAccess(briefId: string, briefTitle: string) {
+  const { neon } = await import('@neondatabase/serverless');
   const sql = neon(process.env.DATABASE_URL!);
   const headerList = await headers();
   const userAgent = headerList.get('user-agent') || 'unknown';

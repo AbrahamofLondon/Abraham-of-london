@@ -327,46 +327,6 @@ const nextConfig = {
       };
     }
 
-    /**
-     * Server-side chunk discipline.
-     * This helps prevent single grotesque server chunks from ballooning into
-     * 40+ MB monsters. It does not reduce total traced payload if the import
-     * graph is still dragging in the whole empire, but it does stop webpack
-     * from emitting single monolithic chunks quite so eagerly.
-     */
-    if (!dev && isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: "all",
-          minSize: 20 * 1024,
-          maxSize: 10 * MB,
-          enforceSizeThreshold: 8 * MB,
-          minChunks: 1,
-          automaticNameDelimiter: "-",
-          cacheGroups: {
-            default: false,
-            defaultVendors: false,
-
-            framework: {
-              test: /[\\/]node_modules[\\/]/,
-              name: "server-framework",
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-
-            heavyServerVendors: {
-              test: /[\\/]node_modules[\\/](?:@react-pdf[\\/]|pdfkit[\\/]|fontkit[\\/]|canvas[\\/]|sharp[\\/]|@img[\\/]|@prisma[\\/]|\.prisma[\\/]|jsdom[\\/]|contentlayer2[\\/]|next-contentlayer2[\\/])/,
-              name: "server-heavy-vendors",
-              priority: 20,
-              reuseExistingChunk: true,
-              enforce: true,
-            },
-          },
-        },
-      };
-    }
-
     return config;
   },
 };

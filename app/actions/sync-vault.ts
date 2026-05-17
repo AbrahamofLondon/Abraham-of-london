@@ -1,8 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getPrisma } from '@/lib/prisma.server';
-import { getAllPDFItemsNode } from '@/lib/pdf/registry';
 import { normalizeRequiredTier } from '@/lib/access/tier-policy';
 import type { AccessTier as PrismaAccessTier } from '@prisma/client';
 
@@ -30,6 +28,10 @@ const toPrismaAccessTier = (tier: string): PrismaAccessTier => {
 
 export async function syncVaultRegistry() {
   try {
+    const [{ getPrisma }, { getAllPDFItemsNode }] = await Promise.all([
+      import('@/lib/prisma.server'),
+      import('@/lib/pdf/registry'),
+    ]);
     const prisma = getPrisma();
     if (!prisma) throw new Error('Database connection unavailable.');
 

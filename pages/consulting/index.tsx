@@ -41,10 +41,10 @@ import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import {
   convertPurposeAlignmentToGovernedMemory,
-} from "@/lib/alignment/evidence-loader";
+} from "@/lib/alignment/evidence-memory";
 import {
   convertFinancialExposureToGovernedMemory,
-} from "@/lib/product/financial-exposure-persistence";
+} from "@/lib/product/financial-exposure-memory";
 import { resolvePageAccess } from "@/lib/access/server";
 
 // ─────────────────────────────────────────────────────────────────────────────
