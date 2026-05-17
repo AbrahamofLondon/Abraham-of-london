@@ -127,8 +127,8 @@ export default function FreeTierUpgradeModal({
           }}
         >
           You have {activeCaseCount} active case{activeCaseCount !== 1 ? "s" : ""}.
-          Your existing records remain readable. To keep governing new active cases,
-          upgrade to Professional or start a 7-day trial.
+          Your existing records remain readable. Professional preserves continuity
+          beyond the free active-case limit so a new live case can remain active over time.
         </p>
 
         {/* Feature list */}

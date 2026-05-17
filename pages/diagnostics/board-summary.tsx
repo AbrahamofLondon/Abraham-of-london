@@ -201,8 +201,8 @@ export default function BoardSummaryPage() {
                 color: "rgba(255,255,255,0.40)",
                 marginBottom: "12px",
               }}
-            >
-              This summary is generated from available diagnostic evidence in this browser session. It does not create a new governed record; the live case continues in Decision Centre.
+              >
+              This is a board-ready preview generated from available diagnostic evidence. It does not create a new governed record.
             </p>
             <p
               style={{
@@ -283,6 +283,8 @@ export default function BoardSummaryPage() {
             <div data-no-print style={{ marginTop: "20px" }}>
               <SaveCaseConversionPanel
                 payload={buildBoardSummaryCarryForwardPayload(data)}
+                surface="board_summary"
+                evidenceState="strong"
               />
             </div>
           )}
@@ -323,41 +325,6 @@ export default function BoardSummaryPage() {
             }}
           />
           <nav data-no-print style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <Link
-              href="/decision-centre"
-              style={{
-                ...mono,
-                fontSize: "9px",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#C9A96E",
-                textDecoration: "none",
-                fontWeight: 600,
-                border: `1px solid ${GOLD}40`,
-                backgroundColor: `${GOLD}08`,
-                padding: "10px 18px",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                alignSelf: "flex-start",
-              }}
-            >
-              Save / Continue in Decision Centre
-            </Link>
-            <Link
-              href="/diagnostics/executive-reporting"
-              style={{
-                ...mono,
-                fontSize: "8px",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.40)",
-                textDecoration: "none",
-                padding: "6px 0",
-              }}
-            >
-              Review Executive Reporting →
-            </Link>
             <Link
               href="/diagnostics"
               style={{

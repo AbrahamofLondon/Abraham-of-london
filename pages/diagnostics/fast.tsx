@@ -39,6 +39,7 @@ import {
 import AssessmentResultSurface from "@/components/diagnostics/AssessmentResultSurface";
 import { mapFastDiagnosticToAssessmentResult } from "@/lib/diagnostics/assessment-result-mappers";
 import { generateCaseReference } from "@/lib/product/case-reference";
+import { evidenceStateFromAssessmentResult } from "@/lib/product/result-pathway-state";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -313,6 +314,10 @@ const FastDiagnosticPage: NextPage = () => {
   }
 
   const an = result?.anchorNarrative;
+  const mappedFastAssessmentResult = React.useMemo(
+    () => (result ? mapFastDiagnosticToAssessmentResult(result, answers.decision) : null),
+    [answers.decision, result],
+  );
   const fallbackVelocitySummary: DecisionVelocitySummary | null = React.useMemo(() => {
     if (!result) return null;
     return {
@@ -676,8 +681,9 @@ const FastDiagnosticPage: NextPage = () => {
 
               {/* ── Shared AssessmentResultSurface ───────────────────────── */}
               <AssessmentResultSurface
-                result={mapFastDiagnosticToAssessmentResult(result, answers.decision)}
+                result={mappedFastAssessmentResult!}
                 canSave={true}
+                showConversionPanel={false}
                 sendToSelfSlot={
                   <SendToSelfFastDiagnostic
                     condition={result.conditionLabel || result.condition}
@@ -769,6 +775,9 @@ const FastDiagnosticPage: NextPage = () => {
                   result,
                   decisionLabel: answers.decision,
                 })}
+                surface="fast_diagnostic"
+                evidenceState={mappedFastAssessmentResult ? evidenceStateFromAssessmentResult(mappedFastAssessmentResult) : "basic"}
+                earnedRoute={mappedFastAssessmentResult?.earnedRoute}
               />
 
               {/* SECTION 1b: BOARD SUMMARY PREVIEW */}
@@ -911,22 +920,6 @@ const FastDiagnosticPage: NextPage = () => {
                     </div>
                   )}
 
-                  {/* CTAs — Decision Centre (primary) + Board Summary */}
-                  <div style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: `1px solid ${GOLD}18`, display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                    <Link
-                      href="/decision-centre"
-                      style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "12px 24px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: "#F5F5F5", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-                    >
-                      Continue in Decision Centre
-                      <ArrowRight style={{ width: 12, height: 12 }} />
-                    </Link>
-                    <Link
-                      href="/diagnostics/board-summary"
-                      style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "12px 24px", border: `1px solid ${GOLD}28`, backgroundColor: "transparent", color: `${GOLD}BB`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-                    >
-                      Generate Board Summary
-                    </Link>
-                  </div>
                 </div>
               )}
 
@@ -1106,35 +1099,6 @@ const FastDiagnosticPage: NextPage = () => {
                     <ProductRecommendationCard recommendation={rec} variant="dark" />
                   ) : null;
                 })()}
-                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1.25rem" }}>
-                  <Link
-                    href="/decision-centre"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "13px 26px", border: `1px solid ${GOLD}55`, backgroundColor: `${GOLD}12`, color: "#F5F5F5", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-                  >
-                    Open Decision Centre
-                    <ArrowRight style={{ width: 12, height: 12 }} />
-                  </Link>
-                  <Link
-                    href="/diagnostics/board-summary"
-                    style={{ display: "inline-flex", alignItems: "center", padding: "13px 26px", border: `1px solid ${GOLD}28`, backgroundColor: "transparent", color: `${GOLD}BB`, ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-                  >
-                    Board Summary
-                  </Link>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", paddingLeft: "26px" }}>
-                      Evidence-gated escalation
-                    </p>
-                    <Link
-                      href="/strategy-room"
-                      style={{ display: "inline-flex", alignItems: "center", padding: "13px 26px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "rgba(255,255,255,0.36)", ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-                    >
-                      Strategy Room
-                    </Link>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", paddingLeft: "26px" }}>
-                      Strategy Room opens only when the evidence record supports intervention. If this case is not admitted, the room will show the repair path.
-                    </p>
-                  </div>
-                </div>
               </div>
 
               {/* SECTION 7: EVIDENCE & GOVERNANCE — collapsible below the fold */}

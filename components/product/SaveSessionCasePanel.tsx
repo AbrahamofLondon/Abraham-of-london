@@ -93,7 +93,7 @@ export default function SaveSessionCasePanel({
         <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(100,220,140,0.85)" }}>
           Saved as {state.caseRef}
         </p>
-        <Link href={`/decision-centre?caseId=${encodeURIComponent(state.caseRef)}`}
+        <Link href={`/decision-centre/case/${encodeURIComponent(state.caseRef)}`}
           style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}DD`, textDecoration: "none", border: `1px solid ${GOLD}44`, backgroundColor: `${GOLD}0A`, padding: "0.6rem 1rem", marginTop: "0.5rem" }}>
           Open in Decision Centre
         </Link>

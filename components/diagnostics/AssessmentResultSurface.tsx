@@ -16,14 +16,22 @@
  */
 
 import * as React from "react";
-import Link from "next/link";
-
 import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 import { describeEvidencePosture, recordStatusLabel } from "@/lib/diagnostics/assessment-result-contract";
 import SaveCaseConversionPanel from "@/components/product/SaveCaseConversionPanel";
-import { buildAssessmentResultSaveCasePayload } from "@/lib/product/save-case-continuity";
+import {
+  buildAssessmentResultSaveCasePayload,
+  type SaveCaseSource,
+} from "@/lib/product/save-case-continuity";
 import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
 import BenchmarkContextPanel from "@/components/product/BenchmarkContextPanel";
+import ResultPathwayPanel from "@/components/product/ResultPathwayPanel";
+import {
+  deriveResultPathwayState,
+  evidenceStateFromAssessmentResult,
+  surfaceFromAssessmentKind,
+  type ResultPathwayUserState,
+} from "@/lib/product/result-pathway-state";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
@@ -108,6 +116,8 @@ export type AssessmentResultSurfaceProps = {
    * for SESSION_PREVIEW records.
    */
   showConversionPanel?: boolean;
+  /** Optional known tier when the parent surface already resolved it. */
+  userState?: ResultPathwayUserState;
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -118,6 +128,7 @@ export default function AssessmentResultSurface({
   canSave,
   sendToSelfSlot,
   showConversionPanel = true,
+  userState,
 }: AssessmentResultSurfaceProps) {
   const {
     title,
@@ -132,6 +143,20 @@ export default function AssessmentResultSurface({
     earnedRoute,
     recordStatus,
   } = result;
+  const pathwaySurface = surfaceFromAssessmentKind(result.kind);
+  const pathwayEvidenceState = evidenceStateFromAssessmentResult(result);
+  const resolvedUserState = userState ?? "authenticated_free";
+  const savedPathwayState = deriveResultPathwayState({
+    surface: pathwaySurface,
+    persistence:
+      recordStatus.level === "GOVERNED_CASE"
+        ? "live_governed_record"
+        : "account_bound",
+    userState: resolvedUserState,
+    evidenceState: pathwayEvidenceState,
+    caseId: recordStatus.caseId,
+    earnedRoute,
+  });
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
@@ -378,76 +403,6 @@ export default function AssessmentResultSurface({
         </p>
       </section>
 
-      {/* ── 8. Primary earned action ───────────────────────────────────── */}
-      <section style={{ marginBottom: "16px" }}>
-        <SectionLabel>Earned next action</SectionLabel>
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          <Link
-            href={earnedRoute.href}
-            style={{
-              ...mono,
-              fontSize: "10px",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: GOLD,
-              border: `1px solid ${GOLD}40`,
-              background: `${GOLD}0A`,
-              padding: "12px 20px",
-              textDecoration: "none",
-              display: "inline-block",
-              alignSelf: "flex-start",
-            }}
-          >
-            {earnedRoute.label}
-          </Link>
-          <p
-            style={{
-              ...mono,
-              fontSize: "9px",
-              color: "rgba(255,255,255,0.30)",
-              lineHeight: 1.5,
-              maxWidth: "480px",
-            }}
-          >
-            {earnedRoute.reason}
-          </p>
-        </div>
-      </section>
-
-      <section
-        style={{
-          border: "1px solid rgba(255,255,255,0.06)",
-          background: "rgba(255,255,255,0.015)",
-          padding: "14px 16px",
-          marginBottom: "16px",
-        }}
-      >
-        <SectionLabel>Where the decision lives now</SectionLabel>
-        <p
-          style={{
-            ...mono,
-            fontSize: "9px",
-            color: "rgba(255,255,255,0.35)",
-            lineHeight: 1.7,
-          }}
-        >
-          {recordStatus.level === "SESSION_PREVIEW"
-            ? "This is a governed session result until saved. Save it to create the enduring case record in Decision Centre."
-            : "This result belongs to a governed case in Decision Centre, where continuity, admissibility, and the next required action remain visible."}
-        </p>
-        <p
-          style={{
-            ...mono,
-            fontSize: "8px",
-            color: "rgba(255,255,255,0.24)",
-            lineHeight: 1.7,
-            marginTop: "8px",
-          }}
-        >
-          Executive Reporting is the first paid governed intelligence layer when evidence justifies it. Strategy Room is an earned intervention layer, not a default upsell.
-        </p>
-      </section>
-
       {/* ── 9. Secondary save/send actions ────────────────────────────── */}
       {(onSave || sendToSelfSlot) && (
         <section
@@ -493,10 +448,35 @@ export default function AssessmentResultSurface({
       {showConversionPanel && result.recordStatus.level === "SESSION_PREVIEW" && (
         <div style={{ marginTop: "24px" }}>
           <SaveCaseConversionPanel
-            payload={buildAssessmentResultSaveCasePayload(result)}
+            payload={buildAssessmentResultSaveCasePayload(result, saveCaseSourceFromKind(result.kind))}
+            surface={pathwaySurface}
+            evidenceState={pathwayEvidenceState}
+            earnedRoute={earnedRoute}
+            userStateOverride={userState}
           />
+        </div>
+      )}
+
+      {result.recordStatus.level !== "SESSION_PREVIEW" && (
+        <div style={{ marginTop: "24px" }}>
+          <ResultPathwayPanel state={savedPathwayState} />
         </div>
       )}
     </div>
   );
+}
+
+function saveCaseSourceFromKind(kind: AssessmentResult["kind"]): SaveCaseSource {
+  switch (kind) {
+    case "FAST_DIAGNOSTIC":
+      return "FAST_DIAGNOSTIC";
+    case "PURPOSE_ALIGNMENT":
+      return "PURPOSE_ALIGNMENT";
+    case "CONSTITUTIONAL_DIAGNOSTIC":
+      return "CONSTITUTIONAL_DIAGNOSTIC";
+    case "TEAM_ASSESSMENT":
+      return "TEAM_ASSESSMENT";
+    case "ENTERPRISE_ASSESSMENT":
+      return "ENTERPRISE_ASSESSMENT";
+  }
 }

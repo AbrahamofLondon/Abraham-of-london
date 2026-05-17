@@ -324,18 +324,20 @@ export default function PurposeAlignmentPage() {
               }}>
                 This analysis reads you personally. The Constitutional Diagnostic reads your organisation structurally. Together they form one decision system: personal direction informing institutional order.
               </p>
-              <Link
-                href={assessmentResult?.earnedRoute.href ?? "/diagnostics/constitutional-diagnostic"}
-                className="inline-flex items-center gap-2 mt-6 transition-all"
-                style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase",
-                  color: `${GOLD}`,
-                }}
-              >
-                {assessmentResult?.earnedRoute.label ?? "Test the organisational structure"}
-                <ArrowRight style={{ width: "11px", height: "11px" }} />
-              </Link>
+              {!assessmentResult && (
+                <Link
+                  href="/diagnostics/constitutional-diagnostic"
+                  className="inline-flex items-center gap-2 mt-6 transition-all"
+                  style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase",
+                    color: `${GOLD}`,
+                  }}
+                >
+                  Test the organisational structure
+                  <ArrowRight style={{ width: "11px", height: "11px" }} />
+                </Link>
+              )}
             </div>
           </div>
         </section>

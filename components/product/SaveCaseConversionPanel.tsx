@@ -22,14 +22,21 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Archive, Mail, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Archive, Mail, CheckCircle2 } from "lucide-react";
 
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import {
   storePendingSessionCase,
   type SessionCaseCarryForwardPayload,
 } from "@/lib/product/session-case-continuity";
+import {
+  deriveResultPathwayState,
+  type ResultPathwayEvidenceState,
+  type ResultPathwaySurface,
+  type ResultPathwayUserState,
+} from "@/lib/product/result-pathway-state";
 import FreeTierUpgradeModal from "./FreeTierUpgradeModal";
+import ResultPathwayPanel from "./ResultPathwayPanel";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -69,6 +76,14 @@ export type SaveCaseConversionPanelProps = {
    * Called with the saved caseRef.
    */
   onSaved?: (caseRef: string) => void;
+  /** Surface-specific pathway framing. */
+  surface?: ResultPathwaySurface;
+  /** Evidence state used to determine eligible secondary pathways. */
+  evidenceState?: ResultPathwayEvidenceState;
+  /** The earned route surfaced by the assessment result, if one exists. */
+  earnedRoute?: Parameters<typeof deriveResultPathwayState>[0]["earnedRoute"];
+  /** Optional known tier when the parent surface already resolved it. */
+  userStateOverride?: ResultPathwayUserState;
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -78,6 +93,10 @@ export default function SaveCaseConversionPanel({
   sendToSelfEmail,
   continueHref = "#",
   onSaved,
+  surface,
+  evidenceState = "basic",
+  earnedRoute,
+  userStateOverride,
 }: SaveCaseConversionPanelProps) {
   const { data: session, status: sessionStatus } = useSession();
   const isAuthenticated = sessionStatus === "authenticated" && !!session;
@@ -85,11 +104,41 @@ export default function SaveCaseConversionPanel({
 
   const [saveState, setSaveState] = React.useState<SaveState>({ status: "idle" });
   const [dismissed, setDismissed] = React.useState(false);
+  const [detectedUserState, setDetectedUserState] =
+    React.useState<ResultPathwayUserState>("anonymous");
 
   // Track panel impression once
   React.useEffect(() => {
     trackLaunch("save_case_prompt_seen", "save_case_conversion_panel");
   }, []);
+
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      setDetectedUserState("anonymous");
+      return;
+    }
+
+    let active = true;
+    fetch("/api/trial/status")
+      .then((response) => response.json())
+      .then((data: { trial?: { status?: string } }) => {
+        if (!active) return;
+        if (data.trial?.status === "ACTIVE") {
+          setDetectedUserState("trial");
+        } else if (data.trial?.status === "CONVERTED") {
+          setDetectedUserState("professional");
+        } else {
+          setDetectedUserState("authenticated_free");
+        }
+      })
+      .catch(() => {
+        if (active) setDetectedUserState("authenticated_free");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
 
   async function handleSave() {
     trackLaunch("save_case_clicked", "save_case_conversion_panel");
@@ -156,20 +205,33 @@ export default function SaveCaseConversionPanel({
     trackLaunch("send_to_self_clicked", "save_case_conversion_panel");
   }
 
+  const resolvedSurface = surface ?? surfaceFromPayload(payload);
+  const resolvedUserState: ResultPathwayUserState =
+    userStateOverride ?? detectedUserState;
+  const pathwayState = deriveResultPathwayState({
+    surface: resolvedSurface,
+    persistence: saveState.status === "saved" ? "saved_case" : "session_only",
+    userState: resolvedUserState,
+    evidenceState,
+    caseId: saveState.status === "saved" ? saveState.caseRef : null,
+    earnedRoute,
+  });
+
   if (dismissed) return null;
 
   // ── Saved state ────────────────────────────────────────────────────────────
   if (saveState.status === "saved") {
     return (
-      <section
-        style={{
-          border: `1px solid rgba(100,220,140,0.25)`,
-          backgroundColor: "rgba(100,220,140,0.03)",
-          padding: "1rem 1.25rem",
-        }}
-        aria-label="Case saved"
-      >
-        <div className="flex items-center gap-2 mb-2">
+      <div aria-label="Case saved">
+        <div
+          style={{
+            border: `1px solid rgba(100,220,140,0.25)`,
+            backgroundColor: "rgba(100,220,140,0.03)",
+            padding: "0.8rem 1rem",
+            marginBottom: "10px",
+          }}
+        >
+          <div className="flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "rgba(100,220,140,0.8)" }} />
           <p
             style={{
@@ -182,29 +244,10 @@ export default function SaveCaseConversionPanel({
           >
             Saved as {saveState.caseRef}
           </p>
+          </div>
         </div>
-        <Link
-          href={`/decision-centre?caseId=${encodeURIComponent(saveState.caseRef)}`}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            ...mono,
-            fontSize: "8px",
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: `${GOLD}DD`,
-            textDecoration: "none",
-            border: `1px solid ${GOLD}44`,
-            backgroundColor: `${GOLD}0A`,
-            padding: "0.6rem 1rem",
-            marginTop: "0.5rem",
-          }}
-        >
-          Open in Decision Centre
-          <ArrowRight className="h-3 w-3" />
-        </Link>
-      </section>
+        <ResultPathwayPanel state={pathwayState} />
+      </div>
     );
   }
 
@@ -218,172 +261,87 @@ export default function SaveCaseConversionPanel({
     );
   }
 
-  // ── Primary panel ──────────────────────────────────────────────────────────
   return (
-    <section
-      style={{
-        border: `1px solid ${GOLD}22`,
-        backgroundColor: `${GOLD}05`,
-        padding: "1.25rem",
-      }}
-      aria-label="Save governed case"
-    >
-      {/* Header label */}
-      <p
+    <section aria-label="Save governed case">
+      <ResultPathwayPanel
+        state={pathwayState}
+        primaryActionNode={
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saveState.status === "saving" || isLoadingAuth}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              ...mono,
+              fontSize: "8px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              border: `1px solid ${GOLD}55`,
+              backgroundColor: `${GOLD}12`,
+              color: `${GOLD}DD`,
+              padding: "0.7rem 1.1rem",
+              cursor:
+                saveState.status === "saving" || isLoadingAuth
+                  ? "not-allowed"
+                  : "pointer",
+              opacity: saveState.status === "saving" || isLoadingAuth ? 0.65 : 1,
+            }}
+          >
+            <Archive className="h-3.5 w-3.5" />
+            {saveState.status === "saving" ? "Saving…" : pathwayState.primaryAction.label}
+          </button>
+        }
+        secondaryActionNodes={{
+          send_to_self: (
+            <Link
+              href={
+                sendToSelfEmail
+                  ? `/api/tools/send-to-self?email=${encodeURIComponent(sendToSelfEmail)}`
+                  : "/auth/signin?callbackUrl=/decision-centre"
+              }
+              onClick={handleSendToSelf}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                ...mono,
+                fontSize: "7.5px",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.42)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                backgroundColor: "rgba(255,255,255,0.02)",
+                padding: "0.55rem 0.9rem",
+                textDecoration: "none",
+              }}
+            >
+              <Mail className="h-3 w-3" />
+              {resolvedSurface === "board_summary" ? "Send preview to self" : "Send result to self"}
+            </Link>
+          ),
+        }}
+      />
+
+      <button
+        type="button"
+        onClick={() => setDismissed(true)}
         style={{
           ...mono,
           fontSize: "7px",
-          letterSpacing: "0.22em",
+          letterSpacing: "0.14em",
           textTransform: "uppercase",
-          color: `${GOLD}88`,
-          marginBottom: "0.65rem",
+          color: "rgba(255,255,255,0.20)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "0.65rem 0.5rem",
+          marginTop: "0.35rem",
         }}
       >
-        This result is currently session-based
-      </p>
-
-      {/* Body copy — verbatim from spec */}
-      <p
-        style={{
-          ...serif,
-          fontSize: "0.95rem",
-          lineHeight: 1.65,
-          color: "rgba(255,255,255,0.55)",
-          marginBottom: "0.75rem",
-        }}
-      >
-        Save it as a governed case so Decision Centre can keep carrying it:
-      </p>
-
-      <ul
-        className="space-y-1 mb-4 pl-2"
-        style={{ listStyle: "none" }}
-      >
-        {[
-          "a case reference",
-          "Decision Centre continuity",
-          "verification status where supported",
-          "future Return Brief eligibility",
-          "your next earned action",
-        ].map((item) => (
-          <li key={item} className="flex items-start gap-2">
-            <span
-              style={{
-                marginTop: "0.4rem",
-                width: "4px",
-                height: "4px",
-                borderRadius: "50%",
-                backgroundColor: `${GOLD}66`,
-                flexShrink: 0,
-              }}
-            />
-            <p
-              style={{
-                ...serif,
-                fontSize: "0.88rem",
-                lineHeight: 1.5,
-                color: "rgba(255,255,255,0.5)",
-              }}
-            >
-              {item}
-            </p>
-          </li>
-        ))}
-      </ul>
-
-      <p
-        style={{
-          ...mono,
-          fontSize: "8px",
-          lineHeight: 1.7,
-          color: "rgba(255,255,255,0.28)",
-          marginBottom: "1rem",
-        }}
-      >
-        Free entry creates the first trusted record. Professional preserves the governed record beyond the free active-case limit when continuity is needed.
-      </p>
-
-      {/* CTA hierarchy */}
-      <div className="flex flex-wrap gap-2 items-center">
-
-        {/* Primary: Save this case */}
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saveState.status === "saving" || isLoadingAuth}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            ...mono,
-            fontSize: "8px",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            border: `1px solid ${GOLD}55`,
-            backgroundColor: `${GOLD}12`,
-            color: `${GOLD}DD`,
-            padding: "0.65rem 1.15rem",
-            cursor:
-              saveState.status === "saving" || isLoadingAuth
-                ? "not-allowed"
-                : "pointer",
-            opacity: saveState.status === "saving" || isLoadingAuth ? 0.65 : 1,
-          }}
-        >
-          <Archive className="h-3.5 w-3.5" />
-          {saveState.status === "saving"
-            ? "Saving…"
-            : isAuthenticated
-              ? "Save this case"
-              : "Create free account and save this case"}
-        </button>
-
-        {/* Secondary: Send result to self */}
-        <Link
-          href={
-            sendToSelfEmail
-              ? `/api/tools/send-to-self?email=${encodeURIComponent(sendToSelfEmail)}`
-              : "/auth/signin?callbackUrl=/decision-centre"
-          }
-          onClick={handleSendToSelf}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            ...mono,
-            fontSize: "8px",
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.38)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            backgroundColor: "rgba(255,255,255,0.02)",
-            padding: "0.65rem 1rem",
-            textDecoration: "none",
-          }}
-        >
-          <Mail className="h-3 w-3" />
-          Send result to self
-        </Link>
-
-        {/* Tertiary: Continue without saving */}
-        <button
-          type="button"
-          onClick={() => setDismissed(true)}
-          style={{
-            ...mono,
-            fontSize: "7px",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.20)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "0.65rem 0.5rem",
-          }}
-        >
-          Continue without saving
-        </button>
-      </div>
+        Continue without saving
+      </button>
 
       {/* Error state */}
       {saveState.status === "error" && (
@@ -401,4 +359,25 @@ export default function SaveCaseConversionPanel({
       )}
     </section>
   );
+}
+
+function surfaceFromPayload(payload: SessionCaseCarryForwardPayload): ResultPathwaySurface {
+  switch (payload.source) {
+    case "DECISION_DELAY_CALCULATOR":
+      return "decision_delay";
+    case "FAST_DIAGNOSTIC":
+      return "fast_diagnostic";
+    case "BOARD_SUMMARY":
+      return "board_summary";
+    case "PURPOSE_ALIGNMENT":
+      return "purpose_alignment";
+    case "CONSTITUTIONAL_DIAGNOSTIC":
+      return "constitutional";
+    case "TEAM_ASSESSMENT":
+      return "team";
+    case "ENTERPRISE_ASSESSMENT":
+      return "enterprise";
+    case "GENERIC_ASSESSMENT":
+      return "fast_diagnostic";
+  }
 }

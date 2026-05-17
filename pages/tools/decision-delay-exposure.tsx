@@ -901,6 +901,8 @@ export default function DecisionDelayExposurePage() {
                     exposureType: form.exposureType,
                     estimateConfidence: form.estimateConfidence,
                   })}
+                  surface="decision_delay"
+                  evidenceState="basic"
                 />
               </div>
             </div>
