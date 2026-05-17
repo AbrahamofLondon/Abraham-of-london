@@ -1,218 +1,192 @@
-/* pages/founders/index.tsx — BUILDER'S FORMATION (INTEGRITY MODE) */
+/* pages/founders/index.tsx — FOR FOUNDERS AND BUILDERS
+ *
+ * Audience-specific pathway page for founders and builders facing
+ * consequential decisions under structural ambiguity.
+ *
+ * This is NOT the founder profile. For the founder profile see /about/founder.
+ *
+ * Design: Institutional Monumentalism — matches site design language.
+ * Typography: JetBrains Mono labels, Cormorant Garamond body/headings.
+ * Gold: #C9A96E softGold.
+ */
+
 import * as React from "react";
 import type { NextPage } from "next";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
-  Building2,
+  ArrowRight,
+  BookOpen,
   Target,
   ShieldCheck,
-  Workflow,
-  BookOpen,
-  Hammer,
-  Users,
-  Landmark,
-  ArrowRight,
-  FileSpreadsheet,
-  Presentation,
-  ClipboardCheck,
-  GraduationCap,
   Layers,
-  Compass,
-  Network,
-  Lock,
-  FileStack,
   Map,
-  Home,
+  Compass,
+  FileText,
+  ScanSearch,
+  Crown,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import MandateStatement from "@/components/MandateStatement";
 
-/**
- * STRATEGIC FIX: INTEGRITY MODE
- * All routing and resources are synchronized with the central vault.
- */
-const FoundersPage: NextPage = () => {
-  const formationPath = [
-    {
-      stage: "Foundations",
-      title: "Ultimate Purpose of Man",
-      description: "Understanding human purpose across seven domains",
-      href: "/blog/ultimate-purpose-of-man",
-      status: 'public' as const,
-      icon: Layers,
-      outcome: "Clarity on why you build"
-    },
-    {
-      stage: "Doctrine",
-      title: "The Canon (Vol I-IV)",
-      description: "Complete doctrinal architecture for builders",
-      href: "/canon",
-      status: 'inner-circle' as const,
-      icon: BookOpen,
-      outcome: "Intellectual foundation"
-    },
-    {
-      stage: "Application",
-      title: "Builder's Catechism",
-      description: "Authoritative question-set for founder legitimacy",
-      href: "/canon/builders-catechism",
-      status: 'inner-circle' as const,
-      icon: Hammer,
-      outcome: "Execution clarity"
-    },
-    {
-      stage: "Implementation",
-      title: "Strategic Frameworks",
-      description: "Decision matrices, prioritization logic, governance templates",
-      href: "/resources/strategic-frameworks",
-      status: 'public' as const,
-      icon: Map,
-      outcome: "Board-ready tooling"
-    }
-  ];
+const GOLD = "#C9A96E";
+const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
-  const builderTools = [
-    {
-      title: "Board Decision Log",
-      description: "Excel template for documenting board-level decisions with accountability matrices",
-      href: "/resources/board-decision-log-template",
-      status: 'public' as const,
-      icon: FileSpreadsheet,
-      useCase: "Governance"
-    },
-    {
-      title: "Operating Cadence Pack",
-      description: "Complete presentation deck for board meeting design and execution rhythm",
-      href: "/resources/operating-cadence-pack",
-      status: 'inner-circle' as const,
-      icon: Presentation,
-      useCase: "Meeting architecture"
-    },
-    {
-      title: "Institutional Health Scorecard",
-      description: "Diagnostic tool for organizational legitimacy and operational health",
-      href: "/resources/institutional-health-scorecard",
-      status: 'public' as const,
-      icon: ShieldCheck,
-      useCase: "Diagnostics"
-    }
-  ];
+const FoundersPage: NextPage = () => (
+  <Layout
+    title="For Founders | Abraham of London"
+    description="Decision authority for founders and builders facing consequential decisions under structural ambiguity. Contradiction detection, consequence pricing, enforcement, verification."
+    canonicalUrl="/founders"
+  >
+    <main className="min-h-screen" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
+      <div className="mx-auto max-w-5xl px-6 pb-16 pt-28 lg:px-12 lg:pb-20 lg:pt-36">
 
-  return (
-    <Layout
-      title="Founders"
-      description="Decision authority for founders facing non-delegable decisions under structural uncertainty."
-      className="bg-black text-cream"
-    >
-      <main>
-        {/* HERO: THE BUILDER'S CALLING */}
-        <section className="relative overflow-hidden border-b border-gold/10 bg-gradient-to-b from-black via-zinc-950 to-black pt-24 pb-16 lg:pt-32 lg:pb-24">
-          <div className="absolute inset-0 bg-[url('/assets/images/texture-grain.png')] opacity-20 mix-blend-overlay" />
-          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">Founders · Decision Authority</p>
-              <h1 className="mt-6 font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-                Decide under <span className="italic text-gold">uncertainty</span>
-              </h1>
-              <p className="mt-8 text-lg leading-relaxed text-gray-400 sm:text-xl">
-                For founders facing non-delegable decisions under structural ambiguity.
-                Identify the contradictions in your positioning. Price what they cost. Execute with verification.
-              </p>
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                <Link href="/diagnostics" className="rounded-xl bg-gold px-8 py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-gold/80 transition-all flex items-center justify-center">
-                  Enter the system <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-                <Link href="/method" className="rounded-xl border border-gold/30 bg-gold/10 px-8 py-4 text-sm font-bold uppercase tracking-widest text-gold hover:bg-gold/15 transition-all flex items-center justify-center">
-                  How it works <Map className="ml-2 h-4 w-4" />
-                </Link>
+        {/* ── Hero ── */}
+        <div className="max-w-3xl">
+          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>
+            For Founders · Decision Authority
+          </p>
+          <h1 className="mt-6" style={{ ...serif, fontSize: "clamp(2.2rem, 5vw, 3.5rem)", lineHeight: 0.98, color: "rgba(255,255,255,0.92)" }}>
+            Decide under uncertainty.
+          </h1>
+          <p className="mt-5 max-w-[56ch]" style={{ ...serif, fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.52)" }}>
+            For founders and builders facing non-delegable decisions under structural ambiguity.
+            Identify the contradictions in your positioning. Price what they cost. Execute with verification.
+          </p>
+
+          {/* ── Primary CTAs ── */}
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/diagnostics/fast"
+              className="group inline-flex items-center gap-2"
+              style={{ padding: "12px 24px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}0C`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+            >
+              Start with the Fast Diagnostic <ArrowRight style={{ width: 11, height: 11 }} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/method"
+              style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)", padding: "12px 20px", textDecoration: "none" }}
+            >
+              Understand the method →
+            </Link>
+          </div>
+        </div>
+
+        {/* ── Divider ── */}
+        <div className="my-14 h-px w-full" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent 100%)" }} />
+
+        {/* ── What founders face ── */}
+        <div className="max-w-3xl">
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.75rem" }}>
+            What founders face
+          </p>
+          <div className="space-y-4">
+            {[
+              { title: "Contradiction", desc: "Your strategy says one thing. Your metrics show another. The system names the gap." },
+              { title: "Consequence", desc: "Every deferred decision carries a priced cost. The system makes it visible." },
+              { title: "Enforcement", desc: "Ownership, deadlines, and breach patterns are tracked across stages." },
+              { title: "Verification", desc: "Action is checked. Outcomes are classified. The record is governed." },
+            ].map((item) => (
+              <div key={item.title} style={{ borderLeft: `2px solid ${GOLD}25`, paddingLeft: "1rem" }}>
+                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}99` }}>{item.title}</span>
+                <p className="mt-1" style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.42)" }}>{item.desc}</p>
               </div>
-            </div>
+            ))}
           </div>
-        </section>
+        </div>
 
-        {/* MANDATE */}
-        <section className="bg-black py-12 lg:py-16">
-          <div className="mx-auto max-w-6xl px-4"><MandateStatement /></div>
-        </section>
+        {/* ── Divider ── */}
+        <div className="my-14 h-px w-full" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent 100%)" }} />
 
-        {/* FORMATION PATH */}
-        <section id="formation" className="bg-zinc-950 py-20 lg:py-28">
-          <div className="mx-auto max-w-6xl px-4">
-            <h2 className="font-serif text-3xl font-semibold text-white mb-16">Decision authority sequence</h2>
-            <div className="space-y-6">
-              {formationPath.map((stage, index) => (
-                <div key={index} className="group rounded-3xl border border-white/8 bg-white/[0.02] p-8 transition-all hover:border-gold/25">
-                  <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex items-start gap-6">
-                      <div className="rounded-2xl bg-gold/10 p-4"><stage.icon className="h-6 w-6 text-gold" /></div>
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">{stage.stage}</span>
-                        <h3 className="font-serif text-xl font-semibold text-white mb-2">{stage.title}</h3>
-                        <p className="text-sm text-gray-400 max-w-xl">{stage.description}</p>
-                      </div>
-                    </div>
-                    <Link href={stage.href} className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/15">
-                      {stage.status === 'public' ? 'Access' : 'Preview'} <ArrowRight className="h-3 w-3" />
-                    </Link>
+        {/* ── Pathway ── */}
+        <div className="max-w-3xl">
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.75rem" }}>
+            Your pathway
+          </p>
+          <div className="space-y-3">
+            {[
+              {
+                step: "01",
+                title: "Run the Fast Diagnostic",
+                desc: "Free, anonymous, under 3 minutes. A governed finding produced immediately.",
+                href: "/diagnostics/fast",
+                cta: "Start free →",
+              },
+              {
+                step: "02",
+                title: "Create your governed case",
+                desc: "Free account. Keep up to 3 active governed cases. Existing records remain readable.",
+                href: "/decision-centre",
+                cta: "Open Decision Centre →",
+              },
+              {
+                step: "03",
+                title: "Enter Professional continuity",
+                desc: "Unlimited active cases, Return Brief generation, client-safe evidence export, reviewer links, and organisation workspace.",
+                href: "/pricing",
+                cta: "View Professional →",
+              },
+              {
+                step: "04",
+                title: "Escalate when the record earns it",
+                desc: "Executive Reporting, Strategy Room, Retained Oversight — earned intervention, not default upsell.",
+                href: "/method",
+                cta: "Understand escalation →",
+              },
+            ].map((item) => (
+              <Link
+                key={item.step}
+                href={item.href}
+                className="group block"
+                style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", textDecoration: "none" }}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <span style={{ ...mono, fontSize: "9px", color: `${GOLD}77` }}>{item.step}</span>
+                    <h3 className="mt-1" style={{ ...serif, fontSize: "1.05rem", color: "rgba(255,255,255,0.78)" }}>{item.title}</h3>
+                    <p className="mt-1" style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>{item.desc}</p>
                   </div>
+                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}88`, whiteSpace: "nowrap", marginTop: "0.25rem" }}>{item.cta}</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* TOOLBOX */}
-        <section className="bg-black py-20 lg:py-28">
-          <div className="mx-auto max-w-6xl px-4">
-            <h2 className="font-serif text-3xl font-semibold text-white mb-16">Builder's Toolbox</h2>
-            <div className="grid gap-6 lg:grid-cols-3">
-              {builderTools.map((tool, index) => (
-                <div key={index} className="rounded-3xl border border-white/8 bg-white/[0.02] p-8 hover:border-gold/20 transition-all flex flex-col h-full">
-                  <tool.icon className="h-8 w-8 text-gold/60 mb-6" />
-                  <h3 className="font-serif text-lg font-semibold text-white mb-2">{tool.title}</h3>
-                  <p className="text-sm text-gray-500 mb-6 flex-grow">{tool.description}</p>
-                  <Link href={tool.href} className="mt-auto text-xs font-bold uppercase tracking-widest text-gold hover:text-gold/80 flex items-center gap-2">
-                    {tool.status === 'public' ? 'Download' : 'Access'} <ArrowRight className="h-3 w-3" />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* LEGACY SECTION */}
-        <section className="bg-zinc-950 py-20 border-t border-gold/10">
-          <div className="mx-auto max-w-4xl px-4 text-center">
-            <h2 className="font-serif text-3xl font-semibold text-white mb-6">Legacy & Stewardship</h2>
-            <p className="text-gray-400 mb-12">Building that lasts means planning beyond your lifetime. Institutional architecture requires multi-generational thinking.</p>
-            <div className="grid gap-4 sm:grid-cols-2 justify-center">
-              <Link href="/resources/multi-generational-legacy-ledger" className="rounded-xl border border-white/10 bg-white/5 p-6 hover:border-gold/30 transition-all">
-                <h4 className="font-bold text-white mb-2">Legacy Ledger</h4>
-                <p className="text-xs text-gray-500 text-center">Map financial and intellectual domains.</p>
               </Link>
-              <Link href="/resources/canon-household-charter" className="rounded-xl border border-white/10 bg-white/5 p-6 hover:border-gold/30 transition-all">
-                <h4 className="font-bold text-white mb-2">Household Charter</h4>
-                <p className="text-xs text-gray-500 text-center">Architect family governance principles.</p>
-              </Link>
-            </div>
+            ))}
           </div>
-        </section>
+        </div>
 
-        {/* FINAL CTA */}
-        <section className="bg-black py-20">
-          <div className="mx-auto max-w-4xl px-4 text-center">
-            <h3 className="font-serif text-2xl text-white mb-8">Begin the Work</h3>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact?source=builders" className="bg-gold px-8 py-4 rounded-xl text-black font-bold uppercase tracking-widest">Request Formation Path</Link>
-              <Link href="/inner-circle" className="border border-gold/40 px-8 py-4 rounded-xl text-gold font-bold uppercase tracking-widest hover:bg-gold/10">Join Inner Circle</Link>
-            </div>
+        {/* ── Divider ── */}
+        <div className="my-14 h-px w-full" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent 100%)" }} />
+
+        {/* ── Trust routing ── */}
+        <div className="max-w-3xl">
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.75rem" }}>
+            Verify the system
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/about/founder" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}99`, border: `1px solid ${GOLD}22`, padding: "0.4rem 0.7rem", textDecoration: "none" }}>
+              Meet the founder
+            </Link>
+            <Link href="/trust" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", border: "1px solid rgba(255,255,255,0.06)", padding: "0.4rem 0.7rem", textDecoration: "none" }}>
+              Trust Center
+            </Link>
+            <Link href="/verification" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", border: "1px solid rgba(255,255,255,0.06)", padding: "0.4rem 0.7rem", textDecoration: "none" }}>
+              Verify credentials
+            </Link>
+            <Link href="/evidence" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", border: "1px solid rgba(255,255,255,0.06)", padding: "0.4rem 0.7rem", textDecoration: "none" }}>
+              Applied evidence
+            </Link>
+            <Link href="/library" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", border: "1px solid rgba(255,255,255,0.06)", padding: "0.4rem 0.7rem", textDecoration: "none" }}>
+              Knowledge estate
+            </Link>
           </div>
-        </section>
-      </main>
-    </Layout>
-  );
-};
+        </div>
+
+        {/* ── Footer ── */}
+        <p className="mt-16" style={{ ...mono, fontSize: "6px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.10)" }}>
+          Developed by Abraham Adaramola · Founder, Abraham of London
+        </p>
+      </div>
+    </main>
+  </Layout>
+);
 
 export default FoundersPage;

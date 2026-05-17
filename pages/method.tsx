@@ -1,7 +1,5 @@
 import type { NextPage } from "next";
-import Head from "next/head";
 import Link from "next/link";
-import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 import { ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
 
@@ -13,8 +11,7 @@ const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia,
 function Rule() { return <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent my-8 lg:my-10" />; }
 
 const MethodPage: NextPage = () => (
-  <Layout title="Method | Abraham of London" description="Identifies contradiction. Prices consequence. Forces decision." canonicalUrl="/method" fullWidth headerTransparent>
-    <Head><meta name="description" content="A governed decision system that identifies contradiction, prices consequence, and forces decision." /></Head>
+  <Layout title="Method | Abraham of London" description="A governed decision system that identifies contradiction, prices consequence, and forces decision. Named conditions, priced exposure, enforced action." canonicalUrl="/method" fullWidth headerTransparent>
 
     <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
       <div className="mx-auto max-w-5xl px-6 pb-16 pt-28 lg:px-12 lg:pb-20 lg:pt-36">
@@ -178,6 +175,7 @@ const MethodPage: NextPage = () => (
           <div className="flex flex-wrap gap-3">
             <Link href="/verification" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Verify the founder</Link>
             <Link href="/trust" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Trust boundaries</Link>
+            <Link href="/provenance/demo" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Provenance demo</Link>
             <Link href="/foundations" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Foundations</Link>
             <Link href="/about/founder" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>Founder</Link>
           </div>

@@ -26,6 +26,9 @@ const proofLinks = [
   { label: "Evidence", href: "/evidence" },
   { label: "Trust", href: "/trust" },
   { label: "Foundations", href: "/foundations" },
+  { label: "Method", href: "/method" },
+  { label: "About", href: "/about" },
+  { label: "Library", href: "/library" },
   { label: "Terms", href: "/terms-of-service" },
   { label: "Privacy", href: "/privacy" },
 ];
@@ -383,7 +386,8 @@ const FounderPage: NextPage = () => {
                 <ul className="mt-4 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.42)" }}>
                   <li>MBA — University of East Anglia, Norwich Business School</li>
                   <li>BSc — Microbiology, University of Lagos</li>
-                  <li>ISO/IEC 27001:2022 Lead Auditor</li>
+                  <li>ISO/IEC 27001:2022 Lead Auditor — Mastermind Assurance</li>
+                  <li>Mastering Cybersecurity — eHacking, 2020</li>
                   <li>CMI Level 7 Diploma in Consulting Management</li>
                 </ul>
               </div>
