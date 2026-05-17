@@ -404,12 +404,60 @@ export default function PricingPage() {
                 maxWidth: "540px",
               }}
             >
-              A structured access model across three tiers: free entry tools
+              A structured access model across three tiers: free entry governed instruments
               available without account, paid instruments and sessions that
               produce governed records, and retained oversight for ongoing
               decision accountability.
             </p>
           </header>
+
+          {/* ── Ladder explainer ───────────────────────────────────────── */}
+          <div
+            style={{
+              border: `1px solid ${GOLD}20`,
+              background: `${GOLD}06`,
+              padding: "18px 20px",
+              marginBottom: "24px",
+            }}
+          >
+            <SectionLabel>How the ladder works</SectionLabel>
+            <p
+              style={{
+                ...serif,
+                fontSize: "16px",
+                color: "rgba(255,255,255,0.72)",
+                lineHeight: 1.75,
+                maxWidth: "680px",
+              }}
+            >
+              Start free. Preserve continuity with Professional. Escalate to
+              Executive Reporting or Strategy Room when the record earns it.
+              Contract retained oversight when governance must continue across cycles.
+            </p>
+            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "14px" }}>
+              {[
+                { label: "View provenance demo", href: "/provenance/demo" },
+                { label: "View Trust Center", href: "/trust" },
+              ].map(({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  style={{
+                    ...mono,
+                    fontSize: "8px",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: `${GOLD}BB`,
+                    textDecoration: "none",
+                    borderBottom: `1px solid ${GOLD}30`,
+                    paddingBottom: "1px",
+                  }}
+                >
+                  {label} →
+                </Link>
+              ))}
+            </div>
+          </div>
 
           {/* ── Mandatory disclaimer ─────────────────────────────────────── */}
           <div
@@ -557,7 +605,7 @@ export default function PricingPage() {
                 marginBottom: "6px",
               }}
             >
-              Unlimited governed case management
+              The continuity layer for live governed cases
             </h2>
             <p
               style={{

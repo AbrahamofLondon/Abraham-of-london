@@ -590,6 +590,63 @@ const CaseDetailPage: NextPage = () => {
             {verifyResult && <VerifyResultPanel result={verifyResult} />}
           </section>
 
+          {/* ── DEFENSIBILITY PATHWAY ──────────────────────────────── */}
+          <section
+            style={{
+              border: `1px solid ${GOLD}18`,
+              backgroundColor: `${GOLD}04`,
+              padding: "1rem",
+            }}
+          >
+            <p
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.20em",
+                textTransform: "uppercase",
+                color: `${GOLD}77`,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Defensibility pathway
+            </p>
+            <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.48)" }}>
+              When the case needs to travel beyond one operator, use client-safe proof surfaces rather than exposing raw working material.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link
+                href="/account/proof-pack"
+                style={{
+                  ...mono,
+                  fontSize: "7.5px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: `${GOLD}AA`,
+                  border: `1px solid ${GOLD}28`,
+                  padding: "0.45rem 0.8rem",
+                  textDecoration: "none",
+                }}
+              >
+                View Proof Pack
+              </Link>
+              <Link
+                href="/provenance/explained"
+                style={{
+                  ...mono,
+                  fontSize: "7.5px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.38)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  padding: "0.45rem 0.8rem",
+                  textDecoration: "none",
+                }}
+              >
+                Learn provenance
+              </Link>
+            </div>
+          </section>
+
           {/* ── CHAIN OF CUSTODY ────────────────────────────────────── */}
           <ChainOfCustodyTimeline entries={timeline} />
 

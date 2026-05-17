@@ -5,6 +5,7 @@ import OutputArtifactPreview from "@/components/homepage/OutputArtifactPreview";
 import TrustArchitectureBlock from "@/components/homepage/TrustArchitectureBlock";
 import VerificationSpineBlock from "@/components/homepage/VerificationSpineBlock";
 import SectionCTAStrip from "@/components/homepage/SectionCTAStrip";
+import ProfessionalContinuitySection from "@/components/homepage/ProfessionalContinuitySection";
 import ExecutiveReportingSection from "@/components/homepage/ExecutiveReportingSection";
 import StrategyRoomSection from "@/components/homepage/StrategyRoomSection";
 import RetainedOversightSection from "@/components/homepage/RetainedOversightSection";
@@ -40,6 +41,7 @@ export default function CategoryFrontDoor() {
       <TrustArchitectureBlock />
       <VerificationSpineBlock />
       <SectionCTAStrip ctas={ENTRY_CTAS} />
+      <ProfessionalContinuitySection />
       <ExecutiveReportingSection />
       <StrategyRoomSection />
       <SectionCTAStrip ctas={MID_CTAS} />

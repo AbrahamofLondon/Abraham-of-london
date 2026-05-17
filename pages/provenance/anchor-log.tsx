@@ -157,8 +157,8 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
               "Observed internal chain-anchor availability",
               "Whether external anchoring is configured",
             ]}
-            nextAction={{ label: "View client-safe provenance sample", href: "/provenance/sample-export" }}
-            secondaryAction={{ label: "Run Fast Diagnostic", href: "/diagnostics/fast" }}
+            nextAction={{ label: "Create your governed case", href: "/diagnostics/fast" }}
+            secondaryAction={{ label: "View client-safe provenance sample", href: "/provenance/sample-export" }}
           />
 
           {/* How to read this page */}
@@ -329,7 +329,10 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                 View client-safe provenance sample
               </Link>
               <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
-                Run Fast Diagnostic
+                Create your governed case
+              </Link>
+              <Link href="/trust" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+                View Trust Center
               </Link>
             </div>
           </section>

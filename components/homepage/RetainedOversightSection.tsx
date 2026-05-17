@@ -25,9 +25,9 @@ export default function RetainedOversightSection() {
   return (
     <SectionShell
       id="retained-oversight"
-      eyebrow="Retained Oversight"
+      eyebrow="Retained Oversight · Contracted continuity"
       title="Governance cadence remains live across cycles."
-      description="Retained Oversight preserves governance cadence across cycles: sponsor-safe visibility, delivery control, outcome verification, and institutional memory."
+      description="Retained Oversight is contracted continuity: sponsor-safe visibility, delivery control, outcome verification, and institutional memory across repeated governance cycles."
     >
       <div className="mx-auto max-w-[900px]">
         <div className="grid gap-3 sm:grid-cols-2">

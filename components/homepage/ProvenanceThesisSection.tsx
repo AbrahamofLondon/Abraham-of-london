@@ -167,7 +167,7 @@ export default function ProvenanceThesisSection() {
           </p>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/provenance/sample-export"
             className="group inline-flex min-h-[44px] items-center gap-3 border px-6 py-3 transition-all duration-200 hover:-translate-y-0.5"
@@ -183,6 +183,32 @@ export default function ProvenanceThesisSection() {
           >
             View provenance sample
             <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+          </Link>
+          <Link
+            href="/provenance/demo"
+            className="inline-flex min-h-[44px] items-center border border-white/[0.10] px-5 py-3"
+            style={{
+              ...mono,
+              fontSize: "9px",
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.44)",
+            }}
+          >
+            View provenance demo
+          </Link>
+          <Link
+            href="/trust"
+            className="inline-flex min-h-[44px] items-center border border-white/[0.08] px-5 py-3"
+            style={{
+              ...mono,
+              fontSize: "9px",
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.34)",
+            }}
+          >
+            View Trust Center
           </Link>
         </div>
       </div>

@@ -19,6 +19,13 @@ const stages: {
     ctaLabel: "Run the Fast Diagnostic",
   },
   {
+    label: "Professional",
+    state: "Continuity layer",
+    detail: "When cases need to remain active over time, Professional preserves continuity: more active governed cases, Return Briefs, client-safe evidence export, sharing, and organisation collaboration.",
+    href: "/pricing",
+    ctaLabel: "View Professional continuity",
+  },
+  {
     label: "Executive Reporting",
     state: "Earned by evidence",
     detail: "Opens when the Fast Diagnostic reaches evidential threshold. A governed report with a named condition, seriousness rating, governance risk score, and a required sequence of moves.",
@@ -64,7 +71,7 @@ export default function EarnedProgressionBlock() {
       id="earned-progression"
       eyebrow="Earned progression"
       title="The next layer is earned by evidence."
-      description="You do not choose the highest product. You submit evidence. The system determines what is warranted, what is blocked, and what is still premature."
+      description="You do not choose the highest product. Free entry creates trust, Professional preserves continuity, and later layers open only when the evidence record warrants them."
     >
       <div className="mx-auto max-w-[900px] space-y-3">
         {stages.map((stage, index) => (

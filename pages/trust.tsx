@@ -136,6 +136,47 @@ const TrustPage: NextPage = () => (
             how provenance integrity works, and what rights you hold over your
             data. No certifications are claimed that we do not hold.
           </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link
+              href="/diagnostics/fast"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                border: `1px solid ${GOLD}44`,
+                backgroundColor: `${GOLD}0A`,
+                color: `${GOLD}CC`,
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                padding: "0.65rem 1.1rem",
+                textDecoration: "none",
+              }}
+            >
+              Create your governed case
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+            <Link
+              href="/pricing"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                border: "1px solid rgba(255,255,255,0.10)",
+                backgroundColor: "rgba(255,255,255,0.02)",
+                color: "rgba(255,255,255,0.4)",
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                padding: "0.65rem 1.1rem",
+                textDecoration: "none",
+              }}
+            >
+              View Professional continuity
+            </Link>
+          </div>
         </header>
 
         {/* ── SECURITY POSTURE ────────────────────────────────────── */}

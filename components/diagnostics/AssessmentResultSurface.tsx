@@ -414,6 +414,40 @@ export default function AssessmentResultSurface({
         </div>
       </section>
 
+      <section
+        style={{
+          border: "1px solid rgba(255,255,255,0.06)",
+          background: "rgba(255,255,255,0.015)",
+          padding: "14px 16px",
+          marginBottom: "16px",
+        }}
+      >
+        <SectionLabel>Where the decision lives now</SectionLabel>
+        <p
+          style={{
+            ...mono,
+            fontSize: "9px",
+            color: "rgba(255,255,255,0.35)",
+            lineHeight: 1.7,
+          }}
+        >
+          {recordStatus.level === "SESSION_PREVIEW"
+            ? "This is a governed session result until saved. Save it to create the enduring case record in Decision Centre."
+            : "This result belongs to a governed case in Decision Centre, where continuity, admissibility, and the next required action remain visible."}
+        </p>
+        <p
+          style={{
+            ...mono,
+            fontSize: "8px",
+            color: "rgba(255,255,255,0.24)",
+            lineHeight: 1.7,
+            marginTop: "8px",
+          }}
+        >
+          Executive Reporting is the first paid governed intelligence layer when evidence justifies it. Strategy Room is an earned intervention layer, not a default upsell.
+        </p>
+      </section>
+
       {/* ── 9. Secondary save/send actions ────────────────────────────── */}
       {(onSave || sendToSelfSlot) && (
         <section

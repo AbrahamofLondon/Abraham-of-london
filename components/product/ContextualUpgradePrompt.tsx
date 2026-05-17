@@ -45,12 +45,12 @@ type ActionConfig = {
 const ACTION_CONFIG: Record<UpgradeAction, ActionConfig> = {
   create_fourth_case: {
     title: "Free tier active case limit reached",
-    body: "You have reached the free limit of 3 active governed cases. Your existing cases remain readable. Upgrade to Professional to continue governing new active cases without limits.",
+    body: "You have reached the free limit of 3 active governed cases. Your existing cases remain readable. Professional preserves the governed record beyond the free active-case limit so more live cases can stay active over time.",
     professionalFeature: "Unlimited active governed cases",
   },
   request_return_brief: {
     title: "Return Brief generation",
-    body: "Generating a Return Brief is a Professional continuity feature. Your case remains readable and active in Decision Centre. Upgrade only if you need structured case re-engagement documents.",
+    body: "Generating a Return Brief is a Professional continuity feature. Your case remains readable and active in Decision Centre. Professional preserves the governed record when a live case needs structured re-engagement over time.",
     professionalFeature: "Return Brief generation",
   },
   export_evidence: {
@@ -60,7 +60,7 @@ const ACTION_CONFIG: Record<UpgradeAction, ActionConfig> = {
   },
   share_case: {
     title: "Case sharing",
-    body: "Sharing cases with reviewers is a Professional collaboration feature. Your case remains private and readable only by you. Upgrade only if you need to share cases with your team.",
+    body: "Sharing cases with reviewers is a Professional continuity and collaboration feature. Your case remains private and readable only by you. Upgrade only if the governed record now needs safe external review.",
     professionalFeature: "Case sharing with reviewers",
   },
   invite_organisation_member: {

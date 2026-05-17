@@ -117,7 +117,7 @@ export default function WhatYouCanUseTodaySection() {
               lineHeight: 1.7,
             }}
           >
-            Entry diagnostics and public tools are available without a consultation. Executive reporting, intervention, and retained oversight are paid or qualification-gated layers.
+            Entry diagnostics, governed instruments, and public proof surfaces are available without a consultation. Professional preserves continuity once cases need to remain live; executive reporting, intervention, and retained oversight are paid or qualification-gated layers.
           </p>
         </div>
       </div>

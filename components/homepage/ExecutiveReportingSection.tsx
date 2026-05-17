@@ -17,7 +17,7 @@ export default function ExecutiveReportingSection() {
       id="executive-reporting"
       eyebrow="Paid report layer · Evidence-gated"
       title="A governed report. Not a summary."
-      description="When diagnostic evidence reaches threshold, Executive Reporting converts it into a board-readable priority stack, seriousness rating, governance risk score, correction sequence, and next checkpoint. It opens when earned, not on request."
+      description="When diagnostic evidence reaches threshold, Executive Reporting becomes the first paid governed intelligence layer: a board-readable priority stack, seriousness rating, governance risk score, correction sequence, and next checkpoint. It opens when earned, not on request."
     >
       <div className="mx-auto max-w-[900px]">
         <div

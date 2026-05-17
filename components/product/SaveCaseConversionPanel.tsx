@@ -252,7 +252,7 @@ export default function SaveCaseConversionPanel({
           marginBottom: "0.75rem",
         }}
       >
-        Save it as a governed case to keep:
+        Save it as a governed case so Decision Centre can keep carrying it:
       </p>
 
       <ul
@@ -290,6 +290,18 @@ export default function SaveCaseConversionPanel({
           </li>
         ))}
       </ul>
+
+      <p
+        style={{
+          ...mono,
+          fontSize: "8px",
+          lineHeight: 1.7,
+          color: "rgba(255,255,255,0.28)",
+          marginBottom: "1rem",
+        }}
+      >
+        Free entry creates the first trusted record. Professional preserves the governed record beyond the free active-case limit when continuity is needed.
+      </p>
 
       {/* CTA hierarchy */}
       <div className="flex flex-wrap gap-2 items-center">

@@ -224,6 +224,32 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
         )}
       </div>
 
+      <div style={{ marginBottom: "16px", border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "12px 14px" }}>
+        <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88`, display: "block", marginBottom: "6px" }}>
+          Next governed pathway
+        </span>
+        <div style={{ display: "grid", gap: "8px" }}>
+          {c.admission.executiveReporting?.status === "ADMITTED" ? (
+            <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
+              Evidence is strong enough for <strong style={{ fontWeight: 400, color: "rgba(255,255,255,0.68)" }}>Executive Reporting</strong>, the first paid governed intelligence layer.
+            </p>
+          ) : (
+            <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.32)" }}>
+              Executive Reporting remains closed until the evidence record is strong enough to justify paid governed interpretation.
+            </p>
+          )}
+          {c.admission.strategyRoom?.status === "ADMITTED" ? (
+            <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
+              Intervention is warranted: <strong style={{ fontWeight: 400, color: "rgba(255,255,255,0.68)" }}>Strategy Room</strong> is now the earned execution layer.
+            </p>
+          ) : (
+            <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.32)" }}>
+              Strategy Room remains an earned intervention layer, not a starting point.
+            </p>
+          )}
+        </div>
+      </div>
+
       {/* Repair actions — shown when any surface is restricted */}
       {(c.admission.executiveReporting?.status === "RESTRICTED" || c.admission.strategyRoom?.status === "RESTRICTED") && (
         <div style={{ border: "1px solid rgba(252,165,165,0.10)", backgroundColor: "rgba(252,165,165,0.02)", padding: "12px 16px", marginBottom: "16px" }}>
@@ -384,12 +410,12 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
               </Link>
             ))}
             <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.22)", marginTop: "8px" }}>
-              A generated client-safe Return Brief appears here when the governed record contains enough return-cycle evidence to reopen the condition safely.
+              A generated client-safe Return Brief appears here when the governed record contains enough return-cycle evidence to reopen the condition safely. This is the Professional continuity path for live cases that return or stall.
             </p>
           </>
         ) : (
           <p style={{ fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.28)" }}>
-            No generated Return Brief yet. A Return Brief appears when the governed record contains enough return-cycle evidence.
+            No generated Return Brief yet. A Return Brief appears when the governed record contains enough return-cycle evidence and continuity warrants re-engagement.
           </p>
         )}
       </div>
