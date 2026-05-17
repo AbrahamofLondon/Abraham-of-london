@@ -126,13 +126,26 @@ export default function Header({
 
   const [isOpen,   setIsOpen]   = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+  const [scrollY,  setScrollY]  = React.useState(0);
 
   React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 16);
+      setScrollY(y);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Long-form knowledge pages: collapse the header to a compact state after
+  // 180px scroll so fixed chrome never obscures deep-reading content.
+  const LONG_FORM_PREFIXES = ["/library", "/intelligence/", "/briefs/", "/books/", "/vault/"];
+  const isLongFormPage = LONG_FORM_PREFIXES.some(
+    (p) => currentPath === p.replace(/\/$/, "") || currentPath.startsWith(p),
+  );
+  const deepScroll = mounted && isLongFormPage && scrollY > 180 && !isOpen;
 
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
@@ -158,12 +171,19 @@ export default function Header({
         suppressHydrationWarning
         className={cn(
           "fixed inset-x-0 top-0 z-[100] w-full backdrop-blur-sm transition-all duration-500",
-          elevated
-            ? "border-b border-white/[0.12] bg-[#060609] py-3.5"
-            : "border-b border-white/[0.08] bg-[#060609]/90 py-4",
+          deepScroll
+            ? "border-b border-white/[0.07] bg-[#060609]/96 py-2"
+            : elevated
+              ? "border-b border-white/[0.12] bg-[#060609] py-3.5"
+              : "border-b border-white/[0.08] bg-[#060609]/90 py-4",
         )}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12">
+        <div
+          className={cn(
+            "mx-auto flex items-center justify-between px-6 lg:px-12 transition-all duration-500",
+            deepScroll ? "max-w-3xl" : "max-w-7xl",
+          )}
+        >
 
           {/* ── Wordmark ───────────────────────────────────────────────────── */}
           <Link
@@ -187,8 +207,8 @@ export default function Header({
           {/* ── Right cluster ─────────────────────────────────────────────── */}
           <div className="flex items-center gap-5">
 
-            {/* Desktop nav */}
-            {!minimal && (
+            {/* Desktop nav — hidden when collapsed (long-form deep scroll) */}
+            {!minimal && !deepScroll && (
               <nav className="hidden items-center gap-3 md:flex" aria-label="Primary navigation">
                 {NAV_ITEMS.map((item) => {
                   const active = mounted && isActive(currentPath, item.href);
@@ -212,10 +232,8 @@ export default function Header({
               </nav>
             )}
 
-            {/* Member slot — auth-aware.
-                Authenticated: Inner Circle → dashboard.
-                Unauthenticated: Inner Circle → /inner-circle (registration/unlock). */}
-            {!minimal && (
+            {/* Member slot — auth-aware. Hidden when collapsed. */}
+            {!minimal && !deepScroll && (
               <Link
                 href="/diagnostics/fast"
                 className="hidden items-center gap-2 border px-3 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] transition-all duration-300 lg:inline-flex"
@@ -231,7 +249,7 @@ export default function Header({
               </Link>
             )}
 
-            {!minimal && (
+            {!minimal && !deepScroll && (
               <Link
                 href={isAuthenticated ? "/inner-circle/dashboard" : "/inner-circle"}
                 className="hidden items-center gap-2 border px-3 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] transition-all duration-300 lg:inline-flex"

@@ -101,10 +101,12 @@ const FORMAT_LABELS: Record<LibraryItemFormat, string> = {
 export function ctaLabel(item: LibraryIndexItem): string {
   if (!item.href || item.href === "#") return "Access route pending";
   if (item.access === "paid") return "Purchase / Unlock";
+  if (item.type === "brief" && item.access === "restricted") return "View metadata / Request access";
   if (item.access === "restricted") return "View access requirements";
   if (item.access === "member") return "Member access";
   if (item.type === "vault") return "View metadata";
   if (item.type === "event") return "View event";
+  if (item.type === "brief") return "Read brief";
   if (
     item.href.startsWith("/assets/") ||
     item.href.startsWith("http") ||
