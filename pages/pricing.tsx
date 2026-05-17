@@ -1045,7 +1045,7 @@ export default function PricingPage() {
           </nav>
 
           {/* ── Closing disclaimer ──────────────────────────────────────── */}
-          <p
+          <div
             style={{
               ...mono,
               fontSize: "7px",
@@ -1053,16 +1053,38 @@ export default function PricingPage() {
               color: "rgba(255,255,255,0.18)",
               lineHeight: 1.8,
               marginTop: "32px",
-              maxWidth: "600px",
+              maxWidth: "720px",
+              display: "grid",
+              gap: "12px",
             }}
           >
-            Abraham of London provides governed decision instruments and structured advisory frameworks.
-            Nothing on this platform constitutes legal, financial, investment, or regulated professional advice.
-            Access fees are charged for methodology access and session facilitation, not for outcomes.
-            Governed records are produced from user-submitted evidence and are not independently audited.
-            Prices shown are in GBP and include VAT where applicable. Access is non-refundable once a
-            session has been initiated.
-          </p>
+            <p style={{ margin: 0 }}>
+              Abraham of London provides governed decision instruments, structured advisory frameworks,
+              and decision-infrastructure methodology. Nothing on this platform constitutes legal,
+              financial, investment, tax, immigration, medical, or other regulated professional advice.
+              Access fees are charged for methodology access, governed instruments, report generation,
+              and session facilitation, not for guaranteed outcomes. Governed records are produced from
+              user-submitted evidence and system-generated analysis and are not independently audited
+              unless expressly stated.
+            </p>
+
+            <p style={{ margin: 0 }}>
+              Users retain ownership of the evidence, facts, and materials they submit. Abraham of London
+              retains all rights in its proprietary methodology, frameworks, instruments, taxonomies,
+              scoring logic, prompts, report structures, templates, product language, visual systems,
+              and decision-infrastructure architecture. Platform outputs may be used by the purchasing
+              user or organisation for internal decision-making and governance purposes. They may not be
+              reproduced, repackaged, adapted, sold, taught, published, used to create courses, books,
+              educational materials, consulting products, software, datasets, or competing frameworks,
+              or used to train third-party systems, without prior written permission.
+            </p>
+
+            <p style={{ margin: 0 }}>
+              Prices shown are in GBP and include VAT where applicable unless stated otherwise. Access is
+              non-refundable once a session, report, instrument, or governed workflow has been initiated,
+              except where required by law.
+            </p>
+          </div>
         </div>
       </div>
     </>
