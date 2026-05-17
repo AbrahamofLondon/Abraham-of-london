@@ -5,27 +5,37 @@
 The confirmed Library indexing gaps are closed without widening public exposure.
 
 - **Before:** 452 indexed Library records.
-- **After:** 496 indexed Library records.
-- **Contentlayer remains:** 390 documents, 0 invalid.
-- **Net new Library records:** 44.
+- **After:** 497 indexed Library records.
+- **Contentlayer now:** 391 valid documents, with the collection landing file remaining outside the Intelligence brief count.
+- **Net new Library records:** 45.
 
 The additional 44 records come from metadata-only discovery surfaces rather than raw-body exposure:
 
 | Gap | Added | Treatment |
 | --- | ---: | --- |
-| Intelligence | 12 | Existing Contentlayer documents now wired through the server facade |
+| Intelligence | 13 | Existing Contentlayer documents now wired through the server facade, plus one new public-facing brief |
 | Toolkits | 19 | Metadata-only index records from `content/toolkits/` |
 | Evidence | 8 | Metadata-only index records from `content/evidence/` |
 | Vault index | 1 | Restricted metadata-only record for `rise-decay-index` |
 | EPUBs | 4 | Indexed from the existing EPUB manifest |
 
-The brief expected **13** intelligence items, but the current filesystem contains **12** files under `content/intelligence/`. The implementation indexes the 12 real documents and leaves the discrepancy documented rather than fabricating a thirteenth item.
+The brief expected **13** Intelligence items. The collection now contains:
+
+- `strategic-autonomy-001.mdx` through `strategic-autonomy-012.mdx`
+- one new public-facing Intelligence brief, `decision-delay-governance-cost.mdx`
+- one separate collection landing file, `index.mdx`
+
+The follow-up reconciliation established the counting doctrine:
+
+- `/intelligence` does **not** require an MDX landing file because it is already served by `pages/intelligence/index.tsx`.
+- `index.mdx` remains a collection/landing artefact, not a normal brief.
+- The Library now indexes **13 valid Intelligence briefs**. The collection landing file is intentionally excluded from that count.
 
 ## Gap status
 
 ### 1. Intelligence wiring — closed
 
-`getAllIntelligence()` now exists in the content facade and the Library aggregator consumes it. The 12 `content/intelligence/` documents now appear under **Intelligence & Briefs**.
+`getAllIntelligence()` now exists in the content facade and the Library aggregator consumes it. The 13 valid `content/intelligence/` briefs now appear under **Intelligence & Briefs**.
 
 ### 2. Toolkits indexing — closed with metadata-only posture
 
@@ -82,14 +92,14 @@ These should **not** be separately indexed now.
 | Books & Manuscripts | 6 |
 | Canon & Lexicon | 78 |
 | Frameworks & Playbooks | 38 |
-| Intelligence & Briefs | 106 |
+| Intelligence & Briefs | 107 |
 | Downloads & Resources | 143 |
 | Vault | 2 |
 | Events | 2 |
 
 | Type / source | Count |
 | --- | ---: |
-| Intelligence | 12 |
+| Intelligence | 13 |
 | Toolkit metadata | 19 |
 | Evidence metadata | 8 |
 | Vault-index metadata | 1 |
@@ -143,11 +153,23 @@ These are commercially or product-significant because they align directly with g
 
 ## Remaining backlog
 
-1. Reconcile the expected-vs-actual intelligence count if a thirteenth document was intended but is absent.
-2. Decide whether route-less toolkit leaf records deserve future first-class routes or should remain discovery metadata that rolls up to parent toolkit surfaces.
-3. Decide whether the five route-less evidence outcome files should receive governed public pages or remain restricted proof metadata only.
-4. Consolidate the artifact source-of-truth between `content/artifacts/` and the premium registry to avoid long-term duplication.
-5. Editorially enrich PDF tags and malformed filename-derived categories in a separate metadata quality pass.
+1. Decide whether route-less toolkit leaf records deserve future first-class routes or should remain discovery metadata that rolls up to parent toolkit surfaces.
+2. Decide whether the five route-less evidence outcome files should receive governed public pages or remain restricted proof metadata only.
+3. Consolidate the artifact source-of-truth between `content/artifacts/` and the premium registry to avoid long-term duplication.
+4. Editorially enrich PDF tags and malformed filename-derived categories in a separate metadata quality pass.
+
+## Intelligence discrepancy reconciliation
+
+| Question | Finding |
+| --- | --- |
+| Actual file count under `content/intelligence/` | **14 physical files** |
+| Files present | `index.mdx`, `decision-delay-governance-cost.mdx`, and `strategic-autonomy-001.mdx` through `strategic-autonomy-012.mdx` |
+| `content/intelligence/index.mdx` present? | **Yes** — maintained as a collection/landing file |
+| Was `index.mdx` created in the Library coverage commit? | **No** — it was added in the follow-up editorial completion pass as a collection landing file |
+| Does `/intelligence` require it? | **No** — the collection landing route is already implemented in `pages/intelligence/index.tsx` |
+| Does Contentlayer count the current `index.mdx` as an Intelligence document? | **No** — it remains collection metadata, not a normal brief |
+| Final Contentlayer Intelligence count | **13** |
+| Final Library Intelligence count | **13** |
 
 ## Verification run
 
