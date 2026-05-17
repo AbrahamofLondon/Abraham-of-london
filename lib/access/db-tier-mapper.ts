@@ -1,15 +1,16 @@
 // lib/access/db-tier-mapper.ts
 import type { AccessTier } from "./tier-policy";
 
-export type DbAccessTier = 
+export type DbAccessTier =
   | "public"
   | "member"
-  | "inner_circle"
+  | "professional"
+  | "inner_circle"  // Legacy DB value — still valid in Prisma enum
   | "client"
   | "legacy"
   | "architect"
   | "owner"
-  | "top_secret";  // ✅ Added
+  | "top_secret";
 
 export function toDbTier(tier: AccessTier): DbAccessTier {
   return tier as DbAccessTier;

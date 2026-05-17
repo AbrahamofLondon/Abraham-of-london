@@ -326,7 +326,8 @@ InnerCircleDataSchema.virtual("accessDescription").get(function (this: any) {
   const descriptions: Record<AccessTier, string> = {
     public: "Available to everyone",
     member: "Available to all members",
-    inner_circle: "Inner Circle exclusive content",
+    professional: "Professional exclusive content",
+    inner_circle: "Professional exclusive content",
     restricted: "Restricted access - limited distribution",
     client: "Client access only",
     legacy: "Legacy member exclusive",

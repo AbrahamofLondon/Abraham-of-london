@@ -33,6 +33,7 @@ export interface UpdateUserInput {
 const ACCESS_RANK: Record<UserTier, number> = {
   public: 0,
   member: 1,
+  professional: 2,
   inner_circle: 2,
   restricted: 3,
   client: 4,
@@ -293,7 +294,8 @@ export class UserService {
     const labels: Record<UserTier, string> = {
       public: "Public Access",
       member: "Member Access",
-      inner_circle: "Inner Circle Access",
+      professional: "Professional Access",
+      inner_circle: "Professional Access",
       restricted: "Restricted Access",
       client: "Client Access",
       legacy: "Legacy Access",

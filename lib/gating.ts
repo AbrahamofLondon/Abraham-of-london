@@ -211,7 +211,8 @@ export const getTierDescription = (tier: Tier | string): string => {
   const descriptions: Record<Tier, string> = {
     public: "Public content accessible to all visitors",
     member: "Member-only content",
-    inner_circle: "Inner Circle membership content",
+    professional: "Professional membership content",
+    inner_circle: "Professional membership content",
     restricted: "Restricted content requiring elevated clearance",
     client: "Client-tier content and resources",
     legacy: "Legacy-tier content and archives",

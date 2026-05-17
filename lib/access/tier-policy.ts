@@ -6,13 +6,14 @@
 export const TIER_ORDER = [
   "public",
   "member",
-  "inner_circle", // Synchronized with Prisma
+  "professional",  // Canonical paid tier (replaces inner_circle at runtime)
+  "inner_circle",  // Legacy DB value — normalizes to professional via normalizeRuntimeTier
   "restricted",
   "client",
   "legacy",
   "architect",
   "owner",
-  "top_secret", // Synchronized with Prisma
+  "top_secret",
 ] as const;
 
 export type AccessTier = (typeof TIER_ORDER)[number];
@@ -20,7 +21,8 @@ export type AccessTier = (typeof TIER_ORDER)[number];
 export const TIER_HIERARCHY: Record<AccessTier, number> = {
   public: 0,
   member: 1,
-  inner_circle: 2,
+  professional: 2,
+  inner_circle: 2,  // Legacy DB value — same rank as professional
   restricted: 3,
   client: 4,
   legacy: 5,
@@ -32,7 +34,8 @@ export const TIER_HIERARCHY: Record<AccessTier, number> = {
 export const TIER_LABELS: Record<AccessTier, string> = {
   public: "Public",
   member: "Member",
-  inner_circle: "Inner Circle",
+  professional: "Professional",
+  inner_circle: "Professional",  // Legacy DB value — shows as Professional to users
   restricted: "Restricted",
   client: "Client",
   legacy: "Legacy",
@@ -59,7 +62,11 @@ export const TIER_ALIASES: Record<string, AccessTier> = {
   basic: "member",
   standard: "member",
 
-  // inner-circle -> inner_circle
+  // professional (canonical paid tier)
+  professional: "professional",
+  pro: "professional",
+
+  // inner-circle -> inner_circle (legacy DB value; normalizes to professional at runtime)
   "inner-circle": "inner_circle",
   innercircle: "inner_circle",
   inner_circle: "inner_circle",
@@ -169,6 +176,15 @@ export function requiredTierFromDoc(doc: TierDocLike): AccessTier {
 
 export function normalizeRequiredTier(input?: unknown): AccessTier {
   return normalizeUserTier(input);
+}
+
+/**
+ * Runtime tier normalisation for display and gate logic.
+ * inner_circle (legacy DB value) surfaces as professional everywhere outside of raw DB writes.
+ */
+export function normalizeRuntimeTier(tier: AccessTier): AccessTier {
+  if (tier === "inner_circle") return "professional";
+  return tier;
 }
 
 /**

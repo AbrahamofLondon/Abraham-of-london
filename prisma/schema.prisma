@@ -46,6 +46,7 @@ enum MemberRole {
 enum AccessTier {
   public
   member
+  professional
   inner_circle
   restricted
   client

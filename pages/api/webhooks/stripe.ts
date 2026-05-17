@@ -31,12 +31,13 @@ function mapStripeTierToAccessTier(membershipTier: unknown): AccessTier {
 
   const explicit: Record<string, AccessTier> = {
     free: "member",
-    premium: "inner_circle",
+    premium: "professional",
     enterprise: "client",
     elite: "legacy",
     basic: "member",
     standard: "member",
-    pro: "inner_circle",
+    pro: "professional",
+    professional: "professional",
     business: "client",
   };
 
@@ -131,7 +132,6 @@ export default async function handler(
       await prisma.innerCircleMember.update({
         where: { id: userId },
         data: {
-          // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
           tier,
           status: "active",
           metadata: JSON.stringify(mergeMetadata(existingUser?.metadata, {
@@ -221,7 +221,6 @@ export default async function handler(
         await prisma.innerCircleMember.update({
           where: { id: user.id },
           data: {
-            // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
             tier: "member",
             status: "active",
             metadata: JSON.stringify(mergeMetadata(user.metadata, {
@@ -261,14 +260,11 @@ export default async function handler(
         : null;
 
       if (user && priceId) {
-        const tier: AccessTier = "inner_circle";
+        const tier: AccessTier = "professional";
 
         await prisma.innerCircleMember.update({
           where: { id: user.id },
-          data: {
-            // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
-            tier,
-          },
+          data: { tier },
         });
 
         await auditLogger.log({

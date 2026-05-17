@@ -143,7 +143,8 @@ export function getClearanceLabel(tier: AccessTier | unknown): string {
   const labels: Record<AccessTier, string> = {
     public: 'Public // Level 0',
     member: 'Member // Level 1',
-    inner_circle: 'Inner Circle // Level 2',
+    professional: 'Professional // Level 2',
+    inner_circle: 'Professional // Level 2',
     restricted: 'Restricted // Level 3',
     client: 'Client // Level 4',
     legacy: 'Legacy // Level 5',
@@ -162,6 +163,7 @@ export function getTierLevel(tier: AccessTier): number {
   const levels: Record<AccessTier, number> = {
     public: 0,
     member: 1,
+    professional: 2,
     inner_circle: 2,
     restricted: 3,
     client: 4,
@@ -182,6 +184,7 @@ export function getTierBadgeClasses(tier: AccessTier | unknown): string {
   const classes: Record<AccessTier, string> = {
     public: 'bg-zinc-900 text-zinc-400 border-zinc-800',
     member: 'bg-blue-950/30 text-blue-400 border-blue-900',
+    professional: 'bg-purple-950/30 text-purple-400 border-purple-900',
     inner_circle: 'bg-purple-950/30 text-purple-400 border-purple-900',
     restricted: 'bg-orange-950/30 text-orange-400 border-orange-900',
     client: 'bg-emerald-950/30 text-emerald-400 border-emerald-900',
@@ -203,6 +206,7 @@ export function getTierIcon(tier: AccessTier | unknown): string {
   const icons: Record<AccessTier, string> = {
     public: '🌐',
     member: '🔑',
+    professional: '⚡',
     inner_circle: '⚡',
     restricted: '🔒',
     client: '💼',
@@ -259,15 +263,16 @@ export function getTierColor(tier: AccessTier | unknown): string {
   const normalized = normalizeUserTier(tier);
   
   const colors: Record<AccessTier, string> = {
-    public: '#71717a',      // zinc-500
-    member: '#3b82f6',      // blue-500
-    inner_circle: '#a855f7', // purple-500
+    public: '#71717a',       // zinc-500
+    member: '#3b82f6',       // blue-500
+    professional: '#a855f7', // purple-500
+    inner_circle: '#a855f7', // purple-500 (legacy alias)
     restricted: '#f97316',   // orange-500
-    client: '#10b981',      // emerald-500
-    legacy: '#f59e0b',      // amber-500
-    architect: '#f43f5e',   // rose-500
-    owner: '#f4f4f5',       // zinc-100
-    top_secret: '#ef4444',  // red-500
+    client: '#10b981',       // emerald-500
+    legacy: '#f59e0b',       // amber-500
+    architect: '#f43f5e',    // rose-500
+    owner: '#f4f4f5',        // zinc-100
+    top_secret: '#ef4444',   // red-500
   };
   
   return colors[normalized] || colors.public;

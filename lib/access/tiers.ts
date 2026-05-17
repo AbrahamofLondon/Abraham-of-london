@@ -10,6 +10,7 @@ export {
   isAccessTier,
   normalizeUserTier,
   normalizeRequiredTier,
+  normalizeRuntimeTier,
   hasAccess,
   getTierLabel,
   requiredTierFromDoc,

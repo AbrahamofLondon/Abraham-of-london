@@ -58,7 +58,8 @@ export function getInnerCircleDisplayTier(tier: AccessTier | string): string {
   const displayMap: Record<AccessTier, string> = {
     public: 'Public',
     member: 'Member',
-    inner_circle: 'Inner Circle',
+    professional: 'Professional',
+    inner_circle: 'Professional',
     restricted: 'Restricted Clearance',
     client: 'Inner Circle Plus',
     legacy: 'Inner Circle Elite',

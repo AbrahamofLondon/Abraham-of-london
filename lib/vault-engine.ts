@@ -303,8 +303,9 @@ export async function getVaultStats(): Promise<{
     const base: Record<PolicyAccessTier, number> = {
       public: 0,
       member: 0,
+      professional: 0,
       inner_circle: 0,
-      restricted: 0, 
+      restricted: 0,
       client: 0,
       legacy: 0,
       architect: 0,
@@ -333,8 +334,9 @@ export async function getVaultStats(): Promise<{
       byTier: {
         public: 0,
         member: 0,
+        professional: 0,
         inner_circle: 0,
-        restricted: 0, 
+        restricted: 0,
         client: 0,
         legacy: 0,
         architect: 0,

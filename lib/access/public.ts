@@ -1,6 +1,7 @@
 export const PUBLIC_TIER_ORDER = [
   "public",
   "member",
+  "professional",
   "inner_circle",
   "restricted",
   "client",
@@ -15,6 +16,7 @@ export type AccessTier = (typeof PUBLIC_TIER_ORDER)[number];
 const PUBLIC_TIER_HIERARCHY: Record<AccessTier, number> = {
   public: 0,
   member: 1,
+  professional: 2,
   inner_circle: 2,
   restricted: 3,
   client: 4,
@@ -27,7 +29,8 @@ const PUBLIC_TIER_HIERARCHY: Record<AccessTier, number> = {
 export const TIER_LABELS: Record<AccessTier, string> = {
   public: "Public",
   member: "Member",
-  inner_circle: "Inner Circle",
+  professional: "Professional",
+  inner_circle: "Professional",
   restricted: "Restricted",
   client: "Client",
   legacy: "Legacy",
@@ -46,6 +49,8 @@ const TIER_ALIASES: Record<string, AccessTier> = {
   members: "member",
   basic: "member",
   standard: "member",
+  professional: "professional",
+  pro: "professional",
   "inner-circle": "inner_circle",
   innercircle: "inner_circle",
   inner_circle: "inner_circle",

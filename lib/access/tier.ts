@@ -3,7 +3,8 @@ import type { AccessTier } from "./types";
 const TIER_RANK: Record<AccessTier, number> = {
   public: 0,
   member: 1,
-  "inner-circle": 2,
+  professional: 2,
+  "inner-circle": 2,  // Legacy alias — same rank as professional
   restricted: 3,
   client: 4,
   legacy: 5,
@@ -20,6 +21,8 @@ const TIER_ALIASES: Record<string, AccessTier> = {
   members: "member",
   basic: "member",
   standard: "member",
+  professional: "professional",
+  pro: "professional",
   "inner-circle": "inner-circle",
   inner_circle: "inner-circle",
   innercircle: "inner-circle",
@@ -47,6 +50,7 @@ const TIER_ALIASES: Record<string, AccessTier> = {
 const ALL_TIERS: AccessTier[] = [
   "public",
   "member",
+  "professional",
   "inner-circle",
   "restricted",
   "client",

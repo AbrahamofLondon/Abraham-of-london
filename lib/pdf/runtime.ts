@@ -228,6 +228,7 @@ export function getPDFTierLabel(pdfTier: string | AccessTier): string {
 const TIER_RANK: Record<AccessTier, number> = {
   public: 0,
   member: 1,
+  professional: 2,
   inner_circle: 2,
   restricted: 3,
   client: 4,

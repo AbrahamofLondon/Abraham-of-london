@@ -1,6 +1,7 @@
 export type AccessTier =
   | "public"
   | "member"
+  | "professional"
   | "inner-circle"
   | "restricted"
   | "client"
