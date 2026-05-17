@@ -225,13 +225,42 @@ const TrustPage: NextPage = () => (
             are implied beyond what is listed here.
           </p>
 
-          <div className="space-y-3 mt-2">
-            <CertRow label="SOC 2 Type I" status="NOT_STARTED" note="Not yet initiated. Planned as part of enterprise readiness programme." />
-            <CertRow label="SOC 2 Type II" status="NOT_STARTED" note="Follows SOC 2 Type I. No timeline committed publicly." />
-            <CertRow label="ISO 27001" status="NOT_STARTED" note="Not yet initiated." />
-            <CertRow label="Independent security audit" status="PLANNED" note="Planned before enterprise GA. Specific firm not yet engaged." />
-            <CertRow label="GDPR compliance programme" status="IN_PROGRESS" note="Data rights fulfillment (deletion, export) implemented. DPA available on request for enterprise accounts." />
-            <CertRow label="CCPA compliance" status="IN_PROGRESS" note="Data rights implemented. Privacy policy covers CCPA requirements." />
+          {/* ── Company / platform certifications ── */}
+          <div className="mb-6">
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+              Company / platform certifications
+            </p>
+            <div className="space-y-3">
+              <CertRow label="SOC 2 Type I" status="PLANNED" note="Not yet held. Planned as part of enterprise readiness programme." />
+              <CertRow label="SOC 2 Type II" status="NOT_STARTED" note="Not yet held. Follows SOC 2 Type I. No timeline committed publicly." />
+              <CertRow label="ISO/IEC 27001 organisational certification" status="NOT_STARTED" note="Not yet held." />
+              <CertRow label="Independent security audit" status="PLANNED" note="Planned before enterprise GA. Specific firm not yet engaged." />
+              <CertRow label="GDPR compliance programme" status="IN_PROGRESS" note="Data rights fulfilment (deletion, export) implemented. DPA available on request for enterprise accounts." />
+              <CertRow label="CCPA compliance" status="IN_PROGRESS" note="Data rights implemented. Privacy policy covers CCPA requirements." />
+            </div>
+          </div>
+
+          {/* ── Founder / operator assurance credentials ── */}
+          <div>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+              Founder assurance credentials
+            </p>
+            <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)", marginBottom: "0.75rem" }}>
+              The platform is not currently ISO/IEC 27001 certified. However, Abraham Adaramola holds an ISO/IEC 27001:2022 Lead Auditor credential from Mastermind Assurance.
+            </p>
+            <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", fontStyle: "italic", marginBottom: "1rem", borderLeft: `1px solid ${GOLD}33`, paddingLeft: "0.75rem" }}>
+              This credential supports the assurance literacy, audit awareness, and governance discipline behind the platform. It should not be read as independent certification of Abraham of London Ltd or of the Abraham of London platform.
+            </p>
+            <div className="space-y-3">
+              <CertRow
+                label="ISO/IEC 27001:2022 Lead Auditor"
+                status="LIVE"
+                note="Abraham Adaramola — Mastermind Assurance"
+              />
+              <CertRow label="Mastering Cybersecurity" status="LIVE" note="eHacking, 2020" />
+              <CertRow label="Level 7 Diploma in Consulting Management" status="LIVE" note="Chartered Management Institute, 2017" />
+              <CertRow label="MBA, Brand Leadership" status="LIVE" note="University of East Anglia, 2017" />
+            </div>
           </div>
         </Section>
 
