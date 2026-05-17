@@ -11,15 +11,14 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { getSocialLinks, type SocialLink } from "@/config/site";
 
 // Guard usePathname against static generation where router context is absent.
 // EnhancedFooter is used by Layout (Pages Router) and may be prerendered.
 function usePathnameSafe(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { usePathname } = require("next/navigation");
-    return usePathname();
+    return usePathname() ?? "/";
   } catch {
     return "/";
   }

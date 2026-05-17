@@ -12,6 +12,39 @@ export const getServerSideProps: GetServerSideProps = async () => {
   return { props: {} };
 };
 
+// ── Safe router hook ───────────────────────────────────────────────────────
+// Guards against "NextRouter was not mounted" during static generation.
+// Returns a fallback object with empty query when router context is absent.
+function useSafeRouter(): ReturnType<typeof useRouter> {
+  try {
+    return useRouter();
+  } catch {
+    // Static generation / prerender context — router not available.
+    // Return a minimal compatible shape so the page can render safely.
+    return {
+      route: "",
+      pathname: "",
+      query: {},
+      asPath: "",
+      basePath: "",
+      isLocaleDomain: false,
+      locales: [],
+      locale: "",
+      defaultLocale: "",
+      isReady: false,
+      isPreview: false,
+      isFallback: false,
+      push: async () => {},
+      replace: async () => {},
+      reload: () => {},
+      back: () => {},
+      prefetch: async () => {},
+      beforePopState: () => {},
+      events: { on: () => {}, off: () => {}, emit: () => {} },
+    } as unknown as ReturnType<typeof useRouter>;
+  }
+}
+
 type AuthStep = "request" | "credentials" | "success";
 
 function normalizeReturnTo(input: unknown): string {
@@ -41,7 +74,7 @@ function getInitialStep(input: unknown): AuthStep {
 }
 
 export default function InnerCircleLoginPage() {
-  const router = useRouter();
+  const router = useSafeRouter();
 
   const returnTo = React.useMemo(
     () => normalizeReturnTo(router.query.returnTo),
@@ -132,7 +165,14 @@ export default function InnerCircleLoginPage() {
         return;
       }
 
-      await router.push(returnTo);
+      // Navigate after sign-in. During static generation router.push is a
+      // no-op; at runtime it works normally. window.location is the fallback
+      // for any edge case where router context is missing.
+      try {
+        await router.push(returnTo);
+      } catch {
+        window.location.href = returnTo;
+      }
     } catch (err) {
       console.error("Inner Circle credential sign-in failed:", err);
       setError("Unexpected authentication error.");
