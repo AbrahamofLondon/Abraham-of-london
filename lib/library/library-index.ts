@@ -23,6 +23,7 @@ import {
   getAllResources,
   getAllShorts,
   getAllBriefs,
+  getAllIntelligence,
   getAllLexicon,
   getAllVault,
   getAllStrategies,
@@ -229,9 +230,9 @@ function safeISO(v: unknown): string | null {
 function normalizeAccess(raw: unknown): LibraryItemAccess {
   const s = safeStr(raw).trim().toLowerCase();
   if (!s || s === "public" || s === "open" || s === "free" || s === "unclassified") return "public";
-  if (s === "member" || s === "members" || s === "inner-circle" || s === "inner_circle") return "member";
+  if (s === "member" || s === "members" || s === "registered" || s === "inner-circle" || s === "inner_circle") return "member";
   if (s === "paid" || s === "premium") return "paid";
-  if (s === "restricted" || s === "private" || s === "confidential" || s === "secret" || s === "top-secret" || s === "top_secret" || s === "hardened" || s === "sovereign" || s === "client" || s === "architect" || s === "owner" || s === "legacy") return "restricted";
+  if (s === "restricted" || s === "private" || s === "confidential" || s === "secret" || s === "top-secret" || s === "top_secret" || s === "hardened" || s === "sovereign" || s === "client" || s === "architect" || s === "owner" || s === "legacy" || s === "enterprise") return "restricted";
   return "unknown";
 }
 
@@ -439,6 +440,192 @@ function buildFromPremiumContent(item: any): LibraryIndexItem | null {
   };
 }
 
+type MetadataRecord = {
+  relativePath: string;
+  data: Record<string, unknown>;
+};
+
+const PUBLIC_EVIDENCE_SLUGS = new Set([
+  "tariff-shock-growth-break",
+  "team-alignment-illusion",
+  "escalation-denied-case",
+]);
+
+function loadMetadataRecords(relativeDir: string): MetadataRecord[] {
+  try {
+    // eslint-disable-next-line no-eval
+    const req = eval("require") as NodeRequire;
+    const fs = req("fs") as typeof import("fs");
+    const path = req("path") as typeof import("path");
+    const matter = req("gray-matter") as typeof import("gray-matter");
+    const root = path.join(process.cwd(), relativeDir);
+    if (!fs.existsSync(root)) return [];
+
+    const out: MetadataRecord[] = [];
+    const walk = (dir: string) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const absolute = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(absolute);
+          continue;
+        }
+        if (!/\.(md|mdx)$/i.test(entry.name)) continue;
+        const raw = fs.readFileSync(absolute, "utf8");
+        const parsed = matter(raw);
+        out.push({
+          relativePath: path.relative(process.cwd(), absolute).replace(/\\/g, "/"),
+          data: (parsed.data || {}) as Record<string, unknown>,
+        });
+      }
+    };
+
+    walk(root);
+    return out;
+  } catch (error) {
+    console.warn(`[LIBRARY_INDEX] Metadata loader unavailable for ${relativeDir}:`, error);
+    return [];
+  }
+}
+
+function buildFromToolkitMetadata(record: MetadataRecord): LibraryIndexItem | null {
+  const sourcePath = cleanSlug(record.relativePath);
+  const metadataSlug = cleanSlug(
+    safeStr(record.data.slug) ||
+      sourcePath.replace(/^content\/toolkits\//, ""),
+  );
+  if (!metadataSlug) return null;
+
+  let href = "/toolkits";
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { TOOLKITS } = require("@/lib/toolkits/registry");
+    const registry = Array.isArray(TOOLKITS) ? TOOLKITS : [];
+    const titleMatch = registry.find((toolkit: any) => safeStr(toolkit.title) === safeStr(record.data.title));
+    const directMatch = registry.find((toolkit: any) => safeStr(toolkit.slug) === metadataSlug);
+    const parentMatch = registry.find(
+      (toolkit: any) => safeStr(toolkit.slug) === metadataSlug.split("/")[0],
+    );
+    const safeSlug = safeStr(titleMatch?.slug || directMatch?.slug || parentMatch?.slug);
+    if (safeSlug) href = `/toolkits/${safeSlug}`;
+  } catch {
+    href = "/toolkits";
+  }
+
+  return {
+    id: `toolkit-${sourcePath}`,
+    title: safeStr(record.data.title, metadataSlug),
+    summary: safeStr(record.data.description, null) || null,
+    description: safeStr(record.data.description, null) || null,
+    type: "toolkit",
+    section: inferSection("toolkit"),
+    href,
+    access: normalizeAccess(record.data.tier || "restricted"),
+    format: "toolkit",
+    status: normalizeStatus(record.data.status),
+    date: safeISO(record.data.date),
+    tags: safeArr(record.data.tags),
+    category: safeStr(record.data.category || "Toolkit", null) || null,
+    featured: Boolean(record.data.featured === true),
+    sourceType: "toolkit-metadata",
+    sourcePath,
+  };
+}
+
+function buildFromEvidenceMetadata(record: MetadataRecord): LibraryIndexItem | null {
+  const sourcePath = cleanSlug(record.relativePath);
+  const slug = sourcePath
+    .replace(/^content\/evidence\//, "")
+    .replace(/\.(md|mdx)$/i, "");
+  if (!slug) return null;
+
+  const isPublicRoute = PUBLIC_EVIDENCE_SLUGS.has(slug);
+  return {
+    id: `evidence-${slug}`,
+    title: safeStr(record.data.title, slug),
+    summary: safeStr(record.data.description, null) || null,
+    description: safeStr(record.data.description, null) || null,
+    type: "evidence",
+    section: inferSection("evidence"),
+    href: isPublicRoute ? `/evidence/${slug}` : "/evidence",
+    access: isPublicRoute ? "public" : "restricted",
+    format: "resource",
+    status: normalizeStatus(record.data.status),
+    date: safeISO(record.data.date),
+    tags: safeArr(record.data.tags),
+    category: safeStr(record.data.category || "Evidence", null) || null,
+    featured: false,
+    sourceType: "evidence-metadata",
+    sourcePath,
+  };
+}
+
+function buildFromVaultIndexMetadata(record: MetadataRecord): LibraryIndexItem | null {
+  const sourcePath = cleanSlug(record.relativePath);
+  const slug = sourcePath
+    .replace(/^content\/vault\/indices\//, "")
+    .replace(/\.(md|mdx)$/i, "");
+  if (!slug) return null;
+
+  return {
+    id: `vault-index-${slug}`,
+    title: safeStr(record.data.title, slug),
+    summary: safeStr(record.data.description, null) || null,
+    description: safeStr(record.data.description, null) || null,
+    type: "vault",
+    section: inferSection("vault"),
+    href: "/vault",
+    access: "restricted",
+    format: "article",
+    status: normalizeStatus(record.data.status),
+    date: safeISO(record.data.date),
+    tags: safeArr(record.data.tags),
+    category: safeStr(record.data.category || "Vault Index", null) || null,
+    featured: false,
+    sourceType: "vault-index-metadata",
+    sourcePath,
+  };
+}
+
+function buildFromEpubManifestEntry(entry: any): LibraryIndexItem | null {
+  const slug = cleanSlug(safeStr(entry?.slug));
+  if (!slug) return null;
+
+  const isFlagshipBook = slug === "ultimate-purpose-of-man-editorial";
+  return {
+    id: `epub-${slug}`,
+    title: safeStr(entry?.title, slug),
+    summary: null,
+    description: null,
+    type: isFlagshipBook ? "book" : "download",
+    section: isFlagshipBook ? "books_manuscripts" : "downloads_resources",
+    href: safeStr(entry?.publicHref) || `/epubs/${slug}.epub`,
+    access: "public",
+    format: "epub",
+    status: "published",
+    date: safeISO(entry?.generatedAt),
+    tags: ["epub"],
+    category: isFlagshipBook ? "Book" : "EPUB",
+    featured: false,
+    sourceType: "epub-manifest",
+    sourcePath: safeStr(entry?.publicHref, null) || null,
+  };
+}
+
+function loadEpubManifestItems(): LibraryIndexItem[] {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const manifest = require("../../public/epubs/epub-manifest.json");
+    const entries = Array.isArray(manifest?.items) ? manifest.items : [];
+    return entries
+      .map((entry: any) => buildFromEpubManifestEntry(entry))
+      .filter((item: LibraryIndexItem | null): item is LibraryIndexItem => Boolean(item));
+  } catch (error) {
+    console.warn("[LIBRARY_INDEX] EPUB manifest unavailable:", error);
+    return [];
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Main aggregation function
 // ─────────────────────────────────────────────────────────────────────────────
@@ -473,6 +660,7 @@ export function buildLibraryIndex(): LibraryIndex {
       ...getAllLexicon(),
       ...getAllPlaybooks(),
       ...getAllStrategies(),
+      ...getAllIntelligence(),
       ...getAllBriefs(),
       ...getAllDownloads(),
       ...getAllPrints(),
@@ -511,7 +699,21 @@ export function buildLibraryIndex(): LibraryIndex {
     console.warn("[LIBRARY_INDEX] Premium content unavailable:", e);
   }
 
-  // ── 4. Build sections ──
+  // ── 4. Metadata-only discovery sources ──
+  for (const record of loadMetadataRecords("content/toolkits")) {
+    add(buildFromToolkitMetadata(record));
+  }
+  for (const record of loadMetadataRecords("content/evidence")) {
+    add(buildFromEvidenceMetadata(record));
+  }
+  for (const record of loadMetadataRecords("content/vault/indices")) {
+    add(buildFromVaultIndexMetadata(record));
+  }
+  for (const item of loadEpubManifestItems()) {
+    add(item);
+  }
+
+  // ── 5. Build sections ──
   const sections: LibrarySectionInfo[] = (Object.keys(SECTION_DEFS) as LibrarySection[]).map((secId) => {
     const def = SECTION_DEFS[secId];
     const sectionItems = items.filter((i) => i.section === secId && i.status === "published");
@@ -526,7 +728,7 @@ export function buildLibraryIndex(): LibraryIndex {
     };
   });
 
-  // ── 5. Compute stats ──
+  // ── 6. Compute stats ──
   const published = items.filter((i) => i.status === "published");
   const stats = {
     total: published.length,

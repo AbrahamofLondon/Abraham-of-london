@@ -527,6 +527,7 @@ export const getAllResources = () => byKind("resource");
 export const getAllStrategies = () => byKind("strategy");
 export const getAllShorts = () => byKind("short");
 export const getAllBriefs = () => byKind("brief");
+export const getAllIntelligence = () => byKind("intelligence");
 export const getAllLexicon = () => byKind("lexicon");
 export const getAllVault = () => byKind("vault");
 export const getAllPlaybooks = () => byKind("playbook");

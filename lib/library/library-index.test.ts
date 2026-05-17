@@ -110,6 +110,33 @@ describe("Library Index", () => {
     expect(unknownAccess).toHaveLength(0);
   });
 
+  it("should index intelligence, toolkit, evidence, vault-index, and EPUB coverage gaps", () => {
+    expect(index.items.filter((i) => i.type === "intelligence").length).toBeGreaterThanOrEqual(12);
+    expect(index.items.filter((i) => i.sourceType === "toolkit-metadata")).toHaveLength(19);
+    expect(index.items.filter((i) => i.sourceType === "evidence-metadata")).toHaveLength(8);
+    expect(index.items.filter((i) => i.sourceType === "vault-index-metadata")).toHaveLength(1);
+    expect(index.items.filter((i) => i.sourceType === "epub-manifest")).toHaveLength(4);
+  });
+
+  it("should keep route-less evidence and vault-index items metadata-only and protected", () => {
+    const routeLessEvidence = index.items.filter(
+      (i) => i.sourceType === "evidence-metadata" && i.href === "/evidence",
+    );
+    expect(routeLessEvidence).toHaveLength(5);
+    expect(routeLessEvidence.every((i) => i.access === "restricted")).toBe(true);
+
+    const vaultIndices = index.items.filter((i) => i.sourceType === "vault-index-metadata");
+    expect(vaultIndices).toHaveLength(1);
+    expect(vaultIndices[0]?.access).toBe("restricted");
+    expect(vaultIndices[0]?.href).toBe("/vault");
+  });
+
+  it("should exclude operational and companion sources from the public library index", () => {
+    expect(index.items.some((i) => i.sourcePath?.startsWith("content/outbound/"))).toBe(false);
+    expect(index.items.some((i) => i.sourcePath?.startsWith("content/downloads/linked-"))).toBe(false);
+    expect(index.items.some((i) => i.sourceType === "report-file")).toBe(false);
+  });
+
   it("should not expose body content on any item", () => {
     for (const item of index.items) {
       expect((item as any).body).toBeUndefined();
@@ -189,6 +216,12 @@ describe("Library Index", () => {
     ]);
     for (const item of index.items) {
       expect(validTypes.has(item.type)).toBe(true);
+    }
+  });
+
+  it("should have every item linked to a route or safe restricted action", () => {
+    for (const item of index.items) {
+      expect(item.href.startsWith("/")).toBe(true);
     }
   });
 

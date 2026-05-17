@@ -265,6 +265,20 @@ const LibraryIndexPage: NextPage<Props> = ({ index }) => {
               restricted vault materials into one governed knowledge estate.
             </h1>
 
+            <p
+              className="mt-4"
+              style={{
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.34)",
+              }}
+            >
+              452+ indexed works across essays, canon, frameworks, intelligence,
+              downloads, proof materials, and restricted vault records.
+            </p>
+
             {/* Stats rail */}
             <div className="mt-6 flex flex-wrap gap-6">
               <Stat label="Total indexed works" value={index.stats.total} />

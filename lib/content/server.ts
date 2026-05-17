@@ -33,6 +33,7 @@ import {
   getAllStrategies as helperGetAllStrategies,
   getAllShorts as helperGetAllShorts,
   getAllBriefs as helperGetAllBriefs,
+  getAllIntelligence as helperGetAllIntelligence,
   getAllLexicon as helperGetAllLexicon,
   getAllVault as helperGetAllVault,
   getAllPlaybooks as helperGetAllPlaybooks,
@@ -106,6 +107,7 @@ export const getAllResources = (): ContentDoc[] => helperGetAllResources();
 export const getAllStrategies = (): ContentDoc[] => helperGetAllStrategies();
 export const getAllShorts = (): ContentDoc[] => helperGetAllShorts();
 export const getAllBriefs = (): ContentDoc[] => helperGetAllBriefs();
+export const getAllIntelligence = (): ContentDoc[] => helperGetAllIntelligence();
 
 /**
  * Backward-compatible lexicon aliases.
@@ -132,6 +134,7 @@ export const getPublishedResources = (): ContentDoc[] => getAllResources().filte
 export const getPublishedStrategies = (): ContentDoc[] => getAllStrategies().filter(isLiveDoc);
 export const getPublishedShorts = (): ContentDoc[] => getAllShorts().filter(isLiveDoc);
 export const getPublishedBriefs = (): ContentDoc[] => getAllBriefs().filter(isLiveDoc);
+export const getPublishedIntelligence = (): ContentDoc[] => getAllIntelligence().filter(isLiveDoc);
 export const getPublishedLexicons = (): ContentDoc[] => getAllLexicons().filter(isLiveDoc);
 export const getPublishedLexicon = (): ContentDoc[] => getAllLexicon().filter(isLiveDoc);
 export const getPublishedVault = (): ContentDoc[] => getAllVault().filter(isLiveDoc);

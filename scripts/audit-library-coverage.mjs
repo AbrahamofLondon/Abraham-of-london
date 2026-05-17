@@ -140,6 +140,53 @@ async function main() {
       console.log("  ✅ No body/content exposed");
     }
 
+    const coverageChecks = [
+      {
+        label: "Intelligence docs indexed",
+        pass: index.items.filter((i) => i.type === "intelligence").length >= 12,
+      },
+      {
+        label: "Toolkit metadata indexed",
+        pass: index.items.filter((i) => i.sourceType === "toolkit-metadata").length === 19,
+      },
+      {
+        label: "Evidence metadata indexed",
+        pass: index.items.filter((i) => i.sourceType === "evidence-metadata").length === 8,
+      },
+      {
+        label: "Vault index protected",
+        pass:
+          index.items.filter(
+            (i) =>
+              i.sourceType === "vault-index-metadata" &&
+              i.access === "restricted" &&
+              i.href === "/vault",
+          ).length === 1,
+      },
+      {
+        label: "EPUB manifest indexed",
+        pass: index.items.filter((i) => i.sourceType === "epub-manifest").length === 4,
+      },
+      {
+        label: "LinkedIn outbound excluded",
+        pass: !index.items.some((i) => i.sourcePath?.startsWith("content/outbound/")),
+      },
+      {
+        label: "Linked download companions excluded",
+        pass: !index.items.some((i) => i.sourcePath?.startsWith("content/downloads/linked-")),
+      },
+      {
+        label: "Generated operational reports excluded",
+        pass: !index.items.some((i) => i.sourceType === "report-file"),
+      },
+    ];
+
+    console.log("\n🧭 Gap closure checks:");
+    for (const check of coverageChecks) {
+      console.log(`  ${check.pass ? "✅" : "❌"} ${check.label}`);
+      if (!check.pass) exitCode = 1;
+    }
+
     // ── Final verdict ──
     console.log("\n═══════════════════════════════════════════════════");
     if (exitCode === 0) {
