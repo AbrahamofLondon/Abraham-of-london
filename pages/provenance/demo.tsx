@@ -606,8 +606,8 @@ const ProvenanceDemoPage: NextPage = () => {
               Decision delay exposure
             </Link>
 
-            {/* Trust Center link */}
-            <div style={{ marginTop: "1rem" }}>
+            {/* Trust Center + Library links */}
+            <div style={{ marginTop: "1rem", display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
               <Link
                 href="/trust"
                 style={{
@@ -620,6 +620,19 @@ const ProvenanceDemoPage: NextPage = () => {
                 }}
               >
                 Trust Center →
+              </Link>
+              <Link
+                href="/library"
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                  textDecoration: "none",
+                }}
+              >
+                Explore Library →
               </Link>
             </div>
           </section>

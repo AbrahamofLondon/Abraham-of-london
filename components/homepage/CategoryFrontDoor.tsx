@@ -29,6 +29,7 @@ const MID_CTAS = [
   { label: "Run the Fast Diagnostic", href: "/diagnostics/fast", primary: true },
   { label: "Explore executive reporting", href: "/diagnostics/executive-reporting" },
   { label: "View provenance sample", href: "/provenance/sample-export" },
+  { label: "Explore Library", href: "/library" },
 ];
 
 export default function CategoryFrontDoor() {

@@ -333,6 +333,11 @@ const SampleExportPage: NextPage = () => {
 
           {/* ── FOOTER ──────────────────────────────────────────────── */}
           <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1rem" }}>
+            <div style={{ marginBottom: "1rem" }}>
+              <Link href="/library" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none", borderBottom: "1px solid rgba(255,255,255,0.10)", paddingBottom: "1px" }}>
+                Explore Library →
+              </Link>
+            </div>
             <div className="flex items-center gap-2 mb-2">
               <FileText className="h-4 w-4" style={{ color: `${GOLD}60` }} />
               <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>

@@ -440,6 +440,7 @@ const TrustPage: NextPage = () => (
               { label: "Privacy policy", href: "/privacy" },
               { label: "Security policy", href: "/security" },
               { label: "Anchor log", href: "/provenance/anchor-log" },
+              { label: "Explore Library", href: "/library" },
             ].map(({ label, href }) => (
               <Link
                 key={href}

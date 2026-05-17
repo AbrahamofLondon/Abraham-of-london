@@ -438,6 +438,7 @@ export default function PricingPage() {
               {[
                 { label: "View provenance demo", href: "/provenance/demo" },
                 { label: "View Trust Center", href: "/trust" },
+                { label: "Explore Library", href: "/library" },
               ].map(({ label, href }) => (
                 <Link
                   key={href}
@@ -456,6 +457,83 @@ export default function PricingPage() {
                   {label} →
                 </Link>
               ))}
+            </div>
+          </div>
+
+          {/* ── Tier guide ───────────────────────────────────────────────── */}
+          <div
+            style={{
+              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.015)",
+              padding: "18px 20px",
+              marginBottom: "24px",
+            }}
+          >
+            <SectionLabel>Which tier is right for me?</SectionLabel>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {[
+                {
+                  condition: "You have a decision to make and no prior record",
+                  answer: "Start with the Fast Diagnostic — free, no account required.",
+                },
+                {
+                  condition: "You want your governed cases preserved and searchable across sessions",
+                  answer: "Professional subscription keeps governed cases alive and unlocks Return Brief.",
+                },
+                {
+                  condition: "Your case has developed enough evidence to warrant a boardroom-ready report",
+                  answer: "Executive Reporting turns a governed case into a structured intelligence brief.",
+                },
+                {
+                  condition: "Your situation is live, high-stakes, and requires intensive facilitated resolution",
+                  answer: "Strategy Room — earned intervention, not a default upsell.",
+                },
+                {
+                  condition: "Your organisation needs sustained decision governance across cycles",
+                  answer: "Retainer. Contracted directly — enquire via the contact form.",
+                },
+              ].map(({ condition, answer }) => (
+                <div
+                  key={condition}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr auto",
+                    gap: "12px",
+                    alignItems: "start",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    paddingBottom: "10px",
+                  }}
+                >
+                  <div>
+                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.35)", lineHeight: 1.5, marginBottom: "3px" }}>
+                      {condition}
+                    </p>
+                    <p style={{ ...serif, fontSize: "14px", color: "rgba(255,255,255,0.68)", lineHeight: 1.55 }}>
+                      {answer}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: "14px" }}>
+              <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.28)", lineHeight: 1.6, marginBottom: "8px" }}>
+                Not sure where you fit?
+              </p>
+              <Link
+                href="/diagnostics/fast"
+                style={{
+                  ...mono,
+                  fontSize: "8px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: `${GOLD}BB`,
+                  textDecoration: "none",
+                  borderBottom: `1px solid ${GOLD}30`,
+                  paddingBottom: "1px",
+                }}
+              >
+                Run the Fast Diagnostic — it will tell you →
+              </Link>
             </div>
           </div>
 
