@@ -58,6 +58,7 @@ const ONE_TIME_PRODUCTS: CatalogProduct[] = [
   CATALOG.governance_drift_detector,
   CATALOG.strategic_priority_stack_builder,
   CATALOG.board_brief_builder,
+  CATALOG.operator_decision_pack,
 ].filter((p): p is CatalogProduct => Boolean(p?.active));
 
 /** Active governed playbooks */
@@ -687,6 +688,23 @@ export default function PricingPage() {
                   </Link>
                 </div>
               )}
+
+              {/* Additional collaborator note */}
+              <div
+                style={{
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  backgroundColor: "rgba(255,255,255,0.01)",
+                  padding: "16px 20px",
+                  gridColumn: "1 / -1",
+                }}
+              >
+                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}77`, marginBottom: "4px" }}>
+                  Additional collaborators
+                </p>
+                <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
+                  Professional includes 5 seats. Additional collaborators are {CATALOG.additional_collaborator?.displayPrice ?? "£15/month"} per seat. Contact us to add seats.
+                </p>
+              </div>
             </div>
           </section>
 

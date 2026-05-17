@@ -103,6 +103,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const product = eligibility.product;
 
+  // ── Commercial status hardening ────────────────────────────────────────────
+  const status = product.commercialStatus;
+  if (status === "inactive" || status === "retired") {
+    return res.status(410).json({ ok: false, reason: "PRODUCT_NOT_AVAILABLE", code });
+  }
+  if (status === "contracted") {
+    return res.status(403).json({ ok: false, reason: "CONTRACT_REQUIRED", code });
+  }
+  if (status === "manual_billing") {
+    return res.status(403).json({ ok: false, reason: "MANUAL_BILLING_REQUIRED", code });
+  }
+  if (status === "paid" && product.requiresCheckout && !product.stripePriceId) {
+    return res.status(500).json({ ok: false, reason: "PRODUCT_NOT_CONFIGURED", code });
+  }
+
   // ── Paths ──
   const origin = typeof originPath === "string" && originPath.startsWith("/") ? originPath : "";
   const successPath = product.successPath || origin || "/dashboard";
