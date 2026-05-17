@@ -225,6 +225,40 @@ describe("Library Index", () => {
     }
   });
 
+  it("should keep public brief items on the public /briefs route family", () => {
+    const publicBriefs = index.items.filter(
+      (item) => item.type === "brief" && item.sourceType === "contentlayer" && item.access === "public",
+    );
+
+    expect(publicBriefs.length).toBeGreaterThan(0);
+    for (const brief of publicBriefs) {
+      expect(brief.href.startsWith("/briefs/")).toBe(true);
+      expect(brief.href.startsWith("/vault/briefs/")).toBe(false);
+    }
+  });
+
+  it("should keep public intelligence items on the public /intelligence route family", () => {
+    const publicIntelligence = index.items.filter(
+      (item) =>
+        item.type === "intelligence" &&
+        item.sourceType === "contentlayer" &&
+        item.access === "public",
+    );
+
+    expect(publicIntelligence.length).toBeGreaterThan(0);
+    for (const item of publicIntelligence) {
+      expect(item.href.startsWith("/intelligence/")).toBe(true);
+    }
+  });
+
+  it("should not treat the intelligence collection landing document as a normal intelligence brief", () => {
+    expect(
+      index.items.some(
+        (item) => item.type === "intelligence" && item.sourcePath === "intelligence",
+      ),
+    ).toBe(false);
+  });
+
   // ── Normalizer tests ──
 
   it("should handle empty input gracefully", () => {

@@ -266,6 +266,11 @@ describe("ctaLabel", () => {
     expect(ctaLabel(makeItem({ access: "restricted", href: "/vault/item" }))).toBe("View access requirements");
   });
 
+  it("returns brief-specific labels for public and restricted briefs", () => {
+    expect(ctaLabel(makeItem({ type: "brief", access: "public", href: "/briefs/public" }))).toBe("Read brief");
+    expect(ctaLabel(makeItem({ type: "brief", access: "restricted", href: "/briefs/restricted" }))).toBe("View metadata / Request access");
+  });
+
   it("returns 'Member access' for member items", () => {
     expect(ctaLabel(makeItem({ access: "member", href: "/essays/member-essay" }))).toBe("Member access");
   });

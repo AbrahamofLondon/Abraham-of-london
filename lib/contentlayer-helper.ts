@@ -610,8 +610,9 @@ function defaultHrefForKind(kind: DocKind, urlSlug: string): string {
       return `/shorts/${s}`;
     case "brief":
     case "dispatch":
-    case "intelligence":
       return `/briefs/${s}`;
+    case "intelligence":
+      return `/intelligence/${s}`;
     case "post":
       return `/blog/${s}`;
     case "canon":

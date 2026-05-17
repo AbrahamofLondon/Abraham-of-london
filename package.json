@@ -22,6 +22,7 @@
     "doctrine:audit": "node scripts/audit-product-doctrine.mjs",
     "surfaces:audit": "node scripts/audit-entry-surfaces.mjs",
     "product-surfacing:audit": "node scripts/audit-product-surfacing.mjs",
+    "public-routes:audit": "node scripts/audit-public-route-coverage.mjs",
     "boundaries:audit": "node scripts/audit-import-boundaries.mjs",
     "generate:epubs": "tsx scripts/generate-all-epubs.ts",
     "build": "pnpm generate:epubs && next build --webpack",

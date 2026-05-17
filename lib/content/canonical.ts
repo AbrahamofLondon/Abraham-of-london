@@ -107,7 +107,8 @@ export function inferCollectionFromDoc(doc: any): string | null {
   // Try kind-based inference
   const kind = doc?.kind || doc?.docKind || doc?.type;
   if (kind === "short") return "shorts";
-  if (kind === "brief" || kind === "dispatch" || kind === "intelligence") return "briefs";
+  if (kind === "brief" || kind === "dispatch") return "briefs";
+  if (kind === "intelligence") return "intelligence";
   if (kind === "post") return "blog";
   if (kind === "canon") return "canon";
   if (kind === "book") return "books";
@@ -125,6 +126,7 @@ export function inferCollectionFromDoc(doc: any): string | null {
   
   if (normalized.startsWith("shorts/")) return "shorts";
   if (normalized.startsWith("briefs/")) return "briefs";
+  if (normalized.startsWith("intelligence/")) return "intelligence";
   if (normalized.startsWith("blog/") || normalized.startsWith("posts/")) return "blog";
   if (normalized.startsWith("canon/")) return "canon";
   if (normalized.startsWith("books/")) return "books";
