@@ -198,7 +198,7 @@
     "typecheck": "tsc --noEmit",
     "typecheck:safe": "tsc --noEmit --skipLibCheck 2>&1 || echo 'TypeScript errors found (non-blocking)'",
     "lint:safe": "eslint . || echo 'Lint warnings found (non-blocking)'",
-    "library:audit": "node scripts/audit-library-coverage.mjs",
+    "library:audit": "tsx scripts/audit-library-coverage.mjs",
     "build:netlify:safe": "pnpm contentlayer:build && pnpm build:fast",
     "build:diagnostic": "pnpm contentlayer:build && pnpm build:fast || true",
     "assets:scan": "node scripts/audit-assets.js || echo 'Asset scan complete'",
