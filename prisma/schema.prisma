@@ -3604,6 +3604,35 @@ model BenchmarkAggregate {
 }
 
 // ============================================================================
+// INTEGRATION TOKENS — OAuth tokens for external integrations (LinkedIn, etc.)
+// ============================================================================
+
+/// Encrypted OAuth tokens for third-party integrations.
+/// Tokens are encrypted at rest using AES-256-GCM via OAUTH_TOKEN_ENCRYPTION_KEY.
+/// Plain tokens are never stored, logged, or exposed to the client.
+model IntegrationToken {
+  id                   String   @id @default(cuid())
+  provider             String   // e.g. "linkedin"
+  organisationId       String   // e.g. "115850136"
+  accessTokenEncrypted String   // AES-256-GCM encrypted
+  refreshTokenEncrypted String? // AES-256-GCM encrypted (if returned by provider)
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scopes               String   // space-separated scope list
+  connectedBy          String?  // user ID who connected
+  connectedAt          DateTime @default(now())
+  lastUsedAt           DateTime @default(now())
+  status               String   @default("active") // "active" | "expired" | "revoked" | "disconnected"
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([provider, organisationId], name: "integration_token_provider_org")
+  @@index([provider])
+  @@index([status])
+  @@map("integration_tokens")
+}
+
+// ============================================================================
 // RATE LIMIT EVENTS — Postgres-authoritative, scope-keyed, identifier-hashed
 // ============================================================================
 
