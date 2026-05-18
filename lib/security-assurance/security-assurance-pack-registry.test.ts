@@ -29,6 +29,12 @@ describe("security-assurance-pack-registry", () => {
       const ids = getSecurityAssuranceMaterials().map((m) => m.id);
       expect(new Set(ids).size).toBe(ids.length);
     });
+
+    it("does not expose internal document paths in the public registry", () => {
+      for (const material of getSecurityAssuranceMaterials()) {
+        expect("internalDocPath" in material).toBe(false);
+      }
+    });
   });
 
   describe("disclosure constraints", () => {

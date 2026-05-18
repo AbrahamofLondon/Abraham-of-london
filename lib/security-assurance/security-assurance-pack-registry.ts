@@ -8,7 +8,6 @@
  *   REQUESTABLE — available after review; shared manually by operator
  *   RESTRICTED  — requires NDA and explicit approval; not auto-released
  *
- * Do not expose internalDocPath to the public layer.
  * Do not auto-deliver restricted documents.
  */
 
@@ -25,7 +24,6 @@ export type SecurityAssuranceMaterial = {
   requiresReview: boolean;
   requiresNda: boolean;
   publicHref?: string;
-  internalDocPath?: string;
 };
 
 const MATERIALS: readonly SecurityAssuranceMaterial[] = [
@@ -47,7 +45,6 @@ const MATERIALS: readonly SecurityAssuranceMaterial[] = [
     disclosureLevel: "REQUESTABLE",
     requiresReview: true,
     requiresNda: false,
-    internalDocPath: "docs/security-assurance/vendor-security-questionnaire.md",
   },
   {
     id: "pilot-data-boundary-policy",
@@ -67,7 +64,6 @@ const MATERIALS: readonly SecurityAssuranceMaterial[] = [
     disclosureLevel: "REQUESTABLE",
     requiresReview: true,
     requiresNda: false,
-    internalDocPath: "docs/security-assurance/incident-response-summary.md",
   },
   {
     id: "sub-processor-register",
@@ -77,7 +73,6 @@ const MATERIALS: readonly SecurityAssuranceMaterial[] = [
     disclosureLevel: "REQUESTABLE",
     requiresReview: true,
     requiresNda: false,
-    internalDocPath: "docs/security-assurance/sub-processor-register.md",
   },
   {
     id: "independent-penetration-test-readiness",
@@ -87,7 +82,6 @@ const MATERIALS: readonly SecurityAssuranceMaterial[] = [
     disclosureLevel: "RESTRICTED",
     requiresReview: true,
     requiresNda: true,
-    internalDocPath: "docs/security-assurance/pen-test-readiness-internal.md",
   },
   {
     id: "procurement-security-review-call",
