@@ -81,7 +81,7 @@ const TrustPage: NextPage = () => (
     canonicalUrl="/trust"
   >
     <main
-      className="min-h-screen px-6 py-20"
+      className="min-h-screen py-20"
       style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}
     >
       <div className="mx-auto max-w-3xl space-y-10">

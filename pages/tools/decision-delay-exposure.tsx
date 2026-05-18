@@ -344,7 +344,7 @@ export default function DecisionDelayExposurePage() {
           paddingBottom: "96px",
         }}
       >
-        <div style={{ maxWidth: "620px", margin: "0 auto", padding: "0 24px" }}>
+        <div style={{ maxWidth: "620px", margin: "0 auto", padding: "0" }}>
 
           {/* ─── Header ─────────────────────────────────────────────────── */}
           <p
