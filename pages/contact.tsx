@@ -8,6 +8,9 @@ import { Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/imports";
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import {
+  getSecurityAssuranceMaterialById,
+} from "@/lib/security-assurance/security-assurance-pack-registry";
 
 const GOLD = "#C9A96E";
 
@@ -23,14 +26,31 @@ const ENQUIRY_TYPES = [
   { value: "other", label: "Other" },
 ];
 
+const PROCUREMENT_STAGES = [
+  { value: "", label: "Select stage (optional)" },
+  { value: "early_review", label: "Early review" },
+  { value: "pilot_due_diligence", label: "Pilot due diligence" },
+  { value: "procurement", label: "Procurement" },
+  { value: "security_review", label: "Security review" },
+  { value: "legal_review", label: "Legal review" },
+  { value: "other", label: "Other" },
+];
+
 const ContactFormContent = () => {
   const router = useRouter();
   const typeParam = (router.query.type as string) ?? "";
+  const requestedParam = (router.query.requested as string) ?? "";
   const defaultType = ENQUIRY_TYPES.some(t => t.value === typeParam) ? typeParam : "";
 
+  const [enquiryType, setEnquiryType] = React.useState(defaultType);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
   const { executeRecaptcha } = useGoogleReCaptcha();
+
+  const isSecurityAssurance = enquiryType === "security-assurance";
+  const requestedMaterial = isSecurityAssurance && requestedParam
+    ? getSecurityAssuranceMaterialById(requestedParam)
+    : null;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -43,31 +63,60 @@ const ContactFormContent = () => {
     setSubmitStatus('idle');
 
     try {
-      const gRecaptchaToken = await executeRecaptcha("contact_form");
       const formData = new FormData(event.currentTarget);
-      const payload: Record<string, unknown> & { gRecaptchaToken: string } = {
-        ...Object.fromEntries(formData.entries()),
-        gRecaptchaToken,
-      };
 
       // Honeypot protection
-      if (payload["website"] || payload["middleName"]) {
-        // Silently fail for bots
+      if (formData.get("website") || formData.get("middleName")) {
         setSubmitStatus('success');
         return;
       }
 
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      if (isSecurityAssurance) {
+        // Route security-assurance requests to the structured intake API
+        const gRecaptchaToken = await executeRecaptcha("security_assurance_request");
+        const payload = {
+          name: formData.get("name") as string | undefined,
+          email: formData.get("email") as string,
+          organisation: (formData.get("organisation") as string) || undefined,
+          role: (formData.get("role") as string) || undefined,
+          requestedMaterial: requestedParam || (formData.get("requestedMaterial") as string) || "security-assurance-readiness",
+          procurementStage: (formData.get("procurementStage") as string) || undefined,
+          message: (formData.get("message") as string) || undefined,
+          gRecaptchaToken,
+        };
 
-      if (response.ok) {
-        setSubmitStatus('success');
-        (event.target as HTMLFormElement).reset();
+        const response = await fetch('/api/security-assurance/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          setSubmitStatus('success');
+          (event.target as HTMLFormElement).reset();
+        } else {
+          setSubmitStatus('error');
+        }
       } else {
-        setSubmitStatus('error');
+        // Standard contact flow
+        const gRecaptchaToken = await executeRecaptcha("contact_form");
+        const payload: Record<string, unknown> & { gRecaptchaToken: string } = {
+          ...Object.fromEntries(formData.entries()),
+          gRecaptchaToken,
+        };
+
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          setSubmitStatus('success');
+          (event.target as HTMLFormElement).reset();
+        } else {
+          setSubmitStatus('error');
+        }
       }
     } catch (_error) {
       setSubmitStatus('error');
@@ -84,6 +133,30 @@ const ContactFormContent = () => {
       >
         {siteConfig.contact?.email ?? ""}
       </a>
+
+      {/* Requested material banner */}
+      {requestedMaterial && (
+        <div
+          className="mt-6"
+          style={{
+            border: `1px solid ${GOLD}22`,
+            backgroundColor: `${GOLD}05`,
+            padding: "0.75rem 1rem",
+          }}
+        >
+          <p className="font-mono text-[7px] uppercase tracking-[0.18em]" style={{ color: `${GOLD}88`, marginBottom: "0.2rem" }}>
+            Requested material
+          </p>
+          <p className="font-serif text-sm" style={{ color: "rgba(255,255,255,0.70)", fontWeight: 300 }}>
+            {requestedMaterial.title}
+          </p>
+          {requestedMaterial.requiresNda && (
+            <p className="font-mono text-[6.5px] uppercase tracking-[0.12em] mt-1" style={{ color: "rgba(252,165,165,0.55)" }}>
+              This material requires NDA before sharing.
+            </p>
+          )}
+        </div>
+      )}
 
       <form className="mt-8 space-y-5 bg-white/[0.02] p-6" onSubmit={handleSubmit}>
         <div className="hidden" aria-hidden="true">
@@ -123,7 +196,8 @@ const ContactFormContent = () => {
           <select
             name="enquiryType"
             required
-            defaultValue={defaultType}
+            value={enquiryType}
+            onChange={(e) => setEnquiryType(e.target.value)}
             className="w-full border border-white/12 bg-[rgb(3,3,5)] px-4 py-3 text-sm text-white focus:outline-none focus:border-white/24"
           >
             {ENQUIRY_TYPES.map(t => (
@@ -131,6 +205,47 @@ const ContactFormContent = () => {
             ))}
           </select>
         </div>
+
+        {/* Security-assurance additional fields */}
+        {isSecurityAssurance && (
+          <>
+            <div className="space-y-2">
+              <label className="ml-1 font-mono text-[9px] uppercase tracking-[0.3em] text-white/32">
+                Organisation
+              </label>
+              <input
+                name="organisation"
+                className="w-full border border-white/12 bg-transparent px-4 py-3 text-sm text-white placeholder:text-white/24 focus:outline-none focus:border-white/24"
+                placeholder="Organisation name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="ml-1 font-mono text-[9px] uppercase tracking-[0.3em] text-white/32">
+                Role
+              </label>
+              <input
+                name="role"
+                className="w-full border border-white/12 bg-transparent px-4 py-3 text-sm text-white placeholder:text-white/24 focus:outline-none focus:border-white/24"
+                placeholder="Your role or title"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="ml-1 font-mono text-[9px] uppercase tracking-[0.3em] text-white/32">
+                Procurement Stage
+              </label>
+              <select
+                name="procurementStage"
+                className="w-full border border-white/12 bg-[rgb(3,3,5)] px-4 py-3 text-sm text-white focus:outline-none focus:border-white/24"
+              >
+                {PROCUREMENT_STAGES.map(s => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
 
         <div className="space-y-2">
           <label className="ml-1 font-mono text-[9px] uppercase tracking-[0.3em] text-white/32">

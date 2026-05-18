@@ -3709,3 +3709,32 @@ model StaleCaseNotification {
   @@index([sentAt])
   @@map("stale_case_notifications")
 }
+
+// ============================================================================
+// SECURITY ASSURANCE REQUESTS — controlled disclosure workflow
+// ============================================================================
+
+/// Tracks procurement/security team requests for controlled assurance materials.
+/// Does not store document content. Status is updated manually by operator.
+/// Allowed statuses: NEW | UNDER_REVIEW | PUBLIC_PACK_APPROVED | NDA_REQUIRED |
+///   RESTRICTED_PACK_APPROVED | DECLINED | FULFILLED
+model SecurityAssuranceRequest {
+  id                String   @id @default(cuid())
+  name              String?
+  email             String
+  organisation      String?
+  role              String?
+  requestedMaterial String
+  procurementStage  String?
+  message           String?
+  status            String   @default("NEW")
+  decisionNote      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([email])
+  @@index([requestedMaterial])
+  @@index([status])
+  @@index([createdAt])
+  @@map("security_assurance_requests")
+}

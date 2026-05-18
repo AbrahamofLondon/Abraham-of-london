@@ -13,9 +13,13 @@ import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { Shield, ArrowRight, FileText, Mail, Lock, AlertTriangle } from "lucide-react";
+import { Shield, ArrowRight, FileText, Mail, Lock, AlertTriangle, ExternalLink } from "lucide-react";
 import Layout from "@/components/Layout";
 import SecurityAssuranceStatusStrip from "@/components/trust/SecurityAssuranceStatusStrip";
+import {
+  getSecurityAssuranceMaterials,
+  getSecurityAssuranceRequestHref,
+} from "@/lib/security-assurance/security-assurance-pack-registry";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -24,6 +28,18 @@ const mono: React.CSSProperties = {
 const serif: React.CSSProperties = {
   fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
   fontWeight: 300,
+};
+
+const LEVEL_LABEL: Record<string, string> = {
+  PUBLIC: "Public",
+  REQUESTABLE: "Controlled — request required",
+  RESTRICTED: "Restricted — review + NDA required",
+};
+
+const LEVEL_COLOR: Record<string, string> = {
+  PUBLIC: "rgba(110,231,183,0.65)",
+  REQUESTABLE: "rgba(253,186,116,0.65)",
+  RESTRICTED: "rgba(252,165,165,0.60)",
 };
 
 const PACK_ITEMS = [
@@ -85,6 +101,8 @@ const PACK_ITEMS = [
 ] as const;
 
 const SecurityReviewPage: NextPage = () => {
+  const materials = getSecurityAssuranceMaterials();
+
   return (
     <Layout
       title="Security Review Pack | Abraham of London"
@@ -95,7 +113,7 @@ const SecurityReviewPage: NextPage = () => {
       </Head>
 
       <main
-        className="min-h-screen px-6 py-20"
+        className="min-h-screen py-20"
         style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}
       >
         <div className="mx-auto max-w-2xl space-y-8">
@@ -150,6 +168,7 @@ const SecurityReviewPage: NextPage = () => {
 
           <SecurityAssuranceStatusStrip />
 
+          {/* ── REQUEST PROCESS NOTICE ──────────────────────────────── */}
           <section
             style={{
               border: `1px solid ${GOLD}18`,
@@ -167,7 +186,7 @@ const SecurityReviewPage: NextPage = () => {
                 marginBottom: "0.65rem",
               }}
             >
-              Security assurance readiness
+              Controlled request process
             </p>
             <p
               style={{
@@ -177,51 +196,186 @@ const SecurityReviewPage: NextPage = () => {
                 color: "rgba(255,255,255,0.60)",
               }}
             >
-              Independent SOC 2, ISO 27001 certification, and external penetration testing are not yet complete. The current assurance posture is documented through legal identity, infrastructure disclosure, sub-processor visibility, pilot data boundaries, incident-response posture, and provenance / auditability controls.
+              Security assurance materials are shared through a controlled request process. Public summaries are available immediately; detailed materials may require review, qualification, or NDA depending on sensitivity.
             </p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              {[
-                "Security assurance readiness",
-                "Vendor security questionnaire",
-                "Pilot data boundary policy",
-                "Incident response summary",
-              ].map((item) => (
-                <div
-                  key={item}
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    backgroundColor: "rgba(255,255,255,0.015)",
-                    padding: "0.65rem 0.75rem",
-                  }}
-                >
-                  <p
-                    style={{
-                      ...mono,
-                      fontSize: "7px",
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.42)",
-                    }}
-                  >
-                    {item}
-                  </p>
-                </div>
-              ))}
-            </div>
             <p
               style={{
                 ...serif,
-                fontSize: "0.84rem",
-                lineHeight: 1.6,
-                color: "rgba(255,255,255,0.45)",
-                marginTop: "0.9rem",
+                fontSize: "0.85rem",
+                lineHeight: 1.65,
+                color: "rgba(255,255,255,0.40)",
+                marginTop: "0.65rem",
               }}
             >
-              These materials are available for procurement discussion through the security review process.
+              SOC 2, ISO 27001 certification, and independent penetration testing are not yet complete and are not represented as completed.
             </p>
           </section>
 
-          {/* ── WHAT IS AVAILABLE ───────────────────────────────────── */}
+          {/* ── MATERIAL REGISTRY — ACTIONABLE CARDS ────────────────── */}
+          <section
+            style={{
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.015)",
+              padding: "1.25rem",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="h-4 w-4" style={{ color: `${GOLD}70` }} />
+              <p
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: `${GOLD}88`,
+                }}
+              >
+                Available materials
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {materials.map((material) => (
+                <div
+                  key={material.id}
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    backgroundColor: "rgba(255,255,255,0.015)",
+                    padding: "0.9rem",
+                  }}
+                >
+                  {/* Disclosure label */}
+                  <div style={{ marginBottom: "0.4rem" }}>
+                    <span
+                      style={{
+                        ...mono,
+                        fontSize: "6.5px",
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: LEVEL_COLOR[material.disclosureLevel],
+                        border: `1px solid ${LEVEL_COLOR[material.disclosureLevel]}33`,
+                        padding: "1px 6px",
+                      }}
+                    >
+                      {LEVEL_LABEL[material.disclosureLevel]}
+                    </span>
+                    {material.requiresNda && (
+                      <span
+                        style={{
+                          ...mono,
+                          fontSize: "6px",
+                          letterSpacing: "0.12em",
+                          textTransform: "uppercase",
+                          color: "rgba(252,165,165,0.45)",
+                          marginLeft: "0.5rem",
+                        }}
+                      >
+                        NDA
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Title + description */}
+                  <p
+                    style={{
+                      ...serif,
+                      fontSize: "0.93rem",
+                      color: "rgba(255,255,255,0.80)",
+                      lineHeight: 1.4,
+                      marginBottom: "0.25rem",
+                    }}
+                  >
+                    {material.title}
+                  </p>
+                  <p
+                    style={{
+                      ...serif,
+                      fontSize: "0.82rem",
+                      lineHeight: 1.6,
+                      color: "rgba(255,255,255,0.42)",
+                      marginBottom: "0.7rem",
+                    }}
+                  >
+                    {material.description}
+                  </p>
+
+                  {/* CTAs */}
+                  <div className="flex flex-wrap gap-2">
+                    {material.disclosureLevel === "PUBLIC" && material.publicHref && (
+                      <Link
+                        href={material.publicHref}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                          ...mono,
+                          fontSize: "7px",
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase",
+                          color: "rgba(110,231,183,0.75)",
+                          border: "1px solid rgba(110,231,183,0.20)",
+                          padding: "0.3rem 0.7rem",
+                          textDecoration: "none",
+                          backgroundColor: "rgba(110,231,183,0.04)",
+                        }}
+                      >
+                        <ExternalLink style={{ width: 9, height: 9 }} />
+                        View public summary
+                      </Link>
+                    )}
+
+                    {material.disclosureLevel === "REQUESTABLE" && (
+                      <Link
+                        href={getSecurityAssuranceRequestHref(material.id)}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                          ...mono,
+                          fontSize: "7px",
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase",
+                          color: `${GOLD}CC`,
+                          border: `1px solid ${GOLD}30`,
+                          padding: "0.3rem 0.7rem",
+                          textDecoration: "none",
+                          backgroundColor: `${GOLD}06`,
+                        }}
+                      >
+                        <Mail style={{ width: 9, height: 9 }} />
+                        Request this material
+                      </Link>
+                    )}
+
+                    {material.disclosureLevel === "RESTRICTED" && (
+                      <Link
+                        href={getSecurityAssuranceRequestHref(material.id)}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                          ...mono,
+                          fontSize: "7px",
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase",
+                          color: "rgba(252,165,165,0.65)",
+                          border: "1px solid rgba(252,165,165,0.18)",
+                          padding: "0.3rem 0.7rem",
+                          textDecoration: "none",
+                          backgroundColor: "rgba(252,165,165,0.03)",
+                        }}
+                      >
+                        <Lock style={{ width: 9, height: 9 }} />
+                        Request review
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ── FULL PACK CONTENTS ──────────────────────────────────── */}
           <section
             style={{
               border: "1px solid rgba(255,255,255,0.08)",
