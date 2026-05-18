@@ -93,6 +93,19 @@ export default function OperatorPilotBlock() {
                 <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
+                href="/engagements/operator-pilot"
+                style={{
+                  ...mono,
+                  fontSize: "9px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.48)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Request governed pilot review
+              </Link>
+              <Link
                 href="/engagements/selective-pilot"
                 style={{
                   ...mono,

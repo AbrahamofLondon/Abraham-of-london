@@ -41,7 +41,7 @@ const OperatorPilotPage: NextPage = () => {
       headerTransparent
     >
       <Head><meta name="robots" content="index,follow" /></Head>
-      <main className="min-h-screen px-6 py-24" style={{ backgroundColor: VOID, color: "white" }}>
+      <main className="min-h-screen px-6 pb-24 pt-32 sm:pt-36" style={{ backgroundColor: VOID, color: "white" }}>
         <div className="mx-auto max-w-4xl space-y-8">
 
           {/* ── 1. WHAT THIS IS ── */}
@@ -167,7 +167,7 @@ const OperatorPilotPage: NextPage = () => {
                   display: "inline-flex", alignItems: "center", gap: "8px",
                 }}
               >
-                Submit a decision for pilot review
+                Request governed pilot review
                 <ArrowRight style={{ width: 11, height: 11 }} />
               </Link>
               <Link

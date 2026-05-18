@@ -315,6 +315,7 @@ export default function EnhancedFooter(): React.ReactElement {
     { label: "Proof Pack", href: "/account/proof-pack" },
   ],
   Engagements: [
+    { label: "Operator Pilot", href: "/engagements/operator-pilot" },
     { label: "Retained Oversight", href: "/engagements/retained-oversight" },
     { label: "Counsel Review", href: "/counsel" },
     { label: "Diagnostics", href: "/diagnostics" },

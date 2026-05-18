@@ -54,7 +54,19 @@ export default function HomepageFinalCTA() {
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-        <div className="mt-5">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
+          <Link
+            href="/engagements/operator-pilot"
+            style={{
+              ...mono,
+              fontSize: "9px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.48)",
+            }}
+          >
+            Request governed pilot review
+          </Link>
           <Link
             href="/engagements"
             style={{

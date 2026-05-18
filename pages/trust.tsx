@@ -274,17 +274,10 @@ const TrustPage: NextPage = () => (
             ].map(({ name, purpose, region }) => (
               <div
                 key={name}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 2fr 0.5fr",
-                  gap: "0.5rem",
-                  padding: "0.6rem 0.75rem",
-                  border: "1px solid rgba(255,255,255,0.05)",
-                  alignItems: "start",
-                }}
+                className="grid gap-2 border border-white/[0.05] px-3 py-3 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,0.5fr)] md:gap-3"
               >
                 <p style={{ ...mono, fontSize: "8px", color: `${GOLD}AA`, letterSpacing: "0.08em" }}>{name}</p>
-                <p style={{ ...serif, fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{purpose}</p>
+                <p className="text-[15px] leading-6 text-white/60 md:text-[16px]">{purpose}</p>
                 <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.1em" }}>{region}</p>
               </div>
             ))}
@@ -543,16 +536,7 @@ function Section({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "10rem 1fr",
-        gap: "0.75rem",
-        padding: "0.55rem 0",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
-        alignItems: "baseline",
-      }}
-    >
+    <div className="grid gap-3 border-b border-white/[0.04] py-4 md:grid-cols-[10rem_minmax(0,1fr)] md:items-baseline md:gap-4 md:py-3">
       <p
         style={{
           ...mono,
@@ -564,14 +548,7 @@ function Row({ label, value }: { label: string; value: string }) {
       >
         {label}
       </p>
-      <p
-        style={{
-          ...serif,
-          fontSize: "0.9rem",
-          lineHeight: 1.6,
-          color: "rgba(255,255,255,0.58)",
-        }}
-      >
+      <p className="max-w-2xl text-[15px] leading-7 text-white/65 md:text-[18px] md:leading-8">
         {value}
       </p>
     </div>

@@ -32,6 +32,7 @@ import {
   BookOpen,
   Lock,
   Key,
+  ClipboardCheck,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -390,8 +391,15 @@ export default function Header({
               <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
             </div>
 
-            {/* Special entries — member access only. */}
+            {/* Special entries — public pathway plus member access. */}
             {[
+              {
+                href: "/engagements/operator-pilot",
+                label: "Pilot",
+                sub: "Selective governed review",
+                tag: "Public",
+                icon: ClipboardCheck,
+              },
               ...(isAuthenticated
                 ? [
                     {
