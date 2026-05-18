@@ -101,10 +101,10 @@ const SampleExportPage: NextPage = () => {
             <h1 style={{ ...serif, fontSize: "clamp(1.5rem, 3vw, 2.2rem)", lineHeight: 1.1, color: "rgba(255,255,255,0.92)" }}>
               Decision Provenance Record
             </h1>
-            <p style={{ marginTop: "0.75rem", ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
+            <p style={{ marginTop: "0.75rem", ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)" }}>
               This is a client-safe provenance summary. It does not expose internal review notes, suppression details, or raw governance events.
             </p>
-            <p style={{ marginTop: "0.4rem", ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+            <p style={{ marginTop: "0.4rem", ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
               This page demonstrates the client-safe provenance format. It is not generated from the current visitor's account or case.
             </p>
             <p style={{ marginTop: "0.4rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
@@ -310,11 +310,11 @@ const SampleExportPage: NextPage = () => {
               </div>
               <div>
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>External anchor</p>
-                <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", marginTop: "0.2rem" }}>Not configured</p>
+                <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)", marginTop: "0.2rem" }}>Not configured</p>
               </div>
               <div>
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>WORM storage</p>
-                <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", marginTop: "0.2rem" }}>Not configured</p>
+                <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)", marginTop: "0.2rem" }}>Not configured</p>
               </div>
             </div>
           </section>
@@ -324,7 +324,7 @@ const SampleExportPage: NextPage = () => {
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
               Proof path
             </p>
-            <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.48)", maxWidth: "52ch" }}>
+            <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)", maxWidth: "52ch" }}>
               This sample shows the client-safe proof surface. A governed case is where the live decision record, evidence posture, and provenance trail are created.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">

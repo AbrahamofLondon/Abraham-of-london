@@ -71,7 +71,7 @@ const VerificationPage: NextPage = () => {
             Verifiable. Traceable. Bounded.
           </h1>
 
-          <p className="mt-4 max-w-2xl text-sm" style={{ color: "rgba(255,255,255,0.48)", lineHeight: 1.8 }}>
+          <p className="mt-4 max-w-2xl text-sm" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.8 }}>
             Abraham of London is built around decision authority, governance discipline, and execution verification.
             This page identifies what can be checked, what is bounded, and what should not be assumed.
           </p>
@@ -83,7 +83,7 @@ const VerificationPage: NextPage = () => {
               </span>
 
               <LegalIdentityBlock variant="embedded" showOperatingIdentityLine />
-              <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.46)" }}>
+              <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                 UTR: 3124426287.
               </p>
             </section>
@@ -93,7 +93,7 @@ const VerificationPage: NextPage = () => {
                 Founder
               </span>
 
-              <div className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.46)", lineHeight: 1.75 }}>
+              <div className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.75 }}>
                 <p>Abraham Adaramola · London, United Kingdom.</p>
                 <p className="mt-1">
                   Commercial strategist with 15+ years across contract governance, procurement strategy,
@@ -123,7 +123,7 @@ const VerificationPage: NextPage = () => {
                 Professional Credentials
               </span>
 
-              <ul className="mt-3 space-y-1.5 text-sm" style={{ color: "rgba(255,255,255,0.42)" }}>
+              <ul className="mt-3 space-y-1.5 text-sm" style={{ color: "rgba(255,255,255,0.60)" }}>
                 <li>ISO/IEC 27001:2022 Lead Auditor.</li>
                 <li>CMI Level 7 Diploma in Consulting Management.</li>
                 <li>MBA — University of East Anglia, Norwich Business School.</li>
@@ -136,7 +136,7 @@ const VerificationPage: NextPage = () => {
                 Operating Reality
               </span>
 
-              <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.48)", lineHeight: 1.75 }}>
+              <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.75 }}>
                 Client engagements are confidential. Case dossiers published on this platform are anonymised,
                 reconstructed, or modelled to protect identity while demonstrating decision-pattern logic,
                 method application, and verified outcome discipline.
@@ -148,7 +148,7 @@ const VerificationPage: NextPage = () => {
                 Evidence Standard
               </span>
 
-              <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.44)", lineHeight: 1.75 }}>
+              <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.75 }}>
                 <li>Public proof is anonymised, human-reviewed, and published only when the underlying outcome is strong enough to defend.</li>
                 <li>Self-reported claims alone are not treated as public proof.</li>
                 <li>Public case material preserves condition, decision, consequence, and verified movement while removing identity and source records.</li>
@@ -162,7 +162,7 @@ const VerificationPage: NextPage = () => {
                   What This Platform Is
                 </span>
 
-                <ul className="mt-2 space-y-1 text-xs" style={{ color: "rgba(255,255,255,0.42)" }}>
+                <ul className="mt-2 space-y-1 text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
                   <li>Decision enforcement infrastructure.</li>
                   <li>Governance and authority frameworks.</li>
                   <li>Execution systems and diagnostic instruments.</li>
@@ -175,7 +175,7 @@ const VerificationPage: NextPage = () => {
                   What This Platform Is Not
                 </span>
 
-                <ul className="mt-2 space-y-1 text-xs" style={{ color: "rgba(255,255,255,0.34)" }}>
+                <ul className="mt-2 space-y-1 text-xs" style={{ color: "rgba(255,255,255,0.48)" }}>
                   <li>Not legal advice.</li>
                   <li>Not therapy, coaching, or counselling.</li>
                   <li>Not generic consulting templates.</li>
@@ -189,7 +189,7 @@ const VerificationPage: NextPage = () => {
                 Intellectual Grounding
               </span>
 
-              <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.44)", lineHeight: 1.75 }}>
+              <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.75 }}>
                 The system draws from Scripture, classical philosophy, institutional theory, governance practice,
                 economics, statecraft, and commercial execution experience. Its originality is in synthesis,
                 operationalisation, and enforcement—not in claiming to invent its source traditions.

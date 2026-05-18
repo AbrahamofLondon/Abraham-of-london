@@ -171,7 +171,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Internal chain anchor
                 </p>
-                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
                   Created inside the platform for supported governed records.
                 </p>
               </div>
@@ -179,7 +179,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Public root
                 </p>
-                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
                   A deliberately published non-sensitive cryptographic root.
                 </p>
               </div>
@@ -187,7 +187,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   External anchoring
                 </p>
-                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
                   WORM or public blockchain anchoring is not configured yet.
                 </p>
               </div>
@@ -212,7 +212,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                     lineHeight: 1.55,
                     color: state.internalAnchoringAvailable === true
                       ? "rgba(110,231,183,0.65)"
-                      : "rgba(255,255,255,0.38)",
+                      : "rgba(255,255,255,0.55)",
                   }}
                 >
                   {internalAnchoringLabel(state.internalAnchoringAvailable)}
@@ -226,7 +226,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Public anchor publication
                 </p>
-                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: state.publicRootsCount > 0 ? "rgba(110,231,183,0.65)" : "rgba(255,255,255,0.38)" }}>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: state.publicRootsCount > 0 ? "rgba(110,231,183,0.65)" : "rgba(255,255,255,0.55)" }}>
                   {state.publicRootsCount === 0
                     ? "No public roots published yet"
                     : `${state.publicRootsCount} public root${state.publicRootsCount !== 1 ? "s" : ""} visible`}
@@ -242,7 +242,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   External anchoring
                 </p>
-                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
+                <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.55)" }}>
                   Not configured
                 </p>
                 <p style={{ marginTop: "0.25rem", ...mono, fontSize: "6.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.22)" }}>
@@ -259,7 +259,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
               <p style={{ marginTop: "1rem", ...serif, fontSize: "1.1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
                 No public anchor roots are currently available.
               </p>
-              <p style={{ marginTop: "0.5rem", ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
+              <p style={{ marginTop: "0.5rem", ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
                 This does not mean a governed case lacks an internal chain anchor. This page only shows roots deliberately published to the public anchor log. External WORM or public blockchain anchoring is not configured.
               </p>
             </section>
@@ -328,7 +328,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
               Boundary
             </p>
-            <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
+            <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
               These anchors disclose cryptographic roots only. They do not reveal client data, evidence, decisions, or internal review material. External WORM or public anchoring is not yet configured. Until then, these roots are stored in the platform database and are not independently anchored to an external immutable store.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">

@@ -139,7 +139,7 @@ const SecurityReviewPage: NextPage = () => {
                 ...serif,
                 fontSize: "1rem",
                 lineHeight: 1.7,
-                color: "rgba(255,255,255,0.5)",
+                color: "rgba(255,255,255,0.60)",
               }}
             >
               For security, legal, and procurement teams evaluating Abraham of
@@ -174,7 +174,7 @@ const SecurityReviewPage: NextPage = () => {
                 ...serif,
                 fontSize: "0.95rem",
                 lineHeight: 1.7,
-                color: "rgba(255,255,255,0.55)",
+                color: "rgba(255,255,255,0.60)",
               }}
             >
               Independent SOC 2, ISO 27001 certification, and external penetration testing are not yet complete. The current assurance posture is documented through legal identity, infrastructure disclosure, sub-processor visibility, pilot data boundaries, incident-response posture, and provenance / auditability controls.
@@ -213,7 +213,7 @@ const SecurityReviewPage: NextPage = () => {
                 ...serif,
                 fontSize: "0.84rem",
                 lineHeight: 1.6,
-                color: "rgba(255,255,255,0.38)",
+                color: "rgba(255,255,255,0.45)",
                 marginTop: "0.9rem",
               }}
             >
@@ -307,7 +307,7 @@ const SecurityReviewPage: NextPage = () => {
                         ...serif,
                         fontSize: "0.82rem",
                         lineHeight: 1.55,
-                        color: "rgba(255,255,255,0.32)",
+                        color: "rgba(255,255,255,0.45)",
                         marginTop: "0.15rem",
                       }}
                     >
@@ -350,7 +350,7 @@ const SecurityReviewPage: NextPage = () => {
                     ...serif,
                     fontSize: "0.9rem",
                     lineHeight: 1.65,
-                    color: "rgba(255,255,255,0.5)",
+                    color: "rgba(255,255,255,0.60)",
                   }}
                 >
                   We are a growth-stage product. SOC 2, ISO 27001, and an
@@ -367,6 +367,7 @@ const SecurityReviewPage: NextPage = () => {
           {/* ── REQUEST SECURITY ASSURANCE PACK ─────────────────────── */}
           <section
             id="request-security-assurance-pack"
+            className="scroll-mt-28"
             style={{
               border: `1px solid ${GOLD}22`,
               backgroundColor: `${GOLD}05`,
@@ -393,7 +394,7 @@ const SecurityReviewPage: NextPage = () => {
                 ...serif,
                 fontSize: "0.95rem",
                 lineHeight: 1.65,
-                color: "rgba(255,255,255,0.55)",
+                color: "rgba(255,255,255,0.60)",
                 marginBottom: "1.25rem",
               }}
             >
@@ -405,7 +406,7 @@ const SecurityReviewPage: NextPage = () => {
                 ...serif,
                 fontSize: "0.9rem",
                 lineHeight: 1.65,
-                color: "rgba(255,255,255,0.45)",
+                color: "rgba(255,255,255,0.55)",
                 marginBottom: "1.25rem",
               }}
             >

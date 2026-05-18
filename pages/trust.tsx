@@ -32,6 +32,7 @@ import {
 import Layout from "@/components/Layout";
 import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 import SecurityAssuranceStatusStrip from "@/components/trust/SecurityAssuranceStatusStrip";
+import TrustInfoRow from "@/components/trust/TrustInfoRow";
 import PlainEnglishDecisionLayer from "@/components/trust/PlainEnglishDecisionLayer";
 import WorkedDecisionExample from "@/components/trust/WorkedDecisionExample";
 
@@ -129,7 +130,7 @@ const TrustPage: NextPage = () => (
               ...serif,
               fontSize: "1rem",
               lineHeight: 1.7,
-              color: "rgba(255,255,255,0.5)",
+              color: "rgba(255,255,255,0.60)",
               maxWidth: "55ch",
             }}
           >
@@ -227,7 +228,7 @@ const TrustPage: NextPage = () => (
                 fontSize: "7px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.38)",
+                color: "rgba(255,255,255,0.45)",
                 textDecoration: "none",
                 border: "1px solid rgba(255,255,255,0.08)",
                 padding: "0.4rem 0.8rem",
@@ -265,7 +266,7 @@ const TrustPage: NextPage = () => (
 
         {/* ── PROVENANCE BOUNDARY ─────────────────────────────────── */}
         <Section icon={<Hash className="h-4 w-4" />} heading="Provenance boundary">
-          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)", marginBottom: "0.75rem" }}>
+          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginBottom: "0.75rem" }}>
             The provenance system computes and stores SHA-256 hashes of canonical
             case records. This creates structural tamper-evidence — if a record
             changes after sealing, its hash no longer matches. Verification is
@@ -295,7 +296,7 @@ const TrustPage: NextPage = () => (
                   <dt style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "2px" }}>
                     {term}
                   </dt>
-                  <dd style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                  <dd style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
                     {def}
                   </dd>
                 </div>
@@ -338,10 +339,10 @@ const TrustPage: NextPage = () => (
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Founder assurance credentials
             </p>
-            <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)", marginBottom: "0.75rem" }}>
+            <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)", marginBottom: "0.75rem" }}>
               The platform is not currently ISO/IEC 27001 certified. However, Abraham Adaramola holds an ISO/IEC 27001:2022 Lead Auditor credential from Mastermind Assurance.
             </p>
-            <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", fontStyle: "italic", marginBottom: "1rem", borderLeft: `1px solid ${GOLD}33`, paddingLeft: "0.75rem" }}>
+            <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1rem", borderLeft: `1px solid ${GOLD}33`, paddingLeft: "0.75rem" }}>
               This credential supports the assurance literacy, audit awareness, and governance discipline behind the platform. It should not be read as independent certification of Abraham of London Ltd or of the Abraham of London platform.
             </p>
             <div className="space-y-3">
@@ -368,13 +369,10 @@ const TrustPage: NextPage = () => (
               { name: "Stripe", purpose: "Payment processing (where applicable)", region: "US/EU" },
               { name: "Vercel Analytics / PostHog", purpose: "Anonymised product analytics", region: "EU" },
             ].map(({ name, purpose, region }) => (
-              <div
-                key={name}
-                className="grid gap-2 border border-white/[0.05] px-3 py-3 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,0.5fr)] md:gap-3"
-              >
-                <p style={{ ...mono, fontSize: "8px", color: `${GOLD}AA`, letterSpacing: "0.08em" }}>{name}</p>
-                <p className="text-[15px] leading-6 text-white/60 md:text-[16px]">{purpose}</p>
-                <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.1em" }}>{region}</p>
+              <div key={name} className="border border-white/[0.05] px-3">
+                <TrustInfoRow label={name} meta={region}>
+                  {purpose}
+                </TrustInfoRow>
               </div>
             ))}
           </div>
@@ -390,7 +388,7 @@ const TrustPage: NextPage = () => (
 
         {/* ── RESPONSIBLE DISCLOSURE ──────────────────────────────── */}
         <Section icon={<AlertTriangle className="h-4 w-4" />} heading="Responsible disclosure">
-          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)", marginBottom: "0.75rem" }}>
+          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginBottom: "0.75rem" }}>
             If you discover a security vulnerability, please report it privately.
             We commit to acknowledging receipt within 2 business days and
             communicating a remediation plan within 10 business days.
@@ -425,7 +423,7 @@ const TrustPage: NextPage = () => (
 
         {/* ── YOUR RIGHTS ─────────────────────────────────────────── */}
         <Section icon={<Users className="h-4 w-4" />} heading="Your rights">
-          <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", marginBottom: "0.75rem" }}>
+          <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)", marginBottom: "0.75rem" }}>
             Only rights that are implemented are listed here.
           </p>
 
@@ -463,7 +461,7 @@ const TrustPage: NextPage = () => (
               ...serif,
               fontSize: "0.85rem",
               lineHeight: 1.6,
-              color: "rgba(255,255,255,0.35)",
+              color: "rgba(255,255,255,0.45)",
               fontStyle: "italic",
             }}
           >
@@ -497,7 +495,7 @@ const TrustPage: NextPage = () => (
             </p>
           </div>
 
-          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)", marginBottom: "1rem" }}>
+          <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)", marginBottom: "1rem" }}>
             Enterprise and procurement enquiries requiring a security review pack,
             DPA, or detailed architecture briefing should use the link below.
           </p>
@@ -614,7 +612,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-4">
+    <section className="scroll-mt-28 space-y-4">
       <div className="flex items-center gap-2">
         <span style={{ color: `${GOLD}70` }}>{icon}</span>
         <h2
@@ -634,24 +632,7 @@ function Section({
 }
 
 function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid gap-3 border-b border-white/[0.04] py-4 md:grid-cols-[10rem_minmax(0,1fr)] md:items-baseline md:gap-4 md:py-3">
-      <p
-        style={{
-          ...mono,
-          fontSize: "6.5px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.28)",
-        }}
-      >
-        {label}
-      </p>
-      <p className="max-w-2xl text-[15px] leading-7 text-white/65 md:text-[18px] md:leading-8">
-        {value}
-      </p>
-    </div>
-  );
+  return <TrustInfoRow label={label}>{value}</TrustInfoRow>;
 }
 
 function CertRow({
@@ -691,7 +672,7 @@ function CertRow({
           ...serif,
           fontSize: "0.82rem",
           lineHeight: 1.55,
-          color: "rgba(255,255,255,0.38)",
+          color: "rgba(255,255,255,0.45)",
         }}
       >
         {note}
@@ -732,7 +713,7 @@ function RightRow({
           ...serif,
           fontSize: "0.85rem",
           lineHeight: 1.6,
-          color: "rgba(255,255,255,0.45)",
+          color: "rgba(255,255,255,0.60)",
           paddingLeft: "1.5rem",
         }}
       >

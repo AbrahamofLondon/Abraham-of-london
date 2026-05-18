@@ -140,9 +140,21 @@ export default function Header({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Long-form knowledge pages: collapse the header to a compact state after
+  // Long-form reading pages: collapse the header to a compact state after
   // 180px scroll so fixed chrome never obscures deep-reading content.
-  const LONG_FORM_PREFIXES = ["/library", "/intelligence/", "/briefs/", "/books/", "/vault/"];
+  const LONG_FORM_PREFIXES = [
+    "/library",
+    "/intelligence/",
+    "/briefs/",
+    "/books/",
+    "/vault/",
+    "/trust",
+    "/security-review",
+    "/verification",
+    "/provenance/",
+    "/engagements/operator-pilot",
+    "/tools/decision-delay-exposure",
+  ];
   const isLongFormPage = LONG_FORM_PREFIXES.some(
     (p) => currentPath === p.replace(/\/$/, "") || currentPath.startsWith(p),
   );
