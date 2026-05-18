@@ -15,6 +15,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { Shield, ArrowRight, FileText, Mail, Lock, AlertTriangle } from "lucide-react";
 import Layout from "@/components/Layout";
+import SecurityAssuranceStatusStrip from "@/components/trust/SecurityAssuranceStatusStrip";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -136,6 +137,8 @@ const SecurityReviewPage: NextPage = () => {
               We document exactly what is available and what is not.
             </p>
           </header>
+
+          <SecurityAssuranceStatusStrip />
 
           {/* ── WHAT IS AVAILABLE ───────────────────────────────────── */}
           <section

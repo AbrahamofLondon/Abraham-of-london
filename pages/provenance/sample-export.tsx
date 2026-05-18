@@ -20,6 +20,7 @@ import { Shield, Hash, Clock, Layers, AlertTriangle, CheckCircle2, FileText } fr
 
 import Layout from "@/components/Layout";
 import SurfaceBoundaryPanel from "@/components/product/SurfaceBoundaryPanel";
+import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
@@ -122,6 +123,8 @@ const SampleExportPage: NextPage = () => {
             nextAction={{ label: "Create a governed case", href: "/diagnostics/fast" }}
             secondaryAction={{ label: "View public anchor log status", href: "/provenance/anchor-log" }}
           />
+
+          <LegalIdentityBlock showOperatingIdentityLine />
 
           {/* ── LIVE CASE VERSION ──────────────────────────────────── */}
           <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}03`, padding: "1rem" }}>

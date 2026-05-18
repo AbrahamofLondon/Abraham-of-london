@@ -17,6 +17,7 @@ import {
 } from "@/lib/tools/decision-delay-exposure-calculator";
 import { buildDelayCalculatorCarryForwardPayload } from "@/lib/product/session-case-continuity";
 import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
+import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 import type { CommercialExposure } from "@/components/diagnostics/CommercialExposurePanel";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -396,6 +397,10 @@ export default function DecisionDelayExposurePage() {
             nextAction={{ label: "Run the Fast Diagnostic", href: "/diagnostics/fast" }}
             secondaryAction={{ label: "Open Decision Centre", href: "/decision-centre" }}
           />
+
+          <div style={{ marginTop: "24px" }}>
+            <LegalIdentityBlock showOperatingIdentityLine />
+          </div>
 
           <GoldDivider />
 

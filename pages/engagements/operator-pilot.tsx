@@ -13,6 +13,7 @@ import type { NextPage } from "next";
 import { ArrowRight, ShieldCheck, AlertTriangle, FileText, Clock, CheckCircle } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 
 const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
@@ -56,6 +57,17 @@ const OperatorPilotPage: NextPage = () => {
               This is not a demo. It is not a trial of the platform. It is a controlled proof of decision intelligence under real pressure. You bring one live decision with real stakes. The system tests it under evidence, authority, consequence, and execution reality — then returns a governed finding, a required move, and a checkpoint.
             </p>
           </header>
+
+          <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+              Trust boundary
+            </p>
+            <p className="mt-3 text-sm leading-7 text-white/60">
+              Pilot use is bounded to one decision or defined review scope. Sensitive or regulated workflows should begin with sanitised or minimally sensitive information until deeper assurance review is completed.
+            </p>
+          </section>
+
+          <LegalIdentityBlock showOperatingIdentityLine />
 
           {/* ── 2. WHO THIS IS FOR ── */}
           <section className="grid gap-6 xl:grid-cols-2">

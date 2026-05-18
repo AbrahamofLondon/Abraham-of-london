@@ -30,6 +30,8 @@ import {
   Users,
 } from "lucide-react";
 import Layout from "@/components/Layout";
+import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
+import SecurityAssuranceStatusStrip from "@/components/trust/SecurityAssuranceStatusStrip";
 
 const GOLD = "#C9A96E";
 
@@ -175,6 +177,10 @@ const TrustPage: NextPage = () => (
             </Link>
           </div>
         </header>
+
+        <LegalIdentityBlock showOperatingIdentityLine />
+
+        <SecurityAssuranceStatusStrip />
 
         {/* ── SECURITY POSTURE ────────────────────────────────────── */}
         <Section icon={<Lock className="h-4 w-4" />} heading="Security posture">

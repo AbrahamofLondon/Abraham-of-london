@@ -8,6 +8,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { ExternalLink, Shield } from "lucide-react";
 import Layout from "@/components/Layout";
+import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 
 const GOLD = "#C9A96E";
 
@@ -81,20 +82,10 @@ const VerificationPage: NextPage = () => {
                 Legal Presence
               </span>
 
-              <div className="mt-3 space-y-1 text-sm" style={{ color: "rgba(255,255,255,0.46)" }}>
-                <p>Abraham of London — United Kingdom platform and operating identity.</p>
-                <p>Alomarada Ltd — UK registered company. Company number: 11549053. UTR: 3124426287.</p>
-
-                <a
-                  href="https://find-and-update.company-information.service.gov.uk/company/11549053/officers"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-flex items-center gap-1"
-                  style={{ color: `${GOLD}A0`, fontSize: "0.82rem" }}
-                >
-                  Companies House — Alomarada Ltd <ExternalLink style={{ width: 9, height: 9 }} />
-                </a>
-              </div>
+              <LegalIdentityBlock variant="embedded" showOperatingIdentityLine />
+              <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.46)" }}>
+                UTR: 3124426287.
+              </p>
             </section>
 
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>

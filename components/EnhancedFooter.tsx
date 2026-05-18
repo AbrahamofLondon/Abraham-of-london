@@ -513,9 +513,12 @@ export default function EnhancedFooter(): React.ReactElement {
                 © {year} Abraham of London · All rights reserved
               </span>
               <div className="hidden h-3 w-px bg-white/12 md:block" />
-              <span className="hidden font-mono text-[7px] uppercase tracking-[0.24em] text-white/30 md:block">
-                Institutional registry
-              </span>
+              <Link
+                href="/verification"
+                className="font-mono text-[7px] uppercase tracking-[0.24em] text-white/38 transition-colors duration-200 hover:text-white/78"
+              >
+                Company verification
+              </Link>
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
