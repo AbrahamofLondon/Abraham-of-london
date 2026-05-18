@@ -39,6 +39,29 @@ describe("security assurance contact helpers", () => {
     );
   });
 
+  it("resolves enterprise-assurance-rfi-answer-pack correctly", () => {
+    expect(
+      resolveSecurityAssuranceMaterialId("enterprise-assurance-rfi-answer-pack"),
+    ).toBe("enterprise-assurance-rfi-answer-pack");
+  });
+
+  it("maps enterprise RFI pack to requestedMaterial in payload", () => {
+    const payload = createSecurityAssuranceRequestPayload(
+      { name: "Jane Smith", email: "jane@acme.com", organisation: "Acme Corp" },
+      "enterprise-assurance-rfi-answer-pack",
+      "token-rfi",
+    );
+    expect(payload.requestedMaterial).toBe("enterprise-assurance-rfi-answer-pack");
+    expect(payload.name).toBe("Jane Smith");
+    expect(payload.organisation).toBe("Acme Corp");
+  });
+
+  it("falls back to default for null requested param", () => {
+    expect(resolveSecurityAssuranceMaterialId(null)).toBe(
+      DEFAULT_SECURITY_ASSURANCE_MATERIAL_ID,
+    );
+  });
+
   it("maps failure classes to distinct buyer-facing messages", () => {
     expect(getSecurityAssuranceSubmissionErrorMessage(400)).toContain(
       "check the request details",

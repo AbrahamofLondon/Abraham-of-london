@@ -18,6 +18,7 @@ import { getSecurityAssuranceMaterialById } from "@/lib/security-assurance/secur
 import type {
   SecurityAssuranceRequestStatus,
 } from "@/lib/security-assurance/security-assurance-pack-registry";
+import { buildSecurityAssuranceResponse } from "@/lib/security-assurance/security-assurance-response-builder";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -78,26 +79,101 @@ type Props = {
   };
 };
 
+const RFI_PACK_ID = "enterprise-assurance-rfi-answer-pack";
+
 function ResponseTemplate({
   request,
+  currentStatus,
 }: {
   request: RequestRow;
+  currentStatus: string;
 }) {
   const material = getSecurityAssuranceMaterialById(request.requestedMaterial);
-  const templates = {
-    PUBLIC_PACK_APPROVED: `Hi${request.name ? ` ${request.name.split(" ")[0]}` : ""},\n\nThank you for reaching out. The ${material?.title ?? request.requestedMaterial} is available publicly — you can view it here:\n\n${material?.publicHref ?? "[link]"}\n\nIf you have further questions, please reply to this email.\n\nBest regards,\nAbraham of London`,
-    NDA_REQUIRED: `Hi${request.name ? ` ${request.name.split(" ")[0]}` : ""},\n\nThank you for your request for the ${material?.title ?? request.requestedMaterial}. Given the sensitivity of this material, we share it under NDA. Please reply confirming you are willing to proceed under a mutual NDA and I will send the agreement for signature.\n\nBest regards,\nAbraham of London`,
-    RESTRICTED_PACK_APPROVED: `Hi${request.name ? ` ${request.name.split(" ")[0]}` : ""},\n\nThank you for the context you provided. Following review, I am happy to share the ${material?.title ?? request.requestedMaterial} with you under the agreed NDA. Please find it attached / accessible at [link].\n\nNote that this material is shared for procurement review only and should not be distributed further.\n\nBest regards,\nAbraham of London`,
-    DECLINED: `Hi${request.name ? ` ${request.name.split(" ")[0]}` : ""},\n\nThank you for your request. After review, we are not in a position to share the requested material at this time. This may be because the procurement stage is not yet appropriate or additional context is needed.\n\nIf you have further questions, please reply to this email.\n\nBest regards,\nAbraham of London`,
-  } as Record<string, string>;
+  const isRfiPack = request.requestedMaterial === RFI_PACK_ID;
 
-  const template = templates[request.status] ?? templates["DECLINED"] ?? "";
+  // For RFI pack and approval statuses, use the response builder
+  const builtResponse =
+    isRfiPack ||
+    currentStatus === "PUBLIC_PACK_APPROVED" ||
+    currentStatus === "RESTRICTED_PACK_APPROVED"
+      ? buildSecurityAssuranceResponse({
+          requestedMaterialId: request.requestedMaterial,
+          requesterName: request.name,
+          organisation: request.organisation,
+          procurementStage: request.procurementStage,
+        })
+      : null;
+
+  // Fallback templates for other statuses
+  const fallbackTemplates: Record<string, string> = {
+    NDA_REQUIRED: `Hi${request.name ? ` ${request.name.split(" ")[0]}` : ""},\n\nThank you for your request for the ${material?.title ?? request.requestedMaterial}. Given the sensitivity of this material, we share it under NDA. Please reply confirming you are willing to proceed under a mutual NDA and I will send the agreement for signature.\n\nBest regards,\nAbraham of London`,
+    DECLINED: `Hi${request.name ? ` ${request.name.split(" ")[0]}` : ""},\n\nThank you for your request. After review, we are not in a position to share the requested material at this time. This may be because the procurement stage is not yet appropriate or additional context is needed.\n\nIf you have further questions, please reply to this email.\n\nBest regards,\nAbraham of London`,
+  };
+
+  const template =
+    builtResponse?.body ??
+    fallbackTemplates[currentStatus] ??
+    fallbackTemplates["DECLINED"] ??
+    "";
+
+  const disclosureNotice = builtResponse?.disclosureNotice;
+  const recommendedAttachments = builtResponse?.recommendedAttachments ?? [];
 
   return (
-    <div style={{ marginTop: "0.75rem" }}>
-      <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.3rem" }}>
-        Response template
+    <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      {/* RFI-specific meta */}
+      {isRfiPack && (
+        <div
+          style={{
+            border: `1px solid ${GOLD}18`,
+            backgroundColor: `${GOLD}04`,
+            padding: "0.6rem 0.75rem",
+          }}
+        >
+          <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}77`, marginBottom: "0.3rem" }}>
+            Suggested action — RFI pack
+          </p>
+          <p style={{ ...serif, fontSize: "0.83rem", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+            Review requester identity, procurement stage, and intended use before release. Confirm organisation is genuine. The pack contains honest assurance boundaries — no SOC 2, ISO 27001, or pen-test completion is claimed.
+          </p>
+          {recommendedAttachments.length > 0 && (
+            <div style={{ marginTop: "0.4rem" }}>
+              <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                Recommended materials to share
+              </p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {recommendedAttachments.map((id) => (
+                  <span
+                    key={id}
+                    style={{
+                      ...mono,
+                      fontSize: "6px",
+                      letterSpacing: "0.10em",
+                      color: "rgba(255,255,255,0.35)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      padding: "1px 6px",
+                    }}
+                  >
+                    {id}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Disclosure notice */}
+      {disclosureNotice && (
+        <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.12em", color: "rgba(255,200,80,0.55)" }}>
+          {disclosureNotice}
+        </p>
+      )}
+
+      <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+        {isRfiPack ? "RFI response template" : "Response template"}
       </p>
+
       <pre
         style={{
           fontFamily: "inherit",
@@ -112,23 +188,43 @@ function ResponseTemplate({
       >
         {template}
       </pre>
-      <button
-        onClick={() => navigator.clipboard.writeText(template)}
-        style={{
-          ...mono,
-          fontSize: "6.5px",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: `${GOLD}88`,
-          background: "none",
-          border: `1px solid ${GOLD}22`,
-          padding: "0.25rem 0.55rem",
-          cursor: "pointer",
-          marginTop: "0.35rem",
-        }}
-      >
-        Copy template
-      </button>
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => navigator.clipboard.writeText(template)}
+          style={{
+            ...mono,
+            fontSize: "6.5px",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: `${GOLD}88`,
+            background: "none",
+            border: `1px solid ${GOLD}22`,
+            padding: "0.25rem 0.55rem",
+            cursor: "pointer",
+          }}
+        >
+          {isRfiPack ? "Copy RFI response template" : "Copy template"}
+        </button>
+        {builtResponse && (
+          <button
+            onClick={() => navigator.clipboard.writeText(builtResponse.subject)}
+            style={{
+              ...mono,
+              fontSize: "6.5px",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.28)",
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.06)",
+              padding: "0.25rem 0.55rem",
+              cursor: "pointer",
+            }}
+          >
+            Copy subject
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -140,6 +236,7 @@ function RequestCard({ request, onStatusChange }: { request: RequestRow; onStatu
   const [saving, setSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
   const material = getSecurityAssuranceMaterialById(request.requestedMaterial);
+  const isRfiPack = request.requestedMaterial === RFI_PACK_ID;
 
   const handleSave = async () => {
     setSaving(true);
@@ -198,6 +295,22 @@ function RequestCard({ request, onStatusChange }: { request: RequestRow; onStatu
               >
                 {material.disclosureLevel}
                 {material.requiresNda && " · NDA required"}
+              </span>
+            )}
+            {isRfiPack && (
+              <span
+                style={{
+                  ...mono,
+                  fontSize: "6px",
+                  letterSpacing: "0.10em",
+                  textTransform: "uppercase",
+                  color: `${GOLD}99`,
+                  border: `1px solid ${GOLD}22`,
+                  padding: "1px 5px",
+                  backgroundColor: `${GOLD}06`,
+                }}
+              >
+                Enterprise RFI
               </span>
             )}
           </div>
@@ -302,7 +415,7 @@ function RequestCard({ request, onStatusChange }: { request: RequestRow; onStatu
           </div>
 
           {/* Response template */}
-          <ResponseTemplate request={{ ...request, status }} />
+          <ResponseTemplate request={request} currentStatus={status} />
         </div>
       )}
     </div>

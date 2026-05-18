@@ -555,17 +555,87 @@ const SecurityReviewPage: NextPage = () => {
               Request security assurance pack
             </Link>
 
+          </section>
+
+          {/* ── ENTERPRISE RFI PACK ─────────────────────────────────── */}
+          <section
+            id="enterprise-rfi-pack"
+            className="scroll-mt-28"
+            style={{
+              border: `1px solid ${GOLD}20`,
+              backgroundColor: `${GOLD}04`,
+              padding: "1.25rem",
+            }}
+          >
+            <p
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: `${GOLD}88`,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Enterprise Assurance RFI Pack
+            </p>
+            <p
+              style={{
+                ...serif,
+                fontSize: "0.93rem",
+                lineHeight: 1.65,
+                color: "rgba(255,255,255,0.70)",
+                marginBottom: "0.4rem",
+              }}
+            >
+              Structured answers for procurement, vendor-risk, legal, security, and operator review.
+            </p>
             <p
               style={{
                 ...serif,
                 fontSize: "0.85rem",
-                lineHeight: 1.65,
-                color: "rgba(255,255,255,0.40)",
-                marginTop: "1rem",
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.42)",
+                marginBottom: "0.85rem",
               }}
             >
-              For procurement or vendor-risk review, an enterprise assurance RFI answer pack is available covering all standard questionnaire categories. Some materials may require qualification, NDA, or contract review.
+              Covers all standard questionnaire categories: legal entity, security assurance status, access control, data residency, privacy, sub-processors, operational resilience, provenance, insurance status, and roadmap commitments. Honest status on every item. Some answers direct to contract review.
             </p>
+            <div style={{ marginBottom: "0.6rem" }}>
+              <span
+                style={{
+                  ...mono,
+                  fontSize: "6.5px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "rgba(253,186,116,0.65)",
+                  border: "1px solid rgba(253,186,116,0.20)",
+                  padding: "1px 6px",
+                }}
+              >
+                Requestable through security assurance process
+              </span>
+            </div>
+            <Link
+              href="/contact?type=security-assurance&requested=enterprise-assurance-rfi-answer-pack"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                border: `1px solid ${GOLD}44`,
+                backgroundColor: `${GOLD}0A`,
+                color: `${GOLD}CC`,
+                ...mono,
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                padding: "0.65rem 1.1rem",
+                textDecoration: "none",
+              }}
+            >
+              <Mail className="h-3.5 w-3.5" />
+              Request RFI pack
+            </Link>
           </section>
 
           {/* ── CROSS-LINKS ─────────────────────────────────────────── */}
