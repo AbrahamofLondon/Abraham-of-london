@@ -92,6 +92,15 @@ const MATERIALS: readonly SecurityAssuranceMaterial[] = [
     requiresReview: true,
     requiresNda: true,
   },
+  {
+    id: "enterprise-assurance-rfi-answer-pack",
+    title: "Enterprise Assurance RFI Answer Pack",
+    description:
+      "Structured honest answers to all standard enterprise vendor-risk questionnaire categories: legal entity, security assurance status, access control, data residency, privacy, sub-processors, operational resilience, provenance, insurance status, and roadmap. Some answers direct to contract or procurement review.",
+    disclosureLevel: "REQUESTABLE",
+    requiresReview: true,
+    requiresNda: false,
+  },
 ] as const;
 
 export function getSecurityAssuranceMaterials(): readonly SecurityAssuranceMaterial[] {

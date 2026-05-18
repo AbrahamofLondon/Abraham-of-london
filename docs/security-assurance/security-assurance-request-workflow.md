@@ -159,4 +159,34 @@ All templates must be reviewed before sending. They are starting points, not aut
 
 ---
 
+## 13. Enterprise RFI answer pack
+
+An enterprise assurance RFI answer pack exists at `docs/security-assurance/enterprise-assurance-rfi-answer-pack.md`. It covers all 10 standard vendor-risk categories including legal entity, security assurance status, access control, data residency, privacy, sub-processors, operational resilience, provenance, insurance, and roadmap.
+
+- The RFI pack is registered as `enterprise-assurance-rfi-answer-pack` in the material registry
+- It is `REQUESTABLE` — share via the controlled request process, not automatically
+- Some answers within the pack direct to contract/procurement review (insurance, liability, RTO/RPO, enterprise residency, SSO/MFA commitments)
+- Unknown items in the pack must not be guessed — use "to be confirmed during procurement review"
+- A vendor risk question index is at `docs/security-assurance/vendor-risk-question-index.md` — use it to route questions to the right answer source quickly
+
+## 14. Items that must never be closed by wording
+
+The following require real external work and must remain honestly marked:
+
+- Independent penetration test
+- SOC 2 Type I and Type II
+- ISO 27001
+- Public status page
+- Historical uptime reporting
+- Contractual RTO/RPO
+- Enterprise SSO / SAML
+- Enforced organisation-level MFA
+- Formal DPO/privacy governance
+- Cyber/professional indemnity insurance confirmation
+- External WORM/blockchain anchoring
+
+Roadmap at `docs/security-assurance/external-assurance-roadmap.md`.
+
+---
+
 *Last updated: 2026-05-18*

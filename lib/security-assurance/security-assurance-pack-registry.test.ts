@@ -10,8 +10,8 @@ import {
 
 describe("security-assurance-pack-registry", () => {
   describe("completeness", () => {
-    it("returns all 7 materials", () => {
-      expect(getSecurityAssuranceMaterials()).toHaveLength(7);
+    it("returns all 8 materials", () => {
+      expect(getSecurityAssuranceMaterials()).toHaveLength(8);
     });
 
     it("every material has id, title, description, disclosureLevel", () => {
@@ -147,6 +147,43 @@ describe("security-assurance-pack-registry", () => {
       for (const id of ids) {
         expect(VALID_SECURITY_ASSURANCE_MATERIAL_IDS).toContain(id);
       }
+    });
+  });
+
+  describe("enterprise-assurance-rfi-answer-pack", () => {
+    it("is present in the registry", () => {
+      const m = getSecurityAssuranceMaterialById("enterprise-assurance-rfi-answer-pack");
+      expect(m).not.toBeNull();
+    });
+
+    it("is REQUESTABLE — not public auto-download", () => {
+      const m = getSecurityAssuranceMaterialById("enterprise-assurance-rfi-answer-pack");
+      expect(m?.disclosureLevel).toBe("REQUESTABLE");
+      expect(m?.publicHref).toBeUndefined();
+    });
+
+    it("requires operator review before sharing", () => {
+      const m = getSecurityAssuranceMaterialById("enterprise-assurance-rfi-answer-pack");
+      expect(m?.requiresReview).toBe(true);
+    });
+
+    it("does not require NDA (content directs to contract review for sensitive items)", () => {
+      const m = getSecurityAssuranceMaterialById("enterprise-assurance-rfi-answer-pack");
+      expect(m?.requiresNda).toBe(false);
+    });
+
+    it("has a valid request href", () => {
+      const href = getSecurityAssuranceRequestHref("enterprise-assurance-rfi-answer-pack");
+      expect(href).toContain("requested=enterprise-assurance-rfi-answer-pack");
+      expect(href).toContain("type=security-assurance");
+    });
+
+    it("isPublicSecurityAssuranceMaterial returns false for RFI pack", () => {
+      expect(isPublicSecurityAssuranceMaterial("enterprise-assurance-rfi-answer-pack")).toBe(false);
+    });
+
+    it("requiresSecurityAssuranceReview returns true for RFI pack", () => {
+      expect(requiresSecurityAssuranceReview("enterprise-assurance-rfi-answer-pack")).toBe(true);
     });
   });
 });

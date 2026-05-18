@@ -554,6 +554,18 @@ const SecurityReviewPage: NextPage = () => {
               <Mail className="h-3.5 w-3.5" />
               Request security assurance pack
             </Link>
+
+            <p
+              style={{
+                ...serif,
+                fontSize: "0.85rem",
+                lineHeight: 1.65,
+                color: "rgba(255,255,255,0.40)",
+                marginTop: "1rem",
+              }}
+            >
+              For procurement or vendor-risk review, an enterprise assurance RFI answer pack is available covering all standard questionnaire categories. Some materials may require qualification, NDA, or contract review.
+            </p>
           </section>
 
           {/* ── CROSS-LINKS ─────────────────────────────────────────── */}

@@ -56,9 +56,28 @@ When answering serious procurement questions, keep the current boundaries explic
 - Formal enterprise RTO/RPO commitments are not yet represented as generally available.
 - A public status page is not yet published; internal health checks are not a public status history or uptime SLA.
 
+## Enterprise RFI answer pack
+
+An enterprise assurance RFI answer pack (`docs/security-assurance/enterprise-assurance-rfi-answer-pack.md`) provides structured honest answers to all standard vendor-risk questionnaire categories. It is registered in the material registry as `enterprise-assurance-rfi-answer-pack` (REQUESTABLE).
+
+**When the RFI pack is requested:**
+- Share via the controlled request process — not automatically or publicly
+- Some answers within the pack direct to contract/procurement review (insurance, liability, RTO/RPO, enterprise residency, SSO/MFA)
+- Do not answer beyond the pack's documented scope without escalation
+
+## Items that require contract or procurement review (never answer by improvisation)
+
+- Insurance coverage, cyber insurance, professional indemnity
+- Contractual liability caps
+- Formal RTO/RPO commitments
+- EU-only or UK-only data residency guarantee
+- Enterprise SSO/SAML and enforced MFA availability
+- Formal incident notification SLA
+
 ## Handling expectations
 
 - Keep a copy of what was sent and when.
 - Do not improvise claims outside the current public claim boundary.
 - If a buyer asks for a fact not currently verified, respond with “to be confirmed during procurement review” rather than guessing.
 - Escalate legal, security, or regulated-data questions before answering beyond approved materials.
+- Use the vendor risk question index (`docs/security-assurance/vendor-risk-question-index.md`) to route questions quickly.
