@@ -347,12 +347,7 @@ describe("trial entitlement — expired trial does not grant access", () => {
     // Trial rows use status:"trial", not "active".
     // resolveCanonicalEntitlement queries status:"active" only.
     // Simulate: only a trial row exists (not returned by active filter).
-    vi.mocked(prisma.clientEntitlement.findFirst).mockImplementation(
-      async (args: any) => {
-        if (args?.where?.status === "active") return null;
-        return null;
-      },
-    );
+    vi.mocked(prisma.clientEntitlement.findFirst).mockResolvedValue(null);
     vi.mocked(prisma.entitlement.findFirst).mockResolvedValue(null);
 
     const result = await resolveCanonicalEntitlement({

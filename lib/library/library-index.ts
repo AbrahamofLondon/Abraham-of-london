@@ -369,7 +369,7 @@ function buildFromPDFRegistryEntry(entry: any): LibraryIndexItem | null {
   const tags = safeArr(entry.tags);
   const category = safeStr(entry.category || entry.categorySlug || "", null) || null;
   const outputPath = safeStr(entry.outputPath);
-  const href = outputPath || `/assets/downloads/${id}.pdf`;
+  const href = `/api/downloads/${encodeURIComponent(id)}`;
   const tier = safeStr(entry.tier || (entry.requiresAuth === true ? "member" : "public"));
   const access = normalizeAccess(tier);
   const date = safeISO(entry.lastModified || entry.createdAt || entry.updatedAt);
