@@ -82,7 +82,7 @@ const VerificationPage: NextPage = () => {
                 Legal Presence
               </span>
 
-              <LegalIdentityBlock variant="embedded" showOperatingIdentityLine />
+              <LegalIdentityBlock variant="embedded" />
               <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                 UTR: 3124426287.
               </p>

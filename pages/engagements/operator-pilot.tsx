@@ -69,7 +69,7 @@ const OperatorPilotPage: NextPage = () => {
             </p>
           </section>
 
-          <LegalIdentityBlock showOperatingIdentityLine />
+          <LegalIdentityBlock />
 
           {/* ── 2. WHO THIS IS FOR ── */}
           <section className="grid gap-6 xl:grid-cols-2">

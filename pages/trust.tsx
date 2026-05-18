@@ -181,7 +181,7 @@ const TrustPage: NextPage = () => (
           </div>
         </header>
 
-        <LegalIdentityBlock showOperatingIdentityLine />
+        <LegalIdentityBlock />
 
         <SecurityAssuranceStatusStrip />
 
@@ -246,6 +246,8 @@ const TrustPage: NextPage = () => (
         <Section icon={<Lock className="h-4 w-4" />} heading="Security posture">
           <Row label="Hosting" value="Netlify (CDN) + serverless functions. TLS 1.2+ enforced. No unencrypted HTTP." />
           <Row label="Authentication" value="Managed via NextAuth.js. Session tokens are short-lived. Magic link and OAuth supported." />
+          <Row label="MFA / SSO" value="Enterprise SSO and enforced organisation-level MFA are not yet represented as generally available. Availability can be reviewed for qualified enterprise deployments." />
+          <Row label="Administrative access" value="Administrative access is limited to authorised operator/admin roles for support, review, delivery, and security operations. Certain provenance and admin operations are logged for review." />
           <Row label="Database" value="PostgreSQL via Prisma ORM. Parameterised queries throughout. No raw SQL strings in user-facing paths." />
           <Row label="Secrets management" value="Environment variables via Netlify. No secrets in source control. No plaintext keys in logs." />
           <Row label="Dependency scanning" value="pnpm audit on every install. Dependabot alerts enabled." />
@@ -257,11 +259,12 @@ const TrustPage: NextPage = () => (
         <Section icon={<Database className="h-4 w-4" />} heading="Data handling">
           <Row label="What we store" value="Governed case records, assessment results, session data, and authentication credentials. No financial data is processed or stored directly." />
           <Row label="What we do not store" value="Raw payment card data. Your evidence content is stored as you submit it — we do not process it for any purpose beyond the product features you use." />
-          <Row label="Data location" value="EU and US regions via hosting provider. Specific region available on request for enterprise accounts." />
+          <Row label="Data location" value="Default infrastructure may involve UK/EU/US provider regions depending on the service used. Region-specific deployment, data residency commitments, and transfer terms must be agreed during enterprise procurement or contract review; no blanket residency guarantee is represented for all accounts." />
           <Row label="Retention" value="Active cases are retained while your account is active. Deleted cases are soft-deleted and permanently purged after 30 days." />
-          <Row label="Third-party access" value="Sub-processors listed below. No sale of personal data. No data sharing for advertising." />
+          <Row label="Third-party access" value="Sub-processors listed below. No sale of personal data. No data sharing for advertising. DPA and sub-processor review can be handled through the security assurance request process." />
+          <Row label="Analytics and telemetry" value="Product analytics may be used to understand usage, reliability, and product improvement. Specific telemetry fields and account-level restrictions can be reviewed through the security assurance process." />
           <Row label="Encryption at rest" value="Database encryption managed by hosting provider. Application-level field encryption applied to sensitive governance fields." />
-          <Row label="Backups" value="Daily automated backups. Retained for 7 days. Restore tested quarterly." />
+          <Row label="Backups" value="Daily automated backups are retained for 7 days. This is not a contractual RTO/RPO commitment; restore-testing posture and available evidence can be discussed through the security assurance process." />
         </Section>
 
         {/* ── PROVENANCE BOUNDARY ─────────────────────────────────── */}
@@ -343,7 +346,7 @@ const TrustPage: NextPage = () => (
               The platform is not currently ISO/IEC 27001 certified. However, Abraham Adaramola holds an ISO/IEC 27001:2022 Lead Auditor credential from Mastermind Assurance.
             </p>
             <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1rem", borderLeft: `1px solid ${GOLD}33`, paddingLeft: "0.75rem" }}>
-              This credential supports the assurance literacy, audit awareness, and governance discipline behind the platform. It should not be read as independent certification of Abraham of London Ltd or of the Abraham of London platform.
+              This credential supports the assurance literacy, audit awareness, and governance discipline behind the platform. It should not be read as independent certification of Alomarada Ltd or of the Abraham of London platform.
             </p>
             <div className="space-y-3">
               <CertRow
@@ -380,9 +383,9 @@ const TrustPage: NextPage = () => (
 
         {/* ── UPTIME / STATUS ─────────────────────────────────────── */}
         <Section icon={<Clock className="h-4 w-4" />} heading="Uptime and status">
-          <Row label="Status page" value="Not yet published publicly. Health endpoint available at /api/health." />
-          <Row label="Incident notification" value="Material incidents notified via email to affected accounts. No public status page yet." />
-          <Row label="Target uptime" value="99.5% monthly. Hosted on Netlify — actual uptime depends on provider SLA." />
+          <Row label="Status page" value="A public status page is not yet published. Internal/system health checks exist, but they should not be read as a public status history or uptime SLA." />
+          <Row label="Incident notification" value="Material incidents are notified via email to affected accounts. For current pilots, incident communication expectations should be agreed within the engagement scope." />
+          <Row label="Target uptime" value="99.5% monthly operating target. This is not represented as a guaranteed uptime SLA unless separately agreed in contract." />
           <Row label="Planned maintenance" value="Notified by email where downtime exceeds 5 minutes." />
         </Section>
 

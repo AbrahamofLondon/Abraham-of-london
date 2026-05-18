@@ -15,6 +15,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { Shield, ArrowRight, FileText, Mail, Lock, AlertTriangle, ExternalLink } from "lucide-react";
 import Layout from "@/components/Layout";
+import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 import SecurityAssuranceStatusStrip from "@/components/trust/SecurityAssuranceStatusStrip";
 import {
   getSecurityAssuranceMaterials,
@@ -108,6 +109,8 @@ const SecurityReviewPage: NextPage = () => {
             </p>
           </header>
 
+          <LegalIdentityBlock />
+
           <SecurityAssuranceStatusStrip />
 
           {/* ── REQUEST PROCESS NOTICE ──────────────────────────────── */}
@@ -151,6 +154,95 @@ const SecurityReviewPage: NextPage = () => {
             >
               SOC 2, ISO 27001 certification, and independent penetration testing are not yet complete and are not represented as completed.
             </p>
+          </section>
+
+          {/* ── OPERATIONAL BOUNDARIES ─────────────────────────────── */}
+          <section
+            style={{
+              border: "1px solid rgba(255,255,255,0.08)",
+              backgroundColor: "rgba(255,255,255,0.015)",
+              padding: "1rem",
+            }}
+          >
+            <p
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: `${GOLD}88`,
+                marginBottom: "0.75rem",
+              }}
+            >
+              Administrative access and internal review
+            </p>
+            <div className="space-y-3">
+              <p
+                style={{
+                  ...serif,
+                  fontSize: "0.92rem",
+                  lineHeight: 1.7,
+                  color: "rgba(255,255,255,0.60)",
+                }}
+              >
+                Administrative access is limited to authorised operator/admin roles and is used for support, review, delivery, and security operations. Access to restricted assurance materials and operational records is controlled through admin review workflows. Certain provenance and admin operations are logged for review.
+              </p>
+              <p
+                style={{
+                  ...serif,
+                  fontSize: "0.9rem",
+                  lineHeight: 1.65,
+                  color: "rgba(255,255,255,0.55)",
+                }}
+              >
+                MFA / SSO: Current authentication is handled through the platform&apos;s configured authentication provider and supported sign-in methods. Enterprise SSO and enforced organisation-level MFA are not yet represented as generally available. Availability can be reviewed for qualified enterprise deployments.
+              </p>
+              <p
+                style={{
+                  ...serif,
+                  fontSize: "0.9rem",
+                  lineHeight: 1.65,
+                  color: "rgba(255,255,255,0.55)",
+                }}
+              >
+                Detailed internal access procedures can be discussed during procurement or security review.
+              </p>
+            </div>
+          </section>
+
+          <section
+            style={{
+              border: "1px solid rgba(255,255,255,0.08)",
+              backgroundColor: "rgba(255,255,255,0.015)",
+              padding: "1rem",
+            }}
+          >
+            <p
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: `${GOLD}88`,
+                marginBottom: "0.75rem",
+              }}
+            >
+              Enterprise operating caveats
+            </p>
+            <div className="space-y-3">
+              <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)" }}>
+                Data residency and transfers: Default infrastructure may involve UK/EU/US provider regions depending on the service used. Region-specific deployment, data residency commitments, transfer terms, DPA, and sub-processor review must be agreed as part of enterprise procurement or contract review. The platform does not currently represent a blanket residency guarantee for all accounts.
+              </p>
+              <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)" }}>
+                Analytics and telemetry: Product analytics may be used to understand usage, reliability, and product improvement. Analytics should not be used to sell personal data or for ad-tech sharing. Specific telemetry fields, analytics configuration, and account-level restrictions can be reviewed through the security assurance process.
+              </p>
+              <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)" }}>
+                Backups and restore: The platform uses provider/database backup mechanisms appropriate to the current deployment. Formal enterprise RTO/RPO commitments are not yet represented as generally available and should be agreed during enterprise procurement. Restore-testing posture and available evidence can be discussed through the security assurance request process.
+              </p>
+              <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)" }}>
+                Status and incident visibility: A public status page is not yet published. Internal/system health checks exist, but they should not be read as a public status history or uptime SLA. For current pilots, incident communication expectations should be agreed within the engagement scope.
+              </p>
+            </div>
           </section>
 
           {/* ── MATERIAL REGISTRY — ACTIONABLE CARDS ────────────────── */}
@@ -360,6 +452,37 @@ const SecurityReviewPage: NextPage = () => {
                 </p>
               </div>
             </div>
+          </section>
+
+          <section
+            style={{
+              border: `1px solid ${GOLD}18`,
+              backgroundColor: `${GOLD}04`,
+              padding: "1rem",
+            }}
+          >
+            <p
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: `${GOLD}88`,
+                marginBottom: "0.65rem",
+              }}
+            >
+              Enterprise readiness boundary
+            </p>
+            <p
+              style={{
+                ...serif,
+                fontSize: "0.95rem",
+                lineHeight: 1.7,
+                color: "rgba(255,255,255,0.60)",
+              }}
+            >
+              The platform is suitable for bounded pilots and structured assurance review. It is not yet represented as SOC 2 certified, ISO 27001 certified, independently penetration-tested, or externally audited. High-sensitivity, regulated, or mission-critical deployments should proceed through security review, DPA / sub-processor review, and agreed operational controls before production use.
+            </p>
           </section>
 
           {/* ── REQUEST SECURITY ASSURANCE PACK ─────────────────────── */}

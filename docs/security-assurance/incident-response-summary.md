@@ -27,6 +27,10 @@ Determine:
 
 Decide whether notification is required based on materiality, contractual obligations, legal requirements, and affected-party impact. Public wording currently states that material incidents are notified to affected accounts by email.
 
+## Status and visibility boundary
+
+A public status page is not yet published. Internal/system health checks exist, but they should not be read as a public status history or uptime SLA. For current pilots, incident communication expectations should be agreed within the engagement scope.
+
 ## Remediation
 
 Apply corrective actions, rebuild from clean state where required, rerun validation, and confirm that exposed or compromised credentials have been invalidated.
@@ -45,4 +49,3 @@ Document:
 ## Target response posture
 
 The operating target is to move from detection to containment, assessment, remediation, and documented review in a disciplined sequence. Specific response times should only be promised where contractually supported.
-

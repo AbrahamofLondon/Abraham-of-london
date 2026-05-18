@@ -92,7 +92,21 @@ For these materials:
 
 ---
 
-## 8. Admin queue statuses
+## 8. Enterprise-boundary prompts to preserve
+
+When handling a serious request, keep these current boundaries intact:
+
+- Abraham of London is operated by Alomarada Ltd, a UK registered company. Company no. 11549053.
+- Administrative access is limited to authorised operator/admin roles and restricted materials are controlled through admin review workflows.
+- Enterprise SSO and enforced organisation-level MFA are not yet represented as generally available.
+- Default infrastructure may involve UK/EU/US provider regions; data residency commitments, transfer terms, DPA, and sub-processor review must be handled in procurement or contract review.
+- Product analytics may be used for usage, reliability, and product improvement; specific telemetry fields can be reviewed through the security assurance process.
+- Formal enterprise RTO/RPO commitments are not yet represented as generally available.
+- A public status page is not yet published; current pilots should agree incident communication expectations within scope.
+
+---
+
+## 9. Admin queue statuses
 
 | Status | Meaning |
 |--------|---------|
@@ -108,7 +122,7 @@ Update status in `/admin/security-assurance-requests`. Status changes are logged
 
 ---
 
-## 9. Manual fulfilment checklist
+## 10. Manual fulfilment checklist
 
 Before marking `FULFILLED`:
 
@@ -121,7 +135,7 @@ Before marking `FULFILLED`:
 
 ---
 
-## 10. Response templates
+## 11. Response templates
 
 Templates are available in the admin queue (`/admin/security-assurance-requests`) per request. Use "Copy template" to copy the pre-filled template for the current status.
 
@@ -135,7 +149,7 @@ All templates must be reviewed before sending. They are starting points, not aut
 
 ---
 
-## 11. Recordkeeping expectation
+## 12. Recordkeeping expectation
 
 - All requests are stored in `SecurityAssuranceRequest` (database table: `security_assurance_requests`)
 - Records should not be deleted; set to `DECLINED` or `FULFILLED` when resolved

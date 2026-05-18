@@ -512,6 +512,9 @@ export default function EnhancedFooter(): React.ReactElement {
               <span className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/48">
                 © {year} Abraham of London · All rights reserved
               </span>
+              <span className="font-mono text-[7px] uppercase tracking-[0.24em] text-white/38">
+                Abraham of London is operated by Alomarada Ltd · UK registered company · Company no. 11549053
+              </span>
               <div className="hidden h-3 w-px bg-white/12 md:block" />
               <Link
                 href="/verification"

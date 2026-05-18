@@ -21,6 +21,12 @@ The current pack can cover:
 - legal identity;
 - infrastructure / provider posture;
 - named sub-processors;
+- administrative-access posture;
+- MFA / SSO availability boundary;
+- data-residency and transfer caveats;
+- analytics / telemetry caveats;
+- backup / restore and RTO / RPO caveats;
+- status-page and incident-visibility caveats;
 - pilot data-boundary guidance;
 - incident-response posture summary;
 - current independent-assurance status.
@@ -38,4 +44,3 @@ Some materials may be shared directly on request. Deeper architecture or securit
 Regards,  
 [Sender name]  
 Abraham of London
-

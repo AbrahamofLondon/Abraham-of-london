@@ -36,10 +36,13 @@ This boundary reduces unnecessary exposure while the platform is still operating
 
 Before the platform is used beyond a bounded pilot, the buyer and operator should review:
 
-- legal entity and contracting path;
+- the legal entity and contracting path: Abraham of London is operated by Alomarada Ltd, a UK registered company. Company no. 11549053;
 - sub-processor requirements;
 - DPA requirements where relevant;
+- data residency, transfer terms, and whether any region-specific commitment is required;
+- analytics / telemetry configuration and any account-level restriction needed;
 - incident-response posture;
-- retention and deletion expectations;
+- retention, deletion, backup, restore, and any RTO / RPO expectation;
+- current status-page and incident-visibility posture;
+- authentication posture, including the fact that enterprise SSO and enforced organisation-level MFA are not yet represented as generally available;
 - whether independent assurance is required before deployment.
-

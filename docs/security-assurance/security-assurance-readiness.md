@@ -21,10 +21,9 @@ The platform does **not** currently claim completed SOC 2, ISO 27001 organisatio
 
 ## Legal operating entity
 
-- Operating entity: Alomarada Ltd
+Abraham of London is operated by Alomarada Ltd, a UK registered company. Company no. 11549053.
+
 - Jurisdiction: United Kingdom
-- Company number: 11549053
-- Operating identity: Abraham of London
 - Public verification path: `/verification`
 
 ## Hosting / infrastructure providers
@@ -36,13 +35,19 @@ The public trust surface currently names:
 - Upstash Redis — rate limiting and session caching;
 - Resend — transactional email;
 - Stripe — payment processing where applicable;
-- Vercel Analytics / PostHog — anonymised product analytics.
+- Vercel Analytics / PostHog — product analytics and telemetry where configured.
 
 ## Authentication and access model summary
 
-The public trust surface states that authentication is managed via NextAuth.js, with short-lived session tokens and magic-link / OAuth support. Admin and privileged routes are governed separately in the codebase and security documentation.
+The public trust surface states that authentication is managed via NextAuth.js, with short-lived session tokens and magic-link / OAuth support.
 
-MFA support is **to be confirmed during procurement review**. It should not be claimed publicly unless the production configuration and user-facing control are verified.
+Current authentication is handled through the platform's configured authentication provider and supported sign-in methods. Enterprise SSO and enforced organisation-level MFA are not yet represented as generally available. Availability can be reviewed for qualified enterprise deployments.
+
+## Administrative access and internal review
+
+Administrative access is limited to authorised operator/admin roles and is used for support, review, delivery, and security operations. Access to restricted assurance materials and operational records is controlled through admin review workflows. Certain provenance and admin operations are logged for review.
+
+Detailed internal access procedures can be discussed during procurement or security review.
 
 ## Data handling summary
 
@@ -57,6 +62,18 @@ The public trust surface currently states:
 
 Prospective clients should use the pilot data boundary guidance before submitting any sensitive or regulated material.
 
+## Data residency and transfer posture
+
+Default infrastructure may involve UK/EU/US provider regions depending on the service used. Region-specific deployment, data residency commitments, transfer terms, DPA, and sub-processor review must be agreed as part of enterprise procurement or contract review. The platform does not currently represent a blanket residency guarantee for all accounts.
+
+## Analytics and telemetry
+
+Product analytics may be used to understand usage, reliability, and product improvement. Analytics should not be used to sell personal data or for ad-tech sharing. Specific telemetry fields, analytics configuration, and account-level restrictions can be reviewed through the security assurance process.
+
+## Backups and restore
+
+The platform uses provider/database backup mechanisms appropriate to the current deployment. Daily automated backups are currently retained for seven days. Formal enterprise RTO/RPO commitments are not yet represented as generally available and should be agreed during enterprise procurement. Restore-testing posture and available evidence can be discussed through the security assurance request process.
+
 ## Sub-processors
 
 Sub-processors are publicly named on `/trust` with their purpose and region. Any procurement review should confirm whether a current DPA, sub-processor addendum, or client-specific annex is required for the intended deployment.
@@ -66,6 +83,10 @@ Sub-processors are publicly named on `/trust` with their purpose and region. Any
 The repository contains an internal incident response plan covering classification, containment, secret rotation, credential invalidation, clean rebuild, and post-incident documentation. Public trust wording states that material incidents are notified to affected accounts by email.
 
 Current posture should be described as a **target response posture**, not a guaranteed SLA, unless a contractual SLA is separately agreed.
+
+## Status page and incident visibility
+
+A public status page is not yet published. Internal/system health checks exist, but they should not be read as a public status history or uptime SLA. For current pilots, incident communication expectations should be agreed within the engagement scope.
 
 ## Provenance and auditability boundary
 
@@ -114,6 +135,11 @@ They may be described as planned or prepared for review only when that remains t
 - pilot data boundary policy;
 - incident response summary;
 - sub-processor list;
+- administrative-access posture;
+- MFA / SSO boundary;
+- data-residency and transfer posture;
+- analytics / telemetry caveat;
+- backup / restore and RTO / RPO caveat;
+- status-page and incident-visibility caveat;
 - current provenance and auditability boundary;
 - a clear statement of which independent assurances are not yet complete.
-

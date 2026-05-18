@@ -10,25 +10,17 @@ const mono: React.CSSProperties = {
 };
 
 type LegalIdentityBlockProps = {
-  showOperatingIdentityLine?: boolean;
   variant?: "standalone" | "embedded";
 };
 
 export default function LegalIdentityBlock({
-  showOperatingIdentityLine = false,
   variant = "standalone",
 }: LegalIdentityBlockProps) {
   const content = (
     <>
       <p className="text-[15px] leading-7 text-white/70">
-        Operated by Alomarada Ltd, a UK registered company.
+        Abraham of London is operated by Alomarada Ltd, a UK registered company. Company no. 11549053.
       </p>
-      <p className="text-[15px] leading-7 text-white/70">Company no. 11549053.</p>
-      {showOperatingIdentityLine && (
-        <p className="text-[15px] leading-7 text-white/60">
-          Abraham of London is the operating identity used for this governed decision platform.
-        </p>
-      )}
       <a
         href={COMPANIES_HOUSE_URL}
         target="_blank"

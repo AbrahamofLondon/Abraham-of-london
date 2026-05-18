@@ -124,7 +124,7 @@ const SampleExportPage: NextPage = () => {
             secondaryAction={{ label: "View public anchor log status", href: "/provenance/anchor-log" }}
           />
 
-          <LegalIdentityBlock showOperatingIdentityLine />
+          <LegalIdentityBlock />
 
           {/* ── LIVE CASE VERSION ──────────────────────────────────── */}
           <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}03`, padding: "1rem" }}>

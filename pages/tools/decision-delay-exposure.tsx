@@ -399,7 +399,7 @@ export default function DecisionDelayExposurePage() {
           />
 
           <div style={{ marginTop: "24px" }}>
-            <LegalIdentityBlock showOperatingIdentityLine />
+            <LegalIdentityBlock />
           </div>
 
           <GoldDivider />
