@@ -1822,7 +1822,7 @@ export default function StrategyRoomPage({
                 If you are not ready to act, do not enter.
               </p>
 
-              <div className="mt-4 grid gap-px grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)", maxWidth: "36rem" }}>
+              <div className="mt-4 grid gap-px sm:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)", maxWidth: "36rem" }}>
                 {["Decision sequencing", "Constraint removal", "Execution verification"].map((item) => (
                   <div key={item} style={{ backgroundColor: VOID, padding: "0.65rem 0.85rem" }}>
                     <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{item}</span>

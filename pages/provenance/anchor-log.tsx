@@ -270,7 +270,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                   key={`${anchor.scope}-${anchor.computedAt}-${index}`}
                   style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}
                 >
-                  <div className="grid gap-3" style={{ gridTemplateColumns: "auto 1fr" }}>
+                  <div className="grid gap-3 md:grid-cols-[auto_minmax(0,1fr)]">
                     {/* Scope badge */}
                     <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
                       <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}99`, border: `1px solid ${GOLD}30`, padding: "0.2rem 0.5rem" }}>
@@ -282,15 +282,22 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                     </div>
 
                     {/* Merkle root */}
-                    <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", minWidth: "80px" }}>
+                    <div className="md:min-w-[80px]" style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
                       Merkle Root
                     </div>
-                    <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.70)", wordBreak: "break-all" }}>
-                      <Hash className="inline h-3 w-3 mr-1" style={{ color: `${GOLD}70` }} />
-                      {truncateHash(anchor.merkleRoot)}
-                      <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", marginLeft: "0.5rem" }}>
-                        {anchor.merkleRoot}
-                      </span>
+                    <div>
+                      <div title={anchor.merkleRoot} style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.70)" }}>
+                        <Hash className="inline h-3 w-3 mr-1" style={{ color: `${GOLD}70` }} />
+                        {truncateHash(anchor.merkleRoot)}
+                      </div>
+                      <details style={{ marginTop: "0.35rem" }}>
+                        <summary style={{ ...mono, cursor: "pointer", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                          Show full root
+                        </summary>
+                        <p style={{ marginTop: "0.35rem", ...mono, fontSize: "8px", lineHeight: 1.6, color: "rgba(255,255,255,0.48)", wordBreak: "break-all" }}>
+                          {anchor.merkleRoot}
+                        </p>
+                      </details>
                     </div>
 
                     {/* Leaf count */}

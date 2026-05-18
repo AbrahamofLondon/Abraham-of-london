@@ -380,7 +380,7 @@ const FastDiagnosticPage: NextPage = () => {
                 <p style={{ marginTop: "0.5rem", fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
                   This is the evidence gate for the Selective Operator Pilot. The diagnostic will determine whether your decision meets the threshold for a governed pilot review — testing evidence, authority, consequence, and execution reality.
                 </p>
-                <p style={{ marginTop: "0.5rem", fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
+                <p style={{ marginTop: "0.5rem", fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.55)" }}>
                   After completion, you will receive a finding and a recommendation. If the case qualifies, you will be directed to the pilot pathway. If not, you will receive a specific explanation of what is required to proceed.
                 </p>
               </div>
@@ -391,7 +391,7 @@ const FastDiagnosticPage: NextPage = () => {
             <p style={{ marginTop: "1.5rem", maxWidth: "44ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.52)" }}>
               The system reads the decision state, evidence posture, authority pressure, cost exposure, and next admissible move.
             </p>
-            <p style={{ marginTop: "0.5rem", maxWidth: "36ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.38)" }}>
+            <p style={{ marginTop: "0.5rem", maxWidth: "36ch", fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.52)" }}>
               Takes 2 minutes. No account required to receive the first reading.
             </p>
             <div style={{ width: "100%", maxWidth: "640px", marginTop: "2rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem", textAlign: "left" }}>
@@ -794,14 +794,14 @@ const FastDiagnosticPage: NextPage = () => {
               )}
               {answers.decision && answers.consequence && (
                 <div style={{ padding: "0.5rem 0" }}>
-                  <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)" }}>
+                  <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
                     You said the decision is: <span style={{ color: "rgba(255,255,255,0.60)" }}>&ldquo;{answers.decision.slice(0, 120)}&rdquo;</span>
                   </p>
-                  <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", marginTop: "0.25rem" }}>
+                  <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)", marginTop: "0.25rem" }}>
                     You said the cost is: <span style={{ color: "rgba(255,255,255,0.60)" }}>&ldquo;{answers.consequence.slice(0, 120)}&rdquo;</span>
                   </p>
                   {answers.claimedOwner && (
-                    <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)", marginTop: "0.25rem" }}>
+                    <p style={{ fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)", marginTop: "0.25rem" }}>
                       You said the owner is: <span style={{ color: "rgba(255,255,255,0.60)" }}>&ldquo;{answers.claimedOwner.slice(0, 80)}&rdquo;</span>
                     </p>
                   )}

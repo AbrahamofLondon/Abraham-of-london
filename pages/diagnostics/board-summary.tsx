@@ -198,7 +198,7 @@ export default function BoardSummaryPage() {
                 ...serif,
                 fontSize: "15px",
                 lineHeight: 1.65,
-                color: "rgba(255,255,255,0.40)",
+                color: "rgba(255,255,255,0.55)",
                 marginBottom: "12px",
               }}
               >

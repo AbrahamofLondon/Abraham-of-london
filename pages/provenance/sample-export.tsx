@@ -47,6 +47,11 @@ const SAMPLE_TIMELINE = [
 
 const SAMPLE_GAP_CLASSES = ["WARNING"];
 
+function truncateHash(hash: string): string {
+  if (hash.length <= 16) return hash;
+  return `${hash.slice(0, 8)}…${hash.slice(-8)}`;
+}
+
 // ─── Page ──────────────────────────────────────────────────────────────────
 
 const SampleExportPage: NextPage = () => {
@@ -160,9 +165,17 @@ const SampleExportPage: NextPage = () => {
                 Provenance hash
               </p>
             </div>
-            <p style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.65)", wordBreak: "break-all" }}>
-              {SAMPLE_HASH}
+            <p title={SAMPLE_HASH} style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.72)" }}>
+              {truncateHash(SAMPLE_HASH)}
             </p>
+            <details style={{ marginTop: "0.55rem" }}>
+              <summary style={{ ...mono, cursor: "pointer", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                Show full hash
+              </summary>
+              <p style={{ marginTop: "0.45rem", ...mono, fontSize: "9px", lineHeight: 1.6, color: "rgba(255,255,255,0.55)", wordBreak: "break-all" }}>
+                {SAMPLE_HASH}
+              </p>
+            </details>
             <p style={{ marginTop: "0.4rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)" }}>
               SHA-256 of the canonical internal record. The client-safe summary carries the same hash.
             </p>
@@ -173,7 +186,7 @@ const SampleExportPage: NextPage = () => {
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Posture
             </p>
-            <div className="grid gap-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Delivery</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.80)", marginTop: "0.2rem" }}>Delivered</p>
@@ -283,7 +296,7 @@ const SampleExportPage: NextPage = () => {
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Anchor status
             </p>
-            <div className="grid gap-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Hash</p>
                 <p style={{ ...mono, fontSize: "11px", color: `${GOLD}AA`, marginTop: "0.2rem" }}>Verified</p>
