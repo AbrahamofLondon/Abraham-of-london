@@ -22,6 +22,7 @@ import {
   RATE_LIMIT_CONFIGS,
 } from "@/lib/server/rateLimit";
 import { notifyDiscord } from "@/lib/notifications/discord";
+import { withSecurity } from "@/lib/apiGuard";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
@@ -60,7 +61,29 @@ function getRateLimitExceeded(result: unknown): boolean {
   return false;
 }
 
-export default async function handler(
+function isDatabaseUnavailableError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+
+  const candidate = error as {
+    code?: string;
+    name?: string;
+  };
+
+  return (
+    candidate.name === "PrismaClientInitializationError" ||
+    [
+      "P1000",
+      "P1001",
+      "P1002",
+      "P1003",
+      "P1017",
+      "P2021",
+      "P2022",
+    ].includes(candidate.code ?? "")
+  );
+}
+
+export async function securityAssuranceRequestHandler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -79,12 +102,26 @@ export default async function handler(
   );
 
   if (getRateLimitExceeded(rl)) {
-    return res.status(429).json({ ok: false, message: "Rate limit exceeded." });
+    return res.status(429).json({
+      ok: false,
+      code: "RATE_LIMITED",
+      message: "Rate limit exceeded.",
+    });
   }
 
   const parsed = RequestSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ ok: false, errors: parsed.error.format() });
+    console.warn("[SECURITY_ASSURANCE_REQUEST_VALIDATION_ERROR]", {
+      issues: parsed.error.issues.map((issue) => ({
+        path: issue.path.join("."),
+        code: issue.code,
+      })),
+    });
+    return res.status(400).json({
+      ok: false,
+      code: "VALIDATION_ERROR",
+      errors: parsed.error.format(),
+    });
   }
 
   const {
@@ -141,8 +178,33 @@ export default async function handler(
     });
   } catch (err) {
     console.error("[SECURITY_ASSURANCE_REQUEST_ERROR]", err);
+    if (isDatabaseUnavailableError(err)) {
+      return res.status(503).json({
+        ok: false,
+        code: "REQUEST_SERVICE_UNAVAILABLE",
+        message: "Request service unavailable.",
+      });
+    }
+
     return res
       .status(500)
-      .json({ ok: false, message: "Internal server error." });
+      .json({
+        ok: false,
+        code: "REQUEST_FAILED",
+        message: "Internal server error.",
+      });
   }
 }
+
+export default withSecurity(securityAssuranceRequestHandler, {
+  method: "POST",
+  requireJson: true,
+  honeypot: {
+    enabled: true,
+    fieldNames: ["website", "middleName", "botField"],
+  },
+  recaptcha: {
+    expectedAction: "security_assurance_request",
+    recaptchaField: "gRecaptchaToken",
+  },
+});

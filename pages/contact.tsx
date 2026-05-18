@@ -11,6 +11,11 @@ import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recapt
 import {
   getSecurityAssuranceMaterialById,
 } from "@/lib/security-assurance/security-assurance-pack-registry";
+import {
+  createSecurityAssuranceRequestPayload,
+  getSecurityAssuranceSubmissionErrorMessage,
+  resolveSecurityAssuranceMaterialId,
+} from "@/lib/security-assurance/security-assurance-contact";
 
 const GOLD = "#C9A96E";
 
@@ -45,6 +50,7 @@ const ContactFormContent = () => {
   const [enquiryType, setEnquiryType] = React.useState(defaultType);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
+  const [submitErrorMessage, setSubmitErrorMessage] = React.useState<string | null>(null);
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   const isSecurityAssurance = enquiryType === "security-assurance";
@@ -55,12 +61,16 @@ const ContactFormContent = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!executeRecaptcha) {
+      setSubmitErrorMessage(
+        "Security verification is still loading. Please refresh and try again.",
+      );
       setSubmitStatus('error');
       return;
     }
 
     setIsSubmitting(true);
     setSubmitStatus('idle');
+    setSubmitErrorMessage(null);
 
     try {
       const formData = new FormData(event.currentTarget);
@@ -74,16 +84,18 @@ const ContactFormContent = () => {
       if (isSecurityAssurance) {
         // Route security-assurance requests to the structured intake API
         const gRecaptchaToken = await executeRecaptcha("security_assurance_request");
-        const payload = {
-          name: formData.get("name") as string | undefined,
-          email: formData.get("email") as string,
-          organisation: (formData.get("organisation") as string) || undefined,
-          role: (formData.get("role") as string) || undefined,
-          requestedMaterial: requestedParam || (formData.get("requestedMaterial") as string) || "security-assurance-readiness",
-          procurementStage: (formData.get("procurementStage") as string) || undefined,
-          message: (formData.get("message") as string) || undefined,
+        const payload = createSecurityAssuranceRequestPayload(
+          {
+            name: formData.get("name") as string | null,
+            email: formData.get("email") as string | null,
+            organisation: formData.get("organisation") as string | null,
+            role: formData.get("role") as string | null,
+            procurementStage: formData.get("procurementStage") as string | null,
+            message: formData.get("message") as string | null,
+          },
+          resolveSecurityAssuranceMaterialId(requestedParam),
           gRecaptchaToken,
-        };
+        );
 
         const response = await fetch('/api/security-assurance/request', {
           method: 'POST',
@@ -95,6 +107,13 @@ const ContactFormContent = () => {
           setSubmitStatus('success');
           (event.target as HTMLFormElement).reset();
         } else {
+          const body = await response.json().catch(() => null);
+          setSubmitErrorMessage(
+            getSecurityAssuranceSubmissionErrorMessage(
+              response.status,
+              typeof body?.code === "string" ? body.code : undefined,
+            ),
+          );
           setSubmitStatus('error');
         }
       } else {
@@ -115,10 +134,12 @@ const ContactFormContent = () => {
           setSubmitStatus('success');
           (event.target as HTMLFormElement).reset();
         } else {
+          setSubmitErrorMessage("Transmission failed. Please try again.");
           setSubmitStatus('error');
         }
       }
     } catch (_error) {
+      setSubmitErrorMessage("Transmission failed. Please try again.");
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -283,7 +304,7 @@ const ContactFormContent = () => {
       )}
       {submitStatus === 'error' && (
         <p className="mt-5 font-mono text-[7.5px] uppercase tracking-[0.16em] text-red-500">
-          Security error. Transmission failed.
+          {submitErrorMessage ?? "Transmission failed. Please try again."}
         </p>
       )}
 
