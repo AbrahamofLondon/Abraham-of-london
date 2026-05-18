@@ -184,6 +184,42 @@ const TrustPage: NextPage = () => (
 
         <SecurityAssuranceStatusStrip />
 
+        <section
+          style={{
+            border: `1px solid ${GOLD}18`,
+            backgroundColor: `${GOLD}04`,
+            padding: "1rem",
+          }}
+        >
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.65rem" }}>
+            Security assurance readiness
+          </p>
+          <p className="max-w-2xl text-[15px] leading-7 text-white/60">
+            Independent SOC 2, ISO 27001 certification, and external penetration testing are not yet complete. The current assurance posture is documented through legal identity, infrastructure disclosure, sub-processor visibility, pilot data boundaries, incident-response posture, and provenance / auditability controls.
+          </p>
+          <div className="mt-4">
+            <Link
+              href="/security-review"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: `${GOLD}99`,
+                textDecoration: "none",
+                border: `1px solid ${GOLD}22`,
+                padding: "0.4rem 0.8rem",
+              }}
+            >
+              Review security assurance materials
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </section>
+
         {/* ── PLAIN-ENGLISH LAYER ─────────────────────────────────── */}
         <PlainEnglishDecisionLayer id="plain-english-trust" />
 

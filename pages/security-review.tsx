@@ -39,6 +39,11 @@ const PACK_ITEMS = [
   },
   {
     included: true,
+    label: "Pilot data boundary guidance",
+    note: "Recommended use of sanitised or minimally sensitive information during first evaluation.",
+  },
+  {
+    included: true,
     label: "Sub-processor list",
     note: "Current sub-processors with purpose and data region.",
   },
@@ -56,6 +61,11 @@ const PACK_ITEMS = [
     included: true,
     label: "Responsible disclosure policy",
     note: "Scope, contact, response commitments.",
+  },
+  {
+    included: true,
+    label: "Incident response summary",
+    note: "Detection, containment, assessment, notification decision, remediation, and review posture.",
   },
   {
     included: false,
@@ -139,6 +149,77 @@ const SecurityReviewPage: NextPage = () => {
           </header>
 
           <SecurityAssuranceStatusStrip />
+
+          <section
+            style={{
+              border: `1px solid ${GOLD}18`,
+              backgroundColor: `${GOLD}04`,
+              padding: "1rem",
+            }}
+          >
+            <p
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: `${GOLD}88`,
+                marginBottom: "0.65rem",
+              }}
+            >
+              Security assurance readiness
+            </p>
+            <p
+              style={{
+                ...serif,
+                fontSize: "0.95rem",
+                lineHeight: 1.7,
+                color: "rgba(255,255,255,0.55)",
+              }}
+            >
+              Independent SOC 2, ISO 27001 certification, and external penetration testing are not yet complete. The current assurance posture is documented through legal identity, infrastructure disclosure, sub-processor visibility, pilot data boundaries, incident-response posture, and provenance / auditability controls.
+            </p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {[
+                "Security assurance readiness",
+                "Vendor security questionnaire",
+                "Pilot data boundary policy",
+                "Incident response summary",
+              ].map((item) => (
+                <div
+                  key={item}
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    backgroundColor: "rgba(255,255,255,0.015)",
+                    padding: "0.65rem 0.75rem",
+                  }}
+                >
+                  <p
+                    style={{
+                      ...mono,
+                      fontSize: "7px",
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.42)",
+                    }}
+                  >
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p
+              style={{
+                ...serif,
+                fontSize: "0.84rem",
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.38)",
+                marginTop: "0.9rem",
+              }}
+            >
+              These materials are available for procurement discussion through the security review process.
+            </p>
+          </section>
 
           {/* ── WHAT IS AVAILABLE ───────────────────────────────────── */}
           <section
