@@ -14,6 +14,8 @@ import { ArrowRight, ShieldCheck, AlertTriangle, FileText, Clock, CheckCircle } 
 
 import Layout from "@/components/Layout";
 import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
+import PlainEnglishDecisionLayer from "@/components/trust/PlainEnglishDecisionLayer";
+import WorkedDecisionExample from "@/components/trust/WorkedDecisionExample";
 
 const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
@@ -79,6 +81,9 @@ const OperatorPilotPage: NextPage = () => {
             </Block>
           </section>
 
+          {/* ── PLAIN-ENGLISH LAYER ── */}
+          <PlainEnglishDecisionLayer id="plain-english-pilot" />
+
           {/* ── 3. WHAT KIND OF DECISION QUALIFIES ── */}
           <section className="grid gap-6 xl:grid-cols-2">
             <Block title="What kind of decision qualifies">
@@ -105,6 +110,9 @@ const OperatorPilotPage: NextPage = () => {
               Personality traits. Team dynamics (use Team Assessment for that). Market conditions (use GMI for that). Long-term strategy (use Strategy Room for that). The pilot tests one decision under one set of conditions.
             </Block>
           </section>
+
+          {/* ── WORKED EXAMPLE ── */}
+          <WorkedDecisionExample id="worked-example-pilot" />
 
           {/* ── 5. WHAT THE OPERATOR RECEIVES ── */}
           <section style={{ border: `1px solid ${GOLD}20`, background: `${GOLD}04`, padding: "1.25rem" }}>

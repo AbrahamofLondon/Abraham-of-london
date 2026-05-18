@@ -3,6 +3,7 @@ import WhatYouCanUseTodaySection from "@/components/homepage/WhatYouCanUseTodayS
 import MarketDefectBlock from "@/components/homepage/MarketDefectBlock";
 import OutputArtifactPreview from "@/components/homepage/OutputArtifactPreview";
 import TrustArchitectureBlock from "@/components/homepage/TrustArchitectureBlock";
+import PlainEnglishDecisionLayer from "@/components/trust/PlainEnglishDecisionLayer";
 import VerificationSpineBlock from "@/components/homepage/VerificationSpineBlock";
 import SectionCTAStrip from "@/components/homepage/SectionCTAStrip";
 import ProfessionalContinuitySection from "@/components/homepage/ProfessionalContinuitySection";
@@ -40,6 +41,7 @@ export default function CategoryFrontDoor() {
       <MarketDefectBlock />
       <OutputArtifactPreview />
       <TrustArchitectureBlock />
+      <PlainEnglishDecisionLayer variant="homepage" id="plain-english-homepage" />
       <VerificationSpineBlock />
       <SectionCTAStrip ctas={ENTRY_CTAS} />
       <ProfessionalContinuitySection />

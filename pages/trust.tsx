@@ -32,6 +32,8 @@ import {
 import Layout from "@/components/Layout";
 import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 import SecurityAssuranceStatusStrip from "@/components/trust/SecurityAssuranceStatusStrip";
+import PlainEnglishDecisionLayer from "@/components/trust/PlainEnglishDecisionLayer";
+import WorkedDecisionExample from "@/components/trust/WorkedDecisionExample";
 
 const GOLD = "#C9A96E";
 
@@ -182,6 +184,9 @@ const TrustPage: NextPage = () => (
 
         <SecurityAssuranceStatusStrip />
 
+        {/* ── PLAIN-ENGLISH LAYER ─────────────────────────────────── */}
+        <PlainEnglishDecisionLayer id="plain-english-trust" />
+
         {/* ── SECURITY POSTURE ────────────────────────────────────── */}
         <Section icon={<Lock className="h-4 w-4" />} heading="Security posture">
           <Row label="Hosting" value="Netlify (CDN) + serverless functions. TLS 1.2+ enforced. No unencrypted HTTP." />
@@ -212,6 +217,37 @@ const TrustPage: NextPage = () => (
             changes after sealing, its hash no longer matches. Verification is
             performed on demand; results are not cached.
           </p>
+
+          {/* ── Terms used here ── */}
+          <div
+            style={{
+              border: "1px solid rgba(255,255,255,0.06)",
+              backgroundColor: "rgba(255,255,255,0.01)",
+              padding: "0.75rem 1rem",
+              marginBottom: "1rem",
+            }}
+          >
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.6rem" }}>
+              Terms used here
+            </p>
+            <dl className="grid gap-2 sm:grid-cols-2">
+              {([
+                { term: "Sealing", def: "Finalising a record and computing its hash, closing it against undetected modification." },
+                { term: "Tamper-evidence", def: "If any field changes after sealing, the hash no longer matches — changes become detectable." },
+                { term: "Hash", def: "A unique fingerprint of a record's content. Any change produces a different fingerprint." },
+                { term: "Anchoring", def: "Publishing the hash to an external immutable log so verification does not depend solely on internal records." },
+              ] as const).map(({ term, def }) => (
+                <div key={term}>
+                  <dt style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "2px" }}>
+                    {term}
+                  </dt>
+                  <dd style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.52)" }}>
+                    {def}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
 
           <div className="space-y-3 mt-2">
             <CertRow label="Internal chain anchoring" status="LIVE" note="Hash computed and stored for supported governed records at time of sealing." />
@@ -388,6 +424,9 @@ const TrustPage: NextPage = () => (
             .
           </p>
         </Section>
+
+        {/* ── WORKED EXAMPLE ─────────────────────────────────────── */}
+        <WorkedDecisionExample id="worked-example-trust" />
 
         {/* ── CONTACT ─────────────────────────────────────────────── */}
         <section
