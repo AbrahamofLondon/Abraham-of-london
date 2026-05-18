@@ -197,7 +197,7 @@ const TrustPage: NextPage = () => (
           <p className="max-w-2xl text-[15px] leading-7 text-white/60">
             Independent SOC 2, ISO 27001 certification, and external penetration testing are not yet complete. The current assurance posture is documented through legal identity, infrastructure disclosure, sub-processor visibility, pilot data boundaries, incident-response posture, and provenance / auditability controls.
           </p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href="/security-review"
               style={{
@@ -216,6 +216,24 @@ const TrustPage: NextPage = () => (
             >
               Review security assurance materials
               <ArrowRight className="h-3 w-3" />
+            </Link>
+            <Link
+              href="/security-review#request-security-assurance-pack"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.38)",
+                textDecoration: "none",
+                border: "1px solid rgba(255,255,255,0.08)",
+                padding: "0.4rem 0.8rem",
+              }}
+            >
+              Request assurance pack
             </Link>
           </div>
         </section>

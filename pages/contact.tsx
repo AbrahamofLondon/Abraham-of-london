@@ -14,6 +14,7 @@ const GOLD = "#C9A96E";
 const ENQUIRY_TYPES = [
   { value: "", label: "Select enquiry type" },
   { value: "institutional", label: "Institutional mandate" },
+  { value: "security-assurance", label: "Security assurance pack" },
   { value: "private", label: "Private / confidential advisory" },
   { value: "education", label: "Education or research" },
   { value: "media", label: "Media enquiry" },

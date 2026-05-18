@@ -364,8 +364,9 @@ const SecurityReviewPage: NextPage = () => {
             </div>
           </section>
 
-          {/* ── REQUEST FORM ────────────────────────────────────────── */}
+          {/* ── REQUEST SECURITY ASSURANCE PACK ─────────────────────── */}
           <section
+            id="request-security-assurance-pack"
             style={{
               border: `1px solid ${GOLD}22`,
               backgroundColor: `${GOLD}05`,
@@ -383,7 +384,7 @@ const SecurityReviewPage: NextPage = () => {
                   color: `${GOLD}88`,
                 }}
               >
-                Request the pack
+                Request security assurance pack
               </p>
             </div>
 
@@ -396,14 +397,23 @@ const SecurityReviewPage: NextPage = () => {
                 marginBottom: "1.25rem",
               }}
             >
-              Email the address below with your organisation name, role, and a
-              brief description of your evaluation requirement. We will respond
-              within 2 business days with the available pack and a call invitation
-              if appropriate.
+              Serious prospects may request the controlled pack for procurement review. It covers legal identity, infrastructure and provider posture, named sub-processors, pilot data-boundary guidance, incident-response posture, and the current independent-assurance status.
             </p>
 
-            <a
-              href="mailto:security@abrahamoflondon.com?subject=Security Review Request&body=Organisation: %0ARole: %0AEvaluation requirement: "
+            <p
+              style={{
+                ...serif,
+                fontSize: "0.9rem",
+                lineHeight: 1.65,
+                color: "rgba(255,255,255,0.45)",
+                marginBottom: "1.25rem",
+              }}
+            >
+              Not yet complete: SOC 2, ISO 27001 organisational certification, and independent external penetration testing.
+            </p>
+
+            <Link
+              href="/contact?type=security-assurance"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -420,8 +430,8 @@ const SecurityReviewPage: NextPage = () => {
               }}
             >
               <Mail className="h-3.5 w-3.5" />
-              security@abrahamoflondon.com
-            </a>
+              Request security assurance pack
+            </Link>
           </section>
 
           {/* ── CROSS-LINKS ─────────────────────────────────────────── */}
