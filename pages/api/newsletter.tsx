@@ -45,10 +45,7 @@ const DISPOSABLE_DOMAINS = [
 ];
 
 const ADMIN_NOTIFICATION_RECIPIENTS = [
-  "info@abrahamoflondon.org",
   "admin@abrahamoflondon.org",
-  "seunadaramola@gmail.com",
-  "abrahamadaramola@outlook.com",
 ];
 
 function logSecurityEvent(
