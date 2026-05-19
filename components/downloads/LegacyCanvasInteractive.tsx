@@ -811,7 +811,7 @@ const LegacyCanvasInteractive: React.FC = () => {
             <div className="text-center">
               <p className="text-slate-300">
                 For enterprise features, bulk generation, or custom templates,
-                contact <span className="text-yellow-300">legacy@abrahamoflondon.org</span>
+                contact <span className="text-yellow-300">support@abrahamoflondon.org</span>
               </p>
               <p className="text-sm text-slate-400 mt-2">
                 © {new Date().getFullYear()} Abraham of London • Legacy Architecture Suite v3.1

@@ -154,6 +154,7 @@ export async function POST(
       to: [email],
       bcc: [
         "info@abrahamoflondon.org",
+        "admin@abrahamoflondon.org",
         "seunadaramola@gmail.com",
         "abrahamadaramola@outlook.com",
       ],

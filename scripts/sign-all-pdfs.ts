@@ -26,7 +26,7 @@ async function signFile(inputPath: string, outputPath: string) {
   const withPlaceholder = plainAddPlaceholder({
     pdfBuffer: Buffer.from(plain),
     reason: "Premium/Enterprise distribution",
-    contactInfo: "legacy@abrahamoflondon.com",
+    contactInfo: "support@abrahamoflondon.org",
     name: "Abraham of London",
     location: "London, UK",
   });

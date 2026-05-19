@@ -45,7 +45,7 @@ JWT_SECRET=your-jwt-secret-key-change-this-in-production
 # ========================
 # Email Configuration
 # ========================
-EMAIL_FROM=noreply@abrahamoflondon.com
+EMAIL_FROM=info@abrahamoflondon.org
 EMAIL_SERVER=smtp.resend.com
 EMAIL_PORT=587
 EMAIL_USER=resend
@@ -108,7 +108,7 @@ NEXTAUTH_SECRET=\${NEXTAUTH_SECRET}
 JWT_SECRET=\${JWT_SECRET}
 
 # Email - MUST be set in production
-EMAIL_FROM=noreply@abrahamoflondon.com
+EMAIL_FROM=info@abrahamoflondon.org
 EMAIL_SERVER=smtp.resend.com
 EMAIL_PORT=587
 EMAIL_USER=resend
@@ -153,7 +153,7 @@ NEXTAUTH_URL=https://staging.abrahamoflondon.com
 NEXTAUTH_SECRET=\${NEXTAUTH_SECRET}
 JWT_SECRET=\${JWT_SECRET}
 
-EMAIL_FROM=noreply@staging.abrahamoflondon.com
+EMAIL_FROM=info@abrahamoflondon.org
 EMAIL_SERVER=smtp.resend.com
 EMAIL_PORT=587
 EMAIL_USER=resend
@@ -194,7 +194,7 @@ NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=dev-nextauth-secret-key-change-in-production
 JWT_SECRET=dev-jwt-secret-key-change-in-production
 
-EMAIL_FROM=dev@abrahamoflondon.com
+EMAIL_FROM=admin@abrahamoflondon.org
 EMAIL_SERVER=smtp.resend.com
 EMAIL_PORT=587
 EMAIL_USER=resend

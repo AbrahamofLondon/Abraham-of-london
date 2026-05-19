@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
-import { siteConfig } from "@/config/site";
 
 const LAST_UPDATED = "30 April 2026";
 
@@ -15,7 +14,7 @@ const sections = [
 ];
 
 const SecurityPage: NextPage = () => {
-  const securityEmail = siteConfig.contact.email ?? "info@abrahamoflondon.org";
+  const securityEmail = "support@abrahamoflondon.org";
 
   return (
     <Layout title="Security Policy | Abraham of London">

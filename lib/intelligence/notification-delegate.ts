@@ -82,7 +82,7 @@ export async function notifyPrincipalOfPriority(inquiry: PriorityInquiry) {
   const ref = escapeHtml(inquiry.id);
 
   const mailOptions: nodemailer.SendMailOptions = {
-    from: `"AoL Intelligence" <system@abraham-of-london.com>`,
+    from: `"AoL Intelligence" <admin@abrahamoflondon.org>`,
     to: recipients,
     subject: `⚠️ PRIORITY INTAKE: ${name}`,
     html: `
@@ -127,7 +127,7 @@ export async function sendOnboardingWelcome(member: MemberIdentity, rawKey: stri
   const safeKey = escapeHtml(rawKey);
 
   const mailOptions: nodemailer.SendMailOptions = {
-    from: `"Abraham of London" <vault@abraham-of-london.com>`,
+    from: `"Abraham of London" <admin@abrahamoflondon.org>`,
     to: toEmail,
     subject: "Sequence Initialized: Access Authorized",
     html: `
@@ -166,7 +166,7 @@ export async function notifyPrincipalOfSecurityAction(member: MemberIdentity, ac
   const isSuspension = action === "SUSPENSION_DORMANCY";
 
   const mailOptions: nodemailer.SendMailOptions = {
-    from: `"AoL Security" <security@abraham-of-london.com>`,
+    from: `"AoL Security" <support@abrahamoflondon.org>`,
     to: toEmail,
     subject: isSuspension ? "ACCESS PAUSED: Security Protocol" : "Security Update",
     html: `

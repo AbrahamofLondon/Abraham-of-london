@@ -39,7 +39,7 @@ export async function sendEmailTransport(payload: EmailTransportPayload): Promis
 
   try {
     const response = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "oversight@abrahamoflondon.org",
+      from: process.env.RESEND_FROM_EMAIL || "info@abrahamoflondon.org",
       to: payload.to,
       subject: payload.subject,
       html: payload.html,

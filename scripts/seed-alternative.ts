@@ -32,7 +32,7 @@ async function main() {
     console.log('Trying to create more data...');
     
     // Create a member
-    const emailHash = hashEmail('test@abrahamoflondon.com');
+    const emailHash = hashEmail('support@abrahamoflondon.org');
     const member = await prisma.innerCircleMember.create({
       data: {
         emailHash,

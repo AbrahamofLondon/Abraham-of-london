@@ -12,7 +12,7 @@ dotenv.config();
 async function runSmokeTest() {
   console.log("🚀 INITIALIZING SOVEREIGN SECURITY SMOKE TEST...\n");
 
-  const testEmail = "director@abrahamoflondon.org";
+  const testEmail = "admin@abrahamoflondon.org";
   const masterSecret = process.env.JWT_SECRET;
   const nextAuthSecret = process.env.NEXTAUTH_SECRET;
   const encryptionKey = process.env.ENCRYPTION_KEY;

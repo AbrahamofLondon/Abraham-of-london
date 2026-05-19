@@ -7,10 +7,10 @@ async function seed() {
 
   // 1. Create your Primary Identity
   const sovereign = await prisma.innerCircleMember.upsert({
-    where: { email: "admin@abraham-of-london.org" }, // Replace with your actual email
+    where: { email: "admin@abrahamoflondon.org" },
     update: {},
     create: {
-      email: "admin@abraham-of-london.org",
+      email: "admin@abrahamoflondon.org",
       name: "Abraham of London",
       role: "OWNER", // Grants absolute system authority
       tier: "private" // Highest access level

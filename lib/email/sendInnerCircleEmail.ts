@@ -29,7 +29,7 @@ function fromAddress(): string {
   return (
     process.env.INNER_CIRCLE_FROM_EMAIL ??
     process.env.MAIL_FROM ??
-    "Inner Circle <innercircle@abrahamoflondon.org>"
+    "Abraham of London <info@abrahamoflondon.org>"
   );
 }
 

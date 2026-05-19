@@ -80,25 +80,25 @@ async function main() {
     console.log('👥 Creating inner circle members...');
     const members = [
       {
-        email: 'admin@abrahamoflondon.com',
+        email: 'admin@abrahamoflondon.org',
         name: 'System Administrator',
         tier: 'admin',
         status: 'active',
       },
       {
-        email: 'editor@abrahamoflondon.com',
+        email: 'info@abrahamoflondon.org',
         name: 'Content Editor',
         tier: 'premium',
         status: 'active',
       },
       {
-        email: 'member@abrahamoflondon.com',
+        email: 'support@abrahamoflondon.org',
         name: 'Premium Member',
         tier: 'premium',
         status: 'active',
       },
       {
-        email: 'viewer@abrahamoflondon.com',
+        email: 'seunadaramola@gmail.com',
         name: 'Basic Viewer',
         tier: 'standard',
         status: 'active',
@@ -232,7 +232,7 @@ async function main() {
       data: {
         actorType: 'system',
         actorId: 'seed-script',
-        actorEmail: 'system@abrahamoflondon.com',
+        actorEmail: 'admin@abrahamoflondon.org',
         action: 'database.seed.complete',
         resourceType: 'database',
         resourceId: 'all',

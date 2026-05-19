@@ -165,7 +165,7 @@ const AdminLoginPage: NextPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setError(null); }}
-                  placeholder="you@abrahamoflondon.org"
+                  placeholder="admin@abrahamoflondon.org"
                   className="w-full rounded-lg border border-white/10 bg-white/5 px-5 py-4 text-sm text-white placeholder:text-white/20 focus:border-amber-500/50 focus:outline-none transition-colors"
                   autoComplete="email"
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleMagicLink(); } }}

@@ -37,7 +37,7 @@ const ENGINE_MAP: Record<GovernanceContext, {
     label: "Fast Diagnostic",
     evidenceBasis: "Based on your stated decision, owner, and consequence.",
     movementRule: "The next governed response adds evidence and can change how the case is treated.",
-    challengeRoute: "Request human review via info@abrahamoflondon.org with your session reference.",
+    challengeRoute: "Request human review via support@abrahamoflondon.org with your session reference.",
   },
   constitutional_diagnostic: {
     label: "Constitutional Diagnostic",
@@ -61,7 +61,7 @@ const ENGINE_MAP: Record<GovernanceContext, {
     label: "Executive Reporting",
     evidenceBasis: "Based on your accumulated diagnostic evidence and recorded exposure context.",
     movementRule: "The report can change when new evidence, checkpoints, or execution signals are recorded.",
-    challengeRoute: "Challenge findings or request clarification via info@abrahamoflondon.org.",
+    challengeRoute: "Challenge findings or request clarification via support@abrahamoflondon.org.",
   },
   strategy_room: {
     label: "Strategy Room",

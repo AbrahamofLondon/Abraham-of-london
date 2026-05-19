@@ -22,6 +22,7 @@ const MAIL_FROM =
 
 const CONTACT_RECEIVERS = [
   process.env.CONTACT_RECEIVER_EMAIL?.trim() || "info@abrahamoflondon.org",
+  "admin@abrahamoflondon.org",
   "seunadaramola@gmail.com",
   "abrahamadaramola@outlook.com",
 ].filter(Boolean);

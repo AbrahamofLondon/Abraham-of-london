@@ -109,7 +109,7 @@ function toInnerCircleSyntheticUser(seed?: Partial<User>): User {
   const nowIso = new Date().toISOString();
   return {
     id: seed?.id || `inner-circle-${seed?.id || "access"}`,
-    email: seed?.email || "inner-circle@abrahamoflondon.org",
+    email: seed?.email || "admin@abrahamoflondon.org",
     name: seed?.name || "Inner Circle Member",
     role: "inner-circle" as UserRole,
     permissions: getPermissionsForRole("inner-circle"),
@@ -190,7 +190,7 @@ export function withInnerCircleAuth<P extends object>(
               setUser(
                 toInnerCircleSyntheticUser({
                   id: sessionUser.id ? `inner-circle-${sessionUser.id}` : "inner-circle-access",
-                  email: sessionUser.email || "inner-circle@abrahamoflondon.org",
+                  email: sessionUser.email || "admin@abrahamoflondon.org",
                   name: sessionUser.name || "Inner Circle Member",
                   membershipDate: sessionUser.membershipDate,
                   lastAccess: sessionUser.lastAccess,

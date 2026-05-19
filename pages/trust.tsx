@@ -414,7 +414,7 @@ const TrustPage: NextPage = () => (
             We commit to acknowledging receipt within 2 business days and
             communicating a remediation plan within 10 business days.
           </p>
-          <Row label="Report to" value="security@abrahamoflondon.com" />
+          <Row label="Report to" value="support@abrahamoflondon.org" />
           <Row label="Scope" value="Authentication, provenance integrity, data exposure, privilege escalation." />
           <Row label="Out of scope" value="Rate limiting bypasses for non-sensitive endpoints, UI cosmetic issues, SPF/DKIM configuration." />
           <Row label="Bug bounty" value="No formal bounty programme at this stage. Responsible researchers are credited where they consent." />
@@ -489,10 +489,10 @@ const TrustPage: NextPage = () => (
             To exercise any right or to request a Data Processing Agreement,
             contact{" "}
             <a
-              href="mailto:privacy@abrahamoflondon.com"
+              href="mailto:support@abrahamoflondon.org"
               style={{ color: `${GOLD}88`, textDecoration: "none" }}
             >
-              privacy@abrahamoflondon.com
+              support@abrahamoflondon.org
             </a>
             .
           </p>
@@ -544,7 +544,7 @@ const TrustPage: NextPage = () => (
             </Link>
 
             <a
-              href="mailto:security@abrahamoflondon.com"
+              href="mailto:support@abrahamoflondon.org"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -560,7 +560,7 @@ const TrustPage: NextPage = () => (
                 textDecoration: "none",
               }}
             >
-              security@abrahamoflondon.com
+              support@abrahamoflondon.org
             </a>
           </div>
         </section>

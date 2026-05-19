@@ -48,8 +48,8 @@ const SecurityDisclosurePage: NextPage = () => {
             </h2>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.50)", lineHeight: 1.8 }}>
               Email:{" "}
-              <a href="mailto:security@abrahamoflondon.com" style={{ color: `${GOLD}CC` }}>
-                security@abrahamoflondon.com
+              <a href="mailto:support@abrahamoflondon.org" style={{ color: `${GOLD}CC` }}>
+                support@abrahamoflondon.org
               </a>
             </p>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.50)", lineHeight: 1.8 }}>

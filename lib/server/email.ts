@@ -14,7 +14,7 @@ export interface SendEmailResult {
 }
 
 function getDefaultSender(): string {
-  return process.env.MAIL_FROM || process.env.MAIL_TO || "no-reply@abrahamoflondon.org";
+  return process.env.MAIL_FROM || process.env.MAIL_TO || "info@abrahamoflondon.org";
 }
 
 function getPrimaryRecipient(): string {

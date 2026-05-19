@@ -125,7 +125,7 @@ function fromAddress(): string {
   return (
     process.env.INVITE_FROM_EMAIL ??
     process.env.MAIL_FROM ??
-    "Abraham of London <access@abrahamoflondon.org>"
+    "Abraham of London <info@abrahamoflondon.org>"
   );
 }
 

@@ -224,7 +224,7 @@ export function createDevToken(): string {
 
   const payload: InnerCircleJWT = {
     id: "dev_001",
-    email: "dev@abrahamoflondon.org",
+    email: "admin@abrahamoflondon.org",
     name: "Development User",
     tier: "inner_circle",
     iat: Math.floor(Date.now() / 1000),

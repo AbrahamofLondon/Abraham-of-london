@@ -32,7 +32,7 @@ async function seed() {
     }
 
     // 2. DIRECTORATE ELEVATION (Fixed to match Schema exactly)
-    const adminEmail = process.env.INITIAL_ADMIN_EMAIL || 'info@abrahamoflondon.org';
+    const adminEmail = process.env.INITIAL_ADMIN_EMAIL || 'admin@abrahamoflondon.org';
     const adminEmailHash = hashEmail(adminEmail);
     
     console.log('🔑 ELEVATING DIRECTORATE ACCESS...');

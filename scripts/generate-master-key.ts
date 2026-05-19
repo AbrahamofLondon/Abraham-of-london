@@ -5,6 +5,7 @@ async function generateMasterKey() {
 
   const adminEmails = [
     "info@abrahamoflondon.org",
+    "admin@abrahamoflondon.org",
     "seunadaramola@gmail.com",
     "abrahamadaramola@outlook.com"
   ];
@@ -27,7 +28,7 @@ async function generateMasterKey() {
         member = await prisma.innerCircleMember.create({
           data: {
             email,
-            name: email === "info@abrahamoflondon.org" ? "AOL Official" : "Abraham Adaramola",
+            name: email === "info@abrahamoflondon.org" ? "AOL Official" : "AOL Admin",
             role: "owner", // UPDATED: Role is now owner
             tier: "Director",
             status: "active",
@@ -58,14 +59,14 @@ async function generateMasterKey() {
         keyType: "master",
         metadata: JSON.stringify({ 
           ownerAccess: true,
-          backups: [adminEmails[1], adminEmails[2]]
+          backups: adminEmails.slice(1)
         })
       }
     });
 
     console.log("\n--- 🛡️ INSTITUTIONAL OWNER ACCESS ---");
     console.log(`👤 OWNER: ${adminEmails[0]}`);
-    console.log(`👤 ADMINS: ${adminEmails[1]}, ${adminEmails[2]}`);
+    console.log(`👤 ADMINS: ${adminEmails.slice(1).join(", ")}`);
     console.log(`🔑 MASTER KEY: ${rawKey}`);
     console.log("---------------------------------------\n");
     console.log("🚀 Success: You now have the Master Key and Owner status.");

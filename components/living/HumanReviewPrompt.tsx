@@ -19,7 +19,7 @@ export default function HumanReviewPrompt({
   showChallenge = true,
   showHumanReview = true,
   showDoesNotFit = true,
-  supportEmail = "info@abrahamoflondon.org",
+  supportEmail = "support@abrahamoflondon.org",
   className = "",
 }: Props) {
   return (

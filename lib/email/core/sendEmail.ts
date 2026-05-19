@@ -51,7 +51,7 @@ function defaultFrom(type: SendEmailInput["type"]): string {
     return (
       process.env.INNER_CIRCLE_FROM_EMAIL?.trim() ||
       process.env.MAIL_FROM?.trim() ||
-      "Inner Circle <innercircle@abrahamoflondon.org>"
+      "Abraham of London <info@abrahamoflondon.org>"
     );
   }
 

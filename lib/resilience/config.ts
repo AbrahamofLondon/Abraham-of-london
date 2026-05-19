@@ -21,7 +21,7 @@ export const RESILIENCE_CONFIG = {
     enabled: process.env.ALERTS_ENABLED === "true",
     emailTo:
       process.env.ALERTS_EMAIL_TO ||
-      "info@abrahamoflondon.org,seunadaramola@gmail.com,abrahamadaramola@outlook.com",
+      "info@abrahamoflondon.org,admin@abrahamoflondon.org,seunadaramola@gmail.com,abrahamadaramola@outlook.com",
   },
   runtime: {
     nodeEnv: process.env.NODE_ENV || "development",

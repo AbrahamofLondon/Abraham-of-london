@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 async function setupAdminUser() {
   const username = process.argv[2] || 'admin';
   const password = process.argv[3] || 'admin123';
-  const email = process.argv[4] || 'admin@abrahamoflondon.com';
+  const email = process.argv[4] || 'admin@abrahamoflondon.org';
   const role = process.argv[5] || 'superadmin';
 
   if (!password || password.length < 8) {

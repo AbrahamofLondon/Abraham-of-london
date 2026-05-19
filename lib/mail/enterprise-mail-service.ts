@@ -4,7 +4,7 @@ import { EmailLinks } from "@/lib/email/links";
 
 const DEFAULT_FROM = "Abraham of London <info@abrahamoflondon.org>";
 const DEFAULT_REPLY_TO = "info@abrahamoflondon.org";
-const DEFAULT_ADMIN_EMAIL = "info@abrahamoflondon.org";
+const DEFAULT_ADMIN_EMAIL = "admin@abrahamoflondon.org";
 export type SendEmailResult = {
   ok: boolean;
   provider: "resend";

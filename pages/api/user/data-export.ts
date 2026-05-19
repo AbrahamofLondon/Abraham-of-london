@@ -188,11 +188,11 @@ export default async function handler(
         "This export contains structured data submitted by you to the governed case registry. " +
         "It does not include entitlement records, billing history, internal audit logs, " +
         "or data held by third-party processors. To request a complete data disclosure " +
-        "including entitlement and billing records, contact privacy@abrahamoflondon.com.",
+        "including entitlement and billing records, contact support@abrahamoflondon.org.",
       rightsNote:
         "Under UK GDPR and CCPA, you have the right to access, correct, and erase personal data held about you. " +
         "To request erasure of all records (beyond case-by-case deletion), " +
-        "contact privacy@abrahamoflondon.com. Requests are processed within 30 days.",
+        "contact support@abrahamoflondon.org. Requests are processed within 30 days.",
     };
 
     res.setHeader("Content-Type", "application/json");

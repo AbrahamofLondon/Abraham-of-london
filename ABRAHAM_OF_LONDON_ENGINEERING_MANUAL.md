@@ -922,10 +922,10 @@ const prisma = new PrismaClient();
 
 async function main() {
   await prisma.user.upsert({
-    where: { email: 'admin@abrahamoflondon.com' },
+    where: { email: 'admin@abrahamoflondon.org' },
     update: {},
     create: {
-      email: 'admin@abrahamoflondon.com',
+      email: 'admin@abrahamoflondon.org',
       name: 'Admin',
       hashedPassword: await hash('dev-password-only'),
       role: 'OWNER',
@@ -1183,7 +1183,7 @@ MFA is **required** for ADMIN and OWNER roles. USER role may optionally enable i
 First-time deployment uses the `BOOTSTRAP_ADMIN_EMAILS` environment variable:
 
 ```env
-BOOTSTRAP_ADMIN_EMAILS="founder@abrahamoflondon.com"
+BOOTSTRAP_ADMIN_EMAILS="info@abrahamoflondon.org,admin@abrahamoflondon.org,seunadaramola@gmail.com,abrahamadaramola@outlook.com"
 ```
 
 When a user with a matching email signs in for the first time, they are automatically assigned the OWNER role.
@@ -4421,7 +4421,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
   const html = render(template(options.data));
 
   await resend.emails.send({
-    from: options.from ?? 'Abraham of London <hello@abrahamoflondon.com>',
+    from: options.from ?? 'Abraham of London <info@abrahamoflondon.org>',
     to: options.to,
     subject: options.subject,
     html,

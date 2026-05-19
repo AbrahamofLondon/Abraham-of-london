@@ -117,7 +117,7 @@ const PREMIUM_CONFIG = {
     name: "Abraham of London",
     legalName: "Abraham of London Ltd.",
     website: "https://abrahamoflondon.com",
-    email: "strategic@abrahamoflondon.com",
+    email: "info@abrahamoflondon.org",
     phone: "+44 (0)20 7123 4567",
     address: "28 St James's Square, London SW1Y 4JH, United Kingdom",
     vat: "GB 123 4567 89",

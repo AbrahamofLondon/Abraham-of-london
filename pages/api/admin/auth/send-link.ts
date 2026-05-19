@@ -117,7 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `Sign in: ${signInUrl}`,
       "This link expires in 15 minutes.",
     ].join("\n"),
-    from: process.env.EMAIL_FROM || "Abraham of London <noreply@abrahamoflondon.org>",
+    from: process.env.EMAIL_FROM || "Abraham of London <admin@abrahamoflondon.org>",
     meta: {
       source: "admin-auth:send-link",
     },

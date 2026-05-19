@@ -191,7 +191,7 @@ export const brandRegistry: Record<BrandKey, Brand> = {
       youtube: "https://www.youtube.com/@abrahamoflondon",
     },
     contact: {
-      email: "hello@abrahamoflondon.org",
+      email: "info@abrahamoflondon.org",
       supportEmail: "support@abrahamoflondon.org",
       address: "London, United Kingdom",
     },
@@ -809,5 +809,4 @@ const brandApi = {
 };
 
 export default brandApi;
-
 

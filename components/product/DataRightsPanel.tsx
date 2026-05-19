@@ -187,7 +187,7 @@ export default function DataRightsPanel() {
         >
           UK GDPR and CCPA rights. Actions below apply to your governed case
           records. For a full data disclosure or to request erasure of all
-          records, contact privacy@abrahamoflondon.com.
+          records, contact support@abrahamoflondon.org.
         </p>
       </div>
 
@@ -251,7 +251,7 @@ export default function DataRightsPanel() {
         description="Request erasure of all records including entitlement and billing history, or request a Data Processing Agreement."
         action={
           <a
-            href="mailto:privacy@abrahamoflondon.com?subject=Data%20Rights%20Request"
+            href="mailto:support@abrahamoflondon.org?subject=Data%20Rights%20Request"
             style={{
               ...mono,
               fontSize: "8px",
