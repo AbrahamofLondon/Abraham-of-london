@@ -8,6 +8,7 @@ const mono: React.CSSProperties = {
 
 const CURRENT_STATUS = [
   "Provider posture disclosed",
+  "Cloudflare DNS boundary stated",
   "Sub-processors named",
   "Data handling stated",
   "Provenance boundary stated",

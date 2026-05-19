@@ -21,6 +21,14 @@ Use this index to quickly locate the right answer source for each buyer question
 | Org-level MFA | RFI pack §3 | Requestable | Yes | Not generally available — reviewable for enterprise |
 | Data residency | RFI pack §4 | Requestable | Yes | No blanket guarantee; region review in enterprise contract |
 | EU-only residency | RFI pack §4 | Restricted | Yes | Requires contract review; not available by default |
+| Registrar | RFI pack §4 and §6 | Requestable | No | Namecheap |
+| Authoritative DNS | `/trust`, RFI pack §4 and §6 | Public | No | Cloudflare for abrahamoflondon.org |
+| Application host/origin | `/trust`, RFI pack §4 and §6 | Public | No | Netlify remains production application host/origin |
+| Cloudflare WAF / rate limiting | RFI pack §6 | Requestable | Yes | Available/configurable where enabled; not universally represented as active |
+| Cloudflare DLP / Data Classification | RFI pack §6 | Requestable | Yes | Not represented as operational for the public application |
+| Cloudflare Zero Trust | RFI pack §6 | Requestable | Yes | Not represented as protecting all admin or user access |
+| mTLS / client certificates | RFI pack §6 | Requestable | Yes | Not represented as active for public production application |
+| HSTS | RFI pack §6 | Requestable | Yes | Not represented as enabled unless confirmed in live configuration |
 | Backups | RFI pack §4 | Requestable | Yes | Provider-default (Neon); not a contractual RTO/RPO |
 | RTO / RPO | RFI pack §4 | Restricted | Yes | Not represented; must be agreed in contract |
 | Encryption at rest | RFI pack §4 | Requestable | Yes | Provider-managed |
@@ -63,6 +71,7 @@ When a buyer asks a question that is not in this index:
 - Insurance coverage (cyber, professional indemnity, liability)
 - Contractual RTO/RPO
 - Data residency guarantees beyond current documentation
+- Cloudflare WAF, proxy, DLP, Zero Trust, mTLS, HSTS, or edge-protection coverage beyond verified deployment scope
 - SOC 2 / ISO 27001 / pen-test completion status
 - Regulator approval
 - Enterprise SSO/MFA general availability

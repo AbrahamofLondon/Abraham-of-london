@@ -245,7 +245,10 @@ const TrustPage: NextPage = () => (
 
         {/* ── SECURITY POSTURE ────────────────────────────────────── */}
         <Section icon={<Lock className="h-4 w-4" />} heading="Security posture">
-          <Row label="Hosting" value="Netlify (CDN) + serverless functions. TLS 1.2+ enforced. No unencrypted HTTP." />
+          <Row label="DNS / registrar" value="Namecheap remains the registrar. Cloudflare is authoritative DNS for abrahamoflondon.org. Netlify remains the production application hosting/CDN origin." />
+          <Row label="Hosting" value="Netlify remains the production application host/origin, including CDN and serverless functions. TLS 1.2+ is enforced for the hosted application." />
+          <Row label="TLS boundary" value="Cloudflare edge certificates may be available for proxied hostnames, while Netlify continues to manage origin/application TLS for the hosted site. Certificate validation and renewal depend on the active DNS/proxy posture." />
+          <Row label="Cloudflare boundary" value="Cloudflare is used as the authoritative DNS provider for abrahamoflondon.org. Edge security features such as proxying, WAF/rate-limiting, bot controls, DLP, and Zero Trust are configured only where explicitly enabled and verified." />
           <Row label="Authentication" value="Managed via NextAuth.js. Session tokens are short-lived. Magic link and OAuth supported." />
           <Row label="MFA / SSO" value="Enterprise SSO and enforced organisation-level MFA are not yet represented as generally available. Availability can be reviewed for qualified enterprise deployments." />
           <Row label="Administrative access" value="Administrative access is limited to authorised operator/admin roles for support, review, delivery, and security operations. Certain provenance and admin operations are logged for review." />
@@ -383,6 +386,7 @@ const TrustPage: NextPage = () => (
         <Section icon={<Server className="h-4 w-4" />} heading="Sub-processors">
           <div className="space-y-2">
             {[
+              { name: "Cloudflare", purpose: "Authoritative DNS, DNS security, edge TLS/proxy/security services where explicitly enabled", region: "Global network" },
               { name: "Netlify", purpose: "Hosting, CDN, serverless functions", region: "US/EU" },
               { name: "Neon / PostgreSQL", purpose: "Primary database", region: "EU" },
               { name: "Upstash Redis", purpose: "Rate limiting, session caching", region: "EU" },

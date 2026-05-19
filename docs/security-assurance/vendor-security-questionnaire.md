@@ -15,7 +15,9 @@ United Kingdom. Company number: 11549053.
 
 ## 3. What infrastructure providers are used?
 
-The public trust surface currently names Netlify, Neon / PostgreSQL, Upstash Redis, Resend, Stripe, and Vercel Analytics / PostHog.
+The public trust surface currently names Cloudflare, Netlify, Neon / PostgreSQL, Upstash Redis, Resend, Stripe, and Vercel Analytics / PostHog.
+
+Namecheap remains the registrar. Cloudflare is authoritative DNS for abrahamoflondon.org. Netlify remains the production application host/origin.
 
 ## 4. What authentication model is used?
 
@@ -39,7 +41,11 @@ Default infrastructure may involve UK/EU/US provider regions depending on the se
 
 ## 9. Is data encrypted in transit?
 
-Yes. The public trust surface states that TLS 1.2+ is enforced and unencrypted HTTP is not used.
+Yes. The public trust surface states that TLS 1.2+ is enforced for the hosted application. Cloudflare edge certificates may be available for proxied hostnames, while Netlify continues to manage origin/application TLS for the hosted site. Certificate validation and renewal depend on the active DNS/proxy posture.
+
+## 9a. Is Cloudflare WAF, rate limiting, DLP, Zero Trust, mTLS, or HSTS active?
+
+Cloudflare WAF/rate-limiting is available/configurable where enabled, but it is not represented as universally active. Cloudflare DLP/Data Classification is not currently represented as operational for the public application. Cloudflare Zero Trust is not currently represented as protecting all administrative or user access. mTLS/client certificates are not currently represented as active for the public production application. HSTS is not currently represented as enabled unless confirmed in live configuration.
 
 ## 10. Is there an incident response process?
 

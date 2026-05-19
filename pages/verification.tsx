@@ -90,6 +90,19 @@ const VerificationPage: NextPage = () => {
 
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
               <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+                Infrastructure Boundary
+              </span>
+
+              <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.75 }}>
+                Namecheap remains the registrar. Cloudflare is authoritative DNS for abrahamoflondon.org. Netlify remains the production application host/origin.
+              </p>
+              <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.75, fontStyle: "italic" }}>
+                Cloudflare proxying, WAF/rate-limiting, DLP, Zero Trust, mTLS, and expanded edge-security controls are enabled only where explicitly configured and verified.
+              </p>
+            </section>
+
+            <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                 Founder
               </span>
 

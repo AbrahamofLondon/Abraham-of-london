@@ -9,6 +9,8 @@ This document tracks the external assurance work that needs to happen, in rough 
 
 ## Next 30 days
 
+- [ ] Confirm production DNS/proxy posture for `@` and `www` after Netlify TLS renewal stabilises
+- [ ] Document any Cloudflare WAF, rate limiting, bot control, DLP, Zero Trust, mTLS, HSTS, or origin-certificate control only after live verification
 - [ ] Identify penetration test provider (CREST-accredited or equivalent)
 - [ ] Define pen-test scope: web application, API surface, authentication flows, access control
 - [ ] Prepare staging/test credentials and test account structure
@@ -39,6 +41,7 @@ This document tracks the external assurance work that needs to happen, in rough 
 - [ ] Enterprise SSO / SAML integration (driven by enterprise client requirements)
 - [ ] Enforced organisation-level MFA
 - [ ] External WORM / blockchain anchoring for provenance records
+- [ ] Cloudflare edge-security hardening where buyer requirements justify it
 - [ ] ISO 27001 organisational certification (if commercially justified)
 - [ ] Formal disaster recovery testing with documented RTO/RPO
 - [ ] Named DPO appointment or formal privacy governance programme
@@ -52,6 +55,7 @@ This document tracks the external assurance work that needs to happen, in rough 
 - Timeline is approximate and subject to commercial priorities.
 - Completed items will be updated in the registry and assurance pack.
 - Prospects should not be told items are completed until they actually are.
+- Cloudflare DNS authority must not be described as blanket WAF, proxy, DLP, Zero Trust, mTLS, HSTS, or DDoS protection coverage.
 
 ---
 

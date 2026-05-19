@@ -52,6 +52,7 @@ When answering serious procurement questions, keep the current boundaries explic
 - Administrative access is limited to authorised operator/admin roles; detailed internal access procedures are available for procurement discussion rather than open publication.
 - Enterprise SSO and enforced organisation-level MFA are not yet represented as generally available.
 - Default infrastructure may involve UK/EU/US provider regions; region-specific deployment, residency commitments, transfer terms, DPA, and sub-processor review must be agreed during enterprise procurement.
+- Cloudflare is authoritative DNS for abrahamoflondon.org. Namecheap remains the registrar, Netlify remains the production application host/origin, and Cloudflare proxying, WAF/rate-limiting, DLP, Zero Trust, mTLS, HSTS, and expanded edge controls must be treated as capability-specific unless verified for the relevant deployment scope.
 - Product analytics may be used for usage, reliability, and product improvement; specific telemetry fields and account-level restrictions can be reviewed through the assurance process.
 - Formal enterprise RTO/RPO commitments are not yet represented as generally available.
 - A public status page is not yet published; internal health checks are not a public status history or uptime SLA.
@@ -72,6 +73,7 @@ An enterprise assurance RFI answer pack (`docs/security-assurance/enterprise-ass
 - Formal RTO/RPO commitments
 - EU-only or UK-only data residency guarantee
 - Enterprise SSO/SAML and enforced MFA availability
+- Cloudflare WAF/proxy/DLP/Zero Trust/mTLS/HSTS status
 - Formal incident notification SLA
 
 ## Handling expectations

@@ -30,12 +30,19 @@ Abraham of London is operated by Alomarada Ltd, a UK registered company. Company
 
 The public trust surface currently names:
 
+- Cloudflare — authoritative DNS and edge-security services where enabled;
 - Netlify — hosting, CDN, and serverless functions;
 - Neon / PostgreSQL — primary database;
 - Upstash Redis — rate limiting and session caching;
 - Resend — transactional email;
 - Stripe — payment processing where applicable;
 - Vercel Analytics / PostHog — product analytics and telemetry where configured.
+
+## Cloudflare DNS and Edge Security Boundary
+
+Cloudflare currently serves as authoritative DNS for abrahamoflondon.org. The production application remains hosted on Netlify. Cloudflare edge security features are being configured progressively and should be treated as capability-specific, not blanket controls. Where a buyer requires proxying, WAF, rate limiting, DLP, Zero Trust, mTLS, HSTS, or specific residency/traffic-routing commitments, those controls must be confirmed during procurement review and reflected in the applicable deployment scope.
+
+Namecheap remains the registrar. Cloudflare is authoritative DNS. Netlify remains the production application hosting/CDN origin.
 
 ## Authentication and access model summary
 
@@ -138,6 +145,7 @@ They may be described as planned or prepared for review only when that remains t
 - administrative-access posture;
 - MFA / SSO boundary;
 - data-residency and transfer posture;
+- Cloudflare DNS and edge-security boundary;
 - analytics / telemetry caveat;
 - backup / restore and RTO / RPO caveat;
 - status-page and incident-visibility caveat;

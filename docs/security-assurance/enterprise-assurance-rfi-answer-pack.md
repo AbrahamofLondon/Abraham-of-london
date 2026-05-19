@@ -62,7 +62,11 @@ If your procurement process requires completed SOC 2, ISO 27001 certification, o
 
 ## 4. Data residency, storage, and backups
 
-**Default infrastructure:** The platform uses a combination of providers whose infrastructure may involve UK, EU, and US regions depending on service. Specific provider regions are listed in the sub-processor register (available on request).
+**Default infrastructure:** The platform uses a combination of providers whose infrastructure may involve UK, EU, US, and global network regions depending on service. Specific provider regions are listed in the sub-processor register (available on request).
+
+**Registrar:** Namecheap.
+**Authoritative DNS:** Cloudflare.
+**Application host/origin:** Netlify.
 
 **Data-residency guarantee:** No blanket data-residency guarantee is made for all accounts by default. Region-specific deployment, EU-only or UK-only data residency, and associated transfer terms require enterprise contract review.
 
@@ -105,14 +109,31 @@ Current primary sub-processors (full register available on request with purpose,
 
 | Sub-processor | Purpose |
 |---|---|
+| Cloudflare | Authoritative DNS, DNS security, edge TLS/proxy/security services where explicitly enabled |
 | Neon (PostgreSQL) | Database |
 | Upstash | Redis / caching |
 | Resend | Transactional email |
 | Stripe | Payments |
-| Vercel / Netlify | Hosting and edge infrastructure |
+| Netlify | Production application hosting, CDN, and serverless functions |
 | Vercel Analytics / PostHog | Product analytics and usage telemetry |
 
 Specific region, data-sharing detail, and sub-processor DPA availability can be reviewed during procurement.
+
+### Cloudflare DNS and Edge Security Boundary
+
+Cloudflare currently serves as authoritative DNS for abrahamoflondon.org. The production application remains hosted on Netlify. Cloudflare edge security features are being configured progressively and should be treated as capability-specific, not blanket controls. Where a buyer requires proxying, WAF, rate limiting, DLP, Zero Trust, mTLS, HSTS, or specific residency/traffic-routing commitments, those controls must be confirmed during procurement review and reflected in the applicable deployment scope.
+
+| Question | Current answer |
+|---|---|
+| Who is the registrar? | Namecheap. |
+| Who is authoritative DNS? | Cloudflare. |
+| Who hosts the application? | Netlify is the production application host/origin. |
+| Is Cloudflare WAF active? | Available/configurable where enabled; not represented as universally active. |
+| Is Cloudflare rate limiting active? | Available/configurable where enabled; not represented as universally active. |
+| Is DLP/Data Classification active? | Not currently represented as operational for the public application. |
+| Is Zero Trust enforced? | Not currently represented as protecting all administrative or user access. |
+| Is mTLS active? | Not currently represented as active for the public production application. |
+| Is HSTS active? | Not currently represented as enabled unless confirmed in live configuration. |
 
 **DPA coverage:** Sub-processor DPAs are in place or in progress with primary providers. Sub-processor DPA documentation is available for review during enterprise procurement.
 

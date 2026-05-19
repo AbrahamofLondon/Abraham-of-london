@@ -113,6 +113,37 @@ const SecurityReviewPage: NextPage = () => {
 
           <SecurityAssuranceStatusStrip />
 
+          <section
+            style={{
+              border: "1px solid rgba(255,255,255,0.08)",
+              backgroundColor: "rgba(255,255,255,0.015)",
+              padding: "1rem",
+            }}
+          >
+            <p
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: `${GOLD}88`,
+                marginBottom: "0.75rem",
+              }}
+            >
+              Current infrastructure routing
+            </p>
+            <p
+              style={{
+                ...serif,
+                fontSize: "0.92rem",
+                lineHeight: 1.7,
+                color: "rgba(255,255,255,0.60)",
+              }}
+            >
+              Cloudflare is authoritative DNS for abrahamoflondon.org. Namecheap remains the registrar, and Netlify remains the production application host/origin. Cloudflare proxying, WAF/rate-limiting, Zero Trust, DLP, mTLS, and expanded edge controls are not represented as universally active unless explicitly configured for the relevant hostname or workflow.
+            </p>
+          </section>
+
           {/* ── REQUEST PROCESS NOTICE ──────────────────────────────── */}
           <section
             style={{

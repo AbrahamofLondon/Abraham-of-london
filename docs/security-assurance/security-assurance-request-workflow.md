@@ -100,6 +100,7 @@ When handling a serious request, keep these current boundaries intact:
 - Administrative access is limited to authorised operator/admin roles and restricted materials are controlled through admin review workflows.
 - Enterprise SSO and enforced organisation-level MFA are not yet represented as generally available.
 - Default infrastructure may involve UK/EU/US provider regions; data residency commitments, transfer terms, DPA, and sub-processor review must be handled in procurement or contract review.
+- Cloudflare is authoritative DNS for abrahamoflondon.org. Namecheap remains the registrar, and Netlify remains the production application host/origin. Cloudflare proxying, WAF/rate-limiting, Zero Trust, DLP, mTLS, HSTS, and expanded edge controls must not be represented as universally active unless verified for the relevant hostname or workflow.
 - Product analytics may be used for usage, reliability, and product improvement; specific telemetry fields can be reviewed through the security assurance process.
 - Formal enterprise RTO/RPO commitments are not yet represented as generally available.
 - A public status page is not yet published; current pilots should agree incident communication expectations within scope.
@@ -184,6 +185,7 @@ The following require real external work and must remain honestly marked:
 - Formal DPO/privacy governance
 - Cyber/professional indemnity insurance confirmation
 - External WORM/blockchain anchoring
+- Blanket Cloudflare proxy, WAF, rate limiting, DLP, Zero Trust, mTLS, HSTS, or edge-protection coverage
 
 Roadmap at `docs/security-assurance/external-assurance-roadmap.md`.
 
