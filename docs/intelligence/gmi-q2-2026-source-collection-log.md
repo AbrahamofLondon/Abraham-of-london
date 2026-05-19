@@ -53,3 +53,24 @@ Sources are not fabricated. Rows marked "Source pending" or "Awaiting Q2 close" 
 - No row in this log may be converted to a report claim without assigning a specific source citation and observation window.
 - Every numerical claim derived from this log must appear in the Q2 Source and Confidence Appendix.
 - This log is an internal preparation document. It does not constitute a report claim or prediction.
+
+---
+
+## Monitor linkage
+
+Key rows in this log are tracked by monitoring signals in `lib/intelligence/gmi-monitoring-signals.ts`. Monitor IDs below correspond to specific signals that govern evidence priority and confidence-posture decisions.
+
+| Signal area | Monitor ID | Status |
+|---|---|---|
+| US-China tariff escalation and impairment thesis | GMI-MONITOR-USCN-TARIFF | ACTIVE |
+| 90-day pause — expiry / extension / modification | GMI-MONITOR-PAUSE-STATUS | ACTIVE |
+| US 10-year Treasury yield volatility | GMI-MONITOR-US10Y | MONITORING |
+| USD behaviour under stress | GMI-MONITOR-USD-STRESS | MONITORING |
+| IG / HY credit spread Q2 movement | GMI-MONITOR-CREDIT | MONITORING |
+| AI capex / productivity offset signal | GMI-MONITOR-AI-OFFSET | MONITORING |
+| India / ASEAN capital-flow reallocation | GMI-MONITOR-INDIA-ASEAN | MONITORING |
+| Africa infrastructure / critical minerals | GMI-MONITOR-AFRICA | DEFERRED (Q3 window) |
+| Oil / commodity repricing | GMI-MONITOR-OIL | MONITORING |
+
+Full monitoring register: `docs/intelligence/gmi-q2-2026-monitoring-register.md`
+Alert thresholds: `lib/intelligence/gmi-alert-thresholds.ts`
