@@ -26,6 +26,7 @@ import {
   Clock,
   Mail,
   ArrowRight,
+  ExternalLink,
   FileText,
   Users,
 } from "lucide-react";
@@ -343,20 +344,37 @@ const TrustPage: NextPage = () => (
               Founder assurance credentials
             </p>
             <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)", marginBottom: "0.75rem" }}>
-              The platform is not currently ISO/IEC 27001 certified. However, Abraham Adaramola holds an ISO/IEC 27001:2022 Lead Auditor credential from Mastermind Assurance.
+              Abraham Adaramola holds an ISO/IEC 27001:2022 Lead Auditor credential and has formal training across consulting management, company direction, cybersecurity, business development, and MBA-level brand leadership.
             </p>
             <p style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1rem", borderLeft: `1px solid ${GOLD}33`, paddingLeft: "0.75rem" }}>
-              This credential supports the assurance literacy, audit awareness, and governance discipline behind the platform. It should not be read as independent certification of Alomarada Ltd or of the Abraham of London platform.
+              These credentials support assurance literacy, audit awareness, and governance discipline. They should not be read as independent certification of Alomarada Ltd, Abraham of London, or the platform.
             </p>
+            <a
+              href="https://www.linkedin.com/in/abraham-adaramola-06630321/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-4 inline-flex items-center gap-1"
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: `${GOLD}99`,
+                textDecoration: "none",
+              }}
+            >
+              View founder profile on LinkedIn
+              <ExternalLink className="h-3 w-3" />
+            </a>
             <div className="space-y-3">
               <CertRow
                 label="ISO/IEC 27001:2022 Lead Auditor"
                 status="LIVE"
                 note="Abraham Adaramola — Mastermind Assurance"
               />
-              <CertRow label="Mastering Cybersecurity" status="LIVE" note="eHacking, 2020" />
               <CertRow label="Level 7 Diploma in Consulting Management" status="LIVE" note="Chartered Management Institute, 2017" />
               <CertRow label="MBA, Brand Leadership" status="LIVE" note="University of East Anglia, 2017" />
+              <CertRow label="Cybersecurity training" status="LIVE" note="Formal cybersecurity training supporting assurance literacy." />
             </div>
           </div>
         </Section>

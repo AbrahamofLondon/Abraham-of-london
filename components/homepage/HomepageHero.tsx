@@ -33,7 +33,7 @@ export default function HomepageHero() {
             letterSpacing: "-0.02em",
           }}
         >
-          Governed decision infrastructure for leaders who cannot afford advisory theatre.
+          Governed decision infrastructure for leaders carrying decisions that cannot drift.
         </h1>
 
         <p

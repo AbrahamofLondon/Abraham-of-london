@@ -120,15 +120,26 @@ const VerificationPage: NextPage = () => {
 
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
               <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
-                Professional Credentials
+                Founder Assurance Credentials
               </span>
 
-              <ul className="mt-3 space-y-1.5 text-sm" style={{ color: "rgba(255,255,255,0.60)" }}>
-                <li>ISO/IEC 27001:2022 Lead Auditor.</li>
-                <li>CMI Level 7 Diploma in Consulting Management.</li>
-                <li>MBA — University of East Anglia, Norwich Business School.</li>
-                <li>BSc — Microbiology, University of Lagos.</li>
-              </ul>
+              <div className="mt-3 space-y-3 text-sm" style={{ color: "rgba(255,255,255,0.60)", lineHeight: 1.75 }}>
+                <p>
+                  Abraham Adaramola holds an ISO/IEC 27001:2022 Lead Auditor credential and has formal training across consulting management, company direction, cybersecurity, business development, and MBA-level brand leadership.
+                </p>
+                <p style={{ color: "rgba(255,255,255,0.45)", fontStyle: "italic", borderLeft: `1px solid ${GOLD}30`, paddingLeft: "0.75rem" }}>
+                  These credentials support assurance literacy, audit awareness, and governance discipline. They should not be read as independent certification of Alomarada Ltd, Abraham of London, or the platform.
+                </p>
+                <a
+                  href="https://www.linkedin.com/in/abraham-adaramola-06630321/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1"
+                  style={{ color: `${GOLD}A0`, fontSize: "0.82rem" }}
+                >
+                  View founder profile on LinkedIn <ExternalLink style={{ width: 9, height: 9 }} />
+                </a>
+              </div>
             </section>
 
             <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
