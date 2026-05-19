@@ -302,31 +302,83 @@ Each call must be scored and a learning note recorded before the Q2 report is pu
 
 ---
 
-## 14. Draft release checklist
+## 14. Release workflow — when Q2 closes
 
-*(To be completed before GMI-Q2-2026 moves to ACTIVE)*
+The canonical release sequence. Steps must be completed in order. Step 2 is not optional.
 
-- [ ] All 16 required report sections complete (per release standard)
+**Step 1 — Complete Q2 source collection log**
+Every row marked "Awaiting Q2 close" or "Source pending" must be resolved with a confirmed source citation and observation window. No hard-number claim may remain without a source or explicit method/estimate label.
+
+**Step 2 — Review and score the 7 Q1 calls due in Q2** *(the crown jewel)*
+CALL-001 through CALL-007 have `expectedReviewWindow: "Q2 2026"`. Each must receive:
+- Outcome status from the `MarketCallOutcomeStatus` enum
+- Score (0–5)
+- Outcome summary
+- Learning note
+
+CALL-008 has `expectedReviewWindow: "Q3 2026"` — it is not a Q2 release blocker but evidence should be collected.
+
+The quality gate critical failure `PRIOR_QUARTER_CALLS_UNREVIEWED` blocks release until this step is complete. Run `getCallsPendingReview("Q2 2026")` from `lib/intelligence/market-intelligence-call-ledger.ts` to retrieve the exact set.
+
+**Step 3 — Add outcome summaries and learning notes**
+Record in the MARKET_CALL_LEDGER constants. Learning notes must be honest about both confirmed and disconfirmed calls — the learning signal from a wrong call is as valuable as confirmation.
+
+**Step 4 — Update future weighting changes where justified**
+If a call was significantly wrong, record `futureWeightingChange` on the ledger entry. This is how the intelligence line earns its authority across quarters.
+
+**Step 5 — Run quality gate**
+`scoreReport()` must return `releaseReady: true` with:
+- `hasPriorQuarterCalls: true`
+- `priorQuarterCallsReviewed: true`
+- `hasSourceAppendix: true`
+- `hasConfidencePosture: true`
+- `hasBoardSummary: true`
+- All other fields correct for an active report
+
+**Step 6 — Promote Q2 lifecycle from DRAFT to ACTIVE_UNTIL_SUPERSEDED**
+Update `lib/intelligence/market-intelligence-lifecycle.ts`:
+- GMI-Q2-2026: `lifecycleState → ACTIVE_UNTIL_SUPERSEDED`, `purchasable → true`, `publicVisible → true`, `publishedAt` set, `version → 1.0.0`
+- GMI-Q3-2026 entry: create as `DRAFT`
+
+**Step 7 — Make Q2 public/paid surfaces live**
+- Update `content/artifacts/global-market-intelligence-report-q2-2026.mdx` frontmatter: `draft: false`, `published: true`, `version: 1.0.0`, `lifecycleState: ACTIVE_UNTIL_SUPERSEDED`
+- Register Q2 in `lib/premium/content-registry.ts` with product code, entitlement slug, and Stripe price ID
+- Verify checkout path and entitlement-gated download route
+- Seed Q2 confidence posture in `lib/intelligence/market-intelligence-confidence-posture.ts`
+
+**Step 8 — Move Q1 from ACTIVE_UNTIL_SUPERSEDED to SUPERSEDED (or ARCHIVED)**
+Commercial policy determines whether Q1 remains purchasable as an archive reference. Set `supersededBy: "GMI-Q2-2026"` in the Q1 registry entry. Do not remove Q1 from the registry.
+
+---
+
+## 14a. Draft release checklist
+
+*(Gate items — all must be checked before Step 6)*
+
+- [ ] Q2 source collection log complete — all "Awaiting Q2 close" rows resolved
+- [ ] CALL-001 through CALL-007 reviewed and scored (Step 2 complete)
+- [ ] All reviewed calls have outcomeSummary and learning note
+- [ ] Future weighting changes recorded where justified
+- [ ] All 17 required report sections present in working draft
 - [ ] Evidence classes assigned to all major analytical claims
-- [ ] Confidence bands assigned
-- [ ] Scenario probabilities confirmed and sum to 100%
+- [ ] Confidence bands assigned and confidence posture seeded in TypeScript
+- [ ] Scenario probabilities confirmed with point estimates that sum to 100%
 - [ ] Method notes present for all scenario probabilities
-- [ ] Hard numbers have source references
+- [ ] Hard numbers have confirmed source references (no "Source pending" in paid edition)
 - [ ] No investment advice language
-- [ ] Compliance disclaimer visible on public page
+- [ ] Compliance disclaimer visible on public page surface
 - [ ] Board Summary is self-contained
-- [ ] Paid edition materially differs from public edition
-- [ ] Coverage period: Q2 2026
-- [ ] Decision window: Q3 2026
-- [ ] Version set in registry
+- [ ] Paid edition materially differs from public surface edition
+- [ ] Coverage period: Q2 2026 — Decision window: Q3 2026
+- [ ] Version set in registry to 1.0.0
 - [ ] Updated date set in registry
-- [ ] Lifecycle state moved to ACTIVE_UNTIL_SUPERSEDED
-- [ ] GMI-Q1-2026 lifecycle state updated to SUPERSEDED
+- [ ] Lifecycle state moved to ACTIVE_UNTIL_SUPERSEDED in registry
+- [ ] GMI-Q1-2026 supersededBy field set
 - [ ] GMI-Q3-2026 entry created in registry as DRAFT
 - [ ] Catalog entry created and active for Q2 institutional edition
-- [ ] Entitlement slug resolves
+- [ ] Entitlement slug resolves in `lib/commercial/product-identity.ts`
 - [ ] Checkout path resolves
-- [ ] Download route gated
+- [ ] Download route gated (no direct PDF links)
 - [ ] `scoreReport()` returns `releaseReady: true`
 
 ---

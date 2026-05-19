@@ -321,3 +321,35 @@ Defined in `lib/intelligence/market-intelligence-quality-gate.ts`. Each dimensio
 | `PAID_SAME_AS_PUBLIC` | Paid edition not materially different from public edition |
 | `MISSING_LIFECYCLE_METADATA` | Missing coverage period, decision window, or version |
 | `MISSING_SUPERSESSION_PLAN` | No Q-next entry in lifecycle registry |
+
+---
+
+## 13. Intelligence line phrasing standard
+
+### Approved phrasing
+
+These formulations may be used on public and institutional surfaces:
+
+> Every quarterly report reviews the material calls from the previous quarter before issuing the next one.
+
+> This intelligence line compounds through verification, not just publication.
+
+> This report is decision-support intelligence. It is not investment advice.
+
+> [Quarter] remains active for [next quarter] operating decisions until superseded.
+
+### Disallowed phrasing
+
+The following formulations must not appear on any surface, in any report, or in any marketing copy for this line:
+
+| Disallowed | Reason |
+|---|---|
+| "Our system predicts markets." | Overclaims predictive capability; implies regulated activity |
+| "We recommend buying / selling / holding." | Investment advice language |
+| "Our target price is..." | Investment advice language |
+| "Investors should..." | Regulated advice framing |
+| "Guaranteed return / outcome..." | Prohibited claim |
+| "Our AI automatically learns from markets." | Overclaims; not accurate to how the verification system works |
+| "Automatically updated predictions." | Overclaims; implies automated inference without human review |
+
+The verification system is governed institutional memory — structured, human-reviewed, and evidence-based. It is not automated market prediction. The distinction is not cosmetic; it is the basis on which this line maintains regulatory and reputational standing.
