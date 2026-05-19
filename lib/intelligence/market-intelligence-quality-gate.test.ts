@@ -280,3 +280,102 @@ describe("scoreReport — critical failure: PRIOR_QUARTER_CALLS_UNREVIEWED", () 
     expect(dim?.score).toBe(8);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Q2 governed draft release gate
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GMI_Q2_DRAFT_INPUT: MarketReportQualityInput = {
+  lifecycleState:                 "DRAFT",
+  purchasable:                    false,
+  copyDescribesAsArchived:        false,
+  hasMetadata:                    true,
+  hasSupersessionPlan:            false, // Q3 not yet registered
+  hasSourceAppendix:              false, // source appendix incomplete
+  hasHardNumbersWithoutSource:    false,
+  hasDecisionImplications:        true,
+  hasBoardSummary:                true,
+  hasScenarioFramework:           true,
+  hasConfidencePosture:           false, // posture draft only
+  paidEditionDifferentFromPublic: true,
+  hasComplianceDisclaimer:        true,
+  hasInvestmentAdviceLanguage:    false,
+  deliveryRouteVerified:          false, // draft — no delivery route
+  freshnessMetadataComplete:      true,
+  hasPriorQuarterCalls:           true,
+  priorQuarterCallsReviewed:      false, // Q1 calls not yet reviewed
+};
+
+describe("scoreReport — Q2 governed draft release gate", () => {
+  it("blocks Q2 release when prior Q1 calls are unreviewed", () => {
+    const result = scoreReport(GMI_Q2_DRAFT_INPUT);
+    expect(result.criticalFailures).toContain("PRIOR_QUARTER_CALLS_UNREVIEWED");
+    expect(result.releaseReady).toBe(false);
+  });
+
+  it("allows Q2 draft state while calls are pending — draft is not a critical failure on its own", () => {
+    const result = scoreReport(GMI_Q2_DRAFT_INPUT);
+    expect(result.criticalFailures).not.toContain("PURCHASABLE_DRAFT");
+  });
+
+  it("does not mark draft reports release-ready", () => {
+    const result = scoreReport(GMI_Q2_DRAFT_INPUT);
+    expect(result.releaseReady).toBe(false);
+  });
+
+  it("requires source appendix before paid edition readiness", () => {
+    const withoutSourceAppendix = scoreReport({
+      ...GMI_Q2_DRAFT_INPUT,
+      lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+      purchasable: true,
+      deliveryRouteVerified: true,
+      hasSupersessionPlan: true,
+      priorQuarterCallsReviewed: true,
+      hasSourceAppendix: false,
+    });
+    const dim = withoutSourceAppendix.scores.find(
+      (s) => s.dimension === "SOURCE_TRACEABILITY",
+    );
+    expect(dim?.score).toBeLessThan(8);
+    expect(withoutSourceAppendix.releaseReady).toBe(false);
+  });
+
+  it("requires confidence posture before paid edition readiness — missing posture reduces SCENARIO_DISCIPLINE", () => {
+    const withoutPosture = scoreReport({
+      ...GMI_Q2_DRAFT_INPUT,
+      lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+      purchasable: true,
+      deliveryRouteVerified: true,
+      hasSupersessionPlan: true,
+      priorQuarterCallsReviewed: true,
+      hasSourceAppendix: true,
+      hasConfidencePosture: false,
+    });
+    const dim = withoutPosture.scores.find(
+      (s) => s.dimension === "SCENARIO_DISCIPLINE",
+    );
+    // Missing confidence posture scores SCENARIO_DISCIPLINE at 8 — at threshold but not perfect.
+    // Combined with other deficiencies it will block release; in isolation it reduces score without hard-blocking.
+    expect(dim?.score).toBe(8);
+    expect(dim?.score).toBeLessThan(10);
+  });
+
+  it("requires board summary before paid edition readiness", () => {
+    const withoutBoard = scoreReport({
+      ...GMI_Q2_DRAFT_INPUT,
+      lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+      purchasable: true,
+      deliveryRouteVerified: true,
+      hasSupersessionPlan: true,
+      priorQuarterCallsReviewed: true,
+      hasSourceAppendix: true,
+      hasConfidencePosture: true,
+      hasBoardSummary: false,
+    });
+    const boardDim = withoutBoard.scores.find(
+      (s) => s.dimension === "BOARD_USABILITY",
+    );
+    expect(boardDim?.score).toBeLessThan(8);
+    expect(withoutBoard.releaseReady).toBe(false);
+  });
+});

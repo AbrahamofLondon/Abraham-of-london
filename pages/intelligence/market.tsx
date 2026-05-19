@@ -701,7 +701,7 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               {[
                 { label: "Evidence base", text: "The quarter just ended is reviewed for market structure, policy posture, capital flow, and consequence patterns." },
                 { label: "Decision window", text: "The current quarter frames live operating choices, scenario posture, and leadership timing." },
-                { label: "Watchlist", text: "The next quarter remains in preparation until the report is published and explicitly activated." },
+                { label: "Watchlist", text: "The next quarter remains in preparation until the report is published and explicitly activated. The Q2 report will not be released until Q1 material calls have been reviewed and the Q2 source appendix is complete." },
               ].map((item) => (
                 <article key={item.label} style={{ borderLeft: `1px solid ${GOLD}33`, paddingLeft: "14px" }}>
                   <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{item.label}</p>

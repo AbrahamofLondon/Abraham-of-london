@@ -328,3 +328,62 @@ Each call must be scored and a learning note recorded before the Q2 report is pu
 - [ ] Checkout path resolves
 - [ ] Download route gated
 - [ ] `scoreReport()` returns `releaseReady: true`
+
+---
+
+## 15. Working Draft
+
+Primary draft:
+
+```
+content/artifacts/global-market-intelligence-report-q2-2026.mdx
+```
+
+The draft contains all 17 required sections per the release standard, with placeholder entries for the source appendix and call review. It is governed as `draft: true`, `published: false`, `lifecycleState: DRAFT`.
+
+A secondary placeholder for the intelligence route also exists at:
+
+```
+content/intelligence/global-market-intelligence-report-q2-2026-draft.mdx
+```
+
+---
+
+## 16. Release Blockers
+
+The following conditions must be satisfied before GMI-Q2-2026 can move from DRAFT to ACTIVE_UNTIL_SUPERSEDED:
+
+- [ ] Q2 has not yet closed — evidence collection incomplete
+- [ ] Q1 call review pending — CALL-001 through CALL-007 must be scored (CALL-008 is Q3 window)
+- [ ] Source appendix incomplete — all entries marked "To verify" require confirmed sources
+- [ ] Confidence posture is draft only — must be finalised in `lib/intelligence/market-intelligence-confidence-posture.ts`
+- [ ] Quality gate pending — `scoreReport()` must return `releaseReady: true`
+
+---
+
+## 17. Q1 Call Review Workspace Reference
+
+Use the Market Intelligence Call Ledger (`lib/intelligence/market-intelligence-call-ledger.ts`) to complete Q1 call scoring before release.
+
+Run `getCallsPendingReview("Q2 2026")` to retrieve the exact set of calls due for review. For each call, record:
+
+- `outcomeStatus`
+- `score` (0–5)
+- `outcomeSummary`
+- `learning`
+
+The quality gate critical failure `PRIOR_QUARTER_CALLS_UNREVIEWED` blocks release until this is complete.
+
+---
+
+## 18. Source Collection Status
+
+Source collection log:
+
+```
+docs/intelligence/gmi-q2-2026-source-collection-log.md
+```
+
+The log contains 25 source rows covering tariffs, central bank decisions, CPI/PCE, yield curve, FX, credit spreads, equities, commodities, and trade flows. All rows are marked "Awaiting Q2 close", "Source pending", or "Evidence to collect".
+
+No row may be converted to a report claim without a confirmed source citation and observation window. Every numerical claim derived from this log must appear in the Q2 Source and Confidence Appendix.
