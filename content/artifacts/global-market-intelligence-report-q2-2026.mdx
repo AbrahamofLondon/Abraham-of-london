@@ -199,9 +199,9 @@ The shift is no longer globalisation → fragmentation. The emerging question is
 
 ### Growth Regime
 
-- Global growth remains constrained and uneven, with institutional consensus still around the low-3 percent area; downside risks remain elevated under continued trade-policy friction. *(MODELLED_ESTIMATE — IMF January 2026 forecast was 3.3% for 2026; Q2 revision pending IMF July 2026 WEO. Source to be confirmed before publication.)*
+- Global growth remains constrained and uneven, with major institutional forecasts still clustering around the low-3% area for 2026. The strategic issue is not outright collapse; it is that growth is being sustained under higher policy friction, tariff persistence, and more selective capital allocation. *(MODELLED_ESTIMATE — IMF January 2026 forecast: 3.3% global growth for 2026; Goldman Sachs 2026 estimate: ~2.8%; Morgan Stanley 2026 estimate: ~3.2%; IMF July 2026 WEO revision pending. See Source Appendix for full institutional forecast comparison.)*
 - Downside skew is material but the base case is not contraction — it is slower, more friction-laden growth than pre-2025 baselines assumed.
-- Trade volume growth is decoupling from GDP growth in sectors most exposed to tariff architecture.
+- Trade volume growth is decoupling from GDP growth in sectors most exposed to tariff architecture. *(INSTITUTIONAL_SOURCE — IMF / WTO trade data pending Q2 confirmation.)*
 
 ### Inflation Regime
 
@@ -294,7 +294,7 @@ Monetary policy is operating under constraint rather than as a forward-looking s
 
 ### FX Regime
 
-- Episodic dollar weakness under risk-off conditions has been observed and is a key monitoring signal. This is not yet confirmed as a broad regime break in reserve-demand dynamics — it may reflect a temporary episode or a narrow cross-asset anomaly rather than a structural shift. *(MONITORING — DXY Q2 behaviour source pending. Do not assert reserve-currency-stress thesis without Q2 institutional evidence.)*
+- Dollar behaviour under stress remains a monitoring variable. Episodic weakness or instability may indicate shifting reserve-demand behaviour, but it is not yet treated as a confirmed reserve-regime break. *(MONITORING — DXY Q2 behaviour source pending; do not assert reserve-currency-stress thesis without Q2 institutional evidence.)*
 - FX is increasingly functioning as a policy signal in tariff-adjacent markets, not only as a market-clearing variable.
 
 ### Equities
@@ -349,6 +349,39 @@ A monitored tail risk for Q2/Q3 is confidence fragmentation — distinct from co
 
 ---
 
+## 11a. Confidence Posture
+
+This section assigns HIGH / MEDIUM / MONITORING / LOW confidence bands to all major analytical claims in this report. It must be finalised before the paid edition is published and seeded into `lib/intelligence/market-intelligence-confidence-posture.ts`.
+
+**Boundary:** Confidence posture indicates analytical confidence in the interpretation of observed and developing signals. It does not imply prediction certainty.
+
+### HIGH — Confirmed or structurally observable
+
+- Trade fragmentation persistence: tariff architecture is functioning as policy, not temporary correction
+- Tariff/policy friction as a board-level operating variable: confirmed from Q1 evidence base
+- Supply-chain optionality premium: structural shift from optimisation to resilience well-supported across institutional commentary
+
+### MEDIUM — Directionally supported; source confirmation pending
+
+- Capital selectivity by jurisdiction: direction supported; Q2 hard data pending
+- Inflation pass-through persistence: consistent with Q1 signals; Q2 CPI/PCE required to confirm quantum
+- Low-3% constrained global growth environment: consistent with IMF January 2026 (3.3%) and Goldman Sachs (~2.8%) institutional range; Q2 WEO revision pending
+
+### MONITORING — Signal observed; interpretation not yet settled
+
+- USD behaviour under stress: episodic weakness observed; not confirmed as reserve-regime break
+- Broad credit tightening: sector-specific signals observed; systematic spread data pending
+- Confidence shock scenario: monitored downside case only; no market-implied elevation
+- India / ASEAN / Africa capital-flow acceleration: plausible trade-rebalancing direction; hard Q2 evidence required before strengthening claim
+
+### LOW / Scenario-sensitive
+
+- Rapid de-escalation probability: no confirmed bilateral signals at time of drafting
+- Non-linear systemic repricing timing: scenario assumption only
+- Coordinated central bank stabilisation pathway: conditional on events not yet in evidence
+
+---
+
 ## 12. Scenario Framework
 
 **Note:** All probabilities are scenario assumptions, not forecasts. Probabilities sum to 100%. Method note: probability clustering based on observable policy trajectory, credit conditions, and institutional positioning signals as of Q2 close. *(SCENARIO_ASSUMPTION — method documentation required before release.)*
@@ -358,7 +391,7 @@ A monitored tail risk for Q2/Q3 is confidence fragmentation — distinct from co
 | Managed Fragmentation (Base Case) | 45–50% | Structural hypothesis: system stabilises under elevated friction; tariff regime persists; monetary constraint extended; slow growth continues within IMF-consistent low-3% band | Directionally supported by IMF "steady amid divergent forces" framing and tariff-regime persistence signals; not yet a demonstrated endpoint |
 | Escalation Continuation | 25–30% | Tariff expansion or enforcement tightening; deeper capital segmentation; supply chain decoupling accelerates | Conditional — depends on policy trajectory not yet resolved |
 | Partial Policy Reset | 10–15% | Limited de-escalation in tariff effective rate without structural reversal of fragmentation architecture | Conditional — no confirmed Q2 bilateral de-escalation signals at time of drafting |
-| Confidence Shock | 10–15% | SCENARIO_ASSUMPTION: non-linear systemic repricing across rates, FX, credit, equities — requires a material secondary shock beyond current tariff architecture | Scenario assumption only; no market-implied evidence or institutional commentary confirms this as elevated probability; retain as tail risk frame |
+| Confidence Shock — scenario assumption / monitored downside case | 10–15% | SCENARIO_ASSUMPTION: non-linear systemic repricing across rates, FX, credit, equities — requires a material secondary shock beyond current tariff architecture | Scenario assumption only; no market-implied evidence or institutional commentary confirms this as elevated probability; retain as monitored downside case, not observed condition |
 
 **Mid-point sum check:** 47.5% + 27.5% + 12.5% + 12.5% = 100%. Finalised probability point estimates with method notes required before publication.
 
@@ -420,6 +453,8 @@ This is not a forecast document. It is a strategic positioning framework under a
 
 No hard-number claim should remain in the final paid edition without a source, method note, or clearly labelled estimate basis.
 
+> **Release blocker note:** No hard macro band, FX regime claim, credit-tightening claim, or regional capital-flow claim may be presented as settled until linked to source/method evidence in this appendix. Entries in MONITORING status must not be promoted to MEDIUM or HIGH without a confirmed Q2 source row.
+
 | Signal / Claim | Evidence Class | Source / Basis | Observation Window | Confidence | Used In Section | Status |
 |---|---|---|---|---|---|---|
 | Global growth constrained and uneven; low-3% consensus | MODELLED_ESTIMATE | IMF January 2026 forecast 3.3% for 2026; IMF July 2026 WEO revision pending | Q1–Q2 2026 | MEDIUM | Global Macro Snapshot | Base figure supported; Q2 revision to confirm — do not use 2.3–2.7% band without confirmed Q2 source |
@@ -433,6 +468,15 @@ No hard-number claim should remain in the final paid edition without a source, m
 | 6–12 month defensive liquidity buffers | OPERATOR_JUDGEMENT | Operator risk framework — basis note required | Q2 2026 | MEDIUM | Immediate Decisions | Label as OPERATOR_JUDGEMENT; not a market-implied figure |
 | Scenario probabilities (all four) | SCENARIO_ASSUMPTION | Probability clustering — point estimates and method note required before publication | Q2 2026 | LOW / Scenario-sensitive | Scenario Framework | Method note pending; Confidence Shock retain as tail risk with no market-implied elevation |
 | Trade volume decoupling from GDP | INSTITUTIONAL_SOURCE | IMF / WTO trade data — source pending | Q2 2026 | MEDIUM | Global Macro Snapshot | Directionally supported; sector-specific decoupling rather than broad GDP divorce |
+| IMF January 2026 global growth projection | INSTITUTIONAL_SOURCE | IMF World Economic Outlook Update, January 2026 — 3.3% global growth for 2026 | Q1 2026 | HIGH | Global Macro Snapshot | Confirmed institutional anchor; Q2 revision pending July 2026 WEO |
+| Goldman Sachs 2026 global growth forecast | INSTITUTIONAL_SOURCE | Goldman Sachs Global Investment Research — ~2.8% global GDP for 2026 | Q1–Q2 2026 | MEDIUM | Global Macro Snapshot | Source pending confirmation; do not cite without confirmed publication reference |
+| Morgan Stanley 2026 global GDP forecast | INSTITUTIONAL_SOURCE | Morgan Stanley Global Economics — ~3.2% global GDP for 2026 | Q1–Q2 2026 | MEDIUM | Global Macro Snapshot | Source pending confirmation; use as bracket alongside IMF figure |
+| JPMorgan 2026 AI/global resilience framing | OPERATOR_JUDGEMENT / INSTITUTIONAL_SOURCE | JPMorgan Research 2026 — qualitative AI-supported resilience framing; no confirmed GDP point estimate at time of drafting | Q1–Q2 2026 | LOW | Core Thesis / Scenario Framework | Do not use as a hard GDP number; use as qualitative offset signal if confirmed |
+| Q2 trade/tariff monitoring — US-China status | PRIMARY_DATA | US Federal Register / USTR; Chinese Ministry of Commerce — tariff schedule Q2 status | Q2 2026 | HIGH | Core Thesis | Source pending; critical for scoring CALL-007 and confirming fragmentation-persistence base case. Monitor ID: GMI-MONITOR-USCN-TARIFF |
+| US 10-year Treasury yield volatility | MARKET_IMPLIED_SIGNAL | US Treasury market data — Q2 yield range and volatility | Q2 2026 | MEDIUM | Rates and Liquidity | Source pending; required before asserting structural tightening claim. Monitor ID: GMI-MONITOR-US10Y |
+| USD behaviour under stress — Q2 observations | MARKET_IMPLIED_SIGNAL | DXY market data; Bloomberg / Refinitiv — Q2 risk-off episodes | Q2 2026 | MONITORING | Cross-Market Signals / FX Regime | Source pending; retain as monitoring signal only. Monitor ID: GMI-MONITOR-USD-STRESS |
+| Credit spread / liquidity conditions Q2 | MARKET_IMPLIED_SIGNAL | ICE BofA IG and HY spread data — Q2 range | Q2 2026 | MONITORING | Rates and Liquidity | Source pending; required before asserting broad credit tightening. Monitor ID: GMI-MONITOR-CREDIT |
+| India / ASEAN / Africa capital-flow evidence | INSTITUTIONAL_SOURCE | World Bank; ADB; UNCTAD; trade body data — Q2 investment flow signals | Q2 2026 | MONITORING | Major Economy Readings | Source pending; retain as monitored development only until confirmed. Monitor ID: GMI-MONITOR-AI-OFFSET (productivity offset) |
 
 ---
 
