@@ -17,7 +17,8 @@ export type CriticalFailureCode =
   | "INVESTMENT_ADVICE_LANGUAGE"
   | "PAID_SAME_AS_PUBLIC"
   | "MISSING_LIFECYCLE_METADATA"
-  | "MISSING_SUPERSESSION_PLAN";
+  | "MISSING_SUPERSESSION_PLAN"
+  | "PRIOR_QUARTER_CALLS_UNREVIEWED";
 
 export type QualityDimensionScore = {
   dimension: QualityDimension;
@@ -57,6 +58,8 @@ export type MarketReportQualityInput = {
   hasInvestmentAdviceLanguage: boolean;
   deliveryRouteVerified: boolean;
   freshnessMetadataComplete: boolean;
+  hasPriorQuarterCalls: boolean;
+  priorQuarterCallsReviewed: boolean;
 };
 
 const DIMENSION_LABELS: Record<QualityDimension, string> = {
@@ -116,6 +119,11 @@ function scoreLifecycleCorrectness(
   if (!input.hasSupersessionPlan)
     return dim("LIFECYCLE_CORRECTNESS", 8, [
       "No supersession plan documented. Q-next record should be registered.",
+    ]);
+
+  if (input.hasPriorQuarterCalls && !input.priorQuarterCallsReviewed)
+    return dim("LIFECYCLE_CORRECTNESS", 8, [
+      "Prior quarter material calls have not been reviewed and scored before this report's release.",
     ]);
 
   return dim("LIFECYCLE_CORRECTNESS", 10, []);
@@ -284,6 +292,9 @@ function detectCriticalFailures(
 
   if (!input.hasSupersessionPlan)
     failures.push("MISSING_SUPERSESSION_PLAN");
+
+  if (input.hasPriorQuarterCalls && !input.priorQuarterCallsReviewed)
+    failures.push("PRIOR_QUARTER_CALLS_UNREVIEWED");
 
   return failures;
 }

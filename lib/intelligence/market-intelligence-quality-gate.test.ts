@@ -23,6 +23,8 @@ const PASSING_INPUT: MarketReportQualityInput = {
   hasInvestmentAdviceLanguage:    false,
   deliveryRouteVerified:          true,
   freshnessMetadataComplete:      true,
+  hasPriorQuarterCalls:           false, // first report — no prior calls
+  priorQuarterCallsReviewed:      false, // N/A for first report
 };
 
 describe("scoreReport — passing report", () => {
@@ -203,5 +205,78 @@ describe("getDimensionLabel", () => {
       const label = getDimensionLabel(s.dimension);
       expect(label.length).toBeGreaterThan(0);
     }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Prior quarter call review gate
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("scoreReport — critical failure: PRIOR_QUARTER_CALLS_UNREVIEWED", () => {
+  it("Q1 report passes because it has no prior quarter calls", () => {
+    const result = scoreReport({
+      ...PASSING_INPUT,
+      hasPriorQuarterCalls: false,
+      priorQuarterCallsReviewed: false,
+    });
+    expect(result.criticalFailures).not.toContain("PRIOR_QUARTER_CALLS_UNREVIEWED");
+    expect(result.releaseReady).toBe(true);
+  });
+
+  it("Q2 report fails when Q1 calls are unreviewed", () => {
+    const q2Input: MarketReportQualityInput = {
+      ...PASSING_INPUT,
+      hasPriorQuarterCalls: true,
+      priorQuarterCallsReviewed: false,
+    };
+    const result = scoreReport(q2Input);
+    expect(result.criticalFailures).toContain("PRIOR_QUARTER_CALLS_UNREVIEWED");
+    expect(result.releaseReady).toBe(false);
+  });
+
+  it("Q2 report can pass once prior calls are reviewed", () => {
+    const q2InputReviewed: MarketReportQualityInput = {
+      ...PASSING_INPUT,
+      hasPriorQuarterCalls: true,
+      priorQuarterCallsReviewed: true,
+    };
+    const result = scoreReport(q2InputReviewed);
+    expect(result.criticalFailures).not.toContain("PRIOR_QUARTER_CALLS_UNREVIEWED");
+    expect(result.releaseReady).toBe(true);
+  });
+
+  it("unreviewed prior calls appear in blockers list", () => {
+    const result = scoreReport({
+      ...PASSING_INPUT,
+      hasPriorQuarterCalls: true,
+      priorQuarterCallsReviewed: false,
+    });
+    expect(
+      result.blockers.some((b) => b.includes("PRIOR_QUARTER_CALLS_UNREVIEWED")),
+    ).toBe(true);
+  });
+
+  it("having prior calls but reviewing them does not lower LIFECYCLE_CORRECTNESS score", () => {
+    const result = scoreReport({
+      ...PASSING_INPUT,
+      hasPriorQuarterCalls: true,
+      priorQuarterCallsReviewed: true,
+    });
+    const dim = result.scores.find(
+      (s) => s.dimension === "LIFECYCLE_CORRECTNESS",
+    );
+    expect(dim?.score).toBe(10);
+  });
+
+  it("unreviewed prior calls reduce LIFECYCLE_CORRECTNESS to 8", () => {
+    const result = scoreReport({
+      ...PASSING_INPUT,
+      hasPriorQuarterCalls: true,
+      priorQuarterCallsReviewed: false,
+    });
+    const dim = result.scores.find(
+      (s) => s.dimension === "LIFECYCLE_CORRECTNESS",
+    );
+    expect(dim?.score).toBe(8);
   });
 });

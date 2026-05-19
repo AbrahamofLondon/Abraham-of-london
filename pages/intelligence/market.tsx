@@ -730,6 +730,9 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
                 <p className="mt-3 text-sm leading-7 text-white/52" style={{ maxWidth: "52ch" }}>
                   Each quarterly report records its material calls, board instructions, scenario assumptions, and risk warnings in a governed ledger. The following report reviews those calls before issuing new ones — scoring what held, what failed, and what the model now weights differently.
                 </p>
+                <p className="mt-3 text-sm leading-7 text-white/52" style={{ maxWidth: "52ch" }}>
+                  Future quarterly reports are not released until material calls from the previous report have been reviewed, scored, or explicitly carried forward as too early to assess.
+                </p>
                 <p className="mt-3 text-sm leading-7 text-white/40" style={{ maxWidth: "52ch" }}>
                   This is not automated market learning. It is governed institutional memory — the same discipline applied to decision records inside high-functioning boards.
                 </p>

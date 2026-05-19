@@ -1,10 +1,13 @@
 # Market Intelligence Release Standard
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Effective from:** Q2 2026
 **Governed by:** `lib/intelligence/market-intelligence-lifecycle.ts`
 **Quality gate:** `lib/intelligence/market-intelligence-quality-gate.ts`
 **Call ledger:** `lib/intelligence/market-intelligence-call-ledger.ts`
+**Source standard:** `docs/intelligence/market-intelligence-source-appendix-standard.md`
+**Board summary standard:** `docs/intelligence/market-intelligence-board-summary-standard.md`
+**Confidence posture:** `lib/intelligence/market-intelligence-confidence-posture.ts`
 
 ---
 
@@ -48,7 +51,7 @@ New report opens with "Prior Quarter Call Review" section — all material calls
 New report issues new calls → seeded into ledger as TOO_EARLY_TO_ASSESS
 ```
 
-For Q2 2026, this means all GMI-Q1-2026 calls with `expectedReviewWindow: "Q2 2026"` must be reviewed and scored before the Q2 report is published.
+For Q2 2026, this means all GMI-Q1-2026 calls with `expectedReviewWindow: "Q2 2026"` must be reviewed and scored before the Q2 report is published. Calls that are past their expected review window and remain unreviewed constitute critical failure `PRIOR_QUARTER_CALLS_UNREVIEWED` and block release regardless of overall score. Calls that remain `TOO_EARLY_TO_ASSESS` past their expected window must carry a written justification in the source collection log.
 
 **Required section in every paid report from Q2 onward:**
 
@@ -163,6 +166,42 @@ The Board Summary section must be self-contained and must include:
 - **What would change the view** — specific triggers that would shift the thesis
 
 The Board Summary must be usable standalone as a briefing extract for a board pack.
+
+---
+
+## 5a. Confidence posture requirement
+
+Every paid quarterly report must include a visible Confidence Posture section positioned before the Scenario Framework. The confidence posture assigns HIGH / MEDIUM / LOW / MONITORING bands to all major analytical claims.
+
+The posture is defined per-report in `lib/intelligence/market-intelligence-confidence-posture.ts`. The Q1 2026 posture is seeded in `GMI_Q1_2026_CONFIDENCE_POSTURE`. Future reports must seed their posture before the report is published.
+
+The posture must distinguish:
+- What is observed (HIGH)
+- What is modelled or estimated (MEDIUM)
+- What is being monitored for structural interpretation (MONITORING)
+- What is a scenario assumption (LOW / Scenario-sensitive)
+
+A report without a confidence posture scores below the release threshold on `SCENARIO_DISCIPLINE`.
+
+---
+
+## 5b. Board summary requirement
+
+The paid institutional edition must include a one-page Board Summary as section 2, immediately before the Executive Summary. The full structure is defined in `docs/intelligence/market-intelligence-board-summary-standard.md`.
+
+Required elements: core thesis, current decision window, five non-optional operating decisions, three watch signals, base-case scenario, biggest downside scenario, what would change this view, board-level instruction, confidence posture summary, not-investment-advice boundary.
+
+A report without a complete Board Summary scores below the release threshold on `BOARD_USABILITY`.
+
+---
+
+## 5c. Source appendix requirement
+
+Every paid quarterly report must include a Source and Confidence Appendix as a named section. The full format is defined in `docs/intelligence/market-intelligence-source-appendix-standard.md`.
+
+Every material claim must have a corresponding source appendix entry with: evidence class, source/basis, observation window, confidence band, section reference, and notes.
+
+The source appendix is a paid-edition-only section. It must not appear in the public surface edition.
 
 ---
 
