@@ -12,6 +12,8 @@ import Layout from "@/components/Layout";
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
+const DISCLOSURE_EMAIL = "support@abrahamoflondon.org";
+const DISCLOSURE_SUBJECT = "Responsible Disclosure Report";
 
 const SecurityDisclosurePage: NextPage = () => {
   return (
@@ -48,9 +50,13 @@ const SecurityDisclosurePage: NextPage = () => {
             </h2>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.50)", lineHeight: 1.8 }}>
               Email:{" "}
-              <a href="mailto:support@abrahamoflondon.org" style={{ color: `${GOLD}CC` }}>
-                support@abrahamoflondon.org
+              <a
+                href={`mailto:${DISCLOSURE_EMAIL}?subject=${encodeURIComponent(DISCLOSURE_SUBJECT)}`}
+                style={{ color: `${GOLD}CC` }}
+              >
+                {DISCLOSURE_EMAIL}
               </a>
+              {" "}with the subject "{DISCLOSURE_SUBJECT}".
             </p>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.50)", lineHeight: 1.8 }}>
               Please include: a clear description of the vulnerability, steps to reproduce,

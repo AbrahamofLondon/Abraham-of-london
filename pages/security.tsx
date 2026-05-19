@@ -15,6 +15,7 @@ const sections = [
 
 const SecurityPage: NextPage = () => {
   const securityEmail = "support@abrahamoflondon.org";
+  const securitySubject = "Responsible Disclosure Report";
 
   return (
     <Layout title="Security Policy | Abraham of London">
@@ -153,11 +154,11 @@ const SecurityPage: NextPage = () => {
                   Report suspected vulnerabilities or misuse to{" "}
                   <a
                     className="text-amber-500 underline underline-offset-4"
-                    href={`mailto:${securityEmail}`}
+                    href={`mailto:${securityEmail}?subject=${encodeURIComponent(securitySubject)}`}
                   >
                     {securityEmail}
                   </a>
-                  .
+                  {" "}with the subject "{securitySubject}".
                 </p>
               </div>
             </section>
