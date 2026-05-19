@@ -568,6 +568,16 @@ const Intelligence = defineDocumentType(() => ({
     },
     briefId: { type: "string", required: false },
     lastUpdated: { type: "string", required: false },
+
+    // Market Intelligence lifecycle governance frontmatter.
+    docId: { type: "string", required: false },
+    lifecycleState: { type: "string", required: false },
+    coveragePeriod: { type: "string", required: false },
+    currentDecisionWindow: { type: "string", required: false },
+    replaces: { type: "string", required: false },
+    publicVisible: { type: "boolean", required: false },
+    purchasable: { type: "boolean", required: false },
+    publicationStatus: { type: "string", required: false },
   },
   computedFields: {
     ...createComputedFields("intelligence/", "intelligence"),
