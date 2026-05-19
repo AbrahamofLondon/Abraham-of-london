@@ -464,6 +464,305 @@ function ReportFreshnessSection() {
 // The data board — the kind a CIO would see on their morning screen
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// EDITION COMPARISON — paid / public separation guardrail
+// ─────────────────────────────────────────────────────────────────────────────
+
+const EDITION_COMPARISON = [
+  {
+    label:       "Public Surface Edition",
+    access:      "OPEN",
+    description: "For serious readers who want the shape of the quarter.",
+    includes: [
+      "Core thesis and quarter framing",
+      "Selected scenario framework",
+      "Public decision implications",
+      "Freshness and methodology note",
+    ],
+    excludes: [
+      "Fuller regional analysis",
+      "Case evidence and operator translations",
+      "Board-level actions",
+      "Source and confidence appendix",
+      "Institutional record",
+    ],
+    href:     ROUTES.publicBrief,
+    cta:      "Read public brief",
+    primary:  false,
+    gold:     false,
+    disclaimer: null,
+  },
+  {
+    label:       "Institutional PDF Edition",
+    access:      "PAID",
+    description: "The full Q1 2026 operating analysis. Active for Q2 decision use.",
+    includes: [
+      "Full operating analysis — all 16 sections",
+      "Board Summary: 5 operating decisions, 3 risks, 3 watch signals",
+      "Case evidence and operator translations",
+      "Board-level actions",
+      "Source and confidence appendix",
+      "Institutional record",
+      "Fuller regional analysis",
+      "Scenario framework with probability model",
+    ],
+    excludes: [],
+    href:     ROUTES.institutionalEdition,
+    cta:      "Access institutional edition",
+    primary:  true,
+    gold:     true,
+    disclaimer: "Not investment advice. Restricted access. Entitlement required.",
+  },
+  {
+    label:       "Board Briefing Deck",
+    access:      "RESTRICTED",
+    description: "Condensed board-ready artefact for institutional use.",
+    includes: [
+      "Executive presentation format",
+      "Rapid internal circulation format",
+      "Board summary condensed",
+      "Scenario framework — condensed",
+    ],
+    excludes: [],
+    href:     ROUTES.boardDeck,
+    cta:      "View board deck",
+    primary:  false,
+    gold:     false,
+    disclaimer: "Institutional access. Not publicly available.",
+  },
+] as const;
+
+function EditionComparisonSection() {
+  return (
+    <section style={{
+      backgroundColor: BASE,
+      borderTop:    "1px solid rgba(255,255,255,0.05)",
+      borderBottom: "1px solid rgba(255,255,255,0.05)",
+    }}>
+      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-12">
+        {/* Header */}
+        <div className="mb-10">
+          <Eyebrow>Edition comparison — paid vs public</Eyebrow>
+          <h2 style={{
+            marginTop: "1rem",
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "clamp(1.55rem,2.5vw,2.2rem)",
+            lineHeight: 1.05,
+            color: "rgba(255,255,255,0.88)",
+          }}>
+            The public edition surfaces the thesis.
+            <br />
+            <span style={{ color: "rgba(255,255,255,0.35)" }}>
+              The institutional edition supplies the operating edge.
+            </span>
+          </h2>
+          <p style={{
+            marginTop: "0.85rem",
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "8px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.30)",
+            maxWidth: "58ch",
+            lineHeight: 1.85,
+          }}>
+            The public surface must not collapse the paid edition's commercial value.
+            Institutional access routes through the artifact entitlement system — not a direct file link.
+          </p>
+        </div>
+
+        {/* Edition grid */}
+        <div className="grid gap-5 lg:grid-cols-3">
+          {EDITION_COMPARISON.map((ed) => {
+            const isOpen = ed.access === "OPEN";
+            const isPaid = ed.access === "PAID";
+            return (
+              <div
+                key={ed.label}
+                style={{
+                  border: isPaid
+                    ? `1px solid ${GOLD}30`
+                    : "1px solid rgba(255,255,255,0.07)",
+                  backgroundColor: isPaid ? `${GOLD}07` : "rgba(255,255,255,0.015)",
+                  padding: "1.5rem",
+                  position: "relative",
+                }}
+              >
+                {/* Access badge */}
+                <div className="flex items-center gap-2 mb-4">
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.20em",
+                    textTransform: "uppercase",
+                    color: isOpen
+                      ? "rgba(34,197,94,0.80)"
+                      : isPaid
+                        ? `${GOLD}CC`
+                        : "rgba(255,255,255,0.35)",
+                    border: `1px solid ${
+                      isOpen
+                        ? "rgba(34,197,94,0.18)"
+                        : isPaid
+                          ? `${GOLD}28`
+                          : "rgba(255,255,255,0.10)"
+                    }`,
+                    backgroundColor: isOpen
+                      ? "rgba(34,197,94,0.05)"
+                      : isPaid
+                        ? `${GOLD}09`
+                        : "rgba(255,255,255,0.02)",
+                    padding: "2px 8px",
+                  }}>
+                    {ed.access}
+                  </span>
+                </div>
+
+                {/* Label and description */}
+                <p style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: isPaid ? `${GOLD}BB` : "rgba(255,255,255,0.50)",
+                }}>
+                  {ed.label}
+                </p>
+                <p style={{
+                  marginTop: "0.5rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "1rem",
+                  lineHeight: 1.55,
+                  color: "rgba(255,255,255,0.62)",
+                }}>
+                  {ed.description}
+                </p>
+
+                {/* Includes */}
+                {ed.includes.length > 0 ? (
+                  <div style={{ marginTop: "1.25rem" }}>
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "6.5px",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                      marginBottom: "0.65rem",
+                    }}>
+                      Includes
+                    </div>
+                    <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                      {ed.includes.map((item) => (
+                        <li key={item} style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: "8px",
+                          marginBottom: "0.45rem",
+                        }}>
+                          <span style={{
+                            width: "4px",
+                            height: "4px",
+                            borderRadius: "50%",
+                            backgroundColor: isPaid ? `${GOLD}AA` : "rgba(34,197,94,0.55)",
+                            flexShrink: 0,
+                            marginTop: "6px",
+                          }} />
+                          <span style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7.5px",
+                            color: "rgba(255,255,255,0.52)",
+                            lineHeight: 1.65,
+                          }}>
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {/* Excludes (public only) */}
+                {"excludes" in ed && ed.excludes.length > 0 ? (
+                  <div style={{ marginTop: "1rem" }}>
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "6.5px",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.15)",
+                      marginBottom: "0.55rem",
+                    }}>
+                      Not included
+                    </div>
+                    <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                      {ed.excludes.map((item) => (
+                        <li key={item} style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: "8px",
+                          marginBottom: "0.35rem",
+                          opacity: 0.55,
+                        }}>
+                          <span style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7px",
+                            color: "rgba(255,255,255,0.28)",
+                            lineHeight: 1.65,
+                            textDecoration: "line-through",
+                          }}>
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {/* Disclaimer */}
+                {ed.disclaimer ? (
+                  <p style={{
+                    marginTop: "1.25rem",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.20)",
+                    lineHeight: 1.7,
+                  }}>
+                    {ed.disclaimer}
+                  </p>
+                ) : null}
+
+                {/* CTA */}
+                <div style={{ marginTop: "1.5rem" }}>
+                  <Link
+                    href={ed.href}
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      color: isPaid
+                        ? GOLD
+                        : isOpen
+                          ? "rgba(34,197,94,0.75)"
+                          : "rgba(255,255,255,0.38)",
+                    }}
+                  >
+                    {ed.cta} →
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function MacroSignalsStrip() {
   return (
     <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
@@ -1318,6 +1617,7 @@ const IntelligenceLandingPage: NextPage = () => {
       <Layout headerTransparent fullWidth>
         <HeroSection />
         <ReportFreshnessSection />
+        <EditionComparisonSection />
         <MacroSignalsStrip />
         <CoreThesis />
         <DecisionUseSection />

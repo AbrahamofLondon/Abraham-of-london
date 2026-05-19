@@ -22,7 +22,11 @@ import {
   getMarketIntelligenceFreshnessLabel,
   getMarketIntelligenceLifecycleBadge,
   getMarketIntelligenceRecord,
+  MARKET_INTELLIGENCE_LIFECYCLE,
 } from "@/lib/intelligence/market-intelligence-lifecycle";
+import { getEditionsForReport } from "@/lib/intelligence/market-intelligence-editions";
+import { MarketIntelligenceCatalogue } from "@/components/Intelligence/MarketIntelligenceCatalogue";
+import { MarketIntelligenceChronology } from "@/components/Intelligence/MarketIntelligenceChronology";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design tokens
@@ -484,25 +488,14 @@ function BriefCard({ brief }: { brief: BriefItem }) {
 // Page
 // ─────────────────────────────────────────────────────────────────────────────
 
+const GMI_Q1_RECORD = getMarketIntelligenceRecord("GMI-Q1-2026");
+const GMI_Q1_EDITIONS = getEditionsForReport("GMI-Q1-2026");
+
 const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   briefs,
   artifacts,
 }) => {
   const activeReport = artifacts.find((artifact) => artifact.id === "global-market-intelligence-report-q1-2026");
-  const reportChronology = [
-    {
-      period: "Q1 2026",
-      title: "Global Market Intelligence Q1 2026",
-      status: "Active until superseded by Q2 2026 report",
-      href: activeReport?.primaryHref || "/artifacts/global-market-intelligence-report-q1-2026",
-    },
-    {
-      period: "Q2 2026",
-      title: "Global Market Intelligence Q2 2026",
-      status: "Q2 2026 report in preparation",
-      href: "",
-    },
-  ];
 
   return (
     <Layout
@@ -558,68 +551,12 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
           </header>
 
           {/* ── Current active report ───────────────────────────────────── */}
-          <section
-            style={{
-              border: `1px solid ${GOLD}28`,
-              background: `${GOLD}06`,
-              padding: "1.35rem",
-            }}
-          >
-            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
-              <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Current active report
-                </p>
-                <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.55rem,3vw,2.45rem)", color: "rgba(255,255,255,0.90)", lineHeight: 1.05 }}>
-                  Global Market Intelligence Q1 2026
-                </h2>
-                <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
-                  The Q1 2026 institutional edition remains active for Q2 decision use and is available through restricted access until superseded by the Q2 2026 report. The public surface remains available as the open reference layer.
-                </p>
-                {activeReport?.freshnessNote ? (
-                  <p className="mt-4 max-w-3xl text-sm leading-7 text-white/46">{activeReport.freshnessNote}</p>
-                ) : null}
-                {activeReport?.freshnessLabel ? (
-                  <p className="mt-3" style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA` }}>
-                    {activeReport.freshnessLabel}
-                  </p>
-                ) : null}
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <Link
-                    href="/intelligence/global-market-intelligence-q1-2026"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:opacity-80"
-                    style={{ color: "rgba(255,255,255,0.72)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
-                  >
-                    Read public brief →
-                  </Link>
-                  <Link
-                    href={activeReport?.primaryHref || "/artifacts/global-market-intelligence-report-q1-2026"}
-                    className="inline-flex items-center gap-1.5 transition-colors hover:opacity-80"
-                    style={{ color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
-                  >
-                    Access institutional edition →
-                  </Link>
-                </div>
-              </div>
-
-              <div className="grid gap-px bg-white/[0.06] sm:grid-cols-2 lg:grid-cols-1">
-                {[
-                  { label: "Coverage period", value: activeReport?.coveragePeriod || "Q1 2026" },
-                  { label: "Current decision window", value: activeReport?.currentDecisionWindow || "Q2 2026" },
-                  { label: "Updated", value: formatDateLabel(activeReport?.updatedAt || "2026-04-08") },
-                  { label: "Status", value: activeReport?.statusLabel || "Active until superseded by Q2 2026 report" },
-                  { label: "Next scheduled report", value: activeReport?.nextScheduledReport || "Q2 2026 report in preparation" },
-                ].map((item) => (
-                  <div key={item.label} style={{ backgroundColor: BASE, padding: "0.95rem" }}>
-                    <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-                      {item.label}
-                    </div>
-                    <div className="mt-2 text-sm leading-6 text-white/70">{item.value}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
+          {GMI_Q1_RECORD ? (
+            <MarketIntelligenceCatalogue
+              record={GMI_Q1_RECORD}
+              editions={GMI_Q1_EDITIONS}
+            />
+          ) : null}
 
           {/* ── Three-column context row ──────────────────────────────────── */}
           <div className="grid gap-5 xl:grid-cols-3">
@@ -740,31 +677,7 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               </p>
               <p className="mt-1 text-xs text-white/35">2026 quarterly report lifecycle.</p>
             </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {reportChronology.map((report) => (
-                <article key={report.period} style={{ borderLeft: `2px solid ${report.href ? GOLD : "rgba(255,255,255,0.18)"}`, paddingLeft: "16px" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
-                    2026 · {report.period}
-                  </p>
-                  <h3 className="mt-2 text-base leading-snug text-white/82">{report.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-white/48">{report.status}</p>
-                  {report.href ? (
-                    <Link
-                      href={report.href}
-                      className="mt-3 inline-flex items-center gap-1.5 transition-colors hover:opacity-80"
-                      style={{ color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
-                    >
-                      Access report →
-                    </Link>
-                  ) : (
-                    <span className="mt-3 inline-flex" style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
-                      In preparation
-                    </span>
-                  )}
-                </article>
-              ))}
-            </div>
+            <MarketIntelligenceChronology records={MARKET_INTELLIGENCE_LIFECYCLE} />
           </section>
 
           {/* ── Methodology and cadence ─────────────────────────────────── */}
