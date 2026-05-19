@@ -1,9 +1,9 @@
 /**
  * pages/intelligence/market.tsx — MARKET INTELLIGENCE LANDING v2
  *
- * Strategic intelligence landing page: quarterly artifact line +
- * related public briefs. Access boundaries are enforced at card level.
- * Restricted materials are described, not exposed.
+ * Dedicated quarterly reports catalogue. Related public briefs are
+ * secondary notes beneath the report line. Access boundaries are enforced
+ * at card level; restricted materials are described, not exposed.
  */
 
 import * as React from "react";
@@ -18,6 +18,11 @@ import {
   normalizeRequiredTier,
   requiredTierFromDoc,
 } from "@/lib/access/tier-policy";
+import {
+  getMarketIntelligenceFreshnessLabel,
+  getMarketIntelligenceLifecycleBadge,
+  getMarketIntelligenceRecord,
+} from "@/lib/intelligence/market-intelligence-lifecycle";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design tokens
@@ -50,6 +55,13 @@ type ArtifactItem = {
   primaryHref: string;
   primaryLabel: string;
   metaHref: string;
+  coveragePeriod?: string;
+  currentDecisionWindow?: string;
+  updatedAt?: string;
+  statusLabel?: string;
+  nextScheduledReport?: string;
+  freshnessLabel?: string;
+  freshnessNote?: string;
 };
 
 type BriefItem = {
@@ -74,6 +86,11 @@ type Props = {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function safeStr(v: unknown, fallback = ""): string {
   return typeof v === "string" && v.trim() ? v.trim() : fallback;
+}
+
+function formatDateLabel(value: string): string {
+  if (value === "2026-04-08") return "8 April 2026";
+  return value;
 }
 
 function normalizeSlug(value: unknown): string {
@@ -122,6 +139,18 @@ function editionTypeToLabel(editionType: string): string {
   return "Intelligence Artifact";
 }
 
+function lifecycleIdForArtifact(id: string): string | null {
+  if (
+    id === "global-market-outlook-q1-2026-public" ||
+    id === "global-market-intelligence-report-q1-2026" ||
+    id === "global-market-intelligence-board-deck-q1-2026"
+  ) {
+    return "GMI-Q1-2026";
+  }
+
+  return null;
+}
+
 function primaryCta(access: ArtifactAccess, editionType: string): { label: string; href: string } | null {
   if (access === "public")  return { label: "Read public briefing", href: "" }; // filled per item
   if (access === "board")   return { label: "Request access", href: "/inner-circle" };
@@ -143,6 +172,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const artifacts: ArtifactItem[] = getPremiumContentList()
     .filter((item) => ARTIFACT_IDS.includes(item.id as typeof ARTIFACT_IDS[number]))
     .map((item) => {
+      const lifecycleRecord = lifecycleIdForArtifact(item.id)
+        ? getMarketIntelligenceRecord(lifecycleIdForArtifact(item.id)!)
+        : null;
+      const lifecycleBadge = lifecycleRecord ? getMarketIntelligenceLifecycleBadge(lifecycleRecord) : null;
       const editionType  = safeStr(item.metadata?.editionType, "document");
       const classification = safeStr(item.metadata?.classification, "RESTRICTED");
       const access       = editionTypeToAccess(editionType, classification);
@@ -160,6 +193,9 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       } else if (access === "board") {
         primaryLabel = "Request access";
         primaryHref  = "/inner-circle";
+      } else if (item.id === "global-market-intelligence-report-q1-2026") {
+        primaryLabel = "Purchase report";
+        primaryHref = metaHref;
       } else {
         primaryLabel = "View artifact metadata";
         primaryHref  = metaHref;
@@ -179,6 +215,17 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         primaryHref,
         primaryLabel,
         metaHref,
+        coveragePeriod: lifecycleRecord?.coveragePeriod ?? safeStr(item.metadata?.coveragePeriod),
+        currentDecisionWindow: lifecycleRecord?.decisionWindow ?? safeStr(item.metadata?.currentDecisionWindow),
+        updatedAt: lifecycleRecord?.updatedAt ?? safeStr(item.metadata?.updatedAt || item.metadata?.createdAt),
+        statusLabel: lifecycleBadge?.label ?? safeStr(item.metadata?.statusLabel),
+        nextScheduledReport: lifecycleRecord?.nextExpected === "GMI-Q2-2026"
+          ? "Q2 2026 report in preparation"
+          : safeStr(item.metadata?.nextScheduledReport),
+        freshnessLabel: lifecycleRecord
+          ? getMarketIntelligenceFreshnessLabel(lifecycleRecord)
+          : safeStr(item.metadata?.freshnessNote),
+        freshnessNote: lifecycleRecord?.freshnessNote ?? safeStr(item.metadata?.freshnessNote),
       };
     })
     // Sort: public first, then restricted, then board
@@ -308,6 +355,12 @@ function ArtifactCard({ artifact }: { artifact: ArtifactItem }) {
       {/* Description */}
       <p className="mt-2 text-sm leading-6 text-white/50">{artifact.description}</p>
 
+      {artifact.currentDecisionWindow ? (
+        <p className="mt-2 text-xs" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: `${GOLD}AA`, textTransform: "uppercase" }}>
+          Current decision window: {artifact.currentDecisionWindow}
+        </p>
+      ) : null}
+
       {/* Restricted notice */}
       {isRestricted && (
         <p className="mt-2 text-xs" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(245,158,11,0.55)", textTransform: "uppercase" }}>
@@ -341,12 +394,12 @@ function ArtifactCard({ artifact }: { artifact: ArtifactItem }) {
           </Link>
         ) : (
           <Link
-            href={artifact.metaHref}
+            href={artifact.primaryHref}
             className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
             style={{ color: "rgba(245,158,11,0.75)" }}
           >
             <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase" }}>
-              View artifact metadata
+              {artifact.primaryLabel}
             </span>
             <span aria-hidden="true" style={{ fontSize: "10px" }}>→</span>
           </Link>
@@ -435,10 +488,26 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
   briefs,
   artifacts,
 }) => {
+  const activeReport = artifacts.find((artifact) => artifact.id === "global-market-intelligence-report-q1-2026");
+  const reportChronology = [
+    {
+      period: "Q1 2026",
+      title: "Global Market Intelligence Q1 2026",
+      status: "Active until superseded by Q2 2026 report",
+      href: activeReport?.primaryHref || "/artifacts/global-market-intelligence-report-q1-2026",
+    },
+    {
+      period: "Q2 2026",
+      title: "Global Market Intelligence Q2 2026",
+      status: "Q2 2026 report in preparation",
+      href: "",
+    },
+  ];
+
   return (
     <Layout
-      title="Market Intelligence | Abraham of London"
-      description="Global Market Intelligence quarterly artifact line — public surface edition, institutional PDF, and board briefing deck. Strategic briefs alongside a governed access structure."
+      title="Market Intelligence Reports | Abraham of London"
+      description="Quarterly Global Market Intelligence reports catalogue: active report, access editions, report chronology, methodology, and secondary intelligence notes."
       canonicalUrl="/intelligence/market"
       fullWidth
       headerTransparent
@@ -462,21 +531,21 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             }}
           >
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-              Market intelligence
+              Quarterly report catalogue
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(1.9rem,4vw,3rem)", color: "rgba(255,255,255,0.93)" }}>
-              Strategic reading for operators and decision-makers.
+              Market Intelligence Reports
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
-              The quarterly intelligence briefing line leads this layer: public surface edition, institutional PDF edition, and board briefing deck. Related briefs sit alongside that line, but do not replace it. Public and restricted materials are separated honestly — artifact identity governs access where a report is active.
+              A dedicated catalogue for the Global Market Intelligence quarterly report line. The current active report leads the page, editions are separated by access posture, and related intelligence notes sit lower as supporting context rather than peers to the quarterly reports.
             </p>
 
             {/* Access posture summary */}
             <div className="mt-5 flex flex-wrap gap-4">
               {[
-                { label: "Public briefings are labelled and open.", color: "rgba(34,197,94,0.65)" },
-                { label: "Restricted intelligence requires entitlement.", color: "rgba(245,158,11,0.65)" },
-                { label: "Board materials route through institutional access.", color: `${GOLD}AA` },
+                { label: "Current report remains active for Q2 decision use.", color: "rgba(34,197,94,0.65)" },
+                { label: "Institutional edition routes through restricted access.", color: "rgba(245,158,11,0.65)" },
+                { label: "Q2 2026 report is in preparation.", color: `${GOLD}AA` },
               ].map(({ label, color }) => (
                 <div key={label} className="flex items-center gap-2">
                   <div style={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
@@ -487,6 +556,70 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               ))}
             </div>
           </header>
+
+          {/* ── Current active report ───────────────────────────────────── */}
+          <section
+            style={{
+              border: `1px solid ${GOLD}28`,
+              background: `${GOLD}06`,
+              padding: "1.35rem",
+            }}
+          >
+            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+              <div>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                  Current active report
+                </p>
+                <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.55rem,3vw,2.45rem)", color: "rgba(255,255,255,0.90)", lineHeight: 1.05 }}>
+                  Global Market Intelligence Q1 2026
+                </h2>
+                <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
+                  The Q1 2026 institutional edition remains active for Q2 decision use and is available through restricted access until superseded by the Q2 2026 report. The public surface remains available as the open reference layer.
+                </p>
+                {activeReport?.freshnessNote ? (
+                  <p className="mt-4 max-w-3xl text-sm leading-7 text-white/46">{activeReport.freshnessNote}</p>
+                ) : null}
+                {activeReport?.freshnessLabel ? (
+                  <p className="mt-3" style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                    {activeReport.freshnessLabel}
+                  </p>
+                ) : null}
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link
+                    href="/intelligence/global-market-intelligence-q1-2026"
+                    className="inline-flex items-center gap-1.5 transition-colors hover:opacity-80"
+                    style={{ color: "rgba(255,255,255,0.72)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+                  >
+                    Read public brief →
+                  </Link>
+                  <Link
+                    href={activeReport?.primaryHref || "/artifacts/global-market-intelligence-report-q1-2026"}
+                    className="inline-flex items-center gap-1.5 transition-colors hover:opacity-80"
+                    style={{ color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+                  >
+                    Access institutional edition →
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid gap-px bg-white/[0.06] sm:grid-cols-2 lg:grid-cols-1">
+                {[
+                  { label: "Coverage period", value: activeReport?.coveragePeriod || "Q1 2026" },
+                  { label: "Current decision window", value: activeReport?.currentDecisionWindow || "Q2 2026" },
+                  { label: "Updated", value: formatDateLabel(activeReport?.updatedAt || "2026-04-08") },
+                  { label: "Status", value: activeReport?.statusLabel || "Active until superseded by Q2 2026 report" },
+                  { label: "Next scheduled report", value: activeReport?.nextScheduledReport || "Q2 2026 report in preparation" },
+                ].map((item) => (
+                  <div key={item.label} style={{ backgroundColor: BASE, padding: "0.95rem" }}>
+                    <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+                      {item.label}
+                    </div>
+                    <div className="mt-2 text-sm leading-6 text-white/70">{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
           {/* ── Three-column context row ──────────────────────────────────── */}
           <div className="grid gap-5 xl:grid-cols-3">
@@ -526,7 +659,7 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               <ul className="mt-3 space-y-2.5 text-sm text-white/52">
                 {[
                   { dot: "rgba(34,197,94,0.65)",  text: "Public briefings are freely available and clearly labelled." },
-                  { dot: "rgba(245,158,11,0.65)", text: "Restricted intelligence is tied to entitlement or governed archive routes." },
+                  { dot: "rgba(245,158,11,0.65)", text: "Restricted intelligence is tied to entitlement or governed access routes." },
                   { dot: `${GOLD}AA`,             text: "Paid or premium reports route through artifact identity, not generic library framing." },
                 ].map(({ dot, text }) => (
                   <li key={text} className="flex items-start gap-2.5">
@@ -550,13 +683,13 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
                   className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
                   style={{ color: "rgba(255,255,255,0.40)", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase" }}
                 >
-                  Browse artifact archive →
+                  Browse artifacts →
                 </Link>
               </div>
             </section>
           </div>
 
-          {/* ── Quarterly intelligence artifacts ─────────────────────────── */}
+          {/* ── Edition structure ────────────────────────────────────────── */}
           <section
             style={{
               border: "1px solid rgba(255,255,255,0.09)",
@@ -567,10 +700,10 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Quarterly intelligence artifacts
+                  Edition structure
                 </p>
                 <p className="mt-1 text-xs text-white/35">
-                  Three editions of the same intelligence line — each governed separately.
+                  Public Surface Edition, Institutional PDF Edition, Board Briefing Deck, and Boardroom PDF where applicable.
                 </p>
               </div>
               <Link
@@ -593,6 +726,78 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             )}
           </section>
 
+          {/* ── Report chronology ───────────────────────────────────────── */}
+          <section
+            style={{
+              border: "1px solid rgba(255,255,255,0.09)",
+              background: "rgba(255,255,255,0.015)",
+              padding: "1.25rem",
+            }}
+          >
+            <div className="mb-5">
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                Report chronology
+              </p>
+              <p className="mt-1 text-xs text-white/35">2026 quarterly report lifecycle.</p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {reportChronology.map((report) => (
+                <article key={report.period} style={{ borderLeft: `2px solid ${report.href ? GOLD : "rgba(255,255,255,0.18)"}`, paddingLeft: "16px" }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                    2026 · {report.period}
+                  </p>
+                  <h3 className="mt-2 text-base leading-snug text-white/82">{report.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-white/48">{report.status}</p>
+                  {report.href ? (
+                    <Link
+                      href={report.href}
+                      className="mt-3 inline-flex items-center gap-1.5 transition-colors hover:opacity-80"
+                      style={{ color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+                    >
+                      Access report →
+                    </Link>
+                  ) : (
+                    <span className="mt-3 inline-flex" style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+                      In preparation
+                    </span>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+
+          {/* ── Methodology and cadence ─────────────────────────────────── */}
+          <section
+            style={{
+              border: "1px solid rgba(255,255,255,0.09)",
+              background: "rgba(255,255,255,0.015)",
+              padding: "1.25rem",
+            }}
+          >
+            <div className="mb-5">
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                Methodology and cadence
+              </p>
+              <p className="mt-1 text-xs text-white/35">
+                Quarter just ended supplies the evidence base. Current quarter supplies the decision window. Next quarter supplies the watchlist.
+              </p>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-3">
+              {[
+                { label: "Evidence base", text: "The quarter just ended is reviewed for market structure, policy posture, capital flow, and consequence patterns." },
+                { label: "Decision window", text: "The current quarter frames live operating choices, scenario posture, and leadership timing." },
+                { label: "Watchlist", text: "The next quarter remains in preparation until the report is published and explicitly activated." },
+              ].map((item) => (
+                <article key={item.label} style={{ borderLeft: `1px solid ${GOLD}33`, paddingLeft: "14px" }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{item.label}</p>
+                  <p className="mt-2 text-sm leading-7 text-white/50">{item.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
           {/* ── Related public briefs ─────────────────────────────────────── */}
           <section
             style={{
@@ -604,7 +809,7 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Related briefs and intelligence notes
+                  Related intelligence notes
                 </p>
                 <p className="mt-1 text-xs text-white/35">
                   Public briefs link directly to their route. Restricted briefs are noted as metadata only.

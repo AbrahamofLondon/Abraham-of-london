@@ -34,13 +34,14 @@ describe("pricing actions", () => {
     });
   });
 
-  it("renders free products and inactive products with non-checkout actions", () => {
+  it("renders free products with non-checkout actions and GMI Q1 as active checkout", () => {
     expect(resolvePricingAction(CATALOG.fast_diagnostic!)).toMatchObject({
       type: "view_free_surface",
       href: "/diagnostics/fast",
     });
     expect(resolvePricingAction(CATALOG.gmi_q1_2026!)).toMatchObject({
-      type: "archive_reference_only",
+      type: "checkout",
+      href: "/artifacts/global-market-intelligence-report-q1-2026",
     });
   });
 });

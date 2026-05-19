@@ -728,11 +728,12 @@ export const CATALOG: Record<string, CatalogProduct> = {
     category: "intelligence",
     accessType: "one_time",
     duration: "lifetime",
-    active: false,
-    commercialStatus: "inactive",
-    requiresCheckout: false,
-    hiddenFromPricing: true,
-    hiddenReason: "stale_report_archive",
+    active: true,
+    commercialStatus: "paid",
+    requiresCheckout: true,
+    hiddenFromPricing: false,
+    shortDescription: "Q1 2026 market intelligence kept active for Q2 decision use until the Q2 report supersedes it.",
+    pricingNote: "Coverage period: Q1 2026. Current decision window: Q2 2026. Updated 8 April 2026.",
     successPath: "/artifacts/global-market-intelligence-report-q1-2026",
     cancelPath: "/artifacts/global-market-intelligence-report-q1-2026",
     cookieName: null,
@@ -1175,8 +1176,8 @@ export const PRICING_FAMILIES: Record<string, PricingFamily> = {
   // Strategy Room
   strategy_room: "strategy_room",
   strategy_room_extended: "strategy_room",
-  // Intelligence reports (none currently active — gmi_q1_2026 is inactive_archive)
-  gmi_q1_2026: "inactive_archive",
+  // Intelligence reports
+  gmi_q1_2026: "intelligence_reports",
   // Enterprise retainer
   enterprise: "enterprise_retainer",
   retainer_core: "enterprise_retainer",

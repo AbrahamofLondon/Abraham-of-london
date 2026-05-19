@@ -29,6 +29,10 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import {
+  getMarketIntelligenceLifecycleBadge,
+  getMarketIntelligenceRecord,
+} from "@/lib/intelligence/market-intelligence-lifecycle";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTES
@@ -40,6 +44,11 @@ const ROUTES = {
   boardDeck:            "/artifacts/global-market-intelligence-board-deck-q1-2026",
   boardroomPdf:         "/artifacts/global-market-intelligence-report-q1-2026",
 } as const;
+
+const GMI_Q1_RECORD = getMarketIntelligenceRecord("GMI-Q1-2026");
+const GMI_Q1_BADGE = GMI_Q1_RECORD
+  ? getMarketIntelligenceLifecycleBadge(GMI_Q1_RECORD)
+  : { label: "Active until superseded", tone: "active" as const };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -147,10 +156,22 @@ const MACRO_SIGNALS = [
   { label: "China tariffs on US",      value: "125%",        sub: "Retaliatory rate",              icon: AlertTriangle, warn: true },
 ] as const;
 
+const REPORT_METADATA = [
+  { label: "Coverage period", value: GMI_Q1_RECORD?.coveragePeriod ?? "Q1 2026" },
+  { label: "Current decision window", value: GMI_Q1_RECORD?.decisionWindow ?? "Q2 2026" },
+  { label: "Updated", value: "8 April 2026" },
+  { label: "Status", value: `${GMI_Q1_BADGE.label} by Q2 2026` },
+  { label: "Next scheduled report", value: "Q2 2026, in preparation" },
+] as const;
+
+const FRESHNESS_NOTE =
+  GMI_Q1_RECORD?.freshnessNote ??
+  "This report reviews Q1 2026 conditions and remains active for Q2 decision use because it includes April 2026 tariff escalation, market repricing, and Q2 scenario implications. It will remain current until superseded by the Q2 2026 Market Intelligence Report.";
+
 const EDITIONS = [
   {
     eyebrow: "Public Brief",
-    title:   "Global Market Outlook Q1 2026",
+    title:   "Global Market Intelligence Q1 2026",
     body:    "A refined public reading for serious readers who want the shape of the quarter without the full institutional edge.",
     href:    ROUTES.publicBrief,
     cta:     "Read public brief",
@@ -160,10 +181,10 @@ const EDITIONS = [
   },
   {
     eyebrow: "Institutional Edition",
-    title:   "Archived intelligence briefing",
-    body:    "The Q1 2026 institutional edition is retained as an archive reference. It is not currently offered as a live paid unlock.",
+    title:   "Active institutional briefing",
+    body:    "The Q1 2026 institutional edition remains active for Q2 decision use until superseded by the Q2 2026 report.",
     href:    ROUTES.institutionalEdition,
-    cta:     "View archive reference",
+    cta:     "Purchase report",
     icon:    Lock,
     primary: false,
     gold:    true,
@@ -347,7 +368,7 @@ function HeroSection() {
                 onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}45`; el.style.backgroundColor = `${GOLD}0E`; }}
               >
                 <Lock style={{ width: "12px", height: "12px" }} />
-                View archive reference
+                Purchase report
               </Link>
 
               <Link href={ROUTES.boardDeck}
@@ -373,6 +394,66 @@ function HeroSection() {
         </motion.div>
 
         <div className="pb-20 md:pb-24" />
+      </div>
+    </section>
+  );
+}
+
+function ReportFreshnessSection() {
+  return (
+    <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="mx-auto max-w-7xl px-6 py-10 lg:px-12">
+        <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+          <div className="grid gap-px bg-white/[0.06] sm:grid-cols-2">
+            {REPORT_METADATA.map((item) => (
+              <div key={item.label} style={{ backgroundColor: BASE, padding: "1rem" }}>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.28em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.32)",
+                }}>
+                  {item.label}
+                </div>
+                <div style={{
+                  marginTop: "0.55rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontSize: "1.05rem",
+                  lineHeight: 1.35,
+                  color: "rgba(255,255,255,0.82)",
+                }}>
+                  {item.value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            border: `1px solid ${GOLD}24`,
+            backgroundColor: `${GOLD}06`,
+            padding: "1.25rem",
+          }}>
+            <div style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: `${GOLD}B8`,
+              marginBottom: "0.65rem",
+            }}>
+              Freshness note
+            </div>
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontSize: "1rem",
+              lineHeight: 1.72,
+              color: "rgba(255,255,255,0.68)",
+            }}>
+              {FRESHNESS_NOTE}
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -787,7 +868,7 @@ function DecisionUseSection() {
               color: "rgba(255,255,255,0.58)",
               maxWidth: "48ch",
             }}>
-              The public brief remains available as a current reference surface. The institutional edition is retained as an archive reference rather than a live paid unlock.
+              The public brief remains available as the open reference surface. The institutional edition remains active for Q2 decision use and is available through restricted access until superseded by the Q2 2026 report.
             </p>
             <Link href={ROUTES.institutionalEdition}
               className="mt-8 inline-flex items-center gap-3 transition-all duration-300"
@@ -803,7 +884,7 @@ function DecisionUseSection() {
               }}
             >
               <Lock style={{ width: "12px", height: "12px" }} />
-              View archive reference
+              Purchase report
             </Link>
           </motion.div>
 
@@ -1236,6 +1317,7 @@ const IntelligenceLandingPage: NextPage = () => {
 
       <Layout headerTransparent fullWidth>
         <HeroSection />
+        <ReportFreshnessSection />
         <MacroSignalsStrip />
         <CoreThesis />
         <DecisionUseSection />

@@ -248,7 +248,7 @@ function ArtifactCheckout({ item }: { item: PremiumContentItem }) {
         disabled={busy}
         className="inline-flex w-full items-center justify-center rounded-2xl border border-[#C9A96A]/35 bg-[#C9A96A]/10 px-5 py-3 text-sm font-semibold text-[#D7B77E] transition hover:bg-[#C9A96A]/15 disabled:opacity-50"
       >
-        {busy ? "Confirming access" : "Confirm access"}
+        {busy ? "Opening checkout" : "Purchase access"}
       </button>
       {error ? <p className="text-xs text-red-300/80">{error}</p> : null}
     </form>
@@ -303,6 +303,13 @@ export default function ArtifactDetailPage({
   const isMarket = isMarketIntelligenceItem(item);
   const productIdentity = resolveByContentId(item.id);
   const isInactiveCommercialArchive = productIdentity?.active === false;
+  const freshnessMetadata = [
+    ["Coverage period", item.metadata?.coveragePeriod],
+    ["Current decision window", item.metadata?.currentDecisionWindow],
+    ["Updated", item.metadata?.updatedAt || item.metadata?.createdAt],
+    ["Status", item.metadata?.statusLabel],
+    ["Next scheduled report", item.metadata?.nextScheduledReport],
+  ].filter((entry): entry is [string, string] => Boolean(entry[1]));
 
   const tierLabel = item.metadata?.watermarkRequired
     ? "Traceable distribution"
@@ -418,7 +425,9 @@ export default function ArtifactDetailPage({
                       The Q1 2026 intelligence line is structured as a public
                       surface edition, an institutional PDF edition, and an
                       executive board deck. Each serves a different reading
-                      context without diluting the core signal.
+                      context without diluting the core signal. The institutional
+                      report remains active for Q2 decision use until the Q2
+                      2026 Market Intelligence Report supersedes it.
                     </p>
 
                     <div className="mt-7 flex flex-wrap gap-3">
@@ -503,6 +512,31 @@ export default function ArtifactDetailPage({
                       </div>
                     </div>
                   </div>
+
+                  {freshnessMetadata.length > 0 ? (
+                    <div className="mt-6 border-t border-white/10 pt-5">
+                      <div className="mb-4 text-[9px] font-mono uppercase tracking-[0.24em] text-amber-300/70">
+                        Freshness
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        {freshnessMetadata.map(([label, value]) => (
+                          <div key={label}>
+                            <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
+                              {label}
+                            </div>
+                            <div className="mt-1 text-sm leading-6 text-white/78">
+                              {value}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {item.metadata?.freshnessNote ? (
+                        <p className="mt-5 border-l border-[#C9A96A]/35 pl-4 text-sm leading-7 text-white/62">
+                          {item.metadata.freshnessNote}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
@@ -522,7 +556,7 @@ export default function ArtifactDetailPage({
                       </PremiumAssetLaunchButton>
                     ) : isInactiveCommercialArchive ? (
                       <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 text-sm leading-7 text-white/60">
-                        This edition is retained as an archive reference and is not currently offered as a live paid unlock.
+                        This edition is not currently available for self-serve checkout.
                       </div>
                     ) : (
                       <ArtifactCheckout item={item} />

@@ -39,6 +39,12 @@ export type PremiumContentItem = {
     surfaceHref?: string;
     directDownloadHref?: string;
     relatedIds?: string[];
+    coveragePeriod?: string;
+    currentDecisionWindow?: string;
+    updatedAt?: string;
+    statusLabel?: string;
+    nextScheduledReport?: string;
+    freshnessNote?: string;
   };
 };
 
@@ -115,10 +121,10 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
 
   {
     id: "global-market-outlook-q1-2026-public",
-    title: "Global Market Outlook Q1 2026",
+    title: "Global Market Intelligence Q1 2026",
     subtitle: "Public Surface Edition",
     description:
-      "Public-facing market outlook for Q1 2026 designed as the discoverable intelligence surface: readable, elegant, and commercially useful without overexposing the deeper institutional layer.",
+      "Public-facing Global Market Intelligence Q1 2026 surface edition: readable, elegant, and commercially useful without overexposing the deeper institutional layer.",
     category: "market-intelligence",
     categorySlug: "market-intel",
     confidentialLevel: "low",
@@ -157,6 +163,11 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       ],
       productLine: "Market Outlook",
       editionType: "public-surface",
+      coveragePeriod: "Q1 2026",
+      currentDecisionWindow: "Q2 2026",
+      updatedAt: "2026-04-08",
+      statusLabel: "Open reference surface",
+      nextScheduledReport: "Q2 2026 report in preparation",
       surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
       directDownloadHref: "/.netlify/functions/gmi-boardroom-pdf",
       coverImage:
@@ -170,7 +181,7 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
     title: "Global Market Intelligence Report Q1 2026",
     subtitle: "Institutional PDF Edition",
     description:
-      "Primary institutional PDF edition for Q1 2026 covering macro strain, capital flows, regional posture, and board-level strategic interpretation for serious operators.",
+      "Primary institutional PDF edition for Q1 2026 covering macro strain, capital flows, regional posture, April tariff escalation, market repricing, and Q2 scenario implications for serious operators.",
     category: "market-intelligence",
     categorySlug: "market-intel",
     confidentialLevel: "high",
@@ -196,8 +207,9 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
     },
     metadata: {
       author: "Abraham of London Intelligence",
-      createdAt: "2026-03-16",
-      version: "1.1.0",
+      createdAt: "2026-04-08",
+      updatedAt: "2026-04-08",
+      version: "2.0.0",
       docId: "GMI-Q1-2026",
       classification: "RESTRICTED",
       watermarkRequired: true,
@@ -205,6 +217,12 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       allowedTiers: ["architect", "owner", "inner-circle"],
       productLine: "Institutional PDF Edition",
       editionType: "institutional-pdf",
+      coveragePeriod: "Q1 2026",
+      currentDecisionWindow: "Q2 2026",
+      statusLabel: "Active until superseded by Q2 2026 report",
+      nextScheduledReport: "Q2 2026 report in preparation",
+      freshnessNote:
+        "This report reviews Q1 2026 conditions and remains active for Q2 decision use because it includes April 2026 tariff escalation, market repricing, and Q2 scenario implications. It will remain current until superseded by the Q2 2026 Market Intelligence Report.",
       surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
       directDownloadHref: "/api/premium/content/download/global-market-intelligence-report-q1-2026",
       coverImage:

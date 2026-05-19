@@ -236,7 +236,7 @@ const EDITIONS = [
   {
     n: "01",
     eyebrow: "Public Brief",
-    title: "Global Market Outlook Q1 2026",
+    title: "Global Market Intelligence Q1 2026",
     body: "The open edition for serious readers who want the shape of the quarter without the full institutional edge.",
     href: ROUTES.publicBrief,
     cta: "Read public brief",
@@ -1366,7 +1366,7 @@ function CloseSection() {
                   maxWidth: "44ch",
                 }}
               >
-                The public brief is open. The institutional edition is available.
+                The public brief remains available as the open reference surface. The institutional edition remains active for Q2 decision use and is available through restricted access until superseded by the Q2 2026 report.
                 Select the layer that matches the seriousness of the task.
               </p>
 

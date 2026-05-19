@@ -35,9 +35,9 @@ const EDITIONS = [
   {
     icon: Lock,
     tag:  "Institutional Edition",
-    body: "Archived institutional edition retained for reference. It is not currently offered as a live paid unlock.",
+    body: "Active Q1 2026 institutional edition for the current Q2 2026 decision window.",
     href: "/artifacts/global-market-intelligence-report-q1-2026",
-    cta:  "View archive reference",
+    cta:  "Purchase report",
     gold: true,
   },
   {
@@ -77,6 +77,21 @@ export default function MarketIntelligenceFeature() {
           }}>
             Global Market Intelligence Q1 2026
           </h2>
+
+          <div style={{
+            display: "inline-flex",
+            border: `1px solid ${GOLD}22`,
+            backgroundColor: `${GOLD}06`,
+            color: `${GOLD}B8`,
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "7px",
+            letterSpacing: "0.24em",
+            textTransform: "uppercase",
+            padding: "0.35rem 0.6rem",
+            marginBottom: "1rem",
+          }}>
+            Current decision window: Q2 2026
+          </div>
 
           <p style={{
             fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",

@@ -11,11 +11,11 @@ describe("catalog integrity", () => {
       expect(undefined_.length, `${undefined_.length} products missing commercialStatus: ${undefined_.map((p) => p.code).join(", ")}`).toBe(0);
     });
 
-    it("active paid checkout products require Stripe IDs", () => {
+    it("active paid checkout products require a Stripe price ID", () => {
       const missing = allProducts.filter(
-        (p) => p.active && p.commercialStatus === "paid" && p.requiresCheckout && (!p.stripeProductId || !p.stripePriceId),
+        (p) => p.active && p.commercialStatus === "paid" && p.requiresCheckout && !p.stripePriceId,
       );
-      expect(missing.length, `${missing.length} active paid checkout products missing Stripe IDs: ${missing.map((p) => p.code).join(", ")}`).toBe(0);
+      expect(missing.length, `${missing.length} active paid checkout products missing Stripe price IDs: ${missing.map((p) => p.code).join(", ")}`).toBe(0);
     });
 
     it("requiresCheckout=true is only used for paid products", () => {
@@ -84,12 +84,12 @@ describe("catalog integrity", () => {
       expect(CATALOG.additional_collaborator!.stripePriceId).toBeNull();
     });
 
-    it("keeps inactive GMI archived rather than live-paid", () => {
-      expect(CATALOG.gmi_q1_2026!.active).toBe(false);
-      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("inactive");
-      expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(false);
-      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(true);
-      expect(CATALOG.gmi_q1_2026!.hiddenReason).toBe("stale_report_archive");
+    it("keeps GMI Q1 active until the Q2 report supersedes it", () => {
+      expect(CATALOG.gmi_q1_2026!.active).toBe(true);
+      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("paid");
+      expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);
+      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(false);
+      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Current decision window: Q2 2026");
     });
 
     it("keeps Return Brief and advanced benchmark access aligned with Professional gating", () => {
@@ -153,7 +153,7 @@ describe("catalog integrity", () => {
     });
 
     it("returns precise ineligibility reasons for non-checkout commercial states", () => {
-      expect(checkCheckoutEligibility("gmi_q1_2026")).toEqual({ eligible: false, reason: "PRODUCT_INACTIVE" });
+      expect(checkCheckoutEligibility("gmi_q1_2026").eligible).toBe(true);
       expect(checkCheckoutEligibility("enterprise")).toEqual({ eligible: false, reason: "PRODUCT_CONTRACTED" });
       expect(checkCheckoutEligibility("additional_collaborator")).toEqual({ eligible: false, reason: "MANUAL_BILLING_REQUIRED" });
       expect(checkCheckoutEligibility("fast_diagnostic")).toEqual({ eligible: false, reason: "CHECKOUT_NOT_AVAILABLE" });

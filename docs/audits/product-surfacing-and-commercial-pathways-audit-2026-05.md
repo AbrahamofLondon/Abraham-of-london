@@ -91,7 +91,7 @@ This architecture is already latent in the codebase. The work is to make it expl
 | `execution_integrity_protocol` | governed playbook | active / paid | playbook run route / £49 | **not live** (`requiresCheckout:false`) | playbook entitlement | P, playbooks estate | next admissible move described | **visible but not checkout-ready** |
 | `alignment_audit_playbook` | governed playbook | active / paid | playbook run route / £49 | **not live** | playbook entitlement | P, playbooks estate | next admissible move described | **visible but not checkout-ready** |
 | `drift_detection_framework` | governed playbook | active / paid | playbook run route / £39 | **not live** | playbook entitlement | P, playbooks estate | next admissible move described | **visible but not checkout-ready** |
-| `gmi_q1_2026` | intelligence report | **inactive / inactive** | public intelligence routes / display price still used | inactive | inactive entitlement | public intelligence routes | not part of current ladder | **visible but inactive** |
+| `gmi_q1_2026` | intelligence report | **active / paid** | public intelligence routes / live checkout | active until superseded by Q2 report | canonical entitlement | public intelligence routes | current Q2 decision window | **visible and active** |
 | `executive_reporting` | reporting | active / paid | `/diagnostics/executive-reporting` / £295 | live | assessment entitlement | H, P, diagnostics hub | strong earned path | correct |
 | `strategy_room` | intervention | active / paid | `/strategy-room` / £750 | live | product entitlement | H, P, footer | strong after-report path | correct |
 | `strategy_room_extended` | intervention | active / paid | `/strategy-room` / £1,250 | live | product entitlement | P | accessible after core room | correct but quiet |
@@ -125,7 +125,7 @@ This architecture is already latent in the codebase. The work is to make it expl
 
 | Question | Verdict | Evidence / issue |
 | --- | --- | --- |
-| Are all active paid products shown or deliberately hidden? | **Mostly** | Core paid estate is shown. Governed playbooks are shown despite no live checkout. `gmi_q1_2026` is hidden from pricing, appropriately if inactive, but still monetised elsewhere. |
+| Are all active paid products shown or deliberately hidden? | **Mostly** | Core paid estate is shown. Governed playbooks are shown despite no live checkout. `gmi_q1_2026` is active for Q2 decision use until superseded by the Q2 2026 report. |
 | Are Professional Monthly / Annual shown correctly? | **Partially** | Monthly, annual, and collaborator seat appear. Monthly is real. Annual is manual billing but styled like an immediate action. |
 | Is Additional Collaborator honest? | **Yes** | Pricing copy says contact us to add seats and catalogue marks it `manual_billing`. |
 | Are Executive Reporting options simplified correctly? | **Yes** | ER is presented as the first paid governed intelligence layer, with route and price intact. |
@@ -145,7 +145,7 @@ This architecture is already latent in the codebase. The work is to make it expl
    In `catalog.ts`, all three have `commercialStatus:"paid"` and prices, but `requiresCheckout:false`; in `pricing.tsx` they are rendered with the same `ProductCard` family as live products.
 
 3. **Inactive GMI still behaves like a live paid report outside pricing.**
-   `gmi_q1_2026` is `active:false` / `commercialStatus:"inactive"` in the catalogue, but `pages/intelligence/global-market-intelligence-q1-2026.tsx` still renders live unlock copy using `getProductDisplayPrice("gmi_q1_2026")`.
+   `gmi_q1_2026` is now `active:true` / `commercialStatus:"paid"` in the catalogue and should remain active until superseded by the Q2 2026 Market Intelligence Report.
 
 ---
 
@@ -318,7 +318,7 @@ That overlap is manageable, but only if the copy deliberately distinguishes them
 | Visible but not checkout-ready | governed playbooks; `professional_annual`; `additional_collaborator` |
 | Checkout-ready but not visible enough | several governed instruments beyond the flagship example |
 | Gated but not explained consistently | Return Brief / benchmark access due entitlement-map drift |
-| Priced but commercially incoherent | governed playbooks; inactive GMI monetisation |
+| Priced but commercially incoherent | governed playbooks requiring assisted access review |
 | Duplicated / semantically overlapping | public playbooks vs governed playbook runs |
 | Stale or archived but still public | `gmi_q1_2026` |
 | Productised in catalogue but not fully surfaced | annual plan, collaborator seat, some developer/API posture |
