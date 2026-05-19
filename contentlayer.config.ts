@@ -631,6 +631,65 @@ const Dispatch = defineDocumentType(() => ({
   },
 }));
 
+const LinkedInOutbound = defineDocumentType(() => ({
+  name: "LinkedInOutbound",
+  filePathPattern: "outbound/linkedin/**/*.mdx",
+  contentType: "mdx",
+  fields: {
+    title: { type: "string", required: true },
+    description: { type: "string", required: false },
+    author: { type: "string", required: false },
+    platform: { type: "string", required: false },
+    sequence: { type: "number", required: false },
+    channel: {
+      type: "enum",
+      options: ["linkedin"],
+      required: true,
+    },
+    contentType: {
+      type: "enum",
+      options: ["post", "article", "caption", "script"],
+      required: true,
+    },
+    status: {
+      type: "enum",
+      options: ["draft", "ready", "published", "posted", "retired"],
+      required: true,
+    },
+    draft: { type: "boolean", required: true },
+    published: { type: "boolean", required: true },
+    date: { type: "string", required: true },
+    category: {
+      type: "enum",
+      options: ["Outbound"],
+      required: true,
+    },
+    tier: {
+      type: "enum",
+      options: ["public", "restricted", "internal"],
+      required: true,
+    },
+    campaign: { type: "string", required: false },
+    productLine: { type: "string", required: false },
+    linkedProduct: { type: "string", required: false },
+    linkedReportId: { type: "string", required: false },
+    publicationGate: { type: "string", required: false },
+    notBefore: { type: "string", required: false },
+    postedAt: { type: "string", required: false },
+    canonicalUrl: { type: "string", required: false },
+    linkedinUrl: { type: "string", required: false },
+    claimRisk: {
+      type: "enum",
+      options: ["LOW", "MEDIUM", "HIGH"],
+      required: true,
+    },
+    requiresLifecycleCheck: { type: "boolean", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    hashtags: { type: "list", of: { type: "string" }, required: false },
+  },
+  computedFields: createComputedFields("outbound/linkedin/", "outbound/linkedin"),
+}));
+
 const Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: "events/**/*.{md,mdx}",
@@ -901,6 +960,7 @@ export default makeSource({
     "resources",
     "strategy",
     "lexicon",
+    "outbound/linkedin",
     "vault/briefs",
     "vault",
     "playbooks",
@@ -915,6 +975,7 @@ export default makeSource({
     VaultBrief,
     Intelligence,
     Dispatch,
+    LinkedInOutbound,
     Download,
     Event,
     Print,

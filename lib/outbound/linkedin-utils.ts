@@ -260,8 +260,8 @@ export function validatePost(
   }
 
   // Channel check
-  if (safeStr(frontmatter.channel) !== "company") {
-    warnings.push(`Channel is not set to "company" (got "${frontmatter.channel}").`);
+  if (!["company", "linkedin"].includes(safeStr(frontmatter.channel))) {
+    warnings.push(`Channel is not set to "company" or "linkedin" (got "${frontmatter.channel}").`);
   }
 
   // Status check
@@ -362,7 +362,8 @@ function buildPost(
     !isPosted &&
     classification === "post" &&
     safeStr(frontmatter.platform) === "linkedin" &&
-    safeStr(frontmatter.channel) === "company" &&
+    ["company", "linkedin"].includes(safeStr(frontmatter.channel)) &&
+    ["ready", "published"].includes(safeStr(frontmatter.status)) &&
     charCount <= MAX_LINKEDIN_CHARS &&
     warnings.filter((w) => w.startsWith("Missing required")).length === 0;
 
