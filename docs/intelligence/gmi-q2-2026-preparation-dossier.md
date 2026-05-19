@@ -213,6 +213,95 @@ Final probabilities must sum to 100% and include a method note before publicatio
 
 ---
 
+## 13a. Q1 Call Review Workspace
+
+Review of all GMI-Q1-2026 calls due for Q2 2026 assessment. These are drawn from `MARKET_CALL_LEDGER` by `getCallsPendingReview("Q2 2026")`.
+
+Each call must be scored and a learning note recorded before the Q2 report is published.
+
+---
+
+### GMI-Q1-2026-CALL-001 — Structural Fragmentation Thesis
+
+**Original statement:** Markets are pricing survivability within fragmentation, not growth within globalisation.
+**Evidence to collect:** Q2 equity pricing patterns, sector rotation data, institutional manager positioning reports.
+**Outcome assessment:** *(to be completed)*
+**Score:** *(0–5)*
+**Learning:** *(to be completed)*
+**Effect on Q2 thesis:** *(to be completed)*
+
+---
+
+### GMI-Q1-2026-CALL-002 — Supplier-Node Tariff Mapping Instruction
+
+**Original statement:** Map tariff exposure at supplier-node level, not country level.
+**Evidence to collect:** Corporate disclosure data showing whether firms have adopted node-level vs. country-level mapping. Supply chain consulting firm reports.
+**Outcome assessment:** *(to be completed)*
+**Score:** *(0–5)*
+**Learning:** *(to be completed)*
+**Effect on Q2 thesis:** *(to be completed)*
+
+---
+
+### GMI-Q1-2026-CALL-003 — Optionality over Optimisation
+
+**Original statement:** Shift supply chain strategy from optimisation to optionality.
+**Evidence to collect:** Corporate capex disclosures on supply chain diversification. Equity premium for firms with demonstrated geographic flexibility.
+**Outcome assessment:** *(to be completed)*
+**Score:** *(0–5)*
+**Learning:** *(to be completed)*
+**Effect on Q2 thesis:** *(to be completed)*
+
+---
+
+### GMI-Q1-2026-CALL-004 — Tariff Inflation Pass-Through (1–2pp over 2–4 quarters)
+
+**Original statement:** US 145% effective tariff rate adds 1–2pp inflation pressure over 2–4 quarters.
+**Evidence to collect:** Q2 US CPI, PCE deflator, PPI data. Import price indices. Retailer margin disclosure.
+**Outcome assessment:** *(to be completed)*
+**Score:** *(0–5)*
+**Learning:** *(to be completed)*
+**Effect on Q2 thesis:** *(to be completed)*
+
+---
+
+### GMI-Q1-2026-CALL-005 — Dollar Weakness Under Risk-Off
+
+**Original statement:** Dollar weakness in risk-off conditions warrants monitoring as a potential reserve currency credibility signal.
+**Evidence to collect:** DXY Q2 trajectory. Gold/USD correlation. Foreign central bank reserve reallocation signals. US Treasury demand at auction.
+**Outcome assessment:** *(to be completed)*
+**Score:** *(0–5)*
+**Learning:** *(to be completed)*
+**Effect on Q2 thesis:** *(to be completed)*
+
+---
+
+### GMI-Q1-2026-CALL-006 — Managed Fragmentation Base Case at 43%
+
+**Original statement:** Managed Fragmentation is the Q1 2026 base case at 43% probability.
+**Evidence to collect:** Tariff trajectory Q2. Credit spread behaviour. Fed posture confirmation. Institutional scenario probability updates from IIF, IMF, major banks.
+**Outcome assessment:** *(to be completed)*
+**Score:** *(0–5)*
+**Learning:** *(to be completed)*
+**Effect on Q2 scenario model:** *(to be completed — probability may shift)*
+
+---
+
+### GMI-Q1-2026-CALL-007 — China-to-US Supply Chains Structurally Impaired
+
+**Original statement:** China-to-US supply chains should be treated as structurally impaired, not temporarily disrupted.
+**Evidence to collect:** Q2 tariff regime (maintained / reduced / escalated). Trade flow data US-China Q2. Shipping data. Third-country transshipment acceleration signals.
+**Outcome assessment:** *(to be completed)*
+**Score:** *(0–5)*
+**Learning:** *(to be completed)*
+**Effect on Q2 thesis:** *(to be completed)*
+
+---
+
+*Note: GMI-Q1-2026-CALL-008 (Africa as strategic infrastructure layer) is expected for Q3 2026 review, not Q2.*
+
+---
+
 ## 14. Draft release checklist
 
 *(To be completed before GMI-Q2-2026 moves to ACTIVE)*

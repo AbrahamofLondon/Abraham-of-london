@@ -1,9 +1,10 @@
 # Market Intelligence Release Standard
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Effective from:** Q2 2026
 **Governed by:** `lib/intelligence/market-intelligence-lifecycle.ts`
 **Quality gate:** `lib/intelligence/market-intelligence-quality-gate.ts`
+**Call ledger:** `lib/intelligence/market-intelligence-call-ledger.ts`
 
 ---
 
@@ -27,6 +28,37 @@ A report's lifecycle state is set in the central registry. It must not be change
 
 ---
 
+## 2a. Call verification cadence
+
+Every new quarterly report must include a review of material calls from the prior report before issuing new calls. This is not optional and is part of the release standard from Q2 2026 onward.
+
+The call ledger is the governed record. It is defined in `lib/intelligence/market-intelligence-call-ledger.ts`.
+
+**Call verification flow:**
+
+```
+Prior report issues calls → calls seeded into MARKET_CALL_LEDGER with TOO_EARLY_TO_ASSESS
+     ↓
+Q-next preparation opens → getCallsPendingReview(currentWindow) identifies which calls are due
+     ↓
+Evidence gathered → outcomes, scores, and learnings recorded against each call
+     ↓
+New report opens with "Prior Quarter Call Review" section — all material calls reviewed
+     ↓
+New report issues new calls → seeded into ledger as TOO_EARLY_TO_ASSESS
+```
+
+For Q2 2026, this means all GMI-Q1-2026 calls with `expectedReviewWindow: "Q2 2026"` must be reviewed and scored before the Q2 report is published.
+
+**Required section in every paid report from Q2 onward:**
+
+> **Prior Quarter Call Review**
+> A structured review of every material call, board instruction, scenario probability, and risk warning made in the preceding report. Each call is scored 0–5, the outcome is summarised, and the learning is recorded. This review precedes the new quarter's calls.
+
+Omitting this section in Q2+ reports is a release blocker.
+
+---
+
 ## 3. Required report structure
 
 Every paid report must contain all of the following sections in order:
@@ -34,19 +66,20 @@ Every paid report must contain all of the following sections in order:
 1. **Cover metadata** — Report ID, Version, Coverage period, Current decision window, Updated date, Lifecycle state, Classification, Not-investment-advice disclaimer
 2. **Board Summary** — Core thesis, 5 non-optional operating decisions, 3 major risks, 3 watch signals, Base-case scenario, What would change the view
 3. **Executive Summary**
-4. **Immediate Decision Implications**
-5. **Core Quarter Thesis**
-6. **Global Macro Snapshot**
-7. **Major Economy Readings**
-8. **Cross-Market Signals**
-9. **Capital Flows and Political Risk**
-10. **Sector Opportunity Map**
-11. **Scenario Framework**
-12. **If You Do Nothing / Cost of Inaction**
-13. **Board-Level Actions**
-14. **Methodology**
-15. **Source and Confidence Appendix**
-16. **Institutional Record**
+4. **Prior Quarter Call Review** *(Q2 2026 onward — required)* — Scored review of all material calls from the preceding report; learning notes; effect on the new quarter's thesis
+5. **Immediate Decision Implications**
+6. **Core Quarter Thesis**
+7. **Global Macro Snapshot**
+8. **Major Economy Readings**
+9. **Cross-Market Signals**
+10. **Capital Flows and Political Risk**
+11. **Sector Opportunity Map**
+12. **Scenario Framework**
+13. **If You Do Nothing / Cost of Inaction**
+14. **Board-Level Actions**
+15. **Methodology**
+16. **Source and Confidence Appendix**
+17. **Institutional Record**
 
 Omitting any of these sections causes the Board Usability and Decision Usefulness dimensions to score below the release threshold.
 
@@ -176,7 +209,10 @@ Operator-facing language is acceptable: "capital allocation posture", "sector ex
 
 Before a report is moved from `DRAFT` or `SCHEDULED` to `ACTIVE` or `ACTIVE_UNTIL_SUPERSEDED`:
 
-- [ ] All 16 required sections present
+- [ ] All required sections present (17 from Q2 2026 onward, including Prior Quarter Call Review)
+- [ ] Prior Quarter Call Review section includes scored outcome for every call from prior report with `expectedReviewWindow` matching current quarter
+- [ ] Every reviewed call has a score (0–5), outcomeSummary, and learning note
+- [ ] New quarter's calls seeded into MARKET_CALL_LEDGER as TOO_EARLY_TO_ASSESS
 - [ ] Evidence classes assigned to all major analytical claims
 - [ ] Confidence bands assigned
 - [ ] Scenario probabilities sum to 100%

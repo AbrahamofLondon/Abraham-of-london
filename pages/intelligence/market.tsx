@@ -711,6 +711,48 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             </div>
           </section>
 
+          {/* ── Intelligence Accountability ─────────────────────────────── */}
+          <section
+            style={{
+              border: `1px solid ${GOLD}20`,
+              background: `${GOLD}04`,
+              padding: "1.25rem",
+            }}
+          >
+            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+              <div>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                  Intelligence accountability
+                </p>
+                <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.2rem,2.5vw,1.75rem)", color: "rgba(255,255,255,0.88)", lineHeight: 1.1 }}>
+                  Every report is accountable to the next one.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-white/52" style={{ maxWidth: "52ch" }}>
+                  Each quarterly report records its material calls, board instructions, scenario assumptions, and risk warnings in a governed ledger. The following report reviews those calls before issuing new ones — scoring what held, what failed, and what the model now weights differently.
+                </p>
+                <p className="mt-3 text-sm leading-7 text-white/40" style={{ maxWidth: "52ch" }}>
+                  This is not automated market learning. It is governed institutional memory — the same discipline applied to decision records inside high-functioning boards.
+                </p>
+              </div>
+
+              <div className="grid gap-px bg-white/[0.05]">
+                {[
+                  { label: "Q1 2026 material calls",        value: "8 calls recorded" },
+                  { label: "Q2 2026 calls due for review",  value: "7 calls pending" },
+                  { label: "Current ledger status",         value: "Awaiting Q2 evidence" },
+                  { label: "Review opens",                  value: "Q2 2026 preparation" },
+                ].map((item) => (
+                  <div key={item.label} style={{ backgroundColor: "rgb(3,3,5)", padding: "0.90rem" }}>
+                    <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                      {item.label}
+                    </div>
+                    <div className="mt-1.5 text-sm leading-6" style={{ color: `${GOLD}CC` }}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* ── Related public briefs ─────────────────────────────────────── */}
           <section
             style={{
