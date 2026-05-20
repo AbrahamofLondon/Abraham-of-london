@@ -5,6 +5,12 @@ import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return "unknown";
+  return `${local.slice(0, 2)}***@${domain}`;
+}
+
 /**
  * GET /api/admin/auth/verify?token=...&email=...&returnTo=...
  *
@@ -25,8 +31,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     failClosed: true,
   });
   if (!rl.allowed) {
-    res.setHeader("Retry-After", String(Math.ceil(rl.retryAfterMs / 1000)));
-    return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
+    const retryAfter = Math.max(1, Math.ceil(rl.retryAfterMs / 1000));
+    const email = typeof req.query.email === "string" ? req.query.email.trim().toLowerCase() : "";
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[admin-auth-verify] RATE_LIMIT_EXCEEDED", {
+        routeKey: "admin-verify",
+        source: rl.source,
+        email: maskEmail(email),
+      });
+    }
+    res.setHeader("Retry-After", String(retryAfter));
+    return res.status(429).json({
+      ok: false,
+      error: "RATE_LIMIT_EXCEEDED",
+      message: "Too many verification attempts. Please wait and request a fresh sign-in link.",
+      retryAfter,
+    });
   }
 
   const { token, email, returnTo } = req.query;

@@ -162,6 +162,17 @@ The browser must never show Prisma invocation text, database hostnames, SQL, sta
 7. Confirm the browser network response for `/api/admin/auth/send-link` is JSON.
 8. If Google sign-in is used, confirm the Google OAuth callback URL matches the local NextAuth callback URL.
 9. In production, confirm Netlify has the same database env values expected by the deployed branch.
+10. If the verify link returns `RATE_LIMIT_EXCEEDED`, wait for the returned `retryAfter` value or request a fresh sign-in link.
+
+In development only, an admin-auth rate-limit key can be cleared with:
+
+```bash
+curl -X POST http://localhost:3000/api/admin/auth/reset-rate-limit \
+  -H "Content-Type: application/json" \
+  -d "{\"routeKey\":\"admin-verify\"}"
+```
+
+The reset helper is unavailable in production and only accepts `admin-verify` or `admin-send-link`.
 
 ## Return Target Handling
 

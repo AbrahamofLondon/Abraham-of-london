@@ -82,7 +82,12 @@ export interface SiteConfig {
 
 // Constants
 const ORIGIN =
-  (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "") ||
+  (
+    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    ""
+  ).replace(/\/$/, "") ||
   "https://www.abrahamoflondon.org";
 
 // Main site configuration
