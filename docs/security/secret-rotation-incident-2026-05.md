@@ -1,7 +1,8 @@
 # GitHub OAuth Secret Rotation Incident - May 2026
 
-Status: active containment
+Status: credential rotation completed; deployment and history follow-up pending
 Date opened: 2026-05-20
+Last updated: 2026-05-20
 
 ## Exposure Source
 
@@ -25,12 +26,16 @@ Treat any GitHub OAuth client secret that was present in the historical `.env.pr
 
 ## Required Rotation
 
-1. Rotate the GitHub OAuth client secret in GitHub Developer settings.
-2. Revoke or delete the old exposed secret.
-3. Update the production Netlify environment variable with the new secret.
-4. Confirm the corresponding GitHub OAuth client ID remains correct.
-5. Redeploy Netlify so the new environment value is loaded.
-6. Test GitHub auth/login end to end after redeploy.
+| Action | Status | Evidence boundary |
+|---|---|---|
+| Rotate the GitHub OAuth client secret in GitHub Developer settings | Completed | Client confirmed rotation on 2026-05-20 |
+| Revoke or delete the old exposed secret | Pending confirmation | Do not mark completed until explicit confirmation is received |
+| Update the production Netlify environment variable with the new secret | Pending confirmation | Do not mark completed until explicit confirmation is received |
+| Confirm the corresponding GitHub OAuth client ID remains correct | Pending confirmation | Verify during auth smoke test |
+| Redeploy Netlify so the new environment value is loaded | Pending confirmation | Required after Netlify env update |
+| Test GitHub auth/login end to end after redeploy | Pending confirmation | Required after redeploy |
+
+Rotation neutralises the exposed credential. Public Git history may still contain the old revoked value until history rewrite is performed.
 
 ## Repository Hygiene Applied
 
@@ -64,4 +69,4 @@ These actions must be performed outside the repository:
 
 ## Claim Boundary
 
-This document records containment and required rotation steps. It does not assert that the secret has already been rotated, revoked, or removed from repository history.
+This document records containment and required rotation steps. It asserts only that the GitHub OAuth client secret rotation has been confirmed by the client. It does not assert that Netlify has been updated, the old exposed secret has been separately revoked or deleted, GitHub auth has been retested, or the historical `.env.production` value has been removed from repository history.
