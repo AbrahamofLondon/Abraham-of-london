@@ -1,5 +1,7 @@
 # GMI Release Event Ledger
 
+**See also:** `docs/intelligence/market-intelligence-release-standard.md` · `docs/intelligence/gmi-buyer-assurance-pack.md` · `lib/intelligence/gmi-release-candidate-checklist.ts`
+
 ## Purpose
 
 The Global Market Intelligence release event ledger records internal governance actions for the quarterly intelligence product line. It is designed to show how release state changed, which gates were run, what blocked release, which source rows were verified or rejected, and how prior calls were reviewed.

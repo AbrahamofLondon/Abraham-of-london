@@ -1,5 +1,7 @@
 # Skeptical Reader Review Checklist
 
+**See also:** `docs/intelligence/market-intelligence-release-standard.md` · `docs/intelligence/gmi-buyer-assurance-pack.md` · `lib/intelligence/gmi-release-candidate-checklist.ts`
+
 This checklist is used before a quarterly Market Intelligence report is moved from draft preparation into publication review.
 
 1. Does every hard number have a source or method note?

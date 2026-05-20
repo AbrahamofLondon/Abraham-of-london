@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ADMIN_NAVIGATION } from "@/lib/admin/admin-navigation";
-import { buildGmiReleaseConsoleViewModel } from "./gmi-release-console";
+import { buildGmiReleaseConsoleViewModel } from "@/pages/admin/intelligence/gmi-release-console";
 
 describe("GMI release console view model", () => {
   const model = buildGmiReleaseConsoleViewModel();

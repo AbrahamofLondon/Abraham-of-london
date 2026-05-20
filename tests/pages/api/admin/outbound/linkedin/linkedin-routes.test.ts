@@ -1,5 +1,5 @@
 /**
- * pages/api/admin/outbound/linkedin/__tests__/linkedin-routes.test.ts
+ * tests/pages/api/admin/outbound/linkedin/linkedin-routes.test.ts
  *
  * Route handler tests for the LinkedIn API endpoints.
  * Covers admin guard enforcement, CSRF validation, token exposure prevention,
@@ -51,10 +51,10 @@ vi.mock("@/lib/outbound/linkedin-utils", () => ({
 // Import handlers after mocks
 // ─────────────────────────────────────────────────────────────────────────────
 
-import connectHandler from "../connect";
-import callbackHandler from "../callback";
-import statusHandler from "../status";
-import publishHandler from "../publish";
+import connectHandler from "@/pages/api/admin/outbound/linkedin/connect";
+import callbackHandler from "@/pages/api/admin/outbound/linkedin/callback";
+import statusHandler from "@/pages/api/admin/outbound/linkedin/status";
+import publishHandler from "@/pages/api/admin/outbound/linkedin/publish";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers

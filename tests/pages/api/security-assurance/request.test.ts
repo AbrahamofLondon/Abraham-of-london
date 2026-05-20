@@ -32,7 +32,7 @@ vi.mock("@/lib/notifications/discord", () => ({
   notifyDiscord: mocks.notifyDiscord,
 }));
 
-import { securityAssuranceRequestHandler } from "./request";
+import { securityAssuranceRequestHandler } from "@/pages/api/security-assurance/request";
 
 function makeReq(body: Record<string, unknown>): NextApiRequest {
   return {

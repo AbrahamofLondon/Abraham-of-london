@@ -4,10 +4,14 @@
 **Effective from:** Q2 2026
 **Governed by:** `lib/intelligence/market-intelligence-lifecycle.ts`
 **Quality gate:** `lib/intelligence/market-intelligence-quality-gate.ts`
+**Release checklist:** `lib/intelligence/gmi-release-candidate-checklist.ts`
 **Call ledger:** `lib/intelligence/market-intelligence-call-ledger.ts`
 **Source standard:** `docs/intelligence/market-intelligence-source-appendix-standard.md`
 **Board summary standard:** `docs/intelligence/market-intelligence-board-summary-standard.md`
 **Confidence posture:** `lib/intelligence/market-intelligence-confidence-posture.ts`
+**Buyer assurance:** `docs/intelligence/gmi-buyer-assurance-pack.md`
+**Skeptical reader checklist:** `docs/intelligence/skeptical-reader-review-checklist.md`
+**Release event ledger:** `docs/intelligence/gmi-release-event-ledger.md`
 
 ---
 

@@ -25,8 +25,12 @@ import {
   MARKET_INTELLIGENCE_LIFECYCLE,
 } from "@/lib/intelligence/market-intelligence-lifecycle";
 import { getEditionsForReport } from "@/lib/intelligence/market-intelligence-editions";
+import { getCallsForReport, getCallsPendingReview } from "@/lib/intelligence/market-intelligence-call-ledger";
+import { calculateGmiSourceCoverageScore } from "@/lib/intelligence/gmi-source-coverage-score";
 import { MarketIntelligenceCatalogue } from "@/components/Intelligence/MarketIntelligenceCatalogue";
 import { MarketIntelligenceChronology } from "@/components/Intelligence/MarketIntelligenceChronology";
+import { GmiPriorCallScorecard, type GmiPriorCallScorecardData } from "@/components/Intelligence/GmiPriorCallScorecard";
+import { GmiEvidenceRoom } from "@/components/Intelligence/GmiEvidenceRoom";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design tokens
@@ -492,6 +496,25 @@ const GMI_Q1_RECORD = getMarketIntelligenceRecord("GMI-Q1-2026");
 const GMI_Q1_EDITIONS = getEditionsForReport("GMI-Q1-2026");
 const GMI_Q2_RECORD = getMarketIntelligenceRecord("GMI-Q2-2026");
 
+// Prior-call scorecard data — computed from ledger, passed to public component
+const GMI_Q1_CALLS = getCallsForReport("GMI-Q1-2026");
+const GMI_Q2_PENDING_CALLS = getCallsPendingReview("Q2 2026");
+const GMI_Q2_DUE_IN_Q2 = GMI_Q1_CALLS.filter((c) => c.expectedReviewWindow === "Q2 2026");
+const GMI_Q2_CARRIED = GMI_Q1_CALLS.filter((c) => c.expectedReviewWindow !== "Q2 2026");
+const GMI_SCORECARD_DATA: GmiPriorCallScorecardData = {
+  reportId: "GMI-Q2-2026",
+  priorReportId: "GMI-Q1-2026",
+  reviewWindow: "Q2 2026",
+  total: GMI_Q1_CALLS.length,
+  dueInCurrentQuarter: GMI_Q2_DUE_IN_Q2.length,
+  carriedForward: GMI_Q2_CARRIED.length,
+  reviewed: GMI_Q2_DUE_IN_Q2.length - GMI_Q2_PENDING_CALLS.length,
+  pending: GMI_Q2_PENDING_CALLS.length,
+};
+
+// Source coverage data for buyer-preview evidence room
+const GMI_Q2_COVERAGE = calculateGmiSourceCoverageScore("GMI-Q2-2026");
+
 const EVIDENCE_POSTURES = [
   {
     label: "Confirmed",
@@ -862,6 +885,82 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             </div>
           </section>
 
+          {/* ── Buyer assurance ─────────────────────────────────────────── */}
+          <section
+            id="governance"
+            style={{
+              border: `1px solid ${GOLD}24`,
+              background: `${GOLD}04`,
+              padding: "1.25rem",
+            }}
+          >
+            <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-start">
+              <div>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                  Governance standard
+                </p>
+                <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.1rem,2.2vw,1.6rem)", color: "rgba(255,255,255,0.88)", lineHeight: 1.12 }}>
+                  What governs this intelligence line
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-white/50" style={{ maxWidth: "52ch" }}>
+                  The Global Market Intelligence line is governed by a formal release standard — not a style guide. Each report must pass a quality gate before publication, satisfy a source coverage threshold, clear all release-blocking evidence rows, and review prior-quarter calls. No report is published until those conditions are met.
+                </p>
+                <div className="mt-4">
+                  <Link
+                    href="/docs/intelligence/market-intelligence-release-standard"
+                    className="inline-flex items-center gap-1.5 transition-colors hover:opacity-80"
+                    style={{ color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+                  >
+                    View governance standard →
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  {
+                    label: "Release gate",
+                    text: "Every report must pass scoreReport() returning releaseReady: true before promotion from DRAFT to ACTIVE.",
+                  },
+                  {
+                    label: "Source threshold",
+                    text: "Source coverage must reach ≥ 80% with all release-blocking rows verified. Source-pending rows are never allowed in active releases.",
+                  },
+                  {
+                    label: "Call accountability",
+                    text: "Every material call is recorded in the verification ledger. The following report reviews and scores those calls before issuing new ones.",
+                  },
+                  {
+                    label: "Evidence posture",
+                    text: "Every claim carries a posture label: Confirmed, Directional, Monitoring, or Scenario assumption. No claim implies more certainty than the evidence allows.",
+                  },
+                  {
+                    label: "Edition separation",
+                    text: "The public edition summarises. The paid institutional edition contains full regional analysis, case evidence, board actions, and source appendix.",
+                  },
+                  {
+                    label: "Compliance boundary",
+                    text: "This is decision-support intelligence. It is not investment advice, does not contain buy/sell recommendations, and does not carry price targets.",
+                  },
+                ].map((item) => (
+                  <article
+                    key={item.label}
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      background: "rgba(255,255,255,0.012)",
+                      padding: "0.85rem",
+                    }}
+                  >
+                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                      {item.label}
+                    </p>
+                    <p className="mt-2 text-xs leading-5 text-white/50">{item.text}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* ── Intelligence Accountability ─────────────────────────────── */}
           <section
             id="accountability"
@@ -915,6 +1014,19 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               </div>
             </div>
           </section>
+
+          {/* ── Prior-call verification record (public) ─────────────────── */}
+          <GmiPriorCallScorecard
+            data={GMI_SCORECARD_DATA}
+            mode="public"
+          />
+
+          {/* ── Source evidence posture (buyer-preview) ──────────────────── */}
+          <GmiEvidenceRoom
+            reportId="GMI-Q2-2026"
+            coverage={GMI_Q2_COVERAGE}
+            mode="buyer-preview"
+          />
 
           {/* ── Related public briefs ─────────────────────────────────────── */}
           <section
