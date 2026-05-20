@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma.server";
+import { normalizeAdminReturnTo } from "@/lib/auth/admin-return-to";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
@@ -31,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { token, email, returnTo } = req.query;
   const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
   const tokenStr = typeof token === "string" ? token : "";
-  const safeReturnTo = typeof returnTo === "string" && returnTo.startsWith("/") ? returnTo : "/admin";
+  const safeReturnTo = normalizeAdminReturnTo(returnTo);
 
   if (!normalizedEmail || !tokenStr) {
     return res.redirect(302, "/admin/login?error=invalid_link");

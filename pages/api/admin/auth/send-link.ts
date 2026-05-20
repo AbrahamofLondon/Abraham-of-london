@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
+import { isBootstrapAdminEmail } from "@/lib/access/admin-emails";
+import { normalizeAdminReturnTo } from "@/lib/auth/admin-return-to";
 import { sendEmail } from "@/lib/email/core/sendEmail";
 import { EmailLinks } from "@/lib/email/links";
 import { prisma } from "@/lib/prisma.server";
@@ -56,11 +57,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Neutral response for non-admin emails (prevents enumeration)
-  if (!BOOTSTRAP_ADMIN_EMAILS.has(normalized)) {
+  if (!isBootstrapAdminEmail(normalized)) {
     console.warn("[admin-auth] Non-admin email attempted login:", normalized);
     return res.status(200).json({
       ok: true,
       message: "If this email is authorised, a secure sign-in link has been sent.",
+    });
+  }
+
+  if (!process.env.RESEND_API_KEY?.trim()) {
+    return res.status(503).json({
+      ok: false,
+      error: "EMAIL_PROVIDER_NOT_CONFIGURED",
+      message: "Email sign-in is not configured in this environment. Use Google sign-in or configure RESEND_API_KEY.",
     });
   }
 
@@ -90,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   });
 
   // Build sign-in link
-  const safeReturnTo = typeof returnTo === "string" && returnTo.startsWith("/") ? returnTo : "/admin";
+  const safeReturnTo = normalizeAdminReturnTo(returnTo);
   const signInUrl = EmailLinks.adminVerify(token, normalized, safeReturnTo);
 
   // Send via Resend

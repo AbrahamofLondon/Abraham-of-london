@@ -4,13 +4,13 @@ import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma.server";
-import { BOOTSTRAP_ADMIN_EMAILS } from "@/lib/access/admin-emails";
+import { isBootstrapAdminEmail } from "@/lib/access/admin-emails";
 import { getUserAccess } from "@/lib/access/get-user-access";
 import { verifyPassword } from "@/lib/auth/password";
 
 function bootstrapRoleForEmail(email: string) {
   if (email === "info@abrahamoflondon.org") return "OWNER" as const;
-  if (BOOTSTRAP_ADMIN_EMAILS.has(email)) return "ADMIN" as const;
+  if (isBootstrapAdminEmail(email)) return "ADMIN" as const;
   return null;
 }
 

@@ -223,6 +223,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/consulting",
+        destination: "/counsel",
+        permanent: true,
+      },
+      {
         source: "/essays/:slug*",
         destination: "/blog/:slug*",
         permanent: true,

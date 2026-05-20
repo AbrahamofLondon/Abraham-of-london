@@ -1,0 +1,124 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+const {
+  mockApplyShield,
+  mockRateLimit,
+  mockVerificationCreate,
+  mockUserUpsert,
+  mockSendEmail,
+} = vi.hoisted(() => ({
+  mockApplyShield: vi.fn(),
+  mockRateLimit: vi.fn(),
+  mockVerificationCreate: vi.fn(),
+  mockUserUpsert: vi.fn(),
+  mockSendEmail: vi.fn(),
+}));
+
+vi.mock("@/lib/server/security/shield-middleware", () => ({
+  applyShield: mockApplyShield,
+}));
+
+vi.mock("@/lib/server/security/persistent-rate-limit", () => ({
+  consumePersistentRateLimit: mockRateLimit,
+}));
+
+vi.mock("@/lib/prisma.server", () => ({
+  prisma: {
+    verificationToken: {
+      create: mockVerificationCreate,
+    },
+    user: {
+      upsert: mockUserUpsert,
+    },
+  },
+}));
+
+vi.mock("@/lib/email/core/sendEmail", () => ({
+  sendEmail: mockSendEmail,
+}));
+
+import handler from "@/pages/api/admin/auth/send-link";
+
+type MockRes = NextApiResponse & {
+  _status: number;
+  _body: unknown;
+  _headers: Record<string, string>;
+};
+
+function makeReq(body: Record<string, unknown>): NextApiRequest {
+  return {
+    method: "POST",
+    body,
+    headers: {},
+    socket: { remoteAddress: "127.0.0.1" },
+  } as NextApiRequest;
+}
+
+function makeRes(): MockRes {
+  const response = {
+    _status: 200,
+    _body: null,
+    _headers: {} as Record<string, string>,
+    status(code: number) {
+      response._status = code;
+      return response;
+    },
+    json(body: unknown) {
+      response._body = body;
+      return response;
+    },
+    setHeader(key: string, value: string) {
+      response._headers[key] = value;
+      return response;
+    },
+  };
+  return response as unknown as MockRes;
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.stubEnv("RESEND_API_KEY", "");
+  mockApplyShield.mockResolvedValue({ blocked: false, delayMs: 0 });
+  mockRateLimit.mockResolvedValue({ allowed: true, retryAfterMs: 0 });
+  mockVerificationCreate.mockResolvedValue({});
+  mockUserUpsert.mockResolvedValue({});
+  mockSendEmail.mockResolvedValue({ ok: true, provider: "resend" });
+});
+
+describe("POST /api/admin/auth/send-link", () => {
+  it("returns JSON when email provider is not configured", async () => {
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "%252Fadmin%252Foutbound%252Flinkedin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(503);
+    expect(res._body).toEqual(expect.objectContaining({
+      ok: false,
+      error: "EMAIL_PROVIDER_NOT_CONFIGURED",
+      message: "Email sign-in is not configured in this environment. Use Google sign-in or configure RESEND_API_KEY.",
+    }));
+    expect(mockVerificationCreate).not.toHaveBeenCalled();
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("uses normalised local returnTo when sending a configured magic link", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "%252Fadmin%252Foutbound%252Flinkedin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(200);
+    expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({
+      text: expect.stringContaining("returnTo=%2Fadmin%2Foutbound%2Flinkedin"),
+    }));
+  });
+});

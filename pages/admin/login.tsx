@@ -6,6 +6,8 @@ import Head from "next/head";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import type { GetServerSideProps, NextPage } from "next";
+import { getAdminLoginErrorMessage } from "@/lib/auth/admin-login-errors";
+import { normalizeAdminReturnTo } from "@/lib/auth/admin-return-to";
 import {
   Shield,
   ArrowRight,
@@ -14,12 +16,19 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  return { props: {} };
-
+type AdminLoginProps = {
+  googleConfigured: boolean;
 };
 
-const AdminLoginPage: NextPage = () => {
+export const getServerSideProps: GetServerSideProps<AdminLoginProps> = async () => {
+  const googleConfigured = Boolean(
+    (process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_ID || process.env.AUTH_GOOGLE_ID) &&
+    (process.env.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_SECRET || process.env.AUTH_GOOGLE_SECRET),
+  );
+  return { props: { googleConfigured } };
+};
+
+const AdminLoginPage: NextPage<AdminLoginProps> = ({ googleConfigured }) => {
   const [mounted, setMounted] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [sent, setSent] = React.useState(false);
@@ -37,15 +46,7 @@ const AdminLoginPage: NextPage = () => {
       const returnToRaw =
         params.get("returnTo") || params.get("callbackUrl");
 
-      if (returnToRaw) {
-        // Decode twice to handle double-encoded URLs from server redirects
-        let decoded = returnToRaw;
-        try { decoded = decodeURIComponent(decoded); } catch { /* already decoded */ }
-        try { decoded = decodeURIComponent(decoded); } catch { /* already decoded */ }
-        if (decoded.startsWith("/")) {
-          setReturnTo(decoded);
-        }
-      }
+      setReturnTo(normalizeAdminReturnTo(returnToRaw));
     }
   }, []);
 
@@ -56,6 +57,10 @@ const AdminLoginPage: NextPage = () => {
   }, [status, router, returnTo]);
 
   const handleGoogleLogin = async () => {
+    if (!googleConfigured) {
+      setError("Google sign-in is not configured in this environment. Configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, or use email sign-in.");
+      return;
+    }
     setLoading(true);
     setError(null);
     await signIn("google", { callbackUrl: returnTo });
@@ -84,7 +89,7 @@ const AdminLoginPage: NextPage = () => {
       }
 
       if (!response.ok || !data.ok) {
-        setError(data.message || data.error || "Unable to send sign-in link.");
+        setError(getAdminLoginErrorMessage(data));
         setLoading(false);
         return;
       }
