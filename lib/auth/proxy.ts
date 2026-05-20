@@ -43,6 +43,7 @@ const PUBLIC_PREFIXES = [
   "/api/admin/auth/send-link",
   "/api/admin/auth/verify",
   "/api/admin/auth/callback",
+  "/api/admin/auth/reset-rate-limit",
   "/_next",
   "/favicon.ico",
   "/robots.txt",

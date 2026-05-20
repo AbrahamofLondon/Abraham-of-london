@@ -22,6 +22,10 @@ describe("proxy admin-auth bootstrap exemption", () => {
     expect(isPublicPath("/api/admin/auth/callback")).toBe(true);
   });
 
+  it("bypasses /api/admin/auth/reset-rate-limit", () => {
+    expect(isPublicPath("/api/admin/auth/reset-rate-limit")).toBe(true);
+  });
+
   it("does NOT bypass /api/admin/outbound/linkedin/publish", () => {
     expect(isPublicPath("/api/admin/outbound/linkedin/publish")).toBe(false);
   });

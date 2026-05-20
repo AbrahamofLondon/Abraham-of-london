@@ -67,6 +67,20 @@ describe("POST /api/admin/auth/reset-rate-limit", () => {
     expect(mockClear).toHaveBeenCalledWith("admin-verify:127.0.0.1");
   });
 
+  it("clears admin send-link throttling in development", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const res = makeRes();
+
+    await handler(makeReq({ routeKey: "admin-send-link" }), res);
+
+    expect(res._status).toBe(200);
+    expect(res._body).toEqual(expect.objectContaining({
+      ok: true,
+      routeKey: "admin-send-link",
+    }));
+    expect(mockClear).toHaveBeenCalledWith("admin-send-link:127.0.0.1");
+  });
+
   it("rejects non-admin-auth keys", async () => {
     vi.stubEnv("NODE_ENV", "development");
     const res = makeRes();
