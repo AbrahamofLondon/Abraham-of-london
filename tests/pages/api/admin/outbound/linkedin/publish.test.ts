@@ -84,12 +84,27 @@ function makeRes(): MockRes {
 const activeConnection = {
   connected: true,
   status: "active",
-  ownerType: "member",
-  ownerUrn: "urn:li:person:abc",
-  scopes: ["openid", "profile", "w_member_social"],
+  ownerType: "organization",
+  ownerUrn: "urn:li:organization:115850136",
+  ownerName: "Abraham of London",
+  organizationId: "115850136",
+  scopes: ["openid", "profile", "w_member_social", "w_organization_social"],
   publishingEnabled: true,
   expiresAt: "2026-06-01T00:00:00.000Z",
   displayName: "Abraham",
+  selectedPublishingTarget: {
+    ownerType: "organization",
+    ownerUrn: "urn:li:organization:115850136",
+    ownerName: "Abraham of London",
+    requiredScope: "w_organization_social",
+    isDefaultPublishingTarget: true,
+    status: "ready",
+  },
+  memberConnection: {
+    ownerUrn: "urn:li:person:abc",
+    displayName: "Abraham Adaramola",
+    status: "active",
+  },
   message: "Connected.",
 };
 
@@ -147,6 +162,10 @@ describe("POST /api/admin/outbound/linkedin/publish", () => {
       connected: false,
       status: "revoked",
       scopes: [],
+      selectedPublishingTarget: {
+        ...activeConnection.selectedPublishingTarget,
+        status: "not_connected",
+      },
     });
     const req = makeReq({ slug: linkedIn6.slug, confirm: true });
     const res = makeRes();
@@ -181,6 +200,9 @@ describe("POST /api/admin/outbound/linkedin/publish", () => {
     }));
     expect(mockAttemptUpdate).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({ status: "succeeded" }),
+    }));
+    expect(mockPublishTextPostToLinkedIn).toHaveBeenCalledWith(expect.objectContaining({
+      ownerType: "organization",
     }));
   });
 

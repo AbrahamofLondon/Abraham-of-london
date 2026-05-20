@@ -160,12 +160,20 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
             <Plug className="h-4 w-4 text-sky-300/80" />
             <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/35">Connection status</p>
           </div>
-          <h2 className="mt-2 font-serif text-2xl text-white">LinkedIn member publishing</h2>
+          <h2 className="mt-2 font-serif text-2xl text-white">LinkedIn company page publishing</h2>
           <p className="mt-2 max-w-3xl text-sm text-white/55">{connection.message}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <AdminStatusBadge label={connection.connected ? "Connected" : "Not connected"} tone={connection.connected ? "success" : "warning"} />
             <AdminStatusBadge label={connection.publishingEnabled ? "Publishing enabled" : "Publishing disabled"} tone={connection.publishingEnabled ? "success" : "warning"} />
             <AdminStatusBadge label={`Status: ${connection.status}`} tone={connection.status === "active" ? "success" : "muted"} />
+            <AdminStatusBadge label={`Target: ${connection.selectedPublishingTarget.ownerType === "organization" ? "Organization Page" : "Member Profile"}`} tone={connection.selectedPublishingTarget.ownerType === "organization" ? "info" : "warning"} />
+            <AdminStatusBadge label={`Required scope: ${connection.selectedPublishingTarget.requiredScope}`} tone={connection.scopes.includes(connection.selectedPublishingTarget.requiredScope) ? "success" : "danger"} />
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <AdminMetricCard label="Connected member" value={connection.memberConnection.displayName || "Unverified"} variant="inner" />
+            <AdminMetricCard label="Page publishing target" value={connection.selectedPublishingTarget.ownerName} variant="inner" />
+            <AdminMetricCard label="Organization URN" value={connection.selectedPublishingTarget.ownerUrn ? "configured" : "missing"} tone={connection.selectedPublishingTarget.ownerUrn ? "success" : "danger"} variant="inner" />
+            <AdminMetricCard label="Target status" value={connection.selectedPublishingTarget.status} tone={connection.selectedPublishingTarget.status === "ready" ? "success" : "danger"} variant="inner" />
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -188,13 +196,13 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
         </div>
       </div>
       <p className="mt-4 text-xs text-white/35">
-        Token values are encrypted server-side and are never rendered in this console.
+        Intended target is Abraham of London Page. Member-profile fallback is blocked unless deliberately approved in a later workflow. Token values are encrypted server-side and are never rendered in this console.
       </p>
     </section>
   );
 }
 
-function PostCard({ post }: { post: ConsolePost }) {
+function PostCard({ post, targetLabel }: { post: ConsolePost; targetLabel: string }) {
   const [gateRun, setGateRun] = React.useState(false);
   const [publishing, setPublishing] = React.useState(false);
   const [result, setResult] = React.useState<string | null>(null);
@@ -252,6 +260,7 @@ function PostCard({ post }: { post: ConsolePost }) {
       </div>
 
       {post.publicationGate ? <p className="mt-3 text-xs text-amber-100/55">{post.publicationGate}</p> : null}
+      <p className="mt-3 text-xs text-sky-100/60">This will publish as: {targetLabel}</p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <AdminMetricCard label="Sequence" value={post.sequence ?? "n/a"} variant="inner" />
@@ -301,7 +310,13 @@ export default function LinkedInOutboundAdminPage({
             <h2 className="font-serif text-2xl text-white">Publishable And Blocked Posts</h2>
             <p className="mt-1 text-sm text-white/45">The final gate must be run before the publish action enables.</p>
           </div>
-          {consoleState.posts.map((post) => <PostCard key={post.slug} post={post} />)}
+          {consoleState.posts.map((post) => (
+            <PostCard
+              key={post.slug}
+              post={post}
+              targetLabel={consoleState.connection.selectedPublishingTarget.ownerName}
+            />
+          ))}
         </section>
 
         <section className="border border-white/10 bg-zinc-950/70 p-5">

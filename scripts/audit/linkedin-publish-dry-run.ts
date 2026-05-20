@@ -4,8 +4,19 @@ import { canPublishLinkedInOutbound } from "@/lib/outbound/linkedin-publish-gate
 const dryRunConnection = {
   connected: true,
   status: "active",
-  scopes: ["openid", "profile", "w_member_social"],
+  ownerType: "organization",
+  ownerUrn: "urn:li:organization:115850136",
+  ownerName: "Abraham of London",
+  scopes: ["openid", "profile", "w_member_social", "w_organization_social"],
   publishingEnabled: true,
+  selectedPublishingTarget: {
+    ownerType: "organization",
+    ownerUrn: "urn:li:organization:115850136",
+    ownerName: "Abraham of London",
+    requiredScope: "w_organization_social",
+    isDefaultPublishingTarget: true,
+    status: "ready",
+  },
 };
 
 const assets = getResolvedLinkedInOutboundAssets(true);

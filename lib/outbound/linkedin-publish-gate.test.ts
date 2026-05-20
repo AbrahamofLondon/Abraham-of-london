@@ -6,8 +6,15 @@ import type { LinkedInOutboundItem } from "./linkedin-outbound-governance";
 const activeConnection = {
   connected: true,
   status: "active",
-  scopes: ["openid", "profile", "w_member_social"],
+  scopes: ["openid", "profile", "w_member_social", "w_organization_social"],
   publishingEnabled: true,
+  selectedPublishingTarget: {
+    ownerType: "organization",
+    ownerUrn: "urn:li:organization:115850136",
+    ownerName: "Abraham of London",
+    requiredScope: "w_organization_social",
+    status: "ready",
+  },
 };
 
 const linkedin6: LinkedInOutboundItem = {
@@ -61,6 +68,56 @@ describe("LinkedIn publish gate", () => {
 
     expect(result.allowed).toBe(true);
     expect(result.blockers).toHaveLength(0);
+  });
+
+  it("blocks missing organization URN when default target is organization", () => {
+    const result = canPublishLinkedInOutbound(linkedin6, {
+      connection: {
+        ...activeConnection,
+        selectedPublishingTarget: {
+          ...activeConnection.selectedPublishingTarget,
+          ownerUrn: null,
+          status: "organization_urn_missing",
+        },
+      },
+    });
+
+    expect(result.allowed).toBe(false);
+    expect(result.blockers.join(" ")).toContain("LINKEDIN_ORG_TARGET_NOT_CONFIGURED");
+  });
+
+  it("blocks missing organization scope", () => {
+    const result = canPublishLinkedInOutbound(linkedin6, {
+      connection: {
+        ...activeConnection,
+        scopes: ["openid", "profile", "w_member_social"],
+        selectedPublishingTarget: {
+          ...activeConnection.selectedPublishingTarget,
+          status: "required_scope_missing",
+        },
+      },
+    });
+
+    expect(result.allowed).toBe(false);
+    expect(result.blockers.join(" ")).toContain("LINKEDIN_ORG_SCOPE_MISSING");
+  });
+
+  it("blocks member fallback without explicit confirmation", () => {
+    const result = canPublishLinkedInOutbound(linkedin6, {
+      connection: {
+        ...activeConnection,
+        selectedPublishingTarget: {
+          ownerType: "member",
+          ownerUrn: "urn:li:person:abc",
+          ownerName: "Abraham Adaramola",
+          requiredScope: "w_member_social",
+          status: "ready",
+        },
+      },
+    });
+
+    expect(result.allowed).toBe(false);
+    expect(result.blockers.join(" ")).toContain("LINKEDIN_MEMBER_FALLBACK_REQUIRES_CONFIRMATION");
   });
 
   it("blocks already posted item", () => {

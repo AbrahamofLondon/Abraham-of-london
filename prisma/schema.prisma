@@ -3635,13 +3635,16 @@ model IntegrationToken {
 
 /// Encrypted LinkedIn publishing connection for governed outbound publishing.
 /// Tokens are encrypted at rest using LINKEDIN_TOKEN_ENCRYPTION_KEY.
-/// v1 supports text-only member-profile publishing.
+/// v1 supports text-only company-page publishing with member-profile fallback.
 model LinkedInPublishingConnection {
   id                    String    @id @default(cuid())
   provider              String    @default("linkedin")
   ownerType             String    // "member" | "organization"
   ownerUrn              String?
   displayName           String?
+  ownerName             String?
+  isDefaultPublishingTarget Boolean @default(false)
+  requiredScope         String    @default("w_member_social")
   encryptedAccessToken  String
   encryptedRefreshToken String?
   expiresAt             DateTime?

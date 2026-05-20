@@ -7,14 +7,28 @@ import type { ResolvedLinkedInOutbound } from "@/lib/outbound/linkedin-content-r
 
 const connection: LinkedInConnectionStatus = {
   connected: true,
-  ownerType: "member",
-  ownerUrn: "urn:li:person:abc",
-  organisationId: null,
+  ownerType: "organization",
+  ownerUrn: "urn:li:organization:115850136",
+  organisationId: "115850136",
   displayName: "Abraham",
-  scopes: ["openid", "profile", "w_member_social"],
+  ownerName: "Abraham of London",
+  scopes: ["openid", "profile", "w_member_social", "w_organization_social"],
   expiresAt: "2026-06-01T00:00:00.000Z",
   status: "active",
   publishingEnabled: true,
+  selectedPublishingTarget: {
+    ownerType: "organization",
+    ownerUrn: "urn:li:organization:115850136",
+    ownerName: "Abraham of London",
+    requiredScope: "w_organization_social",
+    isDefaultPublishingTarget: true,
+    status: "ready",
+  },
+  memberConnection: {
+    ownerUrn: "urn:li:person:abc",
+    displayName: "Abraham Adaramola",
+    status: "active",
+  },
   message: "Connected.",
 };
 
@@ -67,6 +81,14 @@ describe("LinkedIn outbound admin console model", () => {
     expect(model.connection.connected).toBe(true);
     expect(post?.publishable).toBe(true);
     expect(post?.readinessState).toBe("publishable");
+  });
+
+  it("shows Abraham of London Page as the publishing target", () => {
+    const model = buildLinkedInOutboundAdminViewModel(connection, [linkedin6]);
+
+    expect(model.connection.selectedPublishingTarget.ownerName).toBe("Abraham of London");
+    expect(model.connection.selectedPublishingTarget.ownerType).toBe("organization");
+    expect(model.connection.selectedPublishingTarget.requiredScope).toBe("w_organization_social");
   });
 
   it("shows Q2 blocked while linked report is draft", () => {

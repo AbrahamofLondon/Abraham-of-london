@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockGetLinkedInAccessToken } = vi.hoisted(() => ({
-  mockGetLinkedInAccessToken: vi.fn(),
+const { mockGetLinkedInPublishingCredential } = vi.hoisted(() => ({
+  mockGetLinkedInPublishingCredential: vi.fn(),
 }));
 
 vi.mock("./linkedin-oauth", () => ({
   getConnectionStatus: vi.fn(),
-  getLinkedInAccessToken: mockGetLinkedInAccessToken,
+  getLinkedInPublishingCredential: mockGetLinkedInPublishingCredential,
 }));
 
 import {
@@ -21,13 +21,13 @@ beforeEach(() => {
 });
 
 describe("LinkedIn publishing client", () => {
-  it("builds text-only member post payload", () => {
+  it("builds text-only organization post payload", () => {
     const payload = buildLinkedInTextPostPayload({
-      authorUrn: "urn:li:person:abc",
+      authorUrn: "urn:li:organization:115850136",
       commentary: "Post body",
     });
 
-    expect(payload.author).toBe("urn:li:person:abc");
+    expect(payload.author).toBe("urn:li:organization:115850136");
     expect(payload.commentary).toBe("Post body");
     expect(payload.lifecycleState).toBe("PUBLISHED");
     expect(payload).not.toHaveProperty("content");
@@ -40,7 +40,7 @@ describe("LinkedIn publishing client", () => {
   });
 
   it("returns safe not-connected error without token values", async () => {
-    mockGetLinkedInAccessToken.mockResolvedValue(null);
+    mockGetLinkedInPublishingCredential.mockResolvedValue(null);
 
     const result = await publishTextPostToLinkedIn({ commentary: "Body" });
 
@@ -50,10 +50,13 @@ describe("LinkedIn publishing client", () => {
   });
 
   it("maps 429 response to rate-limit safe error", async () => {
-    mockGetLinkedInAccessToken.mockResolvedValue({
+    mockGetLinkedInPublishingCredential.mockResolvedValue({
       accessToken: "secret-access-token",
-      ownerUrn: "urn:li:person:abc",
-      scope: "openid profile w_member_social",
+      ownerType: "organization",
+      ownerUrn: "urn:li:organization:115850136",
+      ownerName: "Abraham of London",
+      scope: "openid profile w_member_social w_organization_social",
+      requiredScope: "w_organization_social",
     });
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       ok: false,
@@ -69,10 +72,13 @@ describe("LinkedIn publishing client", () => {
   });
 
   it("returns post urn and url on success", async () => {
-    mockGetLinkedInAccessToken.mockResolvedValue({
+    mockGetLinkedInPublishingCredential.mockResolvedValue({
       accessToken: "secret-access-token",
-      ownerUrn: "urn:li:person:abc",
-      scope: "openid profile w_member_social",
+      ownerType: "organization",
+      ownerUrn: "urn:li:organization:115850136",
+      ownerName: "Abraham of London",
+      scope: "openid profile w_member_social w_organization_social",
+      requiredScope: "w_organization_social",
     });
     const headers = new Headers();
     headers.set("x-restli-id", "urn:li:share:123");

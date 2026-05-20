@@ -127,7 +127,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     actorEmailHash,
   });
 
-  const result = await publishTextPostToLinkedIn({ commentary: asset.body });
+  const result = await publishTextPostToLinkedIn({
+    commentary: asset.body,
+    ownerType: connection.selectedPublishingTarget.ownerType,
+  });
 
   if (!result.ok) {
     await prisma.linkedInPublishAttempt.update({

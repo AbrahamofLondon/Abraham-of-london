@@ -1,4 +1,8 @@
-import { getConnectionStatus, getLinkedInAccessToken } from "./linkedin-oauth";
+import {
+  getConnectionStatus,
+  getLinkedInPublishingCredential,
+  type LinkedInPublishingOwnerType,
+} from "./linkedin-oauth";
 
 const LINKEDIN_POSTS_URL = "https://api.linkedin.com/rest/posts";
 const LINKEDIN_API_VERSION = "202504";
@@ -14,6 +18,7 @@ export type LinkedInPublishClientResult = {
 
 export type LinkedInTextPostInput = {
   commentary: string;
+  ownerType?: LinkedInPublishingOwnerType;
 };
 
 export function buildLinkedInTextPostPayload(input: {
@@ -61,7 +66,7 @@ export function normaliseLinkedInPublishError(status: number): Pick<
   if (status === 403) {
     return {
       errorCode: "LINKEDIN_SCOPE_OR_PERMISSION_MISSING",
-      safeMessage: "LinkedIn account is missing the required posting permission.",
+      safeMessage: "LinkedIn app or account is missing the required organization/member posting permission. Verify app approval, scope, and Page role.",
     };
   }
   if (status === 429) {
@@ -83,8 +88,8 @@ function postUrlFromUrn(postUrn: string): string | undefined {
 export async function publishTextPostToLinkedIn(
   input: LinkedInTextPostInput,
 ): Promise<LinkedInPublishClientResult> {
-  const token = await getLinkedInAccessToken();
-  if (!token) {
+  const credential = await getLinkedInPublishingCredential(input.ownerType);
+  if (!credential) {
     return {
       ok: false,
       status: "failed",
@@ -93,21 +98,25 @@ export async function publishTextPostToLinkedIn(
     };
   }
 
-  if (!token.scope.split(" ").includes("w_member_social")) {
+  if (!credential.scope.split(" ").includes(credential.requiredScope)) {
     return {
       ok: false,
       status: "failed",
       errorCode: "LINKEDIN_SCOPE_OR_PERMISSION_MISSING",
-      safeMessage: "LinkedIn connection is missing w_member_social scope.",
+      safeMessage: `LinkedIn connection is missing ${credential.requiredScope} scope.`,
     };
   }
 
-  if (!token.ownerUrn) {
+  if (!credential.ownerUrn) {
     return {
       ok: false,
       status: "failed",
-      errorCode: "LINKEDIN_OWNER_URN_MISSING",
-      safeMessage: "LinkedIn member URN is unavailable. Reconnect LinkedIn.",
+      errorCode: credential.ownerType === "organization"
+        ? "LINKEDIN_ORG_TARGET_NOT_CONFIGURED"
+        : "LINKEDIN_OWNER_URN_MISSING",
+      safeMessage: credential.ownerType === "organization"
+        ? "LinkedIn organization URN is not configured."
+        : "LinkedIn member URN is unavailable. Reconnect LinkedIn.",
     };
   }
 
@@ -115,14 +124,14 @@ export async function publishTextPostToLinkedIn(
     const response = await fetch(LINKEDIN_POSTS_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token.accessToken}`,
+        Authorization: `Bearer ${credential.accessToken}`,
         "Content-Type": "application/json",
         "LinkedIn-Version": LINKEDIN_API_VERSION,
         "X-Restli-Protocol-Version": "2.0.0",
       },
       body: JSON.stringify(
         buildLinkedInTextPostPayload({
-          authorUrn: token.ownerUrn,
+          authorUrn: credential.ownerUrn,
           commentary: input.commentary,
         }),
       ),
@@ -152,4 +161,35 @@ export async function publishTextPostToLinkedIn(
       safeMessage: "Network failure while publishing to LinkedIn.",
     };
   }
+}
+
+export async function publishTextPostToLinkedInOrganization(input: {
+  accessToken?: string;
+  organizationUrn?: string | null;
+  text: string;
+}): Promise<LinkedInPublishClientResult> {
+  if (!input.organizationUrn) {
+    return {
+      ok: false,
+      status: "failed",
+      errorCode: "LINKEDIN_ORG_TARGET_NOT_CONFIGURED",
+      safeMessage: "LinkedIn organization URN is not configured.",
+    };
+  }
+  if (input.accessToken) {
+    void input.accessToken;
+  }
+  return publishTextPostToLinkedIn({ commentary: input.text, ownerType: "organization" });
+}
+
+export async function publishTextPostToLinkedInMember(input: {
+  accessToken?: string;
+  memberUrn?: string | null;
+  text: string;
+}): Promise<LinkedInPublishClientResult> {
+  if (input.accessToken || input.memberUrn) {
+    void input.accessToken;
+    void input.memberUrn;
+  }
+  return publishTextPostToLinkedIn({ commentary: input.text, ownerType: "member" });
 }

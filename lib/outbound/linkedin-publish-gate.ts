@@ -9,6 +9,13 @@ export type LinkedInPublishGateConnection = {
   status?: string | null;
   scopes?: string[] | null;
   publishingEnabled?: boolean | null;
+  selectedPublishingTarget?: {
+    ownerType?: "member" | "organization" | string | null;
+    ownerUrn?: string | null;
+    ownerName?: string | null;
+    requiredScope?: string | null;
+    status?: string | null;
+  } | null;
 };
 
 export type LinkedInPublishGateContext = {
@@ -88,7 +95,35 @@ export function canPublishLinkedInOutbound(
     blockers.push("LinkedIn publishing is disabled in environment configuration.");
   }
   if (!connection?.scopes?.includes("w_member_social")) {
-    blockers.push("LinkedIn connection is missing w_member_social scope.");
+    const target = connection?.selectedPublishingTarget;
+    const requiredScope = target?.requiredScope || "w_member_social";
+    if (!connection?.scopes?.includes(requiredScope)) {
+      blockers.push(`${requiredScope === "w_organization_social" ? "LINKEDIN_ORG_SCOPE_MISSING" : "LINKEDIN_MEMBER_SCOPE_MISSING"}: LinkedIn connection is missing ${requiredScope} scope.`);
+    }
+  }
+
+  const target = connection?.selectedPublishingTarget;
+  if (!target) {
+    blockers.push("selectedPublishingTarget is missing.");
+  } else {
+    if (target.ownerType === "organization" && !target.ownerUrn) {
+      blockers.push("LINKEDIN_ORG_TARGET_NOT_CONFIGURED: LinkedIn organization publishing target is missing.");
+    }
+    if (target.ownerType === "organization" && target.status === "required_scope_missing") {
+      blockers.push("LINKEDIN_ORG_SCOPE_MISSING: LinkedIn organization publishing scope is missing.");
+    }
+    if (target.ownerType === "organization" && target.status === "organization_urn_missing") {
+      blockers.push("LINKEDIN_ORG_TARGET_NOT_CONFIGURED: LinkedIn organization URN is not configured.");
+    }
+    if (target.ownerType === "organization" && target.status === "not_connected") {
+      blockers.push("LINKEDIN_ORG_PERMISSION_UNVERIFIED: LinkedIn organization page role is not verified.");
+    }
+    if (target.ownerType === "organization" && target.status !== "ready") {
+      blockers.push("LINKEDIN_APP_ORG_ACCESS_NOT_APPROVED: LinkedIn app organization access may not be approved or verified.");
+    }
+    if (target.ownerType === "member") {
+      blockers.push("LINKEDIN_MEMBER_FALLBACK_REQUIRES_CONFIRMATION: Member-profile fallback requires explicit admin confirmation.");
+    }
   }
 
   const text = textOf(item);

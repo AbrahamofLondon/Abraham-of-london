@@ -11,20 +11,44 @@ const LINKEDIN_TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken";
 const LINKEDIN_USERINFO_URL = "https://api.linkedin.com/v2/userinfo";
 const LINKEDIN_API_VERSION = "202504";
 const PROVIDER = "linkedin";
-const OWNER_TYPE = "member";
 
 export const LINKEDIN_OAUTH_STATE_COOKIE = "linkedin_oauth_state";
 
+export type LinkedInPublishingOwnerType = "member" | "organization";
+export type LinkedInConnectionState = "not_connected" | "active" | "revoked" | "expired" | "invalid";
+export type LinkedInTargetStatus =
+  | "ready"
+  | "not_connected"
+  | "organization_urn_missing"
+  | "required_scope_missing"
+  | "member_fallback_requires_confirmation";
+
+export type LinkedInPublishingTarget = {
+  ownerType: LinkedInPublishingOwnerType;
+  ownerUrn: string | null;
+  ownerName: string;
+  requiredScope: string;
+  isDefaultPublishingTarget: boolean;
+  status: LinkedInTargetStatus;
+};
+
 export type LinkedInConnectionStatus = {
   connected: boolean;
-  ownerType: "member";
+  ownerType: LinkedInPublishingOwnerType;
   ownerUrn: string | null;
   organisationId: string | null;
   displayName: string | null;
+  ownerName: string | null;
   scopes: string[];
   expiresAt: string | null;
-  status: "not_connected" | "active" | "revoked" | "expired" | "invalid";
+  status: LinkedInConnectionState;
   publishingEnabled: boolean;
+  selectedPublishingTarget: LinkedInPublishingTarget;
+  memberConnection: {
+    ownerUrn: string | null;
+    displayName: string | null;
+    status: LinkedInConnectionState;
+  };
   message: string;
 };
 
@@ -65,8 +89,25 @@ function getRedirectUri(): string {
 function getScopeString(): string {
   return (
     process.env.LINKEDIN_OAUTH_SCOPES?.trim() ||
-    "openid profile w_member_social"
+    "openid profile w_member_social w_organization_social r_organization_social"
   );
+}
+
+export function getDefaultLinkedInOwnerType(): LinkedInPublishingOwnerType {
+  return process.env.LINKEDIN_DEFAULT_OWNER_TYPE === "member" ? "member" : "organization";
+}
+
+export function getConfiguredLinkedInOrganizationUrn(): string | null {
+  const value = process.env.LINKEDIN_ORGANIZATION_URN?.trim();
+  return value || null;
+}
+
+function getOrganizationName(): string {
+  return "Abraham of London";
+}
+
+function requiredScopeFor(ownerType: LinkedInPublishingOwnerType): string {
+  return ownerType === "organization" ? "w_organization_social" : "w_member_social";
 }
 
 function getStateSecret(): string {
@@ -132,6 +173,55 @@ function tokenExpiry(expiresIn?: number): Date | null {
   return new Date(Date.now() + expiresIn * 1000);
 }
 
+async function upsertConnection(input: {
+  ownerType: LinkedInPublishingOwnerType;
+  ownerUrn: string | null;
+  ownerName: string | null;
+  displayName: string | null;
+  accessToken: string;
+  refreshToken?: string | null;
+  expiresAt: Date | null;
+  scope: string;
+  isDefaultPublishingTarget: boolean;
+}) {
+  await prisma.linkedInPublishingConnection.upsert({
+    where: {
+      linkedin_publishing_connection_provider_owner_type: {
+        provider: PROVIDER,
+        ownerType: input.ownerType,
+      },
+    },
+    create: {
+      provider: PROVIDER,
+      ownerType: input.ownerType,
+      ownerUrn: input.ownerUrn,
+      ownerName: input.ownerName,
+      displayName: input.displayName,
+      isDefaultPublishingTarget: input.isDefaultPublishingTarget,
+      requiredScope: requiredScopeFor(input.ownerType),
+      encryptedAccessToken: encryptLinkedInToken(input.accessToken),
+      encryptedRefreshToken: input.refreshToken ? encryptLinkedInToken(input.refreshToken) : null,
+      expiresAt: input.expiresAt,
+      scope: input.scope,
+      status: "active",
+      lastVerifiedAt: new Date(),
+    },
+    update: {
+      ownerUrn: input.ownerUrn,
+      ownerName: input.ownerName,
+      displayName: input.displayName,
+      isDefaultPublishingTarget: input.isDefaultPublishingTarget,
+      requiredScope: requiredScopeFor(input.ownerType),
+      encryptedAccessToken: encryptLinkedInToken(input.accessToken),
+      encryptedRefreshToken: input.refreshToken ? encryptLinkedInToken(input.refreshToken) : undefined,
+      expiresAt: input.expiresAt,
+      scope: input.scope,
+      status: "active",
+      lastVerifiedAt: new Date(),
+    },
+  });
+}
+
 export async function exchangeCodeForToken(
   code: string,
   connectedBy?: string | null,
@@ -161,58 +251,125 @@ export async function exchangeCodeForToken(
 
     const profile = await fetchUserInfo(data.access_token);
     const scope = data.scope || getScopeString();
+    const expiresAt = tokenExpiry(data.expires_in);
+    const defaultOwnerType = getDefaultLinkedInOwnerType();
+    const organizationUrn = getConfiguredLinkedInOrganizationUrn();
 
-    await prisma.linkedInPublishingConnection.upsert({
-      where: {
-        linkedin_publishing_connection_provider_owner_type: {
-          provider: PROVIDER,
-          ownerType: OWNER_TYPE,
-        },
-      },
-      create: {
-        provider: PROVIDER,
-        ownerType: OWNER_TYPE,
-        ownerUrn: profile.ownerUrn,
-        displayName: profile.displayName,
-        encryptedAccessToken: encryptLinkedInToken(data.access_token),
-        encryptedRefreshToken: data.refresh_token
-          ? encryptLinkedInToken(data.refresh_token)
-          : null,
-        expiresAt: tokenExpiry(data.expires_in),
-        scope,
-        status: "active",
-        lastVerifiedAt: new Date(),
-      },
-      update: {
-        ownerUrn: profile.ownerUrn,
-        displayName: profile.displayName,
-        encryptedAccessToken: encryptLinkedInToken(data.access_token),
-        encryptedRefreshToken: data.refresh_token
-          ? encryptLinkedInToken(data.refresh_token)
-          : undefined,
-        expiresAt: tokenExpiry(data.expires_in),
-        scope,
-        status: "active",
-        lastVerifiedAt: new Date(),
-      },
+    await upsertConnection({
+      ownerType: "member",
+      ownerUrn: profile.ownerUrn,
+      ownerName: profile.displayName,
+      displayName: profile.displayName,
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token ?? null,
+      expiresAt,
+      scope,
+      isDefaultPublishingTarget: defaultOwnerType === "member",
     });
 
+    if (organizationUrn || defaultOwnerType === "organization") {
+      await upsertConnection({
+        ownerType: "organization",
+        ownerUrn: organizationUrn,
+        ownerName: getOrganizationName(),
+        displayName: getOrganizationName(),
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token ?? null,
+        expiresAt,
+        scope,
+        isDefaultPublishingTarget: defaultOwnerType === "organization",
+      });
+    }
+
     void connectedBy;
-    return { ok: true, message: "LinkedIn member publishing connection stored." };
+    return { ok: true, message: "LinkedIn publishing connection stored." };
   } catch {
     return { ok: false, error: "Failed to complete LinkedIn OAuth connection." };
   }
 }
 
-async function getActiveConnection() {
-  return prisma.linkedInPublishingConnection.findUnique({
-    where: {
-      linkedin_publishing_connection_provider_owner_type: {
-        provider: PROVIDER,
-        ownerType: OWNER_TYPE,
-      },
-    },
+async function getConnections() {
+  return prisma.linkedInPublishingConnection.findMany({
+    where: { provider: PROVIDER },
   });
+}
+
+async function markExpired(id: string) {
+  await prisma.linkedInPublishingConnection.update({
+    where: { id },
+    data: { status: "expired" },
+  });
+}
+
+function connectionState(record: { status: string; expiresAt: Date | null } | null): LinkedInConnectionState {
+  if (!record) return "not_connected";
+  if (record.expiresAt && record.expiresAt < new Date()) return "expired";
+  if (record.status === "active" || record.status === "revoked" || record.status === "expired" || record.status === "invalid") {
+    return record.status;
+  }
+  return "invalid";
+}
+
+function buildTarget(input: {
+  ownerType: LinkedInPublishingOwnerType;
+  ownerUrn: string | null;
+  ownerName: string | null;
+  scopes: string[];
+  connected: boolean;
+  isDefaultPublishingTarget: boolean;
+}): LinkedInPublishingTarget {
+  const requiredScope = requiredScopeFor(input.ownerType);
+  let status: LinkedInTargetStatus = "ready";
+
+  if (!input.connected) status = "not_connected";
+  else if (input.ownerType === "organization" && !input.ownerUrn) status = "organization_urn_missing";
+  else if (!input.scopes.includes(requiredScope)) status = "required_scope_missing";
+  else if (input.ownerType === "member" && getDefaultLinkedInOwnerType() === "organization") {
+    status = "member_fallback_requires_confirmation";
+  }
+
+  return {
+    ownerType: input.ownerType,
+    ownerUrn: input.ownerUrn,
+    ownerName: input.ownerName || (input.ownerType === "organization" ? getOrganizationName() : "LinkedIn member"),
+    requiredScope,
+    isDefaultPublishingTarget: input.isDefaultPublishingTarget,
+    status,
+  };
+}
+
+export async function getLinkedInPublishingCredential(ownerType = getDefaultLinkedInOwnerType()): Promise<{
+  accessToken: string;
+  ownerType: LinkedInPublishingOwnerType;
+  ownerUrn: string | null;
+  ownerName: string;
+  scope: string;
+  requiredScope: string;
+} | null> {
+  const connections = await getConnections();
+  const record = connections.find((connection) => connection.ownerType === ownerType)
+    ?? connections.find((connection) => connection.ownerType === "member")
+    ?? null;
+
+  if (!record || record.status !== "active") return null;
+  if (record.expiresAt && record.expiresAt < new Date()) {
+    await markExpired(record.id);
+    return null;
+  }
+
+  const selectedOwnerType = ownerType as LinkedInPublishingOwnerType;
+  const ownerUrn = selectedOwnerType === "organization"
+    ? (record.ownerUrn || getConfiguredLinkedInOrganizationUrn())
+    : record.ownerUrn;
+
+  return {
+    accessToken: decryptLinkedInToken(record.encryptedAccessToken),
+    ownerType: selectedOwnerType,
+    ownerUrn,
+    ownerName: selectedOwnerType === "organization" ? getOrganizationName() : (record.ownerName || record.displayName || "LinkedIn member"),
+    scope: record.scope,
+    requiredScope: requiredScopeFor(selectedOwnerType),
+  };
 }
 
 export async function getLinkedInAccessToken(): Promise<{
@@ -220,72 +377,81 @@ export async function getLinkedInAccessToken(): Promise<{
   ownerUrn: string | null;
   scope: string;
 } | null> {
-  const record = await getActiveConnection();
-  if (!record || record.status !== "active") return null;
-
-  if (record.expiresAt && record.expiresAt < new Date()) {
-    await prisma.linkedInPublishingConnection.update({
-      where: { id: record.id },
-      data: { status: "expired" },
-    });
-    return null;
-  }
-
+  const credential = await getLinkedInPublishingCredential();
+  if (!credential) return null;
   return {
-    accessToken: decryptLinkedInToken(record.encryptedAccessToken),
-    ownerUrn: record.ownerUrn,
-    scope: record.scope,
+    accessToken: credential.accessToken,
+    ownerUrn: credential.ownerUrn,
+    scope: credential.scope,
   };
 }
 
 export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
   try {
-    const record = await getActiveConnection();
-    const publishingEnabled = process.env.LINKEDIN_PUBLISHING_ENABLED === "true";
+    const connections = await getConnections();
+    const defaultOwnerType = getDefaultLinkedInOwnerType();
+    const memberRecord = connections.find((connection) => connection.ownerType === "member") ?? null;
+    const targetRecord = connections.find((connection) => connection.ownerType === defaultOwnerType) ?? memberRecord;
+    const memberState = connectionState(memberRecord);
+    const targetState = connectionState(targetRecord ?? null);
+    const connected = memberState === "active";
+    const scopes = (targetRecord?.scope || memberRecord?.scope || "").split(" ").filter(Boolean);
+    const targetOwnerUrn = defaultOwnerType === "organization"
+      ? (targetRecord?.ownerUrn || getConfiguredLinkedInOrganizationUrn())
+      : targetRecord?.ownerUrn ?? null;
+    const selectedPublishingTarget = buildTarget({
+      ownerType: defaultOwnerType,
+      ownerUrn: targetOwnerUrn ?? null,
+      ownerName: defaultOwnerType === "organization" ? getOrganizationName() : targetRecord?.ownerName ?? targetRecord?.displayName ?? null,
+      scopes,
+      connected,
+      isDefaultPublishingTarget: true,
+    });
 
-    if (!record) {
-      return {
-        connected: false,
-        ownerType: OWNER_TYPE,
-        ownerUrn: null,
-        organisationId: null,
-        displayName: null,
-        scopes: [],
-        expiresAt: null,
-        status: "not_connected",
-        publishingEnabled,
-        message: "No LinkedIn member publishing connection is active.",
-      };
-    }
-
-    const expired = record.expiresAt ? record.expiresAt < new Date() : false;
-    const status = expired ? "expired" : record.status;
     return {
-      connected: status === "active",
-      ownerType: OWNER_TYPE,
-      ownerUrn: record.ownerUrn,
-      organisationId: null,
-      displayName: record.displayName,
-      scopes: record.scope.split(" ").filter(Boolean),
-      expiresAt: record.expiresAt?.toISOString() ?? null,
-      status: status as LinkedInConnectionStatus["status"],
-      publishingEnabled,
+      connected,
+      ownerType: selectedPublishingTarget.ownerType,
+      ownerUrn: selectedPublishingTarget.ownerUrn,
+      organisationId: selectedPublishingTarget.ownerUrn?.replace("urn:li:organization:", "") ?? null,
+      displayName: memberRecord?.displayName ?? null,
+      ownerName: selectedPublishingTarget.ownerName,
+      scopes,
+      expiresAt: targetRecord?.expiresAt?.toISOString() ?? memberRecord?.expiresAt?.toISOString() ?? null,
+      status: targetState,
+      publishingEnabled: process.env.LINKEDIN_PUBLISHING_ENABLED === "true",
+      selectedPublishingTarget,
+      memberConnection: {
+        ownerUrn: memberRecord?.ownerUrn ?? null,
+        displayName: memberRecord?.displayName ?? null,
+        status: memberState,
+      },
       message:
-        status === "active"
-          ? "LinkedIn member publishing connection is active."
-          : `LinkedIn publishing connection is ${status}.`,
+        selectedPublishingTarget.status === "ready"
+          ? `LinkedIn publishing target ready: ${selectedPublishingTarget.ownerName}.`
+          : `LinkedIn publishing target blocked: ${selectedPublishingTarget.status}.`,
     };
   } catch {
+    const selectedPublishingTarget = buildTarget({
+      ownerType: getDefaultLinkedInOwnerType(),
+      ownerUrn: getConfiguredLinkedInOrganizationUrn(),
+      ownerName: getDefaultLinkedInOwnerType() === "organization" ? getOrganizationName() : null,
+      scopes: [],
+      connected: false,
+      isDefaultPublishingTarget: true,
+    });
     return {
       connected: false,
-      ownerType: OWNER_TYPE,
-      ownerUrn: null,
-      organisationId: null,
+      ownerType: selectedPublishingTarget.ownerType,
+      ownerUrn: selectedPublishingTarget.ownerUrn,
+      organisationId: selectedPublishingTarget.ownerUrn?.replace("urn:li:organization:", "") ?? null,
       displayName: null,
+      ownerName: selectedPublishingTarget.ownerName,
       scopes: [],
       expiresAt: null,
       status: "invalid",
       publishingEnabled: process.env.LINKEDIN_PUBLISHING_ENABLED === "true",
+      selectedPublishingTarget,
+      memberConnection: { ownerUrn: null, displayName: null, status: "invalid" },
       message: "LinkedIn connection status could not be read.",
     };
   }
@@ -293,7 +459,7 @@ export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
 
 export async function revokeLinkedInConnection(): Promise<{ ok: boolean }> {
   await prisma.linkedInPublishingConnection.updateMany({
-    where: { provider: PROVIDER, ownerType: OWNER_TYPE },
+    where: { provider: PROVIDER },
     data: { status: "revoked" },
   });
   return { ok: true };
@@ -323,7 +489,7 @@ export async function publishToLinkedIn(
   void articleDescription;
   return {
     ok: false,
-    error: "Use the governed LinkedIn publishing client for text-only member publishing.",
+    error: "Use the governed LinkedIn publishing client for text-only member or organization publishing.",
     errorCode: "LINKEDIN_GOVERNED_CLIENT_REQUIRED",
   };
 }
