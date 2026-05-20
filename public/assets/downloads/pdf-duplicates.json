@@ -1,5 +1,14 @@
 {
-  "generatedAt": "2026-05-09T20:00:31.621Z",
-  "totalDuplicateIds": 0,
-  "duplicates": []
+  "generatedAt": "2026-05-20T18:43:45.452Z",
+  "totalDuplicateIds": 1,
+  "duplicates": [
+    {
+      "id": "frontier-resilience-01",
+      "chosen": "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
+      "dropped": [
+        "/assets/downloads/frontier-resilience-01.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(75KB) > mtime"
+    }
+  ]
 }
