@@ -145,6 +145,10 @@ function toneForReadiness(state: ConsolePost["readinessState"]): AdminBadgeTone 
 
 function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus }) {
   const [revoking, setRevoking] = React.useState(false);
+  const target = connection.selectedPublishingTarget;
+  const requiredScope = target.requiredScope;
+  const hasRequiredScope = connection.scopes.includes(requiredScope);
+  const isOrganizationTarget = target.ownerType === "organization";
 
   async function revoke() {
     setRevoking(true);
@@ -166,14 +170,28 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
             <AdminStatusBadge label={connection.connected ? "Connected" : "Not connected"} tone={connection.connected ? "success" : "warning"} />
             <AdminStatusBadge label={connection.publishingEnabled ? "Publishing enabled" : "Publishing disabled"} tone={connection.publishingEnabled ? "success" : "warning"} />
             <AdminStatusBadge label={`Status: ${connection.status}`} tone={connection.status === "active" ? "success" : "muted"} />
-            <AdminStatusBadge label={`Target: ${connection.selectedPublishingTarget.ownerType === "organization" ? "Organization Page" : "Member Profile"}`} tone={connection.selectedPublishingTarget.ownerType === "organization" ? "info" : "warning"} />
-            <AdminStatusBadge label={`Required scope: ${connection.selectedPublishingTarget.requiredScope}`} tone={connection.scopes.includes(connection.selectedPublishingTarget.requiredScope) ? "success" : "danger"} />
+            <AdminStatusBadge label={`Target: ${isOrganizationTarget ? "Organization Page" : "Member Profile"}`} tone={isOrganizationTarget ? "info" : "warning"} />
+            <AdminStatusBadge label={`Required scope: ${requiredScope}`} tone={hasRequiredScope ? "success" : "danger"} />
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <AdminMetricCard label="Connected member" value={connection.memberConnection.displayName || "Unverified"} variant="inner" />
-            <AdminMetricCard label="Page publishing target" value={connection.selectedPublishingTarget.ownerName} variant="inner" />
-            <AdminMetricCard label="Organization URN" value={connection.selectedPublishingTarget.ownerUrn ? "configured" : "missing"} tone={connection.selectedPublishingTarget.ownerUrn ? "success" : "danger"} variant="inner" />
-            <AdminMetricCard label="Target status" value={connection.selectedPublishingTarget.status} tone={connection.selectedPublishingTarget.status === "ready" ? "success" : "danger"} variant="inner" />
+            <AdminMetricCard label="Page publishing target" value={target.ownerName} variant="inner" />
+            <AdminMetricCard label="Organization URN" value={target.ownerUrn ? "configured" : "missing"} tone={target.ownerUrn ? "success" : "danger"} variant="inner" />
+            <AdminMetricCard label="Target status" value={target.status} tone={target.status === "ready" ? "success" : "danger"} variant="inner" />
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <div className="border border-white/10 bg-black/30 p-3">
+              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Admin access status</p>
+              <p className="mt-2 text-sm leading-6 text-white/58">
+                This console is only rendered after the Abraham of London admin session passes the server-side admin guard. Login failures on this route are admin-auth issues, not LinkedIn OAuth failures.
+              </p>
+            </div>
+            <div className="border border-white/10 bg-black/30 p-3">
+              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Organisation publishing readiness</p>
+              <p className="mt-2 text-sm leading-6 text-white/58">
+                Company-page publishing requires LinkedIn organisation social scope such as <span className="font-mono text-sky-100">w_organization_social</span>. Current token/app scopes {hasRequiredScope ? "include" : "do not include"} organisation publishing, so Page publishing is {hasRequiredScope && target.status === "ready" ? "ready for the final gate" : "blocked"}.
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -197,6 +215,9 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
       </div>
       <p className="mt-4 text-xs text-white/35">
         Intended target is Abraham of London Page. Member-profile fallback is blocked unless deliberately approved in a later workflow. Token values are encrypted server-side and are never rendered in this console.
+      </p>
+      <p className="mt-2 text-xs text-amber-100/55">
+        LinkedIn member connection and Abraham of London Page publishing readiness are separate states. A valid member OAuth session does not prove Company Page publishing access until organisation scope and Page role are verified.
       </p>
     </section>
   );
