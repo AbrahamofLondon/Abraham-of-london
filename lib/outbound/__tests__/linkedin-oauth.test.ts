@@ -1,17 +1,4 @@
-/**
- * lib/outbound/__tests__/linkedin-oauth.test.ts
- *
- * Tests for the LinkedIn OAuth and publishing service.
- *
- * Note: These tests validate logic, error handling, and validation rules.
- * They do not make real HTTP calls to LinkedIn.
- */
-
-import { describe, it, expect, vi, beforeEach } from "vitest";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Mock Prisma — use vi.hoisted() to create mocks before hoisted vi.mock calls
-// ─────────────────────────────────────────────────────────────────────────────
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockFindUnique, mockUpsert, mockUpdate, mockUpdateMany } = vi.hoisted(
   () => ({
@@ -24,7 +11,7 @@ const { mockFindUnique, mockUpsert, mockUpdate, mockUpdateMany } = vi.hoisted(
 
 vi.mock("@/lib/prisma.server", () => ({
   prisma: {
-    integrationToken: {
+    linkedInPublishingConnection: {
       findUnique: mockFindUnique,
       upsert: mockUpsert,
       update: mockUpdate,
@@ -33,237 +20,126 @@ vi.mock("@/lib/prisma.server", () => ({
   },
 }));
 
-vi.mock("@/lib/integrations/encryption", () => ({
-  encrypt: (s: string) => `encrypted:${s}`,
-  decrypt: (s: string) => s.replace("encrypted:", ""),
+vi.mock("../linkedin-token-encryption", () => ({
+  encryptLinkedInToken: (value: string) => `encrypted:${value}`,
+  decryptLinkedInToken: (value: string) => value.replace("encrypted:", ""),
 }));
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Import after mocks
-// ─────────────────────────────────────────────────────────────────────────────
 
 import {
   buildAuthorizationUrl,
+  exchangeCodeForToken,
   getConnectionStatus,
-  publishToLinkedIn,
+  getLinkedInAccessToken,
+  validateLinkedInOAuthState,
 } from "../linkedin-oauth";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Setup
-// ─────────────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
   vi.clearAllMocks();
-
   process.env.LINKEDIN_CLIENT_ID = "test-client-id";
   process.env.LINKEDIN_CLIENT_SECRET = "test-client-secret";
-  process.env.LINKEDIN_ORGANIZATION_ID = "115850136";
-  process.env.LINKEDIN_REDIRECT_URI = "http://localhost:3000/api/admin/outbound/linkedin/callback";
+  process.env.LINKEDIN_REDIRECT_URI = "http://localhost:3000/api/admin/outbound/linkedin/oauth/callback";
+  process.env.LINKEDIN_OAUTH_SCOPES = "openid profile w_member_social";
   process.env.LINKEDIN_PUBLISHING_ENABLED = "true";
-  process.env.OAUTH_TOKEN_ENCRYPTION_KEY = "test-encryption-key-at-least-32-chars!!";
+  process.env.LINKEDIN_TOKEN_ENCRYPTION_KEY = "test-linkedin-token-key-at-least-32-characters";
   process.env.CSRF_SECRET = "test-csrf-secret";
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tests: buildAuthorizationUrl
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("buildAuthorizationUrl", () => {
-  it("should build a valid authorization URL with required scopes", () => {
+describe("LinkedIn OAuth connection", () => {
+  it("builds member-profile OAuth authorization URL with minimal scopes", () => {
     const { url, state } = buildAuthorizationUrl();
+    const parsed = new URL(url);
 
-    expect(url).toContain("https://www.linkedin.com/oauth/v2/authorization");
-    expect(url).toContain("response_type=code");
-    expect(url).toContain("client_id=test-client-id");
-    expect(url).toContain("redirect_uri=");
-    expect(url).toContain("w_organization_social");
-    expect(url).toContain("r_organization_social");
-    expect(url).toContain("state=");
-    expect(state).toBeDefined();
-    expect(state.length).toBeGreaterThan(0);
+    expect(parsed.origin + parsed.pathname).toBe("https://www.linkedin.com/oauth/v2/authorization");
+    expect(parsed.searchParams.get("response_type")).toBe("code");
+    expect(parsed.searchParams.get("client_id")).toBe("test-client-id");
+    expect(parsed.searchParams.get("scope")).toBe("openid profile w_member_social");
+    expect(parsed.searchParams.get("state")).toBe(state);
+    expect(state).toContain(".");
   });
 
-  it("should include a signed state parameter", () => {
-    const { url } = buildAuthorizationUrl();
-    const stateParam = new URL(url).searchParams.get("state");
-    expect(stateParam).toBeDefined();
-    expect(stateParam).toContain(".");
-    const parts = stateParam!.split(".");
-    expect(parts).toHaveLength(2);
-    expect(parts[0]!.length).toBeGreaterThan(0);
-    expect(parts[1]!.length).toBeGreaterThan(0);
+  it("validates signed OAuth state", () => {
+    const { state } = buildAuthorizationUrl();
+    expect(validateLinkedInOAuthState(state, state)).toBe(true);
+    expect(validateLinkedInOAuthState(`${state}x`, state)).toBe(false);
   });
 
-  it("should throw if LINKEDIN_CLIENT_ID is missing", () => {
-    delete process.env.LINKEDIN_CLIENT_ID;
-    expect(() => buildAuthorizationUrl()).toThrow("LINKEDIN_CLIENT_ID");
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tests: getConnectionStatus
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("getConnectionStatus", () => {
-  it("should return not connected when no token exists", async () => {
+  it("returns safe not-connected status", async () => {
     mockFindUnique.mockResolvedValue(null);
 
     const status = await getConnectionStatus();
 
     expect(status.connected).toBe(false);
-    expect(status.organisationId).toBe("115850136");
+    expect(status.ownerType).toBe("member");
     expect(status.scopes).toEqual([]);
-    expect(status.expiresAt).toBeNull();
-    expect(status.publishingEnabled).toBe(true);
-    expect(status.message).toContain("Not connected");
+    expect(JSON.stringify(status)).not.toContain("encrypted:");
   });
 
-  it("should return connected status when active token exists", async () => {
-    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  it("returns connected status without token values", async () => {
     mockFindUnique.mockResolvedValue({
-      id: "test-id",
+      id: "conn-1",
       provider: "linkedin",
-      organisationId: "115850136",
-      accessTokenEncrypted: "encrypted:test-token",
-      refreshTokenEncrypted: null,
-      accessTokenExpiresAt: futureDate,
-      refreshTokenExpiresAt: null,
-      scopes: "w_organization_social r_organization_social",
-      connectedBy: "user-1",
-      connectedAt: new Date(),
-      lastUsedAt: new Date(),
+      ownerType: "member",
+      ownerUrn: "urn:li:person:abc",
+      displayName: "Abraham",
+      encryptedAccessToken: "encrypted:access-token",
+      encryptedRefreshToken: "encrypted:refresh-token",
+      expiresAt: new Date(Date.now() + 86400 * 1000),
+      scope: "openid profile w_member_social",
       status: "active",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastVerifiedAt: new Date(),
     });
 
     const status = await getConnectionStatus();
 
     expect(status.connected).toBe(true);
-    expect(status.organisationId).toBe("115850136");
-    expect(status.scopes).toContain("w_organization_social");
-    expect(status.scopes).toContain("r_organization_social");
-    expect(status.expiresAt).toBe(futureDate.toISOString());
-    expect(status.publishingEnabled).toBe(true);
+    expect(status.ownerUrn).toBe("urn:li:person:abc");
+    expect(status.scopes).toContain("w_member_social");
+    expect(JSON.stringify(status)).not.toContain("access-token");
+    expect(JSON.stringify(status)).not.toContain("refresh-token");
   });
 
-  it("should return not connected when token is expired/revoked", async () => {
-    mockFindUnique.mockResolvedValue({
-      id: "test-id",
-      provider: "linkedin",
-      organisationId: "115850136",
-      accessTokenEncrypted: "encrypted:test-token",
-      refreshTokenEncrypted: null,
-      accessTokenExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      refreshTokenExpiresAt: null,
-      scopes: "w_organization_social",
-      connectedBy: "user-1",
-      connectedAt: new Date(),
-      lastUsedAt: new Date(),
-      status: "revoked",
-    });
+  it("stores exchanged token encrypted", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          access_token: "plain-access-token",
+          expires_in: 3600,
+          scope: "openid profile w_member_social",
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ sub: "abc", name: "Abraham" }),
+      }));
 
-    const status = await getConnectionStatus();
+    const result = await exchangeCodeForToken("code", "admin-1");
 
-    expect(status.connected).toBe(false);
-    expect(status.message).toContain("revoked");
+    expect(result.ok).toBe(true);
+    expect(mockUpsert).toHaveBeenCalledWith(expect.objectContaining({
+      create: expect.objectContaining({
+        ownerType: "member",
+        ownerUrn: "urn:li:person:abc",
+        encryptedAccessToken: "encrypted:plain-access-token",
+      }),
+    }));
   });
 
-  it("should never return token values", async () => {
+  it("decrypts access token server-side only", async () => {
     mockFindUnique.mockResolvedValue({
-      id: "test-id",
-      provider: "linkedin",
-      organisationId: "115850136",
-      accessTokenEncrypted: "encrypted:test-token",
-      refreshTokenEncrypted: "encrypted:refresh-token",
-      accessTokenExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      refreshTokenExpiresAt: null,
-      scopes: "w_organization_social",
-      connectedBy: "user-1",
-      connectedAt: new Date(),
-      lastUsedAt: new Date(),
+      id: "conn-1",
+      ownerUrn: "urn:li:person:abc",
+      encryptedAccessToken: "encrypted:access-token",
+      expiresAt: new Date(Date.now() + 86400 * 1000),
+      scope: "openid profile w_member_social",
       status: "active",
     });
 
-    const status = await getConnectionStatus();
+    const token = await getLinkedInAccessToken();
 
-    const statusStr = JSON.stringify(status);
-    expect(statusStr).not.toContain("test-token");
-    expect(statusStr).not.toContain("refresh-token");
-    expect(statusStr).not.toContain("encrypted:");
-    expect(statusStr).not.toContain("accessTokenEncrypted");
-    expect(statusStr).not.toContain("refreshTokenEncrypted");
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tests: publishToLinkedIn
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("publishToLinkedIn", () => {
-  it("should return LINKEDIN_NOT_CONNECTED when no token exists", async () => {
-    mockFindUnique.mockResolvedValue(null);
-
-    const result = await publishToLinkedIn("Test body");
-
-    expect(result.ok).toBe(false);
-    expect(result.errorCode).toBe("LINKEDIN_NOT_CONNECTED");
-  });
-
-  it("should return LINKEDIN_PUBLISHING_DISABLED when disabled", async () => {
-    process.env.LINKEDIN_PUBLISHING_ENABLED = "false";
-
-    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    mockFindUnique.mockResolvedValue({
-      id: "test-id",
-      provider: "linkedin",
-      organisationId: "115850136",
-      accessTokenEncrypted: "encrypted:test-token",
-      refreshTokenEncrypted: null,
-      accessTokenExpiresAt: futureDate,
-      refreshTokenExpiresAt: null,
-      scopes: "w_organization_social r_organization_social",
-      connectedBy: "user-1",
-      connectedAt: new Date(),
-      lastUsedAt: new Date(),
-      status: "active",
-    });
-
-    const result = await publishToLinkedIn("Test body");
-
-    expect(result.ok).toBe(false);
-    expect(result.errorCode).toBe("LINKEDIN_PUBLISHING_DISABLED");
-  });
-
-  it("should return LINKEDIN_SCOPE_MISSING when w_organization_social is missing", async () => {
-    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    mockFindUnique.mockResolvedValue({
-      id: "test-id",
-      provider: "linkedin",
-      organisationId: "115850136",
-      accessTokenEncrypted: "encrypted:test-token",
-      refreshTokenEncrypted: null,
-      accessTokenExpiresAt: futureDate,
-      refreshTokenExpiresAt: null,
-      scopes: "r_organization_social",
-      connectedBy: "user-1",
-      connectedAt: new Date(),
-      lastUsedAt: new Date(),
-      status: "active",
-    });
-
-    const result = await publishToLinkedIn("Test body");
-
-    expect(result.ok).toBe(false);
-    expect(result.errorCode).toBe("LINKEDIN_SCOPE_MISSING");
-  });
-
-  it("should not expose tokens in error messages", async () => {
-    mockFindUnique.mockResolvedValue(null);
-
-    const result = await publishToLinkedIn("Test body");
-
-    const resultStr = JSON.stringify(result);
-    expect(resultStr).not.toContain("test-token");
-    expect(resultStr).not.toContain("encrypted:");
-    expect(resultStr).not.toContain("accessTokenEncrypted");
+    expect(token?.accessToken).toBe("access-token");
+    expect(token?.ownerUrn).toBe("urn:li:person:abc");
   });
 });

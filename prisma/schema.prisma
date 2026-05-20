@@ -3633,6 +3633,52 @@ model IntegrationToken {
   @@map("integration_tokens")
 }
 
+/// Encrypted LinkedIn publishing connection for governed outbound publishing.
+/// Tokens are encrypted at rest using LINKEDIN_TOKEN_ENCRYPTION_KEY.
+/// v1 supports text-only member-profile publishing.
+model LinkedInPublishingConnection {
+  id                    String    @id @default(cuid())
+  provider              String    @default("linkedin")
+  ownerType             String    // "member" | "organization"
+  ownerUrn              String?
+  displayName           String?
+  encryptedAccessToken  String
+  encryptedRefreshToken String?
+  expiresAt             DateTime?
+  scope                 String
+  status                String    @default("active") // "active" | "revoked" | "expired" | "invalid"
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  lastVerifiedAt        DateTime?
+
+  @@unique([provider, ownerType], name: "linkedin_publishing_connection_provider_owner_type")
+  @@index([provider])
+  @@index([status])
+  @@map("linkedin_publishing_connections")
+}
+
+/// Governed record of LinkedIn publish attempts. Contains safe metadata only.
+model LinkedInPublishAttempt {
+  id               String    @id @default(cuid())
+  outboundSlug     String
+  outboundTitle    String
+  status           String    // "pending" | "succeeded" | "failed" | "blocked"
+  linkedInPostUrn  String?
+  linkedInUrl      String?
+  errorCode        String?
+  errorMessageSafe String?
+  actorEmailHash   String?
+  actorId          String?
+  requestId        String
+  createdAt        DateTime  @default(now())
+  completedAt      DateTime?
+
+  @@index([outboundSlug])
+  @@index([status])
+  @@index([requestId])
+  @@map("linkedin_publish_attempts")
+}
+
 // ============================================================================
 // RATE LIMIT EVENTS — Postgres-authoritative, scope-keyed, identifier-hashed
 // ============================================================================
