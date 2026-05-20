@@ -17,6 +17,8 @@ const PASSING_INPUT: MarketReportQualityInput = {
   hasUnclassifiedMajorClaims:     false,
   hasSourceRowsForHardClaims:     true,
   hasSourcePendingRows:           false,
+  hasSourceBlockerRowsPending:    false,
+  sourceCoverageScore:            100,
   hasDecisionImplications:        true,
   hasBoardSummary:                true,
   hasScenarioFramework:           true,
@@ -24,6 +26,7 @@ const PASSING_INPUT: MarketReportQualityInput = {
   paidEditionDifferentFromPublic: true,
   hasComplianceDisclaimer:        true,
   hasInvestmentAdviceLanguage:    false,
+  hasInternalWorkflowVocabulary:  false,
   deliveryRouteVerified:          true,
   freshnessMetadataComplete:      true,
   hasPriorQuarterCalls:           false, // first report — no prior calls
@@ -119,6 +122,17 @@ describe("scoreReport — critical failure: INVESTMENT_ADVICE_LANGUAGE", () => {
       hasInvestmentAdviceLanguage: true,
     });
     expect(result.criticalFailures).toContain("INVESTMENT_ADVICE_LANGUAGE");
+    expect(result.releaseReady).toBe(false);
+  });
+});
+
+describe("scoreReport — critical failure: INTERNAL_WORKFLOW_VOCABULARY_EXPOSED", () => {
+  it("flags internal workflow vocabulary in active paid release copy", () => {
+    const result = scoreReport({
+      ...PASSING_INPUT,
+      hasInternalWorkflowVocabulary: true,
+    });
+    expect(result.criticalFailures).toContain("INTERNAL_WORKFLOW_VOCABULARY_EXPOSED");
     expect(result.releaseReady).toBe(false);
   });
 });
@@ -321,6 +335,8 @@ const GMI_Q2_DRAFT_INPUT: MarketReportQualityInput = {
   hasUnclassifiedMajorClaims:     false,
   hasSourceRowsForHardClaims:     true,
   hasSourcePendingRows:           true,
+  hasSourceBlockerRowsPending:    true,
+  sourceCoverageScore:            7.7,
   hasDecisionImplications:        true,
   hasBoardSummary:                true,
   hasScenarioFramework:           true,
@@ -328,6 +344,7 @@ const GMI_Q2_DRAFT_INPUT: MarketReportQualityInput = {
   paidEditionDifferentFromPublic: true,
   hasComplianceDisclaimer:        true,
   hasInvestmentAdviceLanguage:    false,
+  hasInternalWorkflowVocabulary:  false,
   deliveryRouteVerified:          false, // draft — no delivery route
   freshnessMetadataComplete:      true,
   hasPriorQuarterCalls:           true,
@@ -361,6 +378,8 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       priorQuarterCallsReviewed: true,
       hasSourceAppendix: false,
       hasSourcePendingRows: false,
+      hasSourceBlockerRowsPending: false,
+      sourceCoverageScore: 100,
     });
     const dim = withoutSourceAppendix.scores.find(
       (s) => s.dimension === "SOURCE_TRACEABILITY",
@@ -379,15 +398,16 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       priorQuarterCallsReviewed: true,
       hasSourceAppendix: true,
       hasSourcePendingRows: false,
+      hasSourceBlockerRowsPending: false,
+      sourceCoverageScore: 100,
       hasConfidencePosture: false,
     });
     const dim = withoutPosture.scores.find(
       (s) => s.dimension === "SCENARIO_DISCIPLINE",
     );
-    // Missing confidence posture scores SCENARIO_DISCIPLINE at 8 — at threshold but not perfect.
-    // Combined with other deficiencies it will block release; in isolation it reduces score without hard-blocking.
-    expect(dim?.score).toBe(8);
-    expect(dim?.score).toBeLessThan(10);
+    expect(dim?.score).toBe(0);
+    expect(withoutPosture.criticalFailures).toContain("CONFIDENCE_POSTURE_MISSING_FOR_PAID_EDITION");
+    expect(withoutPosture.releaseReady).toBe(false);
   });
 
   it("requires board summary before paid edition readiness", () => {
@@ -400,6 +420,8 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       priorQuarterCallsReviewed: true,
       hasSourceAppendix: true,
       hasSourcePendingRows: false,
+      hasSourceBlockerRowsPending: false,
+      sourceCoverageScore: 100,
       hasConfidencePosture: true,
       hasBoardSummary: false,
     });
@@ -407,6 +429,7 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       (s) => s.dimension === "BOARD_USABILITY",
     );
     expect(boardDim?.score).toBeLessThan(8);
+    expect(withoutBoard.criticalFailures).toContain("BOARD_SUMMARY_MISSING_FOR_PAID_EDITION");
     expect(withoutBoard.releaseReady).toBe(false);
   });
 
@@ -421,6 +444,8 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       hasSourceAppendix: true,
       hasConfidencePosture: true,
       hasSourcePendingRows: false,
+      hasSourceBlockerRowsPending: false,
+      sourceCoverageScore: 100,
       hasUnclassifiedMajorClaims: true,
     });
     expect(result.criticalFailures).toContain("UNCLASSIFIED_MAJOR_CLAIM");
@@ -438,6 +463,8 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       hasSourceAppendix: true,
       hasConfidencePosture: true,
       hasSourcePendingRows: false,
+      hasSourceBlockerRowsPending: false,
+      sourceCoverageScore: 100,
       hasSourceRowsForHardClaims: false,
     });
     expect(result.criticalFailures).toContain("HARD_CLAIM_WITHOUT_SOURCE_ROW");
@@ -450,6 +477,7 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       hasSourceAppendix: true,
       hasConfidencePosture: true,
       hasSourcePendingRows: true,
+      hasSourceBlockerRowsPending: true,
     });
     expect(result.criticalFailures).not.toContain("SOURCE_PENDING_IN_ACTIVE_RELEASE");
     expect(result.criticalFailures).toContain("PRIOR_QUARTER_CALLS_UNREVIEWED");
@@ -467,8 +495,30 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       hasSourceAppendix: true,
       hasConfidencePosture: true,
       hasSourcePendingRows: true,
+      hasSourceBlockerRowsPending: true,
+      sourceCoverageScore: 7.7,
     });
     expect(result.criticalFailures).toContain("SOURCE_PENDING_IN_ACTIVE_RELEASE");
+    expect(result.criticalFailures).toContain("SOURCE_BLOCKER_ROWS_PENDING_IN_ACTIVE_RELEASE");
+    expect(result.criticalFailures).toContain("SOURCE_COVERAGE_BELOW_RELEASE_THRESHOLD");
+    expect(result.releaseReady).toBe(false);
+  });
+
+  it("blocks an active release when source coverage is below 80", () => {
+    const result = scoreReport({
+      ...GMI_Q2_DRAFT_INPUT,
+      lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+      purchasable: true,
+      deliveryRouteVerified: true,
+      hasSupersessionPlan: true,
+      priorQuarterCallsReviewed: true,
+      hasSourceAppendix: true,
+      hasConfidencePosture: true,
+      hasSourcePendingRows: false,
+      hasSourceBlockerRowsPending: false,
+      sourceCoverageScore: 79.9,
+    });
+    expect(result.criticalFailures).toContain("SOURCE_COVERAGE_BELOW_RELEASE_THRESHOLD");
     expect(result.releaseReady).toBe(false);
   });
 });

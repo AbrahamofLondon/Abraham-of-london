@@ -21,7 +21,12 @@ export type CriticalFailureCode =
   | "PRIOR_QUARTER_CALLS_UNREVIEWED"
   | "UNCLASSIFIED_MAJOR_CLAIM"
   | "HARD_CLAIM_WITHOUT_SOURCE_ROW"
-  | "SOURCE_PENDING_IN_ACTIVE_RELEASE";
+  | "SOURCE_PENDING_IN_ACTIVE_RELEASE"
+  | "SOURCE_BLOCKER_ROWS_PENDING_IN_ACTIVE_RELEASE"
+  | "SOURCE_COVERAGE_BELOW_RELEASE_THRESHOLD"
+  | "CONFIDENCE_POSTURE_MISSING_FOR_PAID_EDITION"
+  | "BOARD_SUMMARY_MISSING_FOR_PAID_EDITION"
+  | "INTERNAL_WORKFLOW_VOCABULARY_EXPOSED";
 
 export type QualityDimensionScore = {
   dimension: QualityDimension;
@@ -55,6 +60,8 @@ export type MarketReportQualityInput = {
   hasUnclassifiedMajorClaims: boolean;
   hasSourceRowsForHardClaims: boolean;
   hasSourcePendingRows: boolean;
+  hasSourceBlockerRowsPending: boolean;
+  sourceCoverageScore: number;
   hasDecisionImplications: boolean;
   hasBoardSummary: boolean;
   hasScenarioFramework: boolean;
@@ -62,6 +69,7 @@ export type MarketReportQualityInput = {
   paidEditionDifferentFromPublic: boolean;
   hasComplianceDisclaimer: boolean;
   hasInvestmentAdviceLanguage: boolean;
+  hasInternalWorkflowVocabulary: boolean;
   deliveryRouteVerified: boolean;
   freshnessMetadataComplete: boolean;
   hasPriorQuarterCalls: boolean;
@@ -153,6 +161,16 @@ function scoreSourceTraceability(
       "Active paid release still contains source-pending rows.",
     ]);
 
+  if (isActiveState(input.lifecycleState) && input.hasSourceBlockerRowsPending)
+    return dim("SOURCE_TRACEABILITY", 0, [
+      "Active paid release still has pending source appendix blocker rows.",
+    ]);
+
+  if (isActiveState(input.lifecycleState) && input.sourceCoverageScore < 80)
+    return dim("SOURCE_TRACEABILITY", 0, [
+      "Source coverage score is below the 80 release threshold.",
+    ]);
+
   if (!input.hasSourceAppendix)
     return dim("SOURCE_TRACEABILITY", 7, [
       "No source and confidence appendix. All evidence classes must be disclosed.",
@@ -186,7 +204,7 @@ function scoreScenarioDiscipline(
     ]);
 
   if (!input.hasConfidencePosture)
-    return dim("SCENARIO_DISCIPLINE", 8, [
+    return dim("SCENARIO_DISCIPLINE", isActiveState(input.lifecycleState) ? 0 : 8, [
       "No confidence posture. Evidence classes must be assigned HIGH/MEDIUM/LOW/MONITORING.",
     ]);
 
@@ -222,6 +240,11 @@ function scoreComplianceBoundary(
       "No compliance disclaimer. 'Not investment advice' boundary must be visible.",
     ]);
 
+  if (isActiveState(input.lifecycleState) && input.hasInternalWorkflowVocabulary)
+    return dim("COMPLIANCE_BOUNDARY", 0, [
+      "External-facing paid report contains internal workflow vocabulary.",
+    ]);
+
   return dim("COMPLIANCE_BOUNDARY", 10, []);
 }
 
@@ -229,7 +252,7 @@ function scoreBoardUsability(
   input: MarketReportQualityInput,
 ): QualityDimensionScore {
   if (!input.hasBoardSummary)
-    return dim("BOARD_USABILITY", 4, [
+    return dim("BOARD_USABILITY", isActiveState(input.lifecycleState) ? 0 : 4, [
       "No board summary. Paid report must include 5 operating decisions, 3 risks, 3 watch signals.",
     ]);
 
@@ -325,6 +348,21 @@ function detectCriticalFailures(
 
   if (isActiveState(input.lifecycleState) && input.hasSourcePendingRows)
     failures.push("SOURCE_PENDING_IN_ACTIVE_RELEASE");
+
+  if (isActiveState(input.lifecycleState) && input.hasSourceBlockerRowsPending)
+    failures.push("SOURCE_BLOCKER_ROWS_PENDING_IN_ACTIVE_RELEASE");
+
+  if (isActiveState(input.lifecycleState) && input.sourceCoverageScore < 80)
+    failures.push("SOURCE_COVERAGE_BELOW_RELEASE_THRESHOLD");
+
+  if (isActiveState(input.lifecycleState) && !input.hasConfidencePosture)
+    failures.push("CONFIDENCE_POSTURE_MISSING_FOR_PAID_EDITION");
+
+  if (isActiveState(input.lifecycleState) && !input.hasBoardSummary)
+    failures.push("BOARD_SUMMARY_MISSING_FOR_PAID_EDITION");
+
+  if (isActiveState(input.lifecycleState) && input.hasInternalWorkflowVocabulary)
+    failures.push("INTERNAL_WORKFLOW_VOCABULARY_EXPOSED");
 
   return failures;
 }
