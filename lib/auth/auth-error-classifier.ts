@@ -1,6 +1,7 @@
 export type AuthSafeErrorCode =
   | "AUTH_DATABASE_UNAVAILABLE"
   | "AUTH_DATABASE_CONFIGURATION_ERROR"
+  | "AUTH_DATABASE_AUTHENTICATION_FAILED"
   | "AUTH_SIGNIN_FAILED";
 
 export type AuthSafeError = {
@@ -20,6 +21,18 @@ function errorText(error: unknown): string {
 
 export function classifyAuthError(error: unknown): AuthSafeError {
   const text = errorText(error).toLowerCase();
+
+  if (
+    text.includes("authentication failed against database server") ||
+    text.includes("provided database credentials") ||
+    text.includes("password authentication failed") ||
+    text.includes("p1000")
+  ) {
+    return {
+      code: "AUTH_DATABASE_AUTHENTICATION_FAILED",
+      clientMessage: GENERIC_AUTH_MESSAGE,
+    };
+  }
 
   if (
     text.includes("database_url") ||
@@ -66,5 +79,6 @@ export function safeAuthClientMessage(): string {
 export function sanitizeAuthErrorParam(input: unknown): AuthSafeErrorCode {
   if (input === "AUTH_DATABASE_UNAVAILABLE") return "AUTH_DATABASE_UNAVAILABLE";
   if (input === "AUTH_DATABASE_CONFIGURATION_ERROR") return "AUTH_DATABASE_CONFIGURATION_ERROR";
+  if (input === "AUTH_DATABASE_AUTHENTICATION_FAILED") return "AUTH_DATABASE_AUTHENTICATION_FAILED";
   return "AUTH_SIGNIN_FAILED";
 }

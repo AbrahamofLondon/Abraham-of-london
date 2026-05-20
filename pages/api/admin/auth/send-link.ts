@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { isBootstrapAdminEmail } from "@/lib/access/admin-emails";
+import { classifyAuthError } from "@/lib/auth/auth-error-classifier";
 import { normalizeAdminReturnTo } from "@/lib/auth/admin-return-to";
 import { sendEmail } from "@/lib/email/core/sendEmail";
 import { EmailLinks } from "@/lib/email/links";
@@ -8,12 +9,15 @@ import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rat
 import { applyShield } from "@/lib/server/security/shield-middleware";
 import crypto from "crypto";
 
-function classifyTokenStorageError(err: unknown): "DATABASE_URL_INVALID" | "TOKEN_STORAGE_FAILED" {
+function classifyTokenStorageError(
+  err: unknown,
+): "DATABASE_URL_INVALID" | "DATABASE_AUTHENTICATION_FAILED" | "AUTH_DATABASE_UNAVAILABLE" | "TOKEN_STORAGE_FAILED" {
+  const safe = classifyAuthError(err);
+  if (safe.code === "AUTH_DATABASE_AUTHENTICATION_FAILED") return "DATABASE_AUTHENTICATION_FAILED";
+  if (safe.code === "AUTH_DATABASE_UNAVAILABLE") return "AUTH_DATABASE_UNAVAILABLE";
   if (!(err instanceof Error)) return "TOKEN_STORAGE_FAILED";
-  const name = err.constructor?.name ?? "";
   const msg = err.message ?? "";
   if (
-    name === "PrismaClientInitializationError" ||
     msg.includes("url must start with the protocol") ||
     msg.includes("DATABASE_URL") ||
     msg.includes("datasource") ||
@@ -103,15 +107,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const errorCode = classifyTokenStorageError(err);
     if (errorCode === "DATABASE_URL_INVALID") {
       console.error("[admin-auth] TOKEN_STORAGE: DATABASE_URL_INVALID — DATABASE_URL must be a valid postgresql:// or postgres:// URL");
+    } else if (errorCode === "DATABASE_AUTHENTICATION_FAILED") {
+      console.error("[admin-auth] TOKEN_STORAGE: DATABASE_AUTHENTICATION_FAILED");
+    } else if (errorCode === "AUTH_DATABASE_UNAVAILABLE") {
+      console.error("[admin-auth] TOKEN_STORAGE: AUTH_DATABASE_UNAVAILABLE");
     } else {
-      console.error("[admin-auth] TOKEN_STORAGE_FAILED:", err instanceof Error ? err.message : String(err));
+      console.error("[admin-auth] TOKEN_STORAGE_FAILED");
     }
     return res.status(500).json({
       ok: false,
       error: errorCode,
       message: errorCode === "DATABASE_URL_INVALID"
         ? "Admin sign-in requires a valid PostgreSQL DATABASE_URL in this environment."
-        : "Unable to prepare sign-in. Please try again.",
+        : errorCode === "DATABASE_AUTHENTICATION_FAILED"
+          ? "Admin sign-in could not authenticate to the configured database."
+          : errorCode === "AUTH_DATABASE_UNAVAILABLE"
+            ? "Admin sign-in could not reach the configured database."
+            : "Unable to prepare sign-in. Please try again.",
     });
   }
 

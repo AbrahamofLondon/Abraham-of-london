@@ -15,6 +15,8 @@ NEXTAUTH_SECRET=<configured secret>
 
 `DATABASE_URL` must be a valid Neon PostgreSQL URL. It may use the pooled Neon runtime endpoint. `DIRECT_URL`, where used, should match the direct Neon connection endpoint for migration and schema operations.
 
+Production `DATABASE_URL` and `DIRECT_URL` may differ. Confirm both are current in Netlify and have not gone stale after a Neon branch, password, project, or pooler change.
+
 Do not paste database URLs into browser-visible logs, support tickets, or screenshots.
 
 ## Neon Checks
@@ -44,6 +46,8 @@ After changing `DATABASE_URL`, `DIRECT_URL`, `NEXTAUTH_URL`, or `NEXTAUTH_SECRET
 2. Trigger a fresh deploy.
 3. Confirm the deploy picked up the new env values.
 
+If Prisma CLI works locally but production auth fails, compare the Netlify environment values against the Neon dashboard. Netlify may still be using an older password or old pooler hostname until the env var is changed and the site is redeployed.
+
 ## Runtime Verification
 
 1. Visit `/api/auth/session`.
@@ -64,4 +68,12 @@ Authentication is temporarily unavailable. Please try again later or contact sup
 5. Expected safe error codes include:
    - `AUTH_DATABASE_UNAVAILABLE`
    - `AUTH_DATABASE_CONFIGURATION_ERROR`
+   - `AUTH_DATABASE_AUTHENTICATION_FAILED`
    - `AUTH_SIGNIN_FAILED`
+
+For admin magic-link token storage, equivalent safe API errors include:
+
+- `DATABASE_URL_INVALID`
+- `DATABASE_AUTHENTICATION_FAILED`
+- `AUTH_DATABASE_UNAVAILABLE`
+- `TOKEN_STORAGE_FAILED`

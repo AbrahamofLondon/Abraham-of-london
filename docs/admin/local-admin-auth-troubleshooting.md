@@ -121,6 +121,23 @@ pnpm db:migrate     # run prisma migrate dev
 
 Redis is used for rate-limit caching but is not required for token storage. Redis unavailability logs a warning and fails-open in development — it does not block the sign-in flow.
 
+If Prisma CLI commands work but the Next.js runtime still fails, restart the dev server. Next reads `.env.local` / `.env` at process start, and `.env.local` can override values you expected from `.env`.
+
+Credential-specific checks:
+
+- Confirm the password was not copied as redacted asterisks from a dashboard.
+- URL-encode special characters in the database password before placing it in `DATABASE_URL`.
+- Check Neon pooled and direct connection strings separately.
+- Use `pnpm db:status` to confirm CLI connectivity.
+- Restart the dev server after any env change.
+
+Error meanings:
+
+- `DATABASE_URL_INVALID`: missing, malformed, or non-PostgreSQL `DATABASE_URL`.
+- `DATABASE_AUTHENTICATION_FAILED`: database host was reached, but the configured database credentials were rejected.
+- `AUTH_DATABASE_UNAVAILABLE`: database host could not be reached or timed out.
+- `TOKEN_STORAGE_FAILED`: token write failed for another reason.
+
 ## Production Database Checks
 
 Production authentication also depends on Prisma reaching the configured PostgreSQL database. On Netlify, `DATABASE_URL` must be a valid Neon PostgreSQL connection string. If `DIRECT_URL` is used for migrations or direct connections, it should point at the corresponding direct Neon connection string.

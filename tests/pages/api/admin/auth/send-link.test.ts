@@ -180,6 +180,50 @@ describe("POST /api/admin/auth/send-link", () => {
     expect(JSON.stringify(body)).not.toContain("postgres://");
   });
 
+  it("returns DATABASE_AUTHENTICATION_FAILED JSON for invalid database credentials", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    mockVerificationCreate.mockRejectedValueOnce(
+      new Error("Authentication failed against database server at ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech, the provided database credentials are not valid."),
+    );
+
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(500);
+    const body = res._body as Record<string, unknown>;
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe("DATABASE_AUTHENTICATION_FAILED");
+    const raw = JSON.stringify(body);
+    expect(raw).not.toContain("ep-solitary-mud");
+    expect(raw).not.toContain("neon.tech");
+    expect(raw).not.toContain("provided database credentials");
+  });
+
+  it("returns AUTH_DATABASE_UNAVAILABLE JSON for unreachable database", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    mockVerificationCreate.mockRejectedValueOnce(
+      new Error("Can't reach database server at ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech:5432"),
+    );
+
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(500);
+    const body = res._body as Record<string, unknown>;
+    expect(body.error).toBe("AUTH_DATABASE_UNAVAILABLE");
+    expect(JSON.stringify(body)).not.toContain("neon.tech");
+  });
+
   it("returns TOKEN_STORAGE_FAILED JSON for other Prisma errors", async () => {
     vi.stubEnv("RESEND_API_KEY", "test-resend-key");
     mockVerificationCreate.mockRejectedValueOnce(new Error("Unique constraint failed"));
@@ -217,6 +261,9 @@ describe("POST /api/admin/auth/send-link", () => {
     expect(raw).not.toMatch(/file:\/\//);
     expect(raw).not.toMatch(/postgresql:\/\/[^"]+@/);  // no user:password@host pattern
     expect(raw).not.toMatch(/postgres:\/\/[^"]+@/);
+    expect(raw).not.toMatch(/:\/\/[^:"]+:[^@"]+@/);
+    expect(raw).not.toContain("ep-solitary-mud");
+    expect(raw).not.toContain("neon.tech");
     expect(raw).not.toContain("prisma/dev.db");
   });
 });
