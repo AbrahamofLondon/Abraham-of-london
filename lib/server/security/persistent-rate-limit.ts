@@ -109,8 +109,13 @@ export async function consumePersistentRateLimit(
     } catch (pgError) {
       // Both Redis and Postgres unavailable
       console.error("[RATE_LIMIT] Both Redis and Postgres unavailable", { redisError, pgError });
-      if (!failClosed) {
-        // Only non-critical routes may degrade
+      // In development without infrastructure, fail-open so auth flows work locally.
+      // Production always fails closed regardless of the failClosed flag.
+      const isDev = process.env.NODE_ENV === "development";
+      if (!failClosed || isDev) {
+        if (isDev && failClosed) {
+          console.warn("[RATE_LIMIT] failClosed=true overridden in development — rate-limit stores unavailable");
+        }
         const now = Date.now();
         return {
           allowed: true,
