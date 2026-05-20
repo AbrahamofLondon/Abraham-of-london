@@ -51,8 +51,11 @@ At least one authorised admin email must be present in the admin allow-list. Adm
 
 - the hardcoded bootstrap list used to prevent lockout, and
 - optional `ADMIN_USER_EMAILS` environment values.
+- optional legacy `ADMIN_ALLOWED_EMAILS` environment values.
 
-`ADMIN_USER_EMAILS` accepts comma, semicolon, or whitespace-separated email values. Values are lowercased and trimmed. Do not expose the full allow-list publicly.
+`ADMIN_USER_EMAILS` and `ADMIN_ALLOWED_EMAILS` accept comma, semicolon, or whitespace-separated email values. Values are lowercased and trimmed. Do not expose the full allow-list publicly.
+
+Do not repeat `ADMIN_USER_EMAIL` multiple times in the same env file. Only one value will win. Use `ADMIN_USER_EMAILS` for multiple allow-listed admin emails.
 
 If using magic-link login, configure email delivery:
 
@@ -118,6 +121,19 @@ pnpm db:migrate     # run prisma migrate dev
 
 Redis is used for rate-limit caching but is not required for token storage. Redis unavailability logs a warning and fails-open in development — it does not block the sign-in flow.
 
+## Production Database Checks
+
+Production authentication also depends on Prisma reaching the configured PostgreSQL database. On Netlify, `DATABASE_URL` must be a valid Neon PostgreSQL connection string. If `DIRECT_URL` is used for migrations or direct connections, it should point at the corresponding direct Neon connection string.
+
+Runtime and migration URLs may differ:
+
+- `DATABASE_URL` is commonly the pooled Neon runtime endpoint.
+- `DIRECT_URL` is commonly the direct Neon endpoint used by Prisma migrations.
+
+If the pooled hostname is unreachable, verify the Neon project, branch, region, connection string, and pooler status in the Neon dashboard. Then update the Netlify environment variable and redeploy. Changing Netlify env vars does not affect an already-running deploy until a new deploy is triggered.
+
+The browser must never show Prisma invocation text, database hostnames, SQL, stack traces, or raw connection errors. Database auth failures should surface only as safe auth error codes such as `AUTH_DATABASE_UNAVAILABLE` or `AUTH_DATABASE_CONFIGURATION_ERROR`.
+
 ## Diagnosis Steps
 
 1. Confirm `NEXTAUTH_URL` exactly matches the local origin, usually `http://localhost:3000`.
@@ -128,6 +144,7 @@ Redis is used for rate-limit caching but is not required for token storage. Redi
 6. Confirm `RESEND_API_KEY` is present if using magic links.
 7. Confirm the browser network response for `/api/admin/auth/send-link` is JSON.
 8. If Google sign-in is used, confirm the Google OAuth callback URL matches the local NextAuth callback URL.
+9. In production, confirm Netlify has the same database env values expected by the deployed branch.
 
 ## Return Target Handling
 

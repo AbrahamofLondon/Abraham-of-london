@@ -24,6 +24,7 @@ export function getResolvedAdminEmails(env: NodeJS.ProcessEnv = process.env): re
   return Array.from(new Set([
     ...HARDCODED_BOOTSTRAP_ADMIN_EMAILS,
     ...splitEmailList(env.ADMIN_USER_EMAILS),
+    ...splitEmailList(env.ADMIN_ALLOWED_EMAILS),
   ]));
 }
 

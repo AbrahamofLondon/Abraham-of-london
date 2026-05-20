@@ -26,4 +26,10 @@ describe("admin email resolver", () => {
       ADMIN_USER_EMAILS: "operator@example.com",
     } as unknown as NodeJS.ProcessEnv)).toBe(true);
   });
+
+  it("supports legacy ADMIN_ALLOWED_EMAILS values", () => {
+    expect(isResolvedAdminEmail("allowed@example.com", {
+      ADMIN_ALLOWED_EMAILS: "allowed@example.com",
+    } as unknown as NodeJS.ProcessEnv)).toBe(true);
+  });
 });

@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma.server";
 import { isBootstrapAdminEmail } from "@/lib/access/admin-emails";
 import { getUserAccess } from "@/lib/access/get-user-access";
+import { classifyAuthError } from "@/lib/auth/auth-error-classifier";
 import { verifyPassword } from "@/lib/auth/password";
 
 function bootstrapRoleForEmail(email: string) {
@@ -127,6 +128,10 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   providers: buildProviders(),
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
+  },
   callbacks: {
     async signIn({ user }) {
       const email = user.email?.toLowerCase().trim();
@@ -134,18 +139,27 @@ export const authOptions: NextAuthOptions = {
 
       const bootstrapRole = bootstrapRoleForEmail(email);
 
-      await prisma.user.upsert({
-        where: { email },
-        create: {
-          email,
-          name: user.name ?? null,
-          role: bootstrapRole ?? "USER",
-        },
-        update: {
-          name: user.name ?? undefined,
-          role: bootstrapRole ?? undefined,
-        },
-      });
+      try {
+        await prisma.user.upsert({
+          where: { email },
+          create: {
+            email,
+            name: user.name ?? null,
+            role: bootstrapRole ?? "USER",
+          },
+          update: {
+            name: user.name ?? undefined,
+            role: bootstrapRole ?? undefined,
+          },
+        });
+      } catch (error) {
+        const safe = classifyAuthError(error);
+        console.error("[auth] signIn database failure", {
+          code: safe.code,
+          callback: "signIn",
+        });
+        throw new Error(safe.code);
+      }
 
       return true;
     },
@@ -164,17 +178,32 @@ export const authOptions: NextAuthOptions = {
         await prisma.user.update({
           where: { email: fallbackEmail },
           data: { role: bootstrapRole },
-        }).catch(() => undefined);
+        }).catch((error) => {
+          const safe = classifyAuthError(error);
+          console.error("[auth] jwt role sync failure", {
+            code: safe.code,
+            callback: "jwt",
+          });
+          return undefined;
+        });
       }
 
-      const dbUser = await prisma.user.findUnique({
-        where: { email: fallbackEmail },
-        select: { id: true, role: true },
-      });
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: fallbackEmail },
+          select: { id: true, role: true },
+        });
 
-      if (dbUser) {
-        token.sub = dbUser.id;
-        token.role = dbUser.role;
+        if (dbUser) {
+          token.sub = dbUser.id;
+          token.role = dbUser.role;
+        }
+      } catch (error) {
+        const safe = classifyAuthError(error);
+        console.error("[auth] jwt user lookup failure", {
+          code: safe.code,
+          callback: "jwt",
+        });
       }
 
       if (trigger === "update" && session?.user) {
@@ -192,14 +221,36 @@ export const authOptions: NextAuthOptions = {
       session.user.id = typeof token.sub === "string" ? token.sub : "";
       session.user.role = typeof token.role === "string" ? token.role : "USER";
 
-      const access = await getUserAccess(
-        prisma,
-        typeof token.sub === "string" ? token.sub : null,
-      );
+      try {
+        const access = await getUserAccess(
+          prisma,
+          typeof token.sub === "string" ? token.sub : null,
+        );
 
-      session.user.accessTier = access.tier;
-      session.user.entitlements = access.entitlements;
-      session.user.access = access;
+        session.user.accessTier = access.tier;
+        session.user.entitlements = access.entitlements;
+        session.user.access = access;
+      } catch (error) {
+        const safe = classifyAuthError(error);
+        console.error("[auth] session access resolution failure", {
+          code: safe.code,
+          callback: "session",
+        });
+        session.user.accessTier = "public";
+        session.user.entitlements = { tiers: [], products: [], artifacts: [] };
+        session.user.access = {
+          userId: null,
+          email: session.user.email ?? null,
+          role: null,
+          tier: "public",
+          entitlements: { tiers: [], products: [], artifacts: [] },
+          permissions: {
+            isAuthenticated: Boolean(session.user.email),
+            isAdmin: false,
+            isOwner: false,
+          },
+        };
+      }
 
       return session;
     },
