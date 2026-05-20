@@ -52,6 +52,7 @@ Observation window: [Date, quarter, or "Q1 2026 data"]
 Confidence:        [HIGH | MEDIUM | LOW | MONITORING]
 Used in section:   [Section name]
 Notes:             [Caveats, limitations, method basis summary]
+Release blocker?:  [yes/no]
 ```
 
 ---
@@ -154,6 +155,8 @@ The following entries illustrate the standard. Future reports must match this le
 
 ## Enforcement
 
-Entries missing from the source appendix that correspond to claims in the body of the report constitute a `SOURCE_TRACEABILITY` dimension failure in the quality gate. Hard numbers without entries constitute a critical failure `HARD_NUMBERS_NO_SOURCE`.
+Entries missing from the source appendix that correspond to claims in the body of the report constitute a `SOURCE_TRACEABILITY` dimension failure in the quality gate. Hard numbers without entries constitute a critical failure `HARD_NUMBERS_NO_SOURCE`. Major macro, regional, FX, credit, growth, or scenario claims without evidence posture classification constitute `UNCLASSIFIED_MAJOR_CLAIM`. Hard quantitative or market-condition claims without source appendix rows constitute `HARD_CLAIM_WITHOUT_SOURCE_ROW`.
+
+Draft reports may retain rows marked "Source pending", "Evidence to collect", "Method note required", or "Awaiting Q2 close" only when the report remains non-public and non-purchasable. Active paid releases must resolve release-blocking pending rows before publication.
 
 The source appendix is a paid-edition-only section. It must not appear in the public surface edition.

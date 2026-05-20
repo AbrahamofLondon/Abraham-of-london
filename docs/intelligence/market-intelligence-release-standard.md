@@ -203,6 +203,10 @@ Every material claim must have a corresponding source appendix entry with: evide
 
 The source appendix is a paid-edition-only section. It must not appear in the public surface edition.
 
+Every major macro, regional, FX, credit, growth, or scenario claim must also carry an evidence posture visible to the reader: Confirmed, Directional, Monitoring, Scenario assumption, or Operator judgement. A draft may contain source-pending rows when the pending status is explicit. An active paid release may not retain source-pending rows for release-blocking hard claims.
+
+Reports must include a skeptical-reader falsifiability section before publication. The section should state what would weaken or disconfirm the central thesis, so operators can distinguish intelligence discipline from conviction theatre.
+
 ---
 
 ## 8. Paid vs public edition separation

@@ -18,7 +18,10 @@ export type CriticalFailureCode =
   | "PAID_SAME_AS_PUBLIC"
   | "MISSING_LIFECYCLE_METADATA"
   | "MISSING_SUPERSESSION_PLAN"
-  | "PRIOR_QUARTER_CALLS_UNREVIEWED";
+  | "PRIOR_QUARTER_CALLS_UNREVIEWED"
+  | "UNCLASSIFIED_MAJOR_CLAIM"
+  | "HARD_CLAIM_WITHOUT_SOURCE_ROW"
+  | "SOURCE_PENDING_IN_ACTIVE_RELEASE";
 
 export type QualityDimensionScore = {
   dimension: QualityDimension;
@@ -49,6 +52,9 @@ export type MarketReportQualityInput = {
   hasSupersessionPlan: boolean;
   hasSourceAppendix: boolean;
   hasHardNumbersWithoutSource: boolean;
+  hasUnclassifiedMajorClaims: boolean;
+  hasSourceRowsForHardClaims: boolean;
+  hasSourcePendingRows: boolean;
   hasDecisionImplications: boolean;
   hasBoardSummary: boolean;
   hasScenarioFramework: boolean;
@@ -137,6 +143,16 @@ function scoreSourceTraceability(
       "Hard numbers present without source reference or method label.",
     ]);
 
+  if (!input.hasSourceRowsForHardClaims)
+    return dim("SOURCE_TRACEABILITY", 0, [
+      "Hard quantitative or market-condition claims do not have source appendix rows.",
+    ]);
+
+  if (isActiveState(input.lifecycleState) && input.hasSourcePendingRows)
+    return dim("SOURCE_TRACEABILITY", 0, [
+      "Active paid release still contains source-pending rows.",
+    ]);
+
   if (!input.hasSourceAppendix)
     return dim("SOURCE_TRACEABILITY", 7, [
       "No source and confidence appendix. All evidence classes must be disclosed.",
@@ -172,6 +188,11 @@ function scoreScenarioDiscipline(
   if (!input.hasConfidencePosture)
     return dim("SCENARIO_DISCIPLINE", 8, [
       "No confidence posture. Evidence classes must be assigned HIGH/MEDIUM/LOW/MONITORING.",
+    ]);
+
+  if (input.hasUnclassifiedMajorClaims)
+    return dim("SCENARIO_DISCIPLINE", 0, [
+      "A major macro, regional, FX, credit, growth, or scenario claim lacks evidence posture classification.",
     ]);
 
   return dim("SCENARIO_DISCIPLINE", 10, []);
@@ -295,6 +316,15 @@ function detectCriticalFailures(
 
   if (input.hasPriorQuarterCalls && !input.priorQuarterCallsReviewed)
     failures.push("PRIOR_QUARTER_CALLS_UNREVIEWED");
+
+  if (input.hasUnclassifiedMajorClaims)
+    failures.push("UNCLASSIFIED_MAJOR_CLAIM");
+
+  if (!input.hasSourceRowsForHardClaims)
+    failures.push("HARD_CLAIM_WITHOUT_SOURCE_ROW");
+
+  if (isActiveState(input.lifecycleState) && input.hasSourcePendingRows)
+    failures.push("SOURCE_PENDING_IN_ACTIVE_RELEASE");
 
   return failures;
 }

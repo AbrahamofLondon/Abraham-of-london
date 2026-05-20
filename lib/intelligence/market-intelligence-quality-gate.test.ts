@@ -14,6 +14,9 @@ const PASSING_INPUT: MarketReportQualityInput = {
   hasSupersessionPlan:            true,
   hasSourceAppendix:              true,
   hasHardNumbersWithoutSource:    false,
+  hasUnclassifiedMajorClaims:     false,
+  hasSourceRowsForHardClaims:     true,
+  hasSourcePendingRows:           false,
   hasDecisionImplications:        true,
   hasBoardSummary:                true,
   hasScenarioFramework:           true,
@@ -83,6 +86,28 @@ describe("scoreReport — critical failure: HARD_NUMBERS_NO_SOURCE", () => {
       hasHardNumbersWithoutSource: true,
     });
     expect(result.criticalFailures).toContain("HARD_NUMBERS_NO_SOURCE");
+    expect(result.releaseReady).toBe(false);
+  });
+});
+
+describe("scoreReport — critical failure: UNCLASSIFIED_MAJOR_CLAIM", () => {
+  it("flags major claims without evidence posture classification", () => {
+    const result = scoreReport({
+      ...PASSING_INPUT,
+      hasUnclassifiedMajorClaims: true,
+    });
+    expect(result.criticalFailures).toContain("UNCLASSIFIED_MAJOR_CLAIM");
+    expect(result.releaseReady).toBe(false);
+  });
+});
+
+describe("scoreReport — critical failure: HARD_CLAIM_WITHOUT_SOURCE_ROW", () => {
+  it("flags hard claims without source appendix rows", () => {
+    const result = scoreReport({
+      ...PASSING_INPUT,
+      hasSourceRowsForHardClaims: false,
+    });
+    expect(result.criticalFailures).toContain("HARD_CLAIM_WITHOUT_SOURCE_ROW");
     expect(result.releaseReady).toBe(false);
   });
 });
@@ -293,6 +318,9 @@ const GMI_Q2_DRAFT_INPUT: MarketReportQualityInput = {
   hasSupersessionPlan:            false, // Q3 not yet registered
   hasSourceAppendix:              false, // source appendix incomplete
   hasHardNumbersWithoutSource:    false,
+  hasUnclassifiedMajorClaims:     false,
+  hasSourceRowsForHardClaims:     true,
+  hasSourcePendingRows:           true,
   hasDecisionImplications:        true,
   hasBoardSummary:                true,
   hasScenarioFramework:           true,
@@ -332,6 +360,7 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       hasSupersessionPlan: true,
       priorQuarterCallsReviewed: true,
       hasSourceAppendix: false,
+      hasSourcePendingRows: false,
     });
     const dim = withoutSourceAppendix.scores.find(
       (s) => s.dimension === "SOURCE_TRACEABILITY",
@@ -349,6 +378,7 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       hasSupersessionPlan: true,
       priorQuarterCallsReviewed: true,
       hasSourceAppendix: true,
+      hasSourcePendingRows: false,
       hasConfidencePosture: false,
     });
     const dim = withoutPosture.scores.find(
@@ -369,6 +399,7 @@ describe("scoreReport — Q2 governed draft release gate", () => {
       hasSupersessionPlan: true,
       priorQuarterCallsReviewed: true,
       hasSourceAppendix: true,
+      hasSourcePendingRows: false,
       hasConfidencePosture: true,
       hasBoardSummary: false,
     });
@@ -377,5 +408,67 @@ describe("scoreReport — Q2 governed draft release gate", () => {
     );
     expect(boardDim?.score).toBeLessThan(8);
     expect(withoutBoard.releaseReady).toBe(false);
+  });
+
+  it("fails release readiness if major claims lack posture", () => {
+    const result = scoreReport({
+      ...GMI_Q2_DRAFT_INPUT,
+      lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+      purchasable: true,
+      deliveryRouteVerified: true,
+      hasSupersessionPlan: true,
+      priorQuarterCallsReviewed: true,
+      hasSourceAppendix: true,
+      hasConfidencePosture: true,
+      hasSourcePendingRows: false,
+      hasUnclassifiedMajorClaims: true,
+    });
+    expect(result.criticalFailures).toContain("UNCLASSIFIED_MAJOR_CLAIM");
+    expect(result.releaseReady).toBe(false);
+  });
+
+  it("fails release readiness if hard macro claims lack source rows", () => {
+    const result = scoreReport({
+      ...GMI_Q2_DRAFT_INPUT,
+      lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+      purchasable: true,
+      deliveryRouteVerified: true,
+      hasSupersessionPlan: true,
+      priorQuarterCallsReviewed: true,
+      hasSourceAppendix: true,
+      hasConfidencePosture: true,
+      hasSourcePendingRows: false,
+      hasSourceRowsForHardClaims: false,
+    });
+    expect(result.criticalFailures).toContain("HARD_CLAIM_WITHOUT_SOURCE_ROW");
+    expect(result.releaseReady).toBe(false);
+  });
+
+  it("allows a draft to contain source-pending rows while still blocking release for Q1 review", () => {
+    const result = scoreReport({
+      ...GMI_Q2_DRAFT_INPUT,
+      hasSourceAppendix: true,
+      hasConfidencePosture: true,
+      hasSourcePendingRows: true,
+    });
+    expect(result.criticalFailures).not.toContain("SOURCE_PENDING_IN_ACTIVE_RELEASE");
+    expect(result.criticalFailures).toContain("PRIOR_QUARTER_CALLS_UNREVIEWED");
+    expect(result.releaseReady).toBe(false);
+  });
+
+  it("blocks an active release while source-pending rows remain", () => {
+    const result = scoreReport({
+      ...GMI_Q2_DRAFT_INPUT,
+      lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+      purchasable: true,
+      deliveryRouteVerified: true,
+      hasSupersessionPlan: true,
+      priorQuarterCallsReviewed: true,
+      hasSourceAppendix: true,
+      hasConfidencePosture: true,
+      hasSourcePendingRows: true,
+    });
+    expect(result.criticalFailures).toContain("SOURCE_PENDING_IN_ACTIVE_RELEASE");
+    expect(result.releaseReady).toBe(false);
   });
 });
