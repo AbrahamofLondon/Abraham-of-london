@@ -21,10 +21,11 @@ function getTrackedFiles() {
   return output ? output.split(/\r?\n/).filter(Boolean) : [];
 }
 
-const forbiddenTracked = [
-  ".env",
-  ".env.local",
-];
+const allowedTrackedEnvFiles = new Set([
+  ".env.example",
+  ".env.schema",
+  ".env.local.example",
+]);
 
 const ignoredPathPatterns = [
   /^scripts\/environment\//,
@@ -35,13 +36,22 @@ const placeholderValuePatterns = [
   /CHANGE_ME/i,
   /\$\{/,
   /^["']?$/i,
+  /placeholder/i,
   /your-/i,
+  /localhost/i,
+  /example/i,
+  /file:/i,
+  /dev\.db/i,
+  /USER/i,
+  /PASSWORD/i,
   /change-this-in-production/i,
   /change-in-production/i,
   /random-secret/i,
   /random-64-char-secret/i,
   /any-32-char-string/i,
   /local-dev-/i,
+  /user:password/i,
+  /postgres(?:ql)?:\/\/(?:user|username|\$\{)/i,
   /<[^>]+>/,
 ];
 
@@ -56,7 +66,7 @@ function isPlaceholderAssignment(line) {
 }
 
 for (const path of getTrackedFiles()) {
-  if (forbiddenTracked.includes(path)) {
+  if (/^\.env(?:\.|$)/.test(path) && !allowedTrackedEnvFiles.has(path)) {
     record(`Tracked secret file: ${path}`);
   }
 
@@ -73,12 +83,13 @@ for (const path of getTrackedFiles()) {
   }
 
   const assignmentPattern =
-    /^\s*(NEXTAUTH_SECRET|JWT_SECRET|DOWNLOAD_TOKEN_SECRET|ACTION_TOKEN_SECRET|ENCRYPTION_KEY|STRIPE_WEBHOOK_SECRET|RESEND_WEBHOOK_SECRET|ADMIN_API_KEY|INTERNAL_BYPASS_KEY)\s*=\s*(.+)$/i;
+    /^\s*(GITHUB_SECRET|GITHUB_CLIENT_SECRET|AUTH_GITHUB_SECRET|NEXTAUTH_SECRET|AUTH_SECRET|JWT_SECRET|DOWNLOAD_TOKEN_SECRET|ACTION_TOKEN_SECRET|ENCRYPTION_KEY|STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|RESEND_API_KEY|RESEND_WEBHOOK_SECRET|ADMIN_API_KEY|INTERNAL_BYPASS_KEY|PRIVATE_KEY|DATABASE_URL|DIRECT_URL|NETLIFY_AUTH_TOKEN)\s*=\s*(.+)$/i;
 
   for (const line of content.split(/\r?\n/)) {
-    if (!assignmentPattern.test(line)) continue;
+    const match = line.match(assignmentPattern);
+    if (!match) continue;
     if (isPlaceholderAssignment(line)) continue;
-    record(`Possible committed secret in ${path}: ${line.trim()}`);
+    record(`Possible committed secret assignment in ${path}: ${match[1]}`);
   }
 
   for (const pattern of [/sk_live_[A-Za-z0-9]+/, /rk_live_[A-Za-z0-9]+/, /whsec_[A-Za-z0-9]+/]) {

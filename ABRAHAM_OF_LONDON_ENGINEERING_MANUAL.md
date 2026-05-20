@@ -4648,7 +4648,7 @@ The dev server runs on `http://localhost:3000` by default.
 The `.env` file must contain at minimum:
 
 ```
-DATABASE_URL=postgresql://...
+DATABASE_URL=postgresql://user:password@host:5432/database?sslmode=require
 NEXTAUTH_SECRET=<random-secret>
 NEXTAUTH_URL=http://localhost:3000
 ```
