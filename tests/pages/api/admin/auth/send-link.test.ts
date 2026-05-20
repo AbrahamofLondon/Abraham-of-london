@@ -121,4 +121,36 @@ describe("POST /api/admin/auth/send-link", () => {
       text: expect.stringContaining("returnTo=%2Fadmin%2Foutbound%2Flinkedin"),
     }));
   });
+
+  it("returns JSON (not HTML) for a non-admin email — no enumeration", async () => {
+    const req = makeReq({
+      email: "notanadmin@example.com",
+      returnTo: "/admin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    // Must return JSON with status 200 (neutral — prevents enumeration)
+    expect(res._status).toBe(200);
+    const body = res._body as Record<string, unknown>;
+    expect(body.ok).toBe(true);
+    expect(typeof body.message).toBe("string");
+    // Must never create a token or send an email for non-admin emails
+    expect(mockVerificationCreate).not.toHaveBeenCalled();
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("rejects a missing email with JSON 400", async () => {
+    const req = makeReq({ returnTo: "/admin" });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(400);
+    const body = res._body as Record<string, unknown>;
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe("INVALID_EMAIL");
+    expect(mockVerificationCreate).not.toHaveBeenCalled();
+  });
 });

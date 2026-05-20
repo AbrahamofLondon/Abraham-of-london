@@ -53,6 +53,11 @@ const PUBLIC_PREFIXES = [
   "/api/purpose-alignment",
   "/api/purpose-alignment/assessments",
   "/api/purpose-alignment/report",
+  // Auth bootstrap — these endpoints CREATE the admin session and cannot require one.
+  // Each endpoint enforces its own rate limiting and email allowlist internally.
+  "/api/admin/auth/send-link",
+  "/api/admin/auth/verify",
+  "/api/admin/auth/callback",
   "/_next",
   "/favicon.ico",
   "/robots.txt",
@@ -173,6 +178,9 @@ const CONSTITUTIONAL_PROTECTED_PATHS: Record<
 const LOCKDOWN_EXEMPT_PATHS = [
   "/admin/login",
   "/api/auth",
+  "/api/admin/auth/send-link",
+  "/api/admin/auth/verify",
+  "/api/admin/auth/callback",
   "/api/system/lock-status",
   "/restricted",
   "/inner-circle/insufficient-clearance",
@@ -622,7 +630,7 @@ function isAllowedIp(ip: string): boolean {
   return allowedIps.includes(ip);
 }
 
-function isPublicPath(pathname: string): boolean {
+export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );

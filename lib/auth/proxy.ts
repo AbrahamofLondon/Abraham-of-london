@@ -38,7 +38,11 @@ const PUBLIC_PREFIXES = [
   "/api/check-access",
   "/api/inner-circle",
   "/api/pdfs",
-  "/api/premium/content", 
+  "/api/premium/content",
+  // Auth bootstrap — must not require an existing admin session.
+  "/api/admin/auth/send-link",
+  "/api/admin/auth/verify",
+  "/api/admin/auth/callback",
   "/_next",
   "/favicon.ico",
   "/robots.txt",
@@ -55,7 +59,7 @@ const PUBLIC_PREFIXES = [
   "/fatherhood",
   "/leadership",
   "/auth/access-denied",
-  "/inner-circle/insufficient-clearance"
+  "/inner-circle/insufficient-clearance",
 ] as const;
 
 // --- PERIMETER FUNCTIONS ---
@@ -146,7 +150,10 @@ export async function proxy(req: NextRequest) {
   }
 
   // 2. Lockdown Check (Exempting Auth/Login)
-  const isLockdownExempt = pathname.startsWith("/admin/login") || pathname.startsWith("/api/auth") || pathname.includes("insufficient-clearance");
+  const isLockdownExempt = pathname.startsWith("/admin/login") ||
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/admin/auth/") ||
+    pathname.includes("insufficient-clearance");
   if (!isLockdownExempt) {
     const isLocked = await checkGlobalLock(req);
     if (isLocked) {
