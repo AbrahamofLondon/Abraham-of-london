@@ -49,7 +49,9 @@ const LINKEDIN_AUDIENCES = [
 const LINKEDIN_STATUSES: LinkedInStatus[] = [
   "draft",
   "ready",
+  "published",
   "posted",
+  "retired",
   "archived",
   "needs_review",
 ];

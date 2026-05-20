@@ -81,6 +81,7 @@
     "contentlayer2:watch": "contentlayer2 watch",
     "content:validate": "node scripts/validate-frontmatter.mjs",
     "outbound:linkedin:check": "tsx scripts/audit/verify-linkedin-outbound.ts",
+    "outbound:linkedin:publish-dry-run": "tsx scripts/audit/linkedin-publish-dry-run.ts",
     "outbound:check": "pnpm outbound:linkedin:check",
     "vault:sync": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192 --no-warnings\" npx tsx scripts/vault-master.ts",
     "vault:fix": "node scripts/vault-repair.mjs",

@@ -4,7 +4,14 @@
  * Shared types for the LinkedIn outbound publishing workflow.
  */
 
-export type LinkedInStatus = "draft" | "ready" | "posted" | "archived" | "needs_review";
+export type LinkedInStatus =
+  | "draft"
+  | "ready"
+  | "published"
+  | "posted"
+  | "retired"
+  | "archived"
+  | "needs_review";
 
 export type LinkedInPillar =
   | "decision_authority"
@@ -38,6 +45,14 @@ export interface LinkedInFrontmatter {
   scheduledFor: string | null;
   postedAt: string | null;
   linkedinPostUrl: string | null;
+  linkedinUrl: string | null;
+  linkedReportId: string | null;
+  publicationGate: string | null;
+  claimRisk: "LOW" | "MEDIUM" | "HIGH";
+  requiresLifecycleCheck: boolean;
+  draft: boolean;
+  published: boolean;
+  sequence: number | null;
   source: string | null;
 }
 
