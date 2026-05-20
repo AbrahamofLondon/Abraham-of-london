@@ -8,6 +8,22 @@ import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rat
 import { applyShield } from "@/lib/server/security/shield-middleware";
 import crypto from "crypto";
 
+function classifyTokenStorageError(err: unknown): "DATABASE_URL_INVALID" | "TOKEN_STORAGE_FAILED" {
+  if (!(err instanceof Error)) return "TOKEN_STORAGE_FAILED";
+  const name = err.constructor?.name ?? "";
+  const msg = err.message ?? "";
+  if (
+    name === "PrismaClientInitializationError" ||
+    msg.includes("url must start with the protocol") ||
+    msg.includes("DATABASE_URL") ||
+    msg.includes("datasource") ||
+    msg.includes("Invalid `prisma") && msg.includes("datasource")
+  ) {
+    return "DATABASE_URL_INVALID";
+  }
+  return "TOKEN_STORAGE_FAILED";
+}
+
 /**
  * POST /api/admin/auth/send-link
  *
@@ -84,11 +100,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: { identifier: normalized, token, expires },
     });
   } catch (err) {
-    console.error("[admin-auth] Failed to store verification token:", err);
+    const errorCode = classifyTokenStorageError(err);
+    if (errorCode === "DATABASE_URL_INVALID") {
+      console.error("[admin-auth] TOKEN_STORAGE: DATABASE_URL_INVALID — DATABASE_URL must be a valid postgresql:// or postgres:// URL");
+    } else {
+      console.error("[admin-auth] TOKEN_STORAGE_FAILED:", err instanceof Error ? err.message : String(err));
+    }
     return res.status(500).json({
       ok: false,
-      error: "TOKEN_STORAGE_FAILED",
-      message: "Unable to prepare sign-in. Please try again.",
+      error: errorCode,
+      message: errorCode === "DATABASE_URL_INVALID"
+        ? "Admin sign-in requires a valid PostgreSQL DATABASE_URL in this environment."
+        : "Unable to prepare sign-in. Please try again.",
     });
   }
 

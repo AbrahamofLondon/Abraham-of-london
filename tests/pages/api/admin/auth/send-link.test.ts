@@ -153,4 +153,70 @@ describe("POST /api/admin/auth/send-link", () => {
     expect(body.error).toBe("INVALID_EMAIL");
     expect(mockVerificationCreate).not.toHaveBeenCalled();
   });
+
+  it("returns DATABASE_URL_INVALID JSON when Prisma init fails with invalid URL", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    const initError = Object.assign(
+      new Error("Invalid `prisma.verificationToken.create()` invocation:\n\nerror: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`."),
+      { constructor: { name: "PrismaClientInitializationError" } },
+    );
+    mockVerificationCreate.mockRejectedValueOnce(initError);
+
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(500);
+    const body = res._body as Record<string, unknown>;
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe("DATABASE_URL_INVALID");
+    expect(typeof body.message).toBe("string");
+    // Must never expose DATABASE_URL value
+    expect(JSON.stringify(body)).not.toContain("postgresql://");
+    expect(JSON.stringify(body)).not.toContain("postgres://");
+  });
+
+  it("returns TOKEN_STORAGE_FAILED JSON for other Prisma errors", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    mockVerificationCreate.mockRejectedValueOnce(new Error("Unique constraint failed"));
+
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(500);
+    const body = res._body as Record<string, unknown>;
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe("TOKEN_STORAGE_FAILED");
+  });
+
+  it("never exposes a connection string value in the response body", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    const initError = new Error("url must start with the protocol `postgresql://`");
+    mockVerificationCreate.mockRejectedValueOnce(initError);
+
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    const raw = JSON.stringify(res._body ?? "");
+    // error code and friendly message may contain the word DATABASE_URL — that is expected.
+    // What must not appear is an actual connection string value.
+    expect(raw).not.toMatch(/file:\/\//);
+    expect(raw).not.toMatch(/postgresql:\/\/[^"]+@/);  // no user:password@host pattern
+    expect(raw).not.toMatch(/postgres:\/\/[^"]+@/);
+    expect(raw).not.toContain("prisma/dev.db");
+  });
 });

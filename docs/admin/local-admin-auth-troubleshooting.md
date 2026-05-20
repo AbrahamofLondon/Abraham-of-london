@@ -86,15 +86,48 @@ ADMIN_USER_PASSWORD=<bcrypt or argon2 hash>
 
 Supported aliases in code include `NEXTAUTH_ADMIN_EMAIL` and `NEXTAUTH_ADMIN_PASSWORD`. The password value must be a hash; plaintext passwords are rejected.
 
+## Database Setup
+
+The Prisma schema provider is `postgresql`. `DATABASE_URL` must start with `postgresql://` or `postgres://`. A SQLite `file:` URL will cause a `PrismaClientInitializationError` and the send-link endpoint will return:
+
+```json
+{ "ok": false, "error": "DATABASE_URL_INVALID", "message": "Admin sign-in requires a valid PostgreSQL DATABASE_URL in this environment." }
+```
+
+Use a [Neon](https://neon.tech) or local Postgres instance:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
+```
+
+After setting the URL, ensure the schema is current:
+
+```bash
+pnpm db:generate
+pnpm db:status
+```
+
+The `VerificationToken` and `User` tables must exist. If migrations are pending:
+
+```bash
+pnpm db:push        # apply schema directly (dev only)
+# or
+pnpm db:migrate     # run prisma migrate dev
+```
+
+Redis is used for rate-limit caching but is not required for token storage. Redis unavailability logs a warning and fails-open in development — it does not block the sign-in flow.
+
 ## Diagnosis Steps
 
 1. Confirm `NEXTAUTH_URL` exactly matches the local origin, usually `http://localhost:3000`.
 2. Confirm `NEXTAUTH_SECRET` is set and stable between server restarts.
-3. Confirm the login email appears in `lib/access/admin-email-resolver.ts` or `ADMIN_USER_EMAILS`.
-4. Confirm Prisma can write `VerificationToken` and `User` rows.
-5. Confirm `RESEND_API_KEY` is present if using magic links.
-6. Confirm the browser network response for `/api/admin/auth/send-link` is JSON.
-7. If Google sign-in is used, confirm the Google OAuth callback URL matches the local NextAuth callback URL.
+3. Confirm `DATABASE_URL` starts with `postgresql://` or `postgres://`.
+4. Run `pnpm db:status` and confirm no pending migrations.
+5. Confirm the login email appears in `lib/access/admin-email-resolver.ts` or `ADMIN_USER_EMAILS`.
+6. Confirm `RESEND_API_KEY` is present if using magic links.
+7. Confirm the browser network response for `/api/admin/auth/send-link` is JSON.
+8. If Google sign-in is used, confirm the Google OAuth callback URL matches the local NextAuth callback URL.
 
 ## Return Target Handling
 
