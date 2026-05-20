@@ -66,6 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (!process.env.RESEND_API_KEY?.trim()) {
+    console.warn("[admin-auth] send-link: EMAIL_PROVIDER_NOT_CONFIGURED — RESEND_API_KEY is absent");
     return res.status(503).json({
       ok: false,
       error: "EMAIL_PROVIDER_NOT_CONFIGURED",

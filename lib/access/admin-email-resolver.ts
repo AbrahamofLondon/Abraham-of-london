@@ -1,7 +1,6 @@
 const HARDCODED_BOOTSTRAP_ADMIN_EMAILS = [
   "info@abrahamoflondon.org",
   "admin@abrahamoflondon.org",
-  "support@abrahamoflondon.org",
   "seunadaramola@gmail.com",
   "abrahamadaramola@outlook.com",
 ] as const;

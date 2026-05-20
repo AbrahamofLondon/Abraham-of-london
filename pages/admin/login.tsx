@@ -71,13 +71,22 @@ const AdminLoginPage: NextPage<AdminLoginProps> = ({ googleConfigured }) => {
     if (!normalized) { setError("Enter your admin email first."); return; }
     setLoading(true);
     setError(null);
+    let response: Response;
     try {
-      const response = await fetch("/api/admin/auth/send-link", {
+      response = await fetch("/api/admin/auth/send-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: normalized, returnTo }),
       });
+    } catch {
+      setError(
+        "Unable to reach the authentication endpoint. Check the local dev server and auth provider configuration.",
+      );
+      setLoading(false);
+      return;
+    }
 
+    try {
       // Defensive JSON parsing — never crash on non-JSON response
       const contentType = response.headers.get("content-type") || "";
       let data: { ok?: boolean; message?: string; error?: string };
