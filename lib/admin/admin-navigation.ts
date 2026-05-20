@@ -40,6 +40,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     items: [
       { id: "decision-intelligence", label: "Decision Intelligence", href: "/admin/decision-intelligence", router: "app", visibility: "admin", status: "active", description: "Funnel progression, conversion, escalation metrics" },
       { id: "intelligence-stream", label: "Intelligence Stream", href: "/admin/intelligence", router: "pages", visibility: "admin", status: "active", description: "Real-time deal flow audit stream" },
+      { id: "gmi-release-console", label: "GMI Release Console", href: "/admin/intelligence/gmi-release-console", router: "pages", visibility: "admin", status: "active", description: "Read-only Global Market Intelligence release governance console" },
       { id: "decision-efficacy", label: "Decision Efficacy", href: "/admin/decision/efficacy", router: "app", visibility: "admin", status: "active", description: "Decision efficacy panel with contextual ranking and rebuild controls" },
       { id: "decision-governance", label: "Decision Governance", href: "/admin/decision/governance", router: "app", visibility: "admin", status: "active", description: "Governance alerts and authority violation tracking" },
       { id: "decision-performance", label: "Decision Performance", href: "/admin/decision/performance", router: "app", visibility: "admin", status: "active", description: "Decision performance table with rebuild controls" },
