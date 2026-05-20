@@ -198,7 +198,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         primaryLabel = "Request access";
         primaryHref  = "/inner-circle";
       } else if (item.id === "global-market-intelligence-report-q1-2026") {
-        primaryLabel = "Purchase report";
+        primaryLabel = "Access institutional edition";
         primaryHref = metaHref;
       } else {
         primaryLabel = "View artifact metadata";
@@ -490,13 +490,31 @@ function BriefCard({ brief }: { brief: BriefItem }) {
 
 const GMI_Q1_RECORD = getMarketIntelligenceRecord("GMI-Q1-2026");
 const GMI_Q1_EDITIONS = getEditionsForReport("GMI-Q1-2026");
+const GMI_Q2_RECORD = getMarketIntelligenceRecord("GMI-Q2-2026");
+
+const EVIDENCE_POSTURES = [
+  {
+    label: "Confirmed",
+    text: "Supported by source evidence or observed market data.",
+  },
+  {
+    label: "Directional",
+    text: "Supported by evidence, but not settled enough to treat as final.",
+  },
+  {
+    label: "Monitoring",
+    text: "Important but not yet strong enough for a firm conclusion.",
+  },
+  {
+    label: "Scenario assumption",
+    text: "Used for planning, not prediction.",
+  },
+] as const;
 
 const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   briefs,
   artifacts,
 }) => {
-  const activeReport = artifacts.find((artifact) => artifact.id === "global-market-intelligence-report-q1-2026");
-
   return (
     <Layout
       title="Market Intelligence Reports | Abraham of London"
@@ -524,13 +542,13 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             }}
           >
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-              Quarterly report catalogue
+              Quarterly intelligence desk
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(1.9rem,4vw,3rem)", color: "rgba(255,255,255,0.93)" }}>
-              Market Intelligence Reports
+              Global Market Intelligence
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
-              A dedicated catalogue for the Global Market Intelligence quarterly report line. The current active report leads the page, editions are separated by access posture, and related intelligence notes sit lower as supporting context rather than peers to the quarterly reports.
+              A governed quarterly intelligence product line for operators planning under trade fragmentation, capital selectivity, and policy friction. The active report, preparation queue, evidence standards, and call ledger are shown together so buyers can see the discipline behind the line.
             </p>
 
             {/* Access posture summary */}
@@ -552,10 +570,77 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
 
           {/* ── Current active report ───────────────────────────────────── */}
           {GMI_Q1_RECORD ? (
-            <MarketIntelligenceCatalogue
-              record={GMI_Q1_RECORD}
-              editions={GMI_Q1_EDITIONS}
-            />
+            <section>
+              <div className="mb-4">
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                  Current active report
+                </p>
+                <p className="mt-1 text-xs text-white/38">
+                  Q1 remains active for Q2 decision use until superseded by the Q2 report.
+                </p>
+              </div>
+              <MarketIntelligenceCatalogue
+                record={GMI_Q1_RECORD}
+                editions={GMI_Q1_EDITIONS}
+              />
+            </section>
+          ) : null}
+
+          {/* ── In preparation ──────────────────────────────────────────── */}
+          {GMI_Q2_RECORD ? (
+            <section
+              style={{
+                border: "1px solid rgba(255,255,255,0.09)",
+                background: "rgba(255,255,255,0.015)",
+                padding: "1.25rem",
+              }}
+            >
+              <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr] lg:items-start">
+                <div>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                    In preparation
+                  </p>
+                  <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.35rem,3vw,2.1rem)", color: "rgba(255,255,255,0.88)", lineHeight: 1.08 }}>
+                    Global Market Intelligence Q2 2026
+                  </h2>
+                  <p className="mt-3 max-w-3xl text-sm leading-7 text-white/52">
+                    The Q2 report is in preparation. It is not public, not purchasable, and not indexed as an active report. Release requires Q1 call review, source appendix completion, and quality-gate review.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Link
+                      href="#methodology"
+                      className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
+                      style={{ color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+                    >
+                      View methodology →
+                    </Link>
+                    <Link
+                      href="#accountability"
+                      className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
+                      style={{ color: "rgba(255,255,255,0.46)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+                    >
+                      Track the intelligence process →
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="grid gap-px bg-white/[0.06] sm:grid-cols-2 lg:grid-cols-1">
+                  {[
+                    { label: "Status", value: "In preparation" },
+                    { label: "Coverage", value: GMI_Q2_RECORD.coveragePeriod },
+                    { label: "Decision window", value: GMI_Q2_RECORD.decisionWindow },
+                    { label: "Purchase", value: "Not available" },
+                  ].map((item) => (
+                    <div key={item.label} style={{ backgroundColor: BASE, padding: "0.95rem" }}>
+                      <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+                        {item.label}
+                      </div>
+                      <div className="mt-2 text-sm leading-6 text-white/70">{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
           ) : null}
 
           {/* ── Three-column context row ──────────────────────────────────── */}
@@ -626,8 +711,46 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             </section>
           </div>
 
+          {/* ── Why this report line is different ───────────────────────── */}
+          <section
+            style={{
+              border: `1px solid ${GOLD}24`,
+              background: `${GOLD}05`,
+              padding: "1.25rem",
+            }}
+          >
+            <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+              <div>
+                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                  Why this intelligence line is different
+                </p>
+                <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.2rem,2.5vw,1.8rem)", color: "rgba(255,255,255,0.88)", lineHeight: 1.1 }}>
+                  This intelligence line compounds through verification, not just publication.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-white/50" style={{ maxWidth: "52ch" }}>
+                  Global Market Intelligence is built as a report line with memory: lifecycle state, evidence posture, source discipline, call review, and deliberate separation between public and paid editions.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  "Every report has a lifecycle state.",
+                  "Every major claim carries an evidence posture.",
+                  "Every quarter reviews material calls from the previous quarter.",
+                  "Scenario assumptions are labelled.",
+                  "Source-pending claims cannot become active-release claims.",
+                  "Public and paid editions are separated deliberately.",
+                ].map((item) => (
+                  <div key={item} style={{ borderLeft: `1px solid ${GOLD}35`, paddingLeft: "12px" }}>
+                    <p className="text-sm leading-6 text-white/58">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* ── Edition structure ────────────────────────────────────────── */}
           <section
+            id="methodology"
             style={{
               border: "1px solid rgba(255,255,255,0.09)",
               background: "rgba(255,255,255,0.015)",
@@ -711,8 +834,37 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             </div>
           </section>
 
+          {/* ── Source and confidence standards ─────────────────────────── */}
+          <section
+            style={{
+              border: "1px solid rgba(255,255,255,0.09)",
+              background: "rgba(255,255,255,0.015)",
+              padding: "1.25rem",
+            }}
+          >
+            <div className="mb-5">
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                Source and confidence standards
+              </p>
+              <p className="mt-1 text-xs text-white/38">
+                Evidence posture is a buyer-facing control, not a disclaimer. It shows where evidence ends and judgement begins.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-4">
+              {EVIDENCE_POSTURES.map((item) => (
+                <article key={item.label} style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.012)", padding: "1rem" }}>
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/54">{item.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
           {/* ── Intelligence Accountability ─────────────────────────────── */}
           <section
+            id="accountability"
             style={{
               border: `1px solid ${GOLD}20`,
               background: `${GOLD}04`,
@@ -736,14 +888,22 @@ const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticP
                 <p className="mt-3 text-sm leading-7 text-white/40" style={{ maxWidth: "52ch" }}>
                   This is not automated market learning. It is governed institutional memory — the same discipline applied to decision records inside high-functioning boards.
                 </p>
+                <div className="mt-5">
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                    Call Verification Ledger
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-white/48" style={{ maxWidth: "56ch" }}>
+                    Each quarter, material calls are recorded and reviewed before the next report is released. Q1 2026 currently has 8 material calls recorded, with 7 scheduled for Q2 review and 1 carried toward Q3 review.
+                  </p>
+                </div>
               </div>
 
               <div className="grid gap-px bg-white/[0.05]">
                 {[
                   { label: "Q1 2026 material calls",        value: "8 calls recorded" },
-                  { label: "Q2 2026 calls due for review",  value: "7 calls pending" },
-                  { label: "Current ledger status",         value: "Awaiting Q2 evidence" },
-                  { label: "Review opens",                  value: "Q2 2026 preparation" },
+                  { label: "Reviewed",                      value: "0" },
+                  { label: "Pending review",                value: "7" },
+                  { label: "Carried forward",               value: "1" },
                 ].map((item) => (
                   <div key={item.label} style={{ backgroundColor: "rgb(3,3,5)", padding: "0.90rem" }}>
                     <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>

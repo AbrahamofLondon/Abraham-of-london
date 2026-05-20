@@ -184,7 +184,7 @@ const EDITIONS = [
     title:   "Active institutional briefing",
     body:    "The Q1 2026 institutional edition remains active for Q2 decision use until superseded by the Q2 2026 report.",
     href:    ROUTES.institutionalEdition,
-    cta:     "Purchase report",
+    cta:     "Access institutional edition",
     icon:    Lock,
     primary: false,
     gold:    true,
@@ -368,7 +368,7 @@ function HeroSection() {
                 onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}45`; el.style.backgroundColor = `${GOLD}0E`; }}
               >
                 <Lock style={{ width: "12px", height: "12px" }} />
-                Purchase report
+                Access institutional edition
               </Link>
 
               <Link href={ROUTES.boardDeck}
@@ -452,6 +452,105 @@ function ReportFreshnessSection() {
             }}>
               {FRESHNESS_NOTE}
             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PaidEditionBridgeSection() {
+  return (
+    <section style={{ backgroundColor: LIFT, borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
+          <div style={{ border: `1px solid ${GOLD}26`, backgroundColor: `${GOLD}05`, padding: "1.35rem" }}>
+            <Eyebrow>Paid edition bridge</Eyebrow>
+            <h2 style={{
+              marginTop: "1rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(1.45rem, 2.5vw, 2.15rem)",
+              lineHeight: 1.08,
+              color: "rgba(255,255,255,0.90)",
+            }}>
+              Public thesis. Fuller institutional operating analysis.
+            </h2>
+            <p style={{
+              marginTop: "1rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "1rem",
+              lineHeight: 1.75,
+              color: "rgba(255,255,255,0.58)",
+              maxWidth: "62ch",
+            }}>
+              The public surface gives the open thesis and scenario frame. The institutional edition contains the fuller operating analysis, board instructions, case evidence, and decision implications.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href={ROUTES.institutionalEdition}
+                className="inline-flex items-center gap-3 transition-all duration-300"
+                style={{
+                  padding: "13px 24px",
+                  border: `1px solid ${GOLD}45`,
+                  backgroundColor: `${GOLD}10`,
+                  color: GOLD,
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px",
+                  letterSpacing: "0.26em",
+                  textTransform: "uppercase",
+                }}
+              >
+                <Lock style={{ width: "12px", height: "12px" }} />
+                Access Institutional Edition
+              </Link>
+              <Link href={ROUTES.publicBrief}
+                className="inline-flex items-center gap-3 transition-all duration-300"
+                style={{
+                  padding: "13px 24px",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  backgroundColor: "rgba(255,255,255,0.02)",
+                  color: "rgba(255,255,255,0.56)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px",
+                  letterSpacing: "0.26em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Read public brief
+                <FileText style={{ width: "12px", height: "12px" }} />
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-px bg-white/[0.06] sm:grid-cols-2 lg:grid-cols-1">
+            {[
+              { label: "Current decision window", value: GMI_Q1_RECORD?.decisionWindow ?? "Q2 2026" },
+              { label: "Status", value: GMI_Q1_BADGE.label },
+              { label: "Updated", value: "8 April 2026" },
+              { label: "Next report", value: "Q2 2026, in preparation" },
+            ].map((item) => (
+              <div key={item.label} style={{ backgroundColor: LIFT, padding: "1rem" }}>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.32)",
+                }}>
+                  {item.label}
+                </div>
+                <div style={{
+                  marginTop: "0.55rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontSize: "1.05rem",
+                  lineHeight: 1.35,
+                  color: "rgba(255,255,255,0.82)",
+                }}>
+                  {item.value}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1183,7 +1282,7 @@ function DecisionUseSection() {
               }}
             >
               <Lock style={{ width: "12px", height: "12px" }} />
-              Purchase report
+              Access institutional edition
             </Link>
           </motion.div>
 
@@ -1617,6 +1716,7 @@ const IntelligenceLandingPage: NextPage = () => {
       <Layout headerTransparent fullWidth>
         <HeroSection />
         <ReportFreshnessSection />
+        <PaidEditionBridgeSection />
         <EditionComparisonSection />
         <MacroSignalsStrip />
         <CoreThesis />
