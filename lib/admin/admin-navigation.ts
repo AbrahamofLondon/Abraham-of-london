@@ -125,6 +125,13 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     ],
   },
   {
+    id: "outbound",
+    label: "Outbound",
+    items: [
+      { id: "linkedin-outbound", label: "LinkedIn Publishing", href: "/admin/outbound/linkedin", router: "pages", visibility: "admin", status: "active", description: "Governed LinkedIn publishing console with OAuth, final gate, preview, and attempt history" },
+    ],
+  },
+  {
     id: "commercial",
     label: "Commercial & Entitlements",
     items: [
