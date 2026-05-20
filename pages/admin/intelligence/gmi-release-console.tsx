@@ -8,6 +8,7 @@ import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
 import { AdminStatusBadge, type AdminBadgeTone } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
 import { buildGmiQuarterlyReviewPack } from "@/lib/intelligence/gmi-quarterly-review-pack";
+import { buildGmiReleaseEventSummary, type GmiReleaseEventSummary } from "@/lib/intelligence/gmi-release-event-summary";
 import { resolveGmiReleaseState } from "@/lib/intelligence/gmi-release-state-resolver";
 import { getMarketIntelligenceRecord } from "@/lib/intelligence/market-intelligence-lifecycle";
 import { getCallsForReport, getCallsPendingReview } from "@/lib/intelligence/market-intelligence-call-ledger";
@@ -57,6 +58,7 @@ type ConsoleViewModel = {
     lifecycleGated: boolean;
     publishable: boolean;
   };
+  eventSummary: GmiReleaseEventSummary;
   nextActions: string[];
   mutatingActions: string[];
 };
@@ -160,6 +162,7 @@ export function buildGmiReleaseConsoleViewModel(): ConsoleViewModel {
       dimensionsBelowThreshold,
     },
     outbound: buildQ2OutboundState(),
+    eventSummary: buildGmiReleaseEventSummary("GMI-Q2-2026"),
     nextActions: REQUIRED_NEXT_ACTIONS,
     mutatingActions: [],
   };
@@ -354,6 +357,28 @@ export default function GmiReleaseConsolePage({
             </div>
           </CardSection>
 
+          <CardSection title="Release Event Ledger" description="Console-safe summary of recorded release governance events.">
+            {consoleState.eventSummary.emptyState ? (
+              <div className="border border-white/10 bg-black/30 p-4">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-white/30" />
+                  <p className="text-sm text-white/55">{consoleState.eventSummary.emptyState}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <AdminMetricCard label="Recorded events" value={consoleState.eventSummary.totalEvents} variant="inner" />
+                <AdminMetricCard label="Last quality gate run" value={consoleState.eventSummary.lastQualityGateRun ?? "None"} variant="inner" />
+                <AdminMetricCard label="Last release blocker" value={consoleState.eventSummary.lastReleaseBlockedReason ?? "None"} tone="danger" variant="inner" />
+                <AdminMetricCard label="Last source verification" value={consoleState.eventSummary.lastSourceVerification ?? "None"} variant="inner" />
+                <AdminMetricCard label="Last call review" value={consoleState.eventSummary.lastCallReview ?? "None"} variant="inner" />
+                <AdminMetricCard label="Last outbound gate check" value={consoleState.eventSummary.lastOutboundGateCheck ?? "None"} variant="inner" />
+              </div>
+            )}
+          </CardSection>
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-2">
           <CardSection title="Required Next Actions">
             <ol className="space-y-2">
               {consoleState.nextActions.map((action, index) => (

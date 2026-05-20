@@ -55,6 +55,12 @@ describe("GMI release console view model", () => {
     expect(model.outbound.publishable).toBe(false);
   });
 
+  it("renders release event ledger no-events state", () => {
+    expect(model.eventSummary.reportId).toBe("GMI-Q2-2026");
+    expect(model.eventSummary.totalEvents).toBe(0);
+    expect(model.eventSummary.emptyState).toBe("No release events recorded yet.");
+  });
+
   it("admin navigation contains console link", () => {
     const items = ADMIN_NAVIGATION.flatMap((section) => section.items);
     expect(items.some((item) => item.href === "/admin/intelligence/gmi-release-console")).toBe(true);
