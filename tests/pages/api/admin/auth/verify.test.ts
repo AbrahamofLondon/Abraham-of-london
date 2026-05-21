@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { decode } from "next-auth/jwt";
+import { hashAdminMagicLinkToken } from "@/lib/auth/admin-magic-link-token";
 
 const {
   mockRateLimit,
@@ -85,7 +87,7 @@ beforeEach(() => {
   });
   mockFindUnique.mockResolvedValue({
     identifier: "admin@abrahamoflondon.org",
-    token: "token-value",
+    token: hashAdminMagicLinkToken("token-value"),
     expires: new Date(Date.now() + 60_000),
   });
   mockDelete.mockResolvedValue({});
@@ -156,5 +158,85 @@ describe("GET /api/admin/auth/verify", () => {
     }), res);
 
     expect(JSON.stringify(res._body)).not.toContain("very-secret-token");
+  });
+
+  it("consumes a valid token, writes a NextAuth session cookie, and redirects to returnTo", async () => {
+    const res = makeRes();
+
+    await handler(makeReq({
+      email: "admin@abrahamoflondon.org",
+      token: "token-value",
+      returnTo: "/admin/outbound/linkedin",
+    }), res);
+
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: {
+        token: hashAdminMagicLinkToken("token-value"),
+      },
+    });
+    expect(mockDelete).toHaveBeenCalledWith({
+      where: {
+        token: hashAdminMagicLinkToken("token-value"),
+      },
+    });
+    expect(res._status).toBe(302);
+    expect(res._redirect).toBe("/admin/outbound/linkedin");
+
+    const setCookie = String(res._headers["Set-Cookie"]);
+    expect(setCookie).toContain("next-auth.session-token=");
+    expect(setCookie).toContain("Path=/");
+    expect(setCookie).toContain("SameSite=Lax");
+    expect(setCookie).not.toContain("__Secure-next-auth.session-token=");
+    expect(setCookie).not.toMatch(/;\s*Secure/i);
+
+    const encoded = setCookie.match(/next-auth\.session-token=([^;]+)/)?.[1];
+    expect(encoded).toBeTruthy();
+    const token = await decode({
+      token: decodeURIComponent(encoded ?? ""),
+      secret: "test-nextauth-secret-at-least-32-chars",
+    });
+    expect(token).toEqual(expect.objectContaining({
+      sub: "user_1",
+      email: "admin@abrahamoflondon.org",
+      role: "ADMIN",
+    }));
+  });
+
+  it("redirects an invalid token to invalid_or_expired", async () => {
+    mockFindUnique.mockResolvedValueOnce(null);
+    const res = makeRes();
+
+    await handler(makeReq({
+      email: "admin@abrahamoflondon.org",
+      token: "missing-token",
+      returnTo: "/admin/outbound/linkedin",
+    }), res);
+
+    expect(res._status).toBe(302);
+    expect(res._redirect).toBe("/admin/login?error=invalid_or_expired");
+    expect(res._headers["Set-Cookie"]).toBeUndefined();
+  });
+
+  it("deletes an expired token and redirects to invalid_or_expired", async () => {
+    mockFindUnique.mockResolvedValueOnce({
+      identifier: "admin@abrahamoflondon.org",
+      token: hashAdminMagicLinkToken("expired-token"),
+      expires: new Date(Date.now() - 60_000),
+    });
+    const res = makeRes();
+
+    await handler(makeReq({
+      email: "admin@abrahamoflondon.org",
+      token: "expired-token",
+      returnTo: "/admin/outbound/linkedin",
+    }), res);
+
+    expect(mockDelete).toHaveBeenCalledWith({
+      where: {
+        token: hashAdminMagicLinkToken("expired-token"),
+      },
+    });
+    expect(res._status).toBe(302);
+    expect(res._redirect).toBe("/admin/login?error=invalid_or_expired");
   });
 });

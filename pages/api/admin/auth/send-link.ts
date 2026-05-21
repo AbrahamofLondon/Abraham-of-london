@@ -2,12 +2,17 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { isBootstrapAdminEmail } from "@/lib/access/admin-emails";
 import { classifyAuthError } from "@/lib/auth/auth-error-classifier";
 import { normalizeAdminReturnTo } from "@/lib/auth/admin-return-to";
+import {
+  ADMIN_MAGIC_LINK_TTL_MS,
+  createAdminMagicLinkToken,
+  hashAdminMagicLinkToken,
+  normalizeAdminMagicLinkEmail,
+} from "@/lib/auth/admin-magic-link-token";
 import { sendEmail } from "@/lib/email/core/sendEmail";
 import { EmailLinks } from "@/lib/email/links";
 import { prisma } from "@/lib/prisma.server";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
 import { applyShield } from "@/lib/server/security/shield-middleware";
-import crypto from "crypto";
 
 function classifyTokenStorageError(
   err: unknown,
@@ -66,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const { email, returnTo } = req.body ?? {};
-  const normalized = typeof email === "string" ? email.trim().toLowerCase() : "";
+  const normalized = normalizeAdminMagicLinkEmail(email);
 
   if (!normalized || !normalized.includes("@")) {
     return res.status(400).json({
@@ -95,13 +100,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Generate token
-  const token = crypto.randomBytes(32).toString("hex");
-  const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+  const token = createAdminMagicLinkToken();
+  const storedToken = hashAdminMagicLinkToken(token);
+  const expires = new Date(Date.now() + ADMIN_MAGIC_LINK_TTL_MS);
 
   // Store verification token
   try {
     await prisma.verificationToken.create({
-      data: { identifier: normalized, token, expires },
+      data: { identifier: normalized, token: storedToken, expires },
     });
   } catch (err) {
     const errorCode = classifyTokenStorageError(err);

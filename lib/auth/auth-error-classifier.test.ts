@@ -15,6 +15,17 @@ describe("auth error classifier", () => {
     expect(classifyAuthError(error).code).toBe("AUTH_DATABASE_UNAVAILABLE");
   });
 
+  it("prefers connectivity over generic Prisma initialization classification", () => {
+    const error = Object.assign(
+      new Error(
+        "Can't reach database server at `ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech:5432`",
+      ),
+      { constructor: { name: "PrismaClientInitializationError" } },
+    );
+
+    expect(classifyAuthError(error).code).toBe("AUTH_DATABASE_UNAVAILABLE");
+  });
+
   it("maps invalid DATABASE_URL errors to AUTH_DATABASE_CONFIGURATION_ERROR", () => {
     const error = Object.assign(
       new Error("DATABASE_URL must start with postgresql:// or postgres://"),

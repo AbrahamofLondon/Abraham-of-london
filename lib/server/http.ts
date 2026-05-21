@@ -70,9 +70,9 @@ export function setSecurityHeaders(res: NextApiResponse, customHeaders: Security
       "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
     "X-XSS-Protection": "1; mode=block",
     "X-DNS-Prefetch-Control": "off",
-    "Strict-Transport-Security": isProduction()
-      ? "max-age=31536000; includeSubDomains"
-      : "max-age=0; includeSubDomains",
+    ...(isProduction()
+      ? { "Strict-Transport-Security": "max-age=31536000; includeSubDomains" }
+      : {}),
   };
 
   Object.entries({ ...baseHeaders, ...customHeaders }).forEach(([key, value]) => {

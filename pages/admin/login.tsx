@@ -4,8 +4,10 @@
 import * as React from "react";
 import Head from "next/head";
 import { signIn, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
-import type { GetServerSideProps, NextPage } from "next";
+import type { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
+import { authOptions } from "@/lib/auth/options";
 import { getAdminLoginErrorMessage } from "@/lib/auth/admin-login-errors";
 import { normalizeAdminReturnTo } from "@/lib/auth/admin-return-to";
 import {
@@ -20,7 +22,21 @@ type AdminLoginProps = {
   googleConfigured: boolean;
 };
 
-export const getServerSideProps: GetServerSideProps<AdminLoginProps> = async () => {
+function adminLoginReturnToFromContext(ctx: GetServerSidePropsContext): string {
+  return normalizeAdminReturnTo(ctx.query.returnTo ?? ctx.query.callbackUrl);
+}
+
+export const getServerSideProps: GetServerSideProps<AdminLoginProps> = async (ctx) => {
+  const session = await getServerSession(ctx.req, ctx.res, authOptions);
+  if (session) {
+    return {
+      redirect: {
+        destination: adminLoginReturnToFromContext(ctx),
+        permanent: false,
+      },
+    };
+  }
+
   const googleConfigured = Boolean(
     (process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_ID || process.env.AUTH_GOOGLE_ID) &&
     (process.env.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_SECRET || process.env.AUTH_GOOGLE_SECRET),
@@ -35,6 +51,7 @@ const AdminLoginPage: NextPage<AdminLoginProps> = ({ googleConfigured }) => {
   const [error, setError] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState("");
   const [returnTo, setReturnTo] = React.useState("/admin");
+  const [returnToReady, setReturnToReady] = React.useState(false);
 
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -48,13 +65,14 @@ const AdminLoginPage: NextPage<AdminLoginProps> = ({ googleConfigured }) => {
 
       setReturnTo(normalizeAdminReturnTo(returnToRaw));
     }
+    setReturnToReady(true);
   }, []);
 
   React.useEffect(() => {
-    if (status === "authenticated") {
-      void router.push(returnTo);
+    if (returnToReady && status === "authenticated" && router.asPath !== returnTo) {
+      void router.replace(returnTo);
     }
-  }, [status, router, returnTo]);
+  }, [status, router, returnTo, returnToReady]);
 
   const handleGoogleLogin = async () => {
     if (!googleConfigured) {

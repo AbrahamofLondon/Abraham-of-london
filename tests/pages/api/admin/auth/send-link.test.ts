@@ -39,6 +39,7 @@ vi.mock("@/lib/email/core/sendEmail", () => ({
 }));
 
 import handler from "@/pages/api/admin/auth/send-link";
+import { hashAdminMagicLinkToken } from "@/lib/auth/admin-magic-link-token";
 
 type MockRes = NextApiResponse & {
   _status: number;
@@ -117,9 +118,25 @@ describe("POST /api/admin/auth/send-link", () => {
     await handler(req, res);
 
     expect(res._status).toBe(200);
+    expect(mockVerificationCreate).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        identifier: "admin@abrahamoflondon.org",
+        token: expect.any(String),
+        expires: expect.any(Date),
+      }),
+    }));
     expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({
       text: expect.stringContaining("returnTo=%2Fadmin%2Foutbound%2Flinkedin"),
     }));
+
+    const storedToken = mockVerificationCreate.mock.calls[0]?.[0]?.data?.token;
+    const emailedText = String(mockSendEmail.mock.calls[0]?.[0]?.text ?? "");
+    const verifyUrl = emailedText.match(/Sign in:\s+(\S+)/)?.[1];
+    const emailedToken = verifyUrl ? new URL(verifyUrl).searchParams.get("token") : null;
+
+    expect(emailedToken).toBeTruthy();
+    expect(storedToken).toBe(hashAdminMagicLinkToken(String(emailedToken)));
+    expect(storedToken).not.toBe(emailedToken);
   });
 
   it("returns JSON (not HTML) for a non-admin email — no enumeration", async () => {

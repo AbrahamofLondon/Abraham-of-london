@@ -39,9 +39,7 @@ export function classifyAuthError(error: unknown): AuthSafeError {
     text.includes("must start with postgresql://") ||
     text.includes("must start with postgres://") ||
     text.includes("url must start with the protocol") ||
-    text.includes("environment variable not found") ||
-    text.includes("prisma client initialization") ||
-    text.includes("prismaclientinitializationerror")
+    text.includes("environment variable not found")
   ) {
     return {
       code: "AUTH_DATABASE_CONFIGURATION_ERROR",
@@ -62,6 +60,16 @@ export function classifyAuthError(error: unknown): AuthSafeError {
   ) {
     return {
       code: "AUTH_DATABASE_UNAVAILABLE",
+      clientMessage: GENERIC_AUTH_MESSAGE,
+    };
+  }
+
+  if (
+    text.includes("prisma client initialization") ||
+    text.includes("prismaclientinitializationerror")
+  ) {
+    return {
+      code: "AUTH_DATABASE_CONFIGURATION_ERROR",
       clientMessage: GENERIC_AUTH_MESSAGE,
     };
   }

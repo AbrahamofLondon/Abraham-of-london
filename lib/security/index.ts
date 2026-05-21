@@ -699,7 +699,7 @@ export function createSecurityHeaders(config: SecurityConfig): Record<string, st
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   };
 
-  if (config.hsts.enabled) {
+  if (config.hsts.enabled && process.env.NODE_ENV === "production") {
     let hstsValue = `max-age=${config.hsts.maxAge}`;
     if (config.hsts.includeSubDomains) hstsValue += "; includeSubDomains";
     if (config.hsts.preload) hstsValue += "; preload";

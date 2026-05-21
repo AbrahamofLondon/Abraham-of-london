@@ -608,9 +608,8 @@ function setSecurityHeaders(response: NextResponse, req: NextRequest): void {
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
   response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
-  response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-
   if (process.env.NODE_ENV === "production") {
+    response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
     response.headers.set(
       "Content-Security-Policy",
       "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.neon.tech https://api.stripe.com https://*.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
@@ -644,6 +643,17 @@ function isAdminPath(pathname: string): boolean {
     pathname.startsWith("/api/vault") ||
     pathname.startsWith("/api/admin")
   );
+}
+
+export function isProxyAdminRole(role: unknown): boolean {
+  const normalizedRole = String(role ?? "guest").toLowerCase();
+  const hierarchyRole =
+    normalizedRole === "owner" || normalizedRole === "root"
+      ? "founder"
+      : normalizedRole;
+  const rank = ROLE_HIERARCHY[hierarchyRole as keyof typeof ROLE_HIERARCHY] ?? 0;
+
+  return rank >= (ROLE_HIERARCHY.admin ?? 100);
 }
 
 function needsInstitutionalSession(pathname: string): boolean {
@@ -1220,10 +1230,7 @@ export async function proxy(req: NextRequest) {
         secret: process.env.NEXTAUTH_SECRET,
       });
 
-      const role = String((token as any)?.role || "guest").toLowerCase();
-      const isAdminUser = role === "admin" || role === "root";
-
-      if (!isAdminUser) {
+      if (!isProxyAdminRole((token as any)?.role)) {
         if (isApi) {
           return jsonResponse(
             { error: "SYSTEM_LOCKED", message: "Emergency maintenance" },
@@ -1370,11 +1377,7 @@ export async function proxy(req: NextRequest) {
         return NextResponse.redirect(url, 307);
       }
 
-      const role = String((token as any)?.role ?? "guest").toLowerCase();
-      const rank = ROLE_HIERARCHY[role as keyof typeof ROLE_HIERARCHY] ?? 0;
-      const requiredRank = ROLE_HIERARCHY.admin ?? 100;
-
-      if (rank < requiredRank) {
+      if (!isProxyAdminRole((token as any)?.role)) {
         return isApi
           ? jsonResponse({ error: "CLEARANCE_REQUIRED" }, 403)
           : NextResponse.redirect(new URL("/auth/access-denied", req.url));

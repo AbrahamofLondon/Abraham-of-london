@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { isPublicPath } from "@/proxy";
+import { isProxyAdminRole, isPublicPath } from "@/proxy";
 
 describe("proxy admin-auth bootstrap exemption", () => {
   it("bypasses /api/admin/auth/send-link", () => {
@@ -49,5 +49,11 @@ describe("proxy admin-auth bootstrap exemption", () => {
   it("still bypasses /api/auth paths (NextAuth callbacks)", () => {
     expect(isPublicPath("/api/auth/session")).toBe(true);
     expect(isPublicPath("/api/auth/callback/google")).toBe(true);
+  });
+
+  it("accepts normalized admin and owner roles for protected admin routing", () => {
+    expect(isProxyAdminRole("ADMIN")).toBe(true);
+    expect(isProxyAdminRole("admin")).toBe(true);
+    expect(isProxyAdminRole("owner")).toBe(true);
   });
 });
