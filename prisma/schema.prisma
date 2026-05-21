@@ -3639,8 +3639,10 @@ model IntegrationToken {
 model LinkedInPublishingConnection {
   id                    String    @id @default(cuid())
   provider              String    @default("linkedin")
+  profileKey            String    @default("legacy") // "legacy" | "community"
   ownerType             String    // "member" | "organization"
   ownerUrn              String?
+  accountMemberId       String?
   displayName           String?
   ownerName             String?
   isDefaultPublishingTarget Boolean @default(false)
@@ -3650,12 +3652,14 @@ model LinkedInPublishingConnection {
   expiresAt             DateTime?
   scope                 String
   status                String    @default("active") // "active" | "revoked" | "expired" | "invalid"
+  lastValidationStatus  String    @default("unverified")
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   lastVerifiedAt        DateTime?
 
-  @@unique([provider, ownerType], name: "linkedin_publishing_connection_provider_owner_type")
+  @@unique([provider, profileKey, ownerType], name: "linkedin_publishing_connection_provider_profile_owner_type")
   @@index([provider])
+  @@index([profileKey])
   @@index([status])
   @@map("linkedin_publishing_connections")
 }

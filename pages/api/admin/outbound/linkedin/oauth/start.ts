@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { requireAdminApi } from "@/lib/access/server";
+import { isLinkedInAppProfileKey } from "@/lib/integrations/linkedin/linkedin-app-profile";
 import {
   buildAuthorizationUrl,
   LINKEDIN_OAUTH_STATE_COOKIE,
@@ -20,7 +21,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!guard) return;
 
   try {
-    const { url, state } = buildAuthorizationUrl();
+    const requestedProfile =
+      typeof req.query.profile === "string" &&
+      isLinkedInAppProfileKey(req.query.profile)
+        ? req.query.profile
+        : undefined;
+    const { url, state } = buildAuthorizationUrl(requestedProfile);
     res.setHeader("Set-Cookie", stateCookie(state));
     return res.redirect(302, url);
   } catch {

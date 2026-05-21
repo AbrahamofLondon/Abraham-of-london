@@ -32,6 +32,7 @@ import {
   exchangeCodeForToken,
   getConnectionStatus,
   getLinkedInAccessToken,
+  readLinkedInOAuthState,
   validateLinkedInOAuthState,
 } from "../linkedin-oauth";
 
@@ -46,6 +47,11 @@ beforeEach(() => {
   process.env.LINKEDIN_PUBLISHING_ENABLED = "true";
   process.env.LINKEDIN_TOKEN_ENCRYPTION_KEY = "test-linkedin-token-key-at-least-32-characters";
   process.env.CSRF_SECRET = "test-csrf-secret";
+  process.env.LINKEDIN_ACTIVE_PROFILE = "legacy";
+  process.env.LINKEDIN_COMMUNITY_CLIENT_ID = "community-client-id";
+  process.env.LINKEDIN_COMMUNITY_CLIENT_SECRET = "community-client-secret";
+  process.env.LINKEDIN_COMMUNITY_REDIRECT_URI =
+    "http://localhost:3000/api/admin/outbound/linkedin/oauth/callback";
 });
 
 describe("LinkedIn OAuth connection", () => {
@@ -67,6 +73,17 @@ describe("LinkedIn OAuth connection", () => {
     expect(validateLinkedInOAuthState(`${state}x`, state)).toBe(false);
   });
 
+  it("builds Community OAuth state and URL from the selected app profile", () => {
+    const { url, state } = buildAuthorizationUrl("community");
+    const parsed = new URL(url);
+    const payload = readLinkedInOAuthState(state, state);
+
+    expect(parsed.searchParams.get("client_id")).toBe("community-client-id");
+    expect(parsed.searchParams.get("scope")).toContain("r_organization_admin");
+    expect(payload?.profileKey).toBe("community");
+    expect(readLinkedInOAuthState(`${state}x`, state)).toBeNull();
+  });
+
   it("returns safe not-connected status", async () => {
     mockFindMany.mockResolvedValue([]);
 
@@ -84,6 +101,7 @@ describe("LinkedIn OAuth connection", () => {
       {
         id: "member-conn",
         provider: "linkedin",
+        profileKey: "legacy",
         ownerType: "member",
         ownerUrn: "urn:li:person:abc",
         ownerName: "Abraham",
@@ -102,6 +120,7 @@ describe("LinkedIn OAuth connection", () => {
       {
       id: "conn-1",
       provider: "linkedin",
+      profileKey: "legacy",
       ownerType: "organization",
       ownerUrn: "urn:li:organization:115850136",
       ownerName: "Abraham of London",
@@ -149,6 +168,7 @@ describe("LinkedIn OAuth connection", () => {
     expect(mockUpsert).toHaveBeenCalledWith(expect.objectContaining({
       create: expect.objectContaining({
         ownerType: "member",
+        profileKey: "legacy",
         ownerUrn: "urn:li:person:abc",
         encryptedAccessToken: "encrypted:plain-access-token",
       }),
@@ -156,6 +176,7 @@ describe("LinkedIn OAuth connection", () => {
     expect(mockUpsert).toHaveBeenCalledWith(expect.objectContaining({
       create: expect.objectContaining({
         ownerType: "organization",
+        profileKey: "legacy",
         ownerUrn: "urn:li:organization:115850136",
         requiredScope: "w_organization_social",
       }),
@@ -165,6 +186,7 @@ describe("LinkedIn OAuth connection", () => {
   it("decrypts access token server-side only", async () => {
     mockFindMany.mockResolvedValue([{
       id: "conn-1",
+      profileKey: "legacy",
       ownerType: "organization",
       ownerUrn: "urn:li:organization:115850136",
       ownerName: "Abraham of London",

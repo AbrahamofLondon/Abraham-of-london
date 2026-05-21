@@ -7,6 +7,7 @@ import type { ResolvedLinkedInOutbound } from "@/lib/outbound/linkedin-content-r
 
 const connection: LinkedInConnectionStatus = {
   connected: true,
+  activeProfileKey: "community",
   ownerType: "organization",
   ownerUrn: "urn:li:organization:115850136",
   organisationId: "115850136",
@@ -17,6 +18,7 @@ const connection: LinkedInConnectionStatus = {
   status: "active",
   publishingEnabled: true,
   selectedPublishingTarget: {
+    profileKey: "community",
     ownerType: "organization",
     ownerUrn: "urn:li:organization:115850136",
     ownerName: "Abraham of London",
@@ -28,6 +30,46 @@ const connection: LinkedInConnectionStatus = {
     ownerUrn: "urn:li:person:abc",
     displayName: "Abraham Adaramola",
     status: "active",
+  },
+  profiles: {
+    legacy: {
+      profileKey: "legacy",
+      configured: true,
+      connected: true,
+      status: "active",
+      scopes: ["openid", "profile", "w_member_social"],
+      missingRequiredScopes: [],
+      intendedUse: "Legacy workflows.",
+      memberConnection: {
+        ownerUrn: "urn:li:person:abc",
+        displayName: "Abraham Adaramola",
+        status: "active",
+      },
+      organizationConnection: {
+        ownerUrn: null,
+        ownerName: null,
+        status: "not_connected",
+      },
+    },
+    community: {
+      profileKey: "community",
+      configured: true,
+      connected: true,
+      status: "active",
+      scopes: ["openid", "profile", "email", "w_organization_social"],
+      missingRequiredScopes: [],
+      intendedUse: "Community Management workflows.",
+      memberConnection: {
+        ownerUrn: "urn:li:person:abc",
+        displayName: "Abraham Adaramola",
+        status: "active",
+      },
+      organizationConnection: {
+        ownerUrn: "urn:li:organization:115850136",
+        ownerName: "Abraham of London",
+        status: "active",
+      },
+    },
   },
   message: "Connected.",
 };

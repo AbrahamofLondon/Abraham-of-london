@@ -2,6 +2,13 @@ import crypto from "crypto";
 
 import { prisma } from "@/lib/prisma.server";
 import {
+  getActiveLinkedInProfileKey,
+  getLinkedInAppProfileDiagnostics,
+  isLinkedInAppProfileKey,
+  resolveLinkedInAppProfile,
+  type LinkedInAppProfileKey,
+} from "@/lib/integrations/linkedin/linkedin-app-profile";
+import {
   decryptLinkedInToken,
   encryptLinkedInToken,
 } from "./linkedin-token-encryption";
@@ -24,6 +31,7 @@ export type LinkedInTargetStatus =
   | "member_fallback_requires_confirmation";
 
 export type LinkedInPublishingTarget = {
+  profileKey: LinkedInAppProfileKey;
   ownerType: LinkedInPublishingOwnerType;
   ownerUrn: string | null;
   ownerName: string;
@@ -32,8 +40,29 @@ export type LinkedInPublishingTarget = {
   status: LinkedInTargetStatus;
 };
 
+export type LinkedInAppProfileConnectionStatus = {
+  profileKey: LinkedInAppProfileKey;
+  configured: boolean;
+  connected: boolean;
+  status: LinkedInConnectionState;
+  scopes: string[];
+  missingRequiredScopes: string[];
+  intendedUse: string;
+  memberConnection: {
+    ownerUrn: string | null;
+    displayName: string | null;
+    status: LinkedInConnectionState;
+  };
+  organizationConnection: {
+    ownerUrn: string | null;
+    ownerName: string | null;
+    status: LinkedInConnectionState;
+  };
+};
+
 export type LinkedInConnectionStatus = {
   connected: boolean;
+  activeProfileKey: LinkedInAppProfileKey;
   ownerType: LinkedInPublishingOwnerType;
   ownerUrn: string | null;
   organisationId: string | null;
@@ -44,6 +73,7 @@ export type LinkedInConnectionStatus = {
   status: LinkedInConnectionState;
   publishingEnabled: boolean;
   selectedPublishingTarget: LinkedInPublishingTarget;
+  profiles: Record<LinkedInAppProfileKey, LinkedInAppProfileConnectionStatus>;
   memberConnection: {
     ownerUrn: string | null;
     displayName: string | null;
@@ -66,32 +96,6 @@ type LinkedInUserInfo = {
   given_name?: string;
   family_name?: string;
 };
-
-function getClientId(): string {
-  const id = process.env.LINKEDIN_CLIENT_ID?.trim();
-  if (!id) throw new Error("[LINKEDIN_OAUTH] Missing LINKEDIN_CLIENT_ID");
-  return id;
-}
-
-function getClientSecret(): string {
-  const secret = process.env.LINKEDIN_CLIENT_SECRET?.trim();
-  if (!secret) throw new Error("[LINKEDIN_OAUTH] Missing LINKEDIN_CLIENT_SECRET");
-  return secret;
-}
-
-function getRedirectUri(): string {
-  const uri = process.env.LINKEDIN_REDIRECT_URI?.trim();
-  if (uri) return uri;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  return `${baseUrl}/api/admin/outbound/linkedin/oauth/callback`;
-}
-
-function getScopeString(): string {
-  return (
-    process.env.LINKEDIN_OAUTH_SCOPES?.trim() ||
-    "openid profile w_member_social w_organization_social r_organization_social"
-  );
-}
 
 export function getDefaultLinkedInOwnerType(): LinkedInPublishingOwnerType {
   return process.env.LINKEDIN_DEFAULT_OWNER_TYPE === "member" ? "member" : "organization";
@@ -118,53 +122,103 @@ function signState(rawState: string): string {
   return crypto.createHmac("sha256", getStateSecret()).update(rawState).digest("hex");
 }
 
-export function generateLinkedInOAuthState(): string {
-  const rawState = crypto.randomBytes(32).toString("base64url");
+export type LinkedInOAuthStatePayload = {
+  nonce: string;
+  profileKey: LinkedInAppProfileKey;
+  returnTo: string;
+  issuedAt: number;
+};
+
+function encodeOAuthState(payload: LinkedInOAuthStatePayload): string {
+  const rawState = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
   return `${rawState}.${signState(rawState)}`;
 }
 
-export function validateLinkedInOAuthState(state: string, expectedState: string): boolean {
-  if (!state || !expectedState || state !== expectedState) return false;
-  const [rawState, signature] = state.split(".");
-  if (!rawState || !signature) return false;
-  const expectedSignature = signState(rawState);
-  if (expectedSignature.length !== signature.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature));
+export function generateLinkedInOAuthState(
+  profileKey = getActiveLinkedInProfileKey(),
+): string {
+  return encodeOAuthState({
+    nonce: crypto.randomBytes(32).toString("base64url"),
+    profileKey,
+    returnTo: "/admin/outbound/linkedin",
+    issuedAt: Date.now(),
+  });
 }
 
-export function buildAuthorizationUrl(): { url: string; state: string } {
-  const state = generateLinkedInOAuthState();
+export function readLinkedInOAuthState(
+  state: string,
+  expectedState: string,
+): LinkedInOAuthStatePayload | null {
+  if (!state || !expectedState || state !== expectedState) return null;
+  const [rawState, signature] = state.split(".");
+  if (!rawState || !signature) return null;
+  const expectedSignature = signState(rawState);
+  if (expectedSignature.length !== signature.length) return null;
+  if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(rawState, "base64url").toString("utf8"),
+    ) as Partial<LinkedInOAuthStatePayload>;
+    if (
+      !payload.nonce ||
+      !isLinkedInAppProfileKey(payload.profileKey) ||
+      payload.returnTo !== "/admin/outbound/linkedin" ||
+      typeof payload.issuedAt !== "number"
+    ) {
+      return null;
+    }
+    return payload as LinkedInOAuthStatePayload;
+  } catch {
+    return null;
+  }
+}
+
+export function validateLinkedInOAuthState(state: string, expectedState: string): boolean {
+  return Boolean(readLinkedInOAuthState(state, expectedState));
+}
+
+export function buildAuthorizationUrl(
+  requestedProfile?: LinkedInAppProfileKey,
+): { url: string; state: string; profileKey: LinkedInAppProfileKey } {
+  const profile = resolveLinkedInAppProfile(requestedProfile);
+  const state = generateLinkedInOAuthState(profile.profileKey);
   const params = new URLSearchParams({
     response_type: "code",
-    client_id: getClientId(),
-    redirect_uri: getRedirectUri(),
+    client_id: profile.clientId,
+    redirect_uri: profile.redirectUri,
     state,
-    scope: getScopeString(),
+    scope: profile.requiredScopes.join(" "),
   });
 
   return {
     url: `${LINKEDIN_AUTH_URL}?${params.toString()}`,
     state,
+    profileKey: profile.profileKey,
   };
 }
 
 async function fetchUserInfo(accessToken: string): Promise<{
   ownerUrn: string | null;
+  accountMemberId: string | null;
   displayName: string | null;
 }> {
   try {
     const response = await fetch(LINKEDIN_USERINFO_URL, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    if (!response.ok) return { ownerUrn: null, displayName: null };
+    if (!response.ok) return { ownerUrn: null, accountMemberId: null, displayName: null };
     const data = (await response.json()) as LinkedInUserInfo;
     const displayName = data.name ?? ([data.given_name, data.family_name].filter(Boolean).join(" ") || null);
     return {
       ownerUrn: data.sub ? `urn:li:person:${data.sub}` : null,
+      accountMemberId: data.sub ?? null,
       displayName,
     };
   } catch {
-    return { ownerUrn: null, displayName: null };
+    return { ownerUrn: null, accountMemberId: null, displayName: null };
   }
 }
 
@@ -174,8 +228,10 @@ function tokenExpiry(expiresIn?: number): Date | null {
 }
 
 async function upsertConnection(input: {
+  profileKey: LinkedInAppProfileKey;
   ownerType: LinkedInPublishingOwnerType;
   ownerUrn: string | null;
+  accountMemberId: string | null;
   ownerName: string | null;
   displayName: string | null;
   accessToken: string;
@@ -186,15 +242,18 @@ async function upsertConnection(input: {
 }) {
   await prisma.linkedInPublishingConnection.upsert({
     where: {
-      linkedin_publishing_connection_provider_owner_type: {
+      linkedin_publishing_connection_provider_profile_owner_type: {
         provider: PROVIDER,
+        profileKey: input.profileKey,
         ownerType: input.ownerType,
       },
     },
     create: {
       provider: PROVIDER,
+      profileKey: input.profileKey,
       ownerType: input.ownerType,
       ownerUrn: input.ownerUrn,
+      accountMemberId: input.accountMemberId,
       ownerName: input.ownerName,
       displayName: input.displayName,
       isDefaultPublishingTarget: input.isDefaultPublishingTarget,
@@ -204,10 +263,12 @@ async function upsertConnection(input: {
       expiresAt: input.expiresAt,
       scope: input.scope,
       status: "active",
+      lastValidationStatus: "oauth_connected",
       lastVerifiedAt: new Date(),
     },
     update: {
       ownerUrn: input.ownerUrn,
+      accountMemberId: input.accountMemberId,
       ownerName: input.ownerName,
       displayName: input.displayName,
       isDefaultPublishingTarget: input.isDefaultPublishingTarget,
@@ -217,6 +278,7 @@ async function upsertConnection(input: {
       expiresAt: input.expiresAt,
       scope: input.scope,
       status: "active",
+      lastValidationStatus: "oauth_connected",
       lastVerifiedAt: new Date(),
     },
   });
@@ -225,8 +287,10 @@ async function upsertConnection(input: {
 export async function exchangeCodeForToken(
   code: string,
   connectedBy?: string | null,
+  profileKey = getActiveLinkedInProfileKey(),
 ): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
   try {
+    const appProfile = resolveLinkedInAppProfile(profileKey);
     const response = await fetch(LINKEDIN_TOKEN_URL, {
       method: "POST",
       headers: {
@@ -236,9 +300,9 @@ export async function exchangeCodeForToken(
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        client_id: getClientId(),
-        client_secret: getClientSecret(),
-        redirect_uri: getRedirectUri(),
+        client_id: appProfile.clientId,
+        client_secret: appProfile.clientSecret,
+        redirect_uri: appProfile.redirectUri,
       }),
     });
 
@@ -250,14 +314,16 @@ export async function exchangeCodeForToken(
     if (!data.access_token) return { ok: false, error: "LinkedIn did not return an access token." };
 
     const profile = await fetchUserInfo(data.access_token);
-    const scope = data.scope || getScopeString();
+    const scope = data.scope || appProfile.requiredScopes.join(" ");
     const expiresAt = tokenExpiry(data.expires_in);
     const defaultOwnerType = getDefaultLinkedInOwnerType();
     const organizationUrn = getConfiguredLinkedInOrganizationUrn();
 
     await upsertConnection({
+      profileKey: appProfile.profileKey,
       ownerType: "member",
       ownerUrn: profile.ownerUrn,
+      accountMemberId: profile.accountMemberId,
       ownerName: profile.displayName,
       displayName: profile.displayName,
       accessToken: data.access_token,
@@ -269,8 +335,10 @@ export async function exchangeCodeForToken(
 
     if (organizationUrn || defaultOwnerType === "organization") {
       await upsertConnection({
+        profileKey: appProfile.profileKey,
         ownerType: "organization",
         ownerUrn: organizationUrn,
+        accountMemberId: profile.accountMemberId,
         ownerName: getOrganizationName(),
         displayName: getOrganizationName(),
         accessToken: data.access_token,
@@ -311,6 +379,7 @@ function connectionState(record: { status: string; expiresAt: Date | null } | nu
 }
 
 function buildTarget(input: {
+  profileKey: LinkedInAppProfileKey;
   ownerType: LinkedInPublishingOwnerType;
   ownerUrn: string | null;
   ownerName: string | null;
@@ -329,6 +398,7 @@ function buildTarget(input: {
   }
 
   return {
+    profileKey: input.profileKey,
     ownerType: input.ownerType,
     ownerUrn: input.ownerUrn,
     ownerName: input.ownerName || (input.ownerType === "organization" ? getOrganizationName() : "LinkedIn member"),
@@ -338,8 +408,12 @@ function buildTarget(input: {
   };
 }
 
-export async function getLinkedInPublishingCredential(ownerType = getDefaultLinkedInOwnerType()): Promise<{
+export async function getLinkedInPublishingCredential(
+  ownerType = getDefaultLinkedInOwnerType(),
+  profileKey = getActiveLinkedInProfileKey(),
+): Promise<{
   accessToken: string;
+  profileKey: LinkedInAppProfileKey;
   ownerType: LinkedInPublishingOwnerType;
   ownerUrn: string | null;
   ownerName: string;
@@ -347,8 +421,11 @@ export async function getLinkedInPublishingCredential(ownerType = getDefaultLink
   requiredScope: string;
 } | null> {
   const connections = await getConnections();
-  const record = connections.find((connection) => connection.ownerType === ownerType)
-    ?? connections.find((connection) => connection.ownerType === "member")
+  const profileConnections = connections.filter(
+    (connection) => connection.profileKey === profileKey,
+  );
+  const record = profileConnections.find((connection) => connection.ownerType === ownerType)
+    ?? profileConnections.find((connection) => connection.ownerType === "member")
     ?? null;
 
   if (!record || record.status !== "active") return null;
@@ -364,6 +441,7 @@ export async function getLinkedInPublishingCredential(ownerType = getDefaultLink
 
   return {
     accessToken: decryptLinkedInToken(record.encryptedAccessToken),
+    profileKey,
     ownerType: selectedOwnerType,
     ownerUrn,
     ownerName: selectedOwnerType === "organization" ? getOrganizationName() : (record.ownerName || record.displayName || "LinkedIn member"),
@@ -386,12 +464,65 @@ export async function getLinkedInAccessToken(): Promise<{
   };
 }
 
+function buildProfileConnectionStatus(
+  profileKey: LinkedInAppProfileKey,
+  connections: Awaited<ReturnType<typeof getConnections>>,
+): LinkedInAppProfileConnectionStatus {
+  const diagnostics = getLinkedInAppProfileDiagnostics().profiles[profileKey];
+  const profileConnections = connections.filter(
+    (connection) => connection.profileKey === profileKey,
+  );
+  const memberRecord =
+    profileConnections.find((connection) => connection.ownerType === "member") ??
+    null;
+  const organizationRecord =
+    profileConnections.find(
+      (connection) => connection.ownerType === "organization",
+    ) ?? null;
+  const scopes = (
+    organizationRecord?.scope ||
+    memberRecord?.scope ||
+    ""
+  ).split(" ").filter(Boolean);
+  const status = connectionState(organizationRecord ?? memberRecord);
+
+  return {
+    profileKey,
+    configured: diagnostics.configured,
+    connected: connectionState(memberRecord) === "active",
+    status,
+    scopes,
+    missingRequiredScopes: diagnostics.requiredScopes.filter(
+      (scope) => !scopes.includes(scope),
+    ),
+    intendedUse: diagnostics.intendedUse,
+    memberConnection: {
+      ownerUrn: memberRecord?.ownerUrn ?? null,
+      displayName: memberRecord?.displayName ?? null,
+      status: connectionState(memberRecord),
+    },
+    organizationConnection: {
+      ownerUrn:
+        organizationRecord?.ownerUrn ??
+        (profileKey === getActiveLinkedInProfileKey()
+          ? getConfiguredLinkedInOrganizationUrn()
+          : null),
+      ownerName: organizationRecord?.ownerName ?? null,
+      status: connectionState(organizationRecord),
+    },
+  };
+}
+
 export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
   try {
     const connections = await getConnections();
+    const activeProfileKey = getActiveLinkedInProfileKey();
     const defaultOwnerType = getDefaultLinkedInOwnerType();
-    const memberRecord = connections.find((connection) => connection.ownerType === "member") ?? null;
-    const targetRecord = connections.find((connection) => connection.ownerType === defaultOwnerType) ?? memberRecord;
+    const profileConnections = connections.filter(
+      (connection) => connection.profileKey === activeProfileKey,
+    );
+    const memberRecord = profileConnections.find((connection) => connection.ownerType === "member") ?? null;
+    const targetRecord = profileConnections.find((connection) => connection.ownerType === defaultOwnerType) ?? memberRecord;
     const memberState = connectionState(memberRecord);
     const targetState = connectionState(targetRecord ?? null);
     const connected = memberState === "active";
@@ -400,6 +531,7 @@ export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
       ? (targetRecord?.ownerUrn || getConfiguredLinkedInOrganizationUrn())
       : targetRecord?.ownerUrn ?? null;
     const selectedPublishingTarget = buildTarget({
+      profileKey: activeProfileKey,
       ownerType: defaultOwnerType,
       ownerUrn: targetOwnerUrn ?? null,
       ownerName: defaultOwnerType === "organization" ? getOrganizationName() : targetRecord?.ownerName ?? targetRecord?.displayName ?? null,
@@ -411,6 +543,7 @@ export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
     return {
       connected,
       ownerType: selectedPublishingTarget.ownerType,
+      activeProfileKey,
       ownerUrn: selectedPublishingTarget.ownerUrn,
       organisationId: selectedPublishingTarget.ownerUrn?.replace("urn:li:organization:", "") ?? null,
       displayName: memberRecord?.displayName ?? null,
@@ -420,6 +553,10 @@ export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
       status: targetState,
       publishingEnabled: process.env.LINKEDIN_PUBLISHING_ENABLED === "true",
       selectedPublishingTarget,
+      profiles: {
+        legacy: buildProfileConnectionStatus("legacy", connections),
+        community: buildProfileConnectionStatus("community", connections),
+      },
       memberConnection: {
         ownerUrn: memberRecord?.ownerUrn ?? null,
         displayName: memberRecord?.displayName ?? null,
@@ -432,6 +569,7 @@ export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
     };
   } catch {
     const selectedPublishingTarget = buildTarget({
+      profileKey: getActiveLinkedInProfileKey(),
       ownerType: getDefaultLinkedInOwnerType(),
       ownerUrn: getConfiguredLinkedInOrganizationUrn(),
       ownerName: getDefaultLinkedInOwnerType() === "organization" ? getOrganizationName() : null,
@@ -441,6 +579,7 @@ export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
     });
     return {
       connected: false,
+      activeProfileKey: getActiveLinkedInProfileKey(),
       ownerType: selectedPublishingTarget.ownerType,
       ownerUrn: selectedPublishingTarget.ownerUrn,
       organisationId: selectedPublishingTarget.ownerUrn?.replace("urn:li:organization:", "") ?? null,
@@ -451,15 +590,24 @@ export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
       status: "invalid",
       publishingEnabled: process.env.LINKEDIN_PUBLISHING_ENABLED === "true",
       selectedPublishingTarget,
+      profiles: {
+        legacy: buildProfileConnectionStatus("legacy", []),
+        community: buildProfileConnectionStatus("community", []),
+      },
       memberConnection: { ownerUrn: null, displayName: null, status: "invalid" },
       message: "LinkedIn connection status could not be read.",
     };
   }
 }
 
-export async function revokeLinkedInConnection(): Promise<{ ok: boolean }> {
+export async function revokeLinkedInConnection(
+  profileKey?: LinkedInAppProfileKey,
+): Promise<{ ok: boolean }> {
   await prisma.linkedInPublishingConnection.updateMany({
-    where: { provider: PROVIDER },
+    where: {
+      provider: PROVIDER,
+      ...(profileKey ? { profileKey } : {}),
+    },
     data: { status: "revoked" },
   });
   return { ok: true };

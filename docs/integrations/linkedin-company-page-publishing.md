@@ -2,9 +2,14 @@
 
 ## Overview
 
-This document describes the official LinkedIn API integration for publishing posts to the Abraham of London LinkedIn company page.
+This document describes the governed LinkedIn company-page publishing integration for Abraham of London.
 
-**Status:** Scaffold only — not activated. Requires LinkedIn developer approval and credential configuration before use.
+The platform now separates two LinkedIn developer app profiles:
+
+- `legacy` preserves existing approved LinkedIn OAuth/product access.
+- `community` is the intended clean profile for Community Management organization-page publishing.
+
+Company-page publishing still requires LinkedIn approval, configured profile credentials, an organization URN, and an approved outbound asset that passes the admin publishing gate.
 
 ## Prerequisites
 
@@ -12,15 +17,16 @@ This document describes the official LinkedIn API integration for publishing pos
 
 1. Go to https://developer.linkedin.com/
 2. Create or sign in to your LinkedIn Developer account
-3. Create a new app in the Developer Portal
-4. Request the **Marketing Developer Platform** product (required for `w_organization_social`)
+3. Keep the legacy app and the Community Management app distinct.
+4. Request only the LinkedIn products and scopes required for the selected app profile.
 
 ### Required Permissions
 
 | Permission | Purpose |
 |---|---|
-| `w_organization_social` | Create, read, and update posts as the organization |
-| `r_organization_social` | Read organization posts and engagement data |
+| `w_organization_social` | Publish as the organization page |
+| `r_organization_social` | Read organization social data where approved |
+| `r_organization_admin` | Resolve organization admin context where approved |
 
 ### Organisation Author URN
 
@@ -44,19 +50,27 @@ To find your organisation ID:
 ## Environment Variables
 
 ```bash
-# Enable LinkedIn API publishing (must be "true" to activate)
-LINKEDIN_PUBLISHING_ENABLED=false
+# Keep the approved legacy app active until Community Management approval and scopes land.
+LINKEDIN_ACTIVE_PROFILE=legacy
 
-# LinkedIn OAuth credentials
-LINKEDIN_CLIENT_ID=your_client_id
-LINKEDIN_CLIENT_SECRET=your_client_secret
+# Existing LinkedIn app retained for approved legacy workflows.
+LINKEDIN_LEGACY_CLIENT_ID=
+LINKEDIN_LEGACY_CLIENT_SECRET=
+LINKEDIN_LEGACY_REDIRECT_URI=https://www.abrahamoflondon.org/api/admin/outbound/linkedin/oauth/callback
 
-# Organisation identifier
-LINKEDIN_ORGANIZATION_ID=115850136
+# Community Management app for governed organization publishing.
+LINKEDIN_COMMUNITY_CLIENT_ID=
+LINKEDIN_COMMUNITY_CLIENT_SECRET=
+LINKEDIN_COMMUNITY_REDIRECT_URI=https://www.abrahamoflondon.org/api/admin/outbound/linkedin/oauth/callback
 
-# Access token (or OAuth token storage path)
-LINKEDIN_ACCESS_TOKEN=your_access_token
+# Shared publishing controls.
+LINKEDIN_TOKEN_ENCRYPTION_KEY=
+LINKEDIN_DEFAULT_OWNER_TYPE=organization
+LINKEDIN_ORGANIZATION_URN=
+LINKEDIN_PUBLISHING_ENABLED=true
 ```
+
+`LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, and `LINKEDIN_REDIRECT_URI` are temporary legacy fallback names only. Configure the Community profile while approval is pending, but do not switch `LINKEDIN_ACTIVE_PROFILE` from `legacy` until the required organization scopes are granted and verified. Do not store raw LinkedIn access tokens in env for this integration; OAuth tokens are persisted server-side through the governed connection store.
 
 ## Supported Post Types (v1)
 
@@ -144,11 +158,9 @@ POST /api/admin/outbound/linkedin/publish
 
 ## Token Refresh & Storage
 
-Before activating the API, design and implement:
+The admin OAuth flow stores LinkedIn connection tokens server-side in encrypted form. Token values must never be rendered to the browser, audit events, logs, MDX, or generated content.
 
-1. **Token storage** — Store tokens securely (environment variables or encrypted storage)
-2. **Token refresh** — LinkedIn access tokens expire after 60 days. Implement a refresh mechanism using the refresh token
-3. **Token rotation** — Rotate tokens before expiry to avoid service interruption
+If LinkedIn returns a refresh token for an approved profile, keep it in the encrypted connection store and rotate/reconnect before expiry according to the approved product behavior.
 
 ## Security Considerations
 

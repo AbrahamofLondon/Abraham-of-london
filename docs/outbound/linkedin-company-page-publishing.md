@@ -38,15 +38,22 @@ If LinkedIn returns a permission or scope error, the admin console should show a
 ## Environment Checklist
 
 ```env
-LINKEDIN_CLIENT_ID=
-LINKEDIN_CLIENT_SECRET=
-LINKEDIN_REDIRECT_URI=
+LINKEDIN_ACTIVE_PROFILE=legacy
+LINKEDIN_LEGACY_CLIENT_ID=
+LINKEDIN_LEGACY_CLIENT_SECRET=
+LINKEDIN_LEGACY_REDIRECT_URI=
+LINKEDIN_COMMUNITY_CLIENT_ID=
+LINKEDIN_COMMUNITY_CLIENT_SECRET=
+LINKEDIN_COMMUNITY_REDIRECT_URI=
 LINKEDIN_TOKEN_ENCRYPTION_KEY=
-LINKEDIN_OAUTH_SCOPES=openid profile w_member_social w_organization_social r_organization_social
 LINKEDIN_DEFAULT_OWNER_TYPE=organization
 LINKEDIN_ORGANIZATION_URN=
 LINKEDIN_PUBLISHING_ENABLED=true
 ```
+
+`LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `LINKEDIN_REDIRECT_URI`, and `LINKEDIN_OAUTH_SCOPES` remain temporary legacy fallback names during migration. Production should use the profile-specific variables so the existing LinkedIn app and the Community Management app cannot overwrite each other.
+
+The `community` profile is intended for governed organization-page publishing and requests organization-focused scopes. The `legacy` profile preserves existing approved OAuth/product access where still required. Keep `LINKEDIN_ACTIVE_PROFILE=legacy` while Community Management approval or scopes are pending; the Community profile can be configured and shown in the admin console without making it the active publishing profile. Rotate LinkedIn app secrets before production updates if secret material has been exposed in operator logs or chat.
 
 Do not commit real LinkedIn credentials or token values. `LINKEDIN_ORGANIZATION_URN` may remain empty until the page URN is confirmed.
 

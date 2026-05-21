@@ -4,7 +4,7 @@ import { requireAdminApi } from "@/lib/access/server";
 import {
   exchangeCodeForToken,
   LINKEDIN_OAUTH_STATE_COOKIE,
-  validateLinkedInOAuthState,
+  readLinkedInOAuthState,
 } from "@/lib/outbound/linkedin-oauth";
 
 const ADMIN_LINKEDIN_CONSOLE = "/admin/outbound/linkedin";
@@ -38,13 +38,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (typeof state !== "string") return redirectWithStatus(res, "error", "missing_state");
 
   const expectedState = req.cookies?.[LINKEDIN_OAUTH_STATE_COOKIE];
-  if (!expectedState || !validateLinkedInOAuthState(state, expectedState)) {
+  const statePayload = expectedState
+    ? readLinkedInOAuthState(state, expectedState)
+    : null;
+  if (!statePayload) {
     return redirectWithStatus(res, "error", "state_mismatch");
   }
 
   res.setHeader("Set-Cookie", clearStateCookie());
 
-  const result = await exchangeCodeForToken(code, guard.session?.user?.id ?? null);
+  const result = await exchangeCodeForToken(
+    code,
+    guard.session?.user?.id ?? null,
+    statePayload.profileKey,
+  );
   if (!result.ok) return redirectWithStatus(res, "error", "token_exchange_failed");
 
   return redirectWithStatus(res, "success");

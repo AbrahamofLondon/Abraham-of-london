@@ -32,7 +32,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  if (!credential.scope.split(" ").includes("r_organization_social")) {
+  const scopes = credential.scope.split(" ");
+  const hasOrganizationReadScope = [
+    "r_organization_admin",
+    "rw_organization_admin",
+    "r_organization_social",
+  ].some((scope) => scopes.includes(scope));
+
+  if (!hasOrganizationReadScope) {
     return res.status(403).json({
       ok: false,
       error: "LinkedIn app does not currently have organisation-read permission or the account lacks approved API access.",

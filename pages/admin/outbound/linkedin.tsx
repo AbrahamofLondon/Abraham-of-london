@@ -150,9 +150,12 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
   const hasRequiredScope = connection.scopes.includes(requiredScope);
   const isOrganizationTarget = target.ownerType === "organization";
 
-  async function revoke() {
+  async function revoke(profileKey = connection.activeProfileKey) {
     setRevoking(true);
-    await fetch("/api/admin/outbound/linkedin/oauth/revoke", { method: "POST" }).catch(() => null);
+    await fetch(
+      `/api/admin/outbound/linkedin/oauth/revoke?profile=${encodeURIComponent(profileKey)}`,
+      { method: "POST" },
+    ).catch(() => null);
     window.location.reload();
   }
 
@@ -170,6 +173,7 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
             <AdminStatusBadge label={connection.connected ? "Connected" : "Not connected"} tone={connection.connected ? "success" : "warning"} />
             <AdminStatusBadge label={connection.publishingEnabled ? "Publishing enabled" : "Publishing disabled"} tone={connection.publishingEnabled ? "success" : "warning"} />
             <AdminStatusBadge label={`Status: ${connection.status}`} tone={connection.status === "active" ? "success" : "muted"} />
+            <AdminStatusBadge label={`Active profile: ${connection.activeProfileKey}`} tone={connection.activeProfileKey === "community" ? "info" : "warning"} />
             <AdminStatusBadge label={`Target: ${isOrganizationTarget ? "Organization Page" : "Member Profile"}`} tone={isOrganizationTarget ? "info" : "warning"} />
             <AdminStatusBadge label={`Required scope: ${requiredScope}`} tone={hasRequiredScope ? "success" : "danger"} />
           </div>
@@ -193,23 +197,78 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
               </p>
             </div>
           </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            {(["legacy", "community"] as const).map((profileKey) => {
+              const profile = connection.profiles[profileKey];
+              const scopeTone =
+                profile.missingRequiredScopes.length === 0 ? "success" : "warning";
+              return (
+                <div key={profileKey} className="border border-white/10 bg-black/30 p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">
+                      {profileKey === "community"
+                        ? "Community Management app"
+                        : "Legacy LinkedIn app"}
+                    </p>
+                    <AdminStatusBadge
+                      label={profile.configured ? "configured" : "misconfigured"}
+                      tone={profile.configured ? "success" : "danger"}
+                    />
+                    <AdminStatusBadge
+                      label={profile.connected ? "connected" : "not connected"}
+                      tone={profile.connected ? "success" : "warning"}
+                    />
+                    <AdminStatusBadge
+                      label={`scopes ${profile.missingRequiredScopes.length === 0 ? "ready" : "pending"}`}
+                      tone={scopeTone}
+                    />
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-white/58">
+                    {profile.intendedUse}
+                  </p>
+                  <p className="mt-2 text-xs text-white/38">
+                    Required scopes: {profile.missingRequiredScopes.length === 0
+                      ? "granted for connected token"
+                      : profile.missingRequiredScopes.join(", ")}
+                  </p>
+                  <p className="mt-1 text-xs text-white/38">
+                    Organisation URN: {profile.organizationConnection.ownerUrn ? "configured" : "missing"}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <a
-            href="/api/admin/outbound/linkedin/oauth/start"
+            href="/api/admin/outbound/linkedin/oauth/start?profile=legacy"
             className="inline-flex items-center gap-2 border border-sky-400/25 bg-sky-400/10 px-3 py-2 text-xs font-medium text-sky-100 hover:bg-sky-400/15"
           >
             <ShieldCheck className="h-4 w-4" />
-            {connection.connected ? "Reconnect" : "Connect LinkedIn"}
+            Connect Legacy LinkedIn App
+          </a>
+          <a
+            href="/api/admin/outbound/linkedin/oauth/start?profile=community"
+            className="inline-flex items-center gap-2 border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 text-xs font-medium text-emerald-100 hover:bg-emerald-400/15"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Connect Community Management App
           </a>
           <button
             type="button"
-            onClick={revoke}
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center gap-2 border border-white/10 bg-black/30 px-3 py-2 text-xs text-white/55"
+          >
+            Refresh LinkedIn Status
+          </button>
+          <button
+            type="button"
+            onClick={() => revoke()}
             disabled={!connection.connected || revoking}
             className="inline-flex items-center gap-2 border border-white/10 bg-black/30 px-3 py-2 text-xs text-white/55 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {revoking ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Revoke
+            Disconnect active profile
           </button>
         </div>
       </div>
