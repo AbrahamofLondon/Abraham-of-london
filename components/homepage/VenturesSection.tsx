@@ -27,7 +27,7 @@ type VentureStatus = "Active" | "In development" | "Scaling";
 interface Venture {
   name: "Alomarada" | "Endureluxe" | "InnovateHub";
   description: string;
-  href: string;
+  href?: string;
   status: VentureStatus;
   tag: string;
   focus: string;
@@ -36,25 +36,25 @@ interface Venture {
 const VENTURES: Venture[] = [
   {
     name:        "Alomarada",
-    tag:         "Advisory",
-    description: "Institutional strategy and market-entry architecture for growth corridors.",
-    href:        process.env.NEXT_PUBLIC_ALOMARADA_URL || "#",
+    tag:         "Operating Company",
+    description: "The operating and advisory company behind strategic market-entry, governance, and venture architecture.",
+    href:        process.env.NEXT_PUBLIC_ALOMARADA_URL,
     status:      "Active",
-    focus:       "Governance · Strategy",
+    focus:       "Advisory · Governance",
   },
   {
     name:        "Endureluxe",
-    tag:         "Field Gear",
-    description: "Performance essentials designed for high-responsibility life.",
-    href:        process.env.NEXT_PUBLIC_ENDURELUXE_URL || "#",
+    tag:         "Resilience Goods",
+    description: "A durable lifestyle and field-gear venture for people carrying responsibility under pressure.",
+    href:        process.env.NEXT_PUBLIC_ENDURELUXE_URL,
     status:      "Scaling",
     focus:       "Utility · Resilience",
   },
   {
     name:        "InnovateHub",
-    tag:         "Builders Lab",
-    description: "Practical support for founders turning ideas into durable products.",
-    href:        process.env.NEXT_PUBLIC_INNOVATEHUB_URL || "#",
+    tag:         "Builder Support",
+    description: "A practical formation environment for founders turning ideas into structured ventures.",
+    href:        process.env.NEXT_PUBLIC_INNOVATEHUB_URL,
     status:      "In development",
     focus:       "Venture Design · Execution",
   },
@@ -105,19 +105,33 @@ export default function VenturesSection(): React.ReactElement {
           lineHeight: 1.0, letterSpacing: "-0.025em",
           color: "rgba(255,255,255,0.88)",
         }}>
-          Three ventures. One governing logic.
+          Ventures shaped by the same operating doctrine.
         </h2>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "1rem", lineHeight: 1.68,
+          color: "rgba(255,255,255,0.38)",
+          maxWidth: "62ch", marginTop: "0.85rem",
+        }}>
+          Abraham of London is being built as a strategic umbrella for decision
+          infrastructure, market intelligence, and disciplined venture
+          development. These ventures extend that logic into advisory,
+          resilience, and builder support without collapsing their individual
+          identities.
+        </p>
       </div>
 
       {/* Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         {VENTURES.map((venture) => {
           const Icon = VENTURE_ICONS[venture.name];
+          const href = venture.href || "/ventures";
+          const hasOutboundHref = Boolean(venture.href);
 
           return (
             <Link
               key={venture.name}
-              href={venture.href}
+              href={href}
               className="group block outline-none"
             >
               <div
@@ -217,6 +231,16 @@ export default function VenturesSection(): React.ReactElement {
                       className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.65)]"
                     />
                   </div>
+                  {!hasOutboundHref ? (
+                    <span style={{
+                      marginTop: "0.85rem",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.18)",
+                    }}>
+                      Coming into view
+                    </span>
+                  ) : null}
                 </div>
               </div>
             </Link>

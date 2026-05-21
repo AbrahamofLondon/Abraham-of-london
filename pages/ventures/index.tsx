@@ -89,13 +89,14 @@ const ventures: Venture[] = [
   {
     name: "Alomarada Ltd",
     slug: "alomarada",
-    sector: "Institutional Advisory",
+    sector: "Operating Company",
     description:
-      "We provide governance frameworks and strategic operating systems for boards and institutions navigating complex market environments. Our work centers on aligning oversight, execution, and succession across organizational structures.",
-    descriptionShort: "Governance architecture for institutions",
+      "The operating and advisory company behind strategic market-entry, governance, and venture architecture.",
+    descriptionShort: "Advisory, governance, and venture architecture",
     domain: ["Governance", "Strategic Advisory", "Organizational Design"],
     established: "2018",
-    url: "https://alomarada.com",
+    url: process.env.NEXT_PUBLIC_ALOMARADA_URL || "/ventures/alomarada",
+    isInternal: !process.env.NEXT_PUBLIC_ALOMARADA_URL,
     status: "Operational",
     metrics: {
       founded: "2018",
@@ -106,13 +107,14 @@ const ventures: Venture[] = [
   {
     name: "Endureluxe",
     slug: "endureluxe",
-    sector: "Health & Performance",
+    sector: "Resilience Goods",
     description:
-      "A community-centered approach to physical and mental health. We develop training systems and performance tools while maintaining open access to resources that support sustainable practice across experience levels.",
-    descriptionShort: "Community health systems",
-    domain: ["Community Health", "Performance Systems", "Equipment Design"],
+      "A durable lifestyle and field-gear venture for people carrying responsibility under pressure.",
+    descriptionShort: "Utility and resilience for high-responsibility life",
+    domain: ["Utility", "Resilience", "Field Gear"],
     established: "2024",
-    url: "https://alomarada.com/endureluxe",
+    url: process.env.NEXT_PUBLIC_ENDURELUXE_URL || "/ventures/endureluxe",
+    isInternal: !process.env.NEXT_PUBLIC_ENDURELUXE_URL,
     status: "Operational",
     metrics: {
       founded: "2024",
@@ -141,13 +143,14 @@ const ventures: Venture[] = [
   {
     name: "InnovateHub",
     slug: "innovatehub",
-    sector: "Product & Venture Development",
+    sector: "Builder Support",
     description:
-      "Structured frameworks for product strategy and venture architecture. We work with founders and organizations to establish systematic approaches to development, resource allocation, and market positioning.",
-    descriptionShort: "Venture architecture frameworks",
+      "A practical formation environment for founders turning ideas into structured ventures.",
+    descriptionShort: "Builder support for venture formation",
     domain: ["Product Strategy", "Venture Architecture", "Market Development"],
     established: "2024",
-    url: "https://innovatehub.abrahamoflondon.org",
+    url: process.env.NEXT_PUBLIC_INNOVATEHUB_URL || "/ventures/innovatehub",
+    isInternal: !process.env.NEXT_PUBLIC_INNOVATEHUB_URL,
     status: "Development",
     metrics: {
       founded: "2024",
@@ -338,8 +341,15 @@ const VenturesPage: NextPage = () => {
               </h1>
 
               <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-white/54 md:text-[1.2rem]">
-                Applied platforms across institutional advisory, performance
-                systems, venture architecture, and structured discourse.
+                Abraham of London remains focused on Decision Infrastructure and
+                governed strategic intelligence. These adjacent ventures extend
+                the operating doctrine into advisory, resilience, builder
+                support, and structured discourse without collapsing their own
+                identities.
+              </p>
+              <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/38">
+                Alomarada currently holds the operating-company role. Any future
+                legal umbrella transition is stated only when complete.
               </p>
 
               <div className="mt-14 flex items-center gap-4">

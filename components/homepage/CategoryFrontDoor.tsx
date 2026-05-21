@@ -16,6 +16,7 @@ import RefusalDemo from "@/components/homepage/RefusalDemo";
 import MemoryContinuityPreview from "@/components/homepage/MemoryContinuityPreview";
 import DecisionDelayExposureCTASection from "@/components/homepage/DecisionDelayExposureCTASection";
 import OperatorPilotBlock from "@/components/homepage/OperatorPilotBlock";
+import VenturesSection from "@/components/homepage/VenturesSection";
 import HomepageFinalCTA from "@/components/homepage/HomepageFinalCTA";
 
 // Repeated CTA configurations — restrained, never duplicating the primary in
@@ -55,6 +56,14 @@ export default function CategoryFrontDoor() {
       <MemoryContinuityPreview />
       <DecisionDelayExposureCTASection />
       <OperatorPilotBlock />
+      <section
+        aria-label="Venture ecosystem"
+        className="border-y border-white/[0.05] bg-black px-6 py-20 lg:px-12 lg:py-24"
+      >
+        <div className="mx-auto max-w-7xl">
+          <VenturesSection />
+        </div>
+      </section>
       <HomepageFinalCTA />
     </>
   );

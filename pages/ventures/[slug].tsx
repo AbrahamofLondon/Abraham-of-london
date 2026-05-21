@@ -41,6 +41,7 @@ interface Venture {
   domain: string[];
   established: string;
   url: string;
+  isInternal?: boolean;
   status: VentureStatus;
   metrics?: {
     founded: string;
@@ -60,13 +61,14 @@ const ventures: Venture[] = [
   {
     name: "Alomarada Ltd",
     slug: "alomarada",
-    sector: "Institutional Advisory",
+    sector: "Operating Company",
     description:
-      "We provide governance frameworks and strategic operating systems for boards and institutions navigating complex market environments. Our work centers on aligning oversight, execution, and succession across organizational structures.",
-    descriptionShort: "Governance architecture for institutions",
+      "The operating and advisory company behind strategic market-entry, governance, and venture architecture.",
+    descriptionShort: "Advisory, governance, and venture architecture",
     domain: ["Governance", "Strategic Advisory", "Organizational Design"],
     established: "2018",
-    url: "https://alomarada.com",
+    url: process.env.NEXT_PUBLIC_ALOMARADA_URL || "/ventures",
+    isInternal: !process.env.NEXT_PUBLIC_ALOMARADA_URL,
     status: "Operational",
     metrics: {
       founded: "2018",
@@ -74,7 +76,7 @@ const ventures: Venture[] = [
       stage: "Scaled",
     },
     fullDescription:
-      "Alomarada works with boards, executive teams, and institutional leaders to design governance systems that outlive personalities. Our frameworks address decision rights, accountability structures, and strategic cadence—creating organizations capable of navigating complexity without founder dependency.",
+      "Alomarada holds the operating-company role behind strategic market-entry, governance, and venture architecture work. It provides a practical company frame for advisory activity and disciplined venture development while each public expression keeps its own identity.",
     principles: [
       "Decision rights clarity",
       "Succession as design principle",
@@ -85,13 +87,14 @@ const ventures: Venture[] = [
   {
     name: "Endureluxe",
     slug: "endureluxe",
-    sector: "Health & Performance",
+    sector: "Resilience Goods",
     description:
-      "A community-centered approach to physical and mental health. We develop training systems and performance tools while maintaining open access to resources that support sustainable practice across experience levels.",
-    descriptionShort: "Community health systems",
-    domain: ["Community Health", "Performance Systems", "Equipment Design"],
+      "A durable lifestyle and field-gear venture for people carrying responsibility under pressure.",
+    descriptionShort: "Utility and resilience for high-responsibility life",
+    domain: ["Utility", "Resilience", "Field Gear"],
     established: "2024",
-    url: "https://alomarada.com/endureluxe",
+    url: process.env.NEXT_PUBLIC_ENDURELUXE_URL || "/ventures",
+    isInternal: !process.env.NEXT_PUBLIC_ENDURELUXE_URL,
     status: "Operational",
     metrics: {
       founded: "2024",
@@ -99,7 +102,7 @@ const ventures: Venture[] = [
       stage: "Growth",
     },
     fullDescription:
-      "Endureluxe builds training systems and communities for sustainable physical and mental performance. Our approach integrates movement methodology, equipment design, and open-access education—creating resources that scale from individual practice to institutional implementation.",
+      "Endureluxe extends the wider operating doctrine through durable lifestyle and field-gear work for people carrying responsibility under pressure. Its expression is utility and resilience, not a duplicate of Abraham of London strategic intelligence.",
     principles: [
       "Sustainable practice",
       "Community-centered design",
@@ -135,13 +138,14 @@ const ventures: Venture[] = [
   {
     name: "InnovateHub",
     slug: "innovatehub",
-    sector: "Product & Venture Development",
+    sector: "Builder Support",
     description:
-      "Structured frameworks for product strategy and venture architecture. We work with founders and organizations to establish systematic approaches to development, resource allocation, and market positioning.",
-    descriptionShort: "Venture architecture frameworks",
+      "A practical formation environment for founders turning ideas into structured ventures.",
+    descriptionShort: "Builder support for venture formation",
     domain: ["Product Strategy", "Venture Architecture", "Market Development"],
     established: "2024",
-    url: "https://innovatehub.abrahamoflondon.org",
+    url: process.env.NEXT_PUBLIC_INNOVATEHUB_URL || "/ventures",
+    isInternal: !process.env.NEXT_PUBLIC_INNOVATEHUB_URL,
     status: "Development",
     metrics: {
       founded: "2024",
@@ -149,7 +153,7 @@ const ventures: Venture[] = [
       stage: "Formation",
     },
     fullDescription:
-      "InnovateHub provides founders and organizations with structured frameworks for venture development. From product strategy to market positioning, our approach ensures that growth is built on architectural integrity—not theatrical momentum.",
+      "InnovateHub supports founders as ideas become structured ventures. It concentrates on practical formation, venture design, execution discipline, and the product choices that make early building less improvised.",
     principles: [
       "Structured venture development",
       "Product-market architecture",
@@ -351,17 +355,29 @@ const VenturePage: NextPage<{ venture: Venture }> = ({ venture }) => {
                   )}
 
                   <div className="pt-8 border-t border-white/5">
-                    <a
-                      href={venture.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-3 bg-white/5 border border-white/10 px-8 py-4 transition-all duration-300 hover:bg-white/10 hover:border-white/20"
-                    >
-                      <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/80">
-                        Visit {venture.name}
-                      </span>
-                      <ExternalLink className="h-4 w-4 text-white/40 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </a>
+                    {venture.isInternal ? (
+                      <Link
+                        href={venture.url}
+                        className="group inline-flex items-center gap-3 bg-white/5 border border-white/10 px-8 py-4 transition-all duration-300 hover:bg-white/10 hover:border-white/20"
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/80">
+                          Return to venture directory
+                        </span>
+                        <ArrowRight className="h-4 w-4 text-white/40 transition-transform group-hover:translate-x-0.5" />
+                      </Link>
+                    ) : (
+                      <a
+                        href={venture.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group inline-flex items-center gap-3 bg-white/5 border border-white/10 px-8 py-4 transition-all duration-300 hover:bg-white/10 hover:border-white/20"
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/80">
+                          Visit {venture.name}
+                        </span>
+                        <ExternalLink className="h-4 w-4 text-white/40 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
