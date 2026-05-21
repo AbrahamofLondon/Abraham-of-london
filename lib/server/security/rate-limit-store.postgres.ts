@@ -64,3 +64,26 @@ export async function cleanExpiredBuckets(): Promise<number> {
   });
   return result.count;
 }
+
+export async function clearPostgresRateLimitBuckets(opts: {
+  routeKey: string;
+  identityKeys: string[];
+}): Promise<number> {
+  const routeKey = String(opts.routeKey || "").trim();
+  const identityKeys = Array.from(
+    new Set(opts.identityKeys.map((key) => String(key || "").trim()).filter(Boolean)),
+  );
+
+  if (!routeKey || identityKeys.length === 0) {
+    return 0;
+  }
+
+  const result = await prisma.rateLimitBucket.deleteMany({
+    where: {
+      routeKey,
+      identityKey: { in: identityKeys },
+    },
+  });
+
+  return result.count;
+}

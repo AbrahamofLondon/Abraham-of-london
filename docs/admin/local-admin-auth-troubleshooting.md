@@ -169,10 +169,24 @@ In development only, an admin-auth rate-limit key can be cleared with:
 ```bash
 curl -X POST http://localhost:3000/api/admin/auth/reset-rate-limit \
   -H "Content-Type: application/json" \
-  -d "{\"routeKey\":\"admin-verify\"}"
+  -d "{\"routeKey\":\"admin-verify\",\"email\":\"admin@abrahamoflondon.org\"}"
 ```
 
-The reset helper is unavailable in production and only accepts `admin-verify` or `admin-send-link`.
+PowerShell examples:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "http://localhost:3000/api/admin/auth/reset-rate-limit" `
+  -ContentType "application/json" `
+  -Body '{"routeKey":"admin-send-link","email":"admin@abrahamoflondon.org"}'
+
+Invoke-RestMethod -Method Post `
+  -Uri "http://localhost:3000/api/admin/auth/reset-rate-limit" `
+  -ContentType "application/json" `
+  -Body '{"routeKey":"admin-verify","email":"admin@abrahamoflondon.org"}'
+```
+
+The reset helper is unavailable in production and only accepts `admin-verify` or `admin-send-link`. It clears matching development Redis/Postgres rate-limit buckets and local shield fingerprints for the request source. If Redis is unavailable or no matching bucket exists, wait for the returned retry window before requesting more links. Do not repeatedly request new links while a throttle is active.
 
 ## Return Target Handling
 
