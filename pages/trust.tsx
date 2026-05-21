@@ -240,6 +240,33 @@ const TrustPage: NextPage = () => (
           </div>
         </section>
 
+        <section
+          style={{
+            border: "1px solid rgba(255,255,255,0.08)",
+            backgroundColor: "rgba(255,255,255,0.02)",
+            padding: "1rem",
+          }}
+        >
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)", marginBottom: "0.65rem" }}>
+            Trust &amp; Operations
+          </p>
+          <div className="max-w-2xl space-y-3 text-[15px] leading-7 text-white/60">
+            <p>
+              Abraham of London uses governed internal workflows for administrative
+              access, outbound publishing, and decision-support operations.
+              Public-facing content and platform integrations are handled through
+              controlled approval paths, scoped permissions, and operator-level
+              accountability.
+            </p>
+            <p>
+              We do not treat social publishing as casual automation. Where
+              external APIs are used, permissions are requested only for the
+              functions required, and publishing access is kept behind
+              administrative review.
+            </p>
+          </div>
+        </section>
+
         {/* ── PLAIN-ENGLISH LAYER ─────────────────────────────────── */}
         <PlainEnglishDecisionLayer id="plain-english-trust" />
 
