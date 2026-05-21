@@ -248,21 +248,25 @@ const TrustPage: NextPage = () => (
           }}
         >
           <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)", marginBottom: "0.65rem" }}>
-            Trust &amp; Operations
+            Operational Governance
           </p>
           <div className="max-w-2xl space-y-3 text-[15px] leading-7 text-white/60">
             <p>
-              Abraham of London uses governed internal workflows for administrative
-              access, outbound publishing, and decision-support operations.
-              Public-facing content and platform integrations are handled through
-              controlled approval paths, scoped permissions, and operator-level
-              accountability.
+              Abraham of London operates administrative, publishing, and support
+              workflows through controlled internal channels. Access to sensitive
+              systems is role-gated, and outbound publishing is handled through
+              governed approval paths rather than unmanaged direct posting.
             </p>
             <p>
-              We do not treat social publishing as casual automation. Where
-              external APIs are used, permissions are requested only for the
-              functions required, and publishing access is kept behind
-              administrative review.
+              External platform integrations, including LinkedIn, are treated as
+              controlled publishing channels. Permissions are scoped to the
+              operational purpose, credentials are kept server-side, and
+              publishing activity is limited to authorised operators.
+            </p>
+            <p>
+              Internal coordination channels support incident response, deployment
+              review, and operator accountability. They do not replace governance;
+              they support it.
             </p>
           </div>
         </section>
