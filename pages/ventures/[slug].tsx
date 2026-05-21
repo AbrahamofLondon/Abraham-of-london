@@ -6,22 +6,16 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
-  Activity,
   ExternalLink,
   ChevronLeft,
   Briefcase,
-  TrendingUp as TrendingUpIcon,
   Building,
   Shield,
-  Layers,
-  Users,
   Compass,
-  Gauge,
-  Scale,
-  Clock,
   Target,
-  LineChart,
-  Hexagon,
+  PackageCheck,
+  ShieldCheck,
+  BriefcaseBusiness,
   Calendar,
   Users2,
   TrendingUp,
@@ -30,7 +24,7 @@ import {
 import Layout from "@/components/Layout";
 
 // Re-use the same types and data from your index page
-type VentureStatus = "Operational" | "Development" | "Inactive";
+type VentureStatus = "Active" | "Scaling" | "In development";
 
 interface Venture {
   name: string;
@@ -69,7 +63,7 @@ const ventures: Venture[] = [
     established: "2018",
     url: process.env.NEXT_PUBLIC_ALOMARADA_URL || "/ventures",
     isInternal: !process.env.NEXT_PUBLIC_ALOMARADA_URL,
-    status: "Operational",
+    status: "Active",
     metrics: {
       founded: "2018",
       team: "12",
@@ -95,7 +89,7 @@ const ventures: Venture[] = [
     established: "2024",
     url: process.env.NEXT_PUBLIC_ENDURELUXE_URL || "/ventures",
     isInternal: !process.env.NEXT_PUBLIC_ENDURELUXE_URL,
-    status: "Operational",
+    status: "Scaling",
     metrics: {
       founded: "2024",
       team: "6",
@@ -111,42 +105,17 @@ const ventures: Venture[] = [
     ],
   },
   {
-    name: "Chatham Rooms",
-    slug: "chatham-rooms",
-    sector: "Knowledge Exchange",
-    description:
-      "A secure environment for high-stakes discourse and institutional knowledge exchange. We facilitate structured dialogue between stakeholders under protocols designed to ensure candor, confidentiality, and objective synthesis of complex issues.",
-    descriptionShort: "High-stakes dialogue architecture",
-    domain: ["Discourse Architecture", "Knowledge Management", "Strategic Dialogue"],
-    established: "2025",
-    url: "https://alomarada.com/chatham-rooms",
-    status: "Operational",
-    metrics: {
-      founded: "2025",
-      team: "4",
-      stage: "Early",
-    },
-    fullDescription:
-      "Chatham Rooms provides structured environments for high-stakes discourse. Our protocols ensure candor without exposure, enabling institutions to address sensitive challenges with clarity and confidence. Each session is designed for objective synthesis and actionable outcomes.",
-    principles: [
-      "Radical candor, absolute confidentiality",
-      "Structured dialogue protocols",
-      "Objective synthesis",
-      "Actionable outcomes",
-    ],
-  },
-  {
     name: "InnovateHub",
     slug: "innovatehub",
     sector: "Builder Support",
     description:
       "A practical formation environment for founders turning ideas into structured ventures.",
     descriptionShort: "Builder support for venture formation",
-    domain: ["Product Strategy", "Venture Architecture", "Market Development"],
+    domain: ["Builder Support", "Venture Architecture", "Product Strategy"],
     established: "2024",
     url: process.env.NEXT_PUBLIC_INNOVATEHUB_URL || "/ventures",
     isInternal: !process.env.NEXT_PUBLIC_INNOVATEHUB_URL,
-    status: "Development",
+    status: "In development",
     metrics: {
       founded: "2024",
       team: "5",
@@ -170,29 +139,26 @@ const domainIcons: Record<
   Governance: Shield,
   "Strategic Advisory": Compass,
   "Organizational Design": Building,
-  "Community Health": Activity,
-  "Performance Systems": Gauge,
-  "Equipment Design": Hexagon,
   "Product Strategy": Target,
   "Venture Architecture": Building2,
-  "Market Development": TrendingUpIcon,
-  "Discourse Architecture": Users,
-  "Knowledge Management": Layers,
-  "Strategic Dialogue": Scale,
+  Utility: PackageCheck,
+  Resilience: ShieldCheck,
+  "Field Gear": BriefcaseBusiness,
+  "Builder Support": Building2,
 };
 
 const statusColors: Record<VentureStatus, { text: string; bg: string; border: string }> = {
-  Operational: {
+  Active: {
     text: "text-emerald-400",
     bg: "bg-emerald-400/10",
     border: "border-emerald-400/20",
   },
-  Development: {
+  Scaling: {
     text: "text-amber-400",
     bg: "bg-amber-400/10",
     border: "border-amber-400/20",
   },
-  Inactive: {
+  "In development": {
     text: "text-zinc-400",
     bg: "bg-zinc-400/10",
     border: "border-zinc-400/20",

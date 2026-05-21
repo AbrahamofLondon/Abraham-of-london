@@ -31,6 +31,9 @@ interface Venture {
   status: VentureStatus;
   tag: string;
   focus: string;
+  relationshipToAOL: string;
+  evidenceOfDoctrine: string;
+  maturityNote?: string;
 }
 
 const VENTURES: Venture[] = [
@@ -41,6 +44,8 @@ const VENTURES: Venture[] = [
     href:        process.env.NEXT_PUBLIC_ALOMARADA_URL,
     status:      "Active",
     focus:       "Advisory · Governance",
+    relationshipToAOL: "Current operating-company and advisory foundation.",
+    evidenceOfDoctrine: "Governance before growth.",
   },
   {
     name:        "Endureluxe",
@@ -49,6 +54,8 @@ const VENTURES: Venture[] = [
     href:        process.env.NEXT_PUBLIC_ENDURELUXE_URL,
     status:      "Scaling",
     focus:       "Utility · Resilience",
+    relationshipToAOL: "Commercial expression of responsibility, endurance, and useful discipline.",
+    evidenceOfDoctrine: "Resilience before theatre.",
   },
   {
     name:        "InnovateHub",
@@ -57,6 +64,9 @@ const VENTURES: Venture[] = [
     href:        process.env.NEXT_PUBLIC_INNOVATEHUB_URL,
     status:      "In development",
     focus:       "Venture Design · Execution",
+    relationshipToAOL: "Builder-support expression for disciplined venture formation.",
+    evidenceOfDoctrine: "Structure before scale.",
+    maturityNote: "In development",
   },
 ];
 
@@ -96,7 +106,7 @@ export default function VenturesSection(): React.ReactElement {
             fontSize: "8.5px", letterSpacing: "0.40em", textTransform: "uppercase",
             color: `${GOLD}BF`,
           }}>
-            Ventures
+            Doctrine in Operation
           </span>
         </div>
         <h2 style={{
@@ -105,7 +115,7 @@ export default function VenturesSection(): React.ReactElement {
           lineHeight: 1.0, letterSpacing: "-0.025em",
           color: "rgba(255,255,255,0.88)",
         }}>
-          Ventures shaped by the same operating doctrine.
+          Ventures shaped by one operating logic.
         </h2>
         <p style={{
           fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
@@ -113,11 +123,21 @@ export default function VenturesSection(): React.ReactElement {
           color: "rgba(255,255,255,0.38)",
           maxWidth: "62ch", marginTop: "0.85rem",
         }}>
-          Abraham of London is being built as a strategic umbrella for decision
-          infrastructure, market intelligence, and disciplined venture
-          development. These ventures extend that logic into advisory,
-          resilience, and builder support without collapsing their individual
-          identities.
+          Abraham of London is being built around a disciplined operating logic,
+          not a loose collection of projects. Its wider venture ecosystem shows
+          how the same governing logic can shape advisory, resilience, and
+          builder-support expressions while preserving each venture&apos;s
+          identity.
+        </p>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "0.94rem", lineHeight: 1.62,
+          color: "rgba(255,255,255,0.28)",
+          maxWidth: "60ch", marginTop: "0.65rem",
+        }}>
+          Each venture carries a different market expression. The common thread
+          is disciplined operating judgment: decisions clarified,
+          responsibility carried, and execution made less improvised.
         </p>
       </div>
 
@@ -231,6 +251,14 @@ export default function VenturesSection(): React.ReactElement {
                       className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.65)]"
                     />
                   </div>
+                  <p style={{
+                    marginTop: "0.9rem",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "6.5px", lineHeight: 1.7, letterSpacing: "0.18em",
+                    textTransform: "uppercase", color: "rgba(255,255,255,0.22)",
+                  }}>
+                    Operating signal: {venture.evidenceOfDoctrine}
+                  </p>
                   {!hasOutboundHref ? (
                     <span style={{
                       marginTop: "0.85rem",
@@ -259,7 +287,7 @@ export default function VenturesSection(): React.ReactElement {
             color: "rgba(255,255,255,0.28)",
           }}
         >
-          Portfolio directory
+          View venture architecture
           <ArrowRight style={{ width: "11px", height: "11px" }} />
         </Link>
       </div>

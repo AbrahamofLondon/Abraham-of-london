@@ -1,4 +1,4 @@
-/* pages/ventures/index.tsx — VENTURE PORTFOLIO (ADULT / BOARDROOM EDITION) */
+/* pages/ventures/index.tsx — DOCTRINE-IN-OPERATION VENTURE ARCHITECTURE */
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -6,27 +6,19 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
-  Activity,
-  ExternalLink,
-  ChevronRight,
   Briefcase,
-  TrendingUp as TrendingUpIcon,
   Building,
   Shield,
-  Layers,
-  Users,
   Compass,
-  Gauge,
-  Scale,
-  Clock,
   Target,
-  LineChart,
-  Hexagon,
+  PackageCheck,
+  ShieldCheck,
+  BriefcaseBusiness,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 
-type VentureStatus = "Operational" | "Development" | "Inactive";
+type VentureStatus = "Active" | "Scaling" | "In development";
 
 interface Venture {
   name: string;
@@ -39,29 +31,27 @@ interface Venture {
   url: string;
   isInternal?: boolean;
   status: VentureStatus;
-  metrics?: {
-    founded: string;
-    team?: string;
-    stage?: string;
-  };
+  relationshipToAOL: string;
+  evidenceOfDoctrine: string;
+  maturityNote?: string;
 }
 
 const statusConfig: Record<
   VentureStatus,
   { label: string; className: string; dot: string }
 > = {
-  Operational: {
-    label: "Operational",
+  Active: {
+    label: "Active",
     className: "text-emerald-300 border-emerald-400/20 bg-emerald-400/[0.05]",
     dot: "bg-emerald-400",
   },
-  Development: {
-    label: "Development",
+  Scaling: {
+    label: "Scaling",
     className: "text-amber-300 border-amber-400/20 bg-amber-400/[0.05]",
     dot: "bg-amber-400",
   },
-  Inactive: {
-    label: "Inactive",
+  "In development": {
+    label: "In development",
     className: "text-zinc-400 border-zinc-500/20 bg-zinc-500/[0.04]",
     dot: "bg-zinc-500",
   },
@@ -74,15 +64,12 @@ const domainIcons: Record<
   Governance: Shield,
   "Strategic Advisory": Compass,
   "Organizational Design": Building,
-  "Community Health": Activity,
-  "Performance Systems": Gauge,
-  "Equipment Design": Hexagon,
   "Product Strategy": Target,
   "Venture Architecture": Building2,
-  "Market Development": TrendingUpIcon,
-  "Discourse Architecture": Users,
-  "Knowledge Management": Layers,
-  "Strategic Dialogue": Scale,
+  Utility: PackageCheck,
+  Resilience: ShieldCheck,
+  "Field Gear": BriefcaseBusiness,
+  "Builder Support": Building2,
 };
 
 const ventures: Venture[] = [
@@ -97,12 +84,9 @@ const ventures: Venture[] = [
     established: "2018",
     url: process.env.NEXT_PUBLIC_ALOMARADA_URL || "/ventures/alomarada",
     isInternal: !process.env.NEXT_PUBLIC_ALOMARADA_URL,
-    status: "Operational",
-    metrics: {
-      founded: "2018",
-      team: "12",
-      stage: "Scaled",
-    },
+    status: "Active",
+    relationshipToAOL: "Current operating-company and advisory foundation.",
+    evidenceOfDoctrine: "Governance before growth.",
   },
   {
     name: "Endureluxe",
@@ -115,30 +99,9 @@ const ventures: Venture[] = [
     established: "2024",
     url: process.env.NEXT_PUBLIC_ENDURELUXE_URL || "/ventures/endureluxe",
     isInternal: !process.env.NEXT_PUBLIC_ENDURELUXE_URL,
-    status: "Operational",
-    metrics: {
-      founded: "2024",
-      team: "6",
-      stage: "Growth",
-    },
-  },
-  {
-    name: "Chatham Rooms",
-    slug: "chatham-rooms",
-    sector: "Knowledge Exchange",
-    description:
-      "A secure environment for high-stakes discourse and institutional knowledge exchange. We facilitate structured dialogue between stakeholders under protocols designed to ensure candor, confidentiality, and objective synthesis of complex issues.",
-    descriptionShort: "High-stakes dialogue architecture",
-    domain: ["Discourse Architecture", "Knowledge Management", "Strategic Dialogue"],
-    established: "2025",
-    url: "/chatham-rooms", // ✅ FIXED: Points to internal page, not external URL
-    isInternal: true,
-    status: "Operational",
-    metrics: {
-      founded: "2025",
-      team: "4",
-      stage: "Early",
-    },
+    status: "Scaling",
+    relationshipToAOL: "Commercial expression of responsibility, endurance, and useful discipline.",
+    evidenceOfDoctrine: "Resilience before theatre.",
   },
   {
     name: "InnovateHub",
@@ -147,16 +110,14 @@ const ventures: Venture[] = [
     description:
       "A practical formation environment for founders turning ideas into structured ventures.",
     descriptionShort: "Builder support for venture formation",
-    domain: ["Product Strategy", "Venture Architecture", "Market Development"],
+    domain: ["Builder Support", "Venture Architecture", "Product Strategy"],
     established: "2024",
     url: process.env.NEXT_PUBLIC_INNOVATEHUB_URL || "/ventures/innovatehub",
     isInternal: !process.env.NEXT_PUBLIC_INNOVATEHUB_URL,
-    status: "Development",
-    metrics: {
-      founded: "2024",
-      team: "5",
-      stage: "Formation",
-    },
+    status: "In development",
+    relationshipToAOL: "Builder-support expression for disciplined venture formation.",
+    evidenceOfDoctrine: "Structure before scale.",
+    maturityNote: "Formation remains deliberate.",
   },
 ];
 
@@ -167,25 +128,6 @@ function RailLabel({ children }: { children: React.ReactNode }) {
       <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-400/62">
         {children}
       </span>
-    </div>
-  );
-}
-
-function MetricCell({
-  label,
-  value,
-}: {
-  label: string;
-  value?: string;
-}) {
-  return (
-    <div className="border-l border-white/6 pl-4 first:border-l-0 first:pl-0 transition-colors duration-300 group-hover/metric:border-amber-500/20">
-      <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-white/28 transition-colors group-hover/metric:text-amber-400/40">
-        {label}
-      </div>
-      <div className="mt-2 font-serif text-lg text-white/84 transition-colors group-hover/metric:text-amber-50/90">
-        {value || "—"}
-      </div>
     </div>
   );
 }
@@ -250,10 +192,25 @@ function VentureCard({ venture, index }: { venture: Venture; index: number }) {
           </p>
         </div>
 
-        <div className="group/metric mt-10 grid grid-cols-3 gap-6 border-y border-white/6 py-6">
-          <MetricCell label="Founded" value={venture.metrics?.founded} />
-          <MetricCell label="Team" value={venture.metrics?.team} />
-          <MetricCell label="Stage" value={venture.metrics?.stage} />
+        <div className="mt-8 space-y-4 border-y border-white/6 py-6">
+          <div>
+            <p className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/24">
+              Relationship to Abraham of London
+            </p>
+            <p className="mt-2 text-sm leading-6 text-white/48">
+              {venture.relationshipToAOL}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="font-mono text-[8px] uppercase tracking-[0.22em] text-amber-300/58">
+              Operating signal: {venture.evidenceOfDoctrine}
+            </span>
+            {venture.maturityNote ? (
+              <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/22">
+                {venture.maturityNote}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-2.5">
@@ -310,13 +267,13 @@ const VenturesPage: NextPage = () => {
   return (
     <Layout
       title="Ventures | Abraham of London"
-      description="Applied frameworks across institutional, performance, and development domains."
+      description="The venture ecosystem around Abraham of London, expressed through advisory, resilience, and builder support without diluting Decision Infrastructure."
     >
       <Head>
         <meta property="og:title" content="Ventures | Abraham of London" />
         <meta
           property="og:description"
-          content="Applied frameworks across institutional, performance, and development domains."
+          content="The venture ecosystem around Abraham of London, expressed through advisory, resilience, and builder support without diluting Decision Infrastructure."
         />
         <meta
           property="og:image"
@@ -333,18 +290,18 @@ const VenturesPage: NextPage = () => {
 
           <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-36 lg:px-12 lg:pb-32 lg:pt-44">
             <div className="max-w-4xl">
-              <RailLabel>Operating Platforms</RailLabel>
+              <RailLabel>Doctrine in Operation</RailLabel>
 
-              <h1 className="mt-8 max-w-[10ch] font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.5rem]">
-                Ventures built for
-                <span className="block text-white/58">serious work</span>
+              <h1 className="mt-8 max-w-[12ch] font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.5rem]">
+                A venture ecosystem
+                <span className="block text-white/58">governed by discipline, not noise.</span>
               </h1>
 
               <p className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-white/54 md:text-[1.2rem]">
-                Abraham of London remains focused on Decision Infrastructure and
-                governed strategic intelligence. These adjacent ventures extend
-                the operating doctrine into advisory, resilience, builder
-                support, and structured discourse without collapsing their own
+                Abraham of London remains centred on Decision Infrastructure and
+                governed strategic intelligence. Its adjacent ventures show how
+                the same operating logic can be carried into advisory,
+                resilience, and builder support without collapsing separate
                 identities.
               </p>
               <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/38">
@@ -355,7 +312,7 @@ const VenturesPage: NextPage = () => {
               <div className="mt-14 flex items-center gap-4">
                 <div className="h-px w-12 bg-amber-500/30" />
                 <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/28">
-                  Portfolio Registry
+                  Architecture Registry
                 </span>
                 <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
               </div>
@@ -363,21 +320,72 @@ const VenturesPage: NextPage = () => {
           </div>
         </section>
 
-        {/* Portfolio */}
+        {/* Architecture */}
+        <section className="border-b border-white/5 py-16 md:py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="mb-8">
+              <RailLabel>Architecture</RailLabel>
+              <h2 className="mt-5 max-w-2xl font-serif text-3xl font-light text-white md:text-4xl">
+                Product authority first. Venture expression after.
+              </h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {[
+                {
+                  layer: "Strategic Authority",
+                  value: "Abraham of London",
+                  detail: "Decision Infrastructure and governed intelligence.",
+                },
+                {
+                  layer: "Operating Company",
+                  value: "Alomarada",
+                  detail: "Current company and advisory foundation.",
+                },
+                {
+                  layer: "Venture Expressions",
+                  value: "Endureluxe · InnovateHub",
+                  detail: "Resilience goods and disciplined builder support.",
+                },
+                {
+                  layer: "Product Spine",
+                  value: "Diagnostics · Executive Reporting · Strategy Room · Market Intelligence",
+                  detail: "Commercial paths remain structurally separable.",
+                },
+              ].map((item) => (
+                <article
+                  key={item.layer}
+                  className="border border-white/[0.07] bg-white/[0.015] p-5"
+                >
+                  <p className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/26">
+                    {item.layer}
+                  </p>
+                  <h3 className="mt-4 font-serif text-xl font-light leading-7 text-white/86">
+                    {item.value}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-white/42">
+                    {item.detail}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Venture expressions */}
         <section className="py-24 md:py-28">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-12 flex items-end justify-between gap-6">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/28">
-                  Current Platforms
+                  Venture Expressions
                 </p>
                 <h2 className="mt-3 font-serif text-3xl text-white md:text-4xl">
-                  Active portfolio
+                  Governed expressions in different domains
                 </h2>
               </div>
 
               <div className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-white/22 md:block">
-                {ventures.length} ventures indexed
+                {ventures.length} expressions in view
               </div>
             </div>
 
@@ -389,120 +397,30 @@ const VenturesPage: NextPage = () => {
           </div>
         </section>
 
-        {/* Method */}
-        <section className="relative overflow-hidden border-t border-white/5 py-28 md:py-36">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_72%_28%,rgba(245,158,11,0.025),transparent_60%)]" />
-
-          <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-            <div className="grid gap-16 lg:grid-cols-12">
-              <div className="lg:col-span-4">
-                <div className="lg:sticky lg:top-28">
-                  <RailLabel>Method</RailLabel>
-
-                  <h2 className="mt-8 max-w-[10ch] font-serif text-4xl leading-tight text-white md:text-5xl">
-                    Philosophy turned into operating logic
-                  </h2>
-
-                  <p className="mt-6 max-w-md text-white/46">
-                    The portfolio is not a random collection of projects. Each
-                    platform is a practical expression of the same governing
-                    discipline.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-14 lg:col-span-7 lg:col-start-6">
-                {[
-                  {
-                    icon: Scale,
-                    title: "Integration over isolation",
-                    description:
-                      "Solutions are designed with the full system in view: governance, market, people, and execution.",
-                  },
-                  {
-                    icon: Building,
-                    title: "Structure before scale",
-                    description:
-                      "Expansion without architecture creates fragility. Foundations must be able to carry added complexity.",
-                  },
-                  {
-                    icon: Clock,
-                    title: "Succession by design",
-                    description:
-                      "Institutional continuity requires transfer logic from the start, not improvised inheritance later.",
-                  },
-                  {
-                    icon: LineChart,
-                    title: "Measured deployment",
-                    description:
-                      "Timing matters, but timing without readiness is noise. We prefer disciplined release to theatrical motion.",
-                  },
-                ].map((item, i) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={i} className="group relative border-b border-white/6 pb-10 last:border-b-0">
-                      <div className="flex gap-5">
-                        <div className="mt-1 hidden sm:block">
-                          <div className="flex h-12 w-12 items-center justify-center border border-white/[0.08] bg-white/[0.02]">
-                            <Icon className="h-5 w-5 text-white/28 transition-colors duration-300 group-hover:text-amber-300/60" />
-                          </div>
-                        </div>
-
-                        <div className="flex-1">
-                          <div className="mb-3 flex items-start justify-between gap-4">
-                            <h3 className="font-serif text-xl text-white transition-colors duration-300 group-hover:text-amber-50">
-                              {item.title}
-                            </h3>
-
-                            <span className="font-mono text-[8px] text-white/14">
-                              {String(i + 1).padStart(2, "0")}
-                            </span>
-                          </div>
-
-                          <p className="max-w-2xl leading-relaxed text-white/42">
-                            {item.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* CTA */}
         <section className="relative border-t border-white/5 py-24 md:py-28">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(245,158,11,0.02),transparent_70%)]" />
 
           <div className="relative mx-auto max-w-4xl px-6 text-center">
-            <RailLabel>Engagement</RailLabel>
+            <RailLabel>Decision Infrastructure</RailLabel>
 
             <h2 className="mt-8 font-serif text-4xl text-white md:text-6xl">
-              Strategic engagements
+              Return to the commercial spine
             </h2>
 
             <p className="mx-auto mt-6 max-w-2xl text-lg font-light leading-relaxed text-white/50">
-              We work with leaders, founders, and institutions prepared for
-              structured thinking and serious execution.
+              The ventures show doctrine in operation. Abraham of London remains
+              centred on governed decisions, earned reporting, intelligence, and
+              the case path that carries consequence.
             </p>
 
             <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
               <Link
-                href="/contact"
+                href="/diagnostics/fast"
                 className="group inline-flex items-center justify-center gap-3 bg-white px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
               >
-                <span>Initiate conversation</span>
-                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-
-              <Link
-                href="/canon"
-                className="group inline-flex items-center justify-center gap-3 border border-white/10 px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-white transition-colors hover:border-white/20 hover:bg-white/5"
-              >
-                <span>Explore the Canon</span>
-                <ExternalLink className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100" />
+                <span>Return to Decision Infrastructure</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
 
