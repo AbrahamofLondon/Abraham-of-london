@@ -20,11 +20,20 @@
 // - .contentlayer/generated/ per-doc JSON (keeps _index.json)
 // - node_modules build-only packages still traced despite excludes
 // - dev/test/repo dirs that leaked through tracing
+// - workspace-only media, backups, and root build/env artifacts
+//
+// Node middleware note:
+// @netlify/plugin-nextjs packages Node middleware for Edge from
+// `.next/server/middleware.js.nft.json`, but the emitted middleware bundle
+// still requires sibling `.next/server/webpack-runtime.js`. Keep that runtime
+// in standalone output and in the NFT trace so Edge packaging does not create
+// middleware.js without its Webpack runtime.
 
 import fs from "node:fs";
 import path from "node:path";
 
 const standalone = path.join(process.cwd(), ".next", "standalone");
+const nextServer = path.join(process.cwd(), ".next", "server");
 
 if (!fs.existsSync(standalone)) {
   console.log("[clean-standalone] .next/standalone not found — skipping");
@@ -55,6 +64,15 @@ const REMOVE_DIRS = [
   "config",
   "private_storage",
   "private",
+  ".vercel",
+  "_tests_",
+  "archive",
+  "auth-migration",
+  "backup",
+  "old manual",
+  "test-results",
+  "tmp",
+  "video",
   // Build-only node_modules
   "node_modules/sass",
   "node_modules/@esbuild",
@@ -82,6 +100,33 @@ for (const rel of REMOVE_DIRS) {
   }
 }
 
+// Root workspace artifacts are not runtime inputs for the standalone server.
+// Keep this scoped to top-level files so generated server assets remain intact.
+const REMOVE_ROOT_FILE_PATTERNS = [
+  /^\.env(?:\..*)?$/,
+  /^\.netlify-env\.json$/,
+  /^\.git$/,
+  /^.*\.log$/,
+  /^.*\.mp4$/,
+  /^.*\.pdf$/,
+  /^.*\.tsbuildinfo$/,
+];
+
+for (const entry of fs.readdirSync(standalone, { withFileTypes: true })) {
+  if (!entry.isFile()) continue;
+  if (!REMOVE_ROOT_FILE_PATTERNS.some((pattern) => pattern.test(entry.name))) {
+    continue;
+  }
+
+  const abs = path.join(standalone, entry.name);
+  const before = fs.statSync(abs).size;
+  fs.rmSync(abs, { force: true });
+  saved += before;
+  console.log(
+    `[clean-standalone] removed root artifact ${entry.name} (${(before / 1024 / 1024).toFixed(1)} MB)`,
+  );
+}
+
 // Remove per-document JSON from .contentlayer/generated/ but KEEP _index.json
 const clGenerated = path.join(standalone, ".contentlayer", "generated");
 if (fs.existsSync(clGenerated)) {
@@ -107,9 +152,59 @@ if (fs.existsSync(clGenerated)) {
   }
 }
 
+ensureNetlifyNodeMiddlewareRuntime();
+
 console.log(
   `[clean-standalone] total saved: ${(saved / 1024 / 1024).toFixed(1)} MB`,
 );
+
+function ensureNetlifyNodeMiddlewareRuntime() {
+  const middlewareEntry = path.join(nextServer, "middleware.js");
+  const middlewareTrace = `${middlewareEntry}.nft.json`;
+  const middlewareRuntime = path.join(nextServer, "webpack-runtime.js");
+
+  if (
+    !fs.existsSync(middlewareEntry) ||
+    !fs.existsSync(middlewareTrace) ||
+    !fs.existsSync(middlewareRuntime)
+  ) {
+    console.log(
+      "[clean-standalone] node middleware runtime trace not present — skipping",
+    );
+    return;
+  }
+
+  const standaloneRuntime = path.join(
+    standalone,
+    ".next",
+    "server",
+    "webpack-runtime.js",
+  );
+  fs.mkdirSync(path.dirname(standaloneRuntime), { recursive: true });
+  fs.copyFileSync(middlewareRuntime, standaloneRuntime);
+  console.log(
+    "[clean-standalone] preserved .next/server/webpack-runtime.js for Netlify node middleware",
+  );
+
+  const trace = JSON.parse(fs.readFileSync(middlewareTrace, "utf8"));
+  if (!Array.isArray(trace.files)) {
+    throw new Error(
+      "[clean-standalone] invalid middleware NFT trace: files must be an array",
+    );
+  }
+
+  const runtimeTraceEntry = "webpack-runtime.js";
+  const hasRuntimeTrace = trace.files.some(
+    (file) => path.posix.normalize(String(file)) === runtimeTraceEntry,
+  );
+  if (hasRuntimeTrace) return;
+
+  trace.files.push(runtimeTraceEntry);
+  fs.writeFileSync(middlewareTrace, `${JSON.stringify(trace, null, 2)}\n`);
+  console.log(
+    "[clean-standalone] added webpack-runtime.js to node middleware NFT trace",
+  );
+}
 
 function dirSize(dir) {
   let total = 0;
