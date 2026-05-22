@@ -38,6 +38,7 @@ const strict = process.argv.includes("--strict");
 
 const FACEBOOK_DIR = path.join(rootDir, "content", "outbound", "facebook");
 const X_DIR = path.join(rootDir, "content", "outbound", "x");
+const LINKEDIN_CAMPAIGNS_BASE = path.join(rootDir, "content", "outbound", "linkedin");
 
 const X_TWEET_MAX_CHARS = 280;
 const X_URL_LENGTH = 23; // Twitter wraps all URLs to 23 chars (t.co)
@@ -51,7 +52,7 @@ const ALLOWED_IMAGE_PREFIX = "/assets/";
 
 const VALID_STATUSES = new Set(["draft", "ready", "scheduled", "published", "skipped", "rejected"]);
 const VALID_APPROVAL = new Set(["needs_review", "approved", "rejected"]);
-const VALID_PROVIDERS = new Set(["facebook", "x"]);
+const VALID_PROVIDERS = new Set(["facebook", "x", "linkedin"]);
 
 const REQUIRED_FIELDS = [
   "id",
@@ -299,19 +300,54 @@ async function validateDirectory(dir, provider, allIds) {
   return results;
 }
 
+// ─── LinkedIn campaign scanner ────────────────────────────────────────────────
+
+// Subdirectory names that are not campaign queues and should be skipped.
+// "posted" is a legacy archive of already-published posts in an older format.
+const LINKEDIN_EXCLUDED_SUBDIRS = new Set(["posted", "archive", "_archive", "_drafts"]);
+
+/**
+ * Scans all immediate subdirectories of content/outbound/linkedin/ as
+ * LinkedIn campaign directories and validates each .md/.mdx file within.
+ * Subdirectories listed in LINKEDIN_EXCLUDED_SUBDIRS are skipped.
+ */
+async function validateLinkedInCampaigns(allIds) {
+  const results = [];
+  let entries;
+  try {
+    entries = await fs.readdir(LINKEDIN_CAMPAIGNS_BASE, { withFileTypes: true });
+  } catch {
+    return results; // Base dir doesn't exist — skip silently
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (LINKEDIN_EXCLUDED_SUBDIRS.has(entry.name)) continue;
+    const campaignDir = path.join(LINKEDIN_CAMPAIGNS_BASE, entry.name);
+    const campaignResults = await validateDirectory(campaignDir, "linkedin", allIds);
+    for (const r of campaignResults) {
+      results.push({ ...r, dir: `linkedin/${entry.name}` });
+    }
+  }
+
+  return results;
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
   const allIds = new Set();
 
-  const [fbResults, xResults] = await Promise.all([
+  const [fbResults, xResults, liResults] = await Promise.all([
     validateDirectory(FACEBOOK_DIR, "facebook", allIds),
     validateDirectory(X_DIR, "x", allIds),
+    validateLinkedInCampaigns(allIds),
   ]);
 
   const allResults = [
     ...fbResults.map((r) => ({ ...r, dir: "facebook" })),
     ...xResults.map((r) => ({ ...r, dir: "x" })),
+    ...liResults, // already has dir set to linkedin/<campaign>
   ];
 
   const totalFiles = allResults.length;

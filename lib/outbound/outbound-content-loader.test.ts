@@ -29,9 +29,10 @@ const {
   mockReaddirSync,
   mockReadFileSync,
 } = vi.hoisted(() => ({
-  mockExistsSync: vi.fn<[string], boolean>(),
-  mockReaddirSync: vi.fn<[string, { withFileTypes: true }], fs.Dirent[]>(),
-  mockReadFileSync: vi.fn<[string, string], string>(),
+  // Cast to loose mock types to avoid Dirent<T> / overload-intersection issues in Vitest v4
+  mockExistsSync: vi.fn() as ReturnType<typeof vi.fn<(p: string) => boolean>>,
+  mockReaddirSync: vi.fn() as ReturnType<typeof vi.fn<(p: string, ...args: unknown[]) => fs.Dirent<string>[]>>,
+  mockReadFileSync: vi.fn() as ReturnType<typeof vi.fn<(p: string, ...args: unknown[]) => string>>,
 }));
 
 vi.mock("fs", () => ({
@@ -59,7 +60,7 @@ import {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Minimal fs.Dirent mock — only properties the loader actually reads. */
-function makeDirent(name: string, isFile = true): fs.Dirent {
+function makeDirent(name: string, isFile = true): fs.Dirent<string> {
   return {
     name,
     isFile: () => isFile,

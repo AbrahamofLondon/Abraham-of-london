@@ -33,7 +33,7 @@ export type OutboundApprovalStatus =
   | "approved"
   | "rejected";
 
-export type OutboundPostProvider = "facebook" | "x";
+export type OutboundPostProvider = "facebook" | "x" | "linkedin";
 
 export type OutboundPostType =
   | "single"
@@ -43,7 +43,9 @@ export type OutboundPostType =
   | "quote-card"
   | "discussion"
   | "thread"
-  | "launch";
+  | "launch"
+  | "thesis"
+  | "applied";
 
 export type OutboundPost = {
   /** Internal stable ID — must be unique per post. */
@@ -78,6 +80,17 @@ export type OutboundPost = {
   threadIndex: number | null;
   threadId: string | null;
   xCharCount: number | null;
+  // ── LinkedIn-specific ─────────────────────────────────────────────────────
+  /** Campaign series slug (e.g. "the-burden-changes-hands"). */
+  sourceSeries: string | null;
+  /** Source essay slug (e.g. "the-accountant-in-uruk"). */
+  sourceMaterial: string | null;
+  /** Week number within the campaign (1-indexed). */
+  seriesWeek: number | null;
+  /** Sequence within the week (1 = thesis, 2 = applied, 3 = reflective). */
+  sequence: number | null;
+  /** Provider slugs this post may be synchronised to (e.g. ["facebook"]). */
+  syncTargets: string[];
   // ── Idempotency ───────────────────────────────────────────────────────────
   /** Stable key: id + provider + scheduledFor — used to detect duplicate publishes. */
   idempotencyKey: string;
@@ -296,6 +309,11 @@ function frontmatterToPost(
     threadIndex: safeNum(fm.threadIndex),
     threadId: safeStrNullable(fm.threadId),
     xCharCount: safeNum(fm.xCharCount),
+    sourceSeries: safeStrNullable(fm.sourceSeries),
+    sourceMaterial: safeStrNullable(fm.sourceMaterial),
+    seriesWeek: safeNum(fm.seriesWeek),
+    sequence: safeNum(fm.sequence),
+    syncTargets: safeArr(fm.syncTargets),
     idempotencyKey: buildIdempotencyKey(id, provider, scheduledFor),
     createdBy: safeStrNullable(fm.createdBy),
   };
@@ -361,6 +379,7 @@ function readOutboundDirectory(
 
 const FACEBOOK_DIR = path.join(process.cwd(), "content", "outbound", "facebook");
 const X_DIR = path.join(process.cwd(), "content", "outbound", "x");
+const LINKEDIN_CAMPAIGNS_BASE = path.join(process.cwd(), "content", "outbound", "linkedin");
 
 /**
  * Load all Facebook outbound post drafts from content/outbound/facebook/.
@@ -377,6 +396,56 @@ export function getXOutboundPosts(): OutboundPostsResult {
 }
 
 /**
+ * Load LinkedIn outbound posts for a named campaign subdirectory.
+ * Reads from content/outbound/linkedin/<campaignSlug>/.
+ */
+export function getLinkedInCampaignPosts(campaignSlug: string): OutboundPostsResult {
+  return readOutboundDirectory(
+    path.join(LINKEDIN_CAMPAIGNS_BASE, campaignSlug),
+    "linkedin",
+  );
+}
+
+/**
+ * Load all LinkedIn outbound posts across all campaign subdirectories.
+ * Scans each immediate subdirectory of content/outbound/linkedin/ that
+ * contains .md/.mdx files and merges the results.
+ */
+export function getLinkedInOutboundPosts(): OutboundPostsResult {
+  assertServerRuntime();
+  const merged: OutboundPostsResult = { posts: [], errors: [] };
+
+  if (!fs.existsSync(LINKEDIN_CAMPAIGNS_BASE)) return merged;
+
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(LINKEDIN_CAMPAIGNS_BASE, { withFileTypes: true });
+  } catch {
+    return merged;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const { posts, errors } = readOutboundDirectory(
+      path.join(LINKEDIN_CAMPAIGNS_BASE, entry.name),
+      "linkedin",
+    );
+    merged.posts.push(...posts);
+    merged.errors.push(...errors);
+  }
+
+  // Re-sort merged results by scheduledFor ascending (unscheduled last)
+  merged.posts.sort((a, b) => {
+    if (!a.scheduledFor && !b.scheduledFor) return a.slug.localeCompare(b.slug);
+    if (!a.scheduledFor) return 1;
+    if (!b.scheduledFor) return -1;
+    return a.scheduledFor.localeCompare(b.scheduledFor);
+  });
+
+  return merged;
+}
+
+/**
  * Load all outbound posts for a given provider.
  */
 export function getOutboundPostsByProvider(
@@ -387,6 +456,8 @@ export function getOutboundPostsByProvider(
       return getFacebookOutboundPosts();
     case "x":
       return getXOutboundPosts();
+    case "linkedin":
+      return getLinkedInOutboundPosts();
   }
 }
 
@@ -404,10 +475,10 @@ export function getOutboundPostBySlug(
 
 /**
  * Load a single outbound post by its stable ID.
- * Searches both providers.
+ * Searches all providers.
  */
 export function getOutboundPostById(id: string): OutboundPost | null {
-  for (const provider of ["facebook", "x"] as const) {
+  for (const provider of ["facebook", "x", "linkedin"] as const) {
     const { posts } = getOutboundPostsByProvider(provider);
     const found = posts.find((p) => p.id === id);
     if (found) return found;

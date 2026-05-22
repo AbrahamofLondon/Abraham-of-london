@@ -9,6 +9,7 @@ const {
   mockAttemptCreate,
   mockAttemptUpdate,
   mockAudit,
+  mockCheckRateLimit,
 } = vi.hoisted(() => ({
   mockRequireAdminApi: vi.fn(),
   mockGetConnectionStatus: vi.fn(),
@@ -17,6 +18,7 @@ const {
   mockAttemptCreate: vi.fn(),
   mockAttemptUpdate: vi.fn(),
   mockAudit: vi.fn(),
+  mockCheckRateLimit: vi.fn(),
 }));
 
 vi.mock("@/lib/access/server", () => ({
@@ -48,6 +50,11 @@ vi.mock("@/lib/outbound/linkedin-publishing-audit", () => ({
   recordLinkedInPublishingAuditSafe: mockAudit,
 }));
 
+vi.mock("@/lib/server/rate-limit", () => ({
+  checkRateLimit: mockCheckRateLimit,
+  rateLimitHeaders: () => ({}),
+}));
+
 import publishHandler from "@/pages/api/admin/outbound/linkedin/publish";
 
 function makeReq(body: Record<string, unknown>, method = "POST"): NextApiRequest {
@@ -63,18 +70,24 @@ function makeReq(body: Record<string, unknown>, method = "POST"): NextApiRequest
 type MockRes = NextApiResponse & {
   _status: number;
   _body: unknown;
+  _headers: Record<string, string | number | string[]>;
 };
 
 function makeRes(): MockRes {
   const response = {
     _status: 200,
     _body: null,
+    _headers: {} as Record<string, string | number | string[]>,
     status(code: number) {
       response._status = code;
       return response;
     },
     json(body: unknown) {
       response._body = body;
+      return response;
+    },
+    setHeader(name: string, value: string | number | string[]) {
+      response._headers[name] = value;
       return response;
     },
   };
@@ -142,6 +155,8 @@ beforeEach(() => {
   mockAttemptCreate.mockResolvedValue({ id: "attempt-1" });
   mockAttemptUpdate.mockResolvedValue({});
   mockAudit.mockResolvedValue({ ok: true });
+  // Rate limiter: allow by default; individual tests can override for 429 scenarios
+  mockCheckRateLimit.mockResolvedValue({ allowed: true, remaining: 9, resetAt: Date.now() + 3600_000 });
 });
 
 describe("POST /api/admin/outbound/linkedin/publish", () => {
