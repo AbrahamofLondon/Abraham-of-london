@@ -1,10 +1,9 @@
-import type { NextPage } from "next"
-import Layout from "@/components/Layout"
+import type { GetStaticProps } from "next";
 
-const EditorialsDiscoveryPage: NextPage = () => (
-  <Layout title="Editorial Discovery">
-    <main />
-  </Layout>
-)
+export const getStaticProps: GetStaticProps = async () => ({
+  redirect: { destination: "/editorials", permanent: true },
+});
 
-export default EditorialsDiscoveryPage
+export default function EditorialsDiscoveryRedirect() {
+  return null;
+}

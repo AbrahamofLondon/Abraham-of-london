@@ -14,7 +14,20 @@ import {
 
 type Props = {
   series: EditorialSeries;
+  totalMinutes: number;
 };
+
+function parseMins(readTime: string): number {
+  const m = readTime.match(/(\d+)/);
+  return m ? parseInt(m[1] ?? "0", 10) : 0;
+}
+
+function formatTotalTime(minutes: number): string {
+  if (minutes < 60) return `~${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `~${h} hr` : `~${h} hr ${m} min`;
+}
 
 function PartRow({
   part,
@@ -31,19 +44,37 @@ function PartRow({
     <Link
       href={`/editorials/series/${seriesSlug}/${part.slug}`}
       className="group block border-b py-6 transition-colors duration-200"
-      style={{ borderBottomColor: "var(--ds-border)" }}
+      style={{
+        borderBottomColor: "var(--ds-border)",
+        backgroundColor: isFirst ? "rgba(201,150,58,0.03)" : "transparent",
+      }}
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-8">
         <div className="flex-1 min-w-0">
-          {/* Part number */}
-          <div
-            className="font-mono uppercase tracking-[0.32em] mb-2"
-            style={{
-              fontSize: "7px",
-              color: isFirst ? "var(--ds-accent)" : "var(--ds-text-subtle)",
-            }}
-          >
-            {partLabel}
+          {/* Part number + entry marker */}
+          <div className="flex items-center gap-3 mb-2">
+            <span
+              className="font-mono uppercase tracking-[0.32em]"
+              style={{
+                fontSize: "7px",
+                color: isFirst ? "var(--ds-accent)" : "var(--ds-text-subtle)",
+              }}
+            >
+              {partLabel}
+            </span>
+            {isFirst && (
+              <span
+                className="font-mono uppercase tracking-[0.28em]"
+                style={{
+                  fontSize: "6.5px",
+                  color: "var(--ds-accent)",
+                  border: "1px solid var(--ds-accent-soft)",
+                  padding: "1px 6px",
+                }}
+              >
+                Begin here
+              </span>
+            )}
           </div>
 
           {/* Title */}
@@ -88,7 +119,7 @@ function PartRow({
   );
 }
 
-const SeriesHubPage: NextPage<Props> = ({ series }) => {
+const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
   const publishedParts = series.parts
     .filter((p) => p.status === "PUBLISHED")
     .sort((a, b) => a.order - b.order);
@@ -141,7 +172,9 @@ const SeriesHubPage: NextPage<Props> = ({ series }) => {
                 className="font-mono uppercase tracking-[0.36em]"
                 style={{ fontSize: "7px", color: "var(--ds-accent)" }}
               >
-                {series.partCount}-Part Editorial Series · Complete
+                {series.partCount}-Part Editorial Series
+                {series.status === "PUBLISHED" ? " · Complete" : " · In Progress"}
+                {totalMinutes > 0 ? ` · ${formatTotalTime(totalMinutes)} total` : ""}
               </span>
             </div>
 
@@ -253,8 +286,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
+  const totalMinutes = series.parts
+    .filter((p) => p.status === "PUBLISHED")
+    .reduce((sum, p) => sum + parseMins(p.readTime), 0);
+
   return {
-    props: { series },
+    props: { series, totalMinutes },
     revalidate: 1800,
   };
 };

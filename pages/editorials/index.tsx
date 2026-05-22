@@ -218,7 +218,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
 
             <div className="mt-6 h-px w-full" style={{ backgroundColor: "var(--ds-border)" }} />
 
-            {categories.length > 0 ? (
+            {categories.length > 1 ? (
               <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
                 <button
                   type="button"

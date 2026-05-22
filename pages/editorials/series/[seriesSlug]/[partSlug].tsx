@@ -151,7 +151,7 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
       <main className="mind-clay-reader min-h-screen px-6 pb-20 pt-28 lg:px-10 lg:pb-28 lg:pt-36">
         <article className="mx-auto max-w-[66ch]">
           <Link href={hubHref} className="mind-clay-series-band">
-            {series.title} . Part {part.order} of {series.partCount}
+            {series.title} · Part {part.order} of {series.partCount}
           </Link>
 
           <header className="mind-clay-reader-header">
@@ -167,7 +167,7 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
             <div>
               {previous ? (
                 <Link href={`${hubHref}/${previous.slug}`}>
-                  <span>Part {formatEditorialSeriesPartNumber(previous.order)} &lt;-</span>
+                  <span>← Part {formatEditorialSeriesPartNumber(previous.order)}</span>
                   {previous.title}
                 </Link>
               ) : null}
@@ -175,7 +175,7 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
             <div>
               {next ? (
                 <Link href={`${hubHref}/${next.slug}`}>
-                  <span>Part {formatEditorialSeriesPartNumber(next.order)} -&gt;</span>
+                  <span>Part {formatEditorialSeriesPartNumber(next.order)} →</span>
                   {next.title}
                 </Link>
               ) : null}
