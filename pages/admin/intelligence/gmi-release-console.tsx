@@ -199,9 +199,17 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const guard = await requireAdminPage<PageProps>(ctx);
   if (!guard.authorized) return guard.redirect as never;
 
+  // Fetch persisted GMI events from the audit log and wire into the summary
+  const { getGmiEventsForReport } = await import("@/lib/intelligence/gmi-event-store");
+  const storedEvents = await getGmiEventsForReport("GMI-Q2-2026");
+
+  const base = buildGmiReleaseConsoleViewModel();
+  const { buildGmiReleaseEventSummary: buildSummary } = await import("@/lib/intelligence/gmi-release-event-summary");
+  const eventSummary = buildSummary("GMI-Q2-2026", storedEvents);
+
   return {
     props: {
-      consoleState: buildGmiReleaseConsoleViewModel(),
+      consoleState: { ...base, eventSummary },
     },
   };
 };

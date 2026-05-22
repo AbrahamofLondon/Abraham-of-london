@@ -12,6 +12,10 @@ export function canAccessAdmin(access: EffectiveAccess): boolean {
   return access.permissions.isAdmin;
 }
 
+export function canAccessOwner(access: EffectiveAccess): boolean {
+  return access.permissions.isOwner;
+}
+
 export function canAccessProduct(
   access: EffectiveAccess,
   key: string,

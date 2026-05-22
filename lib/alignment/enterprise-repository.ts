@@ -508,18 +508,24 @@ export async function getTeamSnapshots(campaignId: string) {
     orderBy: { teamName: "asc" },
   });
 
-  return rows.map((row: TeamAssessmentSnapshot) => ({
-    teamName: row.teamName,
-    respondentCount: row.respondentCount,
-    totalScore: row.totalScore,
-    possibleScore: row.possibleScore,
-    percentScore: row.percentScore,
-    band: row.band as EnterpriseAlignmentBand,
-    weakestDomains: parseDomainArray(row.weakestDomainsJson),
-    strongestDomains: parseDomainArray(row.strongestDomainsJson),
-    domainScores: parseDomainScores(row.domainScoresJson),
-    varianceScores: parseVarianceScores(row.varianceScoresJson),
-  }));
+  // Defence-in-depth: suppress any subgroup where respondentCount < 5,
+  // even if suppression was somehow bypassed at write time.
+  const MINIMUM_SAFE_COHORT = 5;
+
+  return rows
+    .filter((row: TeamAssessmentSnapshot) => row.respondentCount >= MINIMUM_SAFE_COHORT)
+    .map((row: TeamAssessmentSnapshot) => ({
+      teamName: row.teamName,
+      respondentCount: row.respondentCount,
+      totalScore: row.totalScore,
+      possibleScore: row.possibleScore,
+      percentScore: row.percentScore,
+      band: row.band as EnterpriseAlignmentBand,
+      weakestDomains: parseDomainArray(row.weakestDomainsJson),
+      strongestDomains: parseDomainArray(row.strongestDomainsJson),
+      domainScores: parseDomainScores(row.domainScoresJson),
+      varianceScores: parseVarianceScores(row.varianceScoresJson),
+    }));
 }
 
 /* -----------------------------------------------------------------------------

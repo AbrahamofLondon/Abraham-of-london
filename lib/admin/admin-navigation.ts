@@ -42,6 +42,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
       { id: "intelligence-stream", label: "Intelligence Stream", href: "/admin/intelligence", router: "pages", visibility: "admin", status: "active", description: "Real-time deal flow audit stream" },
       { id: "gmi-release-console", label: "GMI Release Console", href: "/admin/intelligence/gmi-release-console", router: "pages", visibility: "admin", status: "active", description: "Read-only Global Market Intelligence release governance console" },
       { id: "gmi-signal-monitor", label: "GMI Signal Monitor", href: "/admin/intelligence/gmi-signal-monitor", router: "pages", visibility: "admin", status: "active", description: "Read-only signal register: monitored inputs, thresholds, evidence requirements, and growth forecast comparison for Q2 2026" },
+      { id: "gmi-event-log", label: "GMI Event Log", href: "/admin/intelligence/gmi-event-log", router: "pages", visibility: "admin", status: "active", description: "GMI release event ledger — recorded quality gate runs, call reviews, and lifecycle transition proposals" },
       { id: "decision-efficacy", label: "Decision Efficacy", href: "/admin/decision/efficacy", router: "app", visibility: "admin", status: "active", description: "Decision efficacy panel with contextual ranking and rebuild controls" },
       { id: "decision-governance", label: "Decision Governance", href: "/admin/decision/governance", router: "app", visibility: "admin", status: "active", description: "Governance alerts and authority violation tracking" },
       { id: "decision-performance", label: "Decision Performance", href: "/admin/decision/performance", router: "app", visibility: "admin", status: "active", description: "Decision performance table with rebuild controls" },
@@ -152,6 +153,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     id: "security",
     label: "Security & Audit",
     items: [
+      { id: "command-centre", label: "Command Centre", href: "/admin/command-centre", router: "pages", visibility: "owner", status: "active", description: "Security and governance control plane — platform lock, escalation queue, audit trail, telemetry, live traffic" },
       { id: "access-keys", label: "Access Keys", href: "/admin/access-keys", router: "pages", visibility: "admin", status: "active", description: "Issue and revoke access keys" },
       { id: "audit", label: "Audit Log", href: "/admin/audit", router: "app", visibility: "admin", status: "active", description: "System forensic ledger — Prisma systemAuditLog with graceful fallback" },
       { id: "events", label: "Event Log", href: "/admin/events", router: "pages", visibility: "admin", status: "active", description: "Unified operational event log across system audit, governance, access, and delivery sources. Webhook events not yet connected." },

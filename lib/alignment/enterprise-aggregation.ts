@@ -15,6 +15,7 @@ import {
   replaceTeamSnapshots,
 } from "./enterprise-repository";
 import { determineEnterpriseBand } from "./enterprise-score";
+import { isCohortSafe } from "./anonymity-service";
 
 /* -----------------------------------------------------------------------------
    MATHEMATICAL & STATISTICAL UTILITIES
@@ -260,8 +261,9 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
     return acc;
   }, {} as Record<string, AssessmentEntry[]>);
 
-  const teamSnapshots = Object.entries(teamMap).map(
-    ([teamName, teamAssessments]) => {
+  const teamSnapshots = Object.entries(teamMap)
+    .filter(([, teamAssessments]) => isCohortSafe(teamAssessments.length))
+    .map(([teamName, teamAssessments]) => {
       const {
         domainScores: teamDomainScores,
         varianceScores: teamVarianceScores,
@@ -282,8 +284,7 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
         domainScores: teamDomainScores,
         varianceScores: teamVarianceScores,
       };
-    },
-  );
+    });
 
   await replaceTeamSnapshots(campaignId, teamSnapshots);
 

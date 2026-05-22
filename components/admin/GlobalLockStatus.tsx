@@ -4,18 +4,21 @@ import { ShieldAlert, ShieldCheck } from "lucide-react";
 
 export default function GlobalLockStatus() {
   const [isLocked, setIsLocked] = useState(false);
+  const [checked, setChecked] = useState(false);
 
-  // Poll for system status or use a WebSocket/SWR for real-time updates
   useEffect(() => {
-    const checkStatus = async () => {
-      const res = await fetch("/api/system/status"); // A public-read endpoint for lock status
-      const data = await res.json();
-      setIsLocked(data.locked);
-    };
-    checkStatus();
+    fetch("/api/system/lock-status")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.available && data?.isLocked !== null) {
+          setIsLocked(!!data.isLocked);
+        }
+        setChecked(true);
+      })
+      .catch(() => setChecked(true));
   }, []);
 
-  if (!isLocked) return null;
+  if (!checked || !isLocked) return null;
 
   return (
     <div className="flex items-center gap-2 px-4 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full animate-pulse">

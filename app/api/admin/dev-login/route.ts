@@ -13,9 +13,32 @@ import { applyShieldFromRequest } from "@/lib/server/security/shield-middleware"
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function isPrivateHost(host: string): boolean {
+  const h = host.split(":")[0]!;
+  return (
+    h === "localhost" ||
+    h === "127.0.0.1" ||
+    h === "::1" ||
+    h.startsWith("192.168.") ||
+    h.startsWith("10.") ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(h)
+  );
+}
+
 export async function POST(req: NextRequest) {
-  // Hard gate: development only
+  // Hard gate 1: development only
   if (process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Hard gate 2: explicit opt-in flag must be set
+  if (process.env.ENABLE_DEV_LOGIN !== "true") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Hard gate 3: localhost / private network hosts only
+  const host = req.headers.get("host") ?? "";
+  if (!isPrivateHost(host)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -85,8 +108,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
-  if (process.env.NODE_ENV !== "development") {
+export async function GET(req: NextRequest) {
+  if (
+    process.env.NODE_ENV !== "development" ||
+    process.env.ENABLE_DEV_LOGIN !== "true" ||
+    !isPrivateHost(req.headers.get("host") ?? "")
+  ) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });

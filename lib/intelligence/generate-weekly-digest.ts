@@ -4,6 +4,7 @@ import "server-only";
 import { getAuditLogger } from "@/lib/audit/audit-logger";
 import { getFrameworkBySlug } from "@/lib/resources/strategic-frameworks";
 import { generateInstitutionalPDF } from "@/lib/pdf/pdf-engine";
+import { getCallsPendingReview, summariseCallReview, GMI_Q1_2026_CALLS } from "./market-intelligence-call-ledger";
 
 type DigestDossier = {
   title: string;
@@ -95,11 +96,23 @@ export async function generateWeeklyIntelligenceDigest(): Promise<Buffer> {
     });
   }
 
-  // 7) Structure data for PDF engine
+  // 7) GMI call verification summary
+  const pendingQ2Calls = getCallsPendingReview("Q2 2026");
+  const callReviewSummary = summariseCallReview(GMI_Q1_2026_CALLS);
+
+  // 8) Structure data for PDF engine
   const digestData = {
     generatedAt: new Date().toISOString(),
     weekRange: `${oneWeekAgo.toLocaleDateString("en-GB")} - ${new Date().toLocaleDateString("en-GB")}`,
     dossiers,
+    gmiCallVerification: {
+      pendingReviewCount: pendingQ2Calls.length,
+      totalCalls: callReviewSummary.totalCalls,
+      reviewed: callReviewSummary.reviewed,
+      // Canonical phrasing — do not alter
+      verificationNote:
+        "Every quarterly report reviews the material calls from the previous quarter before issuing the next one. This intelligence line compounds through verification, not just publication.",
+    },
   };
 
   // 8) Create artifact

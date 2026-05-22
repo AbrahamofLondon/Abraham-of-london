@@ -16,6 +16,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const { key } = req.body ?? {};
     if (!key || typeof key !== "string") return res.status(400).json({ error: "key_required" });
     const ok = await revokeKey(key);
+    if (ok) {
+      import("@/lib/reporting/report-lineage").then(({ writeReportLineageEvent }) =>
+        writeReportLineageEvent({
+          reportType: "EXECUTIVE_REPORT",
+          eventType: "REVOKED",
+          resourceId: key,
+          metadata: { keyPrefix: key.slice(0, 8) },
+        })
+      ).catch(() => { /* lineage must not break revocation flow */ });
+    }
     return res.status(200).json({ success: ok });
   } catch (e: any) {
     return res.status(500).json({ error: "server_error" });
