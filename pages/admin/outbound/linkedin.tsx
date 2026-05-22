@@ -8,6 +8,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
 import { AdminStatusBadge, type AdminBadgeTone } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
+import { canAccessOwner } from "@/lib/access/checks";
 import { prisma } from "@/lib/prisma.server";
 import { getConnectionStatus, type LinkedInConnectionStatus } from "@/lib/outbound/linkedin-oauth";
 import {
@@ -97,9 +98,12 @@ export function buildLinkedInOutboundAdminViewModel(
 
 export const getServerSideProps: GetServerSideProps<{
   consoleState: ConsoleViewModel;
+  isOwner: boolean;
 }> = async (ctx) => {
   const guard = await requireAdminPage(ctx);
   if (!guard.authorized) return guard.redirect as never;
+
+  const isOwner = canAccessOwner(guard.access);
 
   const [connection, assets] = await Promise.all([
     getConnectionStatus(),
@@ -131,6 +135,7 @@ export const getServerSideProps: GetServerSideProps<{
   return {
     props: {
       consoleState: buildLinkedInOutboundAdminViewModel(connection, assets, attempts),
+      isOwner,
     },
   };
 };
@@ -281,7 +286,95 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
   );
 }
 
-function PostCard({ post, targetLabel }: { post: ConsolePost; targetLabel: string }) {
+// ─── Force republish panel (OWNER only) ──────────────────────────────────────
+
+function ForceRepublishPanel({ slug }: { slug: string }) {
+  const [open, setOpen] = React.useState(false);
+  const [note, setNote] = React.useState("");
+  const [confirm, setConfirm] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [result, setResult] = React.useState<{ ok: boolean; error?: string } | null>(null);
+
+  async function submit() {
+    if (confirm !== "FORCE_REPUBLISH" || !note.trim()) return;
+    setBusy(true);
+    setResult(null);
+    try {
+      const res = await fetch("/api/admin/outbound/linkedin/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, confirm: true, forceRepublish: true, forceRepublishNote: note.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      setResult({ ok: res.ok, error: res.ok ? undefined : (data.error ?? "Unknown error") });
+    } catch {
+      setResult({ ok: false, error: "Network error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 border border-rose-500/20 bg-rose-500/[0.04] p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-3.5 w-3.5 text-rose-400/60" />
+          <p className="text-xs font-medium text-rose-200/70">Force republish</p>
+          <span className="text-[8px] font-mono uppercase tracking-wider border border-rose-400/20 px-1.5 py-0.5 text-rose-300/60">OWNER ONLY</span>
+        </div>
+        <button onClick={() => setOpen(!open)} className="text-[10px] text-white/30 hover:text-white/60">
+          {open ? "Collapse" : "Expand"}
+        </button>
+      </div>
+
+      {open && (
+        <div className="mt-4 space-y-3">
+          <div className="rounded border border-rose-500/20 bg-black/30 p-3 text-[10px] text-rose-200/60 space-y-1">
+            <p className="font-semibold">⚠ This can create a second public post.</p>
+            <p>Use only for corrected reposts or platform failure recovery. The force republish note is written to the audit ledger. The idempotency check will be bypassed.</p>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-[9px] font-mono uppercase tracking-wider text-white/30">Reason / note (required)</label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+              className="w-full border border-white/10 bg-black/40 px-3 py-2 text-xs text-white placeholder-white/20 focus:border-rose-500/40 focus:outline-none"
+              placeholder="e.g. Original post deleted by platform error — corrected repost"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-[9px] font-mono uppercase tracking-wider text-white/30">
+              Type <code className="text-rose-300">FORCE_REPUBLISH</code> to confirm
+            </label>
+            <input
+              type="text"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              className="w-full border border-white/10 bg-black/40 px-3 py-2 font-mono text-xs text-white placeholder-white/20 focus:border-rose-500/40 focus:outline-none"
+              placeholder="FORCE_REPUBLISH"
+            />
+          </div>
+          <button
+            onClick={submit}
+            disabled={busy || confirm !== "FORCE_REPUBLISH" || !note.trim()}
+            className="inline-flex items-center gap-2 border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs text-rose-100 transition-colors hover:border-rose-500/50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+            Force republish
+          </button>
+          {result && (
+            <p className={`text-[10px] ${result.ok ? "text-emerald-400" : "text-rose-400"}`}>
+              {result.ok ? "Force republish submitted." : result.error}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PostCard({ post, targetLabel, isOwner }: { post: ConsolePost; targetLabel: string; isOwner: boolean }) {
   const [gateRun, setGateRun] = React.useState(false);
   const [publishing, setPublishing] = React.useState(false);
   const [result, setResult] = React.useState<string | null>(null);
@@ -360,12 +453,18 @@ function PostCard({ post, targetLabel }: { post: ConsolePost; targetLabel: strin
         </div>
       ) : null}
       {result ? <p className="mt-4 text-xs text-white/55">{result}</p> : null}
+
+      {/* Force republish — OWNER only, for published items */}
+      {isOwner && post.readinessState === "posted" && (
+        <ForceRepublishPanel slug={post.slug} />
+      )}
     </article>
   );
 }
 
 export default function LinkedInOutboundAdminPage({
   consoleState,
+  isOwner,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <AdminLayout title="LinkedIn Outbound">
@@ -394,6 +493,7 @@ export default function LinkedInOutboundAdminPage({
               key={post.slug}
               post={post}
               targetLabel={consoleState.connection.selectedPublishingTarget.ownerName}
+              isOwner={isOwner}
             />
           ))}
         </section>

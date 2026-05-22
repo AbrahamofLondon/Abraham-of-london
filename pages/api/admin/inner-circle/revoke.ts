@@ -2,11 +2,16 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import "server-only";
 import { requireAdmin } from "@/lib/access/require-admin";
 import { revokeKey } from "@/lib/server/inner-circle/keys";
+import { verifyAdminMutationOrigin } from "@/lib/api/admin-mutation-guard";
 
 type ResData = { success: boolean } | { error: string };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResData>) {
   try {
+    const originCheck = verifyAdminMutationOrigin(req);
+    if (!originCheck.ok) {
+      return res.status(403).json({ error: originCheck.reason });
+    }
     const admin = await requireAdmin(req, res);
     if (!admin) return;
     if (req.method !== "POST") {

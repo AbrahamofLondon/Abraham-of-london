@@ -18,6 +18,7 @@ import crypto from "crypto";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { requireAdminApi, requireTierApi } from "@/lib/access/server";
+import { verifyAdminMutationOrigin } from "@/lib/api/admin-mutation-guard";
 import { prisma } from "@/lib/prisma.server";
 import { getConnectionStatus } from "@/lib/outbound/linkedin-oauth";
 import { getResolvedLinkedInOutboundBySlug } from "@/lib/outbound/linkedin-content-resolver";
@@ -45,6 +46,11 @@ function hashEmail(email?: string | null): string | null {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "Method not allowed" });
+  }
+
+  const originCheck = verifyAdminMutationOrigin(req);
+  if (!originCheck.ok) {
+    return res.status(403).json({ ok: false, error: originCheck.reason });
   }
 
   const guard = await requireAdminApi(req, res);

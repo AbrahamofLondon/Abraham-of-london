@@ -2,7 +2,7 @@ import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { Session } from "next-auth";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { authOptions, ADMIN_SESSION_MAX_AGE_MS } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma.server";
 import { canAccessAdmin, canAccessArtifact, canAccessProduct, canAccessTier } from "./checks";
 import { getUserAccess } from "./get-user-access";
@@ -16,8 +16,20 @@ type ApiResolution = {
 type AccessSession = Session & {
   user?: Session["user"] & {
     id?: string | null;
+    /** Millisecond timestamp when admin access was first granted in this JWT. */
+    adminSessionIssuedAt?: number;
   };
 };
+
+/**
+ * Returns true if the admin session has exceeded the 8-hour TTL.
+ * Non-admin sessions are not checked.
+ */
+function isAdminSessionExpired(session: AccessSession | null): boolean {
+  const issuedAt = session?.user?.adminSessionIssuedAt;
+  if (typeof issuedAt !== "number") return false; // no stamp = not admin session
+  return Date.now() - issuedAt > ADMIN_SESSION_MAX_AGE_MS;
+}
 
 export async function resolveRequestAccess(
   req: NextApiRequest,
@@ -49,6 +61,16 @@ export async function requireAdminApi(
 
   if (!canAccessAdmin(resolved.access)) {
     res.status(403).json({ ok: false, error: "Administrative access required" });
+    return null;
+  }
+
+  // ── Admin session TTL (8 hours) ────────────────────────────────────────────
+  if (isAdminSessionExpired(resolved.session)) {
+    res.status(401).json({
+      ok: false,
+      error: "Admin session expired after 8 hours. Please sign in again.",
+      code: "ADMIN_SESSION_EXPIRED",
+    });
     return null;
   }
 

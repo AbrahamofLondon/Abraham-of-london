@@ -12,6 +12,7 @@ import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 import { getUserAccess } from "@/lib/access/get-user-access";
 import { canAccessOwner } from "@/lib/access/checks";
 import { writeSecurityAudit } from "@/lib/security/audit-log";
+import { verifyAdminMutationOrigin } from "@/lib/api/admin-mutation-guard";
 
 const bodySchema = z.object({
   locked: z.boolean(),
@@ -26,6 +27,11 @@ function getClientIp(req: NextApiRequest): string {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  const originCheck = verifyAdminMutationOrigin(req);
+  if (!originCheck.ok) {
+    return res.status(403).json({ error: originCheck.reason });
+  }
 
   // Layer 1: authenticated admin session with rate-limiting
   const session = await requireAdminServer(req, res, { routeKey: "admin-security-toggle-lock" });

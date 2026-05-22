@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
@@ -8,6 +9,13 @@ import { isBootstrapAdminEmail } from "@/lib/access/admin-emails";
 import { getUserAccess } from "@/lib/access/get-user-access";
 import { classifyAuthError } from "@/lib/auth/auth-error-classifier";
 import { verifyPassword } from "@/lib/auth/password";
+import { checkRateLimit } from "@/lib/server/rate-limit";
+
+// ── Admin session constants ───────────────────────────────────────────────────
+// Admin/Owner sessions expire after 8 hours regardless of JWT maxAge.
+// Checked in requireAdminApi / requireAdminPage via session.user.adminSessionIssuedAt.
+export const ADMIN_SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000; // 8 hours
+const ADMIN_ROLES = new Set(["ADMIN", "OWNER"]);
 
 function bootstrapRoleForEmail(email: string) {
   if (email === "info@abrahamoflondon.org") return "OWNER" as const;
@@ -78,6 +86,30 @@ function buildProviders() {
 
           if (!email || !password || !expectedEmail || !configuredPasswordHash) {
             return null;
+          }
+
+          // ── Rate limit: 5 attempts per 10 minutes per email ────────────────
+          // Identifier is the email (or "unknown") — not exposed in response.
+          // Failure doesn't reveal whether the email exists (null in both cases).
+          try {
+            const emailHash = crypto
+              .createHash("sha256")
+              .update(email)
+              .digest("hex");
+            const rl = await checkRateLimit({
+              scope: "admin-credentials-login",
+              identifier: emailHash,
+              limit: 5,
+              windowSeconds: 600,
+            });
+            if (!rl.allowed) {
+              console.warn("[AUTH_CREDENTIALS] Rate limit exceeded", {
+                emailPrefix: email.slice(0, 3) + "***",
+              });
+              return null;
+            }
+          } catch {
+            // Rate limit check failure is non-fatal — proceed with auth
           }
 
           const isHashedPassword =
@@ -210,6 +242,18 @@ export const authOptions: NextAuthOptions = {
         token.role = session.user.role ?? token.role;
       }
 
+      // ── Admin session expiry stamp ─────────────────────────────────────────
+      // Set once on first admin login — NOT updated on refresh, so the 8-hour
+      // clock starts from when the admin session was first established.
+      const isAdminRole = ADMIN_ROLES.has(typeof token.role === "string" ? token.role : "");
+      if (isAdminRole && !token.adminSessionIssuedAt) {
+        token.adminSessionIssuedAt = Date.now();
+      }
+      // If role was downgraded from admin, clear the stamp
+      if (!isAdminRole) {
+        delete token.adminSessionIssuedAt;
+      }
+
       return token;
     },
 
@@ -220,6 +264,11 @@ export const authOptions: NextAuthOptions = {
 
       session.user.id = typeof token.sub === "string" ? token.sub : "";
       session.user.role = typeof token.role === "string" ? token.role : "USER";
+      // Propagate admin session expiry stamp for server-side TTL enforcement
+      session.user.adminSessionIssuedAt =
+        typeof token.adminSessionIssuedAt === "number"
+          ? token.adminSessionIssuedAt
+          : undefined;
 
       try {
         const access = await getUserAccess(

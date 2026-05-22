@@ -36,7 +36,8 @@ export type RateLimitScope =
   | "API_V1"
   | "FACEBOOK_OUTBOUND_PUBLISH"
   | "X_OUTBOUND_PUBLISH"
-  | "LINKEDIN_OUTBOUND_PUBLISH";
+  | "LINKEDIN_OUTBOUND_PUBLISH"
+  | "admin-credentials-login";
 
 export type RateLimitResult = {
   allowed: boolean;

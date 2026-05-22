@@ -24,6 +24,7 @@ import { checkRateLimit, rateLimitHeaders } from "@/lib/server/rate-limit";
 import { logAuditEvent } from "@/lib/server/audit";
 import { runOutboundScheduler } from "@/lib/outbound/core/outbound-scheduler-runner";
 import { acquireSchedulerLock, releaseSchedulerLock } from "@/lib/outbound/core/outbound-scheduler-lock";
+import { verifyAdminMutationOrigin } from "@/lib/api/admin-mutation-guard";
 import type { ProviderId } from "@/lib/outbound/core/outbound-provider-contract";
 
 function requestId(): string {
@@ -38,6 +39,12 @@ function hashEmail(email?: string | null): string | null {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "Method not allowed" });
+  }
+
+  // ── Origin / CSRF check ───────────────────────────────────────────────────
+  const originCheck = verifyAdminMutationOrigin(req);
+  if (!originCheck.ok) {
+    return res.status(403).json({ ok: false, error: originCheck.reason });
   }
 
   const id = requestId();

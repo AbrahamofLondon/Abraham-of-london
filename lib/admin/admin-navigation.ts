@@ -130,7 +130,10 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     id: "outbound",
     label: "Outbound",
     items: [
+      { id: "outbound-index", label: "Outbound Publishing", href: "/admin/outbound", router: "pages", visibility: "admin", status: "active", description: "Unified outbound command index — provider cards, queue depth, failure summary, scheduler state, and recent publish ledger" },
+      { id: "outbound-scheduler", label: "Scheduler Control", href: "/admin/outbound/scheduler", router: "pages", visibility: "owner", status: "active", description: "Scheduler control surface — state, due queue, dry-run and live-run actions, pause toggle, failure summary, recent runs" },
       { id: "linkedin-outbound", label: "LinkedIn Publishing", href: "/admin/outbound/linkedin", router: "pages", visibility: "admin", status: "active", description: "Governed LinkedIn publishing console with OAuth, final gate, preview, and attempt history" },
+      { id: "linkedin-campaign-tbch", label: "Campaign: The Burden Changes Hands", href: "/admin/outbound/linkedin/campaigns/the-burden-changes-hands", router: "pages", visibility: "admin", status: "active", description: "21-post LinkedIn campaign queue grouped by week with approval discipline and dry-run validation" },
       { id: "facebook-outbound", label: "Facebook Publishing", href: "/admin/outbound/facebook", router: "pages", visibility: "admin", status: "active", description: "Governed Facebook Page publishing console with OAuth, permission check, final gate, sync to X, and attempt history." },
       { id: "x-outbound", label: "X Publishing", href: "/admin/outbound/x", router: "pages", visibility: "admin", status: "active", description: "Standalone X (Twitter) publishing console via Twitter API v2. OAuth 2.0 PKCE, 280-char gate, bidirectional sync with Facebook, attempt history." },
     ],

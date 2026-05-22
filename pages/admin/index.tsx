@@ -34,14 +34,81 @@ export async function getServerSideProps(context: any) {
   if (!guard.authorized) return guard.redirect;
 
   const { buildOperatorCommandCentreSummary } = await import("@/lib/admin/operator-command-centre");
+
+  // Outbound status — best-effort, never blocks page load
+  let outboundStatus: OutboundStatus | null = null;
+  try {
+    const [
+      { getOutboundPostsByProvider },
+      { getFailureSummary },
+      { getOutboundControlState },
+    ] = await Promise.all([
+      import("@/lib/outbound/outbound-content-loader"),
+      import("@/lib/outbound/core/outbound-publish-ledger"),
+      import("@/lib/outbound/core/outbound-control-state"),
+    ]);
+
+    const [liPosts, fbPosts, xPosts, liFail, fbFail, xFail, controlState] = await Promise.all([
+      Promise.resolve(getOutboundPostsByProvider("linkedin")),
+      Promise.resolve(getOutboundPostsByProvider("facebook")),
+      Promise.resolve(getOutboundPostsByProvider("x")),
+      getFailureSummary("linkedin", 24).catch(() => null),
+      getFailureSummary("facebook", 24).catch(() => null),
+      getFailureSummary("x", 24).catch(() => null),
+      getOutboundControlState().catch(() => null),
+    ]);
+
+    const allPosts = [
+      ...liPosts.posts,
+      ...fbPosts.posts,
+      ...xPosts.posts,
+    ];
+
+    const schedulerEnabled = process.env.OUTBOUND_SCHEDULER_ENABLED === "true";
+    const schedulerPaused =
+      process.env.OUTBOUND_SCHEDULER_PAUSED === "true" ||
+      (controlState?.schedulerPaused ?? false);
+
+    outboundStatus = {
+      schedulerEnabled,
+      schedulerPaused,
+      pendingReview: allPosts.filter((p) => p.approvalStatus === "needs_review").length,
+      scheduled: allPosts.filter((p) => p.status === "scheduled").length,
+      failed24h:
+        (liFail?.failureCount ?? 0) +
+        (fbFail?.failureCount ?? 0) +
+        (xFail?.failureCount ?? 0),
+      lastSuccessAt:
+        [liFail?.lastSuccess?.createdAt, fbFail?.lastSuccess?.createdAt, xFail?.lastSuccess?.createdAt]
+          .filter(Boolean)
+          .map((d) => new Date(d!).getTime())
+          .sort((a, b) => b - a)[0] ?? null,
+    };
+    if (outboundStatus.lastSuccessAt !== null) {
+      outboundStatus.lastSuccessAt = new Date(outboundStatus.lastSuccessAt).toISOString();
+    }
+  } catch {
+    // outbound data unavailable — widget renders with null state
+  }
+
   const operatorSummary = await buildOperatorCommandCentreSummary();
 
-  return { props: { isAuthorized: true, operatorSummary } };
+  return { props: { isAuthorized: true, operatorSummary, outboundStatus } };
 }
+
+type OutboundStatus = {
+  schedulerEnabled: boolean;
+  schedulerPaused: boolean;
+  pendingReview: number;
+  scheduled: number;
+  failed24h: number;
+  lastSuccessAt: string | number | null;
+};
 
 type PageProps = {
   isAuthorized: true;
   operatorSummary: OperatorCommandCentreSummary;
+  outboundStatus: OutboundStatus | null;
 };
 
 /* ─── Status card ─────────────────────────────────────── */
@@ -169,7 +236,7 @@ function OperatorStartCard({ summary }: { summary: OperatorCommandCentreSummary 
 /* PAGE                                                    */
 /* ═══════════════════════════════════════════════════════ */
 
-const AdminIndexPage: NextPage<PageProps> = ({ operatorSummary }) => {
+const AdminIndexPage: NextPage<PageProps> = ({ operatorSummary, outboundStatus }) => {
   const { data: session } = useSession();
   const [stats, setStats] = React.useState<any>(null);
   const [proofStats, setProofStats] = React.useState<any>(null);
@@ -279,6 +346,51 @@ const AdminIndexPage: NextPage<PageProps> = ({ operatorSummary }) => {
           </div>
         </div>
 
+        {/* ── OUTBOUND STATUS WIDGET ──────────────────────── */}
+        {outboundStatus && (
+          <section className="border border-sky-400/15 bg-sky-400/[0.04] p-5">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <Megaphone className="h-4 w-4 text-sky-400/70" />
+                <h3 className="text-[9px] font-mono uppercase tracking-[0.28em] text-sky-400/60">Outbound publishing</h3>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-[8px] font-mono uppercase tracking-wider border px-2 py-0.5 ${outboundStatus.schedulerEnabled ? "border-amber-400/25 text-amber-300/70" : "border-emerald-400/25 text-emerald-300/70"}`}>
+                  Scheduler {outboundStatus.schedulerEnabled ? "enabled" : "disabled"}
+                </span>
+                {outboundStatus.schedulerPaused && (
+                  <span className="text-[8px] font-mono uppercase tracking-wider border border-rose-400/25 px-2 py-0.5 text-rose-300/70">Paused</span>
+                )}
+                <Link href="/admin/outbound" className="text-[10px] text-sky-300/60 hover:text-sky-200 transition-colors flex items-center gap-1">
+                  Open <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="border border-white/5 bg-black/20 p-3">
+                <p className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">Pending review</p>
+                <p className={`mt-2 text-lg font-light ${outboundStatus.pendingReview > 0 ? "text-amber-300" : "text-white/40"}`}>{outboundStatus.pendingReview}</p>
+              </div>
+              <div className="border border-white/5 bg-black/20 p-3">
+                <p className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">Scheduled</p>
+                <p className={`mt-2 text-lg font-light ${outboundStatus.scheduled > 0 ? "text-blue-300" : "text-white/40"}`}>{outboundStatus.scheduled}</p>
+              </div>
+              <div className="border border-white/5 bg-black/20 p-3">
+                <p className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">Failures (24h)</p>
+                <p className={`mt-2 text-lg font-light ${outboundStatus.failed24h > 0 ? "text-rose-300" : "text-emerald-300"}`}>{outboundStatus.failed24h}</p>
+              </div>
+              <div className="border border-white/5 bg-black/20 p-3">
+                <p className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">Last success</p>
+                <p className="mt-2 text-xs text-white/40">
+                  {outboundStatus.lastSuccessAt
+                    ? new Date(outboundStatus.lastSuccessAt).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+                    : "—"}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── OPERATIONAL MODULES ─────────────────────────── */}
         <div>
           <SectionLabel icon={Layers3}>Operational modules</SectionLabel>
@@ -295,7 +407,7 @@ const AdminIndexPage: NextPage<PageProps> = ({ operatorSummary }) => {
             <ModuleLink href="/admin/pdf-dashboard" title="PDF & Reports" description="PDF intelligence registry, report status, and documents." icon={FileText} color="text-pink-400" bg="bg-pink-500/10" />
             <ModuleLink href="/admin/oversight-review" title="Oversight Review" description="Governed review bench for internal briefs, client-safe output, suppressions, and operator decisions." icon={ClipboardCheck} color="text-orange-400" bg="bg-orange-500/10" />
             <ModuleLink href="/admin/outcome-verification" title="Outcome Verification" description="Operator review queue for disputed, blocked, and CRITICAL signal verification records. Memory approval gate." icon={ShieldCheck} color="text-red-400" bg="bg-red-500/10" />
-            <ModuleLink href="/admin/outbound/linkedin" title="Outbound Publishing" description="LinkedIn, Facebook, and X outbound queue. Campaign posts, approval gates, dry-run validation, and publish history." icon={Megaphone} color="text-sky-400" bg="bg-sky-500/10" />
+            <ModuleLink href="/admin/outbound" title="Outbound Publishing" description="LinkedIn, Facebook, and X outbound queue. Campaign posts, approval gates, dry-run validation, and publish history." icon={Megaphone} color="text-sky-400" bg="bg-sky-500/10" />
           </div>
         </div>
 

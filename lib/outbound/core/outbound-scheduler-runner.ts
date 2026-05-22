@@ -20,6 +20,7 @@ import { getOutboundPostsDue, getOutboundPostsByProvider, type OutboundPost } fr
 import { isOutboundItemEligibleForScheduling } from "./outbound-scheduler-eligibility";
 import { acquireSchedulerLock, releaseSchedulerLock, generateRunKey } from "./outbound-scheduler-lock";
 import { createLedgerEntry, claimPublishSlot, completePublishSlot } from "./outbound-publish-ledger";
+import { isSchedulerPaused as isSchedulerPausedFromDb } from "./outbound-control-state";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -188,7 +189,8 @@ export async function runOutboundScheduler(
   const runKey = generateRunKey();
   const now = input.now ?? new Date().toISOString();
   const schedulerEnabled = process.env.OUTBOUND_SCHEDULER_ENABLED === "true";
-  const globalPauseActive = process.env.OUTBOUND_SCHEDULER_PAUSED === "true";
+  // DB-backed pause overrides env-only gate — check both
+  const globalPauseActive = await isSchedulerPausedFromDb();
   const results: SchedulerItemResult[] = [];
 
   // ── Record run start ──────────────────────────────────────────────────────

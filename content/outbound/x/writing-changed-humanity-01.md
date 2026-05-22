@@ -4,7 +4,7 @@ provider: x
 postType: single
 sourceType: editorial-series
 sourceSlug: writing-changed-humanity
-sourcePath: content/editorial-series/the-minds-clay/Writing changed humanity.mdx
+sourcePath: content/source-material/the-minds-clay/Writing changed humanity.mdx
 campaign: writing-changed-humanity
 series: the-minds-clay
 status: ready
