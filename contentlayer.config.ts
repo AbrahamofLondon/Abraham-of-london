@@ -416,6 +416,18 @@ const Post = defineDocumentType(() => ({
   computedFields: createComputedFields("blog/", "blog"),
 }));
 
+const EditorialSeriesPart = defineDocumentType(() => ({
+  name: "EditorialSeriesPart",
+  filePathPattern: "editorial-series/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...baseFields,
+    series: { type: "string", required: true },
+    seriesOrder: { type: "number", required: true },
+  },
+  computedFields: createComputedFields("editorial-series/", "editorials/series"),
+}));
+
 const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: "books/**/*.{md,mdx}",
@@ -948,6 +960,7 @@ export default makeSource({
   contentDirPath: "content",
   contentDirInclude: [
     "blog",
+    "editorial-series",
     "shorts",
     "books",
     "canon",
@@ -968,6 +981,7 @@ export default makeSource({
   contentDirExclude: getExclusions(),
   documentTypes: [
     Post,
+    EditorialSeriesPart,
     Short,
     Book,
     Canon,
@@ -1037,6 +1051,7 @@ export default makeSource({
     const buckets = [
       (data as any)?.allDocuments,
       (data as any)?.allPosts,
+      (data as any)?.allEditorialSeriesParts,
       (data as any)?.allShorts,
       (data as any)?.allBooks,
       (data as any)?.allCanon,

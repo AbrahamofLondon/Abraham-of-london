@@ -5,6 +5,9 @@ export async function adminFetch(endpoint: string, options: RequestInit = {}) {
     headers.set("Content-Type", "application/json");
   }
 
+  // Required by proxy.ts step 6: all /api/admin/* mutations need this header.
+  headers.set("X-Institutional-Action", "true");
+
   const response = await fetch(endpoint, {
     ...options,
     headers,

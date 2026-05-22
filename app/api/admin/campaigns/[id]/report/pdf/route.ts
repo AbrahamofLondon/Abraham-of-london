@@ -186,6 +186,18 @@ export async function GET(_request: Request, context: RouteContext) {
     const pdfBuffer = Buffer.from(pdfBytes);
     const generationTimeMs = Date.now() - startTime;
 
+    // Lineage: record PDF export — fire-and-forget.
+    import("@/lib/reporting/report-lineage").then(({ writeReportLineageEvent }) =>
+      writeReportLineageEvent({
+        reportType: "EXECUTIVE_REPORT",
+        eventType: "EXPORTED",
+        resourceId: campaignId!,
+        resourceName: reportContext.organisationName ?? undefined,
+        version: "1",
+        metadata: { format: "pdf", generationTimeMs },
+      })
+    ).catch(() => { /* lineage must not break export */ });
+
     return new Response(pdfBuffer, {
       status: 200,
       headers: {

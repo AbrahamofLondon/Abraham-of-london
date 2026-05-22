@@ -65,6 +65,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     items: [
       { id: "reports", label: "Reports", href: "/admin/reports", router: "app", visibility: "admin", status: "active", description: "Executive intelligence briefs — completed campaign alignment reports by organisation" },
       { id: "reporting-executive", label: "Executive Reports", href: "/admin/reporting/executive", router: "app", visibility: "admin", status: "active", description: "Governance hub linking to intelligence briefs and decision analytics — index page now live." },
+      { id: "report-lineage", label: "Report Lineage & Audit", href: "/admin/reporting/lineage", router: "app", visibility: "admin", status: "active", description: "Append-only chain-of-custody ledger for report events — creation, viewing, export, escalation, revocation, and supersession" },
     ],
   },
   {

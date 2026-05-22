@@ -331,53 +331,96 @@ export default function DiagnosticsIndexPage() {
         <section className="border-t border-white/[0.05] px-6 py-16">
           <div className="mx-auto max-w-[1100px]">
             <Eyebrow>Earned consequence layer</Eyebrow>
-            <div className="mt-8 border border-white/[0.08] bg-white/[0.02] p-5">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div
-                  style={{
-                    ...serif,
-                    fontSize: "1.35rem",
-                    lineHeight: 1.05,
-                    color: "rgba(255,255,255,0.88)",
-                    fontStyle: "italic",
-                  }}
-                >
-                  Executive Reporting
+            <div className="mt-8 grid gap-4">
+              <div className="border border-white/[0.08] bg-white/[0.02] p-5">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div
+                    style={{
+                      ...serif,
+                      fontSize: "1.35rem",
+                      lineHeight: 1.05,
+                      color: "rgba(255,255,255,0.88)",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Executive Reporting
+                  </div>
+                  <StatusBadge state={executiveReady ? "AVAILABLE" : "LOCKED"} />
                 </div>
-                <StatusBadge state={executiveReady ? "AVAILABLE" : "LOCKED"} />
+                <p className="mt-4 text-[14px] leading-[1.8] text-white/60">
+                  Executive Reporting is not a starting point. It becomes available when the evidence shows decision stakes, consequence, and sufficient seriousness.
+                </p>
+                <p className="mt-3 text-[13px] leading-[1.75] text-white/42">
+                  {executiveReady
+                    ? "Eligible for Executive Reporting. Earlier evidence is present, so this gate can be reviewed responsibly."
+                    : "Not yet earned. Submit evidence first through Fast Diagnostic or the Constitutional Diagnostic."}
+                </p>
+                {executiveReady ? (
+                  <div className="mt-5">
+                    <Link
+                      href="/diagnostics/executive-reporting"
+                      className="group inline-flex min-h-[44px] items-center gap-2 border px-5 py-3 transition-all duration-200 hover:-translate-y-0.5"
+                      style={{
+                        borderColor: `${GOLD}40`,
+                        backgroundColor: `${GOLD}10`,
+                        color: "#F5F5F5",
+                        ...mono,
+                        fontSize: "10px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Review Executive Reporting gate
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                  </div>
+                ) : null}
               </div>
-              <p className="mt-4 text-[14px] leading-[1.8] text-white/60">
-                Executive Reporting is not a starting point. It becomes available when the evidence shows decision stakes, consequence, and sufficient seriousness.
-              </p>
-              <p className="mt-3 text-[13px] leading-[1.75] text-white/42">
-                {executiveReady
-                  ? "Eligible for Executive Reporting. Earlier evidence is present, so this gate can be reviewed responsibly."
-                  : "Not yet earned. Submit evidence first through Fast Diagnostic or the Constitutional Diagnostic."}
-              </p>
-              {executiveReady ? (
+
+              <div className="border border-white/[0.06] bg-white/[0.01] p-5">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div
+                    style={{
+                      ...serif,
+                      fontSize: "1.35rem",
+                      lineHeight: 1.05,
+                      color: "rgba(255,255,255,0.70)",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Enterprise Decision Authority
+                  </div>
+                  <StatusBadge state="LOCKED" />
+                </div>
+                <p className="mt-4 text-[14px] leading-[1.8] text-white/50">
+                  The organisational-grade pipeline. Turns campaign-based response patterns into governed decision evidence — protected by anonymisation, cohort safety, lineage, and escalation controls.
+                </p>
+                <p className="mt-3 text-[13px] leading-[1.75] text-white/35">
+                  Reached after individual evidence establishes that an organisational-level reading is warranted. Not an entry point.
+                </p>
                 <div className="mt-5">
                   <Link
-                    href="/diagnostics/executive-reporting"
+                    href="/enterprise-decision-authority"
                     className="group inline-flex min-h-[44px] items-center gap-2 border px-5 py-3 transition-all duration-200 hover:-translate-y-0.5"
                     style={{
-                      borderColor: `${GOLD}40`,
-                      backgroundColor: `${GOLD}10`,
-                      color: "#F5F5F5",
+                      borderColor: "rgba(255,255,255,0.08)",
+                      backgroundColor: "rgba(255,255,255,0.02)",
+                      color: "rgba(255,255,255,0.38)",
                       ...mono,
                       fontSize: "10px",
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                     }}
                   >
-                    Review Executive Reporting gate
+                    Learn about this surface
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>
-              ) : null}
+              </div>
             </div>
             <p className="mt-6 max-w-[62ch] text-[13px] leading-[1.8] text-white/40">
-              Strategy Room, Return Brief, and Counsel Review are not starting
-              points on this page. They appear only when the case record has
+              Strategy Room, Return Brief, Boardroom Dossier, and Counsel Review are not
+              starting points on this page. They appear only when the case record has
               earned them.
             </p>
           </div>

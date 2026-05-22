@@ -6,11 +6,16 @@ import { Download } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { getPublicationCatalogue } from "@/lib/editorial/catalogue";
+import {
+  getEditorialSeriesCatalogue,
+  type EditorialSeries,
+} from "@/lib/editorial/series";
 import type { PublicationRecord } from "@/lib/editorial/types";
 
 type Props = {
   items: PublicationRecord[];
   flagship: PublicationRecord | null;
+  series: EditorialSeries[];
 };
 
 // All color references use --ds-* tokens from design-system.css
@@ -77,7 +82,7 @@ function EditorialRow({ item }: { item: PublicationRecord }) {
   );
 }
 
-const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
+const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
   const [activeCategory, setActiveCategory] = React.useState("");
 
   const categories = React.useMemo(() => {
@@ -180,6 +185,50 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
           </div>
         </section>
 
+        {series.length > 0 ? (
+          <section
+            className="border-b py-10 lg:py-12"
+            style={{ borderBottomColor: "var(--ds-border)" }}
+          >
+            <div className="mx-auto max-w-6xl px-6 lg:px-10">
+              <div className="mb-5 font-mono text-[7.5px] uppercase tracking-[0.34em]" style={{ color: "var(--ds-accent)" }}>
+                Editorial Series
+              </div>
+
+              <div className="divide-y" style={{ borderTop: "1px solid var(--ds-border)", borderBottom: "1px solid var(--ds-border)" }}>
+                {series.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/editorials/series/${item.slug}`}
+                    className="group grid gap-4 py-6 transition-colors md:grid-cols-[minmax(0,1fr)_auto]"
+                    style={{ borderColor: "var(--ds-border)" }}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-3 font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
+                        <span>{item.partCount} parts</span>
+                        <span style={{ color: "var(--ds-border)" }}>·</span>
+                        <span>{item.status}</span>
+                      </div>
+                      <h2
+                        className="mt-3 w-fit border-b border-transparent font-serif text-[1.8rem] leading-none transition-colors duration-200 group-hover:border-[#C9963A]/70 group-hover:text-white"
+                        style={{ color: "var(--ds-text)", fontWeight: 300 }}
+                      >
+                        {item.title}
+                      </h2>
+                      <p className="mt-3 max-w-3xl text-sm leading-6" style={{ color: "var(--ds-text-muted)" }}>
+                        {item.descriptor}
+                      </p>
+                    </div>
+                    <div className="self-center font-mono text-[7.5px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-accent)" }}>
+                      Open series
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         <section className="py-10 lg:py-12">
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
             {showFlagship ? (
@@ -277,7 +326,8 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const items = getPublicationCatalogue();
   const flagship = items.find((item) => item.slug === "ultimate-purpose-of-man") || items[0] || null;
-  return { props: { items, flagship }, revalidate: 1800 };
+  const series = getEditorialSeriesCatalogue();
+  return { props: { items, flagship, series }, revalidate: 1800 };
 
 
 };

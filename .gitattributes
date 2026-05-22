@@ -79,6 +79,7 @@ content/**/*.mdx  text eol=lf working-tree-encoding=UTF-8
 # Optional: enforce UTF-8 for common structured text
 # (Safe for most repos; remove if you store legacy encodings.)
 *.json  text eol=lf working-tree-encoding=UTF-8
+tsconfig.json text eol=lf
 *.yml   text eol=lf working-tree-encoding=UTF-8
 *.yaml  text eol=lf working-tree-encoding=UTF-8
 *.toml  text eol=lf working-tree-encoding=UTF-8

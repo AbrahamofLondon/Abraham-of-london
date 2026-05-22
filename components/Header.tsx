@@ -57,6 +57,7 @@ const NAV_ITEMS: readonly NavItem[] = [
   { href: "/diagnostics", label: "Diagnostics", sub: "Evidence entry surfaces", icon: ScanSearch },
   { href: "/canon", label: "Canon", sub: "Foundational doctrine", icon: BookOpen },
   { href: "/evidence", label: "Evidence", sub: "Applied proof", icon: FileText },
+  { href: "/editorials", label: "Editorials", sub: "Long-form reasoning", icon: FileText },
   { href: "/intelligence", label: "Intelligence", sub: "Memory and market reading", icon: Fingerprint },
   { href: "/library", label: "Library", sub: "Structured reading room", icon: BookOpen },
   { href: "/about", label: "About", sub: "Founder and method", icon: Compass },

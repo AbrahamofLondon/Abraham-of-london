@@ -18,6 +18,8 @@ import { CorrectionRegistry, type LiquidationNode } from "@/components/admin/gov
 import { BriefingTrigger } from "@/components/admin/governance/briefing-trigger";
 import ReportPrintButton from "./ReportPrintButton";
 import { generateExecutiveReportForCampaign } from "@/lib/admin/reporting/executive-report-service";
+import DiagnosticLineagePanel from "@/components/dashboard/DiagnosticLineagePanel";
+import { getAdminReportLineage } from "@/lib/reporting/report-lineage";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -384,9 +386,18 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
                 nodes={(campaignPayload.correctionNodes || []) as LiquidationNode[]}
               />
             </div>
+
+            <div className="mt-16 print:hidden">
+              <LineagePanelSection campaignId={id} />
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+async function LineagePanelSection({ campaignId }: { campaignId: string }) {
+  const events = await getAdminReportLineage(campaignId);
+  return <DiagnosticLineagePanel events={events} />;
 }

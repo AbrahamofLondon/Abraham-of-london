@@ -1,8 +1,9 @@
 /* pages/api/admin/security/appeal.ts — Clearance Request Handler */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/config";
 import { auditLogger } from "@/lib/server/db/audit";
-import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 const bodySchema = z.object({
   reason: z.string().trim().min(1).max(500),
@@ -13,8 +14,12 @@ const bodySchema = z.object({
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
-  const session = await requireAdminServer(req, res, { routeKey: "admin-security-appeal" });
-  if (!session) return;
+  // Any authenticated user may submit a clearance appeal — not just admins.
+  // The Directorate reviews and resolves via UpgradeTerminal (/admin/command-centre).
+  const session = await getServerSession(req, res, authOptions);
+  if (!session?.user) {
+    return res.status(401).json({ ok: false, message: "AUTHENTICATION_REQUIRED" });
+  }
 
   const parsed = bodySchema.safeParse(req.body);
   if (!parsed.success) {
@@ -24,17 +29,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { reason, attemptedPath, requiredTier } = parsed.data;
 
   try {
-    // 1. Lockdown Integrity Check
-    // SystemConfig model does not exist in the current Prisma schema.
-    // Lockdown check cannot be performed. Appeals proceed unconditionally
-    // until the model is provisioned. This is intentional degradation, not a bypass.
-
-    // 2. Transmit Appeal to Audit Feed
     await auditLogger.log({
       action: "CLEARANCE_UPGRADE_REQUEST",
       severity: "warn",
-      actorId: session?.user?.id || "ANONYMOUS",
-      actorEmail: session?.user?.email || "unknown",
+      actorId: (session.user as any)?.id || "ANONYMOUS",
+      actorEmail: session.user?.email || "unknown",
       resourceId: attemptedPath || "ROOT_SECTOR",
       status: "pending",
       category: "SECURITY",
@@ -44,14 +43,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       metadata: {
         reason,
         requiredTier,
-        userRole: session.user?.role || "USER",
+        userRole: (session.user as any)?.role || "USER",
         timestamp: new Date().toISOString(),
       },
     });
 
-    return res.status(200).json({ 
-      ok: true, 
-      message: "Appeal transmitted to Directorate Oversight." 
+    return res.status(200).json({
+      ok: true,
+      message: "Appeal transmitted to Directorate Oversight.",
     });
   } catch (error) {
     console.error("[APPEAL_SUBMISSION_ERROR]", error);

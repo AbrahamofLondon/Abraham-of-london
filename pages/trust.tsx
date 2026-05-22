@@ -253,19 +253,27 @@ const TrustPage: NextPage = () => (
           <div className="max-w-2xl space-y-3 text-[15px] leading-7 text-white/60">
             <p>
               Abraham of London operates administrative, publishing, and support
-              workflows through controlled internal channels. Access to sensitive
-              systems is role-gated, and outbound publishing is handled through
-              governed approval paths rather than unmanaged direct posting.
+              workflows through a governed command environment. Access to sensitive
+              operations is role-gated: different authority levels unlock different
+              capabilities, and the most consequential controls — including
+              platform-level lock and unlock — require the highest authority tier.
+            </p>
+            <p>
+              Report lineage is recorded end-to-end. Every material event — creation,
+              viewing, export, update, escalation, revocation — is written to an
+              append-only ledger. Reports can be revoked by authorised operators;
+              revocation is logged with actor, timestamp, and authority. Cohort
+              privacy is enforced at both write time and read time: any subgroup that
+              falls below the minimum respondent threshold is suppressed before it
+              reaches any output surface.
             </p>
             <p>
               External platform integrations, including LinkedIn, are treated as
               controlled publishing channels. Permissions are scoped to the
               operational purpose, credentials are kept server-side, and
-              publishing activity is limited to authorised operators.
-            </p>
-            <p>
-              Internal coordination channels support incident response, deployment
-              review, and operator accountability. They do not replace governance;
+              publishing activity is limited to authorised operators. Internal
+              coordination channels support incident response, deployment review,
+              and operator accountability. They do not replace governance;
               they support it.
             </p>
           </div>

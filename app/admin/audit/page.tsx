@@ -2,6 +2,8 @@ export const dynamic = "force-dynamic";
 // app/admin/audit/page.tsx
 import { getPrisma } from "@/lib/prisma.server";
 import { Shield, Clock, User, AlertCircle, Database } from "lucide-react";
+import DiagnosticLineagePanel from "@/components/dashboard/DiagnosticLineagePanel";
+import { getAdminReportLineage } from "@/lib/reporting/report-lineage";
 
 export default async function AuditDashboard() {
   try {
@@ -120,6 +122,8 @@ export default async function AuditDashboard() {
             ))}
           </div>
         )}
+
+        <ReportLineageVaultSection />
       </div>
     );
   } catch (error) {
@@ -131,7 +135,7 @@ export default async function AuditDashboard() {
           <Shield className="text-amber-500" size={24} />
           <h1 className="text-xl uppercase tracking-[0.4em] text-white">System Forensic Ledger</h1>
         </div>
-        
+
         <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-6">
           <h3 className="text-lg font-medium text-red-300 mb-2">Error Loading Audit Logs</h3>
           <p className="text-red-200/80 mb-4">
@@ -148,5 +152,43 @@ export default async function AuditDashboard() {
         </div>
       </div>
     );
+  }
+}
+
+/**
+ * Shows recent report lineage events across all campaigns.
+ * Queries the most recent 20 REPORT_* audit log entries regardless of resourceId.
+ */
+async function ReportLineageVaultSection() {
+  try {
+    const prisma = (await import("@/lib/prisma.server")).prisma as any;
+    const rows = await prisma.systemAuditLog.findMany({
+      where: { action: { startsWith: "REPORT_" } },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      select: { id: true, action: true, actorEmail: true, metadata: true, createdAt: true, resourceId: true },
+    });
+
+    const events = rows.map((row: any) => {
+      let version: string | null = null;
+      try { const m = JSON.parse(row.metadata ?? "{}"); version = m.version ?? null; } catch { /* ignore */ }
+      return {
+        id: row.id,
+        eventType: String(row.action).replace(/^REPORT_/, ""),
+        version,
+        actor: row.actorEmail ? `${String(row.actorEmail).charAt(0)}***@${String(row.actorEmail).split("@")[1] ?? ""}` : null,
+        createdAt: new Date(row.createdAt).toISOString(),
+      };
+    });
+
+    if (!events.length) return null;
+
+    return (
+      <div className="mt-12">
+        <DiagnosticLineagePanel events={events} />
+      </div>
+    );
+  } catch {
+    return null;
   }
 }

@@ -357,6 +357,45 @@ export default async function CampaignManagementPage({ params }: PageProps) {
           </Link>
         </div>
 
+        <div className="col-span-12">
+          <Link
+            href={`/admin/campaigns/${campaign.id}/enterprise-report`}
+            className={`group block border border-amber-500/20 bg-amber-500/[0.04] p-6 transition-all hover:border-amber-500/40 ${
+              !isSafeToReport ? "opacity-50 pointer-events-none" : ""
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
+                  <Activity className="w-6 h-6 text-amber-400/70" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-mono uppercase tracking-wider text-amber-300/80">
+                    Enterprise Decision Report
+                  </h3>
+                  <p className="text-[9px] text-white/40 mt-1">
+                    Full pipeline · Constitution · Fragility radar · Enforcement directive
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-amber-400/40 group-hover:text-amber-400/70 transition-colors">
+                <span className="text-[10px] font-mono uppercase tracking-wider">
+                  View Report
+                </span>
+                <TrendingUp className="w-4 h-4" />
+              </div>
+            </div>
+            {!isSafeToReport && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <p className="text-[8px] text-amber-400/70 flex items-center gap-2">
+                  <Lock className="w-3 h-3" />
+                  Enterprise report requires {5 - completedCount} more responses
+                </p>
+              </div>
+            )}
+          </Link>
+        </div>
+
         <div className="col-span-12 lg:col-span-8 border border-white/10 bg-zinc-950/70">
           <div className="p-5 border-b border-white/10 flex justify-between items-center bg-black/30">
             <div className="flex items-center gap-3">

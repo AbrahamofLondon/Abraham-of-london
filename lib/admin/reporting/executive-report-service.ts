@@ -526,6 +526,17 @@ export async function buildExecutiveReportFromCampaign(
       jsonPayload,
     };
 
+    // Append lineage event — fire-and-forget, never throws.
+    import("@/lib/reporting/report-lineage").then(({ writeReportLineageEvent }) =>
+      writeReportLineageEvent({
+        reportType: "EXECUTIVE_REPORT",
+        eventType: "GENERATED",
+        resourceId: normalizedCampaignId,
+        resourceName: campaignPayload.organisationName,
+        version: "1",
+      })
+    ).catch(() => { /* lineage must not break report flow */ });
+
     return { ok: true, payload };
   } catch (error) {
     console.error("[EXECUTIVE_REPORT_BUILD_ERROR]", error);

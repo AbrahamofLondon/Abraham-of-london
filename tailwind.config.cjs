@@ -11,7 +11,6 @@ module.exports = {
       "./lib/**/*.{js,ts,jsx,tsx,md,mdx}",
       "./content/**/*.{md,mdx}",
       "./src/**/*.{js,ts,jsx,tsx,md,mdx}",
-      "./.contentlayer/generated/**/*.{js,ts,jsx,tsx}",
     ],
     // Regex patterns in these files break Tailwind JIT scanning (e.g. [-:.])
     extract: {

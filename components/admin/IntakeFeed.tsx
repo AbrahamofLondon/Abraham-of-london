@@ -1,5 +1,6 @@
-/* components/Admin/IntakeFeed.tsx */
-import { UserCheck, ShieldAlert, Clock } from 'lucide-react';
+/* components/admin/IntakeFeed.tsx */
+import React from "react";
+import { UserCheck, Clock } from "lucide-react";
 
 export const IntakeFeed: React.FC<{ inquiries: any[] }> = ({ inquiries }) => {
   return (
