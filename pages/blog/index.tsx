@@ -37,6 +37,7 @@ type PostItem = {
 type BlogIndexProps = {
   items: PostItem[];
   totalPosts: number;
+  hasAppliedSeries: boolean;
 };
 
 const DEFAULT_COVER = "/assets/images/writing-desk.webp";
@@ -113,7 +114,7 @@ function safeDateLabel(value: unknown): string | null {
   PAGE
 ----------------------------------------------------------------------------- */
 
-const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
+const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeries }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
 
@@ -493,6 +494,65 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
         </div>
       </section>
 
+      {/* Applied Essay Series band */}
+      {hasAppliedSeries && (
+        <section
+          className="border-b"
+          style={{
+            borderColor: "var(--ds-border)",
+            backgroundColor: "var(--ds-background-muted)",
+          }}
+        >
+          <div className="mx-auto max-w-7xl px-6 py-5 lg:px-12">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <span
+                  style={{
+                    width: 1,
+                    height: 20,
+                    backgroundColor: "rgba(201,150,58,0.45)",
+                    display: "inline-block",
+                    flexShrink: 0,
+                  }}
+                />
+                <div>
+                  <div
+                    className="font-mono uppercase tracking-[0.3em] mb-1"
+                    style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                  >
+                    Applied Essay Series
+                  </div>
+                  <p
+                    className="font-serif italic"
+                    style={{
+                      fontWeight: 300,
+                      fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
+                      color: "var(--ds-text)",
+                      lineHeight: 1.25,
+                    }}
+                  >
+                    The Burden Changes Hands
+                  </p>
+                  <p
+                    className="text-[12px] leading-relaxed mt-0.5"
+                    style={{ color: "var(--ds-text-muted)" }}
+                  >
+                    Seven essays on memory, custody, and the intelligence organisations build over time.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/blog/series/the-burden-changes-hands"
+                className="flex-shrink-0 font-mono uppercase tracking-[0.24em] transition-colors duration-200 hover:text-[#C9963A] whitespace-nowrap"
+                style={{ fontSize: "7.5px", color: "var(--ds-text-subtle)" }}
+              >
+                Enter the series →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section
         className="border-b"
         style={{ borderColor: "var(--ds-border)" }}
@@ -756,8 +816,13 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     const { getPublishedPosts } = await import("@/lib/content/server");
     const all = getPublishedPosts() || [];
 
+    // Check whether any series posts exist (for the series band)
+    const hasAppliedSeries = all.some((doc: any) => !doc?.draft && !!doc?.series);
+
     const items: PostItem[] = all
       .filter((doc: any) => !doc?.draft)
+      // Exclude blog series posts — they live at /blog/series/[seriesSlug]/[partSlug]
+      .filter((doc: any) => !doc?.series)
       .map((doc: any) => {
         const fp = String(
           doc?.urlSlug ||
@@ -798,6 +863,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
       props: sanitizeData({
         items,
         totalPosts: items.length,
+        hasAppliedSeries,
       }),
       // No revalidate — content is static (contentlayer build-time JSON).
       // ISR would re-run getStaticProps in a Netlify Lambda where the
@@ -806,7 +872,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     };
   } catch {
     return {
-      props: { items: [], totalPosts: 0 },
+      props: { items: [], totalPosts: 0, hasAppliedSeries: false },
     };
   }
 };

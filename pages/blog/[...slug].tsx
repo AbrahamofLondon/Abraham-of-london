@@ -231,6 +231,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   const paths = [...posts]
     .filter((p: any) => !p?.draft)
+    // Exclude blog series posts — those are handled by /blog/series/[seriesSlug]/[partSlug]
+    .filter((p: any) => !p?.series)
     .map((p: any) => {
       const raw = normalizeSlug(
         p?.urlSlug || p?.collectionSlug || p?.slug || p?._raw?.flattenedPath || ""
