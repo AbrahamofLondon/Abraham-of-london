@@ -146,10 +146,11 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
     >
       <Head>
         <meta name="robots" content="index,follow" />
+        <meta name="color-scheme" content="dark" />
       </Head>
 
-      <main className="mind-clay-reader min-h-screen px-6 pb-20 pt-28 lg:px-10 lg:pb-28 lg:pt-36">
-        <article className="mx-auto max-w-[66ch]">
+      <main className="mind-clay-reader px-6 pb-16 pt-8 sm:pt-10 lg:px-10 lg:pb-28 lg:pt-14">
+        <article className="mind-clay-reader-article mx-auto max-w-[66ch]">
           <Link href={hubHref} className="mind-clay-series-band">
             {series.title} · Part {part.order} of {series.partCount}
           </Link>
@@ -186,15 +187,29 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
 
       <style>{`
         .mind-clay-reader {
-          --mind-clay-bg: #faf9f7;
-          --mind-clay-text: #1a1a1a;
-          --mind-clay-muted: #8a8a8a;
-          --mind-clay-rule: rgba(201, 150, 58, 0.34);
-          --mind-clay-accent: #c9963a;
-          --mind-clay-soft: rgba(26, 26, 26, 0.68);
+          --mind-clay-bg: #1b1b1b;
+          --mind-clay-text: rgba(255, 255, 255, 0.94);
+          --mind-clay-lead: rgba(255, 255, 255, 0.88);
+          --mind-clay-muted: rgba(255, 255, 255, 0.5);
+          --mind-clay-rule: rgba(255, 255, 255, 0.14);
+          --mind-clay-accent: #d0a14e;
+          --mind-clay-soft: rgba(255, 255, 255, 0.82);
+          --mdx-accent: var(--mind-clay-accent);
+          --mdx-border: var(--mind-clay-rule);
+          --mdx-heading: var(--mind-clay-text);
+          --mdx-muted: var(--mind-clay-muted);
+          --mdx-text: var(--mind-clay-soft);
           animation: mind-clay-fade 150ms ease-out;
           background: var(--mind-clay-bg);
           color: var(--mind-clay-text);
+          color-scheme: dark;
+          min-height: 100vh;
+          min-height: 100svh;
+          overflow-x: hidden;
+        }
+
+        .mind-clay-reader-article {
+          color: var(--mind-clay-soft);
         }
 
         @keyframes mind-clay-fade {
@@ -246,23 +261,28 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
         }
 
         .mind-clay-reader-body {
-          color: var(--mind-clay-text);
+          color: var(--mind-clay-soft);
           font-family: Georgia, "Times New Roman", serif;
           font-size: 20px;
           line-height: 1.75;
         }
 
-        .mind-clay-reader-body > p:first-of-type {
-          font-size: 21px;
-        }
-
+        .mind-clay-reader-body > p:first-of-type,
         .mind-clay-reader-body .aol-mdx-content > p:first-of-type {
+          color: var(--mind-clay-lead) !important;
           font-size: 21px;
         }
 
-        .mind-clay-reader-body .aol-mdx-content p {
-          margin-bottom: 1.7rem;
+        .mind-clay-reader-body .aol-mdx-content {
           color: var(--mind-clay-soft);
+          font-size: inherit;
+          line-height: inherit;
+        }
+
+        .mind-clay-reader-body .aol-mdx-content p,
+        .mind-clay-reader-body .aol-mdx-content li {
+          margin-bottom: 1.7rem;
+          color: var(--mind-clay-soft) !important;
           font-family: Georgia, "Times New Roman", serif;
           font-size: inherit;
           font-weight: 400;
@@ -276,6 +296,10 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
           font-size: inherit;
           font-weight: 400;
           line-height: inherit;
+        }
+
+        .mind-clay-paragraph:first-of-type {
+          color: var(--mind-clay-lead);
         }
 
         .mind-clay-reader-body > p:last-of-type {
@@ -322,7 +346,7 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
         .mind-clay-link {
           color: var(--mind-clay-accent);
           text-decoration: underline;
-          text-decoration-color: rgba(201, 150, 58, 0.34);
+          text-decoration-color: rgba(208, 161, 78, 0.38);
           text-underline-offset: 0.24em;
         }
 
@@ -417,25 +441,25 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
           text-transform: uppercase;
         }
 
-        @media (prefers-color-scheme: dark) {
-          .mind-clay-reader {
-            --mind-clay-bg: #1c1c1e;
-            --mind-clay-text: #f0ede8;
-            --mind-clay-muted: rgba(240, 237, 232, 0.46);
-            --mind-clay-rule: rgba(240, 237, 232, 0.13);
-            --mind-clay-accent: #d0a14e;
-            --mind-clay-soft: rgba(240, 237, 232, 0.8);
-          }
-        }
-
         @media (max-width: 640px) {
           .mind-clay-reader {
             padding-left: 12px;
             padding-right: 12px;
           }
 
+          .mind-clay-reader-header {
+            margin-top: 2rem;
+            margin-bottom: 2.5rem;
+          }
+
+          .mind-clay-reader-header h1 {
+            font-size: clamp(2.35rem, 11vw, 3.35rem);
+            line-height: 1.02;
+          }
+
           .mind-clay-reader-body {
             font-size: 19px;
+            line-height: 1.68;
           }
 
           .mind-clay-reader-body > p:first-of-type {
