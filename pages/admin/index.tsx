@@ -295,6 +295,7 @@ const AdminIndexPage: NextPage<PageProps> = ({ operatorSummary }) => {
             <ModuleLink href="/admin/pdf-dashboard" title="PDF & Reports" description="PDF intelligence registry, report status, and documents." icon={FileText} color="text-pink-400" bg="bg-pink-500/10" />
             <ModuleLink href="/admin/oversight-review" title="Oversight Review" description="Governed review bench for internal briefs, client-safe output, suppressions, and operator decisions." icon={ClipboardCheck} color="text-orange-400" bg="bg-orange-500/10" />
             <ModuleLink href="/admin/outcome-verification" title="Outcome Verification" description="Operator review queue for disputed, blocked, and CRITICAL signal verification records. Memory approval gate." icon={ShieldCheck} color="text-red-400" bg="bg-red-500/10" />
+            <ModuleLink href="/admin/outbound/linkedin" title="Outbound Publishing" description="LinkedIn, Facebook, and X outbound queue. Campaign posts, approval gates, dry-run validation, and publish history." icon={Megaphone} color="text-sky-400" bg="bg-sky-500/10" />
           </div>
         </div>
 

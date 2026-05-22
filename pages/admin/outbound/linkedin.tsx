@@ -1,7 +1,8 @@
 import * as React from "react";
 import Head from "next/head";
+import Link from "next/link";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { Clipboard, ExternalLink, Loader2, Plug, Send, ShieldCheck } from "lucide-react";
+import { ChevronRight, Clipboard, ExternalLink, Loader2, Plug, Send, ShieldCheck } from "lucide-react";
 
 import AdminLayout from "@/components/admin/AdminLayout";
 import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
@@ -48,7 +49,6 @@ type ConsoleViewModel = {
   connection: LinkedInConnectionStatus;
   posts: ConsolePost[];
   attempts: AttemptSummary[];
-  tokenLeakProbe: string;
 };
 
 function readinessState(asset: ResolvedLinkedInOutbound, publishable: boolean): ConsolePost["readinessState"] {
@@ -92,7 +92,6 @@ export function buildLinkedInOutboundAdminViewModel(
     connection,
     posts,
     attempts,
-    tokenLeakProbe: JSON.stringify({ connection, posts, attempts }),
   };
 }
 
@@ -397,6 +396,29 @@ export default function LinkedInOutboundAdminPage({
               targetLabel={consoleState.connection.selectedPublishingTarget.ownerName}
             />
           ))}
+        </section>
+
+        {/* Campaign queue navigation */}
+        <section className="border border-sky-400/10 bg-sky-400/5 p-5">
+          <h2 className="font-serif text-2xl text-white">Campaign Queues</h2>
+          <p className="mt-1 text-sm text-white/45">
+            Long-form essay campaign posts live in separate queues — not in the legacy console above.
+          </p>
+          <div className="mt-4 flex flex-col gap-2">
+            <Link
+              href="/admin/outbound/linkedin/campaigns/the-burden-changes-hands"
+              className="inline-flex items-center gap-3 border border-white/10 bg-black/25 px-4 py-3 text-sm text-white/70 hover:border-sky-400/25 hover:text-white transition-colors"
+            >
+              <ChevronRight className="h-4 w-4 text-sky-400/60" />
+              <span>
+                <strong className="text-white">The Burden Changes Hands</strong>
+                <span className="ml-2 text-white/40">7 weeks · 21 posts · awaiting Week 1 approval</span>
+              </span>
+            </Link>
+          </div>
+          <p className="mt-3 text-xs text-white/30">
+            Campaign posts require <code className="font-mono text-white/50">approvalStatus: approved</code> in frontmatter before any publish action enables. Scheduler is disabled.
+          </p>
         </section>
 
         <section className="border border-white/10 bg-zinc-950/70 p-5">
