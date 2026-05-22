@@ -3791,3 +3791,48 @@ model SecurityAssuranceRequest {
   @@index([createdAt])
   @@map("security_assurance_requests")
 }
+
+// ============================================================================
+// FACEBOOK OUTBOUND PUBLISHING
+// ============================================================================
+
+model FacebookOAuthConnection {
+  id                   String    @id @default(cuid())
+  pageId               String
+  pageName             String?
+  encryptedAccessToken String    // AES-256-GCM, never exposed to client
+  encryptedUserToken   String?   // long-lived user token if present
+  scopesJson           String    @default("[]") // JSON array of granted scopes
+  connectedAt          DateTime  @default(now())
+  expiresAt            DateTime?
+  revokedAt            DateTime?
+  actorId              String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([pageId])
+  @@map("facebook_oauth_connections")
+}
+
+model FacebookPublishAttempt {
+  id               String    @id @default(cuid())
+  assetType        String    // "blog" | "editorial" | "gmi" | "custom"
+  assetSlug        String
+  assetTitle       String
+  status           String    // "pending" | "succeeded" | "failed" | "blocked" | "dry_run"
+  facebookPostId   String?
+  facebookPostUrl  String?
+  errorCode        String?
+  errorMessageSafe String?
+  actorEmailHash   String?
+  actorId          String?
+  requestId        String
+  dryRun           Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  completedAt      DateTime?
+
+  @@index([assetSlug])
+  @@index([status])
+  @@index([requestId])
+  @@map("facebook_publish_attempts")
+}

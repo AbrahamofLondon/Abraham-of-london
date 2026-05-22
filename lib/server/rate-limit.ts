@@ -33,7 +33,8 @@ export type RateLimitScope =
   | "BENCHMARK_CONTEXT"
   | "OUTCOME_CONTRIBUTION"
   | "RETURN_BRIEF_GENERATION"
-  | "API_V1";
+  | "API_V1"
+  | "FACEBOOK_OUTBOUND_PUBLISH";
 
 export type RateLimitResult = {
   allowed: boolean;

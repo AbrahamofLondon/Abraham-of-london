@@ -131,6 +131,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     label: "Outbound",
     items: [
       { id: "linkedin-outbound", label: "LinkedIn Publishing", href: "/admin/outbound/linkedin", router: "pages", visibility: "admin", status: "active", description: "Governed LinkedIn publishing console with OAuth, final gate, preview, and attempt history" },
+      { id: "facebook-outbound", label: "Facebook Publishing", href: "/admin/outbound/facebook", router: "pages", visibility: "admin", status: "active", description: "Governed Facebook Page publishing console with OAuth, permission check, final gate, and attempt history. X distribution is currently handled via Facebook cross-posting." },
     ],
   },
   {
