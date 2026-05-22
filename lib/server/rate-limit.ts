@@ -34,7 +34,8 @@ export type RateLimitScope =
   | "OUTCOME_CONTRIBUTION"
   | "RETURN_BRIEF_GENERATION"
   | "API_V1"
-  | "FACEBOOK_OUTBOUND_PUBLISH";
+  | "FACEBOOK_OUTBOUND_PUBLISH"
+  | "X_OUTBOUND_PUBLISH";
 
 export type RateLimitResult = {
   allowed: boolean;

@@ -45,11 +45,11 @@ export const OUTBOUND_PROVIDER_REGISTRY: OutboundProviderEntry[] = [
   {
     provider: "x",
     label: "X (Twitter)",
-    description: "Native X publishing for threads, analytics, and direct platform control.",
-    status: "future",
-    adminHref: null,
-    reason:
-      "X distribution currently handled through Facebook cross-posting. Native X publishing is reserved for future thread and analytics support.",
+    description: "Standalone X publishing via Twitter API v2. Bidirectional sync with Facebook — publish to both platforms in a single action.",
+    status: "active",
+    adminHref: "/admin/outbound/x",
+    crossPostNote:
+      "Facebook cross-posting (via connected X account) and standalone native X publishing are both supported. Use the sync option to coordinate posts across platforms.",
   },
 ];
 

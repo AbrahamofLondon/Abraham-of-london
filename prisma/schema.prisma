@@ -3836,3 +3836,47 @@ model FacebookPublishAttempt {
   @@index([requestId])
   @@map("facebook_publish_attempts")
 }
+
+// ─── X (Twitter) outbound publishing ─────────────────────────────────────────
+
+model XOAuthConnection {
+  id                    String    @id @default(cuid())
+  userId                String?   // Twitter user ID
+  username              String?   // @handle (no @)
+  encryptedAccessToken  String    // AES-256-GCM, never exposed to client
+  encryptedRefreshToken String?   // offline.access refresh token
+  scopesJson            String    @default("[]") // JSON array of granted scopes
+  connectedAt           DateTime  @default(now())
+  expiresAt             DateTime?
+  revokedAt             DateTime?
+  actorId               String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("x_oauth_connections")
+}
+
+model XPublishAttempt {
+  id                 String    @id @default(cuid())
+  assetType          String    // "blog" | "editorial" | "gmi" | "custom"
+  assetSlug          String
+  assetTitle         String
+  status             String    // "pending" | "succeeded" | "failed" | "blocked" | "dry_run"
+  tweetId            String?
+  tweetUrl           String?
+  syncedFromFacebook Boolean   @default(false) // true if triggered via FB sync
+  errorCode          String?
+  errorMessageSafe   String?
+  actorEmailHash     String?
+  actorId            String?
+  requestId          String
+  dryRun             Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  completedAt        DateTime?
+
+  @@index([assetSlug])
+  @@index([status])
+  @@index([requestId])
+  @@map("x_publish_attempts")
+}

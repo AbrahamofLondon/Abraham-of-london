@@ -1,13 +1,14 @@
 /**
- * pages/api/admin/outbound/facebook/publish.ts
+ * pages/api/admin/outbound/x/publish.ts
  *
- * POST — Publish a Facebook Page post.
+ * POST — Publish a tweet to X (Twitter).
  *
- * Admin-only. Rate-limited. Requires explicit finalApproval: true.
- * dryRun: true validates the gate and returns a preview without posting.
+ * Admin-only. Rate-limited (10/hr). Requires finalApproval: true.
+ * dryRun: true validates gate without posting.
+ * syncToFacebook: true also posts to Facebook after a successful tweet
+ *   (uses the existing Facebook publish client).
  *
- * Audit trail recorded for every gate run, block, publish, and failure.
- * The access token is resolved server-side and never surfaced in any response.
+ * Full audit trail. Access token resolved server-side, never surfaced.
  */
 
 import crypto from "crypto";
@@ -16,24 +17,24 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdminApi } from "@/lib/access/server";
 import { prisma } from "@/lib/prisma.server";
 import { checkRateLimit } from "@/lib/server/rate-limit";
-import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
-import {
-  getFacebookAssetBySlug,
-  buildCustomFacebookAsset,
-} from "@/lib/outbound/facebook-content-resolver";
-import { canPublishFacebookPost } from "@/lib/outbound/facebook-publish-gate";
-import { publishLinkPostToFacebook } from "@/lib/outbound/facebook-publishing-client";
-import { recordFacebookPublishingAuditSafe } from "@/lib/outbound/facebook-publishing-audit";
-
-// Optional sync: after a successful Facebook post, also post to X
-import { publishTweetToX } from "@/lib/outbound/x-publishing-client";
 import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
-import { adaptFacebookTextToTweet } from "@/lib/outbound/x-content-resolver";
+import {
+  getXAssetBySlug,
+  buildCustomXAsset,
+  adaptFacebookTextToTweet,
+} from "@/lib/outbound/x-content-resolver";
+import { canPublishXPost } from "@/lib/outbound/x-publish-gate";
+import { publishTweetToX } from "@/lib/outbound/x-publishing-client";
+import { recordXPublishingAuditSafe } from "@/lib/outbound/x-publishing-audit";
+
+// Optional sync: after a successful tweet, also post to Facebook
+import { publishLinkPostToFacebook } from "@/lib/outbound/facebook-publishing-client";
+import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function requestId(): string {
-  return `fb_${Date.now().toString(36)}_${crypto.randomBytes(4).toString("hex")}`;
+  return `x_${Date.now().toString(36)}_${crypto.randomBytes(4).toString("hex")}`;
 }
 
 function hashEmail(email?: string | null): string | null {
@@ -45,15 +46,16 @@ async function createAttempt(input: {
   assetType: string;
   assetSlug: string;
   assetTitle: string;
-  status: "pending" | "succeeded" | "failed" | "blocked" | "dry_run";
+  status: string;
   requestId: string;
   dryRun: boolean;
+  syncedFromFacebook?: boolean;
   actorId?: string | null;
   actorEmailHash?: string | null;
   errorCode?: string | null;
   errorMessageSafe?: string | null;
 }) {
-  return prisma.facebookPublishAttempt.create({
+  return prisma.xPublishAttempt.create({
     data: {
       assetType: input.assetType,
       assetSlug: input.assetSlug,
@@ -61,6 +63,7 @@ async function createAttempt(input: {
       status: input.status,
       requestId: input.requestId,
       dryRun: input.dryRun,
+      syncedFromFacebook: input.syncedFromFacebook ?? false,
       actorId: input.actorId ?? null,
       actorEmailHash: input.actorEmailHash ?? null,
       errorCode: input.errorCode ?? null,
@@ -84,18 +87,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const actorId = guard.session?.user?.id ?? null;
   const actorEmailHash = hashEmail(guard.session?.user?.email);
 
-  // ── Rate limit: 5 publishes per hour per admin ────────────────────────────
+  // ── Rate limit: 10 tweets per hour per admin ──────────────────────────────
   const rateLimitId = actorId ?? actorEmailHash ?? "anonymous";
   const rl = await checkRateLimit({
-    scope: "FACEBOOK_OUTBOUND_PUBLISH",
+    scope: "X_OUTBOUND_PUBLISH",
     identifier: rateLimitId,
-    limit: 5,
+    limit: 10,
     windowSeconds: 3600,
   });
   if (!rl.allowed) {
     return res.status(429).json({
       ok: false,
-      error: "Rate limit reached. Maximum 5 Facebook publish attempts per hour.",
+      error: "Rate limit reached. Maximum 10 X publish attempts per hour.",
       resetAt: rl.resetAt,
       requestId: id,
     });
@@ -108,18 +111,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     customTitle?: string;
     customText?: string;
     customLink?: string;
-    customImagePath?: string;
     finalApproval?: boolean;
     dryRun?: boolean;
-    syncToX?: boolean;  // also post to X after successful Facebook post
+    syncToFacebook?: boolean;
+    // For direct Facebook-text-to-tweet sync
+    facebookText?: string;
+    facebookLink?: string;
   };
 
-  const { slug, dryRun = false, finalApproval, syncToX = false } = body;
+  const { dryRun = false, finalApproval, syncToFacebook = false } = body;
 
   if (!dryRun && finalApproval !== true) {
     return res.status(400).json({
       ok: false,
-      error: "finalApproval: true is required to publish. Set dryRun: true to validate without publishing.",
+      error: "finalApproval: true is required to publish. Set dryRun: true to validate without posting.",
       requestId: id,
     });
   }
@@ -127,56 +132,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // ── Resolve asset ─────────────────────────────────────────────────────────
   let asset = null;
 
-  if (body.assetType === "custom") {
+  if (body.facebookText) {
+    // Sync mode: adapt Facebook post text to tweet format
+    const tweetText = adaptFacebookTextToTweet(body.facebookText, body.facebookLink);
+    asset = buildCustomXAsset({
+      title: "Facebook sync",
+      text: tweetText,
+      link: body.facebookLink ?? null,
+    });
+  } else if (body.assetType === "custom") {
     if (!body.customTitle?.trim() || !body.customText?.trim()) {
       return res.status(400).json({
         ok: false,
-        error: "Custom posts require customTitle and customText.",
+        error: "Custom tweets require customTitle and customText.",
         requestId: id,
       });
     }
-    asset = buildCustomFacebookAsset({
+    asset = buildCustomXAsset({
       title: body.customTitle.trim(),
       text: body.customText.trim(),
       link: body.customLink?.trim() || null,
-      imagePath: body.customImagePath?.trim() || null,
     });
-  } else if (slug) {
-    asset = getFacebookAssetBySlug(slug);
+  } else if (body.slug) {
+    asset = getXAssetBySlug(body.slug);
     if (!asset) {
       return res.status(404).json({
         ok: false,
-        error: "Facebook asset was not found.",
+        error: "X asset was not found.",
         requestId: id,
       });
     }
   } else {
     return res.status(400).json({
       ok: false,
-      error: "Missing required field: slug (or assetType: custom with customTitle/customText).",
+      error: "Missing required field: slug, facebookText, or assetType: custom.",
       requestId: id,
     });
   }
 
-  // ── Connection status ─────────────────────────────────────────────────────
-  const connection = await getFacebookConnectionStatus();
-
-  // ── Publish gate ──────────────────────────────────────────────────────────
-  const gate = canPublishFacebookPost(asset, connection);
-
-  await recordFacebookPublishingAuditSafe({
-    eventType: "FACEBOOK_PUBLISH_BLOCKED",
-    assetSlug: asset.slug,
-    assetType: asset.assetType,
-    assetTitle: asset.title,
-    pageId: connection.pageId,
-    blockerCount: gate.blockers.length,
-    blockers: gate.blockers,
-    dryRun,
-    requestId: id,
-    actorId,
-    actorEmailHash,
-  }).catch(() => null);
+  // ── Connection + gate ─────────────────────────────────────────────────────
+  const connection = await getXConnectionStatus();
+  const gate = canPublishXPost(asset, connection);
 
   if (!gate.allowed) {
     await createAttempt({
@@ -188,20 +184,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       dryRun,
       actorId,
       actorEmailHash,
-      errorCode: "FB_PUBLISH_BLOCKED",
+      errorCode: "X_PUBLISH_BLOCKED",
       errorMessageSafe: gate.blockers.join("; ").slice(0, 500),
     });
+    await recordXPublishingAuditSafe({
+      eventType: "X_PUBLISH_BLOCKED",
+      assetSlug: asset.slug,
+      assetType: asset.assetType,
+      assetTitle: asset.title,
+      blockerCount: gate.blockers.length,
+      blockers: gate.blockers,
+      dryRun,
+      requestId: id,
+      actorId,
+      actorEmailHash,
+    }).catch(() => null);
 
     return res.status(409).json({
       ok: false,
-      error: "Facebook publish gate blocked this post.",
+      error: "X publish gate blocked this tweet.",
       blockers: gate.blockers,
       warnings: gate.warnings,
       requestId: id,
     });
   }
 
-  // ── Dry run: validate only ────────────────────────────────────────────────
+  // ── Dry run ───────────────────────────────────────────────────────────────
   if (dryRun) {
     await createAttempt({
       assetType: asset.assetType,
@@ -213,12 +221,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       actorId,
       actorEmailHash,
     });
-    await recordFacebookPublishingAuditSafe({
-      eventType: "FACEBOOK_PUBLISH_DRY_RUN",
+    await recordXPublishingAuditSafe({
+      eventType: "X_PUBLISH_DRY_RUN",
       assetSlug: asset.slug,
       assetType: asset.assetType,
       assetTitle: asset.title,
-      pageId: connection.pageId,
       dryRun: true,
       requestId: id,
       actorId,
@@ -228,18 +235,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       ok: true,
       dryRun: true,
-      message: "Dry run passed. Gate cleared. No post was published.",
+      message: "Dry run passed. Gate cleared. No tweet was posted.",
       gate: { blockers: gate.blockers, warnings: gate.warnings },
-      preview: {
-        text: asset.text,
-        link: asset.link,
-        imagePath: asset.imagePath,
-      },
+      preview: { text: asset.text, link: asset.link },
       requestId: id,
     });
   }
 
-  // ── Live publish ──────────────────────────────────────────────────────────
+  // ── Post tweet ────────────────────────────────────────────────────────────
   const attempt = await createAttempt({
     assetType: asset.assetType,
     assetSlug: asset.slug,
@@ -251,35 +254,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     actorEmailHash,
   });
 
-  const result = await publishLinkPostToFacebook({
-    message: asset.text,
-    link: asset.link ?? undefined,
-    dryRun: false,
-  });
+  const result = await publishTweetToX({ text: asset.text, dryRun: false });
 
   if (!result.ok) {
-    await prisma.facebookPublishAttempt.update({
+    await prisma.xPublishAttempt.update({
       where: { id: attempt.id },
       data: {
         status: "failed",
-        errorCode: result.errorCode ?? "FB_POST_FAILED",
-        errorMessageSafe: result.safeMessage ?? "Facebook publishing failed.",
+        errorCode: result.errorCode ?? "X_POST_FAILED",
+        errorMessageSafe: result.safeMessage ?? "X publishing failed.",
         completedAt: new Date(),
       },
     });
-    await recordFacebookPublishingAuditSafe({
-      eventType: "FACEBOOK_PUBLISH_FAILED",
+    await recordXPublishingAuditSafe({
+      eventType: "X_PUBLISH_FAILED",
       assetSlug: asset.slug,
       assetType: asset.assetType,
       assetTitle: asset.title,
-      pageId: connection.pageId,
-      dryRun: false,
       requestId: id,
       actorId,
       actorEmailHash,
     }).catch(() => null);
 
-    return res.status(result.errorCode === "FB_RATE_LIMITED" ? 429 : 400).json({
+    return res.status(result.errorCode === "X_RATE_LIMITED" ? 429 : 400).json({
       ok: false,
       errorCode: result.errorCode,
       error: result.safeMessage,
@@ -287,47 +284,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  await prisma.facebookPublishAttempt.update({
+  await prisma.xPublishAttempt.update({
     where: { id: attempt.id },
     data: {
       status: "succeeded",
-      facebookPostId: result.postId ?? null,
-      facebookPostUrl: result.postUrl ?? null,
+      tweetId: result.tweetId ?? null,
+      tweetUrl: result.tweetUrl ?? null,
       completedAt: new Date(),
     },
   });
-  await recordFacebookPublishingAuditSafe({
-    eventType: "FACEBOOK_POST_PUBLISHED",
+  await recordXPublishingAuditSafe({
+    eventType: "X_POST_PUBLISHED",
     assetSlug: asset.slug,
     assetType: asset.assetType,
     assetTitle: asset.title,
-    pageId: connection.pageId,
-    facebookPostId: result.postId ?? null,
-    dryRun: false,
+    tweetId: result.tweetId ?? null,
     requestId: id,
     actorId,
     actorEmailHash,
   }).catch(() => null);
 
-  // ── Optional X sync ───────────────────────────────────────────────────────
-  let xSync: { ok: boolean; tweetUrl?: string | null } | null = null;
-  if (syncToX) {
-    const xStatus = await getXConnectionStatus();
-    if (xStatus.canPublish) {
-      const tweetText = adaptFacebookTextToTweet(asset.text, asset.link);
-      const xResult = await publishTweetToX({ text: tweetText, dryRun: false });
-      xSync = { ok: xResult.ok, tweetUrl: xResult.tweetUrl };
+  // ── Optional Facebook sync ────────────────────────────────────────────────
+  let facebookSync: { ok: boolean; postUrl?: string | null } | null = null;
+  if (syncToFacebook) {
+    const fbStatus = await getFacebookConnectionStatus();
+    if (fbStatus.canPublish) {
+      const fbResult = await publishLinkPostToFacebook({
+        message: asset.text,
+        link: asset.link ?? undefined,
+        dryRun: false,
+      });
+      facebookSync = { ok: fbResult.ok, postUrl: fbResult.postUrl };
     } else {
-      xSync = { ok: false };
+      facebookSync = { ok: false };
     }
   }
 
   return res.status(200).json({
     ok: true,
-    message: "Published to Facebook Page successfully.",
-    postId: result.postId ?? null,
-    postUrl: result.postUrl ?? null,
-    xSync,
+    message: "Tweet posted to X successfully.",
+    tweetId: result.tweetId ?? null,
+    tweetUrl: result.tweetUrl ?? null,
+    facebookSync,
     requestId: id,
   });
 }

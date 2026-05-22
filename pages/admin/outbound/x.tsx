@@ -1,14 +1,14 @@
 /**
- * pages/admin/outbound/facebook.tsx
+ * pages/admin/outbound/x.tsx
  *
- * Facebook Page publishing console.
+ * X (Twitter) publishing console.
  * Admin-only. Server-side rendered. Token never surfaced in UI or props.
  *
  * Sections:
- *   1. Connection status + OAuth actions
- *   2. Page identity + cross-post note
- *   3. Permissions panel
- *   4. Asset selector with post preview
+ *   1. Connection status + OAuth action
+ *   2. Scopes + account identity
+ *   3. Asset selector with tweet preview + character count
+ *   4. Sync to Facebook option (bidirectional)
  *   5. Final approval gate + publish action
  *   6. Attempt history
  */
@@ -17,7 +17,6 @@ import * as React from "react";
 import Head from "next/head";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import {
-  AlertTriangle,
   CheckCircle,
   ExternalLink,
   Loader2,
@@ -31,13 +30,15 @@ import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
 import { AdminStatusBadge, type AdminBadgeTone } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
 import { prisma } from "@/lib/prisma.server";
-import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
-import {
-  getAllFacebookPublishableAssets,
-} from "@/lib/outbound/facebook-content-resolver";
-import { canPublishFacebookPost } from "@/lib/outbound/facebook-publish-gate";
-import type { FacebookConnectionStatus, FacebookPublishedAsset } from "@/lib/outbound/facebook-types";
 import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
+import {
+  getAllXPublishableAssets,
+} from "@/lib/outbound/x-content-resolver";
+import { canPublishXPost } from "@/lib/outbound/x-publish-gate";
+import { countTweetChars } from "@/lib/outbound/x-publish-gate";
+import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
+import type { XConnectionStatus, XPublishedAsset } from "@/lib/outbound/x-types";
+import { X_TWEET_MAX_CHARS } from "@/lib/outbound/x-types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,7 +48,7 @@ type AssetViewModel = {
   title: string;
   text: string;
   link: string | null;
-  imagePath: string | null;
+  charCount: number;
   publishable: boolean;
   blockers: string[];
   warnings: string[];
@@ -57,21 +58,22 @@ type AttemptSummary = {
   assetSlug: string;
   assetTitle: string;
   status: string;
-  facebookPostId: string | null;
-  facebookPostUrl: string | null;
+  tweetId: string | null;
+  tweetUrl: string | null;
+  syncedFromFacebook: boolean;
+  dryRun: boolean;
   errorCode: string | null;
   errorMessageSafe: string | null;
-  dryRun: boolean;
   requestId: string;
   createdAt: string;
   completedAt: string | null;
 };
 
 type ConsoleViewModel = {
-  connection: FacebookConnectionStatus;
+  connection: XConnectionStatus;
   assets: AssetViewModel[];
   attempts: AttemptSummary[];
-  xConnected: boolean;  // true if X is connected and can publish
+  facebookConnected: boolean;
 };
 
 // ─── getServerSideProps ───────────────────────────────────────────────────────
@@ -88,29 +90,28 @@ export const getServerSideProps: GetServerSideProps<{
     typeof ctx.query.error === "string" ? ctx.query.error : null;
   const flashConnected = ctx.query.connected === "1";
 
-  const [connection, rawAssets, xStatus] = await Promise.all([
-    getFacebookConnectionStatus(),
-    Promise.resolve(getAllFacebookPublishableAssets()),
+  const [connection, rawAssets, fbStatus] = await Promise.all([
     getXConnectionStatus(),
+    Promise.resolve(getAllXPublishableAssets()),
+    getFacebookConnectionStatus(),
   ]);
-  const xConnected = xStatus.canPublish;
+  const facebookConnected = fbStatus.canPublish;
 
-  const assets: AssetViewModel[] = rawAssets.map((asset: FacebookPublishedAsset) => {
-    const gate = canPublishFacebookPost(asset, connection);
+  const assets: AssetViewModel[] = rawAssets.map((asset: XPublishedAsset) => {
+    const gate = canPublishXPost(asset, connection);
     return {
       slug: asset.slug,
       assetType: asset.assetType,
       title: asset.title,
       text: asset.text,
       link: asset.link,
-      imagePath: asset.imagePath,
+      charCount: countTweetChars(asset.text),
       publishable: gate.allowed,
       blockers: gate.blockers,
       warnings: gate.warnings,
     };
   });
 
-  // Sort: publishable first, then blocked
   assets.sort((a, b) => {
     if (a.publishable && !b.publishable) return -1;
     if (!a.publishable && b.publishable) return 1;
@@ -119,7 +120,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   let attempts: AttemptSummary[] = [];
   try {
-    const rows = await prisma.facebookPublishAttempt.findMany({
+    const rows = await prisma.xPublishAttempt.findMany({
       orderBy: { createdAt: "desc" },
       take: 15,
     });
@@ -127,11 +128,12 @@ export const getServerSideProps: GetServerSideProps<{
       assetSlug: row.assetSlug,
       assetTitle: row.assetTitle,
       status: row.status,
-      facebookPostId: row.facebookPostId,
-      facebookPostUrl: row.facebookPostUrl,
+      tweetId: row.tweetId,
+      tweetUrl: row.tweetUrl,
+      syncedFromFacebook: row.syncedFromFacebook,
+      dryRun: row.dryRun,
       errorCode: row.errorCode,
       errorMessageSafe: row.errorMessageSafe,
-      dryRun: row.dryRun,
       requestId: row.requestId,
       createdAt: row.createdAt.toISOString(),
       completedAt: row.completedAt?.toISOString() ?? null,
@@ -142,7 +144,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   return {
     props: {
-      consoleState: { connection, assets, attempts, xConnected },
+      consoleState: { connection, assets, attempts, facebookConnected },
       flashError,
       flashConnected,
     },
@@ -151,15 +153,15 @@ export const getServerSideProps: GetServerSideProps<{
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function readinessTone(readiness: FacebookConnectionStatus["readiness"]): AdminBadgeTone {
+function readinessTone(readiness: XConnectionStatus["readiness"]): AdminBadgeTone {
   if (readiness === "READY") return "success";
-  if (readiness === "MISSING_PERMISSION") return "danger";
+  if (readiness === "MISSING_SCOPE") return "danger";
   if (readiness === "TOKEN_INVALID") return "danger";
   if (readiness === "CONFIG_MISSING") return "warning";
   return "muted";
 }
 
-function ConnectionPanel({ connection }: { connection: FacebookConnectionStatus }) {
+function ConnectionPanel({ connection }: { connection: XConnectionStatus }) {
   return (
     <section className="border border-white/10 bg-zinc-950/70 p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -168,7 +170,7 @@ function ConnectionPanel({ connection }: { connection: FacebookConnectionStatus 
             Connection status
           </p>
           <h2 className="mt-2 font-serif text-2xl text-white">
-            Facebook Page publishing
+            X (Twitter) publishing
           </h2>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -178,84 +180,92 @@ function ConnectionPanel({ connection }: { connection: FacebookConnectionStatus 
             />
             <AdminStatusBadge
               label={`State: ${connection.state}`}
-              tone={connection.state === "oauth" ? "success" : connection.state === "env_token" ? "warning" : "muted"}
+              tone={connection.state === "oauth" ? "success" : "muted"}
             />
             <AdminStatusBadge
               label={`Readiness: ${connection.readiness}`}
               tone={readinessTone(connection.readiness)}
             />
             <AdminStatusBadge
-              label={connection.canPublish ? "Can publish" : "Cannot publish"}
+              label={connection.canPublish ? "Can tweet" : "Cannot tweet"}
               tone={connection.canPublish ? "success" : "danger"}
             />
-            {connection.oauthConfigured ? (
-              <AdminStatusBadge label="OAuth configured" tone="success" />
-            ) : (
-              <AdminStatusBadge label="OAuth not configured" tone="warning" />
-            )}
           </div>
 
-          {connection.warning && (
-            <div className="mt-4 flex items-start gap-2 border border-amber-400/20 bg-amber-400/5 p-3">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300/70" />
-              <p className="text-sm text-amber-100/75">{connection.warning}</p>
-            </div>
-          )}
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <AdminMetricCard
-              label="Page ID"
-              value={connection.pageId ?? "not set"}
-              tone={connection.pageId ? "success" : "danger"}
+              label="X account"
+              value={connection.username ? `@${connection.username}` : "not connected"}
+              tone={connection.username ? "success" : "muted"}
               variant="inner"
             />
             <AdminMetricCard
-              label="Page name"
-              value={connection.pageName ?? "unknown"}
+              label="User ID"
+              value={connection.userId ?? "—"}
               variant="inner"
             />
             <AdminMetricCard
-              label="Last publish"
+              label="Last tweet"
               value={connection.lastPublishAt
                 ? new Date(connection.lastPublishAt).toLocaleDateString("en-GB")
                 : "never"}
               variant="inner"
             />
-            <AdminMetricCard
-              label="X cross-post"
-              value="Via Facebook"
-              tone="info"
-              variant="inner"
-            />
           </div>
 
-          {/* Cross-post note */}
-          <div className="mt-4 border border-sky-400/15 bg-sky-400/5 p-3">
-            <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-sky-200/45">
-              X / Twitter distribution
+          {/* Scopes */}
+          {connection.connected && (
+            <div className="mt-4 space-y-2">
+              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">
+                Granted scopes
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {connection.scopes.map((scope) => (
+                  <span
+                    key={scope}
+                    className="border border-emerald-400/20 bg-emerald-400/5 px-2 py-0.5 font-mono text-xs text-emerald-100/70"
+                  >
+                    {scope}
+                  </span>
+                ))}
+                {connection.missingScopes.map((scope) => (
+                  <span
+                    key={scope}
+                    className="border border-rose-400/20 bg-rose-400/5 px-2 py-0.5 font-mono text-xs text-rose-100/70"
+                  >
+                    {scope} (missing)
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* API note */}
+          <div className="mt-4 border border-white/10 bg-black/30 p-3">
+            <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">
+              Twitter API v2 — rate limits
             </p>
             <p className="mt-2 text-sm leading-6 text-white/55">
-              X distribution is currently handled through the Facebook Page's connected
-              X/Twitter account. Native X publishing is reserved as a future provider
-              for threads, analytics, and direct platform control.
+              Free-tier X apps are limited to 17 posts per 24 hours via the API.
+              Basic-tier apps allow 100 posts/day. The publish gate enforces a 10/hr
+              admin-side limit. Plan publication windows accordingly.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 lg:w-48">
+        <div className="flex flex-col gap-2 lg:w-52">
           {connection.oauthConfigured ? (
             <a
-              href="/api/admin/outbound/facebook/oauth/start"
+              href="/api/admin/outbound/x/oauth/start"
               className="inline-flex items-center justify-center gap-2 border border-sky-400/25 bg-sky-400/10 px-3 py-2 text-xs font-medium text-sky-100 hover:bg-sky-400/15"
             >
               <ShieldCheck className="h-4 w-4" />
-              {connection.connected ? "Reconnect OAuth" : "Connect via OAuth"}
+              {connection.connected ? "Reconnect X OAuth" : "Connect X via OAuth"}
             </a>
           ) : (
             <div className="border border-white/10 bg-black/30 p-3">
               <p className="text-xs text-white/40">
-                OAuth not configured. Set FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, and
-                FACEBOOK_REDIRECT_URI to enable the full OAuth flow.
+                X OAuth not configured. Set X_CLIENT_ID and X_REDIRECT_URI to enable.
               </p>
             </div>
           )}
@@ -270,77 +280,56 @@ function ConnectionPanel({ connection }: { connection: FacebookConnectionStatus 
       </div>
 
       <p className="mt-4 text-xs text-white/30">
-        Token values are encrypted server-side (AES-256-GCM) and are never rendered in
-        this console. Diagnostics are connection-status only.
+        X access and refresh tokens are encrypted server-side (AES-256-GCM) and are
+        never rendered in this console. Refresh tokens are stored for offline.access
+        token renewal.
       </p>
     </section>
   );
 }
 
-function PermissionsPanel({
-  connection,
-}: {
-  connection: FacebookConnectionStatus;
-}) {
+function CharBar({ count }: { count: number }) {
+  const pct = Math.min((count / X_TWEET_MAX_CHARS) * 100, 100);
+  const tone =
+    count > X_TWEET_MAX_CHARS
+      ? "bg-rose-500"
+      : count > 240
+      ? "bg-amber-400"
+      : "bg-emerald-500";
   return (
-    <section className="border border-white/10 bg-zinc-950/70 p-5">
-      <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/35">
-        Permissions
-      </p>
-      <h2 className="mt-2 font-serif text-xl text-white">Required Graph API permissions</h2>
-      <div className="mt-4 space-y-2">
-        {connection.requiredPermissions.map((perm) => {
-          const granted = connection.grantedPermissions.includes(perm);
-          return (
-            <div
-              key={perm}
-              className="flex items-center justify-between border border-white/10 bg-black/30 px-3 py-2"
-            >
-              <span className="font-mono text-xs text-white/70">{perm}</span>
-              <div className="flex items-center gap-2">
-                {granted ? (
-                  <CheckCircle className="h-4 w-4 text-emerald-400/70" />
-                ) : (
-                  <XCircle className="h-4 w-4 text-rose-400/70" />
-                )}
-                <AdminStatusBadge
-                  label={granted ? "granted" : "missing"}
-                  tone={granted ? "success" : "danger"}
-                />
-              </div>
-            </div>
-          );
-        })}
+    <div className="mt-2">
+      <div className="flex items-center justify-between text-xs text-white/40">
+        <span>{count} / {X_TWEET_MAX_CHARS} weighted chars</span>
+        {count > X_TWEET_MAX_CHARS && (
+          <span className="text-rose-300/70">exceeds limit by {count - X_TWEET_MAX_CHARS}</span>
+        )}
       </div>
-      {connection.missingPermissions.length > 0 && (
-        <p className="mt-3 text-xs text-rose-200/65">
-          Missing permissions: {connection.missingPermissions.join(", ")}. Reconnect via
-          OAuth to request the required scopes.
-        </p>
-      )}
-    </section>
+      <div className="mt-1 h-1 w-full bg-white/10">
+        <div className={`h-1 ${tone} transition-all`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
   );
 }
 
 function AssetCard({
   asset,
   connectionCanPublish,
-  xConnected,
+  facebookConnected,
 }: {
   asset: AssetViewModel;
   connectionCanPublish: boolean;
-  xConnected: boolean;
+  facebookConnected: boolean;
 }) {
   const [gateRun, setGateRun] = React.useState(false);
   const [finalApproved, setFinalApproved] = React.useState(false);
-  const [syncToX, setSyncToX] = React.useState(false);
+  const [syncToFacebook, setSyncToFacebook] = React.useState(false);
   const [publishing, setPublishing] = React.useState(false);
   const [dryRunning, setDryRunning] = React.useState(false);
   const [result, setResult] = React.useState<{
     ok: boolean;
     message: string;
-    postUrl?: string | null;
-    xSync?: { ok: boolean; tweetUrl?: string | null } | null;
+    tweetUrl?: string | null;
+    facebookSync?: { ok: boolean; postUrl?: string | null } | null;
   } | null>(null);
 
   const canPublish = gateRun && finalApproved && asset.publishable && connectionCanPublish;
@@ -348,7 +337,7 @@ function AssetCard({
   async function runDryRun() {
     setDryRunning(true);
     setResult(null);
-    const res = await fetch("/api/admin/outbound/facebook/publish", {
+    const res = await fetch("/api/admin/outbound/x/publish", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ slug: asset.slug, dryRun: true }),
@@ -357,7 +346,7 @@ function AssetCard({
     setDryRunning(false);
     if (res.ok) {
       setGateRun(true);
-      setResult({ ok: true, message: "Dry run passed — gate cleared. No post was published." });
+      setResult({ ok: true, message: "Dry run passed — gate cleared. No tweet was posted." });
     } else {
       setGateRun(false);
       setResult({
@@ -371,14 +360,14 @@ function AssetCard({
     if (!canPublish) return;
     setPublishing(true);
     setResult(null);
-    const res = await fetch("/api/admin/outbound/facebook/publish", {
+    const res = await fetch("/api/admin/outbound/x/publish", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         slug: asset.slug,
         finalApproval: true,
         dryRun: false,
-        syncToX,
+        syncToFacebook,
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -386,10 +375,10 @@ function AssetCard({
     setResult({
       ok: res.ok,
       message: res.ok
-        ? `Published to Facebook${syncToX ? " + synced to X" : ""}.`
+        ? `Tweet posted to X${syncToFacebook ? " + synced to Facebook" : ""}.`
         : `Failed: ${(data.blockers ?? [data.error]).join("; ")}`,
-      postUrl: data.postUrl ?? null,
-      xSync: data.xSync ?? null,
+      tweetUrl: data.tweetUrl ?? null,
+      facebookSync: data.facebookSync ?? null,
     });
   }
 
@@ -408,7 +397,6 @@ function AssetCard({
             />
           </div>
         </div>
-
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -423,54 +411,45 @@ function AssetCard({
             type="button"
             onClick={publish}
             disabled={!canPublish || publishing}
-            className="inline-flex items-center gap-2 border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-100 disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex items-center gap-2 border border-sky-400/25 bg-sky-400/10 px-3 py-2 text-xs text-sky-100 disabled:cursor-not-allowed disabled:opacity-35"
           >
             {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            Publish to Facebook
+            Post to X
           </button>
         </div>
       </div>
 
-      {/* Preview */}
+      {/* Tweet preview */}
       <div className="mt-4 border border-white/10 bg-zinc-950 p-4">
         <p className="mb-2 text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">
-          Post preview
+          Tweet preview
         </p>
-        <pre className="max-h-64 whitespace-pre-wrap break-words text-sm leading-6 text-white/68">
+        <pre className="whitespace-pre-wrap break-words text-sm leading-6 text-white/68">
           {asset.text}
         </pre>
-        {asset.link && (
-          <p className="mt-2 text-xs text-sky-200/55">Link: {asset.link}</p>
-        )}
-        {asset.imagePath && (
-          <p className="mt-1 text-xs text-white/35">Image: {asset.imagePath}</p>
-        )}
+        <CharBar count={asset.charCount} />
       </div>
 
-      {/* Blockers */}
+      {/* Blockers & warnings */}
       {asset.blockers.length > 0 && (
         <div className="mt-3 space-y-1">
           {asset.blockers.map((b) => (
-            <p key={b} className="text-xs text-rose-200/65">
-              — {b}
-            </p>
+            <p key={b} className="text-xs text-rose-200/65">— {b}</p>
           ))}
         </div>
       )}
       {asset.warnings.length > 0 && (
         <div className="mt-2 space-y-1">
           {asset.warnings.map((w) => (
-            <p key={w} className="text-xs text-amber-200/55">
-              ⚠ {w}
-            </p>
+            <p key={w} className="text-xs text-amber-200/55">⚠ {w}</p>
           ))}
         </div>
       )}
 
-      {/* Final approval gate */}
+      {/* Final approval + sync */}
       {gateRun && asset.publishable && (
         <div className="mt-4 space-y-3">
-          <div className="border border-emerald-400/15 bg-emerald-400/5 p-3">
+          <div className="border border-sky-400/15 bg-sky-400/5 p-3">
             <label className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
@@ -479,22 +458,22 @@ function AssetCard({
                 className="h-4 w-4 rounded border-white/20 bg-zinc-900"
               />
               <span className="text-sm text-white/70">
-                I confirm this post is approved for publication to the Abraham of London
-                Facebook Page.
+                I confirm this tweet is approved for publication to the Abraham of London
+                X account.
               </span>
             </label>
           </div>
-          {xConnected && (
-            <div className="border border-sky-400/15 bg-sky-400/5 p-3">
+          {facebookConnected && (
+            <div className="border border-blue-400/15 bg-blue-400/5 p-3">
               <label className="flex cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
-                  checked={syncToX}
-                  onChange={(e) => setSyncToX(e.target.checked)}
+                  checked={syncToFacebook}
+                  onChange={(e) => setSyncToFacebook(e.target.checked)}
                   className="h-4 w-4 rounded border-white/20 bg-zinc-900"
                 />
-                <span className="text-sm text-sky-100/70">
-                  Also post to X (Twitter) — synced tweet derived from this post.
+                <span className="text-sm text-blue-100/70">
+                  Also post to Facebook — adapted version of this tweet.
                 </span>
               </label>
             </div>
@@ -502,39 +481,40 @@ function AssetCard({
         </div>
       )}
 
+      {/* Result */}
       {result && (
         <div className="mt-4 space-y-2">
-          <p className={`text-xs ${result.ok ? "text-emerald-200/70" : "text-rose-200/65"}`}>
+          <p className={`text-xs ${result.ok ? "text-sky-200/70" : "text-rose-200/65"}`}>
             {result.message}
-            {result.postUrl && (
+            {result.tweetUrl && (
               <>
                 {" "}
                 <a
-                  href={result.postUrl}
+                  href={result.tweetUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-sky-200/70 underline"
+                  className="inline-flex items-center gap-1 underline"
                 >
                   <ExternalLink className="h-3 w-3" />
-                  View on Facebook
+                  View tweet
                 </a>
               </>
             )}
           </p>
-          {result.xSync && (
-            <p className={`text-xs ${result.xSync.ok ? "text-sky-200/70" : "text-amber-200/55"}`}>
-              X sync: {result.xSync.ok ? "posted" : "failed (check X console)"}
-              {result.xSync.tweetUrl && (
+          {result.facebookSync && (
+            <p className={`text-xs ${result.facebookSync.ok ? "text-blue-200/65" : "text-amber-200/55"}`}>
+              Facebook sync: {result.facebookSync.ok ? "posted" : "failed (check Facebook console)"}
+              {result.facebookSync.postUrl && (
                 <>
                   {" "}
                   <a
-                    href={result.xSync.tweetUrl}
+                    href={result.facebookSync.postUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 underline"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    View tweet
+                    View post
                   </a>
                 </>
               )}
@@ -552,7 +532,7 @@ function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
       <h2 className="font-serif text-2xl text-white">Publish Attempt History</h2>
       <div className="mt-4 space-y-2">
         {attempts.length === 0 ? (
-          <p className="text-sm text-white/40">No Facebook publish attempts recorded yet.</p>
+          <p className="text-sm text-white/40">No X publish attempts recorded yet.</p>
         ) : (
           attempts.map((attempt) => (
             <div
@@ -565,11 +545,10 @@ function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
                   {attempt.assetSlug} ·{" "}
                   {new Date(attempt.createdAt).toLocaleString("en-GB")}
                   {attempt.dryRun ? " (dry run)" : ""}
+                  {attempt.syncedFromFacebook ? " (synced from Facebook)" : ""}
                 </p>
                 {attempt.errorMessageSafe && (
-                  <p className="mt-1 text-xs text-rose-200/60">
-                    {attempt.errorMessageSafe}
-                  </p>
+                  <p className="mt-1 text-xs text-rose-200/60">{attempt.errorMessageSafe}</p>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -585,15 +564,15 @@ function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
                       : "warning"
                   }
                 />
-                {attempt.facebookPostUrl && (
+                {attempt.tweetUrl && (
                   <a
-                    href={attempt.facebookPostUrl}
+                    href={attempt.tweetUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-xs text-sky-200/70"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    Facebook
+                    X
                   </a>
                 )}
               </div>
@@ -607,33 +586,33 @@ function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function FacebookOutboundAdminPage({
+export default function XOutboundAdminPage({
   consoleState,
   flashError,
   flashConnected,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { connection, assets, attempts } = consoleState;
+  const { connection, assets, attempts, facebookConnected } = consoleState;
 
   return (
-    <AdminLayout title="Facebook Outbound">
+    <AdminLayout title="X Outbound">
       <Head>
-        <title>Facebook Outbound | Admin</title>
+        <title>X Publishing | Admin</title>
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
       <div className="space-y-6">
         {/* Header */}
-        <section className="border border-blue-400/15 bg-gradient-to-br from-blue-500/10 to-transparent p-6">
-          <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-blue-200/55">
+        <section className="border border-sky-400/15 bg-gradient-to-br from-sky-500/10 to-transparent p-6">
+          <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-sky-200/55">
             Governed outbound publishing
           </p>
           <h1 className="mt-3 font-serif text-3xl text-white">
-            Facebook Publishing Console
+            X (Twitter) Publishing Console
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
-            Admin-only Facebook Page publishing for approved content assets. Final gate
-            confirmation required before any post is submitted. Token values are never
-            shown in this console.
+            Standalone X publishing via Twitter API v2. Final gate confirmation required.
+            Bidirectional sync with Facebook — publish to both platforms in a single action.
+            Token values are never shown in this console.
           </p>
         </section>
 
@@ -642,7 +621,7 @@ export default function FacebookOutboundAdminPage({
           <div className="flex items-center gap-2 border border-emerald-400/20 bg-emerald-400/5 p-4">
             <CheckCircle className="h-4 w-4 text-emerald-300/70" />
             <p className="text-sm text-emerald-100/80">
-              Facebook Page connected successfully via OAuth.
+              X account connected successfully via OAuth.
             </p>
           </div>
         )}
@@ -651,7 +630,7 @@ export default function FacebookOutboundAdminPage({
             <XCircle className="h-4 w-4 text-rose-300/70" />
             <p className="text-sm text-rose-100/80">
               OAuth error: {flashError.replace(/_/g, " ")}. Try reconnecting or check
-              environment configuration.
+              X_CLIENT_ID / X_REDIRECT_URI configuration.
             </p>
           </div>
         )}
@@ -659,16 +638,9 @@ export default function FacebookOutboundAdminPage({
         {/* Section 1: Connection */}
         <ConnectionPanel connection={connection} />
 
-        {/* Section 2: Permissions */}
-        <PermissionsPanel connection={connection} />
-
-        {/* Section 3: Metrics */}
+        {/* Section 2: Metrics */}
         <section className="grid gap-4 sm:grid-cols-3">
-          <AdminMetricCard
-            label="Total assets"
-            value={assets.length}
-            variant="inner"
-          />
+          <AdminMetricCard label="Total assets" value={assets.length} variant="inner" />
           <AdminMetricCard
             label="Publishable"
             value={assets.filter((a) => a.publishable).length}
@@ -676,31 +648,31 @@ export default function FacebookOutboundAdminPage({
             variant="inner"
           />
           <AdminMetricCard
-            label="Blocked"
-            value={assets.filter((a) => !a.publishable).length}
-            tone={assets.some((a) => !a.publishable) ? "danger" : "success"}
+            label="Facebook sync"
+            value={facebookConnected ? "available" : "not connected"}
+            tone={facebookConnected ? "success" : "muted"}
             variant="inner"
           />
         </section>
 
-        {/* Section 4–5: Assets + gate */}
+        {/* Section 3–5: Assets + gate */}
         <section className="space-y-4">
           <div>
-            <h2 className="font-serif text-2xl text-white">Publishable Assets</h2>
+            <h2 className="font-serif text-2xl text-white">Tweet Queue</h2>
             <p className="mt-1 text-sm text-white/45">
-              Run the gate check first. Final approval confirmation is required before
-              publishing goes live.
+              Run the gate check first. Final approval required before posting.
+              {facebookConnected ? " Facebook sync available after gate passes." : ""}
             </p>
           </div>
           {assets.length === 0 ? (
-            <p className="text-sm text-white/40">No publishable Facebook assets found.</p>
+            <p className="text-sm text-white/40">No publishable X assets found.</p>
           ) : (
             assets.map((asset) => (
               <AssetCard
                 key={asset.slug}
                 asset={asset}
                 connectionCanPublish={connection.canPublish}
-                xConnected={consoleState.xConnected}
+                facebookConnected={facebookConnected}
               />
             ))
           )}

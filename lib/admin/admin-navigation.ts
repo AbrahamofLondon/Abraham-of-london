@@ -131,7 +131,8 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     label: "Outbound",
     items: [
       { id: "linkedin-outbound", label: "LinkedIn Publishing", href: "/admin/outbound/linkedin", router: "pages", visibility: "admin", status: "active", description: "Governed LinkedIn publishing console with OAuth, final gate, preview, and attempt history" },
-      { id: "facebook-outbound", label: "Facebook Publishing", href: "/admin/outbound/facebook", router: "pages", visibility: "admin", status: "active", description: "Governed Facebook Page publishing console with OAuth, permission check, final gate, and attempt history. X distribution is currently handled via Facebook cross-posting." },
+      { id: "facebook-outbound", label: "Facebook Publishing", href: "/admin/outbound/facebook", router: "pages", visibility: "admin", status: "active", description: "Governed Facebook Page publishing console with OAuth, permission check, final gate, sync to X, and attempt history." },
+      { id: "x-outbound", label: "X Publishing", href: "/admin/outbound/x", router: "pages", visibility: "admin", status: "active", description: "Standalone X (Twitter) publishing console via Twitter API v2. OAuth 2.0 PKCE, 280-char gate, bidirectional sync with Facebook, attempt history." },
     ],
   },
   {
