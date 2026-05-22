@@ -3687,6 +3687,115 @@ model LinkedInPublishAttempt {
 }
 
 // ============================================================================
+// OUTBOUND PUBLISH LEDGER — durable, idempotent publish record for all providers
+// ============================================================================
+
+/// Durable publish ledger for outbound publishing across all providers.
+/// The idempotency key (provider + outboundItemId + scheduledFor) prevents
+/// duplicate publishes. This is the source of truth for publish state.
+/// File writeback (frontmatter status: posted) is secondary.
+model OutboundPublishLedger {
+  id                String   @id @default(cuid())
+  provider          String   // "linkedin" | "facebook" | "x"
+  outboundItemId    String   // stable ID from frontmatter or filename-derived
+  campaign          String?  // campaign slug (LinkedIn) or null
+  assetSlug         String   // slug of the published asset
+  sourcePath        String?  // filesystem path to the source file
+  scheduledFor      String?  // ISO date string from frontmatter
+
+  // Actor info (safe — no raw tokens or secrets)
+  actorId           String?
+  actorEmail        String?  // raw email (only for admin audit trail)
+  actorEmailHash    String?  // SHA-256 hash for privacy-safe queries
+
+  // Status
+  status            String   // IN_PROGRESS | DRY_RUN | PUBLISHED | FAILED | BLOCKED | SKIPPED
+
+  // Provider response
+  providerPostId    String?  // LinkedIn URN, tweet ID, Facebook post ID
+  providerPostUrl   String?  // URL to the published post
+
+  // Idempotency
+  idempotencyKey    String   // unique: provider + outboundItemId + scheduledFor
+
+  // Sync
+  syncTargetsJson   String?  // JSON array of sync target provider IDs
+
+  // Error handling
+  errorCode         String?
+  safeMessage       String?
+
+  // Force republish tracking
+  forceRepublish    Boolean  @default(false)
+  forceRepublishActorId String?
+  forceRepublishNote    String?
+
+  // Source: who triggered this — "manual" | "scheduler"
+  source            String   @default("manual")
+
+  // Timestamps
+  createdAt         DateTime @default(now())
+  completedAt       DateTime?
+
+  @@unique([idempotencyKey], name: "outbound_publish_ledger_idempotency")
+  @@index([provider])
+  @@index([outboundItemId])
+  @@index([assetSlug])
+  @@index([status])
+  @@index([createdAt])
+  @@index([idempotencyKey])
+  @@index([source])
+  @@map("outbound_publish_ledger")
+}
+
+// ============================================================================
+// SCHEDULER LOCK — prevents duplicate concurrent scheduler runs
+// ============================================================================
+
+/// Distributed lock for the outbound scheduler.
+/// Only one scheduler run can hold the lock at a time.
+/// Stale locks expire after lockTimeoutMs.
+model SchedulerLock {
+  id              String   @id @default(cuid())
+  lockKey         String   @unique // e.g. "outbound-scheduler"
+  lockedAt        DateTime @default(now())
+  expiresAt       DateTime
+  holder          String?  // hostname or PID that acquired the lock
+  metadata        String?  // JSON with additional context
+
+  @@index([lockKey])
+  @@index([expiresAt])
+  @@map("scheduler_locks")
+}
+
+/// Records of scheduler runs for operator visibility.
+model SchedulerRun {
+  id              String   @id @default(cuid())
+  runKey          String   @unique // e.g. "sched_<timestamp>_<random>"
+  source          String   // "api" | "cron" | "manual"
+  dryRun          Boolean  @default(false)
+  provider        String?  // null = all providers
+  campaign        String?  // null = all campaigns
+  status          String   // "started" | "completed" | "failed" | "skipped"
+  scannedCount    Int      @default(0)
+  eligibleCount   Int      @default(0)
+  publishedCount  Int      @default(0)
+  skippedCount    Int      @default(0)
+  failedCount     Int      @default(0)
+  summary         String?  // JSON summary of results
+  errorMessage    String?
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([runKey])
+  @@index([source])
+  @@index([status])
+  @@index([startedAt])
+  @@map("scheduler_runs")
+}
+
+// ============================================================================
 // RATE LIMIT EVENTS — Postgres-authoritative, scope-keyed, identifier-hashed
 // ============================================================================
 
