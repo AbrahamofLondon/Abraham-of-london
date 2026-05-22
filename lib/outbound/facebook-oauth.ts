@@ -41,22 +41,77 @@ export const FACEBOOK_OAUTH_SCOPES = [
 
 // ─── State cookie helpers ─────────────────────────────────────────────────────
 
-export function generateOAuthState(returnTo?: string): string {
-  const nonce = crypto.randomBytes(16).toString("hex");
-  const payload = JSON.stringify({ nonce, returnTo: returnTo ?? "/admin/outbound/facebook" });
-  return Buffer.from(payload).toString("base64url");
+/**
+ * Returns the HMAC secret used to sign OAuth state.
+ * Prefers CSRF_SECRET, falls back to NEXTAUTH_SECRET (same pattern as LinkedIn).
+ * A hardcoded dev fallback is used only in non-production environments.
+ */
+function getStateSecret(): string {
+  return (
+    process.env.CSRF_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    "facebook-oauth-state-development-only"
+  );
 }
 
+function signState(rawState: string): string {
+  return crypto.createHmac("sha256", getStateSecret()).update(rawState).digest("hex");
+}
+
+/**
+ * Generate a signed OAuth state string.
+ * Format: {base64url-payload}.{hmac-sha256-signature}
+ * Payload: JSON { nonce, returnTo, issuedAt }
+ *
+ * The HMAC signature prevents forgery even if the state value is intercepted.
+ */
+export function generateOAuthState(returnTo?: string): string {
+  const nonce = crypto.randomBytes(16).toString("hex");
+  const payload = JSON.stringify({
+    nonce,
+    returnTo: returnTo ?? "/admin/outbound/facebook",
+    issuedAt: Date.now(),
+  });
+  const rawState = Buffer.from(payload).toString("base64url");
+  return `${rawState}.${signState(rawState)}`;
+}
+
+/**
+ * Validate and parse a signed OAuth state string.
+ * Rejects states with invalid signatures (timing-safe comparison),
+ * returnTo outside /admin/, or missing nonce.
+ * Returns null on any validation failure.
+ */
 export function parseOAuthState(raw: string): {
   nonce: string;
   returnTo: string;
 } | null {
   try {
-    const decoded = Buffer.from(raw, "base64url").toString("utf8");
-    const parsed = JSON.parse(decoded) as { nonce?: string; returnTo?: string };
+    const [rawState, signature] = raw.split(".");
+    if (!rawState || !signature) return null;
+
+    const expectedSignature = signState(rawState);
+    // Timing-safe comparison to prevent oracle attacks
+    if (
+      expectedSignature.length !== signature.length ||
+      !crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, "hex"),
+        Buffer.from(signature, "hex"),
+      )
+    ) {
+      return null;
+    }
+
+    const decoded = Buffer.from(rawState, "base64url").toString("utf8");
+    const parsed = JSON.parse(decoded) as {
+      nonce?: string;
+      returnTo?: string;
+      issuedAt?: number;
+    };
     if (!parsed.nonce) return null;
-    const returnTo = parsed.returnTo ?? "/admin/outbound/facebook";
+
     // Guard returnTo to only admin paths
+    const returnTo = parsed.returnTo ?? "/admin/outbound/facebook";
     const safeReturnTo = returnTo.startsWith("/admin/") ? returnTo : "/admin/outbound/facebook";
     return { nonce: parsed.nonce, returnTo: safeReturnTo };
   } catch {

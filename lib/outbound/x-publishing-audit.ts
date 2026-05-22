@@ -28,6 +28,7 @@ export type XPublishingAuditInput = {
   assetType?: string | null;
   assetTitle?: string | null;
   tweetId?: string | null;
+  tweetUrl?: string | null;
   syncedFrom?: "facebook" | "x" | null;
   blockerCount?: number;
   blockers?: readonly string[];
@@ -35,6 +36,9 @@ export type XPublishingAuditInput = {
   requestId?: string | null;
   actorId?: string | null;
   actorEmailHash?: string | null;
+  errorCode?: string | null;
+  /** Sync targets — providers also posted to after this publish */
+  syncTargets?: string[];
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -77,10 +81,13 @@ export async function recordXPublishingAuditSafe(
         assetType: input.assetType ?? null,
         assetTitle: input.assetTitle ?? null,
         tweetId: input.tweetId ?? null,
+        tweetUrl: input.tweetUrl ?? null,
         syncedFrom: input.syncedFrom ?? null,
-        blockerCount: input.blockerCount ?? 0,
+        blockerCount: input.blockerCount ?? (input.blockers?.length ?? 0),
         blockers: (input.blockers ?? []).slice(0, 20),
         dryRun: input.dryRun ?? false,
+        errorCode: input.errorCode ?? null,
+        syncTargets: input.syncTargets ?? [],
         timestamp: new Date().toISOString(),
         requestId: input.requestId ?? null,
         actorEmailHash: input.actorEmailHash ?? null,

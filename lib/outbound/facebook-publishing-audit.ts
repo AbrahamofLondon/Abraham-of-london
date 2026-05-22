@@ -18,7 +18,8 @@ export type FacebookPublishingAuditEventType =
   | "FACEBOOK_POST_PUBLISHED"
   | "FACEBOOK_PUBLISH_BLOCKED"
   | "FACEBOOK_PUBLISH_FAILED"
-  | "FACEBOOK_TOKEN_INVALID";
+  | "FACEBOOK_TOKEN_INVALID"
+  | "FACEBOOK_SYNCED_FROM_X";
 
 export type FacebookPublishingAuditInput = {
   eventType: FacebookPublishingAuditEventType;
@@ -27,12 +28,18 @@ export type FacebookPublishingAuditInput = {
   assetTitle?: string | null;
   pageId?: string | null;
   facebookPostId?: string | null;
+  /** Unified alias for facebookPostId */
+  postId?: string | null;
+  postUrl?: string | null;
   blockerCount?: number;
   blockers?: readonly string[];
   dryRun?: boolean;
   requestId?: string | null;
   actorId?: string | null;
   actorEmailHash?: string | null;
+  errorCode?: string | null;
+  /** Sync targets — providers also posted to after this publish */
+  syncTargets?: string[];
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -75,10 +82,13 @@ export async function recordFacebookPublishingAuditSafe(
         assetType: input.assetType ?? null,
         assetTitle: input.assetTitle ?? null,
         pageId: input.pageId ?? null,
-        facebookPostId: input.facebookPostId ?? null,
-        blockerCount: input.blockerCount ?? 0,
+        facebookPostId: input.facebookPostId ?? input.postId ?? null,
+        postUrl: input.postUrl ?? null,
+        blockerCount: input.blockerCount ?? (input.blockers?.length ?? 0),
         blockers: (input.blockers ?? []).slice(0, 20),
         dryRun: input.dryRun ?? false,
+        errorCode: input.errorCode ?? null,
+        syncTargets: input.syncTargets ?? [],
         timestamp: new Date().toISOString(),
         requestId: input.requestId ?? null,
         actorEmailHash: input.actorEmailHash ?? null,

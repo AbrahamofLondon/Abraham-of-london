@@ -8,6 +8,7 @@ import { getResolvedLinkedInOutboundBySlug } from "@/lib/outbound/linkedin-conte
 import { canPublishLinkedInOutbound } from "@/lib/outbound/linkedin-publish-gate";
 import { publishTextPostToLinkedIn } from "@/lib/outbound/linkedin-publishing-client";
 import { recordLinkedInPublishingAuditSafe } from "@/lib/outbound/linkedin-publishing-audit";
+import { checkRateLimit, rateLimitHeaders } from "@/lib/server/rate-limit";
 
 function requestId(): string {
   return `ln_${Date.now().toString(36)}_${crypto.randomBytes(4).toString("hex")}`;
@@ -54,10 +55,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const id = requestId();
   const actorId = guard.session?.user?.id ?? null;
   const actorEmailHash = hashEmail(guard.session?.user?.email);
-  const { slug, filename, confirm } = req.body as {
+  const { slug, filename, confirm, dryRun } = req.body as {
     slug?: string;
     filename?: string;
     confirm?: boolean;
+    dryRun?: boolean;
   };
   const outboundSlug = slug || filename?.replace(/\.mdx?$/i, "");
 
@@ -66,6 +68,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   if (confirm !== true) {
     return res.status(400).json({ ok: false, error: "Publish confirmation is required." });
+  }
+
+  // ── Rate limit (skip for dryRun) ────────────────────────────────────────────
+  if (!dryRun) {
+    const rateKey = actorId ?? (req.headers["x-forwarded-for"] as string ?? "unknown");
+    const rate = await checkRateLimit({
+      scope: "LINKEDIN_OUTBOUND_PUBLISH",
+      identifier: rateKey,
+      limit: 10,
+      windowSeconds: 3600,
+    });
+    if (!rate.allowed) {
+      res.setHeader("Retry-After", "3600");
+      Object.entries(rateLimitHeaders(rate)).forEach(([k, v]) => res.setHeader(k, v));
+      return res.status(429).json({
+        ok: false,
+        error: "LinkedIn publish rate limit reached. Try again in an hour.",
+        requestId: id,
+      });
+    }
   }
 
   const asset = getResolvedLinkedInOutboundBySlug(outboundSlug);
@@ -115,6 +137,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       blockers: gate.blockers,
       warnings: gate.warnings,
       requestId: id,
+    });
+  }
+
+  // ── dryRun — gate passed, no actual publish ──────────────────────────────────
+  if (dryRun) {
+    await recordLinkedInPublishingAuditSafe({
+      eventType: "LINKEDIN_PUBLISH_GATE_RUN",
+      outboundSlug: asset.slug,
+      linkedReportId: asset.item.linkedReportId,
+      claimRisk: asset.item.claimRisk,
+      blockerCount: 0,
+      requestId: id,
+      actorId,
+      actorEmailHash,
+    });
+    return res.status(200).json({
+      ok: true,
+      dryRun: true,
+      requestId: id,
+      message: "Gate passed. Dry-run complete — no post was published.",
+      warnings: gate.warnings,
     });
   }
 

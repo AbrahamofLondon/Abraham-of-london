@@ -38,23 +38,72 @@ export function derivePKCEChallenge(verifier: string): string {
   return crypto.createHash("sha256").update(verifier).digest("base64url");
 }
 
+// ─── State signing ────────────────────────────────────────────────────────────
+
+/**
+ * Returns the HMAC secret used to sign OAuth state.
+ * Prefers CSRF_SECRET, falls back to NEXTAUTH_SECRET (same pattern as LinkedIn).
+ */
+function getStateSecret(): string {
+  return (
+    process.env.CSRF_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    "x-oauth-state-development-only"
+  );
+}
+
+function signState(rawState: string): string {
+  return crypto.createHmac("sha256", getStateSecret()).update(rawState).digest("hex");
+}
+
+/**
+ * Generate a signed OAuth state string.
+ * Format: {base64url-payload}.{hmac-sha256-signature}
+ * Payload: JSON { nonce, returnTo, issuedAt }
+ */
 export function generateOAuthState(returnTo?: string): string {
   const nonce = crypto.randomBytes(16).toString("hex");
   const payload = JSON.stringify({
     nonce,
     returnTo: returnTo ?? "/admin/outbound/x",
+    issuedAt: Date.now(),
   });
-  return Buffer.from(payload).toString("base64url");
+  const rawState = Buffer.from(payload).toString("base64url");
+  return `${rawState}.${signState(rawState)}`;
 }
 
+/**
+ * Validate and parse a signed X OAuth state string.
+ * Rejects states with invalid signatures (timing-safe comparison),
+ * returnTo outside /admin/, or missing nonce.
+ */
 export function parseOAuthState(raw: string): {
   nonce: string;
   returnTo: string;
 } | null {
   try {
-    const decoded = Buffer.from(raw, "base64url").toString("utf8");
-    const parsed = JSON.parse(decoded) as { nonce?: string; returnTo?: string };
+    const [rawState, signature] = raw.split(".");
+    if (!rawState || !signature) return null;
+
+    const expectedSignature = signState(rawState);
+    if (
+      expectedSignature.length !== signature.length ||
+      !crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, "hex"),
+        Buffer.from(signature, "hex"),
+      )
+    ) {
+      return null;
+    }
+
+    const decoded = Buffer.from(rawState, "base64url").toString("utf8");
+    const parsed = JSON.parse(decoded) as {
+      nonce?: string;
+      returnTo?: string;
+      issuedAt?: number;
+    };
     if (!parsed.nonce) return null;
+
     const returnTo = parsed.returnTo ?? "/admin/outbound/x";
     const safeReturnTo = returnTo.startsWith("/admin/") ? returnTo : "/admin/outbound/x";
     return { nonce: parsed.nonce, returnTo: safeReturnTo };
