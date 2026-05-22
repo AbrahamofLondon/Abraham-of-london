@@ -13,6 +13,7 @@ declare module "next-auth" {
       accessTier?: AccessTier;
       entitlements?: EffectiveAccess["entitlements"];
       access?: EffectiveAccess;
+      adminSessionIssuedAt?: number;
     };
   }
 
@@ -24,5 +25,6 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     role?: "USER" | "ADMIN" | "OWNER";
+    adminSessionIssuedAt?: number;
   }
 }

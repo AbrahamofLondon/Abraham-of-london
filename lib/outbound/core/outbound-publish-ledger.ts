@@ -50,6 +50,7 @@ export type OutboundPublishLedgerEntry = {
   syncTargetsJson: string | null;
   errorCode: string | null;
   safeMessage: string | null;
+  source: string;
   forceRepublish: boolean;
   forceRepublishActorId: string | null;
   forceRepublishNote: string | null;

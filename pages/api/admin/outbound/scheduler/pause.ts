@@ -90,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let state;
     if (paused) {
       state = await pauseScheduler({
-        reason: reason?.trim() ?? null,
+        reason: reason?.trim() || undefined,
         actorId,
         actorEmail,
       });
@@ -100,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await logAuditEvent({
       action: paused ? "OUTBOUND_SCHEDULER_PAUSED" : "OUTBOUND_SCHEDULER_RESUMED",
-      category: "OUTBOUND",
+      resourceType: "outbound",
       status: "success",
       actorType: "admin",
       actorId,

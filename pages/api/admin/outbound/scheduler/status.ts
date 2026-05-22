@@ -66,11 +66,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ? lockRow.expiresAt > new Date()
     : false;
 
-  // ── Due counts ──────────────────────────────────────────────────────────────
+  // ── Due counts — aggregate across all providers ─────────────────────────────
   let dueCount = 0;
   try {
-    const due = getOutboundPostsDue();
-    dueCount = due.posts.length;
+    dueCount =
+      getOutboundPostsDue("linkedin").length +
+      getOutboundPostsDue("facebook").length +
+      getOutboundPostsDue("x").length;
   } catch {
     dueCount = -1; // unavailable
   }

@@ -37,7 +37,8 @@ export type RateLimitScope =
   | "FACEBOOK_OUTBOUND_PUBLISH"
   | "X_OUTBOUND_PUBLISH"
   | "LINKEDIN_OUTBOUND_PUBLISH"
-  | "admin-credentials-login";
+  | "admin-credentials-login"
+  | "admin-scheduler-pause";
 
 export type RateLimitResult = {
   allowed: boolean;

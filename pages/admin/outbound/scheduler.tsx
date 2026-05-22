@@ -143,13 +143,17 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
 
   const lockActive = lockRow ? new Date(lockRow.expiresAt) > new Date() : false;
 
-  // Due posts
+  // Due posts — aggregate across all three providers
   let duePostsRaw: DuePost[] = [];
   let dueCount = 0;
   try {
-    const due = getOutboundPostsDue();
-    dueCount = due.posts.length;
-    duePostsRaw = due.posts.slice(0, 10).map((p) => ({
+    const allDue = [
+      ...getOutboundPostsDue("linkedin"),
+      ...getOutboundPostsDue("facebook"),
+      ...getOutboundPostsDue("x"),
+    ];
+    dueCount = allDue.length;
+    duePostsRaw = allDue.slice(0, 10).map((p) => ({
       id: p.id,
       provider: p.provider ?? "unknown",
       campaign: p.campaign ?? null,
