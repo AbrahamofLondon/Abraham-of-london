@@ -26,6 +26,12 @@ export type EssayCardItem = {
   coverAspect?: string | null;
   coverFit?: string | null;
   coverPosition?: string | null;
+  /** Series badge fields — only populated for series essay cards */
+  seriesLabel?: string | null;   // e.g. "Applied Essay Series"
+  seriesTitle?: string | null;   // e.g. "The Burden Changes Hands"
+  partNumber?: number | null;    // e.g. 3
+  partOf?: number | null;        // e.g. 7
+  seriesHref?: string | null;    // e.g. "/blog/series/the-burden-changes-hands"
 };
 
 export type EssayCardProps = {
@@ -40,6 +46,8 @@ export type EssayCardProps = {
 // ---------------------------------------------------------------------------
 
 function CompactEssayCard({ post, className }: { post: EssayCardItem; className?: string }) {
+  const hasSeries = !!(post.seriesLabel && post.seriesTitle);
+
   return (
     <Link href={post.url || "#"} className={["group block", className].filter(Boolean).join(" ")}>
       <CardShell
@@ -48,6 +56,14 @@ function CompactEssayCard({ post, className }: { post: EssayCardItem; className?
         density="compact"
         className="hover:ds-panel-alt"
       >
+        {hasSeries && (
+          <div className="mb-2 text-[9px] font-mono uppercase tracking-[0.3em] ds-accent">
+            {post.seriesLabel}
+            {post.partNumber != null && post.partOf != null
+              ? ` · Part ${post.partNumber} of ${post.partOf}`
+              : ""}
+          </div>
+        )}
         <div className="text-[10px] font-mono uppercase tracking-[0.32em] ds-text-subtle">
           {post.date || "Undated"}
           {post.readTime ? ` · ${post.readTime}` : ""}
@@ -55,6 +71,11 @@ function CompactEssayCard({ post, className }: { post: EssayCardItem; className?
         <div className="mt-2 font-serif text-[1.2rem] leading-tight transition-colors ds-text">
           {post.title}
         </div>
+        {hasSeries && post.seriesTitle ? (
+          <div className="mt-1 text-[9px] font-mono italic ds-text-subtle">
+            {post.seriesTitle}
+          </div>
+        ) : null}
         {post.excerpt ? (
           <p className="mt-2 line-clamp-2 text-sm leading-relaxed ds-text-muted">
             {post.excerpt}
@@ -79,6 +100,8 @@ export default function EssayCard({
     return <CompactEssayCard post={post} className={className} />;
   }
 
+  const hasSeries = !!(post.seriesLabel && post.seriesTitle);
+
   return (
     <Link href={post.url || "#"} className={["group block", className].filter(Boolean).join(" ")}>
       <CardShell
@@ -100,8 +123,30 @@ export default function EssayCard({
           scrim={false}
         />
 
+        {/* Series badge — shown when card is a series part */}
+        {hasSeries && (
+          <div className="mt-4 flex items-center gap-2">
+            <span
+              className="rounded-full px-3 py-1 text-[9px] font-mono uppercase tracking-[0.3em]"
+              style={{
+                backgroundColor: "rgba(201,150,58,0.12)",
+                color: "var(--ds-accent)",
+                border: "1px solid rgba(201,150,58,0.25)",
+              }}
+            >
+              {post.seriesLabel}
+              {post.partNumber != null && post.partOf != null
+                ? ` · Part ${post.partNumber} of ${post.partOf}`
+                : ""}
+            </span>
+            <span className="text-[9px] font-mono italic ds-text-subtle">
+              {post.seriesTitle}
+            </span>
+          </div>
+        )}
+
         {/* Meta row */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.32em]">
+        <div className={["flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.32em]", hasSeries ? "mt-3" : "mt-4"].join(" ")}>
           {post.date ? (
             <span className="ds-accent">{post.date}</span>
           ) : null}

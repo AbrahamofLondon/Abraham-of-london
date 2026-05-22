@@ -11,6 +11,7 @@ import { Search, Compass, Clock3 } from "lucide-react";
 import Layout from "@/components/Layout";
 import EssayCard from "@/components/essays/EssayCard";
 import { resolveDocCoverImage } from "@/lib/content/shared";
+import { selectFeaturedEssay } from "@/lib/blog/select-featured-post";
 
 /* -----------------------------------------------------------------------------
   TYPES
@@ -147,9 +148,9 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeri
     });
   }, [items, searchQuery, selectedTag]);
 
-  const leadStory = filtered[0] || null;
-  const spotlightShelf = filtered.slice(1, 4);
-  const archiveStories = filtered.slice(1);
+  const leadStory = selectFeaturedEssay(filtered) || null;
+  const archiveStories = filtered.filter((i) => i.slug !== leadStory?.slug);
+  const spotlightShelf = archiveStories.slice(0, 3);
 
   const heroImage = leadStory?.coverImage || DEFAULT_COVER;
 
@@ -167,10 +168,10 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeri
 
       <section
         className="relative overflow-hidden border-b"
-        style={{ paddingTop: 80, borderColor: "var(--ds-border)" }}
+        style={{ paddingTop: 64, borderColor: "var(--ds-border)" }}
       >
-        <div className="relative mx-auto max-w-7xl px-6 py-12 lg:px-12">
-          <div className="grid grid-cols-1 gap-12 xl:grid-cols-[1.05fr_0.95fr_0.42fr]">
+        <div className="relative mx-auto max-w-7xl px-6 py-8 lg:px-12">
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.05fr_0.95fr_0.42fr]">
             {/* LEFT INTRO */}
             <div className="xl:pr-4">
               <div
@@ -213,7 +214,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeri
                 from Abraham of London. Arranged by date, searchable by theme.
               </p>
 
-              <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
                 {[
                   {
                     title: "Atmosphere",
@@ -494,7 +495,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeri
         </div>
       </section>
 
-      {/* Applied Essay Series band */}
+      {/* Applied Essay Series band — full band is a single keyboard-accessible link */}
       {hasAppliedSeries && (
         <section
           className="border-b"
@@ -503,53 +504,60 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeri
             backgroundColor: "var(--ds-background-muted)",
           }}
         >
-          <div className="mx-auto max-w-7xl px-6 py-5 lg:px-12">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-4">
-                <span
-                  style={{
-                    width: 1,
-                    height: 20,
-                    backgroundColor: "rgba(201,150,58,0.45)",
-                    display: "inline-block",
-                    flexShrink: 0,
-                  }}
-                />
-                <div>
-                  <div
-                    className="font-mono uppercase tracking-[0.3em] mb-1"
-                    style={{ fontSize: "7px", color: "var(--ds-accent)" }}
-                  >
-                    Applied Essay Series
-                  </div>
-                  <p
-                    className="font-serif italic"
+          <Link
+            href="/blog/series/the-burden-changes-hands"
+            aria-label="Enter the series: The Burden Changes Hands — seven applied essays"
+            className="group block transition-colors duration-200 hover:bg-[rgba(201,150,58,0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(201,150,58,0.5)] focus-visible:ring-inset"
+          >
+            <div className="mx-auto max-w-7xl px-6 py-5 lg:px-12">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-4">
+                  <span
+                    aria-hidden="true"
                     style={{
-                      fontWeight: 300,
-                      fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
-                      color: "var(--ds-text)",
-                      lineHeight: 1.25,
+                      width: 1,
+                      height: 20,
+                      backgroundColor: "rgba(201,150,58,0.45)",
+                      display: "inline-block",
+                      flexShrink: 0,
                     }}
-                  >
-                    The Burden Changes Hands
-                  </p>
-                  <p
-                    className="text-[12px] leading-relaxed mt-0.5"
-                    style={{ color: "var(--ds-text-muted)" }}
-                  >
-                    Seven essays on memory, custody, and the intelligence organisations build over time.
-                  </p>
+                  />
+                  <div>
+                    <div
+                      className="font-mono uppercase tracking-[0.3em] mb-1"
+                      style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                    >
+                      Applied Essay Series
+                    </div>
+                    <p
+                      className="font-serif italic"
+                      style={{
+                        fontWeight: 300,
+                        fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
+                        color: "var(--ds-text)",
+                        lineHeight: 1.25,
+                      }}
+                    >
+                      The Burden Changes Hands
+                    </p>
+                    <p
+                      className="text-[12px] leading-relaxed mt-0.5"
+                      style={{ color: "var(--ds-text-muted)" }}
+                    >
+                      Seven essays on memory, custody, and the intelligence organisations build over time.
+                    </p>
+                  </div>
                 </div>
+                <span
+                  aria-hidden="true"
+                  className="flex-shrink-0 font-mono uppercase tracking-[0.24em] transition-colors duration-200 group-hover:text-[#C9963A] whitespace-nowrap"
+                  style={{ fontSize: "7.5px", color: "var(--ds-text-subtle)" }}
+                >
+                  Enter the series →
+                </span>
               </div>
-              <Link
-                href="/blog/series/the-burden-changes-hands"
-                className="flex-shrink-0 font-mono uppercase tracking-[0.24em] transition-colors duration-200 hover:text-[#C9963A] whitespace-nowrap"
-                style={{ fontSize: "7.5px", color: "var(--ds-text-subtle)" }}
-              >
-                Enter the series →
-              </Link>
             </div>
-          </div>
+          </Link>
         </section>
       )}
 
