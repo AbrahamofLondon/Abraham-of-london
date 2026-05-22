@@ -1,116 +1,262 @@
-import type { GetStaticProps, NextPage } from "next";
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { SeriesBand } from "@/components/editorial/SeriesBand";
-import { PublicationCard } from "@/components/editorial/PublicationCard";
-import {
-  getPublicPublications,
-  getPublicationCatalogue,
-} from "@/lib/editorial/catalogue";
-import { getEditorialSeriesCatalogue } from "@/lib/editorial/series";
-import type { PublicationRecord } from "@/lib/editorial/types";
-import type { EditorialSeries } from "@/lib/editorial/series";
+import Link from "next/link";
 
-type EditorialsPageProps = {
-  flagship: PublicationRecord | null;
-  publications: PublicationRecord[];
-  series: EditorialSeries[];
+import Layout from "@/components/Layout";
+import {
+  formatEditorialSeriesPartNumber,
+  getEditorialSeriesBySlug,
+  getEditorialSeriesCatalogue,
+  type EditorialSeries,
+  type EditorialSeriesPart,
+} from "@/lib/editorial/series";
+
+type Props = {
+  series: EditorialSeries;
 };
 
-const EditorialsPage: NextPage<EditorialsPageProps> = ({
-  flagship,
-  publications,
-  series,
-}) => {
+function PartRow({
+  part,
+  seriesSlug,
+  isFirst,
+}: {
+  part: EditorialSeriesPart;
+  seriesSlug: string;
+  isFirst: boolean;
+}) {
+  const partLabel = `Part ${formatEditorialSeriesPartNumber(part.order)}`;
+
   return (
-    <>
+    <Link
+      href={`/editorials/series/${seriesSlug}/${part.slug}`}
+      className="group block border-b py-6 transition-colors duration-200"
+      style={{ borderBottomColor: "var(--ds-border)" }}
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-8">
+        <div className="flex-1 min-w-0">
+          {/* Part number */}
+          <div
+            className="font-mono uppercase tracking-[0.32em] mb-2"
+            style={{
+              fontSize: "7px",
+              color: isFirst ? "var(--ds-accent)" : "var(--ds-text-subtle)",
+            }}
+          >
+            {partLabel}
+          </div>
+
+          {/* Title */}
+          <h3
+            className="font-serif italic mb-2 transition-colors duration-200 group-hover:text-white"
+            style={{
+              fontWeight: 300,
+              fontSize: isFirst ? "1.35rem" : "1.15rem",
+              lineHeight: 1.1,
+              color: "var(--ds-text)",
+            }}
+          >
+            {part.title}
+          </h3>
+
+          {/* Excerpt */}
+          <p
+            className="text-[13px] leading-[1.55rem]"
+            style={{ color: "var(--ds-text-muted)", maxWidth: "60ch" }}
+          >
+            {part.excerpt}
+          </p>
+        </div>
+
+        {/* Right meta */}
+        <div className="flex items-center gap-6 md:flex-col md:items-end md:gap-2 md:pt-1 flex-shrink-0">
+          <span
+            className="font-mono uppercase tracking-[0.26em]"
+            style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+          >
+            {part.readTime}
+          </span>
+          <span
+            className="font-mono uppercase tracking-[0.26em] transition-colors duration-200 group-hover:text-[#C9963A]"
+            style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+          >
+            {isFirst ? "Begin reading →" : "Read →"}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+const SeriesHubPage: NextPage<Props> = ({ series }) => {
+  const publishedParts = series.parts
+    .filter((p) => p.status === "PUBLISHED")
+    .sort((a, b) => a.order - b.order);
+
+  const firstPart = publishedParts[0];
+
+  return (
+    <Layout
+      title={`${series.title} — Editorial Series | Abraham of London`}
+      description={series.descriptor}
+      canonicalUrl={`/editorials/series/${series.slug}`}
+      fullWidth
+      headerTransparent
+      className="ds-surface-essays"
+    >
       <Head>
-        <title>Editorials — Abraham of London</title>
-        <meta
-          name="description"
-          content="Flagship publications, editorial series, and formal intellectual work from Abraham of London."
-        />
+        <title>{series.title} — Editorial Series | Abraham of London</title>
+        <meta name="description" content={series.descriptor} />
+        <meta name="robots" content="index,follow" />
       </Head>
 
-      <div className="min-h-screen bg-[#FAF9F7] dark:bg-[#1C1C1E]">
-        <main className="max-w-3xl mx-auto px-6 py-20 md:py-28">
+      <main style={{ backgroundColor: "var(--ds-background)", minHeight: "100vh", color: "white" }}>
 
-          {/* Page header */}
-          <header className="mb-20">
-            <p className="text-[10px] tracking-[0.16em] uppercase text-[#C9963A] font-medium mb-5">
-              Abraham of London
-            </p>
-            <h1 className="font-serif text-5xl md:text-6xl text-[#1A1A1A] dark:text-[#F0EDE8] leading-tight mb-6">
-              Editorials
-            </h1>
-            <p className="text-base text-[#5A5A5A] dark:text-[#8A8A8A] leading-relaxed max-w-lg">
-              Flagship publications, editorial series, and formal intellectual
-              work. Each piece is written to last.
-            </p>
-          </header>
+        {/* Series header */}
+        <section style={{ backgroundColor: "var(--ds-background-muted)", borderBottom: "1px solid var(--ds-border)" }}>
+          <div className="mx-auto max-w-4xl px-6 pb-10 pt-20 lg:px-10 lg:pb-12 lg:pt-24">
 
-          {/* Flagship publication — leads the page */}
-          {flagship && (
-            <section className="mb-20 pb-20 border-b border-[#E8E4DF] dark:border-[#2A2A2A]">
-              <PublicationCard publication={flagship} featured />
-            </section>
-          )}
-
-          {/* Editorial Series band */}
-          {series.length > 0 && (
-            <section className="mb-20 pb-20 border-b border-[#E8E4DF] dark:border-[#2A2A2A]">
-              <SeriesBand series={series} />
-            </section>
-          )}
-
-          {/* Publication catalogue — remaining records */}
-          {publications.length > 0 && (
-            <section>
-              <div className="mb-8">
-                <span className="text-xs tracking-[0.12em] uppercase text-[#8A8A8A] font-medium">
-                  Publications
-                </span>
-              </div>
-              <div>
-                {publications.map((pub) => (
-                  <PublicationCard key={pub.slug} publication={pub} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Empty state — catalogue not yet populated beyond flagship */}
-          {publications.length === 0 && !flagship && series.length === 0 && (
-            <div className="py-20 text-center">
-              <p className="text-sm text-[#8A8A8A]">
-                Publications forthcoming.
-              </p>
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 mb-7">
+              <Link
+                href="/editorials"
+                className="font-mono uppercase tracking-[0.3em] transition-colors duration-200"
+                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+              >
+                Editorials
+              </Link>
+              <span style={{ color: "var(--ds-border)", fontSize: "7px" }}>›</span>
+              <span
+                className="font-mono uppercase tracking-[0.3em]"
+                style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+              >
+                Editorial Series
+              </span>
             </div>
-          )}
 
-        </main>
-      </div>
-    </>
+            {/* Series label */}
+            <div className="flex items-center gap-3 mb-6">
+              <span style={{ width: 1, height: 16, backgroundColor: "var(--ds-accent)", display: "inline-block" }} />
+              <span
+                className="font-mono uppercase tracking-[0.36em]"
+                style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+              >
+                {series.partCount}-Part Editorial Series · Complete
+              </span>
+            </div>
+
+            {/* Title */}
+            <h1
+              className="font-serif italic mb-5"
+              style={{
+                fontWeight: 300,
+                fontSize: "clamp(2rem, 3.5vw, 3rem)",
+                lineHeight: 0.98,
+                color: "var(--ds-text)",
+              }}
+            >
+              {series.title}
+            </h1>
+
+            {/* Descriptor */}
+            <p
+              className="text-sm leading-[1.7rem] mb-8"
+              style={{ color: "var(--ds-text-muted)", maxWidth: "56ch" }}
+            >
+              {series.descriptor}
+            </p>
+
+            {/* Primary CTA */}
+            {firstPart ? (
+              <Link
+                href={`/editorials/series/${series.slug}/${firstPart.slug}`}
+                className="inline-flex items-center border px-5 py-3 font-mono uppercase tracking-[0.28em] transition-colors duration-200"
+                style={{
+                  fontSize: "7.5px",
+                  borderColor: "var(--ds-accent-soft)",
+                  color: "var(--ds-accent)",
+                  backgroundColor: "var(--ds-accent-soft)",
+                }}
+              >
+                Begin with Part One
+              </Link>
+            ) : null}
+          </div>
+        </section>
+
+        {/* Reading sequence */}
+        <section className="py-10 lg:py-12">
+          <div className="mx-auto max-w-4xl px-6 lg:px-10">
+
+            <div className="mb-6 flex items-center justify-between">
+              <span
+                className="font-mono uppercase tracking-[0.34em]"
+                style={{ fontSize: "7.5px", color: "var(--ds-text-subtle)" }}
+              >
+                Reading sequence
+              </span>
+              <span
+                className="font-mono uppercase tracking-[0.28em]"
+                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+              >
+                {publishedParts.length} of {series.partCount} published
+              </span>
+            </div>
+
+            <div style={{ borderTop: "1px solid var(--ds-border)" }}>
+              {publishedParts.map((part) => (
+                <PartRow
+                  key={part.slug}
+                  part={part}
+                  seriesSlug={series.slug}
+                  isFirst={part.order === 1}
+                />
+              ))}
+            </div>
+
+          </div>
+        </section>
+
+        {/* Footer nav */}
+        <section className="border-t py-8" style={{ borderTopColor: "var(--ds-border)" }}>
+          <div className="mx-auto max-w-4xl px-6 lg:px-10">
+            <Link
+              href="/editorials"
+              className="font-mono uppercase tracking-[0.26em] transition-colors duration-200"
+              style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+            >
+              ← All editorials
+            </Link>
+          </div>
+        </section>
+
+      </main>
+    </Layout>
   );
 };
 
-export const getStaticProps: GetStaticProps<EditorialsPageProps> = async () => {
-  const allPublications = getPublicPublications();
-  const series = getEditorialSeriesCatalogue().filter(
-    (s) => s.status === "PUBLISHED",
-  );
-
-  // The flagship is the first publication — currently "ultimate-purpose-of-man"
-  // It leads the page as a featured card; the rest populate the catalogue band.
-  const flagship = allPublications[0] ?? null;
-  const publications = flagship ? allPublications.slice(1) : allPublications;
-
+export const getStaticPaths: GetStaticPaths = async () => {
+  const series = getEditorialSeriesCatalogue();
   return {
-    props: {
-      flagship,
-      publications,
-      series,
-    },
+    paths: series.map((s) => ({
+      params: { seriesSlug: s.slug },
+    })),
+    fallback: false,
   };
 };
 
-export default EditorialsPage;
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = String(params?.seriesSlug ?? "");
+  const series = getEditorialSeriesBySlug(slug);
+
+  if (!series) {
+    return { notFound: true };
+  }
+
+  return {
+    props: { series },
+    revalidate: 1800,
+  };
+};
+
+export default SeriesHubPage;

@@ -39,6 +39,17 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="font-mono uppercase tracking-[0.34em]"
+      style={{ fontSize: "7.5px", color: "var(--ds-accent)" }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function formatDate(value?: string | null) {
   if (!value) return "Undated";
   const parsed = Date.parse(value);
@@ -82,6 +93,63 @@ function EditorialRow({ item }: { item: PublicationRecord }) {
   );
 }
 
+function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
+  const isLead = item.slug === "the-minds-clay";
+  return (
+    <div
+      className="border py-7 px-6 transition-colors duration-200"
+      style={{
+        borderColor: isLead ? "rgba(201,150,58,0.35)" : "var(--ds-border)",
+        backgroundColor: isLead ? "var(--ds-panel)" : "transparent",
+      }}
+    >
+      {/* Meta row */}
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
+          {item.partCount}-Part Series
+        </span>
+        <span style={{ color: "var(--ds-border)" }}>·</span>
+        <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
+          {item.status === "PUBLISHED" ? "Complete" : "In progress"}
+        </span>
+      </div>
+
+      {/* Title */}
+      <h2
+        className="font-serif italic mb-3"
+        style={{
+          fontWeight: 300,
+          fontSize: isLead ? "clamp(1.4rem, 2vw, 1.9rem)" : "1.4rem",
+          lineHeight: 1.05,
+          color: "var(--ds-text)",
+        }}
+      >
+        {item.title}
+      </h2>
+
+      {/* Descriptor */}
+      <p className="text-sm leading-[1.65rem] mb-5" style={{ color: "var(--ds-text-muted)", maxWidth: "56ch" }}>
+        {item.descriptor}
+      </p>
+
+      {/* Actions */}
+      <div className="flex flex-wrap items-center gap-5">
+        <Link
+          href={`/editorials/series/${item.slug}`}
+          className="inline-flex items-center border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em] transition-colors duration-200"
+          style={{
+            borderColor: "var(--ds-accent-soft)",
+            color: "var(--ds-accent)",
+            backgroundColor: "var(--ds-accent-soft)",
+          }}
+        >
+          Enter the series
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
   const [activeCategory, setActiveCategory] = React.useState("");
 
@@ -117,9 +185,11 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
       </Head>
 
       <main style={{ backgroundColor: "var(--ds-background)", minHeight: "100vh", color: "white" }}>
+
+        {/* Page header */}
         <section style={{ backgroundColor: "var(--ds-background-muted)", borderBottom: "1px solid var(--ds-border)" }}>
           <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 lg:px-10 lg:pb-10 lg:pt-24">
-            <Eyebrow>EDITORIALS · PUBLISHED ARGUMENTS</Eyebrow>
+            <Eyebrow>Editorials · Public Intellectual Record</Eyebrow>
 
             <h1
               className="mt-6 max-w-3xl font-serif italic"
@@ -143,7 +213,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
               className="mt-3 max-w-2xl text-sm leading-6"
               style={{ color: "var(--ds-text-muted)" }}
             >
-              This layer gives operators the reasoning behind the diagnostic system before they act on the signal.
+              The public intellectual record behind the operating doctrine — long-form arguments, editorial series, and preserved public reasoning.
             </p>
 
             <div className="mt-6 h-px w-full" style={{ backgroundColor: "var(--ds-border)" }} />
@@ -185,139 +255,127 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
           </div>
         </section>
 
-        {series.length > 0 ? (
-          <section
-            className="border-b py-10 lg:py-12"
-            style={{ borderBottomColor: "var(--ds-border)" }}
-          >
-            <div className="mx-auto max-w-6xl px-6 lg:px-10">
-              <div className="mb-5 font-mono text-[7.5px] uppercase tracking-[0.34em]" style={{ color: "var(--ds-accent)" }}>
-                Editorial Series
-              </div>
+        {/* 1. Flagship Editorials */}
+        <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+            <div className="mb-6">
+              <SectionLabel>Flagship Editorials</SectionLabel>
+            </div>
 
-              <div className="divide-y" style={{ borderTop: "1px solid var(--ds-border)", borderBottom: "1px solid var(--ds-border)" }}>
-                {series.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={`/editorials/series/${item.slug}`}
-                    className="group grid gap-4 py-6 transition-colors md:grid-cols-[minmax(0,1fr)_auto]"
-                    style={{ borderColor: "var(--ds-border)" }}
-                  >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-3 font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
-                        <span>{item.partCount} parts</span>
-                        <span style={{ color: "var(--ds-border)" }}>·</span>
-                        <span>{item.status}</span>
+            {showFlagship ? (
+              <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+                <div>
+                  <div className="flex flex-wrap items-center gap-3 text-[7px] font-mono uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
+                    <span>{formatDate(flagship.date)}</span>
+                    <span style={{ color: "var(--ds-border)" }}>·</span>
+                    <span style={{ color: "var(--ds-accent)" }}>{flagship.category || "Editorial"}</span>
+                    <span style={{ color: "var(--ds-border)" }}>·</span>
+                    <span>{readTime(flagship.readingTime)}</span>
+                  </div>
+
+                  <h2 className="mt-4 max-w-4xl font-serif text-[2rem] italic" style={{ color: "var(--ds-text)", lineHeight: 1.02, fontWeight: 300 }}>
+                    {flagship.title}
+                  </h2>
+
+                  {(flagship.subtitle || flagship.description) ? (
+                    <p className="mt-3 max-w-3xl text-[13px] leading-[1.55rem]" style={{ color: "var(--ds-text-muted)" }}>
+                      {flagship.description || flagship.subtitle}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="border px-5 py-5" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
+                  <div className="font-mono text-[7px] uppercase tracking-[0.32em]" style={{ color: "var(--ds-text-subtle)" }}>
+                    Publication record
+                  </div>
+                  <div className="mt-4 space-y-3">
+                    {[
+                      ["Content ID", flagship.contentId || "—"],
+                      ["Author", flagship.author || "—"],
+                      ["Tier", flagship.tier || "—"],
+                      ["Version", flagship.version || "—"],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex items-start justify-between gap-3 border-b pb-2" style={{ borderBottomColor: "var(--ds-border)" }}>
+                        <span className="font-mono text-[6.5px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>{label}</span>
+                        <span className="font-mono text-[7px] uppercase tracking-[0.16em]" style={{ color: "var(--ds-text-muted)" }}>{value}</span>
                       </div>
-                      <h2
-                        className="mt-3 w-fit border-b border-transparent font-serif text-[1.8rem] leading-none transition-colors duration-200 group-hover:border-[#C9963A]/70 group-hover:text-white"
-                        style={{ color: "var(--ds-text)", fontWeight: 300 }}
+                    ))}
+                  </div>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <Link
+                      href={`/editorials/${flagship.slug}`}
+                      className="inline-flex items-center gap-2 border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em]"
+                      style={{ borderColor: "var(--ds-accent-soft)", color: "var(--ds-accent)", backgroundColor: "var(--ds-accent-soft)" }}
+                    >
+                      Open publication
+                    </Link>
+                    {flagship.pdfPath ? (
+                      <a
+                        href={flagship.pdfPath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em]"
+                        style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }}
                       >
-                        {item.title}
-                      </h2>
-                      <p className="mt-3 max-w-3xl text-sm leading-6" style={{ color: "var(--ds-text-muted)" }}>
-                        {item.descriptor}
-                      </p>
-                    </div>
-                    <div className="self-center font-mono text-[7.5px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-accent)" }}>
-                      Open series
-                    </div>
-                  </Link>
+                        <Download className="h-3 w-3" />
+                        PDF edition
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="border px-6 py-12 text-center" style={{ borderColor: "var(--ds-border)" }}>
+                <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>
+                  Flagship publication forthcoming
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 2. Editorial Series */}
+        {series.length > 0 ? (
+          <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
+            <div className="mx-auto max-w-6xl px-6 lg:px-10">
+              <div className="mb-6">
+                <SectionLabel>Editorial Series</SectionLabel>
+              </div>
+              <div className="space-y-4">
+                {series.map((item) => (
+                  <EditorialSeriesCard key={item.id} item={item} />
                 ))}
               </div>
             </div>
           </section>
         ) : null}
 
-        <section className="py-10 lg:py-12">
-          <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            {showFlagship ? (
-              <div className="mb-10 border-b pb-8" style={{ borderBottomColor: "var(--ds-border)" }}>
-                <div className="mb-4 font-mono text-[7px] uppercase tracking-[0.34em]" style={{ color: "var(--ds-accent)" }}>
-                  Flagship publication
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3 text-[7px] font-mono uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
-                      <span>{formatDate(flagship.date)}</span>
-                      <span style={{ color: "var(--ds-border)" }}>·</span>
-                      <span style={{ color: "var(--ds-accent)" }}>{flagship.category || "Editorial"}</span>
-                      <span style={{ color: "var(--ds-border)" }}>·</span>
-                      <span>{readTime(flagship.readingTime)}</span>
-                    </div>
-
-                    <h2 className="mt-4 max-w-4xl font-serif text-[2rem] italic" style={{ color: "var(--ds-text)", lineHeight: 1.02, fontWeight: 300 }}>
-                      {flagship.title}
-                    </h2>
-
-                    {(flagship.subtitle || flagship.description) ? (
-                      <p className="mt-3 max-w-3xl text-[13px] leading-[1.55rem]" style={{ color: "var(--ds-text-muted)" }}>
-                        {flagship.description || flagship.subtitle}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="border px-5 py-5" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
-                    <div className="font-mono text-[7px] uppercase tracking-[0.32em]" style={{ color: "var(--ds-text-subtle)" }}>
-                      Publication record
-                    </div>
-                    <div className="mt-4 space-y-3">
-                      {[
-                        ["Content ID", flagship.contentId || "—"],
-                        ["Author", flagship.author || "—"],
-                        ["Tier", flagship.tier || "—"],
-                        ["Version", flagship.version || "—"],
-                      ].map(([label, value]) => (
-                        <div key={label} className="flex items-start justify-between gap-3 border-b pb-2" style={{ borderBottomColor: "var(--ds-border)" }}>
-                          <span className="font-mono text-[6.5px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>{label}</span>
-                          <span className="font-mono text-[7px] uppercase tracking-[0.16em]" style={{ color: "var(--ds-text-muted)" }}>{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      <Link
-                        href={`/editorials/${flagship.slug}`}
-                        className="inline-flex items-center gap-2 border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em]"
-                        style={{ borderColor: "var(--ds-accent-soft)", color: "var(--ds-accent)", backgroundColor: "var(--ds-accent-soft)" }}
-                      >
-                        Open publication
-                      </Link>
-                      {flagship.pdfPath ? (
-                        <a
-                          href={flagship.pdfPath}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em]"
-                          style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }}
-                        >
-                          <Download className="h-3 w-3" />
-                          PDF edition
-                        </a>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
+        {/* 3. Publication Record / Archive */}
+        {filteredSupporting.length > 0 ? (
+          <section className="py-10 lg:py-12">
+            <div className="mx-auto max-w-6xl px-6 lg:px-10">
+              <div className="mb-6">
+                <SectionLabel>Publication Record</SectionLabel>
               </div>
-            ) : null}
-
-            {filteredSupporting.length > 0 ? (
               <div>
                 {filteredSupporting.map((item) => (
                   <EditorialRow key={item.slug} item={item} />
                 ))}
               </div>
-            ) : null}
+            </div>
+          </section>
+        ) : null}
 
-            {!showFlagship && filteredSupporting.length === 0 ? (
-              <div className="border px-6 py-16 text-center" style={{ borderColor: "var(--ds-border)" }}>
-                <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>
-                  No publications indexed yet
-                </p>
-              </div>
-            ) : null}
+        {!showFlagship && filteredSupporting.length === 0 && series.length === 0 ? (
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+            <div className="border px-6 py-16 text-center" style={{ borderColor: "var(--ds-border)" }}>
+              <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>
+                No publications indexed yet
+              </p>
+            </div>
           </div>
-        </section>
+        ) : null}
+
       </main>
     </Layout>
   );
@@ -328,8 +386,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const flagship = items.find((item) => item.slug === "ultimate-purpose-of-man") || items[0] || null;
   const series = getEditorialSeriesCatalogue();
   return { props: { items, flagship, series }, revalidate: 1800 };
-
-
 };
 
 export default EditorialLibrary;
