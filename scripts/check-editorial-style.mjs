@@ -8,6 +8,7 @@ const termsPath = path.join(rootDir, "config", "editorial-style-terms.json");
 const scanRoots = [
   path.join(rootDir, "content", "editorial-series"),
   path.join(rootDir, "content", "editorials"),
+  path.join(rootDir, "content", "blog"),
 ];
 
 function escapeRegExp(value) {
@@ -48,8 +49,13 @@ function lineForScan(line, state) {
     return "";
   }
 
-  const source = state.inFrontmatter ? frontmatterValue(line) : line;
-  return stripInlineCodeAndUrls(source);
+  if (state.inFrontmatter) {
+    // Skip technical frontmatter keys whose values are CSS/system constants, not prose
+    const technicalKeys = /^\s*(?:coverPosition|coverFit|coverAspect|coverImage|ogImage|ogType|ogTitle|ogDescription|twitterCard|twitterImage|canonicalUrl|slug|href|type|docKind|layout|accessLevel|accessTier|access|lockMessage|robots|status|density|section|version|institutionalId)\s*:/i;
+    if (technicalKeys.test(line)) return "";
+    return stripInlineCodeAndUrls(frontmatterValue(line));
+  }
+  return stripInlineCodeAndUrls(line);
 }
 
 async function collectMdxFiles(dir) {

@@ -22,6 +22,7 @@ type Props = {
   bodyCode: string;
   author: string;
   description: string;
+  ogImage: string | null;
   previous: BlogSeriesPart | null;
   next: BlogSeriesPart | null;
 };
@@ -121,6 +122,7 @@ const BlogSeriesPartReader: NextPage<Props> = ({
   bodyCode,
   author,
   description,
+  ogImage,
   previous,
   next,
 }) => {
@@ -131,6 +133,7 @@ const BlogSeriesPartReader: NextPage<Props> = ({
       title={`${part.title} | ${series.title} | Abraham of London`}
       description={description}
       canonicalUrl={`${hubHref}/${part.slug}`}
+      ogImage={ogImage ?? undefined}
       fullWidth
       headerTransparent={false}
       className="ds-surface-essays"
@@ -499,6 +502,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const { previous, next } = getBlogSeriesPartNeighbors(series, part.order);
 
+  const rawOgImage =
+    (doc as any)?.ogImage ||
+    (doc as any)?.coverImage ||
+    null;
+
   return {
     props: {
       series,
@@ -508,6 +516,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       description: String(
         (doc as any)?.description || (doc as any)?.excerpt || part.excerpt,
       ),
+      ogImage: rawOgImage ? String(rawOgImage) : null,
       previous,
       next,
     },
