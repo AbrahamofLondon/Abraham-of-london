@@ -68,6 +68,8 @@
     "db:stats": "node scripts/db-stats.js",
     "sync": "node scripts/master-sync.mjs",
     "content:normalize": "node scripts/fix-content-whitespace.mjs",
+    "editorial:style": "node scripts/check-editorial-style.mjs",
+    "editorial:style:strict": "node scripts/check-editorial-style.mjs --strict",
     "prisma:type-gate": "node scripts/prisma-type-gate.mjs",
     "content:build": "contentlayer2 build",
     "predev": "pnpm -s content:build",
