@@ -1,203 +1,116 @@
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-
-import Layout from "@/components/Layout";
+import { SeriesBand } from "@/components/editorial/SeriesBand";
+import { PublicationCard } from "@/components/editorial/PublicationCard";
 import {
-  formatEditorialSeriesPartNumber,
-  getEditorialSeriesBySlug,
-  getEditorialSeriesCatalogue,
-  type EditorialSeries,
-} from "@/lib/editorial/series";
+  getPublicPublications,
+  getPublicationCatalogue,
+} from "@/lib/editorial/catalogue";
+import { getEditorialSeriesCatalogue } from "@/lib/editorial/series";
+import type { PublicationRecord } from "@/lib/editorial/types";
+import type { EditorialSeries } from "@/lib/editorial/series";
 
-type Props = {
-  series: EditorialSeries;
+type EditorialsPageProps = {
+  flagship: PublicationRecord | null;
+  publications: PublicationRecord[];
+  series: EditorialSeries[];
 };
 
-const EditorialSeriesHub: NextPage<Props> = ({ series }) => {
+const EditorialsPage: NextPage<EditorialsPageProps> = ({
+  flagship,
+  publications,
+  series,
+}) => {
   return (
-    <Layout
-      title={`${series.title} | Editorial Series | Abraham of London`}
-      description={series.descriptor}
-      canonicalUrl={`/editorials/series/${series.slug}`}
-      fullWidth
-      headerTransparent
-      className="ds-surface-essays"
-    >
+    <>
       <Head>
-        <meta name="robots" content="index,follow" />
+        <title>Editorials — Abraham of London</title>
+        <meta
+          name="description"
+          content="Flagship publications, editorial series, and formal intellectual work from Abraham of London."
+        />
       </Head>
 
-      <main className="mind-clay-hub min-h-screen px-6 pb-24 pt-28 lg:px-10 lg:pb-28 lg:pt-36">
-        <section className="mx-auto max-w-5xl">
-          <header className="max-w-3xl">
-            <p className="mind-clay-meta">Editorial Series</p>
-            <h1>{series.title}</h1>
-            <p className="mind-clay-descriptor">{series.descriptor}</p>
-            <p className="mind-clay-complete">{series.partCount} parts. A complete work.</p>
+      <div className="min-h-screen bg-[#FAF9F7] dark:bg-[#1C1C1E]">
+        <main className="max-w-3xl mx-auto px-6 py-20 md:py-28">
+
+          {/* Page header */}
+          <header className="mb-20">
+            <p className="text-[10px] tracking-[0.16em] uppercase text-[#C9963A] font-medium mb-5">
+              Abraham of London
+            </p>
+            <h1 className="font-serif text-5xl md:text-6xl text-[#1A1A1A] dark:text-[#F0EDE8] leading-tight mb-6">
+              Editorials
+            </h1>
+            <p className="text-base text-[#5A5A5A] dark:text-[#8A8A8A] leading-relaxed max-w-lg">
+              Flagship publications, editorial series, and formal intellectual
+              work. Each piece is written to last.
+            </p>
           </header>
 
-          <div className="mt-16 border-t border-white/10">
-            {series.parts.map((part) => (
-              <Link
-                key={part.slug}
-                href={`/editorials/series/${series.slug}/${part.slug}`}
-                className="mind-clay-part-band group"
-              >
-                <div className="min-w-0">
-                  <p className="mind-clay-part-number">
-                    Part {formatEditorialSeriesPartNumber(part.order)}
-                  </p>
-                  <h2>{part.title}</h2>
-                  <p className="mind-clay-part-excerpt">{part.excerpt}</p>
-                </div>
-                <p className="mind-clay-read-time">{part.readTime}</p>
-              </Link>
-            ))}
-          </div>
+          {/* Flagship publication — leads the page */}
+          {flagship && (
+            <section className="mb-20 pb-20 border-b border-[#E8E4DF] dark:border-[#2A2A2A]">
+              <PublicationCard publication={flagship} featured />
+            </section>
+          )}
 
-          <p className="mind-clay-thesis">
-            The thesis lands in Part Nine. It was always there.
-          </p>
-        </section>
-      </main>
+          {/* Editorial Series band */}
+          {series.length > 0 && (
+            <section className="mb-20 pb-20 border-b border-[#E8E4DF] dark:border-[#2A2A2A]">
+              <SeriesBand series={series} />
+            </section>
+          )}
 
-      <style>{`
-        .mind-clay-hub {
-          background: #1c1c1e;
-          color: #f0ede8;
-        }
+          {/* Publication catalogue — remaining records */}
+          {publications.length > 0 && (
+            <section>
+              <div className="mb-8">
+                <span className="text-xs tracking-[0.12em] uppercase text-[#8A8A8A] font-medium">
+                  Publications
+                </span>
+              </div>
+              <div>
+                {publications.map((pub) => (
+                  <PublicationCard key={pub.slug} publication={pub} />
+                ))}
+              </div>
+            </section>
+          )}
 
-        .mind-clay-meta,
-        .mind-clay-complete,
-        .mind-clay-part-number,
-        .mind-clay-read-time {
-          font-family: "JetBrains Mono", ui-monospace, monospace;
-          text-transform: uppercase;
-          letter-spacing: 0.28em;
-        }
+          {/* Empty state — catalogue not yet populated beyond flagship */}
+          {publications.length === 0 && !flagship && series.length === 0 && (
+            <div className="py-20 text-center">
+              <p className="text-sm text-[#8A8A8A]">
+                Publications forthcoming.
+              </p>
+            </div>
+          )}
 
-        .mind-clay-meta {
-          color: rgba(201, 150, 58, 0.92);
-          font-size: 8px;
-        }
-
-        h1 {
-          margin-top: 1.75rem;
-          font-family: "Cormorant Garamond", Georgia, serif;
-          font-size: clamp(2.7rem, 6vw, 5.35rem);
-          font-weight: 300;
-          line-height: 0.98;
-          letter-spacing: 0;
-        }
-
-        .mind-clay-descriptor {
-          margin-top: 1.75rem;
-          max-width: 44rem;
-          color: rgba(240, 237, 232, 0.74);
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: clamp(1.1rem, 1.9vw, 1.35rem);
-          line-height: 1.8;
-        }
-
-        .mind-clay-complete {
-          margin-top: 1.5rem;
-          color: rgba(240, 237, 232, 0.42);
-          font-size: 8px;
-        }
-
-        .mind-clay-part-band {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 2rem;
-          align-items: start;
-          border-bottom: 1px solid rgba(240, 237, 232, 0.1);
-          padding: 2rem 0 2.25rem;
-        }
-
-        .mind-clay-part-number,
-        .mind-clay-read-time {
-          color: rgba(240, 237, 232, 0.38);
-          font-size: 7.5px;
-        }
-
-        h2 {
-          margin-top: 0.95rem;
-          width: fit-content;
-          border-bottom: 1px solid transparent;
-          font-family: "Cormorant Garamond", Georgia, serif;
-          font-size: clamp(1.8rem, 3vw, 2.45rem);
-          font-weight: 300;
-          line-height: 1.05;
-          letter-spacing: 0;
-          transition: border-color 150ms ease, color 150ms ease;
-        }
-
-        .mind-clay-part-band:hover h2,
-        .mind-clay-part-band:focus-visible h2 {
-          border-bottom-color: rgba(201, 150, 58, 0.85);
-          color: #fff7ea;
-        }
-
-        .mind-clay-part-band:visited .mind-clay-part-number {
-          color: rgba(240, 237, 232, 0.28);
-        }
-
-        .mind-clay-part-excerpt {
-          margin-top: 0.95rem;
-          max-width: 42rem;
-          color: rgba(240, 237, 232, 0.58);
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 1.05rem;
-          font-style: italic;
-          line-height: 1.75;
-        }
-
-        .mind-clay-thesis {
-          margin: 3.25rem auto 0;
-          color: rgba(240, 237, 232, 0.5);
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 1rem;
-          font-style: italic;
-          line-height: 1.7;
-          text-align: center;
-        }
-
-        @media (max-width: 640px) {
-          .mind-clay-part-band {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            padding: 1.75rem 0 2rem;
-          }
-
-          .mind-clay-read-time {
-            text-align: left;
-          }
-        }
-      `}</style>
-    </Layout>
+        </main>
+      </div>
+    </>
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => ({
-  paths: getEditorialSeriesCatalogue().map((series) => ({
-    params: { seriesSlug: series.slug },
-  })),
-  fallback: false,
-});
+export const getStaticProps: GetStaticProps<EditorialsPageProps> = async () => {
+  const allPublications = getPublicPublications();
+  const series = getEditorialSeriesCatalogue().filter(
+    (s) => s.status === "PUBLISHED",
+  );
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const seriesSlug = String(params?.seriesSlug || "");
-  const series = getEditorialSeriesBySlug(seriesSlug);
-
-  if (!series) {
-    return { notFound: true };
-  }
+  // The flagship is the first publication — currently "ultimate-purpose-of-man"
+  // It leads the page as a featured card; the rest populate the catalogue band.
+  const flagship = allPublications[0] ?? null;
+  const publications = flagship ? allPublications.slice(1) : allPublications;
 
   return {
-    props: { series },
-    revalidate: 1800,
+    props: {
+      flagship,
+      publications,
+      series,
+    },
   };
 };
 
-export default EditorialSeriesHub;
+export default EditorialsPage;
