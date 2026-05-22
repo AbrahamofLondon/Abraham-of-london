@@ -74,8 +74,28 @@ function directiveColor(action: string) {
   return "text-red-300";
 }
 
+// Accepts CUID, UUID, and short slug-style IDs — rejects anything that could
+// be used for injection or path traversal before it reaches the pipeline.
+function isValidCampaignId(id: string): boolean {
+  return /^[a-zA-Z0-9_-]{1,64}$/.test(id);
+}
+
 export default async function EnterpriseReportPage({ params }: PageProps) {
   const { id } = await params;
+
+  if (!id || !isValidCampaignId(id)) {
+    return (
+      <div className="p-6">
+        <div className="mx-auto max-w-3xl border border-white/10 bg-zinc-950/70 p-10 text-center">
+          <AlertTriangle className="mx-auto mb-5 h-10 w-10 text-amber-400" />
+          <h2 className="font-serif text-2xl text-white/80">Invalid Campaign ID</h2>
+          <p className="mt-3 text-sm leading-7 text-white/55">
+            The campaign identifier in the URL is not valid.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const result = await runEnterprisePipeline(id);
 

@@ -103,14 +103,46 @@ export async function writeReportLineageEvent(
 
     return { lineageStatus: "RECORDED" };
   } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
     // Never propagate — lineage write must not break the report flow.
     console.error("[REPORT_LINEAGE_WRITE_ERROR]", JSON.stringify({
       lineageStatus: "FAILED",
       reportType: input.reportType,
       eventType: input.eventType,
       resourceId: input.resourceId,
-      error: error instanceof Error ? error.message : String(error),
+      error: errMsg,
     }));
+
+    // Persist failure event so operators can see repeated lineage failures.
+    // Write directly to systemAuditLog — never call writeReportLineageEvent here (recursion).
+    try {
+      const prisma = await getPrisma();
+      await prisma.systemAuditLog.create({
+        data: {
+          action: "REPORT_LINEAGE_WRITE_FAILED",
+          category: "content",
+          severity: "warn",
+          status: "failed",
+          resourceType: input.reportType,
+          resourceId: input.resourceId,
+          actorId: input.actorId ?? null,
+          actorType: "system",
+          metadata: JSON.stringify({
+            reportType: input.reportType,
+            eventType: input.eventType,
+            errorCategory: error instanceof Error ? error.constructor.name : "UnknownError",
+            message: errMsg.slice(0, 300),
+          }),
+        },
+      });
+    } catch {
+      // Absolute fallback — never throw, never recurse.
+      console.error("[REPORT_LINEAGE_FAILURE_VISIBILITY_ERROR]", {
+        resourceId: input.resourceId,
+        reportType: input.reportType,
+      });
+    }
+
     return { lineageStatus: "FAILED" };
   }
 }

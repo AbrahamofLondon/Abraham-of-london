@@ -1,6 +1,6 @@
 // lib/pdf/pdf-registry.generated.ts
 // AUTO-GENERATED — DO NOT EDIT MANUALLY
-// Generated: 2026-05-22T01:58:44.599Z
+// Generated: 2026-05-22T02:24:11.819Z
 
 import type { PDFRegistryEntry } from "./registry.static";
 
@@ -2247,5 +2247,5 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "preload": false
   }
 ];
-export const GENERATED_AT = "2026-05-22T01:58:44.599Z";
+export const GENERATED_AT = "2026-05-22T02:24:11.819Z";
 export const GENERATED_COUNT = 83;

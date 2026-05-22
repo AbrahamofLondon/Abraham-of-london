@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 // Guard: auth enforced by app/admin/layout.tsx → requireAdminServer().
 
 import { getPrisma } from "@/lib/prisma.server";
-import { GitBranch, Clock, User, FileText, AlertCircle } from "lucide-react";
+import { GitBranch, Clock, User, FileText, AlertCircle, AlertTriangle } from "lucide-react";
 
 export const metadata = {
   title: "Report Lineage & Audit — Admin",
@@ -49,6 +49,7 @@ function parseReportType(metaRaw: string | null, action: string): string {
 
 export default async function ReportLineagePage() {
   let rows: LineageRow[] = [];
+  let failureRows: LineageRow[] = [];
   let dbError: string | null = null;
 
   try {
@@ -59,20 +60,36 @@ export default async function ReportLineagePage() {
       typeof (prisma as any).systemAuditLog.findMany === "function";
 
     if (isPrismaAvailable) {
-      rows = await (prisma as any).systemAuditLog.findMany({
-        where: { action: { startsWith: "REPORT_" } },
-        orderBy: { createdAt: "desc" },
-        take: 200,
-        select: {
-          id: true,
-          action: true,
-          resourceId: true,
-          resourceName: true,
-          actorEmail: true,
-          metadata: true,
-          createdAt: true,
-        },
-      });
+      [rows, failureRows] = await Promise.all([
+        (prisma as any).systemAuditLog.findMany({
+          where: { action: { startsWith: "REPORT_" }, NOT: { action: "REPORT_LINEAGE_WRITE_FAILED" } },
+          orderBy: { createdAt: "desc" },
+          take: 200,
+          select: {
+            id: true,
+            action: true,
+            resourceId: true,
+            resourceName: true,
+            actorEmail: true,
+            metadata: true,
+            createdAt: true,
+          },
+        }),
+        (prisma as any).systemAuditLog.findMany({
+          where: { action: "REPORT_LINEAGE_WRITE_FAILED" },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+          select: {
+            id: true,
+            action: true,
+            resourceId: true,
+            resourceName: true,
+            actorEmail: true,
+            metadata: true,
+            createdAt: true,
+          },
+        }),
+      ]);
     } else {
       dbError = "Prisma client unavailable.";
     }
@@ -100,6 +117,40 @@ export default async function ReportLineagePage() {
             across all reports and report types.
           </p>
         </div>
+
+        {/* Lineage write failure alert */}
+        {failureRows.length > 0 && (
+          <div className="border border-red-900/40 bg-red-950/20 px-5 py-4">
+            <div className="mb-3 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
+              <p className="font-mono text-[9px] uppercase tracking-wider text-red-400">
+                Lineage write failures detected — {failureRows.length} recent event{failureRows.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+            <p className="mb-3 text-xs text-red-300/70">
+              These events indicate that a lineage write failed and was caught. The report
+              pipeline was not affected, but chain-of-custody may be incomplete for the
+              listed resources. Investigate database connectivity or Prisma errors.
+            </p>
+            <div className="space-y-1.5">
+              {failureRows.map((row) => {
+                const meta = (() => { try { return JSON.parse(row.metadata ?? "{}"); } catch { return {}; } })();
+                return (
+                  <div key={row.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-red-900/30 bg-red-950/30 px-3 py-2">
+                    <span className="font-mono text-[9px] text-red-300">{row.resourceId ?? "—"}</span>
+                    <span className="font-mono text-[9px] text-red-300/60">{meta.reportType ?? "—"} / {meta.eventType ?? "—"}</span>
+                    {meta.errorCategory && (
+                      <span className="font-mono text-[9px] text-red-300/50">{meta.errorCategory}</span>
+                    )}
+                    <span className="font-mono text-[9px] text-white/30">
+                      {new Date(row.createdAt).toISOString().replace("T", " ").slice(0, 19)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* DB error state */}
         {dbError && (
