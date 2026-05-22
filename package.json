@@ -231,7 +231,11 @@
     "init:full": "pnpm init && pnpm pdf:build:full && pnpm assets:enterprise",
     "help": "node scripts/help.js",
     "version:check": "node scripts/check-versions.js",
-    "update:scripts": "node scripts/update-scripts.js"
+    "update:scripts": "node scripts/update-scripts.js",
+    "outbound:style": "node scripts/check-editorial-style.mjs --roots content/outbound",
+    "outbound:style:strict": "node scripts/check-editorial-style.mjs --roots content/outbound --strict",
+    "outbound:content": "node scripts/validate-outbound-content.mjs",
+    "outbound:content:strict": "node scripts/validate-outbound-content.mjs --strict"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
