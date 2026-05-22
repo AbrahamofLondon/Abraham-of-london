@@ -23,9 +23,7 @@ themes:
   - governance
 createdBy: system
 ---
-There is a difference between an institution that learns from the past and one that is governed by it.
-
-The distinction sounds philosophical. In practice, it is operational. An organisation that learns from the past treats its records as a source of evidence — material to be weighed, contextualised, and applied selectively. An organisation governed by the past treats its records as instructions — things to be followed because they have been written down, by people who presumably knew what they were doing.
+Learning from the past and being governed by it are not the same thing. The difference is operational, not philosophical. An organisation that learns from the past treats its records as a source of evidence — material to be weighed, contextualised, and applied selectively. An organisation governed by the past treats its records as instructions — things to be followed because they have been written down, by people who presumably knew what they were doing.
 
 The trouble is that organisations rarely know which mode they are in. The records look the same either way. The policy document from eight years ago does not announce whether it was written under conditions that still obtain. The strategic framework produced before a significant market shift does not flag that the market has shifted. The record waits, and organisations move between learning from it and being governed by it without always noticing the transition.
 

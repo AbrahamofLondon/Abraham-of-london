@@ -31,7 +31,7 @@ When someone writes — actually writes, in the traditional sense — they are m
 
 When someone prompts, they are doing something different. They are directing a system to make text. They specify the territory — the topic, the tone, the approximate length, sometimes the specific points to cover. The system makes the decisions about language, sequencing, framing. The prompter reviews the output. If satisfied, they treat it as done.
 
-The accountability question that gets obscured here is this: who is responsible for the decisions the system made? The prompter directed but did not decide. The system decided but is not accountable. The result is text in the world that was produced by a process with no named author in any traditional sense.
+The accountability question that gets obscured here is this: who is responsible for the decisions the system made? The prompter directed but did not decide. The system decided but is not accountable. The result is text in the world with no identifiable person who chose this sentence over that one.
 
 I am not arguing that prompting is worthless or that AI-generated text is inherently problematic. I use these tools and find them useful. What I am arguing is that the category of "I wrote this" needs to be applied more carefully than it currently is when what actually happened is "I prompted this, reviewed it, and did not change it substantially."
 

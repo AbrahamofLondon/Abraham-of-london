@@ -23,9 +23,7 @@ themes:
   - governance
 createdBy: system
 ---
-There is a persistent confusion in organisations about the relationship between IT and institutional memory, and it goes something like this: because information systems are managed by the IT function, IT is therefore responsible for what those systems know.
-
-This is wrong, and the confusion has consequences.
+IT builds the filing cabinet. The institution fills it. These are different jobs — and most organisations have quietly collapsed them into one, with consequences that are now difficult to reverse.
 
 IT builds and maintains the infrastructure — the servers, the search index, the interface, the permissions model. This is genuinely difficult and genuinely important work. But the infrastructure is not the knowledge. The knowledge is what gets put into the infrastructure, how it is organised, whether it is accurate, whether it is maintained, and whether the people who need it can find and use it. These are not IT questions. They are institutional questions.
 

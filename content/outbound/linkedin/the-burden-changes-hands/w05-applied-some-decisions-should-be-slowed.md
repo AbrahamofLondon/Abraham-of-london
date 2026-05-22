@@ -23,9 +23,7 @@ themes:
   - institutional-intelligence
 createdBy: system
 ---
-There is a class of decisions that becomes worse when made quickly.
-
-Not because speed is generally bad — many operational decisions need to be fast, and an institution that deliberates on everything is not thoughtful, it is paralysed. But some decisions have a particular structure: their quality depends on how many analogous situations from the past have been brought to bear on them. For these decisions, the more historical context you have, the better the decision. Speed cuts you off from that context.
+Not all decisions benefit from being made fast. Some — a specific and identifiable category — actually deteriorate with speed, because their quality depends on how much analogous experience from the past has been brought to bear. Speed cuts you off from that context. Slowness does not.
 
 The Babylonians understood this instinctively about astronomical prediction. No single observation, however precisely made, was sufficient to predict the behaviour of celestial bodies. The value was in the pattern — the recognition, across centuries of records, of cycles that repeated with sufficient regularity to be anticipated. One observation in isolation was data. Eight hundred years of observations was intelligence.
 
