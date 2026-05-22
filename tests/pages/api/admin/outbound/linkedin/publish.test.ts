@@ -1,37 +1,53 @@
+/**
+ * tests/pages/api/admin/outbound/linkedin/publish.test.ts
+ *
+ * Unit tests for POST /api/admin/outbound/linkedin/publish
+ *
+ * Tests:
+ *   - Admin guard (unauthenticated → rejected)
+ *   - Idempotency: duplicate publish blocked
+ *   - dryRun does not consume rate limit
+ *   - Gate blocks with 409
+ *   - Successful publish writes PUBLISHED ledger row
+ *   - Failed publish writes FAILED ledger row
+ *   - Provider 401 returns safe error
+ *   - Provider 429 returns rate-limit safe error
+ *   - Q2 draft post cannot be published
+ *   - Token expiry blocks publish
+ */
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const {
   mockRequireAdminApi,
+  mockRequireTierApi,
   mockGetConnectionStatus,
   mockGetResolvedLinkedInOutboundBySlug,
   mockPublishTextPostToLinkedIn,
-  mockAttemptCreate,
-  mockAttemptUpdate,
   mockAudit,
   mockCheckRateLimit,
+  mockCreateLedgerEntry,
+  mockClaimPublishSlot,
+  mockCompletePublishSlot,
+  mockMarkPostAsPosted,
 } = vi.hoisted(() => ({
   mockRequireAdminApi: vi.fn(),
+  mockRequireTierApi: vi.fn(),
   mockGetConnectionStatus: vi.fn(),
   mockGetResolvedLinkedInOutboundBySlug: vi.fn(),
   mockPublishTextPostToLinkedIn: vi.fn(),
-  mockAttemptCreate: vi.fn(),
-  mockAttemptUpdate: vi.fn(),
   mockAudit: vi.fn(),
   mockCheckRateLimit: vi.fn(),
+  mockCreateLedgerEntry: vi.fn(),
+  mockClaimPublishSlot: vi.fn(),
+  mockCompletePublishSlot: vi.fn(),
+  mockMarkPostAsPosted: vi.fn(),
 }));
 
 vi.mock("@/lib/access/server", () => ({
   requireAdminApi: mockRequireAdminApi,
-}));
-
-vi.mock("@/lib/prisma.server", () => ({
-  prisma: {
-    linkedInPublishAttempt: {
-      create: mockAttemptCreate,
-      update: mockAttemptUpdate,
-    },
-  },
+  requireTierApi: mockRequireTierApi,
 }));
 
 vi.mock("@/lib/outbound/linkedin-oauth", () => ({
@@ -53,6 +69,17 @@ vi.mock("@/lib/outbound/linkedin-publishing-audit", () => ({
 vi.mock("@/lib/server/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   rateLimitHeaders: () => ({}),
+}));
+
+vi.mock("@/lib/outbound/core/outbound-publish-ledger", () => ({
+  createLedgerEntry: mockCreateLedgerEntry,
+  claimPublishSlot: mockClaimPublishSlot,
+  completePublishSlot: mockCompletePublishSlot,
+  getItemPublishStatus: vi.fn(),
+}));
+
+vi.mock("@/lib/outbound/linkedin-utils", () => ({
+  markPostAsPosted: mockMarkPostAsPosted,
 }));
 
 import publishHandler from "@/pages/api/admin/outbound/linkedin/publish";
@@ -100,7 +127,7 @@ const activeConnection = {
   ownerType: "organization",
   ownerUrn: "urn:li:organization:115850136",
   ownerName: "Abraham of London",
-  organizationId: "115850136",
+  organisationId: "115850136",
   scopes: ["openid", "profile", "w_member_social", "w_organization_social"],
   publishingEnabled: true,
   expiresAt: "2026-06-01T00:00:00.000Z",
@@ -142,6 +169,7 @@ const linkedIn6 = {
     claimRisk: "LOW",
     body: "Not every execution problem is an execution problem.",
     filename: "06-execution-problem-vs-authority-problem.mdx",
+    campaign: "decision-authority-infrastructure-launch",
   },
 };
 
@@ -150,16 +178,26 @@ beforeEach(() => {
   mockRequireAdminApi.mockResolvedValue({
     session: { user: { id: "admin-1", email: "admin@abrahamoflondon.org" } },
   });
+  mockRequireTierApi.mockResolvedValue({
+    session: { user: { id: "admin-1", email: "admin@abrahamoflondon.org" } },
+    access: { tier: "owner" },
+  });
   mockGetConnectionStatus.mockResolvedValue(activeConnection);
   mockGetResolvedLinkedInOutboundBySlug.mockReturnValue(linkedIn6);
-  mockAttemptCreate.mockResolvedValue({ id: "attempt-1" });
-  mockAttemptUpdate.mockResolvedValue({});
   mockAudit.mockResolvedValue({ ok: true });
-  // Rate limiter: allow by default; individual tests can override for 429 scenarios
   mockCheckRateLimit.mockResolvedValue({ allowed: true, remaining: 9, resetAt: Date.now() + 3600_000 });
+  mockCreateLedgerEntry.mockResolvedValue({ id: "ledger-1" });
+  mockClaimPublishSlot.mockResolvedValue({
+    claimed: true,
+    entry: { id: "claimed-slot-1", status: "IN_PROGRESS" },
+  });
+  mockCompletePublishSlot.mockResolvedValue({ id: "claimed-slot-1", status: "PUBLISHED" });
+  mockMarkPostAsPosted.mockReturnValue({ ok: true });
 });
 
 describe("POST /api/admin/outbound/linkedin/publish", () => {
+  // ── Auth ───────────────────────────────────────────────────────────────────
+
   it("denies unauthenticated/admin-missing requests", async () => {
     mockRequireAdminApi.mockResolvedValue(null);
     const req = makeReq({ slug: linkedIn6.slug, confirm: true });
@@ -170,6 +208,78 @@ describe("POST /api/admin/outbound/linkedin/publish", () => {
     expect(mockGetConnectionStatus).not.toHaveBeenCalled();
     expect(mockPublishTextPostToLinkedIn).not.toHaveBeenCalled();
   });
+
+  // ── Idempotency ────────────────────────────────────────────────────────────
+
+  it("blocks duplicate publish with 409", async () => {
+    mockClaimPublishSlot.mockResolvedValue({
+      claimed: false,
+      entry: {
+        id: "existing-ledger-1",
+        status: "PUBLISHED",
+        providerPostId: "urn:li:share:123",
+        providerPostUrl: "https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A123",
+        completedAt: new Date(),
+      },
+      reason: "Item already published (ledger ID: existing-ledger-1).",
+    });
+    const req = makeReq({ slug: linkedIn6.slug, confirm: true });
+    const res = makeRes();
+
+    await publishHandler(req, res);
+
+    expect(res._status).toBe(409);
+    expect(JSON.stringify(res._body)).toContain("already been published");
+    expect(mockPublishTextPostToLinkedIn).not.toHaveBeenCalled();
+  });
+
+  it("allows forceRepublish with owner privileges", async () => {
+    mockClaimPublishSlot.mockResolvedValue({
+      claimed: false,
+      entry: {
+        id: "existing-ledger-1",
+        status: "PUBLISHED",
+        providerPostId: "urn:li:share:123",
+        providerPostUrl: "https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A123",
+        completedAt: new Date(),
+      },
+      reason: "Item already published.",
+    });
+    mockPublishTextPostToLinkedIn.mockResolvedValue({
+      ok: true,
+      status: "succeeded",
+      postUrn: "urn:li:share:456",
+      postUrl: "https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A456",
+    });
+    const req = makeReq({ slug: linkedIn6.slug, confirm: true, forceRepublish: true, forceRepublishNote: "Owner override" });
+    const res = makeRes();
+
+    await publishHandler(req, res);
+
+    expect(res._status).toBe(200);
+    expect(mockPublishTextPostToLinkedIn).toHaveBeenCalled();
+  });
+
+  // ── dryRun ─────────────────────────────────────────────────────────────────
+
+  it("dryRun does not consume rate limit quota", async () => {
+    const req = makeReq({ slug: linkedIn6.slug, confirm: true, dryRun: true });
+    const res = makeRes();
+
+    await publishHandler(req, res);
+
+    // Rate limit should NOT have been checked for dryRun
+    expect(mockCheckRateLimit).not.toHaveBeenCalled();
+    expect(res._status).toBe(200);
+    const body = res._body as Record<string, any>;
+    expect(body.dryRun).toBe(true);
+    // dryRun writes DRY_RUN ledger entry
+    expect(mockCreateLedgerEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "DRY_RUN" }),
+    );
+  });
+
+  // ── Gate ───────────────────────────────────────────────────────────────────
 
   it("returns 409 and records blocked attempt for blocked item", async () => {
     mockGetConnectionStatus.mockResolvedValue({
@@ -188,13 +298,15 @@ describe("POST /api/admin/outbound/linkedin/publish", () => {
     await publishHandler(req, res);
 
     expect(res._status).toBe(409);
-    expect(mockAttemptCreate).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ status: "blocked" }),
-    }));
+    expect(mockCreateLedgerEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "BLOCKED" }),
+    );
     expect(mockPublishTextPostToLinkedIn).not.toHaveBeenCalled();
   });
 
-  it("successful publish records attempt and returns manual metadata", async () => {
+  // ── Successful publish ─────────────────────────────────────────────────────
+
+  it("successful publish writes PUBLISHED ledger row", async () => {
     mockPublishTextPostToLinkedIn.mockResolvedValue({
       ok: true,
       status: "succeeded",
@@ -209,17 +321,39 @@ describe("POST /api/admin/outbound/linkedin/publish", () => {
     expect(res._status).toBe(200);
     const body = res._body as Record<string, any>;
     expect(body.ok).toBe(true);
-    expect(body.manualMetadata.status).toBe("posted");
-    expect(mockAttemptCreate).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ status: "pending" }),
-    }));
-    expect(mockAttemptUpdate).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ status: "succeeded" }),
-    }));
-    expect(mockPublishTextPostToLinkedIn).toHaveBeenCalledWith(expect.objectContaining({
-      ownerType: "organization",
-    }));
+    // Should have completed the claimed slot as PUBLISHED
+    expect(mockCompletePublishSlot).toHaveBeenCalledWith(
+      "claimed-slot-1",
+      "PUBLISHED",
+      expect.objectContaining({ providerPostId: "urn:li:share:123" }),
+    );
+    // Should have attempted file writeback
+    expect(mockMarkPostAsPosted).toHaveBeenCalled();
   });
+
+  // ── Failed publish ─────────────────────────────────────────────────────────
+
+  it("failed publish writes FAILED ledger row", async () => {
+    mockPublishTextPostToLinkedIn.mockResolvedValue({
+      ok: false,
+      status: "failed",
+      errorCode: "LINKEDIN_POST_FAILED",
+      safeMessage: "LinkedIn publishing failed.",
+    });
+    const req = makeReq({ slug: linkedIn6.slug, confirm: true });
+    const res = makeRes();
+
+    await publishHandler(req, res);
+
+    expect(res._status).toBe(400);
+    expect(mockCompletePublishSlot).toHaveBeenCalledWith(
+      "claimed-slot-1",
+      "FAILED",
+      expect.objectContaining({ errorCode: "LINKEDIN_POST_FAILED" }),
+    );
+  });
+
+  // ── Provider errors ────────────────────────────────────────────────────────
 
   it("provider 401 returns safe error and no token-shaped response", async () => {
     mockPublishTextPostToLinkedIn.mockResolvedValue({
@@ -255,6 +389,8 @@ describe("POST /api/admin/outbound/linkedin/publish", () => {
     expect(JSON.stringify(res._body)).toContain("LINKEDIN_RATE_LIMITED");
   });
 
+  // ── Q2 draft ───────────────────────────────────────────────────────────────
+
   it("Q2 draft post cannot be published", async () => {
     mockGetResolvedLinkedInOutboundBySlug.mockReturnValue({
       ...linkedIn6,
@@ -278,6 +414,23 @@ describe("POST /api/admin/outbound/linkedin/publish", () => {
 
     expect(res._status).toBe(409);
     expect(JSON.stringify(res._body)).toContain("GMI-Q2-2026");
+    expect(mockPublishTextPostToLinkedIn).not.toHaveBeenCalled();
+  });
+
+  // ── Token expiry ───────────────────────────────────────────────────────────
+
+  it("expired token blocks publish with 401", async () => {
+    mockGetConnectionStatus.mockResolvedValue({
+      ...activeConnection,
+      expiresAt: "2025-01-01T00:00:00.000Z",
+    });
+    const req = makeReq({ slug: linkedIn6.slug, confirm: true });
+    const res = makeRes();
+
+    await publishHandler(req, res);
+
+    expect(res._status).toBe(401);
+    expect(JSON.stringify(res._body)).toContain("expired");
     expect(mockPublishTextPostToLinkedIn).not.toHaveBeenCalled();
   });
 });

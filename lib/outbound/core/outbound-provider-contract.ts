@@ -33,6 +33,7 @@ export type OutboundReadiness =
   | "READY"              // connected, all scopes/permissions present, can publish
   | "NOT_CONNECTED"      // no token in DB, no env fallback
   | "MISSING_SCOPE"      // connected but missing required OAuth scope/permission
+  | "TOKEN_EXPIRED"      // token present but expired
   | "TOKEN_INVALID"      // token present but cannot be used (expired, revoked, decryption failure)
   | "CONFIG_MISSING"     // required env vars absent (e.g. no encryption key, no client ID)
   | "PUBLISHING_DISABLED"// publishing explicitly disabled in env config

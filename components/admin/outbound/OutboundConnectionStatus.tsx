@@ -36,6 +36,7 @@ function readinessBadgeTone(readiness: OutboundReadiness) {
     case "READY": return "success" as const;
     case "MISSING_SCOPE": return "warning" as const;
     case "NOT_CONNECTED": return "muted" as const;
+    case "TOKEN_EXPIRED": return "danger" as const;
     case "TOKEN_INVALID": return "danger" as const;
     case "CONFIG_MISSING": return "danger" as const;
     case "PUBLISHING_DISABLED": return "warning" as const;
@@ -48,6 +49,7 @@ function readinessLabel(readiness: OutboundReadiness): string {
     case "READY": return "Ready";
     case "MISSING_SCOPE": return "Missing scope";
     case "NOT_CONNECTED": return "Not connected";
+    case "TOKEN_EXPIRED": return "Token expired";
     case "TOKEN_INVALID": return "Token invalid";
     case "CONFIG_MISSING": return "Config missing";
     case "PUBLISHING_DISABLED": return "Disabled";

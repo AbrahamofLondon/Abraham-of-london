@@ -502,8 +502,19 @@ export function getOutboundPostsForReview(
 }
 
 /**
- * Return only posts scheduled to publish before or at the given ISO datetime.
- * Excludes rejected / published / skipped posts.
+ * Return only posts that are explicitly scheduled and approved.
+ * This is the canonical scheduler eligibility filter.
+ *
+ * Rules:
+ *  - status must be "scheduled" (not "ready", not "draft")
+ *  - approvalStatus must be "approved"
+ *  - requiresFinalApproval must be true
+ *  - scheduledFor must be <= asOf
+ *  - provider diagnostics should be READY (checked by caller)
+ *  - OUTBOUND_SCHEDULER_ENABLED must be "true" (checked by caller)
+ *
+ * The scheduler must NOT pick up "ready" items — they need explicit
+ * scheduling via the admin UI first.
  */
 export function getOutboundPostsDue(
   provider: OutboundPostProvider,
@@ -515,6 +526,23 @@ export function getOutboundPostsDue(
       p.scheduledFor !== null &&
       p.scheduledFor <= asOf &&
       p.status === "scheduled" &&
-      p.approvalStatus === "approved",
+      p.approvalStatus === "approved" &&
+      p.requiresFinalApproval === true,
+  );
+}
+
+/**
+ * Return posts with status "scheduled" regardless of scheduledFor time.
+ * Useful for admin UI to show what's queued for the scheduler.
+ */
+export function getOutboundPostsScheduled(
+  provider: OutboundPostProvider,
+): OutboundPost[] {
+  const { posts } = getOutboundPostsByProvider(provider);
+  return posts.filter(
+    (p) =>
+      p.status === "scheduled" &&
+      p.approvalStatus === "approved" &&
+      p.requiresFinalApproval === true,
   );
 }

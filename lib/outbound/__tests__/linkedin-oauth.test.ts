@@ -38,6 +38,16 @@ import {
 
 beforeEach(() => {
   vi.clearAllMocks();
+
+  // Clear any real env vars that might override test values.
+  // The linkedin-app-profile reads LINKEDIN_LEGACY_* first (with fallback to LINKEDIN_*).
+  // If these are set in the actual environment, they take precedence over process.env
+  // assignments in the test. We must delete them so the test values are used.
+  delete process.env.LINKEDIN_LEGACY_CLIENT_ID;
+  delete process.env.LINKEDIN_LEGACY_CLIENT_SECRET;
+  delete process.env.LINKEDIN_LEGACY_REDIRECT_URI;
+  delete process.env.LINKEDIN_LEGACY_OAUTH_SCOPES;
+
   process.env.LINKEDIN_CLIENT_ID = "test-client-id";
   process.env.LINKEDIN_CLIENT_SECRET = "test-client-secret";
   process.env.LINKEDIN_REDIRECT_URI = "http://localhost:3000/api/admin/outbound/linkedin/oauth/callback";
