@@ -1,8 +1,6 @@
 // lib/intelligence/gmi-publication-service.ts
 // Governs GMI release events: quality gate runs, call reviews, release decisions.
 // All writes are fire-and-forget safe via recordGmiReleaseEventSafe.
-import "server-only";
-
 import {
   recordGmiReleaseEventSafe,
   type GmiReleaseEventRecordResult,

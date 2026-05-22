@@ -2,7 +2,6 @@
 // Append-only report chain-of-custody ledger.
 // Uses SystemAuditLog as the persistent store — no migration required.
 // Provides write helpers and a read helper shaped for DiagnosticLineagePanel.
-import "server-only";
 
 export type ReportEventType =
   | "CREATED"

@@ -2,8 +2,6 @@
 // Reads persisted GMI release events from systemAuditLog.
 // Events are written by recordGmiReleaseEventSafe via logAuditEvent;
 // the action field is the GMI event type, metadata contains the full envelope.
-import "server-only";
-
 import type { GmiReleaseEvent } from "./gmi-release-events";
 
 async function getPrisma(): Promise<any> {

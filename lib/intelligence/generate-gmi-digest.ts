@@ -2,8 +2,6 @@
 // Generates a structured GMI intelligence digest from the call ledger and release events.
 // Distinct from generate-weekly-digest.ts (which targets framework engagement and outputs PDF).
 // This digest is data-structured for admin display, API responses, and weekly review.
-import "server-only";
-
 import {
   getCallsForReport,
   summariseCallReview,
