@@ -29,12 +29,12 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
     slug: "the-science-of-inherited-selves",
     title: "The Science of Inherited Selves",
     description:
-      "A six-part applied essay series on epigenetics, attachment, family memory, inherited trauma, moral responsibility, and the possibility of interrupting what was handed down.",
+      "An eight-part applied essay series on epigenetics, attachment, family memory, inherited trauma, moral responsibility, love, marriage, and the possibility of interrupting what was handed down.",
     excerpt:
       "You did not begin at birth. But neither must your story end where your ancestors left it.",
     category: "Essays",
-    tags: ["epigenetics", "inheritance", "trauma", "attachment", "family", "psychology", "memory", "civilisation", "identity"],
-    partCount: 6,
+    tags: ["epigenetics", "inheritance", "trauma", "attachment", "family", "psychology", "memory", "civilisation", "identity", "love", "marriage"],
+    partCount: 8,
     parts: [
       {
         order: 1,
@@ -88,6 +88,24 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "An essay on healing, responsibility, plasticity, family repair, and the moral courage to interrupt inherited patterns before they reach the next generation.",
         readTime: "13 min read",
+        status: "DRAFT",
+      },
+      {
+        order: 7,
+        slug: "love-loss-and-the-familiar-wound",
+        title: "Love, Loss, and the Familiar Wound",
+        excerpt:
+          "Why we often choose partners who mirror our earliest care, why chemistry can disguise repetition, and why love after loss requires truth without self-condemnation.",
+        readTime: "15 min read",
+        status: "PUBLISHED",
+      },
+      {
+        order: 8,
+        slug: "choose-the-ancestral-landscape",
+        title: "Choose the Ancestral Landscape",
+        excerpt:
+          "A redemptive strategy for choosing love wisely, co-healing responsibly, and building the emotional, spiritual, and generational landscape future children inherit.",
+        readTime: "16 min read",
         status: "DRAFT",
       },
     ],

@@ -13,7 +13,7 @@ const APPLIED_SERIES = [
   },
   {
     href: "/blog/series/the-science-of-inherited-selves",
-    meta: "Applied Series · 6 Parts · In Progress",
+    meta: "Applied Series · 8 Parts · In Progress",
     title: "The Science of Inherited Selves",
     body: "Six essays on inheritance, attachment, family memory, trauma, and the responsibility to interrupt what should not be passed on.",
   },
