@@ -1,9 +1,59 @@
 # Convergence Audit — The Ultimate Purpose of Man
 
-**File audited:** `content/editorials/ultimate-purpose-of-man.mdx`  
-**Route audited:** `/editorials/ultimate-purpose-of-man`  
-**Audit date:** 2026-05-23  
+**File audited:** `content/editorials/ultimate-purpose-of-man.mdx`
+**Route audited:** `/editorials/ultimate-purpose-of-man`
+**Initial audit date:** 2026-05-23
+**Rewrite completed:** 2026-05-23
 **Auditor:** Editorial infrastructure review
+
+---
+
+## Post-Rewrite Verdict
+
+**Flagship-ready. ~92% complete.**
+
+The rewrite addresses all three primary structural gaps identified in the initial audit:
+
+1. **Opening thesis** — The piece now opens with a governing claim before descending into Genesis. The first five paragraphs establish the argument, the epistemic stakes, and the register.
+2. **Christ section substantially expanded** — Five named subsections (The Second Adam, The Obedient Son, The Word Made Flesh, The Servant King, The Suffering of Purpose, The Restoration of Human Nature) with four scriptural anchor points (Colossians 1:15, Romans 5:19, Philippians 2:6–8, John 1:14, Hebrews 2:10, 1 Corinthians 15:22). Approximately 1,600 words. Theologically precise, not sermonic.
+3. **Institutional and leadership application present** — Section VII (The Domains of Human Purpose) provides six subsections covering Person, Family, Work, Leadership, Institutions, and Civilisation. The estate convergence paragraph appears within Institutions.
+
+### What changed structurally
+
+| Gap (initial audit) | Status post-rewrite |
+|---|---|
+| No opening thesis | Resolved — governing claim in first paragraph |
+| Jesus section thin (3 paragraphs) | Resolved — 6 subsections, ~1,600 words |
+| Leadership/institutional application absent | Resolved — Section VII, six domains |
+| "Drift" overused | Resolved — replaced with staged vocabulary (fracture, disordered desire, false autonomy, dissolution, misalignment) |
+| Missing return/realignment arc | Resolved — Section IX (The Return to Order) |
+| Estate convergence absent | Resolved — convergence paragraph in Section VII: Institutions |
+
+### Remaining gap (~8%)
+
+The section on **why Christianity built the modern world** — previously a standalone section — is now partially absorbed into Section VII (Civilisation subsection) and Section VIII (Why Civilisations Fall). The historical specificity (Imago Dei dismantling class systems, prophets correcting kings, personal accountability creating conscience) remains but is now distributed rather than concentrated. A reader who wants the compressed historical argument in one place will not find it as sharply as in version 3.1.0. This is an acceptable trade: the distributed approach produces a more integrated piece, even if slightly less quotable in that specific section.
+
+**Recommended path to 100%:** Review the Civilisation subsection in Section VII to ensure the historical specificity of the previous version is not lost. Consider one tight paragraph restoring the four-doctrine sequence (Imago Dei, rule of law, personal responsibility, justice as moral principle) within the Civilisation domain.
+
+### Page delivery
+
+| Element | Status |
+|---|---|
+| Hero / metadata | Present — well-executed |
+| Publication record panel | Present |
+| Citation panel | Present |
+| Access surfaces | Present |
+| Publication summary | Present |
+| Convergence note ("Why this text sits here") | Present — added this sprint |
+| Canonical body | Rendering — rewritten editorial |
+| Reading typography (.editorial-body) | Present — Cormorant Garamond, gold accents, 68ch |
+| End-state CTA (diagnostics / strategy room) | Present — appropriately restrained |
+
+**Page delivery verdict: Institutionally adequate and flagship-appropriate.**
+
+---
+
+## Previous Audit (Version 3.1.0)
 
 ---
 
