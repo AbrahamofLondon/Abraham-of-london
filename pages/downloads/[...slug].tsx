@@ -176,33 +176,44 @@ const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, 
               ) : (
                 <Lock className="h-4 w-4" style={{ color: access.color }} />
               )}
-              <span
-                className="font-mono uppercase"
-                style={{ fontSize: "8px", letterSpacing: "0.28em", color: access.color }}
-              >
-                {isPaid ? paidLabel : access.label}
-              </span>
+              {/* MDX-only public docs: make the label an anchor link into the content */}
+              {isPublic && isMdxOnly ? (
+                <a
+                  href="#i-what-this-edition-is-for"
+                  className="font-mono uppercase hover:opacity-75 transition-opacity"
+                  style={{ fontSize: "8px", letterSpacing: "0.28em", color: access.color, textDecoration: "none" }}
+                >
+                  {access.label}
+                </a>
+              ) : (
+                <span
+                  className="font-mono uppercase"
+                  style={{ fontSize: "8px", letterSpacing: "0.28em", color: access.color }}
+                >
+                  {isPaid ? paidLabel : access.label}
+                </span>
+              )}
             </div>
 
             {isPublic ? (
               isMdxOnly ? (
                 <a
                   href="#i-what-this-edition-is-for"
-                className="inline-flex items-center gap-2 border px-5 py-2.5 transition-all hover:opacity-80"
-                style={{
-                  borderColor: `${GOLD}40`,
-                  backgroundColor: `${GOLD}0D`,
-                  color: `${GOLD}CC`,
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Begin the schematic
-                <ArrowRight className="h-3 w-3" />
-              </a>
-            ) : (
+                  className="inline-flex items-center gap-2 border px-5 py-2.5 transition-all hover:opacity-80"
+                  style={{
+                    borderColor: `${GOLD}40`,
+                    backgroundColor: `${GOLD}0D`,
+                    color: `${GOLD}CC`,
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8.5px",
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Begin the schematic
+                  <ArrowRight className="h-3 w-3" />
+                </a>
+              ) : (
               <a
                 href={`/api/downloads/resolve/${encodeURIComponent(identity.slug)}`}
                 className="inline-flex items-center gap-2 border px-5 py-2.5 transition-all hover:opacity-80"
@@ -440,7 +451,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
       description: (doc as any)?.description ?? identity.description ?? null,
       price: priceEntry ? { display: priceEntry.display, justification: priceEntry.justification } : null,
       companionEditorialHref,
-      isMdxOnly: !pdfIdentity && !!doc && !!(renderDoc as any)?.body?.code,
+      // isMdxOnly = no PDF binary in the registry AND an MDX doc exists.
+      // Do NOT gate on body?.code — compiled output may be absent in some deploy conditions
+      // but the page is still MDX-only. The CTA and label anchor links must still render.
+      isMdxOnly: !pdfIdentity && !!doc,
     },
   };
 };
