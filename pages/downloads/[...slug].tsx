@@ -42,6 +42,7 @@ type Props = {
   description?: string;
   price?: { display: string; justification: string } | null;
   companionEditorialHref?: string | null;
+  isMdxOnly?: boolean;
 };
 
 function cleanSlug(input: unknown): string {
@@ -105,7 +106,7 @@ const VALUE_LINES: Record<string, string> = {
   toolkit: "A complete working set for structured assessment and correction.",
 };
 
-const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, subtitle, description, price, companionEditorialHref }) => {
+const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, subtitle, description, price, companionEditorialHref, isMdxOnly }) => {
   const isPublic = requiredTier === "public";
   const isPaid = identity.access === "paid";
   const access = ACCESS_CONFIG[identity.access] || ACCESS_CONFIG.public!;
@@ -184,6 +185,24 @@ const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, 
             </div>
 
             {isPublic ? (
+              isMdxOnly ? (
+                <Link
+                  href={`/downloads/${slug}`}
+                className="inline-flex items-center gap-2 border px-5 py-2.5 transition-all hover:opacity-80"
+                style={{
+                  borderColor: `${GOLD}40`,
+                  backgroundColor: `${GOLD}0D`,
+                  color: `${GOLD}CC`,
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8.5px",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Open schematic edition
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            ) : (
               <a
                 href={`/api/downloads/resolve/${encodeURIComponent(identity.slug)}`}
                 className="inline-flex items-center gap-2 border px-5 py-2.5 transition-all hover:opacity-80"
@@ -200,7 +219,8 @@ const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, 
                 {access.cta}
                 <ArrowRight className="h-3 w-3" />
               </a>
-            ) : identity.access === "inner_circle" ? (
+            )
+          ) : identity.access === "inner_circle" ? (
               <Link
                 href="/inner-circle"
                 className="inline-flex items-center gap-2 border px-5 py-2.5 transition-all hover:opacity-80"
@@ -420,6 +440,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
       description: (doc as any)?.description ?? identity.description ?? null,
       price: priceEntry ? { display: priceEntry.display, justification: priceEntry.justification } : null,
       companionEditorialHref,
+      isMdxOnly: !pdfIdentity && !!doc && !!(renderDoc as any)?.body?.code,
     },
   };
 };
