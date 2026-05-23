@@ -186,11 +186,15 @@ export const authOptions: NextAuthOptions = {
         });
       } catch (error) {
         const safe = classifyAuthError(error);
-        console.error("[auth] signIn database failure", {
+        console.error("[auth] signIn database failure — allowing sign-in for bootstrap admin", {
           code: safe.code,
           callback: "signIn",
+          email: email.slice(0, 3) + "***",
         });
-        throw new Error(safe.code);
+        // Allow sign-in even if DB is unavailable — bootstrap admin emails
+        // are authorised by env config, not by database presence.
+        // The user record will be created on the next successful DB write.
+        return true;
       }
 
       return true;

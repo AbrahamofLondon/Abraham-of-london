@@ -37,15 +37,17 @@ describe("authOptions database error sanitization", () => {
       new Error("Invalid `prisma.user.upsert()` invocation: Can't reach database server at ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech:5432"),
     );
 
-    await expect(
-      authOptions.callbacks?.signIn?.({
-        user: { id: "user_1", email: "info@abrahamoflondon.org" },
-        account: null,
-        profile: undefined,
-        email: undefined,
-        credentials: undefined,
-      } as any),
-    ).rejects.toThrow("AUTH_DATABASE_UNAVAILABLE");
+    // signIn now returns true instead of throwing — bootstrap admin emails
+    // are authorised by env config, not by database presence.
+    const result = await authOptions.callbacks?.signIn?.({
+      user: { id: "user_1", email: "info@abrahamoflondon.org" },
+      account: null,
+      profile: undefined,
+      email: undefined,
+      credentials: undefined,
+    } as any);
+
+    expect(result).toBe(true);
   });
 
   it("does not throw raw database hostname from signIn callback", async () => {
@@ -53,20 +55,16 @@ describe("authOptions database error sanitization", () => {
       new Error("Can't reach database server at ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech:5432"),
     );
 
-    try {
-      await authOptions.callbacks?.signIn?.({
-        user: { id: "user_1", email: "info@abrahamoflondon.org" },
-        account: null,
-        profile: undefined,
-        email: undefined,
-        credentials: undefined,
-      } as any);
-      throw new Error("Expected signIn to throw");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      expect(message).toBe("AUTH_DATABASE_UNAVAILABLE");
-      expect(message).not.toContain("neon.tech");
-      expect(message).not.toContain("prisma.user.upsert");
-    }
+    // signIn now returns true instead of throwing — bootstrap admin emails
+    // are authorised by env config, not by database presence.
+    const result = await authOptions.callbacks?.signIn?.({
+      user: { id: "user_1", email: "info@abrahamoflondon.org" },
+      account: null,
+      profile: undefined,
+      email: undefined,
+      credentials: undefined,
+    } as any);
+
+    expect(result).toBe(true);
   });
 });
