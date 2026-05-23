@@ -18,26 +18,24 @@ type Props = {
   series: EditorialSeries[];
 };
 
-// All color references use --ds-* tokens from design-system.css
+// ─── Design tokens ────────────────────────────────────────────────────────────
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span style={{ width: 1, height: 18, backgroundColor: "var(--ds-accent-soft)", display: "inline-block" }} />
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.4em",
-          textTransform: "uppercase",
-          color: "var(--ds-accent)",
-        }}
-      >
-        {children}
-      </span>
-    </div>
-  );
-}
+const GOLD = "#C9A96E";
+const BASE = "rgb(6 6 9)";
+const VOID = "rgb(3 3 5)";
+
+const FLAGSHIP_GOVERNING_CLAIM =
+  "Man was not made merely to exist, consume, choose, or express himself. He was made to receive order, embody it, and return glory to its source. Purpose precedes preference. Order precedes freedom. Mandate precedes ambition.";
+
+const serif = "'Cormorant Garamond', Georgia, ui-serif, serif";
+const mono  = "'JetBrains Mono', ui-monospace, monospace";
+
+const GRAIN: React.CSSProperties = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+  backgroundSize: "180px 180px",
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -64,6 +62,8 @@ function formatDate(value?: string | null) {
 function readTime(value?: string | null) {
   return value || "Read";
 }
+
+// ─── Publication record row ───────────────────────────────────────────────────
 
 function EditorialRow({ item }: { item: PublicationRecord }) {
   return (
@@ -93,9 +93,7 @@ function EditorialRow({ item }: { item: PublicationRecord }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// APPLIED ESSAY SERIES — static data (blog series, not editorial publications)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Applied essay series ─────────────────────────────────────────────────────
 
 const APPLIED_SERIES = [
   {
@@ -132,69 +130,42 @@ function AppliedSeriesCard({ item }: { item: AppliedSeriesEntry }) {
         backgroundColor: "rgba(201,150,58,0.02)",
       }}
     >
-      {/* Meta row */}
       <div className="flex flex-wrap items-center gap-3 mb-3">
-        <span
-          className="font-mono text-[6.5px] uppercase tracking-[0.28em]"
-          style={{ color: "var(--ds-text-subtle)" }}
-        >
+        <span className="font-mono text-[6.5px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
           {item.partCount}-Part Series
         </span>
         <span style={{ color: "var(--ds-border)" }}>·</span>
-        <span
-          className="font-mono text-[6.5px] uppercase tracking-[0.28em]"
-          style={{ color: "var(--ds-accent)" }}
-        >
+        <span className="font-mono text-[6.5px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-accent)" }}>
           {item.displayStatus}
         </span>
       </div>
-
-      {/* Title */}
       <h3
         className="font-serif italic mb-2 transition-colors duration-200 group-hover:text-white"
         style={{ fontWeight: 300, fontSize: "1.18rem", lineHeight: 1.08, color: "var(--ds-text)" }}
       >
         {item.title}
       </h3>
-
-      {/* Description */}
-      <p
-        className="text-[12px] leading-[1.55rem] mb-3"
-        style={{ color: "var(--ds-text-muted)", maxWidth: "52ch" }}
-      >
+      <p className="text-[12px] leading-[1.55rem] mb-3" style={{ color: "var(--ds-text-muted)", maxWidth: "52ch" }}>
         {item.description}
       </p>
-
-      {/* Relation note */}
-      <div
-        className="font-mono text-[6.5px] uppercase tracking-[0.26em] italic mb-4"
-        style={{ color: "var(--ds-text-subtle)" }}
-      >
+      <div className="font-mono text-[6.5px] uppercase tracking-[0.26em] italic mb-4" style={{ color: "var(--ds-text-subtle)" }}>
         {item.relationNote}
       </div>
-
-      {/* Read link */}
-      <div
-        className="font-mono text-[7px] uppercase tracking-[0.26em]"
-        style={{ color: "var(--ds-accent)" }}
-      >
+      <div className="font-mono text-[7px] uppercase tracking-[0.26em]" style={{ color: "var(--ds-accent)" }}>
         Read the series →
       </div>
     </Link>
   );
 }
 
+// ─── Editorial series card (uniform — no lead overrides) ─────────────────────
+
 function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
-  const isLead = item.slug === "the-minds-clay";
   return (
     <div
       className="border py-7 px-6 transition-colors duration-200"
-      style={{
-        borderColor: isLead ? "rgba(201,150,58,0.35)" : "var(--ds-border)",
-        backgroundColor: isLead ? "var(--ds-panel)" : "transparent",
-      }}
+      style={{ borderColor: "var(--ds-border)", backgroundColor: "transparent" }}
     >
-      {/* Meta row */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
           {item.partCount}-Part Series
@@ -204,26 +175,15 @@ function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
           {item.status === "PUBLISHED" ? "Complete" : "In progress"}
         </span>
       </div>
-
-      {/* Title */}
       <h2
         className="font-serif italic mb-3"
-        style={{
-          fontWeight: 300,
-          fontSize: isLead ? "clamp(1.4rem, 2vw, 1.9rem)" : "1.4rem",
-          lineHeight: 1.05,
-          color: "var(--ds-text)",
-        }}
+        style={{ fontWeight: 300, fontSize: "1.4rem", lineHeight: 1.05, color: "var(--ds-text)" }}
       >
         {item.title}
       </h2>
-
-      {/* Descriptor */}
       <p className="text-sm leading-[1.65rem] mb-5" style={{ color: "var(--ds-text-muted)", maxWidth: "56ch" }}>
         {item.descriptor}
       </p>
-
-      {/* Actions */}
       <div className="flex flex-wrap items-center gap-5">
         <Link
           href={`/editorials/series/${item.slug}`}
@@ -241,6 +201,8 @@ function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
   );
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
   const [activeCategory, setActiveCategory] = React.useState("");
 
@@ -251,15 +213,13 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
 
   const supporting = React.useMemo(
     () => items.filter((item) => item.slug !== flagship?.slug),
-    [items, flagship?.slug]
+    [items, flagship?.slug],
   );
 
   const filteredSupporting = React.useMemo(() => {
     if (!activeCategory) return supporting;
     return supporting.filter((i) => i.category === activeCategory);
   }, [supporting, activeCategory]);
-
-  const showFlagship = flagship && (!activeCategory || flagship.category === activeCategory);
 
   return (
     <Layout
@@ -275,165 +235,273 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
         <meta name="robots" content="index,follow" />
       </Head>
 
-      <main style={{ backgroundColor: "var(--ds-background)", minHeight: "100vh", color: "white" }}>
+      <main style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
 
-        {/* Page header */}
-        <section style={{ backgroundColor: "var(--ds-background-muted)", borderBottom: "1px solid var(--ds-border)" }}>
-          <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 lg:px-10 lg:pb-10 lg:pt-24">
-            <Eyebrow>Editorials · Public Intellectual Record</Eyebrow>
-
-            <h1
-              className="mt-6 max-w-3xl font-serif italic"
+        {/* ── FLAGSHIP HERO ────────────────────────────────────────────── */}
+        <section
+          className="relative overflow-hidden"
+          style={{
+            minHeight: "88vh",
+            backgroundColor: VOID,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {/* Atmosphere */}
+          <div className="pointer-events-none absolute inset-0">
+            <div
+              className="absolute"
               style={{
-                fontWeight: 300,
-                fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
-                lineHeight: 0.98,
-                color: "var(--ds-text)",
+                left: "-8%",
+                top: "-20%",
+                width: "700px",
+                height: "640px",
+                borderRadius: "50%",
+                background: `radial-gradient(ellipse at center, ${GOLD}08 0%, ${GOLD}03 35%, transparent 65%)`,
+                filter: "blur(140px)",
               }}
-            >
-              The public intellectual record.
-            </h1>
-
-            <p
-              className="mt-5 font-mono text-[8px] uppercase tracking-[0.34em]"
-              style={{ color: "var(--ds-text-subtle)" }}
-            >
-              Long-form arguments, formal publication records, and preserved public reasoning.
-            </p>
-            <p
-              className="mt-3 max-w-2xl text-sm leading-6"
-              style={{ color: "var(--ds-text-muted)" }}
-            >
-              The public intellectual record behind the operating doctrine — long-form arguments, editorial series, and preserved public reasoning.
-            </p>
-
-            <div className="mt-6 h-px w-full" style={{ backgroundColor: "var(--ds-border)" }} />
-
-            {categories.length > 1 ? (
-              <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
-                <button
-                  type="button"
-                  onClick={() => setActiveCategory("")}
-                  className="font-mono text-[8px] uppercase tracking-[0.3em]"
-                  style={{
-                    color: activeCategory === "" ? "var(--ds-text)" : "var(--ds-text-muted)",
-                    textDecoration: activeCategory === "" ? "underline" : "none",
-                    textUnderlineOffset: "0.35rem",
-                  }}
-                >
-                  All
-                </button>
-                {categories.map((category) => {
-                  const active = activeCategory === category;
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => setActiveCategory(category)}
-                      className="font-mono text-[8px] uppercase tracking-[0.3em]"
-                      style={{
-                        color: active ? "var(--ds-accent)" : "var(--ds-text-muted)",
-                        textDecoration: active ? "underline" : "none",
-                        textUnderlineOffset: "0.35rem",
-                      }}
-                    >
-                      {category}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
+            />
+            {/* Bottom scrim */}
+            <div
+              className="absolute inset-x-0 bottom-0 h-52"
+              style={{ background: `linear-gradient(to top, ${BASE}, transparent)` }}
+            />
+            {/* Grain */}
+            <div className="absolute inset-0 opacity-[0.020]" style={GRAIN} />
           </div>
-        </section>
 
-        {/* 1. Flagship Editorial */}
-        <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
-          <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="mb-8">
-              <SectionLabel>Flagship Editorial</SectionLabel>
-              <p
-                className="mt-3 font-serif italic text-[13px] leading-[1.65rem]"
-                style={{ color: "var(--ds-text-subtle)", maxWidth: "62ch" }}
-              >
-                The Canon establishes the architecture. The flagship editorial concentrates the argument.
-                The series and essays extend it into memory, inheritance, custody, judgement, family,
-                civilisation, and the work of formation.
-              </p>
-            </div>
+          {/* Top gold rule */}
+          <div
+            className="absolute inset-x-0 top-0 h-px"
+            style={{
+              background: `linear-gradient(to right, transparent, ${GOLD}25, transparent)`,
+            }}
+          />
 
-            {showFlagship ? (
-              <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-                <div>
-                  <div className="flex flex-wrap items-center gap-3 text-[7px] font-mono uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
-                    <span>{formatDate(flagship.date)}</span>
-                    <span style={{ color: "var(--ds-border)" }}>·</span>
-                    <span style={{ color: "var(--ds-accent)" }}>{flagship.category || "Editorial"}</span>
-                    <span style={{ color: "var(--ds-border)" }}>·</span>
-                    <span>{readTime(flagship.readingTime)}</span>
-                  </div>
+          {/* Content — centred column */}
+          <div
+            className="relative z-10 flex flex-col flex-1 items-center justify-center text-center px-6"
+            style={{ paddingTop: "8rem", paddingBottom: "6rem" }}
+          >
+            <div style={{ maxWidth: "900px", width: "100%" }}>
 
-                  <h2 className="mt-4 max-w-4xl font-serif text-[2rem] italic" style={{ color: "var(--ds-text)", lineHeight: 1.02, fontWeight: 300 }}>
-                    {flagship.title}
-                  </h2>
-
-                  {(flagship.subtitle || flagship.description) ? (
-                    <p className="mt-3 max-w-3xl text-[13px] leading-[1.55rem]" style={{ color: "var(--ds-text-muted)" }}>
-                      {flagship.description || flagship.subtitle}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="border px-5 py-5" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
-                  <div className="font-mono text-[7px] uppercase tracking-[0.32em]" style={{ color: "var(--ds-text-subtle)" }}>
-                    Publication record
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    {[
-                      ["Content ID", flagship.contentId || "—"],
-                      ["Author", flagship.author || "—"],
-                      ["Tier", flagship.tier || "—"],
-                      ["Version", flagship.version || "—"],
-                    ].map(([label, value]) => (
-                      <div key={label} className="flex items-start justify-between gap-3 border-b pb-2" style={{ borderBottomColor: "var(--ds-border)" }}>
-                        <span className="font-mono text-[6.5px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>{label}</span>
-                        <span className="font-mono text-[7px] uppercase tracking-[0.16em]" style={{ color: "var(--ds-text-muted)" }}>{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <Link
-                      href={`/editorials/${flagship.slug}`}
-                      className="inline-flex items-center gap-2 border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em]"
-                      style={{ borderColor: "var(--ds-accent-soft)", color: "var(--ds-accent)", backgroundColor: "var(--ds-accent-soft)" }}
-                    >
-                      Open publication
-                    </Link>
-                    {flagship.pdfPath ? (
-                      <a
-                        href={flagship.pdfPath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em]"
-                        style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }}
-                      >
-                        <Download className="h-3 w-3" />
-                        PDF edition
-                      </a>
-                    ) : null}
-                  </div>
-                </div>
+              {/* Status mark */}
+              <div style={{
+                fontFamily: mono,
+                fontSize: "7.5px",
+                letterSpacing: "0.42em",
+                textTransform: "uppercase",
+                color: `${GOLD}BB`,
+                marginBottom: "1.25rem",
+              }}>
+                Flagship Editorial · CB-ED-001
               </div>
-            ) : (
-              <div className="border px-6 py-12 text-center" style={{ borderColor: "var(--ds-border)" }}>
-                <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>
-                  Flagship publication forthcoming
+
+              {/* Gold rule */}
+              <div style={{
+                width: "48px",
+                height: "1px",
+                background: `linear-gradient(to right, transparent, ${GOLD}50, transparent)`,
+                margin: "0 auto 2.25rem",
+              }} />
+
+              {/* Title */}
+              <h1 style={{
+                fontFamily: serif,
+                fontWeight: 300,
+                fontSize: "clamp(2.8rem, 6vw, 5.2rem)",
+                lineHeight: 0.92,
+                letterSpacing: "-0.03em",
+                color: "rgba(255,255,255,0.95)",
+                marginBottom: "1.1rem",
+              }}>
+                {flagship?.title ?? "The Ultimate Purpose of Man"}
+              </h1>
+
+              {/* Subtitle */}
+              {flagship?.subtitle && (
+                <p style={{
+                  fontFamily: serif,
+                  fontWeight: 300,
+                  fontSize: "clamp(1rem, 1.4vw, 1.25rem)",
+                  lineHeight: 1.5,
+                  color: `${GOLD}99`,
+                  fontStyle: "italic",
+                  marginBottom: "1.75rem",
+                }}>
+                  {flagship.subtitle}
                 </p>
+              )}
+
+              {/* Governing claim */}
+              <p style={{
+                fontFamily: serif,
+                fontWeight: 300,
+                fontSize: "clamp(0.98rem, 1.2vw, 1.08rem)",
+                lineHeight: 1.80,
+                color: "rgba(255,255,255,0.42)",
+                maxWidth: "54ch",
+                margin: "0 auto 2rem",
+              }}>
+                {FLAGSHIP_GOVERNING_CLAIM}
+              </p>
+
+              {/* Meta strip */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.6rem",
+                fontFamily: mono,
+                fontSize: "7px",
+                letterSpacing: "0.26em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.18)",
+                marginBottom: "2.25rem",
+              }}>
+                {flagship?.date && <span>{formatDate(flagship.date)}</span>}
+                {flagship?.date && flagship?.readingTime && (
+                  <span style={{ color: "rgba(255,255,255,0.08)" }}>·</span>
+                )}
+                {flagship?.readingTime && <span>{flagship.readingTime}</span>}
+                {flagship?.readingTime && flagship?.version && (
+                  <span style={{ color: "rgba(255,255,255,0.08)" }}>·</span>
+                )}
+                {flagship?.version && <span>v{flagship.version}</span>}
               </div>
-            )}
+
+              {/* CTAs */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.75rem",
+                flexWrap: "wrap",
+              }}>
+                {flagship && (
+                  <Link
+                    href={`/editorials/${flagship.slug}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      padding: "13px 28px",
+                      border: `1px solid ${GOLD}50`,
+                      backgroundColor: `${GOLD}14`,
+                      color: GOLD,
+                      fontFamily: mono,
+                      fontSize: "8.5px",
+                      letterSpacing: "0.30em",
+                      textTransform: "uppercase",
+                      transition: "all 0.25s ease",
+                    }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLAnchorElement;
+                      el.style.borderColor = `${GOLD}75`;
+                      el.style.backgroundColor = `${GOLD}20`;
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLAnchorElement;
+                      el.style.borderColor = `${GOLD}50`;
+                      el.style.backgroundColor = `${GOLD}14`;
+                    }}
+                  >
+                    Open the editorial →
+                  </Link>
+                )}
+                {flagship?.pdfPath && (
+                  <a
+                    href={flagship.pdfPath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      padding: "13px 28px",
+                      border: "1px solid rgba(255,255,255,0.10)",
+                      backgroundColor: "transparent",
+                      color: "rgba(255,255,255,0.40)",
+                      fontFamily: mono,
+                      fontSize: "8.5px",
+                      letterSpacing: "0.30em",
+                      textTransform: "uppercase",
+                      transition: "all 0.25s ease",
+                    }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLAnchorElement;
+                      el.style.borderColor = "rgba(255,255,255,0.20)";
+                      el.style.color = "rgba(255,255,255,0.65)";
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLAnchorElement;
+                      el.style.borderColor = "rgba(255,255,255,0.10)";
+                      el.style.color = "rgba(255,255,255,0.40)";
+                    }}
+                  >
+                    <Download style={{ width: "11px", height: "11px" }} />
+                    Download PDF
+                  </a>
+                )}
+              </div>
+
+              {/* Convergence label */}
+              <div style={{
+                marginTop: "3.5rem",
+                fontFamily: mono,
+                fontSize: "7px",
+                letterSpacing: "0.36em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.14)",
+              }}>
+                The convergence text beneath the Canon
+              </div>
+
+            </div>
           </div>
         </section>
 
-        {/* 2. Editorial Series */}
+        {/* ── ESTATE HIERARCHY STRIP ───────────────────────────────────── */}
+        <section style={{
+          backgroundColor: BASE,
+          borderTop: `1px solid ${GOLD}15`,
+          borderBottom: "1px solid rgba(255,255,255,0.04)",
+        }}>
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              flexWrap: "wrap",
+              padding: "0.85rem 0",
+              fontFamily: mono,
+              fontSize: "7.5px",
+              letterSpacing: "0.30em",
+              textTransform: "uppercase",
+            }}>
+              {(
+                [
+                  { label: "Canon",               active: false },
+                  { label: "Flagship Editorial",  active: true  },
+                  { label: "Editorial Series",    active: false },
+                  { label: "Applied Essay Series", active: false },
+                  { label: "Publication Record",  active: false },
+                ] as const
+              ).map((node, i, arr) => (
+                <React.Fragment key={node.label}>
+                  <span style={{ color: node.active ? GOLD : "rgba(255,255,255,0.22)" }}>
+                    {node.label}
+                  </span>
+                  {i < arr.length - 1 && (
+                    <span style={{ color: "rgba(255,255,255,0.10)" }}>›</span>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 2. Editorial Series ─────────────────────────────────────── */}
         {series.length > 0 ? (
           <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
             <div className="mx-auto max-w-6xl px-6 lg:px-10">
@@ -449,7 +517,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
           </section>
         ) : null}
 
-        {/* 3. Applied Essay Series */}
+        {/* ── 3. Applied Essay Series ─────────────────────────────────── */}
         <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
             <div className="mb-2">
@@ -470,13 +538,47 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
           </div>
         </section>
 
-        {/* 4. Publication Record / Archive */}
+        {/* ── 4. Publication Record ───────────────────────────────────── */}
         {filteredSupporting.length > 0 ? (
           <section className="py-10 lg:py-12">
             <div className="mx-auto max-w-6xl px-6 lg:px-10">
               <div className="mb-6">
                 <SectionLabel>Publication Record</SectionLabel>
               </div>
+              {categories.length > 1 && (
+                <div className="mb-6 flex flex-wrap gap-x-8 gap-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveCategory("")}
+                    className="font-mono text-[8px] uppercase tracking-[0.3em]"
+                    style={{
+                      color: activeCategory === "" ? "var(--ds-text)" : "var(--ds-text-muted)",
+                      textDecoration: activeCategory === "" ? "underline" : "none",
+                      textUnderlineOffset: "0.35rem",
+                    }}
+                  >
+                    All
+                  </button>
+                  {categories.map((category) => {
+                    const active = activeCategory === category;
+                    return (
+                      <button
+                        key={category}
+                        type="button"
+                        onClick={() => setActiveCategory(category)}
+                        className="font-mono text-[8px] uppercase tracking-[0.3em]"
+                        style={{
+                          color: active ? "var(--ds-accent)" : "var(--ds-text-muted)",
+                          textDecoration: active ? "underline" : "none",
+                          textUnderlineOffset: "0.35rem",
+                        }}
+                      >
+                        {category}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               <div>
                 {filteredSupporting.map((item) => (
                   <EditorialRow key={item.slug} item={item} />
@@ -486,7 +588,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
           </section>
         ) : null}
 
-        {!showFlagship && filteredSupporting.length === 0 && series.length === 0 ? (
+        {series.length === 0 && filteredSupporting.length === 0 && !flagship ? (
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
             <div className="border px-6 py-16 text-center" style={{ borderColor: "var(--ds-border)" }}>
               <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>

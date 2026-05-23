@@ -1,7 +1,7 @@
 // pages/editorials/[slug].tsx
-// Design: Institutional publication record — the formal page for a written asset
-// Every publication has: a proper hero, a citation panel, access surfaces,
-// and an escalation close. Nothing generic. Nothing decorative without purpose.
+// Design: Body-first publication page — the editorial is the thing. Everything
+// else is apparatus. Hero shows the title and almost nothing else. The body
+// begins immediately after the fold. Metadata moves post-body.
 
 import * as React from "react";
 import Head from "next/head";
@@ -16,7 +16,6 @@ import {
   Download,
   ExternalLink,
   Eye,
-  FileText,
   Quote,
 } from "lucide-react";
 
@@ -53,18 +52,12 @@ const BASE = "rgb(6 6 9)";
 const LIFT = "rgb(10 14 20)";
 const VOID = "rgb(3 3 5)";
 
+const serif = "'Cormorant Garamond', Georgia, ui-serif, serif";
+const mono  = "'JetBrains Mono', ui-monospace, monospace";
+
 const GRAIN: React.CSSProperties = {
   backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
   backgroundSize: "180px 180px",
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MOTION
-// ─────────────────────────────────────────────────────────────────────────────
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -80,23 +73,6 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
   );
 }
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{
-        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "8.5px",
-        letterSpacing: "0.40em",
-        textTransform: "uppercase",
-        color: `${GOLD}BB`,
-      }}>
-        {children}
-      </span>
-    </div>
-  );
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -104,11 +80,6 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relatedSlugs, bodyCode }) => {
   const { data: session } = useSession();
   const isPublic = item.tier === "public";
-
-  // For restricted editorials, strip download links client-side
-  const safePreviewHref = isPublic ? previewHref : null;
-  const safePdfPath = isPublic ? item.pdfPath : null;
-  const safeEpubPath = isPublic ? item.epubPath : null;
 
   if (!isPublic && !session?.user) {
     return (
@@ -150,8 +121,11 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
 
       <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
 
-        {/* ── COVER ─────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden" style={{ backgroundColor: VOID }}>
+        {/* ── COVER — title-only, full viewport ─────────────────────────── */}
+        <section
+          className="relative overflow-hidden"
+          style={{ minHeight: "100vh", backgroundColor: VOID }}
+        >
           {/* Atmosphere */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute" style={{
@@ -172,8 +146,12 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
             background: `linear-gradient(to right, transparent, ${GOLD}25, transparent)`,
           }} />
 
-          <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-            <div className="pt-28 md:pt-36" />
+          {/* Inner flex column — full viewport height */}
+          <div
+            className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12"
+            style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+          >
+            <div style={{ paddingTop: "7rem" }} />
 
             {/* Breadcrumb */}
             <motion.div
@@ -186,7 +164,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                 href="/editorials"
                 className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
                 style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontFamily: mono,
                   fontSize: "8px",
                   letterSpacing: "0.30em",
                   textTransform: "uppercase",
@@ -198,7 +176,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
               </Link>
               <span style={{ color: "rgba(255,255,255,0.12)", fontSize: "10px" }}>/</span>
               <span style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontFamily: mono,
                 fontSize: "8px",
                 letterSpacing: "0.24em",
                 textTransform: "uppercase",
@@ -208,246 +186,282 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
               </span>
             </motion.div>
 
-            {/* Cover block */}
-            <div className="mt-8 grid gap-12 lg:grid-cols-[1.3fr_0.7fr] lg:items-start">
-
-              {/* Left — title block */}
+            {/* Hero — centred, title-only */}
+            <div
+              className="flex-1 flex flex-col items-center justify-center text-center"
+              style={{ paddingBottom: "5rem" }}
+            >
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.85, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                style={{ maxWidth: "800px", width: "100%" }}
               >
-                {/* Classification badges */}
-                <div className="flex flex-wrap items-center gap-2.5 mb-6">
-                  {item.category && (
-                    <div className="px-3 py-1.5" style={{
-                      border: `1px solid ${GOLD}30`,
-                      backgroundColor: `${GOLD}09`,
-                    }}>
-                      <span style={{
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px",
-                        letterSpacing: "0.38em",
-                        textTransform: "uppercase",
-                        color: `${GOLD}BB`,
-                      }}>
-                        {item.category}
-                      </span>
-                    </div>
-                  )}
-                  <div className="px-3 py-1.5" style={{
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    backgroundColor: "rgba(255,255,255,0.015)",
-                  }}>
-                    <span style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.34em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.35)",
-                    }}>
-                      {item.tier}
-                    </span>
-                  </div>
-                </div>
+                {/* Gold accent bar */}
+                <div style={{
+                  width: "1px",
+                  height: "40px",
+                  background: `${GOLD}60`,
+                  margin: "0 auto 2rem",
+                }} />
 
                 {/* Title */}
                 <h1 style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontFamily: serif,
                   fontWeight: 300,
-                  fontSize: "clamp(2.2rem, 5vw, 4.2rem)",
-                  lineHeight: 0.94,
+                  fontSize: "clamp(2.4rem, 5vw, 4.4rem)",
+                  lineHeight: 0.96,
                   letterSpacing: "-0.035em",
                   color: "rgba(255,255,255,0.94)",
+                  marginBottom: "1.1rem",
                 }}>
                   {item.title}
                 </h1>
 
+                {/* Subtitle */}
                 {item.subtitle && (
                   <p style={{
-                    marginTop: "1.1rem",
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontFamily: serif,
                     fontWeight: 300,
-                    fontSize: "clamp(1.05rem, 1.4vw, 1.30rem)",
+                    fontSize: "clamp(1rem, 1.3vw, 1.22rem)",
                     lineHeight: 1.55,
-                    color: "rgba(255,255,255,0.45)",
+                    color: "rgba(255,255,255,0.40)",
                     fontStyle: "italic",
-                    maxWidth: "46ch",
+                    marginBottom: "1.75rem",
                   }}>
                     {item.subtitle}
                   </p>
                 )}
 
-                {item.description && (
-                  <p style={{
-                    marginTop: "0.85rem",
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "1.02rem",
-                    lineHeight: 1.72,
-                    color: "rgba(255,255,255,0.38)",
-                    maxWidth: "46ch",
-                  }}>
-                    {item.description}
-                  </p>
-                )}
-
                 {/* Meta strip */}
-                <div className="flex flex-wrap items-center gap-3 mt-6">
-                  {[item.author, item.date, item.readingTime, item.version ? `v${item.version}` : null, item.contentId]
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexWrap: "wrap",
+                  gap: "0.5rem",
+                  fontFamily: mono,
+                  fontSize: "7.5px",
+                  letterSpacing: "0.26em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.20)",
+                }}>
+                  {[item.author, item.date, item.readingTime, item.tier]
                     .filter(Boolean)
                     .map((val, i, arr) => (
                       <React.Fragment key={i}>
-                        <span style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px",
-                          letterSpacing: "0.26em",
-                          textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.22)",
-                        }}>
-                          {val}
-                        </span>
-                        {i < arr.length - 1 && <span style={{ color: "rgba(255,255,255,0.08)" }}>·</span>}
+                        <span>{val}</span>
+                        {i < arr.length - 1 && (
+                          <span style={{ color: "rgba(255,255,255,0.08)" }}>·</span>
+                        )}
                       </React.Fragment>
                     ))}
                 </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
 
-                {/* CTAs */}
-                <div className="flex flex-wrap gap-3 mt-8">
+        {/* ── READING FRAME ─────────────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-3xl px-6 py-16 lg:px-12">
+
+            {/* Convergence note — inline, no label */}
+            {item.convergenceNote && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.60 }}
+                style={{
+                  fontFamily: serif,
+                  fontWeight: 300,
+                  fontSize: "1rem",
+                  lineHeight: 1.75,
+                  color: "rgba(255,255,255,0.32)",
+                  fontStyle: "italic",
+                  maxWidth: "54ch",
+                  marginBottom: "2.5rem",
+                }}
+              >
+                {item.convergenceNote}
+              </motion.p>
+            )}
+
+            {/* Divider between convergence note and body */}
+            {item.convergenceNote && bodyCode && (
+              <div style={{ marginBottom: "3rem" }}>
+                <GoldRule />
+              </div>
+            )}
+
+            {/* Editorial body */}
+            {bodyCode ? (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.70 }}
+              >
+                <div className="editorial-body">
+                  <SafeMDXRenderer code={bodyCode} />
+                </div>
+
+                {/* Footer links */}
+                <div
+                  className="mt-14 flex flex-wrap items-center gap-4"
+                  style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem" }}
+                >
                   {item.pdfPath && (
                     <a
                       href={item.pdfPath}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-2.5 transition-all duration-300"
+                      className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
                       style={{
-                        padding: "12px 24px",
-                        border: `1px solid ${GOLD}42`,
-                        backgroundColor: `${GOLD}0E`,
-                        color: GOLD,
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "8.5px",
-                        letterSpacing: "0.28em",
+                        fontFamily: mono,
+                        fontSize: "7.5px",
+                        letterSpacing: "0.26em",
                         textTransform: "uppercase",
+                        color: `${GOLD}99`,
                       }}
-                      onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}16`; }}
-                      onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}0E`; }}
                     >
-                      <Download style={{ width: "12px", height: "12px" }} />
+                      <Download style={{ width: "10px", height: "10px" }} />
                       Download PDF
                     </a>
                   )}
-
-                  {previewHref && (
-                    <a
-                      href={previewHref}
-                      className="inline-flex items-center gap-2.5 transition-all duration-300"
-                      style={{
-                        padding: "12px 24px",
-                        border: "1px solid rgba(255,255,255,0.09)",
-                        backgroundColor: "rgba(255,255,255,0.02)",
-                        color: "rgba(255,255,255,0.50)",
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "8.5px",
-                        letterSpacing: "0.28em",
-                        textTransform: "uppercase",
-                      }}
-                      onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.75)"; }}
-                      onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.50)"; }}
-                    >
-                      <Eye style={{ width: "12px", height: "12px" }} />
-                      Preview
-                    </a>
-                  )}
-
-                  {item.epubEnabled && item.epubPath && (
-                    <a
-                      href={item.epubPath}
-                      className="inline-flex items-center gap-2.5 transition-all duration-300"
-                      style={{
-                        padding: "12px 24px",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                        color: "rgba(255,255,255,0.32)",
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "8.5px",
-                        letterSpacing: "0.28em",
-                        textTransform: "uppercase",
-                      }}
-                      onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.14)"; el.style.color = "rgba(255,255,255,0.55)"; }}
-                      onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.07)"; el.style.color = "rgba(255,255,255,0.32)"; }}
-                    >
-                      <BookOpen style={{ width: "12px", height: "12px" }} />
-                      EPUB
-                    </a>
-                  )}
-                </div>
-              </motion.div>
-
-              {/* Right — metadata record panel */}
-              <motion.div
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.75, delay: 0.14 }}
-                className="space-y-3 lg:sticky lg:top-28"
-              >
-                {/* Publication record */}
-                <div style={{
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  backgroundColor: LIFT,
-                }}>
-                  <div style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  }}>
-                    <span style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
+                  <a
+                    href={citationHref}
+                    className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
+                    style={{
+                      fontFamily: mono,
+                      fontSize: "7.5px",
+                      letterSpacing: "0.26em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.22)",
-                    }}>
-                      Publication record
-                    </span>
-                  </div>
-                  <div style={{ padding: "0.75rem 1.25rem" }}>
-                    {[
-                      { label: "Content ID",  value: item.contentId },
-                      { label: "Author",      value: item.author },
-                      { label: "Tier",        value: item.tier },
-                      { label: "Category",    value: item.category || "—" },
-                      { label: "Date",        value: item.date || "—" },
-                      { label: "Version",     value: item.version || "—" },
-                      { label: "Status",      value: item.status || "—" },
-                      { label: "Reading time", value: item.readingTime || "—" },
-                    ].map(({ label, value }) => (
-                      <div key={label}
-                        className="flex items-start justify-between gap-3 py-2"
-                        style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-                      >
-                        <span style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "6.5px",
-                          letterSpacing: "0.32em",
-                          textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.20)",
-                        }}>
-                          {label}
-                        </span>
-                        <span style={{
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px",
-                          letterSpacing: "0.10em",
-                          color: "rgba(255,255,255,0.55)",
-                          textAlign: "right",
-                          maxWidth: "58%",
-                          wordBreak: "break-all",
-                        }}>
-                          {value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                    }}
+                  >
+                    <ExternalLink style={{ width: "10px", height: "10px" }} />
+                    Citation JSON
+                  </a>
+                  <Link
+                    href="/editorials"
+                    className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
+                    style={{
+                      fontFamily: mono,
+                      fontSize: "7.5px",
+                      letterSpacing: "0.26em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.16)",
+                    }}
+                  >
+                    ← All Editorials
+                  </Link>
                 </div>
+              </motion.div>
+            ) : (
+              <div style={{
+                border: "1px solid rgba(255,255,255,0.05)",
+                backgroundColor: "rgba(255,255,255,0.01)",
+                padding: "1.75rem 2rem",
+              }}>
+                <span style={{
+                  fontFamily: mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.38em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.18)",
+                }}>
+                  Canonical text pending
+                </span>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ── POST-BODY APPARATUS ───────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-3xl px-6 py-14 lg:px-12">
+
+            {/* Section label */}
+            <div style={{
+              fontFamily: mono,
+              fontSize: "7px",
+              letterSpacing: "0.40em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.16)",
+              marginBottom: "1.25rem",
+            }}>
+              Publication apparatus
+            </div>
+            <GoldRule soft />
+            <div style={{ marginTop: "2.5rem" }} />
+
+            {/* 2-column grid — publication record + citation/access */}
+            <div className="grid gap-6 lg:grid-cols-2">
+
+              {/* Left — Publication record */}
+              <div style={{
+                border: "1px solid rgba(255,255,255,0.07)",
+                backgroundColor: LIFT,
+              }}>
+                <div style={{
+                  padding: "0.85rem 1.25rem",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}>
+                  <span style={{
+                    fontFamily: mono,
+                    fontSize: "7px",
+                    letterSpacing: "0.38em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.22)",
+                  }}>
+                    Publication record
+                  </span>
+                </div>
+                <div style={{ padding: "0.75rem 1.25rem" }}>
+                  {[
+                    { label: "Content ID",   value: item.contentId },
+                    { label: "Author",       value: item.author },
+                    { label: "Tier",         value: item.tier },
+                    { label: "Category",     value: item.category || "—" },
+                    { label: "Date",         value: item.date || "—" },
+                    { label: "Version",      value: item.version || "—" },
+                    { label: "Status",       value: item.status || "—" },
+                    { label: "Reading time", value: item.readingTime || "—" },
+                  ].map(({ label, value }) => (
+                    <div
+                      key={label}
+                      className="flex items-start justify-between gap-3 py-2"
+                      style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                    >
+                      <span style={{
+                        fontFamily: mono,
+                        fontSize: "6.5px",
+                        letterSpacing: "0.32em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.20)",
+                      }}>
+                        {label}
+                      </span>
+                      <span style={{
+                        fontFamily: mono,
+                        fontSize: "7.5px",
+                        letterSpacing: "0.10em",
+                        color: "rgba(255,255,255,0.55)",
+                        textAlign: "right",
+                        maxWidth: "58%",
+                        wordBreak: "break-all",
+                      }}>
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right — Citation + Access surfaces */}
+              <div className="space-y-3">
 
                 {/* Citation panel */}
                 <div style={{
@@ -458,7 +472,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                   <div className="flex items-center gap-2 mb-4">
                     <Quote style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
                     <span style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontFamily: mono,
                       fontSize: "7px",
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
@@ -469,7 +483,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                   </div>
 
                   <p style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontFamily: serif,
                     fontWeight: 300,
                     fontSize: "0.90rem",
                     lineHeight: 1.65,
@@ -489,7 +503,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                   {item.citation.doi && (
                     <div style={{ marginBottom: "0.5rem" }}>
                       <span style={{
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontFamily: mono,
                         fontSize: "6.5px",
                         letterSpacing: "0.30em",
                         textTransform: "uppercase",
@@ -499,7 +513,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       </span>
                       <span style={{
                         marginLeft: "0.75rem",
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontFamily: mono,
                         fontSize: "7.5px",
                         color: "rgba(255,255,255,0.45)",
                         letterSpacing: "0.06em",
@@ -514,7 +528,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     className="group mt-3 flex items-center justify-between transition-opacity hover:opacity-75"
                   >
                     <span style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontFamily: mono,
                       fontSize: "7px",
                       letterSpacing: "0.28em",
                       textTransform: "uppercase",
@@ -536,7 +550,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     borderBottom: "1px solid rgba(255,255,255,0.04)",
                   }}>
                     <span style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontFamily: mono,
                       fontSize: "7px",
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
@@ -545,256 +559,66 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       Access surfaces
                     </span>
                   </div>
-
                   <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
                     {item.pdfPath && (
-                      <a href={item.pdfPath} target="_blank" rel="noopener noreferrer"
+                      <a
+                        href={item.pdfPath}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="group flex items-center justify-between transition-opacity hover:opacity-75"
                         style={{ padding: "0.85rem 1.25rem" }}
                       >
                         <div className="flex items-center gap-2">
                           <Download style={{ width: "10px", height: "10px", color: `${GOLD}80` }} />
-                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>PDF Edition</span>
+                          <span style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>PDF Edition</span>
                         </div>
                         <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                       </a>
                     )}
                     {previewHref && (
-                      <a href={previewHref}
+                      <a
+                        href={previewHref}
                         className="group flex items-center justify-between transition-opacity hover:opacity-75"
                         style={{ padding: "0.85rem 1.25rem" }}
                       >
                         <div className="flex items-center gap-2">
                           <Eye style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
-                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Preview Route</span>
+                          <span style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Preview Route</span>
                         </div>
                         <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                       </a>
                     )}
                     {item.epubEnabled && item.epubPath && (
-                      <a href={item.epubPath}
+                      <a
+                        href={item.epubPath}
                         className="group flex items-center justify-between transition-opacity hover:opacity-75"
                         style={{ padding: "0.85rem 1.25rem" }}
                       >
                         <div className="flex items-center gap-2">
                           <BookOpen style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
-                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>EPUB Edition</span>
+                          <span style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>EPUB Edition</span>
                         </div>
                         <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                       </a>
                     )}
-                    <a href={citationHref}
+                    <a
+                      href={citationHref}
                       className="group flex items-center justify-between transition-opacity hover:opacity-75"
                       style={{ padding: "0.85rem 1.25rem" }}
                     >
                       <div className="flex items-center gap-2">
                         <ExternalLink style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
-                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Citation JSON</span>
+                        <span style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Citation JSON</span>
                       </div>
                       <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                     </a>
                   </div>
                 </div>
-              </motion.div>
-            </div>
 
-            <div style={{ paddingBottom: "4rem" }} />
-          </div>
-        </section>
-
-        {/* ── PUBLICATION SUMMARY ───────────────────────────────────────── */}
-        {item.description && (
-          <section style={{ backgroundColor: BASE }}>
-            <div className="mx-auto max-w-4xl px-6 py-14 lg:px-12">
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.70 }}
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-px w-8" style={{ background: `linear-gradient(to right, ${GOLD}45, transparent)` }} />
-                  <span style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px",
-                    letterSpacing: "0.40em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.20)",
-                  }}>
-                    Publication summary
-                  </span>
-                </div>
-
-                <div style={{
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  backgroundColor: "rgba(255,255,255,0.012)",
-                  padding: "2rem 2.5rem",
-                }}>
-                  <p style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "clamp(1.05rem, 1.3vw, 1.20rem)",
-                    lineHeight: 1.80,
-                    color: "rgba(255,255,255,0.62)",
-                  }}>
-                    {item.description}
-                  </p>
-
-                  {item.subtitle && (
-                    <p style={{
-                      marginTop: "1.25rem",
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "1.02rem",
-                      lineHeight: 1.72,
-                      color: "rgba(255,255,255,0.38)",
-                      fontStyle: "italic",
-                      borderTop: "1px solid rgba(255,255,255,0.05)",
-                      paddingTop: "1.25rem",
-                    }}>
-                      {item.subtitle}
-                    </p>
-                  )}
-                </div>
-              </motion.div>
-            </div>
-          </section>
-        )}
-
-        {/* ── CONVERGENCE NOTE ──────────────────────────────────────────── */}
-        {item.convergenceNote && (
-          <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-            <div className="mx-auto max-w-3xl px-6 py-10 lg:px-12">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.60 }}
-              >
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="h-px w-6" style={{ background: `linear-gradient(to right, ${GOLD}30, transparent)` }} />
-                  <span style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.40em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.16)",
-                  }}>
-                    Why this text sits here
-                  </span>
-                </div>
-                <p style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "1rem",
-                  lineHeight: 1.75,
-                  color: "rgba(255,255,255,0.36)",
-                  fontStyle: "italic",
-                  maxWidth: "54ch",
-                }}>
-                  {item.convergenceNote}
-                </p>
-              </motion.div>
-            </div>
-          </section>
-        )}
-
-        {/* ── CANONICAL TEXT ────────────────────────────────────────────── */}
-        {bodyCode ? (
-          <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-            <div className="mx-auto max-w-3xl px-6 py-16 lg:px-12">
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.70 }}
-              >
-                {/* Section label */}
-                <div className="flex items-center gap-3 mb-10">
-                  <div className="h-px w-8" style={{ background: `linear-gradient(to right, ${GOLD}45, transparent)` }} />
-                  <span style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px",
-                    letterSpacing: "0.40em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.20)",
-                  }}>
-                    Canonical Text
-                  </span>
-                </div>
-
-                {/* Body */}
-                <div className="editorial-body">
-                  <SafeMDXRenderer code={bodyCode} />
-                </div>
-
-                {/* Footer row */}
-                <div className="mt-14 flex flex-wrap items-center gap-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem" }}>
-                  {item.pdfPath && (
-                    <a href={item.pdfPath} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
-                      style={{
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
-                        letterSpacing: "0.26em",
-                        textTransform: "uppercase",
-                        color: `${GOLD}99`,
-                      }}
-                    >
-                      <Download style={{ width: "10px", height: "10px" }} />
-                      Download PDF
-                    </a>
-                  )}
-                  <a href={citationHref}
-                    className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.26em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                    }}
-                  >
-                    <ExternalLink style={{ width: "10px", height: "10px" }} />
-                    Citation JSON
-                  </a>
-                  <Link href="/editorials"
-                    className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.26em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.16)",
-                    }}
-                  >
-                    ← All Editorials
-                  </Link>
-                </div>
-              </motion.div>
-            </div>
-          </section>
-        ) : (
-          <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-            <div className="mx-auto max-w-3xl px-6 py-12 lg:px-12">
-              <div style={{
-                border: "1px solid rgba(255,255,255,0.05)",
-                backgroundColor: "rgba(255,255,255,0.01)",
-                padding: "1.75rem 2rem",
-              }}>
-                <span style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
-                  letterSpacing: "0.38em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
-                }}>
-                  Canonical text pending
-                </span>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
 
         {/* ── ADJACENT NAVIGATION ───────────────────────────────────────── */}
         {(relatedSlugs.prev || relatedSlugs.next) && (() => {
@@ -806,26 +630,28 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
               <div className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
                 <div className="grid gap-4 sm:grid-cols-2">
                   {prevItem ? (
-                    <Link href={`/editorials/${prevItem.slug}`}
+                    <Link
+                      href={`/editorials/${prevItem.slug}`}
                       className="group flex items-center gap-4 transition-opacity hover:opacity-75"
                       style={{ padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}
                     >
                       <ArrowLeft style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
                       <div>
-                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Previous</div>
-                        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.58)" }}>{prevItem.title}</div>
+                        <div style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Previous</div>
+                        <div style={{ fontFamily: serif, fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.58)" }}>{prevItem.title}</div>
                       </div>
                     </Link>
                   ) : <div />}
 
                   {nextItem && (
-                    <Link href={`/editorials/${nextItem.slug}`}
+                    <Link
+                      href={`/editorials/${nextItem.slug}`}
                       className="group flex items-center justify-end gap-4 text-right transition-opacity hover:opacity-75"
                       style={{ padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}
                     >
                       <div>
-                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Next</div>
-                        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.58)" }}>{nextItem.title}</div>
+                        <div style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Next</div>
+                        <div style={{ fontFamily: serif, fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.58)" }}>{nextItem.title}</div>
                       </div>
                       <ArrowRight style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
                     </Link>
@@ -845,38 +671,40 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
               padding: "2rem 2.5rem",
             }}>
               <div style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontFamily: mono,
                 fontSize: "7px",
                 letterSpacing: "0.40em",
                 textTransform: "uppercase",
                 color: `${GOLD}90`,
                 marginBottom: "1rem",
               }}>
-                If this publication raises a question that requires a conversation
+                The estate that flows from this argument
               </div>
               <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontFamily: serif,
                 fontWeight: 300,
                 fontSize: "1.02rem",
                 lineHeight: 1.72,
                 color: "rgba(255,255,255,0.42)",
                 fontStyle: "italic",
-                maxWidth: "48ch",
+                maxWidth: "50ch",
                 marginBottom: "1.5rem",
               }}>
-                Publications establish the intellectual frame. Diagnostics apply it.
-                The Strategy Room exists for situations where the question carries
-                material consequence.
+                This editorial establishes the frame. The series, the essays, the diagnostics,
+                and the strategy work are all extensions of the question it answers. If something
+                in this argument demands further examination — in your organisation, your leadership,
+                or your own formation — that is what the rest of the estate exists for.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/diagnostics"
+                <Link
+                  href="/diagnostics"
                   className="inline-flex items-center gap-2.5 transition-all duration-300"
                   style={{
                     padding: "11px 22px",
                     border: `1px solid ${GOLD}35`,
                     backgroundColor: `${GOLD}0D`,
                     color: `${GOLD}BB`,
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontFamily: mono,
                     fontSize: "8px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
@@ -886,14 +714,15 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                 >
                   Enter diagnostics <ArrowRight style={{ width: "11px", height: "11px" }} />
                 </Link>
-                <Link href="/strategy-room"
+                <Link
+                  href="/strategy-room"
                   className="inline-flex items-center gap-2.5 transition-all duration-300"
                   style={{
                     padding: "11px 22px",
                     border: "1px solid rgba(255,255,255,0.08)",
                     backgroundColor: "rgba(255,255,255,0.02)",
                     color: "rgba(255,255,255,0.38)",
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontFamily: mono,
                     fontSize: "8px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
@@ -903,13 +732,14 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                 >
                   Strategy Room
                 </Link>
-                <Link href="/editorials"
+                <Link
+                  href="/editorials"
                   className="inline-flex items-center gap-2.5 transition-all duration-300"
                   style={{
                     padding: "11px 22px",
                     border: "1px solid rgba(255,255,255,0.06)",
                     color: "rgba(255,255,255,0.22)",
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontFamily: mono,
                     fontSize: "8px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
@@ -934,15 +764,11 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Hardcoded catalogue is tiny; use blocking so new additions render
-  // without a redeploy.
   const items = getPublicationCatalogue();
   return {
     paths: items.map(item => ({ params: { slug: item.slug } })),
     fallback: "blocking",
   };
-
-
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ctx => {
@@ -962,7 +788,6 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
     : null;
 
   // ── Resolve editorial body ───────────────────────────────────────────────
-  // Use the established server helper (reads JSON indexes, no contentlayer/generated import)
   let bodyCode: string | null = null;
   try {
     const { getAllEditorials } = await import("@/lib/content/server");
@@ -975,14 +800,10 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
       bodyCode = result.mode !== "empty" ? result.code : null;
     }
   } catch {
-    // Generated indexes may not exist yet on first build pass
     bodyCode = null;
   }
 
   // ── Missing-body guard ───────────────────────────────────────────────────
-  // Invariant: a PUBLISHED flagship editorial must have a canonical body source.
-  // If canonicalTextPending is explicitly true in the catalogue the placeholder
-  // is intentional and no warning fires.
   if (!bodyCode && isPublic && !item.canonicalTextPending && process.env.NODE_ENV !== "production") {
     console.warn(
       `[editorial] MISSING BODY: "${slug}" is public but has no body source at content/editorials/${slug}.mdx — set canonicalTextPending: true in the catalogue to suppress this warning.`,
