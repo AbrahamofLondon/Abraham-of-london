@@ -293,9 +293,11 @@ export default function EnhancedFooter(): React.ReactElement {
     { label: "Canon", href: "/canon" },
     { label: "Books", href: "/books" },
     { label: "Editorials", href: "/editorials" },
-    { label: "Essays", href: "/blog", highlight: true }, 
+    { label: "Essays", href: "/blog", highlight: true },
+    { label: "The Burden Changes Hands", href: "/blog/series/the-burden-changes-hands", highlight: true },
+    { label: "The Science of Inherited Selves", href: "/blog/series/the-science-of-inherited-selves", highlight: true },
     { label: "Library", href: "/library" },
-    { label: "Shorts", href: "/shorts", highlight: true }, 
+    { label: "Shorts", href: "/shorts", highlight: true },
     { label: "Playbooks", href: "/playbooks" },
   ],
   Products: [
@@ -449,10 +451,10 @@ export default function EnhancedFooter(): React.ReactElement {
             {Object.entries(
               isHome
                 ? {
-                    Archive: [
-                      { label: "Canon", href: "/canon" },
-                      { label: "Library", href: "/library" },
-                      { label: "Intelligence", href: "/intelligence/market" },
+                    Reading: [
+                      { label: "Essays", href: "/blog" },
+                      { label: "The Burden Changes Hands", href: "/blog/series/the-burden-changes-hands", highlight: true },
+                      { label: "The Science of Inherited Selves", href: "/blog/series/the-science-of-inherited-selves", highlight: true },
                       { label: "Shorts", href: "/shorts", highlight: true },
                     ],
                     Products: [

@@ -12,6 +12,7 @@ import Layout from "@/components/Layout";
 import EssayCard from "@/components/essays/EssayCard";
 import { resolveDocCoverImage } from "@/lib/content/shared";
 import { selectFeaturedEssay } from "@/lib/blog/select-featured-post";
+import type { BlogSeries } from "@/lib/blog/series";
 
 /* -----------------------------------------------------------------------------
   TYPES
@@ -35,10 +36,20 @@ type PostItem = {
   coverPosition?: "center" | string | null;
 };
 
+type SeriesSummary = {
+  slug: string;
+  title: string;
+  description: string;
+  excerpt: string;
+  partCount: number;
+  publishedCount: number;
+  firstPublishedPartSlug: string | null;
+};
+
 type BlogIndexProps = {
   items: PostItem[];
   totalPosts: number;
-  hasAppliedSeries: boolean;
+  seriesCatalogue: SeriesSummary[];
 };
 
 const DEFAULT_COVER = "/assets/images/writing-desk.webp";
@@ -112,10 +123,153 @@ function safeDateLabel(value: unknown): string | null {
 }
 
 /* -----------------------------------------------------------------------------
+  SERIES SHELF
+----------------------------------------------------------------------------- */
+
+function seriesStatusLabel(published: number, total: number): string {
+  if (published === 0) return "Planned";
+  if (published >= total) return "Complete";
+  return `${published} of ${total} published`;
+}
+
+function SeriesShelf({ catalogue }: { catalogue: SeriesSummary[] }) {
+  if (catalogue.length === 0) return null;
+  return (
+    <section
+      className="border-b"
+      style={{
+        borderColor: "var(--ds-border)",
+        backgroundColor: "var(--ds-background-muted)",
+      }}
+    >
+      <div className="mx-auto max-w-7xl px-6 py-7 lg:px-12">
+        {/* Section label */}
+        <div className="flex items-center gap-3 mb-5">
+          <span
+            aria-hidden="true"
+            style={{
+              width: 1,
+              height: 16,
+              backgroundColor: "rgba(201,150,58,0.5)",
+              display: "inline-block",
+              flexShrink: 0,
+            }}
+          />
+          <span
+            className="font-mono uppercase tracking-[0.38em]"
+            style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+          >
+            Applied Essay Series
+          </span>
+        </div>
+
+        {/* Cards grid */}
+        <div
+          className={`grid gap-px`}
+          style={{
+            gridTemplateColumns: `repeat(${Math.min(catalogue.length, 3)}, 1fr)`,
+            backgroundColor: "var(--ds-border)",
+          }}
+        >
+          {catalogue.map((series) => {
+            const statusLabel = seriesStatusLabel(series.publishedCount, series.partCount);
+            const isComplete = series.publishedCount >= series.partCount;
+            const href = `/blog/series/${series.slug}`;
+            const entryHref =
+              series.firstPublishedPartSlug
+                ? `/blog/series/${series.slug}/${series.firstPublishedPartSlug}`
+                : href;
+
+            return (
+              <Link
+                key={series.slug}
+                href={href}
+                className="group block transition-colors duration-200 hover:bg-[rgba(201,150,58,0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(201,150,58,0.4)] focus-visible:ring-inset"
+                style={{ backgroundColor: "var(--ds-background-muted)" }}
+              >
+                <div className="px-7 py-6">
+                  {/* Status */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <span
+                      className="font-mono uppercase tracking-[0.28em]"
+                      style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                    >
+                      {series.partCount}-Part Series
+                    </span>
+                    <span
+                      style={{
+                        width: 1,
+                        height: 8,
+                        backgroundColor: "var(--ds-border)",
+                        display: "inline-block",
+                      }}
+                    />
+                    <span
+                      className="font-mono uppercase tracking-[0.24em]"
+                      style={{
+                        fontSize: "7px",
+                        color: isComplete ? "var(--ds-accent)" : "var(--ds-text-subtle)",
+                      }}
+                    >
+                      {statusLabel}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3
+                    className="font-serif italic mb-2 transition-colors duration-200 group-hover:text-white"
+                    style={{
+                      fontWeight: 300,
+                      fontSize: "clamp(0.95rem, 1.3vw, 1.15rem)",
+                      lineHeight: 1.2,
+                      color: "var(--ds-text)",
+                    }}
+                  >
+                    {series.title}
+                  </h3>
+
+                  {/* Excerpt */}
+                  <p
+                    className="text-[12px] leading-[1.65rem] mb-4"
+                    style={{ color: "var(--ds-text-muted)", maxWidth: "54ch" }}
+                  >
+                    {series.excerpt}
+                  </p>
+
+                  {/* CTA row */}
+                  <div className="flex items-center gap-6">
+                    <span
+                      className="font-mono uppercase tracking-[0.24em] transition-colors duration-200 group-hover:text-[#C9963A] whitespace-nowrap"
+                      style={{ fontSize: "7.5px", color: "var(--ds-text-subtle)" }}
+                    >
+                      Enter the series →
+                    </span>
+                    {series.firstPublishedPartSlug && entryHref !== href && (
+                      <Link
+                        href={entryHref}
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-mono uppercase tracking-[0.24em] transition-colors duration-200 hover:text-[#C9963A] whitespace-nowrap"
+                        style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                      >
+                        Begin Part One →
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -----------------------------------------------------------------------------
   PAGE
 ----------------------------------------------------------------------------- */
 
-const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeries }) => {
+const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, seriesCatalogue }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
 
@@ -495,71 +649,8 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeri
         </div>
       </section>
 
-      {/* Applied Essay Series band — full band is a single keyboard-accessible link */}
-      {hasAppliedSeries && (
-        <section
-          className="border-b"
-          style={{
-            borderColor: "var(--ds-border)",
-            backgroundColor: "var(--ds-background-muted)",
-          }}
-        >
-          <Link
-            href="/blog/series/the-burden-changes-hands"
-            aria-label="Enter the series: The Burden Changes Hands — seven applied essays"
-            className="group block transition-colors duration-200 hover:bg-[rgba(201,150,58,0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(201,150,58,0.5)] focus-visible:ring-inset"
-          >
-            <div className="mx-auto max-w-7xl px-6 py-5 lg:px-12">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      width: 1,
-                      height: 20,
-                      backgroundColor: "rgba(201,150,58,0.45)",
-                      display: "inline-block",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div>
-                    <div
-                      className="font-mono uppercase tracking-[0.3em] mb-1"
-                      style={{ fontSize: "7px", color: "var(--ds-accent)" }}
-                    >
-                      Applied Essay Series
-                    </div>
-                    <p
-                      className="font-serif italic"
-                      style={{
-                        fontWeight: 300,
-                        fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
-                        color: "var(--ds-text)",
-                        lineHeight: 1.25,
-                      }}
-                    >
-                      The Burden Changes Hands
-                    </p>
-                    <p
-                      className="text-[12px] leading-relaxed mt-0.5"
-                      style={{ color: "var(--ds-text-muted)" }}
-                    >
-                      Seven essays on memory, custody, and the intelligence organisations build over time.
-                    </p>
-                  </div>
-                </div>
-                <span
-                  aria-hidden="true"
-                  className="flex-shrink-0 font-mono uppercase tracking-[0.24em] transition-colors duration-200 group-hover:text-[#C9963A] whitespace-nowrap"
-                  style={{ fontSize: "7.5px", color: "var(--ds-text-subtle)" }}
-                >
-                  Enter the series →
-                </span>
-              </div>
-            </div>
-          </Link>
-        </section>
-      )}
+      {/* Applied Essay Series shelf — dynamic, reads from getBlogSeriesCatalogue() */}
+      <SeriesShelf catalogue={seriesCatalogue} />
 
       <section
         className="border-b"
@@ -822,10 +913,25 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts, hasAppliedSeri
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   try {
     const { getPublishedPosts } = await import("@/lib/content/server");
+    const { getBlogSeriesCatalogue } = await import("@/lib/blog/series");
     const all = getPublishedPosts() || [];
 
-    // Check whether any series posts exist (for the series band)
-    const hasAppliedSeries = all.some((doc: any) => !doc?.draft && !!doc?.series);
+    // Build the series catalogue summary for the dynamic shelf
+    const catalogue = getBlogSeriesCatalogue();
+    const seriesCatalogue: SeriesSummary[] = catalogue.map((s) => {
+      const publishedParts = s.parts.filter((p) => p.status === "PUBLISHED");
+      const firstPublished = publishedParts
+        .sort((a, b) => a.order - b.order)[0] ?? null;
+      return {
+        slug: s.slug,
+        title: s.title,
+        description: s.description,
+        excerpt: s.excerpt,
+        partCount: s.partCount,
+        publishedCount: publishedParts.length,
+        firstPublishedPartSlug: firstPublished?.slug ?? null,
+      };
+    });
 
     const items: PostItem[] = all
       .filter((doc: any) => !doc?.draft)
@@ -871,7 +977,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
       props: sanitizeData({
         items,
         totalPosts: items.length,
-        hasAppliedSeries,
+        seriesCatalogue,
       }),
       // No revalidate — content is static (contentlayer build-time JSON).
       // ISR would re-run getStaticProps in a Netlify Lambda where the
@@ -880,7 +986,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     };
   } catch {
     return {
-      props: { items: [], totalPosts: 0, hasAppliedSeries: false },
+      props: { items: [], totalPosts: 0, seriesCatalogue: [] },
     };
   }
 };

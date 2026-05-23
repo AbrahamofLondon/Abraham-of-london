@@ -26,6 +26,73 @@ export type BlogSeries = {
 
 const BLOG_SERIES_REGISTRY: BlogSeries[] = [
   {
+    slug: "the-science-of-inherited-selves",
+    title: "The Science of Inherited Selves",
+    description:
+      "A six-part applied essay series on epigenetics, attachment, family memory, inherited trauma, moral responsibility, and the possibility of interrupting what was handed down.",
+    excerpt:
+      "You did not begin at birth. But neither must your story end where your ancestors left it.",
+    category: "Essays",
+    tags: ["epigenetics", "inheritance", "trauma", "attachment", "family", "psychology", "memory", "civilisation", "identity"],
+    partCount: 6,
+    parts: [
+      {
+        order: 1,
+        slug: "what-we-carry-the-science-of-inherited-selves",
+        title: "What We Carry: The Science of Inherited Selves",
+        excerpt:
+          "You did not begin at birth. Before you had memory, you had inheritance: biological, emotional, relational, and spiritual. The question is not only what you carry, but what you will do with it.",
+        readTime: "14 min read",
+        status: "PUBLISHED",
+      },
+      {
+        order: 2,
+        slug: "the-child-before-the-story",
+        title: "The Child Before the Story",
+        excerpt:
+          "An essay on prenatal life, early attachment, nervous-system formation, and the hidden architecture laid down before conscious memory begins.",
+        readTime: "12 min read",
+        status: "DRAFT",
+      },
+      {
+        order: 3,
+        slug: "the-house-that-teaches-the-nervous-system",
+        title: "The House That Teaches the Nervous System",
+        excerpt:
+          "An essay on the home as the first school of safety, threat, trust, authority, and emotional regulation.",
+        readTime: "12 min read",
+        status: "DRAFT",
+      },
+      {
+        order: 4,
+        slug: "what-silence-gives-to-the-next-generation",
+        title: "What Silence Gives to the Next Generation",
+        excerpt:
+          "An essay on family secrecy, unprocessed grief, inherited atmosphere, and the difference between memory and haunting.",
+        readTime: "13 min read",
+        status: "DRAFT",
+      },
+      {
+        order: 5,
+        slug: "when-biology-becomes-biography",
+        title: "When Biology Becomes Biography",
+        excerpt:
+          "An essay on epigenetics, stress biology, trauma research, and why the body can carry history without reducing the person to biology.",
+        readTime: "12 min read",
+        status: "DRAFT",
+      },
+      {
+        order: 6,
+        slug: "the-generation-that-refuses-to-pass-it-on",
+        title: "The Generation That Refuses to Pass It On",
+        excerpt:
+          "An essay on healing, responsibility, plasticity, family repair, and the moral courage to interrupt inherited patterns before they reach the next generation.",
+        readTime: "13 min read",
+        status: "DRAFT",
+      },
+    ],
+  },
+  {
     slug: "the-burden-changes-hands",
     title: "The Burden Changes Hands",
     description:
