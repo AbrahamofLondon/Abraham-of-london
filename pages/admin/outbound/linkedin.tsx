@@ -50,6 +50,8 @@ type ConsoleViewModel = {
   connection: LinkedInConnectionStatus;
   posts: ConsolePost[];
   attempts: AttemptSummary[];
+  /** Serialised snapshot of all model data. Used in tests to verify no token-shaped values leak into the view model. */
+  tokenLeakProbe: string;
 };
 
 function readinessState(asset: ResolvedLinkedInOutbound, publishable: boolean): ConsolePost["readinessState"] {
@@ -89,10 +91,13 @@ export function buildLinkedInOutboundAdminViewModel(
     return (a.sequence ?? 999) - (b.sequence ?? 999);
   });
 
+  const tokenLeakProbe = JSON.stringify({ connection, posts, attempts });
+
   return {
     connection,
     posts,
     attempts,
+    tokenLeakProbe,
   };
 }
 

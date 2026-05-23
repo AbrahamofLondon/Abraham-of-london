@@ -245,7 +245,9 @@ describe("getBlogSeriesFacebookAssets", () => {
   it("each asset text includes the series title", () => {
     const assets = getBlogSeriesFacebookAssets();
     for (const asset of assets) {
-      expect(asset.text).toContain("The Burden Changes Hands");
+      // Each composed text includes "Part of the series: <series title>" — verify the pattern
+      // rather than a specific series name so the test remains valid as new series are published.
+      expect(asset.text).toMatch(/Part of the series: .+/);
     }
   });
 
