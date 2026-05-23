@@ -23,6 +23,7 @@ import MissingComponent from "./MissingComponent";
 import Note from "./Note";
 import ProcessSteps from "./ProcessSteps";
 import PullLine from "./PullLine";
+import { PullQuote } from "./PullQuote";
 import Quote from "./Quote";
 import ResourcesCTA from "./ResourcesCTA";
 import Responsibility from "./Responsibility";
@@ -55,6 +56,7 @@ const LOW_LEVEL_COMPONENTS: Record<string, AnyComponent> = {
   Note,
   ProcessSteps,
   PullLine,
+  PullQuote,
   Quote,
   ResourcesCTA,
   Responsibility,

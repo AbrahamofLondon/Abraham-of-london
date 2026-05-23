@@ -301,6 +301,7 @@ const registryComponents = [
   "Note",
   "ProcessSteps",
   "PullLine",
+  "PullQuote",
   "Quote",
   "ResourcesCTA",
   "Responsibility",

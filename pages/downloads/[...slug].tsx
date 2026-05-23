@@ -13,6 +13,7 @@ import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 import { getRenderableBody } from "@/lib/content/render-body";
+import { getDownloadBySlug } from "@/lib/content/server";
 
 import { getMdxDocumentBySlug } from "@/lib/server/mdx-collections";
 import {
@@ -400,6 +401,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
       ? DEFAULT_PAID_PRICE
       : null;
 
+  // Try Contentlayer-compiled document first (has compiled body.code for rich MDX rendering)
+  const clDoc = isPublic ? getDownloadBySlug(slug) : null;
+  const renderDoc = clDoc?.body?.code ? clDoc : doc;
+
   // Resolve companion editorial path from MDX frontmatter if available
   const companionEditorialHref =
     (doc as any)?.canonicalEditorialPath ?? null;
@@ -409,7 +414,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
       slug: identity.slug,
       title: identity.title,
       requiredTier,
-      bodyCode: isPublic && doc ? getRenderableBody(doc).code : null,
+      bodyCode: isPublic && renderDoc ? getRenderableBody(renderDoc).code : null,
       identity,
       subtitle: (doc as any)?.subtitle ?? null,
       description: (doc as any)?.description ?? identity.description ?? null,
