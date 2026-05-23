@@ -16,9 +16,11 @@ import { getRenderableBody } from "@/lib/content/render-body";
 
 import { getMdxDocumentBySlug } from "@/lib/server/mdx-collections";
 import {
-  assertPdfAssetIdentity,
+  getPdfAssetBySlug,
   pdfAccessToRequiredTier,
   type PdfAssetIdentityResolved,
+  type PdfCategory,
+  type PdfAccess,
 } from "@/lib/assets/pdf-identity";
 import { getProductByEntitlementSlug } from "@/lib/commercial/catalog";
 
@@ -38,6 +40,7 @@ type Props = {
   subtitle?: string;
   description?: string;
   price?: { display: string; justification: string } | null;
+  companionEditorialHref?: string | null;
 };
 
 function cleanSlug(input: unknown): string {
@@ -101,7 +104,7 @@ const VALUE_LINES: Record<string, string> = {
   toolkit: "A complete working set for structured assessment and correction.",
 };
 
-const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, subtitle, description, price }) => {
+const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, subtitle, description, price, companionEditorialHref }) => {
   const isPublic = requiredTier === "public";
   const isPaid = identity.access === "paid";
   const access = ACCESS_CONFIG[identity.access] || ACCESS_CONFIG.public!;
@@ -278,6 +281,28 @@ const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, 
             Designed for decision environments · Part of the Abraham of London system
           </p>
 
+          {/* Companion editorial cross-link */}
+          {companionEditorialHref && (
+            <div
+              className="mt-6 flex items-center gap-3 border-l-2 pl-4"
+              style={{ borderColor: `${GOLD}30` }}
+            >
+              <span
+                className="font-mono uppercase"
+                style={{ fontSize: "7px", letterSpacing: "0.28em", color: "var(--ds-text-subtle)" }}
+              >
+                Canonical editorial
+              </span>
+              <Link
+                href={companionEditorialHref}
+                className="font-mono uppercase transition-opacity hover:opacity-75"
+                style={{ fontSize: "7px", letterSpacing: "0.28em", color: `${GOLD}CC` }}
+              >
+                ← The Ultimate Purpose of Man
+              </Link>
+            </div>
+          )}
+
           {/* Content body */}
           <div className="mt-12">
             {isPublic ? (
@@ -324,14 +349,42 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
   const slug = cleanSlug(params?.slug);
   if (!slug) return { notFound: true };
 
-  let identity: PdfAssetIdentityResolved;
-  try {
-    identity = assertPdfAssetIdentity(slug);
-  } catch {
-    return { notFound: true };
-  }
+  // Try PDF registry (safe — returns null instead of throwing for unknown slugs)
+  let pdfIdentity = getPdfAssetBySlug(slug);
 
+  // Load MDX document (used for body rendering and identity fallback)
   const doc = await getMdxDocumentBySlug("downloads", slug);
+
+  // If neither PDF registry nor MDX document knows this slug → 404
+  if (!pdfIdentity && !doc) return { notFound: true };
+
+  // Build synthetic identity from MDX frontmatter when slug is not in PDF registry
+  let identity: PdfAssetIdentityResolved;
+  if (pdfIdentity) {
+    identity = pdfIdentity;
+  } else {
+    const docData = doc as any;
+    const rawAccess = String(docData?.accessLevel ?? docData?.access ?? "public");
+    const rawCategory = String(docData?.category ?? "framework").toLowerCase().split(/[\s/]+/)[0] ?? "framework";
+    const validCategories: PdfCategory[] = ["framework", "worksheet", "playbook", "brief", "report", "toolkit", "case_evidence"];
+    const category: PdfCategory = validCategories.includes(rawCategory as PdfCategory)
+      ? (rawCategory as PdfCategory)
+      : "framework";
+    const validAccess: PdfAccess[] = ["public", "inner_circle", "restricted", "paid"];
+    const access: PdfAccess = validAccess.includes(rawAccess as PdfAccess)
+      ? (rawAccess as PdfAccess)
+      : "public";
+    identity = {
+      slug,
+      title: String(docData?.title ?? slug),
+      category,
+      authority: "canonical",
+      access,
+      canonicalPath: String(docData?.downloadUrl ?? docData?.publicPath ?? `/assets/downloads/${slug}.pdf`),
+      description: docData?.description ? String(docData.description) : undefined,
+      fileExists: false,
+    };
+  }
 
   const identityTier = pdfAccessToRequiredTier(identity.access);
   const requiredTier = tiers.normalizeRequired(identityTier || (doc ? requiredTierFromDoc(doc as Parameters<typeof requiredTierFromDoc>[0]) : "public"));
@@ -347,6 +400,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
       ? DEFAULT_PAID_PRICE
       : null;
 
+  // Resolve companion editorial path from MDX frontmatter if available
+  const companionEditorialHref =
+    (doc as any)?.canonicalEditorialPath ?? null;
+
   return {
     props: {
       slug: identity.slug,
@@ -357,6 +414,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
       subtitle: (doc as any)?.subtitle ?? null,
       description: (doc as any)?.description ?? identity.description ?? null,
       price: priceEntry ? { display: priceEntry.display, justification: priceEntry.justification } : null,
+      companionEditorialHref,
     },
   };
 };

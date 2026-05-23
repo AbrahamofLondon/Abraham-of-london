@@ -284,6 +284,14 @@ const CURATED_METADATA: Record<string, CuratedPdfMetadata> = {
     access: "inner_circle",
     description: "A structured canvas for designing legacy, governance, and household stewardship.",
   },
+  // Flagship editorial — MDX-only asset, no PDF binary in canonical registry
+  "ultimate-purpose-of-man-editorial": {
+    title: "The Ultimate Purpose of Man — Strategic Schematic Edition",
+    category: "framework",
+    access: "public",
+    description:
+      "A practical schematic edition of The Ultimate Purpose of Man, translating the flagship argument into definitions, governance checks, operating sequence, civilisational diagnostics, and a 30-day alignment protocol.",
+  },
 };
 
 function normalizeSlug(input: unknown): string {

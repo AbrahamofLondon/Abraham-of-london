@@ -620,6 +620,54 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
           </div>
         </section>
 
+        {/* ── COMPANION SCHEMATIC (flagship only) ────────────────────────── */}
+        {item.slug === "ultimate-purpose-of-man" && (
+          <section style={{ backgroundColor: `${GOLD}06`, borderTop: `1px solid ${GOLD}18` }}>
+            <div className="mx-auto max-w-3xl px-6 py-10 lg:px-12">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div style={{
+                    fontFamily: mono,
+                    fontSize: "7px",
+                    letterSpacing: "0.38em",
+                    textTransform: "uppercase",
+                    color: `${GOLD}70`,
+                    marginBottom: "0.5rem",
+                  }}>
+                    Companion edition
+                  </div>
+                  <p style={{
+                    fontFamily: serif,
+                    fontWeight: 300,
+                    fontSize: "1rem",
+                    lineHeight: 1.45,
+                    color: "rgba(255,255,255,0.72)",
+                  }}>
+                    The Strategic Schematic Edition — definitions, operating sequence, governance checklist, and 30-day alignment protocol.
+                  </p>
+                </div>
+                <Link
+                  href="/downloads/ultimate-purpose-of-man-editorial"
+                  className="shrink-0 inline-flex items-center gap-2 transition-opacity hover:opacity-75"
+                  style={{
+                    border: `1px solid ${GOLD}40`,
+                    backgroundColor: `${GOLD}0D`,
+                    color: `${GOLD}CC`,
+                    fontFamily: mono,
+                    fontSize: "7.5px",
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    padding: "0.6rem 1.1rem",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Open schematic edition
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── ADJACENT NAVIGATION ───────────────────────────────────────── */}
         {(relatedSlugs.prev || relatedSlugs.next) && (() => {
           const catalogue = getPublicationCatalogue();
