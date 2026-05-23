@@ -59,7 +59,7 @@ describe("requireAdminPage", () => {
       authorized: true,
       userId: "user_1",
     }));
-    expect(mockGetUserAccess).toHaveBeenCalledWith({}, "user_1");
+    expect(mockGetUserAccess).toHaveBeenCalledWith({}, "user_1", "admin@abrahamoflondon.org");
   });
 
   it("redirects unauthenticated outbound admin access to login with encoded returnTo", async () => {

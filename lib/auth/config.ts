@@ -278,6 +278,7 @@ export const authOptions: NextAuthOptions = {
         const access = await getUserAccess(
           prisma,
           typeof token.sub === "string" ? token.sub : null,
+          session.user.email,
         );
 
         session.user.accessTier = access.tier;

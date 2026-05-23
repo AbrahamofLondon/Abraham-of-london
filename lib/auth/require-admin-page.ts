@@ -23,7 +23,7 @@ export async function requireAdminPage(ctx: GetServerSidePropsContext): Promise<
     return { ok: false, redirect: { destination: `/admin/login?returnTo=${encodeReturnTo(ctx)}`, permanent: false } };
   }
 
-  const access = await getUserAccess(prisma, (session.user as any)?.id ?? null);
+  const access = await getUserAccess(prisma, (session.user as any)?.id ?? null, (session.user as any)?.email);
   if (!canAccessAdmin(access)) {
     return { ok: false, redirect: { destination: "/auth/access-denied", permanent: false } };
   }

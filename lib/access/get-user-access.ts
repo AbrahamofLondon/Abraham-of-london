@@ -23,11 +23,36 @@ function roleTier(role: UserRole | null): AccessTier | null {
   return null;
 }
 
+function bootstrapAccessForEmail(email: string): EffectiveAccess | null {
+  const normalized = normalizeAdminEmail(email);
+  if (!normalized || !isBootstrapAdminEmail(normalized)) return null;
+
+  const isOwner = normalized === "info@abrahamoflondon.org";
+  return {
+    userId: null,
+    email: normalized,
+    role: isOwner ? "OWNER" as UserRole : "ADMIN" as UserRole,
+    tier: isOwner ? "owner" as AccessTier : "architect" as AccessTier,
+    entitlements: { tiers: [], products: [], artifacts: [] },
+    permissions: {
+      isAuthenticated: true,
+      isAdmin: true,
+      isOwner,
+    },
+  };
+}
+
 export async function getUserAccess(
   prisma: MinimalPrisma,
   userId: string | null | undefined,
+  email?: string | null | undefined,
 ): Promise<EffectiveAccess> {
+  // If no userId is provided, try bootstrap by email
   if (!userId) {
+    if (email) {
+      const bootstrapAccess = bootstrapAccessForEmail(email);
+      if (bootstrapAccess) return bootstrapAccess;
+    }
     return {
       userId: null,
       email: null,
@@ -44,28 +69,27 @@ export async function getUserAccess(
 
   const now = new Date();
 
-  const [user, entitlements] = await Promise.all([
-    prisma.user.findUnique({
+  let user: { id: string; email: string | null; role: UserRole | null } | null = null;
+  try {
+    user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, email: true, role: true },
-    }),
-    prisma.entitlement.findMany({
-      where: {
-        userId,
-        status: ACTIVE_STATUS,
-      },
-      select: {
-        id: true,
-        type: true,
-        key: true,
-        startsAt: true,
-        expiresAt: true,
-        revokedAt: true,
-      },
-    }),
-  ]);
+    });
+  } catch {
+    // DB unavailable — try bootstrap by email if available
+    if (email) {
+      const bootstrapAccess = bootstrapAccessForEmail(email);
+      if (bootstrapAccess) return bootstrapAccess;
+    }
+    // Fall through to return denied access
+  }
 
   if (!user) {
+    // User not found in DB — try bootstrap by email if available
+    if (email) {
+      const bootstrapAccess = bootstrapAccessForEmail(email);
+      if (bootstrapAccess) return bootstrapAccess;
+    }
     return {
       userId: null,
       email: null,
@@ -79,6 +103,23 @@ export async function getUserAccess(
       },
     };
   }
+
+  const [entitlements] = await Promise.all([
+    prisma.entitlement.findMany({
+      where: {
+        userId,
+        status: ACTIVE_STATUS,
+      },
+      select: {
+        id: true,
+        type: true,
+        key: true,
+        startsAt: true,
+        expiresAt: true,
+        revokedAt: true,
+      },
+    }).catch(() => []),
+  ]);
 
   const tiers = new Set<AccessTier>();
   const products = new Set<string>();

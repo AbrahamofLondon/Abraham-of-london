@@ -36,7 +36,7 @@ export async function resolveRequestAccess(
   res: NextApiResponse,
 ): Promise<ApiResolution> {
   const session = (await getServerSession(req, res, authOptions)) as AccessSession | null;
-  const access = await getUserAccess(prisma, session?.user?.id ?? null);
+  const access = await getUserAccess(prisma, session?.user?.id ?? null, session?.user?.email);
   return { session, access };
 }
 
@@ -142,7 +142,7 @@ export async function resolvePageAccess(
   ctx: GetServerSidePropsContext,
 ): Promise<ApiResolution> {
   const session = (await getServerSession(ctx.req, ctx.res, authOptions)) as AccessSession | null;
-  const access = await getUserAccess(prisma, session?.user?.id ?? null);
+  const access = await getUserAccess(prisma, session?.user?.id ?? null, session?.user?.email);
   return { session, access };
 }
 
