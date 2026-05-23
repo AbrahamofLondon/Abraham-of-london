@@ -1,4 +1,5 @@
 ---
+type: LinkedInOutbound
 id: bcoh-li-w02-a
 provider: linkedin
 postType: applied

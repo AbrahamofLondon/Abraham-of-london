@@ -1,4 +1,5 @@
 ---
+type: FacebookOutbound
 id: writing-changed-humanity-fb-005
 provider: facebook
 postType: link

@@ -1,4 +1,5 @@
 ---
+type: LinkedInOutbound
 id: bcoh-li-w07-t
 provider: linkedin
 postType: thesis

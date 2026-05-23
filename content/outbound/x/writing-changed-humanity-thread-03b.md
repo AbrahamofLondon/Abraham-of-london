@@ -1,4 +1,5 @@
 ---
+type: XOutbound
 id: writing-changed-humanity-x-t03b
 provider: x
 postType: thread

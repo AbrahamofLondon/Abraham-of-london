@@ -1,4 +1,5 @@
 ---
+type: LinkedInOutbound
 id: bcoh-li-w05-r
 provider: linkedin
 postType: reflective

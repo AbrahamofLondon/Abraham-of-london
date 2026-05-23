@@ -1,4 +1,5 @@
 ---
+type: XOutbound
 id: writing-changed-humanity-x-005
 provider: x
 postType: single

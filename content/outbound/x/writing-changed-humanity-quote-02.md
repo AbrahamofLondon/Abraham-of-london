@@ -1,4 +1,5 @@
 ---
+type: XOutbound
 id: writing-changed-humanity-x-q02
 provider: x
 postType: quote-card

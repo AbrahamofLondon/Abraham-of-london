@@ -381,3 +381,69 @@ Triggers a warning (not a blocker) if text contains: `release gate`, `quality ga
 | No shared UI components for connection panels    | 9     |
 | No LinkedIn rate-limit scope                     | 3/10  |
 | No `dryRun` on LinkedIn publish route            | 10    |
+
+---
+
+## Contentlayer Indexing Policy
+
+### Scope
+All filesystem outbound content under `content/outbound/[provider]` is Contentlayer-indexed for inventory visibility and build-time schema hygiene.
+
+Three document types exist, one per provider:
+
+| Document Type       | Provider  | File Pattern                              | Count |
+|---------------------|-----------|-------------------------------------------|-------|
+| `LinkedInOutbound`  | linkedin  | `outbound/linkedin/**/*.{md,mdx}`         | 43    |
+| `FacebookOutbound`  | facebook  | `outbound/facebook/**/*.{md,mdx}`         | 10    |
+| `XOutbound`         | x         | `outbound/x/**/*.{md,mdx}`               | 25    |
+
+### Classification ≠ Publication
+- Contentlayer classification is **not** publication approval.
+- Provider queues and publish routes still use the governed outbound loaders and validators as the source of publishing readiness.
+- Contentlayer schemas are intentionally **permissive** — all fields are optional at the Contentlayer level to avoid blocking builds on metadata incompleteness.
+
+### Publication Approval
+Publication approval is controlled by:
+- `approvalStatus` and `requiresFinalApproval` frontmatter fields
+- Provider-specific publish gates (`*-publish-gate.ts`)
+- Ledger idempotency checks
+- Scheduler eligibility
+- Admin action via publish routes
+
+### Strict Validation
+Strict field requirements per provider are enforced by dedicated validator scripts, not by Contentlayer:
+
+| Script                                    | Scope                          |
+|-------------------------------------------|--------------------------------|
+| `scripts/validate-outbound-content.mjs`   | All outbound content           |
+| `scripts/check-editorial-style.mjs`       | Style and spelling             |
+| `scripts/audit/verify-linkedin-outbound.ts` | LinkedIn-specific checks     |
+
+These validators enforce required fields by provider and status. No publishable outbound item can pass without required metadata.
+
+### Public Surface Exclusion
+
+Outbound Contentlayer documents are **internal publishing inventory records**. They are indexed for schema hygiene and admin tooling only. They are **not public content** and must be excluded from public archives, search, sitemap, RSS, and public document APIs.
+
+The exclusion is enforced at the data layer in `lib/contentlayer-helper.ts`:
+
+```typescript
+const INTERNAL_DOC_TYPES = new Set([
+  "LinkedInOutbound",
+  "FacebookOutbound",
+  "XOutbound",
+]);
+```
+
+The `getAllContentlayerDocs()` function filters out any document whose `type` field matches these values or whose raw path starts with `outbound/`. This ensures:
+
+- `allDocuments` (and its Proxy in `lib/contentlayer.ts`) never includes outbound docs
+- `getAllCombinedDocs()` (used by sitemap generators) never includes outbound docs
+- `getDocBySlug()` cannot resolve outbound document slugs
+- Per-kind loaders (`getAllPosts()`, `getAllShorts()`, etc.) are unaffected since outbound docs never match known `DocKind` values
+- The library index (`buildLibraryIndex()`) only uses per-kind loaders, so outbound docs are naturally excluded
+- The search index (`buildSearchIndex()`) iterates over `documentKinds` which does not include outbound types
+
+**If a new public content consumer is added**, ensure it either:
+1. Uses per-kind loaders only (preferred), or
+2. Explicitly filters out `INTERNAL_DOC_TYPES` from any `allDocuments`-style aggregation

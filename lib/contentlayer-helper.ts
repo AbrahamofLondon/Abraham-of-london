@@ -436,6 +436,24 @@ function dedupeKey(doc: ContentDoc): string {
   );
 }
 
+// Document types that are internal publishing inventory records, not public content.
+// These must be excluded from public archives, search, sitemap, RSS, and public document APIs.
+const INTERNAL_DOC_TYPES = new Set([
+  "LinkedInOutbound",
+  "FacebookOutbound",
+  "XOutbound",
+]);
+
+function isInternalDoc(doc: ContentDoc): boolean {
+  const docType = safeString(doc?.type);
+  if (INTERNAL_DOC_TYPES.has(docType)) return true;
+
+  const rawPath = getRawPath(doc);
+  if (rawPath.startsWith("outbound/")) return true;
+
+  return false;
+}
+
 export function getAllContentlayerDocs(): ContentDoc[] {
   if (cache) return cache;
 
@@ -444,6 +462,9 @@ export function getAllContentlayerDocs(): ContentDoc[] {
   const out: ContentDoc[] = [];
 
   for (const rawDoc of sourceDocs) {
+    // Exclude internal publishing inventory documents from public registry
+    if (isInternalDoc(rawDoc)) continue;
+
     const key = dedupeKey(rawDoc);
     if (seen.has(key)) continue;
     seen.add(key);

@@ -1,4 +1,5 @@
 ---
+type: FacebookOutbound
 id: writing-changed-humanity-fb-002
 provider: facebook
 postType: reflective

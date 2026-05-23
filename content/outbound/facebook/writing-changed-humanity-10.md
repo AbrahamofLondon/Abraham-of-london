@@ -1,4 +1,5 @@
 ---
+type: FacebookOutbound
 id: writing-changed-humanity-fb-010
 provider: facebook
 postType: discussion
