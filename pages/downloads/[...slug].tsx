@@ -186,8 +186,8 @@ const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, 
 
             {isPublic ? (
               isMdxOnly ? (
-                <Link
-                  href={`/downloads/${slug}`}
+                <a
+                  href="#i-what-this-edition-is-for"
                 className="inline-flex items-center gap-2 border px-5 py-2.5 transition-all hover:opacity-80"
                 style={{
                   borderColor: `${GOLD}40`,
@@ -199,9 +199,9 @@ const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode, identity, 
                   textTransform: "uppercase",
                 }}
               >
-                Open schematic edition
+                Begin the schematic
                 <ArrowRight className="h-3 w-3" />
-              </Link>
+              </a>
             ) : (
               <a
                 href={`/api/downloads/resolve/${encodeURIComponent(identity.slug)}`}
