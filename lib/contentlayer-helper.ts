@@ -32,6 +32,7 @@ export type DocKind =
   | "dispatch"
   | "intelligence"
   | "download"
+  | "editorial"
   | "event"
   | "print"
   | "resource"
@@ -115,6 +116,7 @@ export const documentKinds: DocKind[] = [
   "dispatch",
   "intelligence",
   "download",
+  "editorial",
   "event",
   "print",
   "resource",
@@ -137,6 +139,7 @@ const COLLECTION_DIRS: Record<DocKind, string[]> = {
   canon: ["Canon"],
   dispatch: ["Dispatch"],
   download: ["Download"],
+  editorial: ["Editorial"],
   event: ["Event"],
   intelligence: ["Intelligence"],
   lexicon: ["Lexicon"],
@@ -288,6 +291,7 @@ export function getDocKind(doc: ContentDoc | null | undefined): DocKind {
   if (p.startsWith("playbooks/")) return "playbook";
   if (p.startsWith("vault/")) return "vault";
   if (p.startsWith("blog/") || p.startsWith("posts/")) return "post";
+  if (p.startsWith("editorials/")) return "editorial";
 
   return "unknown";
 }
@@ -531,6 +535,7 @@ export const getAllIntelligence = () => byKind("intelligence");
 export const getAllLexicon = () => byKind("lexicon");
 export const getAllVault = () => byKind("vault");
 export const getAllPlaybooks = () => byKind("playbook");
+export const getAllEditorials = () => byKind("editorial");
 
 function getByCollectionSlug(collections: string[], slug: string): ContentDoc | null {
   const normalizedSlug = normalizeSlug(String(slug || ""));

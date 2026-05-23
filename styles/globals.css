@@ -638,3 +638,101 @@
     min-height: 44px;
   }
 }
+
+/* ============================================================================
+   EDITORIAL BODY — canonical text reading frame
+   Dark institutional theme; matched to pages/editorials/[slug].tsx palette.
+   ============================================================================ */
+
+.editorial-body {
+  color: rgba(255, 255, 255, 0.72);
+  font-family: 'Cormorant Garamond', Georgia, ui-serif, serif;
+  font-weight: 300;
+  font-size: clamp(1.02rem, 1.15vw, 1.12rem);
+  line-height: 1.85;
+}
+
+.editorial-body p {
+  margin-bottom: 1.45rem;
+  max-width: 68ch;
+}
+
+.editorial-body h2 {
+  font-family: 'Cormorant Garamond', Georgia, ui-serif, serif;
+  font-weight: 400;
+  font-size: clamp(1.3rem, 1.7vw, 1.55rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: rgba(255, 255, 255, 0.88);
+  margin-top: 3.25rem;
+  margin-bottom: 1.1rem;
+}
+
+.editorial-body h3 {
+  font-family: 'Cormorant Garamond', Georgia, ui-serif, serif;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.3vw, 1.20rem);
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.70);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.editorial-body h4 {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.80);
+  margin-top: 1.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.editorial-body strong {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.editorial-body em {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.60);
+}
+
+.editorial-body a {
+  color: rgba(201, 169, 110, 0.85);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.25);
+  transition: border-color 0.18s, color 0.18s;
+}
+
+.editorial-body a:hover {
+  color: #C9A96E;
+  border-bottom-color: rgba(201, 169, 110, 0.55);
+}
+
+.editorial-body hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201, 169, 110, 0.22), transparent);
+  margin: 2.75rem 0;
+}
+
+.editorial-body ul,
+.editorial-body ol {
+  margin-bottom: 1.45rem;
+  padding-left: 1.5rem;
+  max-width: 64ch;
+}
+
+.editorial-body li {
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.editorial-body blockquote {
+  border-left: 2px solid rgba(201, 169, 110, 0.35);
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  margin: 1.75rem 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+}

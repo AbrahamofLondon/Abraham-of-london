@@ -953,6 +953,31 @@ function getExclusions(): string[] {
 }
 
 // ============================================================================
+// EDITORIAL BODY
+// ============================================================================
+// Canonical body for flagship editorials.
+// Metadata lives in lib/editorial/catalogue.ts (the authoritative registry).
+// This document type carries only the body + slug identity.
+// ============================================================================
+
+const Editorial = defineDocumentType(() => ({
+  name: "Editorial",
+  filePathPattern: "editorials/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    type:  { type: "string", required: false },
+    slug:  { type: "string", required: true },
+    draft: { type: "boolean", required: false, default: false },
+  },
+  computedFields: {
+    _id: {
+      type: "string",
+      resolve: (doc) => doc._id,
+    },
+  },
+}));
+
+// ============================================================================
 // SOURCE CONFIGURATION
 // ============================================================================
 
@@ -960,6 +985,7 @@ export default makeSource({
   contentDirPath: "content",
   contentDirInclude: [
     "blog",
+    "editorials",
     "editorial-series",
     "shorts",
     "books",
@@ -981,6 +1007,7 @@ export default makeSource({
   contentDirExclude: getExclusions(),
   documentTypes: [
     Post,
+    Editorial,
     EditorialSeriesPart,
     Short,
     Book,

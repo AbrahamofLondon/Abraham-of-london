@@ -24,11 +24,13 @@ import { useSession } from "next-auth/react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
+import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import {
   getPublicationBySlug,
   getPublicationCatalogue,
 } from "@/lib/editorial/catalogue";
 import type { PublicationRecord } from "@/lib/editorial/types";
+import { getRenderableBody } from "@/lib/content/render-body";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -39,6 +41,7 @@ type Props = {
   previewHref: string | null;
   citationHref: string;
   relatedSlugs: { prev: string | null; next: string | null };
+  bodyCode: string | null;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -98,7 +101,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relatedSlugs }) => {
+const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relatedSlugs, bodyCode }) => {
   const { data: session } = useSession();
   const isPublic = item.tier === "public";
 
@@ -658,6 +661,103 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
           </section>
         )}
 
+        {/* ── CANONICAL TEXT ────────────────────────────────────────────── */}
+        {bodyCode ? (
+          <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <div className="mx-auto max-w-3xl px-6 py-16 lg:px-12">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.70 }}
+              >
+                {/* Section label */}
+                <div className="flex items-center gap-3 mb-10">
+                  <div className="h-px w-8" style={{ background: `linear-gradient(to right, ${GOLD}45, transparent)` }} />
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7.5px",
+                    letterSpacing: "0.40em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.20)",
+                  }}>
+                    Canonical Text
+                  </span>
+                </div>
+
+                {/* Body */}
+                <div className="editorial-body">
+                  <SafeMDXRenderer code={bodyCode} />
+                </div>
+
+                {/* Footer row */}
+                <div className="mt-14 flex flex-wrap items-center gap-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem" }}>
+                  {item.pdfPath && (
+                    <a href={item.pdfPath} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
+                      style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7.5px",
+                        letterSpacing: "0.26em",
+                        textTransform: "uppercase",
+                        color: `${GOLD}99`,
+                      }}
+                    >
+                      <Download style={{ width: "10px", height: "10px" }} />
+                      Download PDF
+                    </a>
+                  )}
+                  <a href={citationHref}
+                    className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.26em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}
+                  >
+                    <ExternalLink style={{ width: "10px", height: "10px" }} />
+                    Citation JSON
+                  </a>
+                  <Link href="/editorials"
+                    className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.26em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.16)",
+                    }}
+                  >
+                    ← All Editorials
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          </section>
+        ) : (
+          <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <div className="mx-auto max-w-3xl px-6 py-12 lg:px-12">
+              <div style={{
+                border: "1px solid rgba(255,255,255,0.05)",
+                backgroundColor: "rgba(255,255,255,0.01)",
+                padding: "1.75rem 2rem",
+              }}>
+                <span style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.38em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.18)",
+                }}>
+                  Canonical text pending
+                </span>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── ADJACENT NAVIGATION ───────────────────────────────────────── */}
         {(relatedSlugs.prev || relatedSlugs.next) && (() => {
           const catalogue = getPublicationCatalogue();
@@ -823,6 +923,31 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
     ? (item.previewPath || `/api/editorials/preview/${item.slug}`)
     : null;
 
+  // ── Resolve editorial body ───────────────────────────────────────────────
+  // Use the established server helper (reads JSON indexes, no contentlayer/generated import)
+  let bodyCode: string | null = null;
+  try {
+    const { getAllEditorials } = await import("@/lib/content/server");
+    const editorials = getAllEditorials();
+    const editorialDoc = editorials.find(
+      (e) => e.slug === slug || e._raw?.flattenedPath?.endsWith(`/${slug}`) || e._raw?.flattenedPath === `editorials/${slug}`,
+    );
+    if (editorialDoc) {
+      const result = getRenderableBody(editorialDoc);
+      bodyCode = result.mode !== "empty" ? result.code : null;
+    }
+  } catch {
+    // Generated indexes may not exist yet on first build pass
+    bodyCode = null;
+  }
+
+  // ── Missing-body guard ───────────────────────────────────────────────────
+  if (!bodyCode && isPublic && process.env.NODE_ENV !== "production") {
+    console.warn(
+      `[editorial] MISSING BODY: "${slug}" is public but has no body source at content/editorials/${slug}.mdx`,
+    );
+  }
+
   // Strip asset paths for non-public publications at the server level
   const safeItem = isPublic
     ? item
@@ -834,11 +959,10 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
       previewHref,
       citationHref: `/api/editorials/citation/${item.slug}`,
       relatedSlugs: { prev, next },
+      bodyCode,
     },
     revalidate: 1800,
   };
-
-
 };
 
 export default EditorialPage;
