@@ -97,7 +97,7 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "Why we often choose partners who mirror our earliest care, why chemistry can disguise repetition, and why love after loss requires truth without self-condemnation.",
         readTime: "15 min read",
-        status: "PUBLISHED",
+        status: "DRAFT",
       },
       {
         order: 8,

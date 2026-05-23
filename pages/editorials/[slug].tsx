@@ -661,6 +661,44 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
           </section>
         )}
 
+        {/* ── CONVERGENCE NOTE ──────────────────────────────────────────── */}
+        {item.convergenceNote && (
+          <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <div className="mx-auto max-w-3xl px-6 py-10 lg:px-12">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.60 }}
+              >
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-px w-6" style={{ background: `linear-gradient(to right, ${GOLD}30, transparent)` }} />
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.40em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.16)",
+                  }}>
+                    Why this text sits here
+                  </span>
+                </div>
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "1rem",
+                  lineHeight: 1.75,
+                  color: "rgba(255,255,255,0.36)",
+                  fontStyle: "italic",
+                  maxWidth: "54ch",
+                }}>
+                  {item.convergenceNote}
+                </p>
+              </motion.div>
+            </div>
+          </section>
+        )}
+
         {/* ── CANONICAL TEXT ────────────────────────────────────────────── */}
         {bodyCode ? (
           <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
@@ -942,9 +980,12 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
   }
 
   // ── Missing-body guard ───────────────────────────────────────────────────
-  if (!bodyCode && isPublic && process.env.NODE_ENV !== "production") {
+  // Invariant: a PUBLISHED flagship editorial must have a canonical body source.
+  // If canonicalTextPending is explicitly true in the catalogue the placeholder
+  // is intentional and no warning fires.
+  if (!bodyCode && isPublic && !item.canonicalTextPending && process.env.NODE_ENV !== "production") {
     console.warn(
-      `[editorial] MISSING BODY: "${slug}" is public but has no body source at content/editorials/${slug}.mdx`,
+      `[editorial] MISSING BODY: "${slug}" is public but has no body source at content/editorials/${slug}.mdx — set canonicalTextPending: true in the catalogue to suppress this warning.`,
     );
   }
 

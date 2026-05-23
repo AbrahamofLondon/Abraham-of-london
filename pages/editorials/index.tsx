@@ -93,6 +93,97 @@ function EditorialRow({ item }: { item: PublicationRecord }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// APPLIED ESSAY SERIES — static data (blog series, not editorial publications)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const APPLIED_SERIES = [
+  {
+    slug: "the-burden-changes-hands",
+    title: "The Burden Changes Hands",
+    description:
+      "Seven essays on memory, custody, records, authorship, and the intelligence organisations build over time.",
+    href: "/blog/series/the-burden-changes-hands",
+    partCount: 7,
+    displayStatus: "Complete",
+    relationNote: "What institutions carry.",
+  },
+  {
+    slug: "the-science-of-inherited-selves",
+    title: "The Science of Inherited Selves",
+    description:
+      "Eight essays on inheritance, attachment, family memory, trauma, love, marriage, responsibility, and the courage to interrupt what should not be passed on.",
+    href: "/blog/series/the-science-of-inherited-selves",
+    partCount: 8,
+    displayStatus: "In progress",
+    relationNote: "What persons, families, and generations carry.",
+  },
+] as const;
+
+type AppliedSeriesEntry = (typeof APPLIED_SERIES)[number];
+
+function AppliedSeriesCard({ item }: { item: AppliedSeriesEntry }) {
+  return (
+    <Link
+      href={item.href}
+      className="group block border py-5 px-5 transition-colors duration-200"
+      style={{
+        borderColor: "rgba(201,150,58,0.14)",
+        backgroundColor: "rgba(201,150,58,0.02)",
+      }}
+    >
+      {/* Meta row */}
+      <div className="flex flex-wrap items-center gap-3 mb-3">
+        <span
+          className="font-mono text-[6.5px] uppercase tracking-[0.28em]"
+          style={{ color: "var(--ds-text-subtle)" }}
+        >
+          {item.partCount}-Part Series
+        </span>
+        <span style={{ color: "var(--ds-border)" }}>·</span>
+        <span
+          className="font-mono text-[6.5px] uppercase tracking-[0.28em]"
+          style={{ color: "var(--ds-accent)" }}
+        >
+          {item.displayStatus}
+        </span>
+      </div>
+
+      {/* Title */}
+      <h3
+        className="font-serif italic mb-2 transition-colors duration-200 group-hover:text-white"
+        style={{ fontWeight: 300, fontSize: "1.18rem", lineHeight: 1.08, color: "var(--ds-text)" }}
+      >
+        {item.title}
+      </h3>
+
+      {/* Description */}
+      <p
+        className="text-[12px] leading-[1.55rem] mb-3"
+        style={{ color: "var(--ds-text-muted)", maxWidth: "52ch" }}
+      >
+        {item.description}
+      </p>
+
+      {/* Relation note */}
+      <div
+        className="font-mono text-[6.5px] uppercase tracking-[0.26em] italic mb-4"
+        style={{ color: "var(--ds-text-subtle)" }}
+      >
+        {item.relationNote}
+      </div>
+
+      {/* Read link */}
+      <div
+        className="font-mono text-[7px] uppercase tracking-[0.26em]"
+        style={{ color: "var(--ds-accent)" }}
+      >
+        Read the series →
+      </div>
+    </Link>
+  );
+}
+
 function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
   const isLead = item.slug === "the-minds-clay";
   return (
@@ -255,11 +346,19 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
           </div>
         </section>
 
-        {/* 1. Flagship Editorials */}
+        {/* 1. Flagship Editorial */}
         <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="mb-6">
-              <SectionLabel>Flagship Editorials</SectionLabel>
+            <div className="mb-8">
+              <SectionLabel>Flagship Editorial</SectionLabel>
+              <p
+                className="mt-3 font-serif italic text-[13px] leading-[1.65rem]"
+                style={{ color: "var(--ds-text-subtle)", maxWidth: "62ch" }}
+              >
+                The Canon establishes the architecture. The flagship editorial concentrates the argument.
+                The series and essays extend it into memory, inheritance, custody, judgement, family,
+                civilisation, and the work of formation.
+              </p>
             </div>
 
             {showFlagship ? (
@@ -350,7 +449,28 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
           </section>
         ) : null}
 
-        {/* 3. Publication Record / Archive */}
+        {/* 3. Applied Essay Series */}
+        <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+            <div className="mb-2">
+              <SectionLabel>Applied Essay Series</SectionLabel>
+            </div>
+            <p
+              className="mb-6 font-mono text-[7px] uppercase tracking-[0.28em] leading-5"
+              style={{ color: "var(--ds-text-subtle)", maxWidth: "58ch" }}
+            >
+              The Burden Changes Hands explores what institutions carry.
+              {" "}The Science of Inherited Selves explores what persons, families, and generations carry.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {APPLIED_SERIES.map((item) => (
+                <AppliedSeriesCard key={item.slug} item={item} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Publication Record / Archive */}
         {filteredSupporting.length > 0 ? (
           <section className="py-10 lg:py-12">
             <div className="mx-auto max-w-6xl px-6 lg:px-10">

@@ -65,6 +65,9 @@ export const EDITORIAL_CATALOGUE: PublicationRecord[] = sortCatalogue([
         "https://www.abrahamoflondon.org/editorials/ultimate-purpose-of-man",
       doi: "10.54210/aol.2026.001",
     },
+
+    convergenceNote:
+      "This editorial is not a campaign piece. It is the convergence text beneath the Canon: the governing statement from which the wider Abraham of London estate draws its concern for purpose, order, drift, judgement, formation, civilisation, and the responsibility of leadership.",
   },
 ]);
 
