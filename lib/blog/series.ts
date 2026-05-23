@@ -52,7 +52,7 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "An essay on prenatal life, early attachment, nervous-system formation, and the hidden architecture laid down before conscious memory begins.",
         readTime: "12 min read",
-        status: "DRAFT",
+        status: "PUBLISHED",
       },
       {
         order: 3,
@@ -61,7 +61,7 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "An essay on the home as the first school of safety, threat, trust, authority, and emotional regulation.",
         readTime: "12 min read",
-        status: "DRAFT",
+        status: "PUBLISHED",
       },
       {
         order: 4,
@@ -70,7 +70,7 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "An essay on family secrecy, unprocessed grief, inherited atmosphere, and the difference between memory and haunting.",
         readTime: "13 min read",
-        status: "DRAFT",
+        status: "PUBLISHED",
       },
       {
         order: 5,
@@ -79,7 +79,7 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "An essay on epigenetics, stress biology, trauma research, and why the body can carry history without reducing the person to biology.",
         readTime: "12 min read",
-        status: "DRAFT",
+        status: "PUBLISHED",
       },
       {
         order: 6,
@@ -88,7 +88,7 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "An essay on healing, responsibility, plasticity, family repair, and the moral courage to interrupt inherited patterns before they reach the next generation.",
         readTime: "13 min read",
-        status: "DRAFT",
+        status: "PUBLISHED",
       },
       {
         order: 7,
@@ -97,7 +97,7 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "Why we often choose partners who mirror our earliest care, why chemistry can disguise repetition, and why love after loss requires truth without self-condemnation.",
         readTime: "15 min read",
-        status: "DRAFT",
+        status: "PUBLISHED",
       },
       {
         order: 8,
@@ -106,7 +106,7 @@ const BLOG_SERIES_REGISTRY: BlogSeries[] = [
         excerpt:
           "A redemptive strategy for choosing love wisely, co-healing responsibly, and building the emotional, spiritual, and generational landscape future children inherit.",
         readTime: "16 min read",
-        status: "DRAFT",
+        status: "PUBLISHED",
       },
     ],
   },
