@@ -186,7 +186,7 @@ export async function requireAdminPage<T = Record<string, never>>(
 
   return {
     authorized: true,
-    userId: session.user.id,
+    userId: session?.user?.id ?? "",
     access,
     props: (extraProps ?? {}) as T,
   };

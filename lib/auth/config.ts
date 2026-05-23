@@ -239,7 +239,7 @@ export const authOptions: NextAuthOptions = {
         });
       }
 
-      let dbUser: { id: string; role: string | null } | null = null;
+      let dbUser: { id: string; role: import("@prisma/client").UserRole } | null = null;
       try {
         dbUser = await prisma.user.findUnique({
           where: { email: fallbackEmail },
