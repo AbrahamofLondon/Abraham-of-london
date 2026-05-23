@@ -19,9 +19,16 @@ type AdminResolution =
 export async function requireAdminAppRoute(): Promise<AdminResolution> {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as any)?.id ?? null;
-  const access = await getUserAccess(prisma, userId);
+  const email = session?.user?.email ?? null;
 
-  if (!access.permissions.isAuthenticated || !userId) {
+  // Pass email alongside userId — bootstrap admin must be authorised by email
+  // even when userId is absent or DB lookup fails.
+  const access = await getUserAccess(prisma, userId, email);
+
+  // Authentication gate: isAuthenticated covers both DB-resolved users and
+  // bootstrap admin emails (which getUserAccess marks authenticated by email).
+  // Do NOT gate on userId alone — a bootstrap admin may have no DB row yet.
+  if (!access.permissions.isAuthenticated) {
     return {
       authorized: false,
       response: NextResponse.json(

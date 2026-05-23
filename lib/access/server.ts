@@ -155,7 +155,12 @@ export async function requireAdminPage<T = Record<string, never>>(
 > {
   const { session, access } = await resolvePageAccess(ctx);
 
-  if (!access.permissions.isAuthenticated || !session?.user?.id) {
+  // Authentication gate: isAuthenticated covers both DB-resolved users and
+  // email-bootstrapped admin sessions (where getUserAccess fires by email even
+  // if session.user.id is absent because the DB was unavailable at JWT time).
+  // Do NOT gate on session.user.id alone — a bootstrap admin email must not be
+  // redirected to login just because their DB user record is not yet resolved.
+  if (!access.permissions.isAuthenticated) {
     return {
       authorized: false,
       redirect: {

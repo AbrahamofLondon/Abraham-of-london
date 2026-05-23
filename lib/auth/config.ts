@@ -5,7 +5,7 @@ import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma.server";
-import { isBootstrapAdminEmail } from "@/lib/access/admin-emails";
+import { isBootstrapAdminEmail, normalizeAdminEmail } from "@/lib/access/admin-emails";
 import { getUserAccess } from "@/lib/access/get-user-access";
 import { classifyAuthError } from "@/lib/auth/auth-error-classifier";
 import { verifyPassword } from "@/lib/auth/password";
@@ -165,11 +165,19 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       const email = user.email?.toLowerCase().trim();
       if (!email) return false;
 
       const bootstrapRole = bootstrapRoleForEmail(email);
+      const masked = `${email.slice(0, 3)}***${email.slice(email.lastIndexOf("@"))}`;
+
+      // ── Diagnostic logging (never logs tokens) ─────────────────────────────
+      console.info("[auth:signIn]", {
+        provider: account?.provider ?? "unknown",
+        emailMasked: masked,
+        isBootstrapAdmin: bootstrapRole !== null,
+      });
 
       try {
         await prisma.user.upsert({
@@ -186,14 +194,13 @@ export const authOptions: NextAuthOptions = {
         });
       } catch (error) {
         const safe = classifyAuthError(error);
-        console.error("[auth] signIn database failure — allowing sign-in for bootstrap admin", {
+        console.error("[auth:signIn] database failure — allowing sign-in for bootstrap admin", {
           code: safe.code,
-          callback: "signIn",
-          email: email.slice(0, 3) + "***",
+          emailMasked: masked,
+          isBootstrapAdmin: bootstrapRole !== null,
         });
         // Allow sign-in even if DB is unavailable — bootstrap admin emails
         // are authorised by env config, not by database presence.
-        // The user record will be created on the next successful DB write.
         return true;
       }
 
@@ -209,23 +216,32 @@ export const authOptions: NextAuthOptions = {
         return token;
       }
 
+      // Explicitly stamp email into JWT — ensures it survives all routes and
+      // session callbacks regardless of which NextAuth internal path is taken.
+      token.email = fallbackEmail;
+
       const bootstrapRole = bootstrapRoleForEmail(fallbackEmail);
+
+      // Stamp bootstrap admin flag so edge/token-only guards can check without
+      // a DB round-trip. This is safe — the email itself is the source of truth.
+      if (bootstrapRole !== null) {
+        token.isBootstrapAdmin = true;
+      }
+
       if (bootstrapRole) {
         await prisma.user.update({
           where: { email: fallbackEmail },
           data: { role: bootstrapRole },
         }).catch((error) => {
           const safe = classifyAuthError(error);
-          console.error("[auth] jwt role sync failure", {
-            code: safe.code,
-            callback: "jwt",
-          });
+          console.error("[auth:jwt] role sync failure", { code: safe.code });
           return undefined;
         });
       }
 
+      let dbUser: { id: string; role: string | null } | null = null;
       try {
-        const dbUser = await prisma.user.findUnique({
+        dbUser = await prisma.user.findUnique({
           where: { email: fallbackEmail },
           select: { id: true, role: true },
         });
@@ -236,11 +252,18 @@ export const authOptions: NextAuthOptions = {
         }
       } catch (error) {
         const safe = classifyAuthError(error);
-        console.error("[auth] jwt user lookup failure", {
-          code: safe.code,
-          callback: "jwt",
-        });
+        console.error("[auth:jwt] user lookup failure", { code: safe.code });
       }
+
+      // ── Diagnostic logging (no tokens logged) ─────────────────────────────
+      const masked = `${fallbackEmail.slice(0, 3)}***${fallbackEmail.slice(fallbackEmail.lastIndexOf("@"))}`;
+      console.info("[auth:jwt]", {
+        emailMasked: masked,
+        isBootstrapAdmin: bootstrapRole !== null,
+        dbUserFound: dbUser !== null,
+        tokenSubPresent: typeof token.sub === "string" && Boolean(token.sub),
+        roleInToken: typeof token.role === "string" ? token.role : null,
+      });
 
       if (trigger === "update" && session?.user) {
         token.role = session.user.role ?? token.role;
@@ -268,11 +291,26 @@ export const authOptions: NextAuthOptions = {
 
       session.user.id = typeof token.sub === "string" ? token.sub : "";
       session.user.role = typeof token.role === "string" ? token.role : "USER";
+      // Propagate bootstrap admin flag from JWT so client code can read it
+      // without an extra DB round-trip.
+      (session.user as any).isBootstrapAdmin =
+        token.isBootstrapAdmin === true;
+
       // Propagate admin session expiry stamp for server-side TTL enforcement
       session.user.adminSessionIssuedAt =
         typeof token.adminSessionIssuedAt === "number"
           ? token.adminSessionIssuedAt
           : undefined;
+
+      // ── Diagnostic: confirm email and id presence in session ─────────────
+      const sessionEmailMasked = session.user.email
+        ? `${session.user.email.slice(0, 3)}***${session.user.email.slice(session.user.email.lastIndexOf("@"))}`
+        : "(missing)";
+      console.info("[auth:session]", {
+        emailMasked: sessionEmailMasked,
+        idPresent: Boolean(session.user.id),
+        isBootstrapAdmin: token.isBootstrapAdmin === true,
+      });
 
       try {
         const access = await getUserAccess(
@@ -286,22 +324,29 @@ export const authOptions: NextAuthOptions = {
         session.user.access = access;
       } catch (error) {
         const safe = classifyAuthError(error);
-        console.error("[auth] session access resolution failure", {
+        console.error("[auth:session] access resolution failure", {
           code: safe.code,
-          callback: "session",
         });
-        session.user.accessTier = "public";
+
+        // Bootstrap admin emails must not be locked out by getUserAccess throwing.
+        // isBootstrapAdmin was stamped in the JWT without a DB call, so it is
+        // reliable even when the DB is unavailable.
+        const isBootstrapAdmin = token.isBootstrapAdmin === true;
+        const sessionEmail = session.user.email ?? null;
+        const isOwner = isBootstrapAdmin && normalizeAdminEmail(sessionEmail) === "info@abrahamoflondon.org";
+
+        session.user.accessTier = isBootstrapAdmin ? "architect" : "public";
         session.user.entitlements = { tiers: [], products: [], artifacts: [] };
         session.user.access = {
           userId: null,
-          email: session.user.email ?? null,
-          role: null,
-          tier: "public",
+          email: sessionEmail,
+          role: isBootstrapAdmin ? ("ADMIN" as any) : null,
+          tier: isBootstrapAdmin ? "architect" : "public",
           entitlements: { tiers: [], products: [], artifacts: [] },
           permissions: {
-            isAuthenticated: Boolean(session.user.email),
-            isAdmin: false,
-            isOwner: false,
+            isAuthenticated: Boolean(sessionEmail),
+            isAdmin: isBootstrapAdmin,
+            isOwner,
           },
         };
       }

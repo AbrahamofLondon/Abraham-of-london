@@ -84,7 +84,13 @@ export async function requireAdminServer(
       return null;
     }
 
-    const access = await getUserAccess(prisma, (session.user as any)?.id ?? null);
+    // Pass email alongside userId — bootstrap admin must be authorised by email
+    // even when the DB user ID is absent or lookup fails.
+    const access = await getUserAccess(
+      prisma,
+      (session.user as any)?.id ?? null,
+      session.user?.email ?? null,
+    );
     if (!canAccessAdmin(access)) {
       await writeSecurityAudit({
         action: "forbidden_object_access",
@@ -134,7 +140,13 @@ export async function requireAdminServer(
     redirect("/admin/login");
   }
 
-  const access = await getUserAccess(prisma, (session.user as any)?.id ?? null);
+  // Pass email alongside userId — bootstrap admin must be authorised by email
+  // even when the DB user ID is absent or lookup fails.
+  const access = await getUserAccess(
+    prisma,
+    (session.user as any)?.id ?? null,
+    session.user?.email ?? null,
+  );
   if (!canAccessAdmin(access)) {
     redirect("/auth/access-denied");
   }

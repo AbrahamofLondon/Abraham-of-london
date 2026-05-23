@@ -11,8 +11,9 @@ import {
   getBootstrapAdminEmails,
   isBootstrapAdminEmail,
 } from "@/lib/access/admin-emails";
+import { getResolvedAdminEmails } from "@/lib/access/admin-email-resolver";
 import { canAccessAdmin } from "@/lib/access/checks";
-import { getUserAccess } from "@/lib/access/get-user-access";
+import { getUserAccess, getUserAccessFromSession } from "@/lib/access/get-user-access";
 import type { EffectiveAccess } from "@/lib/access/types";
 
 type FakeUser = {
@@ -103,5 +104,116 @@ describe("admin authority single source of truth", () => {
       email: "reader@example.com",
       role: "USER",
     })).toBe(false);
+  });
+});
+
+// ── Bootstrap admin recovery tests ────────────────────────────────────────────
+
+function prismaNoUser() {
+  return {
+    user: { findUnique: async () => null },
+    entitlement: { findMany: async () => [] },
+  } as any;
+}
+
+function prismaDbDown() {
+  return {
+    user: {
+      findUnique: async () => {
+        throw new Error("Connection refused");
+      },
+    },
+    entitlement: { findMany: async () => [] },
+  } as any;
+}
+
+describe("bootstrap admin recovery — getUserAccess", () => {
+  it("bootstrap admin email + no DB user ID → canAccessAdmin true", async () => {
+    const access = await getUserAccess(prismaNoUser(), null, "seunadaramola@gmail.com");
+    expect(access.permissions.isAuthenticated).toBe(true);
+    expect(access.permissions.isAdmin).toBe(true);
+    expect(canAccessAdmin(access)).toBe(true);
+  });
+
+  it("bootstrap admin email + DB unavailable → canAccessAdmin true", async () => {
+    const access = await getUserAccess(prismaDbDown(), "some-uuid", "info@abrahamoflondon.org");
+    expect(access.permissions.isAuthenticated).toBe(true);
+    expect(access.permissions.isAdmin).toBe(true);
+    expect(canAccessAdmin(access)).toBe(true);
+  });
+
+  it("bootstrap owner email → isOwner true", async () => {
+    const access = await getUserAccess(prismaNoUser(), null, "info@abrahamoflondon.org");
+    expect(access.permissions.isOwner).toBe(true);
+    expect(access.permissions.isAdmin).toBe(true);
+  });
+
+  it("non-bootstrap email + no DB user ID → denied", async () => {
+    const access = await getUserAccess(prismaNoUser(), null, "random@example.com");
+    expect(access.permissions.isAuthenticated).toBe(false);
+    expect(access.permissions.isAdmin).toBe(false);
+    expect(canAccessAdmin(access)).toBe(false);
+  });
+
+  it("non-bootstrap email + DB unavailable → denied", async () => {
+    const access = await getUserAccess(prismaDbDown(), "some-uuid", "random@example.com");
+    expect(access.permissions.isAdmin).toBe(false);
+    expect(canAccessAdmin(access)).toBe(false);
+  });
+
+  it("getUserAccessFromSession with bootstrap email and no id → admin", async () => {
+    const access = await getUserAccessFromSession(prismaNoUser(), {
+      user: { id: "", email: "admin@abrahamoflondon.org" },
+    });
+    expect(access.permissions.isAdmin).toBe(true);
+    expect(canAccessAdmin(access)).toBe(true);
+  });
+
+  it("getUserAccessFromSession with non-admin email → denied", async () => {
+    const access = await getUserAccessFromSession(prismaNoUser(), {
+      user: { id: null, email: "visitor@example.com" },
+    });
+    expect(access.permissions.isAdmin).toBe(false);
+  });
+});
+
+describe("ADMIN_USER_EMAILS parser", () => {
+  it("accepts comma-separated list and normalises case", () => {
+    const emails = getResolvedAdminEmails({
+      ADMIN_USER_EMAILS: "Alpha@Example.com,beta@example.com",
+    } as unknown as NodeJS.ProcessEnv);
+    expect(emails).toContain("alpha@example.com");
+    expect(emails).toContain("beta@example.com");
+  });
+
+  it("accepts semicolon-separated list", () => {
+    const emails = getResolvedAdminEmails({
+      ADMIN_USER_EMAILS: "a@example.com;b@example.com",
+    } as unknown as NodeJS.ProcessEnv);
+    expect(emails).toContain("a@example.com");
+    expect(emails).toContain("b@example.com");
+  });
+
+  it("accepts space-separated list", () => {
+    const emails = getResolvedAdminEmails({
+      ADMIN_USER_EMAILS: "x@example.com y@example.com",
+    } as unknown as NodeJS.ProcessEnv);
+    expect(emails).toContain("x@example.com");
+    expect(emails).toContain("y@example.com");
+  });
+
+  it("strips whitespace from individual addresses", () => {
+    const emails = getResolvedAdminEmails({
+      ADMIN_USER_EMAILS: "  spaced@example.com  ",
+    } as unknown as NodeJS.ProcessEnv);
+    expect(emails).toContain("spaced@example.com");
+  });
+
+  it("always includes hardcoded bootstrap addresses regardless of env", () => {
+    const emails = getResolvedAdminEmails({} as unknown as NodeJS.ProcessEnv);
+    expect(emails).toContain("seunadaramola@gmail.com");
+    expect(emails).toContain("info@abrahamoflondon.org");
+    expect(emails).toContain("admin@abrahamoflondon.org");
+    expect(emails).toContain("abrahamadaramola@outlook.com");
   });
 });

@@ -42,6 +42,32 @@ function bootstrapAccessForEmail(email: string): EffectiveAccess | null {
   };
 }
 
+/**
+ * Convenience wrapper for use in NextAuth callbacks and server guards.
+ *
+ * Accepts a partial session-shaped object and calls getUserAccess with both
+ * userId and email, ensuring bootstrap admin emails are authorised even when
+ * the DB user ID is not yet set (e.g. when DB was unavailable at JWT time).
+ */
+export async function getUserAccessFromSession(
+  prisma: MinimalPrisma,
+  session: {
+    user?: {
+      id?: string | null;
+      email?: string | null;
+    };
+  } | null | undefined,
+): Promise<EffectiveAccess> {
+  const userId =
+    typeof session?.user?.id === "string" && session.user.id
+      ? session.user.id
+      : null;
+  const email =
+    typeof session?.user?.email === "string" ? session.user.email : null;
+
+  return getUserAccess(prisma, userId, email);
+}
+
 export async function getUserAccess(
   prisma: MinimalPrisma,
   userId: string | null | undefined,
