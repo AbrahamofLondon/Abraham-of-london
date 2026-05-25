@@ -6,14 +6,31 @@ import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 import { ENGINE_REGISTRY } from "@/lib/research/engine-registry";
 import { fastDiagnosticAdapter } from "@/lib/research/engines/fast-diagnostic-adapter";
 import { patternRecurrenceAdapter } from "@/lib/research/engines/pattern-recurrence-adapter";
+import { constitutionalDiagnosticAdapter } from "@/lib/research/engines/constitutional-diagnostic-adapter";
+import { clampIterations, computeStats, MAX_TOTAL_MS } from "@/lib/research/performance-range-service";
 import type { Finding } from "@/lib/research/foundry-contract";
 
-const ADAPTERS: Record<string, { run: Function }> = {
+const ADAPTERS: Record<string, { run: (input: { payload: Record<string, unknown> }) => Promise<unknown> }> = {
   "fast-diagnostic": fastDiagnosticAdapter,
   "pattern-recurrence": patternRecurrenceAdapter,
+  "constitutional-diagnostic": constitutionalDiagnosticAdapter,
 };
 
 const DEFAULT_FIXTURES: Record<string, Record<string, unknown>> = {
+  "constitutional-diagnostic": {
+    answers: {
+      q1: { resonance: 6, certainty: 7 },
+      q2: { resonance: 4, certainty: 5 },
+      q3: { resonance: 7, certainty: 6 },
+      q4: { resonance: 5, certainty: 5 },
+      q5: { resonance: 6, certainty: 8 },
+      q6: { resonance: 4, certainty: 6 },
+      q7: { resonance: 5, certainty: 7 },
+      q8: { resonance: 8, certainty: 9 },
+      q9: { resonance: 6, certainty: 5 },
+      q10: { resonance: 7, certainty: 6 },
+    },
+  },
   "fast-diagnostic": {
     fixture: {
       answers: [
@@ -47,7 +64,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const engineId: string = body.engineId ?? "";
-    const iterations: number = Math.min(Math.max(1, Number(body.iterations ?? 5)), 25);
+    const iterations: number = clampIterations(body.iterations ?? 5);
 
     // Validate engine exists and is callable
     const engine = ENGINE_REGISTRY.find((e) => e.id === engineId);
@@ -72,29 +89,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Run iterations
+    // Run iterations — time-capped at MAX_TOTAL_MS (10s)
     const timings: number[] = [];
-    const allFindings: Finding[] = [];
-
+    let totalElapsed = 0;
     for (let i = 0; i < iterations; i++) {
       const iterStart = Date.now();
-      const result = await adapter.run({ payload: fixture });
-      const elapsed = Date.now() - iterStart;
-
-      timings.push(elapsed);
-      if (result.findings) {
-        allFindings.push(
-          ...result.findings.map((f: any) => ({ ...f, id: `${f.id}-iter-${i}` }))
-        );
-      }
-
-      // Safety: max 10 seconds total
-      if (timings.reduce((a, b) => a + b, 0) > 10000) {
-        break;
-      }
+      await adapter.run({ payload: fixture });
+      const iterMs = Date.now() - iterStart;
+      timings.push(iterMs);
+      totalElapsed += iterMs;
+      if (totalElapsed >= MAX_TOTAL_MS) break;
     }
 
-    // Compute stats
     if (timings.length === 0) {
       return NextResponse.json(
         { ok: false, error: "No iterations completed — engine produced no timing data" },
@@ -102,34 +108,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sorted = [...timings].sort((a, b) => a - b);
-    const totalMs = timings.reduce((a, b) => a + b, 0);
-    const minMs = sorted[0]!;
-    const maxMs = sorted[sorted.length - 1]!;
-    const avgMs = totalMs / sorted.length;
-    const p95Index = Math.ceil(sorted.length * 0.95) - 1;
-    const p95Ms = sorted[Math.max(0, p95Index)]!;
-    const timeoutRisk = maxMs > 2000;
+    const stats = computeStats(timings);
 
     const findings: Finding[] = [
       {
         id: `perf-p95-${Date.now()}`,
-        title: `P95: ${p95Ms.toFixed(1)}ms (${sorted.length} iterations)`,
-        description: `Engine ${engine.name} (${engineId}) over ${sorted.length} iterations.`,
-        severity: p95Ms > 1000 ? "HIGH" : p95Ms > 500 ? "MEDIUM" : "INFO",
+        title: `P95: ${stats.p95Ms.toFixed(1)}ms (${stats.completedIterations} iterations)`,
+        description: `Engine ${engine.name} (${engineId}) over ${stats.completedIterations} iterations.`,
+        severity: stats.p95Ms > 1000 ? "HIGH" : stats.p95Ms > 500 ? "MEDIUM" : "INFO",
         source: "performance-range::run::p95-calculation",
         evidence: `Timings: ${timings.map((t) => `${t.toFixed(0)}ms`).join(", ")}`,
-        remediation: p95Ms > 1000 ? "Investigate engine performance. Consider caching or optimisation." : undefined,
+        remediation: stats.p95Ms > 1000 ? "Investigate engine performance. Consider caching or optimisation." : undefined,
       },
       {
         id: `perf-timeout-${Date.now()}`,
-        title: timeoutRisk ? "Timeout risk detected" : "No timeout risk",
-        description: timeoutRisk
-          ? `Max execution time ${maxMs.toFixed(0)}ms exceeds 2000ms threshold.`
-          : `All iterations completed within safe limits (max ${maxMs.toFixed(0)}ms).`,
-        severity: timeoutRisk ? "HIGH" : "INFO",
+        title: stats.timeoutRisk ? "Timeout risk detected" : "No timeout risk",
+        description: stats.timeoutRisk
+          ? `Max execution time ${stats.maxMs.toFixed(0)}ms exceeds 2000ms threshold.`
+          : `All iterations completed within safe limits (max ${stats.maxMs.toFixed(0)}ms).`,
+        severity: stats.timeoutRisk ? "HIGH" : "INFO",
         source: "performance-range::run::timeout-detection",
-        evidence: `Max: ${maxMs.toFixed(0)}ms, threshold: 2000ms`,
+        evidence: `Max: ${stats.maxMs.toFixed(0)}ms, threshold: 2000ms`,
       },
     ];
 
@@ -138,13 +137,13 @@ export async function POST(request: NextRequest) {
       result: {
         engineId,
         engineName: engine.name,
-        iterations: sorted.length,
-        minMs: Math.round(minMs * 10) / 10,
-        avgMs: Math.round(avgMs * 10) / 10,
-        p95Ms: Math.round(p95Ms * 10) / 10,
-        maxMs: Math.round(maxMs * 10) / 10,
-        totalMs,
-        timeoutRisk,
+        iterations: stats.completedIterations,
+        minMs: stats.minMs,
+        avgMs: stats.avgMs,
+        p95Ms: stats.p95Ms,
+        maxMs: stats.maxMs,
+        totalMs: stats.totalMs,
+        timeoutRisk: stats.timeoutRisk,
         findings,
       },
     });

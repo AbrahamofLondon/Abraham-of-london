@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
         ? (result.rawOutput as { formulaSteps: unknown }).formulaSteps
         : [];
 
+    const raw = result.rawOutput as Record<string, unknown> | undefined;
+
     return NextResponse.json({
       ok: true,
       findings: result.findings,
@@ -27,6 +29,10 @@ export async function POST(request: NextRequest) {
       engineVersion: result.engineVersion,
       durationMs: result.durationMs,
       formulaSteps,
+      limitations: result.limitations ?? [],
+      promotionRequirements: result.promotionRequirements ?? [],
+      productionFunctionsCalled: raw?.["productionFunctionsCalled"] ?? [],
+      pipelineStagesNotCalled: raw?.["pipelineStagesNotCalled"] ?? [],
     });
   } catch (err) {
     return NextResponse.json(

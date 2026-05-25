@@ -36,6 +36,9 @@ export default function FastDiagnosticSimulatorPage() {
   const [findings, setFindings] = React.useState<Finding[]>([]);
   const [formulaSteps, setFormulaSteps] = React.useState<FormulaStep[]>([]);
   const [summary, setSummary] = React.useState<string | null>(null);
+  const [limitations, setLimitations] = React.useState<string[]>([]);
+  const [functionsCalled, setFunctionsCalled] = React.useState<string[]>([]);
+  const [stagesNotCalled, setStagesNotCalled] = React.useState<string[]>([]);
   const [running, setRunning] = React.useState(false);
   const [hasOutput, setHasOutput] = React.useState(false);
   const [saveMsg, setSaveMsg] = React.useState<string | null>(null);
@@ -74,6 +77,9 @@ export default function FastDiagnosticSimulatorPage() {
       setFindings(data.findings ?? []);
       setFormulaSteps(data.formulaSteps ?? []);
       setSummary(data.summary ?? null);
+      setLimitations(data.limitations ?? []);
+      setFunctionsCalled(data.productionFunctionsCalled ?? []);
+      setStagesNotCalled(data.pipelineStagesNotCalled ?? []);
       setHasOutput(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Network error");
@@ -121,6 +127,9 @@ export default function FastDiagnosticSimulatorPage() {
     setFindings([]);
     setFormulaSteps([]);
     setSummary(null);
+    setLimitations([]);
+    setFunctionsCalled([]);
+    setStagesNotCalled([]);
     setHasOutput(false);
     setSaveMsg(null);
     setError(null);
@@ -233,6 +242,44 @@ export default function FastDiagnosticSimulatorPage() {
           )
         }
       />
+
+      {/* Limitation banner — always visible after a run */}
+      {hasOutput && limitations.length > 0 && (
+        <div className="rounded-xl border border-amber-500/15 bg-amber-500/5 p-5 space-y-4">
+          <p className="text-[10px] font-mono uppercase tracking-wider text-amber-400/60">
+            Adapter Scope — What This Simulator Covers
+          </p>
+
+          {functionsCalled.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-[9px] font-mono uppercase text-emerald-400/50 tracking-wider mb-1">
+                Production functions called
+              </p>
+              {functionsCalled.map((fn) => (
+                <p key={fn} className="text-[11px] font-mono text-emerald-400/70 pl-2">✓ {fn}</p>
+              ))}
+            </div>
+          )}
+
+          {stagesNotCalled.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-[9px] font-mono uppercase text-white/20 tracking-wider mb-1">
+                Pipeline stages not called
+              </p>
+              {stagesNotCalled.map((fn) => (
+                <p key={fn} className="text-[11px] font-mono text-white/25 pl-2">— {fn}</p>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-1 border-t border-white/8 pt-3">
+            <p className="text-[9px] font-mono uppercase text-white/20 tracking-wider mb-1">Limitations</p>
+            {limitations.map((l) => (
+              <p key={l} className="text-[11px] text-amber-400/50 pl-2">· {l}</p>
+            ))}
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-xs text-red-400">{error}</div>

@@ -33,6 +33,7 @@ export const RunTypeSchema = z.enum([
   "CONTENT",
   "SCHEDULED",
   "MANUAL",
+  "ENGINE_TEST",
 ]);
 
 export const FindingSchema = z.object({

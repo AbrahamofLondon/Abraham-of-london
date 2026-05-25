@@ -19,6 +19,9 @@ export default defineConfig({
     // Path Aliasing for clean imports
     alias: {
       '@': path.resolve(__dirname, './'),
+      // server-only throws unconditionally and relies on Next.js bundler tree-shaking.
+      // In vitest (Node environment), replace with a no-op so server-side modules can be tested.
+      'server-only': path.resolve(__dirname, './__mocks__/server-only.ts'),
     },
 
     // Coverage Gating: Ensures 10/10 reliability

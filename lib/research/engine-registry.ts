@@ -26,11 +26,10 @@ export const ENGINE_REGISTRY: EngineRegistryEntry[] = [
   {
     id: "constitutional-diagnostic",
     name: "Constitutional Diagnostic",
-    status: "PRODUCTION_NEEDS_WRAP",
-    description: "Diagnostic engine that evaluates against the Abraham of London constitutional framework.",
+    status: "PRODUCTION_CALLABLE",
+    description: "Evaluates against the Abraham of London constitutional framework. Foundry adapter wraps deriveConstitutionalDiagnosticBundle() — domain scoring, constitutional routing, readiness tier, and deterministic route decision.",
     version: "1.0.0",
-    limitationReason: "Engine exists but requires a Foundry adapter to capture version, timing, and structured findings.",
-    adapterRequired: "FoundryEngineAdapter wrapping constitutionalDiagnosticRunner()",
+    limitationReason: "Adapter wraps deterministic scoring and routing only. Does not execute AI narrative generation, strategy room session, or boardroom dossier. Does not persist session state.",
   },
   {
     id: "executive-reporting",

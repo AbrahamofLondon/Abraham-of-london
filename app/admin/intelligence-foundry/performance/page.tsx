@@ -127,6 +127,9 @@ export default function PerformanceRangePage() {
           Run safe performance benchmarks on callable engines. Captures min/avg/p95/max execution times.
           Maximum 25 iterations, 10-second timeout per run.
         </p>
+        <p className="mt-1 text-xs text-amber-400/40 font-mono">
+          Performance Range runs bounded internal benchmarks only. It does not load-test production traffic.
+        </p>
       </div>
 
       <SimulationShell

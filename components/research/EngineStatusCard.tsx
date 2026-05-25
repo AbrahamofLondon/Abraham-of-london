@@ -47,14 +47,17 @@ export function EngineStatusCard({
         </div>
       )}
 
-      {!isCallable && onRequestAdapter && engine.status !== "DECOMMISSIONED" && (
-        <button
-          onClick={() => onRequestAdapter(engine.id)}
-          className="rounded border border-white/15 px-3 py-1.5 text-xs text-white/40 hover:text-white/60 hover:border-white/25 transition-colors"
-        >
-          Request Adapter
-        </button>
-      )}
+      {!isCallable &&
+        onRequestAdapter &&
+        engine.status !== "DECOMMISSIONED" &&
+        (engine.status !== "DOCUMENTATION_ONLY" || !!engine.adapterRequired) && (
+          <button
+            onClick={() => onRequestAdapter(engine.id)}
+            className="rounded border border-white/15 px-3 py-1.5 text-xs text-white/40 hover:text-white/60 hover:border-white/25 transition-colors"
+          >
+            Request Adapter
+          </button>
+        )}
     </div>
   );
 }

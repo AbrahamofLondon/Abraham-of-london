@@ -26,6 +26,10 @@ export type EngineRunOutput = {
   engineVersion: string;
   durationMs: number;
   rawOutput?: Record<string, unknown>;
+  /** What this adapter does NOT cover — must be explicit, never omitted. */
+  limitations?: string[];
+  /** What is required to promote this adapter to full coverage. */
+  promotionRequirements?: string[];
 };
 
 export type EngineRegistryEntry = {

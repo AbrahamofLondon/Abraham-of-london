@@ -236,6 +236,19 @@ export async function run(input: EngineRunInput): Promise<EngineRunOutput> {
     severity: findings.find((f) => f.severity === "CRITICAL") ? "CRITICAL" : findings.find((f) => f.severity === "HIGH") ? "HIGH" : "INFO",
     engineVersion: FAST_DIAGNOSTIC_VERSION,
     durationMs: Date.now() - startTime,
+    limitations: [
+      "Wraps production validation and scoring only.",
+      "Does not execute AI synthesis pipeline (synthesise(), forecastDefaultPath()).",
+      "Does not produce final user-facing diagnostic narrative.",
+      "Does not run shield/rate-limit/anti-reconnaissance checks.",
+      "Does not persist to journey DB or create efficacy checkpoints.",
+    ],
+    promotionRequirements: [
+      "Add safe AI synthesis dry-run adapter (synthesise() with a test-safe model flag).",
+      "Capture prompt/version metadata from synthesis call.",
+      "Return narrative quality findings as FoundryFinding records.",
+      "Prove no customer-facing side effects (no DB persistence in Foundry path).",
+    ],
     rawOutput: {
       score,
       severity,
@@ -243,6 +256,20 @@ export async function run(input: EngineRunInput): Promise<EngineRunOutput> {
       answerCount: answers.length,
       sectionCount: new Set(answers.map((a) => a.sectionId)).size,
       formulaSteps,
+      productionFunctionsCalled: [
+        "percentageScore() — lib/diagnostics/scoring.ts",
+        "severityFromScore() — lib/diagnostics/scoring.ts",
+        "verdictFromScore() — lib/diagnostics/scoring.ts",
+        "diagnosticSubmissionSchema.safeParse() — lib/diagnostics/runtime-validation.ts",
+      ],
+      pipelineStagesNotCalled: [
+        "synthesise() — lib/decision/synthesis-engine.ts",
+        "forecastDefaultPath() — lib/decision/default-path-forecast.ts",
+        "persistSpineToJourney() — lib/decision/spine-persistence.ts",
+        "createDecisionMemory() — lib/server/decision-memory/memory-service.server.ts",
+        "detectIntelligenceSignals() — lib/sovereign/intelligence-signals.ts",
+        "computeCostOfInaction() — lib/server/decision/cost-of-inaction.server.ts",
+      ],
     },
   };
 }
