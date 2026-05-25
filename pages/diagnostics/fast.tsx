@@ -41,6 +41,7 @@ import { mapFastDiagnosticToAssessmentResult } from "@/lib/diagnostics/assessmen
 import { generateCaseReference } from "@/lib/product/case-reference";
 import { evidenceStateFromAssessmentResult } from "@/lib/product/result-pathway-state";
 import ERUpgradePanel from "@/components/diagnostics/ERUpgradePanel";
+import ERPreview from "@/components/diagnostics/ERPreview";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -937,19 +938,43 @@ const FastDiagnosticPage: NextPage = () => {
                 </p>
               </div>
 
-              {/* SECTION 4b: ER UPGRADE — shown for moderate/high severity */}
+              {/* SECTION 4b: ER PREVIEW — shown for moderate/high severity */}
               {(result.signalStrength === "high" || result.signalStrength === "moderate") && (
-                <ERUpgradePanel
-                  condition={result.condition}
-                  conditionLabel={result.conditionLabel}
-                  signalStrength={result.signalStrength}
-                  nextGovernanceMove={result.authorityIndex?.nextGovernanceMove ?? result.synthesis?.concreteMove ?? null}
-                  costOfInaction={result.costOfInaction ? {
-                    horizon30: result.costOfInaction.horizon30,
-                    exposureBand: result.costOfInaction.exposureBand,
-                  } : null}
-                  caseRef={result.caseRef ?? null}
-                />
+                <div style={{ marginBottom: "24px" }}>
+                  <ERPreview
+                    condition={result.condition}
+                    conditionLabel={result.conditionLabel}
+                    signalStrength={result.signalStrength}
+                    topRisks={[
+                      result.authorityIndex?.nextGovernanceMove ?? "Authority gap identified",
+                      result.synthesis?.primaryContradiction ?? "Structural contradiction detected",
+                      `Cost of inaction: ${result.costOfInaction?.exposureBand ?? "unquantified"}`,
+                    ]}
+                    costOfDelayTeaser={result.costOfInaction?.horizon30
+                      ? `Estimated cost within 30 days: ${result.costOfInaction.horizon30}`
+                      : "Unresolved decision exposure carries escalating structural cost"}
+                    onUnlock={() => {
+                      document.getElementById("er-upgrade-panel")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* SECTION 4c: ER UPGRADE PANEL — shown for moderate/high severity */}
+              {(result.signalStrength === "high" || result.signalStrength === "moderate") && (
+                <div id="er-upgrade-panel">
+                  <ERUpgradePanel
+                    condition={result.condition}
+                    conditionLabel={result.conditionLabel}
+                    signalStrength={result.signalStrength}
+                    nextGovernanceMove={result.authorityIndex?.nextGovernanceMove ?? result.synthesis?.concreteMove ?? null}
+                    costOfInaction={result.costOfInaction ? {
+                      horizon30: result.costOfInaction.horizon30,
+                      exposureBand: result.costOfInaction.exposureBand,
+                    } : null}
+                    caseRef={result.caseRef ?? null}
+                  />
+                </div>
               )}
 
               {/* SECTION 5: YOUR COMMITMENT */}

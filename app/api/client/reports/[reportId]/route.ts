@@ -1,5 +1,6 @@
 // app/api/client/reports/[reportId]/route.ts
 // Client-facing: retrieve an Executive Report by ID with token auth.
+// Rate-limited: 10 requests per IP per minute.
 
 export const dynamic = "force-dynamic";
 
@@ -8,11 +9,35 @@ import { prisma } from "@/lib/prisma";
 import { createHash } from "crypto";
 import { routeGovernanceEvent } from "@/lib/platform/governance-event-bus";
 
+// ─── Simple in-memory rate limiter ────────────────────────────────────────────
+
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10; // requests
+const RATE_WINDOW_MS = 60_000; // 1 minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ reportId: string }> },
 ) {
   try {
+    // Rate limit
+    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json({ ok: false, error: "Too many requests" }, { status: 429 });
+    }
+
     const { reportId } = await params;
     const { searchParams } = new URL(request.url);
     const token = searchParams.get("token");
