@@ -9,6 +9,7 @@ import { patternRecurrenceAdapter } from "@/lib/research/engines/pattern-recurre
 import { constitutionalDiagnosticAdapter } from "@/lib/research/engines/constitutional-diagnostic-adapter";
 import { strategyRoomAdapter } from "@/lib/research/engines/strategy-room-adapter";
 import { boardroomModeAdapter } from "@/lib/research/engines/boardroom-mode-adapter";
+import { executiveReportingAdapter } from "@/lib/research/engines/executive-reporting-adapter";
 import { clampIterations, computeStats, MAX_TOTAL_MS } from "@/lib/research/performance-range-service";
 import type { Finding } from "@/lib/research/foundry-contract";
 
@@ -18,6 +19,7 @@ const ADAPTERS: Record<string, { run: (input: { payload: Record<string, unknown>
   "constitutional-diagnostic": constitutionalDiagnosticAdapter,
   "strategy-room": strategyRoomAdapter,
   "boardroom-dossier": boardroomModeAdapter,
+  "executive-reporting": executiveReportingAdapter,
 };
 
 const DEFAULT_FIXTURES: Record<string, Record<string, unknown>> = {
@@ -64,6 +66,9 @@ const DEFAULT_FIXTURES: Record<string, Record<string, unknown>> = {
   },
   "boardroom-dossier": {
     useQualifyingFixture: true,
+  },
+  "executive-reporting": {
+    useDisorderedFixture: true,
   },
 };
 

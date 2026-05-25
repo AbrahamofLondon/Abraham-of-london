@@ -35,9 +35,9 @@ export const ENGINE_REGISTRY: EngineRegistryEntry[] = [
     id: "executive-reporting",
     name: "Executive Reporting",
     status: "PRODUCTION_CALLABLE",
-    description: "Generates executive intelligence briefs and governance reports from assessment data. buildExecutiveReport() from executive-report-builder.ts is pure and callable. Foundry adapter not yet built.",
+    description: "Generates executive intelligence briefs from assessment data. Foundry adapter wraps buildExecutiveReport() — resonance telemetry, HCD delta analysis, OGR manifest computation, state classification (ORDERED/MISALIGNED/DISORDERED), financial exposure, and narrative generation. Pure function: no DB, no AI.",
     version: "2.0.0",
-    limitationReason: "Foundry adapter not yet built. buildExecutiveReport() is callable but requires RawExecutiveResponse[], HCDMetrics[], and OGRMetrics fixtures. Adapter is planned for next pass. executive-report-service.ts is DB-bound and not used in Foundry context.",
+    limitationReason: "Adapter uses synthetic RawExecutiveResponse[], HCDMetrics[], and OGRMetrics fixtures. executive-report-service.ts (DB-bound) is not called. Does not persist reports or emit lineage events.",
   },
   {
     id: "strategy-room",
