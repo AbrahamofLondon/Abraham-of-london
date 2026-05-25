@@ -25,6 +25,7 @@ const TEST_MAP = {
   "fast-diagnostic": "tests/research/engines/fast-diagnostic-adapter.test.ts",
   "constitutional-diagnostic": "tests/research/engines/constitutional-diagnostic-adapter.test.ts",
   "pattern-recurrence": "tests/research/engines/pattern-recurrence-adapter.test.ts",
+  "cost-of-delay": "tests/research/engines/cost-of-delay-engine.test.ts",
 };
 
 const adapterId = process.argv[2];
