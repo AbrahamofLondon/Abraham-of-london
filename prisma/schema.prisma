@@ -2176,6 +2176,28 @@ model BoardroomDossier {
   @@index([createdAt])
 }
 
+/// Decision Action Log — converts ER/Boardroom findings into trackable action items.
+/// This is the retention hook. Every finding becomes an action item with status, owner, and outcome.
+model DecisionActionLog {
+  id                String   @id @default(cuid())
+  reportId          String
+  clientEmail       String
+  finding           String
+  severity          String   @default("MEDIUM")
+  recommendedAction String
+  status            String   @default("open") // open | in_progress | actioned | deferred
+  owner             String?
+  dueDate           DateTime?
+  outcomeNote       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([clientEmail])
+  @@index([reportId])
+  @@index([status])
+  @@index([severity])
+}
+
 // Secure, token-based access for client-facing boardroom dossier delivery.
 // Replaces email-query-parameter access.
 model BoardroomDossierAccessToken {
