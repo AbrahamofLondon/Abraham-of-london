@@ -57,11 +57,10 @@ export const ENGINE_REGISTRY: EngineRegistryEntry[] = [
   {
     id: "boardroom-dossier",
     name: "Boardroom Dossier",
-    status: "PRODUCTION_NEEDS_WRAP",
-    description: "Produces boardroom intelligence dossiers. Two paths: lib/constitution/boardroom-mode.ts (decision-level, callable) and lib/boardroom/dossier-builder.ts (org-level, DB-bound). Adapter must target boardroom-mode.ts path.",
+    status: "PRODUCTION_CALLABLE",
+    description: "Produces boardroom decision dossiers. Foundry adapter wraps qualifiesForBoardroom() and generateBoardroomDossier() from lib/constitution/boardroom-mode.ts — pure functions, no DB, no AI. 9 structured sections, objection handling, decision paths.",
     version: "1.0.0",
-    limitationReason: "lib/constitution/boardroom-mode.ts generateBoardroomDossier() is callable (pure, takes IntelligenceSpine) but requires synthetic IntelligenceSpine fixture. lib/boardroom/dossier-builder.ts buildBoardroomDossier() is DB-bound — not callable in Foundry context.",
-    adapterRequired: "boardroom-mode-adapter.ts calling qualifiesForBoardroom() + generateBoardroomDossier() from lib/constitution/boardroom-mode.ts with synthetic IntelligenceSpine fixture",
+    limitationReason: "Adapter uses synthetic IntelligenceSpine fixtures. Does not render PDF. Does not persist boardroom artefacts or call executive-report-service.ts. lib/boardroom/dossier-builder.ts (org-level, DB-bound) is not called — adapter targets boardroom-mode.ts (decision-level) path only.",
   },
   {
     id: "gmi",

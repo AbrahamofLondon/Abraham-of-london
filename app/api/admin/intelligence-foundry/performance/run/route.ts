@@ -8,6 +8,7 @@ import { fastDiagnosticAdapter } from "@/lib/research/engines/fast-diagnostic-ad
 import { patternRecurrenceAdapter } from "@/lib/research/engines/pattern-recurrence-adapter";
 import { constitutionalDiagnosticAdapter } from "@/lib/research/engines/constitutional-diagnostic-adapter";
 import { strategyRoomAdapter } from "@/lib/research/engines/strategy-room-adapter";
+import { boardroomModeAdapter } from "@/lib/research/engines/boardroom-mode-adapter";
 import { clampIterations, computeStats, MAX_TOTAL_MS } from "@/lib/research/performance-range-service";
 import type { Finding } from "@/lib/research/foundry-contract";
 
@@ -16,6 +17,7 @@ const ADAPTERS: Record<string, { run: (input: { payload: Record<string, unknown>
   "pattern-recurrence": patternRecurrenceAdapter,
   "constitutional-diagnostic": constitutionalDiagnosticAdapter,
   "strategy-room": strategyRoomAdapter,
+  "boardroom-dossier": boardroomModeAdapter,
 };
 
 const DEFAULT_FIXTURES: Record<string, Record<string, unknown>> = {
@@ -59,6 +61,9 @@ const DEFAULT_FIXTURES: Record<string, Record<string, unknown>> = {
   },
   "strategy-room": {
     useDefaultFixture: true,
+  },
+  "boardroom-dossier": {
+    useQualifyingFixture: true,
   },
 };
 

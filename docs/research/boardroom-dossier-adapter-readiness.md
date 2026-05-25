@@ -1,8 +1,44 @@
 # Boardroom Dossier Adapter — Readiness Audit
 
 **Date:** 2026-05-25  
-**Status:** PRODUCTION_NEEDS_WRAP  
-**Audit decision:** Two distinct "boardroom dossier" paths exist. The decision-level path is callable. The org-level path is DB-bound.
+**Status:** ~~PRODUCTION_NEEDS_WRAP~~ → **PRODUCTION_CALLABLE** (adapter implemented 2026-05-25)
+**Audit decision:** Two distinct "boardroom dossier" paths exist. The decision-level path is callable and has been wrapped. The org-level path remains DB-bound.
+
+## Adapter Implementation Status
+
+| Item | Status |
+|---|---|
+| `lib/research/engines/boardroom-mode-adapter.ts` | **IMPLEMENTED** |
+| `qualifiesForBoardroom()` called | **YES** |
+| `generateBoardroomDossier()` called | **YES** |
+| PDF export called | **NO — correct** |
+| DB writes | **NO — correct** |
+| `tests/research/engines/boardroom-mode-adapter.test.ts` | **52 tests passing** |
+| `tests/research/fixtures/boardroom-mode.ts` | Qualifying, borderline, non-qualifying, malformed, high-cost fixtures |
+| Engine registry | `boardroom-dossier` → `PRODUCTION_CALLABLE` |
+| Simulation page | `/admin/intelligence-foundry/simulation/boardroom-mode` |
+| Performance Range | Wired with `useQualifyingFixture: true` |
+
+## Remaining Limitations (explicit)
+
+1. Uses synthetic IntelligenceSpine fixtures — not a real user spine from production DB.
+2. Does not render PDF. PDF export route is not called.
+3. Does not call executive-report-service.ts or fetch real ER run state.
+4. Does not persist boardroom artefacts — no DB writes, no archive events.
+5. Does not issue client-facing board papers or BOARD_RESTRICTED documents.
+6. Does not validate payment or entitlement gate (DB-bound).
+7. `getProofStatements()` called with empty cohort data — no real cohort aggregation.
+8. No session admission check (enforceStrategyRoomAccess).
+
+## Promotion Requirements (next pass)
+
+1. Wire real Executive Reporting result → IntelligenceSpine transformation.
+2. Add entitlement/payment gate dry-run check.
+3. Add PDF render dry-run adapter (section list returned, no binary output).
+4. Add lineage event simulation for BOARDROOM_DOSSIER_GENERATED and BOARDROOM_DOSSIER_EXPORTED.
+5. Validate Boardroom UI slide mapping against generated dossier sections.
+
+---
 
 ---
 
