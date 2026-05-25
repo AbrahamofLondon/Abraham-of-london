@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 const HUB_MODULES = [
   { id: "scenario-workbench",      label: "Scenario Workbench",      href: "/admin/intelligence-foundry/scenario",          desc: "Run callable engines, lock baselines, compare drift, save runs." },
   { id: "fast-diagnostic-sim",     label: "Fast Diagnostic Simulator", href: "/admin/intelligence-foundry/simulation/fast-diagnostic", desc: "Run the Fast Diagnostic engine with synthetic inputs. Real scoring, formula traces, ResearchRun capture." },
+  { id: "strategy-room-sim",       label: "Strategy Room Simulator",   href: "/admin/intelligence-foundry/simulation/strategy-room",   desc: "Dry-run Strategy Room intake scoring: 8-component gate, authority check, decision directive. No intake archived." },
   { id: "research-run-vault",      label: "Research Run Vault",       href: "/admin/intelligence-foundry/runs",              desc: "Complete ledger of all ResearchRuns. Filter, review, export." },
   { id: "content-red-team",        label: "Content Red Team",         href: "/admin/intelligence-foundry/red-team/content",  desc: "Overclaim detection, guarantee language, evidence posture, IP leakage." },
   { id: "security-red-team",       label: "Security Red Team",        href: "/admin/intelligence-foundry/red-team/security", desc: "Route exposure, auth checks, rate-limit presence, manual checklist." },
