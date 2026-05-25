@@ -1,5 +1,6 @@
 // app/api/stripe/webhook/route.ts
 // Stripe webhook handler — triggers post-payment ER generation and delivery.
+// Idempotent: duplicate Stripe events are detected and skipped.
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import { routeGovernanceEvent } from "@/lib/platform/governance-event-bus";
 import { sendEmail } from "@/lib/email/core/sendEmail";
+import { DecisionActionLog } from "@/lib/commercial/decision-action-log";
 import { createHash, randomBytes } from "crypto";
 
 function generateRawToken(): string {
@@ -26,15 +28,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
     const event = JSON.parse(body);
+    const eventId = event.id as string;
+    const eventType = event.type as string;
 
     // Only process completed checkout sessions
-    if (event.type !== "checkout.session.completed") {
+    if (eventType !== "checkout.session.completed") {
       return NextResponse.json({ received: true });
     }
 
     const session = event.data.object;
+    const sessionId = session.id as string;
     const email = session.customer_email ?? session.customer_details?.email;
-    const sessionId = session.id;
     const metadata = session.metadata ?? {};
 
     if (!email) {
@@ -44,10 +48,28 @@ export async function POST(request: NextRequest) {
     // Verify this is an executive_reporting purchase
     const productCode = metadata.productCode ?? "";
     if (productCode !== "executive_reporting") {
-      return NextResponse.json({ received: true }); // Not our product
+      return NextResponse.json({ received: true });
     }
 
-    // Find the ER run that was created during checkout success page load
+    // ── Idempotency check ─────────────────────────────────────────────────
+    const existing = await prisma.stripeWebhookEvent.findUnique({
+      where: { id: eventId },
+    });
+    if (existing) {
+      return NextResponse.json({ received: true, idempotent: true });
+    }
+
+    // Record the event immediately to prevent duplicate processing
+    await prisma.stripeWebhookEvent.create({
+      data: {
+        id: eventId,
+        type: eventType,
+        sessionId,
+        status: "processing",
+      },
+    });
+
+    // ── Find the ER run ───────────────────────────────────────────────────
     const run = await prisma.executiveReportingRun.findFirst({
       where: {
         email,
@@ -58,12 +80,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (!run) {
-      // The run might not exist yet if the user hasn't visited the success page
-      // Store the checkout info for later pickup
+      // Mark event as deferred — run may be created later
+      await prisma.stripeWebhookEvent.update({
+        where: { id: eventId },
+        data: { status: "deferred" },
+      });
       return NextResponse.json({ received: true, note: "Run not yet created" });
     }
 
-    // Create secure access token
+    const snapshot = run.canonicalSnapshot as Record<string, unknown> | null;
+
+    // ── Create secure access token ─────────────────────────────────────────
     const rawToken = generateRawToken();
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -81,7 +108,35 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Email secure link
+    // ── Create DecisionActionLog items ─────────────────────────────────────
+    const failureModes = (snapshot?.failureModes as string[]) ?? [];
+    const priorityStack = (snapshot?.priorityStack as string[]) ?? [];
+    const state = (snapshot?.state as string) ?? "ORDERED";
+
+    if (failureModes.length > 0 || priorityStack.length > 0) {
+      await DecisionActionLog.createFromReport(run.id, email, {
+        failureModes,
+        priorityStack,
+        state,
+      });
+
+      await routeGovernanceEvent({
+        eventType: "FINDING_CREATED",
+        sourceSurface: "executive-reporting",
+        canonicalRecordType: "FoundryFinding",
+        canonicalRecordId: run.id,
+        actorEmail: email,
+        severity: state === "DISORDERED" ? "CRITICAL" : "HIGH",
+        payload: {
+          actionItemCount: failureModes.length + priorityStack.length,
+          source: "paid-er-generation",
+        },
+        shouldWriteAudit: true,
+        shouldWriteLineage: true,
+      });
+    }
+
+    // ── Email secure link ─────────────────────────────────────────────────
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.com";
     const accessUrl = `${baseUrl}/client/reports/${run.id}?token=${encodeURIComponent(rawToken)}`;
 
@@ -94,7 +149,7 @@ export async function POST(request: NextRequest) {
       meta: { source: "stripe-webhook" },
     });
 
-    // Emit governance events
+    // ── Emit governance events ────────────────────────────────────────────
     await routeGovernanceEvent({
       eventType: "EXECUTIVE_REPORT_GENERATED",
       sourceSurface: "executive-reporting",
@@ -117,6 +172,12 @@ export async function POST(request: NextRequest) {
       payload: { deliveryMethod: "email", expiresAt: expiresAt.toISOString() },
       shouldWriteAudit: true,
       shouldWriteLineage: true,
+    });
+
+    // ── Mark event as processed ───────────────────────────────────────────
+    await prisma.stripeWebhookEvent.update({
+      where: { id: eventId },
+      data: { status: "processed", reportId: run.id },
     });
 
     return NextResponse.json({ received: true, reportId: run.id });

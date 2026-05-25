@@ -92,6 +92,22 @@ export async function GET(
       return NextResponse.json({ ok: false, error: "Report data unavailable" }, { status: 500 });
     }
 
+    // Fetch action items for this report
+    const actionItems = await prisma.decisionActionLog.findMany({
+      where: { reportId },
+      orderBy: [{ severity: "desc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        finding: true,
+        severity: true,
+        recommendedAction: true,
+        status: true,
+        owner: true,
+        dueDate: true,
+        outcomeNote: true,
+      },
+    });
+
     // Record view
     await routeGovernanceEvent({
       eventType: "EXECUTIVE_REPORT_VIEWED",
@@ -115,6 +131,16 @@ export async function GET(
         failureModes: snapshot.failureModes,
         ogr: snapshot.ogr,
       },
+      actionItems: actionItems.map((a) => ({
+        id: a.id,
+        finding: a.finding,
+        severity: a.severity,
+        recommendedAction: a.recommendedAction,
+        status: a.status,
+        owner: a.owner,
+        dueDate: a.dueDate?.toISOString() ?? null,
+        outcomeNote: a.outcomeNote,
+      })),
     });
   } catch (err) {
     return NextResponse.json({ ok: false, error: "Failed to retrieve report" }, { status: 500 });

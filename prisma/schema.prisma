@@ -2198,6 +2198,20 @@ model DecisionActionLog {
   @@index([severity])
 }
 
+/// Stripe webhook event tracking for idempotent payment processing.
+/// Prevents duplicate report generation on retried webhook deliveries.
+model StripeWebhookEvent {
+  id              String   @id
+  type            String
+  sessionId       String?
+  reportId        String?
+  status          String   @default("processed")
+  createdAt       DateTime @default(now())
+
+  @@unique([type, sessionId])
+  @@index([createdAt])
+}
+
 // Secure, token-based access for client-facing boardroom dossier delivery.
 // Replaces email-query-parameter access.
 model BoardroomDossierAccessToken {
