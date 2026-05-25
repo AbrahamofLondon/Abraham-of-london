@@ -65,7 +65,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function DataPoisoningLabPage() {
-  const [selectedEngine, setSelectedEngine] = React.useState(CALLABLE_ENGINES[0].id);
+  const [selectedEngine, setSelectedEngine] = React.useState(CALLABLE_ENGINES[0]?.id ?? "");
   const [running, setRunning] = React.useState(false);
   const [result, setResult] = React.useState<PoisonRunResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -106,7 +106,7 @@ export default function DataPoisoningLabPage() {
     if (!result) return {};
     return result.tests.reduce<Record<string, PoisonTestResult[]>>((acc, t) => {
       if (!acc[t.category]) acc[t.category] = [];
-      acc[t.category].push(t);
+      acc[t.category]!.push(t);
       return acc;
     }, {});
   }, [result]);

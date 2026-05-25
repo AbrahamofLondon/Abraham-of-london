@@ -116,6 +116,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         ruleCount: RULE_LABELS.length,
       },
       output: `${surfaceIds.length} surface(s) × ${RULE_LABELS.length} rules`,
+      sourceRule: "runAllRules() — lib/research/engines/enforcement-gates-adapter.ts",
+      engineVersion: ENFORCEMENT_GATES_VERSION,
     },
   ];
 
@@ -143,12 +145,15 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
     output: surfaceResults.every((r) => r.aggregate.status === "GREEN")
       ? "ALL GATES PASS"
       : `${surfaceResults.filter((r) => r.aggregate.status === "RED").length} surface(s) blocked`,
+    sourceRule: "aggregateStatus() — lib/research/engines/enforcement-gates-adapter.ts",
+    engineVersion: ENFORCEMENT_GATES_VERSION,
   });
 
   // ── Map to findings ─────────────────────────────────────────────────────────
   for (const sr of surfaceResults) {
     for (let ruleIdx = 0; ruleIdx < sr.rules.length; ruleIdx++) {
       const rule = sr.rules[ruleIdx];
+      if (!rule) continue;
       const ruleLabel = RULE_LABELS[ruleIdx] ?? `Rule ${ruleIdx + 1}`;
 
       if (rule.status === "RED") {

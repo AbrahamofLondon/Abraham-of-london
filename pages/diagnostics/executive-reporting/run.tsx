@@ -5,6 +5,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import CostOfDelaySection from "@/components/diagnostics/CostOfDelaySection";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
 import { buildInstrumentSignalAuthority, severityColor as instrSeverityColor, severityBg as instrSeverityBg } from "@/lib/product/instrument-signal-authority";
@@ -1384,6 +1385,22 @@ function ResultSurface({
             <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.78rem", lineHeight: 1.5, color: "rgba(255,255,255,0.32)" }}>
               {financialExposure.caveat}
             </p>
+          </div>
+        )}
+
+        {/* ── BLOCK 4b: WSJF / COST OF DELAY SECTION ── */}
+        {(costOfDelayText || projectedCost90) && (
+          <div style={{ marginBottom: "0.75rem" }}>
+            <CostOfDelaySection
+              context="Executive Report"
+              data={{
+                wsjfTier: financialExposure?.totalExposureFormatted ? "HIGH" : null,
+                priorityRationale: costOfDelayText || null,
+                financialExposure: null,
+                recommendation: nextAction || null,
+              }}
+              showFinancial={false}
+            />
           </div>
         )}
 

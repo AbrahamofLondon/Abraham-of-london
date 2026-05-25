@@ -36,7 +36,7 @@ export const OUTBOUND_GATE_VERSION = "1.1.0";
 
 const SAFE_FIXTURE: OutboundDraft = {
   provider: "linkedin",
-  assetType: "post",
+  assetType: "custom",
   slug: "fixture-safe-post",
   title: "The cost of misaligned leadership",
   text: "When authority is unclear, execution falters. Abraham of London works with founders and boards to establish clear decision authority before the organisation pays the price.",
@@ -46,7 +46,7 @@ const SAFE_FIXTURE: OutboundDraft = {
 
 const FAILING_FIXTURE: OutboundDraft = {
   provider: "x",
-  assetType: "post",
+  assetType: "custom",
   slug: "fixture-failing-post",
   title: "GUARANTEED results",
   text: "AI predicts your business will grow 300% guaranteed. Investment advice available. Buy now. Q2 2026 report is now available.",
@@ -66,8 +66,8 @@ function buildDraft(payload: Record<string, unknown>): OutboundDraft {
   if (useSafeFixture) return SAFE_FIXTURE;
 
   return {
-    provider: (payload.provider as string) ?? "linkedin",
-    assetType: "post",
+    provider: ((payload.provider as string) ?? "linkedin") as OutboundDraft["provider"],
+    assetType: "custom",
     slug: (payload.slug as string) ?? "custom-draft",
     title: (payload.title as string) ?? "",
     text: (payload.text as string) ?? "",
@@ -133,6 +133,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         maxChars: maxChars || "no limit",
       },
       output: `text: ${draft.text.length} chars`,
+      sourceRule: "applySharedOutboundPolicy() — lib/outbound/core/outbound-policy-gate.ts",
+      engineVersion: OUTBOUND_GATE_VERSION,
     },
     {
       stepId: "gate-evaluation",
@@ -147,6 +149,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         warnings: gateResult.warnings.join(" | ") || "none",
       },
       output: gateResult.allowed ? "ALLOWED" : "BLOCKED",
+      sourceRule: "applySharedOutboundPolicy() — lib/outbound/core/outbound-policy-gate.ts",
+      engineVersion: OUTBOUND_GATE_VERSION,
     },
   ];
 

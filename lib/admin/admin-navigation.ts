@@ -202,7 +202,11 @@ export function getNavItemsForRole(role: "admin" | "operator" | "sponsor_safe"):
   return ADMIN_NAVIGATION
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => (roleOrder[item.visibility] ?? 0) <= maxLevel),
+      // level >= 1 excludes "internal" (level 0); level <= maxLevel excludes roles above the caller
+      items: section.items.filter((item) => {
+        const level = roleOrder[item.visibility] ?? 0;
+        return level >= 1 && level <= maxLevel;
+      }),
     }))
     .filter((section) => section.items.length > 0);
 }

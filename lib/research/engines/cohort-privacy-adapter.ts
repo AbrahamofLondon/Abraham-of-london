@@ -117,6 +117,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         MIN_CONFIDENCE_INTERVAL_SAMPLE: COHORT_PROOF_THRESHOLDS.MIN_CONFIDENCE_INTERVAL_SAMPLE,
       },
       output: `min-publishable: ${COHORT_PROOF_THRESHOLDS.MIN_PUBLISHABLE_SAMPLE}`,
+      sourceRule: "COHORT_PROOF_THRESHOLDS — lib/proof/cohort-proof-contract.ts",
+      engineVersion: COHORT_PRIVACY_VERSION,
     },
     {
       stepId: "threshold-evaluation",
@@ -127,6 +129,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         aboveThreshold: checkMatrix.filter((r) => r.meetsPublicationThreshold).length,
       },
       output: `${checkMatrix.filter((r) => r.meetsPublicationThreshold).length}/${sampleSizes.length} publishable`,
+      sourceRule: "cohortMeetsPublicationThreshold() — lib/proof/cohort-proof-contract.ts",
+      engineVersion: COHORT_PRIVACY_VERSION,
     },
     {
       stepId: "language-level-distribution",
@@ -138,6 +142,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         causalCount: checkMatrix.filter((r) => r.languageLevel === "causal").length,
       },
       output: "language levels computed",
+      sourceRule: "determineLanguageLevel() — lib/proof/cohort-proof-contract.ts",
+      engineVersion: COHORT_PRIVACY_VERSION,
     },
   ];
 

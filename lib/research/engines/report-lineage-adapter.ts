@@ -111,6 +111,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         availableChains: VALID_CHAIN_IDS.length,
       },
       output: runAll ? VALID_CHAIN_IDS.length : 1,
+      sourceRule: "simulateLineageChain() / simulateAllLineageChains() — lib/research/lineage/report-lineage-simulation.ts",
+      engineVersion: LINEAGE_VERSION,
     },
   ];
 
@@ -131,6 +133,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
       passingRate: results.length > 0 ? `${Math.round((completeCount / results.length) * 100)}%` : "0%",
     },
     output: `${completeCount}/${results.length} chains COMPLETE`,
+    sourceRule: "simulateAllLineageChains() → aggregate — lib/research/lineage/report-lineage-simulation.ts",
+    engineVersion: LINEAGE_VERSION,
   });
 
   // ── Map results to findings ─────────────────────────────────────────────────

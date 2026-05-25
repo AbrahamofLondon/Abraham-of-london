@@ -1,71 +1,116 @@
 // app/api/boardroom/dossier/[dossierId]/route.ts
 // Client-facing: retrieve a Boardroom Dossier by ID.
 //
-// Access gate: requires a valid signed delivery token (?token=<raw>).
-// Token is validated by SHA-256 hash comparison — raw token is never stored.
-// Replaces legacy ?email= query-parameter access.
+// Security controls:
+//   1. Rate limit: 10 requests/IP/minute — probe prevention
+//   2. Constant-time denial: all invalid states return 403 with the same error
+//      message and a forced minimum delay to prevent timing-based enumeration
+//   3. Token validation: SHA-256 hash comparison, expiry, revocation
+//   4. Cross-dossier attack prevention: tokenRecord.dossierId === dossierId check
 
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { BoardroomDossierService } from "@/lib/boardroom/boardroom-dossier-service";
 import { BoardroomAccessTokenService } from "@/lib/boardroom/boardroom-access-token";
+import { checkBoardroomRateLimit, extractIp } from "@/lib/boardroom/boardroom-server-rate-limit";
+import { BoardroomDeliveryLog } from "@/lib/boardroom/boardroom-delivery-log";
+
+/** Constant denial response — same wording regardless of reason. */
+const ACCESS_DENIED_RESPONSE = NextResponse.json(
+  { ok: false, error: "Access link invalid. Please use the link provided in your briefing document." },
+  { status: 403 },
+);
+
+/** Minimum response time in ms to prevent timing attacks on token validation. */
+const MIN_RESPONSE_MS = 200;
+
+async function withMinDelay<T>(fn: () => Promise<T>, startMs: number): Promise<T> {
+  const result = await fn();
+  const elapsed = Date.now() - startMs;
+  if (elapsed < MIN_RESPONSE_MS) {
+    await new Promise((resolve) => setTimeout(resolve, MIN_RESPONSE_MS - elapsed));
+  }
+  return result;
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ dossierId: string }> },
 ) {
+  const startMs = Date.now();
+
   try {
+    // ── Rate limit ────────────────────────────────────────────────────────────
+    const ip = extractIp(request);
+    const rl = checkBoardroomRateLimit(ip);
+
+    if (!rl.ok) {
+      return NextResponse.json(
+        { ok: false, error: "Too many requests. Please wait before trying again." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+            "X-RateLimit-Limit": "10",
+            "X-RateLimit-Remaining": "0",
+          },
+        },
+      );
+    }
+
     const { dossierId } = await params;
     const { searchParams } = new URL(request.url);
     const rawToken = searchParams.get("token");
 
     if (!rawToken) {
-      return NextResponse.json(
-        { ok: false, error: "Access token required" },
-        { status: 401 },
-      );
+      await new Promise((r) => setTimeout(r, MIN_RESPONSE_MS));
+      return ACCESS_DENIED_RESPONSE;
     }
 
-    // Validate token (hash comparison, expiry, revocation)
-    const validation = await BoardroomAccessTokenService.validateToken(rawToken);
+    // ── Token validation (hash, expiry, revocation) ────────────────────────
+    return await withMinDelay(async () => {
+      const validation = await BoardroomAccessTokenService.validateToken(rawToken);
 
-    if (!validation.valid) {
-      const status = validation.reason === "NOT_FOUND" ? 403 : 403;
-      const error =
-        validation.reason === "REVOKED"
-          ? "Access token has been revoked"
-          : validation.reason === "EXPIRED"
-          ? "Access token has expired"
-          : "Access denied or dossier not found";
-      return NextResponse.json({ ok: false, error }, { status });
-    }
+      if (!validation.valid) {
+        // Log EXPIRED lazily — if the reason is EXPIRED, record the event
+        if (validation.reason === "EXPIRED" && (validation as any).tokenRecord?.id) {
+          void BoardroomDeliveryLog.record({
+            tokenId: (validation as any).tokenRecord.id,
+            dossierId,
+            eventType: "EXPIRED",
+          });
+        }
+        return ACCESS_DENIED_RESPONSE;
+      }
 
-    const { tokenRecord } = validation;
+      const { tokenRecord } = validation;
 
-    // Confirm the token is for the requested dossier
-    if (tokenRecord.dossierId !== dossierId) {
-      return NextResponse.json(
-        { ok: false, error: "Access denied or dossier not found" },
-        { status: 403 },
-      );
-    }
+      // ── Cross-dossier attack prevention ──────────────────────────────────
+      if (tokenRecord.dossierId !== dossierId) {
+        return ACCESS_DENIED_RESPONSE;
+      }
 
-    const dossier = await BoardroomDossierService.getById(dossierId);
-    if (!dossier) {
-      return NextResponse.json(
-        { ok: false, error: "Dossier not found" },
-        { status: 404 },
-      );
-    }
+      // ── Fetch dossier ────────────────────────────────────────────────────
+      const dossier = await BoardroomDossierService.getById(dossierId);
+      if (!dossier) {
+        return ACCESS_DENIED_RESPONSE;
+      }
 
-    // Record view against both the token and the dossier
-    await Promise.all([
-      BoardroomAccessTokenService.recordTokenView(tokenRecord.id),
-      BoardroomDossierService.recordView(dossierId),
-    ]);
+      // ── Record view ──────────────────────────────────────────────────────
+      await Promise.all([
+        BoardroomAccessTokenService.recordTokenView(tokenRecord.id),
+        BoardroomDossierService.recordView(dossierId),
+        BoardroomDeliveryLog.record({
+          tokenId: tokenRecord.id,
+          dossierId,
+          eventType: "VIEWED",
+          clientEmail: tokenRecord.clientEmail ?? null,
+        }),
+      ]);
 
-    return NextResponse.json({ ok: true, dossier });
+      return NextResponse.json({ ok: true, dossier });
+    }, startMs);
   } catch (_err) {
     return NextResponse.json(
       { ok: false, error: "Failed to retrieve dossier" },

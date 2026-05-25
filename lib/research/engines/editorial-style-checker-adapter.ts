@@ -59,7 +59,6 @@ const US_TO_UK_MAP: Record<string, string> = {
   "optimize": "optimise",
   "optimized": "optimised",
   "optimizing": "optimising",
-  "optimize": "optimise",
   "behavior": "behaviour",
   "behaviors": "behaviours",
   "color": "colour",
@@ -311,6 +310,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         hasTitle: title ? "yes" : "no",
       },
       output: `${text.length} chars, ${text.split(/\s+/).filter(Boolean).length} words`,
+      sourceRule: "detectPhrases() / detectPatterns() — lib/research/engines/editorial-style-checker-adapter.ts",
+      engineVersion: EDITORIAL_STYLE_VERSION,
     },
     {
       stepId: "rule-results",
@@ -335,6 +336,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
       output: overclaims.length + guaranteeMatches.length + compliancePhrases.length === 0
         ? "CLEAR — no high-severity violations"
         : "VIOLATIONS — high-severity findings",
+      sourceRule: "detectPhrases() / detectPatterns() — lib/research/engines/editorial-style-checker-adapter.ts",
+      engineVersion: EDITORIAL_STYLE_VERSION,
     },
   ];
 

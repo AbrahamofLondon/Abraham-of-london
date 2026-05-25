@@ -12,6 +12,7 @@ import { AlertTriangle, ArrowRight, CheckCircle, Clock, Lock, Plus, XCircle } fr
 
 import Layout from "@/components/Layout";
 import { trackLaunch } from "@/lib/analytics/client-launch-events";
+import CostOfDelaySection from "@/components/diagnostics/CostOfDelaySection";
 import ReturnBriefInterruptionBar from "@/components/strategy-room/ReturnBriefInterruptionBar";
 import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
 import DecisionTimeline, { type DecisionTimelineItem } from "@/components/strategy-room/DecisionTimeline";
@@ -468,6 +469,46 @@ export default function StrategyRoomSessionPage({
     : executionState.checkpoint?.status === "OVERDUE"
       ? "The checkpoint remains overdue. The system will continue to treat the condition as unresolved."
       : "If ignored, execution memory stalls and the next checkpoint cannot confirm movement.";
+  // ── COST OF DELAY — derived from session evidence for WSJF display ──
+  const srCostOfDelay = (() => {
+    const delayText = graphDecision?.costOfDelayText ?? null;
+    const totalExposure = session.financialExposure?.totalExposure ?? null;
+    if (!delayText && !totalExposure) return null;
+    const lvl = (session.exposureLevel ?? "").toLowerCase();
+    const wsjfTier =
+      lvl === "critical" ? ("CRITICAL" as const)
+      : lvl === "high" ? ("HIGH" as const)
+      : lvl === "moderate" || lvl === "medium" ? ("MEDIUM" as const)
+      : totalExposure && totalExposure > 50_000 ? ("HIGH" as const)
+      : totalExposure && totalExposure > 0 ? ("MEDIUM" as const)
+      : null;
+    const escLevel: "CRITICAL" | "ESCALATE" | null =
+      session.escalationLevel === "critical" ? "CRITICAL"
+      : blockedCount > 0 ? "ESCALATE"
+      : null;
+    return {
+      wsjfTier,
+      priorityRationale: delayText,
+      financialExposure: totalExposure
+        ? {
+            totalCostOfDelay: totalExposure,
+            weeklyBurnRate: Math.round(totalExposure / 12),
+            revenueAtRisk: totalExposure,
+            currencyCode: "GBP",
+          }
+        : null,
+      escalation: escLevel
+        ? {
+            level: escLevel,
+            signal:
+              blockedCount > 0
+                ? `${blockedCount} decision${blockedCount === 1 ? "" : "s"} blocked. Financial exposure is compounding.`
+                : "Session has been escalated. Immediate decision authority is required.",
+          }
+        : null,
+    };
+  })();
+
   const sessionIrreversibility = React.useMemo(() => {
     const exposure = session.financialExposure?.totalExposure ?? null;
     const days = daysSince(session.createdAt);
@@ -794,6 +835,17 @@ export default function StrategyRoomSessionPage({
               </div>
             </div>
           </section>
+
+          {/* ── COST OF DELAY ── */}
+          {srCostOfDelay && (
+            <section style={{ padding: "1.25rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <SectionLabel>Cost of Delay</SectionLabel>
+              <CostOfDelaySection
+                context="Strategy Room"
+                data={srCostOfDelay}
+              />
+            </section>
+          )}
 
           {/* ── 3. INTERVENTION STACK ── */}
           {interventions.length > 0 && (

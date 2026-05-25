@@ -2196,6 +2196,71 @@ model BoardroomDossierAccessToken {
   @@index([dossierId])
   @@index([tokenHash])
   @@index([expiresAt])
+
+  deliveryEvents BoardroomDeliveryEvent[]
+}
+
+// Event log for boardroom dossier delivery operations.
+// Records GENERATED, SENT, VIEWED, EXPIRED, REVOKED, RESENT per token.
+model BoardroomDeliveryEvent {
+  id          String   @id @default(cuid())
+  tokenId     String
+  dossierId   String
+  eventType   String   // GENERATED | SENT | VIEWED | EXPIRED | REVOKED | RESENT | SEND_FAILED
+  clientEmail String?
+  performedBy String?  // admin email for admin actions; null for automated/client events
+  metadata    Json?    // extra context (error message, resend source token id, etc.)
+  createdAt   DateTime @default(now())
+
+  token       BoardroomDossierAccessToken @relation(fields: [tokenId], references: [id])
+
+  @@index([tokenId])
+  @@index([dossierId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+// Client Portal: magic-link session for client access to their deliverables.
+// Token: 32 random bytes, SHA-256 hash stored. Raw token never persisted.
+model ClientPortalSession {
+  id          String    @id @default(cuid())
+  clientEmail String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  lastUsedAt  DateTime?
+  useCount    Int       @default(0)
+  createdBy   String    // admin who sent the link
+  createdAt   DateTime  @default(now())
+
+  @@index([clientEmail])
+  @@index([tokenHash])
+  @@index([expiresAt])
+}
+
+// Decision Action Log: tracks finding → recommended action → outcome per client.
+model ClientDecisionAction {
+  id              String    @id @default(cuid())
+  clientEmail     String
+  dossierId       String?   // linked dossier if action came from boardroom delivery
+  findingRef      String?   // finding ID from ER or diagnostic
+  findingTitle    String
+  recommendedAction String
+  owner           String?   // who is responsible for executing
+  status          String    @default("OPEN") // OPEN | IN_PROGRESS | ACTIONED | DEFERRED | WONT_ACT
+  dueDate         DateTime?
+  actionedAt      DateTime?
+  outcomeNote     String?
+  followUpDate    DateTime?
+  severity        String    @default("MEDIUM") // CRITICAL | HIGH | MEDIUM | LOW
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([clientEmail])
+  @@index([dossierId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([createdAt])
 }
 
 model DiagnosticJourney {

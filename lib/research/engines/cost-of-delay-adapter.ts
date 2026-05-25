@@ -202,6 +202,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         numerator: wsjfInputs.userBusinessValue + wsjfInputs.timeCriticality + wsjfInputs.riskReduction,
       },
       output: result.wsjfScore,
+      sourceRule: "computeCostOfDelay() — lib/research/engines/cost-of-delay-engine.ts",
+      engineVersion: COST_OF_DELAY_VERSION,
     },
     {
       stepId: "wsjf-classification",
@@ -213,6 +215,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         mediumThreshold: 2,
       },
       output: result.wsjfTier,
+      sourceRule: "classifyWsjf() — lib/research/engines/cost-of-delay-engine.ts",
+      engineVersion: COST_OF_DELAY_VERSION,
     },
   ];
 
@@ -230,6 +234,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
         weeklyBurnRate: result.financialExposure.weeklyBurnRate,
       },
       output: result.financialExposure.totalCostOfDelay,
+      sourceRule: "computeCostOfDelay() → computeFinancialExposure() — lib/research/engines/cost-of-delay-engine.ts",
+      engineVersion: COST_OF_DELAY_VERSION,
     });
   }
 
@@ -241,6 +247,8 @@ async function run(input: EngineRunInput): Promise<EngineRunOutput> {
       weeksDelayed: financialInputs?.weeksDelayed ?? 0,
     },
     output: result.delayEscalation.level,
+    sourceRule: "computeCostOfDelay() → determineEscalation() — lib/research/engines/cost-of-delay-engine.ts",
+    engineVersion: COST_OF_DELAY_VERSION,
   });
 
   // ── Map to findings ─────────────────────────────────────────────────────────

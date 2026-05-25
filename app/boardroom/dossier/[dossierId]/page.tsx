@@ -7,6 +7,7 @@
 
 import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import CostOfDelaySection, { type CostOfDelayData } from "@/components/diagnostics/CostOfDelaySection";
 
 type DossierSection = {
   id: string;
@@ -24,6 +25,7 @@ type DossierData = {
   sections: DossierSection[];
   objectionHandling: Array<{ objection: string; response: string }>;
   decisionPath: Array<{ option: string; consequence: string; recommended: boolean }>;
+  costOfDelay?: CostOfDelayData | null;
   status: string;
   viewCount: number;
 };
@@ -193,6 +195,14 @@ export default function BoardroomDossierPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Cost of Delay */}
+        {dossier.costOfDelay && (
+          <CostOfDelaySection
+            context="Boardroom Dossier"
+            data={dossier.costOfDelay}
+          />
         )}
 
         {/* Strategy Room escalation */}

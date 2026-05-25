@@ -40,6 +40,7 @@ import AssessmentResultSurface from "@/components/diagnostics/AssessmentResultSu
 import { mapFastDiagnosticToAssessmentResult } from "@/lib/diagnostics/assessment-result-mappers";
 import { generateCaseReference } from "@/lib/product/case-reference";
 import { evidenceStateFromAssessmentResult } from "@/lib/product/result-pathway-state";
+import ERUpgradePanel from "@/components/diagnostics/ERUpgradePanel";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -935,6 +936,21 @@ const FastDiagnosticPage: NextPage = () => {
                   Based on your stated decision context and declared consequence. Scenario only — not a financial forecast.
                 </p>
               </div>
+
+              {/* SECTION 4b: ER UPGRADE — shown for moderate/high severity */}
+              {(result.signalStrength === "high" || result.signalStrength === "moderate") && (
+                <ERUpgradePanel
+                  condition={result.condition}
+                  conditionLabel={result.conditionLabel}
+                  signalStrength={result.signalStrength}
+                  nextGovernanceMove={result.authorityIndex?.nextGovernanceMove ?? result.synthesis?.concreteMove ?? null}
+                  costOfInaction={result.costOfInaction ? {
+                    horizon30: result.costOfInaction.horizon30,
+                    exposureBand: result.costOfInaction.exposureBand,
+                  } : null}
+                  caseRef={result.caseRef ?? null}
+                />
+              )}
 
               {/* SECTION 5: YOUR COMMITMENT */}
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem 1.25rem" }}>

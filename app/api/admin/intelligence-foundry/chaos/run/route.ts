@@ -16,7 +16,7 @@ import { boardroomModeAdapter } from "@/lib/research/engines/boardroom-mode-adap
 import { executiveReportingAdapter } from "@/lib/research/engines/executive-reporting-adapter";
 import { executiveReportBoardroomBridgeAdapter } from "@/lib/research/engines/executive-report-boardroom-bridge-adapter";
 
-const ADAPTERS: Record<string, { run(input: { payload: Record<string, unknown> }): Promise<unknown>; getVersion?(): string }> = {
+const ADAPTERS: Record<string, { run(input: { payload: Record<string, unknown> }): Promise<unknown>; getVersion?(): unknown }> = {
   "fast-diagnostic": fastDiagnosticAdapter,
   "pattern-recurrence": patternRecurrenceAdapter,
   "constitutional-diagnostic": constitutionalDiagnosticAdapter,

@@ -57,7 +57,7 @@ const OUTCOME_LABEL: Record<string, string> = {
 };
 
 export default function ChaosRangePage() {
-  const [selectedEngine, setSelectedEngine] = React.useState(CALLABLE_ENGINES[0].id);
+  const [selectedEngine, setSelectedEngine] = React.useState(CALLABLE_ENGINES[0]?.id ?? "");
   const [running, setRunning] = React.useState(false);
   const [result, setResult] = React.useState<ChaosRunResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);
