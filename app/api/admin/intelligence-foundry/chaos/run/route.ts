@@ -15,6 +15,12 @@ import { strategyRoomAdapter } from "@/lib/research/engines/strategy-room-adapte
 import { boardroomModeAdapter } from "@/lib/research/engines/boardroom-mode-adapter";
 import { executiveReportingAdapter } from "@/lib/research/engines/executive-reporting-adapter";
 import { executiveReportBoardroomBridgeAdapter } from "@/lib/research/engines/executive-report-boardroom-bridge-adapter";
+import { costOfDelayAdapter } from "@/lib/research/engines/cost-of-delay-adapter";
+import { cohortPrivacyAdapter } from "@/lib/research/engines/cohort-privacy-adapter";
+import { editorialStyleCheckerAdapter } from "@/lib/research/engines/editorial-style-checker-adapter";
+import { enforcementGatesAdapter } from "@/lib/research/engines/enforcement-gates-adapter";
+import { outboundPolicyGateAdapter } from "@/lib/research/engines/outbound-policy-gate-adapter";
+import { reportLineageAdapter } from "@/lib/research/engines/report-lineage-adapter";
 
 const ADAPTERS: Record<string, { run(input: { payload: Record<string, unknown> }): Promise<unknown>; getVersion?(): unknown }> = {
   "fast-diagnostic": fastDiagnosticAdapter,
@@ -24,6 +30,12 @@ const ADAPTERS: Record<string, { run(input: { payload: Record<string, unknown> }
   "boardroom-dossier": boardroomModeAdapter,
   "executive-reporting": executiveReportingAdapter,
   "executive-report-boardroom-bridge": executiveReportBoardroomBridgeAdapter,
+  "cost-of-delay": costOfDelayAdapter,
+  "cohort-privacy": cohortPrivacyAdapter,
+  "editorial-style-checker": editorialStyleCheckerAdapter,
+  "enforcement-gates": enforcementGatesAdapter,
+  "outbound-policy-gate": outboundPolicyGateAdapter,
+  "report-lineage": reportLineageAdapter,
 };
 
 export async function POST(request: NextRequest) {

@@ -42,6 +42,12 @@ const CALLABLE_ENGINES = [
   { id: "boardroom-dossier", label: "Boardroom Mode" },
   { id: "executive-reporting", label: "Executive Reporting" },
   { id: "executive-report-boardroom-bridge", label: "ER → Boardroom Bridge" },
+  { id: "cost-of-delay", label: "Cost of Delay" },
+  { id: "cohort-privacy", label: "Cohort Privacy" },
+  { id: "editorial-style-checker", label: "Editorial Style Checker" },
+  { id: "enforcement-gates", label: "Enforcement Gates" },
+  { id: "outbound-policy-gate", label: "Outbound Policy Gate" },
+  { id: "report-lineage", label: "Report Lineage" },
 ];
 
 const OUTCOME_CHIP: Record<string, string> = {

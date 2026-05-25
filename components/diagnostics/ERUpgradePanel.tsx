@@ -193,6 +193,23 @@ export default function ERUpgradePanel({
       hesitation_ms: Date.now() - mountTime.current,
     });
 
+    // Fire upgrade trigger in background — do not await, do not block checkout
+    if (email.trim()) {
+      void fetch("/api/diagnostics/upgrade-trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          condition,
+          conditionLabel,
+          signalStrength: signalStrength as "moderate" | "high",
+          nextGovernanceMove: nextGovernanceMove ?? null,
+          exposureBand: costOfInaction?.exposureBand ?? null,
+          caseRef: caseRef ?? null,
+        }),
+      }).catch(() => {});
+    }
+
     try {
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
