@@ -149,6 +149,21 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     ],
   },
   {
+    id: "intelligence-foundry",
+    label: "Intelligence Foundry",
+    items: [
+      { id: "foundry-hub",      label: "Intelligence Foundry",     href: "/admin/intelligence-foundry",                          router: "app", visibility: "admin", status: "active", description: "Internal enforcement system — module hub, run vault, CI gate, and health dashboard" },
+      { id: "foundry-runs",     label: "Research Run Vault",        href: "/admin/intelligence-foundry/runs",                     router: "app", visibility: "admin", status: "active", description: "Complete ledger of all ResearchRuns" },
+      { id: "foundry-health",   label: "Foundry Health",            href: "/admin/intelligence-foundry/health",                   router: "app", visibility: "admin", status: "active", description: "Real run metrics: velocity, action conversion rate, dormant modules" },
+      { id: "foundry-trash",    label: "Trash Day",                 href: "/admin/intelligence-foundry/trash-day",                router: "app", visibility: "admin", status: "active", description: "Stale unresolved HIGH/CRITICAL findings and stale deferrals" },
+      { id: "foundry-content-rt", label: "Content Red Team",        href: "/admin/intelligence-foundry/red-team/content",         router: "app", visibility: "admin", status: "active", description: "Overclaim detection, evidence posture, IP leakage, authority claim checks" },
+      { id: "foundry-security-rt", label: "Security Red Team",      href: "/admin/intelligence-foundry/red-team/security",        router: "app", visibility: "admin", status: "active", description: "Route exposure, auth checks, rate-limit presence, manual security checklist" },
+      { id: "foundry-outbound", label: "Outbound Narrative Range",  href: "/admin/intelligence-foundry/outbound",                 router: "app", visibility: "admin", status: "active", description: "Outbound post validation: Facebook, X, LinkedIn — claims, style, approval readiness" },
+      { id: "foundry-engines",  label: "Engine Testing Range",      href: "/admin/intelligence-foundry/engines",                  router: "app", visibility: "admin", status: "active", description: "Test callable engines, capture versions, request adapters for non-callable" },
+      { id: "foundry-debug",    label: "Foundry Debug",             href: "/admin/intelligence-foundry/debug",                    router: "app", visibility: "internal", status: "active", description: "Dev-only: registry state, validation paths, execution context" },
+    ],
+  },
+  {
     id: "system",
     label: "System Health",
     items: [
