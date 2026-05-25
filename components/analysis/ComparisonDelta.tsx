@@ -1,3 +1,4 @@
+// DEPRECATED: OGR comparison component. Reference only — do not use in new features. Superseded by Intelligence Foundry analysis views.
 "use client";
 
 import * as React from "react";

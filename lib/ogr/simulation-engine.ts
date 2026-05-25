@@ -1,4 +1,4 @@
-// lib/ogr/simulation-engine.ts
+// lib/ogr/simulation-engine.ts — DEPRECATED: OGR simulation engine. Reference only — do not extend. Superseded by Intelligence Foundry engine adapters.
 
 export type ResonanceInputRecord = {
   id: string;

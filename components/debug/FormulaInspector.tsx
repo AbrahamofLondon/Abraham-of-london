@@ -1,3 +1,4 @@
+// DEPRECATED: OGR formula inspector. Reference only — do not use in new features. Superseded by components/research/FormulaInspector.tsx.
 "use client";
 
 import React from "react";

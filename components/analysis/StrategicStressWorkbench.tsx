@@ -1,3 +1,4 @@
+// DEPRECATED: OGR strategic stress workbench. Reference only — do not use in new features. Superseded by Intelligence Foundry SimulationShell.
 "use client";
 
 import * as React from "react";

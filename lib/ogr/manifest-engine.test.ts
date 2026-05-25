@@ -1,3 +1,4 @@
+// DEPRECATED: Tests for OGR reference engine. Kept for regression reference. Superseded by Intelligence Foundry engine adapter tests.
 import { describe, it, expect } from "vitest";
 import {
   calculateDerived,

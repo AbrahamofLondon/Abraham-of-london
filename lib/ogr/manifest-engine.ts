@@ -1,4 +1,4 @@
-/* lib/ogr/manifest-engine.ts — CANONICAL OGR MATH ENGINE */
+/* lib/ogr/manifest-engine.ts — DEPRECATED: OGR math engine. Reference only — do not extend. Superseded by Intelligence Foundry engine adapters. */
 
 export const OGR_CONSTANTS = {
   FRICTION_FLOOR: 0.0,

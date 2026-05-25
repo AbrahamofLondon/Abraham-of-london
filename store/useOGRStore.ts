@@ -1,4 +1,4 @@
-/* store/useOGRStore.ts — OGR GLOBAL STATE (CANONICAL AUTH ALIGNED) */
+/* store/useOGRStore.ts — DEPRECATED: OGR global state. Reference only — do not use in new features. Superseded by Intelligence Foundry ResearchRun persistence. */
 import { create } from "zustand";
 import { devtools, persist, subscribeWithSelector } from "zustand/middleware";
 import {

@@ -1,0 +1,48 @@
+name: Foundry CI Gate
+
+on:
+  pull_request:
+    branches: [main, production]
+  push:
+    branches: [main, production]
+
+jobs:
+  foundry-gate:
+    name: Intelligence Foundry Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Foundry CI Gate
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.FOUNDRY_API_KEY }}" \
+            "${{ secrets.FOUNDRY_GATE_URL }}/api/admin/intelligence-foundry/ci-gate")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          echo "Gate response: $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "ERROR: Gate endpoint returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          BLOCKED=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('block', False))")
+
+          if [ "$BLOCKED" = "True" ]; then
+            echo ""
+            echo "FOUNDRY GATE BLOCKED — Unresolved CRITICAL findings exist."
+            echo ""
+            echo "$BODY" | python3 -c "
+          import sys, json
+          d = json.load(sys.stdin)
+          for run in d.get('blocking_runs', []):
+              print(f\"  [{run['severity']}] {run['title']} ({run['module']}) — {run['status']}\")
+          "
+            echo ""
+            echo "Resolve all CRITICAL ACTION_REQUIRED findings before merging."
+            exit 1
+          fi
+
+          echo "Foundry gate passed. No blocking findings."

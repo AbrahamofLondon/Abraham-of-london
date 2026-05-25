@@ -3414,6 +3414,199 @@ model DecisionContactLedger {
   @@map("decision_contact_ledger")
 }
 
+// ─── Intelligence Foundry ─────────────────────────────────────────────────────
+
+model ResearchRun {
+  // Identity
+  id             String  @id @default(cuid())
+  title          String
+  slug           String  @unique
+  runType        String  // e.g. "RED_TEAM" | "SCENARIO" | "OUTBOUND" | "SECURITY" | "MARKET" | "CONTENT" | "SCHEDULED"
+  module         String  // module name from module-registry
+  moduleVersion  String  @default("1.0.0")
+
+  // Actor
+  actorId    String?
+  actorEmail String?
+
+  // Inputs / Outputs
+  inputJson    String? // JSON string
+  outputJson   String? // JSON string
+  baselineJson String? // JSON string for baseline comparison
+  findingsJson String? // JSON string — array of Finding objects
+
+  // Actionability
+  blockingIssuesJson      String? // JSON string
+  dependenciesUnmetJson   String? // JSON string
+  recommendation          String?
+  severity                String  @default("INFO") // INFO | LOW | MEDIUM | HIGH | CRITICAL
+  status                  String  @default("PENDING") // PENDING | IN_PROGRESS | COMPLETE | ACTION_REQUIRED | OWNER_DECISION_REQUIRED | IMPLEMENTED | DEFERRED | ARCHIVED
+  estimatedEffort         String?
+  requiresOwnerDecision   Boolean @default(false)
+  decisionMadeAt          DateTime?
+  decisionOutcome         String?
+  deferredReason          String?
+
+  // Comparison / Drift
+  baselineId   String?
+  driftDetected Boolean @default(false)
+  driftSummary  String?
+
+  // Security
+  exploitabilityScore  Float?
+  detectionLikelihood  Float?
+  assetAtRisk          String?
+  attackVector         String?
+
+  // Market Protection
+  claimRisk            String?
+  overclaims           String? // JSON string
+  forbiddenPhrases     String? // JSON string
+  humanReviewRequired  Boolean @default(false)
+
+  // Versioning
+  engineVersionJson    String? // JSON string
+  referenceVersionJson String? // JSON string
+  schemaVersion        String  @default("1.0.0")
+  contentFileHash      String?
+
+  // Linkage
+  linkedRoute        String?
+  linkedRouteExists  Boolean?
+  linkedProductId    String?
+  linkedFileHash     String?
+
+  // Operations
+  runCostEstimate   Float?
+  durationMs        Int?
+  isDemo            Boolean @default(false)
+  resurrectionCount Int     @default(0)
+  resurrectedFromId String?
+
+  // Timestamps
+  reviewedAt     DateTime?
+  implementedAt  DateTime?
+  archivedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  findings    FoundryFinding[]
+  auditEvents FoundryAuditEvent[]
+  briefs      ActionBrief[]
+
+  @@index([module])
+  @@index([status])
+  @@index([severity])
+  @@index([actorId])
+  @@index([createdAt])
+  @@index([archivedAt])
+  @@map("research_runs")
+}
+
+model FoundryFinding {
+  id            String      @id @default(cuid())
+  researchRunId String
+  run           ResearchRun @relation(fields: [researchRunId], references: [id], onDelete: Cascade)
+
+  findingType    String  // SECURITY | CONTENT | MARKET | FORMULA | STRUCTURAL
+  severity       String  // INFO | LOW | MEDIUM | HIGH | CRITICAL
+  title          String
+  description    String
+  source         String  // required — engine name, file path, or audit trail reference
+  recommendation String?
+  evidence       String? // JSON string
+  moduleId       String?
+
+  isActioned Boolean   @default(false)
+  actionedAt DateTime?
+  actionedBy String?
+
+  isDemo    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([researchRunId])
+  @@index([severity])
+  @@index([moduleId])
+  @@index([findingType])
+  @@index([isActioned])
+  @@map("foundry_findings")
+}
+
+model FoundryAuditEvent {
+  id    String      @id @default(cuid())
+  runId String
+  run   ResearchRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  event      String  // FOUNDRY_RUN_CREATED | FOUNDRY_RUN_STATUS_CHANGED | etc.
+  fromStatus String?
+  toStatus   String?
+  actorId    String?
+  actorEmail String?
+  reason     String?
+  metadata   String? // JSON string
+
+  createdAt DateTime @default(now())
+
+  @@index([runId])
+  @@index([event])
+  @@index([createdAt])
+  @@map("foundry_audit_events")
+}
+
+model ActionBrief {
+  id            String      @id @default(cuid())
+  researchRunId String
+  run           ResearchRun @relation(fields: [researchRunId], references: [id], onDelete: Cascade)
+
+  version         Int    @default(1)
+  contentHash     String // SHA-256 of briefJson
+  briefJson       String // immutable export snapshot
+  exportedById    String?
+  exportedByEmail String?
+  exportedAt      DateTime @default(now())
+
+  @@index([researchRunId])
+  @@index([contentHash])
+  @@map("action_briefs")
+}
+
+model CiGateBlock {
+  id             String    @id @default(cuid())
+  triggeredBy    String    // actor email or "ci-system"
+  blockingRunIds String    // JSON array of ResearchRun IDs
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([resolvedAt])
+  @@map("ci_gate_blocks")
+}
+
+model FoundryPattern {
+  id              String   @id @default(cuid())
+  patternType     String   // RECURRENCE | ESCALATION | TREND | CLUSTER
+  moduleId        String?
+  findingType     String?
+  occurrenceCount Int      @default(1)
+  firstSeenAt     DateTime @default(now())
+  lastSeenAt      DateTime @default(now())
+  severity        String?
+  status          String   @default("ACTIVE") // ACTIVE | RESOLVED | SUPPRESSED
+  researchRunIds  String   // JSON array
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patternType])
+  @@index([moduleId])
+  @@index([findingType])
+  @@index([status])
+  @@index([lastSeenAt])
+  @@map("foundry_patterns")
+}
+
 // ─── Privacy Architecture — Data Separation Layer ────────────────────────────
 
 /// Stores decision data WITHOUT any PII. Identified only by opaque sessionId.

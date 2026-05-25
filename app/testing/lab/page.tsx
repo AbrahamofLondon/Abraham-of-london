@@ -1,10 +1,6 @@
-/* app/testing/lab/page.tsx — INTERNAL ANALYSIS LAB CONTAINER */
-
-"use client";
-
-import * as React from "react";
-import StrategicStressWorkbench from "@/components/analysis/StrategicStressWorkbench";
+/* app/testing/lab/page.tsx — redirect to Intelligence Foundry */
+import { redirect } from "next/navigation";
 
 export default function LabPage() {
-  return <StrategicStressWorkbench />;
+  redirect("/admin/intelligence-foundry");
 }
