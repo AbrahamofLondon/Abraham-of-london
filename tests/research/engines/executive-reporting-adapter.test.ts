@@ -7,6 +7,7 @@
  * adapter honesty (limitations), and self-test.
  */
 
+import { describe, it, expect, beforeAll } from "vitest";
 import { executiveReportingAdapter, ER_ENGINE_ID, ER_VERSION } from "@/lib/research/engines/executive-reporting-adapter";
 import type { FormulaStep } from "@/lib/research/foundry-contract";
 

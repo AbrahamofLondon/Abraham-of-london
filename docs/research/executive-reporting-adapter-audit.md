@@ -102,19 +102,49 @@ These are production functions that could be wrapped independently. However, the
 
 ---
 
-## 6. Recommended Next Pass Decision
+## 6. Semantic Fix Standard
 
-**Build `executive-reporting-adapter.ts` AFTER `boardroom-mode-adapter.ts`.**
+This adapter follows the [Foundry Fix Standard](../foundry-fix-standard.md). Key rules:
 
-Rationale:
-1. `boardroom-mode-adapter.ts` is simpler (requires only IntelligenceSpine fixture, no campaign data).
-2. `executive-reporting-adapter.ts` requires `RawExecutiveResponse[]` + `HCDMetrics[]` + `OGRMetrics` — three independent input sets requiring their own fixtures.
-3. `boardroom-mode-adapter.ts` output (a decision-level dossier) is more directly useful as a Foundry simulation — it tests the board qualification gate.
-4. Building boardroom-mode first proves the pattern before tackling the more complex executive report builder.
+| Rule ID | Description |
+|---|---|
+| `adapter:executive_reporting_builder_fixture_v1` | Uses synthetic fixtures |
+| `adapter:executive_reporting_state_thresholds_v1` | State classification thresholds |
+| `adapter:executive_reporting_financial_exposure_v1` | Financial exposure calculation |
 
-**Sequence:**
-1. `boardroom-mode-adapter.ts` — next immediate pass
-2. `executive-reporting-adapter.ts` — pass after that
+All semantic fixes are named, source-traced, limited, tested, and documented in `lib/research/foundry-rule-registry.ts`.
+
+---
+
+## 7. Completed Passes
+
+### Pass 1: `boardroom-mode-adapter.ts` — DONE (2026-05-25)
+- `lib/research/engines/boardroom-mode-adapter.ts` implemented
+- `tests/research/engines/boardroom-mode-adapter.test.ts` — 52 tests passing
+- `tests/research/fixtures/boardroom-mode.ts` — 5 fixtures
+- Engine registry: `boardroom-dossier` → `PRODUCTION_CALLABLE`
+
+### Pass 2: `executive-reporting-adapter.ts` — DONE (2026-05-25)
+- `lib/research/engines/executive-reporting-adapter.ts` implemented
+- `tests/research/engines/executive-reporting-adapter.test.ts` — full test suite
+- Engine registry: `executive-reporting` → `PRODUCTION_CALLABLE`
+
+### Pass 3: ER → Boardroom Bridge — DONE (2026-05-25)
+- `lib/research/bridges/executive-report-to-intelligence-spine.ts` — deterministic mapper with traces and gaps
+- `lib/research/engines/executive-report-boardroom-bridge-adapter.ts` — bridge adapter
+- `tests/research/bridges/executive-report-to-intelligence-spine.test.ts` — mapper tests
+- `tests/research/engines/executive-report-boardroom-bridge-adapter.test.ts` — bridge tests
+- `tests/research/fixtures/executive-report-boardroom-bridge.ts` — 5 fixtures
+- API route: `app/api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run/route.ts`
+- Simulation page: `/admin/intelligence-foundry/simulation/executive-report-boardroom-bridge`
+- Engine registry: `executive-report-boardroom-bridge` → `PRODUCTION_CALLABLE`
+- Hub card added to Foundry page
+- Documentation: `docs/research/executive-report-boardroom-bridge.md`
+
+### Next Pass Sequence (after bridge)
+1. Report lineage simulation
+2. Chaos Range
+3. Data Poisoning Lab
 
 ---
 

@@ -18,8 +18,16 @@ const customJestConfig = {
   },
 
   // Consolidation of roots and matching
-  roots: ["<rootDir>/tests", "<rootDir>/lib"],
+  // tests/research/ is covered exclusively by Vitest (vitest.config.ts).
+  // Keeping Jest scope to lib/ avoids a split test harness.
+  roots: ["<rootDir>/lib"],
   testMatch: ["**/*.test.ts", "**/*.test.tsx"],
+  // Exclude tests that use Vitest-specific imports or are in Vitest's domain.
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/.next/",
+    "/tests/research/",
+  ],
 
   // Merged coverage strategy: Global app + deep OGR-IV logic
   collectCoverageFrom: [

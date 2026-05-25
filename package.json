@@ -35,7 +35,7 @@
     "test:perimeter": "bash ./scripts/perimeter-check.sh",
     "audit:check": "tsc --noEmit ./lib/audit/audit-logger.ts ./lib/inner-circle/exports.server.ts ./lib/server/cron.ts",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
-    "postbuild": "next-sitemap --config next-sitemap.config.js",
+    "postbuild": "next-sitemap --config next-sitemap.config.mjs",
     "prebuild:ci": "pnpm vault:fix && pnpm fix:yaml && pnpm fix:windows && pnpm vault:ready",
     "build:pdfs:clean": "node -e \"console.log('build:pdfs:clean disabled (registry is committed)')\"",
     "build:pdfs": "node -e \"console.log('build:pdfs disabled (run pnpm pdf:build:full manually if needed)')\"",

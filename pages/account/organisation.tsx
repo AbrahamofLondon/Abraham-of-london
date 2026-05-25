@@ -304,3 +304,12 @@ const OrganisationPage: NextPage = () => {
 };
 
 export default OrganisationPage;
+
+/** @see https://nextjs.org/docs/pages/building-your-application/data-fetching/get-server-side-props */
+import type { GetServerSideProps } from "next";
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  // This page uses useRouter() and must be server-rendered, not statically generated.
+  // Static generation would fail with "NextRouter was not mounted".
+  return { props: {} };
+};

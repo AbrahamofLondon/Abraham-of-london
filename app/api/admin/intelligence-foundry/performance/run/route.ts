@@ -10,6 +10,7 @@ import { constitutionalDiagnosticAdapter } from "@/lib/research/engines/constitu
 import { strategyRoomAdapter } from "@/lib/research/engines/strategy-room-adapter";
 import { boardroomModeAdapter } from "@/lib/research/engines/boardroom-mode-adapter";
 import { executiveReportingAdapter } from "@/lib/research/engines/executive-reporting-adapter";
+import { executiveReportBoardroomBridgeAdapter } from "@/lib/research/engines/executive-report-boardroom-bridge-adapter";
 import { clampIterations, computeStats, MAX_TOTAL_MS } from "@/lib/research/performance-range-service";
 import type { Finding } from "@/lib/research/foundry-contract";
 
@@ -20,6 +21,7 @@ const ADAPTERS: Record<string, { run: (input: { payload: Record<string, unknown>
   "strategy-room": strategyRoomAdapter,
   "boardroom-dossier": boardroomModeAdapter,
   "executive-reporting": executiveReportingAdapter,
+  "executive-report-boardroom-bridge": executiveReportBoardroomBridgeAdapter,
 };
 
 const DEFAULT_FIXTURES: Record<string, Record<string, unknown>> = {
@@ -69,6 +71,9 @@ const DEFAULT_FIXTURES: Record<string, Record<string, unknown>> = {
   },
   "executive-reporting": {
     useDisorderedFixture: true,
+  },
+  "executive-report-boardroom-bridge": {
+    useQualifyingFixture: true,
   },
 };
 

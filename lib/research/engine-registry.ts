@@ -63,6 +63,14 @@ export const ENGINE_REGISTRY: EngineRegistryEntry[] = [
     limitationReason: "Adapter uses synthetic IntelligenceSpine fixtures. Does not render PDF. Does not persist boardroom artefacts or call executive-report-service.ts. lib/boardroom/dossier-builder.ts (org-level, DB-bound) is not called — adapter targets boardroom-mode.ts (decision-level) path only.",
   },
   {
+    id: "executive-report-boardroom-bridge",
+    name: "ER → Boardroom Bridge",
+    status: "PRODUCTION_CALLABLE",
+    description: "Tests whether Executive Reporting outputs can qualify, map, and escalate into Boardroom Mode without manual interpretation. Runs executive-reporting-adapter, maps ExecutiveReport → IntelligenceSpine, then runs boardroom-mode-adapter. Pure functions: no DB, no AI, no PDF.",
+    version: "1.0.0",
+    limitationReason: "Uses synthetic ExecutiveReport fixtures. Mapped IntelligenceSpine is synthetic — not a real user spine. Does not render PDF. Does not persist bridge artefacts. HCD and OGR data is lost in mapping (no equivalent fields on IntelligenceSpine).",
+  },
+  {
     id: "gmi",
     name: "Global Market Intelligence",
     status: "PRODUCTION_CALLABLE",
@@ -115,10 +123,9 @@ export const ENGINE_REGISTRY: EngineRegistryEntry[] = [
   {
     id: "cost-of-delay",
     name: "Cost of Delay",
-    status: "DOCUMENTATION_ONLY",
-    description: "Quantifies the cost of delaying a decision or initiative. Requires financial modelling integration.",
-    version: "0.1.0",
-    limitationReason: "Concept documented. Financial data integration not implemented.",
+    status: "PRODUCTION_CALLABLE",
+    description: "Quantifies the cost of delaying a decision using WSJF (Weighted Shortest Job First). Deterministic arithmetic on Fibonacci-scale priority inputs. Optional GBP financial exposure calculation.",
+    version: "1.0.0",
   },
   {
     id: "pattern-recurrence",

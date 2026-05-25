@@ -32,11 +32,28 @@
 
 ## Promotion Requirements (next pass)
 
-1. Wire real Executive Reporting result → IntelligenceSpine transformation.
+1. ~~Wire real Executive Reporting result → IntelligenceSpine transformation.~~ **DONE** — ER → Boardroom Bridge adapter implements this via `mapExecutiveReportToIntelligenceSpine()`.
 2. Add entitlement/payment gate dry-run check.
 3. Add PDF render dry-run adapter (section list returned, no binary output).
 4. Add lineage event simulation for BOARDROOM_DOSSIER_GENERATED and BOARDROOM_DOSSIER_EXPORTED.
 5. Validate Boardroom UI slide mapping against generated dossier sections.
+
+## Bridge Implementation Status
+
+The ER → Boardroom Bridge (`lib/research/engines/executive-report-boardroom-bridge-adapter.ts`) has been implemented:
+
+| Item | Status |
+|---|---|
+| `mapExecutiveReportToIntelligenceSpine()` | **IMPLEMENTED** — deterministic, typed, source-traced |
+| Bridge adapter | **IMPLEMENTED** — runs ER adapter → maps spine → runs Boardroom adapter |
+| Bridge decision logic | **IMPLEMENTED** — QUALIFIES/BORDERLINE/DOES_NOT_QUALIFY/MAPPING_INSUFFICIENT |
+| Mapping traces | **IMPLEMENTED** — every mapping has sourceRule, valueKind, confidence |
+| Mapping gaps | **IMPLEMENTED** — HCD, OGR, financial breakdown gaps documented |
+| API route | **IMPLEMENTED** — admin-auth guarded, zod validation |
+| Simulation page | **IMPLEMENTED** — full UI with trace table, gaps panel, dossier preview |
+| Engine registry | **UPDATED** — `executive-report-boardroom-bridge` → `PRODUCTION_CALLABLE` |
+| Tests | **IMPLEMENTED** — mapper tests + bridge adapter tests |
+| Documentation | **IMPLEMENTED** — `docs/research/executive-report-boardroom-bridge.md` |
 
 ---
 
@@ -170,6 +187,19 @@ const NON_QUALIFYING_SPINE: Partial<IntelligenceSpine> = {
 - Do not generate PDF output — `app/api/executive-reporting/export/boardroom-pdf/route.ts` is out of scope
 - Do not create customer session or journey records
 - Do not call `boardroom-archive.ts` persistence functions
+
+---
+
+## 5. Semantic Fix Standard
+
+This adapter follows the [Foundry Fix Standard](../foundry-fix-standard.md). Key rules:
+
+| Rule ID | Description |
+|---|---|
+| `adapter:boardroom_synthetic_spine_dossier_v1` | Uses synthetic IntelligenceSpine fixtures |
+| `adapter:boardroom_qualification_gate_v1` | Cost + accuracy threshold for qualification |
+
+All semantic fixes are named, source-traced, limited, tested, and documented in `lib/research/foundry-rule-registry.ts`.
 
 ---
 

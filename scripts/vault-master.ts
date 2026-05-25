@@ -166,48 +166,80 @@ async function vaultMaster(): Promise<void> {
         `📡 [VAULT_MASTER]: Syncing ${filteredBriefs.length} metadata records...`
       );
 
-      for (const brief of filteredBriefs) {
-        try {
-          const version = String(brief.version || "1.0.0");
+      // ── Schema drift detection ──
+      // Check if the ContentType enum exists in the database before attempting sync.
+      // If missing, emit one clear warning and skip DB sync to avoid 83 repeated errors.
+      let schemaDriftDetected = false;
+      try {
+        await prisma.$queryRawUnsafe`SELECT 1 FROM pg_type WHERE typname = 'ContentType'`;
+      } catch {
+        schemaDriftDetected = true;
+      }
 
-          await prisma.contentMetadata.upsert({
-            where: { slug: brief.slugSafe },
-            update: {
-              title: brief.titleSafe,
-              contentType: mapToSchemaType(brief.category),
-              classification:
-                brief.accessTierSafe === "public"
-                  ? AccessTier.PUBLIC
-                  : AccessTier.RESTRICTED,
-              summary: brief.excerptSafe || "",
-              metadata: JSON.stringify({
-                status: brief.statusSafe,
+      if (schemaDriftDetected) {
+        console.warn(
+          `⚠️ [VAULT_MASTER]: Schema drift detected — enum "ContentType" does not exist in the database.`
+        );
+        console.warn(
+          `   This is a local development environment issue. The ContentType enum exists in`
+        );
+        console.warn(
+          `   prisma/schema.prisma but was never migrated to this database. To resolve:`
+        );
+        console.warn(
+          `   1. Run: pnpm prisma migrate dev --name add_contenttype_enum`
+        );
+        console.warn(
+          `   2. Or apply the initial schema: pnpm prisma db push`
+        );
+        console.warn(
+          `   Skipping DB sync for ${filteredBriefs.length} records. No data was lost.`
+        );
+        stats.failed += filteredBriefs.length;
+      } else {
+        for (const brief of filteredBriefs) {
+          try {
+            const version = String(brief.version || "1.0.0");
+
+            await prisma.contentMetadata.upsert({
+              where: { slug: brief.slugSafe },
+              update: {
+                title: brief.titleSafe,
+                contentType: mapToSchemaType(brief.category),
+                classification:
+                  brief.accessTierSafe === "public"
+                    ? AccessTier.PUBLIC
+                    : AccessTier.RESTRICTED,
+                summary: brief.excerptSafe || "",
+                metadata: JSON.stringify({
+                  status: brief.statusSafe,
+                  version,
+                }),
+                updatedAt: new Date(),
+              },
+              create: {
+                slug: brief.slugSafe,
+                title: brief.titleSafe,
+                contentType: mapToSchemaType(brief.category),
+                classification:
+                  brief.accessTierSafe === "public"
+                    ? AccessTier.PUBLIC
+                    : AccessTier.RESTRICTED,
+                summary: brief.excerptSafe || "",
+                metadata: JSON.stringify({
+                  status: brief.statusSafe,
+                }),
                 version,
-              }),
-              updatedAt: new Date(),
-            },
-            create: {
-              slug: brief.slugSafe,
-              title: brief.titleSafe,
-              contentType: mapToSchemaType(brief.category),
-              classification:
-                brief.accessTierSafe === "public"
-                  ? AccessTier.PUBLIC
-                  : AccessTier.RESTRICTED,
-              summary: brief.excerptSafe || "",
-              metadata: JSON.stringify({
-                status: brief.statusSafe,
-              }),
-              version,
-            },
-          });
+              },
+            });
 
-          stats.dbSynced++;
-        } catch (dbErr: any) {
-          console.error(
-            `❌ DB_SYNC_ERROR [${brief.slugSafe}]: ${dbErr?.message || String(dbErr)}`
-          );
-          stats.failed++;
+            stats.dbSynced++;
+          } catch (dbErr: any) {
+            console.error(
+              `❌ DB_SYNC_ERROR [${brief.slugSafe}]: ${dbErr?.message || String(dbErr)}`
+            );
+            stats.failed++;
+          }
         }
       }
     } else {

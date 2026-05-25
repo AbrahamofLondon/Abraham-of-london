@@ -1070,11 +1070,46 @@ const Editorial = defineDocumentType(() => ({
   filePathPattern: "editorials/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
-    type:  { type: "string", required: false },
-    slug:  { type: "string", required: true },
-    draft: { type: "boolean", required: false, default: false },
+    ...baseFields,
+
+    // Editorial-specific identifiers
+    contentId: { type: "string", required: false },
+    documentCode: { type: "string", required: false },
+
+    // Publication lifecycle
+    publicationStatus: { type: "string", required: false },
+
+    // Editorial classification
+    flagship: { type: "boolean", required: false, default: false },
+    canonical: { type: "boolean", required: false, default: false },
+    convergenceText: { type: "boolean", required: false, default: false },
+    canonRelation: { type: "string", required: false },
+
+    // Series ordering
+    series: { type: "string", required: false },
+    seriesOrder: { type: "number", required: false },
+
+    // Reading time (legacy variant)
+    readingTime: { type: "string", required: false },
+
+    // Citation metadata
+    citationTitle: { type: "string", required: false },
+    citation: { type: "string", required: false },
+    doi: { type: "string", required: false },
+
+    // Asset paths
+    pdfPath: { type: "string", required: false },
+    downloadPath: { type: "string", required: false },
+    schematicEditionPath: { type: "string", required: false },
+    epubPath: { type: "string", required: false },
+    citationJsonPath: { type: "string", required: false },
+    previewPath: { type: "string", required: false },
+
+    // Convergence note (editorial-specific long-form note)
+    convergenceNote: { type: "string", required: false },
   },
   computedFields: {
+    ...createComputedFields("editorials/", "editorials"),
     _id: {
       type: "string",
       resolve: (doc) => doc._id,

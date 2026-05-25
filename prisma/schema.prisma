@@ -2140,6 +2140,64 @@ model ExecutiveReportingArtifact {
   @@index([createdAt])
 }
 
+/// Boardroom Dossier — client-facing restricted delivery record.
+/// Generated from an IntelligenceSpine via the ER → Boardroom bridge.
+/// Access-gated, lineage-tracked, and revocable.
+model BoardroomDossier {
+  id                 String   @id @default(cuid())
+  spineId            String
+  title              String
+  classification     String   @default("BOARD_RESTRICTED")
+  qualifiedForBoard  Boolean  @default(false)
+  gateMessage        String?
+  sections           Json     @default("[]")
+  objectionHandling  Json     @default("[]")
+  decisionPath       Json     @default("[]")
+  status             String   @default("DRAFT") // DRAFT | APPROVED | DELIVERED | REVOKED
+  generatedById      String
+  clientEmail        String?
+  clientName         String?
+  accessGrantedAt    DateTime?
+  accessRevokedAt    DateTime?
+  lastViewedAt       DateTime?
+  viewCount          Int      @default(0)
+  // Source provenance — required for real delivery (not sample/synthetic)
+  sourceType         String   @default("MANUAL_SYNTHETIC_SAMPLE") // EXECUTIVE_REPORT | DIAGNOSTIC_RUN | ER_BOARDROOM_BRIDGE_RUN | MANUAL_SYNTHETIC_SAMPLE
+  sourceId           String?  // ID of source record (ExecutiveReport, DiagnosticJourney, etc.)
+  isSample           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  accessTokens       BoardroomDossierAccessToken[]
+
+  @@index([status])
+  @@index([clientEmail])
+  @@index([sourceType])
+  @@index([createdAt])
+}
+
+// Secure, token-based access for client-facing boardroom dossier delivery.
+// Replaces email-query-parameter access.
+model BoardroomDossierAccessToken {
+  id           String    @id @default(cuid())
+  dossierId    String
+  tokenHash    String    @unique   // SHA-256 of raw token — raw token never stored
+  clientEmail  String?
+  clientName   String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  lastViewedAt DateTime?
+  viewCount    Int       @default(0)
+  createdBy    String
+  createdAt    DateTime  @default(now())
+
+  dossier      BoardroomDossier @relation(fields: [dossierId], references: [id])
+
+  @@index([dossierId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+}
+
 model DiagnosticJourney {
   id                  String   @id @default(cuid())
   journeyKey          String   @unique
