@@ -1,3 +1,8 @@
+/**
+ * OGR SOVEREIGN FLOW — LEGACY/EXPERIMENTAL
+ * Not part of canonical Intelligence Foundry.
+ * Do not import from Foundry modules.
+ */
 /* app/api/sovereign/report/route.ts — SOVEREIGN API PROTOCOL (HARDENED + AUTH-GATED) */
 
 import { NextResponse } from "next/server";

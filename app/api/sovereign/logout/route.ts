@@ -1,3 +1,8 @@
+/**
+ * OGR SOVEREIGN FLOW — LEGACY/EXPERIMENTAL
+ * Not part of canonical Intelligence Foundry.
+ * Do not import from Foundry modules.
+ */
 /* app/api/sovereign/logout/route.ts — SOVEREIGN LOGOUT */
 
 import { NextResponse } from "next/server";
