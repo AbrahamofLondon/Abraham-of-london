@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-25T06:07:24.286Z",
+  "generatedAt": "2026-05-25T07:27:31.527Z",
   "scannedRoots": [
     "components",
     "pages",
@@ -8,19 +8,12 @@
     "data"
   ],
   "totals": {
-    "rawPdfLinks": 1,
-    "rawCanonicalDownloadLinks": 1
+    "rawPdfLinks": 0,
+    "rawCanonicalDownloadLinks": 0
   },
   "governance": {
-    "primaryUxDownloadSurface": "fail",
+    "primaryUxDownloadSurface": "pass",
     "requiredSurface": "/downloads/{slug}",
-    "rawPdfLinks": [
-      {
-        "file": "pages/downloads/[...slug].tsx",
-        "line": 415,
-        "value": "/assets/downloads/${slug}.pdf",
-        "kind": "string"
-      }
-    ]
+    "rawPdfLinks": []
   }
 }

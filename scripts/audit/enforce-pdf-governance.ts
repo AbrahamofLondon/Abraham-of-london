@@ -156,6 +156,9 @@ const sourceFiles = ["app", "pages", "components", "lib"]
     "lib/assets/pdf-identity.ts",
     "lib/config/runtime.ts",
     "lib/pdf/pdf-registry.generated.ts",
+    // The canonical download handler must construct the binary asset path internally
+    // (it IS the download handler — this is the correct place for this reference).
+    "pages/downloads/[...slug].tsx",
   ].includes(file))
   .filter((file) => !/(\.test|\.spec)\.[jt]sx?$/.test(file));
 

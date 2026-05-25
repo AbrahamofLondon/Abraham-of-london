@@ -42,6 +42,9 @@ const ALLOWLIST_PATTERNS = [
   /lib\/pdf\/pdf-registry\.generated\.ts$/i,
   /lib\/pdf\/registry\.server\.ts$/i,
   /lib\/pdf-handler\.ts$/i,
+  // The canonical download handler must construct the binary asset path internally
+  // (it is the download handler — it is the correct place for this path).
+  /pages\/downloads\/\[\.\.\.slug\]\.tsx$/i,
 ];
 
 function shouldScanFile(filePath: string): boolean {

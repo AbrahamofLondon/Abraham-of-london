@@ -1,14 +1,19 @@
 {
-  "generatedAt": "2026-05-23T09:02:53.890Z",
+  "generatedAt": "2026-05-25T07:28:10.244Z",
   "totals": {
     "failures": 0,
-    "warnings": 1
+    "warnings": 2
   },
   "findings": [
     {
       "rule": "generated_pdf_inventory_outside_canonical_path",
       "severity": "warn",
       "message": "1 generated PDF artifacts remain outside /assets/downloads/{slug}.pdf. Legacy inventory should be normalized, but it is not blocking release."
+    },
+    {
+      "rule": "generated_reports_committed",
+      "severity": "warn",
+      "message": "Generated PDF reports changed during audit regeneration: reports/pdf-link-verification.json."
     }
   ]
 }
