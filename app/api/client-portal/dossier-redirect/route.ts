@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     const tokenResult = await BoardroomAccessTokenService.createToken({
       dossierId,
       clientEmail: session.clientEmail,
-      expiryHours: PORTAL_REDIRECT_EXPIRY_HOURS,
+      expiryDays: PORTAL_REDIRECT_EXPIRY_HOURS / 24, // Convert hours to days
       createdBy: `portal:${session.id}`,
     });
 
