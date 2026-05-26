@@ -1348,13 +1348,6 @@
 
 # End PDF canonical alias redirects
 
-# Catch-all proxy to the Vercel dynamic runtime. Keep this as the final redirect.
-[[redirects]]
-  from = "/*"
-  to = "https://abraham-of-london-git-main-abrahamoflondons-projects.vercel.app/:splat"
-  status = 200
-  force = true
-
 [[headers]]
   for = "/*"
   [headers.values]
@@ -1366,3 +1359,10 @@
   for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Catch-all proxy to the Vercel dynamic runtime. Keep this as the final rule.
+[[redirects]]
+  from = "/*"
+  to = "https://aol-check-visual.vercel.app/:splat"
+  status = 200
+  force = true
