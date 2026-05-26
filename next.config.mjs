@@ -218,11 +218,6 @@ const nextConfig = {
       "./node_modules/caniuse-lite/**",
       "./node_modules/browserslist/**",
       "./node_modules/electron-to-chromium/**",
-
-      // Next.js build cache — webpack packs (~1.4 GB) that are never
-      // needed at runtime. The standalone server only needs compiled
-      // output in .next/server and .next/static.
-      "./.next/cache/**",
     ],
   },
 

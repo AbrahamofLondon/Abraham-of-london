@@ -73,17 +73,6 @@ const REMOVE_DIRS = [
   "test-results",
   "tmp",
   "video",
-  // Next.js build cache — ~1.4 GB of webpack packs that are never
-  // needed at runtime. The standalone server only needs the compiled
-  // output in .next/server, .next/static, and the server entry point.
-  ".next/cache",
-  // Build trace — ~15 MB of JSON, not needed at runtime
-  ".next/trace",
-  // Development SQLite databases — must never reach production
-  "prisma/dev.db",
-  "prisma/prisma",
-  // npm lockfile — not needed at runtime
-  "package-lock.json",
   // Build-only node_modules
   "node_modules/sass",
   "node_modules/@esbuild",
@@ -175,29 +164,6 @@ if (fs.existsSync(clGenerated)) {
     console.log(
       `[clean-standalone] pruned per-doc JSON from .contentlayer/generated (${(removed / 1024 / 1024).toFixed(1)} MB)`,
     );
-  }
-}
-
-// Remove Windows-specific Prisma query engines from standalone.
-// Netlify runs on Linux (rhel-openssl-3.0.x). Windows .dll engines are
-// build artifacts from local `prisma generate` that must never reach
-// the production handler. Each is ~20 MB.
-const prismaClientDir = path.join(standalone, "node_modules", ".prisma", "client");
-if (fs.existsSync(prismaClientDir)) {
-  for (const file of fs.readdirSync(prismaClientDir)) {
-    if (file.endsWith(".dll.node") || file.includes("windows")) {
-      const fp = path.join(prismaClientDir, file);
-      try {
-        const st = fs.statSync(fp);
-        if (st.isFile()) {
-          saved += st.size;
-          fs.unlinkSync(fp);
-          console.log(
-            `[clean-standalone] removed Windows Prisma engine ${file} (${(st.size / 1024 / 1024).toFixed(1)} MB)`,
-          );
-        }
-      } catch {}
-    }
   }
 }
 
