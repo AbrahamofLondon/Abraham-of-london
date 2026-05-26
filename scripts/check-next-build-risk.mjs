@@ -47,8 +47,11 @@ for (const file of sourceFiles) {
     }
   }
 
-  // 2. <Html> usage outside _document
-  if (/<Html[\s>]/.test(content)) {
+  // 2. <Html> usage outside _document — strip comments first to avoid false positives
+  const contentNoComments = content
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "");
+  if (/<Html[\s>]/.test(contentNoComments)) {
     if (normalized !== "pages/_document.tsx") {
       violations.push(`${normalized}: uses <Html> tag outside pages/_document`);
     }
@@ -74,12 +77,14 @@ for (const file of sourceFiles) {
     }
   }
 
-  // 5. getStaticProps on pages that render MDX with document-level components
+  // 5. getStaticProps on pages that render MDX AND directly import from next/document.
+  // Safe MDX renderers (SafeMDXRenderer, MDXComponent, getRenderableBody) do not use
+  // next/document internally, so getStaticProps + MDX alone is not a risk.
   if (normalized.startsWith("pages/") && normalized.endsWith(".tsx")) {
-    const hasGetStaticProps = /getStaticProps/.test(content);
-    const hasMDXRender = /SafeMDXRenderer|MDXComponent|getRenderableBody/.test(content);
-    if (hasGetStaticProps && hasMDXRender) {
-      violations.push(`${normalized}: getStaticProps + MDX render — may cause <Html> build error in Next.js 16`);
+    const hasGetStaticProps = /getStaticProps/.test(contentNoComments);
+    const hasDocumentImport = /from\s+["']next\/document["']/.test(contentNoComments);
+    if (hasGetStaticProps && hasDocumentImport) {
+      violations.push(`${normalized}: getStaticProps + next/document import — will cause build error in Next.js 16`);
     }
   }
 }

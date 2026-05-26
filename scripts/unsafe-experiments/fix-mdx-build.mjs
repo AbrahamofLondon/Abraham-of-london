@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 /**
+ * ⚠️ DO NOT RUN IN PRODUCTION. Regex-based conversion script. Preserved only for investigation.
+ *
  * scripts/fix-mdx-build.mjs
  *
  * Fixes Next.js 16 <Html> build error by replacing getStaticProps + getStaticPaths

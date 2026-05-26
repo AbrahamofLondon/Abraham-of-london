@@ -49,9 +49,12 @@ for (const file of sourceFiles) {
     }
   }
 
-  // Check for usage of <Html> tag (JSX)
+  // Check for usage of <Html> tag (JSX) — skip comment lines to avoid false positives
   const htmlTagRegex = /<Html[\s>]/;
-  if (htmlTagRegex.test(content)) {
+  const contentWithoutComments = content
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "");
+  if (htmlTagRegex.test(contentWithoutComments)) {
     const normalized = file.replace(/\\/g, "/");
     if (normalized !== "pages/_document.tsx") {
       violations.push(`${normalized} (uses <Html> tag)`);

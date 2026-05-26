@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 /**
+ * ⚠️ DO NOT RUN IN PRODUCTION. Regex-based conversion script. Preserved only for investigation.
+ *
  * scripts/fix-mdx-static-pages.mjs
  *
  * Replaces getStaticProps + getStaticPaths with getServerSideProps

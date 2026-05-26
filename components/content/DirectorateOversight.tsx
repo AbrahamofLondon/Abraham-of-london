@@ -15,8 +15,23 @@ import {
 
 import type { AccessTier } from "@/lib/access/public";
 import { getTierLabel } from "@/lib/access/public";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import { SafeTableOfContents } from "@/components/mdx/TableOfContents";
+import dynamic from "next/dynamic";
+
+// Dynamically loaded with ssr:false to keep compiled-MDX evaluation off the SSG path
+const ClientOnlyMDXRenderer = dynamic(
+  () => import("@/components/mdx/ClientOnlyMDXRenderer"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex justify-center py-20">
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+          Loading…
+        </span>
+      </div>
+    ),
+  },
+);
 
 type DirectorateKind = "essay" | "book" | "volume" | "document";
 type CoverAspect = "wide" | "book" | "square" | "standard" | "auto";
@@ -463,7 +478,7 @@ export default function DirectorateOversight({
                     <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
                   </div>
                 ) : hasValidContent ? (
-                  <SafeMDXRenderer
+                  <ClientOnlyMDXRenderer
                     code={cleanCode}
                     debug={process.env.NODE_ENV === "development"}
                   />

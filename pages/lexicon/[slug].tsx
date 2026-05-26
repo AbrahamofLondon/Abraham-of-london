@@ -6,9 +6,8 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import { normalizeSlug } from "@/lib/content/shared";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 type LexiconPageProps = {
   entry: {
@@ -20,7 +19,8 @@ type LexiconPageProps = {
     tags: string[];
     relatedTerms: Array<{ title: string; slug: string }>;
   };
-  bodyCode: string;
+  /** Pre-rendered static HTML (safe for SSG, no runtime MDX evaluation) */
+  staticHtml: string;
 };
 
 function lexiconBareSlug(input: unknown): string {
@@ -87,7 +87,7 @@ function relatedTermsFromDoc(doc: any): Array<{ title: string; slug: string }> {
     .filter(Boolean) as Array<{ title: string; slug: string }>;
 }
 
-const LexiconEntryPage: NextPage<LexiconPageProps> = ({ entry, bodyCode }) => {
+const LexiconEntryPage: NextPage<LexiconPageProps> = ({ entry, staticHtml }) => {
   return (
     <Layout
       title={`${entry.title} // Lexicon`}
@@ -126,7 +126,7 @@ const LexiconEntryPage: NextPage<LexiconPageProps> = ({ entry, bodyCode }) => {
           </header>
 
           <section className="lexicon-archive-body mt-14 font-serif text-xl font-light leading-[1.85] text-white/55">
-            <ServerMDXRenderer code={bodyCode || ""} />
+            <StaticMDXRenderer html={staticHtml} />
           </section>
 
           {entry.relatedTerms.length > 0 ? (
@@ -195,7 +195,9 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
     return { notFound: true };
   }
 
-  const renderBody = getRenderableBody(doc);
+  // Use static-safe HTML rendering instead of runtime MDX evaluation
+  // This avoids Next.js 16's <Html> document import guard during SSG
+  const { html: staticHtml } = renderDocBodyToStaticHtml(doc);
 
   return {
     props: sanitizeData({
@@ -208,7 +210,7 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
         tags: Array.isArray(doc.tags) ? doc.tags.map(String) : [],
         relatedTerms: relatedTermsFromDoc(doc).filter((term) => term.slug !== slug),
       },
-      bodyCode: String(renderBody?.code || ""),
+      staticHtml,
     }),
     revalidate: 3600,
   };
