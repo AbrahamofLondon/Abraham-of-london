@@ -4,9 +4,10 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 
+import dynamic from "next/dynamic";
 import RegistryLayout from "@/components/layout/RegistryLayout";
 import AccessGate from "@/components/AccessGate";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+const ClientOnlyMDXRenderer = dynamic(() => import("@/components/mdx/ClientOnlyMDXRenderer"), { ssr: false });
 
 import { getDocBySlug } from "@/lib/content/unified-router";
 import { getRenderableBody } from "@/lib/content/render-body";
@@ -189,7 +190,7 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
 
         {bodyCode ? (
           <div className="text-zinc-300">
-            <SafeMDXRenderer code={bodyCode} />
+            <ClientOnlyMDXRenderer code={bodyCode} />
           </div>
         ) : (
           <div className="text-center py-12 text-white/30 font-mono text-xs uppercase tracking-widest">

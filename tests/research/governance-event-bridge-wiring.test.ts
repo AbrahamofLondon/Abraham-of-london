@@ -5,7 +5,16 @@
  * Verifies simulation-scoped events are emitted correctly.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+const { mockAuditLog, mockGovernanceLogCreate } = vi.hoisted(() => ({
+  mockAuditLog: vi.fn().mockResolvedValue(null),
+  mockGovernanceLogCreate: vi.fn().mockResolvedValue({ id: "log-id" }),
+}));
+
+vi.mock("@/lib/audit/audit-logger", () => ({ auditLogger: { log: mockAuditLog } }));
+vi.mock("@/lib/prisma.server", () => ({ prisma: { governanceLog: { create: mockGovernanceLogCreate } } }));
+
 import { createGovernanceEvent, emitGovernanceEvent } from "@/lib/platform/governance-event-bus";
 
 // ─── Bridge simulation events ────────────────────────────────────────────────

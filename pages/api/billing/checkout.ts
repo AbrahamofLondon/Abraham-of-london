@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") return res.status(405).end();
   if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
 
-  const { email, priceCode, productCode, entitlementSlug, contentId, originPath, contractId, organisationId } = req.body || {};
+  const { email, priceCode, productCode, entitlementSlug, contentId, originPath, contractId, organisationId, caseRef } = req.body || {};
   const rawCode = String(productCode || entitlementSlug || contentId || priceCode || "").trim();
 
   // Resolve canonical product code — accepts catalog key OR content ID OR entitlement slug
@@ -119,6 +119,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     originPath: origin,
     ...(typeof contractId === "string" && contractId.trim() ? { contractId: contractId.trim() } : {}),
     ...(typeof organisationId === "string" && organisationId.trim() ? { organisationId: organisationId.trim() } : {}),
+    ...(typeof caseRef === "string" && caseRef.trim() ? { caseRef: caseRef.trim().slice(0, 120) } : {}),
     // For bundles, include the full list of entitlement slugs
     ...(entitlementSlugs.length > 1
       ? { bundleEntitlements: entitlementSlugs.join(",") }

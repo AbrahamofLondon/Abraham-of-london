@@ -7,7 +7,7 @@ import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext, GetStaticPr
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 
@@ -19,7 +19,6 @@ import {
   normalizeUserTier,
   hasAccess,
 } from "@/lib/access/tier-policy";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 /* -----------------------------------------------------------------------------
    Routing guardrails
@@ -121,30 +120,6 @@ function looksLikeLeakedModuleCode(code: string): boolean {
   );
 }
 
-// Retained wrapper: prefers getRenderableBody result, falls back to direct
-// access only as last resort. Called from getStaticProps with renderBody
-// from getRenderableBody(). Safe because SafeMDXRenderer governs downstream.
-function pickRenderableDocCode(rawDoc: any, renderBody?: any): string {
-  const compiled =
-    safeString(renderBody?.code) ||
-    safeString(rawDoc?.body?.code) ||
-    safeString(rawDoc?.bodyCode);
-
-  const raw =
-    safeString(renderBody?.raw) ||
-    safeString(rawDoc?.body?.raw) ||
-    safeString(rawDoc?.content);
-
-  if (compiled && !looksLikeLeakedModuleCode(compiled)) {
-    return compiled;
-  }
-
-  if (raw) {
-    return raw;
-  }
-
-  return compiled || "";
-}
 
 interface Props {
   doc: {
@@ -153,8 +128,7 @@ interface Props {
     date: string | null;
     excerpt: string;
     readTime: string | null;
-    bodyCode: string;
-    bodyMode: "compiled" | "raw" | "empty";
+    staticHtml: string;
   } | null;
   canonicalUrl: string;
   requiredTier: AccessTier;
@@ -267,7 +241,7 @@ const GenericContentPage: NextPage<Props> = ({
 
         <div className="mx-auto max-w-2xl px-6">
           <div className="prose prose-invert max-w-none">
-            <SafeMDXRenderer code={doc.bodyCode} />
+            <StaticMDXRenderer html={doc.staticHtml} />
           </div>
         </div>
       </article>
@@ -315,8 +289,7 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   }
 
   const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
-  const renderBody = getRenderableBody(rawDoc);
-  const bodyCode = requiredTier === "public" ? pickRenderableDocCode(rawDoc, renderBody) : "";
+  const staticHtml = requiredTier === "public" ? renderDocBodyToStaticHtml(rawDoc).html : "";
 
   const doc = sanitizeData({
     title: rawDoc?.title || "Untitled",
@@ -324,8 +297,7 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
     date: rawDoc?.date ? new Date(rawDoc.date).toLocaleDateString("en-GB") : null,
     excerpt: rawDoc?.excerpt || rawDoc?.description || "",
     readTime: rawDoc?.readTime ?? null,
-    bodyCode,
-    bodyMode: renderBody.mode,
+    staticHtml,
   });
 
   return {

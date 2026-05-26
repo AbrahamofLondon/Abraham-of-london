@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+const ClientOnlyMDXRenderer = dynamic(() => import("@/components/mdx/ClientOnlyMDXRenderer"), { ssr: false });
 import EventHero from "@/components/events/EventHero";
 import { useClientRouter } from "@/lib/router/useClientRouter";
 import { Bookmark, BookmarkCheck, Shield, Lock, CornerRightDown } from "lucide-react";
@@ -174,7 +174,7 @@ const EventPage: NextPage<Props> = ({ event, initialBodyCode, requiredTier }) =>
             <article className="prose prose-zinc prose-amber max-w-none">
               {bodyCode ? (
                 <div className="animate-in fade-in duration-1000">
-                  <SafeMDXRenderer code={bodyCode} />
+                  <ClientOnlyMDXRenderer code={bodyCode} />
                 </div>
               ) : needsAuth ? (
                 <AccessGate title={event.title} requiredTier={required} isAuthenticated={!!session?.user} onUnlocked={handleUnlock} />

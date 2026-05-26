@@ -4,7 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import {
   getBlogSeriesCatalogue,
   getBlogSeriesBySlug,
@@ -14,12 +14,11 @@ import {
   type BlogSeries,
   type BlogSeriesPart,
 } from "@/lib/blog/series";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 type Props = {
   series: BlogSeries;
   part: BlogSeriesPart;
-  bodyCode: string;
+  staticHtml: string;
   author: string;
   description: string;
   ogImage: string | null;
@@ -119,7 +118,7 @@ const blogSeriesComponents = {
 const BlogSeriesPartReader: NextPage<Props> = ({
   series,
   part,
-  bodyCode,
+  staticHtml,
   author,
   description,
   ogImage,
@@ -159,7 +158,7 @@ const BlogSeriesPartReader: NextPage<Props> = ({
 
           {/* Body */}
           <div className="burden-reader-body">
-            <SafeMDXRenderer code={bodyCode} components={blogSeriesComponents} />
+            <StaticMDXRenderer html={staticHtml} />
           </div>
 
           {/* Navigation */}
@@ -497,9 +496,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   if (!doc) return { notFound: true };
 
-  const body = getRenderableBody(doc);
-  if (!body?.code) return { notFound: true };
-
+  const { html: staticHtml } = renderDocBodyToStaticHtml(doc);
   const { previous, next } = getBlogSeriesPartNeighbors(series, part.order);
 
   const rawOgImage =
@@ -511,7 +508,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: {
       series,
       part,
-      bodyCode: body.code,
+      staticHtml,
       author: String((doc as any)?.author || "Abraham of London"),
       description: String(
         (doc as any)?.description || (doc as any)?.excerpt || part.excerpt,

@@ -22,6 +22,8 @@ import { createHash, randomBytes } from "crypto";
 import { buildExecutiveReport } from "@/lib/admin/reporting/executive-report-builder";
 import { routeGovernanceEvent } from "@/lib/platform/governance-event-bus";
 import { sendEmail } from "@/lib/email/core/sendEmail";
+import { DecisionActionLog } from "@/lib/commercial/decision-action-log";
+import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 
 function generateRawToken(): string {
   return randomBytes(32).toString("hex");
@@ -33,10 +35,12 @@ function hashToken(token: string): string {
 
 export type PaidERGenerationInput = {
   checkoutSessionId: string;
+  stripeEventId?: string;
   email: string;
   clientName?: string;
+  caseRef?: string | null;
   /** The Fast Diagnostic result data used to generate the ER */
-  diagnosticData: {
+  diagnosticData?: {
     responses: Array<{ domain: string; intent: number; reality: number }>;
     hcdMetrics: Array<{ label: string; intent: number; reality: number; burnoutIndex: number; wellbeing: number; headcount: number; tenure: number; attritionRisk: string }>;
     ogrMetrics: { resonanceScore?: number; marketFriction?: number; targetRevenue?: number };
@@ -47,21 +51,140 @@ export type PaidERGenerationResult = {
   ok: boolean;
   reportId?: string;
   accessToken?: string;
+  tokenStatus?: "created" | "existing";
+  emailStatus?: "sent" | "failed";
+  actionLogCount?: number;
   error?: string;
 };
+
+type PaidERDiagnosticData = NonNullable<PaidERGenerationInput["diagnosticData"]>;
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function asNumber(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function conditionReality(condition: string, target: string, base: number): number {
+  if (condition === "authority" && target === "DECISION_AUTHORITY") return 35;
+  if (condition === "definition" && target === "STRATEGIC_CLARITY") return 38;
+  if (condition === "execution" && target === "EXECUTION_DISCIPLINE") return 42;
+  if (condition === "instability" && target === "OPERATING_STABILITY") return 34;
+  return base;
+}
+
+function diagnosticDataFromSpine(spine: IntelligenceSpine | null): PaidERDiagnosticData {
+  const condition = spine?.deterministic?.conditionClass ?? "authority";
+  const specificity = clamp(asNumber(spine?.c3?.specificityScore, 0.62), 0, 1);
+  const pressure = Math.round(45 + specificity * 35);
+  const baseReality = Math.round(78 - specificity * 28);
+  const exposureText = spine?.case?.costOfDelay ?? "";
+  const exposureNumber = Number(String(exposureText).replace(/[^0-9.]/g, "")) || 250;
+
+  const domains = [
+    "DECISION_AUTHORITY",
+    "STRATEGIC_CLARITY",
+    "EXECUTION_DISCIPLINE",
+    "OPERATING_STABILITY",
+  ];
+
+  return {
+    responses: domains.map((domain) => ({
+      domain,
+      intent: 88,
+      reality: conditionReality(condition, domain, baseReality),
+    })),
+    hcdMetrics: [
+      {
+        label: "LEADERSHIP_LOAD",
+        intent: 90,
+        reality: clamp(100 - pressure, 15, 85),
+        burnoutIndex: pressure,
+        wellbeing: clamp(92 - pressure, 20, 80),
+        headcount: 5,
+        tenure: 24,
+        attritionRisk: pressure >= 72 ? "HIGH" : pressure >= 58 ? "MODERATE" : "LOW",
+      },
+      {
+        label: "EXECUTION_CAPACITY",
+        intent: 86,
+        reality: clamp(baseReality, 25, 82),
+        burnoutIndex: clamp(pressure - 8, 25, 82),
+        wellbeing: clamp(96 - pressure, 20, 82),
+        headcount: 8,
+        tenure: 18,
+        attritionRisk: pressure >= 75 ? "HIGH" : "MODERATE",
+      },
+    ],
+    ogrMetrics: {
+      resonanceScore: clamp(baseReality, 20, 82),
+      marketFriction: clamp(pressure, 20, 88),
+      targetRevenue: exposureNumber,
+    },
+  };
+}
+
+async function loadSpineForPaidER(input: Pick<PaidERGenerationInput, "caseRef" | "email">): Promise<IntelligenceSpine | null> {
+  const caseRef = input.caseRef?.trim();
+  const where = caseRef
+    ? { journeyKey: `spine_${caseRef}` }
+    : {
+        email: input.email,
+        diagnosticType: "intelligence_spine",
+        status: "active",
+      };
+
+  const row = await prisma.diagnosticJourney.findFirst({
+    where,
+    orderBy: { updatedAt: "desc" },
+    select: { mergedTensionThread: true },
+  });
+
+  const spine = asRecord(row?.mergedTensionThread) as unknown as IntelligenceSpine;
+  return spine?.id && spine?.case ? spine : null;
+}
 
 export async function generatePaidExecutiveReport(
   input: PaidERGenerationInput,
 ): Promise<PaidERGenerationResult> {
   try {
+    const runKey = `paid-er-${input.checkoutSessionId}`;
+    const existing = await prisma.executiveReportingRun.findUnique({
+      where: { runKey },
+      include: { artifacts: { where: { kind: "ACCESS_TOKEN", status: "active" }, take: 1 } },
+    });
+    if (existing) {
+      const actionLogCount = await prisma.decisionActionLog.count({
+        where: { reportId: existing.id, clientEmail: input.email },
+      });
+      return {
+        ok: true,
+        reportId: existing.id,
+        tokenStatus: existing.artifacts.length > 0 ? "existing" : "created",
+        emailStatus: "sent",
+        actionLogCount,
+      };
+    }
+
+    const spine = await loadSpineForPaidER(input);
+    const diagnosticData = input.diagnosticData ?? diagnosticDataFromSpine(spine);
+
     // 1. Generate Executive Report from diagnostic data
     const report = buildExecutiveReport({
-      responses: input.diagnosticData.responses.map((r) => ({
+      responses: diagnosticData.responses.map((r) => ({
         domain: r.domain,
         intent: r.intent,
         reality: r.reality,
       })),
-      hcdMetrics: input.diagnosticData.hcdMetrics.map((m) => ({
+      hcdMetrics: diagnosticData.hcdMetrics.map((m) => ({
         label: m.label,
         intent: m.intent,
         reality: m.reality,
@@ -72,14 +195,13 @@ export async function generatePaidExecutiveReport(
         attritionRisk: m.attritionRisk as "LOW" | "MODERATE" | "HIGH",
       })),
       ogrMetrics: {
-        resonanceScore: input.diagnosticData.ogrMetrics.resonanceScore ?? 50,
-        marketFriction: input.diagnosticData.ogrMetrics.marketFriction ?? 30,
-        targetRevenue: input.diagnosticData.ogrMetrics.targetRevenue ?? 250,
+        resonanceScore: diagnosticData.ogrMetrics.resonanceScore ?? 50,
+        marketFriction: diagnosticData.ogrMetrics.marketFriction ?? 30,
+        targetRevenue: diagnosticData.ogrMetrics.targetRevenue ?? 250,
       },
     });
 
     // 2. Store report record (using canonicalSnapshot JSON field)
-    const runKey = `paid-er-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const stored = await prisma.executiveReportingRun.create({
       data: {
         runKey,
@@ -95,6 +217,12 @@ export async function generatePaidExecutiveReport(
           financialExposure: report.financialExposure,
           priorityStack: report.priorityStack,
           failureModes: report.failureModes,
+          source: {
+            checkoutSessionId: input.checkoutSessionId,
+            stripeEventId: input.stripeEventId ?? null,
+            caseRef: input.caseRef ?? null,
+            spineId: spine?.id ?? null,
+          },
         } as any,
         viewModelSnapshot: {} as any,
       },
@@ -122,13 +250,19 @@ export async function generatePaidExecutiveReport(
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.com";
     const accessUrl = `${baseUrl}/client/reports/${stored.id}?token=${encodeURIComponent(rawToken)}`;
 
-    await sendEmail({
+    const emailResult = await sendEmail({
       type: "TRANSACTIONAL",
       to: input.email,
       subject: "Your Executive Report is ready",
       html: buildERDeliveryEmail(input.email, accessUrl, report.state),
       text: `Your Executive Report is ready.\n\nAccess it here: ${accessUrl}\n\nThis link expires in 30 days.`,
       meta: { source: "paid-er-generation" },
+    });
+
+    const actionItems = await DecisionActionLog.createFromReport(stored.id, input.email, {
+      failureModes: report.failureModes,
+      priorityStack: report.priorityStack,
+      state: report.state,
     });
 
     // 5. Emit governance events
@@ -148,10 +282,32 @@ export async function generatePaidExecutiveReport(
       shouldWriteLineage: true,
     });
 
+    await routeGovernanceEvent({
+      eventType: "EXECUTIVE_REPORT_DELIVERED",
+      sourceSurface: "executive-reporting",
+      canonicalRecordType: "ExecutiveReport",
+      canonicalRecordId: stored.id,
+      actorEmail: input.email,
+      severity: emailResult.ok ? "MEDIUM" : "HIGH",
+      payload: {
+        checkoutSessionId: input.checkoutSessionId,
+        deliveryMethod: "email",
+        emailStatus: emailResult.ok ? "sent" : "failed",
+        emailId: emailResult.id ?? null,
+        tokenStatus: "created",
+        expiresAt: expiresAt.toISOString(),
+      },
+      shouldWriteAudit: true,
+      shouldWriteLineage: true,
+    });
+
     return {
       ok: true,
       reportId: stored.id,
       accessToken: rawToken,
+      tokenStatus: "created",
+      emailStatus: emailResult.ok ? "sent" : "failed",
+      actionLogCount: actionItems.length,
     };
   } catch (err) {
     return {

@@ -15,10 +15,8 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
-
-import { getRenderableBody } from "@/lib/content/render-body";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
@@ -63,7 +61,7 @@ const StrategySlugPage: NextPage<Props> = ({ item, requiredTier }) => {
   const slug = cleanPathish(item?.slug || "");
   const canonical = `${SITE}/strategy/${encodeURIComponent(slug)}`;
   const isPublic = requiredTier === "public";
-  const code = isPublic ? safeStr(item?.bodyCode, "") : "";
+  const staticHtml = isPublic ? safeStr(item?.staticHtml, "") : "";
 
   return (
     <Layout title={title} description={desc} ogImage={og} className="bg-[#050505]">
@@ -139,8 +137,8 @@ const StrategySlugPage: NextPage<Props> = ({ item, requiredTier }) => {
                     title={title}
                     message="This strategy document requires appropriate access."
                   />
-                ) : code ? (
-                  <SafeMDXRenderer code={code} />
+                ) : staticHtml ? (
+                  <StaticMDXRenderer html={staticHtml} />
                 ) : (
                   <div className="rounded border border-dashed border-white/10 p-12 text-center text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                     Intelligence body missing or corrupted.
@@ -232,11 +230,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc as any));
   const isPublic = requiredTier === "public";
-  const renderBody = getRenderableBody(doc);
-  const bodyCode = isPublic ? renderBody.code : "";
+  const staticHtml = isPublic ? renderDocBodyToStaticHtml(doc).html : "";
 
   return {
-    props: jsonSafe({ item: { ...doc, slug, bodyCode }, requiredTier }),
+    props: jsonSafe({ item: { ...doc, slug, staticHtml }, requiredTier }),
     revalidate: 1800,
   };
 

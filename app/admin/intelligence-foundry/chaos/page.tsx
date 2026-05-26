@@ -62,8 +62,14 @@ const OUTCOME_LABEL: Record<string, string> = {
   EXPECTED_THROW: "CAUGHT",
 };
 
+const DEFAULT_ENGINE_ID = CALLABLE_ENGINES[0]?.id;
+
+if (!DEFAULT_ENGINE_ID) {
+  throw new Error("Chaos Range requires at least one callable engine.");
+}
+
 export default function ChaosRangePage() {
-  const [selectedEngine, setSelectedEngine] = React.useState(CALLABLE_ENGINES[0]?.id ?? "");
+  const [selectedEngine, setSelectedEngine] = React.useState(DEFAULT_ENGINE_ID);
   const [running, setRunning] = React.useState(false);
   const [result, setResult] = React.useState<ChaosRunResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);

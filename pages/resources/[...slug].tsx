@@ -3,11 +3,10 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
-import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
 import { normalizeSlug } from "@/lib/content/shared";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -18,7 +17,7 @@ type Props = {
     slug: string;
   };
   requiredTier: AccessTier;
-  bodyCode: string | null;
+  staticHtml: string;
 };
 
 function isResourceDoc(doc: any): boolean {
@@ -55,7 +54,7 @@ function cleanResourceSlug(input: unknown): string {
   return s;
 }
 
-const Page: NextPage<Props> = ({ resource, requiredTier, bodyCode }) => {
+const Page: NextPage<Props> = ({ resource, requiredTier, staticHtml }) => {
   const isPublic = requiredTier === "public";
 
   return (
@@ -69,7 +68,7 @@ const Page: NextPage<Props> = ({ resource, requiredTier, bodyCode }) => {
           <h1 className="text-5xl font-serif mb-10">{resource.title}</h1>
 
           {isPublic ? (
-            <ServerMDXRenderer code={bodyCode || ""} />
+            <StaticMDXRenderer html={staticHtml} />
           ) : (
             <ClientUnlockRenderer
               slug={`resources/${resource.slug}`}
@@ -150,7 +149,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         slug,
       },
       requiredTier,
-      bodyCode: isPublic ? getRenderableBody(doc).code : null,
+      staticHtml: isPublic ? renderDocBodyToStaticHtml(doc).html : "",
     }),
     revalidate: 3600,
   };

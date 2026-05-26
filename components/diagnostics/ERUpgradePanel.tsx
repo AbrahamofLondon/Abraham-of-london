@@ -214,7 +214,12 @@ export default function ERUpgradePanel({
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productCode: "executive_reporting", email: email.trim() || undefined }),
+        body: JSON.stringify({
+          productCode: "executive_reporting",
+          email: email.trim() || undefined,
+          caseRef: caseRef ?? undefined,
+          originPath: "/diagnostics/fast",
+        }),
       });
       const data = await res.json();
 

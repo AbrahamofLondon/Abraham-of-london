@@ -10,27 +10,7 @@
  */
 
 import { ENGINE_REGISTRY } from "./engine-registry";
-
-// ─── The canonical set of adapter IDs registered in chaos/data-poisoning ─────
-// Keep this in sync with the ADAPTERS maps in:
-//   app/api/admin/intelligence-foundry/chaos/run/route.ts
-//   app/api/admin/intelligence-foundry/data-poisoning/run/route.ts
-
-export const REGISTERED_ADAPTER_IDS = new Set([
-  "fast-diagnostic",
-  "pattern-recurrence",
-  "constitutional-diagnostic",
-  "strategy-room",
-  "boardroom-dossier",
-  "executive-reporting",
-  "executive-report-boardroom-bridge",
-  "cost-of-delay",
-  "cohort-privacy",
-  "editorial-style-checker",
-  "enforcement-gates",
-  "outbound-policy-gate",
-  "report-lineage",
-]);
+import { REGISTERED_ADAPTER_IDS } from "./adapter-registry";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

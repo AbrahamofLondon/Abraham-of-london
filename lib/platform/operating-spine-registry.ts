@@ -29,7 +29,9 @@ export type OperatingSpineEntry = {
   canonicalRecord: CanonicalRecordType;
   adminDomain: AdminDomain;
   adminRoute: string;
-  foundryModule?: string;
+  foundryModuleId?: string;
+  engineId?: string;
+  adapterId?: string;
   emitsAudit: boolean;
   emitsLineage: boolean;
   entitlementGated: boolean;
@@ -46,7 +48,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "ContentAsset",
     adminDomain: "content",
     adminRoute: "/admin/content",
-    foundryModule: "editorial-style-checker",
+    foundryModuleId: "content-category-lab",
+    engineId: "editorial-style-checker",
+    adapterId: "editorial-style-checker",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: false,
@@ -61,7 +65,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "ContentAsset",
     adminDomain: "content",
     adminRoute: "/admin/content",
-    foundryModule: "editorial-style-checker",
+    foundryModuleId: "content-category-lab",
+    engineId: "editorial-style-checker",
+    adapterId: "editorial-style-checker",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: false,
@@ -76,7 +82,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "ContentAsset",
     adminDomain: "content",
     adminRoute: "/admin/content",
-    foundryModule: "editorial-style-checker",
+    foundryModuleId: "content-category-lab",
+    engineId: "editorial-style-checker",
+    adapterId: "editorial-style-checker",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: false,
@@ -91,7 +99,23 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "ContentAsset",
     adminDomain: "content",
     adminRoute: "/admin/content",
-    foundryModule: "content-red-team",
+    foundryModuleId: "content-red-team",
+    engineId: "editorial-style-checker",
+    adapterId: "editorial-style-checker",
+    emitsAudit: true,
+    emitsLineage: true,
+    entitlementGated: false,
+    outboundEligible: false,
+    canCreateResearchRun: true,
+  },
+  {
+    surfaceId: "canon",
+    surfaceLabel: "Canon",
+    surfaceType: "content",
+    publicStatus: "PUBLIC",
+    canonicalRecord: "ContentAsset",
+    adminDomain: "content",
+    adminRoute: "/admin/content",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: false,
@@ -106,7 +130,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "DiagnosticRun",
     adminDomain: "foundry",
     adminRoute: "/admin/intelligence-foundry/simulation/fast-diagnostic",
-    foundryModule: "fast-diagnostic",
+    foundryModuleId: "fast-diagnostic-sim",
+    engineId: "fast-diagnostic",
+    adapterId: "fast-diagnostic",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: false,
@@ -121,7 +147,8 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "DiagnosticRun",
     adminDomain: "foundry",
     adminRoute: "/admin/intelligence-foundry/simulation/fast-diagnostic",
-    foundryModule: "purpose-alignment",
+    foundryModuleId: "fast-diagnostic-sim",
+    engineId: "purpose-alignment",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: true,
@@ -136,7 +163,8 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "DiagnosticRun",
     adminDomain: "foundry",
     adminRoute: "/admin/intelligence-foundry/simulation/constitutional-diagnostic",
-    foundryModule: "constitutional-diagnostic",
+    engineId: "constitutional-diagnostic",
+    adapterId: "constitutional-diagnostic",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: true,
@@ -151,7 +179,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "ExecutiveReport",
     adminDomain: "product-operations",
     adminRoute: "/admin/reporting/executive",
-    foundryModule: "executive-reporting",
+    foundryModuleId: "executive-reporting-sim",
+    engineId: "executive-reporting",
+    adapterId: "executive-reporting",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: true,
@@ -166,7 +196,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "StrategyRoomCase",
     adminDomain: "product-operations",
     adminRoute: "/admin/strategy-room",
-    foundryModule: "strategy-room",
+    foundryModuleId: "strategy-room-sim",
+    engineId: "strategy-room",
+    adapterId: "strategy-room",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: true,
@@ -181,7 +213,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "BoardroomDossier",
     adminDomain: "product-operations",
     adminRoute: "/admin/intelligence-foundry/simulation/boardroom-mode",
-    foundryModule: "boardroom-dossier",
+    foundryModuleId: "boardroom-mode-sim",
+    engineId: "boardroom-dossier",
+    adapterId: "boardroom-dossier",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: true,
@@ -196,7 +230,7 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "EnterpriseCampaign",
     adminDomain: "product-operations",
     adminRoute: "/admin/enterprise",
-    foundryModule: "enterprise-decision-authority",
+    engineId: "enterprise-decision-authority",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: true,
@@ -211,7 +245,7 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "GmiRelease",
     adminDomain: "intelligence",
     adminRoute: "/admin/intelligence/gmi-release-console",
-    foundryModule: "gmi",
+    engineId: "gmi",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: true,
@@ -226,7 +260,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "OutboundPost",
     adminDomain: "outbound",
     adminRoute: "/admin/outbound/linkedin",
-    foundryModule: "outbound-content-validator",
+    foundryModuleId: "outbound-narrative-range",
+    engineId: "outbound-policy-gate",
+    adapterId: "outbound-policy-gate",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: false,
@@ -241,7 +277,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "OutboundPost",
     adminDomain: "outbound",
     adminRoute: "/admin/outbound/facebook",
-    foundryModule: "outbound-content-validator",
+    foundryModuleId: "outbound-narrative-range",
+    engineId: "outbound-policy-gate",
+    adapterId: "outbound-policy-gate",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: false,
@@ -256,7 +294,9 @@ export const OPERATING_SPINE: OperatingSpineEntry[] = [
     canonicalRecord: "OutboundPost",
     adminDomain: "outbound",
     adminRoute: "/admin/outbound/x",
-    foundryModule: "outbound-content-validator",
+    foundryModuleId: "outbound-narrative-range",
+    engineId: "outbound-policy-gate",
+    adapterId: "outbound-policy-gate",
     emitsAudit: true,
     emitsLineage: true,
     entitlementGated: false,
@@ -274,9 +314,9 @@ export function getSpineEntriesByDomain(domain: AdminDomain): OperatingSpineEntr
 }
 
 export function getSpineEntriesByFoundryModule(moduleId: string): OperatingSpineEntry[] {
-  return OPERATING_SPINE.filter((e) => e.foundryModule === moduleId);
+  return OPERATING_SPINE.filter((e) => e.foundryModuleId === moduleId);
 }
 
 export function getOrphanedSurfaces(): OperatingSpineEntry[] {
-  return OPERATING_SPINE.filter((e) => !e.foundryModule || !e.adminRoute);
+  return OPERATING_SPINE.filter((e) => !e.foundryModuleId || !e.adminRoute);
 }

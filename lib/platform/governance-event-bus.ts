@@ -9,15 +9,21 @@
  * Routing behaviour:
  *   - shouldWriteAudit = true → writes audit event
  *   - shouldWriteLineage = true → writes lineage event
- *   - shouldCreateResearchRun = true → creates ResearchRun + FoundryFinding
+ *   - shouldCreateResearchRun = true → signals intent; bus marks SKIPPED (caller must create ResearchRun via Foundry service)
  *
- * Returns structured result: RECORDED / PARTIAL / FAILED.
+ * Status semantics:
+ *   RECORDED — all requested writes succeeded
+ *   PARTIAL  — at least one write succeeded, at least one failed or was skipped when required
+ *   FAILED   — validation error or no required write succeeded
+ *
  * No silent event drops. No raw stack traces.
  */
 
 import "server-only";
 
 import { getEventType, type GovernanceEvent } from "./governance-event-types";
+import { auditLogger } from "@/lib/audit/audit-logger";
+import { prisma } from "@/lib/prisma.server";
 
 // ─── Result Types ─────────────────────────────────────────────────────────────
 
@@ -48,6 +54,15 @@ export function validateGovernanceEvent(event: GovernanceEvent): string[] {
   return errors;
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function mapSeverity(sev?: string): string {
+  if (sev === "CRITICAL") return "critical";
+  if (sev === "HIGH") return "error";
+  if (sev === "MEDIUM") return "warn";
+  return "info";
+}
+
 // ─── Emit ─────────────────────────────────────────────────────────────────────
 
 /**
@@ -63,7 +78,6 @@ export async function emitGovernanceEvent(event: GovernanceEvent): Promise<Gover
     return { ok: false, status: "FAILED", eventId, errors };
   }
 
-  const eventTypeDef = getEventType(event.eventType);
   const results: GovernanceEventResult = {
     ok: true,
     status: "RECORDED",
@@ -76,41 +90,81 @@ export async function emitGovernanceEvent(event: GovernanceEvent): Promise<Gover
   // ── Route: Audit ──
   if (event.shouldWriteAudit) {
     try {
-      // Write audit via the existing FoundryAuditEvent mechanism or log
-      if (typeof globalThis !== "undefined" && process.env.NODE_ENV !== "test") {
-        // In production, this would write to the audit log
-        // await writeAuditEvent({ eventType: event.eventType, ... });
-      }
+      await auditLogger.log({
+        action: event.eventType,
+        actorId: event.actorId,
+        actorEmail: event.actorEmail,
+        actorType: event.actorRole ?? "system",
+        resourceType: event.canonicalRecordType,
+        resourceId: event.canonicalRecordId,
+        severity: mapSeverity(event.severity),
+        status: "success",
+        category: "system",
+        metadata: {
+          sourceSurface: event.sourceSurface,
+          eventId: event.eventId,
+          emittedAt: event.emittedAt,
+          ...event.payload,
+        },
+      });
       results.auditStatus = "RECORDED";
     } catch (err) {
       results.auditStatus = "FAILED";
       results.errors = [...(results.errors ?? []), `Audit write failed: ${err instanceof Error ? err.message : String(err)}`];
       results.status = "PARTIAL";
+      results.ok = false;
     }
   }
 
   // ── Route: Lineage ──
   if (event.shouldWriteLineage) {
     try {
-      // Write lineage via the existing lineage mechanism
+      await prisma.governanceLog.create({
+        data: {
+          action: event.eventType,
+          performedBy: event.actorId ?? event.sourceSurface,
+          target: event.canonicalRecordId ?? event.canonicalRecordType,
+          details: JSON.stringify({
+            eventId: event.eventId,
+            sourceSurface: event.sourceSurface,
+            severity: event.severity,
+            emittedAt: event.emittedAt,
+            payload: event.payload,
+          }),
+        },
+      });
       results.lineageStatus = "RECORDED";
     } catch (err) {
       results.lineageStatus = "FAILED";
       results.errors = [...(results.errors ?? []), `Lineage write failed: ${err instanceof Error ? err.message : String(err)}`];
       results.status = "PARTIAL";
+      results.ok = false;
     }
   }
 
   // ── Route: ResearchRun ──
+  // ResearchRun creation requires module context unavailable in the event bus.
+  // Callers must create ResearchRuns directly via the Foundry service.
   if (event.shouldCreateResearchRun) {
-    try {
-      // ResearchRun creation is handled by the caller or a dedicated service
-      results.researchRunStatus = "CREATED";
-    } catch (err) {
-      results.researchRunStatus = "FAILED";
-      results.errors = [...(results.errors ?? []), `ResearchRun creation failed: ${err instanceof Error ? err.message : String(err)}`];
+    results.researchRunStatus = "SKIPPED";
+    // A requested but skipped write is a partial outcome.
+    if (results.status === "RECORDED") {
       results.status = "PARTIAL";
+      results.ok = false;
     }
+  }
+
+  // ── Resolve final status ──
+  // Escalate PARTIAL → FAILED when every bus-executable write explicitly errored.
+  // ResearchRun is always SKIPPED by the bus (caller handles creation) and is
+  // excluded from this check — SKIPPED is already captured as PARTIAL above.
+  const busWrites: Array<"RECORDED" | "SKIPPED" | "FAILED" | undefined> = [];
+  if (event.shouldWriteAudit) busWrites.push(results.auditStatus);
+  if (event.shouldWriteLineage) busWrites.push(results.lineageStatus);
+
+  if (busWrites.length > 0 && busWrites.every((s) => s === "FAILED")) {
+    results.status = "FAILED";
+    results.ok = false;
   }
 
   // Log in dev

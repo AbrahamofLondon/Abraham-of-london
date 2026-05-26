@@ -13,7 +13,9 @@ type SimulatedEvent = {
   canonicalRecord: string;
   sourceSurface: string;
   adminOwnerSurface: string;
-  foundryModule?: string;
+  foundryModuleId?: string;
+  engineId?: string;
+  adapterId?: string;
   requiredActorRole: string;
   downstreamEffects: string[];
   auditRequired: boolean;
@@ -257,9 +259,9 @@ export default function ReportLineageSimulationPage() {
                       <span className={`px-1.5 py-0.5 rounded ${event.lineageRequired ? "bg-emerald-400/10 text-emerald-400/60" : "bg-white/5 text-white/25"}`}>
                         {event.lineageRequired ? "lineage" : "no-lineage"}
                       </span>
-                      {event.foundryModule && (
+                      {event.foundryModuleId && (
                         <span className="px-1.5 py-0.5 rounded bg-blue-400/10 text-blue-400/60">
-                          {event.foundryModule}
+                          {event.foundryModuleId}
                         </span>
                       )}
                     </div>

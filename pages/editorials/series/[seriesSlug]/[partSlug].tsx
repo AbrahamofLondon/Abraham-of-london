@@ -4,7 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import {
   formatEditorialSeriesPartNumber,
   getEditorialSeriesBySlug,
@@ -15,12 +15,11 @@ import {
   type EditorialSeriesPart,
 } from "@/lib/editorial/series";
 import { getEditorialSeriesPartDocument } from "@/lib/editorial/series-content";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 type Props = {
   series: EditorialSeries;
   part: EditorialSeriesPart;
-  bodyCode: string;
+  staticHtml: string;
   author: string;
   description: string;
   previous: EditorialSeriesPart | null;
@@ -127,7 +126,7 @@ const editorialSeriesComponents = {
 const EditorialSeriesPartReader: NextPage<Props> = ({
   series,
   part,
-  bodyCode,
+  staticHtml,
   author,
   description,
   previous,
@@ -161,7 +160,7 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
           </header>
 
           <div className="mind-clay-reader-body">
-            <SafeMDXRenderer code={bodyCode} components={editorialSeriesComponents} />
+            <StaticMDXRenderer html={staticHtml} />
           </div>
 
           <nav className="mind-clay-reader-nav" aria-label={`${series.title} part navigation`}>
@@ -500,19 +499,18 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const part = getEditorialSeriesPart(series, partSlug);
   const doc = part ? getEditorialSeriesPartDocument(part.mdxSlug) : null;
-  const body = doc ? getRenderableBody(doc) : null;
-
-  if (!part || !doc || !body?.code) {
+  if (!part || !doc) {
     return { notFound: true };
   }
 
+  const { html: staticHtml } = renderDocBodyToStaticHtml(doc);
   const { previous, next } = getEditorialSeriesPartNeighbors(series, part.order);
 
   return {
     props: {
       series,
       part,
-      bodyCode: body.code,
+      staticHtml,
       author: String(doc.author || "Abraham of London"),
       description: String(doc.description || doc.excerpt || part.excerpt),
       previous,

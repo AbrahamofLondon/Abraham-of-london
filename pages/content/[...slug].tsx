@@ -3,11 +3,10 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
 import { normalizeSlug } from "@/lib/content/shared";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -18,7 +17,7 @@ type Props = {
     slug: string;
   };
   requiredTier: AccessTier;
-  bodyCode: string | null;
+  staticHtml: string;
 };
 
 function cleanSlug(input: unknown): string {
@@ -28,7 +27,7 @@ function cleanSlug(input: unknown): string {
   return s;
 }
 
-const Page: NextPage<Props> = ({ doc, requiredTier, bodyCode }) => {
+const Page: NextPage<Props> = ({ doc, requiredTier, staticHtml }) => {
   const isPublic = requiredTier === "public";
 
   return (
@@ -45,7 +44,7 @@ const Page: NextPage<Props> = ({ doc, requiredTier, bodyCode }) => {
           <h1 className="text-4xl font-serif mb-8">{doc?.title}</h1>
 
           {isPublic ? (
-            <ServerMDXRenderer code={bodyCode || ""} />
+            <StaticMDXRenderer html={staticHtml} />
           ) : (
             <ClientUnlockRenderer
               slug={`content/${doc.slug}`}
@@ -84,8 +83,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
   const isPublic = requiredTier === "public";
-  const renderBody = getRenderableBody(doc);
-
   return {
     props: sanitizeData({
       doc: {
@@ -93,7 +90,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         slug,
       },
       requiredTier,
-      bodyCode: isPublic ? renderBody.code : null,
+      staticHtml: isPublic ? renderDocBodyToStaticHtml(doc).html : "",
     }),
     revalidate: 1800,
   };

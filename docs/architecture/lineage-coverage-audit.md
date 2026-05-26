@@ -1,7 +1,7 @@
 # Lineage Coverage Audit
 
 **Date:** 2026-05-25
-**Updated:** Pass 3A — Governance event vocabulary closure. All 7 lineage chains now COMPLETE.
+**Updated:** Enforced Operating Spine pass — governance event bus now writes durably to systemAuditLog (audit) and GovernanceLog (lineage). RECORDED status requires a real Prisma write. PARTIAL returned when any required write fails.
 **Simulation:** `lib/research/lineage/report-lineage-simulation.ts` — `POST /api/admin/intelligence-foundry/lineage/simulate`
 **Governance events:** 47 total (up from 42) — added BOARDROOM_DOSSIER_PREVIEWED, BOARDROOM_DOSSIER_EXPORTED_SIMULATED, CONTENT_ASSET_CREATED, CONTENT_STYLE_CHECKED, CONTENT_METADATA_VALIDATED, CONTENT_OUTBOUND_ELIGIBLE, GMI_PRIOR_CALLS_REVIEWED, GMI_QUALITY_GATE_RUN, GMI_RELEASE_APPROVED, GMI_CALL_CARRIED_FORWARD, FOUNDRY_ACTION_REQUIRED
 

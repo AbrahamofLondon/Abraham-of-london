@@ -105,6 +105,61 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   { route: "/admin/oversight-review", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/outcome-ledger", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
   { route: "/admin/suppression-ledger", domain: "product-operations", requiredRole: "OWNER", riskLevel: "CRITICAL", emitsAudit: true },
+
+  // ── Delivery & Proof ────────────────────────────────────────────────────
+  { route: "/admin/report-state", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/delivery-queue", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "LineageEvent", riskLevel: "MEDIUM", emitsAudit: true },
+  { route: "/admin/proof", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/outcome-verification", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: true },
+  { route: "/admin/pdf-dashboard", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/pdf-status", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/boardroom-delivery", domain: "product-operations", requiredRole: "ADMIN", productSurface: "boardroom-mode", canonicalRecord: "BoardroomDossier", riskLevel: "CRITICAL", emitsAudit: true },
+  { route: "/admin/boardroom-archive", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "BoardroomDossier", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/counsel-review", domain: "audit", requiredRole: "ADMIN", riskLevel: "HIGH", emitsAudit: true },
+
+  // ── Campaigns & Organisations ───────────────────────────────────────────
+  { route: "/admin/campaigns", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "EnterpriseCampaign", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/campaigns/new", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "EnterpriseCampaign", riskLevel: "MEDIUM", emitsAudit: true },
+  { route: "/admin/organisations", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/organisations/new", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: true },
+  { route: "/admin/enterprise-pipeline", domain: "product-operations", requiredRole: "ADMIN", productSurface: "enterprise-decision-authority", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/enterprise-foundation", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/snapshot", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/commercial", domain: "access", requiredRole: "ADMIN", canonicalRecord: "Entitlement", riskLevel: "HIGH", emitsAudit: true },
+
+  // ── Content & Canon ─────────────────────────────────────────────────────
+  { route: "/admin/assets", domain: "content", requiredRole: "ADMIN", canonicalRecord: "ContentAsset", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/inner-circle", domain: "access", requiredRole: "OWNER", canonicalRecord: "AccessGrant", riskLevel: "HIGH", emitsAudit: true },
+
+  // ── Outbound (index & scheduler) ────────────────────────────────────────
+  { route: "/admin/outbound", domain: "outbound", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/outbound/scheduler", domain: "outbound", requiredRole: "OWNER", riskLevel: "HIGH", emitsAudit: true },
+
+  // ── Commercial & Launch ─────────────────────────────────────────────────
+  { route: "/admin/validation", domain: "command", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/conversion-dashboard", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/launch-dashboard", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+
+  // ── Decision Intelligence (extended) ────────────────────────────────────
+  { route: "/admin/decision/contextual-efficacy", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/decision/contextual-ranking", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+
+  // ── Intelligence Foundry (extended modules) ─────────────────────────────
+  { route: "/admin/intelligence-foundry/simulation/constitutional-diagnostic", domain: "foundry", requiredRole: "ADMIN", productSurface: "constitutional-diagnostic", canonicalRecord: "DiagnosticRun", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/intelligence-foundry/content", domain: "foundry", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/intelligence-foundry/market", domain: "foundry", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/intelligence-foundry/reference", domain: "foundry", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/intelligence-foundry/debug", domain: "foundry", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+
+  // ── System ──────────────────────────────────────────────────────────────
+  { route: "/admin/redis", domain: "command", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+
+  // ── Security & Audit (extended) ─────────────────────────────────────────
+  { route: "/admin/command-centre", domain: "command", requiredRole: "OWNER", riskLevel: "CRITICAL", emitsAudit: true },
+  { route: "/admin/access-keys", domain: "access", requiredRole: "ADMIN", canonicalRecord: "AccessGrant", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/events", domain: "audit", requiredRole: "ADMIN", canonicalRecord: "AuditEvent", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/provenance-chain", domain: "audit", requiredRole: "OWNER", canonicalRecord: "LineageEvent", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/access-diagnostics", domain: "access", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
 ];
 
 export function getAdminRoute(route: string): AdminRouteEntry | undefined {

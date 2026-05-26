@@ -3,11 +3,10 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
 import { normalizeSlug } from "@/lib/content/shared";
-import { getRenderableBody } from "@/lib/content/render-body";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
@@ -17,7 +16,7 @@ type Props = {
     slug: string;
   };
   requiredTier: AccessTier;
-  bodyCode: string | null;
+  staticHtml: string;
 };
 
 function isPrintDoc(doc: any): boolean {
@@ -35,7 +34,7 @@ function isPrintDoc(doc: any): boolean {
   );
 }
 
-const Page: NextPage<Props> = ({ print, requiredTier, bodyCode }) => {
+const Page: NextPage<Props> = ({ print, requiredTier, staticHtml }) => {
   const isPublic = requiredTier === "public";
 
   return (
@@ -47,8 +46,8 @@ const Page: NextPage<Props> = ({ print, requiredTier, bodyCode }) => {
       <main className="min-h-screen bg-white text-black px-6 py-16">
         <div className="mx-auto max-w-5xl">
           <h1 className="text-5xl font-serif mb-10">{print.title}</h1>
-          {isPublic && bodyCode ? (
-            <ServerMDXRenderer code={bodyCode} />
+          {isPublic ? (
+            <StaticMDXRenderer html={staticHtml} />
           ) : !isPublic ? (
             <ClientUnlockRenderer
               slug={`prints/${print.slug}`}
@@ -118,7 +117,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         slug,
       },
       requiredTier,
-      bodyCode: isPublic ? getRenderableBody(doc).code : null,
+      staticHtml: isPublic ? renderDocBodyToStaticHtml(doc).html : "",
     }),
     revalidate: 3600,
   };

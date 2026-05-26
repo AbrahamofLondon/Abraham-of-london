@@ -24,7 +24,7 @@ export const MODULE_REGISTRY: ModuleRegistryEntry[] = [
   {
     id: "scenario-workbench",
     name: "Scenario Workbench",
-    status: "WIRED",
+    status: "PARTIAL",
     description: "Select and run callable engines with baseline comparison, formula inspection, and ResearchRun capture.",
     route: "/admin/intelligence-foundry/scenario",
     runType: "SCENARIO",
@@ -34,7 +34,7 @@ export const MODULE_REGISTRY: ModuleRegistryEntry[] = [
   {
     id: "research-run-vault",
     name: "Research Run Vault",
-    status: "WIRED",
+    status: "PARTIAL",
     description: "Complete ledger of all ResearchRuns. View, filter, export action briefs, and manage run lifecycle.",
     route: "/admin/intelligence-foundry/runs",
     runType: "MANUAL",
@@ -181,7 +181,7 @@ export const MODULE_REGISTRY: ModuleRegistryEntry[] = [
     description: "Dry-run boardroom qualification gate and dossier generation. Calls qualifiesForBoardroom() + generateBoardroomDossier(). No PDF rendered.",
     route: "/admin/intelligence-foundry/simulation/boardroom-mode",
     runType: "SCENARIO",
-    engineId: "boardroom-mode",
+    engineId: "boardroom-dossier",
     capabilities: ["qualification-gate", "dossier-generation", "objection-handling", "dry-run"],
     limitationNote: "No PDF rendered. No dossier persisted.",
   },

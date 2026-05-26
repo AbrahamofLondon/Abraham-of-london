@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSession } from "next-auth/react";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import ClientOnlyMDXRenderer from "@/components/mdx/ClientOnlyMDXRenderer";
 import AccessGate from "@/components/AccessGate";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
 import type { AccessTier } from "@/lib/access/public";
@@ -146,7 +146,7 @@ export default function ClientUnlockRenderer({
 
   return (
     <div className={loading ? "pointer-events-none opacity-60" : ""}>
-      <SafeMDXRenderer code={code} />
+      <ClientOnlyMDXRenderer code={code} />
     </div>
   );
 }

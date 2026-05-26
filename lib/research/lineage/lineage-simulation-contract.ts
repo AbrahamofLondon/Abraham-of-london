@@ -23,7 +23,9 @@ export type SimulatedLineageEvent = {
   canonicalRecord: string;
   sourceSurface: string;
   adminOwnerSurface: string;
-  foundryModule?: string;
+  foundryModuleId?: string;
+  engineId?: string;
+  adapterId?: string;
   requiredActorRole: "ADMIN" | "OWNER" | "SYSTEM" | "USER";
   requiredEvidence?: string[];
   downstreamEffects: string[];

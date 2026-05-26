@@ -6,9 +6,8 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import { normalizeRequiredTier, requiredTierFromDoc } from "@/lib/access/tier-policy";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 type PublicIntelligenceDoc = {
   title: string;
@@ -17,7 +16,7 @@ type PublicIntelligenceDoc = {
   summary: string | null;
   date: string | null;
   category: string | null;
-  bodyCode: string;
+  staticHtml: string;
 };
 
 type Props = {
@@ -85,7 +84,7 @@ function publicIntelligenceSlugForDoc(doc: any): string {
 }
 
 function toPublicIntelligenceDoc(doc: any): PublicIntelligenceDoc {
-  const renderBody = getRenderableBody(doc);
+  const { html: staticHtml } = renderDocBodyToStaticHtml(doc);
 
   return {
     title: safeString(doc?.title) || "Untitled Intelligence",
@@ -94,7 +93,7 @@ function toPublicIntelligenceDoc(doc: any): PublicIntelligenceDoc {
     summary: safeString(doc?.summary || doc?.excerpt || doc?.description) || null,
     date: safeString(doc?.date) || null,
     category: safeString(doc?.category) || null,
-    bodyCode: safeString(renderBody.code),
+    staticHtml,
   };
 }
 
@@ -156,7 +155,7 @@ const PublicIntelligencePage: NextPage<Props> = ({ doc, bareSlug }) => {
           </header>
 
           <div className="prose prose-invert max-w-none">
-            <SafeMDXRenderer code={doc.bodyCode} />
+            <StaticMDXRenderer html={doc.staticHtml} />
           </div>
 
           <footer className="mt-16 border-t border-white/10 pt-8 text-sm leading-7 text-white/50">

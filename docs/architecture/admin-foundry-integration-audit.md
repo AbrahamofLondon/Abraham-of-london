@@ -1,6 +1,7 @@
 # Admin ↔ Foundry Integration Audit
 
 **Date:** 2026-05-25
+**Updated:** Enforced Operating Spine pass — all admin routes verified against disk; admin-domain-registry extended to cover all active nav items; route-existence enforced by product health rules.
 
 ## Classification
 
@@ -65,6 +66,18 @@
 | executive-reporting-sim | executive-reporting | `/admin/intelligence-foundry/simulation/executive-reporting` | **INTEGRATED** |
 | er-boardroom-bridge-sim | executive-report-boardroom-bridge | `/admin/intelligence-foundry/simulation/executive-report-boardroom-bridge` | **INTEGRATED** |
 
+## Admin Route Registry Coverage
+
+All admin routes for Foundry modules are now registered in `admin-domain-registry.ts` and verified
+to have route files on disk. Previously unregistered routes resolved:
+
+| Route | Status |
+|---|---|
+| `/admin/intelligence-foundry/simulation/constitutional-diagnostic` | Added to registry |
+| `/admin/intelligence-foundry/content` | Added to registry |
+| `/admin/intelligence-foundry/market` | Added to registry |
+| `/admin/intelligence-foundry/reference` | Added to registry |
+
 ## Summary
 
 | Status | Engines | Modules |
@@ -73,4 +86,8 @@
 | PARTIAL | 1 | 0 |
 | ORPHANED | 7 | 0 |
 
-**Orphaned engines** are all DOCUMENTATION_ONLY or reference models — they have no implementation, no product surface, and no admin route. This is expected for planned/retired items.
+**Orphaned engines** are all DOCUMENTATION_ONLY or reference models — they have no implementation,
+no product surface, and no admin route. This is expected for planned/retired items.
+
+**Verification:** `node scripts/market-readiness-gate.mjs` confirms all admin Foundry routes
+exist on disk and are registered. No INTEGRATED claim requires a missing page.

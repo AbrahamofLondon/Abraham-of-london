@@ -23,6 +23,7 @@ export type ProductHealthRecord = {
   route: string;
   publicStatus: "PUBLIC" | "GATED" | "ADMIN_ONLY" | "RETIRED";
 
+  productRouteStatus: HealthStatus;
   canonicalRecordStatus: HealthStatus;
   adminOwnerStatus: HealthStatus;
   foundryCoverageStatus: HealthStatus;
@@ -68,13 +69,14 @@ export function getProductHealthForSurface(surfaceId: string): ProductHealthReco
   const aggregated = aggregateStatus(rules);
 
   // Map rule results to individual statuses
-  const canonicalRecordStatus = rules[1]?.status ?? "GREY";
-  const adminOwnerStatus = rules[2]?.status ?? "GREY";
-  const foundryCoverageStatus = rules[3]?.status ?? "GREY";
-  const lineageCoverageStatus = rules[4]?.status ?? "GREY";
-  const governanceEventStatus = rules[5]?.status ?? "GREY";
-  const entitlementStatus = rules[6]?.status ?? "GREY";
-  const outboundStatus = rules[7]?.status ?? "GREY";
+  const productRouteStatus = rules[1]?.status ?? "GREY";
+  const canonicalRecordStatus = rules[2]?.status ?? "GREY";
+  const adminOwnerStatus = rules[3]?.status ?? "GREY";
+  const foundryCoverageStatus = rules[4]?.status ?? "GREY";
+  const lineageCoverageStatus = rules[5]?.status ?? "GREY";
+  const governanceEventStatus = rules[6]?.status ?? "GREY";
+  const entitlementStatus = rules[7]?.status ?? "GREY";
+  const outboundStatus = rules[8]?.status ?? "GREY";
 
   return {
     productSurfaceId: surface.id,
@@ -82,6 +84,7 @@ export function getProductHealthForSurface(surfaceId: string): ProductHealthReco
     route: surface.route,
     publicStatus: surface.publicStatus,
 
+    productRouteStatus,
     canonicalRecordStatus,
     adminOwnerStatus,
     foundryCoverageStatus,

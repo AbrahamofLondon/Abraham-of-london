@@ -16,6 +16,7 @@ import {
   getProductByStripePriceId,
 } from "@/lib/commercial/catalog";
 import { syncRetainerContractFromSubscription } from "@/lib/retainers/retainer-service";
+import { generatePaidExecutiveReport } from "@/lib/commercial/paid-er-generation";
 
 const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
 
@@ -173,6 +174,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({
           error: "ENTITLEMENT_SYNC_FAILED",
         });
+      }
+
+      if (catalogProduct?.code === "executive_reporting") {
+        const generation = await generatePaidExecutiveReport({
+          checkoutSessionId: session.id,
+          stripeEventId: event.id,
+          email,
+          clientName: session.customer_details?.name ?? undefined,
+          caseRef: session.metadata?.caseRef ?? null,
+        });
+
+        if (!generation.ok || !generation.reportId) {
+          console.error("[BILLING_WEBHOOK_PAID_ER_GENERATION_FAILED]", {
+            sessionId: session.id,
+            email,
+            error: generation.error,
+          });
+          return res.status(500).json({
+            error: "PAID_ER_GENERATION_FAILED",
+          });
+        }
+
+        await prisma.stripeWebhookEvent.upsert({
+          where: { id: event.id },
+          create: {
+            id: event.id,
+            type: event.type,
+            sessionId: session.id,
+            reportId: generation.reportId,
+            status: "processed",
+          },
+          update: {
+            reportId: generation.reportId,
+            status: "processed",
+          },
+        }).catch(() => undefined);
       }
 
       if (subscriptionId && contractId) {

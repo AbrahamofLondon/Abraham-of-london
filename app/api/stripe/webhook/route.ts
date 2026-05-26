@@ -1,218 +1,140 @@
 // app/api/stripe/webhook/route.ts
-// Stripe webhook handler — triggers post-payment ER generation and delivery.
-// Idempotent: duplicate Stripe events are detected and skipped.
+// Stripe webhook handler for paid Executive Report generation.
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
 import { prisma } from "@/lib/prisma.server";
-import { routeGovernanceEvent } from "@/lib/platform/governance-event-bus";
-import { sendEmail } from "@/lib/email/core/sendEmail";
-import { DecisionActionLog } from "@/lib/commercial/decision-action-log";
-import { createHash, randomBytes } from "crypto";
+import { resolveProductCode } from "@/lib/commercial/catalog";
+import { generatePaidExecutiveReport } from "@/lib/commercial/paid-er-generation";
 
-function generateRawToken(): string {
-  return randomBytes(32).toString("hex");
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any }) : null;
+
+function json(status: number, body: Record<string, unknown>) {
+  return NextResponse.json(body, { status });
 }
 
-function hashToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex");
+function resolveCheckoutProduct(session: Stripe.Checkout.Session) {
+  const metadata = session.metadata ?? {};
+  return (
+    resolveProductCode(String(metadata.priceCode || "")) ??
+    resolveProductCode(String(metadata.productCode || "")) ??
+    null
+  );
 }
 
 export async function POST(request: NextRequest) {
+  if (!stripe || !webhookSecret) {
+    return json(500, { error: "STRIPE_WEBHOOK_NOT_CONFIGURED" });
+  }
+
   const signature = request.headers.get("stripe-signature");
   if (!signature) {
-    return NextResponse.json({ error: "No signature" }, { status: 401 });
+    return json(400, { error: "STRIPE_SIGNATURE_MISSING" });
   }
 
+  let event: Stripe.Event;
+  const rawBody = await request.text();
   try {
-    const body = await request.text();
-    const event = JSON.parse(body);
-    const eventId = event.id as string;
-    const eventType = event.type as string;
-
-    // Only process completed checkout sessions
-    if (eventType !== "checkout.session.completed") {
-      return NextResponse.json({ received: true });
-    }
-
-    const session = event.data.object;
-    const sessionId = session.id as string;
-    const email = session.customer_email ?? session.customer_details?.email;
-    const metadata = session.metadata ?? {};
-
-    if (!email) {
-      return NextResponse.json({ error: "No email" }, { status: 400 });
-    }
-
-    // Verify this is an executive_reporting purchase
-    const productCode = metadata.productCode ?? "";
-    if (productCode !== "executive_reporting") {
-      return NextResponse.json({ received: true });
-    }
-
-    // ── Idempotency check ─────────────────────────────────────────────────
-    const existing = await prisma.stripeWebhookEvent.findUnique({
-      where: { id: eventId },
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+  } catch (error) {
+    return json(400, {
+      error: "STRIPE_SIGNATURE_VERIFICATION_FAILED",
+      message: error instanceof Error ? error.message : "Invalid Stripe signature",
     });
-    if (existing) {
-      return NextResponse.json({ received: true, idempotent: true });
-    }
-
-    // Record the event immediately to prevent duplicate processing
-    await prisma.stripeWebhookEvent.create({
-      data: {
-        id: eventId,
-        type: eventType,
-        sessionId,
-        status: "processing",
-      },
-    });
-
-    // ── Find the ER run ───────────────────────────────────────────────────
-    const run = await prisma.executiveReportingRun.findFirst({
-      where: {
-        email,
-        status: "completed",
-      },
-      orderBy: { createdAt: "desc" },
-      select: { id: true, canonicalSnapshot: true },
-    });
-
-    if (!run) {
-      // Mark event as deferred — run may be created later
-      await prisma.stripeWebhookEvent.update({
-        where: { id: eventId },
-        data: { status: "deferred" },
-      });
-      return NextResponse.json({ received: true, note: "Run not yet created" });
-    }
-
-    const snapshot = run.canonicalSnapshot as Record<string, unknown> | null;
-
-    // ── Create secure access token ─────────────────────────────────────────
-    const rawToken = generateRawToken();
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    await prisma.executiveReportingArtifact.create({
-      data: {
-        artifactKey: `er-access-${run.id}-${Date.now()}`,
-        runId: run.id,
-        kind: "ACCESS_TOKEN",
-        payload: {
-          tokenHash: hashToken(rawToken),
-          email,
-          expiresAt: expiresAt.toISOString(),
-        } as any,
-        status: "active",
-      },
-    });
-
-    // ── Create DecisionActionLog items ─────────────────────────────────────
-    const failureModes = (snapshot?.failureModes as string[]) ?? [];
-    const priorityStack = (snapshot?.priorityStack as string[]) ?? [];
-    const state = (snapshot?.state as string) ?? "ORDERED";
-
-    if (failureModes.length > 0 || priorityStack.length > 0) {
-      await DecisionActionLog.createFromReport(run.id, email, {
-        failureModes,
-        priorityStack,
-        state,
-      });
-
-      await routeGovernanceEvent({
-        eventType: "FINDING_CREATED",
-        sourceSurface: "executive-reporting",
-        canonicalRecordType: "FoundryFinding",
-        canonicalRecordId: run.id,
-        actorEmail: email,
-        severity: state === "DISORDERED" ? "CRITICAL" : "HIGH",
-        payload: {
-          actionItemCount: failureModes.length + priorityStack.length,
-          source: "paid-er-generation",
-        },
-        shouldWriteAudit: true,
-        shouldWriteLineage: true,
-      });
-    }
-
-    // ── Email secure link ─────────────────────────────────────────────────
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.com";
-    const accessUrl = `${baseUrl}/client/reports/${run.id}?token=${encodeURIComponent(rawToken)}`;
-
-    await sendEmail({
-      type: "TRANSACTIONAL",
-      to: email,
-      subject: "Your Executive Report is ready",
-      html: buildERDeliveryEmail(accessUrl),
-      text: `Your Executive Report is ready.\n\nAccess it here: ${accessUrl}\n\nThis link expires in 30 days.`,
-      meta: { source: "stripe-webhook" },
-    });
-
-    // ── Emit governance events ────────────────────────────────────────────
-    await routeGovernanceEvent({
-      eventType: "EXECUTIVE_REPORT_GENERATED",
-      sourceSurface: "executive-reporting",
-      canonicalRecordType: "ExecutiveReport",
-      canonicalRecordId: run.id,
-      actorEmail: email,
-      severity: "HIGH",
-      payload: { sessionId },
-      shouldWriteAudit: true,
-      shouldWriteLineage: true,
-    });
-
-    await routeGovernanceEvent({
-      eventType: "EXECUTIVE_REPORT_DELIVERED",
-      sourceSurface: "executive-reporting",
-      canonicalRecordType: "ExecutiveReport",
-      canonicalRecordId: run.id,
-      actorEmail: email,
-      severity: "MEDIUM",
-      payload: { deliveryMethod: "email", expiresAt: expiresAt.toISOString() },
-      shouldWriteAudit: true,
-      shouldWriteLineage: true,
-    });
-
-    // ── Mark event as processed ───────────────────────────────────────────
-    await prisma.stripeWebhookEvent.update({
-      where: { id: eventId },
-      data: { status: "processed", reportId: run.id },
-    });
-
-    return NextResponse.json({ received: true, reportId: run.id });
-  } catch (err) {
-    console.error("[STRIPE_WEBHOOK]", err);
-    return NextResponse.json({ error: "Webhook error" }, { status: 500 });
   }
-}
 
-function buildERDeliveryEmail(url: string): string {
-  return `<!DOCTYPE html>
-<html>
-<body style="margin:0;padding:0;background:#0a0a0b;font-family:Georgia,serif;">
-  <div style="max-width:560px;margin:0 auto;padding:32px 24px;">
-    <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(201,169,110,0.70);margin:0 0 20px;">
-      Abraham of London
-    </p>
-    <h1 style="font-family:Georgia,serif;font-weight:300;font-size:22px;line-height:1.45;color:rgba(255,255,255,0.82);margin:0 0 20px;">
-      Your Executive Report is ready
-    </h1>
-    <p style="font-size:15px;line-height:1.65;color:rgba(255,255,255,0.55);margin:0 0 20px;">
-      Your report has been generated and is now available through your secure link below.
-    </p>
-    <a href="${url}" style="display:inline-block;background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.35);color:rgba(201,169,110,0.90);font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;padding:14px 28px;">
-      View Your Executive Report
-    </a>
-    <p style="font-family:'Courier New',monospace;font-size:8px;letter-spacing:0.12em;color:rgba(255,255,255,0.22);margin:16px 0 0;">
-      This link expires in 30 days. Do not share it.
-    </p>
-    <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;margin-top:24px;">
-      <p style="font-family:'Courier New',monospace;font-size:8px;letter-spacing:0.12em;color:rgba(255,255,255,0.18);margin:0;">
-        This report is a governed analytical output, not financial or legal advice.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
+  if (event.type !== "checkout.session.completed") {
+    return NextResponse.json({ received: true, ignored: true });
+  }
+
+  const session = event.data.object as Stripe.Checkout.Session;
+  const product = resolveCheckoutProduct(session);
+  if (product?.code !== "executive_reporting") {
+    return NextResponse.json({ received: true, ignored: true });
+  }
+
+  const existing = await prisma.stripeWebhookEvent.findUnique({
+    where: { id: event.id },
+    select: { id: true, status: true, reportId: true },
+  });
+  if (existing?.status === "processed") {
+    return NextResponse.json({
+      received: true,
+      replay: true,
+      reportId: existing.reportId ?? null,
+    });
+  }
+
+  if (!existing) {
+    try {
+      await prisma.stripeWebhookEvent.create({
+        data: {
+          id: event.id,
+          type: event.type,
+          sessionId: session.id,
+          status: "processing",
+        },
+      });
+    } catch (error: any) {
+      if (error?.code === "P2002") {
+        return NextResponse.json({ received: true, replay: true });
+      }
+      throw error;
+    }
+  }
+
+  const email = String(
+    session.metadata?.email ||
+    session.customer_details?.email ||
+    session.customer_email ||
+    "",
+  ).trim().toLowerCase();
+
+  if (!email) {
+    await prisma.stripeWebhookEvent.update({
+      where: { id: event.id },
+      data: { status: "failed" },
+    });
+    return json(400, { error: "EMAIL_MISSING" });
+  }
+
+  const result = await generatePaidExecutiveReport({
+    checkoutSessionId: session.id,
+    stripeEventId: event.id,
+    email,
+    clientName: session.customer_details?.name ?? undefined,
+    caseRef: session.metadata?.caseRef ?? null,
+  });
+
+  if (!result.ok || !result.reportId) {
+    await prisma.stripeWebhookEvent.update({
+      where: { id: event.id },
+      data: { status: "failed" },
+    });
+    return json(500, {
+      error: "EXECUTIVE_REPORT_GENERATION_FAILED",
+      detail: result.error ?? null,
+    });
+  }
+
+  await prisma.stripeWebhookEvent.update({
+    where: { id: event.id },
+    data: {
+      status: "processed",
+      reportId: result.reportId,
+    },
+  });
+
+  return NextResponse.json({
+    received: true,
+    reportId: result.reportId,
+    tokenStatus: result.tokenStatus ?? null,
+    emailStatus: result.emailStatus ?? null,
+    actionLogCount: result.actionLogCount ?? 0,
+  });
 }

@@ -23,13 +23,12 @@ import { useSession } from "next-auth/react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import {
   getPublicationBySlug,
   getPublicationCatalogue,
 } from "@/lib/editorial/catalogue";
 import type { PublicationRecord } from "@/lib/editorial/types";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -40,7 +39,7 @@ type Props = {
   previewHref: string | null;
   citationHref: string;
   relatedSlugs: { prev: string | null; next: string | null };
-  bodyCode: string | null;
+  staticHtml: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -77,7 +76,7 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relatedSlugs, bodyCode }) => {
+const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relatedSlugs, staticHtml }) => {
   const { data: session } = useSession();
   const isPublic = item.tier === "public";
 
@@ -289,14 +288,14 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
             )}
 
             {/* Divider between convergence note and body */}
-            {item.convergenceNote && bodyCode && (
+            {item.convergenceNote && staticHtml && (
               <div style={{ marginBottom: "3rem" }}>
                 <GoldRule />
               </div>
             )}
 
             {/* Editorial body */}
-            {bodyCode ? (
+            {staticHtml ? (
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -304,7 +303,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                 transition={{ duration: 0.70 }}
               >
                 <div className="editorial-body">
-                  <SafeMDXRenderer code={bodyCode} />
+                  <StaticMDXRenderer html={staticHtml} />
                 </div>
 
                 {/* Footer links */}
@@ -836,7 +835,7 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
     : null;
 
   // ── Resolve editorial body ───────────────────────────────────────────────
-  let bodyCode: string | null = null;
+  let staticHtml = "";
   try {
     const { getAllEditorials } = await import("@/lib/content/server");
     const editorials = getAllEditorials();
@@ -844,15 +843,15 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
       (e) => e.slug === slug || e._raw?.flattenedPath?.endsWith(`/${slug}`) || e._raw?.flattenedPath === `editorials/${slug}`,
     );
     if (editorialDoc) {
-      const result = getRenderableBody(editorialDoc);
-      bodyCode = result.mode !== "empty" ? result.code : null;
+      const result = renderDocBodyToStaticHtml(editorialDoc);
+      staticHtml = result.mode !== "empty" ? result.html : "";
     }
   } catch {
-    bodyCode = null;
+    staticHtml = "";
   }
 
   // ── Missing-body guard ───────────────────────────────────────────────────
-  if (!bodyCode && isPublic && !item.canonicalTextPending && process.env.NODE_ENV !== "production") {
+  if (!staticHtml && isPublic && !item.canonicalTextPending && process.env.NODE_ENV !== "production") {
     console.warn(
       `[editorial] MISSING BODY: "${slug}" is public but has no body source at content/editorials/${slug}.mdx — set canonicalTextPending: true in the catalogue to suppress this warning.`,
     );
@@ -869,7 +868,7 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
       previewHref,
       citationHref: `/api/editorials/citation/${item.slug}`,
       relatedSlugs: { prev, next },
-      bodyCode,
+      staticHtml,
     },
     revalidate: 1800,
   };

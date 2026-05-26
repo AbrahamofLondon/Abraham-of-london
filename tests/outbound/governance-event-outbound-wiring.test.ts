@@ -5,7 +5,16 @@
  * Verifies that publish attempts emit standard GovernanceEvents.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+const { mockAuditLog, mockGovernanceLogCreate } = vi.hoisted(() => ({
+  mockAuditLog: vi.fn().mockResolvedValue(null),
+  mockGovernanceLogCreate: vi.fn().mockResolvedValue({ id: "log-id" }),
+}));
+
+vi.mock("@/lib/audit/audit-logger", () => ({ auditLogger: { log: mockAuditLog } }));
+vi.mock("@/lib/prisma.server", () => ({ prisma: { governanceLog: { create: mockGovernanceLogCreate } } }));
+
 import { createGovernanceEvent, emitGovernanceEvent } from "@/lib/platform/governance-event-bus";
 
 // ─── Outbound lifecycle events ───────────────────────────────────────────────
@@ -101,7 +110,7 @@ describe("outbound event emission", () => {
     expect(result.status).toBe("RECORDED");
   });
 
-  it("OUTBOUND_FAILED emits successfully", async () => {
+  it("OUTBOUND_FAILED emits as PARTIAL (ResearchRun deferred to caller)", async () => {
     const event = createGovernanceEvent({
       eventType: "OUTBOUND_FAILED",
       sourceSurface: "outbound-linkedin",
@@ -110,6 +119,9 @@ describe("outbound event emission", () => {
       payload: { errorCode: "API_ERROR", provider: "linkedin" },
     });
     const result = await emitGovernanceEvent(event);
-    expect(result.ok).toBe(true);
+    // canCreateResearchRun=true for OUTBOUND_FAILED; bus always SKIPs (caller handles it).
+    expect(result.ok).toBe(false);
+    expect(result.status).toBe("PARTIAL");
+    expect(result.researchRunStatus).toBe("SKIPPED");
   });
 });

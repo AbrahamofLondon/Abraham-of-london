@@ -1,6 +1,7 @@
 # Product Integration Audit
 
 **Date:** 2026-05-25
+**Updated:** Enforced Operating Spine pass — all product route files verified on disk; all admin owner routes verified in admin-domain-registry with page files; governance event bus wired to durable writes.
 **Standard:** Governed Product Operating System
 
 ## Classification
@@ -67,3 +68,16 @@
 | RETIRED | 0 |
 
 **No orphaned surfaces.** All major product surfaces have an admin owner, canonical record, and audit/lineage events defined.
+
+## Route Verification Status
+
+All routes verified against disk using `lib/platform/route-existence.ts` (runtime) and `scripts/market-readiness-gate.mjs` (CI):
+
+| Check | Result |
+|---|---|
+| Product route files on disk | ✓ All 16 surfaces verified |
+| Admin owner routes in registry | ✓ All declared adminOwnerSurface values registered |
+| Admin owner route files on disk | ✓ All page files confirmed |
+| Governance event durability | ✓ Audit writes to systemAuditLog; lineage writes to GovernanceLog |
+
+INTEGRATED status now requires runtime-verified route existence. Registry-only declarations are not sufficient.

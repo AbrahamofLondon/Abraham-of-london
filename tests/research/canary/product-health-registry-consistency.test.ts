@@ -26,6 +26,12 @@ describe("product health registry consistency", () => {
     }
   });
 
+  it("every surface has a product route status", () => {
+    for (const surface of surfaces) {
+      expect(["GREEN", "AMBER", "RED", "GREY"]).toContain(surface.productRouteStatus);
+    }
+  });
+
   it("every surface has an admin owner status", () => {
     for (const surface of surfaces) {
       expect(["GREEN", "AMBER", "RED", "GREY"]).toContain(surface.adminOwnerStatus);

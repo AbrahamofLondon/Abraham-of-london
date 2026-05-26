@@ -7,6 +7,7 @@
 import { describe, it, expect } from "vitest";
 import {
   checkProductSurfaceExists,
+  checkProductRoute,
   checkCanonicalRecord,
   checkAdminOwner,
   checkFoundryCoverage,
@@ -31,6 +32,14 @@ describe("checkProductSurfaceExists", () => {
   it("non-existent surface returns RED", () => {
     const result = checkProductSurfaceExists("nonexistent-surface");
     expect(result.status).toBe("RED");
+  });
+});
+
+describe("checkProductRoute", () => {
+  it("surface with real route returns GREEN", () => {
+    const surface = getProductLadderEntry("executive-reporting")!;
+    const result = checkProductRoute(surface);
+    expect(result.status).toBe("GREEN");
   });
 });
 

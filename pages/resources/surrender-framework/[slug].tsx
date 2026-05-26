@@ -3,11 +3,10 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
-import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
 import { normalizeSlug } from "@/lib/content/shared";
-import { getRenderableBody } from "@/lib/content/render-body";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -16,7 +15,7 @@ type Props = {
   title: string;
   slug: string;
   requiredTier: AccessTier;
-  bodyCode: string | null;
+  staticHtml: string;
 };
 
 function isSurrenderFrameworkDoc(doc: any): boolean {
@@ -38,7 +37,7 @@ function cleanSlug(input: unknown): string {
   return s.split("/").filter(Boolean).pop() || "";
 }
 
-const Page: NextPage<Props> = ({ title, slug, requiredTier, bodyCode }) => {
+const Page: NextPage<Props> = ({ title, slug, requiredTier, staticHtml }) => {
   const isPublic = requiredTier === "public";
 
   return (
@@ -52,7 +51,7 @@ const Page: NextPage<Props> = ({ title, slug, requiredTier, bodyCode }) => {
           <h1 className="text-5xl font-serif mb-10">{title}</h1>
 
           {isPublic ? (
-            <ServerMDXRenderer code={bodyCode || ""} />
+            <StaticMDXRenderer html={staticHtml} />
           ) : (
             <ClientUnlockRenderer
               slug={`frameworks/surrender/${slug}`}
@@ -118,7 +117,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       title: doc.title || "Surrender Framework",
       slug,
       requiredTier,
-      bodyCode: isPublic ? getRenderableBody(doc).code : null,
+      staticHtml: isPublic ? renderDocBodyToStaticHtml(doc).html : "",
     }),
     revalidate: 3600,
   };

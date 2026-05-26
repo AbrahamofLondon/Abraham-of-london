@@ -26,6 +26,10 @@ import { getCanonicalRecord } from "@/lib/platform/canonical-record-registry";
 import { getAdminRoute } from "@/lib/platform/admin-domain-registry";
 import { getEventType } from "@/lib/platform/governance-event-types";
 import { getEngine } from "@/lib/research/engine-registry";
+import { getModule } from "@/lib/research/module-registry";
+import { getAdapter } from "@/lib/research/adapter-registry";
+import { computeModuleStatus } from "@/lib/research/module-status-computer";
+import { routeExists } from "@/lib/platform/route-existence";
 import { simulateLineageChain } from "@/lib/research/lineage/report-lineage-simulation";
 import type { LineageSimulationChainId } from "@/lib/research/lineage/lineage-simulation-contract";
 
@@ -44,6 +48,19 @@ export function checkProductSurfaceExists(surfaceId: string): RuleResult {
     return { status: "RED", explanation: `Product surface "${surfaceId}" not found in product-ladder-registry.` };
   }
   return { status: "GREEN", explanation: `Surface "${surface.label}" registered in product-ladder-registry.` };
+}
+
+// ─── Rule 1B: Product route exists ───────────────────────────────────────────
+
+export function checkProductRoute(surface: ProductLadderEntry): RuleResult {
+  if (surface.publicStatus === "RETIRED") {
+    return { status: "GREY", explanation: "Retired surface — route existence not required." };
+  }
+  const result = routeExists(surface.route, { kind: surface.route.startsWith("/api/") ? "api" : "page" });
+  if (!result.exists) {
+    return { status: "RED", explanation: `Product route "${surface.route}" has no route file on disk.` };
+  }
+  return { status: "GREEN", explanation: `Product route exists: ${surface.route} (${result.router}).` };
 }
 
 // ─── Rule 2: Canonical record exists ─────────────────────────────────────────
@@ -66,23 +83,76 @@ export function checkAdminOwner(surface: ProductLadderEntry): RuleResult {
   if (!route) {
     return { status: "AMBER", explanation: `Admin route "${surface.adminOwnerSurface}" declared but not found in admin-domain-registry.` };
   }
-  return { status: "GREEN", explanation: `Admin owner: ${surface.adminOwnerSurface} (${route.requiredRole}, risk: ${route.riskLevel}).` };
+  const routeFile = routeExists(surface.adminOwnerSurface, { kind: "page" });
+  if (!routeFile.exists) {
+    return { status: "RED", explanation: `Admin route "${surface.adminOwnerSurface}" is registered but has no page on disk.` };
+  }
+  return { status: "GREEN", explanation: `Admin owner: ${surface.adminOwnerSurface} (${route.requiredRole}, risk: ${route.riskLevel}, ${routeFile.router}).` };
 }
 
-// ─── Rule 4: Foundry module exists ───────────────────────────────────────────
+// ─── Rule 4: Foundry module, engine, and adapter exist ───────────────────────
 
 export function checkFoundryCoverage(surface: ProductLadderEntry): RuleResult {
-  if (!surface.foundryModule) {
-    return { status: "GREY", explanation: "No Foundry module declared — may be intentional (e.g., static content)." };
+  const checks: string[] = [];
+  let status: HealthStatus = "GREEN";
+
+  if (surface.foundryModuleId) {
+    const moduleEntry = getModule(surface.foundryModuleId);
+    if (!moduleEntry) {
+      return { status: "RED", explanation: `Foundry module "${surface.foundryModuleId}" not found in module-registry.` };
+    }
+    const computed = computeModuleStatus(moduleEntry);
+    if (computed.computedStatus !== "WIRED" && moduleEntry.status === "WIRED") {
+      status = "RED";
+      checks.push(`module ${surface.foundryModuleId} declares WIRED but computes ${computed.computedStatus}: ${computed.reason}`);
+    } else if (computed.computedStatus !== "WIRED") {
+      status = "AMBER";
+      checks.push(`module ${surface.foundryModuleId} computes ${computed.computedStatus}: ${computed.reason}`);
+    } else {
+      checks.push(`module ${surface.foundryModuleId} WIRED`);
+    }
+  } else {
+    status = "AMBER";
+    checks.push("no Foundry module declared");
   }
-  const engine = getEngine(surface.foundryModule);
-  if (!engine) {
-    return { status: "RED", explanation: `Foundry module "${surface.foundryModule}" not found in engine-registry.` };
+
+  if (surface.engineId) {
+    const engine = getEngine(surface.engineId);
+    if (!engine) {
+      return { status: "RED", explanation: `Engine "${surface.engineId}" not found in engine-registry.` };
+    }
+    if (engine.status !== "PRODUCTION_CALLABLE") {
+      status = status === "RED" ? "RED" : "AMBER";
+      checks.push(`engine ${surface.engineId} status ${engine.status}`);
+    } else {
+      checks.push(`engine ${surface.engineId} PRODUCTION_CALLABLE`);
+    }
+  } else {
+    status = surface.foundryModuleId ? "AMBER" : status;
+    checks.push("no engine declared");
   }
-  if (engine.status !== "PRODUCTION_CALLABLE") {
-    return { status: "AMBER", explanation: `Foundry module "${surface.foundryModule}" exists but status is ${engine.status}.` };
+
+  if (surface.adapterId) {
+    const adapter = getAdapter(surface.adapterId);
+    if (!adapter) {
+      return { status: "RED", explanation: `Adapter "${surface.adapterId}" not found in adapter-registry.` };
+    }
+    if (surface.engineId && adapter.engineId !== surface.engineId) {
+      status = status === "RED" ? "RED" : "AMBER";
+      checks.push(`adapter ${surface.adapterId} targets ${adapter.engineId}, not ${surface.engineId}`);
+    } else {
+      checks.push(`adapter ${surface.adapterId} registered`);
+    }
+  } else if (surface.engineId) {
+    status = status === "RED" ? "RED" : "AMBER";
+    checks.push("no adapter declared for engine");
   }
-  return { status: "GREEN", explanation: `Foundry module "${surface.foundryModule}" is PRODUCTION_CALLABLE.` };
+
+  if (checks.every((check) => check.startsWith("no "))) {
+    return { status: "GREY", explanation: "No Foundry module, engine, or adapter declared." };
+  }
+
+  return { status, explanation: checks.join("; ") };
 }
 
 // ─── Rule 5: Lineage simulation chain status ─────────────────────────────────
@@ -141,7 +211,7 @@ export function checkGovernanceEvents(surface: ProductLadderEntry): RuleResult {
 // ─── Rule 7: Entitlement declared for gated products ─────────────────────────
 
 export function checkEntitlement(surface: ProductLadderEntry): RuleResult {
-  if (surface.publicStatus === "PUBLIC" || surface.publicStatus === "RETIRED") {
+  if (surface.publicStatus === "PUBLIC" || surface.publicStatus === "ADMIN_ONLY" || surface.publicStatus === "RETIRED") {
     return { status: "GREY", explanation: "Public or retired — no entitlement required." };
   }
   if (!surface.entitlementRequired) {
@@ -230,6 +300,7 @@ export function runAllRules(surfaceId: string): RuleResult[] {
 
   return [
     checkProductSurfaceExists(surfaceId),
+    checkProductRoute(surface),
     checkCanonicalRecord(surface),
     checkAdminOwner(surface),
     checkFoundryCoverage(surface),

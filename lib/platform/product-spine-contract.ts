@@ -17,7 +17,11 @@ export type ProductSpineAnswers = {
   /** What admin surface sees it? */
   adminSurface: string;
   /** What Foundry module can test it? */
-  foundryModule?: string;
+  foundryModuleId?: string;
+  /** What production engine powers it? */
+  engineId?: string;
+  /** What adapter lets Foundry exercise the engine safely? */
+  adapterId?: string;
   /** What audit/lineage event does it emit? */
   events: string[];
   /** What entitlement governs it? */

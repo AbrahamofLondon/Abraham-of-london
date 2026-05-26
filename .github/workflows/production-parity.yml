@@ -1,0 +1,61 @@
+name: Production Parity
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  production-parity:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.0
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma generate
+        run: pnpm prisma generate
+
+      - name: Contentlayer build
+        run: pnpm contentlayer2 build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Focused tests
+        run: pnpm vitest run tests/research tests/platform tests/outbound tests/intelligence tests/research/canary
+
+      - name: Netlify parity build
+        run: pnpm build:netlify
+
+      - name: Case-sensitive imports
+        run: node scripts/check-case-sensitive-imports.mjs
+
+      - name: App Router useSearchParams
+        run: node scripts/check-app-router-searchparams.mjs
+
+      - name: Unsafe MDX prerender
+        run: node scripts/check-unsafe-mdx-prerender.mjs
+
+      - name: Market readiness gate
+        run: node scripts/market-readiness-gate.mjs
+
+      - name: Whitespace diff check
+        run: git diff --check

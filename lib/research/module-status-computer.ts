@@ -12,11 +12,10 @@
  *   DEMO / DECOMMISSIONED / DEPRECATED = pass through (can't be overridden)
  */
 
-import fs from "fs";
-import path from "path";
 import type { ModuleStatus } from "./foundry-contract";
 import type { ModuleRegistryEntry } from "./module-registry";
 import { ENGINE_REGISTRY } from "./engine-registry";
+import { routeExists } from "@/lib/platform/route-existence";
 
 export type ModuleStatusReport = {
   moduleId: string;
@@ -28,13 +27,7 @@ export type ModuleStatusReport = {
 };
 
 function routeExistsOnDisk(route: string): boolean {
-  const appDir = path.join(process.cwd(), "app");
-  const normalized = route.replace(/^\//, "");
-  const candidates = [
-    path.join(appDir, normalized, "page.tsx"),
-    path.join(appDir, normalized, "page.ts"),
-  ];
-  return candidates.some((p) => fs.existsSync(p));
+  return routeExists(route, { kind: "page" }).exists;
 }
 
 function engineIsCallable(engineId: string | undefined): boolean {
@@ -75,6 +68,9 @@ export function computeModuleStatus(entry: ModuleRegistryEntry): ModuleStatusRep
   if (routeExists && callable) {
     computedStatus = "WIRED";
     reason = "Route file exists and engine is PRODUCTION_CALLABLE";
+  } else if (routeExists && !engineId && declared === "WIRED") {
+    computedStatus = "WIRED";
+    reason = "Route file exists and module is an operational dashboard/manual range without a dedicated engine";
   } else if (routeExists && needsWrap) {
     computedStatus = "ADAPTER_NEEDED";
     reason = "Route file exists but engine requires a Foundry adapter (PRODUCTION_NEEDS_WRAP)";

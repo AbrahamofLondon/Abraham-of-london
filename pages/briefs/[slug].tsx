@@ -7,9 +7,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
-
-import { getRenderableBody } from "@/lib/content/render-body";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import {
   normalizeRequiredTier,
   requiredTierFromDoc,
@@ -24,7 +22,7 @@ type PublicBrief = {
   readTime: string | null;
   category: string | null;
   tags: string[];
-  bodyCode: string;
+  staticHtml: string;
 };
 
 type Props = {
@@ -93,7 +91,7 @@ function publicBriefSlugForDoc(doc: any): string {
 }
 
 function toPublicBrief(doc: any): PublicBrief {
-  const renderBody = getRenderableBody(doc);
+  const { html: staticHtml } = renderDocBodyToStaticHtml(doc);
 
   return {
     title:       safeString(doc?.title) || "Untitled Brief",
@@ -106,7 +104,7 @@ function toPublicBrief(doc: any): PublicBrief {
     tags:        Array.isArray(doc?.tags)
       ? doc.tags.map((tag: unknown) => safeString(tag)).filter(Boolean)
       : [],
-    bodyCode:    safeString(renderBody.code),
+    staticHtml,
   };
 }
 
@@ -191,7 +189,7 @@ const PublicBriefPage: NextPage<Props> = ({ brief, bareSlug }) => {
 
           {/* Body */}
           <div className="prose prose-invert max-w-none">
-            <SafeMDXRenderer code={brief.bodyCode} />
+            <StaticMDXRenderer html={brief.staticHtml} />
           </div>
 
           {/* Footer */}

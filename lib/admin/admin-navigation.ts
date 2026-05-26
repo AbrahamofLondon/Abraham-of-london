@@ -133,7 +133,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
       { id: "outbound-index", label: "Outbound Publishing", href: "/admin/outbound", router: "pages", visibility: "admin", status: "active", description: "Unified outbound command index — provider cards, queue depth, failure summary, scheduler state, and recent publish ledger" },
       { id: "outbound-scheduler", label: "Scheduler Control", href: "/admin/outbound/scheduler", router: "pages", visibility: "owner", status: "active", description: "Scheduler control surface — state, due queue, dry-run and live-run actions, pause toggle, failure summary, recent runs" },
       { id: "linkedin-outbound", label: "LinkedIn Publishing", href: "/admin/outbound/linkedin", router: "pages", visibility: "admin", status: "active", description: "Governed LinkedIn publishing console with OAuth, final gate, preview, and attempt history" },
-      { id: "linkedin-campaign-tbch", label: "Campaign: The Burden Changes Hands", href: "/admin/outbound/linkedin/campaigns/the-burden-changes-hands", router: "pages", visibility: "admin", status: "active", description: "21-post LinkedIn campaign queue grouped by week with approval discipline and dry-run validation" },
+      { id: "linkedin-campaign-tbch", label: "Campaign: The Burden Changes Hands", href: "/admin/outbound/linkedin/campaigns/the-burden-changes-hands", router: "pages", visibility: "admin", status: "stub", description: "21-post LinkedIn campaign queue — page not yet created." },
       { id: "facebook-outbound", label: "Facebook Publishing", href: "/admin/outbound/facebook", router: "pages", visibility: "admin", status: "active", description: "Governed Facebook Page publishing console with OAuth, permission check, final gate, sync to X, and attempt history." },
       { id: "x-outbound", label: "X Publishing", href: "/admin/outbound/x", router: "pages", visibility: "admin", status: "active", description: "Standalone X (Twitter) publishing console via Twitter API v2. OAuth 2.0 PKCE, 280-char gate, bidirectional sync with Facebook, attempt history." },
     ],
@@ -209,4 +209,42 @@ export function getNavItemsForRole(role: "admin" | "operator" | "sponsor_safe"):
       }),
     }))
     .filter((section) => section.items.length > 0);
+}
+
+/**
+ * Validate admin navigation against admin-domain-registry.
+ *
+ * Active nav items (status "active", visibility not "internal") must be
+ * registered in the admin domain registry. Returns violations for use in
+ * tests and CI gate.
+ */
+export type NavRegistryViolation = {
+  id: string;
+  href: string;
+  status: string;
+  reason: string;
+};
+
+export function validateAdminNavAgainstRegistry(
+  getAdminRouteFn: (route: string) => unknown,
+): NavRegistryViolation[] {
+
+  const violations: NavRegistryViolation[] = [];
+
+  for (const item of getAllAdminNavItems()) {
+    if (item.status !== "active") continue;
+    if (item.visibility === "internal") continue;
+
+    const registered = getAdminRouteFn(item.href);
+    if (!registered) {
+      violations.push({
+        id: item.id,
+        href: item.href,
+        status: item.status,
+        reason: `Active nav item "${item.id}" (${item.href}) is not registered in admin-domain-registry.`,
+      });
+    }
+  }
+
+  return violations;
 }

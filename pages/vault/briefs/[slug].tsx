@@ -8,9 +8,10 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ChevronLeft, ShieldCheck, Terminal, Loader2 } from "lucide-react";
 
+import dynamic from "next/dynamic";
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+const ClientOnlyMDXRenderer = dynamic(() => import("@/components/mdx/ClientOnlyMDXRenderer"), { ssr: false });
 import ReaderFrame from "@/components/reader/ReaderFrame";
 import ReaderHeader from "@/components/reader/ReaderHeader";
 import ReaderBody from "@/components/reader/ReaderBody";
@@ -452,7 +453,7 @@ const BriefPage: NextPage<Props> = ({
 
           <div className={loadingContent ? "pointer-events-none opacity-20" : "opacity-100"}>
             <ReaderBody surface="vault">
-              <SafeMDXRenderer
+              <ClientOnlyMDXRenderer
                 code={activeCode}
                 components={mdxComponents as any}
                 directive={directive}

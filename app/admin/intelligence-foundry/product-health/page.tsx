@@ -13,6 +13,7 @@ type SurfaceHealth = {
   label: string;
   route: string;
   publicStatus: string;
+  productRouteStatus: HealthStatus;
   canonicalRecordStatus: HealthStatus;
   adminOwnerStatus: HealthStatus;
   foundryCoverageStatus: HealthStatus;
@@ -166,6 +167,7 @@ export default function ProductHealthPage() {
           <thead>
             <tr className="text-white/20 border-b border-white/8">
               <th className="text-left py-2 pr-3">Product</th>
+              <th className="text-left py-2 pr-3">Route</th>
               <th className="text-left py-2 pr-3">Record</th>
               <th className="text-left py-2 pr-3">Admin</th>
               <th className="text-left py-2 pr-3">Foundry</th>
@@ -188,6 +190,11 @@ export default function ProductHealthPage() {
                     <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[surface.overallStatus]}`} />
                     <span className="text-white/70">{surface.label}</span>
                   </div>
+                </td>
+                <td className="py-2.5 pr-3">
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] ${STATUS_STYLE[surface.productRouteStatus]}`}>
+                    {surface.productRouteStatus}
+                  </span>
                 </td>
                 <td className="py-2.5 pr-3">
                   <span className={`px-1.5 py-0.5 rounded text-[9px] ${STATUS_STYLE[surface.canonicalRecordStatus]}`}>
@@ -266,6 +273,7 @@ export default function ProductHealthPage() {
           <div className="grid grid-cols-4 gap-2">
             {([
               { key: "canonicalRecordStatus", label: "Record" },
+              { key: "productRouteStatus", label: "Route" },
               { key: "adminOwnerStatus", label: "Admin" },
               { key: "foundryCoverageStatus", label: "Foundry" },
               { key: "lineageCoverageStatus", label: "Lineage" },

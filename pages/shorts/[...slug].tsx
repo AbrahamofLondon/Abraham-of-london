@@ -6,7 +6,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 import NextStepCTA from "@/components/content/NextStepCTA";
 
@@ -21,7 +21,6 @@ import ShortShare from "@/components/shorts/ShortShare";
 import RelatedShorts from "@/components/shorts/RelatedShorts";
 import ShortComments from "@/components/shorts/ShortComments";
 
-import { getRenderableBody } from "@/lib/content/render-body";
 import { resolveDocCoverImage } from "@/lib/content/shared";
 
 type RawShortLike = {
@@ -72,8 +71,7 @@ type PageItem = {
   description: string;
   excerpt: string;
   slug: string;
-  bodyCode: string | null;
-  bodyMode: string | null;
+  staticHtml: string | null;
   date: string | null;
   tags: string[];
   readingTime: string | null;
@@ -113,8 +111,7 @@ const EMPTY_ITEM: PageItem = {
   description: "",
   excerpt: "",
   slug: "",
-  bodyCode: null,
-  bodyMode: null,
+  staticHtml: null,
   date: null,
   tags: [],
   readingTime: null,
@@ -324,15 +321,14 @@ function toShortLinkItem(doc: RawShortLike | null | undefined): ShortLinkItem | 
 
 function toPageItem(doc: RawShortLike): PageItem {
   const slug = toShortRouteSlug(getRawDocSlug(doc));
-  const renderBody = getRenderableBody(doc);
+  const { html: staticHtml } = renderDocBodyToStaticHtml(doc);
 
   return {
     title: safeString(doc.title).trim() || `[Untitled: ${slug || "unknown"}]`,
     description: safeString(doc.description || doc.excerpt || doc.summary).trim(),
     excerpt: safeString(doc.excerpt || doc.summary || doc.description).trim(),
     slug,
-    bodyCode: renderBody.code,
-    bodyMode: renderBody.mode,
+    staticHtml: staticHtml || null,
     date: safeString(doc.date) || null,
     tags: safeArray(doc.tags).map((tag) => safeString(tag)).filter(Boolean),
     readingTime:
@@ -601,11 +597,11 @@ const ShortsSlugPage: NextPage<Props> = ({
               title={safeItem.title}
               message="This short requires appropriate access."
             />
-          ) : safeItem.bodyCode ? (
-            <SafeMDXRenderer code={safeItem.bodyCode} />
+          ) : safeItem.staticHtml ? (
+            <StaticMDXRenderer html={safeItem.staticHtml} />
           ) : (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center font-mono text-sm text-red-200">
-              No compiled MDX body found for: {safeItem.title || safeItem.slug || "(unknown)"}
+              No content found for: {safeItem.title || safeItem.slug || "(unknown)"}
             </div>
           )}
 
@@ -772,11 +768,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const tier = requiredTierFromDoc(doc as any);
   const isPublic = tier === "public";
 
-  // Strip body code for gated content
+  // Strip body HTML for gated content
   if (!isPublic) {
-    item.bodyCode = null;
-  } else if (!item.bodyCode) {
-    console.warn(`[Short ${item.title}] No body code available. Content may not render.`);
+    item.staticHtml = null;
+  } else if (!item.staticHtml) {
+    console.warn(`[Short ${item.title}] No body HTML available. Content may not render.`);
   }
 
   const prevDoc =

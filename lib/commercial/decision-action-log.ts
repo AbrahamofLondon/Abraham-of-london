@@ -102,13 +102,17 @@ export const DecisionActionLog = {
     });
 
     await routeGovernanceEvent({
-      eventType: "FINDING_CREATED",
+      eventType: "ACTION_LOG_CREATED",
       sourceSurface: "executive-reporting",
-      canonicalRecordType: "FoundryFinding",
+      canonicalRecordType: "DecisionActionLog",
       canonicalRecordId: record.id,
       actorEmail: input.clientEmail,
       severity: input.severity === "CRITICAL" ? "CRITICAL" : input.severity === "HIGH" ? "HIGH" : "MEDIUM",
-      payload: { finding: input.finding, recommendedAction: input.recommendedAction },
+      payload: {
+        reportId: input.reportId,
+        finding: input.finding,
+        recommendedAction: input.recommendedAction,
+      },
       shouldWriteAudit: true,
       shouldWriteLineage: true,
     });

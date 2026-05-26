@@ -5,7 +5,16 @@
  * Verifies that GMI release events emit standard GovernanceEvents.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+const { mockAuditLog, mockGovernanceLogCreate } = vi.hoisted(() => ({
+  mockAuditLog: vi.fn().mockResolvedValue(null),
+  mockGovernanceLogCreate: vi.fn().mockResolvedValue({ id: "log-id" }),
+}));
+
+vi.mock("@/lib/audit/audit-logger", () => ({ auditLogger: { log: mockAuditLog } }));
+vi.mock("@/lib/prisma.server", () => ({ prisma: { governanceLog: { create: mockGovernanceLogCreate } } }));
+
 import { createGovernanceEvent, emitGovernanceEvent } from "@/lib/platform/governance-event-bus";
 
 // ─── GMI lifecycle events ────────────────────────────────────────────────────
@@ -69,7 +78,7 @@ describe("GMI release governance events", () => {
 // ─── GMI event emission ──────────────────────────────────────────────────────
 
 describe("GMI event emission", () => {
-  it("GMI_QUALITY_GATE_RUN emits successfully", async () => {
+  it("GMI_QUALITY_GATE_RUN emits as PARTIAL (ResearchRun deferred to caller)", async () => {
     const event = createGovernanceEvent({
       eventType: "GMI_QUALITY_GATE_RUN",
       sourceSurface: "gmi",
@@ -78,8 +87,10 @@ describe("GMI event emission", () => {
       payload: { gatePassed: true, signalCount: 12 },
     });
     const result = await emitGovernanceEvent(event);
-    expect(result.ok).toBe(true);
-    expect(result.status).toBe("RECORDED");
+    // canCreateResearchRun=true for GMI_QUALITY_GATE_RUN; bus always SKIPs.
+    expect(result.ok).toBe(false);
+    expect(result.status).toBe("PARTIAL");
+    expect(result.researchRunStatus).toBe("SKIPPED");
   });
 
   it("GMI_RELEASE_PUBLISHED emits successfully", async () => {

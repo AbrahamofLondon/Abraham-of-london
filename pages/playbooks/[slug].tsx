@@ -28,12 +28,11 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 import NextStepCTA from "@/components/content/NextStepCTA";
 import ValueReceipt from "@/components/product/ValueReceipt";
 
-import { getRenderableBody } from "@/lib/content/render-body";
 import { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
@@ -174,7 +173,7 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
   return {
     props: {
       playbook,
-      renderCode: isPublic ? getRenderableBody(playbook).code : null,
+      renderCode: isPublic ? renderDocBodyToStaticHtml(playbook).html : null,
       requiredTier: tier,
       adjacent: {
         prev: prevItem
@@ -785,7 +784,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     message="This playbook requires appropriate access."
                   />
                 ) : renderCode ? (
-                  <SafeMDXRenderer code={renderCode} />
+                  <StaticMDXRenderer html={renderCode} />
                 ) : null}
               </div>
 

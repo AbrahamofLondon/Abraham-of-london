@@ -5,7 +5,16 @@
  * Verifies that ResearchRun lifecycle events emit standard GovernanceEvents.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+const { mockAuditLog, mockGovernanceLogCreate } = vi.hoisted(() => ({
+  mockAuditLog: vi.fn().mockResolvedValue(null),
+  mockGovernanceLogCreate: vi.fn().mockResolvedValue({ id: "log-id" }),
+}));
+
+vi.mock("@/lib/audit/audit-logger", () => ({ auditLogger: { log: mockAuditLog } }));
+vi.mock("@/lib/prisma.server", () => ({ prisma: { governanceLog: { create: mockGovernanceLogCreate } } }));
+
 import { createGovernanceEvent, emitGovernanceEvent } from "@/lib/platform/governance-event-bus";
 
 // ─── ResearchRun lifecycle events ────────────────────────────────────────────
@@ -84,7 +93,7 @@ describe("Foundry event emission", () => {
     expect(result.status).toBe("RECORDED");
   });
 
-  it("FOUNDRY_ACTION_REQUIRED emits successfully", async () => {
+  it("FOUNDRY_ACTION_REQUIRED with shouldCreateResearchRun emits as PARTIAL", async () => {
     const event = createGovernanceEvent({
       eventType: "FOUNDRY_ACTION_REQUIRED",
       sourceSurface: "foundry",
@@ -93,6 +102,10 @@ describe("Foundry event emission", () => {
       shouldCreateResearchRun: true,
     });
     const result = await emitGovernanceEvent(event);
-    expect(result.ok).toBe(true);
+    // Bus always SKIPs ResearchRun creation (caller must use Foundry service directly).
+    // Audit and lineage writes succeed, but the skipped ResearchRun makes this PARTIAL.
+    expect(result.ok).toBe(false);
+    expect(result.status).toBe("PARTIAL");
+    expect(result.researchRunStatus).toBe("SKIPPED");
   });
 });

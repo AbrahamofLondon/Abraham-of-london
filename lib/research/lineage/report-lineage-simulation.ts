@@ -103,7 +103,9 @@ export function simulateLineageChain(chainId: LineageSimulationChainId): Lineage
       canonicalRecord: eventDef.expectedCanonicalRecord,
       sourceSurface: chainDef.sourceSurface,
       adminOwnerSurface: productSurface?.adminOwnerSurface ?? "unknown",
-      foundryModule: productSurface?.foundryModule,
+      foundryModuleId: productSurface?.foundryModuleId,
+      engineId: productSurface?.engineId,
+      adapterId: productSurface?.adapterId,
       requiredActorRole: "SYSTEM",
       downstreamEffects: [],
       auditRequired: govEvent?.writesAudit ?? false,
@@ -168,13 +170,13 @@ export function simulateLineageChain(chainId: LineageSimulationChainId): Lineage
     }
 
     // ── Validate Foundry module link ──
-    if (productSurface?.foundryModule && !spineEntry?.foundryModule) {
+    if (productSurface?.foundryModuleId && !spineEntry?.foundryModuleId) {
       gaps.push(generateGap(
         "MISSING_FOUNDRY_MODULE",
         "MEDIUM",
         eventDef.eventType,
-        `Foundry module "${productSurface.foundryModule}" for surface "${chainDef.sourceSurface}" not linked in operating-spine-registry.`,
-        `Add foundryModule to operating-spine-registry.ts for "${chainDef.sourceSurface}".`,
+        `Foundry module "${productSurface.foundryModuleId}" for surface "${chainDef.sourceSurface}" not linked in operating-spine-registry.`,
+        `Add foundryModuleId to operating-spine-registry.ts for "${chainDef.sourceSurface}".`,
         "operating-spine-registry.ts::OPERATING_SPINE",
       ));
     }

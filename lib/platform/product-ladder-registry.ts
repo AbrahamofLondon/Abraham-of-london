@@ -36,6 +36,7 @@ export type CanonicalRecordType =
   | "OutboundPost"
   | "ResearchRun"
   | "FoundryFinding"
+  | "DecisionActionLog"
   | "ActionBrief"
   | "AccessGrant"
   | "Entitlement"
@@ -52,7 +53,9 @@ export type ProductLadderEntry = {
   canonicalRecord: CanonicalRecordType;
   entitlementRequired?: string;
   adminOwnerSurface: string;
-  foundryModule?: string;
+  foundryModuleId?: string;
+  engineId?: string;
+  adapterId?: string;
   lineageEvents: string[];
   auditEvents: string[];
   outboundEligible: boolean;
@@ -68,7 +71,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "content",
     canonicalRecord: "ContentAsset",
     adminOwnerSurface: "/admin/content",
-    foundryModule: "editorial-style-checker",
+    foundryModuleId: "content-category-lab",
+    engineId: "editorial-style-checker",
+    adapterId: "editorial-style-checker",
     lineageEvents: ["CONTENT_PUBLISHED", "CONTENT_UPDATED", "CONTENT_ARCHIVED"],
     auditEvents: ["CONTENT_PUBLISHED", "CONTENT_UPDATED"],
     outboundEligible: true,
@@ -81,7 +86,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "content",
     canonicalRecord: "ContentAsset",
     adminOwnerSurface: "/admin/content",
-    foundryModule: "editorial-style-checker",
+    foundryModuleId: "content-category-lab",
+    engineId: "editorial-style-checker",
+    adapterId: "editorial-style-checker",
     lineageEvents: ["CONTENT_PUBLISHED", "CONTENT_UPDATED", "CONTENT_ARCHIVED"],
     auditEvents: ["CONTENT_PUBLISHED", "CONTENT_UPDATED"],
     outboundEligible: true,
@@ -94,7 +101,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "content",
     canonicalRecord: "ContentAsset",
     adminOwnerSurface: "/admin/content",
-    foundryModule: "editorial-style-checker",
+    foundryModuleId: "content-category-lab",
+    engineId: "editorial-style-checker",
+    adapterId: "editorial-style-checker",
     lineageEvents: ["CONTENT_PUBLISHED", "CONTENT_UPDATED"],
     auditEvents: ["CONTENT_PUBLISHED"],
     outboundEligible: true,
@@ -107,7 +116,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "content",
     canonicalRecord: "ContentAsset",
     adminOwnerSurface: "/admin/content",
-    foundryModule: "content-red-team",
+    foundryModuleId: "content-red-team",
+    engineId: "editorial-style-checker",
+    adapterId: "editorial-style-checker",
     lineageEvents: ["CONTENT_PUBLISHED", "CONTENT_UPDATED"],
     auditEvents: ["CONTENT_PUBLISHED"],
     outboundEligible: false,
@@ -116,11 +127,13 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
   {
     id: "canon",
     label: "Canon",
-    route: "/canons",
+    route: "/canon",
     surfaceType: "content",
     canonicalRecord: "ContentAsset",
     adminOwnerSurface: "/admin/content",
-    foundryModule: undefined,
+    foundryModuleId: undefined,
+    engineId: undefined,
+    adapterId: undefined,
     lineageEvents: ["CONTENT_PUBLISHED", "CONTENT_UPDATED"],
     auditEvents: ["CONTENT_PUBLISHED"],
     outboundEligible: false,
@@ -135,7 +148,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "diagnostic",
     canonicalRecord: "DiagnosticRun",
     adminOwnerSurface: "/admin/intelligence-foundry/simulation/fast-diagnostic",
-    foundryModule: "fast-diagnostic",
+    foundryModuleId: "fast-diagnostic-sim",
+    engineId: "fast-diagnostic",
+    adapterId: "fast-diagnostic",
     lineageEvents: ["DIAGNOSTIC_STARTED", "DIAGNOSTIC_COMPLETED", "DIAGNOSTIC_REVIEWED"],
     auditEvents: ["DIAGNOSTIC_COMPLETED"],
     outboundEligible: false,
@@ -148,7 +163,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "diagnostic",
     canonicalRecord: "DiagnosticRun",
     adminOwnerSurface: "/admin/intelligence-foundry/simulation/fast-diagnostic",
-    foundryModule: "purpose-alignment",
+    foundryModuleId: "fast-diagnostic-sim",
+    engineId: "purpose-alignment",
+    adapterId: undefined,
     lineageEvents: ["PURPOSE_ALIGNMENT_STARTED", "PURPOSE_ALIGNMENT_COMPLETED"],
     auditEvents: ["PURPOSE_ALIGNMENT_COMPLETED"],
     outboundEligible: false,
@@ -157,11 +174,13 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
   {
     id: "constitutional-diagnostic",
     label: "Constitutional Diagnostic",
-    route: "/constitutional",
+    route: "/diagnostics/constitutional-diagnostic",
     surfaceType: "diagnostic",
     canonicalRecord: "DiagnosticRun",
     adminOwnerSurface: "/admin/intelligence-foundry/simulation/constitutional-diagnostic",
-    foundryModule: "constitutional-diagnostic",
+    foundryModuleId: undefined,
+    engineId: "constitutional-diagnostic",
+    adapterId: "constitutional-diagnostic",
     lineageEvents: ["CONSTITUTIONAL_STARTED", "CONSTITUTIONAL_COMPLETED"],
     auditEvents: ["CONSTITUTIONAL_COMPLETED"],
     outboundEligible: false,
@@ -177,7 +196,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     canonicalRecord: "ExecutiveReport",
     entitlementRequired: "professional",
     adminOwnerSurface: "/admin/reporting/executive",
-    foundryModule: "executive-reporting",
+    foundryModuleId: "executive-reporting-sim",
+    engineId: "executive-reporting",
+    adapterId: "executive-reporting",
     lineageEvents: [
       "EXECUTIVE_REPORT_STARTED",
       "EXECUTIVE_REPORT_GENERATED",
@@ -203,7 +224,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     canonicalRecord: "StrategyRoomCase",
     entitlementRequired: "professional",
     adminOwnerSurface: "/admin/strategy-room",
-    foundryModule: "strategy-room",
+    foundryModuleId: "strategy-room-sim",
+    engineId: "strategy-room",
+    adapterId: "strategy-room",
     lineageEvents: [
       "STRATEGY_ROOM_CASE_OPENED",
       "EVIDENCE_REVIEWED",
@@ -229,7 +252,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     canonicalRecord: "BoardroomDossier",
     entitlementRequired: "enterprise",
     adminOwnerSurface: "/admin/intelligence-foundry/simulation/boardroom-mode",
-    foundryModule: "boardroom-dossier",
+    foundryModuleId: "boardroom-mode-sim",
+    engineId: "boardroom-dossier",
+    adapterId: "boardroom-dossier",
     lineageEvents: [
       "BOARDROOM_QUALIFICATION_EVALUATED",
       "BOARDROOM_DOSSIER_GENERATED",
@@ -248,12 +273,14 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
   {
     id: "enterprise-decision-authority",
     label: "Enterprise Decision Authority",
-    route: "/enterprise",
+    route: "/enterprise-decision-authority",
     surfaceType: "enterprise",
     canonicalRecord: "EnterpriseCampaign",
     entitlementRequired: "enterprise",
     adminOwnerSurface: "/admin/enterprise",
-    foundryModule: "enterprise-decision-authority",
+    foundryModuleId: undefined,
+    engineId: "enterprise-decision-authority",
+    adapterId: undefined,
     lineageEvents: [
       "ENTERPRISE_CAMPAIGN_CREATED",
       "ENTERPRISE_CAMPAIGN_EXECUTED",
@@ -276,7 +303,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     canonicalRecord: "GmiRelease",
     entitlementRequired: "enterprise",
     adminOwnerSurface: "/admin/intelligence/gmi-release-console",
-    foundryModule: "gmi",
+    foundryModuleId: undefined,
+    engineId: "gmi",
+    adapterId: undefined,
     lineageEvents: [
       "GMI_RELEASE_DRAFTED",
       "GMI_RELEASE_REVIEWED",
@@ -298,7 +327,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "outbound",
     canonicalRecord: "OutboundPost",
     adminOwnerSurface: "/admin/outbound/linkedin",
-    foundryModule: "outbound-content-validator",
+    foundryModuleId: "outbound-narrative-range",
+    engineId: "outbound-policy-gate",
+    adapterId: "outbound-policy-gate",
     lineageEvents: [
       "OUTBOUND_DRAFT_CREATED",
       "OUTBOUND_POLICY_CHECKED",
@@ -322,7 +353,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "outbound",
     canonicalRecord: "OutboundPost",
     adminOwnerSurface: "/admin/outbound/facebook",
-    foundryModule: "outbound-content-validator",
+    foundryModuleId: "outbound-narrative-range",
+    engineId: "outbound-policy-gate",
+    adapterId: "outbound-policy-gate",
     lineageEvents: [
       "OUTBOUND_DRAFT_CREATED",
       "OUTBOUND_POLICY_CHECKED",
@@ -346,7 +379,9 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     surfaceType: "outbound",
     canonicalRecord: "OutboundPost",
     adminOwnerSurface: "/admin/outbound/x",
-    foundryModule: "outbound-content-validator",
+    foundryModuleId: "outbound-narrative-range",
+    engineId: "outbound-policy-gate",
+    adapterId: "outbound-policy-gate",
     lineageEvents: [
       "OUTBOUND_DRAFT_CREATED",
       "OUTBOUND_POLICY_CHECKED",
@@ -374,5 +409,13 @@ export function getSurfacesByType(type: SurfaceType): ProductLadderEntry[] {
 }
 
 export function getSurfacesByFoundryModule(moduleId: string): ProductLadderEntry[] {
-  return PRODUCT_LADDER.filter((e) => e.foundryModule === moduleId);
+  return PRODUCT_LADDER.filter((e) => e.foundryModuleId === moduleId);
+}
+
+export function getSurfacesByEngine(engineId: string): ProductLadderEntry[] {
+  return PRODUCT_LADDER.filter((e) => e.engineId === engineId);
+}
+
+export function getSurfacesByAdapter(adapterId: string): ProductLadderEntry[] {
+  return PRODUCT_LADDER.filter((e) => e.adapterId === adapterId);
 }

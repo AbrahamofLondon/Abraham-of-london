@@ -5,7 +5,7 @@ import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } 
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
-import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 import ReaderFrame from "@/components/reader/ReaderFrame";
 import ReaderHeader from "@/components/reader/ReaderHeader";
@@ -13,7 +13,6 @@ import ReaderBody from "@/components/reader/ReaderBody";
 
 import { normalizeSlug } from "@/lib/content/shared";
 
-import { getRenderableBody } from "@/lib/content/render-body";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -29,7 +28,7 @@ type Props = {
     readTime?: string | null;
   };
   requiredTier: AccessTier;
-  bodyCode: string | null;
+  staticHtml: string;
 };
 
 function canonBareSlug(input: unknown): string {
@@ -75,7 +74,7 @@ function isCanonDoc(doc: any): boolean {
   );
 }
 
-const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
+const Page: NextPage<Props> = ({ canon, requiredTier, staticHtml }) => {
   const isPublic = requiredTier === "public";
 
   return (
@@ -104,7 +103,7 @@ const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
 
         {isPublic ? (
           <ReaderBody surface="canon">
-            <ServerMDXRenderer code={bodyCode || ""} />
+            <StaticMDXRenderer html={staticHtml} />
           </ReaderBody>
         ) : (
           <div className="mx-auto max-w-3xl px-6 py-12">
@@ -183,8 +182,9 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
   const isPublic = requiredTier === "public";
 
-  const renderBody = getRenderableBody(doc);
-  const safeCode = isPublic ? String(renderBody?.code || "") : null;
+  const { html: staticHtml } = isPublic
+    ? renderDocBodyToStaticHtml(doc)
+    : { html: "" };
 
   return {
     props: sanitizeData({
@@ -198,7 +198,7 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
         readTime: doc.readTime || null,
       },
       requiredTier,
-      bodyCode: safeCode,
+      staticHtml,
     }),
     revalidate: 3600,
   };
