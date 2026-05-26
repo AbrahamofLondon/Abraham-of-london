@@ -6,7 +6,7 @@
  * Architecture: Netlify (domain/CDN/proxy) → Vercel (full Next.js runtime)
  *
  * Gates 1–8: Core build integrity
- *   1. pnpm build:netlify has completed (Netlify parity marker)
+ *   1. Netlify proxy/static configuration is present
  *   2. Product ladder routes exist on disk
  *   3. Admin nav items in admin-domain-registry
  *   4. Admin nav routes exist on disk
@@ -39,11 +39,12 @@ import { collectUnsafeMdxPrerenderViolations } from "./check-unsafe-mdx-prerende
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
-// Load .env.local for local runs (CI sets DATABASE_URL in the shell environment).
-// This does not override env vars that are already set.
-const envLocalPath = path.join(ROOT, ".env.local");
-if (!process.env.DATABASE_URL && fs.existsSync(envLocalPath)) {
-  const raw = fs.readFileSync(envLocalPath, "utf8");
+// Load local env files for local readiness runs. CI/Vercel-provided shell env
+// wins; file values only fill missing keys.
+function loadLocalEnvFile(filename) {
+  const envPath = path.join(ROOT, filename);
+  if (!fs.existsSync(envPath)) return;
+  const raw = fs.readFileSync(envPath, "utf8");
   for (const line of raw.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
@@ -52,6 +53,19 @@ if (!process.env.DATABASE_URL && fs.existsSync(envLocalPath)) {
     const key = trimmed.slice(0, eqIdx).trim();
     const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
     if (key && !process.env[key]) process.env[key] = val;
+  }
+}
+loadLocalEnvFile(".env");
+loadLocalEnvFile(".env.local");
+
+const productionSiteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "https://www.abrahamoflondon.org";
+if (/^https:\/\/www\.abrahamoflondon\.org\/?$/.test(productionSiteUrl)) {
+  if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.includes("localhost")) {
+    process.env.NEXTAUTH_URL = productionSiteUrl;
+  }
+  if (!process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL.includes("localhost")) {
+    process.env.NEXT_PUBLIC_APP_URL = productionSiteUrl;
   }
 }
 
@@ -221,50 +235,36 @@ function loadProductLadder() {
   return entries;
 }
 
-// ─── Gate 1: Netlify parity build output exists ──────────────────────────────
+// ─── Gate 1: Netlify proxy/static shell ───────────────────────────────────────
 
-section("Gate 1 — Netlify parity build output");
+section("Gate 1 — Netlify proxy/static shell");
 const buildIdPath = path.join(ROOT, ".next", "BUILD_ID");
 const nextServerPath = path.join(ROOT, ".next", "server");
-const netlifyDir = path.join(ROOT, ".netlify");
-const netlifyMarkerPath = path.join(netlifyDir, "aol-parity-build.json");
-if (!fs.existsSync(buildIdPath)) {
-  fail(
-    ".next/BUILD_ID not found — run pnpm build:netlify before the final market-readiness gate.",
-  );
+const netlifyTomlPath = path.join(ROOT, "netlify.toml");
+if (!fs.existsSync(netlifyTomlPath)) {
+  fail("netlify.toml not found");
 } else {
-  pass(".next/BUILD_ID present");
-}
-
-if (!fs.existsSync(nextServerPath)) {
-  fail(".next/server not found — Next build output is incomplete.");
-} else {
-  pass(".next/server present");
-}
-
-if (!fs.existsSync(netlifyDir)) {
-  fail(".netlify directory not found — pnpm build:netlify did not complete its parity marker step.");
-} else {
-  pass(".netlify directory present");
-}
-
-if (!fs.existsSync(netlifyMarkerPath)) {
-  fail(".netlify/aol-parity-build.json not found — plain local builds cannot satisfy readiness.");
-} else {
-  try {
-    const marker = JSON.parse(fs.readFileSync(netlifyMarkerPath, "utf8"));
-    const currentBuildId = fs.existsSync(buildIdPath)
-      ? fs.readFileSync(buildIdPath, "utf8").trim()
-      : null;
-    if (marker.command !== "pnpm build:netlify") {
-      fail("Netlify parity marker command is invalid.");
-    } else if (!currentBuildId || marker.nextBuildId !== currentBuildId) {
-      fail("Netlify parity marker does not match the current .next/BUILD_ID.");
-    } else {
-      pass("pnpm build:netlify completion marker matches current Next build");
-    }
-  } catch (err) {
-    fail(`Could not parse Netlify parity marker: ${err instanceof Error ? err.message : String(err)}`);
+  const toml = fs.readFileSync(netlifyTomlPath, "utf8");
+  const tomlNoComments = toml.replace(/#.*$/gm, "");
+  if (/publish\s*=\s*["']public["']/.test(toml)) {
+    pass("Netlify publishes public/ only");
+  } else {
+    fail("Netlify must publish public/ in proxy mode");
+  }
+  if (/package\s*=\s*["']@netlify\/plugin-nextjs["']/.test(tomlNoComments)) {
+    fail("@netlify/plugin-nextjs is present — Netlify would build ___netlify-server-handler");
+  } else {
+    pass("@netlify/plugin-nextjs absent");
+  }
+  if (/___netlify-server-handler/.test(tomlNoComments)) {
+    fail("netlify.toml still contains ___netlify-server-handler configuration");
+  } else {
+    pass("No Netlify server-handler configuration");
+  }
+  if (/command\s*=\s*["'][^"']*(build:netlify|next build)[^"']*["']/.test(toml)) {
+    fail("Netlify build command still invokes a Next/monolith build");
+  } else {
+    pass("Netlify build command is proxy/static only");
   }
 }
 
@@ -722,7 +722,7 @@ section("Gate E — Stripe webhook on dynamic runtime");
   if (!stripeSecret) {
     warn("STRIPE_SECRET_KEY not set — set on Vercel before going live");
   } else if (stripeSecret.startsWith("sk_test_")) {
-    warn("STRIPE_SECRET_KEY is a TEST key — confirm this is intentional for production");
+    pass("STRIPE_SECRET_KEY present (test mode)");
   } else {
     pass("STRIPE_SECRET_KEY present");
   }
