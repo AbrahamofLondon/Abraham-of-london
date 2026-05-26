@@ -256,6 +256,11 @@ if (!fs.existsSync(netlifyTomlPath)) {
   } else {
     pass("@netlify/plugin-nextjs absent");
   }
+  if (/NETLIFY_NEXT_PLUGIN_SKIP\s*=\s*["']true["']/.test(toml)) {
+    pass("Netlify Next runtime auto-injection disabled");
+  } else {
+    fail("NETLIFY_NEXT_PLUGIN_SKIP must be true so Netlify does not auto-inject @netlify/plugin-nextjs");
+  }
   if (/___netlify-server-handler/.test(tomlNoComments)) {
     fail("netlify.toml still contains ___netlify-server-handler configuration");
   } else {
@@ -486,6 +491,11 @@ section("Gate A — Netlify proxy configuration");
     fail("netlify.toml still has a `package = \"@netlify/plugin-nextjs\"` directive — remove this plugin entry in proxy mode");
   } else {
     pass("@netlify/plugin-nextjs package directive not present in netlify.toml");
+  }
+  if (/NETLIFY_NEXT_PLUGIN_SKIP\s*=\s*["']true["']/.test(toml)) {
+    pass("NETLIFY_NEXT_PLUGIN_SKIP = \"true\"");
+  } else {
+    fail("NETLIFY_NEXT_PLUGIN_SKIP is not true — Netlify will auto-inject the Next.js Runtime");
   }
 
   // Check for catch-all proxy redirect and warn if still using placeholder

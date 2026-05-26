@@ -10,6 +10,7 @@
   NODE_VERSION = "20.20.0"
   CI = "true"
   NETLIFY_USE_PNPM = "true"
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
   PNPM_FLAGS = "--frozen-lockfile"
   PNPM_VERSION = "10.33.0"
   # RECAPTCHA_TIMEOUT_MS value is a plain number (e.g. 5000) that naturally
