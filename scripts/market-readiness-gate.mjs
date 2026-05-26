@@ -3,15 +3,28 @@
  *
  * CI Market-Readiness Gate — Enforced Operating Spine
  *
- * Fails if:
- *  1. pnpm build:netlify has not completed in this workspace
- *  2. .netlify build marker output is absent
- *  3. .next build output is absent
- *  4. DATABASE_URL is absent
- *  5. Product/admin/commercial routes drift from disk
- *  6. Pages Router SSG imports unsafe MDX runtime
- *  7. App Router pages directly use useSearchParams
- *  8. Local imports rely on Windows case-insensitive resolution
+ * Architecture: Netlify (domain/CDN/proxy) → Vercel (full Next.js runtime)
+ *
+ * Gates 1–8: Core build integrity
+ *   1. pnpm build:netlify has completed (Netlify parity marker)
+ *   2. Product ladder routes exist on disk
+ *   3. Admin nav items in admin-domain-registry
+ *   4. Admin nav routes exist on disk
+ *   5. Product surface admin owner routes registered
+ *   6. Commercial-critical routes exist on disk
+ *   7. DATABASE_URL is present (governance event bus)
+ *   8. Production parity guardrails (MDX, useSearchParams, case-sensitive imports)
+ *
+ * Gate 9: Proxy mode enforcement
+ *   9. ___netlify-server-handler must NOT exist (Netlify is proxy-only)
+ *
+ * Gates A–F: Split architecture (Netlify proxy + Vercel runtime)
+ *   A. Netlify proxy configuration (publish=public, no plugin-nextjs, catch-all redirect)
+ *   B. Vercel dynamic runtime build (.next present, vercel.json correct)
+ *   C. Route classification coverage (reports/route-classification.json)
+ *   D. Commercial-critical routes classified as dynamic (not STATIC_NETLIFY)
+ *   E. Stripe webhook on dynamic runtime + webhook secret set
+ *   F. Paid ER and client delivery readiness (NEXTAUTH_URL, domain, secrets)
  *
  * Usage: node scripts/market-readiness-gate.mjs
  */
@@ -393,57 +406,407 @@ runInProcessCheck(
   "No case-sensitive import mismatches",
 );
 
-// ─── Gate 9: Netlify handler size ─────────────────────────────────────────────
+// ─── Gate 9: Proxy mode — no Netlify server handler ──────────────────────────
+//
+// In the Netlify-proxy + Vercel-runtime architecture, @netlify/plugin-nextjs
+// must NOT run and ___netlify-server-handler must NOT be built.
+// If the handler directory or zip exists it means the plugin ran accidentally.
 
-section("Gate 9 — Netlify handler size");
-(function checkHandlerSize() {
+section("Gate 9 — Netlify proxy mode (no ___netlify-server-handler)");
+(function checkHandlerAbsent() {
   const handlerDir = path.join(ROOT, ".netlify", "functions", "___netlify-server-handler");
   const handlerZip = path.join(ROOT, ".netlify", "functions", "___netlify-server-handler.zip");
 
-  const LIMIT_WARN_MB = 220;
-  const LIMIT_FAIL_MB = 240;
+  if (fs.existsSync(handlerDir)) {
+    function getDirSizeSync(dir) {
+      let total = 0;
+      try {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+          const full = path.join(dir, entry.name);
+          if (entry.isDirectory()) total += getDirSizeSync(full);
+          else if (entry.isFile()) total += fs.statSync(full).size;
+        }
+      } catch { /* skip inaccessible */ }
+      return total;
+    }
+    const sizeMB = (getDirSizeSync(handlerDir) / (1024 * 1024)).toFixed(1);
+    fail(
+      `___netlify-server-handler directory exists (${sizeMB} MB) — @netlify/plugin-nextjs must have run. ` +
+      "In proxy mode, @netlify/plugin-nextjs should NOT be in netlify.toml. " +
+      "Delete the handler directory and remove the plugin from netlify.toml.",
+    );
+  } else if (fs.existsSync(handlerZip)) {
+    const zipMB = (fs.statSync(handlerZip).size / (1024 * 1024)).toFixed(1);
+    fail(
+      `___netlify-server-handler.zip exists (${zipMB} MB) — @netlify/plugin-nextjs must have run. ` +
+      "In proxy mode, this zip must not exist. Remove the plugin from netlify.toml.",
+    );
+  } else {
+    pass("No ___netlify-server-handler — Netlify is in proxy mode (correct)");
+  }
+})();
 
-  if (!fs.existsSync(handlerDir) && !fs.existsSync(handlerZip)) {
+// ─── Gate A: Netlify proxy configuration ──────────────────────────────────────
+//
+// Confirms netlify.toml is correctly configured as a proxy-only deployment:
+//  - publish = "public" (not ".next")
+//  - build command has no "next build"
+//  - @netlify/plugin-nextjs is NOT present
+//  - catch-all proxy redirect exists with a non-placeholder URL
+//  - public/ directory exists for Netlify CDN
+
+section("Gate A — Netlify proxy configuration");
+(function checkNetlifyProxy() {
+  const netlifyToml = path.join(ROOT, "netlify.toml");
+  if (!fs.existsSync(netlifyToml)) {
+    fail("netlify.toml not found");
+    return;
+  }
+
+  const toml = fs.readFileSync(netlifyToml, "utf8");
+
+  if (/publish\s*=\s*["']\.next["']/.test(toml)) {
+    fail("netlify.toml has publish = \".next\" — should be publish = \"public\" in proxy mode");
+  } else if (/publish\s*=\s*["']public["']/.test(toml)) {
+    pass("netlify.toml publish = \"public\"");
+  } else {
+    warn("Could not confirm netlify.toml publish directory");
+  }
+
+  if (/next build/.test(toml)) {
+    fail("netlify.toml build command contains \"next build\" — proxy mode should use the echo command only");
+  } else {
+    pass("netlify.toml build command has no next build");
+  }
+
+  // Check for the plugin DIRECTIVE (package = "..."), not comments that mention it.
+  // The toml header comment deliberately says "@netlify/plugin-nextjs is REMOVED" — that's fine.
+  const tomlNoComments = toml.replace(/#.*$/gm, "");
+  if (/package\s*=\s*["']@netlify\/plugin-nextjs["']/.test(tomlNoComments)) {
+    fail("netlify.toml still has a `package = \"@netlify/plugin-nextjs\"` directive — remove this plugin entry in proxy mode");
+  } else {
+    pass("@netlify/plugin-nextjs package directive not present in netlify.toml");
+  }
+
+  // Check for catch-all proxy redirect and warn if still using placeholder
+  const catchAllMatch = toml.match(/from\s*=\s*["']\/\*["'][^]*?to\s*=\s*["']([^"']+)["'][^]*?status\s*=\s*200/);
+  if (!catchAllMatch) {
+    fail("netlify.toml has no catch-all proxy redirect (from = \"/*\" with status = 200) — add it as the last [[redirects]] rule");
+  } else {
+    const proxyTarget = catchAllMatch[1];
+    if (proxyTarget.includes("YOUR_PROJECT")) {
+      warn(
+        `netlify.toml catch-all proxy redirect still uses placeholder URL: ${proxyTarget} ` +
+        "— replace YOUR_PROJECT.vercel.app with the actual Vercel deployment hostname before going live",
+      );
+    } else {
+      pass(`Catch-all proxy redirect configured → ${proxyTarget}`);
+    }
+  }
+
+  const publicDir = path.join(ROOT, "public");
+  if (!fs.existsSync(publicDir)) {
+    fail("public/ directory not found — Netlify CDN has nothing to serve for static assets");
+  } else {
+    pass("public/ directory present");
+  }
+})();
+
+// ─── Gate B: Vercel dynamic runtime build ─────────────────────────────────────
+//
+// Confirms the Next.js build output (.next/) is present (produced by pnpm build:fast
+// for Vercel) and that vercel.json is correctly configured.
+
+section("Gate B — Vercel dynamic runtime build");
+(function checkVercelBuild() {
+  const buildId = path.join(ROOT, ".next", "BUILD_ID");
+  const nextServer = path.join(ROOT, ".next", "server");
+  const vercelJson = path.join(ROOT, "vercel.json");
+
+  if (!fs.existsSync(buildId)) {
+    warn(".next/BUILD_ID not found — run pnpm build:fast to produce Vercel build output");
+  } else {
+    pass(".next/BUILD_ID present");
+  }
+
+  if (!fs.existsSync(nextServer)) {
+    warn(".next/server not found — Next.js build incomplete");
+  } else {
+    pass(".next/server present");
+  }
+
+  if (!fs.existsSync(vercelJson)) {
+    fail("vercel.json not found — Vercel deployment is not configured");
+    return;
+  }
+
+  let vcfg;
+  try {
+    vcfg = JSON.parse(fs.readFileSync(vercelJson, "utf8"));
+  } catch (e) {
+    fail(`vercel.json is not valid JSON: ${e.message}`);
+    return;
+  }
+
+  const buildCmd = vcfg.buildCommand || "";
+  if (!buildCmd.includes("pnpm build:fast") && !buildCmd.includes("next build")) {
+    fail(`vercel.json buildCommand does not contain a Next.js build step: "${buildCmd}"`);
+  } else {
+    pass(`vercel.json buildCommand: "${buildCmd}"`);
+  }
+
+  if (!buildCmd.includes("pnpm build:netlify") && !buildCmd.includes("check:netlify")) {
+    pass("vercel.json buildCommand correctly excludes pnpm build:netlify (handler check)");
+  } else {
+    fail("vercel.json buildCommand includes build:netlify or check:netlify — this would fail on Vercel (no ___netlify-server-handler on Vercel)");
+  }
+
+  if (vcfg.crons && vcfg.crons.length > 0) {
+    pass(`vercel.json has ${vcfg.crons.length} cron job(s) configured`);
+  } else {
+    warn("vercel.json has no crons — scheduled jobs (cleanup-download-tokens, escalation, decision-state) may not run");
+  }
+})();
+
+// ─── Gate C: Route classification coverage ────────────────────────────────────
+//
+// Confirms reports/route-classification.json exists and all dynamic-critical
+// categories have at least one classified route.
+
+section("Gate C — Route classification coverage");
+(function checkRouteClassification() {
+  const classFile = path.join(ROOT, "reports", "route-classification.json");
+  if (!fs.existsSync(classFile)) {
     warn(
-      "___netlify-server-handler not found — run `netlify build` or deploy to Netlify to produce the handler. " +
-      "Handler size cannot be verified locally without the plugin packaging step.",
+      "reports/route-classification.json not found — run: node scripts/classify-routes.mjs " +
+      "Route classification cannot be verified without this file.",
     );
     return;
   }
 
-  function getDirSizeSync(dir) {
-    let total = 0;
-    try {
-      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-        const full = path.join(dir, entry.name);
-        if (entry.isDirectory()) total += getDirSizeSync(full);
-        else if (entry.isFile()) total += fs.statSync(full).size;
-      }
-    } catch { /* skip inaccessible */ }
-    return total;
+  let classification;
+  try {
+    classification = JSON.parse(fs.readFileSync(classFile, "utf8"));
+  } catch (e) {
+    fail(`reports/route-classification.json is invalid JSON: ${e.message}`);
+    return;
   }
 
-  let sizeMB = 0;
-  if (fs.existsSync(handlerDir)) {
-    sizeMB = getDirSizeSync(handlerDir) / (1024 * 1024);
-    if (sizeMB > LIMIT_FAIL_MB) {
-      fail(`Handler directory is ${sizeMB.toFixed(1)} MB — exceeds ${LIMIT_FAIL_MB} MB Netlify upload limit. Run node scripts/check-netlify-handler-size.mjs for details.`);
-    } else if (sizeMB > LIMIT_WARN_MB) {
-      warn(`Handler directory is ${sizeMB.toFixed(1)} MB — above ${LIMIT_WARN_MB} MB warning threshold.`);
+  const REQUIRED_DYNAMIC_CATEGORIES = [
+    "ADMIN_DYNAMIC",
+    "PAYMENT_DYNAMIC",
+    "CLIENT_DELIVERY_DYNAMIC",
+    "PUBLIC_DYNAMIC",
+  ];
+
+  for (const cat of REQUIRED_DYNAMIC_CATEGORIES) {
+    const routes = classification[cat] || [];
+    if (routes.length === 0) {
+      fail(`Classification category "${cat}" has 0 routes — expected at least 1`);
     } else {
-      pass(`Handler directory is ${sizeMB.toFixed(1)} MB — within ${LIMIT_FAIL_MB} MB limit.`);
+      pass(`${cat}: ${routes.length} route(s) classified`);
     }
-  } else if (fs.existsSync(handlerZip)) {
-    const zipMB = fs.statSync(handlerZip).size / (1024 * 1024);
-    // Zip is typically ~40% of unzipped; Netlify limit is on the unzipped size.
-    const projected = zipMB / 0.4;
-    if (projected > LIMIT_FAIL_MB) {
-      fail(`Handler zip is ${zipMB.toFixed(1)} MB — projected unzipped ~${projected.toFixed(1)} MB, exceeds ${LIMIT_FAIL_MB} MB limit.`);
-    } else if (projected > LIMIT_WARN_MB) {
-      warn(`Handler zip is ${zipMB.toFixed(1)} MB — projected unzipped ~${projected.toFixed(1)} MB, above warning threshold.`);
+  }
+
+  const stripeRoutes = (classification["PAYMENT_DYNAMIC"] || []).filter(
+    r => r.includes("stripe") || r.includes("billing"),
+  );
+  if (stripeRoutes.length === 0) {
+    fail("No Stripe/billing routes found in PAYMENT_DYNAMIC — payment processing may be miscategorised");
+  } else {
+    pass(`PAYMENT_DYNAMIC includes Stripe/billing routes: ${stripeRoutes.length}`);
+  }
+})();
+
+// ─── Gate D: Commercial-critical routes on dynamic runtime ────────────────────
+//
+// Verifies that routes which MUST be on Vercel (SSR, auth, payments, admin)
+// are NOT classified as STATIC_NETLIFY.
+
+section("Gate D — Commercial-critical routes on dynamic runtime");
+(function checkCriticalRoutesOnDynamic() {
+  const classFile = path.join(ROOT, "reports", "route-classification.json");
+  if (!fs.existsSync(classFile)) {
+    warn("reports/route-classification.json not found — skipping Gate D. Run: node scripts/classify-routes.mjs");
+    return;
+  }
+
+  let classification;
+  try {
+    classification = JSON.parse(fs.readFileSync(classFile, "utf8"));
+  } catch (e) {
+    fail(`Could not parse route-classification.json: ${e.message}`);
+    return;
+  }
+
+  const staticRoutes = new Set(classification["STATIC_NETLIFY"] || []);
+
+  // These path patterns must NOT appear in STATIC_NETLIFY
+  const MUST_BE_DYNAMIC = [
+    { pattern: /\/admin\//, label: "admin routes" },
+    { pattern: /\/api\/stripe\/|\/api\/billing\//, label: "Stripe/billing API routes" },
+    { pattern: /\/api\/auth\//, label: "NextAuth API routes" },
+    { pattern: /pages\/client\/|pages\/boardroom\/|pages\/inner-circle\/|pages\/directorate\//, label: "client delivery routes" },
+    { pattern: /\/api\/admin\//, label: "admin API routes" },
+    { pattern: /\/api\/downloads|\/api\/download/, label: "download API routes" },
+  ];
+
+  for (const rule of MUST_BE_DYNAMIC) {
+    const violations = [...staticRoutes].filter(r => rule.pattern.test(r));
+    if (violations.length > 0) {
+      for (const v of violations) {
+        fail(`Route misclassified as STATIC_NETLIFY (should be dynamic — ${rule.label}): ${v}`);
+      }
     } else {
-      pass(`Handler zip is ${zipMB.toFixed(1)} MB — projected unzipped ~${projected.toFixed(1)} MB, within limit.`);
+      pass(`No ${rule.label} in STATIC_NETLIFY`);
     }
+  }
+})();
+
+// ─── Gate E: Stripe webhook on dynamic runtime ────────────────────────────────
+//
+// Confirms the Stripe webhook route is in PAYMENT_DYNAMIC (not proxied through
+// Netlify without raw-body preservation) and that the webhook secret is set.
+
+section("Gate E — Stripe webhook on dynamic runtime");
+(function checkStripeWebhook() {
+  // Check route exists on disk
+  const webhookCandidates = [
+    "app/api/stripe/webhook/route.ts",
+    "pages/api/stripe/webhook.ts",
+    "pages/api/billing/webhook.ts",
+    "pages/api/webhooks/stripe.ts",
+  ];
+  const webhookFiles = webhookCandidates.filter(f => fs.existsSync(path.join(ROOT, f)));
+  if (webhookFiles.length === 0) {
+    fail("No Stripe webhook route file found — expected one of: " + webhookCandidates.join(", "));
+  } else {
+    pass(`Stripe webhook route file(s): ${webhookFiles.join(", ")}`);
+  }
+
+  // Check route classification
+  const classFile = path.join(ROOT, "reports", "route-classification.json");
+  if (fs.existsSync(classFile)) {
+    let classification;
+    try {
+      classification = JSON.parse(fs.readFileSync(classFile, "utf8"));
+    } catch { classification = null; }
+
+    if (classification) {
+      const paymentRoutes = classification["PAYMENT_DYNAMIC"] || [];
+      const stripeInPayment = paymentRoutes.some(r => /stripe|billing|webhook/.test(r));
+      if (!stripeInPayment) {
+        warn(
+          "No Stripe/billing/webhook routes found in PAYMENT_DYNAMIC classification. " +
+          "Run node scripts/classify-routes.mjs to regenerate.",
+        );
+      } else {
+        pass(`Stripe webhook classified as PAYMENT_DYNAMIC (${paymentRoutes.length} payment routes)`);
+      }
+
+      const staticRoutes = classification["STATIC_NETLIFY"] || [];
+      const stripeInStatic = staticRoutes.some(r => /stripe|billing|webhook/.test(r));
+      if (stripeInStatic) {
+        fail("Stripe/webhook route(s) found in STATIC_NETLIFY — Stripe webhooks require raw-body and must be on the dynamic runtime");
+      } else {
+        pass("No Stripe/webhook routes in STATIC_NETLIFY");
+      }
+    }
+  } else {
+    warn("reports/route-classification.json not found — cannot verify Stripe webhook classification");
+  }
+
+  // Check env vars
+  const stripeSecret = process.env.STRIPE_SECRET_KEY || "";
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+  if (!stripeSecret) {
+    warn("STRIPE_SECRET_KEY not set — set on Vercel before going live");
+  } else if (stripeSecret.startsWith("sk_test_")) {
+    warn("STRIPE_SECRET_KEY is a TEST key — confirm this is intentional for production");
+  } else {
+    pass("STRIPE_SECRET_KEY present");
+  }
+  if (!webhookSecret) {
+    warn("STRIPE_WEBHOOK_SECRET not set — set on Vercel matching the Stripe Dashboard webhook signing secret");
+  } else {
+    pass("STRIPE_WEBHOOK_SECRET present");
+  }
+})();
+
+// ─── Gate F: Paid ER and client delivery readiness ────────────────────────────
+//
+// Confirms that paid client-delivery routes are present on disk, NEXTAUTH_URL
+// is set to the public domain (not a .vercel.app URL), and key delivery env
+// vars are configured on Vercel.
+
+section("Gate F — Paid ER and client delivery readiness");
+(function checkPaidERReadiness() {
+  // Route existence for paid delivery surfaces
+  const DELIVERY_ROUTES = [
+    { route: "/admin/reporting/executive", label: "Executive Reporting admin surface" },
+    { route: "/client/reports",            label: "Client ER report delivery" },
+    { route: "/boardroom",                 label: "Boardroom Mode" },
+    { route: "/inner-circle",              label: "Inner Circle" },
+    // App Router: app/api/download/[token]/route.ts
+    { route: "/api/download/[token]",      label: "Authenticated download API" },
+  ];
+
+  for (const { route, label } of DELIVERY_ROUTES) {
+    if (routeExistsOnDisk(route)) {
+      pass(`${label} (${route}) — route file present`);
+    } else {
+      warn(`${label} (${route}) — no route file found on disk`);
+    }
+  }
+
+  // NEXTAUTH_URL must be the public domain, not a Vercel deployment URL
+  const nextAuthUrl = process.env.NEXTAUTH_URL || "";
+  if (!nextAuthUrl) {
+    warn("NEXTAUTH_URL not set — must be set to https://www.abrahamoflondon.org on Vercel");
+  } else if (nextAuthUrl.includes(".vercel.app")) {
+    fail(
+      `NEXTAUTH_URL is set to a Vercel deployment URL: "${nextAuthUrl}" — ` +
+      "must be set to https://www.abrahamoflondon.org (the public domain visible to users). " +
+      "Admin login emails, OAuth callbacks, and session cookies will break if this is wrong.",
+    );
+  } else if (nextAuthUrl.includes("localhost")) {
+    warn(`NEXTAUTH_URL is set to localhost: "${nextAuthUrl}" — expected in dev, must be changed for production`);
+  } else {
+    pass(`NEXTAUTH_URL: "${nextAuthUrl}"`);
+  }
+
+  // NEXT_PUBLIC_APP_URL must also be the public domain
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  if (!appUrl) {
+    warn("NEXT_PUBLIC_APP_URL not set — secure report links and email templates may use wrong domain");
+  } else if (appUrl.includes(".vercel.app")) {
+    warn(
+      `NEXT_PUBLIC_APP_URL is set to a Vercel deployment URL: "${appUrl}" — ` +
+      "client-facing report links and email templates will point to .vercel.app instead of abrahamoflondon.org",
+    );
+  } else {
+    pass(`NEXT_PUBLIC_APP_URL: "${appUrl}"`);
+  }
+
+  // Download token secret — required for paid PDF delivery
+  if (!process.env.DOWNLOAD_TOKEN_SECRET) {
+    warn("DOWNLOAD_TOKEN_SECRET not set — signed download URLs will not work");
+  } else {
+    pass("DOWNLOAD_TOKEN_SECRET present");
+  }
+
+  // NEXTAUTH_SECRET
+  if (!process.env.NEXTAUTH_SECRET) {
+    warn("NEXTAUTH_SECRET not set — admin sessions will not work");
+  } else {
+    pass("NEXTAUTH_SECRET present");
+  }
+
+  // Resend — email delivery for ER reports
+  if (!process.env.RESEND_API_KEY) {
+    warn("RESEND_API_KEY not set — transactional email delivery (ER reports, Inner Circle invites) will fail");
+  } else {
+    pass("RESEND_API_KEY present");
   }
 })();
 

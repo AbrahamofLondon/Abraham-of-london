@@ -1,128 +1,39 @@
 # netlify.toml — Abraham of London
 # Minimal, adapter-first Netlify config for modern Next.js
 
+# ── Deployment architecture ────────────────────────────────────────────────────
+# Netlify = domain/CDN/proxy layer only.
+# Vercel   = full Next.js runtime (all routes, SSR, API, admin, payments).
+#
+# ALL Next.js requests are proxied to Vercel (see catch-all [[redirects]] below).
+# @netlify/plugin-nextjs is REMOVED — no ___netlify-server-handler is ever built.
+# Stripe webhook, cron jobs, and all API routes must point to the Vercel URL.
+#
+# Required setup:
+#  1. Set DYNAMIC_RUNTIME_URL in Netlify UI → https://YOUR_PROJECT.vercel.app
+#  2. Deploy the Next.js app to Vercel (see vercel.json)
+#  3. Update Stripe webhook URL to point to Vercel deployment URL directly
+#  4. Update NEXTAUTH_URL on Vercel to https://www.abrahamoflondon.org
+# ──────────────────────────────────────────────────────────────────────────────
+
 [build]
-  # `publish` is set explicitly so @netlify/plugin-nextjs does not error
-  # with "publish directory cannot be the same as the base directory".
-  # The plugin manages `.next` output internally; pointing publish at it
-  # satisfies the plugin's base-vs-publish sanity check without fighting
-  # its internal file placement.
-  publish = ".next"
-  command = "pnpm build:netlify"
+  # Static assets in public/ are served directly by Netlify CDN.
+  # Everything else (all Next.js routes) is proxied to Vercel via the
+  # catch-all [[redirects]] rule at the bottom of this file.
+  publish = "public"
+  command = "echo 'Netlify proxy mode: no Next.js build — all routes served via Vercel'"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
-  NODE_OPTIONS = "--max-old-space-size=7168"
   CI = "true"
-  NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_DISABLE_SOURCEMAPS = "true"
-  CONTENTLAYER_DISABLE_WARNINGS = "1"
-  NETLIFY_USE_PNPM = "true"
-  PNPM_FLAGS = "--frozen-lockfile"
-  PNPM_VERSION = "10.33.0"
-  # RECAPTCHA_TIMEOUT_MS value is a plain number (e.g. 5000) that naturally
-  # appears as a literal throughout the codebase — not a real secret leak.
-  # DB_PASSWORD appears only in docker-compose.yml (dev-only).
+  # RECAPTCHA_TIMEOUT_MS value is a plain number — not a real secret leak.
   SECRETS_SCAN_OMIT_KEYS = "RECAPTCHA_TIMEOUT_MS,DB_PASSWORD"
+  # Set DYNAMIC_RUNTIME_URL in Netlify UI to the Vercel deployment URL.
+  # Example: https://aol-YOUR_HASH.vercel.app  OR  https://aol.vercel.app
+  # This is used by the catch-all proxy redirect at the bottom of this file.
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-[[plugins]]
-  package = "@netlify/plugin-emails"
-
-# Keep this block ONLY if these are genuinely custom non-Next functions
-# that you still use. If not, delete the whole block.
-[functions]
-  directory = "netlify/functions_src/functions"
-  node_bundler = "nft"
-  # NOTE: external_node_modules here applies ONLY to custom functions in
-  # netlify/functions_src/functions — it does NOT affect the plugin-generated
-  # ___netlify-server-handler. Handler exclusions are configured in the
-  # [functions."___netlify-server-handler"] block below.
-  external_node_modules = [
-    "@prisma/client",
-    ".prisma",
-    "prisma",
-  ]
-
-# Strip the handler package from ~1.1 GB to <250 MB by removing
-# directories that should never be in a serverless function.
-# `outputFileTracingExcludes` in next.config.mjs is supposed to handle
-# this, but the plugin-nextjs trace copy does not honour all of those
-# patterns. The Netlify-native `excluded_files` directive IS enforced.
-[functions."___netlify-server-handler"]
-  excluded_files = [
-    # Recursive self-inclusion: the plugin copies .netlify/ into the handler
-    # because outputFileTracingRoot = process.cwd(), and .netlify/ is under cwd.
-    ".netlify/**",
-    # Static assets are served via Netlify CDN, not the function.
-    "public/**",
-    "public/assets/**",
-    # Contentlayer build cache — runtime only needs the _index.json files.
-    ".contentlayer/.cache/**",
-    # Build tools / dev-only dirs that have no place in a Lambda function.
-    "tests/**",
-    "scripts/**",
-    ".agents/**",
-    ".github/**",
-    ".husky/**",
-    "playwright-report/**",
-    "briefs-contamination-backup/**",
-    "deepseek-terminal-chat/**",
-    "triage_hold/**",
-    "CRM/**",
-    "OGR/**",
-    "src/**",
-    # Build-only node_modules — mirrors outputFileTracingExcludes in
-    # next.config.mjs and REMOVE_DIRS in scripts/clean-standalone.mjs.
-    # Three-layer exclusion: next.config traces → clean-standalone strips
-    # standalone dir → excluded_files strips the handler zip.
-    "node_modules/sass/**",
-    "node_modules/@esbuild/**",
-    # webpack toolchain — build-only, never needed at Lambda request time
-    "node_modules/webpack/**",
-    "node_modules/webpack-sources/**",
-    "node_modules/enhanced-resolve/**",
-    "node_modules/@webassemblyjs/**",
-    "node_modules/acorn/**",
-    "node_modules/acorn-import-attributes/**",
-    "node_modules/eslint-scope/**",
-    # CSS / optimisation tools — build-time only
-    "node_modules/postcss/**",
-    "node_modules/critters/**",
-    "node_modules/beasties/**",
-    "node_modules/terser/**",
-    "node_modules/terser-webpack-plugin/**",
-    "node_modules/uglify-js/**",
-    # Browser-compat data — used by postcss/autoprefixer at build time only
-    "node_modules/caniuse-lite/**",
-    "node_modules/browserslist/**",
-    "node_modules/electron-to-chromium/**",
-    "node_modules/@img/**",
-    "node_modules/typescript/**",
-    "node_modules/puppeteer/**",
-    "node_modules/puppeteer-core/**",
-    "node_modules/@puppeteer/**",
-    "node_modules/chrome-headless-shell/**",
-    "node_modules/.cache/**",
-  ]
-
-[functions.emails]
-  included_files = ["emails/**", "./emails/**"]
-  node_bundler = "esbuild"
-
-[[schedule]]
-  path = "/api/cleanup-download-tokens"
-  schedule = "0 2 * * *"
-
-[[schedule]]
-  path = "/api/cron/escalation"
-  schedule = "0 */6 * * *"
-
-[[schedule]]
-  path = "/api/cron/decision-state"
-  schedule = "0 */12 * * *"
+# NOTE: All scheduled cron jobs have been moved to vercel.json.
+# Netlify scheduled functions require a local handler; in proxy mode there is none.
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -1453,6 +1364,29 @@
   force = true
 
 # End PDF canonical alias redirects
+
+# ── Catch-all: proxy ALL Next.js requests to Vercel ─────────────────────────
+# This MUST be the last [[redirects]] rule in this file.
+# Netlify matches redirects top-to-bottom; all specific 301 rules above fire
+# first. Anything not matched by a specific rule falls through to this proxy.
+#
+# STATUS 200 = transparent proxy — the visitor's browser sees abrahamoflondon.org
+# while Vercel renders the response. No client-side redirect occurs.
+#
+# BEFORE GOING LIVE:
+#   Replace "YOUR_PROJECT.vercel.app" below with the actual Vercel deployment
+#   hostname (e.g., aol-check-visual.vercel.app or your custom alias).
+#   Netlify does NOT interpolate environment variables in redirect `to` fields,
+#   so the URL must be a literal value.
+#
+# NOTE: Netlify serves files in `public/` directly without hitting this rule.
+# Static assets (favicon, images, OG images, robots.txt, sitemap.xml) are
+# served from Netlify CDN. Everything else proxies to Vercel.
+[[redirects]]
+  from = "/*"
+  to = "https://YOUR_PROJECT.vercel.app/:splat"
+  status = 200
+  force = true
 
 [[headers]]
   for = "/*"

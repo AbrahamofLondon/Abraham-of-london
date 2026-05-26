@@ -1,14 +1,42 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "CI=false pnpm install && pnpm run build",
-  "devCommand": "pnpm run dev",
-  "installCommand": "pnpm install",
   "framework": "nextjs",
+  "buildCommand": "pnpm contentlayer2 build && node scripts/generate-briefs-registry.mjs && pnpm build:fast",
+  "installCommand": "pnpm install --frozen-lockfile",
   "outputDirectory": ".next",
   "regions": ["lhr1"],
   "env": {
-    "NEXT_DISABLE_ESLINT": "1",
-    "NEXT_DISABLE_TYPECHECK": "1",
     "NEXT_TELEMETRY_DISABLED": "1"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cleanup-download-tokens",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/escalation",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/decision-state",
+      "schedule": "0 */12 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
 }
