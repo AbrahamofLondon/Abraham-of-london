@@ -1360,9 +1360,35 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Catch-all proxy to the Vercel dynamic runtime. Keep this as the final rule.
+# ── Catch-all: proxy ALL Next.js requests to Vercel ─────────────────────────
+# This MUST be the last [[redirects]] rule in this file.
+# Netlify matches redirects top-to-bottom; all specific 301 rules above fire
+# first. Anything not matched by a specific rule falls through to this proxy.
+#
+# STATUS 200 = transparent proxy. The visitor sees abrahamoflondon.org while
+# Vercel renders every response. No client-side redirect occurs.
+#
+# ⚠️  BEFORE GOING LIVE — two required Vercel dashboard actions:
+#
+#  1. PROMOTE TO PRODUCTION: Vercel Dashboard → Project → Deployments →
+#     promote the current preview to "production". That activates the stable
+#     production alias below (without the per-deployment hash).
+#     Current preview URL (changes every push — do NOT use this in production):
+#       aol-check-visual-1o8z3qoil-abrahamoflondons-projects.vercel.app
+#     Stable production alias (active after promotion):
+#       aol-check-visual-abrahamoflondons-projects.vercel.app  ← used below
+#
+#  2. DISABLE DEPLOYMENT PROTECTION for production: Vercel → Project →
+#     Settings → Deployment Protection → set to "Only preview deployments"
+#     (or disable entirely). If left on, Netlify's proxy will serve a Vercel
+#     SSO challenge page instead of your app.
+#     Alternative: use a Protection Bypass Automation secret — add the header:
+#       headers = {x-vercel-protection-bypass = "YOUR_BYPASS_SECRET"}
+#
+# NOTE: Files in public/ (favicon, OG images, robots.txt, sitemap.xml) are
+# served directly by Netlify CDN and never hit this proxy rule.
 [[redirects]]
   from = "/*"
-  to = "https://aol-check-visual.vercel.app/:splat"
+  to = "https://aol-check-visual-abrahamoflondons-projects.vercel.app/:splat"
   status = 200
   force = true
