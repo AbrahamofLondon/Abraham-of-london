@@ -187,6 +187,37 @@ const nextConfig = {
       "./node_modules/@puppeteer/**",
       "./node_modules/chrome-headless-shell/**",
       "./node_modules/.cache/puppeteer/**",
+
+      // ── Build-only webpack toolchain ────────────────────────────────────────
+      // These packages appear in next-server.js.nft.json because Next.js
+      // bundles webpack for its own build pipeline. None of them are required
+      // at request time by the deployed Lambda handler.
+      "./node_modules/webpack/**",
+      "./node_modules/webpack-sources/**",
+      "./node_modules/enhanced-resolve/**",
+      "./node_modules/@webassemblyjs/**",
+      "./node_modules/acorn/**",
+      "./node_modules/acorn-import-attributes/**",
+      "./node_modules/eslint-scope/**",
+
+      // ── Build-only CSS / optimisation tools ─────────────────────────────────
+      // postcss, critters, terser, uglify-js are invoked during `next build`
+      // for CSS processing, critical-CSS extraction, and minification.
+      // None execute at request time.
+      "./node_modules/postcss/**",
+      "./node_modules/critters/**",
+      "./node_modules/beasties/**",
+      "./node_modules/terser/**",
+      "./node_modules/terser-webpack-plugin/**",
+      "./node_modules/uglify-js/**",
+
+      // ── Build-only browser-compat data ──────────────────────────────────────
+      // caniuse-lite and browserslist are consumed by postcss/autoprefixer
+      // at build time to emit the correct vendor prefixes. The deployed
+      // server never inspects browser compatibility at runtime.
+      "./node_modules/caniuse-lite/**",
+      "./node_modules/browserslist/**",
+      "./node_modules/electron-to-chromium/**",
     ],
   },
 

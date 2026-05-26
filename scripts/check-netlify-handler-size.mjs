@@ -48,7 +48,7 @@ function getDirSize(dirPath) {
   return total;
 }
 
-function getTopFiles(dirPath, maxFiles = 50) {
+function getTopFiles(dirPath, maxFiles = 100) {
   const files = [];
   try {
     const entries = readdirSync(dirPath, { withFileTypes: true, recursive: true });
@@ -80,6 +80,54 @@ function getTopFiles(dirPath, maxFiles = 50) {
   }
   files.sort((a, b) => b.size - a.size);
   return files.slice(0, maxFiles);
+}
+
+function getTopDirs(dirPath, maxDirs = 50) {
+  const dirs = [];
+  try {
+    const entries = readdirSync(dirPath, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const fullPath = join(dirPath, entry.name);
+        try {
+          dirs.push({ path: fullPath, name: entry.name, size: getDirSize(fullPath) });
+        } catch {
+          // skip
+        }
+      }
+    }
+  } catch {
+    // skip
+  }
+  dirs.sort((a, b) => b.size - a.size);
+  return dirs.slice(0, maxDirs);
+}
+
+function getPackageDirSizes(handlerDir) {
+  // Summarise node_modules/ subdirectories within the handler
+  const nodeModulesDir = join(handlerDir, "node_modules");
+  if (!existsSync(nodeModulesDir)) return [];
+  const pkgs = [];
+  try {
+    for (const entry of readdirSync(nodeModulesDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const fullPath = join(nodeModulesDir, entry.name);
+      // Handle scoped packages (@org/pkg)
+      if (entry.name.startsWith("@")) {
+        for (const sub of readdirSync(fullPath, { withFileTypes: true })) {
+          if (!sub.isDirectory()) continue;
+          const subPath = join(fullPath, sub.name);
+          pkgs.push({ name: `${entry.name}/${sub.name}`, size: getDirSize(subPath) });
+        }
+      } else {
+        pkgs.push({ name: entry.name, size: getDirSize(fullPath) });
+      }
+    }
+  } catch {
+    // skip
+  }
+  pkgs.sort((a, b) => b.size - a.size);
+  return pkgs.slice(0, 50);
 }
 
 function main() {
@@ -121,12 +169,26 @@ function main() {
     console.log(`Handler directory: ${HANDLER_DIR}`);
     console.log(`Unzipped size:    ${formatSize(unzippedSize)}`);
 
-    // Top 20 largest files
-    console.log("\nTop 20 largest files in handler:");
-    const topFiles = getTopFiles(HANDLER_DIR, 20);
+    // Top 100 largest files
+    console.log("\nTop 100 largest files in handler:");
+    const topFiles = getTopFiles(HANDLER_DIR, 100);
     for (const f of topFiles) {
       const relPath = f.path.replace(HANDLER_DIR, "");
       console.log(`  ${formatSize(f.size).padStart(10)}  ${relPath}`);
+    }
+
+    // Top 50 largest directories (first level)
+    console.log("\nTop 50 largest top-level directories in handler:");
+    const topDirs = getTopDirs(HANDLER_DIR, 50);
+    for (const d of topDirs) {
+      console.log(`  ${formatSize(d.size).padStart(10)}  ${d.name}/`);
+    }
+
+    // Top 50 node_modules packages by size
+    console.log("\nTop 50 node_modules packages in handler:");
+    const pkgSizes = getPackageDirSizes(HANDLER_DIR);
+    for (const p of pkgSizes) {
+      console.log(`  ${formatSize(p.size).padStart(10)}  node_modules/${p.name}`);
     }
   }
 

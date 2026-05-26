@@ -1,0 +1,258 @@
+{
+  "generatedAt": "2026-05-26T13:59:44.471Z",
+  "source": ".next/next-server.js.nft.json",
+  "note": "This is a PRE-BUILD trace analysis. .next/standalone does not exist. Run pnpm build:fast to produce standalone and re-run check-netlify-handler-size.mjs for actual handler inventory.",
+  "totalFiles": 3042,
+  "topPackages": [
+    {
+      "package": "next/dist",
+      "fileCount": 1184,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "caniuse-lite/data",
+      "fileCount": 587,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "webpack/lib",
+      "fileCount": 571,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "webpack/schemas",
+      "fileCount": 61,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@opentelemetry/api",
+      "fileCount": 48,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "enhanced-resolve/lib",
+      "fileCount": 47,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "ajv/lib",
+      "fileCount": 42,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "ajv-keywords/dist",
+      "fileCount": 37,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "postcss/lib",
+      "fileCount": 28,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "webpack-sources/lib",
+      "fileCount": 24,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "critters/node_modules",
+      "fileCount": 18,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "tapable/lib",
+      "fileCount": 15,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "terser-webpack-plugin/node_modules",
+      "fileCount": 14,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "sharp/lib",
+      "fileCount": 13,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "semver/functions",
+      "fileCount": 11,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "uglify-js/lib",
+      "fileCount": 11,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@webassemblyjs/ast",
+      "fileCount": 10,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "css-select/lib",
+      "fileCount": 10,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "source-map-js/lib",
+      "fileCount": 10,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "caniuse-lite/dist",
+      "fileCount": 9,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "schema-utils/dist",
+      "fileCount": 9,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "domutils/lib",
+      "fileCount": 8,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "entities/lib",
+      "fileCount": 8,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "eslint-scope/lib",
+      "fileCount": 8,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@img/sharp-win32-x64",
+      "fileCount": 6,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "react-dom/cjs",
+      "fileCount": 6,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "semver/internal",
+      "fileCount": 6,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "watchpack/lib",
+      "fileCount": 6,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "@webassemblyjs/helper-wasm-section",
+      "fileCount": 5,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@webassemblyjs/leb128",
+      "fileCount": 5,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "next/node_modules",
+      "fileCount": 5,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "terser-webpack-plugin/dist",
+      "fileCount": 5,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "webpack/hot",
+      "fileCount": 5,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@webassemblyjs/utf8",
+      "fileCount": 4,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "css-what/lib",
+      "fileCount": 4,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "detect-libc/lib",
+      "fileCount": 4,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "postcss-media-query-parser/dist",
+      "fileCount": 4,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "react/cjs",
+      "fileCount": 4,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "schema-utils/node_modules",
+      "fileCount": 4,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "webpack/node_modules",
+      "fileCount": 4,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@img/colour",
+      "fileCount": 3,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "@webassemblyjs/helper-wasm-bytecode",
+      "fileCount": 3,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@webassemblyjs/wasm-edit",
+      "fileCount": 3,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@webassemblyjs/wasm-gen",
+      "fileCount": 3,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@webassemblyjs/wasm-opt",
+      "fileCount": 3,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "@webassemblyjs/wasm-parser",
+      "fileCount": 3,
+      "classification": "BUILD_ONLY"
+    },
+    {
+      "package": "loader-runner/lib",
+      "fileCount": 3,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "nth-check/lib",
+      "fileCount": 3,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "semver/classes",
+      "fileCount": 3,
+      "classification": "EXPECTED_RUNTIME_OR_UNKNOWN"
+    },
+    {
+      "package": "uglify-js/tools",
+      "fileCount": 3,
+      "classification": "BUILD_ONLY"
+    }
+  ]
+}

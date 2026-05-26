@@ -36,9 +36,10 @@
 [functions]
   directory = "netlify/functions_src/functions"
   node_bundler = "nft"
-  # Keep the Prisma client and its generated client package OUT of the
-  # function zip. They resolve from the Netlify runtime layer instead.
-  # This drops ~60 MB of traced weight out of `___netlify-server-handler`.
+  # NOTE: external_node_modules here applies ONLY to custom functions in
+  # netlify/functions_src/functions — it does NOT affect the plugin-generated
+  # ___netlify-server-handler. Handler exclusions are configured in the
+  # [functions."___netlify-server-handler"] block below.
   external_node_modules = [
     "@prisma/client",
     ".prisma",
@@ -73,11 +74,31 @@
     "CRM/**",
     "OGR/**",
     "src/**",
-    # Build-only node_modules already in next.config.mjs excludes but
-    # not consistently honoured by the trace copy.
+    # Build-only node_modules — mirrors outputFileTracingExcludes in
+    # next.config.mjs and REMOVE_DIRS in scripts/clean-standalone.mjs.
+    # Three-layer exclusion: next.config traces → clean-standalone strips
+    # standalone dir → excluded_files strips the handler zip.
     "node_modules/sass/**",
     "node_modules/@esbuild/**",
+    # webpack toolchain — build-only, never needed at Lambda request time
     "node_modules/webpack/**",
+    "node_modules/webpack-sources/**",
+    "node_modules/enhanced-resolve/**",
+    "node_modules/@webassemblyjs/**",
+    "node_modules/acorn/**",
+    "node_modules/acorn-import-attributes/**",
+    "node_modules/eslint-scope/**",
+    # CSS / optimisation tools — build-time only
+    "node_modules/postcss/**",
+    "node_modules/critters/**",
+    "node_modules/beasties/**",
+    "node_modules/terser/**",
+    "node_modules/terser-webpack-plugin/**",
+    "node_modules/uglify-js/**",
+    # Browser-compat data — used by postcss/autoprefixer at build time only
+    "node_modules/caniuse-lite/**",
+    "node_modules/browserslist/**",
+    "node_modules/electron-to-chromium/**",
     "node_modules/@img/**",
     "node_modules/typescript/**",
     "node_modules/puppeteer/**",

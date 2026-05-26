@@ -393,6 +393,60 @@ runInProcessCheck(
   "No case-sensitive import mismatches",
 );
 
+// ─── Gate 9: Netlify handler size ─────────────────────────────────────────────
+
+section("Gate 9 — Netlify handler size");
+(function checkHandlerSize() {
+  const handlerDir = path.join(ROOT, ".netlify", "functions", "___netlify-server-handler");
+  const handlerZip = path.join(ROOT, ".netlify", "functions", "___netlify-server-handler.zip");
+
+  const LIMIT_WARN_MB = 220;
+  const LIMIT_FAIL_MB = 240;
+
+  if (!fs.existsSync(handlerDir) && !fs.existsSync(handlerZip)) {
+    warn(
+      "___netlify-server-handler not found — run `netlify build` or deploy to Netlify to produce the handler. " +
+      "Handler size cannot be verified locally without the plugin packaging step.",
+    );
+    return;
+  }
+
+  function getDirSizeSync(dir) {
+    let total = 0;
+    try {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) total += getDirSizeSync(full);
+        else if (entry.isFile()) total += fs.statSync(full).size;
+      }
+    } catch { /* skip inaccessible */ }
+    return total;
+  }
+
+  let sizeMB = 0;
+  if (fs.existsSync(handlerDir)) {
+    sizeMB = getDirSizeSync(handlerDir) / (1024 * 1024);
+    if (sizeMB > LIMIT_FAIL_MB) {
+      fail(`Handler directory is ${sizeMB.toFixed(1)} MB — exceeds ${LIMIT_FAIL_MB} MB Netlify upload limit. Run node scripts/check-netlify-handler-size.mjs for details.`);
+    } else if (sizeMB > LIMIT_WARN_MB) {
+      warn(`Handler directory is ${sizeMB.toFixed(1)} MB — above ${LIMIT_WARN_MB} MB warning threshold.`);
+    } else {
+      pass(`Handler directory is ${sizeMB.toFixed(1)} MB — within ${LIMIT_FAIL_MB} MB limit.`);
+    }
+  } else if (fs.existsSync(handlerZip)) {
+    const zipMB = fs.statSync(handlerZip).size / (1024 * 1024);
+    // Zip is typically ~40% of unzipped; Netlify limit is on the unzipped size.
+    const projected = zipMB / 0.4;
+    if (projected > LIMIT_FAIL_MB) {
+      fail(`Handler zip is ${zipMB.toFixed(1)} MB — projected unzipped ~${projected.toFixed(1)} MB, exceeds ${LIMIT_FAIL_MB} MB limit.`);
+    } else if (projected > LIMIT_WARN_MB) {
+      warn(`Handler zip is ${zipMB.toFixed(1)} MB — projected unzipped ~${projected.toFixed(1)} MB, above warning threshold.`);
+    } else {
+      pass(`Handler zip is ${zipMB.toFixed(1)} MB — projected unzipped ~${projected.toFixed(1)} MB, within limit.`);
+    }
+  }
+})();
+
 // ─── Summary ──────────────────────────────────────────────────────────────────
 
 console.log("\n────────────────────────────────────────────────────");
