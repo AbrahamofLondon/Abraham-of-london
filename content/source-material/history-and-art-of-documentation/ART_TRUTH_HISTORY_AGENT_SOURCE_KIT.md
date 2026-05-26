@@ -4,8 +4,8 @@ title: "Art, Narrative, and the History of Truth Agent Source Kit"
 description: "Internal source kit for The Truth in the Frame content production."
 series: the-truth-in-the-frame
 accessLevel: restricted
-draft: true
-published: false
+draft: false
+published: true
 ---
 
 	# ART, NARRATIVE, AND THE HISTORY OF TRUTH
@@ -439,6 +439,8 @@ Argument Engine: Claims 2 and 3
 ## PART FIVE — THE VOICE RULES
 
 ### What Abraham of London Sounds Like When Writing About History and Truth
+
+**Governing framework:** All content produced from this kit is subject to the Narrative Discipline Standards documented in THE_TRUTH_IN_THE_FRAME_PROJECT.md (Section 8). The five rules — begin in the scene, demonstrate don't declare, remove section headers, show character through action, make one strong claim late — take precedence over any format-specific guidance below. If a format instruction in this kit conflicts with the Narrative Discipline Standards, the Standards govern.
 
 **Rule 1 — The voice has already decided.**
 Abraham of London does not write think pieces that perform uncertainty. It writes pieces that carry a position. The position can be nuanced — it often is — but it is declared, not hedged. If the argument is "visual credibility is not evidentiary credibility," the piece says that directly and demonstrates it. It does not invite the reader to consider whether this might be the case.

@@ -4,8 +4,8 @@ title: "The Truth in the Frame Project Record"
 description: "Series retrospective and production reference for The Truth in the Frame."
 series: the-truth-in-the-frame
 accessLevel: restricted
-draft: true
-published: false
+draft: false
+published: true
 ---
 
 # THE TRUTH IN THE FRAME — PROJECT RECORD
@@ -13,8 +13,9 @@ published: false
 **Series status:** Complete
 **Total content:** 90 pieces across 4 channels
 **Original source material:** Research framework on art, narrative, and historical documentation
-**Production period:** [Series development to 2026-07-07 launch]
+**Production period:** May 2026 to September 2026
 **Classification:** Internal reference — content team, scheduling team, future series agents
+**Governing standard:** Narrative Discipline Standards v1.0 (see Section 8)
 
 ---
 
@@ -251,4 +252,83 @@ The question is what this one says.
 
 ---
 
-*Project record filed: May 2026. Series launches: July 7, 2026. Series closes: September 1, 2026. LinkedIn pipeline closes: October 17, 2026. Archive all content to permanent series folder on October 18, 2026.*
+## SECTION 8 — THE NARRATIVE DISCIPLINE STANDARDS
+
+This section codifies the narrative rules that governed the production of THE TRUTH IN THE FRAME. These standards were derived from the production of Part 3 (The Emperor's Canvas) and applied retroactively to Parts 1–2 and forward to Parts 4–9. They constitute the permanent standard for all content produced from the Abraham of London editorial system.
+
+### The Five Rules
+
+**Rule 1 — Begin in the scene. Always.**
+
+The opening of a piece is not the introduction to the argument. It is the first moment of the story. The reader should be somewhere specific — a room, a moment, a single image — before they know what the piece is about.
+
+*Test:* Can the first paragraph be understood by someone who knows nothing about the subject? If yes, it is a scene. If it requires the reader to already know why the subject matters, it is an argument waiting for its evidence.
+
+*Correct (Part 3):* "In 1804, Napoleon Bonaparte walked into Jacques-Louis David's studio, looked at the nearly finished coronation canvas, and said: add my mother. She was not there."
+
+*Incorrect:* "Napoleon Bonaparte understood something that earlier rulers had only glimpsed: that a painting could be more powerful than a battle."
+
+**Rule 2 — Do not state the argument. Demonstrate it and stop.**
+
+The central argument of any piece should never be declared in so many words. It should be demonstrated — through specific evidence, specific scenes, specific images — and then the piece should stop before naming what has been demonstrated.
+
+*The reader who produces their own conclusion has understood the piece. The reader who was given the conclusion has been told it.*
+
+*Failure (Part 3):* "That is the power of realism. And that is the moment modern propaganda was born." — This sentence arrived after five paragraphs of evidence. The evidence was sufficient. The reader had already made the connection. Delete it.
+
+*Exception:* The closing of the piece may name the argument — but only if it names it in a form that opens something rather than closing it. "The truth does not defend itself. That is your job" names the argument and opens the question. "That is the moment modern propaganda was born" names the argument and closes it.
+
+**Rule 3 — Remove section headers. Replace them with transitions.**
+
+Section headers tell the reader they are moving to a new section. This is precisely what should not be visible. The reader who is inside a story does not know they are moving from one section to another. They are simply moving — pulled by the narrative, carried by the argument, without awareness of structure.
+
+A transition is a single sentence — sometimes two — that closes what came before and opens what follows. It does not announce the move. It makes the move. The reader follows without noticing.
+
+*Example (Part 3, replacing "The Studio and the State"):* The opening scene ends with Napoleon's mother painted into the canvas. The next paragraph opens with David — not with a summary of his career, but with the specific action that reveals his character. "David did not hesitate. He had survived the Terror by being useful, survived the Directory by being indispensable, and attached himself to Napoleon with the same instinct that had kept him alive through twenty years of political slaughter. He picked up the brush and painted her in."
+
+**Rule 4 — Show the character through action, not biography.**
+
+When a character enters the piece for the first time, do not summarise who they are. Show what they do. The character's identity emerges from their actions. The reader understands who they are because of what they do, not because of what the writer tells them.
+
+*Failure (Part 3):* "Jacques-Louis David was not merely a painter. He was the most powerful visual artist in Europe, and he had survived the French Revolution by being more radical than the radicals..."
+
+*Correct:* Begin with what David does. Let his survival instinct emerge from the action of agreeing to paint in Napoleon's mother. If biography is necessary, weave it into the scene as specific details rather than summary: "David picked up the brush. He had survived the Terror by being useful. He had no intention of failing to be useful now."
+
+**Rule 5 — Make one strong claim late. Make no claims early.**
+
+The instinct when writing analytical narrative is to announce the argument in the first quarter of the piece, then spend the rest supporting it. This instinct produces essays. It does not produce stories.
+
+The alternative: make no claims at all for the first half of the piece. Tell the story. Let the evidence accumulate. Then, in the second half, allow one claim to emerge — not as a thesis statement, but as a conclusion that the evidence has produced. Let the claim be specific. Let it go one step further than the reader expected.
+
+*Failure (Part 3):* "That is the power of realism. And that is the moment modern propaganda was born." — This appears in paragraph five of approximately twenty. Too early. The piece has not yet shown the reader David's specific choices, Goya's counter-example, the comparison between them, or the contemporary implication.
+
+*Correct:* The one claim that should appear in the second half of Part 3 is the observation about what made Napoleon's propaganda modern — not that he controlled images (kings had always done that) but that he controlled the copies. The printing press and mass reproduction changed the scale of the operation. That is the specific step further than the reader expects.
+
+### The Four Pre-Filing Questions
+
+Every piece must pass these four questions before filing. If any answer is no, revise before filing.
+
+1. **Does the opening sentence put the reader somewhere specific?** Not a claim. Not a thesis. A scene, a moment, a single image. If the opening sentence could be the first sentence of an argumentative essay, it is wrong.
+
+2. **Does the piece make its central argument through demonstration rather than declaration?** Read the draft and mark every sentence that names a conclusion. Count them. If more than one appears in the first half of the piece, the piece is declaring rather than demonstrating. Remove the early declarations. Fix the demonstration so it does not need them.
+
+3. **Are there section headers?** If yes: remove them all. For each removed header, write a transition sentence that closes the preceding section and opens the following one without announcing the move.
+
+4. **Is every character introduced through action before they are described?** Find the first appearance of each character. Is it a biographical summary or a scene? If biographical summary: find the scene where that character does something that reveals their character, move it before the summary, then cut the summary to only what the reader cannot infer from the action.
+
+### The Standard
+
+*"The state called it socialist realism. The peasant called it hunger."*
+
+This sentence makes no claims. It demonstrates through contrast. It trusts the reader to produce the conclusion. It is eleven words. Every piece from this platform is tested against it.
+
+If a sentence takes more words to say less, cut it.
+If a sentence names what the evidence has already shown, cut it.
+If a sentence explains what the reader can feel without explanation, cut it.
+If a section header announces a move the writing should make invisibly, remove it and fix the transition.
+
+The writer who follows these rules produces pieces that readers do not put down. Not because the pieces are entertaining. Because the pieces demand something of the reader — the active production of conclusions from evidence — and the reader who produces their own conclusion has understood something. Understanding that is produced, rather than supplied, stays.
+
+---
+
+*Project record filed: May 2026. Series launches: July 7, 2026. Series closes: September 1, 2026. LinkedIn pipeline closes: October 17, 2026. Archive all content to permanent series folder on October 18, 2026. Narrative Discipline Standards codified: May 2026.*
