@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "pnpm contentlayer2 build && node scripts/generate-briefs-registry.mjs && tsx scripts/build-pdf-registry-json.ts && cross-env NODE_OPTIONS='--max-old-space-size=6144' NEXT_TELEMETRY_DISABLED=1 next build --webpack && node scripts/clean-standalone.mjs",
+  "buildCommand": "pnpm contentlayer2 build && node scripts/generate-briefs-registry.mjs && tsx scripts/build-pdf-registry-json.ts && cross-env NODE_OPTIONS='--max-old-space-size=6144' NEXT_TELEMETRY_DISABLED=1 next build --webpack && node scripts/clean-standalone.mjs && touch .next/lock",
   "installCommand": "pnpm install --frozen-lockfile",
   "regions": ["lhr1"],
   "env": {
