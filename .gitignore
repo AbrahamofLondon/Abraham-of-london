@@ -25,9 +25,11 @@ build/
 .cache/
 .turbo/
 .vercel/
+.vercel/output/
 .netlify/
 .netlify-edge-functions/
 .contentlayer/
+.contentlayer/.cache/
 .contentlayer-cache/
 *.tsbuildinfo
 tsconfig.tsbuildinfo
@@ -49,6 +51,7 @@ tsconfig.next.tsbuildinfo
 # Logs & diagnostics
 # ------------------------------
 logs/
+build-*.log
 *.log
 *.log.*
 npm-debug.log*
@@ -221,6 +224,8 @@ id_rsa
 # Testing & coverage
 # ------------------------------
 coverage/
+playwright-report/
+test-results/
 .nyc_output/
 .coveralls.yml
 *.lcov
@@ -246,6 +251,10 @@ ehthumbs.db
 # Video build outputs (large files — use LFS or external storage)
 # ------------------------------
 video/
+private_storage/
+output_tiktok*.mp4
+ABRAHAM_OF_LONDON_ENGINEERING_MANUAL.pdf
+ABRAHAM_OF_LONDON_INSTITUTIONAL_MANUAL.pdf
 
 # ------------------------------
 # Keep institutional assets tracked

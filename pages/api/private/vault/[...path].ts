@@ -7,6 +7,7 @@ import fs from "fs";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import tiers, { requiredTierFromVaultPath } from "@/lib/access/tiers";
 import { vaultRuntimeConfig } from "@/lib/runtime/vault-config";
+import { VAULT_FILE_SET } from "@/lib/runtime/vault-manifest";
 
 const VAULT_ROOT = path.join(
   /* turbopackIgnore: true */ process.cwd(),
@@ -63,6 +64,11 @@ function safeResolveVaultPath(parts: string[]): string | null {
     ) {
       return null;
     }
+  }
+
+  const manifestKey = clean.join("/");
+  if (!VAULT_FILE_SET.has(manifestKey)) {
+    return null;
   }
 
   const joined = path.join(VAULT_ROOT, ...clean);
