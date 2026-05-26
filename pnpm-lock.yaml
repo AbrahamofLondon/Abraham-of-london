@@ -37,9 +37,9 @@ overrides:
   defu: '>=6.1.5'
   aws-sdk: '>=2.1692.0'
   postcss: 8.5.10
-  next-contentlayer>next: ^16.1.7
+  next-contentlayer>next: $next
   protobufjs: 7.5.5
-  next-contentlayer2>next: ^16.1.7
+  next-contentlayer2>next: $next
 
 pnpmfileChecksum: sha256-xWy+VI/0lt8qlXFzRJyYtZr9c9UGPwirmDxGk4q80qM=
 
