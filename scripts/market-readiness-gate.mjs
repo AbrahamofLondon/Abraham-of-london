@@ -451,17 +451,15 @@ section("Gate 9 — Netlify proxy mode (no ___netlify-server-handler)");
   }
 })();
 
-// ─── Gate A: Netlify proxy configuration ──────────────────────────────────────
+// ─── Gate A: Netlify proxy redirect + CDN assets ──────────────────────────────
 //
-// Confirms netlify.toml is correctly configured as a proxy-only deployment:
-//  - publish = "public" (not ".next")
-//  - build command has no "next build"
-//  - @netlify/plugin-nextjs is NOT present
-//  - catch-all proxy redirect exists with a non-placeholder URL
-//  - public/ directory exists for Netlify CDN
+// Gate 1 already checks publish dir, build command, plugin-nextjs, and
+// NETLIFY_NEXT_PLUGIN_SKIP. Gate A adds the two checks unique to the proxy arch:
+//  - catch-all proxy redirect exists and points to a real Vercel URL
+//  - public/ directory exists (Netlify CDN serves these directly)
 
-section("Gate A — Netlify proxy configuration");
-(function checkNetlifyProxy() {
+section("Gate A — Netlify proxy redirect + CDN assets");
+(function checkNetlifyProxyRedirect() {
   const netlifyToml = path.join(ROOT, "netlify.toml");
   if (!fs.existsSync(netlifyToml)) {
     fail("netlify.toml not found");
@@ -470,35 +468,7 @@ section("Gate A — Netlify proxy configuration");
 
   const toml = fs.readFileSync(netlifyToml, "utf8");
 
-  if (/publish\s*=\s*["']\.next["']/.test(toml)) {
-    fail("netlify.toml has publish = \".next\" — should be publish = \"public\" in proxy mode");
-  } else if (/publish\s*=\s*["']public["']/.test(toml)) {
-    pass("netlify.toml publish = \"public\"");
-  } else {
-    warn("Could not confirm netlify.toml publish directory");
-  }
-
-  if (/next build/.test(toml)) {
-    fail("netlify.toml build command contains \"next build\" — proxy mode should use the echo command only");
-  } else {
-    pass("netlify.toml build command has no next build");
-  }
-
-  // Check for the plugin DIRECTIVE (package = "..."), not comments that mention it.
-  // The toml header comment deliberately says "@netlify/plugin-nextjs is REMOVED" — that's fine.
-  const tomlNoComments = toml.replace(/#.*$/gm, "");
-  if (/package\s*=\s*["']@netlify\/plugin-nextjs["']/.test(tomlNoComments)) {
-    fail("netlify.toml still has a `package = \"@netlify/plugin-nextjs\"` directive — remove this plugin entry in proxy mode");
-  } else {
-    pass("@netlify/plugin-nextjs package directive not present in netlify.toml");
-  }
-  if (/NETLIFY_NEXT_PLUGIN_SKIP\s*=\s*["']true["']/.test(toml)) {
-    pass("NETLIFY_NEXT_PLUGIN_SKIP = \"true\"");
-  } else {
-    fail("NETLIFY_NEXT_PLUGIN_SKIP is not true — Netlify will auto-inject the Next.js Runtime");
-  }
-
-  // Check for catch-all proxy redirect and warn if still using placeholder
+  // Catch-all proxy redirect — must exist, must not use the placeholder
   const catchAllMatch = toml.match(/from\s*=\s*["']\/\*["'][^]*?to\s*=\s*["']([^"']+)["'][^]*?status\s*=\s*200/);
   if (!catchAllMatch) {
     fail("netlify.toml has no catch-all proxy redirect (from = \"/*\" with status = 200) — add it as the last [[redirects]] rule");
@@ -506,14 +476,15 @@ section("Gate A — Netlify proxy configuration");
     const proxyTarget = catchAllMatch[1];
     if (proxyTarget.includes("YOUR_PROJECT")) {
       warn(
-        `netlify.toml catch-all proxy redirect still uses placeholder URL: ${proxyTarget} ` +
-        "— replace YOUR_PROJECT.vercel.app with the actual Vercel deployment hostname before going live",
+        `Catch-all proxy target is still a placeholder: ${proxyTarget} — ` +
+        "update with the actual Vercel production hostname before going live",
       );
     } else {
-      pass(`Catch-all proxy redirect configured → ${proxyTarget}`);
+      pass(`Catch-all proxy redirect → ${proxyTarget}`);
     }
   }
 
+  // public/ must exist — Netlify CDN serves it directly (favicon, OG images, robots.txt, etc.)
   const publicDir = path.join(ROOT, "public");
   if (!fs.existsSync(publicDir)) {
     fail("public/ directory not found — Netlify CDN has nothing to serve for static assets");
