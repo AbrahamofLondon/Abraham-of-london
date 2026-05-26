@@ -412,6 +412,8 @@ const Post = defineDocumentType(() => ({
     ...baseFields,
     series: { type: "string", required: false },
     seriesOrder: { type: "number", required: false },
+    seriesTitle: { type: "string", required: false },
+    seriesDescription: { type: "string", required: false },
   },
   computedFields: createComputedFields("blog/", "blog"),
 }));
@@ -424,6 +426,8 @@ const EditorialSeriesPart = defineDocumentType(() => ({
     ...baseFields,
     series: { type: "string", required: true },
     seriesOrder: { type: "number", required: true },
+    seriesTitle: { type: "string", required: false },
+    seriesDescription: { type: "string", required: false },
   },
   computedFields: createComputedFields("editorial-series/", "editorials/series"),
 }));
