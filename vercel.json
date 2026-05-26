@@ -16,11 +16,11 @@
     },
     {
       "path": "/api/cron/escalation",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/cron/decision-state",
-      "schedule": "0 */12 * * *"
+      "schedule": "0 4 * * *"
     }
   ],
   "headers": [
