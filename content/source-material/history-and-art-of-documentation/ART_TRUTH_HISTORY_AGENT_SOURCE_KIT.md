@@ -1,3 +1,13 @@
+---
+type: SourceMaterial
+title: "Art, Narrative, and the History of Truth Agent Source Kit"
+description: "Internal source kit for The Truth in the Frame content production."
+series: the-truth-in-the-frame
+accessLevel: restricted
+draft: true
+published: false
+---
+
 	# ART, NARRATIVE, AND THE HISTORY OF TRUTH
 ## Agent Source Kit — Abraham of London Content Production
 **Classification:** Internal storytelling resource

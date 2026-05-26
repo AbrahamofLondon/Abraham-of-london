@@ -1,3 +1,13 @@
+---
+type: SourceMaterial
+title: "The Truth in the Frame Project Record"
+description: "Series retrospective and production reference for The Truth in the Frame."
+series: the-truth-in-the-frame
+accessLevel: restricted
+draft: true
+published: false
+---
+
 # THE TRUTH IN THE FRAME — PROJECT RECORD
 ## Abraham of London | Series Retrospective and Production Reference
 **Series status:** Complete
