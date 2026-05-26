@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": ">=20.0.0",
+    "node": "20.x",
     "pnpm": ">=9.0.0"
   },
   "scripts": {
@@ -397,7 +397,6 @@
     "@mdx-js/esbuild": "3",
     "@mdx-js/mdx": "^3.0.0",
     "@netlify/functions": "^5.1.3",
-    "@netlify/plugin-nextjs": "^5.15.8",
     "@next/eslint-plugin-next": "^16.2.6",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/aspect-ratio": "^0.4.2",
