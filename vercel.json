@@ -4,7 +4,6 @@
   "framework": "nextjs",
   "buildCommand": "pnpm contentlayer2 build && node scripts/generate-briefs-registry.mjs && tsx scripts/build-pdf-registry-json.ts && cross-env NODE_OPTIONS='--max-old-space-size=6144' NEXT_TELEMETRY_DISABLED=1 next build --webpack && node scripts/clean-standalone.mjs",
   "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": ".next",
   "regions": ["lhr1"],
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1",
