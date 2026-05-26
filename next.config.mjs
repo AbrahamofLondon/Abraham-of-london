@@ -93,7 +93,10 @@ const nextConfig = {
   staticPageGenerationTimeout: 60,
 
   typescript: {
-    ignoreBuildErrors: false,
+    // Skip the post-webpack tsc pass on Vercel (set NEXT_SKIP_TYPE_CHECK=1 in vercel.json env).
+    // Type errors are caught locally and in CI; running a full tsc on the 8 GB Vercel
+    // build container OOMs because the heap limit plus the TypeScript worker exhaust RAM.
+    ignoreBuildErrors: process.env.NEXT_SKIP_TYPE_CHECK === "1",
   },
 
   experimental: {
