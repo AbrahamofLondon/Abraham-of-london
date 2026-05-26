@@ -37,9 +37,9 @@ overrides:
   defu: '>=6.1.5'
   aws-sdk: '>=2.1692.0'
   postcss: 8.5.10
-  next-contentlayer>next: $next
+  next-contentlayer>next: ^16.2.2
   protobufjs: 7.5.5
-  next-contentlayer2>next: $next
+  next-contentlayer2>next: ^16.2.2
 
 pnpmfileChecksum: sha256-xWy+VI/0lt8qlXFzRJyYtZr9c9UGPwirmDxGk4q80qM=
 
@@ -9533,7 +9533,7 @@ packages:
     resolution: {integrity: sha512-3Xh8quPCFmg/QGa4qTnOwSsT3oNYCtmm+Ii0UlbOHxX59gHYVX9M5mTzkdUKiKC1aJfiGIPPGQXhKNfc6qvWZg==}
     peerDependencies:
       contentlayer2: 0.5.8
-      next: ^16.1.7
+      next: ^16.2.2
       react: ^18 || ^19 || ^19.0.0-rc
       react-dom: ^18 || ^19 || ^19.0.0-rc
 

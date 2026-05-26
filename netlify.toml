@@ -19,7 +19,7 @@
   CONTENTLAYER_DISABLE_WARNINGS = "1"
   NETLIFY_USE_PNPM = "true"
   PNPM_FLAGS = "--frozen-lockfile"
-  PNPM_VERSION = "10.29.3"
+  PNPM_VERSION = "10.33.0"
   # RECAPTCHA_TIMEOUT_MS value is a plain number (e.g. 5000) that naturally
   # appears as a literal throughout the codebase — not a real secret leak.
   # DB_PASSWORD appears only in docker-compose.yml (dev-only).
