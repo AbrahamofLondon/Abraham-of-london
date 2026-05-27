@@ -688,4 +688,147 @@ The following episodes have been identified as candidates for the kit but do not
 
 ---
 
+---
+
+### Episode 15 — The Paintings That Waited Thirty-Six Thousand Years (Chauvet Cave)
+
+**The Fact:**
+The Chauvet Cave in southern France contains paintings estimated to be 36,000 years old — the oldest known figurative art in the world. The cave sealed itself approximately 20,000 years ago under a collapsed rock face. It was discovered in 1994 by Jean-Marie Chauvet and two colleagues. The paintings were so sophisticated that experts initially suspected forgery. They depict animals — lions, horses, rhinos, mammoths — with a technical mastery that had no parallel in European art for another 35,000 years. The context — what the paintings meant, who made them, what accompanied them — is completely unknown.
+
+**The Story:**
+In 1994, three people pushed through a gap in a rock face in the Ardèche and found a room that had been sealed for twenty millennia. The animals on the walls moved in the torchlight — the painters had carved curves into the rock beneath the pigment so the horses appeared to run when a flame passed across them. Someone had understood perspective. Someone had understood animation. Someone had spent days in the dark making something that would not be seen for thirty-six thousand years.
+
+We found the paintings. We did not find the songs. We did not find the stories. We did not find the names. The paintings survived because the cave sealed and the mineral conditions were exactly right and three people pushed through a gap in 1994 and not before. The meaning did not survive because meaning travels by performance, by transmission, by the voice of one person passing it to another — and that chain broke somewhere in the ice age and cannot be repaired.
+
+**The Payload:**
+Primary: Claim 1 (The medium decides what gets remembered — stone preserved the physical marks; the interpretive layer, made of breath and voice, left no trace)
+Secondary: Claim 4 (Oral cultures were not primitive — the meaning-carrying context was carried by performance, and performance is the most fragile medium)
+
+**The Emotional Register:**
+Awe shading into epistemological vertigo. The reader should feel the scale of what was made — thirty-six thousand years ago, in the dark, with a sophistication that would not be matched for millennia — and then feel the recognition that the discovery is also a loss. The paintings are there. The question they were made to answer is not. The gap cannot be closed.
+
+**The Hook:**
+*The most sophisticated art in Europe for 35,000 years was made 36,000 years ago. We found it in 1994. We have no idea what it means.*
+
+**The Turn:**
+The Chauvet paintings are described as a discovery. What they are is a partial survival. The physical marks survived the accident of geology. The interpretive layer — the performance, the teaching, the meaning-carrying context that told the community what the paintings were for — survived nothing, because it was made of breath and voice and memory, and those leave no mark. What we found in 1994 was not what was made 36,000 years ago. What we found was the part that stone could carry. We have been treating the partial survival as the thing itself. We have been mistaking the body for the person.
+
+**Format Fit:**
+Long read, editorial, chapter opening. The episode requires space for the awe-to-vertigo arc. Does not work as a Short because the emotional register needs accumulation.
+
+**The Question It Leaves:**
+What are you mistaking the body for the person — what partial survival are you treating as the whole thing?
+
+---
+
+### Episode 16 — The Library That Cannot Tell Us What It Lost (Alexandria)
+
+**The Fact:**
+The Library of Alexandria was damaged or destroyed across multiple events attributed to multiple actors across multiple centuries: Julius Caesar (48 BCE), Aurelian (270s CE), Theophilus (391 CE), the Arab conquest (642 CE). The precise sequence and extent of destruction is itself contested — the historical record of the Library's destruction is incomplete. What is documented: a significant portion of the ancient world's accumulated written knowledge no longer exists. Estimates of what was lost range from 40,000 to 700,000 scrolls. No inventory of the Library's holdings survived to allow precise accounting. We know what was in it only from references in texts that were preserved elsewhere — every reference to a lost work is evidence of the work's existence and its loss simultaneously.
+
+**The Story:**
+The Library cannot tell us what it lost because the Library's own catalogue is gone. The inventory that would allow us to measure the loss was part of the loss. We are left with the shadow of the shadow: references in surviving texts to works that did not survive, citations of authors whose names we know and whose words we do not, arguments responding to positions we cannot read because the positions themselves are gone. We know Aristotle wrote a second book of the Poetics, the one on comedy, because other writers refer to it. The book does not exist. We know it existed. We cannot read it. We cannot know what it contained except that it contained something about comedy, and that comedy was the only major subject Aristotle addressed that he did not leave us with a surviving text on.
+
+This is the condition of catastrophic archival loss: the thing you most want to know — what was in the inventory — is precisely what the catastrophe took. The gap cannot be measured from inside the gap.
+
+**The Payload:**
+Primary: Claim 1 (The medium decides what gets remembered — and what the medium's destruction takes with it)
+Secondary: Claim 4 (Oral cultures were not primitive — what survived the Library's destruction was partly what was held in human memory and performance, not only what was written)
+
+**The Emotional Register:**
+Vertiginous grief without sentimentality. The reader should feel the scale of an absence they cannot fully comprehend — not the melodrama of loss, but the specific epistemological problem of trying to measure something whose measuring tools were themselves destroyed. The feeling of standing at the edge of a gap whose dimensions cannot be determined.
+
+**The Hook:**
+*We do not know what was lost at Alexandria because the record of what was there did not survive either. The catalogue burned with the books. We are compiling the inventory from the margins of things that survived elsewhere — footnotes in surviving texts pointing to originals that are gone.*
+
+**The Turn:**
+The Library of Alexandria is invoked constantly as a metaphor for catastrophic cultural loss. What is rarely noted is that the digital era has already produced losses on a comparable scale — not through fire, but through link rot, server decommissioning, format obsolescence, and platform closure. The average lifespan of a URL is approximately two years. Entire early internet archives, digital art movements, online communities, and journalistic records from the 1990s and 2000s are already gone. The Internet Archive estimates it has preserved less than a quarter of what has been created digitally. The Library of Alexandria burned visibly, dramatically, and was mourned. The digital Library of Alexandria is dissolving silently, incrementally, and largely without notice. The question is not whether the loss is happening. It is whether anyone will know what to mourn.
+
+**Format Fit:**
+Strong as a Long Read or editorial — the argument requires the accumulation of both the ancient loss and the contemporary parallel to land with full weight. Can work as a Short if compressed to the core comparison (what was lost at Alexandria vs what is being lost digitally), but loses the epistemological depth of the "inventory of the catalogue is gone" argument.
+
+**The Question It Leaves:**
+What are you creating now that will not exist in twenty years, and does that matter to you?
+
+---
+
+### Episode 17 — The Digital Dark Age: What We Are Losing Right Now
+
+**The Fact:**
+The average lifespan of a URL is approximately two years. The Internet Archive's Wayback Machine has captured an estimated 20–25% of publicly accessible web content since 1996. Born-digital works — websites, digital art, online journalism, community archives, social media records — are being lost at a rate that no institution is equipped to match. Format obsolescence alone has rendered unreadable entire categories of digital work from the 1980s and 1990s: software that requires hardware that no longer exists, file formats that no application can open, digital art created in proprietary systems that have since closed. The Video Game History Foundation estimated in 2023 that 87% of classic video games are out of print and essentially inaccessible. Email archives, blog networks, social platforms that have closed — Geocities, MySpace, Vine, Google+ — have taken with them the cultural record of millions of people's creative and intellectual output. The destruction is ongoing, silent, and largely unwitnessed.
+
+**The Story:**
+You have made things that will not survive.
+
+Not because you failed to preserve them. Because the infrastructure you created them on was not yours to preserve. The blog post you wrote in 2008 on a platform that closed in 2014. The photographs you uploaded to a service that was acquired and discontinued. The forum thread where you worked through an idea in public across a hundred posts over three months. The community you belonged to that existed only on a platform that is now gone. These are not minor losses. They are the record of how you thought, who you were in conversation with, what you were figuring out. They are the Griot's transmission, the Homer's performance — and they ended not because the chain of transmission broke but because the platform that hosted the chain closed, without notice, without archive, without recourse.
+
+The Library of Alexandria burned visibly. There was smoke. There were witnesses. There were writers who mourned it. The digital Library of Alexandria is dissolving in silence, at scale, and the inventory of what is being lost is already incomplete, because the things being lost are not leaving records of their loss.
+
+**The Payload:**
+Primary: Claim 1 (The medium decides what gets remembered — digital platforms are a medium that was never designed for preservation)
+Secondary: Claim 3 (Who controls distribution controls history — platform owners decide what survives by deciding what to maintain)
+
+**The Emotional Register:**
+The cold recognition that the loss is already underway and the reader is inside it. Not panic. Not despair. The specific discomfort of realising that the infrastructure you trusted was never designed to last, and that you knew this without acting on it.
+
+**The Hook:**
+*You have made things that will not survive. Not because you failed to preserve them — because the infrastructure you created them on was not yours to preserve, and it is already gone.*
+
+**The Turn:**
+This is not a historical problem. It is your problem, now, in the present tense. The Chauvet painters did not know their paintings would survive. The Griot did not know whether his transmission would outlast the next generation. Homer's performers did not know that writing would arrive in time to fix what they had kept alive. Yezhov did not know that the original photograph would survive his removal from it. The Library's curators did not know that fire was coming.
+
+You know. You know that the infrastructure is fragile. You know that platforms close. You know that formats become unreadable. You know that the default condition of digital creation is impermanence. The difference between you and everyone in this series is that you have been told.
+
+The question is not whether you knew. It is what you do now that you do.
+
+**Format Fit:**
+Long read, editorial, closing chapter. The formal shift to second person requires the accumulation of preceding material to land. Does not work as a standalone Short.
+
+**The Question It Leaves:**
+What will you do now that you know?
+
+---
+
+### Episode 3 — The Oral Epic That Lasted Three Thousand Years (UPDATED)
+
+**Updated component — The Turn:**
+
+The comparison between oral transmission and digital storage is not sentimental. It is technical. The Homeric tradition preserved a 15,000-line poem across four centuries with no external storage medium, using only the trained minds of performers and the social infrastructure that maintained them. Digital culture has lost entire early internet archives, web-native art movements, and decades of online community in thirty years — not through deliberate destruction but through format obsolescence, server decommissioning, and platform closure. The oral tradition that kept Troy alive for four hundred years is more durable, by the measure of actual survival, than the digital culture that has existed for forty and is already losing significant parts of itself. The technology that seemed more fragile was not. The technology that seemed permanent is not.
+
+**Updated — The Hook:**
+*The Iliad kept a war alive in human memory for four hundred years before anyone wrote it down. The average lifespan of a URL is two years.*
+
+**Updated — The Question It Leaves:**
+What are you trusting for the long-term preservation of what currently matters — and have you tested that trust against the actual survival rate of digital content?
+
+---
+
+### Episode 4 — Stalin Erases a Man (UPDATED)
+
+**Updated component — The Story (distributed erasure detail added):**
+
+The retoucher did not lie. They removed. The canal bank is accurate — there is a canal bank there. The image shows what was there after the removing. This is the distinction that matters: fabrication adds something false, but removal takes something true and leaves no trace of the taking. A fabrication can be detected by what it added. A removal can be detected only if the original survives somewhere, available for comparison. In Yezhov's case, the original did survive — which is why we know. In cases where the original did not survive, we do not know what was removed. We know only the smooth canal bank. We do not know there was ever a man standing on it.
+
+The subscribers who cut out the encyclopaedia pages and pasted in the replacements were not merely complicit in the erasure. They were its instrument. The removal was not performed once by one retoucher in one darkroom. It was performed thousands of times, by thousands of hands, in thousands of homes, with scissors and paste and the instructions that arrived in the post. The archive was not edited at the centre. It was edited everywhere, simultaneously, by the people who owned it.
+
+**Updated — The Turn:**
+
+The Yezhov retouching required a skilled technician, darkroom chemistry, time, and state resources. Those friction costs were the only barrier between the operation and anyone who wanted to perform it. The friction is gone. What took the Soviet state months of careful work and the cooperation of thousands of book-owners can now be done in seconds by anyone with access to an image editor, applied to any photograph that has ever been digitised, without leaving a trace the original did not survive to contradict. The operation has not changed. The cost of performing it has collapsed to zero. The inventory of removals we cannot detect has grown accordingly, and we have no way of knowing by how much, because the removals we cannot detect are, by definition, the ones that left no before.
+
+---
+
+### Episode 9 — The Bayeux Tapestry Has a Perspective (UPDATED)
+
+**Updated component — The Turn (survival-as-power emphasis):**
+
+Survival is not neutral. The Bayeux Tapestry did not survive because it was the most accurate record of 1066, or the most beautiful, or the most complete. It survived because the people who made it controlled the preservation infrastructure of England for the following century. The inverse is equally true: what did not survive did not perish because it was less valuable or less true. It perished because the people who made it lost. The historical record is not a representative sample of what was created. It is a sample biased toward what the powerful found worth preserving — which is, reliably, the record of their own legitimacy. Every archive is also an argument. The argument is: this is what deserves to survive. And the people who made that argument were the people who won.
+
+**Updated — The Hook:**
+*The Bayeux Tapestry is one of the most important historical records of the Norman Conquest. It was made by the Normans. It survived because the Normans won. These three facts are not incidental to each other.*
+
+**Updated — The Question It Leaves:**
+Which records you currently rely on were produced by the people whose version of events they record — and which of those records survive because the alternative was not preserved?
+
+---
+
 *This kit is a living document. Add episodes as source material expands. Every new episode must have: The Fact, The Story, The Payload (Argument Engine claim), The Emotional Register, The Hook, The Turn, Format Fit, and The Question It Leaves. Episodes without all eight components are not ready for production use.*
