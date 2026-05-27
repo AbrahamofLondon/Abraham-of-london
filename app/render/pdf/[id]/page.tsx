@@ -1,5 +1,7 @@
 // app/render/pdf/[id]/page.tsx
 
+export const dynamic = "force-dynamic";
+
 // ✅ Polyfill for notFound – works in any Next.js version
 function notFound(): never {
   const error = new Error("NEXT_NOT_FOUND");

@@ -273,6 +273,18 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     platform: "vercel",
   },
 
+  // ─── PUBLIC_DYNAMIC ───────────────────────────────────────────────────────
+  {
+    path: "/purpose-alignment",
+    class: "PUBLIC_DYNAMIC",
+    owner: "product",
+    intent: "Purpose alignment diagnostic tool (parallel support surface)",
+    deployable: true,
+    requiresAuth: false,
+    requiresDatabase: false,
+    platform: "vercel",
+  },
+
   // ─── CLIENT_DELIVERY ──────────────────────────────────────────────────────
   {
     path: "/__pdf/[slug]",
@@ -302,6 +314,16 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    platform: "vercel",
+  },
+  {
+    path: "/settings/integrations",
+    class: "CLIENT_DELIVERY",
+    owner: "product",
+    intent: "OAuth integration management (Google Calendar, Slack)",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
     platform: "vercel",
   },
 

@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 /**
  * app/settings/integrations/page.tsx
  * Settings page for managing OAuth integrations.

@@ -188,6 +188,104 @@ if (middlewareManifest) {
   }
 }
 
+// ─── Check 7: app/dashboard/** source must not contain 'use client' ──────────
+// All dashboard/* routes must be pure server-side redirects (force-static).
+// A 'use client' component would create a Lambda without proper NFT traces,
+// triggering "Unable to find lambda for route: /dashboard/..." at deploy time.
+
+const dashboardAppDir = path.join(projectRoot, "app", "dashboard");
+if (fileExists(dashboardAppDir)) {
+  const dashboardPageFiles = collectSourcePageFiles(dashboardAppDir);
+  for (const pageFile of dashboardPageFiles) {
+    try {
+      const content = fs.readFileSync(pageFile, "utf8");
+      if (/^\s*['"]use client['"]/m.test(content)) {
+        fail(
+          `app/dashboard route contains 'use client': ${path.relative(projectRoot, pageFile)}` +
+            ` — dashboard routes must be server-only redirects with force-static`,
+        );
+      }
+    } catch {
+      // skip unreadable files
+    }
+  }
+}
+
+// ─── Check 8: REDIRECT_ONLY / LEGACY_DISABLED routes must declare force-static ─
+// These routes are permanently retired or redirect-only. They must declare
+// force-static so Next.js prerenders them as static responses — never Lambdas.
+// force-dynamic on a redirect/notFound page creates a Lambda that cannot be
+// cleanly packaged, causing sequential "Unable to find lambda" deploy failures.
+
+const FORCE_STATIC_RE = /export\s+const\s+dynamic\s*=\s*["']force-static["']/;
+const FORCE_DYNAMIC_RE = /export\s+const\s+dynamic\s*=\s*["']force-dynamic["']/;
+
+const MUST_BE_FORCE_STATIC = [
+  path.join("app", "dashboard", "live"),
+  path.join("app", "dashboard", "pdf-analytics"),
+  path.join("app", "dashboard", "purpose-alignment"),
+  path.join("app", "pdf-dashboard"),
+  path.join("app", "testing", "lab"),
+  path.join("app", "downloads", "vault"),
+];
+
+for (const rel of MUST_BE_FORCE_STATIC) {
+  for (const ext of ["page.tsx", "page.ts", "page.jsx", "page.js"]) {
+    const abs = path.join(projectRoot, rel, ext);
+    if (!fileExists(abs)) continue;
+    try {
+      const content = fs.readFileSync(abs, "utf8");
+      if (!FORCE_STATIC_RE.test(content)) {
+        fail(
+          `Quarantined route missing force-static: ${path.join(rel, ext)}` +
+            ` — retired/redirect routes must declare \`export const dynamic = "force-static"\``,
+        );
+      }
+      if (FORCE_DYNAMIC_RE.test(content)) {
+        fail(
+          `Quarantined route incorrectly uses force-dynamic: ${path.join(rel, ext)}` +
+            ` — use force-static to prerender as a static redirect, not a Lambda`,
+        );
+      }
+    } catch {
+      // skip unreadable files
+    }
+    break; // found the page file for this directory
+  }
+}
+
+// ─── Check 9: Production dynamic routes must declare force-dynamic explicitly ─
+// Routes that are not under app/admin/ (which inherits force-dynamic from its
+// layout) must explicitly declare force-dynamic to ensure Vercel creates a
+// Lambda with a complete NFT trace. Omitting the declaration causes Next.js to
+// attempt static prerender which fails when runtime data (params, DB) is needed.
+
+const MUST_BE_FORCE_DYNAMIC = [
+  path.join("app", "render", "pdf", "[id]"),
+  path.join("app", "settings", "integrations"),
+  path.join("app", "assessment", "[token]"),
+  path.join("app", "purpose-alignment"),
+];
+
+for (const rel of MUST_BE_FORCE_DYNAMIC) {
+  for (const ext of ["page.tsx", "page.ts", "page.jsx", "page.js"]) {
+    const abs = path.join(projectRoot, rel, ext);
+    if (!fileExists(abs)) continue;
+    try {
+      const content = fs.readFileSync(abs, "utf8");
+      if (!FORCE_DYNAMIC_RE.test(content)) {
+        fail(
+          `Production route missing force-dynamic: ${path.join(rel, ext)}` +
+            ` — non-admin dynamic routes must declare \`export const dynamic = "force-dynamic"\``,
+        );
+      }
+    } catch {
+      // skip unreadable files
+    }
+    break; // found the page file for this directory
+  }
+}
+
 // ─── Result ───────────────────────────────────────────────────────────────────
 
 console.log(
@@ -211,6 +309,27 @@ if (violations > 0) {
 console.log("[route-integrity] ✓ All route integrity checks passed.");
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Recursively collect page.tsx/ts/jsx/js source files under a directory. */
+function collectSourcePageFiles(dir) {
+  const results = [];
+  try {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        results.push(...collectSourcePageFiles(full));
+      } else if (
+        entry.isFile() &&
+        /^page\.(tsx|ts|jsx|js)$/.test(entry.name)
+      ) {
+        results.push(full);
+      }
+    }
+  } catch {
+    // skip unreadable dirs
+  }
+  return results;
+}
 
 /** Recursively collect page.js and route.js files under a directory. */
 function collectRouteFiles(dir) {

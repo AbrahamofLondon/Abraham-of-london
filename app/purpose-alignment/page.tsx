@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import PurposeAlignmentAssessment from "@/components/alignment/PurposeAlignmentAssessment";
 
 export default function PurposeAlignmentPage() {

@@ -3,7 +3,7 @@
 // Redirects to the admin reporting lineage view which supersedes it.
 import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 export default function RetiredPdfDashboard() {
   redirect("/admin/reporting/lineage");
